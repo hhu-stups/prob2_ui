@@ -1,7 +1,5 @@
 package de.prob2.ui.project.verifications;
 
-import java.util.Locale;
-
 import javax.inject.Inject;
 
 import com.google.inject.Singleton;

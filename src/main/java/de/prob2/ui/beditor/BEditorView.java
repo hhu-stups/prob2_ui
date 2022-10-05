@@ -112,10 +112,6 @@ public class BEditorView extends BorderPane {
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
-		/*
-		 *	TODO: remember scroll position.
-		 *   Getting scrollbar values does not work. Getting estimated y values of Virtualized Scroll Pane does produce weird values (Code area refreshing too often?)
-		 */
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentProject = currentProject;
@@ -185,7 +181,6 @@ public class BEditorView extends BorderPane {
 
 		beditor.caretPositionProperty().addListener((observable, from, to) -> {
 			if (!changingText) {
-				// System.out.println("[" + machineChoice.getSelectionModel().getSelectedItem() + "] caretPosition: " + to);
 				Machine m = currentProject.getCurrentMachine();
 				if (m != null) {
 					Path machine = machineChoice.getSelectionModel().getSelectedItem();
@@ -197,7 +192,6 @@ public class BEditorView extends BorderPane {
 		});
 		beditor.estimatedScrollXProperty().addListener((observable, from, to) -> {
 			if (!changingText) {
-				// System.out.println("[" + machineChoice.getSelectionModel().getSelectedItem() + "] scrollXPosition: " + to);
 				Machine m = currentProject.getCurrentMachine();
 				if (m != null) {
 					Path machine = machineChoice.getSelectionModel().getSelectedItem();
@@ -209,7 +203,6 @@ public class BEditorView extends BorderPane {
 		});
 		beditor.estimatedScrollYProperty().addListener((observable, from, to) -> {
 			if (!changingText) {
-				// System.out.println("[" + machineChoice.getSelectionModel().getSelectedItem() + "] scrollYPosition: " + to);
 				Machine m = currentProject.getCurrentMachine();
 				if (m != null) {
 					Path machine = machineChoice.getSelectionModel().getSelectedItem();
@@ -223,7 +216,6 @@ public class BEditorView extends BorderPane {
 		currentProject.addListener((observable, from, to) -> resetWatching());
 
 		machineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			// System.out.println("[" + Thread.currentThread().getName() + "] selectedItem changed: from=" + from + " to=" + to);
 			if (to == null) {
 				return;
 			}
@@ -282,13 +274,8 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void restoreState(TextAreaState textAreaState) {
-		// System.out.println("[" + machineChoice.getSelectionModel().getSelectedItem() + "] restoring: " + textAreaState);
 		beditor.moveTo(textAreaState.caretPosition);
 		beditor.requestFollowCaret();
-
-		// TODO: scroll to old position
-		// beditor.estimatedScrollXProperty().setValue(textAreaState.scrollXPosition);
-		// beditor.estimatedScrollYProperty().setValue(textAreaState.scrollYPosition);
 	}
 
 	private void loadText(Path machinePath) {
@@ -400,8 +387,6 @@ public class BEditorView extends BorderPane {
 		this.lastSavedText.set(text);
 		if (!beditor.getText().equals(text)) {
 			beditor.replaceText(text);
-			// beditor.moveTo(0);
-			// beditor.requestFollowCaret();
 		}
 		beditor.setEditable(true);
 		changingText = false;

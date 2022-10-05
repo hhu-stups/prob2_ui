@@ -5,7 +5,6 @@ import java.util.List;
 
 import de.prob.statespace.Trace;
 
-import de.prob.statespace.TraceElement;
 import de.prob2.ui.operations.OperationItem;
 
 public class HistoryItem {

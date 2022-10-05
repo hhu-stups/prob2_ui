@@ -5,7 +5,9 @@ import com.google.inject.Inject;
 import de.prob.animator.domainobjects.ErrorItem;
 
 import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.text.Text;
 
 import java.nio.file.FileSystems;
@@ -22,7 +24,15 @@ final class MessageCell extends TreeTableCell<Object, Object> {
 			this.setText(null);
 			this.setGraphic(null);
 		} else if (item instanceof String) {
-			this.setText(((String) item).substring(((String) item).lastIndexOf(FileSystems.getDefault().getSeparator())+1));
+			if (((String) item).isEmpty()) {
+				// TODO Check if this occurs with other file types
+				//  this.setText("(VisB json error)");
+			} else {
+				this.setText(((String) item).substring(((String) item).lastIndexOf(FileSystems.getDefault().getSeparator())+1));
+				final TreeTableRow<?> row = this.tableRowProperty().get();
+				// Set tooltip for full filename
+				row.setTooltip(new Tooltip((String) item));
+			}
 			this.setTextOverrun(OverrunStyle.LEADING_ELLIPSIS);
 			this.setGraphic(null);
 		} else if (item instanceof ErrorItem) {

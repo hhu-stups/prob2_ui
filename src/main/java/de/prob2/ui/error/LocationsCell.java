@@ -23,7 +23,7 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 final class LocationsCell extends TreeTableCell<Object, Object> {
-	final private Injector injector;
+	private final Injector injector;
 
 	@Inject
 	private LocationsCell(Injector injector) {
@@ -37,45 +37,22 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 		if (empty || item instanceof String) {
 			this.setGraphic(null);
 		} else if (item instanceof ErrorItem) {
-			final VBox vbox = new VBox();
 			I18n i18n = injector.getInstance(I18n.class);
 			final List<ErrorItem.Location> locations = ((ErrorItem)item).getLocations();
-			for (final ErrorItem.Location location : locations) {
-				final StringBuilder sb = new StringBuilder();
-				sb.append(location.getStartLine());
-				sb.append(":");
-				sb.append(location.getStartColumn());
-				
-				if (location.getStartLine() != location.getEndLine() || location.getStartColumn() != location.getEndColumn()) {
-					sb.append(i18n.translate("error.errorTable.columns.locations.to"));
-					sb.append(location.getEndLine());
-					sb.append(":");
-					sb.append(location.getEndColumn());
-				}
-				// Add ContextMenu for every location to be able to jump to each of them
-				if (!location.getFilename().isEmpty()) {
-					ContextMenu contextMenu = new ContextMenu();
-					MenuItem menuItem = new MenuItem(i18n.translate("error.errorTable.location.jumpTo",
-							i18n.translate("error.errorTable.columns.locations.line") + location.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + location.getStartColumn()));
-					menuItem.setOnAction(e -> jumpToResource(location));
-					contextMenu.getItems().add(menuItem);
-
-					Label locationLabel = new Label(sb.toString());
-					locationLabel.setContextMenu(contextMenu);
-					vbox.getChildren().add(locationLabel);
-				}
-			}
-			this.setGraphic(vbox);
+			addContextMenu(locations);
 			// this.getTreeTableRow() is deprecated since JavaFX 17
 			// and the replacement this.getTableRow() was only introduced in JavaFX 17.
 			// To stay compatible with older JavaFX versions without causing deprecation warnings on newer versions,
 			// go through this.tableRowProperty() instead.
 			final TreeTableRow<?> row = this.tableRowProperty().get();
 			if (!locations.isEmpty()) {
-				// If the TreeTableRow is double clicked the BEditorView will jump to the first error location corresponding to the ErrorItem
+				// If the TreeTableRow is double-clicked the BEditorView will jump to the first error location corresponding to the ErrorItem
 				ErrorItem.Location firstError = locations.get(0);
 				if (firstError.getFilename().isEmpty()) {
 					// TODO Investigate the empty filenames and the corresponding locations given
+					//  -(Empty filenames seems to appear with VisB models and show an error in the value part of the corresponding json)
+					//  -(Check if other filetypes are involved and if not add line:column info accordingly)
+					//  System.out.println(firstError.getStartLine()+":"+firstError.getStartColumn()+"-"+firstError.getEndLine()+":"+firstError.getEndColumn());
 				} else {
 					row.setOnMouseClicked(e -> {
 						if (e.getClickCount() == 2) {
@@ -93,6 +70,37 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 		} else {
 			throw new AssertionError("Invalid table element type: " + item.getClass());
 		}
+	}
+
+	private void addContextMenu(final List<ErrorItem.Location> locations) {
+		I18n i18n = injector.getInstance(I18n.class);
+		final VBox vbox = new VBox();
+		for (final ErrorItem.Location location : locations) {
+			final StringBuilder sb = new StringBuilder();
+			sb.append(location.getStartLine());
+			sb.append(":");
+			sb.append(location.getStartColumn());
+
+			if (location.getStartLine() != location.getEndLine() || location.getStartColumn() != location.getEndColumn()) {
+				sb.append(i18n.translate("error.errorTable.columns.locations.to"));
+				sb.append(location.getEndLine());
+				sb.append(":");
+				sb.append(location.getEndColumn());
+			}
+			// Add ContextMenu for every location to be able to jump to each of them
+			if (!location.getFilename().isEmpty()) {
+				ContextMenu contextMenu = new ContextMenu();
+				MenuItem menuItem = new MenuItem(i18n.translate("error.errorTable.location.jumpTo",
+						i18n.translate("error.errorTable.columns.locations.line") + location.getStartLine() + ", " + i18n.translate("error.errorTable.columns.locations.column") + location.getStartColumn()));
+				menuItem.setOnAction(e -> jumpToResource(location));
+				contextMenu.getItems().add(menuItem);
+
+				Label locationLabel = new Label(sb.toString());
+				locationLabel.setContextMenu(contextMenu);
+				vbox.getChildren().add(locationLabel);
+			}
+		}
+		this.setGraphic(vbox);
 	}
 
 	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
