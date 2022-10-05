@@ -477,20 +477,6 @@ public class VOManagerStage extends Stage {
 		return tvRequirements.getSelectionModel().getSelectedItem() == null ? null : tvRequirements.getSelectionModel().getSelectedItem().getValue();
 	}
 
-	public void replaceCurrentValidationObligation(final ValidationObligation newVo) {
-		final TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-		final ValidationObligation oldVo = (ValidationObligation)treeItem.getValue();
-		final Requirement oldRequirement = getRequirementForItem(treeItem);
-		final Set<ValidationObligation> updatedVos = new HashSet<>(oldRequirement.getValidationObligations());
-		updatedVos.remove(oldVo);
-		updatedVos.add(newVo);
-
-		final List<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
-		predecessors.add(oldRequirement);
-		final Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getType(), oldRequirement.getText(), updatedVos, predecessors, oldRequirement.getParent());
-		currentProject.replaceRequirement(oldRequirement, updatedRequirement);
-	}
-
 	private void resolveRefinementHierarchy(AbstractModel model) {
 		if(model == null) {
 			return;

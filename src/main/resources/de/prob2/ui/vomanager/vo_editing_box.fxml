@@ -9,7 +9,6 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="VOEditingBox" styleClass="border" xmlns:fx="http://javafx.com/fxml/1">
@@ -39,8 +38,7 @@
 			<ComboBox fx:id="cbVOExpression" editable="true"/>
 		</HBox>
 		<HBox spacing="5.0">
-			<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.add" onAction="#addVO"/>
-			<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceVO"/>
+			<Button fx:id="applyVOButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyVO"/>
 			<Button fx:id="refineVOButton" styleClass="button-blue" text="%common.buttons.refine" onAction="#refineVO"/>
 		</HBox>
 
