@@ -1,8 +1,10 @@
 package de.prob2.ui.vomanager;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -15,6 +17,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,15 +29,18 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.ComboBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.converter.DefaultStringConverter;
 
+import se.sawano.java.text.AlphanumericComparator;
+
 @FXMLInjected
 @Singleton
 public class RequirementsEditingBox extends VBox {
+	private static final Comparator<? super String> VT_ID_COMPARATOR = new AlphanumericComparator(Locale.ROOT);
 
 	@FXML
 	private TextField tfName;
@@ -121,7 +127,21 @@ public class RequirementsEditingBox extends VBox {
 		});
 		voMachineColumn.setCellValueFactory(new PropertyValueFactory<>("machine"));
 
-		voExpressionColumn.setCellFactory(col -> new TextFieldTableCell<>(new DefaultStringConverter()));
+		voExpressionColumn.setCellFactory(col -> {
+			final ComboBoxTableCell<ValidationObligation, String> cell = new ComboBoxTableCell<>(new DefaultStringConverter());
+			cell.setComboBoxEditable(true);
+			Bindings.<ValidationObligation>select(cell.tableRowProperty(), "item").addListener((o, from, to) -> {
+				if (to == null) {
+					cell.getItems().clear();
+				} else {
+					final Machine machine = currentProject.get().getMachine(to.getMachine());
+					final List<String> vtIds = new ArrayList<>(machine.getValidationTasks().keySet());
+					vtIds.sort(VT_ID_COMPARATOR);
+					cell.getItems().setAll(vtIds);
+				}
+			});
+			return cell;
+		});
 		voExpressionColumn.setCellValueFactory(new PropertyValueFactory<>("expression"));
 		voExpressionColumn.setOnEditCommit(e -> {
 			final int row = e.getTablePosition().getRow();
