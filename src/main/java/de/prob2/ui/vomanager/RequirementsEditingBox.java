@@ -154,7 +154,7 @@ public class RequirementsEditingBox extends VBox {
 	@FXML
 	private void addVo() {
 		voTable.getItems().add(new ValidationObligation(linkedMachineNames.get(0), ""));
-		voTable.edit(voTable.getItems().size(), voExpressionColumn);
+		voTable.edit(voTable.getItems().size()-1, voExpressionColumn);
 	}
 
 	@FXML
