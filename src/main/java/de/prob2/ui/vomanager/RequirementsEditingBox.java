@@ -92,10 +92,10 @@ public class RequirementsEditingBox extends VBox {
 
 		removeVoButton.disableProperty().bind(voTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
-		voStatusColumn.setCellFactory(features -> new CheckedCell<>());
+		voStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		voStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 
-		voMachineColumn.setCellFactory(features -> new TableCell<ValidationObligation, String>() {
+		voMachineColumn.setCellFactory(col -> new TableCell<ValidationObligation, String>() {
 			@Override
 			protected void updateItem(final String item, final boolean empty) {
 				super.updateItem(item, empty);
@@ -121,7 +121,7 @@ public class RequirementsEditingBox extends VBox {
 		});
 		voMachineColumn.setCellValueFactory(new PropertyValueFactory<>("machine"));
 
-		voExpressionColumn.setCellFactory(features -> new TextFieldTableCell<>(new DefaultStringConverter()));
+		voExpressionColumn.setCellFactory(col -> new TextFieldTableCell<>(new DefaultStringConverter()));
 		voExpressionColumn.setCellValueFactory(new PropertyValueFactory<>("expression"));
 		voExpressionColumn.setOnEditCommit(e -> {
 			final int row = e.getTablePosition().getRow();
