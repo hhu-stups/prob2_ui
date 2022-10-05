@@ -1,6 +1,7 @@
 package de.prob2.ui.vomanager;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -18,6 +19,8 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -70,7 +73,10 @@ public class RequirementsEditingBox extends VBox {
 	private TableColumn<ValidationObligation, String> voExpressionColumn;
 
 	@FXML
-	private Button applyButton;
+	private Button historyButton;
+
+	@FXML
+	private Button refineButton;
 
 	private final StageManager stageManager;
 
@@ -80,6 +86,8 @@ public class RequirementsEditingBox extends VBox {
 
 	private final ObservableList<String> linkedMachineNames;
 
+	private final ObjectProperty<Requirement> oldRequirement;
+
 	@Inject
 	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject) {
 		super();
@@ -87,6 +95,7 @@ public class RequirementsEditingBox extends VBox {
 		this.currentProject = currentProject;
 
 		this.linkedMachineNames = FXCollections.observableArrayList();
+		this.oldRequirement = new SimpleObjectProperty<>(this, "oldRequirement", null);
 
 		stageManager.loadFXML(this, "requirements_editing_box.fxml");
 	}
@@ -94,7 +103,6 @@ public class RequirementsEditingBox extends VBox {
 	@FXML
 	private void initialize() {
 		cbRequirementLinkMachineChoice.setItems(linkedMachineNames);
-		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
 
 		removeVoButton.disableProperty().bind(voTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
@@ -149,6 +157,9 @@ public class RequirementsEditingBox extends VBox {
 			final ValidationObligation changedVo = new ValidationObligation(existingVo.getMachine(), e.getNewValue());
 			voTable.getItems().set(row, changedVo);
 		});
+
+		historyButton.disableProperty().bind(oldRequirement.isNull());
+		refineButton.disableProperty().bind(oldRequirement.isNull());
 	}
 
 	@FXML
@@ -200,19 +211,34 @@ public class RequirementsEditingBox extends VBox {
 	}
 
 	@FXML
-	public void replaceRequirement(){
+	private void applyRequirement(){
+		if (tfName.getText().trim().isEmpty() || taRequirement.getText().trim().isEmpty()) {
+			warnNotValid();
+			return;
+		}
+
 		boolean nameExists = nameExists();
-		final Requirement oldRequirement = (Requirement) voManagerStage.getSelectedRequirement();
 
 		//If another requirement has the name we have chosen we should not allow the change
-		if(nameExists && !oldRequirement.getName().equals(tfName.getText())) {
+		if (nameExists && (oldRequirement.get() == null || !oldRequirement.get().getName().equals(tfName.getText()))) {
 			warnAlreadyExists();
 			return;
 		}
-		ArrayList<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
-		predecessors.add(oldRequirement);
+
+		final List<Requirement> predecessors;
+		if (oldRequirement.get() == null) {
+			predecessors = Collections.emptyList();
+		} else {
+			predecessors = new ArrayList<>(oldRequirement.get().getPreviousVersions());
+			predecessors.add(oldRequirement.get());
+		}
 		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
-		currentProject.replaceRequirement(oldRequirement, newRequirement);
+
+		if (oldRequirement.get() == null) {
+			currentProject.addRequirement(newRequirement);
+		} else {
+			currentProject.replaceRequirement(oldRequirement.get(), newRequirement);
+		}
 	}
 
 	@FXML
@@ -223,30 +249,11 @@ public class RequirementsEditingBox extends VBox {
 		table.toFront();
 	}
 
-	@FXML
-	public void addRequirement() {
-		if(!tfName.getText().trim().isEmpty() && !taRequirement.getText().trim().isEmpty()) {
-			boolean nameExists = nameExists();
-			addRequirement(nameExists);
-			voManagerStage.closeEditingBox();
-		} else {
-			warnNotValid();
-		}
-	}
-
 	private boolean nameExists(){
 		return currentProject.getRequirements().stream()
 				.map(Requirement::getName)
 				.collect(Collectors.toList())
 				.contains(tfName.getText());
-	}
-
-	private void addRequirement(boolean nameExists) {
-		if(nameExists) {
-			warnAlreadyExists();
-			return;
-		}
-		currentProject.addRequirement(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), new HashSet<>(voTable.getItems())));
 	}
 
 	@FXML
@@ -258,6 +265,7 @@ public class RequirementsEditingBox extends VBox {
 	}
 
 	public void resetRequirementEditing() {
+		this.oldRequirement.set(null);
 		cbRequirementChoice.getSelectionModel().clearSelection();
 		taRequirement.clear();
 		tfName.clear();
@@ -269,6 +277,7 @@ public class RequirementsEditingBox extends VBox {
 		if(requirement == null) {
 			return;
 		}
+		this.oldRequirement.set(requirement);
 		tfName.setText(requirement.getName());
 		cbRequirementLinkMachineChoice.getSelectionModel().select(requirement.getIntroducedAt());
 		cbRequirementChoice.getSelectionModel().select(requirement.getType());

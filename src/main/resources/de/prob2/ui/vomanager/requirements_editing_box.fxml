@@ -82,10 +82,9 @@
 			</VBox>
 		</VBox>
 		<HBox spacing="5.0">
-			<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#addRequirement"/>
-			<Button fx:id="changeVOButton" styleClass="button-blue" text="%common.buttons.replace" onAction="#replaceRequirement"/>
-			<Button fx:id="historyVOButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyRequirement"/>
-			<Button fx:id="refineVOButton" styleClass="button-blue" text="%common.buttons.refine" onAction="#refineRequirement"/>
+			<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
+			<Button fx:id="historyButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyRequirement"/>
+			<Button fx:id="refineButton" styleClass="button-blue" text="%common.buttons.refine" onAction="#refineRequirement"/>
 		</HBox>
 
 	</VBox>
