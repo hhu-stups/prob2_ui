@@ -153,7 +153,44 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private void addVo() {
-		voTable.getItems().add(new ValidationObligation(linkedMachineNames.get(0), ""));
+		assert !linkedMachineNames.isEmpty();
+
+		final ValidationObligation newVo;
+		if (voTable.getItems().isEmpty()) {
+			// No VOs exist yet - nothing can be copied.
+			// Start with the first machine and an empty expression.
+			newVo = new ValidationObligation(linkedMachineNames.get(0), "");
+		} else {
+			// At least one VO exists - copy the last one and auto-select the next machine.
+			final ValidationObligation existingVo = voTable.getItems().get(voTable.getItems().size() - 1);
+			assert !linkedMachineNames.isEmpty();
+			final int lastMachineIndex = linkedMachineNames.indexOf(existingVo.getMachine());
+			assert lastMachineIndex != -1;
+
+			final String nextMachine;
+			if (lastMachineIndex == linkedMachineNames.size() - 1) {
+				// We're already at the last machine in the list.
+				// Try to find any other machine that doesn't have a VO yet,
+				// otherwise default to the first machine again.
+				final List<String> machinesWithoutVos = new ArrayList<>(linkedMachineNames);
+				for (final ValidationObligation vo : voTable.getItems()) {
+					machinesWithoutVos.remove(vo.getMachine());
+				}
+				if (machinesWithoutVos.isEmpty()) {
+					nextMachine = linkedMachineNames.get(0);
+				} else {
+					nextMachine = machinesWithoutVos.get(0);
+				}
+			} else {
+				// Select the next machine in the list.
+				nextMachine = linkedMachineNames.get(lastMachineIndex + 1);
+			}
+
+			// Copy the validation expression from the last VO.
+			newVo = new ValidationObligation(nextMachine, existingVo.getExpression());
+		}
+
+		voTable.getItems().add(newVo);
 		voTable.edit(voTable.getItems().size()-1, voExpressionColumn);
 	}
 
