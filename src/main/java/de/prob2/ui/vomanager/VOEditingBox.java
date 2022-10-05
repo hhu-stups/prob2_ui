@@ -140,10 +140,7 @@ public class VOEditingBox extends VBox {
 		vtTable.setItems(FXCollections.emptyObservableList());
 	}
 
-	public void showValidationObligation(ValidationObligation validationObligation, Requirement requirement, boolean edit) {
-		if(edit) {
-			voManagerStage.switchMode(VOManagerStage.Mode.VO);
-		}
+	public void showValidationObligation(ValidationObligation validationObligation, Requirement requirement) {
 		if(validationObligation == null) {
 			return;
 		}

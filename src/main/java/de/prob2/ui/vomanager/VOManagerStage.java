@@ -250,9 +250,11 @@ public class VOManagerStage extends Stage {
 			if(to != null && to.getValue() != null) {
 				INameable item = to.getValue();
 				if(item instanceof Requirement) {
-					requirementEditingBox.showRequirement((Requirement)item, true);
+					requirementEditingBox.showRequirement((Requirement)item);
+					switchMode(Mode.REQUIREMENT);
 				} else if(item instanceof ValidationObligation) {
-					voEditingBox.showValidationObligation((ValidationObligation)item, getRequirementForItem(to), true);
+					voEditingBox.showValidationObligation((ValidationObligation)item, getRequirementForItem(to));
+					switchMode(Mode.VO);
 				} else {
 					switchMode(Mode.NONE);
 				}
@@ -332,7 +334,7 @@ public class VOManagerStage extends Stage {
 		projectChangeListener.changed(null, null, currentProject.get());
 	}
 
-	public void switchMode(Mode mode) {
+	private void switchMode(Mode mode) {
 		modeProperty.set(mode);
 	}
 

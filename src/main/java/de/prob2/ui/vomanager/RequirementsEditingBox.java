@@ -265,10 +265,7 @@ public class RequirementsEditingBox extends VBox {
 		voManagerStage.clearRequirementsSelection();
 	}
 
-	public void showRequirement(Requirement requirement, boolean edit) {
-		if(edit) {
-			voManagerStage.switchMode(VOManagerStage.Mode.REQUIREMENT);
-		}
+	public void showRequirement(Requirement requirement) {
 		if(requirement == null) {
 			return;
 		}
