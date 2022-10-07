@@ -169,6 +169,7 @@ public class BEditorView extends BorderPane {
 		});
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			// System.out.println("[" + Thread.currentThread().getName() + "] currentProject changed: from=" + from + " to=" + to);
 			if (to == null) {
 				machineChoice.getItems().clear();
 				this.setHint();
@@ -179,6 +180,8 @@ public class BEditorView extends BorderPane {
 				Path selectedMachine = to.getCachedEditorState().getSelectedMachine();
 				if (selectedMachine != null) {
 					selectMachine(selectedMachine);
+				} else {
+					machineChoice.getSelectionModel().selectFirst();
 				}
 			}
 		});
