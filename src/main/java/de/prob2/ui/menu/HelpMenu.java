@@ -27,7 +27,6 @@ public class HelpMenu extends Menu {
 	private final Injector injector;
 	private final StageManager stageManager;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HelpMenu.class);
-	private final String folder = "de/prob2/ui/menu/";
 
 	@Inject
 	private HelpMenu(final StageManager stageManager, final Injector injector) {
