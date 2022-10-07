@@ -50,11 +50,7 @@ public final class AndValidationExpression implements IValidationExpression {
 			return Checked.FAIL;
 		}
 		
-		if (leftRes == Checked.SUCCESS && rightRes == Checked.SUCCESS) {
-			return Checked.SUCCESS;
-		} else {
-			return Checked.UNKNOWN;
-		}
+		return leftRes.and(rightRes);
 	}
 
 	@Override

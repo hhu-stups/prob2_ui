@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.google.inject.Injector;
-
 import de.prob.check.tracereplay.check.exploration.TraceExplorer;
 import de.prob.check.tracereplay.check.ui.ToManyOptionsIdentifierMapping;
 import de.prob2.ui.internal.I18n;
