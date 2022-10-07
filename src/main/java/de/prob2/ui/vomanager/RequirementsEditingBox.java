@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -82,6 +83,10 @@ public class RequirementsEditingBox extends VBox {
 
 	private final CurrentProject currentProject;
 
+	private final VOChecker voChecker;
+
+	private final VOErrorHandler voErrorHandler;
+
 	private VOManagerStage voManagerStage;
 
 	private final ObservableList<String> linkedMachineNames;
@@ -89,10 +94,12 @@ public class RequirementsEditingBox extends VBox {
 	private final ObjectProperty<Requirement> oldRequirement;
 
 	@Inject
-	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject) {
+	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOChecker voChecker, final VOErrorHandler voErrorHandler) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.voChecker = voChecker;
+		this.voErrorHandler = voErrorHandler;
 
 		this.linkedMachineNames = FXCollections.observableArrayList();
 		this.oldRequirement = new SimpleObjectProperty<>(this, "oldRequirement", null);
@@ -128,6 +135,7 @@ public class RequirementsEditingBox extends VBox {
 						final ValidationObligation existingVo = voTable.getItems().get(this.getIndex());
 						final ValidationObligation changedVo = new ValidationObligation(machine, existingVo.getExpression());
 						voTable.getItems().set(this.getIndex(), changedVo);
+						tryParseVo(changedVo);
 					});
 					this.setGraphic(machineChoiceBox);
 				}
@@ -156,10 +164,20 @@ public class RequirementsEditingBox extends VBox {
 			final ValidationObligation existingVo = voTable.getItems().get(row);
 			final ValidationObligation changedVo = new ValidationObligation(existingVo.getMachine(), e.getNewValue());
 			voTable.getItems().set(row, changedVo);
+			tryParseVo(changedVo);
 		});
 
 		historyButton.disableProperty().bind(oldRequirement.isNull());
 		refineButton.disableProperty().bind(oldRequirement.isNull());
+	}
+
+	private void tryParseVo(final ValidationObligation vo) {
+		final Machine machine = currentProject.get().getMachine(vo.getMachine());
+		try {
+			voChecker.parseVO(machine, vo);
+		} catch (VOParseException exc) {
+			voErrorHandler.handleError(this.getScene().getWindow(), exc);
+		}
 	}
 
 	@FXML
