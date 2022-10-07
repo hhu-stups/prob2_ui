@@ -1,0 +1,355 @@
+Using ProZ for Animation and Model Checking of Z specifications
+---------------------------------------------------------------
+
+ProZ is a extension of the ProB animator and model checker to
+support Z specifications. It uses the Fuzz type checker by
+Mike Spivey (http://spivey.oriel.ox.ac.uk/mike/fuzz)
+for extracting the formal specification from a LaTeX file.
+On the website you can also find documentation about the syntax
+of Z specifications.
+
+1. Requirements
+1.1. Fuzz
+1.2. Preferences
+
+2. Structure of the Z Specification
+2.1. State and Initialisation
+2.2. Operations
+2.3. Axiomatic definitions
+2.4. Invariant
+2.5. Scope
+2.6. Abbreviation Definitions 
+
+3. Special constructs
+3.1. \prozignore
+3.2. Translation to B
+
+4. Known Limitations
+4.1. Generic definitions
+4.2. Bags
+4.3. Miscellaneous unsupported constructs
+4.4. Error Messages
+
+5. Syntax Summary
+
+1. Requirements
+
+1.1. Fuzz
+
+You need Fuzz for using ProZ. You can download if from
+  http://spivey.oriel.ox.ac.uk/mike/fuzz
+
+The path to Fuzz can be set in the preferences menu:
+
+ * Advanced Preferences ->
+    - Path to the fuzz tool for ProZ
+
+The default is "fuzz".
+
+
+1.2. Preferences
+
+Often a Z specification makes use of comprehension sets, often
+introduced by the underlying translation process from Z to B.
+Normally those comprehension sets should be treated symbolically.
+To support this you should set the following in the preferences
+menu:
+
+ * Animation Preferences ->
+    - Lazy expansion of lambdas & set comprehensions: True
+    - Convert lazy form back into explicit form for
+      Variables and Constants: False
+
+
+
+2. Structure of the Z Specification
+
+2.1. State and Initialisation
+
+To identify the components (like state, initialisation, operations)
+of a Z specification, ProZ expects a certain structure of the
+specification: There must be a schema called "Init".
+"Init" describes the initialisation of the state.
+"Init" must include exactly one schema in the declaration part, the
+included is assumed to be the state schema.
+
+For example, let S be the state schema (= is used for \defs):
+  S = [ x,y:N ]
+There are two supported styles for the initialisation:
+ a)   Init = [ S | x=0 /\ y=1]
+ b)   Init = [ S'| x'=0 /\ y'=1 ]
+
+If you want to use the logic of other schemas beside the state schema
+in the initialisation, you can do that by including those schemas
+in the predicate part.
+
+
+2.2. Operations
+
+ProZ identifies schemas as operations if they satisfy
+the following properties:
+ * All variables of the state and their primed counterpart
+   are declared in the operation.
+   Usually this is done by including "\Delta S" in the operation
+   (with S being the state schema).
+ * The operation is not referenced by any other schema in the
+   specification
+Example: Let S be defined as in 2.1:
+  A = [ \Delta S | x'=x+1 /\ y'=y ]
+  B = [ x,y,x',y':N | x'=x+1 /\ y'=y ]
+  C = [ x,x':N | x'=x+1 ]
+  D = [ y,y':N | y'=y ]
+  E = C /\ D
+  F = [ \Xi S | x=0 ]
+Then the schemas A,B and E describe all the same operation, also
+F is identified as an operation that leaves the state unchanged.
+
+
+2.3. Axiomatic definitions
+
+If axiomatic definitions are present, the declared variables
+are treated like constants. In the first step of the animation,
+ProB searches for values that satisfy all predicates of the
+axiomatic definitions are searched.
+After the first step the predicates of the axiomatic definitions
+are ignored.
+If you want to define functions in an axiomatic definition,
+consider that ProB can treat lambda expressions and
+set comprehensions symbolically.
+Example: The definition of a function "square" could be
+ a)   | square : Z -> Z
+      |-----------------------
+      | square = (\lambda x:Z @ x*x)
+
+ b)   | square : Z -> Z
+      |-----------------------
+      | \forall x:Z @ square x = x*x
+The preferred way when using ProZ is a), because the
+lambda expression can be interpreted symbolically.
+In case of using b) ProB will try to find a explicit set
+that will satisfy the given property. 
+
+
+2.4. Invariant
+
+You can add a B-style invariant to the specification by defining
+a schema "Invariant" that declares a subset of the state variables.
+In each explored state the invariant will be checked. The model
+checking feature of ProB will try to find states that violate
+the invariant.
+
+
+2.5. Scope
+
+It is possible to limit the search space of the model checker by
+adding a schema "Scope" that declares a subset of the state
+variables. If such a schema is present, each explored state is
+checked, if it satisfies the predicate. If not, the state is not
+further explored.
+
+
+2.6. Abbreviation Definitions 
+
+Abbreviation definitions (e.g. Abbr == {1,2,3}) are used like macros by
+ProZ, a reference to an abbreviation is replaced by its definition in
+a preprocessor phase.
+Thereby schemas defined by abbreviation definitions are ignored when
+ProZ tries to identify components. So use schema definitions instead
+of abbreviation definitions (\defs instead of ==) when defining
+state, initialisation, operations, etc.
+
+
+
+3. Special constructs
+
+3.1. \prozignore
+
+Sometimes it is not desired to check properties of some variables.
+E.g. ProZ checks if the square function in 2.3.a is a total
+function by enumerating it (it checks the function only for
+a limited interval). For more complex definitions the number of
+entries is often too large to check.
+When the user is sure that those properties are satisfied (like
+in our example), a solution is relaxing the declaration
+from "square : Z -> Z" to "square : Z <-> Z".
+Sometimes this is not easy to do, e.g. if schema types are used
+which imply other constraints.
+
+ProZ supports an operation \prozignore that instructs ProZ to
+ignore all constraints on the type and to use just the underlying
+type. E.g. the square function could be defined by:
+    | square : \prozignore( Z -> Z )
+    |-----------------------
+    | square = (\lambda x:Z @ x*x)
+
+If you want to use \prozignore, you must first define a TeX
+command \prozignore:
+
+  \newcommand{\prozignore}{ignore_\textsl{\tiny ProZ}}
+
+You can change the definition of the macro as you like, the
+content is ignored by ProZ.
+Then you must introduce a generic definition of \prozignore. The
+definition is ignored by ProB, but Fuzz needs it for type checking.
+
+  %%pregen \prozignore
+  \begin{gendef}[X]
+    \prozignore~\_ : \power X
+  \end{gendef}
+
+It is also possible to append this lines to the "fuzzlib" in the
+fuzz distribution.
+
+
+3.2. Translation to B
+
+You can inspect the result of the translation process with
+"Show internal representation" in the "Debug" menu.
+Please note, that the shown B machine is normally not
+syntactically correct, because of
+ * additional constructs like free types
+ * additional type information of the form "var:type"
+ * names with primes (') or question marks, etc.
+ * the pretty printer may not support every construct
+
+
+
+4. Known Limitations
+
+4.1. Generic definitions
+ Generic definitions are not supported yet.
+
+4.2. Bags
+ Bags are not supported yet.
+
+4.3. Miscellaneous unsupported constructs
+ * disjoint
+ * partition
+ * reflexive-transitive closure
+ * probably other?
+
+4.4. Error Messages
+ The error messages are not very helpful yet.
+
+5. Syntax Summary
+
+Here is a summary of a few of the Z syntax that
+is supported.
+
+Logical predicates:
+-------------------
+ P \land Q         conjunction
+ P \lor Q          disjunction
+ P \implies Q      implication
+ P \iff Q          equivalence
+ \lnot P           negation
+
+Quantifiers:
+------------
+ \forall x:T | P @ Q      universal quantification (P => Q)
+ \exists x:T | P @ Q      existential quantification (P & Q)
+ \exists_1 x:T | P @ Q    exactly one existential quantification
+
+Sets:
+----- 
+  \emptyset        empty set
+  \{E,F\}          set extension
+  \{~x:S | P~\}    set comprehension
+  E \in S          element of
+  E \notin S       not element of
+  S \cup T         union
+  S \cap T         intersection
+  S \setminus T    set difference
+  \power S         power set
+  \# S             cardinality
+  S \subseteq T    subset predicate
+  S \subset T      strict subset
+  \bigcup A        generalized union of sets of sets
+  \bigcap A        generalized intersection of sets of sets
+
+Pairs:
+------
+  E \mapsto F      pair
+  S \cross T       Cartesian product
+  first E          first part of pair
+  second E         second part of pair
+
+Numbers:
+--------
+  \nat             Natural numbers
+  \num             Integers
+  \nat_1           Positive natural numbers
+  m < n            less
+  m \leq n         less equal
+  m > n            greater
+  m \geq n         greater equal
+  m + n            addition
+  m - n            difference
+  m * n            multiplication
+  m \div n         division
+  m \mod n         modulo**
+  m \upto n        m..n
+  min S            minimum of a set
+  max S            maximum of a set
+  succ n           successor of a number
+
+**:  modulo of negative numbers not supported
+
+Functions:
+----------
+  S \rel T         relations
+  S \pfun T        partial functions from S to T
+  S \fun T         total functions from S to T
+  S \pinj T        partial injections from S to T
+  S \inj T         total injections from S to T
+  S \bij T         total bijections from S to T
+  \dom R           domain
+  \ran R           range
+  \id S            identity relation over S
+  S \dres R        domain restriction
+  S \ndres R       domain anti-restriction
+  R \rres S        range restriction
+  R \nrres S       range anti-restriction
+  R \oplus Q       overriding
+  R \plus          transitive closure
+
+Sequences:
+----------
+  \langle E,... \rangle   explicit sequence
+  \seq S           sequences over S
+  \seq_1 S         non-empty sequences
+  \iseq S          injective sequences over S
+  rev E            reverse a sequence
+  head E           first element of a sequence
+  last E           last element of a sequence
+  tail E           sequence with first element removed
+  front E          all but the last element
+  E \cat F         concatenation of two sequences
+  \dcat ss         concatenation of sequences of sequences
+  E \filter F      subsequence of elements of sequence E contained in set F
+  E \extract F     extract subsequence from F with indexes in set E
+  squash F         compaction
+  E \prefix F      sequence E is a prefix of F
+  E \suffix F      sequence E is a suffix of F
+  E \inseq F       E is a sequence occuring in the middle of F (segment relation)
+  \disjoint E      family of sets E is disjoint
+  E \partition F   family of sets E is a partition of set F
+
+Bags:
+----------
+  \bag S              bags over S
+  \lbag E,... \rbag   explicit bag
+  count B E           count of occurences of E in bag B
+  B \bcount E         infix version of count
+  E \inbag B          bag membership
+  B \subbageq C       sub-bag relation
+  B \uplus C          bag union
+  B \uminus C         bag difference
+  items E             bag of items in a sequence
+  n \otimes B         bag scaling
+
+Other:
+-----------
+\IF P \THEN E \ELSE F   if-then-else expression
+(\LET x == E @ F)       Let-expression
+(\mu x:T | P @ E)       Mu-expression

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.menu.SyntaxStage?>
+
+<?import javafx.scene.Scene?>
+<?import javafx.scene.control.TextArea?>
+<fx:root type="SyntaxStage" xmlns:fx="http://javafx.com/fxml" minWidth="640" minHeight="480" >
+	<scene>
+		<Scene>
+			<TextArea fx:id="syntaxText" editable="false"/>
+		</Scene>
+	</scene>
+</fx:root>

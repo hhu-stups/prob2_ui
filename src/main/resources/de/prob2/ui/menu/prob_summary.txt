@@ -1,0 +1,470 @@
+Logical predicates:
+-------------------
+ P & Q       conjunction
+ P or Q      disjunction
+ P => Q      implication
+ P <=> Q     equivalence
+ not(P)      negation
+ !(x).(P=>Q) universal quantification
+ #(x).(P&Q)  existential quantification
+ btrue       truth
+ bfalse      falsity
+
+Equality:
+---------
+ E = F      equality
+ E /= F     disequality
+
+Booleans:
+---------
+ TRUE
+ FALSE
+ BOOL        set of boolean values ({TRUE,FALSE})
+ bool(P)     convert predicate into BOOL value
+
+Sets:
+-----
+ {}          empty set
+ {E}         singleton set
+ {E,F}       set enumeration
+ {x|P}       comprehension set
+ POW(S)      power set
+ POW1(S)     set of non-empty subsets
+ FIN(S)      set of all finite subsets
+ FIN1(S)     set of all non-empty finite subsets
+ card(S)     cardinality
+ S*T         cartesian product
+ S\/T        set union
+ S/\T        set intersection
+ S-T         set difference
+ E:S         element of
+ E/:S        not element of
+ S<:T        subset of
+ S/<:T       not subset of
+ S<<:T       strict subset of
+ S/<<:T      not strict subset of
+ union(S)        generalised union over sets of sets
+ inter(S)         generalised intersection over sets of sets
+ UNION(z).(P|E)  generalised union with predicate
+ INTER(z).(P|E)  generalised intersection with predicate
+
+Numbers:
+--------
+ INTEGER     set of integers
+ NATURAL     set of natural numbers
+ NATURAL1    set of non-zero natural numbers
+ INT         set of implementable integers (MININT..MAXINT)
+ NAT         set of implementable natural numbers
+ NAT1        set of non-zero implementable natural numbers
+ n..m        set of numbers from n to m
+ MININT      the minimum implementable integer
+ MAXINT      the maximum implementable integer
+ m>n         greater than
+ m<n         less than
+ m>=n        greater than or equal
+ m<=n        less than or equal
+ max(S)      maximum of a set of numbers
+ min(S)      minimum of a set of numbers
+ m+n         addition
+ m-n         difference
+ m*n         multiplication
+ m/n         division
+ m**n        power
+ m mod n     remainder of division
+ PI(z).(P|E)    Set product
+ SIGMA(z).(P|E) Set summation
+ succ(n)     successor (n+1)
+ pred(n)     predecessor (n-1)
+ 0xH         hexadecimal literal, where H is a sequence of letters in [0-9A-Fa-f]
+
+
+Relations:
+----------
+ S<->T     relation
+ S<<->T    total relation
+ S<->>T    surjective relation
+ S<<->>T   total surjective relation
+ E|->F     maplet
+ dom(r)    domain of relation
+ ran(r)    range of relation
+ id(S)     identity relation
+ S<|r      domain restriction
+ S<<|r     domain subtraction
+ r|>S      range restriction
+ r|>>S     range subtraction
+ r~        inverse of relation
+ r[S]      relational image
+ r1<+r2    relational overriding (r2 overrides r1)
+ r1><r2    direct product {x,(y,z) | x,y:r1 & x,z:r2}
+ (r1;r2)     relational composition {x,y| x|->z:r1 & z|->y:r2}
+ (r1||r2)    parallel product {((x,v),(y,w)) | x,y:r1 & v,w:r2}
+ prj1(S,T)     projection function (usage prj1(Dom,Ran)(Pair))
+ prj2(S,T)     projection function (usage prj2(Dom,Ran)(Pair))
+ closure1(r)   transitive closure
+ closure(r)    reflexive & transitive closure
+               (equal to id(TYPEOF_r) \/ closure1(r))
+ iterate(r,n)  iteration of r with n>=0 
+               (Note: iterate(r,0) = id(s) where s =TYPEOF_r)
+ fnc(r)    translate relation A<->B into function A+->POW(B)
+ rel(r)    translate relation A<->POW(B) into relation A<->B
+
+Functions:
+----------
+  S+->T      partial function
+  S-->T      total function
+  S+->>T     partial surjection
+  S-->>T     total surjection
+  S>+>T      partial injection
+  S>->T      total injection
+  S>+>>T     partial bijection
+  S>->>T     total bijection
+  %x.(P|E)   lambda abstraction
+  f(E)       function application
+  f(E1,...,En)   is now supported (as well as f(E1|->E2))
+
+
+Sequences:
+----------
+  []         empty sequence
+  [E]        singleton sequence
+  [E,F]      constructed sequence
+  seq(S)     set of sequences over Sequence
+  seq1(S)    set of non-empty sequences over S
+  iseq(S)    set of injective sequences
+  iseq1(S)   set of non-empty injective sequences
+  perm(S)    set of bijective sequences (permutations)
+  size(s)    size of sequence
+  s^t        concatenation
+  E->s       prepend element
+  s<-E       append element
+  rev(s)     reverse of sequence
+  first(s)   first element
+  last(s)    last element
+  front(s)   front of sequence (all but last element)
+  tail(s)    tail of sequence (all but first element)
+  conc(S)    concatenation of sequence of sequences
+  s/|\n     take first n elements of sequence
+  s\|/n     drop first n elements from sequence
+  
+Records:
+--------
+  struct(ID:S,...,ID:S)   set of records with given fields and field types
+  rec(ID:E,...,ID:E)      construct a record with given field names and values
+  E'ID                    get value of field with name ID
+
+Identifiers:
+------------
+  ID           must start with letter (ASCII or Unicode), can then contain
+               letters (ASCII or Unicode), digits and underscore (_) and
+               can end with Unicode subscripts followed by Unicode primes
+  M.ID         Composed identifier for identifier coming from included machine M
+  `ID`         an identifier in backquotes can contain almost any character (except newline)
+
+Strings:
+--------
+  "astring"     a specific (single-line) string value
+  '''astring''' an alternate way of writing (multi-line) strings, no need to escape "
+  STRING        the set of all strings
+                Note: for the moment enumeration of strings is limited (if a variable
+                of type STRING is not given a value by the machine, then ProB assumes
+                STRING = { "STR1", "STR2" })
+Atelier-B does not support any operations on strings, apart from equality and disequality.
+However, the ProB external function library contains several operators on strings.
+ProB also allows multi-line strings.
+As of version 1.7.0, ProB supports the following escape sequences within strings:
+ \n   newline (ASCII character 13)
+ \r   carriage return (ASCII 10)
+ \t   tab (ASCII 9)
+ \"   the double quote symbol "
+ \'   the single quote symbol '
+ \\   the backslash symbol
+
+Within single-line string literals, you do not need to escape '.
+Within multi-line string literals, you do not need to escape " and you can use
+tabs and newlines.
+ProB assumes that all B machines and strings use the UTF-8 encoding.
+The library LibraryStrings.def in stdlib contains additional useful external functions
+(like TO_STRING, STRING_SPLIT, FORMAT_TO_STRING, INT_TO_HEX_STRING, ...).
+Some of the sequence operators work also on strings:
+  size(s)     the length of a string s
+  rev(s)      the reverse a string s
+  s ^ t       the concatenation of two strings
+  conc(ss)    the concatenation of a sequence of strings
+You can turn this support off using the STRING_AS_SEQUENCE preference.
+
+Reals:
+------
+ REAL        set of reals
+ FLOAT       set of floating point numbers
+ i.f         real literal, where i and f are sequences of digits
+ real(n)     convert an integer n into a real number
+ floor(r)    convert a real r into an integer
+ ceiling(r)  convert a real r into an integer
+ 
+Standard arithmetic operators can be applied to reals: +, - , *, /, SIGMA, PI.
+Exponentiation of a real with an integer is also allowed.
+The comparison predicates =, /=, <, >, <=, >= also all work.
+Support for reals and floats is experimental. The definition in Atelier-B
+is also not stable yet. Currently ProB supports floating point numbers only.
+Warning: properties such as associativity and commutativity of arithmetic operators
+thus does not hold.
+The library LibraryReals.def in stdlib contains additional useful external functions
+(like RSIN, RCOS, RLOG, RSQRT, RPOW, ...).
+You can turn off support for REALS using the preference ALLOW_REALS.
+
+
+Trees:
+------
+Nodes in the tree are denoted by index sequences (branches), e.g, n=[1,2,1].
+Each node in the tree is labelled with an element from a domain S.
+A tree is a function mapping of branches to elements of the domain S.
+  tree(S)      set of trees over domain S
+  btree(S)     set of binary trees over domain S
+  top(t)       top of a tree
+  const(E,s)   construct a tree from info E and sequence of subtrees s
+  rank(t,n)    rank of the node at end of branch n in the tree t
+  father(t,n)  father of the node denoted by branch n in the tree t
+  son(t,n,i)   the ith son of the node denoted by branch n in tree t
+  sons(t)      the sequence of sons of the root of the tree t
+  subtree(t,n)
+  arity(t,n)
+  bin(E)       construct a binary tree with a single node E
+  bin(tl,E,tr) construct a binary tree with root info E and subtrees tl,tr
+  left(t)      the left (first) son of the root of the binary tree t
+  right(t)     the right (last) son of the root of the binary tree t
+  sizet(t)     the size of the tree (number of nodes)
+  prefix(t)    the nodes of the tree t in prefix order
+  postfix(t)   the nodes of the tree t in prefix order
+  mirror, infix are recognised by the parser but not yet supported by ProB itself
+
+
+LET and IF-THEN-ELSE:
+---------------------
+ProB allows the following for predicates and expressions:
+   IF P THEN E1 ELSE E2 END    conditional for expressions or predicates E1,E2
+                               for expressions we also allow ELSIF branches
+   LET x1,... BE x1=E1 & ... IN E END
+Note: the expression Ei defining xi is allowed to use x1,...,x(i-1) for predicates/expressions.
+      By setting the preference ALLOW_COMPLEX_LETS to TRUE, this is also allowed for substitutions.
+
+Statements:
+-----------
+  skip         no operation
+  x := E       assignment
+  f(x) := E    functional override
+  x :: S       choice from set
+  x : (P)      choice by predicate P (constraining x; previous value of x is x$0)
+  x <-- OP(x)  call operation and assign return value
+  G||H         parallel substitution**
+  G;H          sequential composition**
+  ANY x,... WHERE P THEN G END   non deterministic choice
+  LET x,... BE x=E & ... IN G END
+  VAR x,... IN G END             generate local variables
+  PRE P THEN G END
+  ASSERT P THEN G END
+  CHOICE G OR H END
+  IF P THEN G END
+  IF P THEN G ELSE H END
+  IF P1 THEN G1 ELSIF P2 THEN G2 ... END
+  IF P1 THEN G1 ELSIF P2 THEN G2 ... ELSE Gn END
+  SELECT P THEN G WHEN ... WHEN Q THEN H END
+  SELECT P THEN G WHEN ... WHEN Q THEN H ELSE I END
+  CASE E OF EITHER m THEN G OR n THEN H ... END END
+  CASE E OF EITHER m THEN G OR n THEN H ... ELSE I END END
+  WHILE P1 DO G INVARIANT P2 VARIANT E END
+
+  WHEN P THEN G END  is a synonym for SELECT P THEN G END
+
+**: cannot be used at the top-level of an operation, but needs to
+  be wrapped inside a BEGIN END or another statement (to avoid
+  confusion with the operators ; and || on relations).
+  
+Machine header:
+---------------
+  MACHINE or REFINEMENT or IMPLEMENTATION
+  
+  Note: machine parameters can either be SETS (if identifier is all upper-case)
+        or scalars (i.e., integer, boolean or SET element; if identifier is not
+        all upper-case; typing must be provided be CONSTRAINTS)
+  You can also use MODEL or SYSTEM as a synonym for MACHINE, as well
+  as EVENTS as a synonym for OPERATIONS.
+  ProB also supports the ref keyword of Atelier-B for event refinement.
+
+Machine sections:
+-----------------
+  CONSTRAINTS         P      (logical predicate)
+  SETS                S;T={e1,e2,...};...
+  CONSTANTS           x,y,...
+  CONCRETE_CONSTANTS cx,cy,...
+  PROPERTIES         P       (logical predicate)
+  DEFINITIONS        m(x,...) == BODY;....
+  VARIABLES          x,y,...  
+  CONCRETE_VARIABLES cv,cw,...
+  INVARIANT          P       (logical predicate)
+  ASSERTIONS         P;...;P (list of logical predicates separated by ;)
+  INITIALISATION
+  OPERATIONS
+
+Machine inclusion:
+------------------
+  USES list of machines
+  INCLUDES list of machines
+  SEES list of machines
+  EXTENDS list of machines
+  PROMOTES list of operations
+  REFINES machine
+  
+  Note:
+  Refinement machines should express the operation preconditions in terms
+  of their own variables.
+  
+Definitions:
+------------
+  NAME1 == Expression;          Definition without arguments
+  NAME2(ID,...,ID) == E2;       Definition with arguments
+  "FILE.def";                   Include definitions from file
+There are a few specific definitions which can be used to influence ProB:
+  GOAL == P                to define a custom Goal predicate for Model Checking
+                        (the Goal is also set by using "Advanced Find...")
+  SCOPE == P               to limit the search space to "interesting" nodes
+  scope_SETNAME == n..n    to define custom cardinality for set SETNAME
+  scope_SETNAME == n       equivalent to 1..n
+  SET_PREF_MININT == n
+  SET_PREF_MAXINT == n
+  SET_PREF_MAX_INITIALISATIONS == n  max. number of intialisations computed
+  SET_PREF_MAX_OPERATIONS == n       max. number of enablings per operation computed
+  MAX_OPERATIONS_OPNAME == n         max. number of enablings for the operation OPNAME
+  SET_PREF_SYMBOLIC == TRUE/FALSE
+  SET_PREF_TIME_OUT == n             time out for operation computation in ms
+  ASSERT_LTL... == "LTL Formula"  	using X,F,G,U,R LTL operators +
+                                   Y,O,H,S Past-LTL operators +
+                                   atomic propositions: e(OpName), [OpName], {BPredicate}
+The following definitions allow providing a custom state visualization (n can be empty or a number):
+  ANIMATION_FUNCTIONn == e           a function (INT*INT) +-> INT or an INT
+  ANIMATION_FUNCTION_DEFAULT == e    a function (INT*INT) +-> INT or an INT
+                    instead of any INT above you can also use BOOL or any SET
+                    as a result you can also use STRING values,
+                    or even other values which are pretty printed
+  ANIMATION_IMGn == "PATH to .gif"   a path to a gif file
+  ANIMATION_STRn == "sometext"       a string without spaces;
+                                     the result integer n will be rendered as a string
+  ANIMATION_STR_JUSTIFY_LEFT == TRUE computes the longest string in the outputs and pads
+                                     the other strings accordingly
+  SET_PREF_TK_CUSTOM_STATE_VIEW_PADDING == n          additional padding between images in pixels
+  SET_PREF_TK_CUSTOM_STATE_VIEW_STRING_PADDING == n   additional padding between text in pixels
+The following definitions allow providing a custom state graph (n can be empty or a number):
+  CUSTOM_GRAPH_NODESn == e    define a set of nodes to be shown,
+                              nodes can also be pairs (node,colour) or triples (node,shape,colour)
+                              colours are strings of valid Dot/Tk colors (e.g., "maroon" or "red")
+                              shapes are strings of valid Dot shapes (e.g., "rect" or "hexagon")
+  CUSTOM_GRAPH_EDGESn == e    define a relation to be shown
+                              edges can either be pairs (node1,node2) or triples (node1,label,node2)
+                              where label is either a Dot/Tk color or a string or value representing
+                              the label to be used for the edges
+  In both cases e can also be a record which defines default dot attributes like
+  color, shape, style and description, e.g., rec(color:"red", style:"dotted", edges:Expression)
+  VISB_JSON_FILE == "PATH to .json"  a path to a default VisB JSON file for visualisation
+
+Comments and Pragmas:
+--------------------
+   /* ... */       block comments
+   // ...          line comments
+
+ProB recognises several pragma comments of the form /*@ PRAGMA VALUE */
+The whitespace between @ and PRAGMA is optional.
+  /*@symbolic */      put before comprehension set or lambda to instruct ProB
+                      to keep it symbolic and not try to compute it explicitly
+  /*@label LBL */     associates a label LBL with the following predicate
+                      (LBL must be identifier or a string "....")
+  /*@desc DESC */     associates a description DESC with the preceding predicate or
+                      introduced identifier (in VARIABLES, CONSTANTS,... section)
+                      There are two special descriptions
+                      /*@desc memo*/ to be put after identifiers in the ABSTRACT_CONSTANTS section
+                                     indicating that these functions should be memoized
+                      /*@desc expand*/ to be put after identifiers (in VARIABLES, CONSTANTS,... section)
+                                       indicating that they should be expanded and not kept symbolically
+                      /*@desc prob-ignore */ to be put after predicates (e.g., in PROPERTIES) which
+                                             should be ignored by ProB
+                                             when the preference USE_IGNORE_PRAGMAS is TRUE
+  /*@file PATH */     associates a file for machines in SEES, INCLUDES, ...
+                      put pragma after a seen or included machine
+  /*@package NAME */  at start of machine, machine file should be in folder NAME/...
+                      NAME can be qualified N1.N2...Nk, in which case the machine
+                      file should be in N1/N2/.../Nk
+  /*@import-package NAME */  adds ../NAME to search paths for SEES,...
+                      NAME can also be qualified N1.N2...Nk, use after package pragma
+  /*@generated */     can be put at the top of a machine file; indicates the machine
+                      is generated from some other source
+
+File Extensions:
+----------------
+   .mch   for abstract machine files
+   .ref   for refinement machines
+   .imp   for implementation machines
+   .def   for DEFINITIONS files
+   .rmch  for Rules machines for data validation
+
+  
+Differences with Atelier B
+--------------------------
+Basically, ProB tries to be compatible with Atelier B and conforms to the semantics
+of Abrial's B-Book and of Atelier B's reference manual 
+(http://www.atelierb.eu/php/documents-en.php#manuel-reference).
+Here are the main differences with Atelier B:
+  - tuples without parentheses are not supported; write (a,b,c) instead of a,b,c
+  - relational composition has to be wrapped into parentheses; write (f;g)
+  - parallel product also has to be wrapped into parentheses; write (f||g)
+  - not all tree operators are supported
+  - the VALUES clause is only partially supported
+  - definitions have to be syntactically correct and be either an expression,
+    predicate or substitution;
+    the arguments to definitions have to be expressions;
+    definitions which are predicates or substitutions must be declared before first use
+  - definitions are local to a machine
+  - for ProB the order of fields in a record is not relevant (internally the fields are
+    sorted), Atelier-B reports a type error if the order of the name of the fields changes
+  - well-definedness: for disjunctions and implications ProB uses the L-system
+    of well-definedness (i.e., for P => Q, P should be well-defined and
+    if P is true then Q should also be well-defined)
+  - ProB allows WHILE loops and sequential composition in abstract machines
+  - ProB now allows the IF-THEN-ELSE and LET for expressions and predicates
+    (e.g., IF x<0 THEN -x ELSE x END or LET x BE x=f(y) IN x+x END)
+  - ProB's type inference is stronger than Atelier-B's, much less typing predicates
+    are required
+  - ProB accepts operations with parameters but without pre-conditions
+  - ProB allows identifiers consisting of a single character and identifiers in single backquotes (`id`)
+  - ProB allows to use <> for the empty sequence (but this use is deprecated)
+  - ProB allows escape codes (\n, \', \", see above) and supports UTF-8 characters in strings,
+    and ProB allows multi-line string literals written using three apostrophes ('''string''')
+  - ProB allows a she-bang line in machine files starting with #!
+ (If you discover more differences, please let us know!)
+  - ProB allows btrue and bfalse as predicates in B machines
+  - ProB allows to use the Event-B relation operators <<->, <->>, <<->>
+
+See also our Wiki for documentation:
+  http://www.stups.hhu.de/ProB/index.php5/Current_Limitations
+  http://www.stups.hhu.de/ProB/index.php5/Using_ProB_with_Atelier_B
+
+Also note that there are various differences between BToolkit and AtelierB/ProB:
+ - AtelierB/ProB do not allow true as predicate;
+   e.g., PRE true THEN ... END is not allowed (use BEGIN ... END instead)
+   ProB now allows btrue and bfalse to be used as predicates.
+ - AtelierB/ProB do not allow a machine parameter to be used in the PROPERTIES
+ - AtelierB/ProB require a scalar machine parameter to be typed in the
+   CONSTRAINTS clause
+ - In AtelierB/ProB the BOOL type is pre-defined and cannot be redefined
+
+Other notes
+------------
+ ProB now supports the Unicode mathematical symbols, exactly like Atelier-B
+ ProB is best at treating universally quantified formulas of the form
+   !x.(x:SET => RHS), or
+   !(x,y).(x|->y:SET =>RHS), 
+   !(x,y,z).(x|->y|->z:SET =>RHS), ...;
+ otherwise the treatment of !(x1,...,xn).(LHS => RHS) may delay until all values
+ treated by LHS are known.
+ Similarly, expressions of the form SIGMA(x).(x:SET|Expr) and PI(x).(x:SET|Expr)
+ lead to better constraint propagation.
+ The construction S:FIN(S) is recognised by ProB as equivalent to the Event-B
+ finite(S) operator.
+ ProB assumes that machines and STRING values are encoded using UTF-8.

@@ -1,0 +1,103 @@
+Summary of LTL Syntax supported by ProB
+---------------------------------------
+   use {...} for B predicates,
+   G,F,X,U,W,R,true,false,not,&,or and => are part of the supported LTL syntax (see below),
+   use e(op) to check if an operation op is enabled,
+   use deadlock to check if a state is deadlocked,
+   use deadlock(op1,...,opk) with k>0 to check if all operations in the brackets are disabled,
+   use controller(op1,...,opk) with k>0 to check if exactly one of the operations in the brackets is enabled,
+   use deterministic(op1,...,opk) with k>0 to check if maximum one of the operations in the brackets is enabled,
+   use sink to check if no operation is enabled that leads to another state,
+   use current to check if the state is the current state in ProB's animator,
+   use [op] to check that op is the next operation in the trace, e.g. [reset] => X{db={}},
+   use TransitionProp({BExpr}), where TransitionProp is unchanged, changed, increasing, decreasing
+   Past-LTL is supported: Y,H,O,S,T are the duals to X,G,F,U,R (see below).
+
+Setting Fairness Constraints
+----------------------------
+   Give fairness constraints by means of implication: fair => f, 
+   where "fair" are the fairness constraints and "f" is LTL-formula intended to be checked.
+   Use WF(-) and SF(-) to set action-based weak and strong fairness constraints, respectively,
+   use WEF and SEF to search for bad paths that are weakly and strongly fair with respect to all transitions, respectively.
+
+
+Regular LTL Operators
+---------------------
+   G Globally
+   F Finally
+   X NeXt
+   U Until
+   W Weak Until
+   R Release
+
+Past LTL Operators
+---------------------
+   Y Yesterday (dual of X)
+   H History (dual of G)
+   O Once (dual of F)
+   S Since (dual of U)
+   T dual of R
+
+Atomic Propositions
+-------------------
+   {BPred}                      check if predicate holds in state
+   e(op)                        check if operation op is enabled in state (but not necessarily the next transition)
+   deadlock                     check if the state is deadlocked
+   deadlock(op1,...,opk)        check if all operations in the brackets are disabled (k>0),
+   controller(op1,...,opk)      check if exactly one of the operations in the brackets is enabled (k>0),
+   deterministic(op1,...,opk)   check if maximum one of the operations in the brackets is enabled (k>0),
+   sink                         check if no operation leads to another state
+   current                      check if we are in the current state of the ProB animator
+   true                         always true
+   false                        always false
+
+Transition Properties
+---------------------
+These checks operate on the next transition, i.e., from the current state to the next state.
+   [op]                 check if op is the next operation taken in the trace
+   unchanged({BExpr})   check if the B expression BExpr is unchanged compared to the next state
+   changed({BExpr})     check if the BExpr is changed by the next transition
+   decreasing({BExpr})  check if the BExpr will decrease due to the next transition
+   increasing({BExpr})  check if the BExpr will increase due to the next transition
+   BA({BPred})          check before-after B predicate BPred on current and next state, where
+                        x$0 refers to value in current (before) state, and x to value in next (after) state
+
+Safety Properties
+-----------------
+   For safety properties ProB uses another checking algorithm, to avoid having to
+   explore the entire SCC (strongly connected component) of a counter example.
+   In general this requires installing the LTL2BA tool (see Help menu), but
+   the following patterns are supported directly without LTL2BA:
+    G StateProposition
+    G (StateProposition => X StateProposition)
+   where StateProposition is either an atomic proposition ({Pred}, e(Op), [Op], deadlock,...)
+   or a propositional operators (not, &, =>, or) applied to StatePropositions.
+   Here are a few example patterns covered by the above:
+   
+   G {Pred}                       Invariant
+   G(e(Op) => {Pred})             Necessary precondition for operation Op
+   G({Pred} => e(Op))             Sufficient precondition for operation Op
+   G([Op] => X{Pred})             Postcondition of operation Op
+   G(e(Op1) => not(e(Op2)))       Enabling relations between operations
+   G(not(deadlock(Op1,...,Opk)))  Relative deadlock freedom
+   G(deterministic(Op1,...,Opk))  Relative deadlock freedom
+   G(controller(Op1,...,Opk))     Relative deadlock freedom and determinism
+   
+
+Advanced Operators
+-----------------
+   Av(.)   Gavin Lowe's available operator for CSP
+
+
+DEFINITIONS
+-----------
+   In classical B you can store your LTL formulas in the DEFINITIONS clause
+   using ASSERT_LTLnr definitions, for example:   
+   
+    DEFINITIONS
+      ASSERT_LTL1 == "G ({xx=0} => X {xx=2})";
+      ASSERT_LTL2 == "G ([Inc] => X {xx>0})";
+
+   The formulas then automatically appear in the
+   "Check LTL/CTL Assertions" dialog (Verify menu).
+
