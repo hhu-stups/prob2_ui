@@ -165,7 +165,6 @@ public class BEditorView extends BorderPane {
 		});
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			// System.out.println("[" + Thread.currentThread().getName() + "] currentProject changed: from=" + from + " to=" + to);
 			if (to == null) {
 				machineChoice.getItems().clear();
 				this.setHint();
