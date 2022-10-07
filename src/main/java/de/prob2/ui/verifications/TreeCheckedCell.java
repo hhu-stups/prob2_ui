@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications;
 
 import de.prob2.ui.layout.BindableGlyph;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TreeTableCell;
 import org.controlsfx.glyphfont.FontAwesome;
 

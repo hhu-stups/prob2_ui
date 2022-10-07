@@ -2,7 +2,10 @@ package de.prob2.ui.vomanager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -12,21 +15,35 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.ComboBoxTableCell;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import javafx.util.converter.DefaultStringConverter;
+
+import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
 public class RequirementsEditingBox extends VBox {
+	private static final Comparator<? super String> VT_ID_COMPARATOR = new AlphanumericComparator(Locale.ROOT);
 
 	@FXML
 	private TextField tfName;
@@ -41,7 +58,25 @@ public class RequirementsEditingBox extends VBox {
 	private ChoiceBox<String> cbRequirementLinkMachineChoice;
 
 	@FXML
-	private Button applyButton;
+	private Button removeVoButton;
+
+	@FXML
+	private TableView<ValidationObligation> voTable;
+
+	@FXML
+	private TableColumn<ValidationObligation, Checked> voStatusColumn;
+
+	@FXML
+	private TableColumn<ValidationObligation, String> voMachineColumn;
+
+	@FXML
+	private TableColumn<ValidationObligation, String> voExpressionColumn;
+
+	@FXML
+	private Button historyButton;
+
+	@FXML
+	private Button refineButton;
 
 	private final StageManager stageManager;
 
@@ -51,6 +86,8 @@ public class RequirementsEditingBox extends VBox {
 
 	private final ObservableList<String> linkedMachineNames;
 
+	private final ObjectProperty<Requirement> oldRequirement;
+
 	@Inject
 	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject) {
 		super();
@@ -58,6 +95,7 @@ public class RequirementsEditingBox extends VBox {
 		this.currentProject = currentProject;
 
 		this.linkedMachineNames = FXCollections.observableArrayList();
+		this.oldRequirement = new SimpleObjectProperty<>(this, "oldRequirement", null);
 
 		stageManager.loadFXML(this, "requirements_editing_box.fxml");
 	}
@@ -65,24 +103,142 @@ public class RequirementsEditingBox extends VBox {
 	@FXML
 	private void initialize() {
 		cbRequirementLinkMachineChoice.setItems(linkedMachineNames);
-		applyButton.visibleProperty().bind(cbRequirementChoice.getSelectionModel().selectedItemProperty().isNotNull());
+
+		removeVoButton.disableProperty().bind(voTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
+
+		voStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		voStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+
+		voMachineColumn.setCellFactory(col -> new TableCell<ValidationObligation, String>() {
+			@Override
+			protected void updateItem(final String item, final boolean empty) {
+				super.updateItem(item, empty);
+
+				this.setText(null);
+				if (empty) {
+					this.setGraphic(null);
+				} else {
+					final ChoiceBox<String> machineChoiceBox = new ChoiceBox<>(linkedMachineNames);
+					machineChoiceBox.getSelectionModel().select(item);
+					machineChoiceBox.setOnAction(e -> {
+						final String machine = machineChoiceBox.getValue();
+						if (machine == null) {
+							return;
+						}
+						final ValidationObligation existingVo = voTable.getItems().get(this.getIndex());
+						final ValidationObligation changedVo = new ValidationObligation(machine, existingVo.getExpression());
+						voTable.getItems().set(this.getIndex(), changedVo);
+					});
+					this.setGraphic(machineChoiceBox);
+				}
+			}
+		});
+		voMachineColumn.setCellValueFactory(new PropertyValueFactory<>("machine"));
+
+		voExpressionColumn.setCellFactory(col -> {
+			final ComboBoxTableCell<ValidationObligation, String> cell = new ComboBoxTableCell<>(new DefaultStringConverter());
+			cell.setComboBoxEditable(true);
+			Bindings.<ValidationObligation>select(cell.tableRowProperty(), "item").addListener((o, from, to) -> {
+				if (to == null) {
+					cell.getItems().clear();
+				} else {
+					final Machine machine = currentProject.get().getMachine(to.getMachine());
+					final List<String> vtIds = new ArrayList<>(machine.getValidationTasks().keySet());
+					vtIds.sort(VT_ID_COMPARATOR);
+					cell.getItems().setAll(vtIds);
+				}
+			});
+			return cell;
+		});
+		voExpressionColumn.setCellValueFactory(new PropertyValueFactory<>("expression"));
+		voExpressionColumn.setOnEditCommit(e -> {
+			final int row = e.getTablePosition().getRow();
+			final ValidationObligation existingVo = voTable.getItems().get(row);
+			final ValidationObligation changedVo = new ValidationObligation(existingVo.getMachine(), e.getNewValue());
+			voTable.getItems().set(row, changedVo);
+		});
+
+		historyButton.disableProperty().bind(oldRequirement.isNull());
+		refineButton.disableProperty().bind(oldRequirement.isNull());
 	}
 
+	@FXML
+	private void addVo() {
+		assert !linkedMachineNames.isEmpty();
+
+		final ValidationObligation newVo;
+		if (voTable.getItems().isEmpty()) {
+			// No VOs exist yet - nothing can be copied.
+			// Start with the first machine and an empty expression.
+			newVo = new ValidationObligation(linkedMachineNames.get(0), "");
+		} else {
+			// At least one VO exists - copy the last one and auto-select the next machine.
+			final ValidationObligation existingVo = voTable.getItems().get(voTable.getItems().size() - 1);
+			assert !linkedMachineNames.isEmpty();
+			final int lastMachineIndex = linkedMachineNames.indexOf(existingVo.getMachine());
+			assert lastMachineIndex != -1;
+
+			final String nextMachine;
+			if (lastMachineIndex == linkedMachineNames.size() - 1) {
+				// We're already at the last machine in the list.
+				// Try to find any other machine that doesn't have a VO yet,
+				// otherwise default to the first machine again.
+				final List<String> machinesWithoutVos = new ArrayList<>(linkedMachineNames);
+				for (final ValidationObligation vo : voTable.getItems()) {
+					machinesWithoutVos.remove(vo.getMachine());
+				}
+				if (machinesWithoutVos.isEmpty()) {
+					nextMachine = linkedMachineNames.get(0);
+				} else {
+					nextMachine = machinesWithoutVos.get(0);
+				}
+			} else {
+				// Select the next machine in the list.
+				nextMachine = linkedMachineNames.get(lastMachineIndex + 1);
+			}
+
+			// Copy the validation expression from the last VO.
+			newVo = new ValidationObligation(nextMachine, existingVo.getExpression());
+		}
+
+		voTable.getItems().add(newVo);
+		voTable.edit(voTable.getItems().size()-1, voExpressionColumn);
+	}
 
 	@FXML
-	public void replaceRequirement(){
+	private void removeVo() {
+		voTable.getItems().remove(voTable.getSelectionModel().getSelectedIndex());
+	}
+
+	@FXML
+	private void applyRequirement(){
+		if (tfName.getText().trim().isEmpty() || taRequirement.getText().trim().isEmpty()) {
+			warnNotValid();
+			return;
+		}
+
 		boolean nameExists = nameExists();
-		final Requirement oldRequirement = (Requirement) voManagerStage.getSelectedRequirement();
 
 		//If another requirement has the name we have chosen we should not allow the change
-		if(nameExists && !oldRequirement.getName().equals(tfName.getText())) {
+		if (nameExists && (oldRequirement.get() == null || !oldRequirement.get().getName().equals(tfName.getText()))) {
 			warnAlreadyExists();
 			return;
 		}
-		ArrayList<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
-		predecessors.add(oldRequirement);
-		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), oldRequirement.getValidationObligations(), predecessors, null);
-		currentProject.replaceRequirement(oldRequirement, newRequirement);
+
+		final List<Requirement> predecessors;
+		if (oldRequirement.get() == null) {
+			predecessors = Collections.emptyList();
+		} else {
+			predecessors = new ArrayList<>(oldRequirement.get().getPreviousVersions());
+			predecessors.add(oldRequirement.get());
+		}
+		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
+
+		if (oldRequirement.get() == null) {
+			currentProject.addRequirement(newRequirement);
+		} else {
+			currentProject.replaceRequirement(oldRequirement.get(), newRequirement);
+		}
 	}
 
 	@FXML
@@ -93,30 +249,11 @@ public class RequirementsEditingBox extends VBox {
 		table.toFront();
 	}
 
-	@FXML
-	public void addRequirement() {
-		if(!tfName.getText().trim().isEmpty() && !taRequirement.getText().trim().isEmpty()) {
-			boolean nameExists = nameExists();
-			addRequirement(nameExists);
-			voManagerStage.closeEditingBox();
-		} else {
-			warnNotValid();
-		}
-	}
-
 	private boolean nameExists(){
 		return currentProject.getRequirements().stream()
 				.map(Requirement::getName)
 				.collect(Collectors.toList())
 				.contains(tfName.getText());
-	}
-
-	private void addRequirement(boolean nameExists) {
-		if(nameExists) {
-			warnAlreadyExists();
-			return;
-		}
-		currentProject.addRequirement(new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), Collections.emptySet()));
 	}
 
 	@FXML
@@ -128,23 +265,24 @@ public class RequirementsEditingBox extends VBox {
 	}
 
 	public void resetRequirementEditing() {
+		this.oldRequirement.set(null);
 		cbRequirementChoice.getSelectionModel().clearSelection();
 		taRequirement.clear();
 		tfName.clear();
+		voTable.getItems().clear();
 		voManagerStage.clearRequirementsSelection();
 	}
 
-	public void showRequirement(Requirement requirement, boolean edit) {
-		if(edit) {
-			voManagerStage.switchMode(VOManagerStage.EditType.MODIFY, VOManagerStage.Mode.REQUIREMENT);
-		}
+	public void showRequirement(Requirement requirement) {
 		if(requirement == null) {
 			return;
 		}
+		this.oldRequirement.set(requirement);
 		tfName.setText(requirement.getName());
 		cbRequirementLinkMachineChoice.getSelectionModel().select(requirement.getIntroducedAt());
 		cbRequirementChoice.getSelectionModel().select(requirement.getType());
 		taRequirement.setText(requirement.getText());
+		voTable.getItems().setAll(requirement.getValidationObligations());
 	}
 
 	private void warnNotValid() {

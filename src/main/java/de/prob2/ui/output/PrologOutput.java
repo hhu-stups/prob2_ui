@@ -22,7 +22,7 @@ public class PrologOutput extends InlineCssTextArea {
 			String[] messageAndStyle = handleOutput(lineToFormat);
 			this.appendText(messageAndStyle[0]);
 			this.setStyle(Math.max(this.getLength()-messageAndStyle[0].length(), 0), this.getLength(), messageAndStyle[1]);
-		});;
+		});
 		this.setPrefWidth(Double.MAX_VALUE);
 		this.setWrapText(true);
 		this.setEditable(false);

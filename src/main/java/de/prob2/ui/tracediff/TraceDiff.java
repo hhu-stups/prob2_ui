@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -191,7 +192,7 @@ public class TraceDiff extends VBox {
 		});
 
 		String typeOfTraceDiff = injector.getInstance(PreferencesStage.class).getTraceDiffType();
-		switch (typeOfTraceDiff) {
+		switch (Objects.requireNonNull(typeOfTraceDiff)) {
 			case "multipleLines":
 				openingBrace = "\n(";
 				argDelimiter = ",\n";
