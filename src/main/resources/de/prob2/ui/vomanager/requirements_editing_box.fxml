@@ -53,7 +53,7 @@
 			<TextArea fx:id="taRequirement" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 		</VBox>
 		<VBox spacing="5.0">
-			<Label text="Validation obligations:"/>
+			<Label text="%vomanager.edit.requirement.validationObligations"/>
 			<VBox>
 				<HBox styleClass="border">
 					<Button onAction="#addVo">
@@ -72,8 +72,8 @@
 						<TableColumn fx:id="voStatusColumn" editable="false" style="-fx-alignment: CENTER;"
 							minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}"
 							text="%common.columns.status"/>
-						<TableColumn fx:id="voMachineColumn" minWidth="80.0" text="Machine"/>
-						<TableColumn fx:id="voExpressionColumn" minWidth="160.0" text="Expression"/>
+						<TableColumn fx:id="voMachineColumn" minWidth="80.0" text="%vomanager.edit.requirement.validationObligations.columns.machine"/>
+						<TableColumn fx:id="voExpressionColumn" minWidth="160.0" text="%vomanager.edit.requirement.validationObligations.columns.expression"/>
 					</columns>
 					<columnResizePolicy>
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
