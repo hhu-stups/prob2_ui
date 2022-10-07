@@ -331,14 +331,18 @@ public class VOManagerStage extends Stage {
 			return;
 		}
 		if(currentFeedback.isEmpty()) {
+			boolean checked = true;
 			for (Requirement requirement : currentProject.getRequirements()) {
 				final Optional<ValidationObligation> vo = requirement.getValidationObligation(currentProject.getCurrentMachine());
 				if (vo.isPresent() && vo.get().getChecked() == Checked.NOT_CHECKED) {
 					taFeedback.appendText(i18n.translate("vomanager.feedback.notChecked"));
-					return;
+					checked = false;
+					break;
 				}
 			}
-			taFeedback.appendText(i18n.translate("vomanager.feedback.successful"));
+			if(checked) {
+				taFeedback.appendText(i18n.translate("vomanager.feedback.successful"));
+			}
 		} else {
 			for (VOValidationFeedback validationFeedback : currentFeedback.values()) {
 				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", validationFeedback.getRequirement()));
