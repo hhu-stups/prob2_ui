@@ -276,7 +276,7 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void restoreState(TextAreaState textAreaState) {
-		beditor.moveTo(textAreaState.caretPosition);
+		beditor.moveTo(Math.max(0, Math.min(beditor.getLength(), textAreaState.caretPosition)));
 		beditor.requestFollowCaret();
 	}
 
