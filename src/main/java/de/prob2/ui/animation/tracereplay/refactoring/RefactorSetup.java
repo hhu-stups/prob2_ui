@@ -42,14 +42,13 @@ public class RefactorSetup {
 
 
 	public enum WhatToDo implements Translatable {
-		REFACTOR_TRACE("traceModification.traceRefactorSetup.whatToDo.refactor"),
 		REFINEMENT_REPLAY("traceModification.traceRefactorSetup.whatToDo.refine"),
 		OPTION_REPLAY("traceModification.traceRefactorSetup.whatToDo.replay"),
 		NOTHING("traceModification.traceRefactorSetup.whatToDo.nothing"),
 		;
 
 		public static WhatToDo[] validValues() {
-			return new WhatToDo[]{REFACTOR_TRACE, REFINEMENT_REPLAY, OPTION_REPLAY};
+			return new WhatToDo[]{REFINEMENT_REPLAY, OPTION_REPLAY};
 		}
 
 		private final String translationKey;

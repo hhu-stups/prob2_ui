@@ -111,21 +111,6 @@ public class RefactorButton extends Button {
 			}
 
 			switch (result.whatToDo){
-				case REFACTOR_TRACE:
-					TraceRefactoredSetup traceRefactoredSetup = null;
-					try {
-						traceRefactoredSetup = new TraceRefactoredSetup(fileObject,  result.fileAlpha, result.fileBeta, result.getTraceFile(), injector, currentProject, stageManager);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					final Machine currentMachine = currentProject.getCurrentMachine();
-					traceRefactoredSetup.executeCheck(currentMachine.getLocation()==result.getFileAlpha());
-					List<Path> traceFiles = traceRefactoredSetup.evaluateResults();
-
-					if(result.setResult){
-						traceFiles.forEach(entry -> traceFileHandler.addTraceFile(currentMachine, entry));
-					}
-					break;
 				case REFINEMENT_REPLAY:
 
 					AbstractTraceRefinement abstractTraceRefinement = checkCorrectFileType(fileObject, result);
@@ -197,6 +182,9 @@ public class RefactorButton extends Button {
 		}
 	}
 
+	/*
+	 * TODO: Move this to ProB2 UI rendering
+	 */
 	private void caterForGraphic(TraceJsonFile fileObject, List<PersistentTransition> resultingTrace, List<String> skips){
 		TracePlotter.ResizableCanvas canvas = new TracePlotter.ResizableCanvas();
 		canvas.resize(500, 300);

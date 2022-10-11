@@ -84,13 +84,6 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 				secondMachine.disableProperty().setValue(false);
 			} else {
 				switch (newValue) {
-					case REFACTOR_TRACE:
-						firstMachine.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.file1.refactor"));
-						secondMachine.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.file2.refactor"));
-						traceFile.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.trace.refactor"));
-						secondMachine.disableProperty().setValue(false);
-
-						break;
 					case REFINEMENT_REPLAY:
 						firstMachine.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.file1.refinement"));
 						secondMachine.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.file2.refinement"));
@@ -155,13 +148,8 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 		if (whatToDo.get() != null && whatToDo.get() != RefactorSetup.WhatToDo.NOTHING && trace.get() != null) {
 			if (alpha.get() != null && beta.get() != null) {
 				return true;
-			} else if (alpha.get() == null && (whatToDo.get() == RefactorSetup.WhatToDo.REFACTOR_TRACE)) {
-				return true; //Refactoring replay can work with one trace
 			}
-			if (beta.get() == null && whatToDo.get() == RefactorSetup.WhatToDo.OPTION_REPLAY) {
-				return true; //Conditional replay can work with one trace
-
-			}
+			return beta.get() == null && whatToDo.get() == RefactorSetup.WhatToDo.OPTION_REPLAY; //Conditional replay can work with one trace
 
 		}
 
