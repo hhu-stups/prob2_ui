@@ -3,6 +3,7 @@ package de.prob2.ui.operations;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -12,11 +13,12 @@ import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
-import de.prob.model.classicalb.ClassicalBConstant;
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.classicalb.Operation;
-import de.prob.model.classicalb.Property;
+import de.prob.model.representation.AbstractElement;
+import de.prob.model.representation.Axiom;
+import de.prob.model.representation.BEvent;
+import de.prob.model.representation.ConstantsComponent;
 import de.prob.model.representation.Guard;
+import de.prob.model.representation.Machine;
 import de.prob.model.representation.ModelElementList;
 import de.prob.statespace.Transition;
 import de.prob2.ui.dynamic.dotty.DotView;
@@ -198,9 +200,12 @@ public final class ExecuteByPredicateStage extends Stage {
 		predicate.append("(");
 
 		String opName = this.getItem().getName();
+		final AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();
 		switch (opName) {
 			case Transition.SETUP_CONSTANTS_NAME:
-				ModelElementList<Property> properties = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getProperties();
+				// FIXME Doesn't work for properties/axioms outside the main machine
+				// FIXME getAxioms doesn't work for .eventb files, only Rodin projects
+				ModelElementList<? extends Axiom> properties = ((ConstantsComponent)mainComponent).getAxioms();
 				if(!properties.isEmpty()) {
 					predicate.append(properties.stream().map(prop -> "(" + prop.toString() + ")").collect(Collectors.joining(" & ")));
 					predicate.append(" & ");
@@ -211,7 +216,8 @@ public final class ExecuteByPredicateStage extends Stage {
 				break;
 			default:
 				// TODO: Implement visualization with before/after predicate
-				Operation operation = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getOperation(opName);
+				BEvent operation = ((Machine)mainComponent).getEvent(opName);
+				// FIXME getChildrenOfType doesn't work for .eventb files, only Rodin projects
 				ModelElementList<Guard> guards = operation.getChildrenOfType(Guard.class);
 				if(!guards.isEmpty()) {
 					predicate.append(guards.stream().map(guard -> "(" + guard.toString() + ")").collect(Collectors.joining(" & ")));
@@ -229,11 +235,11 @@ public final class ExecuteByPredicateStage extends Stage {
 		StringBuilder freeVariables = new StringBuilder();
 		switch (opName) {
 			case Transition.SETUP_CONSTANTS_NAME:
-				ModelElementList<ClassicalBConstant> constants = ((ClassicalBModel) currentTrace.getModel()).getMainMachine().getConstants();
-				if(!constants.isEmpty()) {
-					freeVariables.append("#(");
-					freeVariables.append(constants.stream().map(ClassicalBConstant::getName).collect(Collectors.joining(", ")));
-					freeVariables.append(").");
+				final Set<String> constantNames = this.getItem().getConstants().keySet();
+				if(!constantNames.isEmpty()) {
+					freeVariables.append("#");
+					freeVariables.append(String.join(", ", constantNames));
+					freeVariables.append(".");
 				}
 				break;
 			case Transition.INITIALISE_MACHINE_NAME:
@@ -243,9 +249,9 @@ public final class ExecuteByPredicateStage extends Stage {
 				// TODO: Implement visualization with before/after predicate -> also add some variables
 				List<String> parameterNames = this.getItem().getParameterNames();
 				if(!parameterNames.isEmpty()) {
-					freeVariables.append("#(");
+					freeVariables.append("#");
 					freeVariables.append(String.join(", ", parameterNames));
-					freeVariables.append(").");
+					freeVariables.append(".");
 				}
 				break;
 		}
