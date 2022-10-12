@@ -173,7 +173,7 @@ public class RefactorButton extends Button {
 
 	private void saveAdaptedTrace(List<PersistentTransition> resultTrace, TraceJsonFile fileObject, RefactorSetup userInput) throws IOException {
 		TraceJsonFile newFileObject = fileObject.changeTransitionList(resultTrace);
-		Path path = userInput.getTraceFile().getParent().resolve(userInput.traceFile.getFileName() + "_adapted_with_options.prob2trace" );
+		Path path = userInput.getTraceFile().getParent().resolve(userInput.traceFile.getFileName().toString().replaceFirst("[.][^.]+$", "") + "_adapted_with_options.prob2trace" );
 		traceFileHandler.save(newFileObject, path);
 
 		if(userInput.setResult){
