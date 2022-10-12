@@ -33,6 +33,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import org.fxmisc.richtext.CodeArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,7 +63,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected ListView<T> lvChoice;
 
 	@FXML
-	protected TextArea taFormula;
+	protected CodeArea taFormula;
 
 	@FXML
 	protected Button evaluateFormulaButton;
@@ -89,7 +90,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected Parent errorsView;
 	
 	// Used to remember the last selected item even when the list might be cleared temporarily,
-	// e. g. when reloading the current machine.
+	// e.g. when reloading the current machine.
 	protected T lastItem;
 	
 	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
@@ -305,7 +306,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			if (choice.getArity() == 0) {
 				throw new IllegalArgumentException("Visualization command does not take an argument: " + command);
 			}
-			taFormula.setText(formula);
+			taFormula.replaceText(formula);
 			visualize(choice);
 		}
 	}

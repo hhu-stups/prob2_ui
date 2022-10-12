@@ -16,6 +16,8 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+<?import org.fxmisc.richtext.CodeArea?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <fx:root type="ExpressionTableView" title="%table.expressionTableView.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -50,7 +52,11 @@
 								<VBox spacing="10.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 									<padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
 									<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
-									<TextArea fx:id="taFormula" promptText="%dynamic.enterFormula.placeholder" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+									<VirtualizedScrollPane fx:id="virtualizedScrollPane">
+										<content>
+											<CodeArea fx:id="taFormula" VBox.vgrow="ALWAYS" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+										</content>
+									</VirtualizedScrollPane>
 									<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%dynamic.evaluateFormula" onAction="#evaluateFormula"/>
 								</VBox>
 							</VBox>
