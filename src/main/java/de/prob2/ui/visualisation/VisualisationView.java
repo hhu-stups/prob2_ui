@@ -1,7 +1,6 @@
 package de.prob2.ui.visualisation;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,16 +11,16 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.Main;
 import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
+import de.prob.annotations.Home;
 import de.prob.statespace.State;
-import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.statusbar.StatusBar;
@@ -56,15 +55,16 @@ public class VisualisationView extends AnchorPane {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final I18n i18n;
-
+	private final Path proBHomePath;
 	private final BackgroundUpdater updater;
 
 	@Inject
-	public VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final I18n i18n, final StopActions stopActions, final StatusBar statusBar) {
+	private VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final I18n i18n, final @Home Path proBHomePath, final StopActions stopActions, final StatusBar statusBar) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.i18n = i18n;
+		this.proBHomePath = proBHomePath;
 		this.updater = new BackgroundUpdater("VisualisationView Updater");
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
@@ -117,8 +117,7 @@ public class VisualisationView extends AnchorPane {
 		final Path projectDirectory = currentProject.get().getLocation();
 		//getParent is required to access the directory of the machine
 		final Path machineDirectory = currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()).getParent();
-		final Path proBDirectory = Paths.get(Main.getProBDirectory());
-		final List<Path> imageDirectories = Arrays.asList(machineDirectory, projectDirectory, proBDirectory);
+		final List<Path> imageDirectories = Arrays.asList(machineDirectory, projectDirectory, proBHomePath);
 
 		final Map<Integer, Image> machineImages = new HashMap<>();
 		final List<String> notFoundImages = new ArrayList<>();
@@ -145,7 +144,7 @@ public class VisualisationView extends AnchorPane {
 				String.join("\n", notFoundImages),
 				machineDirectory,
 				projectDirectory,
-				proBDirectory
+				proBHomePath
 			);
 			alert.initOwner(this.getScene().getWindow());
 			alert.show();
