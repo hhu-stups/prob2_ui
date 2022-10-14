@@ -89,9 +89,6 @@ public final class ModelcheckingView extends ScrollPane {
 	private TableColumn<ModelCheckingJobItem, Checked> jobStatusColumn;
 
 	@FXML
-	private TableColumn<ModelCheckingJobItem, Integer> indexColumn;
-
-	@FXML
 	private TableColumn<ModelCheckingJobItem, String> messageColumn;
 
 	@FXML
@@ -167,8 +164,9 @@ public final class ModelcheckingView extends ScrollPane {
 
 		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		indexColumn.setCellValueFactory(new PropertyValueFactory<>("index"));
+		jobStatusColumn.setSortable(false);
 		messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
+		messageColumn.setSortable(false);
 
 		tvItems.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		tvChecks.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));

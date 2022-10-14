@@ -70,7 +70,6 @@
 			</columnResizePolicy>
 			<columns>
 				<TableColumn fx:id="jobStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
-				<TableColumn fx:id="indexColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.index" />
 				<TableColumn fx:id="messageColumn" minWidth="120.0" text="%common.columns.message" />
 			</columns>
 			<placeholder>
