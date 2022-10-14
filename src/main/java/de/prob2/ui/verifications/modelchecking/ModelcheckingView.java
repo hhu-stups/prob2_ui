@@ -293,6 +293,13 @@ public final class ModelcheckingView extends ScrollPane {
 		tvChecks.setRowFactory(table -> {
 			final TableRow<ModelCheckingJobItem> row = new TableRow<>();
 
+			row.setOnMouseClicked(event -> {
+				if (event.getClickCount() == 2 && (!(row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription)))){
+					ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
+					injector.getInstance(CurrentTrace.class).set(item.getTrace());
+				}
+			});
+
 			MenuItem showTraceItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
 			showTraceItem.setOnAction(e-> {
 				ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
