@@ -230,16 +230,22 @@ public final class ModelcheckingView extends ScrollPane {
 			return;
 		}
 
-		final CompletableFuture<ModelCheckingJobItem> future = checker.startNextCheckStep(item);
-		future.whenComplete((r, t) -> {
-			if (t == null) {
-				if (r.getResult() instanceof ITraceDescription) {
-					currentTrace.set(r.getTrace());
+		try {
+			final CompletableFuture<ModelCheckingJobItem> future = checker.startNextCheckStep(item);
+			future.whenComplete((r, t) -> {
+				if (t == null) {
+					if (r.getResult() instanceof ITraceDescription) {
+						currentTrace.set(r.getTrace());
+					}
+				} else {
+					showModelCheckException(t);
 				}
-			} else {
-				showModelCheckException(t);
-			}
-		});
+			});
+		}
+		catch (IllegalArgumentException e){
+			stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show();
+		}
+
 	}
 
 	private void tvItemsClicked(MouseEvent e) {
