@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import org.fxmisc.richtext.CodeArea?>
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
 <fx:root type="LTLPatternStage" title="%verifications.ltl.pattern.ltlPatternStage.title" minWidth="800" minHeight="600" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -27,7 +27,7 @@
 							<Spacer/>
 							<Button styleClass="button-blue" text="%verifications.ltl.pattern.ltlPatternStage.showBuiltins" onAction="#showBuiltins" HBox.hgrow="NEVER"/>
 						</HBox>
-						<CodeArea fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+						<ExtendedCodeArea fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 						<Label text="%verifications.ltl.pattern.ltlPatternStage.description" VBox.vgrow="NEVER"/>
 						<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
 						<Label text="%verifications.ltl.pattern.ltlPatternStage.errors" VBox.vgrow="NEVER"/>

@@ -5,14 +5,13 @@ import java.util.List;
 
 import com.google.inject.Provider;
 
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.CommandInterruptedException;
-import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.FormulaExpand;
-import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StopActions;
@@ -63,7 +62,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected ListView<T> lvChoice;
 
 	@FXML
-	protected CodeArea taFormula;
+	protected ExtendedCodeArea taFormula;
 
 	@FXML
 	protected Button evaluateFormulaButton;
@@ -162,7 +161,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		});
 		
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
-		
+
+		taFormula.getStyleClass().add("visualization-formula");
 		taFormula.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
 				if (!e.isShiftDown()) {
@@ -281,14 +281,31 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			} catch (CommandInterruptedException | InterruptedException e) {
 				LOGGER.info("Visualization interrupted", e);
 				Thread.currentThread().interrupt();
-			} catch (ProBError | EvaluationException e) {
-				LOGGER.error("Visualization failed", e);
-				Platform.runLater(() -> {
-					taErrors.setText(e.getMessage());
-					errorsView.setVisible(true);
-					placeholderLabel.setVisible(false);
-				});
+			} catch (ProBError e) {
+				handleProBError(e);
+			} catch (Exception e) {
+				if (e.getCause() instanceof ProBError) {
+					handleProBError((ProBError) e.getCause());
+				} else if (e.getCause() instanceof BCompoundException) {
+					handleProBError(new ProBError((BCompoundException) e.getCause()));
+				} else {
+					LOGGER.error("Visualization failed", e);
+					Platform.runLater(() -> {
+						taErrors.setText(e.getMessage());
+						errorsView.setVisible(true);
+						placeholderLabel.setVisible(false);
+					});
+				}
 			}
+		});
+	}
+
+	private void handleProBError(ProBError e)  {
+		LOGGER.error("Visualization failed", e);
+		Platform.runLater(() -> {
+			taErrors.setText(e.getMessage());
+			errorsView.setVisible(true);
+			placeholderLabel.setVisible(false);
 		});
 	}
 	

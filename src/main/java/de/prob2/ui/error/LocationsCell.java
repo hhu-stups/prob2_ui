@@ -118,7 +118,8 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 
 		BEditor bEditor = injector.getInstance(BEditor.class);
 		// Remove the error markers set before this
-		bEditor.resetHighlighting();
+		// TODO: why is this needed?
+		// bEditor.resetHighlighting();
 		int start = bEditor.getAbsolutePosition(location.getStartLine()-1, location.getStartColumn());
 		int end = bEditor.getAbsolutePosition(location.getEndLine()-1, location.getEndColumn());
 		StyleSpans<Collection<String>> errorStyleSpans = bEditor.getStyleSpans(0, end);

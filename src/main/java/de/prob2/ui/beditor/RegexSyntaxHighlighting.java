@@ -22,7 +22,7 @@ import de.prob.scripting.ZFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 
-final class RegexSyntaxHighlighting {
+public final class RegexSyntaxHighlighting {
 	private static final Map<Class<? extends ModelFactory<?>>, Map<String, String>> syntaxClassesOtherLanguages = new HashMap<>();
 
 	private RegexSyntaxHighlighting() {

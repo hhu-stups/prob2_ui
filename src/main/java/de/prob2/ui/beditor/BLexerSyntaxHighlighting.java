@@ -221,7 +221,7 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-final class BLexerSyntaxHighlighting {
+public final class BLexerSyntaxHighlighting {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BLexerSyntaxHighlighting.class);
 
 	private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();

@@ -1,20 +1,19 @@
 package de.prob2.ui.verifications.ltl;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
-
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-
 import org.fxmisc.richtext.CodeArea;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public abstract class LTLItemStage extends Stage {
 	

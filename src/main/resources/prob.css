@@ -1204,3 +1204,11 @@
 .trace-diff-cell.FOLLOWING {
 	-fx-text-fill: blue;
 }
+
+/* ==================== GRAPH/TABLE VISUALIZATION ======================== */
+
+.visualization-formula {
+	-fx-control-inner-background: #f8f8f8;
+	-fx-border-color: -prob-aqua;
+	-fx-border-width: 2;
+}
