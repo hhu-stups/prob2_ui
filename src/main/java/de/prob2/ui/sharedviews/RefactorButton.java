@@ -3,6 +3,7 @@ package de.prob2.ui.sharedviews;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -121,25 +122,9 @@ public class RefactorButton extends Button {
 							Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Refinement Successful", ButtonType.OK, new ButtonType("Show"));
 							Optional<ButtonType> buttonPressed = alert.showAndWait();
 							if(buttonPressed.isPresent() && buttonPressed.get().getButtonData().equals(ButtonBar.ButtonData.OTHER)){
-								if(abstractTraceRefinement instanceof TraceRefinerEventB){
-									ReusableAnimator animator = injector.getInstance(ReusableAnimator.class);
-									StateSpace stateSpace = animator.createStateSpace();
-									EventBFactory eventBFactory = injector.getInstance(EventBFactory.class);
-									eventBFactory.extract(result.getFileBeta().toString()).loadIntoStateSpace(stateSpace);
-									EventBModel eventBModel = (EventBModel) stateSpace.getModel();
-									caterForGraphic(fileObject, resultingTrace, eventBModel.introducedBySkip());
-								}else{
-								if(abstractTraceRefinement instanceof VerticalTraceRefiner){
-									ReusableAnimator animator = injector.getInstance(ReusableAnimator.class);
-									StateSpace stateSpace = animator.createStateSpace();
-									ClassicalBFactory eventBFactory = injector.getInstance(ClassicalBFactory.class);
-									eventBFactory.extract(result.getFileBeta().toString()).loadIntoStateSpace(stateSpace);
-									EventBModel eventBModel = (EventBModel) stateSpace.getModel();
-									caterForGraphic(fileObject, resultingTrace, eventBModel.introducedBySkip());
-								}}
-
+								caterForGraphic(fileObject, resultingTrace, skipTransitions(result, abstractTraceRefinement));
 							}
-							saveTrace(resultingTrace, fileObject, result);
+							saveRefinedTrace(resultingTrace, fileObject, result, result.getFileBeta().getFileName().toString().replaceFirst("[.][^.]+$", ""));
 						} catch (IOException | BCompoundException e) {
 							e.printStackTrace();
 						} catch (TraceConstructionError e) {
@@ -154,7 +139,7 @@ public class RefactorButton extends Button {
 					try {
 						List<Transition> resultTrace = AdvancedTraceConstructor.constructTraceWithOptions(fileObject.getTransitionList(), TraceCheckerUtils.createStateSpace(result.fileAlpha.toString(), injector), replayOptions);
 						createFeedNackMessage("Trace could be fully replayed while enforcing all predicates");
-						saveTrace(PersistentTransition.createFromList(resultTrace), fileObject, result);
+						saveAdaptedTrace(PersistentTransition.createFromList(resultTrace), fileObject, result);
 					} catch ( IOException e) {
 						e.printStackTrace();
 					} catch (TraceConstructionError e){
@@ -166,15 +151,38 @@ public class RefactorButton extends Button {
 		});
 	}
 
+	private List<String> skipTransitions(RefactorSetup result, AbstractTraceRefinement abstractTraceRefinement) throws IOException {
+		ReusableAnimator animator = injector.getInstance(ReusableAnimator.class);
+		StateSpace stateSpace = animator.createStateSpace();
+		if(abstractTraceRefinement instanceof TraceRefinerEventB){
+			EventBFactory eventBFactory = injector.getInstance(EventBFactory.class);
+			eventBFactory.extract(result.getFileBeta().toString()).loadIntoStateSpace(stateSpace);
+			EventBModel eventBModel = (EventBModel) stateSpace.getModel();
+			return eventBModel.introducedBySkip();
+		}else{
+			return Collections.emptyList();
+		}
+	}
+
 	private void createFeedNackMessage(String messageText){
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, messageText, ButtonType.OK);
 		alert.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
 		alert.showAndWait();
 	}
 
-	private void saveTrace(List<PersistentTransition> resultTrace, TraceJsonFile fileObject, RefactorSetup userInput) throws IOException {
+
+	private void saveAdaptedTrace(List<PersistentTransition> resultTrace, TraceJsonFile fileObject, RefactorSetup userInput) throws IOException {
 		TraceJsonFile newFileObject = fileObject.changeTransitionList(resultTrace);
-		Path path = userInput.getTraceFile().getParent().resolve(userInput.traceFile.getFileName() + "_adapted_with_options.prob2trace" );
+		Path path = userInput.getTraceFile().getParent().resolve(userInput.traceFile.getFileName().toString().replaceFirst("[.][^.]+$", "") + "_adapted_with_options.prob2trace" );
+		traceFileHandler.save(newFileObject, path);
+
+		if(userInput.setResult){
+			traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
+		}
+	}
+	private void saveRefinedTrace(List<PersistentTransition> resultTrace, TraceJsonFile fileObject, RefactorSetup userInput, String adaptedFor) throws IOException {
+		TraceJsonFile newFileObject = fileObject.changeTransitionList(resultTrace).changeModelName(adaptedFor);
+		Path path = userInput.getTraceFile().getParent().resolve(userInput.traceFile.getFileName().toString().replaceFirst("[.][^.]+$", "")  + "___refined_from___"+adaptedFor+".prob2trace" );
 		traceFileHandler.save(newFileObject, path);
 
 		if(userInput.setResult){
