@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage?>
 <?import javafx.geometry.Insets?>
@@ -13,8 +14,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import de.prob2.ui.internal.ExtendedCodeArea?>
-<?import org.fxmisc.richtext.CodeArea?>
 <fx:root type="LTLFormulaStage" title="%verifications.ltl.formula.ltlFormulaStage.title" minWidth="800" minHeight="600" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -30,11 +29,11 @@
 							<Spacer/>
 							<Button styleClass="button-blue" text="%verifications.ltl.formula.ltlFormulaStage.showBuiltins" onAction="#showBuiltins" HBox.hgrow="NEVER"/>
 						</HBox>
-						<!--<VirtualizedScrollPane fx:id="virtualizedScrollPane">
-							<content>-->
+						<VirtualizedScrollPane fx:id="virtualizedScrollPane">
+							<content>
 								<ExtendedCodeArea fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
-							<!--</content>
-						</VirtualizedScrollPane>-->
+							</content>
+						</VirtualizedScrollPane>
 						<HBox alignment="CENTER_LEFT" spacing="5.0">
 							<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>
 							<TextField fx:id="idTextField" promptText="%common.optionalPlaceholder" HBox.hgrow="NEVER"/>

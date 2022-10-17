@@ -14,7 +14,6 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -63,7 +62,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
 
-import org.fxmisc.richtext.model.StyleSpans;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -107,7 +105,6 @@ public class BEditorView extends BorderPane {
 
 	private Thread watchThread;
 	private WatchKey key;
-	private StyleSpans<Collection<String>> highlighting;
 	private boolean changingText;
 
 	@Inject
@@ -123,7 +120,6 @@ public class BEditorView extends BorderPane {
 		this.errors = FXCollections.observableArrayList();
 		this.watchThread = null;
 		this.key = null;
-		this.highlighting = null;
 		stageManager.loadFXML(this, "beditorView.fxml");
 	}
 
@@ -475,7 +471,7 @@ public class BEditorView extends BorderPane {
 		machineChoice.getSelectionModel().select(path);
 	}
 
-	public void jumpToSource(Path machinePath, int line, int column) {
+	public void jumpToSource(Path machinePath, int paragraphIndex, int columnIndex) {
 		stageManager.getMainStage().toFront();
 		injector.getInstance(MainView.class).switchTabPane("beditorTab");
 
@@ -483,15 +479,12 @@ public class BEditorView extends BorderPane {
 
 		BEditor bEditor = injector.getInstance(BEditor.class);
 		bEditor.requestFocus();
-		bEditor.moveTo(line, column);
+		bEditor.moveTo(paragraphIndex, columnIndex);
 		bEditor.requestFollowCaret();
 	}
 
-	void setHighlighting(StyleSpans<Collection<String>> highlighting) {
-		this.highlighting = highlighting;
-	}
-
-	StyleSpans<Collection<String>> getHighlighting() {
-		return highlighting;
+	public void jumpToErrorSource(ErrorItem.Location errorLocation) {
+		beditor.setErrorHighlight(errorLocation);
+		jumpToSource(Paths.get(errorLocation.getFilename()), errorLocation.getStartLine(), errorLocation.getStartColumn());
 	}
 }

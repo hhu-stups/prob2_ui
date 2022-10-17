@@ -22,6 +22,7 @@ import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
+import javafx.util.Builder;
 import javafx.util.BuilderFactory;
 
 public class ProB2Module extends AbstractModule {
@@ -91,6 +92,11 @@ public class ProB2Module extends AbstractModule {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setBuilderFactory(type -> {
 			if (injector.getExistingBinding(Key.get(type)) != null || type.isAnnotationPresent(FXMLInjected.class)) {
+				// this allows FXML to configure instances, remember to implement Builder and return "this" in the build method.
+				if (Builder.class.isAssignableFrom(type)) {
+					return (Builder<?>) injector.getInstance(type);
+				}
+
 				return () -> injector.getInstance(type);
 			} else {
 				return javafxDefaultBuilderFactory.getBuilder(type);

@@ -1,26 +1,21 @@
 package de.prob2.ui.error;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob2.ui.beditor.BEditor;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.MainView;
 
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.layout.VBox;
-
-import org.fxmisc.richtext.model.StyleSpans;
-import org.fxmisc.richtext.model.StyleSpansBuilder;
 
 final class LocationsCell extends TreeTableCell<Object, Object> {
 	private final Injector injector;
@@ -29,16 +24,16 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 	private LocationsCell(Injector injector) {
 		this.injector = injector;
 	}
-	
+
 	@Override
 	protected void updateItem(final Object item, final boolean empty) {
 		super.updateItem(item, empty);
-		
+
 		if (empty || item instanceof String) {
 			this.setGraphic(null);
 		} else if (item instanceof ErrorItem) {
 			I18n i18n = injector.getInstance(I18n.class);
-			final List<ErrorItem.Location> locations = ((ErrorItem)item).getLocations();
+			final List<ErrorItem.Location> locations = ((ErrorItem) item).getLocations();
 			addContextMenu(locations);
 			// this.getTreeTableRow() is deprecated since JavaFX 17
 			// and the replacement this.getTableRow() was only introduced in JavaFX 17.
@@ -103,31 +98,8 @@ final class LocationsCell extends TreeTableCell<Object, Object> {
 		this.setGraphic(vbox);
 	}
 
-	private static <T> Collection<T> combineCollections(final Collection<T> a, final Collection<T> b) {
-		final Collection<T> ret = new ArrayList<>(a);
-		ret.addAll(b);
-		return ret;
-	}
-
 	private void jumpToResource(ErrorItem.Location location) {
-		injector.getInstance(StageManager.class).getMainStage().toFront();
-		injector.getInstance(MainView.class).switchTabPane("beditorTab");
-
 		BEditorView bEditorView = injector.getInstance(BEditorView.class);
-		bEditorView.selectMachine(new File(location.getFilename()).toPath());
-
-		BEditor bEditor = injector.getInstance(BEditor.class);
-		// Remove the error markers set before this
-		// TODO: why is this needed?
-		// bEditor.resetHighlighting();
-		int start = bEditor.getAbsolutePosition(location.getStartLine()-1, location.getStartColumn());
-		int end = bEditor.getAbsolutePosition(location.getEndLine()-1, location.getEndColumn());
-		StyleSpans<Collection<String>> errorStyleSpans = bEditor.getStyleSpans(0, end);
-		errorStyleSpans = errorStyleSpans.overlay(new StyleSpansBuilder<Collection<String>>().add(Collections.emptyList(), start).add(Collections.singleton("errorTable"), end-start).create(), LocationsCell::combineCollections);
-		bEditor.setStyleSpans(0, errorStyleSpans);
-
-		bEditor.requestFocus();
-		bEditor.moveTo(bEditor.getAbsolutePosition(location.getStartLine()-1, location.getStartColumn()));
-		bEditor.requestFollowCaret();
+		bEditorView.jumpToErrorSource(location);
 	}
 }

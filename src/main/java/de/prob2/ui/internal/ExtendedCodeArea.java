@@ -1,20 +1,38 @@
 package de.prob2.ui.internal;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.layout.FontSize;
+
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Popup;
+import javafx.util.Builder;
+
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.event.MouseOverTextEvent;
@@ -23,20 +41,11 @@ import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.inject.Inject;
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-
 /**
  * CodeArea with error highlighting support.
  */
 @FXMLInjected
-public class ExtendedCodeArea extends CodeArea {
+public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeArea> {
 
 	protected static final Map<ErrorItem.Type, String> ERROR_STYLE_CLASSES;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedCodeArea.class);
@@ -54,11 +63,11 @@ public class ExtendedCodeArea extends CodeArea {
 	protected final ObservableList<ErrorItem> errors;
 	protected final Popup errorPopup;
 	protected final Label errorPopupLabel;
+	protected final SimpleObjectProperty<ErrorItem.Location> errorHighlight;
 	private final ExecutorService executor;
 
 	@Inject
 	public ExtendedCodeArea(FontSize fontSize, I18n i18n, StopActions stopActions) {
-		super();
 		this.fontSize = fontSize;
 		this.i18n = i18n;
 		this.executor = Executors.newSingleThreadExecutor();
@@ -68,6 +77,8 @@ public class ExtendedCodeArea extends CodeArea {
 		this.errorPopup = new Popup();
 		this.errorPopupLabel = new Label();
 		this.errorPopup.getContent().add(this.errorPopupLabel);
+
+		this.errorHighlight = new SimpleObjectProperty<>(null, "errorHighlight", null);
 
 		initialize();
 	}
@@ -101,27 +112,29 @@ public class ExtendedCodeArea extends CodeArea {
 					}
 				})
 				.subscribe(this::applyHighlighting);
-		this.getErrors().addListener((ListChangeListener<ErrorItem>) change ->
-				this.applyHighlighting(computeHighlighting(this.getText()))
-		);
+		this.errors.addListener((ListChangeListener<ErrorItem>) change -> this.reloadHighlighting());
+		this.errorHighlight.addListener((observable, oldValue, newValue) -> this.reloadHighlighting());
 
 		this.setMouseOverTextDelay(Duration.ofMillis(500));
 		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
 			// Inefficient, but works - there should never be so many errors that the iteration has a noticeable performance impact.
 			final String errorsText = this.getErrors().stream()
-					.filter(error -> error.getLocations().stream().anyMatch(location ->
-							e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
-									&& e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location))
-					)
-					.map(ErrorItem::getMessage)
-					.collect(Collectors.joining("\n"));
+					                          .filter(error ->
+							                                  error.getLocations().stream()
+									                                  .anyMatch(
+											                                  location -> e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
+													                                              && e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location)
+									                                  )
+					                          )
+					                          .map(ErrorItem::getMessage)
+					                          .collect(Collectors.joining("\n"));
 			if (!errorsText.isEmpty()) {
 				this.errorPopupLabel.setText(errorsText);
 				// Try to position the popup under the text being hovered over,
 				// so that the line in question is not covered by the popup.
 				final double popupY = this.getCharacterBoundsOnScreen(e.getCharacterIndex(), e.getCharacterIndex() + 1)
-						.map(Bounds::getMaxY)
-						.orElse(e.getScreenPosition().getY());
+						                      .map(Bounds::getMaxY)
+						                      .orElse(e.getScreenPosition().getY());
 				this.errorPopup.show(this, e.getScreenPosition().getX(), popupY);
 			}
 		});
@@ -217,21 +230,30 @@ public class ExtendedCodeArea extends CodeArea {
 				);
 			}
 		}
+
+		if (errorHighlight.get() != null) {
+			int startIndex = this.errorLocationAbsoluteStart(errorHighlight.get());
+			int endIndex = this.errorLocationAbsoluteEnd(errorHighlight.get());
+			highlighting = highlighting.overlay(
+					new StyleSpansBuilder<Collection<String>>()
+							.add(Collections.emptySet(), startIndex)
+							.add(Collections.singletonList("errorTable"), endIndex - startIndex)
+							.create(),
+					ExtendedCodeArea::combineCollections
+			);
+		}
+
 		return highlighting;
 	}
 
 	private void applyHighlighting(StyleSpans<Collection<String>> highlighting) {
-		// injector.getInstance(BEditorView.class).setHighlighting(highlighting);
 		this.setStyleSpans(0, highlighting);
 	}
-
-	/*public void resetHighlighting() {
-		this.setStyleSpans(0, injector.getInstance(BEditorView.class).getHighlighting());
-	}*/
 
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
 		final String text = this.getText();
 		final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+
 			@Override
 			protected StyleSpans<Collection<String>> call() {
 				return computeHighlighting(text);
@@ -253,5 +275,18 @@ public class ExtendedCodeArea extends CodeArea {
 
 	public ObservableList<ErrorItem> getErrors() {
 		return this.errors;
+	}
+
+	public void setErrorHighlight(ErrorItem.Location errorLocation) {
+		this.errorHighlight.set(errorLocation);
+	}
+
+	public void reloadHighlighting() {
+		this.applyHighlighting(computeHighlighting(this.getText()));
+	}
+
+	@Override
+	public ExtendedCodeArea build() {
+		return this;
 	}
 }
