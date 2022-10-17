@@ -137,7 +137,7 @@ public class TraceTestView extends Stage {
 				final TextArea textArea = new TextArea();
 				textArea.setStyle("-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;");
 				textArea.setText(descriptions.get(index));
-				textArea.setPrefHeight(100);
+				textArea.setPrefHeight(50);
 				textArea.textProperty().addListener((o, from, to) -> {
 					if(to != null) {
 						descriptions.set(index, to);
