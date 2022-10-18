@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -17,6 +18,7 @@ import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
 import de.prob.check.tracereplay.PostconditionPredicate;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -59,7 +61,32 @@ public class TraceTestView extends Stage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceTestView.class);
 
-	private static final class PositionCell extends TableCell<PersistentTransition, String> {
+	private class TracePositionHighlightCell<S, T> extends TableCell<S, T> {
+		private TracePositionHighlightCell() {
+			super();
+		}
+
+		@Override
+		protected void updateItem(T item, boolean empty) {
+			super.updateItem(item, empty);
+			this.getStyleClass().removeAll(Arrays.asList("past", "present", "future"));
+
+			final TableRow<S> tableRow = this.getTableRow();
+			if (!empty && tableRow != null && currentTraceIsReplayedTrace()) {
+				int index = tableRow.getIndex();
+				final int currentIndex = currentTrace.get().getCurrent().getIndex();
+				if (index < currentIndex) {
+					this.getStyleClass().add("past");
+				} else if (index > currentIndex) {
+					this.getStyleClass().add("future");
+				} else {
+					this.getStyleClass().add("present");
+				}
+			}
+		}
+	}
+
+	private final class PositionCell extends TraceTestView.TracePositionHighlightCell<PersistentTransition, String> {
 
 		private PositionCell() {
 			super();
@@ -80,6 +107,19 @@ public class TraceTestView extends Stage {
 				// so its numbering has to start at 1.
 				this.setText(String.valueOf(index + 1));
 			}
+		}
+	}
+
+	private final class TransitionCell extends TraceTestView.TracePositionHighlightCell<PersistentTransition, String> {
+		private TransitionCell() {
+			super();
+		}
+
+		@Override
+		protected void updateItem(final String item, final boolean empty) {
+			super.updateItem(item, empty);
+
+			this.setText(empty ? null : item);
 		}
 	}
 
@@ -168,6 +208,8 @@ public class TraceTestView extends Stage {
 
 	private final I18n i18n;
 
+	private final CurrentTrace currentTrace;
+
 	private final Injector injector;
 
 	private SimpleObjectProperty<ReplayTrace> replayTrace;
@@ -180,10 +222,11 @@ public class TraceTestView extends Stage {
 
 	@Inject
 	public TraceTestView(final StageManager stageManager, final FontSize fontSize,
-						 final I18n i18n, final Injector injector) {
+						 final I18n i18n, final CurrentTrace currentTrace, final Injector injector) {
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
 		this.i18n = i18n;
+		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.replayTrace = new SimpleObjectProperty<>();
 		stageManager.loadFXML(this, "trace_test_view.fxml");
@@ -197,14 +240,7 @@ public class TraceTestView extends Stage {
 			final TableRow<PersistentTransition> row = new TableRow<>();
 			row.setOnMouseClicked(event -> {
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					this.saveTrace();
-					injector.getInstance(TraceChecker.class).check(replayTrace.get(), true).thenAccept(r -> {
-						int index = row.getIndex();
-						if(index < r.getLoadedTrace().getTransitionList().size()) {
-							injector.getInstance(CurrentTrace.class).set(r.getAnimatedReplayedTrace().gotoPosition(index));
-						}
-						traceTableView.refresh();
-					});
+					goToPositionInReplayTrace(row.getIndex());
 				}
 			});
 			return row;
@@ -212,11 +248,60 @@ public class TraceTestView extends Stage {
 
 		positionColumn.setCellFactory(param -> new PositionCell());
 		positionColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+		transitionColumn.setCellFactory(param -> new TransitionCell());
 		transitionColumn.setCellValueFactory(features -> new SimpleStringProperty(buildTransitionString(features.getValue())));
 		testColumn.setCellFactory(param -> new TestCell());
 		testColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
 		descriptionColumn.setCellFactory(param -> new TransitionDescriptionCell());
 		descriptionColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+
+		currentTrace.addListener((o, from, to) -> {
+			if (currentTraceIsReplayedTrace()) {
+				// Update highlighting of current transition
+				traceTableView.refresh();
+			}
+		});
+	}
+
+	private boolean currentTraceIsReplayedTrace() {
+		final Trace trace = currentTrace.get();
+		final ReplayTrace replayed = replayTrace.get();
+		return trace != null
+			&& replayed != null
+			&& replayed.getAnimatedReplayedTrace() != null
+			&& safeListEquals(trace.getTransitionList(), replayed.getAnimatedReplayedTrace().getTransitionList());
+	}
+
+	private void goToPositionInReplayTrace(final int index) {
+		if (currentTraceIsReplayedTrace()) {
+			final Trace trace = currentTrace.get();
+			if (index < trace.getTransitionList().size()) {
+				currentTrace.set(trace.gotoPosition(index));
+			}
+		} else {
+			this.saveTrace();
+			injector.getInstance(TraceChecker.class).check(replayTrace.get(), true).thenAccept(r -> {
+				if (index < r.getLoadedTrace().getTransitionList().size()) {
+					currentTrace.set(r.getAnimatedReplayedTrace().gotoPosition(index));
+				}
+				traceTableView.refresh();
+			});
+		}
+	}
+
+	/**
+	 * Workaround for the broken equals implementation of PersistentVector,
+	 * which throws {@link ArrayIndexOutOfBoundsException}s for apparently no reason.
+	 * This method converts one of the two lists to a plain {@link ArrayList},
+	 * which has a properly working equals method.
+	 * 
+	 * @param left first list to compare
+	 * @param right second list to compare
+	 * @return whether the two lists are equal
+	 * @param <E> element type of the lists
+	 */
+	private static <E> boolean safeListEquals(final List<E> left, final List<E> right) {
+		return new ArrayList<>(left).equals(right);
 	}
 
 	private String buildTransitionString(PersistentTransition persistentTransition) {

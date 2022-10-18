@@ -918,7 +918,7 @@
 	-fx-font-family: ARIAL;
 	-fx-font-style: italic;
 }
-.future .table-cell {
+.future .table-cell, .table-cell.future {
 	-fx-text-fill: -prob-grey-75;
 }
 
