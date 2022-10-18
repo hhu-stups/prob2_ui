@@ -74,7 +74,11 @@ public class TraceTestView extends Stage {
 				this.setText(null);
 			} else {
 				int index = tableRow.getIndex();
-				this.setText(String.valueOf(index));
+				// Increment displayed index by 1 for consistency with the history view,
+				// which displays the root state as "transition 0".
+				// The trace table view doesn't show the root state,
+				// so its numbering has to start at 1.
+				this.setText(String.valueOf(index + 1));
 			}
 		}
 	}
