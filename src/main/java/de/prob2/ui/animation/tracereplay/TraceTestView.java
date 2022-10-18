@@ -68,16 +68,13 @@ public class TraceTestView extends Stage {
 		@Override
 		protected void updateItem(String item, boolean empty) {
 			super.updateItem(item, empty);
-			this.setGraphic(null);
 
-			if(empty || item == null || this.getTableRow() == null || this.getTableRow().getItem() == null) {
-				this.setGraphic(null);
+			final TableRow<PersistentTransition> tableRow = this.getTableRow();
+			if (empty || tableRow == null) {
+				this.setText(null);
 			} else {
-				final TableRow<PersistentTransition> tableRow = this.getTableRow();
 				int index = tableRow.getIndex();
-				VBox box = new VBox();
-				box.getChildren().add(new Label(String.valueOf(index)));
-				this.setGraphic(box);
+				this.setText(String.valueOf(index));
 			}
 		}
 	}
