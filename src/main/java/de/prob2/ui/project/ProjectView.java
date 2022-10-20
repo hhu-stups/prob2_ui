@@ -33,38 +33,43 @@ public final class ProjectView extends StackPane {
 	private MenuButton recentProjectButton;
 	@FXML
 	private MachinesTab machinesTab;
-
+	@FXML
+	private Button documentButton;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ProjectManager projectManager;
 	private final Provider<NewProjectStage> newProjectStageProvider;
 	private final CurrentProject currentProject;
+	private final Provider<SaveDocumentationStage> documentSaveStageProvider;
 
 	@Inject
 	private ProjectView(
-		final StageManager stageManager,
-		final FileChooserManager fileChooserManager,
-		final ProjectManager projectManager,
-		final Provider<NewProjectStage> newProjectStageProvider,
-		final CurrentProject currentProject
+			final StageManager stageManager,
+			final FileChooserManager fileChooserManager,
+			final ProjectManager projectManager,
+			final Provider<NewProjectStage> newProjectStageProvider,
+			final CurrentProject currentProject,
+			Provider<SaveDocumentationStage> documentSaveStageProvider
 	) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.projectManager = projectManager;
 		this.newProjectStageProvider = newProjectStageProvider;
 		this.currentProject = currentProject;
+		this.documentSaveStageProvider = documentSaveStageProvider;
 		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
 		projectTabPane.visibleProperty().bind(currentProject.isNotNull());
+		documentButton.visibleProperty().bind(currentProject.isNotNull());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		recentProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		openProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 
 		projectManager.getRecentProjects().addListener((InvalidationListener)o ->
-			recentProjectButton.getItems().setAll(projectManager.getRecentProjectItems())
+				recentProjectButton.getItems().setAll(projectManager.getRecentProjectItems())
 		);
 		recentProjectButton.getItems().setAll(projectManager.getRecentProjectItems());
 	}
@@ -75,7 +80,7 @@ public final class ProjectView extends StackPane {
 		newProjectStage.showAndWait();
 		newProjectStage.toFront();
 	}
-	
+
 	@FXML
 	private void openProject() {
 		final Path selected = fileChooserManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
@@ -87,5 +92,13 @@ public final class ProjectView extends StackPane {
 
 	public void showMachines() {
 		projectTabPane.getSelectionModel().select(machinesTab);
-	}	
+	}
+
+
+	@FXML
+	public void saveDocumentation() {
+		final Stage documentSaveStage = documentSaveStageProvider.get();
+		documentSaveStage.showAndWait();
+		documentSaveStage.toFront();
+	}
 }

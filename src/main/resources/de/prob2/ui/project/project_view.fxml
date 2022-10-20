@@ -9,19 +9,39 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.control.Tooltip?>
 <fx:root type="ProjectView" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox spacing="5.0" alignment="CENTER">
-		<Button fx:id="newProjectButton" text="%menu.file.items.newProject"
-			onAction="#createNewProject" styleClass="button-blue" />
-		<Button fx:id="openProjectButton" text="%menu.file.items.open"
-			onAction="#openProject" styleClass="button-blue" />
-		<MenuButton fx:id="recentProjectButton" text="%menu.file.items.openRecentProject"
-			styleClass="button-blue" />
-	</VBox>
-	<BetterTabPane fx:id="projectTabPane">
-		<MachinesTab fx:id="machinesTab" />
-		<VerificationsTab fx:id="verificationsTab" />
-		<PreferencesTab fx:id="preferencesTab" />
-		<ProjectTab fx:id="projectTab" />
-	</BetterTabPane>
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+	<AnchorPane>
+		<VBox spacing="5.0" alignment="CENTER" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+			  AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<Button fx:id="newProjectButton" text="%menu.file.items.newProject"
+					onAction="#createNewProject" styleClass="button-blue" />
+			<Button fx:id="openProjectButton" text="%menu.file.items.open"
+					onAction="#openProject" styleClass="button-blue" />
+			<MenuButton fx:id="recentProjectButton" text="%menu.file.items.openRecentProject"
+						styleClass="button-blue" />
+		</VBox>
+		<BetterTabPane fx:id="projectTabPane" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+					   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<MachinesTab fx:id="machinesTab" />
+			<VerificationsTab fx:id="verificationsTab" />
+			<PreferencesTab fx:id="preferencesTab" />
+			<ProjectTab fx:id="projectTab" />
+		</BetterTabPane>
+		<Button fx:id="documentButton" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" onAction="#saveDocumentation" bindableFontSize="${fontSize.fontSize * 1.5}">
+			<graphic>
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILE"  />
+			</graphic>
+			<tooltip>
+				<Tooltip
+						text="%verifications.documentation.icon" />
+			</tooltip>
+		</Button>
+	</AnchorPane>
 </fx:root>
