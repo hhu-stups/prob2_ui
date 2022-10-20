@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import de.prob2.ui.layout.FontSize?>
+<fx:root xmlns:fx="http://javafx.com/fxml/1" type="Stage"
+		 title="%verifications.documentation.saveStage.label.title" resizable="true">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+	<scene>
+			<Scene stylesheets="@/prob.css">
+				<AnchorPane prefWidth="500">
+
+					<VBox alignment="CENTER" spacing="5" AnchorPane.topAnchor="15" AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
+						  AnchorPane.rightAnchor="0">
+						<Label text="%verifications.documentation.saveStage.label.title" styleClass="title"/>
+						<Label text="%verifications.documentation.tableview.title" styleClass="title" />
+						<TableView editable="true" fx:id="tvDocumentation" prefWidth="50.0">
+							<columnResizePolicy>
+								<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+							</columnResizePolicy>
+							<columns>
+								<TableColumn fx:id="tvChecked" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}" />
+								<TableColumn fx:id="tvMachines" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}"  text="%project.machines.machinesTab.title" />
+							</columns>
+							<placeholder>
+								<Label text="%project.machines.machinesTab.noMachines" />
+							</placeholder>
+						</TableView>
+						<Label text="%verifications.documentation.checkbox.title" styleClass="title"/>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<padding><Insets left="5"/></padding>
+							<CheckBox fx:id="checkModelchecking" selected="true"
+									  text="%verifications.documentation.modelchecking.checkbox">
+								<tooltip>
+									<Tooltip text="%verifications.documentation.modelchecking.checkbox" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<padding><Insets left="5"/></padding>
+							<CheckBox fx:id="checkLTL" selected="true"
+									  text="%verifications.documentation.ltl.checkbox">
+								<tooltip>
+									<Tooltip text="%verifications.documentation.ltl.checkbox" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<padding><Insets left="5"/></padding>
+							<CheckBox fx:id="checkSymbolic"
+									  text="%verifications.documentation.symbolic.checkbox">
+								<tooltip>
+									<Tooltip text="%verifications.documentation.symbolic.checkbox" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+						<AnchorPane styleClass="border">
+							<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15" AnchorPane.topAnchor="20"
+								  AnchorPane.bottomAnchor="20" alignment="center_right">
+								<HBox spacing="20" alignment="center_left">
+									<Label text="%verifications.documentation.saveStage.label.name"/>
+									<TextField fx:id="filename" HBox.hgrow="always"/>
+								</HBox>
+								<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+									<padding><Insets top="5"/></padding>
+									<CheckBox fx:id="makePdf" selected="true"
+											  text="%verifications.documentation.symbolic.pdf">
+										<tooltip>
+											<Tooltip text="%verifications.documentation.symbolic.pdf" />
+										</tooltip>
+									</CheckBox>
+								</HBox>
+								<HBox spacing="20" alignment="center_left">
+									<Label text="%verifications.documentation.saveStage.label.location"/>
+									<TextField fx:id="locationField" HBox.hgrow="always"/>
+									<Button styleClass="button-dark2"  text="%preferences.stage.tabs.general.buttons.selectLocation"
+											onAction="#selectLocation" />
+									<VBox.margin>
+										<Insets top="10"/>
+									</VBox.margin>
+								</HBox>
+							</VBox>
+						</AnchorPane>
+						<ButtonBar styleClass="dialog">
+							<buttons>
+								<Button text="%common.buttons.cancel" cancelButton="true" onAction="#cancel"/>
+								<Button fx:id="finishButton" text="%common.buttons.finish" onAction="#finish"/>
+							</buttons>
+							<VBox.margin>
+								<Insets left="10" right="10" top="10"/>
+							</VBox.margin>
+						</ButtonBar>
+					</VBox>
+				</AnchorPane>
+			</Scene>
+	</scene>
+</fx:root>
