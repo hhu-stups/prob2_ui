@@ -197,7 +197,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	private int getClampedAbsolutePosition(final int paragraphIndex, final int columnIndex) {
-		if (paragraphIndex >= this.getParagraphs().size() - 1) {
+		if (paragraphIndex >= this.getParagraphs().size()) {
 			return this.getLength();
 		}
 		return Math.min(this.getAbsolutePosition(paragraphIndex, columnIndex), this.getLength());
@@ -282,6 +282,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	public void reloadHighlighting() {
+		System.out.println("["+getClass().getSimpleName()+"] ExtendedCodeArea.reloadHighlighting()");
 		this.applyHighlighting(computeHighlighting(this.getText()));
 	}
 

@@ -255,6 +255,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.errorsView.setVisible(false);
 		this.clearContent();
 		this.updatePlaceholderLabel();
+		taFormula.getErrors().clear();
 	}
 	
 	protected abstract void clearContent();
@@ -301,11 +302,12 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	}
 
 	private void handleProBError(ProBError e)  {
-		LOGGER.error("Visualization failed", e);
+		LOGGER.error("Visualization failed with ProBError", e);
 		Platform.runLater(() -> {
 			taErrors.setText(e.getMessage());
 			errorsView.setVisible(true);
 			placeholderLabel.setVisible(false);
+			taFormula.getErrors().setAll(e.getErrors());
 		});
 	}
 	
