@@ -282,7 +282,6 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	public void reloadHighlighting() {
-		System.out.println("["+getClass().getSimpleName()+"] ExtendedCodeArea.reloadHighlighting()");
 		this.applyHighlighting(computeHighlighting(this.getText()));
 	}
 
