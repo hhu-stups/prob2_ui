@@ -52,7 +52,7 @@
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<padding><Insets left="5"/></padding>
-							<CheckBox fx:id="checkSymbolic"
+							<CheckBox fx:id="checkSymbolic" selected="true"
 									  text="%verifications.documentation.symbolic.checkbox">
 								<tooltip>
 									<Tooltip text="%verifications.documentation.symbolic.checkbox" />

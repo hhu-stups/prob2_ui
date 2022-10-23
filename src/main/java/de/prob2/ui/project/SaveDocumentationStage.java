@@ -1,6 +1,7 @@
 package de.prob2.ui.project;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.documentation.Documenter;
 import de.prob2.ui.documentation.MachineDocumentationItem;
@@ -63,12 +64,14 @@ public class SaveDocumentationStage extends Stage {
 	@FXML
 	private CheckBox makePdf;
 	private final ObservableList<MachineDocumentationItem> machineDocumentationItems = FXCollections.observableArrayList();
+	private final Injector injector;
 
 	@Inject
-	private SaveDocumentationStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, final StageManager stageManager, I18n i18n) {
+	private SaveDocumentationStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, final StageManager stageManager, I18n i18n, Injector injector) {
 		this.fileChooserManager = fileChooserManager;
 		this.currentProject = currentProject;
 		this.i18n = i18n;
+		this.injector = injector;
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "save_modelchecking_stage.fxml");
@@ -115,7 +118,7 @@ public class SaveDocumentationStage extends Stage {
 																.filter(MachineDocumentationItem::getDocument)
 																.map(MachineDocumentationItem::getMachineItem)
 																.collect(Collectors.toList());
-		Documenter documenter = new Documenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, filename.getText());
+		Documenter documenter = new Documenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, filename.getText(),injector);
 		documenter.document();
 		this.close();
 	}

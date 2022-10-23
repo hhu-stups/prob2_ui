@@ -22,6 +22,14 @@ public class Converter {
 		}
 	}
 
+	public static void stringToPng(String html, String filename, Path path) {
+		try (PrintWriter out = new PrintWriter(path.toString() + "/" + filename + ".html")) {
+			out.println(html);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	static String readResource(final Object controller, String filename)
 			throws IOException {
 		File file = null;

@@ -1,20 +1,28 @@
 package de.prob2.ui.documentation;
 
+import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.visb.VisBFileHandler;
+import de.prob2.ui.visb.VisBStage;
+import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import org.apache.commons.text.StringSubstitutor;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
@@ -34,13 +42,15 @@ public class Documenter {
 	private final List<Machine> machines;
 	StringBuilder latexBody = new StringBuilder();
 	CurrentProject project;
+	Injector injector;
 	@Inject
 	public Documenter(CurrentProject project,
 					  I18n i18n, boolean modelchecking,
 					  boolean ltl, boolean symbolic,boolean makePdf,
 					  List<Machine> machines,
 					  Path dir,
-					  String filename) throws IOException {
+					  String filename,
+					  Injector injector) throws IOException {
 		this.project = project;
 		this.i18n = i18n;
 		this.modelchecking = modelchecking;
@@ -50,6 +60,7 @@ public class Documenter {
 		this.machines = machines;
 		this.dir = dir;
 		this.filename = filename;
+		this.injector = injector;
 		latexBody.append(readResource(this, "latexBody.tex"));
 	}
 
@@ -79,7 +90,7 @@ public class Documenter {
 	}
 
 	private String getModelcheckingString(Machine elem) throws IOException {
-		String modelcheckingTemplate = readResource(this, "modelchecking.tex");
+		String modelcheckingTemplate = readResource(this, "modelcheckingTable.tex");
 		Map<String, String> valuesMap = new HashMap<String, String>();
 		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		StringBuilder modelcheckingString = new StringBuilder();
@@ -101,15 +112,15 @@ public class Documenter {
 
 
 	private String getLTLString(Machine elem) throws IOException {
-		String ltlTemplate = readResource(this, "ltl.tex");
+		String ltlTemplate = readResource(this, "ltlTable.tex");
 		Map<String, String> valuesMap = new HashMap<String, String>();
 		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		StringBuilder ltlFormulars = new StringBuilder();
 		StringBuilder ltlPatterns = new StringBuilder();
-		for (LTLFormulaItem formular : elem.getLTLFormulas()) {
-			if (formular.selected()) {
-				valuesMap.put("fcode", formular.getCode());
-				valuesMap.put("fresult", (formular.getResultItem() != null) ? i18n.translate(formular.getResultItem().getHeaderBundleKey()) : "Formular not Solved");
+		for (LTLFormulaItem formula : elem.getLTLFormulas()) {
+			if (formula.selected()) {
+				valuesMap.put("fcode", formula.getCode());
+				valuesMap.put("fresult", (formula.getResultItem() != null) ? i18n.translate(formula.getResultItem().getHeaderBundleKey()) : "Formular not Solved");
 				ltlFormulars.append(sub.replace(readResource(this, "formularCell.tex")));
 			}
 		}
@@ -126,9 +137,48 @@ public class Documenter {
 		return sub.replace(ltlTemplate);
 	}
 
-	private String getSymbolicString(Machine elem) {
-		//SYMBOLIC STRING
-		return "";
+	private String getSymbolicString(Machine elem) throws IOException {
+		String symbolicTemplate = readResource(this, "symbolicTable.tex");
+		Map<String, String> valuesMap = new HashMap<String, String>();
+		StringSubstitutor sub = new StringSubstitutor(valuesMap);
+		StringBuilder symbolicFormulas = new StringBuilder();
+		for(SymbolicCheckingFormulaItem formula : elem.getSymbolicCheckingFormulas()){
+			if(formula.selected()){
+				valuesMap.put("stype", latexSafe(String.valueOf(formula.getType())));
+				valuesMap.put("sconfig", latexSafe(formula.getCode()));
+				valuesMap.put("sresult", (formula.getResultItem() != null) ? i18n.translate(formula.getResultItem().getHeaderBundleKey()) : "Formular not Solved");
+				symbolicFormulas.append(sub.replace(readResource(this, "symbolicCell.tex")));
+			}
+		}
+		valuesMap.put("formulars", String.valueOf(symbolicFormulas));
+		return sub.replace(symbolicTemplate);
+	}
+
+	private void saveTraceImage(Machine elem, ReplayTrace trace){
+		VisBFileHandler visBFileHandler = injector.getInstance(VisBFileHandler.class);
+		VisBVisualisation visualisation = visBFileHandler.constructVisualisationFromJSON(trace.getAbsoluteLocation()); //maybe create own json file
+		final Path path = visualisation.getSvgPath();
+		String svgContent;
+		try {
+			svgContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		String html;
+		final InputStream inputStream = VisBStage.class.getResourceAsStream("visb_html_view.html");
+		if (inputStream == null) {
+			throw new AssertionError("VisB HTML template resource not found - this should never happen");
+		}
+		try (final InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+			html = CharStreams.toString(reader)
+				.replace("@BASE_URL@", path.getParent().toUri().toString())
+				.replace("@SVG_CONTENT@", svgContent);
+		} catch (IOException e) {
+			throw new UncheckedIOException("I/O exception while reading VisB HTML template resource - this should never happen", e);
+		}
+		stringToPng(html, "1",dir);
+		//HTML TO PNG
+		return;
 	}
 
 	private String getTracesString(Machine elem) throws IOException {
@@ -152,6 +202,7 @@ public class Documenter {
 			valuesMap.put("name", latexSafe(trace.getName()));
 			valuesMap.put("item", String.valueOf(cellString));
 			table.append(sub.replace(readResource(this, "traceItemTable.tex")));
+			//saveTraceImage(elem, trace);
 		}
 		valuesMap.put("traceitemtables", String.valueOf(table));
 		return sub.replace(traceTemplate);
