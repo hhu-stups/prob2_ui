@@ -94,11 +94,20 @@ public class TraceChecker {
 		final CompletableFuture<ReplayTrace> future = cliExecutor.submit(() -> {
 			final TraceJsonFile traceJsonFile = replayTrace.load();
 			ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
-			if (replayed.getErrors().isEmpty() && replayed.getReplayStatus() == TraceReplayStatus.PARTIAL) {
+			final List<ErrorItem> newErrors = new ArrayList<>(replayed.getErrors());
+			// TODO Display transition-specific errors in a proper table instead of merging them into the general list of errors
+			for (int i = 0; i < replayed.getTransitionErrorMessages().size(); i++) {
+				final List<String> errorMessages = replayed.getTransitionErrorMessages().get(i);
+				for (final String errorMessage : errorMessages) {
+					newErrors.add(ErrorItem.fromErrorMessage("Transition " + i + ": " + errorMessage));
+				}
+			}
+			if (newErrors.isEmpty() && replayed.getReplayStatus() == TraceReplayStatus.PARTIAL) {
 				// FIXME Should this case be reported as an error on the Prolog side?
 				final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
-				replayed = replayed.withErrors(Collections.singletonList(error));
+				newErrors.add(error);
 			}
+			replayed = replayed.withErrors(newErrors);
 			replayTrace.setReplayedTrace(replayed);
 			// TODO Display replay information for each transition if the replay was not perfect/complete
 			Trace trace = replayed.getTrace(stateSpace);
