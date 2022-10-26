@@ -501,10 +501,13 @@ public class TraceTestView extends Stage {
 		final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
 		final BindableGlyph statusIcon = buildStatusIcon();
 
-		if(replayTrace.get().getPostconditionStatus().isEmpty() || replayTrace.get().getPostconditionStatus().get(index).isEmpty() || isNewBox) {
+		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
+		if (transitionErrorMessages.size() <= index || isNewBox) {
 			TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
 		} else {
-			Checked status = replayTrace.get().getPostconditionStatus().get(index).get(postconditionIndex);
+			// TODO There's currently no good way to tell which errors belong to which postcondition.
+			// For now, we display all postconditions as failed if there are any errors for the relevant transition.
+			Checked status = transitionErrorMessages.get(index).isEmpty() ? Checked.SUCCESS : Checked.FAIL;
 			replayTrace.get().checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
 			TraceViewHandler.updateStatusIcon(statusIcon, status);
 		}

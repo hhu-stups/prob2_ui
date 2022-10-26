@@ -148,7 +148,6 @@ public class TraceViewHandler {
 				alert.initOwner(scene.getWindow());
 				alert.setErrorMessage();
 			}
-			traceChecker.showTestError(replayTrace.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
 		});
 		openInExternalEditorItem.setOnAction(event ->
 			injector.getInstance(ExternalEditor.class).open(row.getItem().getAbsoluteLocation())

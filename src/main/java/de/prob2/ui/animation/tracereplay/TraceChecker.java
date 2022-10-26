@@ -2,7 +2,6 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
@@ -15,21 +14,14 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.check.tracereplay.OperationDisabledness;
-import de.prob.check.tracereplay.OperationEnabledness;
-import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
-import de.prob.check.tracereplay.Postcondition;
-import de.prob.check.tracereplay.PostconditionPredicate;
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob.check.tracereplay.TraceReplayStatus;
 import de.prob.check.tracereplay.TransitionReplayPrecision;
-import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -37,7 +29,6 @@ import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
-import javafx.scene.control.Alert;
 
 @FXMLInjected
 @Singleton
@@ -46,15 +37,13 @@ public class TraceChecker {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
-	private final I18n i18n;
 
 	@Inject
-	private TraceChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager, final I18n i18n) {
+	private TraceChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager) {
 		this.cliExecutor = cliExecutor;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
-		this.i18n = i18n;
 	}
 
 	public void checkAll(List<ReplayTrace> replayTraces) {
@@ -68,7 +57,6 @@ public class TraceChecker {
 
 		return checkNoninteractive(replayTrace).whenComplete((r, e) -> {
 			if (e == null) {
-				showTestError(r.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
 				if (setCurrentAnimation) {
 					// set the current trace if no error has occurred. Otherwise leave the decision to the user
 					if (!r.getReplayedTrace().getErrors().isEmpty()) {
@@ -92,7 +80,10 @@ public class TraceChecker {
 		replayTrace.setProgress(-2);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		final CompletableFuture<ReplayTrace> future = cliExecutor.submit(() -> {
-			final TraceJsonFile traceJsonFile = replayTrace.load();
+			// TODO We shouldn't need to load the trace on the Java side anymore now that the replay happens purely on the Prolog side.
+			// We have to keep this load call for now though,
+			// because the lineNumber method still uses the loaded TraceJsonFile.
+			replayTrace.load();
 			ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
 			final List<ErrorItem> newErrors = new ArrayList<>(replayed.getErrors());
 			// TODO Display transition-specific errors in a proper table instead of merging them into the general list of errors
@@ -112,21 +103,12 @@ public class TraceChecker {
 			// TODO Display replay information for each transition if the replay was not perfect/complete
 			Trace trace = replayed.getTrace(stateSpace);
 			replayTrace.setAnimatedReplayedTrace(trace);
-			final PersistentTrace persistentTrace = new PersistentTrace(traceJsonFile.getDescription(), traceJsonFile.getTransitionList());
-			final List<List<TraceReplay.PostconditionResult>> postconditionResults = TraceReplay.checkPostconditionsAfterReplay(persistentTrace, trace);
-			storePostconditionResults(replayTrace, postconditionResults);
 			return replayTrace;
 		});
 		return future.whenComplete((r, e) -> {
 			final Checked res;
 			if (e == null) {
-				if (
-					replayTrace.getReplayedTrace().getErrors().isEmpty()
-					// Check that all postconditions are ok
-					&& replayTrace.getPostconditionStatus().stream()
-						.flatMap(Collection::stream)
-						.allMatch(x -> x == Checked.SUCCESS)
-				) {
+				if (replayTrace.getReplayedTrace().getErrors().isEmpty()) {
 					res = Checked.SUCCESS;
 				} else {
 					res = Checked.FAIL;
@@ -140,91 +122,6 @@ public class TraceChecker {
 			replayTrace.setChecked(res);
 			Platform.runLater(() -> replayTrace.setProgress(-1));
 		});
-	}
-
-	public void showTestError(List<PersistentTransition> transitions, List<List<Checked>> postconditionResults) {
-		assert transitions.size() >= postconditionResults.size();
-		StringBuilder sb = new StringBuilder();
-		boolean failed = false;
-		for(int i = 0; i < postconditionResults.size(); i++) {
-			PersistentTransition transition = transitions.get(i);
-			List<Checked> postconditionTransitionResults = postconditionResults.get(i);
-			for(int j = 0; j < postconditionTransitionResults.size(); j++) {
-				Checked result = postconditionTransitionResults.get(j);
-				if(result != Checked.SUCCESS) {
-					assert result == Checked.FAIL || result == Checked.PARSE_ERROR;
-					Postcondition postcondition = transition.getPostconditions().get(j);
-					switch (postcondition.getKind()) {
-						case PREDICATE:
-							sb.append(i18n.translate("animation.trace.replay.test.alert.content.predicate", transition.getOperationName(), ((PostconditionPredicate) postcondition).getPredicate()));
-							if(result == Checked.PARSE_ERROR) {
-								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
-							}
-							sb.append("\n");
-							break;
-						case ENABLEDNESS: {
-							String predicate = ((OperationEnabledness) postcondition).getPredicate();
-							if (predicate.isEmpty()) {
-								sb.append(i18n.translate("animation.trace.replay.test.alert.content.enabled", transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation()));
-							} else {
-								sb.append(i18n.translate("animation.trace.replay.test.alert.content.enabledWithPredicate", transition.getOperationName(), ((OperationEnabledness) postcondition).getOperation(), predicate));
-							}
-							if(result == Checked.PARSE_ERROR) {
-								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
-							}
-							sb.append("\n");
-							break;
-						}
-						case DISABLEDNESS: {
-							String predicate = ((OperationDisabledness) postcondition).getPredicate();
-							if (predicate.isEmpty()) {
-								sb.append(i18n.translate("animation.trace.replay.test.alert.content.disabled", transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation()));
-							} else {
-								sb.append(i18n.translate("animation.trace.replay.test.alert.content.disabledWithPredicate", transition.getOperationName(), ((OperationDisabledness) postcondition).getOperation(), predicate));
-							}
-							if(result == Checked.PARSE_ERROR) {
-								sb.append(i18n.translate("animation.trace.replay.test.alert.content.parseError"));
-							}
-							sb.append("\n");
-							break;
-						}
-						default:
-							throw new RuntimeException("Postcondition kind is unknown: " + postcondition.getKind());
-					}
-					failed = true;
-					sb.append("\n");
-				}
-			}
-		}
-		if(failed) {
-			Platform.runLater(() -> {
-				Alert alert = new Alert(Alert.AlertType.ERROR);
-				alert.setHeaderText(i18n.translate("animation.trace.replay.test.alert.header"));
-				alert.setContentText(sb.toString());
-				stageManager.register(alert);
-				alert.showAndWait();
-			});
-		}
-	}
-
-	private static void storePostconditionResults(final ReplayTrace replayTrace, final List<List<TraceReplay.PostconditionResult>> postconditionResults) {
-		final List<List<Checked>> convertedResults = new ArrayList<>();
-		for (List<TraceReplay.PostconditionResult> transitionResults : postconditionResults) {
-			final List<Checked> convertedTransitionResults = new ArrayList<>();
-			for (TraceReplay.PostconditionResult result : transitionResults) {
-				final Checked convertedResult;
-				if (result == TraceReplay.PostconditionResult.SUCCESS) {
-					convertedResult = Checked.SUCCESS;
-				} else if (result == TraceReplay.PostconditionResult.FAIL) {
-					convertedResult = Checked.FAIL;
-				} else {
-					convertedResult = Checked.PARSE_ERROR;
-				}
-				convertedTransitionResults.add(convertedResult);
-			}
-			convertedResults.add(convertedTransitionResults);
-		}
-		replayTrace.setPostconditionStatus(convertedResults);
 	}
 
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
