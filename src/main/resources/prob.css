@@ -1107,7 +1107,7 @@
 /* =================== STATES VIEW =================== */
 
 .tree-table-row-cell.changed {
-	-fx-background-color: lightblue;
+	-fx-background-color: rgba(52, 149, 235, 0.1); /* was lightblue */
 }
 
 .tree-table-row-cell.changed .tree-table-cell {
@@ -1115,12 +1115,14 @@
 }
 
 .tree-table-cell.false {
-	-fx-background-color: pink;
+	-fx-background-color: rgba(175, 76, 80, 0.15); /* was #F2D4C6 pink */
 }
 
 .tree-table-cell.true {
-	-fx-background-color: palegreen;
+ -fx-background-color: rgba(76, 175, 80, 0.15) ; /* was #A4D8B4 palegreen */
 }
+
+
 
 .tree-table-cell.not-initialized {
 	-fx-text-fill: -prob-grey-75;
