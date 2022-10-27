@@ -284,14 +284,22 @@ public abstract class Console extends StyleClassedTextArea {
 			this.appendText("\n" + EMPTY_PROMPT + " ");
 			return;
 		}
-			
-		for(int i = 0; i < instructionLengthInLine; i++) {
-			ConsoleInstruction instruction = instructions.get(instructions.size() - instructionLengthInLine + i);
-			interpreter.exec(instruction);
+
+		posInList = instructions.size() - 1;
+
+		ConsoleInstruction instruction;
+		if (instructionLengthInLine > 1) {
+			StringBuilder actualInstructionBuilder = new StringBuilder();
+			for (int i = 0; i < instructionLengthInLine; i++) {
+				ConsoleInstruction listInstruction = instructions.get(instructions.size() - instructionLengthInLine + i);
+				actualInstructionBuilder.append(listInstruction.getInstruction()).append('\n');
+			}
+
+			instruction = new ConsoleInstruction(actualInstructionBuilder.toString(), ConsoleInstructionOption.ENTER);
+		} else {
+			instruction = instructions.get(posInList);
 		}
 			
-		posInList = instructions.size() - 1;
-		ConsoleInstruction instruction = instructions.get(posInList);
 		ConsoleExecResult execResult = interpreter.exec(instruction);
 		int from = this.getLength();
 		if (execResult.getResultType() == ConsoleExecResultType.CLEAR) {
