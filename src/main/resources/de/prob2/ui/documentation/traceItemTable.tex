@@ -1,10 +1,16 @@
-	\caption{${name}}
-	\centering
-	\begin{tabular}{*{2}{p{0.1\textwidth} p{0.45\textwidth}}}
+
+	\tablestyle[sansbold]
+	\begin{longtable}{|l l|}
+		\rowcolor{white}\caption{${tname}} \\
 		\theadstart
+			\thead Position &
+			\thead Transition\\
+		\endfirsthead
+		\tsubheadstart
 		\thead Position &
 		\thead Transition\\
+		\endhead
 		\tbody
-	${item}
-	\end{tabular}
-	\label{tab:style:sansbold}
+			${titem}
+		\tend
+	\end{longtable}

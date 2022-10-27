@@ -1,27 +1,42 @@
 \subsection{LTL Model Checking}
-\begin{table}[H]
 	\tablestyle[sansbold]
-	\begin{tabular}{*{2}{p{0.45\textwidth}}}
+	\begin{longtable}{*{2}{p{0.45\textwidth}}}
 		\theadstart
 		\thead LTL Formular &
 		\thead Status\\
+		\endfirsthead
+		\tsubheadstart
+		\thead LTL Formular &
+		\thead Status\\
+		\endhead
+		\rowcolor{white}\caption{LTL Formulars and Results}\\
+		\endlastfoot
 		\tbody
-		${formulars}
-	\end{tabular}
-	\caption{LTL Formulars and Results}
-	\label{tab:style:sansbold}
-\end{table}
-\begin{table}[H]
+		${ltlformulars}
+		\tend
+	\end{longtable}
 	\tablestyle[sansbold]
-	\hskip-6em
-	\begin{tabular}{*{3}{p{0.45\textwidth}}}
-	\theadstart
+	\begingroup
+	\setlength{\LTleft}{-\textwidth plus -1fill}
+	\setlength{\LTright}{\LTleft}
+	\begin{longtable}{p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
+		\theadstart
 		\thead Pattern Name &
 		\thead Code &
 		\thead Result\\
-	\tbody
-		${patterns}
-	\end{tabular}
-	\caption{LTL Patterns and Results}
-	\label{tab:style:sansbold}
-\end{table}
+		\endfirsthead
+		\tsubheadstart
+		\thead Pattern Name &
+		\thead Code &
+		\thead Result\\
+		\endhead
+		\rowcolor{white}\caption{LTL Patterns and Results}\\
+		\endlastfoot
+		\tbody
+	${ltlpatterns}
+	\tend
+	\end{longtable}
+	\endgroup
+
+
+

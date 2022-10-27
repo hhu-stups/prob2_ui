@@ -40,6 +40,8 @@ public class Documenter {
 	private final boolean symbolic;
 	private final boolean makePdf;
 	private final List<Machine> machines;
+	private final HashMap<String, String> valuesMap;
+	private final StringSubstitutor sub;
 	StringBuilder latexBody = new StringBuilder();
 	CurrentProject project;
 	Injector injector;
@@ -62,6 +64,8 @@ public class Documenter {
 		this.filename = filename;
 		this.injector = injector;
 		latexBody.append(readResource(this, "latexBody.tex"));
+		valuesMap = new HashMap<String, String>();
+		sub = new StringSubstitutor(valuesMap);
 	}
 
 	private String documentMachines() throws IOException {
@@ -74,14 +78,12 @@ public class Documenter {
 
 	private String machineTexTemplate(Machine elem) throws IOException {
 		String machineTemplate = readResource(this, "machine.tex");
-		Map<String, String> valuesMap = new HashMap<String, String>();
 		valuesMap.put("name", latexSafe(elem.getName()));
 		valuesMap.put("code", getMachineCode(elem));
 		valuesMap.put("modelchecking", modelchecking ? getModelcheckingString(elem) : "");
 		valuesMap.put("ltl", ltl ? getLTLString(elem) : "");
 		valuesMap.put("symbolic", symbolic ? getSymbolicString(elem) : "");
 		valuesMap.put("traces", getTracesString(elem));
-		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		return sub.replace(machineTemplate);
 	}
 
@@ -91,8 +93,6 @@ public class Documenter {
 
 	private String getModelcheckingString(Machine elem) throws IOException {
 		String modelcheckingTemplate = readResource(this, "modelcheckingTable.tex");
-		Map<String, String> valuesMap = new HashMap<String, String>();
-		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		StringBuilder modelcheckingString = new StringBuilder();
 		for (ModelCheckingItem item : elem.getModelcheckingItems()) {
 			StringBuilder resultString = new StringBuilder();
@@ -106,15 +106,13 @@ public class Documenter {
 			valuesMap.put("modresult",String.valueOf(resultString));
 			modelcheckingString.append(sub.replace(readResource(this, "modelcheckingCell.tex")));
 		}
-		valuesMap.put("items", String.valueOf(modelcheckingString));
+		valuesMap.put("mitems", String.valueOf(modelcheckingString));
 		return sub.replace(modelcheckingTemplate);
 	}
 
 
 	private String getLTLString(Machine elem) throws IOException {
 		String ltlTemplate = readResource(this, "ltlTable.tex");
-		Map<String, String> valuesMap = new HashMap<String, String>();
-		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		StringBuilder ltlFormulars = new StringBuilder();
 		StringBuilder ltlPatterns = new StringBuilder();
 		for (LTLFormulaItem formula : elem.getLTLFormulas()) {
@@ -132,15 +130,13 @@ public class Documenter {
 				ltlPatterns.append(sub.replace(readResource(this, "patternCell.tex")));
 			}
 		}
-		valuesMap.put("formulars", String.valueOf(ltlFormulars));
-		valuesMap.put("patterns", String.valueOf(ltlPatterns));
+		valuesMap.put("ltlformulars", String.valueOf(ltlFormulars));
+		valuesMap.put("ltlpatterns", String.valueOf(ltlPatterns));
 		return sub.replace(ltlTemplate);
 	}
 
 	private String getSymbolicString(Machine elem) throws IOException {
 		String symbolicTemplate = readResource(this, "symbolicTable.tex");
-		Map<String, String> valuesMap = new HashMap<String, String>();
-		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		StringBuilder symbolicFormulas = new StringBuilder();
 		for(SymbolicCheckingFormulaItem formula : elem.getSymbolicCheckingFormulas()){
 			if(formula.selected()){
@@ -150,7 +146,7 @@ public class Documenter {
 				symbolicFormulas.append(sub.replace(readResource(this, "symbolicCell.tex")));
 			}
 		}
-		valuesMap.put("formulars", String.valueOf(symbolicFormulas));
+		valuesMap.put("symbolicformulars", String.valueOf(symbolicFormulas));
 		return sub.replace(symbolicTemplate);
 	}
 
@@ -184,8 +180,6 @@ public class Documenter {
 	private String getTracesString(Machine elem) throws IOException {
 		String traceTemplate = readResource(this, "traces.tex");
 		StringBuilder table = new StringBuilder();
-		Map<String, String> valuesMap = new HashMap<String, String>();
-		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		if (elem.getTraces().isEmpty()) {
 			return "";
 		}
@@ -199,8 +193,8 @@ public class Documenter {
 				cellString.append(sub.replace(readResource(this, "traceCell.tex")));
 				i++;
 			}
-			valuesMap.put("name", latexSafe(trace.getName()));
-			valuesMap.put("item", String.valueOf(cellString));
+			valuesMap.put("tname", latexSafe(trace.getName()));
+			valuesMap.put("titem", String.valueOf(cellString));
 			table.append(sub.replace(readResource(this, "traceItemTable.tex")));
 			//saveTraceImage(elem, trace);
 		}
