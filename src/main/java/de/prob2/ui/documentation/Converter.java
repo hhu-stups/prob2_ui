@@ -47,7 +47,7 @@ public class Converter {
 		return "";
 	}
 
-	static String readFile(Path path) {
+	public static String readFile(Path path) {
 		String content = null;
 		try {
 			content = new String(Files.readAllBytes(path));
@@ -57,7 +57,7 @@ public class Converter {
 		return content;
 	}
 
-	static String latexSafe(String text) {
+	public static String latexSafe(String text) {
 		/*
 		text = text.replace("⇒","\\Rightarrow");
 		text = text.replace("∈ ","\\in");

@@ -9,7 +9,6 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -19,14 +18,18 @@ import de.prob2.ui.visb.VisBFileHandler;
 import de.prob2.ui.visb.VisBStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import org.apache.commons.text.StringSubstitutor;
+import org.apache.velocity.VelocityContext;
+import org.apache.velocity.app.Velocity;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static de.prob2.ui.documentation.Converter.*;
 
@@ -80,18 +83,18 @@ public class Documenter {
 		String machineTemplate = readResource(this, "machine.tex");
 		valuesMap.put("name", latexSafe(elem.getName()));
 		valuesMap.put("code", getMachineCode(elem));
-		valuesMap.put("modelchecking", modelchecking ? getModelcheckingString(elem) : "");
+		valuesMap.put("modelchecking", modelchecking && !elem.getModelcheckingItems().isEmpty() ? getModelcheckingString(elem) : "");
 		valuesMap.put("ltl", ltl ? getLTLString(elem) : "");
-		valuesMap.put("symbolic", symbolic ? getSymbolicString(elem) : "");
+		valuesMap.put("symbolic", symbolic && !elem.getSymbolicCheckingFormulas().isEmpty() ? getSymbolicString(elem) : "");
 		valuesMap.put("traces", getTracesString(elem));
 		return sub.replace(machineTemplate);
 	}
 
-	String getMachineCode(Machine elem) {
+	public String getMachineCode(Machine elem) {
 		return readFile(project.getLocation().resolve(elem.getLocation()));
 	}
 
-	private String getModelcheckingString(Machine elem) throws IOException {
+	public String getModelcheckingString(Machine elem) throws IOException {
 		String modelcheckingTemplate = readResource(this, "modelcheckingTable.tex");
 		StringBuilder modelcheckingString = new StringBuilder();
 		for (ModelCheckingItem item : elem.getModelcheckingItems()) {
@@ -115,6 +118,7 @@ public class Documenter {
 		String ltlTemplate = readResource(this, "ltlTable.tex");
 		StringBuilder ltlFormulars = new StringBuilder();
 		StringBuilder ltlPatterns = new StringBuilder();
+
 		for (LTLFormulaItem formula : elem.getLTLFormulas()) {
 			if (formula.selected()) {
 				valuesMap.put("fcode", formula.getCode());
@@ -149,7 +153,6 @@ public class Documenter {
 		valuesMap.put("symbolicformulars", String.valueOf(symbolicFormulas));
 		return sub.replace(symbolicTemplate);
 	}
-
 	private void saveTraceImage(Machine elem, ReplayTrace trace){
 		VisBFileHandler visBFileHandler = injector.getInstance(VisBFileHandler.class);
 		VisBVisualisation visualisation = visBFileHandler.constructVisualisationFromJSON(trace.getAbsoluteLocation()); //maybe create own json file
@@ -174,7 +177,6 @@ public class Documenter {
 		}
 		stringToPng(html, "1",dir);
 		//HTML TO PNG
-		return;
 	}
 
 	private String getTracesString(Machine elem) throws IOException {
@@ -203,6 +205,7 @@ public class Documenter {
 	}
 
 	public void document() throws IOException{
+		Files.createDirectories(Paths.get(dir+"/resources"));
 		Map<String, String> valuesMap = new HashMap<String, String>();
 		valuesMap.put("machines", documentMachines());
 		StringSubstitutor sub = new StringSubstitutor(valuesMap);
@@ -223,7 +226,7 @@ public class Documenter {
 		}
 	}
 
-	private String toUIString(ModelCheckingItem item) {
+	public String toUIString(ModelCheckingItem item) {
 		String description = item.getTaskDescription(i18n);
 		if (item.getId() != null) {
 			description = "[" + item.getId() + "] " + description;

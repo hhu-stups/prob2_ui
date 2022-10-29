@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.documentation.Documenter;
 import de.prob2.ui.documentation.MachineDocumentationItem;
+import de.prob2.ui.documentation.VelocityDocumenter;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -120,6 +121,8 @@ public class SaveDocumentationStage extends Stage {
 																.collect(Collectors.toList());
 		Documenter documenter = new Documenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, filename.getText(),injector);
 		documenter.document();
+		VelocityDocumenter documenter1 = new VelocityDocumenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, "test",injector);
+		documenter1.documentVelocity();
 		this.close();
 	}
 }

@@ -1,0 +1,154 @@
+\documentclass[11pt]{article}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage[table]{xcolor}
+\usepackage{colortbl}
+\usepackage{tablestyles}
+\usepackage{float}
+\usepackage[style=1]{mdframed}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{changepage}
+\usepackage{ragged2e, lipsum}
+\usepackage{caption, booktabs}
+
+\lstset{literate=
+		{∈}{$\in$}1
+		{⇒}{$\Rightarrow$}1
+		{≠}{$\neq$}1
+		{∀}{$\forall$}1
+		{‥}{$\cdot\cdot$}1
+}
+
+\lstset{ %
+	language=C++,                % choose the language of the code
+	basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+	numbers=left,                   % where to put the line-numbers
+	numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+	stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+	numbersep=5pt,                  % how far the line-numbers are from the code
+	backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+	showspaces=false,               % show spaces adding particular underscores
+	showstringspaces=false,         % underline spaces within strings
+	showtabs=false,                 % show tabs within strings adding particular underscores
+	frame=single,           % adds a frame around the code
+	tabsize=2,          % sets default tabsize to 2 spaces
+	captionpos=b,           % sets the caption-position to bottom
+	breaklines=true,        % sets automatic line breaking
+	breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+	escapeinside={\%*}{*)}          % if you want to add a comment within your code
+}
+\lstnewenvironment{tabularlstlisting}[1][]
+{%
+	\lstset{aboveskip=-2ex,belowskip=-3ex,#1}%
+}
+{}
+
+% Packages
+% Document
+\begin{document}
+\section{Projekt}
+#foreach($machine in $machines)
+% MACHINE CODE
+\section{$converter.latexSafe($machine.getName()) }
+	\begin{lstlisting}[caption = $converter.latexSafe($machine.getName()) MCH Code]
+	$documenter.getMachineCode($machine)
+	\end{lstlisting}
+%MODELCHECKING
+#if($modelchecking && !$machine.getModelcheckingItems().isEmpty())
+\subsection{Model Checking}
+	\tablestyle[sansbold]
+	\begin{longtable}{*{2}{p{0.45\textwidth}}}
+	\theadstart
+		\thead Modelchecking Item &
+		\thead Modelchecking Result\\
+	\endfirsthead
+	\tsubheadstart
+		\thead Modelchecking Item &
+		\thead Modelchecking Result\\
+	\endhead
+		\rowcolor{white}\caption{Modelchecking Items and Results}\\
+	\endlastfoot
+	\tbody
+		#foreach($item in $machine.getModelcheckingItems())
+			#if($item.getItems().isEmpty())
+	$documenter.toUIString($item) & Modelchecking not solved\\
+			#else
+	$documenter.toUIString($item) & #foreach($result in $item.getItems()) $result.getMessage() #end \\
+			#end
+		#end
+	\tend
+	\end{longtable}
+#end
+%LTL
+#if($ltl)
+\subsection{LTL Model Checking}
+#if(!$machine.getLTLFormulas().isEmpty())
+	\tablestyle[sansbold]
+	\begin{longtable}{*{2}{p{0.45\textwidth}}}
+	\theadstart
+		\thead LTL Formular &
+		\thead Status\\
+	\endfirsthead
+	\tsubheadstart
+		\thead LTL Formular &
+		\thead Status\\
+	\endhead
+		\rowcolor{white}\caption{LTL Formulars and Results}\\
+	\endlastfoot
+	\tbody
+	#foreach($formula in $machine.getLTLFormulas())
+		#if($formula.selected())
+			#if($documenter.formulaHasResult($formula))
+\begin{tabularlstlisting}
+$formula.getCode()
+\end{tabularlstlisting} &  $i18n.translate($formula.getResultItem().getHeaderBundleKey())\\
+			#else
+\begin{tabularlstlisting}
+$formula.getCode()
+\end{tabularlstlisting} & Formula not solved \\
+			#end
+		#end
+	#end
+#end
+\tend
+\end{longtable}
+#end
+%SYMBOLIC
+#if($symbolic && !$machine.getSymbolicCheckingFormulas().isEmpty())
+\subsection{Symbolic Model Checking}
+	\tablestyle[sansbold]
+	\begingroup
+	\setlength{\LTleft}{-\textwidth plus -1fill}
+	\setlength{\LTright}{\LTleft}
+	\begin{longtable}{p{0.45\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
+	\theadstart
+		\thead Symbolic Type&
+		\thead Configuration &
+		\thead Result\\
+	\endfirsthead
+	\tsubheadstart
+		\thead Symbolic Type&
+		\thead Configuration &
+		\thead Result\\
+	\endhead
+	\rowcolor{white}\caption{Symbolic Formulars and Results}\\
+	\endlastfoot
+	\tbody
+	#foreach($sitem in $machine.getSymbolicCheckingFormulas())
+		#if($sitem.selected())
+			#if($documenter.symbolicHasResult($sitem))
+$converter.latexSafe($sitem.getType().toString()) & $converter.latexSafe($sitem.getCode()) &  $i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
+			#else
+$converter.latexSafe($sitem.getType().toString()) & $converter.latexSafe($sitem.getCode())  & Formula not solved \\
+			#end
+		#end
+	#end
+	\tend
+	\end{longtable}
+	\endgroup
+	#end
+	#end
+\end{document}
