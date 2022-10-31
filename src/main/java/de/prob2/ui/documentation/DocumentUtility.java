@@ -1,5 +1,8 @@
 package de.prob2.ui.documentation;
 
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -11,7 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
-public class Converter {
+public class DocumentUtility {
 	static Charset encoding = StandardCharsets.UTF_8;
 
 	public static void stringToTex(String latex, String filename, Path path) {
@@ -63,5 +66,22 @@ public class Converter {
 		text = text.replace("∈ ","\\in");
 		text = text.replace("≠","\\neq");*/
 		return text.replace("_", "\\_");
+	}
+	public static void createPdf(String filename, Path dir) {
+		ProcessBuilder builder = new ProcessBuilder();
+		builder.directory(new File(dir.toString()));
+		builder.command("bash", "-c", "pdflatex -interaction=nonstopmode " + filename + ".tex");
+		try {
+			builder.start();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	public static String toUIString(ModelCheckingItem item, I18n i18n) {
+		String description = item.getTaskDescription(i18n);
+		if (item.getId() != null) {
+			description = "[" + item.getId() + "] " + description;
+		}
+		return description;
 	}
 }

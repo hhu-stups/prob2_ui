@@ -18,10 +18,11 @@ import de.prob2.ui.visb.VisBFileHandler;
 import de.prob2.ui.visb.VisBStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import org.apache.commons.text.StringSubstitutor;
-import org.apache.velocity.VelocityContext;
-import org.apache.velocity.app.Velocity;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -29,9 +30,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
-import static de.prob2.ui.documentation.Converter.*;
+import static de.prob2.ui.documentation.DocumentUtility.*;
 
 @FXMLInjected
 public class Documenter {
@@ -81,8 +81,8 @@ public class Documenter {
 
 	private String machineTexTemplate(Machine elem) throws IOException {
 		String machineTemplate = readResource(this, "machine.tex");
-		valuesMap.put("name", latexSafe(elem.getName()));
-		valuesMap.put("code", getMachineCode(elem));
+		valuesMap.put("machineName", latexSafe(elem.getName()));
+		valuesMap.put("machineCode", getMachineCode(elem));
 		valuesMap.put("modelchecking", modelchecking && !elem.getModelcheckingItems().isEmpty() ? getModelcheckingString(elem) : "");
 		valuesMap.put("ltl", ltl ? getLTLString(elem) : "");
 		valuesMap.put("symbolic", symbolic && !elem.getSymbolicCheckingFormulas().isEmpty() ? getSymbolicString(elem) : "");
@@ -99,17 +99,16 @@ public class Documenter {
 		StringBuilder modelcheckingString = new StringBuilder();
 		for (ModelCheckingItem item : elem.getModelcheckingItems()) {
 			StringBuilder resultString = new StringBuilder();
-			if (item.getItems().isEmpty()){
+			if (item.getItems().isEmpty()) {
 				resultString.append("Modelchecking not solved");
+			} else {
+				item.getItems().forEach(result -> resultString.append(result.getMessage()));
 			}
-			else {
-				item.getItems().forEach(result ->  resultString.append(result.getMessage()));
-			}
-			valuesMap.put("modname", toUIString(item));
-			valuesMap.put("modresult",String.valueOf(resultString));
+			valuesMap.put("modelcheckingItemName", toUIString(item, i18n));
+			valuesMap.put("modelcheckingItemResult", String.valueOf(resultString));
 			modelcheckingString.append(sub.replace(readResource(this, "modelcheckingCell.tex")));
 		}
-		valuesMap.put("mitems", String.valueOf(modelcheckingString));
+		valuesMap.put("modelcheckingItems", String.valueOf(modelcheckingString));
 		return sub.replace(modelcheckingTemplate);
 	}
 
@@ -121,21 +120,21 @@ public class Documenter {
 
 		for (LTLFormulaItem formula : elem.getLTLFormulas()) {
 			if (formula.selected()) {
-				valuesMap.put("fcode", formula.getCode());
-				valuesMap.put("fresult", (formula.getResultItem() != null) ? i18n.translate(formula.getResultItem().getHeaderBundleKey()) : "Formular not Solved");
+				valuesMap.put("formulaCode", formula.getCode());
+				valuesMap.put("formulaResult", (formula.getResultItem() != null) ? i18n.translate(formula.getResultItem().getHeaderBundleKey()) : "Formular not Solved");
 				ltlFormulars.append(sub.replace(readResource(this, "formularCell.tex")));
 			}
 		}
 		for (LTLPatternItem pattern : elem.getLTLPatterns()) { //TODO FIX TABLE ALLIGNMENT
 			if (pattern.selected() && pattern.getResultItem() != null) {
-				valuesMap.put("pname", pattern.getName());
-				valuesMap.put("pcode", pattern.getCode());
-				valuesMap.put("presult", i18n.translate(pattern.getResultItem().getHeaderBundleKey())); //CHANGE LANGUANGE
+				valuesMap.put("patternName", pattern.getName());
+				valuesMap.put("patternCode", pattern.getCode());
+				valuesMap.put("patternResult", i18n.translate(pattern.getResultItem().getHeaderBundleKey())); //CHANGE LANGUANGE
 				ltlPatterns.append(sub.replace(readResource(this, "patternCell.tex")));
 			}
 		}
-		valuesMap.put("ltlformulars", String.valueOf(ltlFormulars));
-		valuesMap.put("ltlpatterns", String.valueOf(ltlPatterns));
+		valuesMap.put("ltlFormulars", String.valueOf(ltlFormulars));
+		valuesMap.put("ltlPatterns", String.valueOf(ltlPatterns));
 		return sub.replace(ltlTemplate);
 	}
 
@@ -143,14 +142,14 @@ public class Documenter {
 		String symbolicTemplate = readResource(this, "symbolicTable.tex");
 		StringBuilder symbolicFormulas = new StringBuilder();
 		for(SymbolicCheckingFormulaItem formula : elem.getSymbolicCheckingFormulas()){
-			if(formula.selected()){
-				valuesMap.put("stype", latexSafe(String.valueOf(formula.getType())));
-				valuesMap.put("sconfig", latexSafe(formula.getCode()));
-				valuesMap.put("sresult", (formula.getResultItem() != null) ? i18n.translate(formula.getResultItem().getHeaderBundleKey()) : "Formular not Solved");
+			if(formula.selected()) {
+				valuesMap.put("symbolicItemType", latexSafe(String.valueOf(formula.getType())));
+				valuesMap.put("symbolicItemConfig", latexSafe(formula.getCode()));
+				valuesMap.put("symbolicItemResult", (formula.getResultItem() != null) ? i18n.translate(formula.getResultItem().getHeaderBundleKey()) : "Formular not Solved");
 				symbolicFormulas.append(sub.replace(readResource(this, "symbolicCell.tex")));
 			}
 		}
-		valuesMap.put("symbolicformulars", String.valueOf(symbolicFormulas));
+		valuesMap.put("symbolicFormulars", String.valueOf(symbolicFormulas));
 		return sub.replace(symbolicTemplate);
 	}
 	private void saveTraceImage(Machine elem, ReplayTrace trace){
@@ -190,17 +189,17 @@ public class Documenter {
 			trace.load();
 			int i = 0;
 			for (PersistentTransition transition : trace.getLoadedTrace().getTransitionList()) {
-				valuesMap.put("pos", String.valueOf(i));
+				valuesMap.put("position", String.valueOf(i));
 				valuesMap.put("transition", latexSafe(Transition.prettifyName(transition.getOperationName())));
 				cellString.append(sub.replace(readResource(this, "traceCell.tex")));
 				i++;
 			}
-			valuesMap.put("tname", latexSafe(trace.getName()));
-			valuesMap.put("titem", String.valueOf(cellString));
+			valuesMap.put("traceName", latexSafe(trace.getName()));
+			valuesMap.put("traceItems", String.valueOf(cellString));
 			table.append(sub.replace(readResource(this, "traceItemTable.tex")));
 			//saveTraceImage(elem, trace);
 		}
-		valuesMap.put("traceitemtables", String.valueOf(table));
+		valuesMap.put("traceItemTables", String.valueOf(table));
 		return sub.replace(traceTemplate);
 	}
 
@@ -210,27 +209,9 @@ public class Documenter {
 		valuesMap.put("machines", documentMachines());
 		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		latexBody = new StringBuilder(sub.replace(latexBody.toString()));
-		Converter.stringToTex(latexBody.toString(), filename, dir);
+		DocumentUtility.stringToTex(latexBody.toString(), filename, dir);
 		if(makePdf)
-			createPdf();
+			createPdf(filename, dir);
 	}
 
-	private void createPdf() {
-		ProcessBuilder builder = new ProcessBuilder();
-		builder.directory(new File(dir.toString()));
-		builder.command("bash", "-c", "pdflatex -interaction=nonstopmode " + filename + ".tex");
-		try {
-			builder.start();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public String toUIString(ModelCheckingItem item) {
-		String description = item.getTaskDescription(i18n);
-		if (item.getId() != null) {
-			description = "[" + item.getId() + "] " + description;
-		}
-		return description;
-	}
 }

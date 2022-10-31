@@ -1,3 +1,4 @@
+#macro( call $this )#set( $stfu = $this )#end
 \documentclass[11pt]{article}
 \usepackage{color}
 \usepackage{listings}
@@ -52,8 +53,8 @@
 \section{Projekt}
 #foreach($machine in $machines)
 % MACHINE CODE
-\section{$converter.latexSafe($machine.getName()) }
-	\begin{lstlisting}[caption = $converter.latexSafe($machine.getName()) MCH Code]
+\section{$DocumentUtility.latexSafe($machine.getName()) }
+	\begin{lstlisting}[caption = $DocumentUtility.latexSafe($machine.getName()) MCH Code]
 	$documenter.getMachineCode($machine)
 	\end{lstlisting}
 %MODELCHECKING
@@ -74,9 +75,9 @@
 	\tbody
 		#foreach($item in $machine.getModelcheckingItems())
 			#if($item.getItems().isEmpty())
-	$documenter.toUIString($item) & Modelchecking not solved\\
+	$DocumentUtility.toUIString($item,$i18n) & Modelchecking not solved\\
 			#else
-	$documenter.toUIString($item) & #foreach($result in $item.getItems()) $result.getMessage() #end \\
+	$DocumentUtility.toUIString($item,$i18n) & #foreach($result in $item.getItems()) $result.getMessage() #end \\
 			#end
 		#end
 	\tend
@@ -140,9 +141,9 @@ $formula.getCode()
 	#foreach($sitem in $machine.getSymbolicCheckingFormulas())
 		#if($sitem.selected())
 			#if($documenter.symbolicHasResult($sitem))
-$converter.latexSafe($sitem.getType().toString()) & $converter.latexSafe($sitem.getCode()) &  $i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
+$DocumentUtility.latexSafe($sitem.getType().toString()) & $DocumentUtility.latexSafe($sitem.getCode()) &  $i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
 			#else
-$converter.latexSafe($sitem.getType().toString()) & $converter.latexSafe($sitem.getCode())  & Formula not solved \\
+$DocumentUtility.latexSafe($sitem.getType().toString()) & $DocumentUtility.latexSafe($sitem.getCode())  & Formula not solved \\
 			#end
 		#end
 	#end
@@ -150,5 +151,27 @@ $converter.latexSafe($sitem.getType().toString()) & $converter.latexSafe($sitem.
 	\end{longtable}
 	\endgroup
 	#end
+\subsection{Traces}
+#foreach($trace in $machine.getTraces())
+	#call($trace.load())
+	\tablestyle[sansbold]
+	\begin{longtable}{ll}
+	\rowcolor{white}\caption{$DocumentUtility.latexSafe($trace.getName())} \\
+	\theadstart
+		\thead Position &
+		\thead Transition\\
+	\endfirsthead
+	\tsubheadstart
+		\thead Position &
+		\thead Transition\\
+	\endhead
+	\tbody
+	#foreach($transition in $trace.getLoadedTrace().getTransitionList())
+$velocityCount & $DocumentUtility.latexSafe($Transition.prettifyName($transition.getOperationName())) \\
+	#end
+	\tend
+	\end{longtable}
+#end
+
 	#end
 \end{document}
