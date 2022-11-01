@@ -192,9 +192,8 @@ public class SimulationEventHandler {
 					if (evaluatedTime < otherActivationTime) {
 						activationsForId.clear();
 						simulator.getConfigurationToActivation().get(id).add(activation);
-						return;
 					}
-					break;
+					return;
 				}
 				case SINGLE_MAX: {
 					Activation activationForId = activationsForId.get(0);
@@ -202,9 +201,8 @@ public class SimulationEventHandler {
 					if (evaluatedTime > otherActivationTime) {
 						activationsForId.clear();
 						simulator.getConfigurationToActivation().get(id).add(activation);
-						return;
 					}
-					break;
+					return;
 				}
 				case SINGLE:
 					return;
