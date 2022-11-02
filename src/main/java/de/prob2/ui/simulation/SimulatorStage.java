@@ -374,7 +374,6 @@ public class SimulatorStage extends Stage {
 			noSimulations.unbind();
 
 			this.loadSimulationIntoSimulator(to);
-			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
 			if(to != null) {
 				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
