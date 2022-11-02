@@ -1115,7 +1115,7 @@
 }
 
 .tree-table-cell.false {
-	-fx-background-color: rgba(175, 76, 80, 0.15); /* was #F2D4C6 pink */
+	-fx-background-color: rgba(204, 47, 39, 0.15); /* was #F2D4C6 pink */
 }
 
 .tree-table-cell.true {
