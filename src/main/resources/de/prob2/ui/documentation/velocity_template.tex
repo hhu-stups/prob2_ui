@@ -52,126 +52,127 @@
 \begin{document}
 \section{Projekt}
 #foreach($machine in $machines)
-% MACHINE CODE
-\section{$DocumentUtility.latexSafe($machine.getName()) }
+	% MACHINE CODE
+	\section{$DocumentUtility.latexSafe($machine.getName()) }
 	\begin{lstlisting}[caption = $DocumentUtility.latexSafe($machine.getName()) MCH Code]
 	$documenter.getMachineCode($machine)
 	\end{lstlisting}
-%MODELCHECKING
-#if($modelchecking && !$machine.getModelcheckingItems().isEmpty())
-\subsection{Model Checking}
-	\tablestyle[sansbold]
-	\begin{longtable}{*{2}{p{0.45\textwidth}}}
-	\theadstart
-		\thead Modelchecking Item &
-		\thead Modelchecking Result\\
-	\endfirsthead
-	\tsubheadstart
-		\thead Modelchecking Item &
-		\thead Modelchecking Result\\
-	\endhead
+	%MODELCHECKING
+	#if($modelchecking && !$machine.getModelcheckingItems().isEmpty())
+		\subsection{Model Checking}
+		\tablestyle[sansbold]
+		\begin{longtable}{*{2}{p{0.45\textwidth}}}
+		\theadstart
+			\thead Modelchecking Item &
+			\thead Modelchecking Result\\
+		\endfirsthead
+		\tsubheadstart
+			\thead Modelchecking Item &
+			\thead Modelchecking Result\\
+		\endhead
 		\rowcolor{white}\caption{Modelchecking Items and Results}\\
-	\endlastfoot
-	\tbody
+		\endlastfoot
+		\tbody
 		#foreach($item in $machine.getModelcheckingItems())
 			#if($item.getItems().isEmpty())
-	$DocumentUtility.toUIString($item,$i18n) & Modelchecking not solved\\
+				$DocumentUtility.toUIString($item,$i18n) & Modelchecking not solved\\
 			#else
-	$DocumentUtility.toUIString($item,$i18n) & #foreach($result in $item.getItems()) $result.getMessage() #end \\
+				$DocumentUtility.toUIString($item,$i18n) & #foreach($result in $item.getItems()) $result.getMessage() #end \\
 			#end
 		#end
-	\tend
-	\end{longtable}
-#end
-%LTL
-#if($ltl)
-\subsection{LTL Model Checking}
-#if(!$machine.getLTLFormulas().isEmpty())
-	\tablestyle[sansbold]
-	\begin{longtable}{*{2}{p{0.45\textwidth}}}
-	\theadstart
-		\thead LTL Formular &
-		\thead Status\\
-	\endfirsthead
-	\tsubheadstart
-		\thead LTL Formular &
-		\thead Status\\
-	\endhead
-		\rowcolor{white}\caption{LTL Formulars and Results}\\
-	\endlastfoot
-	\tbody
-	#foreach($formula in $machine.getLTLFormulas())
-		#if($formula.selected())
-			#if($documenter.formulaHasResult($formula))
+		\tend
+		\end{longtable}
+	#end
+	%LTL
+	#if($ltl)
+		\subsection{LTL Model Checking}
+		#if(!$machine.getLTLFormulas().isEmpty())
+			\tablestyle[sansbold]
+			\begin{longtable}{*{2}{p{0.45\textwidth}}}
+			\theadstart
+				\thead LTL Formular &
+				\thead Status\\
+			\endfirsthead
+			\tsubheadstart
+				\thead LTL Formular &
+				\thead Status\\
+			\endhead
+			\rowcolor{white}\caption{LTL Formulars and Results}\\
+			\endlastfoot
+			\tbody
+			#foreach($formula in $machine.getLTLFormulas())
+				#if($formula.selected())
+					#if($documenter.formulaHasResult($formula)) % #if ((! $formula) && ("$!formula" == "")) possible but custom method better readable
 \begin{tabularlstlisting}
 $formula.getCode()
 \end{tabularlstlisting} &  $i18n.translate($formula.getResultItem().getHeaderBundleKey())\\
-			#else
+					#else
 \begin{tabularlstlisting}
 $formula.getCode()
 \end{tabularlstlisting} & Formula not solved \\
+					#end
+				#end
 			#end
 		#end
+		\tend
+		\end{longtable}
 	#end
-#end
-\tend
-\end{longtable}
-#end
-%SYMBOLIC
-#if($symbolic && !$machine.getSymbolicCheckingFormulas().isEmpty())
-\subsection{Symbolic Model Checking}
-	\tablestyle[sansbold]
-	\begingroup
-	\setlength{\LTleft}{-\textwidth plus -1fill}
-	\setlength{\LTright}{\LTleft}
-	\begin{longtable}{p{0.45\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
-	\theadstart
-		\thead Symbolic Type&
-		\thead Configuration &
-		\thead Result\\
-	\endfirsthead
-	\tsubheadstart
-		\thead Symbolic Type&
-		\thead Configuration &
-		\thead Result\\
-	\endhead
-	\rowcolor{white}\caption{Symbolic Formulars and Results}\\
-	\endlastfoot
-	\tbody
-	#foreach($sitem in $machine.getSymbolicCheckingFormulas())
-		#if($sitem.selected())
-			#if($documenter.symbolicHasResult($sitem))
-$DocumentUtility.latexSafe($sitem.getType().toString()) & $DocumentUtility.latexSafe($sitem.getCode()) &  $i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
-			#else
-$DocumentUtility.latexSafe($sitem.getType().toString()) & $DocumentUtility.latexSafe($sitem.getCode())  & Formula not solved \\
+	%SYMBOLIC
+	#if($symbolic && !$machine.getSymbolicCheckingFormulas().isEmpty())
+		\subsection{Symbolic Model Checking}
+		\tablestyle[sansbold]
+		\begingroup
+		\setlength{\LTleft}{-\textwidth plus -1fill}
+		\setlength{\LTright}{\LTleft}
+		\begin{longtable}{p{0.45\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
+		\theadstart
+			\thead Symbolic Type&
+			\thead Configuration &
+			\thead Result\\
+		\endfirsthead
+		\tsubheadstart
+			\thead Symbolic Type&
+			\thead Configuration &
+			\thead Result\\
+		\endhead
+		\rowcolor{white}\caption{Symbolic Formulars and Results}\\
+		\endlastfoot
+		\tbody
+		#foreach($sitem in $machine.getSymbolicCheckingFormulas())
+			#if($sitem.selected())
+				#if($documenter.symbolicHasResult($sitem))
+					$DocumentUtility.latexSafe($sitem.getType().toString()) & $DocumentUtility.latexSafe($sitem.getCode()) &  $i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
+				#else
+					$DocumentUtility.latexSafe($sitem.getType().toString()) & $DocumentUtility.latexSafe($sitem.getCode())  & Formula not solved \\
+				#end
 			#end
 		#end
+		\tend
+		\end{longtable}
+		\endgroup
 	#end
-	\tend
-	\end{longtable}
-	\endgroup
+	\subsection{Traces}
+	#foreach($trace in $machine.getTraces())
+		#call($trace.load())
+		#call($documenter.saveTraceImage($machine,$trace))
+		\tablestyle[sansbold]
+		\begin{longtable}{ll}
+		\rowcolor{white}\caption{$DocumentUtility.latexSafe($trace.getName())} \\
+		\theadstart
+			\thead Position &
+			\thead Transition\\
+		\endfirsthead
+		\tsubheadstart
+			\thead Position &
+			\thead Transition\\
+		\endhead
+		\tbody
+		#foreach($transition in $trace.getLoadedTrace().getTransitionList())
+			$velocityCount & $DocumentUtility.latexSafe($Transition.prettifyName($transition.getOperationName())) \\
+		#end
+		\tend
+		\end{longtable}
 	#end
-\subsection{Traces}
-#foreach($trace in $machine.getTraces())
-	#call($trace.load())
-	\tablestyle[sansbold]
-	\begin{longtable}{ll}
-	\rowcolor{white}\caption{$DocumentUtility.latexSafe($trace.getName())} \\
-	\theadstart
-		\thead Position &
-		\thead Transition\\
-	\endfirsthead
-	\tsubheadstart
-		\thead Position &
-		\thead Transition\\
-	\endhead
-	\tbody
-	#foreach($transition in $trace.getLoadedTrace().getTransitionList())
-$velocityCount & $DocumentUtility.latexSafe($Transition.prettifyName($transition.getOperationName())) \\
-	#end
-	\tend
-	\end{longtable}
 #end
-
-	#end
+#end
 \end{document}

@@ -119,10 +119,8 @@ public class SaveDocumentationStage extends Stage {
 																.filter(MachineDocumentationItem::getDocument)
 																.map(MachineDocumentationItem::getMachineItem)
 																.collect(Collectors.toList());
-		Documenter documenter = new Documenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, filename.getText(),injector);
-		documenter.document();
-		VelocityDocumenter documenter1 = new VelocityDocumenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, "test",injector);
-		documenter1.documentVelocity();
+		VelocityDocumenter documenter = new VelocityDocumenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, filename.getText(),injector);
+		documenter.documentVelocity();
 		this.close();
 	}
 }

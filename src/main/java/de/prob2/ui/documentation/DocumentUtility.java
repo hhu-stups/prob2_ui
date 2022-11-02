@@ -61,10 +61,6 @@ public class DocumentUtility {
 	}
 
 	public static String latexSafe(String text) {
-		/*
-		text = text.replace("⇒","\\Rightarrow");
-		text = text.replace("∈ ","\\in");
-		text = text.replace("≠","\\neq");*/
 		return text.replace("_", "\\_");
 	}
 	public static void createPdf(String filename, Path dir) {
