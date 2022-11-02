@@ -152,31 +152,6 @@ public class Documenter {
 		valuesMap.put("symbolicFormulars", String.valueOf(symbolicFormulas));
 		return sub.replace(symbolicTemplate);
 	}
-	private void saveTraceImage(Machine elem, ReplayTrace trace){
-		VisBFileHandler visBFileHandler = injector.getInstance(VisBFileHandler.class);
-		VisBVisualisation visualisation = visBFileHandler.constructVisualisationFromJSON(trace.getAbsoluteLocation()); //maybe create own json file
-		final Path path = visualisation.getSvgPath();
-		String svgContent;
-		try {
-			svgContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		String html;
-		final InputStream inputStream = VisBStage.class.getResourceAsStream("visb_html_view.html");
-		if (inputStream == null) {
-			throw new AssertionError("VisB HTML template resource not found - this should never happen");
-		}
-		try (final InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
-			html = CharStreams.toString(reader)
-				.replace("@BASE_URL@", path.getParent().toUri().toString())
-				.replace("@SVG_CONTENT@", svgContent);
-		} catch (IOException e) {
-			throw new UncheckedIOException("I/O exception while reading VisB HTML template resource - this should never happen", e);
-		}
-		stringToPng(html, "1",dir);
-		//HTML TO PNG
-	}
 
 	private String getTracesString(Machine elem) throws IOException {
 		String traceTemplate = readResource(this, "traces.tex");
