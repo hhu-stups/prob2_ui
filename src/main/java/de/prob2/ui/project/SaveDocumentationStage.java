@@ -3,7 +3,6 @@ package de.prob2.ui.project;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.documentation.Documenter;
 import de.prob2.ui.documentation.MachineDocumentationItem;
 import de.prob2.ui.documentation.VelocityDocumenter;
 import de.prob2.ui.internal.FXMLInjected;

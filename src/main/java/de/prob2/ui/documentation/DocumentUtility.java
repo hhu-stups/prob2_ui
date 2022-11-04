@@ -64,6 +64,7 @@ public class DocumentUtility {
 		return text.replace("_", "\\_");
 	}
 	public static void createPdf(String filename, Path dir) {
+		//CHECK IF PDFLATEX IS INSTALLED
 		ProcessBuilder builder = new ProcessBuilder();
 		builder.directory(new File(dir.toString()));
 		builder.command("bash", "-c", "pdflatex -interaction=nonstopmode " + filename + ".tex");

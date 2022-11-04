@@ -14,6 +14,7 @@
 \usepackage{changepage}
 \usepackage{ragged2e, lipsum}
 \usepackage{caption, booktabs}
+\usepackage{graphicx}
 
 \lstset{literate=
 		{∈}{$\in$}1
@@ -50,6 +51,21 @@
 % Packages
 % Document
 \begin{document}
+\begin{titlepage}
+	\centering
+	\includegraphics[width=0.50\textwidth]{$documenter.saveProBLogo()}\par\vspace{1cm}
+	{\scshape\LARGE Automated Documentation \par}
+	\vspace{1cm}
+	{\scshape\Large of Project \par}
+	\vspace{1.5cm}
+	{\huge\bfseries $DocumentUtility.latexSafe($project.getName()) \par}
+	\vspace{2cm}
+	{\Large\itshape #if(!$project.getDescription().isEmpty()) \textsc{Abstract:} $project.getDescription() #end \par}
+	\vfill
+
+	% Bottom of the page
+	{\large \today\par}
+\end{titlepage}
 \section{Projekt}
 #foreach($machine in $machines)
 	% MACHINE CODE
@@ -102,7 +118,7 @@
 			\tbody
 			#foreach($formula in $machine.getLTLFormulas())
 				#if($formula.selected())
-					#if($documenter.formulaHasResult($formula)) % #if ((! $formula) && ("$!formula" == "")) possible but custom method better readable
+					#if($documenter.formulaHasResult($formula))
 \begin{tabularlstlisting}
 $formula.getCode()
 \end{tabularlstlisting} &  $i18n.translate($formula.getResultItem().getHeaderBundleKey())\\
@@ -154,7 +170,6 @@ $formula.getCode()
 	\subsection{Traces}
 	#foreach($trace in $machine.getTraces())
 		#call($trace.load())
-		#call($documenter.saveTraceImage($machine,$trace))
 		\tablestyle[sansbold]
 		\begin{longtable}{ll}
 		\rowcolor{white}\caption{$DocumentUtility.latexSafe($trace.getName())} \\
@@ -162,7 +177,7 @@ $formula.getCode()
 			\thead Position &
 			\thead Transition\\
 		\endfirsthead
-		\tsubheadstart
+		\theadstart
 			\thead Position &
 			\thead Transition\\
 		\endhead
@@ -172,7 +187,9 @@ $formula.getCode()
 		#end
 		\tend
 		\end{longtable}
+		#foreach($image in $documenter.saveTraceImage($machine,$trace))
+			\includegraphics[width=0.33\textwidth]{$image}
+		#end
 	#end
-#end
 #end
 \end{document}
