@@ -453,6 +453,10 @@ public class VisBStage extends Stage {
 		}
 	}
 
+	public WritableImage getWebViewSnapshot() {
+		return webView.snapshot(new SnapshotParameters(), null);
+	}
+
 	/**
 	 * This method throws an ProB2-UI ExceptionAlert
 	 */
