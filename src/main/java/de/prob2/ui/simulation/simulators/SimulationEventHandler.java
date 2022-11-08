@@ -109,10 +109,20 @@ public class SimulationEventHandler {
 		} else {
 			switch (mode) {
 				case CLASSICAL_B:
-					newExpression = String.format(Locale.ROOT, "LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+					// TODO: Rises problem when one of the parameters are the empty set. In this case, the type cannot be infered. Fix this in the future by inspecting the AST.
+					if(!parametersAsString.stream().map(expression::contains).findAny().get()) {
+						newExpression = expression;
+					} else {
+						newExpression = String.format(Locale.ROOT, "LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+					}
 					break;
 				case EVENT_B:
-					newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
+					// TODO: Rises problem when one of the parameters are the empty set. In this case, the type cannot be infered. Fix this in the future by inspecting the AST.
+					if(!parametersAsString.stream().map(expression::contains).findAny().get()) {
+						newExpression = expression;
+					} else {
+						newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
+					}
 					break;
 				default:
 					throw new RuntimeException("Evaluation mode is not supported.");
