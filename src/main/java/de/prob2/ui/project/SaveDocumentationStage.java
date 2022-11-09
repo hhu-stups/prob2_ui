@@ -95,7 +95,7 @@ public class SaveDocumentationStage extends Stage {
 	@FXML
 	void selectLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle(i18n.translate("verifications.modelchecking.saveModelcheckingStage.label.title"));
+		dirChooser.setTitle(i18n.translate("verifications.documentation.saveStage.label.title"));
 		final Path path = fileChooserManager.showDirectoryChooser(dirChooser, null, this.getOwner());
 		if (path != null) {
 			locationField.setText(path.toString());
@@ -111,7 +111,7 @@ public class SaveDocumentationStage extends Stage {
 	void finish() throws IOException, IllegalAccessException{
 		Path dir = Paths.get(locationField.getText());
 		if (!dir.toFile().isDirectory()) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "", "verifications.modelchecking.saveModelcheckingStage.invalidLocationError").show();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.newProjectStage.invalidLocationError").show();
 			return;
 		}
 		List<Machine> toDocumentMachines = machineDocumentationItems.stream()
