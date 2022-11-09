@@ -3,36 +3,27 @@ package de.prob2.ui.documentation;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.PersistentTransition;
-import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.visb.VisBStage;
-import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.SnapshotParameters;
-import javafx.scene.image.WritableImage;
+import javafx.stage.Stage;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.exception.TemplateInitException;
-
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,7 +36,6 @@ import java.util.Properties;
 import static de.prob2.ui.documentation.DocumentUtility.*;
 
 public class VelocityDocumenter {
-
 	private final String filename;
 	private final I18n i18n;
 	private final Path dir;
@@ -100,17 +90,6 @@ public class VelocityDocumenter {
 			createPdf(filename,dir);
 	}
 
-	public String saveProBLogo() {
-		try {
-			String pathname = dir+"/images/ProB_Logo.png";
-			BufferedImage proBLogo = ImageIO.read(Objects.requireNonNull(Main.class.getResource("ProB_Logo.png")));
-			ImageIO.write(proBLogo, "PNG", new File(pathname));
-			return pathname;
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 	private VelocityContext getVelocityContext() {
 		VelocityContext context = new VelocityContext();
 		context.put("project",project);
@@ -124,42 +103,44 @@ public class VelocityDocumenter {
 		context.put("i18n", i18n);
 		return context;
 	}
-	public String getMachineCode(Machine elem) {
-		return readFile(project.getLocation().resolve(elem.getLocation()));
-	}
 
-	public List<String> saveTraceImage(Machine machine, ReplayTrace trace){
-		List<String> imagePaths = new ArrayList<>();
-		project.startAnimation(machine, Preference.DEFAULT);
-		CurrentTrace currentTrace = injector.getInstance(CurrentTrace.class);
-		//REPLAYED TRACE ZU TRACE
-		currentTrace.set(trace.getAnimatedReplayedTrace());
+	public List<String> saveTraceImage(Machine machine, ReplayTrace trace) throws InterruptedException {
 		VisBStage stage = injector.getInstance(VisBStage.class);
-		stage.initialize();
-		stage.show();
-		//stage.getCurrentTrace().addTransitions(trace.getAnimatedReplayedTrace().getTransitionList());
-		//stage.reloadVisualisation();
-		WritableImage snapshot = stage.getWebViewSnapshot();
-		int count = 1;
-		for(PersistentTransition transition : trace.getLoadedTrace().getTransitionList()){
-			currentTrace.forward();
-			String imagePath = getPath(machine,trace)+"/image"+count+".png";
+		List<String> imagePaths = new ArrayList<>();
+		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
+		int imageNr = 1;
+		for (PersistentTransition transition : trace.getLoadedTrace().getTransitionList()) {
+			//traceChecker.check(trace,true);
+			String imagePath = getPath(machine, trace) + "/image" + imageNr + ".png";
 			imagePaths.add(imagePath);
 			Path path = Paths.get(imagePath);
-			count++;
-			try {
-				ImageIO.write(SwingFXUtils.fromFXImage(snapshot, null), "PNG", path.toFile());
-			} catch (IOException ex) {
-				throw new RuntimeException(ex);
-			}
-			stage.closeVisualisation();
+			imageNr++;
+			stage.exportImageWithPath(path);
 		}
+		stage.closeVisualisation();
 		stage.close();
 		return imagePaths;
 	}
 
+	/*--- exclusive used by Template ---*/
+	public String getMachineCode(Machine elem) {
+		return readFile(project.getLocation().resolve(elem.getLocation()));
+	}
+
 	public boolean formulaHasResult(LTLFormulaItem formula){return (formula.getResultItem() != null);}
 	public boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
+	public String saveProBLogo() {
+		try {
+			String pathname = dir+"/images/ProB_Logo.png";
+			BufferedImage proBLogo = ImageIO.read(Objects.requireNonNull(Main.class.getResource("ProB_Logo.png")));
+			ImageIO.write(proBLogo, "PNG", new File(pathname));
+			return pathname;
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	/*---------------------------------*/
+
 	private String getPath(Machine machine, ReplayTrace trace) {
 		return dir + "/images/" + machine.getName() + "/" + Transition.prettifyName(trace.getName());
 	}
