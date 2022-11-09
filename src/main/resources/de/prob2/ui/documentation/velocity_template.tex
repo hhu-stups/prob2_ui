@@ -48,6 +48,10 @@
 }
 {}
 
+\newcommand\cropped[1]{%
+\immediate\write18{convert -trim #1 #1}%
+\includegraphics[width=\textwidth]{#1}}
+
 % Packages
 % Document
 \begin{document}
@@ -66,7 +70,6 @@
 	% Bottom of the page
 	{\large \today\par}
 \end{titlepage}
-\section{Projekt}
 #foreach($machine in $machines)
 	% MACHINE CODE
 	\section{$DocumentUtility.latexSafe($machine.getName()) }
@@ -188,7 +191,7 @@ $formula.getCode()
 		\tend
 		\end{longtable}
 		#foreach($image in $documenter.saveTraceImage($machine,$trace))
-			\includegraphics[width=0.33\textwidth]{$image}
+			\cropped{$image}
 		#end
 	#end
 #end
