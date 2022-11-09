@@ -453,10 +453,6 @@ public class VisBStage extends Stage {
 		}
 	}
 
-	public WritableImage getWebViewSnapshot() {
-		return webView.snapshot(new SnapshotParameters(), null);
-	}
-
 	/**
 	 * This method throws an ProB2-UI ExceptionAlert
 	 */
@@ -473,15 +469,24 @@ public class VisBStage extends Stage {
 				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
 		);
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		exportImageWithPath(path);
+	}
+
+	public void exportImageWithPath(Path path) {
 		if(path != null) {
 			File file = path.toFile();
-			WritableImage snapshot = webView.snapshot(new SnapshotParameters(), null);
-			RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot, null);
-			try {
-				ImageIO.write(renderedImage, "png", file);
-			} catch (IOException e){
-				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
-			}
+			this.runWhenLoaded( () -> {
+				if(!this.isShowing()) {
+					this.show();
+				}
+				WritableImage snapshot = webView.snapshot(new SnapshotParameters(), null);
+				RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot, null);
+				try {
+					ImageIO.write(renderedImage, "png", file);
+				} catch (IOException e){
+					alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
+				}
+			});
 		}
 	}
 
