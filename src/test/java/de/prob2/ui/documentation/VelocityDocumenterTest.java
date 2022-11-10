@@ -1,9 +1,12 @@
 package de.prob2.ui.documentation;
 
 import com.google.inject.Injector;
+import de.prob2.ui.Main;
+import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import javafx.application.Application;
 import javafx.embed.swing.JFXPanel;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
@@ -11,6 +14,7 @@ import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.testfx.api.FxToolkit;
 import org.testfx.framework.junit.ApplicationTest;
 
 import java.io.File;
@@ -21,13 +25,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.TimeoutException;
+
+import javafx.application.Platform;
 
 import static org.junit.Assert.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(MockitoJUnitRunner.class)
 class VelocityDocumenterTest extends ApplicationTest {
-
 	Machine trafficLight;
 	List<Machine> machines = new ArrayList<>();
 	I18n i18n = Mockito.mock(I18n.class);
@@ -35,10 +41,12 @@ class VelocityDocumenterTest extends ApplicationTest {
 	CurrentProject project = Mockito.mock(CurrentProject.class);
 	public final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
+	private String[] args;
+
 	//TODO add FormulaItems to Machine so Test dont fail because machine lists are empty
 	@BeforeAll
-	void setup(){
-		final JFXPanel fxPanel = new JFXPanel();
+	void setup() throws TimeoutException {
+		FxToolkit.registerPrimaryStage();
 		trafficLight = new Machine("TrafficLight", "", Paths.get("src/test/resources/machines/TrafficLight/TrafficLight.mch"));
 		Mockito.when(project.getName()).thenReturn("Projekt Name");
 		Mockito.when(project.getLocation()).thenReturn(Paths.get(""));
@@ -113,6 +121,6 @@ class VelocityDocumenterTest extends ApplicationTest {
 
 	@Override
 	public void start(Stage stage) throws Exception {
-
+		stage.show();
 	}
 }
