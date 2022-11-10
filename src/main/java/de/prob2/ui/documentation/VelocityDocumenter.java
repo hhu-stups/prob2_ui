@@ -12,7 +12,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.visb.VisBStage;
-import javafx.stage.Stage;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.exception.MethodInvocationException;
@@ -78,16 +77,20 @@ public class VelocityDocumenter {
 	}
 
 	public void documentVelocity() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
-		Properties p = new Properties();
-		p.setProperty("resource.loader", "class");
-		p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-		Velocity.init(p);
+		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
 		StringWriter writer = new StringWriter();
 		Velocity.mergeTemplate("de/prob2/ui/documentation/velocity_template.tex", String.valueOf(StandardCharsets.UTF_8),context,writer);
 		DocumentUtility.stringToTex(writer.toString(), filename, dir);
 		if(makePdf)
 			createPdf(filename,dir);
+	}
+
+	private static void initVelocityEngine() {
+		Properties p = new Properties();
+		p.setProperty("resource.loader", "class");
+		p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		Velocity.init(p);
 	}
 
 	private VelocityContext getVelocityContext() {
@@ -131,10 +134,10 @@ public class VelocityDocumenter {
 	public boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
 	public String saveProBLogo() {
 		try {
-			String pathname = dir+"/images/ProB_Logo.png";
+			String pathname = dir +"/images/ProB_Logo.png";
 			BufferedImage proBLogo = ImageIO.read(Objects.requireNonNull(Main.class.getResource("ProB_Logo.png")));
 			ImageIO.write(proBLogo, "PNG", new File(pathname));
-			return pathname;
+			return "images/ProB_Logo.png";
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
