@@ -1,39 +1,31 @@
 package de.prob2.ui.documentation;
+
 import com.google.inject.Injector;
-import de.prob2.ui.config.Config;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.Project;
-import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.project.machines.Machine;
 import javafx.embed.swing.JFXPanel;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
-import org.junit.AfterClass;
-import org.junit.Rule;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.testfx.framework.junit.ApplicationTest;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(MockitoJUnitRunner.class)
@@ -46,6 +38,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 	CurrentProject project = Mockito.mock(CurrentProject.class);
 	public final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
+	//TODO add FormulaItems to Machine so Test dont fail because machine lists are empty
 	@BeforeAll
 	void setup(){
 		final JFXPanel fxPanel = new JFXPanel();
@@ -54,7 +47,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 		Mockito.when(project.getLocation()).thenReturn(Paths.get(""));
 		Mockito.when(project.getDescription()).thenReturn("");
 	}
-	/*
+
 	@BeforeEach
 	public void cleanOutput() {
 		File dir = new File(outputPath.toUri());
@@ -63,7 +56,6 @@ class VelocityDocumenterTest extends ApplicationTest {
 		}
 		dir.delete();
 	}
-*/
 	@Test
 	void testBlankDocument() {
 		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,false,false,false,false,machines,outputPath, outputFilename,injector);
