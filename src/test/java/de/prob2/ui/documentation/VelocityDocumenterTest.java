@@ -7,7 +7,6 @@ import de.prob2.ui.project.machines.Machine;
 import javafx.embed.swing.JFXPanel;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
-import org.junit.Ignore;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -68,6 +67,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 		assertTexFileContainsString("MCH Code");
 		assertTexFileContainsString("Traces");
 	}
+	/*
 	@Disabled("Template checks if ModelcheckingItems are Empty -> add Items to Machine")
 	@Test
 	void testModelcheckingInserted() throws IOException {
@@ -75,7 +75,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
 		assertTexFileContainsString("Model Checking");
-	}
+	}*/
 
 	@Test
 	void testLTLInserted() throws IOException {
@@ -84,7 +84,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 		velocityDocumenter1.documentVelocity();
 		assertTexFileContainsString("LTL Model Checking");
 	}
-
+/*
 	@Disabled("Template checks if SymbolicFormulaItems are Empty -> add Items to Machine")
 	@Test
 	void testSymbolicInserted() throws IOException {
@@ -100,7 +100,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
 		assertTrue(getOutputFile(".pdf").exists());
-	}
+	}*/
 
 	private void assertTexFileContainsString(String s) throws IOException {
 		File texOutput = getOutputFile(".tex");
