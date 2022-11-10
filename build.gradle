@@ -131,7 +131,7 @@ dependencies {
 	testImplementation 'org.assertj:assertj-core:3.23.1'
 	testImplementation group: 'org.testfx', name: 'testfx-junit', version: '4.0.15-alpha'
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.1.0'
-	testImplementation 'org.mockito:mockito-inline:2.13.0'
+	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.6.1'
 	testImplementation group: 'commons-io', name: 'commons-io', version: '2.6'
 
 }
