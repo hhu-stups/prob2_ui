@@ -135,6 +135,42 @@ $formula.getCode()
 			\tend
 			\end{longtable}
 		#end
+		#if(!$machine.getLTLPatterns().isEmpty())
+			\tablestyle[sansbold]
+			\begingroup
+			\setlength{\LTleft}{-\textwidth plus -1fill}
+			\setlength{\LTright}{\LTleft}
+			\begin{longtable}{p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
+			\theadstart
+				\thead Pattern Name &
+				\thead Code &
+				\thead Result\\
+			\endfirsthead
+			\tsubheadstart
+				\thead Pattern Name &
+				\thead Code &
+				\thead Result\\
+			\endhead
+			\rowcolor{white}\caption{LTL Patterns and Results}\\
+			\endlastfoot
+			\tbody
+			#foreach($pattern in $machine.getLTLPatterns())
+				#if($documenter.patternHasResult($pattern))
+$pattern.getName() &
+\begin{tabularlstlisting}
+$pattern.getCode()
+\end{tabularlstlisting} & $i18n.translate($pattern.getResultItem().getHeaderBundleKey()) \\
+				#else
+$pattern.getName() &
+\begin{tabularlstlisting}
+$pattern.getCode()
+\end{tabularlstlisting} & Pattern not solved \\
+				#end
+			#end
+			\tend
+			\end{longtable}
+		#end
+
 	#end
 	%SYMBOLIC
 	#if($symbolic && !$machine.getSymbolicCheckingFormulas().isEmpty())
