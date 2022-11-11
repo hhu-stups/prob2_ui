@@ -10,6 +10,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.visb.VisBStage;
 import org.apache.velocity.VelocityContext;
@@ -131,6 +132,7 @@ public class VelocityDocumenter {
 	}
 
 	public boolean formulaHasResult(LTLFormulaItem formula){return (formula.getResultItem() != null);}
+	public boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
 	public boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
 	public String saveProBLogo() {
 		try {
