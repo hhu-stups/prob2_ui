@@ -34,19 +34,13 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import org.slf4j.Logger;
@@ -168,6 +162,19 @@ public final class ModelcheckingView extends ScrollPane {
 		messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
 		messageColumn.setSortable(false);
 
+		messageColumn.setCellFactory(col -> {
+			TableCell<ModelCheckingJobItem, String> cell = new TableCell<>();
+			cell.itemProperty().addListener((obs, old, newVal) -> {
+				if (newVal != null) {
+					TableRow<ModelCheckingJobItem> row = cell.getTableRow();
+					boolean noButton = row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription);
+					Node box = buildMessageCell(newVal, noButton);
+					cell.graphicProperty().bind(Bindings.when(cell.emptyProperty()).then((Node) null).otherwise(box));
+				}
+			});
+			return cell;
+		});
+
 		tvItems.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		tvChecks.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 
@@ -206,6 +213,23 @@ public final class ModelcheckingView extends ScrollPane {
 				tvChecks.getSelectionModel().selectLast();
 			}
 		});
+	}
+
+	private Node buildMessageCell(String text, boolean noButton){
+		HBox container = new HBox();
+		container.setAlignment(Pos.CENTER_LEFT);
+		container.getChildren().add(new Label(text));
+		if(!noButton) {
+			container.setSpacing(5);
+			Button button = new Button(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
+			button.getStyleClass().add("button-blue");
+			button.setOnAction(actionEvent -> {
+				ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
+				injector.getInstance(CurrentTrace.class).set(item.getTrace());
+			});
+			container.getChildren().add(button);
+		}
+		return container;
 	}
 
 	private String toUIString(ModelCheckingItem item) {
