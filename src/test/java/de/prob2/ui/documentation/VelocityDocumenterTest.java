@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.testfx.framework.junit.ApplicationTest;
@@ -35,7 +36,7 @@ import static org.mockito.Mockito.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(MockitoJUnitRunner.class)
 class VelocityDocumenterTest extends ApplicationTest {
-	Machine trafficLight;
+
 	List<Machine> machines = new ArrayList<>();
 	Machine trafficLight = Mockito.mock(Machine.class);
 	ReplayTrace trace = Mockito.mock(ReplayTrace.class);
@@ -44,8 +45,6 @@ class VelocityDocumenterTest extends ApplicationTest {
 	CurrentProject currentProject = Mockito.mock(CurrentProject.class);
 	public final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
-	private String[] args;
-
 	//TODO add FormulaItems to Machine so Test dont fail because machine lists are empty
 	@BeforeAll
 	void setup() throws Exception {
@@ -80,33 +79,33 @@ class VelocityDocumenterTest extends ApplicationTest {
 	}
 	@Test
 	void testBlankDocument() {
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,false,false,false,false,machines,outputPath, outputFilename,injector);
+		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath, outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
 		assertTrue(getOutputFile(".tex").exists());
 	}
 	@Test
-	void testMachineCodeAndTracesInserted() throws IOException {
+	void testMachineCodeAndTracesInserted() throws Exception {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,false,false,false,false,machines,outputPath,outputFilename,injector);
-		velocityDocumenter1.documentVelocity();
+		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("MCH Code");
 		assertTexFileContainsString("Traces");
 	}
 
 	@Disabled("Template checks if ModelcheckingItems are Empty -> add Items to Machine")
 	@Test
-	void testModelcheckingInserted() throws IOException {
+	void testModelcheckingInserted() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
-		velocityDocumenter1.documentVelocity();
+		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("Model Checking");
 	}
 
 	@Test
-	void testLTLInserted() throws IOException {
+	void testLTLInserted() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
-		velocityDocumenter1.documentVelocity();
+		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("LTL Model Checking");
 	}
 
@@ -114,7 +113,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 	@Test
 	void testSymbolicInserted() throws IOException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
+		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
 		assertTexFileContainsString("Symbolic Model Checking");
 	}
@@ -122,7 +121,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 	@Disabled
 	@Test
 	void testPDFCreated() {
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(project,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
+		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
 		assertTrue(getOutputFile(".pdf").exists());
 	}
@@ -130,6 +129,12 @@ class VelocityDocumenterTest extends ApplicationTest {
 	private void assertTexFileContainsString(String s) throws IOException {
 		File texOutput = getOutputFile(".tex");
 		assertTrue(FileUtils.readFileToString(texOutput, StandardCharsets.UTF_8).contains(s));
+	}
+
+	private static void spyDocumentation(VelocityDocumenter velocityDocumenter1) throws InterruptedException {
+		VelocityDocumenter documenterSpy = Mockito.spy(velocityDocumenter1);
+		doReturn(new ArrayList<>()).when(documenterSpy).saveTraceImage(any(),any());
+		documenterSpy.documentVelocity();
 	}
 
 	private File getOutputFile(String extension) {
@@ -140,4 +145,5 @@ class VelocityDocumenterTest extends ApplicationTest {
 	public void start(Stage stage) throws Exception {
 		stage.show();
 	}
+
 }
