@@ -1,15 +1,19 @@
 package de.prob2.ui.documentation;
 
 import com.google.inject.Injector;
+import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
 import javafx.collections.FXCollections;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
@@ -25,13 +29,11 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doReturn;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(MockitoJUnitRunner.class)
@@ -45,16 +47,20 @@ class VelocityDocumenterTest extends ApplicationTest {
 	CurrentProject currentProject = Mockito.mock(CurrentProject.class);
 	public final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
-	//TODO add FormulaItems to Machine so Test dont fail because machine lists are empty
+	ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1",ModelCheckingSearchStrategy.RANDOM,1,1,"",new HashSet<>());
+	LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("","","");
+	SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("","", SymbolicCheckingType.SYMBOLIC_MODEL_CHECK);
+	LTLPatternItem ltlPatternItem = new LTLPatternItem("","","");
+
 	@BeforeAll
 	void setup() throws Exception {
 		Mockito.when(trafficLight.getName()).thenReturn("TrafficLight");
 		Mockito.when(trafficLight.getLocation()).thenReturn(Paths.get("src/test/resources/machines/TrafficLight/TrafficLight.mch"));
 		Mockito.when(trafficLight.getTraces()).thenReturn(FXCollections.observableArrayList(trace));
-		Mockito.when(trafficLight.getModelcheckingItems()).thenReturn(new ArrayList<>());
-		Mockito.when(trafficLight.getLTLFormulas()).thenReturn(new ArrayList<>());
-		Mockito.when(trafficLight.getLTLPatterns()).thenReturn(new ArrayList<>());
-		Mockito.when(trafficLight.getSymbolicCheckingFormulas()).thenReturn(new ArrayList<>());
+		Mockito.when(trafficLight.getModelcheckingItems()).thenReturn(Collections.singletonList(modelCheckingItem));
+		Mockito.when(trafficLight.getLTLFormulas()).thenReturn(Collections.singletonList(ltlFormulaItem));
+		Mockito.when(trafficLight.getLTLPatterns()).thenReturn(Collections.singletonList(ltlPatternItem));
+		Mockito.when(trafficLight.getSymbolicCheckingFormulas()).thenReturn(Collections.singletonList(symbolicCheckingFormulaItem));
 
 		Mockito.when(trace.getName()).thenReturn("TrafficLight_Cars");
 		TraceJsonFile jsonFile = Mockito.mock(TraceJsonFile.class);
@@ -64,8 +70,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 		Mockito.when(currentProject.getName()).thenReturn("Projekt Name");
 		Mockito.when(currentProject.getLocation()).thenReturn(Paths.get(""));
 		Mockito.when(currentProject.getDescription()).thenReturn("");
-		Project project = Mockito.mock(Project.class);
-		Mockito.when(currentProject.get()).thenReturn(project);
+		Mockito.when(currentProject.get()).thenReturn(Mockito.mock(Project.class));
 		Mockito.when(currentProject.get().getPreference(any(String.class))).thenReturn(Preference.DEFAULT);
 	}
 
@@ -92,32 +97,59 @@ class VelocityDocumenterTest extends ApplicationTest {
 		assertTexFileContainsString("Traces");
 	}
 
-	@Disabled("Template checks if ModelcheckingItems are Empty -> add Items to Machine")
+
 	@Test
-	void testModelcheckingInserted() throws IOException, InterruptedException {
+	void testModelcheckingBoolean() throws IOException, InterruptedException {
 		machines.add(trafficLight);
 		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("Model Checking");
 	}
+	@Test
+	void testModelcheckingItemInserted() throws IOException, InterruptedException {
+		machines.add(trafficLight);
+		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter);
+		assertTexFileContainsString("Modelchecking Items and Results");
+	}
 
 	@Test
-	void testLTLInserted() throws IOException, InterruptedException {
+	void testLTLBoolean() throws IOException, InterruptedException {
 		machines.add(trafficLight);
 		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("LTL Model Checking");
 	}
 
-	@Disabled("Template checks if SymbolicFormulaItems are Empty -> add Items to Machine")
 	@Test
-	void testSymbolicInserted() throws IOException {
+	void testLTLFormulaItemInserted() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
-		velocityDocumenter1.documentVelocity();
-		assertTexFileContainsString("Symbolic Model Checking");
+		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter);
+		assertTexFileContainsString("LTL Formulars and Results");
+	}
+	@Test
+	void testLTLPatternItemInserted() throws IOException, InterruptedException {
+		machines.add(trafficLight);
+		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter);
+		assertTexFileContainsString("LTL Patterns and Results");
 	}
 
+	@Test
+	void testSymbolicBoolean() throws IOException, InterruptedException {
+		machines.add(trafficLight);
+		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter);
+		assertTexFileContainsString("Symbolic Model Checking");
+	}
+	@Test
+	void testSymbolicItemInserted() throws IOException, InterruptedException {
+		machines.add(trafficLight);
+		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter1);
+		assertTexFileContainsString("Symbolic Formulars and Results");
+	}
 	@Disabled
 	@Test
 	void testPDFCreated() {
