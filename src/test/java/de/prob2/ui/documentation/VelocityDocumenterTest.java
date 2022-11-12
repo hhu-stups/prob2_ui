@@ -19,7 +19,6 @@ import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.testfx.framework.junit.ApplicationTest;
@@ -31,6 +30,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
@@ -53,7 +54,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 	LTLPatternItem ltlPatternItem = new LTLPatternItem("","","");
 
 	@BeforeAll
-	void setup() throws Exception {
+	void setup(){
 		Mockito.when(trafficLight.getName()).thenReturn("TrafficLight");
 		Mockito.when(trafficLight.getLocation()).thenReturn(Paths.get("src/test/resources/machines/TrafficLight/TrafficLight.mch"));
 		Mockito.when(trafficLight.getTraces()).thenReturn(FXCollections.observableArrayList(trace));
@@ -150,11 +151,12 @@ class VelocityDocumenterTest extends ApplicationTest {
 		spyDocumentation(velocityDocumenter1);
 		assertTexFileContainsString("Symbolic Formulars and Results");
 	}
-	@Disabled
 	@Test
-	void testPDFCreated() {
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
-		velocityDocumenter1.documentVelocity();
+	void testPDFCreated() throws InterruptedException {
+		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
+		spyDocumentation(velocityDocumenter);
+		//PDF creation not instant set max delay 10s
+		await().atMost(10, SECONDS).until(() -> getOutputFile(".pdf").exists());
 		assertTrue(getOutputFile(".pdf").exists());
 	}
 
@@ -174,7 +176,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 	}
 
 	@Override
-	public void start(Stage stage) throws Exception {
+	public void start(Stage stage){
 		stage.show();
 	}
 
