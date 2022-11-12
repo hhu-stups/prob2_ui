@@ -159,7 +159,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		//PDF creation not instant set max delay 10s
-		await().atMost(10, SECONDS).until(() -> getOutputFile(".pdf").exists());
+		await().atMost(30, SECONDS).until(() -> getOutputFile(".pdf").exists());
 		assertTrue(getOutputFile(".pdf").exists());
 	}
 
