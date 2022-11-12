@@ -34,6 +34,7 @@ test:jdk-8-linux:
     - *default_before_script_linux
     # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
     - apt-get install --assume-yes curl perl rsync
+    - apt-get install texlive-latex-base
     # Install OpenJFX 8.
     # This downloads the Debian stretch version of the libopenjfx-java package (which is the last version compatible with Java 8) and installs it into the OpenJDK directory.
     # This is a terrible solution, but there's no better alternative - there are apparently no Docker images that have a (non-Oracle) JDK 8 with JavaFX installed.
@@ -50,6 +51,7 @@ test:jdk-17-linux:
   before_script:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
+    - apt-get install texlive-latex-base
   script:
     - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.2 check jpackage
 

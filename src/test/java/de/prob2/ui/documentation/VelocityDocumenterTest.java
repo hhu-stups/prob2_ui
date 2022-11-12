@@ -18,6 +18,7 @@ import javafx.collections.FXCollections;
 import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -33,6 +34,7 @@ import java.util.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.condition.OS.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
@@ -151,6 +153,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 		spyDocumentation(velocityDocumenter1);
 		assertTexFileContainsString("Symbolic Formulars and Results");
 	}
+	@DisabledOnOs({ WINDOWS, MAC })
 	@Test
 	void testPDFCreated() throws InterruptedException {
 		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
