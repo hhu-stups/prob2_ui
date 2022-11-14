@@ -153,7 +153,8 @@ class VelocityDocumenterTest extends ApplicationTest {
 		spyDocumentation(velocityDocumenter1);
 		assertTexFileContainsString("Symbolic Formulars and Results");
 	}
-	@DisabledOnOs({ WINDOWS, MAC })
+	//@DisabledOnOs({ WINDOWS, MAC })
+	@Disabled
 	@Test
 	void testPDFCreated() throws InterruptedException {
 		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
