@@ -327,7 +327,6 @@ public class VOManagerStage extends Stage {
 				tvRequirements.setRoot(null);
 			}
 
-			switchMode(Mode.NONE);
 			btAddRequirementVO.setDisable(to == null);
 		};
 		currentProject.addListener(projectChangeListener);
@@ -342,6 +341,20 @@ public class VOManagerStage extends Stage {
 		this.switchMode(Mode.NONE);
 	}
 
+	private static TreeItem<INameable> findItemForLastSelection(final TreeItem<INameable> item, final INameable lastSelected) {
+		for (final TreeItem<INameable> subItem : item.getChildren()) {
+			if (subItem.getValue().getName().equals(lastSelected.getName())) {
+				return subItem;
+			} else {
+				final TreeItem<INameable> found = findItemForLastSelection(subItem, lastSelected);
+				if (found != null) {
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void updateRequirementsTable() {
 		VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
 		TreeItem<INameable> root = new TreeItem<>();
@@ -353,7 +366,21 @@ public class VOManagerStage extends Stage {
 		for (final TreeItem<INameable> item : root.getChildren()) {
 			item.setExpanded(true);
 		}
+		// Try to find an item in the new tree
+		// that matches the currently selected item in the old tree,
+		// so that the selection can be restored after the tree is updated.
+		final TreeItem<INameable> lastSelectedItem = tvRequirements.getSelectionModel().getSelectedItem();
+		final TreeItem<INameable> newSelectedItem;
+		if (lastSelectedItem == null) {
+			newSelectedItem = null;
+		} else {
+			newSelectedItem = findItemForLastSelection(root, lastSelectedItem.getValue());
+		}
 		tvRequirements.setRoot(root);
+		// Restore the previous selection if possible.
+		if (newSelectedItem != null) {
+			tvRequirements.getSelectionModel().select(newSelectedItem);
+		}
 		if(currentProject.getCurrentMachine() == null) {
 			return;
 		}

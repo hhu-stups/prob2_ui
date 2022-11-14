@@ -59,6 +59,9 @@ public class RequirementsEditingBox extends VBox {
 	private ChoiceBox<String> cbRequirementLinkMachineChoice;
 
 	@FXML
+	private VBox voTableBox;
+
+	@FXML
 	private Button removeVoButton;
 
 	@FXML
@@ -111,6 +114,9 @@ public class RequirementsEditingBox extends VBox {
 	private void initialize() {
 		cbRequirementLinkMachineChoice.setItems(linkedMachineNames);
 
+		// When creating a new requirement,
+		// VOs can only be added after the requirement has been saved.
+		voTableBox.visibleProperty().bind(oldRequirement.isNotNull());
 		removeVoButton.disableProperty().bind(voTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
 		voStatusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -136,6 +142,7 @@ public class RequirementsEditingBox extends VBox {
 						final ValidationObligation changedVo = new ValidationObligation(machine, existingVo.getExpression());
 						voTable.getItems().set(this.getIndex(), changedVo);
 						tryParseVo(changedVo);
+						updateRequirementVos();
 					});
 					this.setGraphic(machineChoiceBox);
 				}
@@ -165,6 +172,7 @@ public class RequirementsEditingBox extends VBox {
 			final ValidationObligation changedVo = new ValidationObligation(existingVo.getMachine(), e.getNewValue());
 			voTable.getItems().set(row, changedVo);
 			tryParseVo(changedVo);
+			updateRequirementVos();
 		});
 
 		historyButton.disableProperty().bind(oldRequirement.isNull());
@@ -178,6 +186,16 @@ public class RequirementsEditingBox extends VBox {
 		} catch (VOParseException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}
+	}
+
+	private void updateRequirementVos() {
+		final Requirement oldReq = oldRequirement.get();
+		assert oldReq != null;
+		final List<Requirement> predecessors = new ArrayList<>(oldReq.getPreviousVersions());
+		predecessors.add(oldReq);
+		final Requirement newRequirement = new Requirement(oldReq.getName(), oldReq.getIntroducedAt(), oldReq.getType(), oldReq.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
+		currentProject.replaceRequirement(oldReq, newRequirement);
+		oldRequirement.set(newRequirement);
 	}
 
 	@FXML
@@ -220,12 +238,14 @@ public class RequirementsEditingBox extends VBox {
 		}
 
 		voTable.getItems().add(newVo);
+		updateRequirementVos();
 		voTable.edit(voTable.getItems().size()-1, voExpressionColumn);
 	}
 
 	@FXML
 	private void removeVo() {
 		voTable.getItems().remove(voTable.getSelectionModel().getSelectedIndex());
+		updateRequirementVos();
 	}
 
 	@FXML
@@ -257,6 +277,7 @@ public class RequirementsEditingBox extends VBox {
 		} else {
 			currentProject.replaceRequirement(oldRequirement.get(), newRequirement);
 		}
+		voManagerStage.closeEditingBox();
 	}
 
 	@FXML
