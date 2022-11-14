@@ -162,6 +162,9 @@ public class VOManagerStage extends Stage {
 			final INameable value = treeItem.getValue();
 			if (value == null) {
 				return null;
+			} else if (value instanceof ValidationObligation) {
+				final ValidationObligation vo = (ValidationObligation)value;
+				return Bindings.format("%s: %s", vo.getMachine(), vo.getExpression());
 			}
 			
 			final StringProperty name;
@@ -173,7 +176,7 @@ public class VOManagerStage extends Stage {
 			
 			final INameable parentValue = treeItem.getParent().getValue();
 			
-			if (parentValue == null || value instanceof ValidationObligation) {
+			if (parentValue == null) {
 				// Top-level item - show just the name.
 				return name;
 			} else {
@@ -392,14 +395,10 @@ public class VOManagerStage extends Stage {
 			TreeItem<INameable> machineItem = new TreeItem<>(machine);
 			for (Requirement requirement : currentProject.getRequirements()) {
 				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
-					TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-					requirement.getValidationObligation(machine).ifPresent(vo ->
-						requirementItem.getChildren().add(new TreeItem<>(vo))
-					);
 					// Show the requirement under the machine where it was introduced
 					// and under any other machines that have corresponding VOs.
-					if (requirement.getIntroducedAt().equals(machine.getName()) || !requirementItem.getChildren().isEmpty()) {
-						machineItem.getChildren().add(requirementItem);
+					if (requirement.getIntroducedAt().equals(machine.getName()) || requirement.getValidationObligation(machine).isPresent()) {
+						machineItem.getChildren().add(new TreeItem<>(requirement));
 					}
 				}
 			}
@@ -414,9 +413,7 @@ public class VOManagerStage extends Stage {
 			TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
 			for (final ValidationObligation vo : requirement.getValidationObligations()) {
 				if (currentTrace.getModel() == null || (refinementChain.containsKey(vo.getMachine()) && refinementChain.get(vo.getMachine()).contains(requirement.getIntroducedAt()))) {
-					TreeItem<INameable> machineItem = new TreeItem<>(currentProject.get().getMachine(vo.getMachine()));
-					machineItem.getChildren().add(new TreeItem<>(vo));
-					requirementItem.getChildren().add(machineItem);
+					requirementItem.getChildren().add(new TreeItem<>(vo));
 				}
 			}
 			root.getChildren().add(requirementItem);
