@@ -475,10 +475,10 @@ public class VisBStage extends Stage {
 	public void exportImageWithPath(Path path) {
 		if(path != null) {
 			File file = path.toFile();
+			if(!this.isShowing()) {
+				this.show();
+			}
 			this.runWhenLoaded( () -> {
-				if(!this.isShowing()) {
-					this.show();
-				}
 				WritableImage snapshot = webView.snapshot(new SnapshotParameters(), null);
 				RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot, null);
 				try {
