@@ -2,23 +2,18 @@ package de.prob2.ui.vomanager;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
-import de.prob.statespace.StateSpace;
 import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -32,10 +27,13 @@ import de.prob2.ui.verifications.TreeCheckedCell;
 import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -97,7 +95,7 @@ public class VOManagerStage extends Stage {
 
 	private final ObjectProperty<Mode> modeProperty;
 
-	private final Map<String, List<String>> refinementChain;
+	private final ObservableSet<String> relatedMachineNames;
 
 	private Map<String, VOValidationFeedback> currentFeedback;
 
@@ -113,7 +111,7 @@ public class VOManagerStage extends Stage {
 		this.feedbackManager = feedbackManager;
 		this.i18n = i18n;
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
-		this.refinementChain = new HashMap<>();
+		this.relatedMachineNames = FXCollections.observableSet();
 		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
 	}
 
@@ -162,7 +160,7 @@ public class VOManagerStage extends Stage {
 					}
 					
 					// Gray out items belonging to machines that are not in the current machine's refinement chain.
-					if (item.getMachineName() != null && !refinementChain.isEmpty() && !refinementChain.containsKey(item.getMachineName())) {
+					if (item.getMachineName() != null && !relatedMachineNames.isEmpty() && !relatedMachineNames.contains(item.getMachineName())) {
 						this.getStyleClass().add("unrelated");
 					}
 				}
@@ -200,8 +198,9 @@ public class VOManagerStage extends Stage {
 				}
 			}
 		});
-		currentTrace.stateSpaceProperty().addListener((o, from, to) -> initializeRefinementHierarchy(to));
-		initializeRefinementHierarchy(currentTrace.getStateSpace());
+		relatedMachineNames.addListener((InvalidationListener)o -> updateRequirementsTable());
+		currentTrace.modelProperty().addListener((o, from, to) -> this.updateRelatedMachines(to));
+		this.updateRelatedMachines(currentTrace.getModel());
 	}
 
 	private void checkItem(final VOManagerItem item) {
@@ -217,14 +216,6 @@ public class VOManagerStage extends Stage {
 		} catch (VOParseException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}
-	}
-
-	private void initializeRefinementHierarchy(StateSpace stateSpace) {
-		if(stateSpace == null) {
-			return;
-		}
-		this.resolveRefinementHierarchy(stateSpace.getModel());
-		updateRequirementsTable();
 	}
 
 	private void initializeEditingBoxes() {
@@ -412,24 +403,12 @@ public class VOManagerStage extends Stage {
 		return tvRequirements.getSelectionModel().getSelectedItem() == null ? null : tvRequirements.getSelectionModel().getSelectedItem().getValue();
 	}
 
-	private void resolveRefinementHierarchy(AbstractModel model) {
+	private void updateRelatedMachines(AbstractModel model) {
+		relatedMachineNames.clear();
 		if(model == null) {
 			return;
 		}
-		if(model instanceof ClassicalBModel) {
-			// TODO
-		} else if(model instanceof EventBModel) {
-			refinementChain.clear();
-			// TODO: Implement parsing project without considering the loaded machine
-			List<String> machines = ((EventBModel) model).getMachines().stream()
-					.map(de.prob.model.representation.Machine::getName)
-					.collect(Collectors.toList());
-			for(int i = 0; i < machines.size(); i++) {
-				String machine = machines.get(i);
-				List<String> refinedMachines = machines.subList(0, i+1);
-				refinementChain.put(machine, refinedMachines);
-			}
-		}
+		relatedMachineNames.addAll(model.getGraph().getVertices());
 	}
 
 }
