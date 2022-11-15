@@ -135,6 +135,7 @@ public class VOManagerStage extends Stage {
 			protected void updateItem(final VOManagerItem item, final boolean empty) {
 				super.updateItem(item, empty);
 				
+				this.getStyleClass().remove("unrelated");
 				if (empty) {
 					this.setContextMenu(null);
 				} else {
@@ -158,6 +159,11 @@ public class VOManagerStage extends Stage {
 					} else {
 						// TODO Allow checking (but not removing) machines from VO manager tree
 						this.setContextMenu(null);
+					}
+					
+					// Gray out items belonging to machines that are not in the current machine's refinement chain.
+					if (item.getMachineName() != null && !refinementChain.isEmpty() && !refinementChain.containsKey(item.getMachineName())) {
+						this.getStyleClass().add("unrelated");
 					}
 				}
 			}
@@ -316,13 +322,11 @@ public class VOManagerStage extends Stage {
 		for (Machine machine : currentProject.getMachines()) {
 			TreeItem<VOManagerItem> machineItem = new TreeItem<>(new VOManagerItem.TopLevelMachine(currentProject.getRequirements(), machine));
 			for (Requirement requirement : currentProject.getRequirements()) {
-				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
-					// Show the requirement under the machine where it was introduced
-					// and under any other machines that have corresponding VOs.
-					final Optional<ValidationObligation> vo = requirement.getValidationObligation(machine);
+				// Show the requirement under the machine where it was introduced
+				// and under any other machines that have corresponding VOs.
+				final Optional<ValidationObligation> vo = requirement.getValidationObligation(machine);
 					if (requirement.getIntroducedAt().equals(machine.getName()) || vo.isPresent()) {
-						machineItem.getChildren().add(new TreeItem<>(new VOManagerItem.RequirementUnderMachine(requirement, machine, vo.orElse(null))));
-					}
+					machineItem.getChildren().add(new TreeItem<>(new VOManagerItem.RequirementUnderMachine(requirement, machine, vo.orElse(null))));
 				}
 			}
 			if (!machineItem.getChildren().isEmpty()) {
@@ -335,9 +339,7 @@ public class VOManagerStage extends Stage {
 		for(Requirement requirement : currentProject.getRequirements()) {
 			TreeItem<VOManagerItem> requirementItem = new TreeItem<>(new VOManagerItem.TopLevelRequirement(requirement));
 			for (final ValidationObligation vo : requirement.getValidationObligations()) {
-				if (currentTrace.getModel() == null || (refinementChain.containsKey(vo.getMachine()) && refinementChain.get(vo.getMachine()).contains(requirement.getIntroducedAt()))) {
-					requirementItem.getChildren().add(new TreeItem<>(new VOManagerItem.MachineUnderRequirement(requirement, currentProject.get().getMachine(vo.getMachine()), vo)));
-				}
+				requirementItem.getChildren().add(new TreeItem<>(new VOManagerItem.MachineUnderRequirement(requirement, currentProject.get().getMachine(vo.getMachine()), vo)));
 			}
 			root.getChildren().add(requirementItem);
 		}

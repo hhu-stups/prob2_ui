@@ -1214,3 +1214,9 @@
 	-fx-border-color: -prob-aqua;
 	-fx-border-width: 2;
 }
+
+/* VO manager */
+
+.unrelated .tree-table-cell {
+	-fx-text-fill: -prob-grey-75;
+}
