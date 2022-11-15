@@ -288,7 +288,7 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	public void historyRequirement(){
-		Stage table = new RequirementHistoryTable((Requirement) voManagerStage.getSelectedRequirement());
+		Stage table = new RequirementHistoryTable(voManagerStage.getSelectedItem().getRequirement());
 		stageManager.loadFXML(table, "requirement_history_box.fxml", this.getClass().getName());
 		table.show();
 		table.toFront();
@@ -303,7 +303,7 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private void refineRequirement(){
-		Stage requirementRefineDialog = new RequirementRefineDialog(currentProject, (Requirement) voManagerStage.getSelectedRequirement());
+		Stage requirementRefineDialog = new RequirementRefineDialog(currentProject, voManagerStage.getSelectedItem().getRequirement());
 		stageManager.loadFXML(requirementRefineDialog, "requirements_refine_dialog.fxml", this.getClass().getName());
 		requirementRefineDialog.show();
 		requirementRefineDialog.toFront();
