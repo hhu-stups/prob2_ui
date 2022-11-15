@@ -32,7 +32,6 @@ import de.prob2.ui.verifications.TreeCheckedCell;
 import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -131,23 +130,37 @@ public class VOManagerStage extends Stage {
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(features -> features.getValue().getValue().checkedProperty());
 
-		tvRequirements.setRowFactory(table -> {
-			final TreeTableRow<VOManagerItem> row = new TreeTableRow<>();
-			if (row.getItem() instanceof VOManagerItem.TopLevelMachine) {
-				return row;
+		tvRequirements.setRowFactory(table -> new TreeTableRow<VOManagerItem>() {
+			@Override
+			protected void updateItem(final VOManagerItem item, final boolean empty) {
+				super.updateItem(item, empty);
+				
+				if (empty) {
+					this.setContextMenu(null);
+				} else {
+					if (item.getVo() != null) {
+						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.check"));
+						checkItem.setOnAction(e -> checkItem(item));
+						
+						final MenuItem removeItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.remove"));
+						removeItem.setOnAction(e -> removeItem(item));
+						
+						this.setContextMenu(new ContextMenu(checkItem, removeItem));
+					} else if (item.getRequirement() != null) {
+						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.check", item.getRequirement().getValidationObligations().size()));
+						checkItem.setOnAction(e -> checkItem(item));
+						checkItem.setDisable(item.getRequirement().getValidationObligations().isEmpty());
+						
+						final MenuItem removeItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.remove"));
+						removeItem.setOnAction(e -> removeItem(item));
+						
+						this.setContextMenu(new ContextMenu(checkItem, removeItem));
+					} else {
+						// TODO Allow checking (but not removing) machines from VO manager tree
+						this.setContextMenu(null);
+					}
+				}
 			}
-
-			MenuItem checkItem = new MenuItem(i18n.translate("common.buttons.check"));
-			checkItem.setOnAction(e -> checkItem(row.getItem()));
-
-			MenuItem removeItem = new MenuItem(i18n.translate("common.buttons.remove"));
-			removeItem.setOnAction(e -> removeItem(row.getItem()));
-
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(checkItem, removeItem)));
-			return row;
 		});
 
 		tvRequirements.setOnMouseClicked(e-> {
