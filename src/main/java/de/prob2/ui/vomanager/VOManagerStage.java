@@ -204,7 +204,7 @@ public class VOManagerStage extends Stage {
 		}
 		try {
 			if (item.getVo() != null) {
-				voChecker.checkVO(item.getMachine(), item.getVo());
+				voChecker.checkVO(item.getVo());
 			} else if (item.getRequirement() != null) {
 				voChecker.checkRequirement(item.getRequirement());
 			}
