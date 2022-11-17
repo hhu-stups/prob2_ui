@@ -34,7 +34,7 @@
 						<Label text="%verifications.documentation.checkbox.title" styleClass="title"/>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<padding><Insets left="5"/></padding>
-							<CheckBox fx:id="checkModelchecking" selected="true"
+							<CheckBox fx:id="documentModelchecking" selected="true"
 									  text="%verifications.documentation.modelchecking.checkbox">
 								<tooltip>
 									<Tooltip text="%verifications.documentation.modelchecking.checkbox" />
@@ -43,7 +43,7 @@
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<padding><Insets left="5"/></padding>
-							<CheckBox fx:id="checkLTL" selected="true"
+							<CheckBox fx:id="documentLTL" selected="true"
 									  text="%verifications.documentation.ltl.checkbox">
 								<tooltip>
 									<Tooltip text="%verifications.documentation.ltl.checkbox" />
@@ -52,7 +52,7 @@
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<padding><Insets left="5"/></padding>
-							<CheckBox fx:id="checkSymbolic" selected="true"
+							<CheckBox fx:id="documentSymbolic" selected="true"
 									  text="%verifications.documentation.symbolic.checkbox">
 								<tooltip>
 									<Tooltip text="%verifications.documentation.symbolic.checkbox" />

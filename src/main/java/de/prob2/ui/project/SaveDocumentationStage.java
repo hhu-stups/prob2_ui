@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.documentation.MachineDocumentationItem;
-import de.prob2.ui.documentation.VelocityDocumenter;
+import de.prob2.ui.documentation.ProjectDocumenter;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -22,8 +22,6 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -31,7 +29,6 @@ import java.util.stream.Collectors;
 
 @FXMLInjected
 public class SaveDocumentationStage extends Stage {
-
 	@FXML
 	private Button finishButton;
 	@FXML
@@ -43,9 +40,6 @@ public class SaveDocumentationStage extends Stage {
 	@FXML
 	private Label errorExplanationLabel;
 
-	private final FileChooserManager fileChooserManager;
-	private final I18n i18n;
-	private final StageManager stageManager;
 	@FXML
 	private TableView<MachineDocumentationItem> tvDocumentation;
 
@@ -56,15 +50,18 @@ public class SaveDocumentationStage extends Stage {
 	private TableColumn<MachineDocumentationItem, String> tvMachines;
 
 	@FXML
-	private CheckBox checkLTL;
+	private CheckBox documentLTL;
 	@FXML
-	private CheckBox checkModelchecking;
+	private CheckBox documentModelchecking;
 	@FXML
-	private CheckBox checkSymbolic;
+	private CheckBox documentSymbolic;
 	@FXML
 	private CheckBox makePdf;
 	private final ObservableList<MachineDocumentationItem> machineDocumentationItems = FXCollections.observableArrayList();
 	private final Injector injector;
+	private final FileChooserManager fileChooserManager;
+	private final I18n i18n;
+	private final StageManager stageManager;
 
 	@Inject
 	private SaveDocumentationStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, final StageManager stageManager, I18n i18n, Injector injector) {
@@ -108,17 +105,22 @@ public class SaveDocumentationStage extends Stage {
 	}
 
 	@FXML
-	void finish() throws IOException, IllegalAccessException{
+	void finish(){
 		Path dir = Paths.get(locationField.getText());
 		if (!dir.toFile().isDirectory()) {
 			stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.newProjectStage.invalidLocationError").show();
 			return;
 		}
-		List<Machine> toDocumentMachines = machineDocumentationItems.stream()
+		List<Machine> checkedMachines = machineDocumentationItems.stream()
 																.filter(MachineDocumentationItem::getDocument)
 																.map(MachineDocumentationItem::getMachineItem)
 																.collect(Collectors.toList());
-		VelocityDocumenter documenter = new VelocityDocumenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, filename.getText(),injector);
+		ProjectDocumenter documenter = new ProjectDocumenter(currentProject,i18n,
+															 documentModelchecking.isSelected(),
+															 documentLTL.isSelected(),
+														     documentSymbolic.isSelected(),
+														     makePdf.isSelected(),
+														     checkedMachines, dir, filename.getText(),injector);
 		documenter.documentVelocity();
 		this.close();
 	}
