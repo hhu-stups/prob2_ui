@@ -166,9 +166,7 @@ public final class ModelcheckingView extends ScrollPane {
 			TableCell<ModelCheckingJobItem, String> cell = new TableCell<>();
 			cell.itemProperty().addListener((obs, old, newVal) -> {
 				if (newVal != null) {
-					TableRow<ModelCheckingJobItem> row = cell.getTableRow();
-					boolean noButton = row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription);
-					Node box = buildMessageCell(newVal, noButton);
+					Node box = buildMessageCell(newVal, cell.getTableRow());
 					cell.graphicProperty().bind(Bindings.when(cell.emptyProperty()).then((Node) null).otherwise(box));
 				}
 			});
@@ -215,20 +213,24 @@ public final class ModelcheckingView extends ScrollPane {
 		});
 	}
 
-	private Node buildMessageCell(String text, boolean noButton){
+	private Node buildMessageCell(String text, TableRow<ModelCheckingJobItem> row){
 		HBox container = new HBox();
 		container.setAlignment(Pos.CENTER_LEFT);
 		container.getChildren().add(new Label(text));
-		if(!noButton) {
-			container.setSpacing(5);
-			Button button = new Button(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
-			button.getStyleClass().add("button-blue");
-			button.setOnAction(actionEvent -> {
-				ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
-				injector.getInstance(CurrentTrace.class).set(item.getTrace());
-			});
-			container.getChildren().add(button);
-		}
+
+		container.setSpacing(5);
+		Button button = new Button(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
+		button.getStyleClass().add("button-blue");
+		button.setOnAction(actionEvent -> {
+			ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
+			injector.getInstance(CurrentTrace.class).set(item.getTrace());
+		});
+
+		button.visibleProperty().bind(Bindings.createBooleanBinding(
+			() -> !row.isEmpty() && !(row.getItem() == null) && !(row.getItem().getStats() == null) && row.getItem().getResult() instanceof ITraceDescription,
+			row.emptyProperty(), row.itemProperty()));
+
+		container.getChildren().add(button);
 		return container;
 	}
 
