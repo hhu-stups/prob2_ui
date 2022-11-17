@@ -16,10 +16,6 @@ public class MachineDocumentationItem {
 		return machineItem;
 	}
 
-	public void setMachineItem(Machine machineItem) {
-		this.machineItem = machineItem;
-	}
-
 	public Boolean getDocument() {
 		return document;
 	}
@@ -27,5 +23,4 @@ public class MachineDocumentationItem {
 	public void setDocument(Boolean checked) {
 		this.document = checked;
 	}
-	//vllt UI PRINT METHOD
 }
