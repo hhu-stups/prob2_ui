@@ -26,6 +26,11 @@ stages:
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
     - apt-get install --assume-yes git pandoc
+    - apt-get install --assume-yes texlive-latex-base
+    - apt-get install --assume-yes texlive-latex-extra
+    - apt-get install --assume-yes texlive-bibtex-extra
+    - apt-get install --assume-yes texlive-science
+    - apt-get install --assume-yes texlive-lang-german
 
 test:jdk-8-linux:
   extends: .test-linux
@@ -35,7 +40,6 @@ test:jdk-8-linux:
     # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
     - apt-get install --assume-yes curl perl rsync
     - apt-get install --assume-yes bash
-    - apt-get install --assume-yes texlive-latex-base
     # Install OpenJFX 8.
     # This downloads the Debian stretch version of the libopenjfx-java package (which is the last version compatible with Java 8) and installs it into the OpenJDK directory.
     # This is a terrible solution, but there's no better alternative - there are apparently no Docker images that have a (non-Oracle) JDK 8 with JavaFX installed.
@@ -53,7 +57,6 @@ test:jdk-17-linux:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
     - apt-get install --assume-yes bash
-    - apt-get install --assume-yes texlive-latex-base
   script:
     - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.2 check jpackage
 
