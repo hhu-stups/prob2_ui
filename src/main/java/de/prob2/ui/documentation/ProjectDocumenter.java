@@ -44,8 +44,8 @@ public class ProjectDocumenter {
 	private final boolean symbolic;
 	private final boolean makePdf;
 	private final List<Machine> machines;
-	CurrentProject project;
-	Injector injector;
+	private final CurrentProject project;
+	private final Injector injector;
 
 	@Inject
 	public ProjectDocumenter(CurrentProject project,
@@ -65,16 +65,8 @@ public class ProjectDocumenter {
 		this.dir = dir;
 		this.filename = filename;
 		this.injector = injector;
-		for (Machine machine : machines) {
-			for (ReplayTrace trace : machine.getTraces()) {
-				try {
-					Files.createDirectories(Paths.get(getPath(machine, trace))
-					);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
+		createImageDirectoryStructure();
+		saveProBLogo();
 	}
 
 	public void documentVelocity() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
@@ -108,14 +100,14 @@ public class ProjectDocumenter {
 		return context;
 	}
 
-	public List<String> saveTraceImage(Machine machine, ReplayTrace trace) throws InterruptedException {
+	public List<String> saveTraceImage(Machine machine, ReplayTrace trace) throws InterruptedException { //TODO clean up
 		VisBStage stage = injector.getInstance(VisBStage.class);
 		List<String> imagePaths = new ArrayList<>();
 		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
 		int imageNr = 1;
 		for (PersistentTransition transition : trace.getLoadedTrace().getTransitionList()) {
 			//traceChecker.check(trace,true);
-			String imagePath = getPath(machine, trace) + "/image" + imageNr + ".png";
+			String imagePath = getImagePath(machine, trace) + "/image" + imageNr + ".png";
 			imagePaths.add(imagePath);
 			Path path = Paths.get(imagePath);
 			imageNr++;
@@ -130,23 +122,34 @@ public class ProjectDocumenter {
 	public String getMachineCode(Machine elem) {
 		return readFile(project.getLocation().resolve(elem.getLocation()));
 	}
-
 	public boolean formulaHasResult(LTLFormulaItem formula){return (formula.getResultItem() != null);}
+
 	public boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
 	public boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
-	public String saveProBLogo() {
+	/*---------------------------------*/
+	private void createImageDirectoryStructure() {
+		for (Machine machine : machines) {
+			for (ReplayTrace trace : machine.getTraces()) {
+				try {
+					Files.createDirectories(Paths.get(getImagePath(machine, trace))
+					);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+		}
+	}
+	private void saveProBLogo() {
 		try {
 			String pathname = dir +"/images/ProB_Logo.png";
 			BufferedImage proBLogo = ImageIO.read(Objects.requireNonNull(Main.class.getResource("ProB_Logo.png")));
 			ImageIO.write(proBLogo, "PNG", new File(pathname));
-			return "images/ProB_Logo.png";
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
 	}
-	/*---------------------------------*/
 
-	private String getPath(Machine machine, ReplayTrace trace) {
+	private String getImagePath(Machine machine, ReplayTrace trace) {
 		return dir + "/images/" + machine.getName() + "/" + Transition.prettifyName(trace.getName());
 	}
 
