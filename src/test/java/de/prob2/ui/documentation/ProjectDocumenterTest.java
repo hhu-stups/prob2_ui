@@ -34,13 +34,14 @@ import java.util.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.condition.OS.*;
+import static org.junit.jupiter.api.condition.OS.MAC;
+import static org.junit.jupiter.api.condition.OS.WINDOWS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(MockitoJUnitRunner.class)
-class VelocityDocumenterTest extends ApplicationTest {
+class ProjectDocumenterTest extends ApplicationTest {
 
 	List<Machine> machines = new ArrayList<>();
 	Machine trafficLight = Mockito.mock(Machine.class);
@@ -87,14 +88,14 @@ class VelocityDocumenterTest extends ApplicationTest {
 	}
 	@Test
 	void testBlankDocument() {
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath, outputFilename,injector);
+		ProjectDocumenter velocityDocumenter1 = new ProjectDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath, outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
 		assertTrue(getOutputFile(".tex").exists());
 	}
 	@Test
 	void testMachineCodeAndTracesInserted() throws Exception {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("MCH Code");
 		assertTexFileContainsString("Traces");
@@ -104,14 +105,14 @@ class VelocityDocumenterTest extends ApplicationTest {
 	@Test
 	void testModelcheckingBoolean() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("Model Checking");
 	}
 	@Test
 	void testModelcheckingItemInserted() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("Modelchecking Items and Results");
 	}
@@ -119,7 +120,7 @@ class VelocityDocumenterTest extends ApplicationTest {
 	@Test
 	void testLTLBoolean() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("LTL Model Checking");
 	}
@@ -127,14 +128,14 @@ class VelocityDocumenterTest extends ApplicationTest {
 	@Test
 	void testLTLFormulaItemInserted() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("LTL Formulars and Results");
 	}
 	@Test
 	void testLTLPatternItemInserted() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("LTL Patterns and Results");
 	}
@@ -142,22 +143,21 @@ class VelocityDocumenterTest extends ApplicationTest {
 	@Test
 	void testSymbolicBoolean() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		assertTexFileContainsString("Symbolic Model Checking");
 	}
 	@Test
 	void testSymbolicItemInserted() throws IOException, InterruptedException {
 		machines.add(trafficLight);
-		VelocityDocumenter velocityDocumenter1 = new VelocityDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter1 = new ProjectDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter1);
 		assertTexFileContainsString("Symbolic Formulars and Results");
 	}
-	//@DisabledOnOs({ WINDOWS, MAC })
-	@Disabled
+	@DisabledOnOs({ WINDOWS, MAC })
 	@Test
 	void testPDFCreated() throws InterruptedException {
-		VelocityDocumenter velocityDocumenter = new VelocityDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
 		spyDocumentation(velocityDocumenter);
 		//PDF creation not instant set max delay 10s
 		await().atMost(30, SECONDS).until(() -> getOutputFile(".pdf").exists());
@@ -169,8 +169,8 @@ class VelocityDocumenterTest extends ApplicationTest {
 		assertTrue(FileUtils.readFileToString(texOutput, StandardCharsets.UTF_8).contains(s));
 	}
 
-	private static void spyDocumentation(VelocityDocumenter velocityDocumenter1) throws InterruptedException {
-		VelocityDocumenter documenterSpy = Mockito.spy(velocityDocumenter1);
+	private static void spyDocumentation(ProjectDocumenter velocityDocumenter1) throws InterruptedException {
+		ProjectDocumenter documenterSpy = Mockito.spy(velocityDocumenter1);
 		doReturn(new ArrayList<>()).when(documenterSpy).saveTraceImage(any(),any());
 		documenterSpy.documentVelocity();
 	}
