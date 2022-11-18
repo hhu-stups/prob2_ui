@@ -60,6 +60,11 @@ public class Modelchecker {
 
 	public CompletableFuture<ModelCheckingJobItem> startNextCheckStep(ModelCheckingItem item) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
+		// The options must be calculated before adding the ModelCheckingJobItem,
+		// so that the recheckExisting/INSPECT_EXISTING_NODES option is set correctly,
+		// which depends on whether any job items were already added.
+		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel());
+		
 		final int jobItemListIndex = item.getItems().size();
 		final int jobItemDisplayIndex = jobItemListIndex + 1;
 		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(jobItemDisplayIndex, new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
@@ -85,7 +90,6 @@ public class Modelchecker {
 				this.updateStats(jobId, timeElapsed, result, stats);
 			}
 		};
-		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel());
 		final ConsistencyChecker checker = new ConsistencyChecker(stateSpace, options, listener);
 
 		return this.executor.submit(() -> {
