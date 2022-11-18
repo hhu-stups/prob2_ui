@@ -8,6 +8,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.verifications.Checked;
 
 import java.util.Map;
 
@@ -25,29 +26,25 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 	}
 
 	@Override
-	public void checkTrace(Trace trace, int time) {
+	public Checked checkTrace(Trace trace, int time) {
 		switch (type) {
 			case ALL_INVARIANTS:
-				checkAllInvariants(trace);
-				break;
+				return checkAllInvariants(trace);
 			case PREDICATE_INVARIANT:
-				checkPredicateInvariant(trace);
-				break;
+				return checkPredicateInvariant(trace);
 			case PREDICATE_FINAL:
-				checkPredicateFinal(trace);
-				break;
+				return checkPredicateFinal(trace);
 			case PREDICATE_EVENTUALLY:
-				checkPredicateEventually(trace);
-				break;
+				return checkPredicateEventually(trace);
 			case TIMING:
-				checkTiming(time);
-				break;
+				return checkTiming(time);
 			default:
 				break;
 		}
+		return Checked.SUCCESS;
 	}
 
-	public void checkAllInvariants(Trace trace) {
+	public Checked checkAllInvariants(Trace trace) {
 		boolean invariantOk = true;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
@@ -59,10 +56,12 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 		}
 		if(invariantOk) {
 			numberSuccess++;
+			return Checked.SUCCESS;
 		}
+		return Checked.FAIL;
 	}
 
-	public void checkPredicateInvariant(Trace trace) {
+	public Checked checkPredicateInvariant(Trace trace) {
 		boolean invariantOk = true;
 		String invariant = (String) additionalInformation.get("PREDICATE");
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
@@ -79,10 +78,12 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 		}
 		if(invariantOk) {
 			numberSuccess++;
+			return Checked.SUCCESS;
 		}
+		return Checked.FAIL;
 	}
 
-	public void checkPredicateFinal(Trace trace) {
+	public Checked checkPredicateFinal(Trace trace) {
 		boolean predicateOk = true;
 		String finalPredicate = (String) additionalInformation.get("PREDICATE");
 		int size = trace.getTransitionList().size();
@@ -97,10 +98,12 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 		}
 		if(predicateOk) {
 			numberSuccess++;
+			return Checked.SUCCESS;
 		}
+		return Checked.FAIL;
 	}
 
-	public void checkPredicateEventually(Trace trace) {
+	public Checked checkPredicateEventually(Trace trace) {
 		boolean predicateOk = false;
 		String predicate = (String) additionalInformation.get("PREDICATE");
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
@@ -117,14 +120,18 @@ public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
 		}
 		if(predicateOk) {
 			numberSuccess++;
+			return Checked.SUCCESS;
 		}
+		return Checked.FAIL;
 	}
 
-	public void checkTiming(int time) {
+	public Checked checkTiming(int time) {
 		int maximumTime = (int) additionalInformation.get("TIME");
 		if(time - startAtTime <= maximumTime) {
 			numberSuccess++;
+			return Checked.SUCCESS;
 		}
+		return Checked.FAIL;
 	}
 
 }

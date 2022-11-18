@@ -11,6 +11,7 @@ import de.prob2.ui.simulation.SimulationError;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.simulators.Simulator;
+import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 
@@ -73,6 +74,8 @@ public class SimulationMonteCarlo extends Simulator {
 
 	protected List<Trace> resultingTraces;
 
+	protected List<Checked> resultingStatus;
+
 	protected int numberExecutions;
 
 	protected int maxStepsBeforeProperty;
@@ -99,6 +102,7 @@ public class SimulationMonteCarlo extends Simulator {
 		this.operationExecutionPercentage = new HashMap<>();
 		this.resultingTraces = new ArrayList<>();
 		this.resultingTimestamps = new ArrayList<>();
+		this.resultingStatus = new ArrayList<>();
 		this.numberExecutions = numberExecutions;
 		this.maxStepsBeforeProperty = maxStepsBeforeProperty;
 		this.startingConditionReached = false;
@@ -216,7 +220,8 @@ public class SimulationMonteCarlo extends Simulator {
 				}
 				resultingTraces.add(newTrace);
 				resultingTimestamps.add(getTimestamps());
-				checkTrace(newTrace, time.get());
+				Checked checked = checkTrace(newTrace, time.get());
+				resultingStatus.add(checked);
 				collectOperationStatistics(newTrace);
 				resetSimulator();
 			}
@@ -243,8 +248,9 @@ public class SimulationMonteCarlo extends Simulator {
 		}
 	}
 
-	public void checkTrace(Trace trace, int time) {
+	public Checked checkTrace(Trace trace, int time) {
 		// Monte Carlo Simulation does not apply any checks on a trace. But classes inheriting from SimulationMonteCarlo might apply some checks
+		return Checked.SUCCESS;
 	}
 
 	private void collectOperationStatistics(Trace trace) {
@@ -313,6 +319,10 @@ public class SimulationMonteCarlo extends Simulator {
 
 	public List<List<Integer>> getResultingTimestamps() {
 		return resultingTimestamps;
+	}
+
+	public List<Checked> getResultingStatus() {
+		return resultingStatus;
 	}
 
 	public SimulationStats getStats() {

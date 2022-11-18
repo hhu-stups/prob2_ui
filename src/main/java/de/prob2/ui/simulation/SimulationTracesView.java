@@ -22,6 +22,8 @@ import de.prob2.ui.simulation.simulators.SimulationCreator;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.table.SimulationItem;
 
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -33,6 +35,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
@@ -40,7 +43,7 @@ import javafx.stage.Stage;
 @Singleton
 public class SimulationTracesView extends Stage {
 
-	private static class SimulationTraceItem implements Translatable {
+	public static class SimulationTraceItem implements Translatable {
 
 		private final SimulationItem parent;
 
@@ -48,12 +51,15 @@ public class SimulationTracesView extends Stage {
 
 		private final List<Integer> timestamps;
 
+		private final Checked checked;
+
 		private final int index;
 
-		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, int index) {
+		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, Checked checked, int index) {
 			this.parent = parent;
 			this.trace = trace;
 			this.timestamps = timestamps;
+			this.checked = checked;
 			this.index = index;
 		}
 
@@ -73,6 +79,10 @@ public class SimulationTracesView extends Stage {
 			return index;
 		}
 
+		public Checked getChecked() {
+			return checked;
+		}
+
 		@Override
 		public String getTranslationKey() {
 			return "simulation.traces.view.name";
@@ -86,6 +96,8 @@ public class SimulationTracesView extends Stage {
 
 	@FXML
 	private TableView<SimulationTraceItem> traceTableView;
+	@FXML
+	private TableColumn<SimulationTraceItem, Checked> statusColumn;
 	@FXML
 	private TableColumn<SimulationTraceItem, String> traceColumn;
 	@FXML
@@ -116,15 +128,17 @@ public class SimulationTracesView extends Stage {
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
-	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps) {
+	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps, List<Checked> status) {
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
 		for (int i = 1; i <= traces.size(); i++) {
-			items.add(new SimulationTraceItem(item, traces.get(i - 1), timestamps.get(i - 1), i));
+			items.add(new SimulationTraceItem(item, traces.get(i - 1), timestamps.get(i - 1), status.get(i - 1), i));
 		}
 		traceTableView.setItems(items);
 	}
 
 	private void initTableColumns() {
+		statusColumn.setCellFactory(col -> new CheckedCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		traceColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue()));
 	}
 

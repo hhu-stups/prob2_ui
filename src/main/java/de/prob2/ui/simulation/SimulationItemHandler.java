@@ -101,6 +101,7 @@ public class SimulationItemHandler {
 	private void setResult(SimulationItem item, SimulationMonteCarlo monteCarlo) {
 		item.setTraces(monteCarlo.getResultingTraces());
 		item.setTimestamps(monteCarlo.getResultingTimestamps());
+		item.setStatuses(monteCarlo.getResultingStatus());
 		item.setSimulationStats(monteCarlo.getStats());
 		Platform.runLater(() -> {
 			switch (monteCarlo.getResult()) {
