@@ -15,10 +15,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 public class Requirement implements INameable {
 
@@ -37,9 +33,6 @@ public class Requirement implements INameable {
 	private final List<Requirement> previousVersions;
 
 	private final Requirement parent;
-
-	@JsonIgnore
-	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
 	@JsonCreator
 	public Requirement(@JsonProperty("name") String name,
@@ -125,18 +118,6 @@ public class Requirement implements INameable {
 		return this.getValidationObligation(machine.getName());
 	}
 
-	public ObjectProperty<Checked> checkedProperty() {
-		return checked;
-	}
-
-	public Checked getChecked() {
-		return checked.get();
-	}
-
-	public void setChecked(Checked checked) {
-		this.checked.set(checked);
-	}
-
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -152,7 +133,7 @@ public class Requirement implements INameable {
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ROOT, "Requirement{checked = %s, name = %s, introducedAt = %s, type = %s, text = %s, validationObligations = %s}", this.getChecked(), name, introducedAt, type, text, getValidationObligations());
+		return String.format(Locale.ROOT, "Requirement{name = %s, introducedAt = %s, type = %s, text = %s, validationObligations = %s}", name, introducedAt, type, text, getValidationObligations());
 	}
 
 	@JsonIgnore //TODO Fix this when making history and refinement saving persistent

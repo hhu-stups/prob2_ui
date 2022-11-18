@@ -80,24 +80,9 @@ public class VOChecker {
 		}
 	}
 
-	public void checkRequirement(Requirement requirement, Machine machine, VOManagerSetting setting) throws VOParseException{
-		if(setting == VOManagerSetting.REQUIREMENT) {
-			checkRequirementOnRequirementView(requirement);
-		} else if(setting == VOManagerSetting.MACHINE) {
-			checkRequirementOnMachineView(requirement, machine);
-		}
-	}
-
-	private void checkRequirementOnRequirementView(Requirement requirement) throws VOParseException {
+	public void checkRequirement(Requirement requirement) throws VOParseException {
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
-			final Machine machine = currentProject.get().getMachine(vo.getMachine());
-			this.checkVO(machine, vo);
-		}
-	}
-
-	private void checkRequirementOnMachineView(Requirement requirement, Machine machine) throws VOParseException {
-		for (final ValidationObligation vo : requirement.getValidationObligations()) {
-			this.checkVO(machine, vo);
+			this.checkVO(vo);
 		}
 	}
 
@@ -200,8 +185,9 @@ public class VOChecker {
 	}
 
 
-	public void checkVO(Machine machine, ValidationObligation validationObligation) throws VOParseException {
+	public void checkVO(ValidationObligation validationObligation) throws VOParseException {
 		if (validationObligation.getParsedExpression() == null) {
+			final Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
 			this.parseVO(machine, validationObligation);
 		}
 		checkVOExpression(validationObligation.getParsedExpression());

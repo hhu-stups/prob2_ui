@@ -27,7 +27,6 @@ public class HelpMenu extends Menu {
 	private final Injector injector;
 	private final StageManager stageManager;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HelpMenu.class);
-	private final String folder = "de/prob2/ui/menu/";
 
 	@Inject
 	private HelpMenu(final StageManager stageManager, final Injector injector) {
@@ -57,31 +56,32 @@ public class HelpMenu extends Menu {
 
 	@FXML
 	private void handleBSyntax() {
-		handleSyntax("prob_summary.txt");
+		handleSyntax("prob_summary.txt", "B");
 	}
 
 	@FXML
 	private void handleZSyntax() {
-		handleSyntax("proz_summary.txt");
+		handleSyntax("proz_summary.txt", "Z");
 	}
 
 	@FXML
 	private void handleCSPSyntax() {
-		handleSyntax("procsp_summary.txt");
+		handleSyntax("procsp_summary.txt", "CSP");
 	}
 	@FXML
 	private void handleTLASyntax() {
-		handleSyntax("tla_summary.txt");
+		handleSyntax("tla_summary.txt", "TLA");
 	}
 
 	@FXML
 	private void handleLTLSyntax() {
-		handleSyntax("ltl_summary.txt");
+		handleSyntax("ltl_summary.txt", "LTL");
 	}
 
-	private void handleSyntax(String filename) {
+	private void handleSyntax(String filename, String title) {
 		SyntaxStage syntaxStage = injector.getInstance(SyntaxStage.class);
 		try {
+			syntaxStage.setTitle(title);
 			syntaxStage.setContent(Paths.get(Objects.requireNonNull(this.getClass().getResource(filename)).toURI()));
 		} catch (URISyntaxException e) {
 			LOGGER.error("Could not create URI of {}", this.getClass().getResource(filename), e);

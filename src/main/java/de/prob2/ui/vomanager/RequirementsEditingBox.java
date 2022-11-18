@@ -20,6 +20,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
@@ -57,6 +58,9 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private ChoiceBox<String> cbRequirementLinkMachineChoice;
+
+	@FXML
+	private VBox voTableBox;
 
 	@FXML
 	private Button removeVoButton;
@@ -111,6 +115,9 @@ public class RequirementsEditingBox extends VBox {
 	private void initialize() {
 		cbRequirementLinkMachineChoice.setItems(linkedMachineNames);
 
+		// When creating a new requirement,
+		// VOs can only be added after the requirement has been saved.
+		voTableBox.visibleProperty().bind(oldRequirement.isNotNull());
 		removeVoButton.disableProperty().bind(voTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
 		voStatusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -136,6 +143,7 @@ public class RequirementsEditingBox extends VBox {
 						final ValidationObligation changedVo = new ValidationObligation(machine, existingVo.getExpression());
 						voTable.getItems().set(this.getIndex(), changedVo);
 						tryParseVo(changedVo);
+						updateRequirementVos();
 					});
 					this.setGraphic(machineChoiceBox);
 				}
@@ -146,7 +154,12 @@ public class RequirementsEditingBox extends VBox {
 		voExpressionColumn.setCellFactory(col -> {
 			final ComboBoxTableCell<ValidationObligation, String> cell = new ComboBoxTableCell<>(new DefaultStringConverter());
 			cell.setComboBoxEditable(true);
-			Bindings.<ValidationObligation>select(cell.tableRowProperty(), "item").addListener((o, from, to) -> {
+			final ObjectExpression<ValidationObligation> rowItem = Bindings.select(cell.tableRowProperty(), "item");
+			// Prevent the binding object from getting garbage-collected
+			// (which also removes the listener)
+			// by storing it on the cell.
+			cell.getProperties().put(col, rowItem);
+			rowItem.addListener((o, from, to) -> {
 				if (to == null) {
 					cell.getItems().clear();
 				} else {
@@ -165,6 +178,7 @@ public class RequirementsEditingBox extends VBox {
 			final ValidationObligation changedVo = new ValidationObligation(existingVo.getMachine(), e.getNewValue());
 			voTable.getItems().set(row, changedVo);
 			tryParseVo(changedVo);
+			updateRequirementVos();
 		});
 
 		historyButton.disableProperty().bind(oldRequirement.isNull());
@@ -178,6 +192,16 @@ public class RequirementsEditingBox extends VBox {
 		} catch (VOParseException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}
+	}
+
+	private void updateRequirementVos() {
+		final Requirement oldReq = oldRequirement.get();
+		assert oldReq != null;
+		final List<Requirement> predecessors = new ArrayList<>(oldReq.getPreviousVersions());
+		predecessors.add(oldReq);
+		final Requirement newRequirement = new Requirement(oldReq.getName(), oldReq.getIntroducedAt(), oldReq.getType(), oldReq.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
+		currentProject.replaceRequirement(oldReq, newRequirement);
+		oldRequirement.set(newRequirement);
 	}
 
 	@FXML
@@ -220,12 +244,14 @@ public class RequirementsEditingBox extends VBox {
 		}
 
 		voTable.getItems().add(newVo);
+		updateRequirementVos();
 		voTable.edit(voTable.getItems().size()-1, voExpressionColumn);
 	}
 
 	@FXML
 	private void removeVo() {
 		voTable.getItems().remove(voTable.getSelectionModel().getSelectedIndex());
+		updateRequirementVos();
 	}
 
 	@FXML
@@ -257,11 +283,12 @@ public class RequirementsEditingBox extends VBox {
 		} else {
 			currentProject.replaceRequirement(oldRequirement.get(), newRequirement);
 		}
+		voManagerStage.closeEditingBox();
 	}
 
 	@FXML
 	public void historyRequirement(){
-		Stage table = new RequirementHistoryTable((Requirement) voManagerStage.getSelectedRequirement());
+		Stage table = new RequirementHistoryTable(voManagerStage.getSelectedItem().getRequirement());
 		stageManager.loadFXML(table, "requirement_history_box.fxml", this.getClass().getName());
 		table.show();
 		table.toFront();
@@ -276,7 +303,7 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private void refineRequirement(){
-		Stage requirementRefineDialog = new RequirementRefineDialog(currentProject, (Requirement) voManagerStage.getSelectedRequirement());
+		Stage requirementRefineDialog = new RequirementRefineDialog(currentProject, voManagerStage.getSelectedItem().getRequirement());
 		stageManager.loadFXML(requirementRefineDialog, "requirements_refine_dialog.fxml", this.getClass().getName());
 		requirementRefineDialog.show();
 		requirementRefineDialog.toFront();

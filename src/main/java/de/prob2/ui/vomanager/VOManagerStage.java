@@ -1,24 +1,19 @@
 package de.prob2.ui.vomanager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import com.google.inject.Singleton;
 
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
-import de.prob.statespace.StateSpace;
 import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -32,16 +27,13 @@ import de.prob2.ui.verifications.TreeCheckedCell;
 import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
-import javafx.beans.Observable;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.ObjectExpression;
+import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableObjectValue;
-import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableSet;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -63,13 +55,13 @@ public class VOManagerStage extends Stage {
 	}
 
 	@FXML
-	private TreeTableView<INameable> tvRequirements;
+	private TreeTableView<VOManagerItem> tvRequirements;
 
 	@FXML
-	private TreeTableColumn<INameable, String> requirementNameColumn;
+	private TreeTableColumn<VOManagerItem, String> requirementNameColumn;
 
 	@FXML
-	private TreeTableColumn<INameable, Checked> requirementStatusColumn;
+	private TreeTableColumn<VOManagerItem, Checked> requirementStatusColumn;
 
 	@FXML
 	private MenuButton btAddRequirementVO;
@@ -103,7 +95,7 @@ public class VOManagerStage extends Stage {
 
 	private final ObjectProperty<Mode> modeProperty;
 
-	private final Map<String, List<String>> refinementChain;
+	private final ObservableSet<String> relatedMachineNames;
 
 	private Map<String, VOValidationFeedback> currentFeedback;
 
@@ -119,7 +111,7 @@ public class VOManagerStage extends Stage {
 		this.feedbackManager = feedbackManager;
 		this.i18n = i18n;
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
-		this.refinementChain = new HashMap<>();
+		this.relatedMachineNames = FXCollections.observableSet();
 		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
 	}
 
@@ -131,129 +123,65 @@ public class VOManagerStage extends Stage {
 		initializeListenerOnProjectChange();
 	}
 
-	private static Optional<ValidationObligation> voForMachineAndRequirement(final INameable value, final INameable parentValue) {
-		final Machine machine;
-		final Requirement requirement;
-		if (value instanceof Machine) {
-			machine = (Machine)value;
-			requirement = (Requirement)parentValue;
-		} else if (value instanceof Requirement) {
-			machine = (Machine)parentValue;
-			requirement = (Requirement)value;
-		} else {
-			throw new AssertionError("Unhandled type in VO tree: " + value.getClass());
-		}
-
-		return requirement.getValidationObligation(machine);
-	}
-
-	private static ObservableValue<Checked> checkedPropertyConjunction(final Collection<? extends ObjectExpression<Checked>> checkeds) {
-		return Bindings.createObjectBinding(() ->
-			checkeds.stream()
-				.map(ObservableObjectValue::get)
-				.reduce(Checked::and)
-				.orElse(null),
-			checkeds.toArray(new Observable[0]));
-	}
-
 	private void initializeTables() {
-		requirementNameColumn.setCellValueFactory(features -> {
-			final TreeItem<INameable> treeItem = features.getValue();
-			final INameable value = treeItem.getValue();
-			if (value == null) {
-				return null;
-			}
-			
-			final StringProperty name;
-			if (value instanceof Machine) {
-				name = ((Machine)value).nameProperty();
-			} else {
-				name = new SimpleStringProperty(value.getName());
-			}
-			
-			final INameable parentValue = treeItem.getParent().getValue();
-			
-			if (parentValue == null || value instanceof ValidationObligation) {
-				// Top-level item - show just the name.
-				return name;
-			} else {
-				// Second-level item - also show validation expression (if any) for this machine/requirement combination.
-				return voForMachineAndRequirement(value, parentValue)
-					.map(vo -> Bindings.format("%s: %s", name, vo.getExpression()))
-					.orElse(name);
-			}
-		});
+		requirementNameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue().getDisplayText()));
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
-		requirementStatusColumn.setCellValueFactory(features -> {
-			final TreeItem<INameable> treeItem = features.getValue();
-			final INameable value = treeItem.getValue();
-			if (value == null) {
-				return null;
+		requirementStatusColumn.setCellValueFactory(features -> features.getValue().getValue().checkedProperty());
+
+		tvRequirements.setRowFactory(table -> new TreeTableRow<VOManagerItem>() {
+			@Override
+			protected void updateItem(final VOManagerItem item, final boolean empty) {
+				super.updateItem(item, empty);
+				
+				this.getStyleClass().remove("unrelated");
+				if (empty) {
+					this.setContextMenu(null);
+				} else {
+					if (item.getVo() != null) {
+						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.check"));
+						checkItem.setOnAction(e -> checkItem(item));
+						
+						final MenuItem removeItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.remove"));
+						removeItem.setOnAction(e -> removeItem(item));
+						
+						this.setContextMenu(new ContextMenu(checkItem, removeItem));
+					} else if (item.getRequirement() != null) {
+						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.check", item.getRequirement().getValidationObligations().size()));
+						checkItem.setOnAction(e -> checkItem(item));
+						checkItem.setDisable(item.getRequirement().getValidationObligations().isEmpty());
+						
+						final MenuItem removeItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.remove"));
+						removeItem.setOnAction(e -> removeItem(item));
+						
+						this.setContextMenu(new ContextMenu(checkItem, removeItem));
+					} else {
+						// TODO Allow checking (but not removing) machines from VO manager tree
+						this.setContextMenu(null);
+					}
+					
+					// Gray out items belonging to machines that are not in the current machine's refinement chain.
+					if (item.getMachineName() != null && !relatedMachineNames.isEmpty() && !relatedMachineNames.contains(item.getMachineName())) {
+						this.getStyleClass().add("unrelated");
+					}
+				}
 			}
-			
-			final INameable parentValue = treeItem.getParent().getValue();
-			
-			if (value instanceof ValidationObligation) {
-				return ((ValidationObligation)value).checkedProperty();
-			} else if (parentValue != null) {
-				// Second-level item - show checked status of the VO (if any) for this machine/requirement combination.
-				return voForMachineAndRequirement(value, parentValue)
-					.map(ValidationObligation::checkedProperty)
-					.orElse(null);
-			} else if (value instanceof Requirement) {
-				// Top-level requirement item - show combined checked status of all VOs for this requirement.
-				final Requirement requirement = (Requirement)value;
-				return checkedPropertyConjunction(requirement.getValidationObligations().stream()
-					.map(ValidationObligation::checkedProperty)
-					.collect(Collectors.toList()));
-			} else if (value instanceof Machine) {
-				// Top-level machine item - show combined checked status of all VOs for this machine.
-				final Machine machine = (Machine)value;
-				return checkedPropertyConjunction(currentProject.requirementsProperty().stream()
-					.map(req -> req.getValidationObligation(machine))
-					.filter(Optional::isPresent)
-					.map(Optional::get)
-					.map(ValidationObligation::checkedProperty)
-					.collect(Collectors.toList()));
-			} else {
-				throw new AssertionError("Unhandled type in VO tree: " + value.getClass());
-			}
-		});
-
-		tvRequirements.setRowFactory(table -> {
-			final TreeTableRow<INameable> row = new TreeTableRow<>();
-			if(row.getItem() instanceof Machine) {
-				return row;
-			}
-
-			MenuItem checkItem = new MenuItem(i18n.translate("common.buttons.check"));
-			checkItem.setOnAction(e -> checkItem(row.getTreeItem()));
-
-			MenuItem removeItem = new MenuItem(i18n.translate("common.buttons.remove"));
-			removeItem.setOnAction(e -> removeItem(row.getTreeItem()));
-
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(checkItem, removeItem)));
-			return row;
 		});
 
 		tvRequirements.setOnMouseClicked(e-> {
-			TreeItem<INameable> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
+			TreeItem<VOManagerItem> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
 			if (treeItem != null && e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
-				checkItem(treeItem);
+				checkItem(treeItem.getValue());
 			}
 		});
 
 		tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null && to.getValue() != null) {
-				INameable item = to.getValue();
-				if(item instanceof Requirement) {
-					requirementEditingBox.showRequirement((Requirement)item);
+				VOManagerItem item = to.getValue();
+				if (item.getRequirement() != null) {
+					requirementEditingBox.showRequirement(item.getRequirement());
 					switchMode(Mode.REQUIREMENT);
-				} else if(item instanceof ValidationObligation) {
-					voEditingBox.showValidationObligation((ValidationObligation)item, getRequirementForItem(to));
+				} else if (item.getVo() != null) {
+					voEditingBox.showValidationObligation(item.getVo(), item.getRequirement());
 					switchMode(Mode.VO);
 				} else {
 					switchMode(Mode.NONE);
@@ -270,34 +198,24 @@ public class VOManagerStage extends Stage {
 				}
 			}
 		});
-		currentTrace.stateSpaceProperty().addListener((o, from, to) -> initializeRefinementHierarchy(to));
-		initializeRefinementHierarchy(currentTrace.getStateSpace());
+		relatedMachineNames.addListener((InvalidationListener)o -> updateRequirementsTable());
+		currentTrace.modelProperty().addListener((o, from, to) -> this.updateRelatedMachines(to));
+		this.updateRelatedMachines(currentTrace.getModel());
 	}
 
-	private void checkItem(TreeItem<INameable> treeItem) {
-		INameable item = treeItem == null ? null : treeItem.getValue();
+	private void checkItem(final VOManagerItem item) {
 		if(item == null) {
 			return;
 		}
 		try {
-			if (item instanceof Requirement) {
-				VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
-				Machine selectedMachine = setting == VOManagerSetting.MACHINE ? (Machine) treeItem.getParent().getValue() : null;
-				voChecker.checkRequirement((Requirement) item, selectedMachine, setting);
-			} else if (item instanceof ValidationObligation) {
-				voChecker.checkVO(getMachineForItem(treeItem), (ValidationObligation) item);
+			if (item.getVo() != null) {
+				voChecker.checkVO(item.getVo());
+			} else if (item.getRequirement() != null) {
+				voChecker.checkRequirement(item.getRequirement());
 			}
 		} catch (VOParseException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}
-	}
-
-	private void initializeRefinementHierarchy(StateSpace stateSpace) {
-		if(stateSpace == null) {
-			return;
-		}
-		this.resolveRefinementHierarchy(stateSpace.getModel());
-		updateRequirementsTable();
 	}
 
 	private void initializeEditingBoxes() {
@@ -327,7 +245,6 @@ public class VOManagerStage extends Stage {
 				tvRequirements.setRoot(null);
 			}
 
-			switchMode(Mode.NONE);
 			btAddRequirementVO.setDisable(to == null);
 		};
 		currentProject.addListener(projectChangeListener);
@@ -342,38 +259,65 @@ public class VOManagerStage extends Stage {
 		this.switchMode(Mode.NONE);
 	}
 
+	private static TreeItem<VOManagerItem> findItemForLastSelection(final TreeItem<VOManagerItem> item, final VOManagerItem lastSelected) {
+		for (final TreeItem<VOManagerItem> subItem : item.getChildren()) {
+			final VOManagerItem value = subItem.getValue();
+			if (
+				Objects.equals(value.getRequirementName(), lastSelected.getRequirementName())
+				&& Objects.equals(value.getMachineName(), lastSelected.getMachineName())
+			) {
+				return subItem;
+			} else {
+				final TreeItem<VOManagerItem> found = findItemForLastSelection(subItem, lastSelected);
+				if (found != null) {
+					return found;
+				}
+			}
+		}
+		return null;
+	}
+
 	public void updateRequirementsTable() {
 		VOManagerSetting setting = cbViewSetting.getSelectionModel().getSelectedItem();
-		TreeItem<INameable> root = new TreeItem<>();
+		TreeItem<VOManagerItem> root = new TreeItem<>();
 		if(setting == VOManagerSetting.MACHINE) {
 			updateMachineRequirementsTable(root);
 		} else if(setting == VOManagerSetting.REQUIREMENT) {
 			updateRequirementsMachineTable(root);
 		}
-		for (final TreeItem<INameable> item : root.getChildren()) {
+		for (final TreeItem<VOManagerItem> item : root.getChildren()) {
 			item.setExpanded(true);
 		}
+		// Try to find an item in the new tree
+		// that matches the currently selected item in the old tree,
+		// so that the selection can be restored after the tree is updated.
+		final TreeItem<VOManagerItem> lastSelectedItem = tvRequirements.getSelectionModel().getSelectedItem();
+		final TreeItem<VOManagerItem> newSelectedItem;
+		if (lastSelectedItem == null) {
+			newSelectedItem = null;
+		} else {
+			newSelectedItem = findItemForLastSelection(root, lastSelectedItem.getValue());
+		}
 		tvRequirements.setRoot(root);
+		// Restore the previous selection if possible.
+		if (newSelectedItem != null) {
+			tvRequirements.getSelectionModel().select(newSelectedItem);
+		}
 		if(currentProject.getCurrentMachine() == null) {
 			return;
 		}
 		showFeedback();
 	}
 
-	private void updateMachineRequirementsTable(TreeItem<INameable> root) {
+	private void updateMachineRequirementsTable(TreeItem<VOManagerItem> root) {
 		for (Machine machine : currentProject.getMachines()) {
-			TreeItem<INameable> machineItem = new TreeItem<>(machine);
+			TreeItem<VOManagerItem> machineItem = new TreeItem<>(new VOManagerItem.TopLevelMachine(currentProject.getRequirements(), machine));
 			for (Requirement requirement : currentProject.getRequirements()) {
-				if (currentTrace.getModel() == null || (refinementChain.containsKey(machine.getName()) && refinementChain.get(machine.getName()).contains(requirement.getIntroducedAt()))) {
-					TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
-					requirement.getValidationObligation(machine).ifPresent(vo ->
-						requirementItem.getChildren().add(new TreeItem<>(vo))
-					);
-					// Show the requirement under the machine where it was introduced
-					// and under any other machines that have corresponding VOs.
-					if (requirement.getIntroducedAt().equals(machine.getName()) || !requirementItem.getChildren().isEmpty()) {
-						machineItem.getChildren().add(requirementItem);
-					}
+				// Show the requirement under the machine where it was introduced
+				// and under any other machines that have corresponding VOs.
+				final Optional<ValidationObligation> vo = requirement.getValidationObligation(machine);
+					if (requirement.getIntroducedAt().equals(machine.getName()) || vo.isPresent()) {
+					machineItem.getChildren().add(new TreeItem<>(new VOManagerItem.RequirementUnderMachine(requirement, machine, vo.orElse(null))));
 				}
 			}
 			if (!machineItem.getChildren().isEmpty()) {
@@ -382,15 +326,11 @@ public class VOManagerStage extends Stage {
 		}
 	}
 
-	private void updateRequirementsMachineTable(TreeItem<INameable> root) {
+	private void updateRequirementsMachineTable(TreeItem<VOManagerItem> root) {
 		for(Requirement requirement : currentProject.getRequirements()) {
-			TreeItem<INameable> requirementItem = new TreeItem<>(requirement);
+			TreeItem<VOManagerItem> requirementItem = new TreeItem<>(new VOManagerItem.TopLevelRequirement(requirement));
 			for (final ValidationObligation vo : requirement.getValidationObligations()) {
-				if (currentTrace.getModel() == null || (refinementChain.containsKey(vo.getMachine()) && refinementChain.get(vo.getMachine()).contains(requirement.getIntroducedAt()))) {
-					TreeItem<INameable> machineItem = new TreeItem<>(currentProject.get().getMachine(vo.getMachine()));
-					machineItem.getChildren().add(new TreeItem<>(vo));
-					requirementItem.getChildren().add(machineItem);
-				}
+				requirementItem.getChildren().add(new TreeItem<>(new VOManagerItem.MachineUnderRequirement(requirement, currentProject.get().getMachine(vo.getMachine()), vo)));
 			}
 			root.getChildren().add(requirementItem);
 		}
@@ -440,35 +380,17 @@ public class VOManagerStage extends Stage {
 		switchMode(Mode.VO);
 	}
 
-	private static Machine getMachineForItem(final TreeItem<INameable> treeItem) {
-		final TreeItem<INameable> parentItem = treeItem.getParent();
-		if (parentItem.getValue() instanceof Machine) {
-			return (Machine) parentItem.getValue();
-		} else {
-			return (Machine) parentItem.getParent().getValue();
-		}
-	}
-
-	private static Requirement getRequirementForItem(final TreeItem<INameable> treeItem) {
-		final TreeItem<INameable> parentItem = treeItem.getParent();
-		if (parentItem.getValue() instanceof Requirement) {
-			return (Requirement) parentItem.getValue();
-		} else {
-			return (Requirement) parentItem.getParent().getValue();
-		}
-	}
-
-	private void removeItem(TreeItem<INameable> item) {
-		if (item.getValue() instanceof Requirement) {
-			currentProject.removeRequirement((Requirement)item.getValue());
-		} else if (item.getValue() instanceof ValidationObligation) {
-			final Requirement oldRequirement = getRequirementForItem(item);
+	private void removeItem(final VOManagerItem item) {
+		if (item.getVo() != null) {
+			final Requirement oldRequirement = item.getRequirement();
 			final Set<ValidationObligation> updatedVos = new HashSet<>(oldRequirement.getValidationObligations());
-			updatedVos.remove((ValidationObligation)item.getValue());
+			updatedVos.remove(item.getVo());
 			final List<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
 			predecessors.add(oldRequirement);
 			final Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getType(), oldRequirement.getText(), updatedVos, predecessors, oldRequirement.getParent());
 			currentProject.replaceRequirement(oldRequirement, updatedRequirement);
+		} else if (item.getRequirement() != null) {
+			currentProject.removeRequirement(item.getRequirement());
 		}
 		// Machine items cannot be manually removed (they disappear when all their children are removed)
 	}
@@ -477,28 +399,16 @@ public class VOManagerStage extends Stage {
 		tvRequirements.getSelectionModel().clearSelection();
 	}
 
-	public INameable getSelectedRequirement() {
+	VOManagerItem getSelectedItem() {
 		return tvRequirements.getSelectionModel().getSelectedItem() == null ? null : tvRequirements.getSelectionModel().getSelectedItem().getValue();
 	}
 
-	private void resolveRefinementHierarchy(AbstractModel model) {
+	private void updateRelatedMachines(AbstractModel model) {
+		relatedMachineNames.clear();
 		if(model == null) {
 			return;
 		}
-		if(model instanceof ClassicalBModel) {
-			// TODO
-		} else if(model instanceof EventBModel) {
-			refinementChain.clear();
-			// TODO: Implement parsing project without considering the loaded machine
-			List<String> machines = ((EventBModel) model).getMachines().stream()
-					.map(de.prob.model.representation.Machine::getName)
-					.collect(Collectors.toList());
-			for(int i = 0; i < machines.size(); i++) {
-				String machine = machines.get(i);
-				List<String> refinedMachines = machines.subList(0, i+1);
-				refinementChain.put(machine, refinedMachines);
-			}
-		}
+		relatedMachineNames.addAll(model.getGraph().getVertices());
 	}
 
 }
