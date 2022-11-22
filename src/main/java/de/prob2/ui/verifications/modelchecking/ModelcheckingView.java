@@ -28,6 +28,7 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -166,7 +167,11 @@ public final class ModelcheckingView extends ScrollPane {
 			TableCell<ModelCheckingJobItem, String> cell = new TableCell<>();
 			cell.itemProperty().addListener((obs, old, newVal) -> {
 				if (newVal != null) {
-					Node box = buildMessageCell(newVal, cell.getTableRow());
+					TableRow<ModelCheckingJobItem> row = cell.getTableRow();
+					BooleanBinding buttonBinding = Bindings.createBooleanBinding(
+						() -> !row.isEmpty() && !(row.getItem() == null) && !(row.getItem().getStats() == null) && row.getItem().getResult() instanceof ITraceDescription,
+						row.emptyProperty(), row.itemProperty());
+					Node box = buildMessageCell(newVal, buttonBinding);
 					cell.graphicProperty().bind(Bindings.when(cell.emptyProperty()).then((Node) null).otherwise(box));
 				}
 			});
@@ -213,7 +218,7 @@ public final class ModelcheckingView extends ScrollPane {
 		});
 	}
 
-	private Node buildMessageCell(String text, TableRow<ModelCheckingJobItem> row){
+	private Node buildMessageCell(String text, BooleanBinding buttonBinding){
 		HBox container = new HBox();
 		container.setAlignment(Pos.CENTER_LEFT);
 		container.getChildren().add(new Label(text));
@@ -226,9 +231,7 @@ public final class ModelcheckingView extends ScrollPane {
 			injector.getInstance(CurrentTrace.class).set(item.getTrace());
 		});
 
-		button.visibleProperty().bind(Bindings.createBooleanBinding(
-			() -> !row.isEmpty() && !(row.getItem() == null) && !(row.getItem().getStats() == null) && row.getItem().getResult() instanceof ITraceDescription,
-			row.emptyProperty(), row.itemProperty()));
+		button.managedProperty().bind(buttonBinding);
 
 		container.getChildren().add(button);
 		return container;
