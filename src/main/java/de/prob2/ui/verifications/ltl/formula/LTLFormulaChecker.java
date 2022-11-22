@@ -123,9 +123,17 @@ public class LTLFormulaChecker {
 		}
 		
 		if (result instanceof LTLOk) {
-			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.ltl.result.succeeded.message"));
+			if(item.getExpectedResult()) {
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.ltl.result.succeeded.message"));
+			} else {
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.ltl.result.counterExampleFound.message"));
+			}
 		} else if (result instanceof LTLCounterExample) {
-			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.ltl.result.counterExampleFound.message"));
+			if(item.getExpectedResult()) {
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.ltl.result.counterExampleFound.message"));
+			} else {
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.ltl.result.succeeded.message"));
+			}
 		} else if (result instanceof LTLNotYetFinished || result instanceof CheckInterrupted) {
 			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage()));
 		} else {
