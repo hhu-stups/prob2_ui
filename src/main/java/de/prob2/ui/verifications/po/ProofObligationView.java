@@ -3,7 +3,6 @@ package de.prob2.ui.verifications.po;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.model.eventb.EventBModel;
-import de.prob.model.eventb.EventBPackageModel;
 import de.prob.model.eventb.ProofObligation;
 import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.FXMLInjected;
@@ -40,6 +39,8 @@ public class ProofObligationView extends AnchorPane {
 
 	private final I18n i18n;
 
+	private final POManager poManager;
+
 	@FXML
 	private TableView<ProofObligationItem> tvProofObligations;
 
@@ -58,6 +59,7 @@ public class ProofObligationView extends AnchorPane {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.i18n = i18n;
+		this.poManager = new POManager();
 		stageManager.loadFXML(this, "po_view.fxml");
 	}
 
@@ -69,6 +71,7 @@ public class ProofObligationView extends AnchorPane {
 		poColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		poDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
+		tvProofObligations.itemsProperty().bind(poManager.proofObligationsProperty());
 		currentTrace.addListener((observable, from, to) -> {
 			tvProofObligations.getItems().clear();
 			AbstractModel model = currentTrace.getModel();
@@ -82,8 +85,7 @@ public class ProofObligationView extends AnchorPane {
 				}
 				List<ProofObligation> pos = ((EventBModel) model).getTopLevelMachine().getProofs();
 				List<ProofObligationItem> poItems = pos.stream().map(ProofObligationItem::new).collect(Collectors.toList());
-				tvProofObligations.getItems().addAll(poItems);
-
+				poManager.setProofObligations(poItems);
 			}
 		});
 
@@ -102,7 +104,6 @@ public class ProofObligationView extends AnchorPane {
 					final String id = idText.trim().isEmpty() ? null : idText;
 					item.setId(id);
 				});
-				tvProofObligations.refresh();
 			});
 
 			row.contextMenuProperty().bind(
