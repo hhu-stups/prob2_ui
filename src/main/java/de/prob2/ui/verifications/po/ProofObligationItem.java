@@ -2,13 +2,16 @@ package de.prob2.ui.verifications.po;
 
 import de.prob.model.eventb.ProofObligation;
 import de.prob.util.Tuple2;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.vomanager.IValidationTask;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class ProofObligationItem {
+public class ProofObligationItem extends AbstractCheckableItem implements IValidationTask {
 
 	private String id;
 	private final String name;
@@ -37,6 +40,15 @@ public class ProofObligationItem {
 
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public String getTaskDescription(I18n i18n) {
+		if (this.getDescription().isEmpty()) {
+			return this.getName();
+		} else {
+			return this.getName() + " // " + getDescription();
+		}
 	}
 
 	public void setId(String id) {
