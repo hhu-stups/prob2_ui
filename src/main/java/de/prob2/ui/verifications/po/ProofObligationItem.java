@@ -21,7 +21,7 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 	private final boolean discharged;
 
 	public ProofObligationItem(final String name, final String description, final String sourceName, boolean discharged, List<Tuple2<String, String>> content) {
-		this.id = null;
+		this.id = "";
 		this.name = name;
 		this.description = description;
 		this.sourceName = sourceName;
@@ -30,7 +30,7 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
-		this.id = null;
+		this.id = "";
 		this.name = proofObligation.getName();
 		this.description = proofObligation.getDescription();
 		this.sourceName = proofObligation.getSourceName();
@@ -42,6 +42,10 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 		return id;
 	}
 
+	public void setId(String id) {
+		this.id = id;
+	}
+
 	@Override
 	public String getTaskDescription(I18n i18n) {
 		if (this.getDescription().isEmpty()) {
@@ -49,10 +53,6 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 		} else {
 			return this.getName() + " // " + getDescription();
 		}
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public String getName() {
@@ -74,6 +74,7 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", ProofObligationItem.class.getSimpleName() + "[", "]")
+				.add("id='" + id + "'")
 				.add("name='" + name + "'")
 				.add("description='" + description + "'")
 				.add("sourceName='" + sourceName + "'")
@@ -86,11 +87,11 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ProofObligationItem that = (ProofObligationItem) o;
-		return discharged == that.discharged && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(sourceName, that.sourceName);
+		return id.equals(that.id) && discharged == that.discharged && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(sourceName, that.sourceName);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, description, sourceName, discharged);
+		return Objects.hash(id, name, description, sourceName, discharged);
 	}
 }
