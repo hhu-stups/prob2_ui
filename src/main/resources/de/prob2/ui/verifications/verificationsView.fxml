@@ -20,7 +20,7 @@
 		<Tab fx:id="tabSymbolic" id="symbolic" text="%verifications.verificationsView.tabs.symbolic">
 			<SymbolicCheckingView />
 		</Tab>
-		<Tab fx:id="tabPO" id="po" text="Proof Obligations">
+		<Tab fx:id="tabPO" id="po" text="%verifications.po.poView.name">
 			<ProofObligationView />
 		</Tab>
 	</BetterTabPane>
