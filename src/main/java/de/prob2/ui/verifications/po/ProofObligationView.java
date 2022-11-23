@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.po;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.model.eventb.EventBModel;
+import de.prob.model.eventb.EventBPackageModel;
 import de.prob.model.eventb.ProofObligation;
 import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.FXMLInjected;
@@ -75,12 +76,14 @@ public class ProofObligationView extends AnchorPane {
 				return;
 			}
 			if (model instanceof EventBModel) {
+				// TODO: Does not yet work with .eventb files
 				if(((EventBModel) model).getTopLevelMachine() == null) {
 					return;
 				}
 				List<ProofObligation> pos = ((EventBModel) model).getTopLevelMachine().getProofs();
 				List<ProofObligationItem> poItems = pos.stream().map(ProofObligationItem::new).collect(Collectors.toList());
 				tvProofObligations.getItems().addAll(poItems);
+
 			}
 		});
 
