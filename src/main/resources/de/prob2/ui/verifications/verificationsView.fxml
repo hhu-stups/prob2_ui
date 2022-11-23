@@ -4,6 +4,7 @@
 <?import de.prob2.ui.verifications.ltl.LTLView?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
+<?import de.prob2.ui.verifications.po.ProofObligationView?>
 <?import de.prob2.ui.verifications.VerificationsView?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -18,6 +19,9 @@
 		</Tab>
 		<Tab fx:id="tabSymbolic" id="symbolic" text="%verifications.verificationsView.tabs.symbolic">
 			<SymbolicCheckingView />
+		</Tab>
+		<Tab fx:id="tabPO" id="po" text="Proof Obligations">
+			<ProofObligationView />
 		</Tab>
 	</BetterTabPane>
 </fx:root>
