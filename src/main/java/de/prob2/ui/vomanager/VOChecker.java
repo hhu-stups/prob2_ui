@@ -1,7 +1,9 @@
 package de.prob2.ui.vomanager;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -22,6 +24,8 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
+import de.prob2.ui.verifications.po.POManager;
+import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
@@ -49,16 +53,20 @@ public class VOChecker {
 
 	private final SimulationItemHandler simulationItemHandler;
 
+	private final POManager poManager;
+
 	@Inject
 	public VOChecker(final CurrentProject currentProject, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
-					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
+					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler,
+					 final POManager poManager) {
 		this.currentProject = currentProject;
 		this.modelchecker = modelchecker;
 		this.ltlChecker = ltlChecker;
 		this.symbolicChecker = symbolicChecker;
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
+		this.poManager = poManager;
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateOnMachine(to));
 		updateOnMachine(currentProject.getCurrentMachine());
@@ -89,12 +97,22 @@ public class VOChecker {
 	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
 		final VOParser voParser = new VOParser();
 		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
+		poManager.getProofObligations().stream()
+				.filter(po -> po.getId() != null)
+				.forEach(po -> voParser.registerTask(po.getId(), extractType(po)));
 		try {
 			final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
 			expression.getAllTasks().forEach(taskExpr -> {
 				IValidationTask validationTask;
 				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
 					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
+				} else if(poManager.getProofObligations().stream()
+						.map(ProofObligationItem::getId)
+						.filter(Objects::nonNull).anyMatch(id -> id.equals(taskExpr.getIdentifier()))) {
+					validationTask = poManager.getProofObligations().stream()
+							.filter(po -> po.getId() != null)
+							.filter(po -> po.getId().equals(taskExpr.getIdentifier()))
+							.collect(Collectors.toList()).get(0);
 				} else {
 					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
 				}
@@ -129,6 +147,8 @@ public class VOChecker {
 			// Otherwise invariant/deadlock checking, or just covering state space
 			return VTType.EXPLORE;
 		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
+			return VTType.STATIC;
+		} else if(validationTask instanceof ProofObligationItem) {
 			return VTType.STATIC;
 		}
 		return null;

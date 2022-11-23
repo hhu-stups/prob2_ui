@@ -54,12 +54,13 @@ public class ProofObligationView extends AnchorPane {
 	private TableColumn<ProofObligationItem, String> poDescriptionColumn;
 
 	@Inject
-	private ProofObligationView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final I18n i18n) {
+	private ProofObligationView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final I18n i18n,
+								final POManager poManager) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.i18n = i18n;
-		this.poManager = new POManager();
+		this.poManager = poManager;
 		stageManager.loadFXML(this, "po_view.fxml");
 	}
 
@@ -72,6 +73,14 @@ public class ProofObligationView extends AnchorPane {
 		poDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		tvProofObligations.itemsProperty().bind(poManager.proofObligationsProperty());
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if(from != null) {
+				from.removeValidationTaskListener(poManager.proofObligationsProperty());
+			}
+			if(to != null) {
+				to.addValidationTaskListener(poManager.proofObligationsProperty());
+			}
+		});
 		currentTrace.addListener((observable, from, to) -> {
 			tvProofObligations.getItems().clear();
 			AbstractModel model = currentTrace.getModel();
@@ -104,6 +113,7 @@ public class ProofObligationView extends AnchorPane {
 					final String id = idText.trim().isEmpty() ? null : idText;
 					item.setId(id);
 				});
+				tvProofObligations.refresh();
 			});
 
 			row.contextMenuProperty().bind(

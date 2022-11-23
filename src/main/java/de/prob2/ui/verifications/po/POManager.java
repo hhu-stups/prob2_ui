@@ -19,7 +19,8 @@ public class POManager {
 	}
 
 	public void setProofObligations(List<ProofObligationItem> proofObligations) {
-		this.proofObligations.setAll(proofObligations);
+		this.proofObligations.clear();
+		this.proofObligations.addAll(proofObligations);
 	}
 
 	public ListProperty<ProofObligationItem> proofObligationsProperty() {

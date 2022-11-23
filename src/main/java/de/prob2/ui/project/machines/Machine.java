@@ -231,7 +231,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		updateListener.invalidated(null);
 	}
 	
-	private void addValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
+	public void addValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
 		tasks.addListener(this.validationTaskListener);
 		for (final IValidationTask task : tasks) {
 			if (task.getId() != null) {
@@ -240,7 +240,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		}
 	}
 	
-	private void removeValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
+	public void removeValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
 		tasks.removeListener(this.validationTaskListener);
 		for (final IValidationTask task : tasks) {
 			if (task.getId() != null) {

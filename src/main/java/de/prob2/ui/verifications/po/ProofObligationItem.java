@@ -21,7 +21,7 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 	private final boolean discharged;
 
 	public ProofObligationItem(final String name, final String description, final String sourceName, boolean discharged, List<Tuple2<String, String>> content) {
-		this.id = "";
+		this.id = null;
 		this.name = name;
 		this.description = description;
 		this.sourceName = sourceName;
@@ -30,7 +30,7 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
-		this.id = "";
+		this.id = null;
 		this.name = proofObligation.getName();
 		this.description = proofObligation.getDescription();
 		this.sourceName = proofObligation.getSourceName();
