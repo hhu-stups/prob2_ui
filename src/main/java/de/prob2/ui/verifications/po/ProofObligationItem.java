@@ -5,6 +5,7 @@ import de.prob.util.Tuple2;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import java.util.List;
@@ -18,7 +19,6 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 	private final String description;
 	private final String sourceName;
 	private final boolean discharged;
-	private final Checked checked;
 
 	public ProofObligationItem(final String name, final String description, final String sourceName, boolean discharged, List<Tuple2<String, String>> content) {
 		this.id = null;
@@ -26,7 +26,7 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 		this.description = description;
 		this.sourceName = sourceName;
 		this.discharged = discharged;
-		this.checked = discharged ? Checked.SUCCESS : Checked.UNKNOWN;
+		this.setResultItem(new CheckingResultItem(discharged ? Checked.SUCCESS : Checked.UNKNOWN, ""));
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
@@ -35,7 +35,7 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 		this.description = proofObligation.getDescription();
 		this.sourceName = proofObligation.getSourceName();
 		this.discharged = proofObligation.isDischarged();
-		this.checked = proofObligation.isDischarged() ? Checked.SUCCESS : Checked.UNKNOWN;
+		this.setResultItem(new CheckingResultItem(discharged ? Checked.SUCCESS : Checked.UNKNOWN, ""));
 	}
 
 	public String getId() {
@@ -69,10 +69,6 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 
 	public String getDescription() {
 		return description;
-	}
-
-	public Checked getChecked() {
-		return checked;
 	}
 
 	@Override
