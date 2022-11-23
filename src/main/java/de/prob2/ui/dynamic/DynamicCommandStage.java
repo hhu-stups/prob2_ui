@@ -11,6 +11,7 @@ import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.I18n;
@@ -20,6 +21,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
@@ -27,6 +30,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -55,11 +59,72 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 		}
 	}
+
+	private static final class DynamicCommandFormulaCell extends ListCell<String> {
+		private final StringProperty code;
+
+		private DynamicCommandFormulaCell() {
+			super();
+
+			this.code = new SimpleStringProperty(this, "code", null);
+			this.textProperty().bind(this.code);
+		}
+
+		@Override
+		protected void updateItem(final String item, final boolean empty) {
+			super.updateItem(item, empty);
+
+			this.code.set(item == null || empty ? null : item);
+		}
+
+		@Override
+		public void startEdit() {
+			super.startEdit();
+
+			if (!this.isEditing()) {
+				return;
+			}
+
+			final TextField textField = new TextField(this.getText());
+			textField.setOnAction(event -> {
+				textField.getStyleClass().remove("text-field-error");
+				this.commitEdit(textField.getText());
+			});
+			textField.setOnKeyPressed(event -> {
+				if (KeyCode.ESCAPE.equals(event.getCode())) {
+					this.cancelEdit();
+				}
+			});
+			textField.textProperty().addListener(observable -> textField.getStyleClass().remove("text-field-error"));
+
+			this.textProperty().unbind();
+			this.setText(null);
+			this.setGraphic(textField);
+			textField.requestFocus();
+		}
+
+		@Override
+		public void commitEdit(final String newValue) {
+			super.commitEdit(newValue);
+			this.textProperty().bind(this.code);
+			this.setGraphic(null);
+		}
+
+		@Override
+		public void cancelEdit() {
+			super.cancelEdit();
+			this.textProperty().bind(this.code);
+			this.setGraphic(null);
+		}
+	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
 	@FXML
 	protected ListView<T> lvChoice;
+
+	@FXML
+	protected ListView<String> lvFormula;
 
 	@FXML
 	protected ExtendedCodeArea taFormula;
@@ -129,6 +194,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.updatePlaceholderLabel();
 			if (to == null || currentTrace.get() == null || !this.isShowing()) {
+				lvFormula.setVisible(false);
 				return;
 			}
 			if (!to.isAvailable()) {
@@ -138,6 +204,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
+			lvFormula.setVisible(needFormula);
 			// Update the visualization automatically if possible.
 			// If the command selection changed and the new command requires a formula,
 			// clear the visualization and wait for the user to input one.
@@ -174,6 +241,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 		});
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell<>());
+		lvFormula.setCellFactory(view -> new DynamicCommandFormulaCell());
 		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
 		editPreferencesButton.disableProperty().bind(Bindings.createBooleanBinding(() -> {
 			final T item = lvChoice.getSelectionModel().getSelectedItem();
@@ -332,5 +400,17 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 
 	public void selectCommand(final String command) {
 		this.selectCommand(command, null);
+	}
+
+
+	@FXML
+	private void handleAddFormula() {
+		this.lvFormula.getItems().add("New Formula");
+		this.lvFormula.edit(this.lvFormula.getItems().size() - 1);
+	}
+
+	@FXML
+	private void handleRemoveFormula() {
+		this.lvFormula.getItems().remove(this.lvFormula.getSelectionModel().getSelectedIndex());
 	}
 }
