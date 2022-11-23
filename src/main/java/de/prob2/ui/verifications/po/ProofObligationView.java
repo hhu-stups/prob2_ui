@@ -11,7 +11,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -38,6 +37,8 @@ public class ProofObligationView extends AnchorPane {
 	private TableColumn<ProofObligationItem, String> poIdColumn;
 	@FXML
 	private TableColumn<ProofObligationItem, String> poColumn;
+	@FXML
+	private TableColumn<ProofObligationItem, String> poDescriptionColumn;
 
 	@Inject
 	private ProofObligationView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace) {
@@ -52,6 +53,7 @@ public class ProofObligationView extends AnchorPane {
 		poStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		poIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		poColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
+		poDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		currentTrace.addListener((observable, from, to) -> {
 			tvProofObligations.getItems().clear();

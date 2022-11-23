@@ -16,7 +16,6 @@ public class ProofObligationItem {
 	private final String sourceName;
 	private final boolean discharged;
 	private final Checked checked;
-	private final List<Tuple2<String, String>> content;
 
 	public ProofObligationItem(final String name, final String description, final String sourceName, boolean discharged, List<Tuple2<String, String>> content) {
 		this.id = null;
@@ -25,7 +24,6 @@ public class ProofObligationItem {
 		this.sourceName = sourceName;
 		this.discharged = discharged;
 		this.checked = discharged ? Checked.SUCCESS : Checked.UNKNOWN;
-		this.content = content;
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
@@ -35,7 +33,6 @@ public class ProofObligationItem {
 		this.sourceName = proofObligation.getSourceName();
 		this.discharged = proofObligation.isDischarged();
 		this.checked = proofObligation.isDischarged() ? Checked.SUCCESS : Checked.UNKNOWN;
-		this.content = null;
 	}
 
 	public String getId() {
@@ -66,10 +63,6 @@ public class ProofObligationItem {
 		return checked;
 	}
 
-	public List<Tuple2<String, String>> getContent() {
-		return content;
-	}
-
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", ProofObligationItem.class.getSimpleName() + "[", "]")
@@ -77,7 +70,6 @@ public class ProofObligationItem {
 				.add("description='" + description + "'")
 				.add("sourceName='" + sourceName + "'")
 				.add("discharged=" + discharged)
-				.add("content=" + content)
 				.toString();
 	}
 
@@ -86,11 +78,11 @@ public class ProofObligationItem {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		ProofObligationItem that = (ProofObligationItem) o;
-		return discharged == that.discharged && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(sourceName, that.sourceName) && Objects.equals(content, that.content);
+		return discharged == that.discharged && Objects.equals(name, that.name) && Objects.equals(description, that.description) && Objects.equals(sourceName, that.sourceName);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, description, sourceName, discharged, content);
+		return Objects.hash(name, description, sourceName, discharged);
 	}
 }
