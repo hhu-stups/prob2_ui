@@ -197,7 +197,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				taErrors.clear();
 				errorsView.setVisible(false);
 				dotView.setVisible(true);
-				taFormula.getErrors().clear();
 			}
 		});
 	}

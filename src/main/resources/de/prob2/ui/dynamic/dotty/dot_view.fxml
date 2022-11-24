@@ -52,6 +52,11 @@
 									<Label text="%common.noModelLoaded"/>
 								</placeholder>
 							</ListView>
+
+							<HBox alignment="CENTER" VBox.vgrow="NEVER">
+								<Label fx:id="lbDescription" prefHeight="200.0" wrapText="true" VBox.vgrow="ALWAYS"/>
+							</HBox>
+
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
 								<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />
 								<Button fx:id="saveButton" onAction="#save" HBox.hgrow="NEVER">
@@ -64,21 +69,21 @@
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
+								<Button fx:id="addButton" onAction="#handleAddFormula">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
+								<Button fx:id="removeButton" onAction="#handleRemoveFormula">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
-							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
-								<Label fx:id="lbDescription" prefHeight="100.0" wrapText="true" VBox.vgrow="ALWAYS"/>
-								<VBox spacing="10.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-									<padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
-									<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
-									<VirtualizedScrollPane fx:id="virtualizedScrollPane">
-										<content>
-											<ExtendedCodeArea fx:id="taFormula" VBox.vgrow="ALWAYS"/>
-										</content>
-									</VirtualizedScrollPane>
-									<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%dynamic.evaluateFormula" onAction="#evaluateFormula"/>
-								</VBox>
-							</VBox>
+
+							<ListView fx:id="lvFormula" minHeight="200.0" VBox.vgrow="ALWAYS"/>
+
 						</VBox>
 						<VBox>
 							<HBox alignment="TOP_RIGHT" styleClass="border">
