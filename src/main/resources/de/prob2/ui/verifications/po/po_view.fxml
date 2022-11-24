@@ -22,7 +22,7 @@
 						</columnResizePolicy>
 						<columns>
 							<TableColumn fx:id="poStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-							<TableColumn fx:id="poIdColumn" minWidth="50.0" maxWidth="100.0" text="%verifications.common.columns.id" />
+							<TableColumn fx:id="poIdColumn" minWidth="80.0" maxWidth="150.0" text="%verifications.common.columns.id" />
 							<TableColumn fx:id="poColumn" minWidth="80.0" text="%verifications.po.poView.name" />
 							<TableColumn fx:id="poDescriptionColumn" minWidth="80.0" text="%verifications.common.columns.description" />
 						</columns>
