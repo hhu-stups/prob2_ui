@@ -101,7 +101,7 @@ public class ProofObligationView extends AnchorPane {
 
 		this.tvProofObligations.setRowFactory(param -> {
 			final TableRow<ProofObligationItem> row = new TableRow<>();
-			MenuItem editItem = new MenuItem("Edit validation task ID");
+			MenuItem editItem = new MenuItem(i18n.translate("verifications.po.poView.contextMenu.editId"));
 			editItem.setOnAction(event -> {
 				ProofObligationItem item = row.getItem();
 				final TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
