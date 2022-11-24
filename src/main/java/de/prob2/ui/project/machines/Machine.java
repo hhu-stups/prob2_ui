@@ -27,6 +27,7 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.INameable;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -65,6 +66,7 @@ import javafx.collections.ObservableMap;
 	"testCases",
 	"traces",
 	"modelcheckingItems",
+	"proofObligationItems",
 	"simulations",
 	"visBVisualisation",
 	"historyChartItems"
@@ -123,6 +125,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final ListProperty<ReplayTrace> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
+	private final ListProperty<ProofObligationItem> proofObligationItems;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
@@ -158,6 +161,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
+		this.proofObligationItems = new SimpleListProperty<>(this, "proofObligationItems", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
@@ -261,6 +265,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
+		this.proofObligationItemsProperty().addListener(changedListener);
 		this.simulationsProperty().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.historyChartItemsProperty().addListener(changedListener);
@@ -275,6 +280,8 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.addValidationTaskListener(this.symbolicCheckingFormulasProperty());
 		this.addValidationTaskListener(this.tracesProperty());
 		this.addValidationTaskListener(this.modelcheckingItemsProperty());
+		this.addValidationTaskListener(this.proofObligationItemsProperty());
+
 		this.simulationsProperty().addListener((ListChangeListener<SimulationModel>)change -> {
 			while (change.next()) {
 				for (final SimulationModel simulationModel : change.getRemoved()) {
@@ -500,7 +507,20 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private void setModelcheckingItems(final List<ModelCheckingItem> modelcheckingItems) {
 		this.modelcheckingItemsProperty().setAll(modelcheckingItems);
 	}
-	
+
+	public ListProperty<ProofObligationItem> proofObligationItemsProperty() {
+		return proofObligationItems;
+	}
+
+	public List<ProofObligationItem> getProofObligationItems() {
+		return proofObligationItems.get();
+	}
+
+	@JsonProperty
+	private void setProofObligationItems(final List<ProofObligationItem> proofObligationItems) {
+		this.proofObligationItemsProperty().setAll(proofObligationItems);
+	}
+
 	public ListProperty<ReplayTrace> tracesProperty() {
 		return this.traces;
 	}

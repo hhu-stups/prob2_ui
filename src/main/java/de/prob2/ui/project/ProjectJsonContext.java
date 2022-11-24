@@ -779,6 +779,12 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			formula.put("expectedResult", "true");
 		}
 	}
+
+	private static void updateV32Machine(final ObjectNode machine) {
+		if(!machine.has("proofObligationItems")) {
+			machine.set("proofObligationItems", machine.arrayNode());
+		}
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -899,6 +905,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			final ObjectNode machine = checkObject(machineNode);
 			if (oldVersion <= 31) {
 				updateV31Machine(machine);
+			}
+			if (oldVersion <= 32) {
+				updateV32Machine(machine);
 			}
 		});
 		

@@ -20,8 +20,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
-import de.prob2.ui.verifications.po.POManager;
-import de.prob2.ui.verifications.po.ProofObligationItem;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.ObjectProperty;
@@ -94,8 +92,6 @@ public class RequirementsEditingBox extends VBox {
 
 	private final VOErrorHandler voErrorHandler;
 
-	private final POManager poManager;
-
 	private VOManagerStage voManagerStage;
 
 	private final ObservableList<String> linkedMachineNames;
@@ -103,14 +99,12 @@ public class RequirementsEditingBox extends VBox {
 	private final ObjectProperty<Requirement> oldRequirement;
 
 	@Inject
-	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOChecker voChecker, final VOErrorHandler voErrorHandler,
-								  final POManager poManager) {
+	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOChecker voChecker, final VOErrorHandler voErrorHandler) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.voChecker = voChecker;
 		this.voErrorHandler = voErrorHandler;
-		this.poManager = poManager;
 
 		this.linkedMachineNames = FXCollections.observableArrayList();
 		this.oldRequirement = new SimpleObjectProperty<>(this, "oldRequirement", null);
@@ -172,10 +166,6 @@ public class RequirementsEditingBox extends VBox {
 				} else {
 					final Machine machine = currentProject.get().getMachine(to.getMachine());
 					final List<String> vtIds = new ArrayList<>(machine.getValidationTasks().keySet());
-					vtIds.addAll(poManager.getProofObligations().stream()
-							.map(ProofObligationItem::getId)
-							.filter(Objects::nonNull)
-							.collect(Collectors.toList()));
 					vtIds.sort(VT_ID_COMPARATOR);
 					cell.getItems().setAll(vtIds);
 				}

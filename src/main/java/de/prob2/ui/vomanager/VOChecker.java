@@ -97,19 +97,17 @@ public class VOChecker {
 	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
 		final VOParser voParser = new VOParser();
 		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
-		poManager.getProofObligations().stream()
-				.filter(po -> po.getId() != null)
-				.forEach(po -> voParser.registerTask(po.getId(), extractType(po)));
 		try {
 			final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
 			expression.getAllTasks().forEach(taskExpr -> {
 				IValidationTask validationTask;
 				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
 					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
-				} else if(poManager.getProofObligations().stream()
+				} else if(machine.getProofObligationItems().stream()
 						.map(ProofObligationItem::getId)
-						.filter(Objects::nonNull).anyMatch(id -> id.equals(taskExpr.getIdentifier()))) {
-					validationTask = poManager.getProofObligations().stream()
+						.filter(Objects::nonNull)
+						.anyMatch(id -> id.equals(taskExpr.getIdentifier()))) {
+					validationTask = machine.getProofObligationItems().stream()
 							.filter(po -> po.getId() != null)
 							.filter(po -> po.getId().equals(taskExpr.getIdentifier()))
 							.collect(Collectors.toList()).get(0);

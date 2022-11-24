@@ -10,9 +10,12 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import javafx.beans.binding.Bindings;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -72,17 +75,7 @@ public class ProofObligationView extends AnchorPane {
 		poColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		poDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-		tvProofObligations.itemsProperty().bind(poManager.proofObligationsProperty());
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if(from != null) {
-				from.removeValidationTaskListener(poManager.proofObligationsProperty());
-			}
-			if(to != null) {
-				to.addValidationTaskListener(poManager.proofObligationsProperty());
-			}
-		});
 		currentTrace.addListener((observable, from, to) -> {
-			tvProofObligations.getItems().clear();
 			AbstractModel model = currentTrace.getModel();
 			if(model == null) {
 				return;
@@ -124,5 +117,16 @@ public class ProofObligationView extends AnchorPane {
 			return row;
 		});
 
+		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			tvProofObligations.itemsProperty().unbind();
+			if(to != null) {
+				tvProofObligations.itemsProperty().bind(to.proofObligationItemsProperty());
+			} else {
+				tvProofObligations.setItems(FXCollections.emptyObservableList());
+			}
+		};
+
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 }
