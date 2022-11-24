@@ -53,20 +53,16 @@ public class VOChecker {
 
 	private final SimulationItemHandler simulationItemHandler;
 
-	private final POManager poManager;
-
 	@Inject
 	public VOChecker(final CurrentProject currentProject, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
-					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler,
-					 final POManager poManager) {
+					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
 		this.currentProject = currentProject;
 		this.modelchecker = modelchecker;
 		this.ltlChecker = ltlChecker;
 		this.symbolicChecker = symbolicChecker;
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
-		this.poManager = poManager;
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateOnMachine(to));
 		updateOnMachine(currentProject.getCurrentMachine());

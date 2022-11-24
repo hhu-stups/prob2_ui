@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.eventb.ProofObligation;
 import de.prob.model.representation.AbstractModel;
+import de.prob.voparser.VOParser;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -13,6 +14,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.vomanager.VOChecker;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
@@ -44,6 +46,10 @@ public class ProofObligationView extends AnchorPane {
 
 	private final POManager poManager;
 
+	private final VOChecker voChecker;
+
+	private final VOParser voParser;
+
 	@FXML
 	private TableView<ProofObligationItem> tvProofObligations;
 
@@ -58,12 +64,14 @@ public class ProofObligationView extends AnchorPane {
 
 	@Inject
 	private ProofObligationView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final I18n i18n,
-								final POManager poManager) {
+								final POManager poManager, final VOChecker voChecker, final VOParser voParser) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.i18n = i18n;
 		this.poManager = poManager;
+		this.voChecker = voChecker;
+		this.voParser = voParser;
 		stageManager.loadFXML(this, "po_view.fxml");
 	}
 
@@ -104,7 +112,10 @@ public class ProofObligationView extends AnchorPane {
 				final Optional<String> res = dialog.showAndWait();
 				res.ifPresent(idText -> {
 					final String id = idText.trim().isEmpty() ? null : idText;
+					Machine machine = currentProject.getCurrentMachine();
 					item.setId(id);
+					// This is necessary to force updating ids for VO Manager
+					machine.getProofObligationItems().set(machine.getProofObligationItems().indexOf(item), item);
 				});
 				tvProofObligations.refresh();
 			});

@@ -16,8 +16,6 @@ import javafx.stage.Stage;
 
 public class VORefineDialog extends Stage {
 
-
-
 	@FXML
 	private TextArea oldVOExpression;
 

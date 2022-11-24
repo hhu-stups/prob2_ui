@@ -56,6 +56,7 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 		this.setResultItem(new CheckingResultItem(discharged ? Checked.SUCCESS : Checked.UNKNOWN, ""));
 	}
 
+	@Override
 	public String getId() {
 		return id;
 	}
