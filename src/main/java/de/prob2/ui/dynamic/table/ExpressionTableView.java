@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -33,6 +34,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 
 import de.prob2.ui.project.machines.Machine;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -48,6 +50,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
@@ -131,7 +134,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Inject
 	public ExpressionTableView(final Injector injector, final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
 	                           final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions) {
-		super(preferencesStageProvider, currentTrace, currentProject, i18n, stopActions, "Expression Table Visualizer");
+		super(preferencesStageProvider, stageManager, currentTrace, currentProject, i18n, stopActions, "Expression Table Visualizer");
 		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
@@ -159,6 +162,34 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				machine.addTableVisualizationListProperty(to.getCommand());
 			}
 			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
+		});
+
+		this.tvFormula.setRowFactory(param -> {
+			final TableRow<DynamicCommandFormulaItem> row = new TableRow<>();
+			MenuItem editItem = new MenuItem(i18n.translate("verifications.po.poView.contextMenu.editId"));
+			editItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				final TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
+				stageManager.register(dialog);
+				dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+				dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
+				dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
+				final Optional<String> res = dialog.showAndWait();
+				res.ifPresent(idText -> {
+					final String id = idText.trim().isEmpty() ? null : idText;
+					Machine machine = currentProject.getCurrentMachine();
+					item.setId(id);
+					// This is necessary to force updating ids for VO Manager
+					machine.getDotVisualizationItems().get(lastItem.getCommand()).set(machine.getDotVisualizationItems().get(lastItem.getCommand()).indexOf(item), item);
+				});
+				tvFormula.refresh();
+			});
+
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(editItem)));
+			return row;
 		});
 	}
 

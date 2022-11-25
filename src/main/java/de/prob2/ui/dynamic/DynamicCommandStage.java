@@ -2,6 +2,7 @@ package de.prob2.ui.dynamic;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.google.inject.Provider;
 
@@ -11,25 +12,33 @@ import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.po.ProofObligationItem;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Modality;
@@ -106,6 +115,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected T lastItem;
 	
 	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
+
+	protected final StageManager stageManager;
 	
 	protected final CurrentTrace currentTrace;
 	
@@ -116,8 +127,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected final BackgroundUpdater updater;
 	
 	protected DynamicCommandStage(final Provider<DynamicPreferencesStage> preferencesStageProvider,
-			final CurrentTrace currentTrace, final CurrentProject currentProject, final I18n i18n, final StopActions stopActions, final String threadName) {
+								  final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final I18n i18n, final StopActions stopActions, final String threadName) {
 		this.preferencesStageProvider = preferencesStageProvider;
+		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.i18n = i18n;
@@ -189,9 +201,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		});
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("formula"));
 
-
 		tvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> evaluateFormula());
-
 
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell<>());
 		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
