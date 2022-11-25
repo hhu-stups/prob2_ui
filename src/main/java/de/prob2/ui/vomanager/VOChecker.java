@@ -14,6 +14,7 @@ import de.prob.voparser.VOParser;
 import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
@@ -144,6 +145,8 @@ public class VOChecker {
 			return VTType.STATIC;
 		} else if(validationTask instanceof ProofObligationItem) {
 			return VTType.STATIC;
+		} else if(validationTask instanceof DynamicCommandFormulaItem) {
+			return VTType.STATE_SPACE;
 		}
 		return null;
 	}

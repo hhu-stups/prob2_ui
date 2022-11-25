@@ -32,6 +32,8 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
@@ -176,10 +178,37 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				tvFormula.refresh();
 			});
 
+			MenuItem dischargeItem = new MenuItem("Discharge VT");
+			dischargeItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "", ""));
+			});
+
+			MenuItem failItem = new MenuItem("Fail VT");
+			failItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "", ""));
+			});
+
+			MenuItem unknownItem = new MenuItem("Set VT Status to Unknown");
+			unknownItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setResultItem(new CheckingResultItem(Checked.NOT_CHECKED, "", ""));
+			});
+
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(editItem)));
+							.otherwise(new ContextMenu(editItem, dischargeItem, failItem, unknownItem)));
 			return row;
 		});
 	}
