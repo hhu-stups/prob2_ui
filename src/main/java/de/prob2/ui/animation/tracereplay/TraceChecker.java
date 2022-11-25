@@ -140,6 +140,8 @@ public class TraceChecker {
 			alert.setHistory(currentTrace.get());
 			currentTrace.set(trace);
 			alert.setErrorMessage();
+			ReplayedTraceStatusAlert newAlert = new ReplayedTraceStatusAlert(injector, replayTrace);
+			newAlert.show();
 		});
 	}
 
