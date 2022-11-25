@@ -612,6 +612,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 			collections.addAll(dotVisualizationItems.get(key));
 			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
 			map.put(key, listProperty);
+			listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
 			this.addValidationTaskListener(listProperty);
 		}
 		this.dotVisualizationItems.setValue(map);
@@ -639,6 +640,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 	public void addDotVisualizationListProperty(String commandType) {
 		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
 		dotVisualizationItems.put(commandType, listProperty);
+		listProperty.addListener((InvalidationListener) o -> this.changed.set(true));
 		this.addValidationTaskListener(listProperty);
 	}
 
@@ -659,6 +661,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 			collections.addAll(tableVisualizationItems.get(key));
 			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
 			map.put(key, listProperty);
+			listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
 			this.addValidationTaskListener(listProperty);
 		}
 		this.tableVisualizationItems.setValue(map);
@@ -686,6 +689,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 	public void addTableVisualizationListProperty(String commandType) {
 		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
 		tableVisualizationItems.put(commandType, listProperty);
+		listProperty.addListener((InvalidationListener) o -> this.changed.set(true));
 		this.addValidationTaskListener(listProperty);
 	}
 

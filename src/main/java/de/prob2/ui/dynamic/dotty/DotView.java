@@ -145,7 +145,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 			}
 			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getDotVisualizationItems();
 			if(!items.containsKey(to.getCommand())) {
-				machine.addTableVisualizationListProperty(to.getCommand());
+				machine.addDotVisualizationListProperty(to.getCommand());
 			}
 			lvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});
