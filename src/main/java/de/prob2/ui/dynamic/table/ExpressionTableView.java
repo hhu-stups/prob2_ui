@@ -156,7 +156,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			}
 			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getTableVisualizationItems();
 			if(!items.containsKey(to.getCommand())) {
-				items.put(to.getCommand(), new SimpleListProperty<>());
+				machine.addTableVisualizationListProperty(to.getCommand());
 			}
 			lvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});

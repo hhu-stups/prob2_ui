@@ -278,6 +278,8 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.simulationsProperty().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.historyChartItemsProperty().addListener(changedListener);
+		this.dotVisualizationItemsProperty().addListener(changedListener);
+		this.tableVisualizationItemsProperty().addListener(changedListener);
 
 		addCheckingStatusListener(this.ltlFormulasProperty(), this.ltlStatusProperty());
 		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolicCheckingStatusProperty());
@@ -301,6 +303,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 				}
 			}
 		});
+
 	}
 	
 	public BooleanProperty changedProperty() {
@@ -607,7 +610,9 @@ public class Machine implements DescriptionView.Describable, INameable {
 		for(String key : dotVisualizationItems.keySet()) {
 			ObservableList<DynamicCommandFormulaItem> collections = FXCollections.observableArrayList();
 			collections.addAll(dotVisualizationItems.get(key));
-			map.put(key, new SimpleListProperty<>(collections));
+			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
+			map.put(key, listProperty);
+			this.addValidationTaskListener(listProperty);
 		}
 		this.dotVisualizationItems.setValue(map);
 	}
@@ -615,7 +620,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 	public void addDotVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
 		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getDotVisualizationItems();
 		if(!map.containsKey(commandType)) {
-			map.put(commandType, new SimpleListProperty<>(FXCollections.observableArrayList()));
+			addDotVisualizationListProperty(commandType);
 		}
 		map.get(commandType).add(formula);
 	}
@@ -625,13 +630,20 @@ public class Machine implements DescriptionView.Describable, INameable {
 		if(map.containsKey(commandType)) {
 			map.get(commandType).remove(formula);
 			if(map.get(commandType).isEmpty()) {
+				this.removeValidationTaskListener(map.get(commandType));
 				map.remove(commandType);
 			}
 		}
 	}
 
+	public void addDotVisualizationListProperty(String commandType) {
+		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
+		dotVisualizationItems.put(commandType, listProperty);
+		this.addValidationTaskListener(listProperty);
+	}
 
-	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> tableVisualizationItems() {
+
+	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> tableVisualizationItemsProperty() {
 		return tableVisualizationItems;
 	}
 
@@ -645,7 +657,9 @@ public class Machine implements DescriptionView.Describable, INameable {
 		for(String key : tableVisualizationItems.keySet()) {
 			ObservableList<DynamicCommandFormulaItem> collections = FXCollections.observableArrayList();
 			collections.addAll(tableVisualizationItems.get(key));
-			map.put(key, new SimpleListProperty<>(collections));
+			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
+			map.put(key, listProperty);
+			this.addValidationTaskListener(listProperty);
 		}
 		this.tableVisualizationItems.setValue(map);
 	}
@@ -653,7 +667,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 	public void addTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
 		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getTableVisualizationItems();
 		if(!map.containsKey(commandType)) {
-			map.put(commandType, new SimpleListProperty<>(FXCollections.observableArrayList()));
+			addTableVisualizationListProperty(commandType);
 		}
 		map.get(commandType).add(formula);
 	}
@@ -663,9 +677,16 @@ public class Machine implements DescriptionView.Describable, INameable {
 		if(map.containsKey(commandType)) {
 			map.get(commandType).remove(formula);
 			if(map.get(commandType).isEmpty()) {
+				this.removeValidationTaskListener(map.get(commandType));
 				map.remove(commandType);
 			}
 		}
+	}
+
+	public void addTableVisualizationListProperty(String commandType) {
+		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
+		tableVisualizationItems.put(commandType, listProperty);
+		this.addValidationTaskListener(listProperty);
 	}
 
 	public PatternManager getPatternManager() {
