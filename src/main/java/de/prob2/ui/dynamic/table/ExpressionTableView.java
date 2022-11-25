@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -19,6 +20,7 @@ import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.statespace.State;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -29,9 +31,12 @@ import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import de.prob2.ui.project.machines.Machine;
 import javafx.application.Platform;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -117,7 +122,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 
 	private final FileChooserManager fileChooserManager;
 
-	private ObjectProperty<TableData> currentTable;
+	private final ObjectProperty<TableData> currentTable;
 
 	// Store header globally so that ValueItemRow always use the current header
 	private List<String> header;
@@ -143,6 +148,18 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			}
 		});
 		saveButton.disableProperty().bind(currentTable.isNull());
+
+		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			Machine machine = currentProject.getCurrentMachine();
+			if(machine == null || to == null) {
+				return;
+			}
+			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getTableVisualizationItems();
+			if(!items.containsKey(to.getCommand())) {
+				items.put(to.getCommand(), new SimpleListProperty<>());
+			}
+			lvFormula.itemsProperty().bind(items.get(to.getCommand()));
+		});
 	}
 
 	@Override
@@ -311,5 +328,20 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		tableView.getColumns().clear();
 		tableView.setVisible(false);
 		placeholderLabel.setVisible(true);
+	}
+
+	@Override
+	protected void addFormula() {
+		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
+		Machine machine = currentProject.getCurrentMachine();
+		machine.addTableVisualizationItem(lastItem.getCommand(), formulaItem);
+		this.lvFormula.edit(this.lvFormula.getItems().size() - 1);
+	}
+
+	@Override
+	protected void removeFormula() {
+		DynamicCommandFormulaItem formulaItem = this.lvFormula.getItems().get(this.lvFormula.getSelectionModel().getSelectedIndex());
+		Machine machine = currentProject.getCurrentMachine();
+		machine.removeTableVisualizationItem(lastItem.getCommand(), formulaItem);
 	}
 }

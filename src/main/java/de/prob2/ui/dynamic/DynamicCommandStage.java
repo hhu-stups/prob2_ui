@@ -30,6 +30,7 @@ import javafx.scene.control.cell.TextFieldListCell;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,6 +53,41 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 		}
 	}
+
+	private static final class DynamicCommandFormulaItemCell extends TextFieldListCell<DynamicCommandFormulaItem> {
+
+		private DynamicCommandFormulaItem item;
+
+		private DynamicCommandFormulaItemCell() {
+			super();
+			this.item = null;
+			super.setConverter(new StringConverter<DynamicCommandFormulaItem>() {
+				@Override
+				public String toString(DynamicCommandFormulaItem object) {
+					if(object == null) {
+						return "";
+					}
+					return object.getFormula();
+				}
+
+				@Override
+				public DynamicCommandFormulaItem fromString(String string) {
+					if(item == null) {
+						return new DynamicCommandFormulaItem("", "", string);
+					}
+					item.setFormula(string);
+					return item;
+				}
+			});
+
+		}
+
+		@Override
+		public void updateItem(DynamicCommandFormulaItem item, boolean empty) {
+			super.updateItem(item, empty);
+			this.item = item;
+		}
+	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
@@ -59,7 +95,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected ListView<T> lvChoice;
 
 	@FXML
-	protected ListView<String> lvFormula;
+	protected ListView<DynamicCommandFormulaItem> lvFormula;
 
 	@FXML
 	protected Button evaluateFormulaButton;
@@ -166,10 +202,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
 
 		lvFormula.setEditable(true);
-		lvFormula.setCellFactory(TextFieldListCell.forListView());
-		lvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			evaluateFormula();
-		});
+		lvFormula.setCellFactory(item -> new DynamicCommandFormulaItemCell());
+		lvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> evaluateFormula());
 
 
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell<>());
@@ -180,7 +214,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
 	}
 
-	@FXML
 	private void evaluateFormula() {
 		T item = lvChoice.getSelectionModel().getSelectedItem();
 		if (item == null) {
@@ -266,13 +299,13 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.updater.execute(() -> {
 			try {
 				final Trace trace = currentTrace.get();
-				String formula = lvFormula.getSelectionModel().getSelectedItem();
-				if(trace == null || (item.getArity() > 0 && formula.isEmpty())) {
+				DynamicCommandFormulaItem formulaItem = lvFormula.getSelectionModel().getSelectedItem();
+				if(trace == null || (item.getArity() > 0 && formulaItem != null && formulaItem.getFormula().isEmpty())) {
 					return;
 				}
 				final List<IEvalElement> formulas;
-				if (item.getArity() > 0) {
-					formulas = Collections.singletonList(trace.getModel().parseFormula(formula, FormulaExpand.EXPAND));
+				if (item.getArity() > 0 && formulaItem != null) {
+					formulas = Collections.singletonList(trace.getModel().parseFormula(formulaItem.getFormula(), FormulaExpand.EXPAND));
 				} else {
 					formulas = Collections.emptyList();
 				}
@@ -333,12 +366,15 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 
 	@FXML
 	private void handleAddFormula() {
-		this.lvFormula.getItems().add("New Formula");
-		this.lvFormula.edit(this.lvFormula.getItems().size() - 1);
+		addFormula();
 	}
 
 	@FXML
 	private void handleRemoveFormula() {
-		this.lvFormula.getItems().remove(this.lvFormula.getSelectionModel().getSelectedIndex());
+		removeFormula();
 	}
+
+	protected abstract void addFormula();
+
+	protected abstract void removeFormula();
 }

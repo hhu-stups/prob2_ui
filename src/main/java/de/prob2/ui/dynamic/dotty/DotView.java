@@ -5,6 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -18,6 +19,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -28,8 +30,11 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import de.prob2.ui.project.machines.Machine;
 import javafx.application.Platform;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -132,6 +137,18 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		zoomResetMenuButton.setAccelerator(new MultiKeyCombination(zoomResetChar, zoomResetCode, zoomResetKeypad));
 		zoomInMenuButton.setAccelerator(new MultiKeyCombination(zoomInChar, zoomInCode, zoomInKeypad));
 		zoomOutMenuButton.setAccelerator(new MultiKeyCombination(zoomOutChar, zoomOutCode, zoomOutKeypad));
+
+		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			Machine machine = currentProject.getCurrentMachine();
+			if(machine == null || to == null) {
+				return;
+			}
+			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getDotVisualizationItems();
+			if(!items.containsKey(to.getCommand())) {
+				items.put(to.getCommand(), new SimpleListProperty<>());
+			}
+			lvFormula.itemsProperty().bind(items.get(to.getCommand()));
+		});
 	}
 
 	@Override
@@ -310,6 +327,21 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	public void visualizeProjection(final String formula) {
 		this.selectCommand(DotVisualizationCommand.STATE_SPACE_PROJECTION_NAME, formula);
+	}
+
+	@Override
+	protected void addFormula() {
+		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
+		Machine machine = currentProject.getCurrentMachine();
+		machine.addDotVisualizationItem(lastItem.getCommand(), formulaItem);
+		this.lvFormula.edit(this.lvFormula.getItems().size() - 1);
+	}
+
+	@Override
+	protected void removeFormula() {
+		DynamicCommandFormulaItem formulaItem = this.lvFormula.getItems().get(this.lvFormula.getSelectionModel().getSelectedIndex());
+		Machine machine = currentProject.getCurrentMachine();
+		machine.removeDotVisualizationItem(lastItem.getCommand(), formulaItem);
 	}
 
 }
