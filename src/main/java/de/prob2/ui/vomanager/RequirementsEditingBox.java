@@ -165,6 +165,9 @@ public class RequirementsEditingBox extends VBox {
 					cell.getItems().clear();
 				} else {
 					final Machine machine = currentProject.get().getMachine(to.getMachine());
+					if(machine == null){
+						return;
+					}
 					final List<String> vtIds = new ArrayList<>(machine.getValidationTasks().keySet());
 					vtIds.sort(VT_ID_COMPARATOR);
 					cell.getItems().setAll(vtIds);
