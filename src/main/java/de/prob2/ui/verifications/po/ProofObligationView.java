@@ -25,6 +25,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
@@ -46,9 +47,6 @@ public class ProofObligationView extends AnchorPane {
 
 	private final POManager poManager;
 
-	private final VOChecker voChecker;
-
-	private final VOParser voParser;
 
 	@FXML
 	private TableView<ProofObligationItem> tvProofObligations;
@@ -59,19 +57,15 @@ public class ProofObligationView extends AnchorPane {
 	private TableColumn<ProofObligationItem, String> poIdColumn;
 	@FXML
 	private TableColumn<ProofObligationItem, String> poColumn;
-	@FXML
-	private TableColumn<ProofObligationItem, String> poDescriptionColumn;
 
 	@Inject
 	private ProofObligationView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final I18n i18n,
-								final POManager poManager, final VOChecker voChecker, final VOParser voParser) {
+								final POManager poManager) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.i18n = i18n;
 		this.poManager = poManager;
-		this.voChecker = voChecker;
-		this.voParser = voParser;
 		stageManager.loadFXML(this, "po_view.fxml");
 	}
 
@@ -81,7 +75,6 @@ public class ProofObligationView extends AnchorPane {
 		poStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		poIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		poColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
-		poDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		currentTrace.addListener((observable, from, to) -> {
 			AbstractModel model = currentTrace.getModel();
@@ -120,11 +113,18 @@ public class ProofObligationView extends AnchorPane {
 				tvProofObligations.refresh();
 			});
 
+			row.itemProperty().addListener((observable, from, to) -> {
+				if(to == null) {
+					row.setTooltip(null);
+					return;
+				}
+				row.setTooltip(new Tooltip(to.getDescription()));
+			});
+
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 							.then((ContextMenu) null)
 							.otherwise(new ContextMenu(editItem)));
-
 			return row;
 		});
 
