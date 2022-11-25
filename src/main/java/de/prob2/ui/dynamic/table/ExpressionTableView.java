@@ -187,7 +187,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				tvFormula.refresh();
 			});
 
-			MenuItem dischargeItem = new MenuItem("Discharge VT");
+			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
 			dischargeItem.setOnAction(event -> {
 				DynamicCommandFormulaItem item = row.getItem();
 				if(item == null) {
@@ -196,7 +196,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "", ""));
 			});
 
-			MenuItem failItem = new MenuItem("Fail VT");
+			MenuItem failItem = new MenuItem(i18n.translate("dynamic.formulaView.fail"));
 			failItem.setOnAction(event -> {
 				DynamicCommandFormulaItem item = row.getItem();
 				if(item == null) {
@@ -205,7 +205,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				item.setResultItem(new CheckingResultItem(Checked.FAIL, "", ""));
 			});
 
-			MenuItem unknownItem = new MenuItem("Set VT Status to Unknown");
+			MenuItem unknownItem = new MenuItem(i18n.translate("dynamic.formulaView.unknown"));
 			unknownItem.setOnAction(event -> {
 				DynamicCommandFormulaItem item = row.getItem();
 				if(item == null) {
