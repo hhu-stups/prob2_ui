@@ -300,7 +300,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			try {
 				final Trace trace = currentTrace.get();
 				DynamicCommandFormulaItem formulaItem = lvFormula.getSelectionModel().getSelectedItem();
-				if(trace == null || (item.getArity() > 0 && formulaItem != null && formulaItem.getFormula().isEmpty())) {
+				if(trace == null || (item.getArity() > 0 && (formulaItem == null || formulaItem != null && formulaItem.getFormula().isEmpty()))) {
 					return;
 				}
 				final List<IEvalElement> formulas;
