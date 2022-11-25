@@ -97,7 +97,7 @@ public class ProofObligationView extends AnchorPane {
 				ProofObligationItem item = row.getItem();
 				final TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
 				stageManager.register(dialog);
-				dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+				dialog.setTitle(i18n.translate("verifications.po.poView.contextMenu.editId"));
 				dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
 				dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
 				final Optional<String> res = dialog.showAndWait();
