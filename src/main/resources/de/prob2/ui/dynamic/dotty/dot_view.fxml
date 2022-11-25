@@ -23,6 +23,8 @@
 <?import javafx.scene.web.WebView?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <fx:root type="DotView" title="%dotty.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -82,7 +84,16 @@
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 
-							<ListView fx:id="lvFormula" minHeight="200.0" VBox.vgrow="ALWAYS"/>
+							<TableView fx:id="tvFormula" minHeight="200.0" VBox.vgrow="ALWAYS">
+								<columnResizePolicy>
+									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+								</columnResizePolicy>
+								<columns>
+									<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
+									<TableColumn fx:id="idColumn" minWidth="80.0" maxWidth="150.0" text="ID" />
+									<TableColumn fx:id="formulaColumn" minWidth="80.0" text="Formula" />
+								</columns>
+							</TableView>
 
 						</VBox>
 						<VBox>

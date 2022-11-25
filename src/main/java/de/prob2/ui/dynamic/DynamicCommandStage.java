@@ -17,6 +17,8 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
@@ -25,8 +27,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
-import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -53,41 +58,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			}
 		}
 	}
-
-	private static final class DynamicCommandFormulaItemCell extends TextFieldListCell<DynamicCommandFormulaItem> {
-
-		private DynamicCommandFormulaItem item;
-
-		private DynamicCommandFormulaItemCell() {
-			super();
-			this.item = null;
-			super.setConverter(new StringConverter<DynamicCommandFormulaItem>() {
-				@Override
-				public String toString(DynamicCommandFormulaItem object) {
-					if(object == null) {
-						return "";
-					}
-					return object.getFormula();
-				}
-
-				@Override
-				public DynamicCommandFormulaItem fromString(String string) {
-					if(item == null) {
-						return new DynamicCommandFormulaItem("", "", string);
-					}
-					item.setFormula(string);
-					return item;
-				}
-			});
-
-		}
-
-		@Override
-		public void updateItem(DynamicCommandFormulaItem item, boolean empty) {
-			super.updateItem(item, empty);
-			this.item = item;
-		}
-	}
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicCommandStage.class);
 	
@@ -95,7 +65,14 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected ListView<T> lvChoice;
 
 	@FXML
-	protected ListView<DynamicCommandFormulaItem> lvFormula;
+	protected TableView<DynamicCommandFormulaItem> tvFormula;
+
+	@FXML
+	protected TableColumn<DynamicCommandFormulaItem, Checked> statusColumn;
+	@FXML
+	protected TableColumn<DynamicCommandFormulaItem, String> idColumn;
+	@FXML
+	protected TableColumn<DynamicCommandFormulaItem, String> formulaColumn;
 
 	@FXML
 	protected Button evaluateFormulaButton;
@@ -165,7 +142,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.updatePlaceholderLabel();
 			if (to == null || currentTrace.get() == null || !this.isShowing()) {
-				lvFormula.setVisible(false);
+				tvFormula.setVisible(false);
 				return;
 			}
 			if (!to.isAvailable()) {
@@ -174,7 +151,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				lbDescription.setText(to.getDescription());
 			}
 			boolean needFormula = to.getArity() > 0;
-			lvFormula.setVisible(needFormula);
+			tvFormula.setVisible(needFormula);
 			addButton.setVisible(needFormula);
 			removeButton.setVisible(needFormula);
 			// Update the visualization automatically if possible.
@@ -201,9 +178,19 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
 
-		lvFormula.setEditable(true);
-		lvFormula.setCellFactory(item -> new DynamicCommandFormulaItemCell());
-		lvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> evaluateFormula());
+		tvFormula.setEditable(true);
+		statusColumn.setCellFactory(col -> new CheckedCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+		formulaColumn.setCellFactory(TextFieldTableCell.forTableColumn());
+		formulaColumn.setOnEditCommit(e -> {
+			e.getRowValue().setFormula(e.getNewValue());
+			currentProject.getCurrentMachine().setChanged(true);
+		});
+		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("formula"));
+
+
+		tvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> evaluateFormula());
 
 
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell<>());
@@ -299,8 +286,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.updater.execute(() -> {
 			try {
 				final Trace trace = currentTrace.get();
-				DynamicCommandFormulaItem formulaItem = lvFormula.getSelectionModel().getSelectedItem();
-				if(trace == null || (item.getArity() > 0 && (formulaItem == null || formulaItem != null && formulaItem.getFormula().isEmpty()))) {
+				DynamicCommandFormulaItem formulaItem = tvFormula.getSelectionModel().getSelectedItem();
+				if(trace == null || (item.getArity() > 0 && (formulaItem == null || (formulaItem != null && formulaItem.getFormula().isEmpty())))) {
 					return;
 				}
 				final List<IEvalElement> formulas;

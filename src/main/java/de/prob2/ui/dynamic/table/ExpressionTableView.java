@@ -158,7 +158,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			if(!items.containsKey(to.getCommand())) {
 				machine.addTableVisualizationListProperty(to.getCommand());
 			}
-			lvFormula.itemsProperty().bind(items.get(to.getCommand()));
+			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});
 	}
 
@@ -335,12 +335,15 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
 		Machine machine = currentProject.getCurrentMachine();
 		machine.addTableVisualizationItem(lastItem.getCommand(), formulaItem);
-		this.lvFormula.edit(this.lvFormula.getItems().size() - 1);
+		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 	}
 
 	@Override
 	protected void removeFormula() {
-		DynamicCommandFormulaItem formulaItem = this.lvFormula.getItems().get(this.lvFormula.getSelectionModel().getSelectedIndex());
+		if(this.tvFormula.getSelectionModel().getSelectedIndex() < 0) {
+			return;
+		}
+		DynamicCommandFormulaItem formulaItem = this.tvFormula.getItems().get(this.tvFormula.getSelectionModel().getSelectedIndex());
 		Machine machine = currentProject.getCurrentMachine();
 		machine.removeTableVisualizationItem(lastItem.getCommand(), formulaItem);
 	}
