@@ -186,15 +186,11 @@ public class SimulationEventHandler {
 		activationsForOperation.add(insertionIndex, activation);
 	}
 
-	private void activateSingleOperations(String id, String opName, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
-		Set<String> activationsForOperation = simulator.getOperationToActivations().get(opName);
+	private void activateSingleOperations(String id, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
 		int evaluatedTime = activation.getTime();
 
-		for(String activationId : activationsForOperation) {
-			List<Activation> activationsForId = simulator.getConfigurationToActivation().get(activationId);
-			if(activationsForId.isEmpty()) {
-				continue;
-			}
+		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(id);
+		if(!activationsForId.isEmpty()) {
 			switch(activationKind) {
 				case SINGLE_MIN: {
 					Activation activationForId = activationsForId.get(0);
@@ -220,6 +216,7 @@ public class SimulationEventHandler {
 					break;
 			}
 		}
+
 		simulator.getConfigurationToActivation().get(id).add(activation);
 	}
 
@@ -277,7 +274,7 @@ public class SimulationEventHandler {
 			case SINGLE:
 			case SINGLE_MAX:
 			case SINGLE_MIN:
-				activateSingleOperations(id, opName, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+				activateSingleOperations(id, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
 				break;
 		}
 	}
