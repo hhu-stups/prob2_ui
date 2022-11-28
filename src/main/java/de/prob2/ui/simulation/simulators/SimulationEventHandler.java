@@ -254,8 +254,8 @@ public class SimulationEventHandler {
 
 	public void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration,
 								   List<String> parametersAsString, String parameterPredicates) {
-		List<Activation> activationsForOperation = simulator.getConfigurationToActivation().get(activationOperationConfiguration.getId());
-		if(activationsForOperation == null) {
+		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(activationOperationConfiguration.getId());
+		if(activationsForId == null) {
 			return;
 		}
 		String id = activationOperationConfiguration.getId();
@@ -269,7 +269,7 @@ public class SimulationEventHandler {
 
 		switch (activationKind) {
 			case MULTI:
-				activateMultiOperations(activationsForOperation, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+				activateMultiOperations(activationsForId, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
 				break;
 			case SINGLE:
 			case SINGLE_MAX:
