@@ -186,15 +186,11 @@ public class SimulationEventHandler {
 		activationsForOperation.add(insertionIndex, activation);
 	}
 
-	private void activateSingleOperations(String id, String opName, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
-		Set<String> activationsForOperation = simulator.getOperationToActivations().get(opName);
+	private void activateSingleOperations(String id, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
 		int evaluatedTime = activation.getTime();
 
-		for(String activationId : activationsForOperation) {
-			List<Activation> activationsForId = simulator.getConfigurationToActivation().get(activationId);
-			if(activationsForId.isEmpty()) {
-				continue;
-			}
+		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(id);
+		if(!activationsForId.isEmpty()) {
 			switch(activationKind) {
 				case SINGLE_MIN: {
 					Activation activationForId = activationsForId.get(0);
@@ -220,6 +216,7 @@ public class SimulationEventHandler {
 					break;
 			}
 		}
+
 		simulator.getConfigurationToActivation().get(id).add(activation);
 	}
 
@@ -257,8 +254,8 @@ public class SimulationEventHandler {
 
 	public void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration,
 								   List<String> parametersAsString, String parameterPredicates) {
-		List<Activation> activationsForOperation = simulator.getConfigurationToActivation().get(activationOperationConfiguration.getId());
-		if(activationsForOperation == null) {
+		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(activationOperationConfiguration.getId());
+		if(activationsForId == null) {
 			return;
 		}
 		String id = activationOperationConfiguration.getId();
@@ -272,12 +269,12 @@ public class SimulationEventHandler {
 
 		switch (activationKind) {
 			case MULTI:
-				activateMultiOperations(activationsForOperation, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+				activateMultiOperations(activationsForId, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
 				break;
 			case SINGLE:
 			case SINGLE_MAX:
 			case SINGLE_MIN:
-				activateSingleOperations(id, opName, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+				activateSingleOperations(id, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
 				break;
 		}
 	}
