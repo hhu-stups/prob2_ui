@@ -127,7 +127,7 @@ public class TraceChecker {
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
 		final Trace trace = replayTrace.getAnimatedReplayedTrace();
 		Platform.runLater(() -> {
-			// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
+			// TODO: switch this to ReplayedTraceStatusAlert once ready
 			final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()
 				.map(ErrorItem::toString)
 				.collect(Collectors.joining("\n"));
@@ -135,13 +135,12 @@ public class TraceChecker {
 
 			stageManager.register(alert);
 			alert.setLineNumber(lineNumber(replayTrace, trace.size()));
+			alert.setReplayTrace(replayTrace);
 			alert.setAttemptedReplayOrLostTrace(trace);
 			alert.setStoredTrace(replayTrace.getLoadedTrace());
 			alert.setHistory(currentTrace.get());
 			currentTrace.set(trace);
 			alert.setErrorMessage();
-			ReplayedTraceStatusAlert newAlert = new ReplayedTraceStatusAlert(injector, replayTrace);
-			newAlert.show();
 		});
 	}
 

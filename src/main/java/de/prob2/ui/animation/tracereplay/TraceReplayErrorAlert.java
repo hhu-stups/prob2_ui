@@ -18,7 +18,11 @@ import javafx.scene.text.Text;
 
 public final class TraceReplayErrorAlert extends Alert {
 	public enum Trigger {
-		TRIGGER_SAVE_TRACE, TRIGGER_TRACE_CHECKER, TRIGGER_TRACE_REPLAY_VIEW
+		TRIGGER_SAVE_TRACE,
+		@Deprecated
+		TRIGGER_TRACE_CHECKER,
+		@Deprecated
+		TRIGGER_TRACE_REPLAY_VIEW
 	}
 
 	@FXML
@@ -35,6 +39,8 @@ public final class TraceReplayErrorAlert extends Alert {
 	private int storedTraceSize = -1;
 	private int lineNumber = -1;
 	private ButtonType showTraceDiff;
+	private ButtonType showNewStatusAlert;
+	private ReplayTrace replayTrace = null;
 	private Trace attemptedReplayTrace = null;
 	private TraceJsonFile storedTrace = null;
 	private Trace history = null;
@@ -51,6 +57,10 @@ public final class TraceReplayErrorAlert extends Alert {
 	}
 
 	void setLineNumber(int lineNumber) {this.lineNumber = lineNumber;}
+
+	public void setReplayTrace(ReplayTrace replayTrace) {
+		this.replayTrace = replayTrace;
+	}
 
 	public void setAttemptedReplayOrLostTrace(Trace copyFailedTrace) {
 		this.attemptedReplayTrace = copyFailedTrace;
@@ -74,6 +84,8 @@ public final class TraceReplayErrorAlert extends Alert {
 		taError.setText(text);
 		double padding = this.getDialogPane().getPadding().getRight() + this.getDialogPane().getPadding().getLeft();
 		error.wrappingWidthProperty().bind(this.getDialogPane().widthProperty().subtract(padding));
+		this.showTraceDiff = new ButtonType(i18n.translate("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
+		this.showNewStatusAlert = new ButtonType(i18n.translate("animation.tracereplay.alerts.traceReplayError.replayStatus"));
 		setButtons();
 	}
 
@@ -89,8 +101,7 @@ public final class TraceReplayErrorAlert extends Alert {
 				this.getButtonTypes().addAll(ButtonType.YES, ButtonType.NO);
 				break;
 			case TRIGGER_TRACE_CHECKER:
-				this.showTraceDiff = new ButtonType(i18n.translate("animation.tracereplay.alerts.traceReplayError.error.traceDiff"));
-				this.getButtonTypes().addAll(this.showTraceDiff, ButtonType.CLOSE);
+				this.getButtonTypes().addAll(this.showTraceDiff, this.showNewStatusAlert, ButtonType.CLOSE);
 				break;
 			default:
 				// Trigger has not been added yet.
@@ -142,6 +153,8 @@ public final class TraceReplayErrorAlert extends Alert {
 				traceDiffStage.setLists(attemptedReplayTrace, storedTrace);
 			}
 			traceDiffStage.show();
+		} else if (type == showNewStatusAlert) {
+			new ReplayedTraceStatusAlert(injector, replayTrace).show();
 		}
 	}
 }
