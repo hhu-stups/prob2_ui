@@ -25,6 +25,7 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.UIInteraction;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -350,12 +351,15 @@ public final class OperationsView extends VBox {
 			&& item.getStatus() == OperationItem.Status.ENABLED
 			&& item.getTransition().getSource().equals(trace.getCurrentState())
 		) {
+			UIInteraction uiInteraction = injector.getInstance(UIInteraction.class);
 			Trace forward = trace.forward();
 			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
 				currentTrace.set(trace.forward());
+				uiInteraction.addUIInteraction(forward.getCurrentTransition());
 				return;
 			}
 			currentTrace.set(trace.add(item.getTransition()));
+			uiInteraction.addUIInteraction(item.getTransition());
 		}
 	}
 

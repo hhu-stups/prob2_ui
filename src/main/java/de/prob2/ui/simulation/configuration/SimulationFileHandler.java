@@ -36,8 +36,9 @@ public class SimulationFileHandler {
 			simulationFile = gson.fromJson(reader, JsonObject.class);
 		}
 		List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
+		List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
 		final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
-		return new SimulationConfiguration(activationConfigurations, metadata);
+		return new SimulationConfiguration(activationConfigurations, uiListenerConfigurations, metadata);
 	}
 
 	private static List<ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
@@ -48,6 +49,16 @@ public class SimulationFileHandler {
 			activationConfigurations.add(activationConfiguration);
 		}
 		return activationConfigurations;
+	}
+
+	private static List<UIListenerConfiguration> buildUIListenerConfigurations(JsonElement jsonElement) {
+		List<UIListenerConfiguration> uiListenerConfigurations = new ArrayList<>();
+		JsonArray uiListenerConfigurationsAsArray = jsonElement.getAsJsonArray();
+		for (JsonElement uiListenerElement : uiListenerConfigurationsAsArray) {
+			UIListenerConfiguration uiListenerConfiguration = buildUIListenerConfiguration(uiListenerElement);
+			uiListenerConfigurations.add(uiListenerConfiguration);
+		}
+		return uiListenerConfigurations;
 	}
 
 	private static ActivationChoiceConfiguration buildChoiceActivationConfiguration(JsonElement activationElement) {
@@ -158,6 +169,15 @@ public class SimulationFileHandler {
 			activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE;
 		}
 		return activationKind;
+	}
+
+	private static UIListenerConfiguration buildUIListenerConfiguration(JsonElement uiListenerElement) {
+		JsonObject uiListenerObject = uiListenerElement.getAsJsonObject();
+		String id = uiListenerObject.get("id").getAsString();
+		String event = uiListenerObject.get("event").getAsString();
+		String predicate = uiListenerObject.get("predicate") == null ? "1=1" : uiListenerObject.get("predicate").getAsString();
+		List<String> activating = buildActivation(uiListenerObject.get("activating"));
+		return new UIListenerConfiguration(id, event, predicate, activating);
 	}
 
 }

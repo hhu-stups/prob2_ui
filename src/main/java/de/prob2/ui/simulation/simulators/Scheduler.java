@@ -62,7 +62,13 @@ public class Scheduler {
 		startSimulationLoop();
 	}
 
-	private void startSimulationLoop() {
+	public void runWithoutInitialisation() {
+		runningProperty.set(true);
+		realTimeSimulator.updateDelay();
+		startSimulationLoop();
+	}
+
+	public void startSimulationLoop() {
 		TimerTask task = new TimerTask() {
 			@Override
 			public void run() {

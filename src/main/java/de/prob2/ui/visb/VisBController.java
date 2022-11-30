@@ -26,6 +26,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.UIInteraction;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
@@ -201,6 +202,10 @@ public class VisBController {
 				Trace trace = currentTrace.get().addTransitions(transitions);
 				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + event.getPredicates());
 				currentTrace.set(trace);
+				for(Transition transition : transitions) {
+					UIInteraction uiInteraction = injector.getInstance(UIInteraction.class);
+					uiInteraction.addUIInteraction(transition);
+				}
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			}
 		} catch (ExecuteOperationException e) {
