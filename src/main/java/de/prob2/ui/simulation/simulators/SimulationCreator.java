@@ -57,7 +57,7 @@ public class SimulationCreator {
 			activationConfigurations.add(activationConfig);
 			currentTimestamp = timestamps.get(i);
 		}
-		return new SimulationConfiguration(activationConfigurations, metadata);
+		return new SimulationConfiguration(activationConfigurations, new ArrayList<>(), metadata);
 	}
 
 }

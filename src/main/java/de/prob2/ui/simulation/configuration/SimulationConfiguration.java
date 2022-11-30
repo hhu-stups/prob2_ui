@@ -11,17 +11,20 @@ import de.prob.json.JsonMetadataBuilder;
 
 @JsonPropertyOrder({
 	"activations",
+	"listeners",
 	"metadata",
 })
 public class SimulationConfiguration implements HasMetadata {
 	public static final String FILE_TYPE = "Timed_Trace";
-	public static final int CURRENT_FORMAT_VERSION = 1;
+	public static final int CURRENT_FORMAT_VERSION = 2;
 
 	private final List<ActivationConfiguration> activations;
+	private final List<UIListenerConfiguration> uiListenerConfigurations;
 	private final JsonMetadata metadata;
 
-	public SimulationConfiguration(List<ActivationConfiguration> activations, JsonMetadata metadata) {
+	public SimulationConfiguration(List<ActivationConfiguration> activations, List<UIListenerConfiguration> uiListenerConfigurations, JsonMetadata metadata) {
 		this.activations = activations;
+		this.uiListenerConfigurations = uiListenerConfigurations;
 		this.metadata = metadata;
 	}
 
@@ -36,6 +39,11 @@ public class SimulationConfiguration implements HasMetadata {
 		return activations;
 	}
 
+	@JsonProperty("listeners")
+	public List<UIListenerConfiguration> getUiListenerConfigurations() {
+		return uiListenerConfigurations;
+	}
+
 	@Override
 	public JsonMetadata getMetadata() {
 		return this.metadata;
@@ -43,6 +51,6 @@ public class SimulationConfiguration implements HasMetadata {
 
 	@Override
 	public HasMetadata withMetadata(final JsonMetadata metadata) {
-		return new SimulationConfiguration(this.getActivationConfigurations(), metadata);
+		return new SimulationConfiguration(this.getActivationConfigurations(), this.getUiListenerConfigurations(), metadata);
 	}
 }
