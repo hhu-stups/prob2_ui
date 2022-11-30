@@ -55,9 +55,6 @@ test:jdk-17-linux:
 
 test:jdk-17-macos:
   extends: .test-common
-  before_script:
-    - export JAVA_HOME="/usr/local/jdk/jdk-17/Contents/Home"
-    - export PATH="${JAVA_HOME}/bin:${PATH}"
   script:
     - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.2 check jpackage
   tags:
