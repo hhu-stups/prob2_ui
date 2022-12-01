@@ -393,6 +393,9 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	@Override
 	protected void addFormula() {
+		if(lastItem == null) {
+			return;
+		}
 		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
 		Machine machine = currentProject.getCurrentMachine();
 		machine.addDotVisualizationItem(lastItem.getCommand(), formulaItem);

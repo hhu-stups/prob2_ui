@@ -392,6 +392,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 
 	@Override
 	protected void addFormula() {
+		if(lastItem == null) {
+			return;
+		}
 		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
 		Machine machine = currentProject.getCurrentMachine();
 		machine.addTableVisualizationItem(lastItem.getCommand(), formulaItem);
