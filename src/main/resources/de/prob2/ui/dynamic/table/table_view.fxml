@@ -50,12 +50,12 @@
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
-								<Button fx:id="addButton" onAction="#handleAddFormula">
+								<Button fx:id="addButton" visible="false" onAction="#handleAddFormula">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
-								<Button fx:id="removeButton" onAction="#handleRemoveFormula">
+								<Button fx:id="removeButton" visible="false" onAction="#handleRemoveFormula">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
@@ -63,7 +63,7 @@
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 
-							<TableView fx:id="tvFormula" minHeight="200.0" VBox.vgrow="ALWAYS">
+							<TableView fx:id="tvFormula" visible="false" minHeight="200.0" VBox.vgrow="ALWAYS">
 								<columnResizePolicy>
 									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 								</columnResizePolicy>
