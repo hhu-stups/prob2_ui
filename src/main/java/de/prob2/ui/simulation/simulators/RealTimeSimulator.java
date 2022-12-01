@@ -47,7 +47,7 @@ public class RealTimeSimulator extends Simulator {
 				if(event.equals(to.getName())) {
 					// TODO: Handle parameter predicates
 					for(String activatingEvent : activating) {
-						simulationEventHandler.activateOperation(to.getDestination(), (ActivationOperationConfiguration) activationConfigurationMap.get(activatingEvent), new ArrayList<>(), "1=1");
+						simulationEventHandler.handleOperationConfiguration(to.getDestination(),  activationConfigurationMap.get(activatingEvent), new ArrayList<>(), "1=1");
 						anyActivated = true;
 					}
 				}

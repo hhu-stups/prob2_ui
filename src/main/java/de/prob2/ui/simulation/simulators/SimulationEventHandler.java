@@ -227,7 +227,7 @@ public class SimulationEventHandler {
 		}
 	}
 
-	private void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
+	public void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
 		if(activationConfiguration instanceof ActivationChoiceConfiguration) {
 			chooseOperation(state, (ActivationChoiceConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
 		} else if(activationConfiguration instanceof ActivationOperationConfiguration) {
