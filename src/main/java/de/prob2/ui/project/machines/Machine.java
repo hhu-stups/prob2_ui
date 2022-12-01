@@ -630,10 +630,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getDotVisualizationItems();
 		if(map.containsKey(commandType)) {
 			map.get(commandType).remove(formula);
-			if(map.get(commandType).isEmpty()) {
-				this.removeValidationTaskListener(map.get(commandType));
-				map.remove(commandType);
-			}
 		}
 	}
 
@@ -679,10 +675,6 @@ public class Machine implements DescriptionView.Describable, INameable {
 		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getTableVisualizationItems();
 		if(map.containsKey(commandType)) {
 			map.get(commandType).remove(formula);
-			if(map.get(commandType).isEmpty()) {
-				this.removeValidationTaskListener(map.get(commandType));
-				map.remove(commandType);
-			}
 		}
 	}
 
