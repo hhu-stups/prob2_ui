@@ -147,6 +147,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			Machine machine = currentProject.getCurrentMachine();
+			tvFormula.itemsProperty().unbind();
 			if(machine == null || to == null) {
 				return;
 			}

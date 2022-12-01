@@ -156,6 +156,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			Machine machine = currentProject.getCurrentMachine();
+			tvFormula.itemsProperty().unbind();
 			if(machine == null || to == null) {
 				return;
 			}
