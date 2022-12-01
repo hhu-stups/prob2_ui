@@ -56,7 +56,7 @@
 							</ListView>
 
 							<HBox alignment="CENTER" VBox.vgrow="NEVER">
-								<Label fx:id="lbDescription" prefHeight="200.0" wrapText="true" VBox.vgrow="ALWAYS"/>
+								<Label fx:id="lbDescription" prefHeight="80.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 							</HBox>
 
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
@@ -84,7 +84,7 @@
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 
-							<TableView fx:id="tvFormula" visible="false" minHeight="200.0" VBox.vgrow="ALWAYS">
+							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0">
 								<columnResizePolicy>
 									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 								</columnResizePolicy>
@@ -94,6 +94,18 @@
 									<TableColumn fx:id="formulaColumn" minWidth="80.0" text="Formula" />
 								</columns>
 							</TableView>
+							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
+								<VBox spacing="10.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+									<padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+									<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
+									<VirtualizedScrollPane fx:id="virtualizedScrollPane">
+										<content>
+											<ExtendedCodeArea fx:id="taFormula" VBox.vgrow="ALWAYS"/>
+										</content>
+									</VirtualizedScrollPane>
+									<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%dynamic.evaluateFormula" onAction="#evaluateFormulaButton"/>
+								</VBox>
+							</VBox>
 
 						</VBox>
 						<VBox>

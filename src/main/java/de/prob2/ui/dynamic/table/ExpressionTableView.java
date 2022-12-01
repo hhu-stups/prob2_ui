@@ -240,6 +240,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			taErrors.clear();
 			errorsView.setVisible(false);
 			tableView.setVisible(true);
+			taFormula.getErrors().clear();
 		});
 	}
 
