@@ -63,7 +63,7 @@ public class Scheduler {
 	}
 
 	public void runWithoutInitialisation() {
-		runningProperty.set(true);
+		runningProperty.set(currentTrace.getCurrentState().isInitialised());
 		realTimeSimulator.updateDelay();
 		startSimulationLoop();
 	}

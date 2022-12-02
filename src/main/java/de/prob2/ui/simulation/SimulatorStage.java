@@ -515,7 +515,7 @@ public class SimulatorStage extends Stage {
 					time = realTimeSimulator.timeProperty().get();
 					firstStart.set(0, false);
 				} else if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
-					if(time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
+					if(currentTrace.getCurrentState().isInitialised() && time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
 						time += 100;
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 						Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.time.second", seconds.doubleValue())));

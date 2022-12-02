@@ -231,6 +231,10 @@ public class VisBController {
 			String transitionName = nextTransitions.stream().map(Transition::getName).collect(Collectors.toList()).get(0);
 			Trace trace = currentTrace.get().execute(transitionName, new ArrayList<>());
 			currentTrace.set(trace);
+			for(Transition transition : nextTransitions) {
+				UIInteraction uiInteraction = injector.getInstance(UIInteraction.class);
+				uiInteraction.addUIInteraction(transition);
+			}
 		} else {
 			updateInfo("visb.infobox.events.not.initialise");
 		}
