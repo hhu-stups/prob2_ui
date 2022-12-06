@@ -6,6 +6,7 @@ import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import static de.prob2.ui.documentation.DocumentUtility.*;
 
@@ -117,6 +119,23 @@ public class ProjectDocumenter {
 		return imagePaths;
 	}
 
+	public String saveTraceHtml(Machine machine, ReplayTrace trace){
+		VisBStage stage = injector.getInstance(VisBStage.class);
+		TraceChecker traceChecker = injector.getInstance(TraceChecker.class);
+		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
+		//TODO FEEDBACK SYSTEM KEIN SLEEP
+		try {
+			TimeUnit.SECONDS.sleep(5);
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+		traceChecker.check(trace,true).join();
+		stage.show();
+		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteImagePath(machine,trace)+Transition.prettifyName(trace.getName())+".html"));
+		stage.close();
+		return latexSafe(getImagePath(machine,trace)+Transition.prettifyName(trace.getName())+".html");
+	}
+
 	/*--- exclusive used by Template ---*/
 	public String getMachineCode(Machine elem) {
 		return readFile(project.getLocation().resolve(elem.getLocation()));
@@ -130,7 +149,7 @@ public class ProjectDocumenter {
 		for (Machine machine : machines) {
 			for (ReplayTrace trace : machine.getTraces()) {
 				try {
-					Files.createDirectories(Paths.get(getImagePath(machine, trace))
+					Files.createDirectories(Paths.get(getAbsoluteImagePath(machine, trace))
 					);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -148,8 +167,10 @@ public class ProjectDocumenter {
 		}
 	}
 
-	private String getImagePath(Machine machine, ReplayTrace trace) {
-		return dir + "/images/" + machine.getName() + "/" + Transition.prettifyName(trace.getName());
+	private String getAbsoluteImagePath(Machine machine, ReplayTrace trace) {
+		return dir + getImagePath(machine,trace);
 	}
-
+	private String getImagePath(Machine machine, ReplayTrace trace) {
+		return "/images/" + machine.getName() + "/" + Transition.prettifyName(trace.getName()) +"/";
+	}
 }
