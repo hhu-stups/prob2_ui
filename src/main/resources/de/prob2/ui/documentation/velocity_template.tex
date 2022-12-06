@@ -15,6 +15,7 @@
 \usepackage{ragged2e, lipsum}
 \usepackage{caption, booktabs}
 \usepackage{graphicx}
+\usepackage{hyperref}
 
 \lstset{literate=
 		{∈}{$\in$}1
@@ -226,9 +227,7 @@
 #end
 	\tend
 	\end{longtable}
-#foreach($image in $documenter.saveTraceImage($machine,$trace))
-	\cropped{$image}
+\href{$documenter.saveTraceHtml($machine,$trace)}{HTML Trace Visualization of $DocumentUtility.latexSafe($trace.getName())}
 #end
-	#end
 #end
 \end{document}
