@@ -52,7 +52,12 @@
 			<Label text="%vomanager.edit.requirement.content"/>
 			<TextArea fx:id="taRequirement" wrapText="true" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
 		</VBox>
-		<VBox spacing="5.0">
+		<HBox spacing="5.0">
+			<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
+			<Button fx:id="historyButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyRequirement"/>
+			<Button fx:id="refineButton" styleClass="button-blue" text="%common.buttons.refine" onAction="#refineRequirement"/>
+		</HBox>
+		<VBox fx:id="voTableBox" spacing="5.0">
 			<Label text="%vomanager.edit.requirement.validationObligations"/>
 			<VBox>
 				<HBox styleClass="border">
@@ -81,11 +86,5 @@
 				</TableView>
 			</VBox>
 		</VBox>
-		<HBox spacing="5.0">
-			<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyRequirement"/>
-			<Button fx:id="historyButton" styleClass="button-blue" text="%common.buttons.history" onAction="#historyRequirement"/>
-			<Button fx:id="refineButton" styleClass="button-blue" text="%common.buttons.refine" onAction="#refineRequirement"/>
-		</HBox>
-
 	</VBox>
 </fx:root>

@@ -28,6 +28,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class SimulationItem implements IValidationTask {
 
@@ -154,6 +155,9 @@ public class SimulationItem implements IValidationTask {
 	private ListProperty<List<Integer>> timestamps;
 
 	@JsonIgnore
+	private ListProperty<Checked> statuses;
+
+	@JsonIgnore
 	private SimulationModel simulationModel;
 
 	public SimulationItem(String id, SimulationType type, Map<String, Object> information) {
@@ -176,6 +180,7 @@ public class SimulationItem implements IValidationTask {
 		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 		this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
+		this.statuses = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.simulationStats = null;
 	}
 
@@ -291,6 +296,18 @@ public class SimulationItem implements IValidationTask {
 
 	public List<List<Integer>> getTimestamps() {
 		return timestamps.get();
+	}
+
+	public void setStatuses(List<Checked> statuses) {
+		this.statuses.setAll(statuses);
+	}
+
+	public ListProperty<Checked> statusesProperty() {
+		return statuses;
+	}
+
+	public List<Checked> getStatuses() {
+		return statuses.get();
 	}
 
 	public void setSimulationStats(SimulationStats simulationStats) {

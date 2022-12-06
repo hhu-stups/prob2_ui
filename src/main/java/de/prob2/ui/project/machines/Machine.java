@@ -3,6 +3,7 @@ package de.prob2.ui.project.machines;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -17,6 +18,7 @@ import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.sharedviews.DescriptionView;
@@ -27,6 +29,7 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.INameable;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -65,9 +68,12 @@ import javafx.collections.ObservableMap;
 	"testCases",
 	"traces",
 	"modelcheckingItems",
+	"proofObligationItems",
 	"simulations",
 	"visBVisualisation",
-	"historyChartItems"
+	"historyChartItems",
+	"dotVisualizationItems",
+	"tableVisualizationItems"
 })
 public class Machine implements DescriptionView.Describable, INameable {
 	public enum CheckingStatus {
@@ -123,9 +129,13 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final ListProperty<ReplayTrace> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
+	private final ListProperty<ProofObligationItem> proofObligationItems;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
+	private final MapProperty<String, ListProperty<DynamicCommandFormulaItem>> dotVisualizationItems;
+	private final MapProperty<String, ListProperty<DynamicCommandFormulaItem>> tableVisualizationItems;
+
 	@JsonIgnore
 	private PatternManager patternManager = new PatternManager();
 	@JsonIgnore
@@ -158,9 +168,12 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
+		this.proofObligationItems = new SimpleListProperty<>(this, "proofObligationItems", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
+		this.dotVisualizationItems = new SimpleMapProperty<>(this, "dotVisualizationItems", FXCollections.observableHashMap());
+		this.tableVisualizationItems = new SimpleMapProperty<>(this, "tableVisualizationItems", FXCollections.observableHashMap());
 
 		this.validationTasks = new SimpleMapProperty<>(this, "validationTasks", FXCollections.observableHashMap());
 		this.validationTaskListener = change -> {
@@ -231,7 +244,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		updateListener.invalidated(null);
 	}
 	
-	private void addValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
+	public void addValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
 		tasks.addListener(this.validationTaskListener);
 		for (final IValidationTask task : tasks) {
 			if (task.getId() != null) {
@@ -240,7 +253,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		}
 	}
 	
-	private void removeValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
+	public void removeValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
 		tasks.removeListener(this.validationTaskListener);
 		for (final IValidationTask task : tasks) {
 			if (task.getId() != null) {
@@ -261,9 +274,12 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
+		this.proofObligationItemsProperty().addListener(changedListener);
 		this.simulationsProperty().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.historyChartItemsProperty().addListener(changedListener);
+		this.dotVisualizationItemsProperty().addListener(changedListener);
+		this.tableVisualizationItemsProperty().addListener(changedListener);
 
 		addCheckingStatusListener(this.ltlFormulasProperty(), this.ltlStatusProperty());
 		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolicCheckingStatusProperty());
@@ -275,6 +291,8 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.addValidationTaskListener(this.symbolicCheckingFormulasProperty());
 		this.addValidationTaskListener(this.tracesProperty());
 		this.addValidationTaskListener(this.modelcheckingItemsProperty());
+		this.addValidationTaskListener(this.proofObligationItemsProperty());
+
 		this.simulationsProperty().addListener((ListChangeListener<SimulationModel>)change -> {
 			while (change.next()) {
 				for (final SimulationModel simulationModel : change.getRemoved()) {
@@ -285,6 +303,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 				}
 			}
 		});
+
 	}
 	
 	public BooleanProperty changedProperty() {
@@ -500,7 +519,20 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private void setModelcheckingItems(final List<ModelCheckingItem> modelcheckingItems) {
 		this.modelcheckingItemsProperty().setAll(modelcheckingItems);
 	}
-	
+
+	public ListProperty<ProofObligationItem> proofObligationItemsProperty() {
+		return proofObligationItems;
+	}
+
+	public List<ProofObligationItem> getProofObligationItems() {
+		return proofObligationItems.get();
+	}
+
+	@JsonProperty
+	private void setProofObligationItems(final List<ProofObligationItem> proofObligationItems) {
+		this.proofObligationItemsProperty().setAll(proofObligationItems);
+	}
+
 	public ListProperty<ReplayTrace> tracesProperty() {
 		return this.traces;
 	}
@@ -562,6 +594,95 @@ public class Machine implements DescriptionView.Describable, INameable {
 	@JsonProperty("historyChartItems")
 	public void setHistoryChartItems(ArrayList<String> historyChartItems) {
 		this.historyChartItems.setValue(FXCollections.observableArrayList(historyChartItems));
+	}
+
+	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> dotVisualizationItemsProperty() {
+		return dotVisualizationItems;
+	}
+
+	public Map<String, ListProperty<DynamicCommandFormulaItem>> getDotVisualizationItems() {
+		return dotVisualizationItems.get();
+	}
+
+	@JsonProperty("dotVisualizationItems")
+	public void setDotVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> dotVisualizationItems) {
+		ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> map = FXCollections.observableHashMap();
+		for(String key : dotVisualizationItems.keySet()) {
+			ObservableList<DynamicCommandFormulaItem> collections = FXCollections.observableArrayList();
+			collections.addAll(dotVisualizationItems.get(key));
+			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
+			map.put(key, listProperty);
+			listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
+			this.addValidationTaskListener(listProperty);
+		}
+		this.dotVisualizationItems.setValue(map);
+	}
+
+	public void addDotVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
+		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getDotVisualizationItems();
+		if(!map.containsKey(commandType)) {
+			addDotVisualizationListProperty(commandType);
+		}
+		map.get(commandType).add(formula);
+	}
+
+	public void removeDotVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
+		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getDotVisualizationItems();
+		if(map.containsKey(commandType)) {
+			map.get(commandType).remove(formula);
+		}
+	}
+
+	public void addDotVisualizationListProperty(String commandType) {
+		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
+		dotVisualizationItems.put(commandType, listProperty);
+		listProperty.addListener((InvalidationListener) o -> this.changed.set(true));
+		this.addValidationTaskListener(listProperty);
+	}
+
+
+	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> tableVisualizationItemsProperty() {
+		return tableVisualizationItems;
+	}
+
+	public Map<String, ListProperty<DynamicCommandFormulaItem>> getTableVisualizationItems() {
+		return tableVisualizationItems.get();
+	}
+
+	@JsonProperty("tableVisualizationItems")
+	public void setTableVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> tableVisualizationItems) {
+		ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> map = FXCollections.observableHashMap();
+		for(String key : tableVisualizationItems.keySet()) {
+			ObservableList<DynamicCommandFormulaItem> collections = FXCollections.observableArrayList();
+			collections.addAll(tableVisualizationItems.get(key));
+			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
+			map.put(key, listProperty);
+			listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
+			this.addValidationTaskListener(listProperty);
+		}
+		this.tableVisualizationItems.setValue(map);
+	}
+
+	public void addTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
+		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getTableVisualizationItems();
+		if(!map.containsKey(commandType)) {
+			addTableVisualizationListProperty(commandType);
+		}
+		map.get(commandType).add(formula);
+	}
+
+	public void removeTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
+		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getTableVisualizationItems();
+		if(map.containsKey(commandType)) {
+			map.get(commandType).remove(formula);
+		}
+	}
+
+	public void addTableVisualizationListProperty(String commandType) {
+		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
+		tableVisualizationItems.put(commandType, listProperty);
+		listProperty.addListener((InvalidationListener) o -> this.changed.set(true));
+		this.addValidationTaskListener(listProperty);
 	}
 
 	public PatternManager getPatternManager() {

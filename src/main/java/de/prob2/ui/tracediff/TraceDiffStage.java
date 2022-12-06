@@ -12,6 +12,7 @@ import de.prob2.ui.internal.StageManager;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+@Deprecated
 @Singleton
 public class TraceDiffStage extends Stage {
 	private TraceDiff traceDiff;

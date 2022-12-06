@@ -136,7 +136,7 @@ public class SimulatorStage extends Stage {
 					} else {
 						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
 						tracesView.setSimulatorStage(simulatorStage);
-						tracesView.setItems(item, item.getTraces(), item.getTimestamps());
+						tracesView.setItems(item, item.getTraces(), item.getTimestamps(), item.getStatuses());
 						tracesView.show();
 					}
 				});
@@ -374,7 +374,6 @@ public class SimulatorStage extends Stage {
 			noSimulations.unbind();
 
 			this.loadSimulationIntoSimulator(to);
-			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
 			if(to != null) {
 				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
@@ -516,7 +515,7 @@ public class SimulatorStage extends Stage {
 					time = realTimeSimulator.timeProperty().get();
 					firstStart.set(0, false);
 				} else if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
-					if(time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
+					if(currentTrace.getCurrentState().isInitialised() && time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
 						time += 100;
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 						Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.time.second", seconds.doubleValue())));

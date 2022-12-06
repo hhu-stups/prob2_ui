@@ -143,8 +143,8 @@ public class BEditorView extends BorderPane {
 		saveButton.disableProperty().bind(saved);
 		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(Bindings.when(saved)
-				                                 .then("")
-				                                 .otherwise(i18n.translate("beditor.unsavedWarning"))
+			.then("")
+			.otherwise(i18n.translate("beditor.unsavedWarning"))
 		);
 		setHint();
 
@@ -247,10 +247,10 @@ public class BEditorView extends BorderPane {
 	private void updateErrors() {
 		if (this.savedProperty().get()) {
 			this.beditor.getErrors().setAll(this.getErrors().stream()
-					                                .filter(error -> error.getLocations().stream()
-							                                                 .map(ErrorItem.Location::getFilename)
-							                                                 .anyMatch(this::isCurrentEditorFile))
-					                                .collect(Collectors.toList()));
+				.filter(error -> error.getLocations().stream()
+					.map(ErrorItem.Location::getFilename)
+					.anyMatch(this::isCurrentEditorFile))
+				.collect(Collectors.toList()));
 		} else {
 			this.beditor.getErrors().clear();
 		}

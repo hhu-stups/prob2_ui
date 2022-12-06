@@ -6,6 +6,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -19,6 +21,7 @@ import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.statespace.State;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -29,9 +32,15 @@ import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -43,6 +52,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.TextInputDialog;
 import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
@@ -117,7 +127,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 
 	private final FileChooserManager fileChooserManager;
 
-	private ObjectProperty<TableData> currentTable;
+	private final ObjectProperty<TableData> currentTable;
 
 	// Store header globally so that ValueItemRow always use the current header
 	private List<String> header;
@@ -126,7 +136,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Inject
 	public ExpressionTableView(final Injector injector, final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
 	                           final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions) {
-		super(preferencesStageProvider, currentTrace, currentProject, i18n, stopActions, "Expression Table Visualizer");
+		super(preferencesStageProvider, stageManager, currentTrace, currentProject, i18n, stopActions, "Expression Table Visualizer");
 		this.injector = injector;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTable = new SimpleObjectProperty<>(this, "currentTable", null);
@@ -143,6 +153,74 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			}
 		});
 		saveButton.disableProperty().bind(currentTable.isNull());
+
+		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			Machine machine = currentProject.getCurrentMachine();
+			tvFormula.itemsProperty().unbind();
+			if(machine == null || to == null) {
+				return;
+			}
+			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getTableVisualizationItems();
+			if(!items.containsKey(to.getCommand())) {
+				machine.addTableVisualizationListProperty(to.getCommand());
+			}
+			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
+		});
+
+		this.tvFormula.setRowFactory(param -> {
+			final TableRow<DynamicCommandFormulaItem> row = new TableRow<>();
+			MenuItem editItem = new MenuItem(i18n.translate("verifications.po.poView.contextMenu.editId"));
+			editItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				final TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
+				stageManager.register(dialog);
+				dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+				dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
+				dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
+				final Optional<String> res = dialog.showAndWait();
+				res.ifPresent(idText -> {
+					final String id = idText.trim().isEmpty() ? null : idText;
+					Machine machine = currentProject.getCurrentMachine();
+					item.setId(id);
+					// This is necessary to force updating ids for VO Manager
+					machine.getDotVisualizationItems().get(lastItem.getCommand()).set(machine.getDotVisualizationItems().get(lastItem.getCommand()).indexOf(item), item);
+				});
+				tvFormula.refresh();
+			});
+
+			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
+			dischargeItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "", ""));
+			});
+
+			MenuItem failItem = new MenuItem(i18n.translate("dynamic.formulaView.fail"));
+			failItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "", ""));
+			});
+
+			MenuItem unknownItem = new MenuItem(i18n.translate("dynamic.formulaView.unknown"));
+			unknownItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setResultItem(new CheckingResultItem(Checked.NOT_CHECKED, "", ""));
+			});
+
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(editItem, dischargeItem, failItem, unknownItem)));
+			return row;
+		});
 	}
 
 	@Override
@@ -163,6 +241,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			taErrors.clear();
 			errorsView.setVisible(false);
 			tableView.setVisible(true);
+			taFormula.getErrors().clear();
 		});
 	}
 
@@ -311,5 +390,26 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		tableView.getColumns().clear();
 		tableView.setVisible(false);
 		placeholderLabel.setVisible(true);
+	}
+
+	@Override
+	protected void addFormula() {
+		if(lastItem == null) {
+			return;
+		}
+		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
+		Machine machine = currentProject.getCurrentMachine();
+		machine.addTableVisualizationItem(lastItem.getCommand(), formulaItem);
+		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
+	}
+
+	@Override
+	protected void removeFormula() {
+		if(this.tvFormula.getSelectionModel().getSelectedIndex() < 0) {
+			return;
+		}
+		DynamicCommandFormulaItem formulaItem = this.tvFormula.getItems().get(this.tvFormula.getSelectionModel().getSelectedIndex());
+		Machine machine = currentProject.getCurrentMachine();
+		machine.removeTableVisualizationItem(lastItem.getCommand(), formulaItem);
 	}
 }

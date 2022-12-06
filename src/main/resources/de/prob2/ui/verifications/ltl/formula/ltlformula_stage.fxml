@@ -14,6 +14,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.collections.FXCollections?>
+<?import java.lang.Boolean?>
 <fx:root type="LTLFormulaStage" title="%verifications.ltl.formula.ltlFormulaStage.title" minWidth="800" minHeight="600" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -34,6 +37,17 @@
 								<ExtendedCodeArea fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 							</content>
 						</VirtualizedScrollPane>
+						<HBox alignment="CENTER_LEFT" spacing="5.0">
+							<Label text="%verifications.ltl.formula.ltlFormulaStage.expectedResult" HBox.hgrow="NEVER"/>
+							<ChoiceBox fx:id="cbExpectedResult" HBox.hgrow="NEVER">
+								<items>
+									<FXCollections fx:factory="observableArrayList">
+										<Boolean fx:constant="TRUE"/>
+										<Boolean fx:constant="FALSE"/>
+									</FXCollections>
+								</items>
+							</ChoiceBox>
+						</HBox>
 						<HBox alignment="CENTER_LEFT" spacing="5.0">
 							<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>
 							<TextField fx:id="idTextField" promptText="%common.optionalPlaceholder" HBox.hgrow="NEVER"/>

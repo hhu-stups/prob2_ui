@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import com.google.inject.Singleton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.SimulationItemHandler;
@@ -23,6 +24,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+@Singleton
 public class SimulationChoosingStage extends Stage {
 	@FXML
 	private Button btCheck;

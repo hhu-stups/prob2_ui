@@ -20,12 +20,14 @@ import javafx.beans.property.SimpleObjectProperty;
 	"id",
 	"description",
 	"code",
+	"expectedResult",
 	"selected",
 })
 public class LTLFormulaItem extends AbstractCheckableItem implements IValidationTask {
 	private final String id;
 	private final String code;
 	private final String description;
+	private final boolean expectedResult;
 	
 	@JsonIgnore
 	private final ObjectProperty<Trace> counterExample = new SimpleObjectProperty<>(this, "counterExample", null);
@@ -34,13 +36,15 @@ public class LTLFormulaItem extends AbstractCheckableItem implements IValidation
 	public LTLFormulaItem(
 		@JsonProperty("id") final String id,
 		@JsonProperty("code") final String code,
-		@JsonProperty("description") final String description
+		@JsonProperty("description") final String description,
+		@JsonProperty("expectedResult") final boolean expectedResult
 	) {
 		super();
 		
 		this.id = id;
 		this.code = code;
 		this.description = description;
+		this.expectedResult = expectedResult;
 	}
 	
 	@Override
@@ -60,6 +64,10 @@ public class LTLFormulaItem extends AbstractCheckableItem implements IValidation
 	
 	public String getDescription() {
 		return this.description;
+	}
+
+	public boolean getExpectedResult() {
+		return this.expectedResult;
 	}
 	
 	@Override
@@ -86,12 +94,13 @@ public class LTLFormulaItem extends AbstractCheckableItem implements IValidation
 	public boolean settingsEqual(final LTLFormulaItem other) {
 		return Objects.equals(this.getId(), other.getId())
 			&& this.getCode().equals(other.getCode())
-			&& this.getDescription().equals(other.getDescription());
+			&& this.getDescription().equals(other.getDescription())
+			&& this.expectedResult == other.expectedResult;
 	}
 
 	@Override
 	@JsonIgnore
 	public String toString() {
-		return String.format(Locale.ROOT, "%s(%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getCode());
+		return String.format(Locale.ROOT, "%s(%s,%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getCode(), this.getExpectedResult());
 	}
 }

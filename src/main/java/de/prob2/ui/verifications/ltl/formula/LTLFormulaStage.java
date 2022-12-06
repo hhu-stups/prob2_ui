@@ -11,6 +11,7 @@ import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 
 public class LTLFormulaStage extends LTLItemStage {
@@ -19,6 +20,9 @@ public class LTLFormulaStage extends LTLItemStage {
 
 	@FXML
 	private Button applyButton;
+
+	@FXML
+	private ChoiceBox<Boolean> cbExpectedResult;
 	
 	private final LTLFormulaChecker formulaChecker;
 
@@ -35,10 +39,17 @@ public class LTLFormulaStage extends LTLItemStage {
 		stageManager.loadFXML(this, "ltlformula_stage.fxml");
 	}
 
+	@Override
+	public void initialize() {
+		super.initialize();
+		cbExpectedResult.getSelectionModel().select(true);
+	}
+
 	public void setData(final LTLFormulaItem item) {
 		idTextField.setText(item.getId() == null ? "" : item.getId());
 		taCode.replaceText(item.getCode());
 		taDescription.setText(item.getDescription());
+		cbExpectedResult.setValue(item.getExpectedResult());
 	}
 
 	@FXML
@@ -46,7 +57,7 @@ public class LTLFormulaStage extends LTLItemStage {
 		result = null;
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		String code = taCode.getText();
-		final LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText());
+		final LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), cbExpectedResult.getValue());
 		try {
 			formulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine());
 		} catch (ProBError e) {

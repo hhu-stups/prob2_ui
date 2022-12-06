@@ -193,6 +193,16 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(new Project(this.getName(), this.getDescription(), machinesList, this.getRequirements(), this.getPreferences(), this.getMetadata(), this.getLocation()));
 	}
 
+	public void changeMachineOrder(List<Machine> machines) {
+		if (machines.size() != this.getMachines().size()) {
+			throw new IllegalArgumentException("size mismatch, expected same number of machines");
+		} else if (!this.getMachines().containsAll(machines)) {
+			throw new IllegalArgumentException("machine mismatch");
+		}
+
+		this.set(new Project(this.getName(), this.getDescription(), machines, this.getRequirements(), this.getPreferences(), this.getMetadata(), this.getLocation()));
+	}
+
 	public void addRequirement(Requirement requirement) {
 		List<Requirement> requirementsList = this.getRequirements();
 		requirementsList.add(requirement);

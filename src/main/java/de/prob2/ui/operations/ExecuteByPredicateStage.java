@@ -25,6 +25,7 @@ import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.UIInteraction;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
@@ -176,7 +177,9 @@ public final class ExecuteByPredicateStage extends Stage {
 			return;
 		}
 		assert transitions.size() == 1;
-		this.currentTrace.set(this.currentTrace.get().add(transitions.get(0)));
+		Transition transition = transitions.get(0);
+		injector.getInstance(UIInteraction.class).addUIInteraction(transition);
+		this.currentTrace.set(this.currentTrace.get().add(transition));
 		this.hide();
 	}
 

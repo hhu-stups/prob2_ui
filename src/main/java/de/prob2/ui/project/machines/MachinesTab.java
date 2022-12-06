@@ -3,12 +3,7 @@ package de.prob2.ui.project.machines;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -39,16 +34,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 
@@ -66,14 +52,14 @@ public class MachinesTab extends Tab {
 		@FXML private ContextMenu contextMenu;
 		@FXML private Menu startAnimationMenu;
 		@FXML private MenuItem showInternalItem;
-		
+
 		private ObjectProperty<Machine> machineProperty;
-		
+
 		private MachinesItem() {
 			this.machineProperty = new SimpleObjectProperty<>(this, "machine", null);
 			stageManager.loadFXML(this, "machines_item.fxml");
 		}
-		
+
 		@FXML
 		private void initialize() {
 			this.setOnMouseClicked(event -> {
@@ -93,7 +79,7 @@ public class MachinesTab extends Tab {
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
 			statusIcon.visibleProperty().bind(machineProperty.isNotNull());
 			this.contextMenuProperty().bind(Bindings.when(machineProperty.isNull()).then((ContextMenu)null).otherwise(contextMenu));
-			
+
 			final BooleanBinding machineIsCurrent = machineProperty.isEqualTo(currentProject.currentMachineProperty());
 			showInternalItem.disableProperty().bind(machineIsCurrent.not().or(currentTrace.isNull()));
 			statusIcon.iconProperty().bind(Bindings.when(machineIsCurrent).then(FontAwesome.Glyph.SPINNER).otherwise(FontAwesome.Glyph.PLAY));
@@ -105,20 +91,20 @@ public class MachinesTab extends Tab {
 				}
 			});
 		}
-		
+
 		@FXML
 		private void handleShowDescription() {
 			showMachineView(this.machineProperty.get());
 			machinesList.getSelectionModel().select(this.machineProperty.get());
 		}
-		
+
 		@FXML
 		private void handleEditConfiguration() {
 			final EditMachinesDialog editDialog = injector.getInstance(EditMachinesDialog.class);
 			editDialog.initOwner(MachinesTab.this.getTabPane().getScene().getWindow());
 			editDialog.editAndShow(this.machineProperty.get()).ifPresent(result -> showMachineView(this.machineProperty.get()));
 		}
-		
+
 		@FXML
 		private void handleRemove() {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, "",
@@ -130,7 +116,7 @@ public class MachinesTab extends Tab {
 				}
 			});
 		}
-		
+
 		@FXML
 		private void handleEditFileExternal() {
 			injector.getInstance(ExternalEditor.class).open(currentProject.get().getAbsoluteMachinePath(this.machineProperty.get()));
@@ -140,7 +126,7 @@ public class MachinesTab extends Tab {
 		private void handleRevealFileInExplorer() {
 			injector.getInstance(RevealInExplorer.class).revealInExplorer(currentProject.get().getAbsoluteMachinePath(this.machineProperty.get()));
 		}
-		
+
 		@FXML
 		private void handleShowInternal() {
 			final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
@@ -148,7 +134,7 @@ public class MachinesTab extends Tab {
 			stage.setCode();
 			stage.show();
 		}
-		
+
 		private void updatePreferences(final List<Preference> prefs) {
 			startAnimationMenu.getItems().setAll(Stream.concat(Stream.of(Preference.DEFAULT), prefs.stream())
 				.map(preference -> {
@@ -164,11 +150,11 @@ public class MachinesTab extends Tab {
 				})
 				.collect(Collectors.toList()));
 		}
-		
+
 		@Override
 		protected void updateItem(final Machine item, final boolean empty) {
 			super.updateItem(item, empty);
-			
+
 			if (empty || item == null) {
 				this.machineProperty.set(null);
 				this.nameLabel.textProperty().unbind();
@@ -194,11 +180,13 @@ public class MachinesTab extends Tab {
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		}
 	}
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachinesTab.class);
-	
+
 	@FXML private ListView<Machine> machinesList;
 	@FXML private SplitPane splitPane;
+	@FXML private Button moveUpBtn;
+	@FXML private Button moveDownBtn;
 	@FXML private HelpButton helpButton;
 
 	private final CurrentTrace currentTrace;
@@ -238,6 +226,24 @@ public class MachinesTab extends Tab {
 				startMachine(machinesList.getSelectionModel().getSelectedItem());
 			}
 		});
+		machinesList.getSelectionModel().selectedIndexProperty().addListener((observable, from, to) -> {
+			if (!(to instanceof Integer)) {
+				moveUpBtn.setDisable(true);
+				moveDownBtn.setDisable(true);
+				return;
+			}
+
+			int n = (int) to;
+			int size = machinesList.getItems().size();
+			if (n < 0 || n >= size) {
+				moveUpBtn.setDisable(true);
+				moveDownBtn.setDisable(true);
+				return;
+			}
+
+			moveUpBtn.setDisable(n == 0);
+			moveDownBtn.setDisable(n == (size - 1));
+		});
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
 			if (node instanceof DescriptionView && !to.contains((Machine) ((DescriptionView) node).getDescribable())) {
@@ -275,7 +281,7 @@ public class MachinesTab extends Tab {
 			alert.show();
 			return;
 		}
-		
+
 		try {
 			final String extension = MoreFiles.getFileExtension(relative);
 			List<String> content = Collections.emptyList();
@@ -337,7 +343,7 @@ public class MachinesTab extends Tab {
 				case "zed":
 				case "tex":
 					content = Arrays.asList(
-						"\\documentclass{article}", 
+						"\\documentclass{article}",
 						"\\usepackage{fuzz}",
 						"\\begin{document}",
 						"This defines a deferred set ID:",
@@ -426,10 +432,42 @@ public class MachinesTab extends Tab {
 		splitPane.getItems().add(0, new DescriptionView(machine, this::closeMachineView, stageManager, injector));
 		showMachineView = true;
 	}
-	
+
 	private void startMachine(final Machine machine) {
 		if (machine != null) {
 			currentProject.startAnimation(machine, currentProject.get().getPreference(machine.getLastUsedPreferenceName()));
+		}
+	}
+
+	@FXML
+	void moveUp() {
+		int n = machinesList.getSelectionModel().getSelectedIndex();
+		int size = machinesList.getItems().size();
+		if (n <= 0 || n >= size) {
+			return;
+		}
+
+		swapMachineOrder(n, n - 1);
+		machinesList.getSelectionModel().select(n - 1);
+	}
+
+	@FXML
+	void moveDown() {
+		int n = machinesList.getSelectionModel().getSelectedIndex();
+		int size = machinesList.getItems().size();
+		if (n < 0 || n >= (size - 1)) {
+			return;
+		}
+
+		swapMachineOrder(n, n + 1);
+		machinesList.getSelectionModel().select(n + 1);
+	}
+
+	private void swapMachineOrder(int i, int j) {
+		if (i != j) {
+			List<Machine> machines = new ArrayList<>(currentProject.getMachines());
+			Collections.swap(machines, i, j);
+			currentProject.changeMachineOrder(machines);
 		}
 	}
 }

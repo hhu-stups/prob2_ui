@@ -23,6 +23,8 @@
 <?import javafx.scene.web.WebView?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <fx:root type="DotView" title="%dotty.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -52,6 +54,11 @@
 									<Label text="%common.noModelLoaded"/>
 								</placeholder>
 							</ListView>
+
+							<HBox alignment="CENTER" VBox.vgrow="NEVER">
+								<Label fx:id="lbDescription" prefHeight="80.0" wrapText="true" VBox.vgrow="ALWAYS"/>
+							</HBox>
+
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
 								<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />
 								<Button fx:id="saveButton" onAction="#save" HBox.hgrow="NEVER">
@@ -64,10 +71,30 @@
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
+								<Button fx:id="addButton" visible="false" onAction="#handleAddFormula">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
+								<Button fx:id="removeButton" visible="false" onAction="#handleRemoveFormula">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
+
+							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0">
+								<columnResizePolicy>
+									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+								</columnResizePolicy>
+								<columns>
+									<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
+									<TableColumn fx:id="idColumn" minWidth="80.0" maxWidth="150.0" text="ID" />
+									<TableColumn fx:id="formulaColumn" minWidth="80.0" text="Formula" />
+								</columns>
+							</TableView>
 							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
-								<Label fx:id="lbDescription" prefHeight="100.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 								<VBox spacing="10.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
 									<padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
 									<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
@@ -76,9 +103,10 @@
 											<ExtendedCodeArea fx:id="taFormula" VBox.vgrow="ALWAYS"/>
 										</content>
 									</VirtualizedScrollPane>
-									<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%dynamic.evaluateFormula" onAction="#evaluateFormula"/>
+									<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%dynamic.evaluateFormula" onAction="#evaluateFormulaButton"/>
 								</VBox>
 							</VBox>
+
 						</VBox>
 						<VBox>
 							<HBox alignment="TOP_RIGHT" styleClass="border">

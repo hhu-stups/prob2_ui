@@ -22,6 +22,7 @@
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 						</columnResizePolicy>
 						<columns>
+							<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
 							<TableColumn fx:id="traceColumn" text="%simulation.generatedTraces.columns.trace"/>
 						</columns>
 						<placeholder>

@@ -1,15 +1,12 @@
 package de.prob2.ui.sharedviews;
 
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.ReplayedTraceStatusAlert;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
-import de.prob2.ui.animation.tracereplay.TraceReplayErrorAlert;
 import de.prob2.ui.animation.tracereplay.TraceTestView;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.I18n;
@@ -130,25 +127,16 @@ public class TraceViewHandler {
 		};
 	}
 
-	public void initializeRow(final Scene scene, final TableRow<ReplayTrace> row, final MenuItem addTestsItem, final MenuItem replayTraceItem, final MenuItem showErrorItem, final MenuItem openInExternalEditorItem, final MenuItem revealInExplorerItem) {
+	public void initializeRow(final Scene scene, final TableRow<ReplayTrace> row, final MenuItem addTestsItem, final MenuItem replayTraceItem, final MenuItem showStatusItem, final MenuItem openInExternalEditorItem, final MenuItem revealInExplorerItem) {
 		replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
 		addTestsItem.setOnAction(event -> {
 			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
 			traceTestView.loadReplayTrace(row.getItem());
 			traceTestView.show();
 		});
-		showErrorItem.setOnAction(event -> {
-			ReplayTrace replayTrace = row.getItem();
-			if(!row.getItem().getReplayedTrace().getErrors().isEmpty()) {
-				// TODO Implement displaying rich error information in TraceReplayErrorAlert (using ErrorTableView) instead of converting the error messages to a string
-				final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()
-					.map(ErrorItem::toString)
-					.collect(Collectors.joining("\n"));
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "common.literal", TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_REPLAY_VIEW, errorMessage);
-				alert.initOwner(scene.getWindow());
-				alert.setErrorMessage();
-			}
-			traceChecker.showTestError(replayTrace.getLoadedTrace().getTransitionList(), replayTrace.getPostconditionStatus());
+		showStatusItem.setOnAction(event -> {
+			ReplayedTraceStatusAlert alert = new ReplayedTraceStatusAlert(injector, row.getItem());
+			alert.show();
 		});
 		openInExternalEditorItem.setOnAction(event ->
 			injector.getInstance(ExternalEditor.class).open(row.getItem().getAbsoluteLocation())
@@ -157,11 +145,8 @@ public class TraceViewHandler {
 			injector.getInstance(RevealInExplorer.class).revealInExplorer(row.getItem().getAbsoluteLocation())
 		);
 		row.itemProperty().addListener((observable, from, to) -> {
-			showErrorItem.disableProperty().unbind();
 			if (to != null) {
 				replayTraceItem.disableProperty().bind(row.getItem().selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-
-				showErrorItem.disableProperty().bind(to.checkedProperty().isNotEqualTo(Checked.FAIL));
 				row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 			}
 		});
@@ -194,10 +179,8 @@ public class TraceViewHandler {
 		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
 	}
 
-	public MenuItem createShowErrorItem() {
-		final MenuItem showErrorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showError"));
-		showErrorItem.setDisable(true);
-		return showErrorItem;
+	public MenuItem createShowStatusItem() {
+		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
 	}
 
 	public MenuItem createOpenInExternalEditorItem() {

@@ -770,6 +770,30 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			});
 		});
 	}
+
+
+	private static void updateV31Machine(ObjectNode machine) {
+		final ArrayNode ltlFormulas = checkArray(machine.get("ltlFormulas"));
+		for (final JsonNode formulaNode : ltlFormulas) {
+			final ObjectNode formula = checkObject(formulaNode);
+			formula.put("expectedResult", "true");
+		}
+	}
+
+	private static void updateV32Machine(final ObjectNode machine) {
+		if(!machine.has("proofObligationItems")) {
+			machine.set("proofObligationItems", machine.arrayNode());
+		}
+	}
+
+	private static void updateV33Machine(final ObjectNode machine) {
+		if(!machine.has("dotVisualizationItems")) {
+			machine.set("dotVisualizationItems", machine.objectNode());
+		}
+		if(!machine.has("tableVisualizationItems")) {
+			machine.set("tableVisualizationItems", machine.objectNode());
+		}
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -885,6 +909,19 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		if (oldVersion <= 30) {
 			updateV30Project(oldObject);
 		}
+
+		checkArray(oldObject.get("machines")).forEach(machineNode -> {
+			final ObjectNode machine = checkObject(machineNode);
+			if (oldVersion <= 31) {
+				updateV31Machine(machine);
+			}
+			if (oldVersion <= 32) {
+				updateV32Machine(machine);
+			}
+			if (oldVersion <= 33) {
+				updateV33Machine(machine);
+			}
+		});
 		
 		return oldObject;
 	}

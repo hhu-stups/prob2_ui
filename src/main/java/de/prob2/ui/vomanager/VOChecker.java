@@ -1,7 +1,9 @@
 package de.prob2.ui.vomanager;
 
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -12,6 +14,7 @@ import de.prob.voparser.VOParser;
 import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
@@ -22,6 +25,8 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
+import de.prob2.ui.verifications.po.POManager;
+import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
@@ -80,24 +85,9 @@ public class VOChecker {
 		}
 	}
 
-	public void checkRequirement(Requirement requirement, Machine machine, VOManagerSetting setting) throws VOParseException{
-		if(setting == VOManagerSetting.REQUIREMENT) {
-			checkRequirementOnRequirementView(requirement);
-		} else if(setting == VOManagerSetting.MACHINE) {
-			checkRequirementOnMachineView(requirement, machine);
-		}
-	}
-
-	private void checkRequirementOnRequirementView(Requirement requirement) throws VOParseException {
+	public void checkRequirement(Requirement requirement) throws VOParseException {
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
-			final Machine machine = currentProject.get().getMachine(vo.getMachine());
-			this.checkVO(machine, vo);
-		}
-	}
-
-	private void checkRequirementOnMachineView(Requirement requirement, Machine machine) throws VOParseException {
-		for (final ValidationObligation vo : requirement.getValidationObligations()) {
-			this.checkVO(machine, vo);
+			this.checkVO(vo);
 		}
 	}
 
@@ -110,6 +100,14 @@ public class VOChecker {
 				IValidationTask validationTask;
 				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
 					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
+				} else if(machine.getProofObligationItems().stream()
+						.map(ProofObligationItem::getId)
+						.filter(Objects::nonNull)
+						.anyMatch(id -> id.equals(taskExpr.getIdentifier()))) {
+					validationTask = machine.getProofObligationItems().stream()
+							.filter(po -> po.getId() != null)
+							.filter(po -> po.getId().equals(taskExpr.getIdentifier()))
+							.collect(Collectors.toList()).get(0);
 				} else {
 					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
 				}
@@ -145,6 +143,10 @@ public class VOChecker {
 			return VTType.EXPLORE;
 		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
 			return VTType.STATIC;
+		} else if(validationTask instanceof ProofObligationItem) {
+			return VTType.STATIC;
+		} else if(validationTask instanceof DynamicCommandFormulaItem) {
+			return VTType.STATE_SPACE;
 		}
 		return null;
 	}
@@ -200,8 +202,9 @@ public class VOChecker {
 	}
 
 
-	public void checkVO(Machine machine, ValidationObligation validationObligation) throws VOParseException {
+	public void checkVO(ValidationObligation validationObligation) throws VOParseException {
 		if (validationObligation.getParsedExpression() == null) {
+			final Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
 			this.parseVO(machine, validationObligation);
 		}
 		checkVOExpression(validationObligation.getParsedExpression());

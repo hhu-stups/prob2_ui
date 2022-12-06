@@ -109,10 +109,20 @@ public class SimulationEventHandler {
 		} else {
 			switch (mode) {
 				case CLASSICAL_B:
-					newExpression = String.format(Locale.ROOT, "LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+					// TODO: Rises problem when one of the parameters are the empty set. In this case, the type cannot be infered. Fix this in the future by inspecting the AST.
+					if(!parametersAsString.stream().map(expression::contains).findAny().get()) {
+						newExpression = expression;
+					} else {
+						newExpression = String.format(Locale.ROOT, "LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
+					}
 					break;
 				case EVENT_B:
-					newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
+					// TODO: Rises problem when one of the parameters are the empty set. In this case, the type cannot be infered. Fix this in the future by inspecting the AST.
+					if(!parametersAsString.stream().map(expression::contains).findAny().get()) {
+						newExpression = expression;
+					} else {
+						newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
+					}
 					break;
 				default:
 					throw new RuntimeException("Evaluation mode is not supported.");
@@ -176,15 +186,11 @@ public class SimulationEventHandler {
 		activationsForOperation.add(insertionIndex, activation);
 	}
 
-	private void activateSingleOperations(String id, String opName, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
-		Set<String> activationsForOperation = simulator.getOperationToActivations().get(opName);
+	private void activateSingleOperations(String id, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
 		int evaluatedTime = activation.getTime();
 
-		for(String activationId : activationsForOperation) {
-			List<Activation> activationsForId = simulator.getConfigurationToActivation().get(activationId);
-			if(activationsForId.isEmpty()) {
-				continue;
-			}
+		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(id);
+		if(!activationsForId.isEmpty()) {
 			switch(activationKind) {
 				case SINGLE_MIN: {
 					Activation activationForId = activationsForId.get(0);
@@ -192,9 +198,8 @@ public class SimulationEventHandler {
 					if (evaluatedTime < otherActivationTime) {
 						activationsForId.clear();
 						simulator.getConfigurationToActivation().get(id).add(activation);
-						return;
 					}
-					break;
+					return;
 				}
 				case SINGLE_MAX: {
 					Activation activationForId = activationsForId.get(0);
@@ -202,9 +207,8 @@ public class SimulationEventHandler {
 					if (evaluatedTime > otherActivationTime) {
 						activationsForId.clear();
 						simulator.getConfigurationToActivation().get(id).add(activation);
-						return;
 					}
-					break;
+					return;
 				}
 				case SINGLE:
 					return;
@@ -212,6 +216,7 @@ public class SimulationEventHandler {
 					break;
 			}
 		}
+
 		simulator.getConfigurationToActivation().get(id).add(activation);
 	}
 
@@ -222,7 +227,7 @@ public class SimulationEventHandler {
 		}
 	}
 
-	private void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
+	public void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
 		if(activationConfiguration instanceof ActivationChoiceConfiguration) {
 			chooseOperation(state, (ActivationChoiceConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
 		} else if(activationConfiguration instanceof ActivationOperationConfiguration) {
@@ -249,8 +254,8 @@ public class SimulationEventHandler {
 
 	public void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration,
 								   List<String> parametersAsString, String parameterPredicates) {
-		List<Activation> activationsForOperation = simulator.getConfigurationToActivation().get(activationOperationConfiguration.getId());
-		if(activationsForOperation == null) {
+		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(activationOperationConfiguration.getId());
+		if(activationsForId == null) {
 			return;
 		}
 		String id = activationOperationConfiguration.getId();
@@ -264,12 +269,12 @@ public class SimulationEventHandler {
 
 		switch (activationKind) {
 			case MULTI:
-				activateMultiOperations(activationsForOperation, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+				activateMultiOperations(activationsForId, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
 				break;
 			case SINGLE:
 			case SINGLE_MAX:
 			case SINGLE_MIN:
-				activateSingleOperations(id, opName, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+				activateSingleOperations(id, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
 				break;
 		}
 	}

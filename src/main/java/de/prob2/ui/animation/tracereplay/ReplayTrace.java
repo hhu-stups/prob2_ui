@@ -6,8 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -27,14 +25,11 @@ import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 
 public class ReplayTrace implements IValidationTask, DescriptionView.Describable {
 	private final String id;
@@ -43,8 +38,6 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 	private final DoubleProperty progress;
 	@JsonIgnore
 	private final ObjectProperty<TraceJsonFile> loadedTrace;
-	@JsonIgnore
-	private final ListProperty<List<Checked>> postconditionStatus;
 	@JsonIgnore
 	private final ObjectProperty<ReplayedTrace> replayedTrace;
 	@JsonIgnore
@@ -61,7 +54,6 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
-		this.postconditionStatus = new SimpleListProperty<>(this, "postcondition", FXCollections.observableArrayList());
 		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
 		this.animatedReplayedTrace = new SimpleObjectProperty<>(this, "animatedReplayedTrace", null);
 		this.location = location;
@@ -117,7 +109,6 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 		this.setChecked(Checked.NOT_CHECKED);
 		this.setReplayedTrace(null);
 		this.setAnimatedReplayedTrace(null);
-		this.setPostconditionStatus(Collections.emptyList());
 	}
 
 	/**
@@ -131,18 +122,6 @@ public class ReplayTrace implements IValidationTask, DescriptionView.Describable
 	 */
 	public TraceJsonFile getLoadedTrace() {
 		return this.loadedTraceProperty().get();
-	}
-
-	public ListProperty<List<Checked>> postconditionStatusProperty() {
-		return postconditionStatus;
-	}
-
-	public List<List<Checked>> getPostconditionStatus() {
-		return postconditionStatus.get();
-	}
-
-	public void setPostconditionStatus(List<List<Checked>> postconditionStatus) {
-		this.postconditionStatus.set(FXCollections.observableArrayList(postconditionStatus));
 	}
 
 	public DoubleProperty progressProperty() {
