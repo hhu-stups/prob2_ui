@@ -100,20 +100,19 @@ public class ProjectDocumenter {
 		return context;
 	}
 
-	public List<String> saveTraceImage(Machine machine, ReplayTrace trace) throws InterruptedException { //TODO clean up
+	public List<String> saveTraceImages(Machine machine, ReplayTrace trace){ //TODO clean up
 		VisBStage stage = injector.getInstance(VisBStage.class);
 		List<String> imagePaths = new ArrayList<>();
 		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
 		int imageNr = 1;
 		for (PersistentTransition transition : trace.getLoadedTrace().getTransitionList()) {
-			//traceChecker.check(trace,true);
-			String imagePath = getImagePath(machine, trace) + "/image" + imageNr + ".png";
+			// traceChecker.check(trace,true) oder sharedview->navigation Buttons verhalten anschauen
+			String imagePath = getAbsoluteImagePath(machine, trace) + "image" + imageNr + ".png";
 			imagePaths.add(imagePath);
 			Path path = Paths.get(imagePath);
-			imageNr++;
 			stage.exportImageWithPath(path);
+			imageNr++;
 		}
-		stage.closeVisualisation();
 		stage.close();
 		return imagePaths;
 	}
