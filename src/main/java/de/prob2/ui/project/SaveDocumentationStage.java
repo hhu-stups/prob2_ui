@@ -3,6 +3,7 @@ package de.prob2.ui.project;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.documentation.DocumentUtility;
 import de.prob2.ui.documentation.MachineDocumentationItem;
 import de.prob2.ui.documentation.ProjectDocumenter;
 import de.prob2.ui.internal.FXMLInjected;
@@ -77,6 +78,8 @@ public class SaveDocumentationStage extends Stage {
 
 	@FXML
 	public void initialize() {
+		//can be removed when Windows and Mac Pdf Creation is added in DocumentUtility
+		disableMakePdfIfNotLinux();
 		finishButton.disableProperty().bind(filename.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
 		filename.setText(this.currentProject.getName());
@@ -86,9 +89,18 @@ public class SaveDocumentationStage extends Stage {
 			SimpleBooleanProperty property = new SimpleBooleanProperty(c.getValue().getDocument());
 			property.addListener((observable, oldValue, newValue) -> c.getValue().setDocument(newValue));
 			return property;
+
 		});
 		tvDocumentation.setItems(machineDocumentationItems);
 	}
+
+	private void disableMakePdfIfNotLinux() {
+		if(DocumentUtility.getOS() != DocumentUtility.OS.LINUX) {
+			makePdf.setText(i18n.translate("verifications.documentation.saveStage.wrongOS"));
+			makePdf.setDisable(true);
+		}
+	}
+
 	@FXML
 	void selectLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
