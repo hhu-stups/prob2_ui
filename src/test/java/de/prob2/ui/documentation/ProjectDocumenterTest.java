@@ -96,69 +96,69 @@ class ProjectDocumenterTest extends ApplicationTest {
 	void testMachineCodeAndTracesInserted() throws Exception {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("MCH Code");
 		assertTexFileContainsString("Traces");
 	}
 
 
 	@Test
-	void testModelcheckingBoolean() throws IOException, InterruptedException {
+	void testModelcheckingBoolean() throws IOException{
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Model Checking");
 	}
 	@Test
-	void testModelcheckingItemInserted() throws IOException, InterruptedException {
+	void testModelcheckingItemInserted() throws IOException {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Modelchecking Items and Results");
 	}
 
 	@Test
-	void testLTLBoolean() throws IOException, InterruptedException {
+	void testLTLBoolean() throws IOException {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("LTL Model Checking");
 	}
 
 	@Test
-	void testLTLFormulaItemInserted() throws IOException, InterruptedException {
+	void testLTLFormulaItemInserted() throws IOException {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("LTL Formulars and Results");
 	}
 	@Test
-	void testLTLPatternItemInserted() throws IOException, InterruptedException {
+	void testLTLPatternItemInserted() throws IOException {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("LTL Patterns and Results");
 	}
 
 	@Test
-	void testSymbolicBoolean() throws IOException, InterruptedException {
+	void testSymbolicBoolean() throws IOException {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Symbolic Model Checking");
 	}
 	@Test
-	void testSymbolicItemInserted() throws IOException, InterruptedException {
+	void testSymbolicItemInserted() throws IOException {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Symbolic Formulars and Results");
 	}
 	@DisabledOnOs({ WINDOWS, MAC })
 	@Test
-	void testPDFCreated() throws InterruptedException {
+	void testPDFCreated() {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceImage(velocityDocumenter);
+		runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(velocityDocumenter);
 		//PDF creation not instant set max delay 10s
 		await().atMost(30, SECONDS).until(() -> getOutputFile(".pdf").exists());
 		assertTrue(getOutputFile(".pdf").exists());
@@ -170,9 +170,10 @@ class ProjectDocumenterTest extends ApplicationTest {
 	}
 
 
-	private static void runDocumentationWithMockedSaveTraceImage(ProjectDocumenter velocityDocumenter1) throws InterruptedException {
+	private static void runDocumentationWithMockedSaveTraceImageAndMockedSaveTraceHtml(ProjectDocumenter velocityDocumenter1){
 		ProjectDocumenter documenterSpy = Mockito.spy(velocityDocumenter1);
 		doReturn(new ArrayList<>()).when(documenterSpy).saveTraceImages(any(),any());
+		doReturn("").when(documenterSpy).saveTraceHtml(any(),any());
 		documenterSpy.documentVelocity();
 	}
 
