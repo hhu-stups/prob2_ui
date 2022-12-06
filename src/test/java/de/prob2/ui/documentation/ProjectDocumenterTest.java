@@ -52,7 +52,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 	public final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
 	ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1",ModelCheckingSearchStrategy.RANDOM,1,1,"",new HashSet<>());
-	LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("","","");
+	LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("","","",true);
 	SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("","", SymbolicCheckingType.SYMBOLIC_MODEL_CHECK);
 	LTLPatternItem ltlPatternItem = new LTLPatternItem("","","");
 
