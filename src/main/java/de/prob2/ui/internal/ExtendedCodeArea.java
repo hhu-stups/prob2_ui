@@ -197,10 +197,15 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	private int getClampedAbsolutePosition(final int paragraphIndex, final int columnIndex) {
-		if (paragraphIndex >= this.getParagraphs().size()) {
-			return this.getLength();
+		if (paragraphIndex < 0) {
+			return 0;
+		} else if (paragraphIndex >= getParagraphs().size()) {
+			return getLength();
 		}
-		return Math.min(this.getAbsolutePosition(paragraphIndex, columnIndex), this.getLength());
+
+		Position clampedPos = getContent().position(paragraphIndex, columnIndex).clamp();
+		// let us not trust the library...
+		return Math.max(0, Math.min(clampedPos.toOffset(), this.getLength()));
 	}
 
 	private int errorLocationAbsoluteStart(final ErrorItem.Location location) {
