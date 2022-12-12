@@ -126,10 +126,10 @@ public class OperationItem {
 		return values;
 	}
 
-	private static Collection<OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions, final boolean avoidCliCommunication) {
+	private static Map<Transition, OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions, final boolean avoidCliCommunication) {
 		final LoadedMachine loadedMachine = stateSpace.getLoadedMachine();
 		final Map<String, List<Transition>> transitionsByName = transitions.stream().collect(Collectors.groupingBy(Transition::getName));
-		final List<OperationItem> items = new ArrayList<>();
+		final Map<Transition, OperationItem> items = new LinkedHashMap<>();
 		transitionsByName.forEach((name, transitionsWithName) -> {
 			OperationInfo opInfo;
 			try {
@@ -190,7 +190,7 @@ public class OperationItem {
 				final List<String> paramNames = opInfo == null ? Collections.emptyList() : opInfo.getParameterNames();
 				final List<String> outputNames = opInfo == null ? Collections.emptyList() : opInfo.getOutputParameterNames();
 				
-				items.add(new OperationItem(transition, transition.getName(), Status.ENABLED, paramNames,
+				items.put(transition, new OperationItem(transition, transition.getName(), Status.ENABLED, paramNames,
 					transition.getParameterValues(), outputNames, transition.getReturnValues(), constants, variables,
 					Collections.emptySet(), Collections.emptySet()));
 			}
@@ -198,24 +198,24 @@ public class OperationItem {
 		return items;
 	}
 
-	public static Collection<OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions) {
+	public static Map<Transition, OperationItem> forTransitions(final StateSpace stateSpace, final Collection<Transition> transitions) {
 		return forTransitions(stateSpace, transitions, false);
 	}
 
-	public static Collection<OperationItem> forTransitionsFast(final StateSpace stateSpace, final Collection<Transition> transitions) {
+	public static Map<Transition, OperationItem> forTransitionsFast(final StateSpace stateSpace, final Collection<Transition> transitions) {
 		return forTransitions(stateSpace, transitions, true);
 	}
 
 	public static OperationItem forTransition(final StateSpace stateSpace, final Transition transition) {
-		final Collection<OperationItem> items = forTransitions(stateSpace, Collections.singletonList(transition));
+		final Map<Transition, OperationItem> items = forTransitions(stateSpace, Collections.singletonList(transition));
 		assert items.size() == 1;
-		return items.iterator().next();
+		return items.values().iterator().next();
 	}
 
 	public static OperationItem forTransitionFast(final StateSpace stateSpace, final Transition transition) {
-		final Collection<OperationItem> items = forTransitionsFast(stateSpace, Collections.singletonList(transition));
+		final Map<Transition, OperationItem> items = forTransitionsFast(stateSpace, Collections.singletonList(transition));
 		assert items.size() == 1;
-		return items.iterator().next();
+		return items.values().iterator().next();
 	}
 
 	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters) {

@@ -380,7 +380,7 @@ public final class OperationsView extends VBox {
 		events.clear();
 		final Set<Transition> operations = trace.getNextTransitions(true, FormulaExpand.EXPAND);
 		events.addAll(OperationItem.computeUnambiguousConstantsAndVariables(
-			OperationItem.forTransitions(trace.getStateSpace(), operations)
+			OperationItem.forTransitions(trace.getStateSpace(), operations).values()
 		));
 		
 		final LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
