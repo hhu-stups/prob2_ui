@@ -30,16 +30,22 @@ import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
 @Singleton
 public class TraceChecker {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
+
 	private final CliTaskExecutor cliExecutor;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
 
 	@Inject
-	private TraceChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace,  final Injector injector, final StageManager stageManager) {
+	private TraceChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
 		this.cliExecutor = cliExecutor;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
@@ -51,7 +57,7 @@ public class TraceChecker {
 	}
 
 	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		if(!replayTrace.selected()) {
+		if (!replayTrace.selected()) {
 			return CompletableFuture.completedFuture(replayTrace);
 		}
 
@@ -80,27 +86,16 @@ public class TraceChecker {
 		replayTrace.setProgress(-2);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		final CompletableFuture<ReplayTrace> future = cliExecutor.submit(() -> {
-			// TODO We shouldn't need to load the trace on the Java side anymore now that the replay happens purely on the Prolog side.
-			// We have to keep this load call for now though,
-			// because the lineNumber method still uses the loaded TraceJsonFile.
-			replayTrace.load();
 			ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
-			final List<ErrorItem> newErrors = new ArrayList<>(replayed.getErrors());
-			// TODO Display transition-specific errors in a proper table instead of merging them into the general list of errors
-			for (int i = 0; i < replayed.getTransitionErrorMessages().size(); i++) {
-				final List<String> errorMessages = replayed.getTransitionErrorMessages().get(i);
-				for (final String errorMessage : errorMessages) {
-					newErrors.add(ErrorItem.fromErrorMessage("Transition " + i + ": " + errorMessage));
-				}
-			}
-			if (newErrors.isEmpty() && replayed.getReplayStatus() == TraceReplayStatus.PARTIAL) {
+			List<ErrorItem> errors = replayed.getErrors();
+			if (errors.isEmpty() && replayed.getReplayStatus() != TraceReplayStatus.PERFECT) {
 				// FIXME Should this case be reported as an error on the Prolog side?
 				final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
-				newErrors.add(error);
+				errors = new ArrayList<>(errors);
+				errors.add(error);
 			}
-			replayed = replayed.withErrors(newErrors);
+			replayed = replayed.withErrors(errors);
 			replayTrace.setReplayedTrace(replayed);
-			// TODO Display replay information for each transition if the replay was not perfect/complete
 			Trace trace = replayed.getTrace(stateSpace);
 			replayTrace.setAnimatedReplayedTrace(trace);
 			return replayTrace;
@@ -129,12 +124,16 @@ public class TraceChecker {
 		Platform.runLater(() -> {
 			// TODO: switch this to ReplayedTraceStatusAlert once ready
 			final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()
-				.map(ErrorItem::toString)
-				.collect(Collectors.joining("\n"));
+					                            .map(ErrorItem::toString)
+					                            .collect(Collectors.joining("\n"));
 			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "common.literal", TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, errorMessage);
 
 			stageManager.register(alert);
-			alert.setLineNumber(lineNumber(replayTrace, trace.size()));
+			try {
+				alert.setLineNumber(lineNumber(replayTrace, trace.size()));
+			} catch (IOException e) {
+				LOGGER.error("error while trying to read trace file after the replay failed", e);
+			}
 			alert.setReplayTrace(replayTrace);
 			alert.setAttemptedReplayOrLostTrace(trace);
 			alert.setStoredTrace(replayTrace.getLoadedTrace());
@@ -156,7 +155,8 @@ public class TraceChecker {
 		return this.runningProperty().get();
 	}
 
-	private static int lineNumber(ReplayTrace replayTrace, int failedTraceLength) {
+	@Deprecated
+	private static int lineNumber(ReplayTrace replayTrace, int failedTraceLength) throws IOException {
 		final List<TransitionReplayPrecision> precisions = replayTrace.getReplayedTrace().getTransitionReplayPrecisions();
 		int firstTransitionWithError = failedTraceLength;
 		for (int i = 0; i < precisions.size(); i++) {
@@ -165,6 +165,8 @@ public class TraceChecker {
 				break;
 			}
 		}
+
+		replayTrace.load();
 		final List<PersistentTransition> transitionList = replayTrace.getLoadedTrace().getTransitionList();
 		if (firstTransitionWithError >= transitionList.size()) {
 			// Every transition was replayed, and each one was precise, but we still got a replay error...

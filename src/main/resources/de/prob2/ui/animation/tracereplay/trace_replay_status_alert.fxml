@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.animation.tracereplay.ReplayedTraceTable?>
-<?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.scene.control.Alert?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.text.Text?>
+<?import de.prob2.ui.error.ErrorTableView?>
 <fx:root type="Alert" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane>
 			<content>
 				<VBox stylesheets="@/prob.css">
-					<Text fx:id="errorText"/>
-					<ReplayedTraceTable fx:id="traceTable" VBox.vgrow="ALWAYS"/>
+					<ReplayedTraceTable fx:id="traceTable" VBox.vgrow="ALWAYS" />
+					<ErrorTableView fx:id="errorTable" />
 				</VBox>
 			</content>
 		</DialogPane>

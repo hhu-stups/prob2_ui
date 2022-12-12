@@ -37,6 +37,8 @@ public final class ErrorTableView extends TreeTableView<Object> {
 	private final Provider<BEditorView> bEditorViewProvider;
 	
 	private final ObservableList<ErrorItem> errorItems;
+
+	private boolean syncWithEditor = true;
 	
 	@Inject
 	private ErrorTableView(
@@ -94,12 +96,18 @@ public final class ErrorTableView extends TreeTableView<Object> {
 					.collect(Collectors.toCollection(ti::getChildren));
 				ti.setExpanded(true);
 			});
-			this.bEditorViewProvider.get().getErrors().addAll(this.getErrorItems());
+			if (syncWithEditor) {
+				this.bEditorViewProvider.get().getErrors().addAll(this.getErrorItems());
+			}
 			this.setRoot(root);
 		});
 	}
 	
 	public ObservableList<ErrorItem> getErrorItems() {
 		return errorItems;
+	}
+
+	public void dontSyncWithEditor() {
+		this.syncWithEditor = false;
 	}
 }

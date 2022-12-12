@@ -7,31 +7,32 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Injector;
 
-import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.TransitionReplayPrecision;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.error.ErrorTableView;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.operations.OperationItem;
 
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
-import javafx.scene.text.Text;
 
 public class ReplayedTraceStatusAlert extends Alert {
 
 	@FXML
-	private Text errorText;
+	private ReplayedTraceTable traceTable;
 
 	@FXML
-	private ReplayedTraceTable traceTable;
+	private ErrorTableView errorTable;
 
 	private final StageManager stageManager;
 	private final I18n i18n;
@@ -55,6 +56,9 @@ public class ReplayedTraceStatusAlert extends Alert {
 
 		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 
+		this.errorTable.dontSyncWithEditor();
+		this.errorTable.visibleProperty().bind(Bindings.createBooleanBinding(() -> !this.errorTable.getErrorItems().isEmpty(), this.errorTable.getErrorItems()));
+
 		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
 		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
 		TraceJsonFile fileTrace = replayTrace.getLoadedTrace();
@@ -68,14 +72,10 @@ public class ReplayedTraceStatusAlert extends Alert {
 
 		if (replayedTrace != null) {
 			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithReplayStatus", replayedTrace.getReplayStatus()));
-			this.errorText.setText(
-					replayedTrace.getErrors().stream()
-							.map(ErrorItem::toString)
-							.collect(Collectors.joining("\n"))
-			);
+			this.errorTable.getErrorItems().setAll(replayedTrace.getErrors());
 		} else {
 			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithoutReplayStatus"));
-			this.errorText.setText(i18n.translate("animation.tracereplay.replayedStatus.replayToGetMoreInfo"));
+			this.errorTable.getErrorItems().clear();
 		}
 
 		ObservableList<ReplayedTraceRow> items = FXCollections.observableArrayList();
@@ -86,8 +86,41 @@ public class ReplayedTraceStatusAlert extends Alert {
 			List<String> transitionErrorMessages = replayedTrace != null ? replayedTrace.getTransitionErrorMessages().get(i) : null;
 
 			int step = i + 1;
-			String fileTransition = Transition.prettifyName(fileTransitionObj.getOperationName()); // TODO: show parameters
-			String replayedTransition = replayedTransitionObj != null ? replayedTransitionObj.getPrettyName() : ""; // TODO: show parameters
+			String fileTransition;
+			{
+				fileTransition = Transition.prettifyName(fileTransitionObj.getOperationName());
+
+				// if we want to show all state changes use this code (as it was in the TraceDiff but not in HistoryView)
+				/*String args = Stream.concat(
+						fileTransitionObj.getParameters().entrySet().stream()
+								.map(e -> e.getKey() + "=" + e.getValue()),
+						Transition.isArtificialTransitionName(fileTransitionObj.getOperationName()) ?
+								fileTransitionObj.getDestinationStateVariables().entrySet().stream()
+										.map(e -> e.getKey() + ":=" + e.getValue()) :
+								Stream.empty()
+				).collect(Collectors.joining(", "));*/
+				// this code does not show these state variable changes, which is more in line with OperationItem#prettyPrint
+				String args = fileTransitionObj.getParameters().entrySet().stream()
+						              .map(e -> e.getKey() + "=" + e.getValue())
+						              .collect(Collectors.joining(", "));
+				if (!args.isEmpty()) {
+					fileTransition += "(" + args + ")";
+				}
+
+				String outputArgs = String.join(", ", fileTransitionObj.getOutputParameters().values());
+				if (!outputArgs.isEmpty()) {
+					fileTransition += " → " + outputArgs;
+				}
+			}
+
+			String replayedTransition;
+			if (replayedTransitionObj != null) {
+				OperationItem opItem = OperationItem.forTransitionFast(replayedTransitionObj.getStateSpace(), replayedTransitionObj);
+				replayedTransition = opItem.toPrettyString(true);
+			} else {
+				replayedTransition = "";
+			}
+
 			String precision = transitionReplayPrecision != null ? transitionReplayPrecision.toString() : ""; // TODO: pretty name
 			String errorMessage = transitionErrorMessages != null ? String.join(" ", transitionErrorMessages) : ""; // TODO: prettify
 
