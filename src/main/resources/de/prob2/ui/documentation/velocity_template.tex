@@ -3,8 +3,8 @@
 % Document
 \begin{document}
 \begin{titlepage}
-	\centering
-	\includegraphics[width=0.50\textwidth]{images/ProB_Logo.png}\par\vspace{1cm}
+	\begin{center}
+	\includegraphics[width=0.50\textwidth]{html_files/ProB_Logo.png}\par\vspace{1cm}
 	{\scshape\LARGE Automated Documentation \par}
 	\vspace{1cm}
 	{\scshape\Large of Project \par}
@@ -16,6 +16,7 @@
 
 	% Bottom of the page
 	{\large \today\par}
+\end{center}
 \end{titlepage}
 #foreach($machine in $machines)
 	% MACHINE CODE
@@ -25,6 +26,7 @@
 	\end{lstlisting}
 	%MODELCHECKING
 	#if($modelchecking && !$machine.getModelcheckingItems().isEmpty())
+
 \subsection{Model Checking}
 	\tablestyle[sansbold]
 	\begin{longtable}{*{2}{p{0.45\textwidth}}}
@@ -81,6 +83,7 @@
 #end
 	\tend
 	\end{longtable}
+	\justifying
 		#end
 		#if(!$machine.getLTLPatterns().isEmpty())
 	\tablestyle[sansbold]
@@ -116,7 +119,8 @@
 #end
 	\tend
 	\end{longtable}
-	#end
+	\justifying
+#end
 
 	#end
 	%SYMBOLIC
@@ -152,6 +156,7 @@
 	\tend
 	\end{longtable}
 	\endgroup
+	\justifying
 	#end
 \subsection{Traces}
 	#foreach($trace in $machine.getTraces())
