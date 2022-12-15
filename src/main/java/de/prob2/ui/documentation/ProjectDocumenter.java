@@ -2,7 +2,6 @@ package de.prob2.ui.documentation;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -20,19 +19,15 @@ import org.apache.velocity.exception.MethodInvocationException;
 import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.exception.TemplateInitException;
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
+
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static de.prob2.ui.documentation.DocumentUtility.*;
@@ -48,6 +43,7 @@ public class ProjectDocumenter {
 	private final List<Machine> machines;
 	private final CurrentProject project;
 	private final Injector injector;
+	private HashMap<String,String> tracesHtmlPaths;
 
 	@Inject
 	public ProjectDocumenter(CurrentProject project,
@@ -67,6 +63,7 @@ public class ProjectDocumenter {
 		this.dir = dir;
 		this.filename = filename;
 		this.injector = injector;
+		tracesHtmlPaths = new HashMap<>();
 		createImageDirectoryStructure();
 		saveProBLogo();
 	}
@@ -99,6 +96,7 @@ public class ProjectDocumenter {
 		context.put("DocumentUtility", DocumentUtility.class);
 		context.put("Transition", Transition.class);
 		context.put("i18n", i18n);
+		context.put("traceHtmlPaths",tracesHtmlPaths);
 		return context;
 	}
 	public String saveTraceHtml(Machine machine, ReplayTrace trace){
@@ -122,11 +120,15 @@ public class ProjectDocumenter {
 	public String getMachineCode(Machine elem) {
 		return readFile(project.getLocation().resolve(elem.getLocation()));
 	}
-	public boolean formulaHasResult(LTLFormulaItem formula){return (formula.getResultItem() != null);}
 
-	public boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
-	public boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
-	/*---------------------------------*/
+	private String getAbsoluteHtmlPath(Machine machine, ReplayTrace trace) {
+		return dir + getHtmlPath(machine,trace);
+	}
+
+	private String getHtmlPath(Machine machine, ReplayTrace trace) {
+		return "/html_files/" + machine.getName() + "/" + Transition.prettifyName(trace.getName()) +"/";
+	}
+
 	private void createImageDirectoryStructure() {
 		for (Machine machine : machines) {
 			for (ReplayTrace trace : machine.getTraces()) {
