@@ -112,9 +112,9 @@ public class ProjectDocumenter {
 		}
 		traceChecker.check(trace,true).join();
 		stage.show();
-		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteImagePath(machine,trace)+Transition.prettifyName(trace.getName())+".html"));
+		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(machine,trace)+Transition.prettifyName(trace.getName())+".html"));
 		stage.close();
-		return latexSafe(getImagePath(machine,trace)+Transition.prettifyName(trace.getName())+".html");
+		return getAbsoluteHtmlPath(machine,trace)+Transition.prettifyName(trace.getName())+".html";
 	}
 
 	private void saveProBLogo() {
@@ -148,7 +148,7 @@ public class ProjectDocumenter {
 		for (Machine machine : machines) {
 			for (ReplayTrace trace : machine.getTraces()) {
 				try {
-					Files.createDirectories(Paths.get(getAbsoluteImagePath(machine, trace))
+					Files.createDirectories(Paths.get(getAbsoluteHtmlPath(machine, trace))
 					);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
@@ -156,20 +156,13 @@ public class ProjectDocumenter {
 			}
 		}
 	}
-	private void saveProBLogo() {
-		try {
-			String pathname = dir +"/images/ProB_Logo.png";
-			BufferedImage proBLogo = ImageIO.read(Objects.requireNonNull(Main.class.getResource("ProB_Logo.png")));
-			ImageIO.write(proBLogo, "PNG", new File(pathname));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
-	private String getAbsoluteImagePath(Machine machine, ReplayTrace trace) {
-		return dir + getImagePath(machine,trace);
+	/*--- exclusive used by Template ---*/
+	public String getMachineCode(Machine elem) {
+		return readFile(project.getLocation().resolve(elem.getLocation()));
 	}
-	private String getImagePath(Machine machine, ReplayTrace trace) {
-		return "/images/" + machine.getName() + "/" + Transition.prettifyName(trace.getName()) +"/";
-	}
+	public boolean formulaHasResult(LTLFormulaItem formula){return (formula.getResultItem() != null);}
+	public boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
+	public boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
+	/*---------------------------------*/
 }
