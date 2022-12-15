@@ -34,6 +34,10 @@ public class DocumentUtility {
 		return content;
 	}
 
+	public static String readFileWithStringPath(String path){
+		return readFile(Paths.get(path));
+	}
+
 	public static String latexSafe(String text) {
 		return text.replace("_", "\\_");
 	}
