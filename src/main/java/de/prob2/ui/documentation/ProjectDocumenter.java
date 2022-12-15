@@ -66,6 +66,7 @@ public class ProjectDocumenter {
 		tracesHtmlPaths = new HashMap<>();
 		createImageDirectoryStructure();
 		saveProBLogo();
+		saveLatexCls();
 	}
 
 	public void documentVelocity() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
@@ -116,9 +117,23 @@ public class ProjectDocumenter {
 		return latexSafe(getImagePath(machine,trace)+Transition.prettifyName(trace.getName())+".html");
 	}
 
-	/*--- exclusive used by Template ---*/
-	public String getMachineCode(Machine elem) {
-		return readFile(project.getLocation().resolve(elem.getLocation()));
+	private void saveProBLogo() {
+		String pathname = dir +"/html_files/ProB_Logo.png";
+		try (InputStream logoAsStream = Main.class.getResourceAsStream("ProB_Logo.png")) {
+			assert logoAsStream != null;
+			Files.copy(logoAsStream, Paths.get(pathname));
+		} catch (IOException e) {
+			// An error occurred copying the resource
+		}
+	}
+	private void saveLatexCls() {
+		String pathname = dir +"/autodoc.cls";
+		try (InputStream clsAsStream = this.getClass().getResourceAsStream("autodoc.cls")) {
+			assert clsAsStream != null;
+			Files.copy(clsAsStream, Paths.get(pathname));
+		} catch (IOException e) {
+			// An error occurred copying the resource
+		}
 	}
 
 	private String getAbsoluteHtmlPath(Machine machine, ReplayTrace trace) {
