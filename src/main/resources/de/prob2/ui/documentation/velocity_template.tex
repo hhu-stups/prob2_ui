@@ -21,8 +21,8 @@
 #foreach($machine in $machines)
 	% MACHINE CODE
 \section{$DocumentUtility.latexSafe($machine.getName()) }
-	\begin{lstlisting}[caption = $DocumentUtility.latexSafe($machine.getName()) MCH Code]
-	$documenter.getMachineCode($machine)
+	\begin{lstlisting}[style=MCH, caption = $DocumentUtility.latexSafe($machine.getName()) MCH Code]
+$documenter.getMachineCode($machine)
 	\end{lstlisting}
 	%MODELCHECKING
 	#if($modelchecking && !$machine.getModelcheckingItems().isEmpty())
@@ -50,6 +50,7 @@
 #end
 	\tend
 	\end{longtable}
+	\justifying
 	#end
 	%LTL
 	#if($ltl)
@@ -178,7 +179,24 @@
 #end
 	\tend
 	\end{longtable}
-\href{$documenter.saveTraceHtml($machine,$trace)}{HTML Trace Visualization of $DocumentUtility.latexSafe($trace.getName())}
+	#call( $traceHtmlPaths.put($trace.getName(), $documenter.saveTraceHtml($machine,$trace)) )
+	\embedfile{$traceHtmlPaths.get($trace.getName())}
+	\href{gotoe:embedded= $traceHtmlPaths.get($trace.getName())}{HTML Trace Visualization of $DocumentUtility.latexSafe($trace.getName())} is an attached file.\\
+	For the HTML Source Code \hyperref[lst:$trace.getName()]{[click here!]}  \\
+	\justifying
 #end
+#end
+
+#if(!$traceHtmlPaths.isEmpty())
+	\appendix
+\justifying
+	\section{Traces Visualization HTML Code}
+The visualizations are in the form of interactive HTML files.
+These are attached to this PDF. If your PDF viewer does not support this feature, you can manually copy the following HTML source codes.
+	#foreach($pathEntry in $traceHtmlPaths.entrySet())
+\begin{lstlisting}[label = lst:$pathEntry.key ,style = htmlAppendix, caption = $DocumentUtility.latexSafe($pathEntry.key) MCH Code]
+$DocumentUtility.readFileWithStringPath($pathEntry.value)
+\end{lstlisting}
+	#end
 #end
 \end{document}
