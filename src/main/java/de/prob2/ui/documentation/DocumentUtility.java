@@ -26,7 +26,7 @@ public class DocumentUtility {
 
 
 	public static String readFile(Path path) {
-		String content = null;
+		String content = "";
 		try {
 			content = new String(Files.readAllBytes(path));
 		} catch (IOException e) {
