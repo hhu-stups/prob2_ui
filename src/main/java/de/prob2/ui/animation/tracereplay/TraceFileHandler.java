@@ -1,20 +1,11 @@
 package de.prob2.ui.animation.tracereplay;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.CancellationException;
-
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
-
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.exception.ProBError;
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -29,12 +20,21 @@ import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.table.SimulationItem;
-
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.concurrent.CancellationException;
 
 public class TraceFileHandler extends ProBFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
@@ -48,7 +48,7 @@ public class TraceFileHandler extends ProBFileHandler {
 
 	@Inject
 	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject,
-	                        StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n) {
+							StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n) {
 		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);
 		this.traceManager = traceManager;
 	}
@@ -64,7 +64,7 @@ public class TraceFileHandler extends ProBFileHandler {
 		final String headerBundleKey;
 		final String contentBundleKey;
 		List<Object> messageContent = new ArrayList<>();
-		if (e instanceof NoSuchFileException || e instanceof FileNotFoundException) {
+		if (isFileNotFound(e)) {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
 			messageContent.add(path);
@@ -90,6 +90,29 @@ public class TraceFileHandler extends ProBFileHandler {
 				currentMachine.getTraces().removeIf(trace -> trace.getLocation().equals(path));
 			}
 		});
+	}
+
+	private static boolean isFileNotFound(Throwable e) {
+		if (e instanceof FileNotFoundException || e instanceof NoSuchFileException) {
+			return true;
+		}
+
+		// TODO: let prolog convey this information in a cleaner way (error code, type enum, ...)
+		if (e instanceof ProBError) {
+			ProBError be = (ProBError) e;
+			for (ErrorItem error : be.getErrors()) {
+				if (error == null || error.getMessage() == null) {
+					continue;
+				}
+
+				String msg = error.getMessage().toLowerCase(Locale.ROOT);
+				if (msg.contains("file does not exist:")) {
+					return true;
+				}
+			}
+		}
+
+		return e.getCause() != null && isFileNotFound(e.getCause());
 	}
 
 	public void addTraceFile(final Machine machine, final Path traceFilePath) {
@@ -156,8 +179,8 @@ public class TraceFileHandler extends ProBFileHandler {
 
 	public void save(Trace trace, Path location, String createdBy) throws IOException {
 		JsonMetadata jsonMetadata = updateMetadataBuilder(TraceJsonFile.metadataBuilder())
-			.withCreator(createdBy)
-			.build();
+				.withCreator(createdBy)
+				.build();
 		traceManager.save(location, new TraceJsonFile(trace, jsonMetadata));
 	}
 
