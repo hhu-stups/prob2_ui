@@ -68,7 +68,7 @@ public class TraceFileHandler extends ProBFileHandler {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.fileNotFound.content";
 			messageContent.add(path);
-		} else if (e instanceof JacksonException) {
+		} else if (isInvalidJSON(e)) {
 			headerBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.header";
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.notAValidTraceFile.content";
 			messageContent.add(path);
@@ -113,6 +113,29 @@ public class TraceFileHandler extends ProBFileHandler {
 		}
 
 		return e.getCause() != null && isFileNotFound(e.getCause());
+	}
+
+	private static boolean isInvalidJSON(Throwable e) {
+		if (e instanceof JacksonException) {
+			return true;
+		}
+
+		// TODO: let prolog convey this information in a cleaner way (error code, type enum, ...)
+		if (e instanceof ProBError) {
+			ProBError be = (ProBError) e;
+			for (ErrorItem error : be.getErrors()) {
+				if (error == null || error.getMessage() == null) {
+					continue;
+				}
+
+				String msg = error.getMessage().toLowerCase(Locale.ROOT);
+				if (msg.contains("parse json file:")) {
+					return true;
+				}
+			}
+		}
+
+		return e.getCause() != null && isInvalidJSON(e.getCause());
 	}
 
 	public void addTraceFile(final Machine machine, final Path traceFilePath) {
