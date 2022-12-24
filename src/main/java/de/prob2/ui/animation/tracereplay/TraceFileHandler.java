@@ -86,7 +86,8 @@ public class TraceFileHandler extends ProBFileHandler {
 		if (e instanceof ProBError) {
 			for (ErrorItem error : ((ProBError) e).getErrors()) {
 				if (error != null && error.getMessage() != null) {
-					if (error.getMessage().toLowerCase(Locale.ROOT).contains("could not parse json file:")) {
+					String msg = error.getMessage().toLowerCase(Locale.ROOT);
+					if (msg.contains("could not parse json file:") || msg.contains("json file is empty:")) {
 						return true;
 					}
 				}
