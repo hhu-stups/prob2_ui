@@ -16,8 +16,8 @@ public class DocumentUtility {
 		LINUX, WINDOWS, MAC, OTHER
 	}
 
-	public static void stringToTex(String latex, String filename, Path path) {
-		try (PrintWriter out = new PrintWriter(path.toString() + "/" + filename + ".tex")) {
+	public static void saveStringWithExtension(String latex, String filename, Path path, String extension) {
+		try (PrintWriter out = new PrintWriter(path.toString() + "/" + filename + extension)) {
 			out.println(latex);
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
