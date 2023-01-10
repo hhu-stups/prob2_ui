@@ -24,9 +24,8 @@
 	\begin{lstlisting}[style=MCH, caption = $DocumentUtility.latexSafe($machine.getName()) MCH Code]
 $documenter.getMachineCode($machine)
 	\end{lstlisting}
-	%MODELCHECKING
-	#if($modelchecking && !$machine.getModelcheckingItems().isEmpty())
-
+%MODELCHECKING
+#if($modelchecking && !$machine.getModelcheckingItems().isEmpty())
 \subsection{Model Checking}
 	\tablestyle[sansbold]
 	\begin{longtable}{*{2}{p{0.45\textwidth}}}
@@ -53,10 +52,10 @@ $documenter.getMachineCode($machine)
 	\justifying
 	#end
 	%LTL
-	#if($ltl)
-\subsection{LTL Model Checking}
-		#if(!$machine.getLTLFormulas().isEmpty())
-	\tablestyle[sansbold]
+#if($ltl)
+#if(!$machine.getLTLFormulas().isEmpty() || !$machine.getLTLPatterns().isEmpty() )\subsection{LTL Model Checking} #end
+#if(!$machine.getLTLFormulas().isEmpty())
+\tablestyle[sansbold]
 	\begin{longtable}{*{2}{p{0.45\textwidth}}}
 	\theadstart
 		\thead LTL Formular &
