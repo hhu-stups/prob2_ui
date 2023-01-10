@@ -88,14 +88,14 @@ class ProjectDocumenterTest extends ApplicationTest {
 	}
 	@Test
 	void testBlankDocument() {
-		ProjectDocumenter velocityDocumenter1 = new ProjectDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath, outputFilename,injector);
+		ProjectDocumenter velocityDocumenter1 = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
 		assertTrue(getOutputFile(".tex").exists());
 	}
 	@Test
 	void testMachineCodeAndTracesInserted() throws Exception {
 		machines.add(trafficLight);
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("MCH Code");
 		assertTexFileContainsString("Traces");
@@ -105,14 +105,14 @@ class ProjectDocumenterTest extends ApplicationTest {
 	@Test
 	void testModelcheckingBoolean() throws IOException{
 		machines.add(trafficLight);
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Model Checking");
 	}
 	@Test
 	void testModelcheckingItemInserted() throws IOException {
 		machines.add(trafficLight);
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Modelchecking Items and Results");
 	}
@@ -120,7 +120,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 	@Test
 	void testLTLBoolean() throws IOException {
 		machines.add(trafficLight);
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("LTL Model Checking");
 	}
@@ -128,14 +128,14 @@ class ProjectDocumenterTest extends ApplicationTest {
 	@Test
 	void testLTLFormulaItemInserted() throws IOException {
 		machines.add(trafficLight);
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("LTL Formulars and Results");
 	}
 	@Test
 	void testLTLPatternItemInserted() throws IOException {
 		machines.add(trafficLight);
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("LTL Patterns and Results");
 	}
@@ -143,21 +143,21 @@ class ProjectDocumenterTest extends ApplicationTest {
 	@Test
 	void testSymbolicBoolean() throws IOException {
 		machines.add(trafficLight);
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,true,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Symbolic Model Checking");
 	}
 	@Test
 	void testSymbolicItemInserted() throws IOException {
 		machines.add(trafficLight);
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,true,false,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,true,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Symbolic Formulars and Results");
 	}
 	@DisabledOnOs({ WINDOWS, MAC })
 	@Test
 	void testPDFCreated() {
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,machines,outputPath,outputFilename,injector);
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		//PDF creation not instant set max delay 10s
 		await().atMost(30, SECONDS).until(() -> getOutputFile(".pdf").exists());
