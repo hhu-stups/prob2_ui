@@ -15,7 +15,6 @@
 \usepackage{caption, booktabs}
 \usepackage{graphicx}
 \usepackage{hyperref}
-\usepackage{embedfile}
 \usepackage{hypgotoe}
 
 \lstset{literate=
