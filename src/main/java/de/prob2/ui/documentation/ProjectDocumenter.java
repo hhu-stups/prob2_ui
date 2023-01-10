@@ -40,6 +40,7 @@ public class ProjectDocumenter {
 	private final boolean ltl;
 	private final boolean symbolic;
 	private final boolean makePdf;
+	private final boolean printHtmlCode;
 	private final List<Machine> machines;
 	private final CurrentProject project;
 	private final Injector injector;
@@ -59,6 +60,7 @@ public class ProjectDocumenter {
 		this.ltl = ltl;
 		this.symbolic = symbolic;
 		this.makePdf = makePdf;
+		this.printHtmlCode = printHtmlCode;
 		this.machines = machines;
 		this.dir = dir;
 		this.filename = filename;
@@ -93,6 +95,7 @@ public class ProjectDocumenter {
 		context.put("modelchecking", modelchecking);
 		context.put("ltl", ltl);
 		context.put("symbolic", symbolic);
+		context.put("printHtmlCode",printHtmlCode);
 		context.put("DocumentUtility", DocumentUtility.class);
 		context.put("Transition", Transition.class);
 		context.put("i18n", i18n);
@@ -136,7 +139,7 @@ public class ProjectDocumenter {
 	}
 
 	private String getAbsoluteHtmlPath(Machine machine, ReplayTrace trace) {
-		return dir + getHtmlPath(machine,trace);
+		return dir+"/" + getHtmlPath(machine,trace);
 	}
 
 	private String getHtmlPath(Machine machine, ReplayTrace trace) {
