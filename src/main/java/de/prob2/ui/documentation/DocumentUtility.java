@@ -51,6 +51,11 @@ public class DocumentUtility {
 		switch (getOS()){
 			case LINUX:
 				builder.command("bash", "-c",command);
+				try {
+					builder.start();
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
 				break;
 			case MAC:
 				break;
@@ -59,11 +64,7 @@ public class DocumentUtility {
 			case OTHER:
 				break;
 		}
-		try {
-			builder.start();
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
+
 	}
 
 	public static OS getOS() {

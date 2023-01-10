@@ -66,7 +66,6 @@ public class ProjectDocumenter {
 		this.injector = injector;
 		tracesHtmlPaths = new HashMap<>();
 		buildLatexResources();
-		saveMakeZipBash();
 	}
 
 	public void documentVelocity() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
@@ -77,6 +76,7 @@ public class ProjectDocumenter {
 		DocumentUtility.saveStringWithExtension(writer.toString(), filename, dir, ".tex");
 		if(makePdf)
 			createPdf(filename,dir);
+		saveMakeZipBash();
 	}
 
 	private static void initVelocityEngine() {
