@@ -397,7 +397,11 @@ public final class OperationsView extends VBox {
 
 		final String text;
 		if (trace.getCurrentState().isMaxTransitionsCalculated()) {
-			text = i18n.translate("operations.operationsView.warningLabel.maxReached");
+			if (!trace.getCurrentState().isInitialised()){
+				text = i18n.translate("operations.operationsView.warningLabel.maxInitialisationsReached");
+			} else {
+				text = i18n.translate("operations.operationsView.warningLabel.maxOperationsReached");
+			}
 		} else if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
 			text = i18n.translate("operations.operationsView.warningLabel.noSetupConstantsOrInit");
 		} else {
