@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -61,6 +62,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StageManager stageManager;
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
+	private CompletableFuture<?> loadFuture;
 
 	@Inject
 	private CurrentProject(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace, final Config config) {
@@ -158,7 +160,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(CliTaskExecutor.class).interruptAll();
 		injector.getInstance(BEditorView.class).getErrors().clear();
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
-		machineLoader.loadAsync(m, p.getPreferences());
+		loadFuture = machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		injector.getInstance(LTLPatternParser.class).parseMachine(m);
@@ -389,5 +391,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		} else {
 			return true;
 		}
+	}
+
+	public CompletableFuture<?> getLoadFuture() {
+		return loadFuture;
 	}
 }
