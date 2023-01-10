@@ -74,7 +74,7 @@ public class ProjectDocumenter {
 		VelocityContext context = getVelocityContext();
 		StringWriter writer = new StringWriter();
 		Velocity.mergeTemplate("de/prob2/ui/documentation/velocity_template.tex", String.valueOf(StandardCharsets.UTF_8),context,writer);
-		DocumentUtility.stringToTex(writer.toString(), filename, dir);
+		DocumentUtility.saveStringWithExtension(writer.toString(), filename, dir, ".tex");
 		if(makePdf)
 			createPdf(filename,dir);
 	}
@@ -104,37 +104,14 @@ public class ProjectDocumenter {
 	public String saveTraceHtml(Machine machine, ReplayTrace trace){
 		VisBStage stage = injector.getInstance(VisBStage.class);
 		TraceChecker traceChecker = injector.getInstance(TraceChecker.class);
+		String filename = Transition.prettifyName(trace.getName())+".html";
 		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
-		//TODO FEEDBACK SYSTEM KEIN SLEEP
-		try {
-			TimeUnit.SECONDS.sleep(5);
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
-		}
+		project.getLoadFuture().join();
 		traceChecker.check(trace,true).join();
 		stage.show();
-		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(machine,trace)+Transition.prettifyName(trace.getName())+".html"));
+		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(machine,trace)+filename));
 		stage.close();
-		return getAbsoluteHtmlPath(machine,trace)+Transition.prettifyName(trace.getName())+".html";
-	}
-
-	private void saveProBLogo() {
-		String pathname = dir +"/html_files/ProB_Logo.png";
-		try (InputStream logoAsStream = Main.class.getResourceAsStream("ProB_Logo.png")) {
-			assert logoAsStream != null;
-			Files.copy(logoAsStream, Paths.get(pathname));
-		} catch (IOException e) {
-			// An error occurred copying the resource
-		}
-	}
-	private void saveLatexCls() {
-		String pathname = dir +"/autodoc.cls";
-		try (InputStream clsAsStream = this.getClass().getResourceAsStream("autodoc.cls")) {
-			assert clsAsStream != null;
-			Files.copy(clsAsStream, Paths.get(pathname));
-		} catch (IOException e) {
-			// An error occurred copying the resource
-		}
+		return getHtmlPath(machine,trace)+filename;
 	}
 
 	private String getAbsoluteHtmlPath(Machine machine, ReplayTrace trace) {
