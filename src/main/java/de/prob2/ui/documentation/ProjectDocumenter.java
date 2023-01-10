@@ -28,7 +28,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 
 import static de.prob2.ui.documentation.DocumentUtility.*;
 
@@ -49,7 +48,7 @@ public class ProjectDocumenter {
 	@Inject
 	public ProjectDocumenter(CurrentProject project,
 							 I18n i18n, boolean modelchecking,
-							 boolean ltl, boolean symbolic, boolean makePdf,
+							 boolean ltl, boolean symbolic, boolean makePdf, boolean printHtmlCode,
 							 List<Machine> machines,
 							 Path dir,
 							 String filename,
