@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class DocumentUtility {
 	public enum OS {
@@ -24,7 +23,6 @@ public class DocumentUtility {
 		}
 	}
 
-
 	public static String readFile(Path path) {
 		String content = "";
 		try {
@@ -35,9 +33,6 @@ public class DocumentUtility {
 		return content;
 	}
 
-	public static String readFileWithStringPath(String path){
-		return readFile(Paths.get(path));
-	}
 
 	public static String latexSafe(String text) {
 		return text.replace("_", "\\_");
