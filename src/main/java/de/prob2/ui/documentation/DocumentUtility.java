@@ -43,11 +43,19 @@ public class DocumentUtility {
 		return text.replace("_", "\\_");
 	}
 	public static void createPdf(String filename, Path dir) {
+		executeCommand(dir,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
+	}
+
+	public static void makeShellExecutable(String filename, Path dir) {
+		executeCommand(dir,"chmod +x "+ filename+".sh");
+	}
+
+	private static void executeCommand(Path dir, String command) {
 		ProcessBuilder builder = new ProcessBuilder();
 		builder.directory(new File(dir.toString()));
 		switch (getOS()){
 			case LINUX:
-				builder.command("bash", "-c", "pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
+				builder.command("bash", "-c",command);
 				break;
 			case MAC:
 				break;
