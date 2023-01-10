@@ -179,9 +179,8 @@ $documenter.getMachineCode($machine)
 	\tend
 	\end{longtable}
 	#call( $traceHtmlPaths.put($trace.getName(), $documenter.saveTraceHtml($machine,$trace)) )
-	\embedfile{$traceHtmlPaths.get($trace.getName())}
-	\href{gotoe:embedded= $traceHtmlPaths.get($trace.getName())}{HTML Trace Visualization of $DocumentUtility.latexSafe($trace.getName())} is an attached file.\\
-	For the HTML Source Code \hyperref[lst:$trace.getName()]{[click here!]}  \\
+	\href{run:$traceHtmlPaths.get($trace.getName())}{HTML Trace Visualization of $DocumentUtility.latexSafe($trace.getName())}\\
+	#if($printHtmlCode) For the HTML Source Code \hyperref[lst:$trace.getName()]{[click here!]}  \\ #end
 	\justifying
 #end
 #end
