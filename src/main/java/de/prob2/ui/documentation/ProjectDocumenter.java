@@ -64,9 +64,8 @@ public class ProjectDocumenter {
 		this.filename = filename;
 		this.injector = injector;
 		tracesHtmlPaths = new HashMap<>();
-		createImageDirectoryStructure();
-		saveProBLogo();
-		saveLatexCls();
+		buildLatexResources();
+		saveMakeZipBash();
 	}
 
 	public void documentVelocity() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
@@ -141,7 +140,15 @@ public class ProjectDocumenter {
 	}
 
 	private String getHtmlPath(Machine machine, ReplayTrace trace) {
-		return "/html_files/" + machine.getName() + "/" + Transition.prettifyName(trace.getName()) +"/";
+		return "html_files/" + machine.getName() + "/" + Transition.prettifyName(trace.getName()) +"/";
+	}
+	public String getTraceHtmlCode(String relativePath){
+		return readFile(Paths.get(dir +"/"+ relativePath));
+	}
+	private void buildLatexResources() {
+		createImageDirectoryStructure();
+		saveProBLogo();
+		saveLatexCls();
 	}
 
 	private void createImageDirectoryStructure() {
