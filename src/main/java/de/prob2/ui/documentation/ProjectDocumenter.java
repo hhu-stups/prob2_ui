@@ -142,6 +142,27 @@ public class ProjectDocumenter {
 			}
 		}
 	}
+	private void saveProBLogo() {
+		String pathname = dir +"/html_files/ProB_Logo.png";
+		copyFile(pathname,  Main.class.getResourceAsStream("ProB_Logo.png"));
+	}
+	private void saveLatexCls() {
+		String pathname = dir +"/autodoc.cls";
+		copyFile(pathname, this.getClass().getResourceAsStream("autodoc.cls"));
+	}
+	private void saveMakeZipBash() {
+		String content = "#!/bin/bash \n zip -r "+ filename +".zip html_files "+filename+".pdf";
+		DocumentUtility.saveStringWithExtension(content, "makeZip", dir, ".sh");
+		makeShellExecutable("makeZip",dir);
+	}
+	private void copyFile(String pathname, InputStream resource) {
+		try (InputStream resourceAsStream = resource) {
+			assert resourceAsStream != null;
+			Files.copy(resourceAsStream, Paths.get(pathname));
+		} catch (IOException e) {
+			// An error occurred copying the resource
+		}
+	}
 
 	/*--- exclusive used by Template ---*/
 	public String getMachineCode(Machine elem) {
