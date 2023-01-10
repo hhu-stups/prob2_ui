@@ -58,6 +58,8 @@ public class SaveDocumentationStage extends Stage {
 	private CheckBox documentSymbolic;
 	@FXML
 	private CheckBox makePdf;
+	@FXML
+	private CheckBox printHtmlCode;
 	private final ObservableList<MachineDocumentationItem> machineDocumentationItems = FXCollections.observableArrayList();
 	private final Injector injector;
 	private final FileChooserManager fileChooserManager;
@@ -72,7 +74,7 @@ public class SaveDocumentationStage extends Stage {
 		this.injector = injector;
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.stageManager = stageManager;
-		stageManager.loadFXML(this, "save_modelchecking_stage.fxml");
+		stageManager.loadFXML(this, "save_project_documentation_stage.fxml");
 		currentProject.getMachines().forEach(machine -> machineDocumentationItems.add(new MachineDocumentationItem(Boolean.TRUE, machine)));
 	}
 
@@ -132,6 +134,7 @@ public class SaveDocumentationStage extends Stage {
 															 documentLTL.isSelected(),
 														     documentSymbolic.isSelected(),
 														     makePdf.isSelected(),
+															 printHtmlCode.isSelected(),
 														     checkedMachines, dir, filename.getText(),injector);
 		documenter.documentVelocity();
 		this.close();

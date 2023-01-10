@@ -186,15 +186,15 @@ $documenter.getMachineCode($machine)
 #end
 #end
 
-#if(!$traceHtmlPaths.isEmpty())
-	\appendix
+#if(!$traceHtmlPaths.isEmpty() && $printHtmlCode)
+\appendix
 \justifying
 	\section{Traces Visualization HTML Code}
 The visualizations are in the form of interactive HTML files.
 These are attached to this PDF. If your PDF viewer does not support this feature, you can manually copy the following HTML source codes.
 	#foreach($pathEntry in $traceHtmlPaths.entrySet())
 \begin{lstlisting}[label = lst:$pathEntry.key ,style = htmlAppendix, caption = $DocumentUtility.latexSafe($pathEntry.key) MCH Code]
-$DocumentUtility.readFileWithStringPath($pathEntry.value)
+$documenter.getTraceHtmlCode($pathEntry.value)
 \end{lstlisting}
 	#end
 #end

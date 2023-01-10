@@ -66,12 +66,18 @@
 									<Label text="%verifications.documentation.saveStage.label.name"/>
 									<TextField fx:id="filename" HBox.hgrow="always"/>
 								</HBox>
-								<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+								<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="15.0">
 									<padding><Insets top="5"/></padding>
 									<CheckBox fx:id="makePdf" selected="true"
-											  text="%verifications.documentation.symbolic.pdf">
+											  text="%verifications.documentation.pdf">
 										<tooltip>
-											<Tooltip text="%verifications.documentation.symbolic.pdf" />
+											<Tooltip text="%verifications.documentation.pdf" />
+										</tooltip>
+									</CheckBox>
+									<CheckBox fx:id="printHtmlCode" selected="true"
+											  text="%verifications.documentation.printhtml">
+										<tooltip>
+											<Tooltip text="%verifications.documentation.printhtml" />
 										</tooltip>
 									</CheckBox>
 								</HBox>
