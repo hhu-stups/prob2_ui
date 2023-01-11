@@ -304,7 +304,7 @@
  * Menu, ContextMenu, MenuBar													  *
  ************************************************************************************/
 .context-menu {
-	-fx-background-color: -prob-grey-75;
+	-fx-background-color: rgba(85, 85, 96, 0.95); /* increased opacity to 95, was prob-grey-75 */
 	-fx-background-radius: 3.0 3.0 3.0 3.0;
 	-fx-effect: null;
 }
