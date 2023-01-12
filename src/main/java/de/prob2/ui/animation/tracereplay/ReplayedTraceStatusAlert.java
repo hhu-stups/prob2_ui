@@ -22,7 +22,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.TableRow;
 import javafx.scene.layout.Region;
 
 import java.util.Collection;
@@ -59,70 +58,6 @@ public class ReplayedTraceStatusAlert extends Alert {
 
 	private static boolean isError(ReplayTrace replayTrace) {
 		return replayTrace.getReplayedTrace() != null && (!replayTrace.getReplayedTrace().getErrors().isEmpty() || replayTrace.getReplayedTrace().getReplayStatus() != TraceReplayStatus.PERFECT);
-	}
-
-	@FXML
-	private void initialize() {
-		stageManager.register(this);
-
-		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
-		this.getButtonTypes().setAll(ButtonType.OK);
-
-		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-
-		this.errorTable.dontSyncWithEditor();
-		this.errorTable.visibleProperty().bind(Bindings.createBooleanBinding(() -> !this.errorTable.getErrorItems().isEmpty(), this.errorTable.getErrorItems()));
-
-		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
-		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
-
-		if (replayedTrace != null) {
-			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithReplayStatus", replayedTrace.getReplayStatus()));
-			this.errorTable.getErrorItems().setAll(replayedTrace.getErrors());
-		} else {
-			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithoutReplayStatus"));
-			this.errorTable.getErrorItems().clear();
-		}
-
-		this.traceTable.setRowFactory(t -> new TableRow<ReplayedTraceRow>() {
-
-			{
-				// getStyleClass().add("trace-diff-cell");
-			}
-
-			@Override
-			protected void updateItem(ReplayedTraceRow item, boolean empty) {
-				super.updateItem(item, empty);
-				if (item != null && !empty) {
-					// setTextFill(Color.DARKGREEN);
-					getStyleClass().removeAll("FAULTY", "FOLLOWING");
-					getStyleClass().addAll(item.getStyleClasses());
-					// System.out.println(getStyleClass() + " " + getChildrenUnmodifiable());
-					// styleProperty().bind(item.styleProperty());
-				}
-			}
-		});
-
-		if (replayedTrace == null || traceFromReplayed == null) {
-			this.traceTable.disableReplayedTransitionColumns();
-		}
-
-		executor.submit(this::buildRowsAsync).whenComplete((items, exc) -> {
-			if (exc != null) {
-				Platform.runLater(() -> {
-					this.close();
-					traceFileHandler.showLoadError(replayTrace.getAbsoluteLocation(), exc);
-				});
-			} else if (items != null) {
-				Platform.runLater(() -> this.traceTable.setItems(items));
-			}
-		});
-	}
-
-	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws Exception {
-		// load newest trace file from disk
-		replayTrace.load();
-		return cliExecutor.submit(() -> buildRowsCli(replayTrace)).get();
 	}
 
 	private static ObservableList<ReplayedTraceRow> buildRowsCli(ReplayTrace replayTrace) {
@@ -190,7 +125,7 @@ public class ReplayedTraceStatusAlert extends Alert {
 			String errorMessage = transitionErrorMessages != null ? String.join(" ", transitionErrorMessages) : ""; // TODO: prettify
 
 			Collection<String> styleClasses;
-			if (transitionReplayPrecision != TransitionReplayPrecision.PRECISE) {
+			if (transitionReplayPrecision != null && transitionReplayPrecision != TransitionReplayPrecision.PRECISE) {
 				styleClasses = Collections.singletonList("FAULTY");
 			} else {
 				styleClasses = Collections.emptyList();
@@ -200,5 +135,50 @@ public class ReplayedTraceStatusAlert extends Alert {
 		}
 
 		return items;
+	}
+
+	@FXML
+	private void initialize() {
+		stageManager.register(this);
+
+		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
+		this.getButtonTypes().setAll(ButtonType.OK);
+
+		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+
+		this.errorTable.dontSyncWithEditor();
+		this.errorTable.visibleProperty().bind(Bindings.createBooleanBinding(() -> !this.errorTable.getErrorItems().isEmpty(), this.errorTable.getErrorItems()));
+
+		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
+		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
+
+		if (replayedTrace != null) {
+			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithReplayStatus", replayedTrace.getReplayStatus()));
+			this.errorTable.getErrorItems().setAll(replayedTrace.getErrors());
+		} else {
+			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithoutReplayStatus"));
+			this.errorTable.getErrorItems().clear();
+		}
+
+		if (replayedTrace == null || traceFromReplayed == null) {
+			this.traceTable.disableReplayedTransitionColumns();
+		}
+
+		executor.submit(this::buildRowsAsync).whenComplete((items, exc) -> {
+			if (exc != null) {
+				Platform.runLater(() -> {
+					this.close();
+					traceFileHandler.showLoadError(replayTrace.getAbsoluteLocation(), exc);
+				});
+			} else if (items != null) {
+				Platform.runLater(() -> this.traceTable.setItems(items));
+			}
+		});
+	}
+
+	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws Exception {
+		// load newest trace file from disk
+		replayTrace.load();
+		return cliExecutor.submit(() -> buildRowsCli(replayTrace)).get();
 	}
 }
