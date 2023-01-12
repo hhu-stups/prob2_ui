@@ -22,8 +22,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.TableRow;
 import javafx.scene.layout.Region;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -80,6 +83,25 @@ public class ReplayedTraceStatusAlert extends Alert {
 			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithoutReplayStatus"));
 			this.errorTable.getErrorItems().clear();
 		}
+
+		this.traceTable.setRowFactory(t -> new TableRow<ReplayedTraceRow>() {
+
+			{
+				// getStyleClass().add("trace-diff-cell");
+			}
+
+			@Override
+			protected void updateItem(ReplayedTraceRow item, boolean empty) {
+				super.updateItem(item, empty);
+				if (item != null && !empty) {
+					// setTextFill(Color.DARKGREEN);
+					getStyleClass().removeAll("FAULTY", "FOLLOWING");
+					getStyleClass().addAll(item.getStyleClasses());
+					// System.out.println(getStyleClass() + " " + getChildrenUnmodifiable());
+					// styleProperty().bind(item.styleProperty());
+				}
+			}
+		});
 
 		if (replayedTrace == null || traceFromReplayed == null) {
 			this.traceTable.disableReplayedTransitionColumns();
@@ -142,9 +164,9 @@ public class ReplayedTraceStatusAlert extends Alert {
 								Stream.empty()
 				).collect(Collectors.joining(", "));
 				// this code does not show these state variable changes, which is more in line with OperationItem#prettyPrint
-					/*String args = fileTransitionObj.getParameters().entrySet().stream()
-					.map(e -> e.getKey() + "=" + e.getValue())
-					.collect(Collectors.joining(", "));*/
+				/*String args = fileTransitionObj.getParameters().entrySet().stream()
+				.map(e -> e.getKey() + "=" + e.getValue())
+				.collect(Collectors.joining(", "));*/
 
 				if (!args.isEmpty()) {
 					fileTransition += "(" + args + ")";
@@ -167,7 +189,14 @@ public class ReplayedTraceStatusAlert extends Alert {
 			String precision = transitionReplayPrecision != null ? transitionReplayPrecision.toString() : ""; // TODO: pretty name
 			String errorMessage = transitionErrorMessages != null ? String.join(" ", transitionErrorMessages) : ""; // TODO: prettify
 
-			items.add(new ReplayedTraceRow(step, fileTransition, replayedTransition, precision, errorMessage));
+			Collection<String> styleClasses;
+			if (transitionReplayPrecision != TransitionReplayPrecision.PRECISE) {
+				styleClasses = Collections.singletonList("FAULTY");
+			} else {
+				styleClasses = Collections.emptyList();
+			}
+
+			items.add(new ReplayedTraceRow(step, fileTransition, replayedTransition, precision, errorMessage, null, styleClasses));
 		}
 
 		return items;
