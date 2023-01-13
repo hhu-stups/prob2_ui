@@ -27,7 +27,7 @@ public final class BConsole extends Console {
 				final String name = modelFile == null ? to.getMainComponent().toString() : modelFile.getName();
 				message = i18n.translate("consoles.b.message.modelLoaded", name);
 				String lastLine = this.getText(this.getLineNumber() - 1);
-				if(!message.equals(lastLine)) {
+				if (!message.equals(lastLine)) {
 					final int oldCaretPos = this.getCaretPosition();
 					final String line = message + '\n';
 					this.insertText(this.getLineNumber(), 0, line);
@@ -36,7 +36,7 @@ public final class BConsole extends Console {
 				}
 			}
 		});
-		
+
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
@@ -44,7 +44,7 @@ public final class BConsole extends Console {
 					loadInstructions(configData.bConsoleInstructions);
 				}
 			}
-			
+
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.bConsoleInstructions = saveInstructions();

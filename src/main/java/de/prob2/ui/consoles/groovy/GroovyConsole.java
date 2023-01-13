@@ -25,15 +25,15 @@ import org.fxmisc.wellbehaved.event.Nodes;
 @Singleton
 public class GroovyConsole extends Console {
 	private final GroovyInterpreter groovyInterpreter;
-	
+
 	@Inject
 	private GroovyConsole(GroovyInterpreter groovyInterpreter, I18n i18n, Config config) {
 		super(i18n, i18n.translate("consoles.groovy.header"), i18n.translate("consoles.groovy.prompt"), groovyInterpreter);
 		this.groovyInterpreter = groovyInterpreter;
 		this.groovyInterpreter.setCodeCompletion(this);
 		setCodeCompletionEvent();
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e-> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
-		
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
+
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
@@ -41,45 +41,47 @@ public class GroovyConsole extends Console {
 					loadInstructions(configData.groovyConsoleInstructions);
 				}
 			}
-			
+
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.groovyConsoleInstructions = saveInstructions();
 			}
 		});
 	}
-	
+
 	@Override
-	protected void keyPressed(KeyEvent e) {
-		if (".".equals(e.getText())) {
+	protected void keyTyped(KeyEvent e) {
+		if (".".equals(e.getCharacter())) {
 			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
 		}
-		super.keyPressed(e);
+
+		super.keyTyped(e);
 	}
-	
+
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
 		if (getCaretPosition() >= this.getInputStart()) {
 			int caretPosInLine = getCaretPosition() - getInputStart();
 			groovyInterpreter.triggerCodeCompletion(getInput().substring(0, caretPosInLine), action);
 		}
 	}
-	
+
 	private void setCodeCompletionEvent() {
 		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> groovyInterpreter.triggerCloseCodeCompletion());
 		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, this::handleCodeCompletionEvent);
 	}
-	
+
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
-		if (e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent)e.getEvent()).getText())) {
+		if (e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent) e.getEvent()).getText())) {
 			handleChooseSuggestion(e);
 			requestFollowCaret(); //This forces the text area to scroll to the bottom. Invoking scrollYToPixel does not have the expected effect
 		} else if (e.getCode() == KeyCode.SPACE) {
 			//handle Space in Code Completion
-			keyPressed((KeyEvent)e.getEvent());
-			e.consume();
+			// TODO: fix
+			// keyPressed((KeyEvent) e.getEvent());
+			// e.consume();
 		}
 	}
-		
+
 	private void handleChooseSuggestion(CodeCompletionEvent e) {
 		String choice = e.getChoice();
 		String suggestion = e.getCurrentSuggestion();
@@ -94,7 +96,7 @@ public class GroovyConsole extends Console {
 		charCounterInLine += diff;
 		this.moveTo(indexOfRest + diff);
 	}
-	
+
 	private int getIndexSkipped(String rest, String choice, String suggestion) {
 		String restOfChoice = choice.substring(suggestion.length());
 		int result = 0;
@@ -107,7 +109,7 @@ public class GroovyConsole extends Console {
 		}
 		return result;
 	}
-	
+
 	public void closeObjectStage() {
 		groovyInterpreter.closeObjectStage();
 	}
