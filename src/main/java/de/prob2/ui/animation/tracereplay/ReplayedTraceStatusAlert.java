@@ -1,6 +1,16 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import com.google.inject.Injector;
+
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.TraceReplayStatus;
@@ -15,6 +25,7 @@ import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.executor.CompletableExecutorService;
 import de.prob2.ui.internal.executor.CompletableThreadPoolExecutor;
 import de.prob2.ui.operations.OperationItem;
+
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
@@ -24,12 +35,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 
 public class ReplayedTraceStatusAlert extends Alert {
 
@@ -58,83 +64,6 @@ public class ReplayedTraceStatusAlert extends Alert {
 
 	private static boolean isError(ReplayTrace replayTrace) {
 		return replayTrace.getReplayedTrace() != null && (!replayTrace.getReplayedTrace().getErrors().isEmpty() || replayTrace.getReplayedTrace().getReplayStatus() != TraceReplayStatus.PERFECT);
-	}
-
-	private static ObservableList<ReplayedTraceRow> buildRowsCli(ReplayTrace replayTrace) {
-		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
-		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
-		TraceJsonFile fileTrace = Objects.requireNonNull(replayTrace.getLoadedTrace(), "traceJsonFile");
-
-		ObservableList<ReplayedTraceRow> items = FXCollections.observableArrayList();
-
-		int transitionCount = fileTrace.getTransitionList().size();
-		if (traceFromReplayed != null) {
-			transitionCount = Math.min(transitionCount, traceFromReplayed.getTransitionList().size());
-		}
-		if (traceFromReplayed != null) {
-			transitionCount = Math.min(transitionCount, traceFromReplayed.getTransitionList().size());
-		}
-		if (replayedTrace != null) {
-			transitionCount = Math.min(transitionCount, Math.min(replayedTrace.getTransitionReplayPrecisions().size(), replayedTrace.getTransitionErrorMessages().size()));
-		}
-
-		for (int i = 0; i < transitionCount; i++) {
-			PersistentTransition fileTransitionObj = fileTrace.getTransitionList().get(i);
-			Transition replayedTransitionObj = traceFromReplayed != null ? traceFromReplayed.getTransitionList().get(i) : null;
-			TransitionReplayPrecision transitionReplayPrecision = replayedTrace != null ? replayedTrace.getTransitionReplayPrecisions().get(i) : null;
-			List<String> transitionErrorMessages = replayedTrace != null ? replayedTrace.getTransitionErrorMessages().get(i) : null;
-
-			int step = i + 1;
-			String fileTransition;
-			{
-				fileTransition = Transition.prettifyName(fileTransitionObj.getOperationName());
-
-				// if we want to show all state changes use this code (as it was in the TraceDiff but not in HistoryView)
-				String args = Stream.concat(
-						fileTransitionObj.getParameters().entrySet().stream()
-								.map(e -> e.getKey() + "=" + e.getValue()),
-						Transition.isArtificialTransitionName(fileTransitionObj.getOperationName()) ?
-								fileTransitionObj.getDestinationStateVariables().entrySet().stream()
-										.map(e -> e.getKey() + ":=" + e.getValue()) :
-								Stream.empty()
-				).collect(Collectors.joining(", "));
-				// this code does not show these state variable changes, which is more in line with OperationItem#prettyPrint
-				/*String args = fileTransitionObj.getParameters().entrySet().stream()
-				.map(e -> e.getKey() + "=" + e.getValue())
-				.collect(Collectors.joining(", "));*/
-
-				if (!args.isEmpty()) {
-					fileTransition += "(" + args + ")";
-				}
-
-				String outputArgs = String.join(", ", fileTransitionObj.getOutputParameters().values());
-				if (!outputArgs.isEmpty()) {
-					fileTransition += " → " + outputArgs;
-				}
-			}
-
-			String replayedTransition;
-			if (replayedTransitionObj != null) {
-				OperationItem opItem = OperationItem.forTransition(replayedTransitionObj.getStateSpace(), replayedTransitionObj);
-				replayedTransition = opItem.toPrettyString(true);
-			} else {
-				replayedTransition = "";
-			}
-
-			String precision = transitionReplayPrecision != null ? transitionReplayPrecision.toString() : ""; // TODO: pretty name
-			String errorMessage = transitionErrorMessages != null ? String.join(" ", transitionErrorMessages) : ""; // TODO: prettify
-
-			Collection<String> styleClasses;
-			if (transitionReplayPrecision != null && transitionReplayPrecision != TransitionReplayPrecision.PRECISE) {
-				styleClasses = Collections.singletonList("FAULTY");
-			} else {
-				styleClasses = Collections.emptyList();
-			}
-
-			items.add(new ReplayedTraceRow(step, fileTransition, replayedTransition, precision, errorMessage, null, styleClasses));
-		}
-
-		return items;
 	}
 
 	@FXML
@@ -177,8 +106,87 @@ public class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws Exception {
-		// load newest trace file from disk
-		replayTrace.load();
-		return cliExecutor.submit(() -> buildRowsCli(replayTrace)).get();
+		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
+		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
+
+		CompletableFuture<Map<Transition, OperationItem>> future;
+		if (traceFromReplayed != null) {
+			// start cli instantly on another thread, while doing IO on this thread
+			future = cliExecutor.submit(() -> OperationItem.forTransitions(
+					traceFromReplayed.getStateSpace(),
+					traceFromReplayed.getTransitionList()
+			));
+		} else {
+			future = null;
+		}
+
+		// always load newest trace file from disk
+		TraceJsonFile fileTrace = Objects.requireNonNull(replayTrace.load(), "traceJsonFile");
+
+		ObservableList<ReplayedTraceRow> items = FXCollections.observableArrayList();
+
+		int transitionCount = fileTrace.getTransitionList().size();
+		if (traceFromReplayed != null) {
+			transitionCount = Math.min(transitionCount, traceFromReplayed.getTransitionList().size());
+		}
+		if (traceFromReplayed != null) {
+			transitionCount = Math.min(transitionCount, traceFromReplayed.getTransitionList().size());
+		}
+		if (replayedTrace != null) {
+			transitionCount = Math.min(transitionCount, Math.min(replayedTrace.getTransitionReplayPrecisions().size(), replayedTrace.getTransitionErrorMessages().size()));
+		}
+
+		for (int i = 0; i < transitionCount; i++) {
+			PersistentTransition fileTransitionObj = fileTrace.getTransitionList().get(i);
+			Transition replayedTransitionObj = traceFromReplayed != null ? traceFromReplayed.getTransitionList().get(i) : null;
+			TransitionReplayPrecision transitionReplayPrecision = replayedTrace != null ? replayedTrace.getTransitionReplayPrecisions().get(i) : null;
+			List<String> transitionErrorMessages = replayedTrace != null ? replayedTrace.getTransitionErrorMessages().get(i) : null;
+
+			int step = i + 1;
+			String fileTransition;
+			{
+				fileTransition = Transition.prettifyName(fileTransitionObj.getOperationName());
+
+				String args = Stream.concat(
+						fileTransitionObj.getParameters().entrySet().stream()
+								.map(e -> e.getKey() + "=" + e.getValue()),
+						Transition.isArtificialTransitionName(fileTransitionObj.getOperationName()) ?
+								fileTransitionObj.getDestinationStateVariables().entrySet().stream()
+										.map(e -> e.getKey() + ":=" + e.getValue()) :
+								Stream.empty()
+				).collect(Collectors.joining(", "));
+
+				if (!args.isEmpty()) {
+					fileTransition += "(" + args + ")";
+				}
+
+				String outputArgs = String.join(", ", fileTransitionObj.getOutputParameters().values());
+				if (!outputArgs.isEmpty()) {
+					fileTransition += " → " + outputArgs;
+				}
+			}
+
+			String replayedTransition;
+			if (replayedTransitionObj != null) {
+				OperationItem opItem = future.get().get(replayedTransitionObj);
+				replayedTransition = opItem.toPrettyString(true);
+			} else {
+				replayedTransition = "";
+			}
+
+			String precision = transitionReplayPrecision != null ? i18n.translate(enumNameAdapter("animation.tracereplay.replayedStatus.transitionReplayPrecision"), transitionReplayPrecision) : "";
+			String errorMessage = transitionErrorMessages != null ? String.join("; ", transitionErrorMessages) : ""; // TODO: prettify
+
+			Collection<String> styleClasses;
+			if (transitionReplayPrecision != null && transitionReplayPrecision != TransitionReplayPrecision.PRECISE) {
+				styleClasses = Collections.singletonList("FAULTY");
+			} else {
+				styleClasses = Collections.emptyList();
+			}
+
+			items.add(new ReplayedTraceRow(step, fileTransition, replayedTransition, precision, errorMessage, null, styleClasses));
+		}
+
+		return items;
 	}
 }
