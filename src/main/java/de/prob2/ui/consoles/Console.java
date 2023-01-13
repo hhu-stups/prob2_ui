@@ -1,34 +1,23 @@
 package de.prob2.ui.consoles;
 
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StringHelper;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.*;
+import org.controlsfx.tools.Platform;
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StringHelper;
-
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.input.Clipboard;
-import javafx.scene.input.Dragboard;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseButton;
-import javafx.scene.input.TransferMode;
-
-import org.controlsfx.tools.Platform;
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.fxmisc.wellbehaved.event.InputHandler;
-import org.fxmisc.wellbehaved.event.InputMap;
-import org.fxmisc.wellbehaved.event.Nodes;
-
-import static de.prob2.ui.internal.StringHelper.escapeNonAscii;
 
 public abstract class Console extends StyleClassedTextArea {
 
@@ -115,7 +104,9 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyReleased()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyTyped()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyTyped().onlyIf(Console::hasInsertableText), this::keyTyped));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyTyped().onlyIf(Console::hasInsertableText), e -> keyTyped(e.getCharacter())));
+
+		// TODO: use KeyCharacterCombination because of different keyboard layouts
 
 		// GUI-style shortcuts, these should use the Shortcut key (i. e. Command on Mac, Control on other systems).
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.SHORTCUT_DOWN), e -> this.copy()));
@@ -140,14 +131,14 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE, KeyCombination.ALT_DOWN), KeyEvent::consume));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> this.handleEnter()));
 
-		Nodes.addInputMap(this, InputMap.process(KeyEvent.KEY_PRESSED, e -> {
+		/*Nodes.addInputMap(this, InputMap.process(KeyEvent.KEY_PRESSED, e -> {
 			System.out.printf("[%s, text=%s, char=%s, code=%s%s%s%s%s%s]%n", e.getEventType(), escapeNonAscii(e.getText()), escapeNonAscii(e.getCharacter()), e.getCode(), e.isShiftDown() ? " SHIFT" : "", e.isControlDown() ? " CTRL" : "", e.isAltDown() ? " ALT" : "", e.isMetaDown() ? " META" : "", e.isShortcutDown() ? " SHRTCT" : "");
 			return InputHandler.Result.PROCEED;
 		}));
 		Nodes.addInputMap(this, InputMap.process(KeyEvent.KEY_TYPED, e -> {
 			System.out.printf("[%s, text=%s, char=%s, code=%s%s%s%s%s%s]%n", e.getEventType(), escapeNonAscii(e.getText()), escapeNonAscii(e.getCharacter()), e.getCode(), e.isShiftDown() ? " SHIFT" : "", e.isControlDown() ? " CTRL" : "", e.isAltDown() ? " ALT" : "", e.isMetaDown() ? " META" : "", e.isShortcutDown() ? " SHRTCT" : "");
 			return InputHandler.Result.PROCEED;
-		}));
+		}));*/
 	}
 
 	private void setDragDrop() {
@@ -215,24 +206,18 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 	}
 
-	protected void keyTyped(KeyEvent e) {
-		if (hasInsertableText(e)) {
-			handleInsertChar(e);
-		}
-	}
-
-	private void handleInsertChar(KeyEvent e) {
+	protected void keyTyped(String character) {
 		if (this.getLength() - this.getCaretPosition() > charCounterInLine) {
 			goToLastPos();
 		}
 
-		String character = e.getCharacter();
-		System.out.println("handleInsertChar: '" + escapeNonAscii(character) + "'");
+		// System.out.println("keyTyped: '" + escapeNonAscii(character) + "' line before='" + getLine() + "'");
 		this.insertText(this.getCaretPosition(), character);
+		// System.out.println("  line after='" + getLine() + "'");
 		charCounterInLine += character.length();
 		currentPosInLine += character.length();
 		posInList = instructions.size() - 1;
-		searchHandler.handleKey(e);
+		searchHandler.update();
 	}
 
 	private void controlA() {
@@ -250,13 +235,14 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	protected void activateSearch() {
-		final String input = this.getInput();
+		// TODO: fix reverse search
+		/*final String input = this.getInput();
 		this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
 		this.appendText(i18n.translate("consoles.prompt.backwardSearch", "", input));
 		this.moveTo(getLineNumber(), this.getLine().lastIndexOf('\''));
 		currentPosInLine = 0;
 		charCounterInLine = 0;
-		searchHandler.activateSearch();
+		searchHandler.activateSearch();*/
 	}
 
 	protected void deactivateSearch() {
@@ -486,5 +472,9 @@ public abstract class Console extends StyleClassedTextArea {
 
 	public List<ConsoleInstruction> getInstructions() {
 		return instructions;
+	}
+
+	public boolean isSearching() {
+		return searchHandler.isActive();
 	}
 }

@@ -2,7 +2,6 @@ package de.prob2.ui.consoles.groovy;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -11,12 +10,10 @@ import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
-
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
@@ -50,19 +47,20 @@ public class GroovyConsole extends Console {
 	}
 
 	@Override
-	protected void keyTyped(KeyEvent e) {
-		if (".".equals(e.getCharacter())) {
+	protected void keyTyped(String character) {
+		if (!isSearching() && ".".equals(character)) {
 			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
 		}
 
-		super.keyTyped(e);
+		super.keyTyped(character);
 	}
 
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
-		if (getCaretPosition() >= this.getInputStart()) {
+		// TODO: fix code completion
+		/*if (getCaretPosition() >= this.getInputStart()) {
 			int caretPosInLine = getCaretPosition() - getInputStart();
 			groovyInterpreter.triggerCodeCompletion(getInput().substring(0, caretPosInLine), action);
-		}
+		}*/
 	}
 
 	private void setCodeCompletionEvent() {
@@ -71,14 +69,14 @@ public class GroovyConsole extends Console {
 	}
 
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
+		// TODO: handle different key event types
 		if (e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent) e.getEvent()).getText())) {
 			handleChooseSuggestion(e);
 			requestFollowCaret(); //This forces the text area to scroll to the bottom. Invoking scrollYToPixel does not have the expected effect
 		} else if (e.getCode() == KeyCode.SPACE) {
-			//handle Space in Code Completion
-			// TODO: fix
-			// keyPressed((KeyEvent) e.getEvent());
-			// e.consume();
+			// handle Space in Code Completion
+			keyTyped(" ");
+			e.consume();
 		}
 	}
 
@@ -113,6 +111,4 @@ public class GroovyConsole extends Console {
 	public void closeObjectStage() {
 		groovyInterpreter.closeObjectStage();
 	}
-
-
 }
