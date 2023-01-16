@@ -185,7 +185,7 @@ public class TestCaseGenerationView extends ScrollPane {
 
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("animation", "Symbolic");
+		helpButton.setHelpContent("animation", "testCases");
 		setBindings();
 		tvTestCases.setRowFactory(new TestCaseGenerationCellFactory());
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
