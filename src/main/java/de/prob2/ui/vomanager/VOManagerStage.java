@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -46,6 +47,8 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
+
+import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
@@ -125,6 +128,7 @@ public class VOManagerStage extends Stage {
 
 	private void initializeTables() {
 		requirementNameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue().getDisplayText()));
+		requirementNameColumn.setComparator(new AlphanumericComparator(Locale.ROOT)::compare);
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(features -> features.getValue().getValue().checkedProperty());
 
