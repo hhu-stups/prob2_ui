@@ -28,6 +28,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.UIInteraction;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.beans.property.ObjectProperty;
@@ -202,9 +203,10 @@ public class VisBController {
 				Trace trace = currentTrace.get().addTransitions(transitions);
 				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + event.getPredicates());
 				currentTrace.set(trace);
+				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 				for(Transition transition : transitions) {
 					UIInteraction uiInteraction = injector.getInstance(UIInteraction.class);
-					uiInteraction.addUIInteraction(transition);
+					uiInteraction.addUIInteraction(realTimeSimulator, transition);
 				}
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			}
@@ -231,9 +233,10 @@ public class VisBController {
 			String transitionName = nextTransitions.stream().map(Transition::getName).collect(Collectors.toList()).get(0);
 			Trace trace = currentTrace.get().execute(transitionName, new ArrayList<>());
 			currentTrace.set(trace);
+			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 			for(Transition transition : nextTransitions) {
 				UIInteraction uiInteraction = injector.getInstance(UIInteraction.class);
-				uiInteraction.addUIInteraction(transition);
+				uiInteraction.addUIInteraction(realTimeSimulator, transition);
 			}
 		} else {
 			updateInfo("visb.infobox.events.not.initialise");

@@ -101,6 +101,7 @@
 									<items>
 										<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace"/>
 										<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace"/>
+										<MenuItem fx:id="saveAutomaticSimulationItem" text="Save Automatic Simulation"/>
 									</items>
 								</MenuButton>
 							</HBox>

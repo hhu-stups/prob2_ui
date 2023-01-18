@@ -2,7 +2,6 @@ package de.prob2.ui.internal;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.prob.json.JacksonManager;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -12,8 +11,6 @@ import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,24 +22,21 @@ public class UIInteraction {
 
 	private final ObjectProperty<Transition> uiListener;
 
-	private final RealTimeSimulator realTimeSimulator;
-
-	private final JacksonManager<SimulationConfiguration> jsonManager;
-
 	private final List<ActivationConfiguration> userInteractions;
 
 	private int interactionCounter;
 
 	@Inject
-	public UIInteraction(final RealTimeSimulator realTimeSimulator, final JacksonManager<SimulationConfiguration> jsonManager) {
+	public UIInteraction() {
 		this.uiListener = new SimpleObjectProperty<>(null);
-		this.realTimeSimulator = realTimeSimulator;
-		this.jsonManager = jsonManager;
 		this.userInteractions = new ArrayList<>();
 		this.interactionCounter = 0;
 	}
 
-	public void addUIInteraction(Transition transition) {
+	public void addUIInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
+		if(!realTimeSimulator.isRunning()) {
+			return;
+		}
 		uiListener.set(transition);
 		String id = "user_interaction_" + interactionCounter;
 		String op = transition.getName();
@@ -83,7 +77,7 @@ public class UIInteraction {
 		interactionCounter++;
 	}
 
-	public SimulationConfiguration createAutomaticSimulation() {
+	public SimulationConfiguration createAutomaticSimulation(RealTimeSimulator realTimeSimulator) {
 		SimulationConfiguration config = realTimeSimulator.getConfig();
 		List<ActivationConfiguration> activationConfigurations = config.getActivationConfigurations();
 		List<ActivationConfiguration> activationConfigurationsForResult = new ArrayList<>();
@@ -102,8 +96,5 @@ public class UIInteraction {
 		return new SimulationConfiguration(activationConfigurationsForResult, null, SimulationConfiguration.metadataBuilder("Automatic_Simulation_with_User_Interaction").withSavedNow().withUserCreator().build());
 	}
 
-	public void saveAsAutomaticSimulation(Path location) throws IOException {
-		SimulationConfiguration configuration = createAutomaticSimulation();
-		this.jsonManager.writeToFile(location, configuration);
-	}
+
 }
