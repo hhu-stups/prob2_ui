@@ -15,7 +15,6 @@ import de.prob.json.JsonMetadataBuilder;
 	"metadata",
 })
 public class SimulationConfiguration implements HasMetadata {
-	public static final String FILE_TYPE = "Timed_Trace";
 	public static final int CURRENT_FORMAT_VERSION = 2;
 
 	private final List<ActivationConfiguration> activations;
@@ -28,8 +27,8 @@ public class SimulationConfiguration implements HasMetadata {
 		this.metadata = metadata;
 	}
 
-	public static JsonMetadataBuilder metadataBuilder() {
-		return new JsonMetadataBuilder(FILE_TYPE, CURRENT_FORMAT_VERSION)
+	public static JsonMetadataBuilder metadataBuilder(String fileType) {
+		return new JsonMetadataBuilder(fileType, CURRENT_FORMAT_VERSION)
 			.withSavedNow()
 			.withUserCreator();
 	}
