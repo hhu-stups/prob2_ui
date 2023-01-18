@@ -2,15 +2,13 @@ package de.prob2.ui.simulation.simulators;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.UIInteraction;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 
@@ -40,6 +38,7 @@ public class RealTimeSimulator extends Simulator {
 			}
 			List<UIListenerConfiguration> uiListenerConfigurations = config.getUiListenerConfigurations();
 			boolean anyActivated = false;
+			State destinationState = to.getDestination();
 			for(UIListenerConfiguration uiListener : uiListenerConfigurations) {
 				String event = uiListener.getEvent();
 				// TODO: handle predicate
@@ -47,9 +46,10 @@ public class RealTimeSimulator extends Simulator {
 				if(event.equals(to.getName())) {
 					// TODO: Handle parameter predicates
 					for(String activatingEvent : activating) {
-						simulationEventHandler.handleOperationConfiguration(to.getDestination(),  activationConfigurationMap.get(activatingEvent), new ArrayList<>(), "1=1");
+						simulationEventHandler.handleOperationConfiguration(destinationState,  activationConfigurationMap.get(activatingEvent), new ArrayList<>(), "1=1");
 						anyActivated = true;
 					}
+					break;
 				}
 			}
 			if(anyActivated) {
