@@ -4,7 +4,7 @@ By default the main window is split into three vertical panes (see below).
 
 * In the left pane, the [Operations View](Operations.md), showing the operations whose preconditions and guards are true in this state (the view also uses a blue circular arrow icon when an operation does not change the state), and the [Animations View](Animation.md), ;
 * In the middle 
-	* the [State View](Main%20View/State.md), containing the current state of the B machine, listing e.g., the current values of the machine variables,
+	* the [State View](Main%20View/State%20View.md), containing the current state of the B machine, listing e.g., the current values of the machine variables,
 	* the [State Errors View](Main%20View/State%20Errors.md), containing possible state errors and
 	* the [State Visualisation View](Main%20View/State%20Visualisation.md), containing a visualisation, if provided by the user;
 * In the right pane there are a variety of subviews, which can be activated:
