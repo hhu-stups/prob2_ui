@@ -58,6 +58,7 @@ public class UIInteraction {
 		}
 		ActivationConfiguration activation = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, null, fixedVariables, null, activations);
 		userInteractions.add(activation);
+		interactionCounter++;
 	}
 
 	public ObjectProperty<Transition> getUiListener() {
@@ -82,15 +83,22 @@ public class UIInteraction {
 		List<ActivationConfiguration> activationConfigurations = config.getActivationConfigurations();
 		List<ActivationConfiguration> activationConfigurationsForResult = new ArrayList<>();
 
+		boolean hasInitialization = false;
+		List<String> activations = new ArrayList<>();
 		for(ActivationConfiguration activationConfiguration : activationConfigurations) {
 			if(activationConfiguration.getId().equals("$initialise_machine")) {
+				hasInitialization = true;
 				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) activationConfiguration;
-				List<String> activations = new ArrayList<>(initializationConfiguration.getActivating());
+				activations = new ArrayList<>(initializationConfiguration.getActivating());
 				activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
 				activationConfigurations.add(new ActivationOperationConfiguration("$initialise_machine", "$initialise_machine", initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), activations));
 			} else {
 				activationConfigurationsForResult.add(activationConfiguration);
 			}
+		}
+		if(!hasInitialization) {
+			activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
+			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration("$initialise_machine", "$initialise_machine", null, 0, null, null, null, null, activations));
 		}
 		activationConfigurationsForResult.addAll(userInteractions);
 		return new SimulationConfiguration(activationConfigurationsForResult, null, SimulationConfiguration.metadataBuilder("Automatic_Simulation_with_User_Interaction").withSavedNow().withUserCreator().build());
