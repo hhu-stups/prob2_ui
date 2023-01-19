@@ -134,7 +134,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		super.initialize();
 		stageManager.setMacMenuBar(this, this.menuBar);
 		saveButton.disableProperty().bind(currentDotContent.isNull());
-		helpButton.setHelpContent("graphVisualisation", null);
+		helpButton.setHelpContent("visualisations.graphVisualisation", null);
 		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
 			Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
 			for (Node scrollBar : scrollBars) {
