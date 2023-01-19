@@ -1,23 +1,39 @@
 package de.prob2.ui.consoles;
 
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StringHelper;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.input.*;
-import org.controlsfx.tools.Platform;
-import org.fxmisc.richtext.StyleClassedTextArea;
-import org.fxmisc.wellbehaved.event.EventPattern;
-import org.fxmisc.wellbehaved.event.InputMap;
-import org.fxmisc.wellbehaved.event.Nodes;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StringHelper;
+
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCharacterCombination;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
+
+import org.controlsfx.tools.Platform;
+import org.fxmisc.richtext.StyleClassedTextArea;
+import org.fxmisc.wellbehaved.event.Nodes;
+
+import static javafx.scene.input.KeyCombination.CONTROL_DOWN;
+import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
+import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
+import static org.fxmisc.wellbehaved.event.EventPattern.anyOf;
+import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
+import static org.fxmisc.wellbehaved.event.EventPattern.keyReleased;
+import static org.fxmisc.wellbehaved.event.EventPattern.keyTyped;
+import static org.fxmisc.wellbehaved.event.EventPattern.mouseClicked;
+import static org.fxmisc.wellbehaved.event.InputMap.consume;
 
 public abstract class Console extends StyleClassedTextArea {
 
@@ -100,36 +116,37 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public void setEvents() {
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.mouseClicked(MouseButton.PRIMARY), e -> this.mouseClicked()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyReleased()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyTyped()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyTyped().onlyIf(Console::hasInsertableText), e -> keyTyped(e.getCharacter())));
-
-		// TODO: use KeyCharacterCombination because of different keyboard layouts
+		Nodes.addInputMap(this, consume(mouseClicked(MouseButton.PRIMARY), e -> this.onMouseClicked()));
+		Nodes.addInputMap(this, consume(keyPressed()));
+		Nodes.addInputMap(this, consume(keyReleased()));
+		Nodes.addInputMap(this, consume(keyTyped()));
+		Nodes.addInputMap(this, consume(keyTyped().onlyIf(Console::hasInsertableText), e -> this.onKeyTyped(e.getCharacter())));
 
 		// GUI-style shortcuts, these should use the Shortcut key (i. e. Command on Mac, Control on other systems).
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.SHORTCUT_DOWN), e -> this.copy()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.V, KeyCombination.SHORTCUT_DOWN), e -> this.paste()));
+		Nodes.addInputMap(this, consume(anyOf(
+				keyPressed(new KeyCharacterCombination("c", SHORTCUT_DOWN)),
+				keyPressed(KeyCode.COPY),
+				keyPressed(KeyCode.INSERT, SHORTCUT_DOWN)
+		), e -> this.copy()));
+		Nodes.addInputMap(this, consume(anyOf(
+				keyPressed(new KeyCharacterCombination("v", SHORTCUT_DOWN)),
+				keyPressed(KeyCode.PASTE),
+				keyPressed(KeyCode.INSERT, SHIFT_DOWN)
+		), e -> this.paste()));
 
 		// Shell/Emacs-style shortcuts, these should always use Control as the modifier, even on Mac (this is how it works in a normal terminal window).
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.R, KeyCombination.CONTROL_DOWN), e -> this.controlR()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.A, KeyCombination.CONTROL_DOWN), e -> this.controlA()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.E, KeyCombination.CONTROL_DOWN), e -> this.controlE()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.K, KeyCombination.CONTROL_DOWN), e -> this.reset()));
+		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("r", CONTROL_DOWN)), e -> this.controlR()));
+		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("a", CONTROL_DOWN)), e -> this.controlA()));
+		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("e", CONTROL_DOWN)), e -> this.controlE()));
+		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("k", CONTROL_DOWN)), e -> this.reset()));
 
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.UP), e -> this.handleUp()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DOWN), e -> this.handleDown()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.LEFT), e -> this.handleLeft()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.RIGHT), e -> this.handleRight()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE), this::handleDeletion));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE), this::handleDeletion));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), KeyEvent::consume));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ESCAPE, KeyCombination.SHIFT_DOWN), KeyEvent::consume));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.ALT_DOWN), KeyEvent::consume));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.BACK_SPACE, KeyCombination.ALT_DOWN), KeyEvent::consume));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.DELETE, KeyCombination.ALT_DOWN), KeyEvent::consume));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> this.handleEnter()));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.UP), e -> this.handleUp()));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.DOWN), e -> this.handleDown()));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.LEFT), e -> this.handleLeft()));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.RIGHT), e -> this.handleRight()));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.DELETE), this::handleDeletion));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.BACK_SPACE), this::handleDeletion));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.ENTER), e -> this.handleEnter()));
 
 		/*Nodes.addInputMap(this, InputMap.process(KeyEvent.KEY_PRESSED, e -> {
 			System.out.printf("[%s, text=%s, char=%s, code=%s%s%s%s%s%s]%n", e.getEventType(), escapeNonAscii(e.getText()), escapeNonAscii(e.getCharacter()), e.getCode(), e.isShiftDown() ? " SHIFT" : "", e.isControlDown() ? " CTRL" : "", e.isAltDown() ? " ALT" : "", e.isMetaDown() ? " META" : "", e.isShortcutDown() ? " SHRTCT" : "");
@@ -192,7 +209,8 @@ public abstract class Console extends StyleClassedTextArea {
 		currentPosInLine += diff;
 	}
 
-	private void mouseClicked() {
+	private void onMouseClicked() {
+		System.out.printf("mouseClicked: %d %d %d %d%n", this.getLength(), this.getCaretPosition(), currentPosInLine, charCounterInLine);
 		if (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
 			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 		}
@@ -206,7 +224,7 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 	}
 
-	protected void keyTyped(String character) {
+	protected void onKeyTyped(String character) {
 		if (this.getLength() - this.getCaretPosition() > charCounterInLine) {
 			goToLastPos();
 		}

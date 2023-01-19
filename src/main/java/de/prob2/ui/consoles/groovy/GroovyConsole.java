@@ -47,12 +47,12 @@ public class GroovyConsole extends Console {
 	}
 
 	@Override
-	protected void keyTyped(String character) {
+	protected void onKeyTyped(String character) {
 		if (!isSearching() && ".".equals(character)) {
 			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
 		}
 
-		super.keyTyped(character);
+		super.onKeyTyped(character);
 	}
 
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
@@ -75,7 +75,7 @@ public class GroovyConsole extends Console {
 			requestFollowCaret(); //This forces the text area to scroll to the bottom. Invoking scrollYToPixel does not have the expected effect
 		} else if (e.getCode() == KeyCode.SPACE) {
 			// handle Space in Code Completion
-			keyTyped(" ");
+			onKeyTyped(" ");
 			e.consume();
 		}
 	}
