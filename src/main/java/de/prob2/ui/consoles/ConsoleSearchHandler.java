@@ -1,66 +1,82 @@
 package de.prob2.ui.consoles;
 
 import de.prob2.ui.internal.I18n;
+
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 
-import java.util.ArrayList;
-import java.util.List;
+final class ConsoleSearchHandler {
 
-public final class ConsoleSearchHandler {
-
-	private boolean searchActive = false;
-	private final List<SearchResult> searchResults;
-	private int currentSearchIndex = 0;
-	private final Console parent;
 	private final I18n i18n;
+	private final Console parent;
+	private final BooleanProperty searchActive;
+	private final ObservableList<String> searchResults;
+	private final IntegerProperty currentSearchIndex;
+	private final StringBinding currentSearchResult;
 
-	public ConsoleSearchHandler(Console parent, I18n i18n) {
-		this.searchResults = new ArrayList<>();
-		this.parent = parent;
+	public ConsoleSearchHandler(I18n i18n, Console parent) {
 		this.i18n = i18n;
+		this.parent = parent;
+		this.searchActive = new SimpleBooleanProperty(false);
+		this.searchResults = FXCollections.observableArrayList();
+		this.currentSearchIndex = new SimpleIntegerProperty(0);
+		this.currentSearchResult = Bindings.createStringBinding(() -> {
+			int idx = this.currentSearchIndex.get();
+			if (this.searchActive.get() && 0 <= idx && idx < this.searchResults.size()) {
+				return this.searchResults.get(idx);
+			} else {
+				return null;
+			}
+		}, this.searchActive, this.searchResults, this.currentSearchIndex);
 	}
 
-	public boolean isActive() {
+	public BooleanProperty searchActiveProperty() {
 		return searchActive;
 	}
 
+	public boolean isActive() {
+		return searchActive.get();
+	}
+
 	public void activateSearch() {
-		currentSearchIndex = 0;
-		searchActive = true;
-		if (searchResults.isEmpty()) {
-			searchResults.add(new SearchResult(getCurrentSearchResult(), false));
-		}
+		this.searchActive.set(true);
+		reset();
 	}
 
 	public void deactivateSearch() {
-		searchResults.clear();
-		currentSearchIndex = 0;
-		searchActive = false;
+		searchActive.set(false);
+		reset();
+	}
+
+	private void reset() {
+		this.searchResults.clear();
+		this.currentSearchIndex.set(0);
+	}
+
+	public StringBinding currentSearchResultProperty() {
+		return currentSearchResult;
 	}
 
 	private void searchResult() {
 		searchResults.clear();
 		String key = getSearchCurrent();
-		System.out.println("searching for '" + key + "'");
-		for (int i = parent.getInstructions().size() - 1; i >= 0; i--) {
-			if (parent.getInstructions().get(i).getInstruction().contains(key)) {
-				searchResults.add(new SearchResult(parent.getInstructions().get(i).getInstruction(), true));
+		// System.out.println("searching for '" + key + "'");
+		for (int i = parent.getHistory().size() - 1; i >= 0; i--) {
+			if (parent.getHistory().get(i).getInstruction().contains(key)) {
+				searchResults.add(new SearchResult(parent.getHistory().get(i).getInstruction(), true));
 			}
 		}
 		if (searchResults.isEmpty()) {
 			searchResults.add(new SearchResult(getCurrentSearchResult(), false));
 		}
-	}
-
-	public String getSearchCurrent() {
-		int posOfFirstQuotation = parent.getLine().indexOf('\'');
-		int posOfLastQuotation = parent.getLine().lastIndexOf('\'');
-		return parent.getLine().substring(posOfFirstQuotation + 1, posOfLastQuotation);
-	}
-
-	public String getCurrentSearchResult() {
-		return parent.getLine().substring(parent.getLine().indexOf(':') + 1);
 	}
 
 	void update() {
@@ -100,7 +116,7 @@ public final class ConsoleSearchHandler {
 		parent.scrollYToPixel(Double.MAX_VALUE);
 	}
 
-	void searchNext() {
+	public void searchNext() {
 		currentSearchIndex = Math.min(searchResults.size() - 1, currentSearchIndex + 1);
 		refreshSearch();
 	}

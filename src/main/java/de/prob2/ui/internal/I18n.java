@@ -219,7 +219,7 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(key, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> translate((String) evaluateArgument(key), copiedArguments),
+				() -> translate(Objects.toString(evaluateArgument(key)), copiedArguments),
 				dependencies
 		);
 	}
@@ -281,7 +281,7 @@ public final class I18n {
 		Object[] copiedArguments = Arrays.copyOf(arguments, arguments.length);
 		ObservableValue<?>[] dependencies = collectDependencies(pattern, copiedArguments);
 		return Bindings.createStringBinding(
-				() -> format((String) evaluateArgument(pattern), copiedArguments),
+				() -> format(Objects.toString(evaluateArgument(pattern)), copiedArguments),
 				dependencies
 		);
 	}

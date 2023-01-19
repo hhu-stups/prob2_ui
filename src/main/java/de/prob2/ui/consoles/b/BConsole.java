@@ -19,7 +19,7 @@ public final class BConsole extends Console {
 
 	@Inject
 	private BConsole(BInterpreter bInterpreter, I18n i18n, CurrentTrace currentTrace, Config config) {
-		super(i18n, i18n.translate("consoles.b.header"), i18n.translate("consoles.b.prompt.classicalB"), bInterpreter);
+		super(i18n, bInterpreter, i18n.translate("consoles.b.header"), i18n.translate("consoles.b.prompt.classicalB"));
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
 			final String message;
 			if (to != null) {

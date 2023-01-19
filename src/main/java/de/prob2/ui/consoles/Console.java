@@ -1,16 +1,22 @@
 package de.prob2.ui.consoles;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StringHelper;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.Clipboard;
@@ -37,26 +43,41 @@ import static org.fxmisc.wellbehaved.event.InputMap.consume;
 
 public abstract class Console extends StyleClassedTextArea {
 
-	private static final String EMPTY_PROMPT = ">";
-
 	private final I18n i18n;
-	private final List<ConsoleInstruction> instructions;
-	private final ConsoleSearchHandler searchHandler;
 	private final Executable interpreter;
-	private final String header;
+
+	private final BooleanProperty lineContinuation;
+	private final StringProperty header;
 	private final StringProperty prompt;
+	private final StringProperty lineContinuationPrompt;
+	private final StringProperty successfulSearchPrompt;
+	private final StringProperty failedSearchPrompt;
+	private final StringProperty input;
+	private final StringProperty inputWithPrompt;
+
+	private final ObservableList<ConsoleInstruction> history;
+	private final ConsoleSearchHandler searchHandler;
+
 	protected int charCounterInLine = 0;
 	protected int currentPosInLine = 0;
 	protected int posInList = -1;
 	protected int instructionLengthInLine = 1;
 
-	protected Console(I18n i18n, String header, String prompt, Executable interpreter) {
-		this.i18n = i18n;
-		this.instructions = new ArrayList<>();
-		this.searchHandler = new ConsoleSearchHandler(this, i18n);
-		this.interpreter = interpreter;
-		this.header = header;
-		this.prompt = new SimpleStringProperty(this, "prompt", prompt);
+	protected Console(I18n i18n, Executable interpreter, String header, String prompt) {
+		this.i18n = Objects.requireNonNull(i18n, "i18n");
+		this.interpreter = Objects.requireNonNull(interpreter, "interpreter");
+
+		this.lineContinuation = new SimpleBooleanProperty(this, "lineContinuation", false);
+		this.header = new SimpleStringProperty(this, "header", Objects.requireNonNull(header, "header"));
+		this.prompt = new SimpleStringProperty(this, "prompt", Objects.requireNonNull(prompt, "prompt"));
+		this.lineContinuationPrompt = new SimpleStringProperty(this, "lineContinuationPrompt", "consoles.prompt.lineContinuation");
+		this.successfulSearchPrompt = new SimpleStringProperty(this, "successfulSearchPrompt", "consoles.prompt.backwardSearch");
+		this.failedSearchPrompt = new SimpleStringProperty(this, "failedSearchPrompt", "consoles.prompt.backwardSearchFailed");
+		this.input = new SimpleStringProperty(this, "input", "");
+		this.inputWithPrompt = new SimpleStringProperty(this, "inputWithPrompt", null);
+
+		this.history = FXCollections.observableArrayList();
+		this.searchHandler = new ConsoleSearchHandler(i18n, this);
 
 		this.requestFollowCaret();
 		initializeContextMenu();
@@ -65,6 +86,28 @@ public abstract class Console extends StyleClassedTextArea {
 		this.reset();
 		this.setWrapText(true);
 		this.getStyleClass().add("console");
+
+		StringBinding translatedPrompt = i18n.translateBinding(this.prompt);
+		StringBinding translatedLineContinuationPrompt = i18n.translateBinding(this.lineContinuationPrompt);
+		StringBinding translatedSuccessfulSearchPrompt = i18n.translateBinding(this.successfulSearchPrompt);
+		StringBinding translatedFailedSearchPrompt = i18n.translateBinding(this.failedSearchPrompt);
+		this.inputWithPrompt.bind(Bindings.createStringBinding(() -> {
+			if (searchHandler.isActive()) {
+				String result = searchHandler.currentSearchResultProperty().get();
+				if (result == null) {
+					return translatedFailedSearchPrompt.get() + "`" + input.get() + "': ";
+				} else {
+					return translatedSuccessfulSearchPrompt.get() + "`" + input.get() + "': " + result;
+				}
+			} else {
+				if (lineContinuation.get()) {
+					return lineContinuationPrompt.get() + input.get();
+				} else {
+					return translatedPrompt.get() + input.get();
+				}
+			}
+		}, this.lineContinuation, translatedPrompt, translatedLineContinuationPrompt, translatedSuccessfulSearchPrompt, translatedFailedSearchPrompt, this.input, this.searchHandler.searchActiveProperty(), this.searchHandler.currentSearchResultProperty()));
+		this.inputWithPrompt.addListener((o, from, to) -> this.update(from, to));
 
 		this.promptProperty().addListener((o, from, to) -> {
 			// If the cursor is in the input, remember its position relative to the end of the prompt, and place it there again after the prompt is updated.
@@ -79,6 +122,17 @@ public abstract class Console extends StyleClassedTextArea {
 				this.moveTo(this.getLineNumber(), caretPositionInInput + to.length());
 			}
 		});
+
+		this.update(null, inputWithPrompt.get());
+	}
+
+	private void update(String from, String to) {
+		if (this.getLength() == 0) {
+			super.insertText(0, i18n.translate(this.header.get()) + "\n");
+		}
+
+		int lastParagraph = this.getParagraphs().size() - 1;
+		this.replaceText(lastParagraph, 0, lastParagraph, 1000, to);
 	}
 
 	private static boolean hasInsertableText(KeyEvent event) {
@@ -210,7 +264,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	private void onMouseClicked() {
-		System.out.printf("mouseClicked: %d %d %d %d%n", this.getLength(), this.getCaretPosition(), currentPosInLine, charCounterInLine);
+		// System.out.printf("mouseClicked: %d %d %d %d%n", this.getLength(), this.getCaretPosition(), currentPosInLine, charCounterInLine);
 		if (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
 			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
 		}
@@ -234,7 +288,7 @@ public abstract class Console extends StyleClassedTextArea {
 		// System.out.println("  line after='" + getLine() + "'");
 		charCounterInLine += character.length();
 		currentPosInLine += character.length();
-		posInList = instructions.size() - 1;
+		posInList = history.size() - 1;
 		searchHandler.update();
 	}
 
@@ -299,10 +353,10 @@ public abstract class Console extends StyleClassedTextArea {
 		if (endsWithNewline) {
 			currentLine = currentLine.substring(0, currentLine.length() - 1);
 		}
-		if (!instructions.isEmpty() && instructions.get(instructions.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
-			instructions.set(instructions.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
+		if (!history.isEmpty() && history.get(history.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
+			history.set(history.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 		} else {
-			instructions.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
+			history.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
 		}
 		if (endsWithNewline) {
 			instructionLengthInLine++;
@@ -310,19 +364,19 @@ public abstract class Console extends StyleClassedTextArea {
 			return;
 		}
 
-		posInList = instructions.size() - 1;
+		posInList = history.size() - 1;
 
 		ConsoleInstruction instruction;
 		if (instructionLengthInLine > 1) {
 			StringBuilder actualInstructionBuilder = new StringBuilder();
 			for (int i = 0; i < instructionLengthInLine; i++) {
-				ConsoleInstruction listInstruction = instructions.get(instructions.size() - instructionLengthInLine + i);
+				ConsoleInstruction listInstruction = history.get(history.size() - instructionLengthInLine + i);
 				actualInstructionBuilder.append(listInstruction.getInstruction()).append('\n');
 			}
 
 			instruction = new ConsoleInstruction(actualInstructionBuilder.toString(), ConsoleInstructionOption.ENTER);
 		} else {
-			instruction = instructions.get(posInList);
+			instruction = history.get(posInList);
 		}
 
 		ConsoleExecResult execResult = interpreter.exec(instruction);
@@ -344,25 +398,25 @@ public abstract class Console extends StyleClassedTextArea {
 
 	private void handleDown() {
 		deactivateSearch();
-		if (instructions.isEmpty() || posInList == instructions.size() - 1) {
+		if (history.isEmpty() || posInList == history.size() - 1) {
 			return;
 		}
-		posInList = Math.min(posInList + 1, instructions.size() - 1);
+		posInList = Math.min(posInList + 1, history.size() - 1);
 		setTextAfterArrowKey();
 	}
 
 	private void handleUp() {
 		deactivateSearch();
-		if (instructions.isEmpty() || posInList == -1) {
+		if (history.isEmpty() || posInList == -1) {
 			return;
 		}
-		if (posInList == instructions.size() - 1) {
-			String lastinstruction = instructions.get(instructions.size() - 1).getInstruction();
+		if (posInList == history.size() - 1) {
+			String lastinstruction = history.get(history.size() - 1).getInstruction();
 			if (!lastinstruction.equals(this.getInput())) {
-				if (instructions.get(posInList).getOption() == ConsoleInstructionOption.UP) {
-					instructions.set(instructions.size() - 1, new ConsoleInstruction(this.getInput(), ConsoleInstructionOption.UP));
+				if (history.get(posInList).getOption() == ConsoleInstructionOption.UP) {
+					history.set(history.size() - 1, new ConsoleInstruction(this.getInput(), ConsoleInstructionOption.UP));
 				} else {
-					instructions.add(new ConsoleInstruction(this.getInput(), ConsoleInstructionOption.UP));
+					history.add(new ConsoleInstruction(this.getInput(), ConsoleInstructionOption.UP));
 					setTextAfterArrowKey();
 					return;
 				}
@@ -391,7 +445,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	private void setTextAfterArrowKey() {
-		String currentLine = instructions.get(posInList).getInstruction();
+		String currentLine = history.get(posInList).getInstruction();
 		this.deleteText(this.getInputStart(), this.getLength());
 		this.appendText(currentLine);
 		charCounterInLine = currentLine.length();
@@ -473,23 +527,23 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public List<String> saveInstructions() {
-		return instructions.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList());
+		return history.stream().map(ConsoleInstruction::getInstruction).collect(Collectors.toList());
 	}
 
 	public void loadInstructions(List<String> instructions) {
-		this.instructions.clear();
+		this.history.clear();
 		for (final String instruction : instructions) {
-			this.instructions.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
+			this.history.add(new ConsoleInstruction(instruction, ConsoleInstructionOption.ENTER));
 		}
-		posInList = this.instructions.size();
+		posInList = this.history.size();
 	}
 
 	public int getCurrentPosInLine() {
 		return currentPosInLine;
 	}
 
-	public List<ConsoleInstruction> getInstructions() {
-		return instructions;
+	public ObservableList<ConsoleInstruction> getHistory() {
+		return history;
 	}
 
 	public boolean isSearching() {

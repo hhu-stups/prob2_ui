@@ -25,7 +25,7 @@ public class GroovyConsole extends Console {
 
 	@Inject
 	private GroovyConsole(GroovyInterpreter groovyInterpreter, I18n i18n, Config config) {
-		super(i18n, i18n.translate("consoles.groovy.header"), i18n.translate("consoles.groovy.prompt"), groovyInterpreter);
+		super(i18n, groovyInterpreter, i18n.translate("consoles.groovy.header"), i18n.translate("consoles.groovy.prompt"));
 		this.groovyInterpreter = groovyInterpreter;
 		this.groovyInterpreter.setCodeCompletion(this);
 		setCodeCompletionEvent();
