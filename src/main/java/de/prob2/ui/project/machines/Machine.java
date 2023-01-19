@@ -2,7 +2,7 @@ package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,6 +29,7 @@ import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -543,41 +544,41 @@ public class Machine implements DescriptionView.Describable, INameable {
 			return;
 		}
 		
-		List<ProofObligationItem> proofObligations = ((EventBModel) model)
-			.getTopLevelMachine()
+		// Save the previous POs and allow lookup by name.
+		Map<String, ProofObligationItem> previousPOsByName = this.getProofObligationItems().stream()
+			.collect(Collectors.toMap(ProofObligationItem::getName, x -> x));
+		
+		// Read the current POs from the model.
+		List<ProofObligationItem> proofObligations = ((EventBModel) model).getTopLevelMachine()
 			.getProofs()
 			.stream()
 			.map(ProofObligationItem::new)
 			.collect(Collectors.toList());
-		List<ProofObligationItem> machinePOs = this.getProofObligationItems();
 		
-		// Store PO Names
-		List<String> poNames = proofObligations.stream()
-			.map(ProofObligationItem::getName)
-			.collect(Collectors.toList());
-		
-		List<String> machinePONames = machinePOs.stream()
-			.map(ProofObligationItem::getName)
-			.collect(Collectors.toList());
-		
-		// Add new POs
-		proofObligations.stream()
-			.filter(po -> !machinePONames.contains(po.getName()))
-			.forEach(machinePOs::add);
-		
-		// Remove POs that are removed
-		List<ProofObligationItem> removedPOs = machinePOs.stream()
-			.filter(po -> !poNames.contains(po.getName()))
-			.collect(Collectors.toList());
-		machinePOs.removeAll(removedPOs);
-		
-		// Set discharged status
-		Map<String, Boolean> poStatuses = new HashMap<>();
-		for(ProofObligationItem po : proofObligations) {
-			poStatuses.put(po.getName(), po.isDischarged());
+		// Copy any PO validation task IDs from the previous POs.
+		// This also removes all POs from previousPOsByName that have a corresponding current PO,
+		// leaving only the POs that no longer exist in the model.
+		for (final ProofObligationItem po : proofObligations) {
+			final ProofObligationItem previousPO = previousPOsByName.remove(po.getName());
+			if (previousPO != null) {
+				po.setId(previousPO.getId());
+			}
 		}
 		
-		machinePOs.forEach(po -> po.setDischarged(poStatuses.get(po.getName())));
+		// Look for removed POs that have an ID and keep them,
+		// so that POs for which the user assigned an ID don't silently disappear.
+		final List<ProofObligationItem> noLongerExistingPOs = previousPOsByName.values().stream()
+			.filter(po -> po.getId() != null)
+			.sorted(Comparator.comparing(ProofObligationItem::getName))
+			.collect(Collectors.toList());
+		for (final ProofObligationItem po : noLongerExistingPOs) {
+			po.setDischarged(false);
+			po.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, ""));
+		}
+		proofObligations.addAll(noLongerExistingPOs);
+		
+		// Store the updated POs in the machine.
+		this.proofObligationItemsProperty().setAll(proofObligations);
 	}
 
 	public ListProperty<ReplayTrace> tracesProperty() {
