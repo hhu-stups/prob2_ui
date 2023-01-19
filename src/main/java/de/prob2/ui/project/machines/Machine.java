@@ -2,9 +2,11 @@ package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.io.MoreFiles;
 
 import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
@@ -531,6 +535,49 @@ public class Machine implements DescriptionView.Describable, INameable {
 	@JsonProperty
 	private void setProofObligationItems(final List<ProofObligationItem> proofObligationItems) {
 		this.proofObligationItemsProperty().setAll(proofObligationItems);
+	}
+
+	public void updateProofObligationsFromModel(final AbstractModel model) {
+		// TODO: Does not yet work with .eventb files
+		if(!(model instanceof EventBModel) || ((EventBModel) model).getTopLevelMachine() == null) {
+			return;
+		}
+		
+		List<ProofObligationItem> proofObligations = ((EventBModel) model)
+			.getTopLevelMachine()
+			.getProofs()
+			.stream()
+			.map(ProofObligationItem::new)
+			.collect(Collectors.toList());
+		List<ProofObligationItem> machinePOs = this.getProofObligationItems();
+		
+		// Store PO Names
+		List<String> poNames = proofObligations.stream()
+			.map(ProofObligationItem::getName)
+			.collect(Collectors.toList());
+		
+		List<String> machinePONames = machinePOs.stream()
+			.map(ProofObligationItem::getName)
+			.collect(Collectors.toList());
+		
+		// Add new POs
+		proofObligations.stream()
+			.filter(po -> !machinePONames.contains(po.getName()))
+			.forEach(machinePOs::add);
+		
+		// Remove POs that are removed
+		List<ProofObligationItem> removedPOs = machinePOs.stream()
+			.filter(po -> !poNames.contains(po.getName()))
+			.collect(Collectors.toList());
+		machinePOs.removeAll(removedPOs);
+		
+		// Set discharged status
+		Map<String, Boolean> poStatuses = new HashMap<>();
+		for(ProofObligationItem po : proofObligations) {
+			poStatuses.put(po.getName(), po.isDischarged());
+		}
+		
+		machinePOs.forEach(po -> po.setDischarged(poStatuses.get(po.getName())));
 	}
 
 	public ListProperty<ReplayTrace> tracesProperty() {
