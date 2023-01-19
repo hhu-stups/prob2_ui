@@ -1,9 +1,12 @@
 package de.prob2.ui.simulation.configuration;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Map;
 
 public class ActivationChoiceConfiguration extends ActivationConfiguration {
 
+	@JsonProperty("chooseActivation")
 	private final Map<String, String> activations;
 
 	public ActivationChoiceConfiguration(String id, Map<String, String> activations) {

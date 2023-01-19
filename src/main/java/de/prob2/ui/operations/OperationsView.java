@@ -35,6 +35,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
@@ -346,6 +347,7 @@ public final class OperationsView extends VBox {
 
 	private void executeOperationIfPossible(final OperationItem item) {
 		final Trace trace = currentTrace.get();
+		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 		if (
 			item != null
 			&& item.getStatus() == OperationItem.Status.ENABLED
@@ -355,11 +357,11 @@ public final class OperationsView extends VBox {
 			Trace forward = trace.forward();
 			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
 				currentTrace.set(trace.forward());
-				uiInteraction.addUIInteraction(forward.getCurrentTransition());
+				uiInteraction.addUIInteraction(realTimeSimulator, forward.getCurrentTransition());
 				return;
 			}
 			currentTrace.set(trace.add(item.getTransition()));
-			uiInteraction.addUIInteraction(item.getTransition());
+			uiInteraction.addUIInteraction(realTimeSimulator, item.getTransition());
 		}
 	}
 

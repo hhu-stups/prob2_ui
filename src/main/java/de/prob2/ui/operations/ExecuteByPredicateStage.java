@@ -30,6 +30,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -178,7 +179,8 @@ public final class ExecuteByPredicateStage extends Stage {
 		}
 		assert transitions.size() == 1;
 		Transition transition = transitions.get(0);
-		injector.getInstance(UIInteraction.class).addUIInteraction(transition);
+		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
+		injector.getInstance(UIInteraction.class).addUIInteraction(realTimeSimulator, transition);
 		this.currentTrace.set(this.currentTrace.get().add(transition));
 		this.hide();
 	}
