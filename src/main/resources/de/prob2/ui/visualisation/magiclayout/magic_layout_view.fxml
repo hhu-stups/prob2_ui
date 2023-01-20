@@ -24,8 +24,9 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+<?import javafx.scene.control.Tooltip?>
 <fx:root type="Stage" xmlns:fx="http://javafx.com/fxml/1"
-	title="%visualisation.magicLayout.view.title" minWidth="640" minHeight="480">
+		 title="%visualisation.magicLayout.view.title" minWidth="640" minHeight="480">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -93,11 +94,17 @@
 										<graphic>
 											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 										</graphic>
+										<tooltip>
+											<Tooltip text="%common.buttons.zoomIn" />
+										</tooltip>
 									</Button>
 									<Button fx:id="zoomOutButton">
 										<graphic>
 											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 										</graphic>
+										<tooltip>
+											<Tooltip text="%common.buttons.zoomOut" />
+										</tooltip>
 									</Button>
 									<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 								</HBox>
