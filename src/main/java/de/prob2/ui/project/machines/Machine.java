@@ -572,8 +572,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 			.sorted(Comparator.comparing(ProofObligationItem::getName))
 			.collect(Collectors.toList());
 		for (final ProofObligationItem po : noLongerExistingPOs) {
-			po.setDischarged(false);
-			po.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, ""));
+			po.setChecked(Checked.PARSE_ERROR);
 		}
 		proofObligations.addAll(noLongerExistingPOs);
 		
