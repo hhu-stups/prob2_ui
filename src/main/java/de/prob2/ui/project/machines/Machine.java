@@ -2,9 +2,11 @@ package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.io.MoreFiles;
 
 import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
@@ -129,7 +133,8 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final ListProperty<ReplayTrace> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
-	private final ListProperty<ProofObligationItem> proofObligationItems;
+	@JsonIgnore // Saved as proofObligationItems instead
+	private final ListProperty<ProofObligationItem> allProofObligationItems;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
@@ -168,7 +173,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-		this.proofObligationItems = new SimpleListProperty<>(this, "proofObligationItems", FXCollections.observableArrayList());
+		this.allProofObligationItems = new SimpleListProperty<>(this, "allProofObligationItems", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
@@ -274,7 +279,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
-		this.proofObligationItemsProperty().addListener(changedListener);
+		this.allProofObligationItemsProperty().addListener(changedListener);
 		this.simulationsProperty().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.historyChartItemsProperty().addListener(changedListener);
@@ -291,7 +296,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.addValidationTaskListener(this.symbolicCheckingFormulasProperty());
 		this.addValidationTaskListener(this.tracesProperty());
 		this.addValidationTaskListener(this.modelcheckingItemsProperty());
-		this.addValidationTaskListener(this.proofObligationItemsProperty());
+		this.addValidationTaskListener(this.allProofObligationItemsProperty());
 
 		this.simulationsProperty().addListener((ListChangeListener<SimulationModel>)change -> {
 			while (change.next()) {
@@ -520,17 +525,69 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.modelcheckingItemsProperty().setAll(modelcheckingItems);
 	}
 
-	public ListProperty<ProofObligationItem> proofObligationItemsProperty() {
-		return proofObligationItems;
+	public ListProperty<ProofObligationItem> allProofObligationItemsProperty() {
+		return allProofObligationItems;
 	}
 
+	public List<ProofObligationItem> getAllProofObligationItems() {
+		return allProofObligationItems.get();
+	}
+
+	// When saving to the project file,
+	// only include POs that have IDs.
 	public List<ProofObligationItem> getProofObligationItems() {
-		return proofObligationItems.get();
+		return this.getAllProofObligationItems().stream()
+			.filter(po -> po.getId() != null)
+			.collect(Collectors.toList());
 	}
 
+	// This overwrites all existing PO information,
+	// so updateAllProofObligationsFromModel must be called afterwards to get the information from the model again.
 	@JsonProperty
 	private void setProofObligationItems(final List<ProofObligationItem> proofObligationItems) {
-		this.proofObligationItemsProperty().setAll(proofObligationItems);
+		this.allProofObligationItemsProperty().setAll(proofObligationItems);
+	}
+
+	public void updateAllProofObligationsFromModel(final AbstractModel model) {
+		// TODO: Does not yet work with .eventb files
+		if(!(model instanceof EventBModel) || ((EventBModel) model).getTopLevelMachine() == null) {
+			return;
+		}
+		
+		// Save the previous POs and allow lookup by name.
+		Map<String, ProofObligationItem> previousPOsByName = this.getAllProofObligationItems().stream()
+			.collect(Collectors.toMap(ProofObligationItem::getName, x -> x));
+		
+		// Read the current POs from the model.
+		List<ProofObligationItem> proofObligations = ((EventBModel) model).getTopLevelMachine()
+			.getProofs()
+			.stream()
+			.map(ProofObligationItem::new)
+			.collect(Collectors.toList());
+		
+		// Copy any PO validation task IDs from the previous POs.
+		// This also removes all POs from previousPOsByName that have a corresponding current PO,
+		// leaving only the POs that no longer exist in the model.
+		for (final ProofObligationItem po : proofObligations) {
+			final ProofObligationItem previousPO = previousPOsByName.remove(po.getName());
+			if (previousPO != null) {
+				po.setId(previousPO.getId());
+			}
+		}
+		
+		// Look for removed POs that have an ID and keep them,
+		// so that POs for which the user assigned an ID don't silently disappear.
+		final List<ProofObligationItem> noLongerExistingPOs = previousPOsByName.values().stream()
+			.filter(po -> po.getId() != null)
+			.sorted(Comparator.comparing(ProofObligationItem::getName))
+			.collect(Collectors.toList());
+		for (final ProofObligationItem po : noLongerExistingPOs) {
+			po.setChecked(Checked.PARSE_ERROR);
+		}
+		proofObligations.addAll(noLongerExistingPOs);
+		
+		// Store the updated POs in the machine.
+		this.allProofObligationItemsProperty().setAll(proofObligations);
 	}
 
 	public ListProperty<ReplayTrace> tracesProperty() {

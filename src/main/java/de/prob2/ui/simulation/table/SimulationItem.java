@@ -22,13 +22,11 @@ import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 public class SimulationItem implements IValidationTask {
 
@@ -191,21 +189,6 @@ public class SimulationItem implements IValidationTask {
 
 	public void setChecked(Checked checked) {
 		this.checked.set(checked);
-	}
-
-	@Override
-	public boolean selected() {
-		return true;
-	}
-
-	@Override
-	public BooleanProperty selectedProperty() {
-		return null;
-	}
-
-	@Override
-	public void setSelected(boolean selected) {
-
 	}
 
 	@Override

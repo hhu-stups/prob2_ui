@@ -794,6 +794,15 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			machine.set("tableVisualizationItems", machine.objectNode());
 		}
 	}
+
+	private static void updateV34Machine(final ObjectNode machine) {
+		final ArrayNode proofObligations = checkArray(machine.get("proofObligationItems"));
+		for (final JsonNode poNode : proofObligations) {
+			final ObjectNode po = checkObject(poNode);
+			po.remove("selected");
+			po.remove("description");
+		}
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -920,6 +929,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 33) {
 				updateV33Machine(machine);
+			}
+			if (oldVersion <= 34) {
+				updateV34Machine(machine);
 			}
 		});
 		

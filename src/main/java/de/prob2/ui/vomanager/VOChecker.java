@@ -1,9 +1,7 @@
 package de.prob2.ui.vomanager;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -25,7 +23,6 @@ import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.verifications.po.POManager;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
@@ -100,14 +97,6 @@ public class VOChecker {
 				IValidationTask validationTask;
 				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
 					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
-				} else if(machine.getProofObligationItems().stream()
-						.map(ProofObligationItem::getId)
-						.filter(Objects::nonNull)
-						.anyMatch(id -> id.equals(taskExpr.getIdentifier()))) {
-					validationTask = machine.getProofObligationItems().stream()
-							.filter(po -> po.getId() != null)
-							.filter(po -> po.getId().equals(taskExpr.getIdentifier()))
-							.collect(Collectors.toList()).get(0);
 				} else {
 					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
 				}

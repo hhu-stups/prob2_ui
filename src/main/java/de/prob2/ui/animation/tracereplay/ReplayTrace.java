@@ -21,6 +21,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.BooleanProperty;
@@ -31,7 +32,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ReplayTrace implements IValidationTask, DescriptionView.Describable {
+public class ReplayTrace implements IExecutableItem, IValidationTask, DescriptionView.Describable {
 	private final String id;
 	private final ObjectProperty<Checked> status;
 	@JsonIgnore

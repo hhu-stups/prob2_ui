@@ -1,9 +1,13 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.util.Arrays;
+
 import com.google.inject.Inject;
+
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.TableCell;
@@ -11,8 +15,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-
-import java.util.Arrays;
 
 @FXMLInjected
 public class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
@@ -68,7 +70,9 @@ public class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
 					TableRow<ReplayedTraceRow> row = getTableRow();
 					ReplayedTraceRow rowItem = row.getItem();
 
-					getStyleClass().addAll(rowItem.getStyleClasses());
+					if (rowItem != null) {
+						getStyleClass().addAll(rowItem.getStyleClasses());
+					}
 				}
 			}
 		};
