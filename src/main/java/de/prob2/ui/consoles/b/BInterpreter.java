@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
 
 public class BInterpreter implements Executable {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BInterpreter.class);
-	
+
 	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;
 
@@ -32,16 +32,12 @@ public class BInterpreter implements Executable {
 		this.machineLoader = machineLoader;
 		this.currentTrace = currentTrace;
 	}
-	
-	private Trace getDefaultTrace() {
-		return new Trace(machineLoader.getActiveStateSpace());
-	}
-	
+
 	private static ErrorItem getParseErrorFromException(final Exception e) {
 		if (!(e instanceof EvaluationException) || !(e.getCause() instanceof BCompoundException)) {
 			return null;
 		}
-		final ProBError convertedError = new ProBError((BCompoundException)e.getCause());
+		final ProBError convertedError = new ProBError((BCompoundException) e.getCause());
 		if (convertedError.getErrors().isEmpty()) {
 			return null;
 		}
@@ -51,10 +47,10 @@ public class BInterpreter implements Executable {
 		}
 		return firstError;
 	}
-	
+
 	private static String formatParseException(final String source, final Exception e) {
 		final ErrorItem error = getParseErrorFromException(e);
-		
+
 		if (error != null) {
 			assert !error.getLocations().isEmpty();
 			final int startColumn = error.getLocations().get(0).getStartColumn();
@@ -63,15 +59,19 @@ public class BInterpreter implements Executable {
 			return String.format("%s: %s", e.getClass().getSimpleName(), e.getMessage());
 		}
 	}
-	
+
+	private Trace getDefaultTrace() {
+		return new Trace(machineLoader.getActiveStateSpace());
+	}
+
 	@Override
 	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
 		final String source = instruction.getInstruction();
 		if (":clear".equals(source)) {
-			return new ConsoleExecResult("","", ConsoleExecResultType.CLEAR);
+			return new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR);
 		}
-		if(source.replace(" ", "").isEmpty()) {
-			return new ConsoleExecResult("","", ConsoleExecResultType.PASSED);
+		if (source.replace(" ", "").isEmpty()) {
+			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
 		}
 		Trace trace = currentTrace.get();
 		if (trace == null) {

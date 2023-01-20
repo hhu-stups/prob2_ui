@@ -21,14 +21,16 @@ import javafx.stage.Stage;
 
 @Singleton
 public final class GroovyObjectStage extends Stage {
-	@FXML private TableView<GroovyObjectItem> tvObjects;
-	@FXML private TableColumn<GroovyObjectItem, String> objects;
-	@FXML private TableColumn<GroovyObjectItem, String> classes;
-	@FXML private TableColumn<GroovyObjectItem, String> values;
-
-	private ObservableList<GroovyObjectItem> items = FXCollections.observableArrayList();
-
 	private final StageManager stageManager;
+	private final ObservableList<GroovyObjectItem> items = FXCollections.observableArrayList();
+	@FXML
+	private TableView<GroovyObjectItem> tvObjects;
+	@FXML
+	private TableColumn<GroovyObjectItem, String> objects;
+	@FXML
+	private TableColumn<GroovyObjectItem, String> classes;
+	@FXML
+	private TableColumn<GroovyObjectItem, String> values;
 
 	@Inject
 	private GroovyObjectStage(StageManager stageManager) {

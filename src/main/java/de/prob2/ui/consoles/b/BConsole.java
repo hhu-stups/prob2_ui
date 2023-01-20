@@ -1,7 +1,5 @@
 package de.prob2.ui.consoles.b;
 
-import java.io.File;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -19,8 +17,9 @@ public final class BConsole extends Console {
 
 	@Inject
 	private BConsole(BInterpreter bInterpreter, I18n i18n, CurrentTrace currentTrace, Config config) {
-		super(i18n, bInterpreter, i18n.translate("consoles.b.header"), i18n.translate("consoles.b.prompt.classicalB"));
-		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
+		super(i18n, bInterpreter, "consoles.b.header", "consoles.b.prompt.classicalB");
+		// TODO: fix
+		/*currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
 			final String message;
 			if (to != null) {
 				final File modelFile = to.getModel().getModelFile();
@@ -35,19 +34,19 @@ public final class BConsole extends Console {
 					this.requestFollowCaret();
 				}
 			}
-		});
+		});*/
 
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.bConsoleInstructions != null) {
-					loadInstructions(configData.bConsoleInstructions);
+					setHistory(configData.bConsoleInstructions);
 				}
 			}
 
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.bConsoleInstructions = saveInstructions();
+				configData.bConsoleInstructions = getHistory();
 			}
 		});
 	}

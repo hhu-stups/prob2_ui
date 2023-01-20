@@ -22,7 +22,7 @@ import groovy.lang.PropertyValue;
 
 public class GroovyClassPropertyItem extends GroovyAbstractItem {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
-	
+
 	private final StringProperty params;
 	private final StringProperty type;
 	private final StringProperty origin;
@@ -32,10 +32,10 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 	private final StringProperty value;
 	private final Class<?> returnTypeClass;
 	private final boolean isMethod;
-	
+
 	private GroovyClassPropertyItem(String name, Class<?> returnTypeClass, boolean isMethod) {
 		super(name);
-		
+
 		params = new SimpleStringProperty(this, "params");
 		type = new SimpleStringProperty(this, "type");
 		origin = new SimpleStringProperty(this, "origin");
@@ -49,7 +49,7 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 
 	public GroovyClassPropertyItem(Method m) {
 		this(m.getName(), m.getReturnType(), true);
-		
+
 		final List<String> parameterNames = new ArrayList<>();
 		for (Class<?> c : m.getParameterTypes()) {
 			parameterNames.add(c.getSimpleName());
@@ -68,7 +68,7 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 
 	public GroovyClassPropertyItem(Field f) {
 		this(f.getName(), f.getType(), false);
-		
+
 		this.type.set(f.getType().getSimpleName());
 		this.origin.set("JAVA");
 		this.modifier.set(Modifier.toString(f.getModifiers()));
@@ -82,7 +82,7 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 
 	public GroovyClassPropertyItem(PropertyValue p) {
 		this(p.getName(), p.getType(), false);
-		
+
 		this.type.set(p.getType().getSimpleName());
 		this.origin.set("GROOVY");
 		this.modifier.set(Modifier.toString(p.getType().getModifiers()));
@@ -95,10 +95,10 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 			LOGGER.error("error creating property", e);
 		}
 	}
-	
+
 	public GroovyClassPropertyItem(MetaProperty m) {
 		this(m.getName(), m.getType(), false);
-		
+
 		this.type.set(m.getType().getSimpleName());
 		this.origin.set("GROOVY");
 		this.modifier.set(Modifier.toString(m.getType().getModifiers()));
@@ -107,7 +107,7 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 
 	public GroovyClassPropertyItem(MetaMethod m) {
 		this(m.getName(), m.getReturnType(), true);
-		
+
 		final List<String> parameterNames = new ArrayList<>();
 		for (CachedClass c : m.getParameterTypes()) {
 			if (c.isPrimitive()) {
@@ -178,38 +178,38 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 	public void setValue(String value) {
 		this.value.set(value);
 	}
-	
+
 	@Override
 	public String getNameAndParams() {
 		final String parameters = isMethod ? "(" + getParams() + ")" : "";
 		return getName() + parameters;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(name, isMethod, params, type, declarer);
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if(this == obj) {
+		if (this == obj) {
 			return true;
 		}
-		if(!(obj instanceof GroovyClassPropertyItem)) {
+		if (!(obj instanceof GroovyClassPropertyItem)) {
 			return false;
 		}
 		GroovyClassPropertyItem other = (GroovyClassPropertyItem) obj;
-		return other.name.get().equals(name.get()) && 
-				other.isMethod == this.isMethod && 
-				other.params.get().equals(params.get()) &&
-				other.type.get().equals(this.type.get()) && other.declarer.get().equals(this.declarer.get());
+		return other.name.get().equals(name.get()) &&
+				       other.isMethod == this.isMethod &&
+				       other.params.get().equals(params.get()) &&
+				       other.type.get().equals(this.type.get()) && other.declarer.get().equals(this.declarer.get());
 	}
-	
+
 	@Override
 	public String toString() {
 		return getNameAndParams() + " : " + getType() + " - " + getDeclarer();
 	}
-	
+
 	public Class<?> getReturnTypeClass() {
 		return returnTypeClass;
 	}

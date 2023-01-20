@@ -10,7 +10,7 @@ public class GroovyObjectItem extends GroovyAbstractItem {
 	private final StringProperty value;
 	private final Object object;
 	private GroovyClassStage classstage;
-	
+
 	public GroovyObjectItem(String name, Object object, GroovyClassStage classstage) {
 		super(name);
 		this.object = object;
@@ -23,37 +23,37 @@ public class GroovyObjectItem extends GroovyAbstractItem {
 		this.classstage = classstage;
 		classstage.setClass(clazz);
 	}
-	
+
 	public String getClazzname() {
 		return clazzname.get();
 	}
-	
+
 	public void setClass(String clazzname) {
 		this.clazzname.set(clazzname);
 	}
-	
+
 	public String getValue() {
 		return value.get();
 	}
-	
+
 	public void setValue(String value) {
 		this.value.set(value);
 	}
-	
+
 	public void show() {
 		classstage.setTitle(clazz.getSimpleName());
 		classstage.showMethodsAndFields(object);
 		classstage.show();
 		classstage.toFront();
 	}
-	
+
 	public void close() {
 		classstage.close();
 	}
-	
+
 	public GroovyClassStage getStage() {
 		return classstage;
 	}
-	
+
 
 }

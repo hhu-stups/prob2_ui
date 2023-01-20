@@ -2,6 +2,7 @@ package de.prob2.ui.consoles.groovy;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -10,10 +11,12 @@ import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
+
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
@@ -25,7 +28,7 @@ public class GroovyConsole extends Console {
 
 	@Inject
 	private GroovyConsole(GroovyInterpreter groovyInterpreter, I18n i18n, Config config) {
-		super(i18n, groovyInterpreter, i18n.translate("consoles.groovy.header"), i18n.translate("consoles.groovy.prompt"));
+		super(i18n, groovyInterpreter, "consoles.groovy.header", "consoles.groovy.prompt");
 		this.groovyInterpreter = groovyInterpreter;
 		this.groovyInterpreter.setCodeCompletion(this);
 		setCodeCompletionEvent();
@@ -35,24 +38,24 @@ public class GroovyConsole extends Console {
 			@Override
 			public void loadConfig(final ConfigData configData) {
 				if (configData.groovyConsoleInstructions != null) {
-					loadInstructions(configData.groovyConsoleInstructions);
+					setHistory(configData.groovyConsoleInstructions);
 				}
 			}
 
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.groovyConsoleInstructions = saveInstructions();
+				configData.groovyConsoleInstructions = getHistory();
 			}
 		});
 	}
 
 	@Override
-	protected void onKeyTyped(String character) {
-		if (!isSearching() && ".".equals(character)) {
+	protected void onEnterText(String text) {
+		if (!isSearching() && ".".equals(text)) {
 			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
 		}
 
-		super.onKeyTyped(character);
+		super.onEnterText(text);
 	}
 
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
@@ -75,13 +78,14 @@ public class GroovyConsole extends Console {
 			requestFollowCaret(); //This forces the text area to scroll to the bottom. Invoking scrollYToPixel does not have the expected effect
 		} else if (e.getCode() == KeyCode.SPACE) {
 			// handle Space in Code Completion
-			onKeyTyped(" ");
+			onEnterText(" ");
 			e.consume();
 		}
 	}
 
 	private void handleChooseSuggestion(CodeCompletionEvent e) {
-		String choice = e.getChoice();
+		// TODO: fix
+		/*String choice = e.getChoice();
 		String suggestion = e.getCurrentSuggestion();
 		int indexSkipped = getIndexSkipped(this.getText(this.getCaretPosition(), this.getLength()), choice, suggestion);
 		int indexOfRest = this.getCaretPosition() + indexSkipped;
@@ -92,7 +96,7 @@ public class GroovyConsole extends Console {
 		int diff = this.getLength() - oldLength;
 		currentPosInLine += diff + indexSkipped;
 		charCounterInLine += diff;
-		this.moveTo(indexOfRest + diff);
+		this.moveTo(indexOfRest + diff);*/
 	}
 
 	private int getIndexSkipped(String rest, String choice, String suggestion) {

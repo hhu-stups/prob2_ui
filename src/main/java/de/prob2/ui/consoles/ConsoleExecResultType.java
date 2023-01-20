@@ -4,5 +4,4 @@ public enum ConsoleExecResultType {
 	PASSED,
 	ERROR,
 	CLEAR,
-	;
 }

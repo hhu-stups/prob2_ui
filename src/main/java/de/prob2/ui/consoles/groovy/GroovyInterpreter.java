@@ -30,14 +30,14 @@ public final class GroovyInterpreter implements Executable {
 		this.groovyObjectStage = groovyObjectStage;
 		this.codeCompletion = new GroovyCodeCompletion(stageManager, engine);
 	}
-	
+
 	@Override
 	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
 		if ("inspect".equals(instruction.getInstruction())) {
 			groovyObjectStage.showObjects(engine);
 			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
 		} else if ("clear".equals(instruction.getInstruction())) {
-			return new ConsoleExecResult("","", ConsoleExecResultType.CLEAR);
+			return new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR);
 		} else {
 			final StringBuilder console = new StringBuilder();
 			engine.put("__console", console);
@@ -75,21 +75,21 @@ public final class GroovyInterpreter implements Executable {
 			return new ConsoleExecResult(console.toString(), resultString, ConsoleExecResultType.PASSED);
 		}
 	}
-	
+
 	public void setCodeCompletion(GroovyConsole parent) {
 		codeCompletion.setParent(parent);
 	}
-	
+
 	public void triggerCodeCompletion(String currentLine, CodeCompletionTriggerAction action) {
 		if (!codeCompletion.isVisible()) {
 			codeCompletion.activate(currentLine, action);
 		}
 	}
-	
+
 	public void triggerCloseCodeCompletion() {
 		codeCompletion.deactivate();
 	}
-	
+
 	public void closeObjectStage() {
 		groovyObjectStage.close();
 	}

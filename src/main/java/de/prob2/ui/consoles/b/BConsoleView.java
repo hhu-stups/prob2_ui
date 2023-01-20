@@ -3,17 +3,12 @@ package de.prob2.ui.consoles.b;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.model.eventb.EventBModel;
-import de.prob.model.representation.AbstractModel;
-import de.prob.model.representation.CSPModel;
-import de.prob.model.representation.XTLModel;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -25,9 +20,12 @@ public class BConsoleView extends VBox {
 	private final CurrentTrace currentTrace;
 	private final I18n i18n;
 
-	@FXML private BConsole bConsole;
-	@FXML private Label languageLabel;
-	@FXML private HelpButton helpButton;
+	@FXML
+	private BConsole bConsole;
+	@FXML
+	private Label languageLabel;
+	@FXML
+	private HelpButton helpButton;
 
 	@Inject
 	private BConsoleView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
@@ -41,7 +39,8 @@ public class BConsoleView extends VBox {
 
 	@FXML
 	private void initialize() {
-		this.currentTrace.addListener((o, from, to) -> {
+		// TODO: fix
+		/*this.currentTrace.addListener((o, from, to) -> {
 			final String lang;
 			final String prompt;
 			if (to == null) {
@@ -67,7 +66,7 @@ public class BConsoleView extends VBox {
 				this.languageLabel.setText(lang);
 				this.bConsole.setPrompt(prompt);
 			});
-		});
+		});*/
 		helpButton.setHelpContent("mainView.bconsole", null);
 	}
 
