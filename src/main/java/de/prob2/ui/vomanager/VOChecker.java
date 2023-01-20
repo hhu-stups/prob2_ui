@@ -1,9 +1,7 @@
 package de.prob2.ui.vomanager;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -99,14 +97,6 @@ public class VOChecker {
 				IValidationTask validationTask;
 				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
 					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
-				} else if(machine.getAllProofObligationItems().stream()
-						.map(ProofObligationItem::getId)
-						.filter(Objects::nonNull)
-						.anyMatch(id -> id.equals(taskExpr.getIdentifier()))) {
-					validationTask = machine.getAllProofObligationItems().stream()
-							.filter(po -> po.getId() != null)
-							.filter(po -> po.getId().equals(taskExpr.getIdentifier()))
-							.collect(Collectors.toList()).get(0);
 				} else {
 					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
 				}
