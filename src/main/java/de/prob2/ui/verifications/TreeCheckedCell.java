@@ -43,11 +43,16 @@ public final class TreeCheckedCell<T> extends TreeTableCell<T, Checked> {
 					styleClass = "fail";
 					icon = FontAwesome.Glyph.REMOVE;
 					break;
-				case LIMIT_REACHED:
+				
 				case INTERRUPTED:
-				case TIMEOUT:
 					styleClass = "interrupted";
-					icon = FontAwesome.Glyph.EXCLAMATION_TRIANGLE;
+					icon = FontAwesome.Glyph.PAUSE;
+					break;
+				
+				case LIMIT_REACHED:
+				case TIMEOUT:
+					styleClass = "timeout";
+					icon = FontAwesome.Glyph.CLOCK_ALT;
 					break;
 				
 				case PARSE_ERROR:

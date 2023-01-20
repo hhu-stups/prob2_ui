@@ -2,9 +2,11 @@ package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -13,6 +15,8 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.io.MoreFiles;
 
 import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
@@ -25,6 +29,7 @@ import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -531,6 +536,49 @@ public class Machine implements DescriptionView.Describable, INameable {
 	@JsonProperty
 	private void setProofObligationItems(final List<ProofObligationItem> proofObligationItems) {
 		this.proofObligationItemsProperty().setAll(proofObligationItems);
+	}
+
+	public void updateProofObligationsFromModel(final AbstractModel model) {
+		// TODO: Does not yet work with .eventb files
+		if(!(model instanceof EventBModel) || ((EventBModel) model).getTopLevelMachine() == null) {
+			return;
+		}
+		
+		// Save the previous POs and allow lookup by name.
+		Map<String, ProofObligationItem> previousPOsByName = this.getProofObligationItems().stream()
+			.collect(Collectors.toMap(ProofObligationItem::getName, x -> x));
+		
+		// Read the current POs from the model.
+		List<ProofObligationItem> proofObligations = ((EventBModel) model).getTopLevelMachine()
+			.getProofs()
+			.stream()
+			.map(ProofObligationItem::new)
+			.collect(Collectors.toList());
+		
+		// Copy any PO validation task IDs from the previous POs.
+		// This also removes all POs from previousPOsByName that have a corresponding current PO,
+		// leaving only the POs that no longer exist in the model.
+		for (final ProofObligationItem po : proofObligations) {
+			final ProofObligationItem previousPO = previousPOsByName.remove(po.getName());
+			if (previousPO != null) {
+				po.setId(previousPO.getId());
+			}
+		}
+		
+		// Look for removed POs that have an ID and keep them,
+		// so that POs for which the user assigned an ID don't silently disappear.
+		final List<ProofObligationItem> noLongerExistingPOs = previousPOsByName.values().stream()
+			.filter(po -> po.getId() != null)
+			.sorted(Comparator.comparing(ProofObligationItem::getName))
+			.collect(Collectors.toList());
+		for (final ProofObligationItem po : noLongerExistingPOs) {
+			po.setDischarged(false);
+			po.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, ""));
+		}
+		proofObligations.addAll(noLongerExistingPOs);
+		
+		// Store the updated POs in the machine.
+		this.proofObligationItemsProperty().setAll(proofObligations);
 	}
 
 	public ListProperty<ReplayTrace> tracesProperty() {

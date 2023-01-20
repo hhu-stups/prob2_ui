@@ -1,5 +1,21 @@
-![Operations](../screenshots/Operations.png)
+![Operationen](../screenshots/Operations.png)
 
-The Operations View shows the operations on a machine, if a machine is loaded. If you click on an operation shown in the list, it will be executed if possible. 
+The Operations View shows the operations on a machine, if a machine is loaded.
+If you click on an operation shown in the list, it will be executed if possible.
+The icons and marks next to the operations show, if an operations is executable and which state will be reached.
+* <span style="color:green">green</span> triangle: operations is executable
+* <span style="color:red">red</span> circle: operation is not executable
+* <span style="color:#1284F7">blue</span> circular arrow: operation is executable but leads to the current state  
 
-The text box on the top of this view provides filtering of operations and the questionmark button leads to this article providing help on the Operations View. The chevron buttons and the circular button on the left provide the same functionality like those of the [History View](History.md), namely moving back and forth in history and reloading a machine. The four buttons on the right side below the help button have following purposes: The leftmost button allows you to sort the operations, the eye button toggles visibility of unusable operations, the entwined arrows button executes a certain amount of random operations and the stop button cancels the currently executed operation.
+* <span style="color:#037875">darkgreen</span> mark: operation leads to unexplored state (which might be an errored state)
+* <span style="color:#B77300">orange</span> mark: operation leads errored state  
+
+
+The icons in the upper right corner of the view allow you to
+* sort operations in alphabetical order
+* hide non-executable or inactive operations
+* show/hide unambiguous operations variables
+* execute a specific number of randomized operations
+* filter operations
+
+Using the arrow in the upper left corner, you can jump back and forth in history or reload the machine.

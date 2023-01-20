@@ -40,15 +40,6 @@ public class ProofObligationItem extends AbstractCheckableItem implements IValid
 		this.description = description;
 	}
 
-	public ProofObligationItem(final String name, final String description, final String sourceName, boolean discharged) {
-		super();
-		this.id = null;
-		this.name = name;
-		this.description = description;
-		this.discharged = discharged;
-		this.setResultItem(new CheckingResultItem(discharged ? Checked.SUCCESS : Checked.UNKNOWN, ""));
-	}
-
 	public ProofObligationItem(ProofObligation proofObligation) {
 		super();
 		this.id = null;
