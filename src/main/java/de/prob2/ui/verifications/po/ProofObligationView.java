@@ -68,7 +68,7 @@ public class ProofObligationView extends AnchorPane {
 
 		currentTrace.addListener((observable, from, to) -> {
 			if (to != null) {
-				currentProject.getCurrentMachine().updateProofObligationsFromModel(to.getModel());
+				currentProject.getCurrentMachine().updateAllProofObligationsFromModel(to.getModel());
 			}
 		});
 
@@ -88,7 +88,7 @@ public class ProofObligationView extends AnchorPane {
 					Machine machine = currentProject.getCurrentMachine();
 					item.setId(id);
 					// This is necessary to force updating ids for VO Manager
-					machine.getProofObligationItems().set(machine.getProofObligationItems().indexOf(item), item);
+					machine.getAllProofObligationItems().set(machine.getAllProofObligationItems().indexOf(item), item);
 				});
 				tvProofObligations.refresh();
 			});
@@ -111,7 +111,7 @@ public class ProofObligationView extends AnchorPane {
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvProofObligations.itemsProperty().unbind();
 			if(to != null) {
-				tvProofObligations.itemsProperty().bind(to.proofObligationItemsProperty());
+				tvProofObligations.itemsProperty().bind(to.allProofObligationItemsProperty());
 			} else {
 				tvProofObligations.setItems(FXCollections.emptyObservableList());
 			}

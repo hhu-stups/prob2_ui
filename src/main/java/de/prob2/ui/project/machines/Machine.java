@@ -29,7 +29,6 @@ import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -134,7 +133,8 @@ public class Machine implements DescriptionView.Describable, INameable {
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final ListProperty<ReplayTrace> traces;
 	private final ListProperty<ModelCheckingItem> modelcheckingItems;
-	private final ListProperty<ProofObligationItem> proofObligationItems;
+	@JsonIgnore // Saved as proofObligationItems instead
+	private final ListProperty<ProofObligationItem> allProofObligationItems;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
@@ -173,7 +173,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
 		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
-		this.proofObligationItems = new SimpleListProperty<>(this, "proofObligationItems", FXCollections.observableArrayList());
+		this.allProofObligationItems = new SimpleListProperty<>(this, "allProofObligationItems", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
@@ -279,7 +279,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
-		this.proofObligationItemsProperty().addListener(changedListener);
+		this.allProofObligationItemsProperty().addListener(changedListener);
 		this.simulationsProperty().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.historyChartItemsProperty().addListener(changedListener);
@@ -296,7 +296,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.addValidationTaskListener(this.symbolicCheckingFormulasProperty());
 		this.addValidationTaskListener(this.tracesProperty());
 		this.addValidationTaskListener(this.modelcheckingItemsProperty());
-		this.addValidationTaskListener(this.proofObligationItemsProperty());
+		this.addValidationTaskListener(this.allProofObligationItemsProperty());
 
 		this.simulationsProperty().addListener((ListChangeListener<SimulationModel>)change -> {
 			while (change.next()) {
@@ -525,27 +525,37 @@ public class Machine implements DescriptionView.Describable, INameable {
 		this.modelcheckingItemsProperty().setAll(modelcheckingItems);
 	}
 
-	public ListProperty<ProofObligationItem> proofObligationItemsProperty() {
-		return proofObligationItems;
+	public ListProperty<ProofObligationItem> allProofObligationItemsProperty() {
+		return allProofObligationItems;
 	}
 
+	public List<ProofObligationItem> getAllProofObligationItems() {
+		return allProofObligationItems.get();
+	}
+
+	// When saving to the project file,
+	// only include POs that have IDs.
 	public List<ProofObligationItem> getProofObligationItems() {
-		return proofObligationItems.get();
+		return this.getAllProofObligationItems().stream()
+			.filter(po -> po.getId() != null)
+			.collect(Collectors.toList());
 	}
 
+	// This overwrites all existing PO information,
+	// so updateAllProofObligationsFromModel must be called afterwards to get the information from the model again.
 	@JsonProperty
 	private void setProofObligationItems(final List<ProofObligationItem> proofObligationItems) {
-		this.proofObligationItemsProperty().setAll(proofObligationItems);
+		this.allProofObligationItemsProperty().setAll(proofObligationItems);
 	}
 
-	public void updateProofObligationsFromModel(final AbstractModel model) {
+	public void updateAllProofObligationsFromModel(final AbstractModel model) {
 		// TODO: Does not yet work with .eventb files
 		if(!(model instanceof EventBModel) || ((EventBModel) model).getTopLevelMachine() == null) {
 			return;
 		}
 		
 		// Save the previous POs and allow lookup by name.
-		Map<String, ProofObligationItem> previousPOsByName = this.getProofObligationItems().stream()
+		Map<String, ProofObligationItem> previousPOsByName = this.getAllProofObligationItems().stream()
 			.collect(Collectors.toMap(ProofObligationItem::getName, x -> x));
 		
 		// Read the current POs from the model.
@@ -577,7 +587,7 @@ public class Machine implements DescriptionView.Describable, INameable {
 		proofObligations.addAll(noLongerExistingPOs);
 		
 		// Store the updated POs in the machine.
-		this.proofObligationItemsProperty().setAll(proofObligations);
+		this.allProofObligationItemsProperty().setAll(proofObligations);
 	}
 
 	public ListProperty<ReplayTrace> tracesProperty() {

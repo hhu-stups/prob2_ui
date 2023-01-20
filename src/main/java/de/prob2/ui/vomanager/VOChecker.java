@@ -99,11 +99,11 @@ public class VOChecker {
 				IValidationTask validationTask;
 				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
 					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
-				} else if(machine.getProofObligationItems().stream()
+				} else if(machine.getAllProofObligationItems().stream()
 						.map(ProofObligationItem::getId)
 						.filter(Objects::nonNull)
 						.anyMatch(id -> id.equals(taskExpr.getIdentifier()))) {
-					validationTask = machine.getProofObligationItems().stream()
+					validationTask = machine.getAllProofObligationItems().stream()
 							.filter(po -> po.getId() != null)
 							.filter(po -> po.getId().equals(taskExpr.getIdentifier()))
 							.collect(Collectors.toList()).get(0);
