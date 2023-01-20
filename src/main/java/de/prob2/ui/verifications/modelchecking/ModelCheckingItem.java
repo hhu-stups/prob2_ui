@@ -18,6 +18,7 @@ import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.BooleanProperty;
@@ -40,7 +41,7 @@ import javafx.collections.FXCollections;
 	"goal",
 	"shouldExecute",
 })
-public class ModelCheckingItem implements IValidationTask {
+public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
