@@ -1,4 +1,4 @@
-![HistoryChart](../../screenshots/Visualisations/History%20Chart.png)
+![HistoryChart](../../../screenshots/Visualisations/History%20Chart.png)
 
 The history chart shows values of the machine as a diagram. 
 

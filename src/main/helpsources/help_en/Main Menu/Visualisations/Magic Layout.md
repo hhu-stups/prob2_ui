@@ -1,4 +1,4 @@
-![Magic Layout](../../screenshots/Visualisations/MagicLayout.png)
+![Magic Layout](../../../screenshots/Visualisations/MagicLayout.png)
 
 Magic Layout View provides the possibility for interactive and customizable state visualization.
 The view is divided into the [Settings View](#settings) on the left side and the [Graph View](#graph) on the right side.

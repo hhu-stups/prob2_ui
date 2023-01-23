@@ -40,7 +40,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -146,7 +145,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Override
 	protected void initialize() {
 		super.initialize();
-		helpButton.setHelpContent("visualisations.formulaTableVisualisation", null);
+		helpButton.setHelpContent("mainmenu.visualisations.formulaTableVisualisation", null);
 		currentTable.addListener((observable, from, to) -> {
 			if(to != null) {
 				fillTable(to);

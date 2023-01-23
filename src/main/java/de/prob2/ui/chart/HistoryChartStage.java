@@ -179,7 +179,7 @@ public final class HistoryChartStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		helpButton.setHelpContent("visualisations.historyChart", null);
+		helpButton.setHelpContent("mainmenu.visualisations.historyChart", null);
 		this.formulaList.setCellFactory(view -> new ClassicalBListCell());
 		this.formulaList.getItems().addListener((ListChangeListener<ClassicalB>) change -> {
 			while (change.next()) {

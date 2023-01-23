@@ -1,4 +1,4 @@
-![DotView](../../screenshots/Visualisations/DotView.png)
+![DotView](../../../screenshots/Visualisations/DotView.png)
 
 In dieser Ansicht kann man bestimmte Visualisierungen über die aktuelle Maschine wie z.B. den Zustandsraum oder die Maschinenhierarchie anzeigen lassen und als Bild-Datei speichern.
 
