@@ -32,6 +32,9 @@ import de.prob2.ui.vomanager.ast.OrValidationExpression;
 import de.prob2.ui.vomanager.ast.SequentialValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.ReadOnlyProperty;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +54,8 @@ public class VOChecker {
 
 	private final SimulationItemHandler simulationItemHandler;
 
+	private final InvalidationListener tasksUpdateListener;
+
 	@Inject
 	public VOChecker(final CurrentProject currentProject, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
@@ -62,7 +67,14 @@ public class VOChecker {
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
 
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateOnMachine(to));
+		tasksUpdateListener = o -> updateOnMachine((Machine)((ReadOnlyProperty<?>)o).getBean());
+
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if (from != null) {
+				from.validationTasksProperty().removeListener(tasksUpdateListener);
+			}
+			updateOnMachine(to);
+		});
 		updateOnMachine(currentProject.getCurrentMachine());
 	}
 
@@ -70,6 +82,8 @@ public class VOChecker {
 		if (machine == null) {
 			return;
 		}
+
+		machine.validationTasksProperty().addListener(tasksUpdateListener);
 
 		for (final Requirement requirement : currentProject.getRequirements()) {
 			requirement.getValidationObligation(machine).ifPresent(vo -> {
