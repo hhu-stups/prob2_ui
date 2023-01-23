@@ -23,6 +23,7 @@
 <?import de.prob2.ui.visb.VisBStage?>
 
 <?import javafx.scene.control.MenuButton?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root title="%visb.title" type="VisBStage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="1000" height="500" minHeight="160" minWidth="480">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -50,6 +51,7 @@
 						</Menu>
 						<Menu mnemonicParsing="false" text="%visb.menu.help">
 							<MenuItem fx:id="helpMenu_userManual" mnemonicParsing="false" text="%visb.menu.help.user.manual" />
+							<MenuItem fx:id="helpMenu_helpPage" mnemonicParsing="false" text="%visb.menu.help.helppages" />
 						</Menu>
 					</MenuBar>
 				</top>
@@ -115,6 +117,7 @@
 									<Tooltip text="%visb.buttons.manageDefaultVisualisation" />
 								</tooltip>
 							</Button>
+							<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							<Spacer/>
 							<NavigationButtons/>
 							<Spacer/>

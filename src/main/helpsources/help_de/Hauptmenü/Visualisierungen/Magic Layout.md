@@ -1,5 +1,5 @@
 
-![Magic Layout](../../screenshots/Visualisations/MagicLayout.png)
+![Magic Layout](../../../screenshots/Visualisations/MagicLayout.png)
 
 
 Die Magic Layout Ansicht ermöglicht eine interaktive und individualisierbare Zustandsvisualisierung.

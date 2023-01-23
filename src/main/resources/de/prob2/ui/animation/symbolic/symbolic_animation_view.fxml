@@ -41,6 +41,9 @@
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
+				<tooltip>
+					<Tooltip text="%animation.symbolic.button.add" />
+				</tooltip>
 			</Button>
 			<HelpButton fx:id="helpButton" />
 		</HBox>

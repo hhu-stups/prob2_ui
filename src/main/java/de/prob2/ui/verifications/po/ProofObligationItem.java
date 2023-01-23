@@ -17,31 +17,31 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class ProofObligationItem implements IValidationTask {
 
-	private String id;
+	private final String id;
 	private final String name;
 	@JsonIgnore
 	private final String description;
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked;
 
+	public ProofObligationItem(final String id, final String name, final String description) {
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
+	}
+
 	@JsonCreator
 	public ProofObligationItem(
 			@JsonProperty("id") final String id,
 			@JsonProperty("name") final String name
 	) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.description = "";
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
+		this(id, name, "");
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
-		super();
-		this.id = null;
-		this.name = proofObligation.getName();
-		this.description = proofObligation.getDescription();
-		this.checked = new SimpleObjectProperty<>(this, "checked", proofObligation.isDischarged() ? Checked.SUCCESS : Checked.NOT_CHECKED);
+		this(null, proofObligation.getName(), proofObligation.getDescription());
+		this.setChecked(proofObligation.isDischarged() ? Checked.SUCCESS : Checked.NOT_CHECKED);
 	}
 
 	@Override
@@ -49,8 +49,10 @@ public class ProofObligationItem implements IValidationTask {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public ProofObligationItem withId(final String id) {
+		final ProofObligationItem updatedPO = new ProofObligationItem(id, this.getName(), this.getDescription());
+		updatedPO.setChecked(this.getChecked());
+		return updatedPO;
 	}
 
 	@Override
@@ -95,17 +97,7 @@ public class ProofObligationItem implements IValidationTask {
 				.toString();
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		ProofObligationItem that = (ProofObligationItem) o;
-		return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description)
-			&& Objects.equals(this.getChecked(), that.getChecked());
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, name, description, getChecked());
+	public boolean settingsEqual(final ProofObligationItem that) {
+		return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description);
 	}
 }

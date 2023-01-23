@@ -25,6 +25,7 @@
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.Tooltip?>
 <fx:root type="DotView" title="%dotty.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -65,6 +66,9 @@
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.saveAs" />
+									</tooltip>
 								</Button>
 								<Button fx:id="cancelButton" onAction="#cancel" HBox.hgrow="NEVER">
 									<graphic>
@@ -75,11 +79,17 @@
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
+									<tooltip>
+										<Tooltip text="%dynamic.button.addFormula" />
+									</tooltip>
 								</Button>
 								<Button fx:id="removeButton" visible="false" onAction="#handleRemoveFormula">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
+									<tooltip>
+										<Tooltip text="%dynamic.button.removeFormula" />
+									</tooltip>
 								</Button>
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
@@ -114,11 +124,17 @@
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.zoomIn" />
+									</tooltip>
 								</Button>
 								<Button fx:id="zoomOutButton" onAction="#zoomOut">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.zoomOut" />
+									</tooltip>
 								</Button>
 							</HBox>
 							<StackPane VBox.vgrow="ALWAYS">

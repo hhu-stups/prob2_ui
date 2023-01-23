@@ -1,4 +1,4 @@
-![Tabelle](../../screenshots/Visualisations/Formula%20Table.png)
+![Tabelle](../../../screenshots/Visualisations/Formula%20Table.png)
 
 In dieser Ansicht lassen sich verschiedene Eigenschaften der Maschine als Tabelle anzeigen.
 

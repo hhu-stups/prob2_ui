@@ -1,4 +1,4 @@
-![HistoryChart](../../screenshots/Visualisations/History%20Chart.png)
+![HistoryChart](../../../screenshots/Visualisations/History%20Chart.png)
 
 Das Zeitdiagramm zeigt gewünschte Werte der Maschine als Diagramm. 
 

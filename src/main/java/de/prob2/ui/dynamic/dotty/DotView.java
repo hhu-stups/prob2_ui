@@ -38,7 +38,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -134,7 +133,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		super.initialize();
 		stageManager.setMacMenuBar(this, this.menuBar);
 		saveButton.disableProperty().bind(currentDotContent.isNull());
-		helpButton.setHelpContent("visualisations.graphVisualisation", null);
+		helpButton.setHelpContent("mainmenu.visualisations.graphVisualisation", null);
 		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
 			Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
 			for (Node scrollBar : scrollBars) {
