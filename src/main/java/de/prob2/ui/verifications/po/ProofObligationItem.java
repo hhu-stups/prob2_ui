@@ -95,17 +95,7 @@ public class ProofObligationItem implements IValidationTask {
 				.toString();
 	}
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		ProofObligationItem that = (ProofObligationItem) o;
-		return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description)
-			&& Objects.equals(this.getChecked(), that.getChecked());
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, name, description, getChecked());
+	public boolean settingsEqual(final ProofObligationItem that) {
+		return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description);
 	}
 }
