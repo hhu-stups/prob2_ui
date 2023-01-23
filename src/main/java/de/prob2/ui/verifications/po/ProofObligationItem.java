@@ -24,24 +24,24 @@ public class ProofObligationItem implements IValidationTask {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked;
 
+	public ProofObligationItem(final String id, final String name, final String description) {
+		this.id = id;
+		this.name = name;
+		this.description = description;
+		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
+	}
+
 	@JsonCreator
 	public ProofObligationItem(
 			@JsonProperty("id") final String id,
 			@JsonProperty("name") final String name
 	) {
-		super();
-		this.id = id;
-		this.name = name;
-		this.description = "";
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
+		this(id, name, "");
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
-		super();
-		this.id = null;
-		this.name = proofObligation.getName();
-		this.description = proofObligation.getDescription();
-		this.checked = new SimpleObjectProperty<>(this, "checked", proofObligation.isDischarged() ? Checked.SUCCESS : Checked.NOT_CHECKED);
+		this(null, proofObligation.getName(), proofObligation.getDescription());
+		this.setChecked(proofObligation.isDischarged() ? Checked.SUCCESS : Checked.NOT_CHECKED);
 	}
 
 	@Override
