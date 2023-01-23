@@ -86,11 +86,8 @@ public class ProofObligationView extends AnchorPane {
 				res.ifPresent(idText -> {
 					final String id = idText.trim().isEmpty() ? null : idText;
 					Machine machine = currentProject.getCurrentMachine();
-					item.setId(id);
-					// This is necessary to force updating ids for VO Manager
-					machine.getAllProofObligationItems().set(machine.getAllProofObligationItems().indexOf(item), item);
+					machine.getAllProofObligationItems().set(machine.getAllProofObligationItems().indexOf(item), item.withId(id));
 				});
-				tvProofObligations.refresh();
 			});
 
 			row.itemProperty().addListener((observable, from, to) -> {

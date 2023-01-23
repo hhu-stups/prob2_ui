@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -568,10 +569,11 @@ public class Machine implements DescriptionView.Describable, INameable {
 		// Copy any PO validation task IDs from the previous POs.
 		// This also removes all POs from previousPOsByName that have a corresponding current PO,
 		// leaving only the POs that no longer exist in the model.
-		for (final ProofObligationItem po : proofObligations) {
+		for (ListIterator<ProofObligationItem> iterator = proofObligations.listIterator(); iterator.hasNext();) {
+			final ProofObligationItem po = iterator.next();
 			final ProofObligationItem previousPO = previousPOsByName.remove(po.getName());
 			if (previousPO != null) {
-				po.setId(previousPO.getId());
+				iterator.set(po.withId(previousPO.getId()));
 			}
 		}
 		

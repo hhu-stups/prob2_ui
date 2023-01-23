@@ -17,7 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class ProofObligationItem implements IValidationTask {
 
-	private String id;
+	private final String id;
 	private final String name;
 	@JsonIgnore
 	private final String description;
@@ -49,8 +49,10 @@ public class ProofObligationItem implements IValidationTask {
 		return id;
 	}
 
-	public void setId(String id) {
-		this.id = id;
+	public ProofObligationItem withId(final String id) {
+		final ProofObligationItem updatedPO = new ProofObligationItem(id, this.getName(), this.getDescription());
+		updatedPO.setChecked(this.getChecked());
+		return updatedPO;
 	}
 
 	@Override
