@@ -113,7 +113,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,true,false,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
-		assertTexFileContainsString("Modelchecking Items and Results");
+		assertTexFileContainsString("Modelchecking Tasks and Results");
 	}
 
 	@Test
