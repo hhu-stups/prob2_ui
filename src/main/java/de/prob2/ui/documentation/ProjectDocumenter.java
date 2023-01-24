@@ -3,16 +3,18 @@ package de.prob2.ui.documentation;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob.statespace.Transition;
-import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.visb.VisBStage;
+import de.prob2.ui.vomanager.IValidationTask;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.exception.MethodInvocationException;
@@ -20,16 +22,16 @@ import org.apache.velocity.exception.ParseErrorException;
 import org.apache.velocity.exception.ResourceNotFoundException;
 import org.apache.velocity.exception.TemplateInitException;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static de.prob2.ui.documentation.DocumentUtility.*;
+import static de.prob2.ui.documentation.DocumentationProcessHandler.*;
+import static de.prob2.ui.documentation.DocumentationResourceBuilder.*;
+import static de.prob2.ui.documentation.DocumentationUtility.getAbsoluteHtmlPath;
+import static de.prob2.ui.documentation.DocumentationUtility.getHtmlPath;
 
 public class ProjectDocumenter {
 	private final String filename;
@@ -65,7 +67,7 @@ public class ProjectDocumenter {
 		this.filename = filename;
 		this.injector = injector;
 		tracesHtmlPaths = new HashMap<>();
-		buildLatexResources();
+		buildLatexResources(dir,machines);
 	}
 
 	public void documentVelocity() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
@@ -73,7 +75,7 @@ public class ProjectDocumenter {
 		VelocityContext context = getVelocityContext();
 		StringWriter writer = new StringWriter();
 		Velocity.mergeTemplate("de/prob2/ui/documentation/velocity_template.tex", String.valueOf(StandardCharsets.UTF_8),context,writer);
-		DocumentUtility.saveStringWithExtension(writer.toString(), filename, dir, ".tex");
+		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, dir, ".tex");
 		if(makePdf)
 			createPdf(filename,dir);
 		saveMakeZipBash();
@@ -95,7 +97,7 @@ public class ProjectDocumenter {
 		context.put("ltl", ltl);
 		context.put("symbolic", symbolic);
 		context.put("printHtmlCode",printHtmlCode);
-		context.put("DocumentUtility", DocumentUtility.class);
+		context.put("documentationUtility", DocumentationUtility.class);
 		context.put("Transition", Transition.class);
 		context.put("i18n", i18n);
 		context.put("traceHtmlPaths",tracesHtmlPaths);
@@ -114,59 +116,12 @@ public class ProjectDocumenter {
 		return getHtmlPath(machine,trace)+filename;
 	}
 
-	private String getAbsoluteHtmlPath(Machine machine, ReplayTrace trace) {
-		return dir+"/" + getHtmlPath(machine,trace);
-	}
-
-	private String getHtmlPath(Machine machine, ReplayTrace trace) {
-		return "html_files/" + machine.getName() + "/" + Transition.prettifyName(trace.getName()) +"/";
-	}
-	public String getTraceHtmlCode(String relativePath){
-		return readFile(Paths.get(dir +"/"+ relativePath));
-	}
-	private void buildLatexResources() {
-		createImageDirectoryStructure();
-		saveProBLogo();
-		saveLatexCls();
-	}
-
-	private void createImageDirectoryStructure() {
-		for (Machine machine : machines) {
-			for (ReplayTrace trace : machine.getTraces()) {
-				try {
-					Files.createDirectories(Paths.get(getAbsoluteHtmlPath(machine, trace))
-					);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
-		}
-	}
-	private void saveProBLogo() {
-		String pathname = dir +"/html_files/ProB_Logo.png";
-		copyFile(pathname,  Main.class.getResourceAsStream("ProB_Logo.png"));
-	}
-	private void saveLatexCls() {
-		String pathname = dir +"/autodoc.cls";
-		copyFile(pathname, this.getClass().getResourceAsStream("autodoc.cls"));
-	}
-	private void saveMakeZipBash() {
-		String content = "#!/bin/bash \n zip -r "+ filename +".zip html_files "+filename+".pdf";
-		DocumentUtility.saveStringWithExtension(content, "makeZip", dir, ".sh");
-		makeShellExecutable("makeZip",dir);
-	}
-	private void copyFile(String pathname, InputStream resource) {
-		try (InputStream resourceAsStream = resource) {
-			assert resourceAsStream != null;
-			Files.copy(resourceAsStream, Paths.get(pathname));
-		} catch (IOException e) {
-			// An error occurred copying the resource
-		}
-	}
-
 	/*--- exclusive used by Template ---*/
 	public String getMachineCode(Machine elem) {
 		return readFile(project.getLocation().resolve(elem.getLocation()));
+	}
+	public String getTraceHtmlCode(String relativePath){
+		return readFile(Paths.get(dir +"/"+ relativePath));
 	}
 	public boolean formulaHasResult(LTLFormulaItem formula){return (formula.getResultItem() != null);}
 	public boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
