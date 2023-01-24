@@ -121,11 +121,13 @@ public class ProjectDocumenter {
 		VisBStage stage = injector.getInstance(VisBStage.class);
 		TraceChecker traceChecker = injector.getInstance(TraceChecker.class);
 		String filename = Transition.prettifyName(trace.getName())+".html";
+		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
+		* To solve this Problem the completable future is saved as an field an can be accessed to be synced  */
 		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
 		project.getLoadFuture().join();
 		traceChecker.check(trace,true).join();
 		stage.show();
-		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(machine,trace)+filename));
+		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(dir,machine,trace)+filename));
 		stage.close();
 		return getHtmlPath(machine,trace)+filename;
 	}

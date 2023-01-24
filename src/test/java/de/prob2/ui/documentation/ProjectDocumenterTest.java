@@ -101,7 +101,6 @@ class ProjectDocumenterTest extends ApplicationTest {
 		assertTexFileContainsString("Traces");
 	}
 
-
 	@Test
 	void testModelcheckingBoolean() throws IOException{
 		machines.add(trafficLight);
@@ -154,13 +153,16 @@ class ProjectDocumenterTest extends ApplicationTest {
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Symbolic Formulars and Results");
 	}
+
+	/* Can be tested localy for all Os's, but is disabled so Gitlab CI dont get blowded with
+	necessary terminal packages*/
 	@DisabledOnOs({ WINDOWS, MAC })
 	@Test
 	void testPDFCreated() {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		//PDF creation not instant set max delay 10s
-		await().atMost(30, SECONDS).until(() -> getOutputFile(".pdf").exists());
+		await().atMost(10, SECONDS).until(() -> getOutputFile(".pdf").exists());
 		assertTrue(getOutputFile(".pdf").exists());
 	}
 
@@ -169,7 +171,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 		assertTrue(FileUtils.readFileToString(texOutput, StandardCharsets.UTF_8).contains(s));
 	}
 
-
+	/* html trace creation uses many of JavaFX Classes that cannot be easily mocked. So function call Returns dummy html file from test resources*/
 	private static void runDocumentationWithMockedSaveTraceHtml(ProjectDocumenter velocityDocumenter1){
 		ProjectDocumenter documenterSpy = Mockito.spy(velocityDocumenter1);
 		doReturn("src/test/resources/documentation/output/html_files/TrafficLight/TrafficLight_Cars/dummy.html").when(documenterSpy).saveTraceHtml(any(),any());

@@ -16,14 +16,8 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{hypgotoe}
+\usepackage{amsfonts}
 
-\lstset{literate=
-		{∈}{$\in$}1
-		{⇒}{$\Rightarrow$}1
-		{≠}{$\neq$}1
-		{∀}{$\forall$}1
-		{‥}{$\cdot\cdot$}1
-}
 \definecolor{MCHblue}{HTML}{0060A1}
 \definecolor{MCHturquoise}{HTML}{00977E}
 \definecolor{MCHpurple}{HTML}{970050}
@@ -63,7 +57,16 @@
 	breaklines=true,        % sets automatic line breaking
 	breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
 	escapeinside={\%*}{*)},          % if you want to add a comment within your code
-	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}
+	postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space},
+	literate=
+	%ADD UNICODE LITERATES %
+		{∈}{$\in$}1
+		{ℕ}{$\mathbb{N}$}1
+		{⇒}{$\Rightarrow$}1
+		{≠}{$\neq$}1
+		{∀}{$\forall$}1
+		{‥}{$\cdot\cdot$}1
+		{∧}{$\land$}1
 }
 
 \lstdefinelanguage{JavaScript}{
@@ -122,10 +125,30 @@
 
 \lstnewenvironment{tabularlstlisting}[1][]
 {%
+	\lstset{ %
+		language=C++,                % choose the language of the code
+		basicstyle=\footnotesize,       % the size of the fonts that are used for the code
+		numbers=left,                   % where to put the line-numbers
+		numberstyle=\footnotesize,      % the size of the fonts that are used for the line-numbers
+		stepnumber=1,                   % the step between two line-numbers. If it is 1 each line will be numbered
+		numbersep=5pt,                  % how far the line-numbers are from the code
+		backgroundcolor=\color{white},  % choose the background color. You must add \usepackage{color}
+		showspaces=false,               % show spaces adding particular underscores
+		showstringspaces=false,         % underline spaces within strings
+		showtabs=false,                 % show tabs within strings adding particular underscores
+		frame=single,           % adds a frame around the code
+		tabsize=2,          % sets default tabsize to 2 spaces
+		captionpos=b,           % sets the caption-position to bottom
+		breaklines=true,        % sets automatic line breaking
+		breakatwhitespace=false,    % sets if automatic breaks should only happen at whitespace
+		escapeinside={\%*}{*)}          % if you want to add a comment within your code
+	}
 	\lstset{aboveskip=-2ex,belowskip=-3ex,#1}%
 }
 {}
 
+
 \newcommand\cropped[1]{%
 	\immediate\write18{convert -trim #1 #1}%
 	\includegraphics[width=\textwidth]{#1}}
+
