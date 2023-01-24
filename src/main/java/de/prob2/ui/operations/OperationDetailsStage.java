@@ -18,7 +18,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.stage.Stage;
 
-class OperationDetailsStage extends Stage {
+public class OperationDetailsStage extends Stage {
 	private static final class ValueItem {
 		private final String name;
 		private final String value;
