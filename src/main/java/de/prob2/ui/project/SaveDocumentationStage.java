@@ -101,6 +101,7 @@ public class SaveDocumentationStage extends Stage {
 
 	private void disableMakePdfIfPackageNotInstalled() throws IOException {
 		DocumentationProcessHandler.OS os = DocumentationProcessHandler.getOS();
+		//Windows Script uses Powershell which is installed defaultly, so no check needed
 		if(os == DocumentationProcessHandler.OS.LINUX || os == DocumentationProcessHandler.OS.MAC ){
 			if(!packageInstalled("pdflatex")){
 				makePdf.setText(i18n.translate("verifications.documentation.saveStage.pdfPackageNotInstalled"));

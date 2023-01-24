@@ -103,6 +103,20 @@ public class ProjectDocumenter {
 		context.put("traceHtmlPaths",tracesHtmlPaths);
 		return context;
 	}
+
+	private void saveMakeZipBash() {
+		switch (DocumentationProcessHandler.getOS()){
+			case LINUX:
+				createPortableDocumentationScriptLinux(filename,dir);
+				break;
+			case MAC:
+				createPortableDocumentationScriptMac(filename,dir);
+				break;
+			case WINDOWS:
+				createPortableDocumentationScriptWindows(filename,dir);
+				break;
+		}
+	}
 	public String saveTraceHtml(Machine machine, ReplayTrace trace){
 		VisBStage stage = injector.getInstance(VisBStage.class);
 		TraceChecker traceChecker = injector.getInstance(TraceChecker.class);
