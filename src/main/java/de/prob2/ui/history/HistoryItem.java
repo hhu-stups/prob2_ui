@@ -29,6 +29,10 @@ public class HistoryItem {
 		return items;
 	}
 	
+	public OperationItem getOperation() {
+		return this.operation;
+	}
+	
 	public int getIndex() {
 		return this.index;
 	}

@@ -11,7 +11,9 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.operations.OperationDetailsStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.TraceSelectionView;
@@ -25,7 +27,9 @@ import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -64,8 +68,20 @@ public final class HistoryView extends VBox {
 						this.getStyleClass().add("present");
 					}
 				}
+				
+				final MenuItem showDetailsItem = new MenuItem(i18n.translate("operations.operationsView.contextMenu.items.showDetails"));
+				showDetailsItem.setOnAction(event -> {
+					final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
+					stage.setItem(item.getOperation());
+					stage.show();
+				});
+				// The root state doesn't have a corresponding operation
+				showDetailsItem.setDisable(item.getOperation() == null);
+				
+				this.setContextMenu(new ContextMenu(showDetailsItem));
 			} else {
 				this.setCursor(Cursor.DEFAULT);
+				this.setContextMenu(null);
 			}
 		}
 	}
@@ -84,12 +100,14 @@ public final class HistoryView extends VBox {
 	private HelpButton helpButton;
 
 	private final CurrentTrace currentTrace;
+	private final I18n i18n;
 	private final Injector injector;
 	private final CurrentProject currentProject;
 
 	@Inject
-	private HistoryView(StageManager stageManager, CurrentTrace currentTrace, Injector injector,
+	private HistoryView(StageManager stageManager, CurrentTrace currentTrace, I18n i18n, Injector injector,
 			CurrentProject currentProject) {
+		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.currentProject = currentProject;
