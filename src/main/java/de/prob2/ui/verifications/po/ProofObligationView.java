@@ -66,9 +66,9 @@ public class ProofObligationView extends AnchorPane {
 		poIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		poColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		currentTrace.addListener((observable, from, to) -> {
+		currentTrace.modelProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				currentProject.getCurrentMachine().updateAllProofObligationsFromModel(to.getModel());
+				currentProject.getCurrentMachine().updateAllProofObligationsFromModel(to);
 			}
 		});
 
