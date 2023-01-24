@@ -22,8 +22,10 @@ public class DocumentationProcessHandler {
 	}
 
 	public static String readResourceWithFilename(String filename) {
-		URL resourceUrl = DocumentationProcessHandler.class.getResource(filename);
-		return readFile(Paths.get(Objects.requireNonNull(resourceUrl).getPath()));
+		Path path = new File(Objects.requireNonNull(DocumentationProcessHandler.class
+						.getResource(filename))
+				.getFile()).toPath();
+		return readFile(path);
 	}
 	public static String readFile(Path path) {
 		String content = "";
