@@ -3,10 +3,6 @@ package de.prob2.ui.verifications.po;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
@@ -19,9 +15,7 @@ public class ProofObligationItem implements IValidationTask {
 
 	private final String id;
 	private final String name;
-	@JsonIgnore
 	private final String description;
-	@JsonIgnore
 	private final ObjectProperty<Checked> checked;
 
 	public ProofObligationItem(final String id, final String name, final String description) {
@@ -31,12 +25,8 @@ public class ProofObligationItem implements IValidationTask {
 		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
 	}
 
-	@JsonCreator
-	public ProofObligationItem(
-			@JsonProperty("id") final String id,
-			@JsonProperty("name") final String name
-	) {
-		this(id, name, "");
+	public ProofObligationItem(final SavedProofObligationItem po) {
+		this(po.getId(), po.getName(), "");
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
@@ -86,7 +76,6 @@ public class ProofObligationItem implements IValidationTask {
 		this.checkedProperty().set(checked);
 	}
 
-	@JsonIgnore
 	@Override
 	public String toString() {
 		return new StringJoiner(", ", ProofObligationItem.class.getSimpleName() + "[", "]")
