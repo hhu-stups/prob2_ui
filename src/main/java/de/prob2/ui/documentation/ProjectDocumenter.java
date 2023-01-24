@@ -140,5 +140,30 @@ public class ProjectDocumenter {
 	public boolean formulaHasResult(LTLFormulaItem formula){return (formula.getResultItem() != null);}
 	public boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
 	public boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
+
+	public int getNumberSelectedTasks(List<IValidationTask> validationTasks){
+		long selectedTasksCount = validationTasks.stream()
+				.filter(IExecutableItem::selected)
+				.count();
+		return Math.toIntExact(selectedTasksCount);
+	}
+	public int getNumberSuccessfulTasks(List<IValidationTask> validationTasks){
+		long countSuccessful = validationTasks.stream()
+											  .filter(task -> task.selected() && task.getChecked().equals(Checked.SUCCESS))
+										      .count();
+		return Math.toIntExact(countSuccessful);
+	}
+	public int getNumberNotCheckedTasks(List<IValidationTask> validationTasks){
+		long countNotChecked = validationTasks.stream()
+				.filter(task -> task.selected() && task.getChecked().equals(Checked.NOT_CHECKED))
+				.count();
+		return Math.toIntExact(countNotChecked);
+	}
+	public int getNumberFailedTasks(List<IValidationTask> validationTasks){
+		long countFailed= validationTasks.stream()
+				.filter(task -> task.selected() && (!task.getChecked().equals(Checked.NOT_CHECKED) && !task.getChecked().equals(Checked.SUCCESS)))
+				.count();
+		return Math.toIntExact(countFailed);
+	}
 	/*---------------------------------*/
 }
