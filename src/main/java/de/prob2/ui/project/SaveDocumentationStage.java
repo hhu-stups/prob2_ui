@@ -3,7 +3,7 @@ package de.prob2.ui.project;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.documentation.DocumentUtility;
+import de.prob2.ui.documentation.DocumentationProcessHandler;
 import de.prob2.ui.documentation.MachineDocumentationItem;
 import de.prob2.ui.documentation.ProjectDocumenter;
 import de.prob2.ui.internal.FXMLInjected;
@@ -23,10 +23,14 @@ import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static de.prob2.ui.documentation.DocumentationProcessHandler.packageInstalled;
 
 @FXMLInjected
 public class SaveDocumentationStage extends Stage {
@@ -79,9 +83,8 @@ public class SaveDocumentationStage extends Stage {
 	}
 
 	@FXML
-	public void initialize() {
-		//can be removed when Windows and Mac Pdf Creation is added in DocumentUtility
-		disableMakePdfIfNotLinux();
+	public void initialize() throws IOException {
+		disableMakePdfIfPackageNotInstalled();
 		finishButton.disableProperty().bind(filename.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
 		filename.setText(this.currentProject.getName());
@@ -96,10 +99,13 @@ public class SaveDocumentationStage extends Stage {
 		tvDocumentation.setItems(machineDocumentationItems);
 	}
 
-	private void disableMakePdfIfNotLinux() {
-		if(DocumentUtility.getOS() != DocumentUtility.OS.LINUX) {
-			makePdf.setText(i18n.translate("verifications.documentation.saveStage.wrongOS"));
-			makePdf.setDisable(true);
+	private void disableMakePdfIfPackageNotInstalled() throws IOException {
+		DocumentationProcessHandler.OS os = DocumentationProcessHandler.getOS();
+		if(os == DocumentationProcessHandler.OS.LINUX || os == DocumentationProcessHandler.OS.MAC ){
+			if(!packageInstalled("pdflatex")){
+				makePdf.setText(i18n.translate("verifications.documentation.saveStage.pdfPackageNotInstalled"));
+				makePdf.setDisable(true);
+			}
 		}
 	}
 
@@ -129,7 +135,7 @@ public class SaveDocumentationStage extends Stage {
 																.filter(MachineDocumentationItem::getDocument)
 																.map(MachineDocumentationItem::getMachineItem)
 																.collect(Collectors.toList());
-		ProjectDocumenter documenter = new ProjectDocumenter(currentProject,i18n,
+		ProjectDocumenter documenter = new ProjectDocumenter(currentProject, i18n,
 															 documentModelchecking.isSelected(),
 															 documentLTL.isSelected(),
 														     documentSymbolic.isSelected(),
