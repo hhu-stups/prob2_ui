@@ -114,7 +114,7 @@ public class Documenter {
 			}
 		}
 		for (LTLPatternItem pattern : elem.getLTLPatterns()) { //TODO FIX TABLE ALLIGNMENT
-			if (pattern.selected() && pattern.getResultItem() != null) {
+			if (pattern.getResultItem() != null) {
 				valuesMap.put("pname", pattern.getName());
 				valuesMap.put("pcode", pattern.getCode());
 				valuesMap.put("presult", i18n.translate(pattern.getResultItem().getHeaderBundleKey())); //CHANGE LANGUANGE

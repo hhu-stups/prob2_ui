@@ -805,6 +805,10 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	}
 
 	private static void updateV35Machine(final ObjectNode machine) {
+		checkArray(machine.get("ltlPatterns")).forEach(patternNode ->
+			checkObject(patternNode).remove("selected")
+		);
+		
 		for (final String key : new String[] {"dotVisualizationItems", "tableVisualizationItems"}) {
 			final ObjectNode itemsByType = checkObject(machine.get(key));
 			itemsByType.fields().forEachRemaining(e -> {
