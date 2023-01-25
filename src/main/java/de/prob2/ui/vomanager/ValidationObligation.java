@@ -19,7 +19,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 
-public final class ValidationObligation implements INameable {
+public final class ValidationObligation {
 	private final String machine;
 
 	private final String expression;
@@ -111,12 +111,6 @@ public final class ValidationObligation implements INameable {
 
 	public IValidationExpression getParsedExpression() {
 		return parsedExpression;
-	}
-
-	@Override
-	@JsonIgnore
-	public String getName() {
-		return this.getExpression();
 	}
 
 	@Override
