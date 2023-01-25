@@ -1,25 +1,26 @@
 package de.prob2.ui.dynamic;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.vomanager.IValidationTask;
-
 import java.util.Objects;
 import java.util.StringJoiner;
 
-@JsonPropertyOrder({
-		"id",
-		"commandType",
-		"formula",
-})
-public class DynamicCommandFormulaItem extends AbstractCheckableItem implements IValidationTask {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.vomanager.IValidationTask;
+
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
+
+public class DynamicCommandFormulaItem implements IValidationTask {
 
 	private String id;
 	private final String commandType;
 	private String formula;
+	@JsonIgnore
+	private final ObjectProperty<Checked> checked;
 
 	@JsonCreator
 	public DynamicCommandFormulaItem(
@@ -31,6 +32,7 @@ public class DynamicCommandFormulaItem extends AbstractCheckableItem implements 
 		this.id = id;
 		this.commandType = commandType;
 		this.formula = formula;
+		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 	}
 
 	@Override
@@ -61,6 +63,20 @@ public class DynamicCommandFormulaItem extends AbstractCheckableItem implements 
 
 	public String getFormula() {
 		return formula;
+	}
+
+	@Override
+	public ObjectProperty<Checked> checkedProperty() {
+		return this.checked;
+	}
+
+	@Override
+	public Checked getChecked() {
+		return this.checkedProperty().get();
+	}
+
+	public void setChecked(final Checked checked) {
+		this.checkedProperty().set(checked);
 	}
 
 	@Override

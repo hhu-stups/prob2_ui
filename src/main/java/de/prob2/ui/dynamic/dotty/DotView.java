@@ -184,7 +184,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				if(item == null) {
 					return;
 				}
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "", ""));
+				item.setChecked(Checked.SUCCESS);
 			});
 
 			MenuItem failItem = new MenuItem(i18n.translate("dynamic.formulaView.fail"));
@@ -193,7 +193,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				if(item == null) {
 					return;
 				}
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "", ""));
+				item.setChecked(Checked.FAIL);
 			});
 
 			MenuItem unknownItem = new MenuItem(i18n.translate("dynamic.formulaView.unknown"));
@@ -202,7 +202,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				if(item == null) {
 					return;
 				}
-				item.setResultItem(new CheckingResultItem(Checked.NOT_CHECKED, "", ""));
+				item.setChecked(Checked.NOT_CHECKED);
 			});
 
 			row.contextMenuProperty().bind(
