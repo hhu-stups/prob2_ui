@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.symbolic;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -61,7 +62,11 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 					// User cancelled/closed the window
 					return;
 				}
-				final Optional<SymbolicAnimationItem> existingItem = formulaHandler.replaceItem(currentProject.getCurrentMachine(), oldItem, newItem);
+				final List<SymbolicAnimationItem> items = currentProject.getCurrentMachine().getSymbolicAnimationFormulas();
+				final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+				if (!existingItem.isPresent()) {
+					items.set(items.indexOf(oldItem), newItem);
+				}
 				formulaHandler.handleItem(existingItem.orElse(newItem), false);
 			});
 			
@@ -123,7 +128,11 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			// User cancelled/closed the window
 			return;
 		}
-		final Optional<SymbolicAnimationItem> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
+		final List<SymbolicAnimationItem> items = currentProject.getCurrentMachine().getSymbolicAnimationFormulas();
+		final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+		if (!existingItem.isPresent()) {
+			items.add(newItem);
+		}
 		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
 	}
 	

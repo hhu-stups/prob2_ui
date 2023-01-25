@@ -16,7 +16,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -35,11 +34,6 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor) {
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
-	}
-
-	@Override
-	public List<SymbolicAnimationItem> getItems(final Machine machine) {
-		return machine.getSymbolicAnimationFormulas();
 	}
 
 	private CompletableFuture<SymbolicAnimationItem> checkItem(final SymbolicAnimationItem item, final Runnable task) {
@@ -101,7 +95,6 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		});
 	}
 
-	@Override
 	public CompletableFuture<SymbolicAnimationItem> handleItemNoninteractive(final SymbolicAnimationItem item) {
 		switch(item.getType()) {
 			case SEQUENCE:

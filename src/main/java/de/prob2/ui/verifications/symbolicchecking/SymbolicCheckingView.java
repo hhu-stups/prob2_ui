@@ -67,7 +67,11 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 					// User cancelled/closed the window
 					return;
 				}
-				final Optional<SymbolicCheckingFormulaItem> existingItem = formulaHandler.replaceItem(currentProject.getCurrentMachine(), oldItem, newItem);
+				final List<SymbolicCheckingFormulaItem> items = currentProject.getCurrentMachine().getSymbolicCheckingFormulas();
+				final Optional<SymbolicCheckingFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+				if (!existingItem.isPresent()) {
+					items.set(items.indexOf(oldItem), newItem);
+				}
 				formulaHandler.handleItem(existingItem.orElse(newItem), false);
 			});
 			
@@ -150,7 +154,11 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			// User cancelled/closed the window
 			return;
 		}
-		final Optional<SymbolicCheckingFormulaItem> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
+		final List<SymbolicCheckingFormulaItem> items = currentProject.getCurrentMachine().getSymbolicCheckingFormulas();
+		final Optional<SymbolicCheckingFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+		if (!existingItem.isPresent()) {
+			items.add(newItem);
+		}
 		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
 	}
 	
