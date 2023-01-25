@@ -1,5 +1,7 @@
 package de.prob2.ui.animation.symbolic;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import com.google.inject.Injector;
@@ -50,8 +52,17 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> {
+				final SymbolicAnimationItem oldItem = row.getItem();
 				final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
-				choosingStage.changeFormula(row.getItem());
+				choosingStage.setData(oldItem);
+				choosingStage.showAndWait();
+				final SymbolicAnimationItem newItem = choosingStage.getResult();
+				if (newItem == null) {
+					// User cancelled/closed the window
+					return;
+				}
+				final Optional<SymbolicAnimationItem> existingItem = formulaHandler.replaceItem(currentProject.getCurrentMachine(), oldItem, newItem);
+				formulaHandler.handleItem(existingItem.orElse(newItem), false);
 			});
 			
 
@@ -105,7 +116,15 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(SymbolicAnimationChoosingStage.class).showAndWait();
+		final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
+		choosingStage.showAndWait();
+		final SymbolicAnimationItem newItem = choosingStage.getResult();
+		if (newItem == null) {
+			// User cancelled/closed the window
+			return;
+		}
+		final Optional<SymbolicAnimationItem> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
+		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
 	}
 	
 	@FXML

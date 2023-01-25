@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -57,8 +58,17 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> {
+				final SymbolicCheckingFormulaItem oldItem = row.getItem();
 				final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
-				choosingStage.changeFormula(row.getItem());
+				choosingStage.setData(oldItem);
+				choosingStage.showAndWait();
+				final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
+				if (newItem == null) {
+					// User cancelled/closed the window
+					return;
+				}
+				final Optional<SymbolicCheckingFormulaItem> existingItem = formulaHandler.replaceItem(currentProject.getCurrentMachine(), oldItem, newItem);
+				formulaHandler.handleItem(existingItem.orElse(newItem), false);
 			});
 			
 			Menu showCounterExampleItem = new Menu(i18n.translate("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
@@ -133,7 +143,15 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	
 	@FXML
 	public void addFormula() {
-		injector.getInstance(SymbolicCheckingChoosingStage.class).showAndWait();
+		final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
+		choosingStage.showAndWait();
+		final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
+		if (newItem == null) {
+			// User cancelled/closed the window
+			return;
+		}
+		final Optional<SymbolicCheckingFormulaItem> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
+		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
 	}
 	
 	@FXML

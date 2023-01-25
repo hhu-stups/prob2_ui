@@ -2,18 +2,15 @@ package de.prob2.ui.symbolic;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
@@ -21,9 +18,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET extends SymbolicExecutionType> extends Stage {
-	@FXML
-	private Button btCheck;
-	
 	@FXML
 	private TextField tfFormula;
 	
@@ -44,21 +38,15 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	
 	private final I18n i18n;
 	
-	protected final CurrentProject currentProject;
-	
 	private final CurrentTrace currentTrace;
-	
-	private final SymbolicFormulaHandler<T> formulaHandler;
 	
 	private final String checkAllOperations;
 
-	private T lastItem;
+	private T result;
 	
-	public SymbolicChoosingStage(final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final SymbolicFormulaHandler<T> formulaHandler) {
+	protected SymbolicChoosingStage(final I18n i18n, final CurrentTrace currentTrace) {
 		this.i18n = i18n;
-		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.formulaHandler = formulaHandler;
 		this.checkAllOperations = i18n.translate("verifications.symbolicchecking.choice.checkAllOperations");
 		
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -68,7 +56,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 	public void initialize() {
 		this.update();
 		currentTrace.addListener((observable, from, to) -> update());
-		setCheckListeners();
 		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if(to == null) {
@@ -106,16 +93,6 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 			}
 		}
 		predicateBuilderView.setItems(items);
-	}
-	
-	protected void setCheckListeners() {
-		btCheck.setOnAction(e -> {
-			final T newItem = this.extractItem();
-			final Optional<T> existingItem = this.formulaHandler.addItem(currentProject.getCurrentMachine(), newItem);
-			lastItem = existingItem.orElse(newItem);
-			this.close();
-			this.formulaHandler.handleItem(lastItem, false);
-		});
 	}
 	
 	public void changeGUIType(final SymbolicGUIType guiType) {
@@ -163,9 +140,7 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 
 	protected abstract T extractItem();
 
-	public void changeFormula(T item) {
-		btCheck.setText(i18n.translate("symbolic.formulaInput.buttons.change"));
-		setChangeListeners(item);
+	public void setData(T item) {
 		cbChoice.getSelectionModel().select(item.getType());
 		if(this.getGUIType() == SymbolicGUIType.TEXT_FIELD) {
 			tfFormula.setText(item.getCode());
@@ -180,25 +155,21 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 		} else if (this.getGUIType() == SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM) {
 			symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode()));
 		}
-		this.show();
 	}
 	
-	protected void setChangeListeners(T item) {
-		btCheck.setOnAction(e -> {
-			final T newItem = this.extractItem();
-			final Optional<T> existingItem = this.formulaHandler.replaceItem(currentProject.getCurrentMachine(), item, newItem);
-			lastItem = existingItem.orElse(newItem);
-			this.close();
-			this.formulaHandler.handleItem(lastItem, false);
-		});
+	@FXML
+	private void ok() {
+		this.result = this.extractItem();
+		this.close();
 	}
 	
 	@FXML
 	public void cancel() {
+		this.result = null;
 		this.close();
 	}
 
-	public T getLastItem() {
-		return lastItem;
+	public T getResult() {
+		return result;
 	}
 }
