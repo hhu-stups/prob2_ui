@@ -16,7 +16,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
@@ -24,7 +23,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<SymbolicAnimationItem> {
+public final class SymbolicAnimationItemHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationItemHandler.class);
 
 	private final CurrentTrace currentTrace;
@@ -106,7 +105,6 @@ public class SymbolicAnimationItemHandler implements SymbolicFormulaHandler<Symb
 		}
 	}
 
-	@Override
 	public CompletableFuture<SymbolicAnimationItem> handleItem(SymbolicAnimationItem item, boolean checkAll) {
 		if(!item.selected()) {
 			return CompletableFuture.completedFuture(item);

@@ -34,6 +34,13 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		public TableRow<SymbolicAnimationItem> call(TableView<SymbolicAnimationItem> param) {
 			TableRow<SymbolicAnimationItem> row = new TableRow<>();
 			
+			row.setOnMouseClicked(e -> {
+				final SymbolicAnimationItem item = row.getItem();
+				if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
+					formulaHandler.handleItem(item, false);
+				}
+			});
+			
 			MenuItem checkItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.check"));
 			checkItem.setDisable(true);
 			checkItem.setOnAction(e -> formulaHandler.handleItem(row.getItem(), false));
@@ -97,13 +104,15 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	}
 	
 	private final StageManager stageManager;
+	private final SymbolicAnimationItemHandler formulaHandler;
 	
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
 	                             final CliTaskExecutor cliExecutor, final Injector injector) {
-		super(i18n, currentTrace, currentProject, injector, cliExecutor, symbolicCheckHandler);
+		super(i18n, currentTrace, currentProject, injector, cliExecutor);
 		this.stageManager = stageManager;
+		this.formulaHandler = symbolicCheckHandler;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 	

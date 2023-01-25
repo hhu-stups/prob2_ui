@@ -67,19 +67,15 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	protected final Injector injector;
 	
 	protected CliTaskExecutor cliExecutor;
-	protected final SymbolicFormulaHandler<T> formulaHandler;
 
 	protected final CheckBox selectAll;
 	
-	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace,
-	                    final CurrentProject currentProject, final Injector injector, final CliTaskExecutor cliExecutor,
-	                    final SymbolicFormulaHandler<T> formulaHandler) {
+	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector, final CliTaskExecutor cliExecutor) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.cliExecutor = cliExecutor;
-		this.formulaHandler = formulaHandler;
 		this.selectAll = new CheckBox();
 	}
 	
@@ -121,13 +117,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
-		tvFormula.setOnMouseClicked(e-> {
-			T item = tvFormula.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
-				formulaHandler.handleItem(item, false);
-			}
-		});
-
 	}
 	
 	@FXML
