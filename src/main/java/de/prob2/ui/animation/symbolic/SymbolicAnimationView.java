@@ -22,6 +22,7 @@ import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
@@ -106,6 +107,9 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	private final StageManager stageManager;
 	private final SymbolicAnimationItemHandler formulaHandler;
 	
+	@FXML
+	private TableColumn<SymbolicAnimationItem, String> typeColumn;
+	
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
@@ -120,6 +124,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	public void initialize() {
 		super.initialize();
 		tvFormula.setRowFactory(new SymbolicAnimationCellFactory());
+		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		helpButton.setHelpContent("animation", "Symbolic");
 	}
 	

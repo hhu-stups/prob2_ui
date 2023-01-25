@@ -38,13 +38,10 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	protected TableView<T> tvFormula;
 	
 	@FXML
-	protected TableColumn<T, Checked> statusColumn;
+	protected TableColumn<IExecutableItem, Checked> statusColumn;
 	
 	@FXML
-	protected TableColumn<T, String> configurationColumn;
-	
-	@FXML
-	protected TableColumn<T, String> typeColumn;
+	protected TableColumn<SymbolicItem<?>, String> configurationColumn;
 	
 	@FXML
 	protected TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -114,7 +111,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
-		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 	}
