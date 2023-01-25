@@ -22,9 +22,6 @@ import javafx.stage.Stage;
 
 public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET extends SymbolicExecutionType> extends Stage {
 	@FXML
-	private Button btAdd;
-	
-	@FXML
 	private Button btCheck;
 	
 	@FXML
@@ -203,9 +200,5 @@ public abstract class SymbolicChoosingStage<T extends SymbolicItem<ET>, ET exten
 
 	public T getLastItem() {
 		return lastItem;
-	}
-
-	public void setAvailableTypes(final List<ET> types) {
-		cbChoice.getItems().setAll(types);
 	}
 }
