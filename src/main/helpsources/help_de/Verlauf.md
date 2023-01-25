@@ -1,5 +1,15 @@
 ![Verlaufsansicht](../screenshots/History.png)
 
-Die Verlaufsansicht zeigt eine Liste von bereits ausgeführten Operationen. Die Punkte, die in der Liste enthalten sind, sind an die Zustandsansicht gebunden: Wenn einer dieser Punkte ausgewählt wird, zeigt die Zustandsansicht den derzeitigen und den vorigen Zustand der gewählten Maschine. Die Pfeil-Buttons auf der linken Seite erlauben es einen Schritt im Verlauf nach hinten oder vorne zu gehen. Der kreisförmige Knopf erlaubt es die Maschine neu zu starten, wobei man den gesammten Verlauf verliert, wenn man den Pfad nicht gespeichert hat. Die zwei Knöpfe auf der rechten Seite liefern Sichern einer Trace und Hilfe.
+Die Verlaufs-Ansicht zeigt eine Liste von bereits ausgeführten Operationen. 
+Die Ansicht korrespondiert mit den Animations-Möglichkeiten und der [Zustandsansicht](Zentrale%20Ansicht/Zustandsansicht.md) von ProB. 
+Wenn also eine Transition über z.B. [VisB](Hauptmenü/Visualisierungen/VisB.md) oder die [Operations-Ansicht](Operationen.md)
+ausgeführt wird, wird diese automatisch dem Verlauf hinzugefügt. Wenn man im Verlauf zurückgeht, zum Beispiel durch Anklicken einzelner Transitionen oder durch Nutzen der Pfeiltasten,
+ändern sich auch die möglichen Operationen in der Operations-Ansicht, der Zustand der Maschine in der Zustandsansicht sowie die Darstellung in den verschiedenen Visualisierungsmöglichkeiten.
 
-Man beachte, dass wenn man sich entschließt, im Verlauf nach hinten zu gehen, und dann eine Operation ausführt, gehen die bisher folgenden Operationen verloren.
+Die Pfeile am linken oberen Rand der Ansicht erlauben es, im Verlauf nach hinten oder vorne zu gehen. 
+Der Kreispfeil lädt die Maschine neu. Achtung! Wenn die Maschine neu geladen wird, oder man im Verlauf zurückgeht und 
+dann eine Operation ausführt, wird der bisherige Verlauf überschrieben/gelöscht!
+
+Mit den Buttons am oberen rechten Rand können ausgeführte Pfade abgespeichert werden (wahlweise als .csv oder als .prob2trace) und zum Nachspielen geladen werden.
+
+
