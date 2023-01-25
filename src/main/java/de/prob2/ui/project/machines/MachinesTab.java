@@ -50,7 +50,8 @@ public class MachinesTab extends Tab {
 		@FXML private BindableGlyph statusIcon;
 		@FXML private Label locationLabel;
 		@FXML private ContextMenu contextMenu;
-		@FXML private Menu startAnimationMenu;
+		@FXML private MenuItem startAnimationMenu;
+		@FXML private Menu startAnimationWithPreferencesMenu;
 		@FXML private MenuItem showInternalItem;
 
 		private ObjectProperty<Machine> machineProperty;
@@ -75,6 +76,8 @@ public class MachinesTab extends Tab {
 				}
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
+			this.startAnimationMenu.setOnAction(e -> currentProject.startAnimation(this.machineProperty.get(), Preference.DEFAULT));
+			this.startAnimationWithPreferencesMenu.disableProperty().bind(currentProject.preferencesProperty().emptyProperty());
 			this.updatePreferences(currentProject.getPreferences());
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
 			statusIcon.visibleProperty().bind(machineProperty.isNotNull());
@@ -136,7 +139,7 @@ public class MachinesTab extends Tab {
 		}
 
 		private void updatePreferences(final List<Preference> prefs) {
-			startAnimationMenu.getItems().setAll(Stream.concat(Stream.of(Preference.DEFAULT), prefs.stream())
+			startAnimationWithPreferencesMenu.getItems().setAll(prefs.stream()
 				.map(preference -> {
 					final MenuItem menuItem = new MenuItem();
 					menuItem.textProperty().bind(preference.nameProperty());
