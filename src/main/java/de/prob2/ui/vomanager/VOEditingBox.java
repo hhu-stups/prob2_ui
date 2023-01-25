@@ -10,7 +10,7 @@ import java.util.Set;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -192,7 +192,7 @@ public class VOEditingBox extends VBox {
 				predecessors.add(requirement);
 				final Requirement updatedRequirement = new Requirement(requirement.getName(), requirement.getIntroducedAt(), requirement.getType(), requirement.getText(), updatedVos, predecessors, requirement.getParent());
 				currentProject.replaceRequirement(requirement, updatedRequirement);
-			} catch (VOParseException e) {
+			} catch (VOException e) {
 				voErrorHandler.handleError(this.getScene().getWindow(), e);
 			}
 			voManagerStage.closeEditingBox();
