@@ -9,102 +9,94 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="LTLView"
+<fx:root type="LTLView" fitToHeight="true" fitToWidth="true"
 	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
-	<children>
-		<VBox AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-			<HBox styleClass="border" alignment="CENTER">
-				<Button fx:id="checkMachineButton" disable="true" onAction="#checkMachine">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
-					</graphic>
-					<tooltip>
-						<Tooltip text="%common.checkMachine" />
-					</tooltip>
-				</Button>
-				<Button fx:id="cancelButton" onAction="#cancel">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
-					</graphic>
-					<tooltip>
-						<Tooltip text="%common.buttons.cancel" />
-					</tooltip>
-				</Button>
-				<Spacer/>
-				<Button fx:id="saveLTLButton" onAction="#saveLTL">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-					</graphic>
-					<tooltip>
-						<Tooltip text="%common.buttons.save" />
-					</tooltip>
-				</Button>
-				<Button fx:id="loadLTLButton" onAction="#loadLTL">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
-					</graphic>
-					<tooltip>
-						<Tooltip text="%common.buttons.load" />
-					</tooltip>
-				</Button>
-				<MenuButton fx:id="addMenuButton">
-					<items>
-						<MenuItem fx:id="addFormulaButton" onAction="#addFormula"
-							text="%verifications.ltl.ltlView.addFormula" />
-						<MenuItem fx:id="addPatternButton" onAction="#addPattern"
-							text="%verifications.ltl.ltlView.addPattern" />
-					</items>
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
-					</graphic>
-					<tooltip>
-						<Tooltip text="%verifications.ltl.ltlView.tooltips.addFormulaOrPattern" />
-					</tooltip>
-				</MenuButton>
-				<HelpButton fx:id="helpButton" />
-			</HBox>
-			<ScrollPane fitToHeight="true" fitToWidth="true">
-				<VBox>
-					<TableView fx:id="tvFormula" minHeight="80.0" VBox.vgrow="ALWAYS">
-						<columnResizePolicy>
-							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-						</columnResizePolicy>
-						<columns>
-							<TableColumn fx:id="formulaSelectedColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
-							<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-							<TableColumn fx:id="formulaIdColumn" minWidth="40.0" text="%verifications.common.columns.id" />
-							<TableColumn fx:id="formulaColumn" minWidth="80.0" text="%common.columns.formula" />
-							<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
-						</columns>
-						<placeholder>
-							<Label text="%verifications.ltl.ltlView.noFormulas" />
-						</placeholder>
-					</TableView>
-					<TableView fx:id="tvPattern" minHeight="80.0" VBox.vgrow="ALWAYS">
-						<columnResizePolicy>
-							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-						</columnResizePolicy>
-						<columns>
-							<TableColumn fx:id="patternStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-							<TableColumn fx:id="patternColumn" minWidth="80.0" text="%verifications.common.columns.pattern" />
-							<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
-						</columns>
-						<placeholder>
-							<Label text="%verifications.ltl.ltlView.noPattern" />
-						</placeholder>
-					</TableView>
-				</VBox>
-			</ScrollPane>
-		</VBox>
-	</children>
+	<VBox>
+		<HBox styleClass="border" alignment="CENTER">
+			<Button fx:id="checkMachineButton" disable="true" onAction="#checkMachine">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.checkMachine" />
+				</tooltip>
+			</Button>
+			<Button fx:id="cancelButton" onAction="#cancel">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.buttons.cancel" />
+				</tooltip>
+			</Button>
+			<Spacer/>
+			<Button fx:id="saveLTLButton" onAction="#saveLTL">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.buttons.save" />
+				</tooltip>
+			</Button>
+			<Button fx:id="loadLTLButton" onAction="#loadLTL">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.buttons.load" />
+				</tooltip>
+			</Button>
+			<MenuButton fx:id="addMenuButton">
+				<items>
+					<MenuItem fx:id="addFormulaButton" onAction="#addFormula"
+						text="%verifications.ltl.ltlView.addFormula" />
+					<MenuItem fx:id="addPatternButton" onAction="#addPattern"
+						text="%verifications.ltl.ltlView.addPattern" />
+				</items>
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%verifications.ltl.ltlView.tooltips.addFormulaOrPattern" />
+				</tooltip>
+			</MenuButton>
+			<HelpButton fx:id="helpButton" />
+		</HBox>
+		<TableView fx:id="tvFormula" minHeight="80.0" VBox.vgrow="ALWAYS">
+			<columnResizePolicy>
+				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+			</columnResizePolicy>
+			<columns>
+				<TableColumn fx:id="formulaSelectedColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
+				<TableColumn fx:id="formulaStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
+				<TableColumn fx:id="formulaIdColumn" minWidth="40.0" text="%verifications.common.columns.id" />
+				<TableColumn fx:id="formulaColumn" minWidth="80.0" text="%common.columns.formula" />
+				<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
+			</columns>
+			<placeholder>
+				<Label text="%verifications.ltl.ltlView.noFormulas" />
+			</placeholder>
+		</TableView>
+		<TableView fx:id="tvPattern" minHeight="80.0" VBox.vgrow="ALWAYS">
+			<columnResizePolicy>
+				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+			</columnResizePolicy>
+			<columns>
+				<TableColumn fx:id="patternStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
+				<TableColumn fx:id="patternColumn" minWidth="80.0" text="%verifications.common.columns.pattern" />
+				<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
+			</columns>
+			<placeholder>
+				<Label text="%verifications.ltl.ltlView.noPattern" />
+			</placeholder>
+		</TableView>
+	</VBox>
 </fx:root>
