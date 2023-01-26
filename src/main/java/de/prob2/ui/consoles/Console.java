@@ -3,6 +3,7 @@ package de.prob2.ui.consoles;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.I18n;
@@ -207,8 +208,8 @@ public abstract class Console extends StyleClassedTextArea {
 
 		// Shell/Emacs-style shortcuts, these should always use Control as the modifier, even on Mac (this is how it works in a normal terminal window).
 		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("r", CONTROL_DOWN)), e -> this.reverseSearch()));
-		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("a", CONTROL_DOWN)), e -> this.moveToStart()));
-		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("e", CONTROL_DOWN)), e -> this.moveToEnd()));
+		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("a", CONTROL_DOWN)), e -> this.moveToInputStart()));
+		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("e", CONTROL_DOWN)), e -> this.moveToInputEnd()));
 		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("k", CONTROL_DOWN)), e -> this.reset()));
 
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.UP), e -> this.handleUp()));
@@ -315,32 +316,38 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	protected void onEnterSingleLineText(String text) {
-		moveCaretToInputIfRequired();
+		moveCaretToInputEndIfRequired();
 
 		if (text.isEmpty()) {
 			return;
 		}
 		assert text.indexOf('\n') < 0 && text.indexOf('\r') < 0;
 
-		int caretColumn = this.getCaretColumn();
-		int lastParagraph = this.getParagraphs().size() - 1;
-		int inputPosition = caretColumn - this.inputStart.get();
-		assert lastParagraph >= 0 && inputPosition >= 0 && inputPosition <= this.input.get().length();
-
+		int inputPosition = getPositionInInput().orElseThrow(() -> new AssertionError("caret not in input"));
+		int caretPos = this.getCaretPosition();
 		String prefix = this.input.get().substring(0, inputPosition);
 		String suffix = this.input.get().substring(inputPosition);
 		this.input.set(prefix + text + suffix);
-		this.moveTo(lastParagraph, caretColumn + text.length());
+		this.moveTo(caretPos + text.length());
 	}
 
-	private void moveToStart() {
-		assert this.getParagraphs().size() >= 2;
-		this.moveTo(this.getParagraphs().size() - 1, this.inputStart.get());
+	private void moveCaretToPosInInput(int pos) {
+		assert this.getParagraphs().size() >= 1;
+		this.moveTo(this.getParagraphs().size() - 1, this.inputStart.get() + pos);
 	}
 
-	private void moveToEnd() {
-		assert this.getParagraphs().size() >= 2;
-		this.moveTo(this.getParagraphs().size() - 1, this.inputEnd.get());
+	private void moveToInputStart() {
+		this.moveCaretToPosInInput(0);
+	}
+
+	private void moveToInputEnd() {
+		this.moveCaretToPosInInput(this.input.get().length());
+	}
+
+	private void moveCaretToInputEndIfRequired() {
+		if (!this.getPositionInInput().isPresent()) {
+			this.moveToInputEnd();
+		}
 	}
 
 	protected void activateSearch() {
@@ -373,11 +380,11 @@ public abstract class Console extends StyleClassedTextArea {
 		this.clear();
 		this.input.set("");
 		this.update();
-		this.moveCaretToInputIfRequired();
+		this.moveCaretToInputEndIfRequired();
 	}
 
 	protected void handleEnter() {
-		this.moveCaretToInputIfRequired();
+		this.moveCaretToInputEndIfRequired();
 
 		String command = this.input.get();
 		boolean activateLineContinuation = command.endsWith("\\");
@@ -394,7 +401,7 @@ public abstract class Console extends StyleClassedTextArea {
 
 		this.input.set("");
 		this.lineContinuation.set(activateLineContinuation);
-		this.moveCaretToInputIfRequired();
+		this.moveCaretToInputEndIfRequired();
 
 		/*charCounterInLine = 0;
 		currentPosInLine = 0;
@@ -462,69 +469,63 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	private void handleLeft() {
-		// TODO: move caret left
-		/*deactivateSearch();
-		if (currentPosInLine > 0 && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
-			currentPosInLine--;
-			this.moveTo(this.getCaretPosition() - 1);
-		} else if (currentPosInLine == 0) {
-			super.deselect();
-		}*/
+		// TODO: search interaction
+		OptionalInt inputPos = this.getPositionInInput();
+		if (inputPos.isPresent()) {
+			this.moveCaretToPosInInput(Math.max(0, inputPos.getAsInt() - 1));
+		} else {
+			this.moveToInputEnd();
+		}
 	}
 
 	private void handleRight() {
-		// TODO: move caret right
-		/*deactivateSearch();
-		if (currentPosInLine < charCounterInLine && this.getLength() - this.getCaretPosition() <= charCounterInLine) {
-			currentPosInLine++;
-			this.moveTo(this.getCaretPosition() + 1);
-		}*/
-	}
-
-	private void handleDeletion(KeyEvent e) {
-		/*int maxPosInLine = charCounterInLine;
-		if (searchHandler.handleDeletion(e)) {
-			return;
-		}
-		if (searchHandler.isActive()) {
-			maxPosInLine = charCounterInLine + 2 + searchHandler.getCurrentSearchResult().length();
-		}
-		if (!this.getSelectedText().isEmpty() || this.getLength() - this.getCaretPosition() > maxPosInLine) {
-			return;
-		}
-		if (e.getCode().equals(KeyCode.BACK_SPACE)) {
-			handleBackspace();
+		// TODO: search interaction
+		OptionalInt inputPos = this.getPositionInInput();
+		if (inputPos.isPresent()) {
+			this.moveCaretToPosInInput(Math.min(this.input.get().length(), inputPos.getAsInt() + 1));
 		} else {
-			handleDelete();
-		}*/
+			this.moveToInputStart();
+		}
 	}
 
 	private void handleBackspace() {
-		// TODO: check if cursor is in input and then delete char before
-		// TODO: mind multi-char codepoints!
-		/*if (currentPosInLine > 0) {
-			currentPosInLine = Math.max(currentPosInLine - 1, 0);
-			charCounterInLine = Math.max(charCounterInLine - 1, 0);
-			this.deletePreviousChar();
-		}*/
+		// TODO: search interaction
+		this.getPositionInInput().ifPresent(end -> {
+			if (end > 0) {
+				String input = this.input.get();
+				int start = input.offsetByCodePoints(end, -1);
+				this.input.set(input.substring(0, start) + input.substring(end));
+				this.moveCaretToPosInInput(start);
+			}
+		});
 	}
 
 	private void handleDelete() {
-		// TODO: check if cursor is in input and then delete char before
-		// TODO: mind multi-char codepoints!
-		/*if (currentPosInLine < charCounterInLine) {
-			charCounterInLine = Math.max(charCounterInLine - 1, 0);
-			this.deleteNextChar();
-		}*/
+		// TODO: search interaction
+		this.getPositionInInput().ifPresent(start -> {
+			if (start < this.input.get().length()) {
+				String input = this.input.get();
+				int end = input.offsetByCodePoints(start, 1);
+				this.input.set(input.substring(0, start) + input.substring(end));
+				this.moveCaretToPosInInput(start);
+			}
+		});
 	}
 
-	private void moveCaretToInputIfRequired() {
+	private OptionalInt getPositionInInput() {
 		int lastParagraph = this.getParagraphs().size() - 1;
-		int caretParagraph = this.getCurrentParagraph();
-		int caretColumn = this.getCaretColumn();
-		if (caretParagraph != lastParagraph || caretColumn < this.inputStart.get() || caretColumn > this.inputEnd.get()) {
-			this.moveTo(lastParagraph, this.inputEnd.get(), SelectionPolicy.CLEAR);
+		assert lastParagraph >= 0;
+		if (lastParagraph != this.getCurrentParagraph()) {
+			return OptionalInt.empty();
 		}
+
+		int caretColumn = this.getCaretColumn();
+		int inputPosition = caretColumn - this.inputStart.get();
+		if (inputPosition < 0 || inputPosition > this.inputEnd.get()) {
+			return OptionalInt.empty();
+		}
+
+		return OptionalInt.of(inputPosition);
 	}
 
 	public boolean isSearching() {
@@ -561,6 +562,6 @@ public abstract class Console extends StyleClassedTextArea {
 
 	public void setInput(String input) {
 		this.input.set(input);
-		this.moveToEnd();
+		this.moveToInputEnd();
 	}
 }
