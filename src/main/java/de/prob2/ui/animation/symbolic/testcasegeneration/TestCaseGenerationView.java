@@ -250,7 +250,6 @@ public class TestCaseGenerationView extends ScrollPane {
 	private void changeItem(TestCaseGenerationItem item) {
 		TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
 		choosingStage.setItem(item);
-		choosingStage.useChangeButtons();
 		choosingStage.showAndWait();
 		final TestCaseGenerationItem newItem = choosingStage.getItem();
 		if (newItem == null) {
