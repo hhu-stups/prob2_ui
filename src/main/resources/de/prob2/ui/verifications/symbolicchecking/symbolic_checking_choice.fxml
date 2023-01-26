@@ -50,8 +50,8 @@
 							<TextField fx:id="idTextField" promptText="%common.optionalPlaceholder" HBox.hgrow="NEVER"/>
 						</HBox>
 						<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
-							<Button fx:id="btCheck" text="%common.buttons.add" styleClass="button-blue"/>
-							<Button fx:id="btCancel" onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>
+							<Button onAction="#ok" text="%common.buttons.ok" styleClass="button-blue"/>
+							<Button onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>
 						</HBox>
 					</VBox>
 				</VBox>

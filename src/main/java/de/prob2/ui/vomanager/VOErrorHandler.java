@@ -1,8 +1,12 @@
 package de.prob2.ui.vomanager;
 
 import com.google.inject.Inject;
+
+import de.prob.voparser.VOException;
 import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOTypeCheckException;
 import de.prob2.ui.internal.StageManager;
+
 import javafx.scene.control.Alert;
 import javafx.stage.Window;
 
@@ -15,22 +19,15 @@ public class VOErrorHandler {
 		this.stageManager = stageManager;
 	}
 
-	public void handleError(Window window, VOParseException exception) {
-		VOParseException.ErrorType errorType = exception.getErrorType();
+	public void handleError(Window window, VOException exception) {
 		String headerKey = "vomanager.error.parsing.header";
 		String contentKey;
-		switch (errorType) {
-			case PARSING:
-				contentKey = "vomanager.error.parsing.content";
-				break;
-			case SCOPING:
-				contentKey = "vomanager.error.scoping";
-				break;
-			case TYPECHECKING:
-				contentKey = "vomanager.error.typechecking";
-				break;
-			default:
-				throw new RuntimeException("VO parsing error type unknown: " + errorType);
+		if (exception instanceof VOParseException) {
+			contentKey = "vomanager.error.parsing.content";
+		} else if (exception instanceof VOTypeCheckException) {
+			contentKey = "vomanager.error.typechecking";
+		} else {
+			contentKey = "vomanager.error.generic";
 		}
 		final Alert alert = stageManager.makeExceptionAlert(exception, headerKey, contentKey);
 		alert.initOwner(window);

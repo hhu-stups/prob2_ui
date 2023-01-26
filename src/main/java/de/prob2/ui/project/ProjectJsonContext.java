@@ -803,6 +803,22 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			po.remove("description");
 		}
 	}
+
+	private static void updateV35Machine(final ObjectNode machine) {
+		checkArray(machine.get("ltlPatterns")).forEach(patternNode ->
+			checkObject(patternNode).remove("selected")
+		);
+		
+		for (final String key : new String[] {"dotVisualizationItems", "tableVisualizationItems"}) {
+			final ObjectNode itemsByType = checkObject(machine.get(key));
+			itemsByType.fields().forEachRemaining(e -> {
+				for (final JsonNode itemNode : checkArray(e.getValue())) {
+					final ObjectNode item = checkObject(itemNode);
+					item.remove("selected");
+				}
+			});
+		}
+	}
 	
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
@@ -932,6 +948,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 34) {
 				updateV34Machine(machine);
+			}
+			if (oldVersion <= 35) {
+				updateV35Machine(machine);
 			}
 		});
 		

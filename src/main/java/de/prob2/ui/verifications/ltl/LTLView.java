@@ -402,9 +402,7 @@ public class LTLView extends AnchorPane {
 			List<LTLFormulaItem> formulas = machine.getLTLFormulas().stream()
 				.filter(LTLFormulaItem::selected)
 				.collect(Collectors.toList());
-			List<LTLPatternItem> patterns = machine.getLTLPatterns().stream()
-				.filter(LTLPatternItem::selected)
-				.collect(Collectors.toList());
+			List<LTLPatternItem> patterns = machine.getLTLPatterns();
 			try {
 				final JsonMetadata metadata = LTLData.metadataBuilder()
 					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())

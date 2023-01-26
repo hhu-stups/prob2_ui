@@ -1,5 +1,13 @@
 ![History View](../screenshots/History.png)
 
-The History View shows a list of already executed operations. The items contained in this list are linked to the State View: When selecting one of these items, State View shows the current and the previous state of the chosen machine.  The chrevron buttons on the left allow to go back and forth in history by one step. If you push the circular button the machine will be reloaded and the previous history will be lost if you did not save the trace. The two buttons on the right provide saving a trace and help.
+The History View shows a list of already executed operations.
+The view ist linked to the operation- and visualisation-options and the [state-view](Main%20View/State%20View.md) of ProB.
+So when executing a transition via [VisB](Main%20Menu/Visualisations/VisB.md) or the [operations-view](Operations.md) for example, it will be added to the history automatically. 
+When going back in history by clicking on one of the listed transitions or via the arrow-buttons, the possible operations in the operations-view, 
+the state of the machine in the stateview and the visualisations change.
 
-Note that if you choose to go back in history and execute an operation the previously following one will be lost. 
+The arrow in the top left corner of the view allows you to go back and forth in the history. The circular arrow reloads the machine.
+Attention! When reloading the machine or going back in the history and then executing an operation, the previous history will be overwritten/deleted!
+
+With the buttons in the top right corner you can save executed traces (as .csv-file oder a .prob2trace) and load traces for replay.
+

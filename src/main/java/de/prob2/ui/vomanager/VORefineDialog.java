@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOException;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 
@@ -67,7 +67,7 @@ public class VORefineDialog extends Stage {
 			currentProject.replaceRequirement(oldRequirement, updatedRequirement);
 
 			this.close();
-		} catch (VOParseException e) {
+		} catch (VOException e) {
 			voErrorHandler.handleError(this.getScene().getWindow(), e);
 		}
 

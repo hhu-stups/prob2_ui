@@ -6,13 +6,12 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -193,7 +192,7 @@ public class RequirementsEditingBox extends VBox {
 		final Machine machine = currentProject.get().getMachine(vo.getMachine());
 		try {
 			voChecker.parseVO(machine, vo);
-		} catch (VOParseException exc) {
+		} catch (VOException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}
 	}

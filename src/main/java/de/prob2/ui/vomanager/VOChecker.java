@@ -7,7 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.check.ModelCheckingOptions;
-import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOException;
 import de.prob.voparser.VOParser;
 import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -89,20 +89,20 @@ public class VOChecker {
 			requirement.getValidationObligation(machine).ifPresent(vo -> {
 				try {
 					parseVO(machine, vo);
-				} catch (VOParseException e) {
-					LOGGER.warn("Parse error in validation expression", e);
+				} catch (VOException e) {
+					LOGGER.warn("Error in validation expression", e);
 				}
 			});
 		}
 	}
 
-	public void checkRequirement(Requirement requirement) throws VOParseException {
+	public void checkRequirement(Requirement requirement) {
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
 			this.checkVO(vo);
 		}
 	}
 
-	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
+	public void parseVO(Machine machine, ValidationObligation vo) {
 		final VOParser voParser = new VOParser();
 		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
 		try {
@@ -117,7 +117,7 @@ public class VOChecker {
 				taskExpr.setTask(validationTask);
 			});
 			vo.setParsedExpression(expression);
-		} catch (VOParseException e) {
+		} catch (VOException e) {
 			vo.setParsedExpression(null);
 			throw e;
 		}
@@ -205,7 +205,7 @@ public class VOChecker {
 	}
 
 
-	public void checkVO(ValidationObligation validationObligation) throws VOParseException {
+	public void checkVO(ValidationObligation validationObligation) {
 		if (validationObligation.getParsedExpression() == null) {
 			final Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
 			this.parseVO(machine, validationObligation);

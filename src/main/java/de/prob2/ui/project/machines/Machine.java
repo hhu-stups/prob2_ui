@@ -37,7 +37,6 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.po.SavedProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.vomanager.INameable;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.application.Platform;
@@ -81,7 +80,7 @@ import javafx.collections.ObservableMap;
 	"dotVisualizationItems",
 	"tableVisualizationItems"
 })
-public class Machine implements DescriptionView.Describable, INameable {
+public class Machine implements DescriptionView.Describable {
 	public enum CheckingStatus {
 		UNKNOWN, SUCCESSFUL, FAILED, NONE
 	}

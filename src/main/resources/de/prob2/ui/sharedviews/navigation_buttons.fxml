@@ -32,7 +32,7 @@
 			<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="ANGLE_RIGHT" bindableFontSize="${fontSize.fontSize * 1.5 + 2}"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="%internal.navigationButtons.fastForward.tooltip"/>
+			<Tooltip text="%internal.navigationButtons.forward.tooltip"/>
 		</tooltip>
 	</Button>
 	<Button fx:id="fastForwardButton" HBox.hgrow="NEVER" onAction="#handleFastForwardButton">
@@ -40,7 +40,7 @@
 			<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="ANGLE_DOUBLE_RIGHT" bindableFontSize="${fontSize.fontSize * 1.5 + 2}"/>
 		</graphic>
 		<tooltip>
-			<Tooltip text="%internal.navigationButtons.forward.tooltip"/>
+			<Tooltip text="%internal.navigationButtons.fastForward.tooltip"/>
 		</tooltip>
 	</Button>
 	<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
