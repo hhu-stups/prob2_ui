@@ -2,6 +2,7 @@ package de.prob2.ui.consoles.b;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -14,10 +15,10 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 @Singleton
 public final class BConsole extends Console {
 
-    @Inject
-    private BConsole(BInterpreter bInterpreter, I18n i18n, CurrentTrace currentTrace, Config config) {
-        super(i18n, bInterpreter, "consoles.b.header", "consoles.b.prompt.classicalB");
-        // TODO: fix
+	@Inject
+	private BConsole(BInterpreter bInterpreter, I18n i18n, CurrentTrace currentTrace, Config config) {
+		super(i18n, bInterpreter, "consoles.b.header", "consoles.b.prompt.classicalB");
+		// TODO: fix
 		/*currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
 			final String message;
 			if (to != null) {
@@ -35,18 +36,18 @@ public final class BConsole extends Console {
 			}
 		});*/
 
-        config.addListener(new ConfigListener() {
-            @Override
-            public void loadConfig(final ConfigData configData) {
-                if (configData.bConsoleInstructions != null) {
-                    setHistory(configData.bConsoleInstructions);
-                }
-            }
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.bConsoleInstructions != null) {
+					setHistory(configData.bConsoleInstructions);
+				}
+			}
 
-            @Override
-            public void saveConfig(final ConfigData configData) {
-                configData.bConsoleInstructions = getHistory();
-            }
-        });
-    }
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.bConsoleInstructions = getHistory();
+			}
+		});
+	}
 }

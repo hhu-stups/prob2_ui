@@ -2,11 +2,13 @@ package de.prob2.ui.consoles.b;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.layout.VBox;
@@ -15,29 +17,29 @@ import javafx.scene.layout.VBox;
 @Singleton
 public class BConsoleView extends VBox {
 
-    private final CurrentTrace currentTrace;
-    private final I18n i18n;
+	private final CurrentTrace currentTrace;
+	private final I18n i18n;
 
-    @FXML
-    private BConsole bConsole;
-    @FXML
-    private Label languageLabel;
-    @FXML
-    private HelpButton helpButton;
+	@FXML
+	private BConsole bConsole;
+	@FXML
+	private Label languageLabel;
+	@FXML
+	private HelpButton helpButton;
 
-    @Inject
-    private BConsoleView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
-        super();
+	@Inject
+	private BConsoleView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
+		super();
 
-        this.i18n = i18n;
-        this.currentTrace = currentTrace;
+		this.i18n = i18n;
+		this.currentTrace = currentTrace;
 
-        stageManager.loadFXML(this, "b_console_view.fxml");
-    }
+		stageManager.loadFXML(this, "b_console_view.fxml");
+	}
 
-    @FXML
-    private void initialize() {
-        // TODO: fix
+	@FXML
+	private void initialize() {
+		// TODO: fix
 		/*this.currentTrace.addListener((o, from, to) -> {
 			final String lang;
 			final String prompt;
@@ -65,11 +67,11 @@ public class BConsoleView extends VBox {
 				this.bConsole.setPrompt(prompt);
 			});
 		});*/
-        helpButton.setHelpContent("mainView.bconsole", null);
-    }
+		helpButton.setHelpContent("mainView.bconsole", null);
+	}
 
-    @FXML
-    private void handleClear() {
-        bConsole.reset();
-    }
+	@FXML
+	private void handleClear() {
+		bConsole.reset();
+	}
 }
