@@ -16,9 +16,7 @@
 <fx:root type="SymbolicAnimationChoosingStage" fx:id="cbcChoice" title="%animation.symbolic.choice.title" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<TextField fx:id="tfFormula" VBox.vgrow="NEVER"/>
-		<ChoiceBox fx:id="cbOperations" VBox.vgrow="NEVER"/>
 		<PredicateBuilderView fx:id="predicateBuilderView" VBox.vgrow="NEVER"/>
-		<ChoiceBox fx:id="symbolicModelCheckAlgorithmChoiceBox" VBox.vgrow="NEVER"/>
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">

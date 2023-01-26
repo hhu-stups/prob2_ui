@@ -1,19 +1,51 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 
+import de.prob.animator.command.SymbolicModelcheckCommand;
+import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.symbolic.SymbolicChoosingStage;
-import de.prob2.ui.symbolic.SymbolicGUIType;
+import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
+import de.prob2.ui.sharedviews.PredicateBuilderView;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 
-public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<SymbolicCheckingFormulaItem, SymbolicCheckingType> {
+public final class SymbolicCheckingChoosingStage extends Stage {
+	@FXML
+	private ChoiceBox<String> cbOperations;
+	
+	@FXML
+	private PredicateBuilderView predicateBuilderView;
+	
+	@FXML
+	private ChoiceBox<SymbolicModelcheckCommand.Algorithm> symbolicModelCheckAlgorithmChoiceBox;
+	
+	@FXML
+	private VBox formulaInput;
+	
+	@FXML
+	private ChoiceBox<SymbolicCheckingType> cbChoice;
+	
 	@FXML
 	private TextField idTextField;
+	
+	private final I18n i18n;
+	
+	private final CurrentTrace currentTrace;
+	
+	private final String checkAllOperations;
+	
+	private SymbolicCheckingFormulaItem result;
 	
 	@Inject
 	private SymbolicCheckingChoosingStage(
@@ -21,43 +53,148 @@ public class SymbolicCheckingChoosingStage extends SymbolicChoosingStage<Symboli
 		final I18n i18n,
 		final CurrentTrace currentTrace
 	) {
-		super(i18n, currentTrace);
+		this.i18n = i18n;
+		this.currentTrace = currentTrace;
+		this.checkAllOperations = i18n.translate("verifications.symbolicchecking.choice.checkAllOperations");
+		
+		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "symbolic_checking_choice.fxml");
 	}
 	
-	@Override
-	public SymbolicGUIType getGUIType(final SymbolicCheckingType item) {
-		switch (item) {
+	@FXML
+	private void initialize() {
+		this.update();
+		currentTrace.addListener((observable, from, to) -> update());
+		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
+		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			changeGUIType(to);
+			this.sizeToScene();
+		});
+		cbChoice.setConverter(i18n.translateConverter());
+		symbolicModelCheckAlgorithmChoiceBox.getItems().setAll(SymbolicModelcheckCommand.Algorithm.values());
+		symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(0);
+		this.setResizable(true);
+	}
+	
+	private void update() {
+		cbOperations.getItems().setAll(this.checkAllOperations);
+		cbOperations.getSelectionModel().select(this.checkAllOperations);
+		final List<PredicateBuilderTableItem> items = new ArrayList<>();
+		if (currentTrace.get() != null) {
+			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
+			if (loadedMachine != null) {
+				cbOperations.getItems().addAll(loadedMachine.getOperationNames());
+				loadedMachine.getConstantNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.CONSTANT)));
+				loadedMachine.getVariableNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.VARIABLE)));
+			}
+		}
+		predicateBuilderView.setItems(items);
+	}
+	
+	private void changeGUIType(final SymbolicCheckingType type) {
+		formulaInput.getChildren().removeAll(cbOperations, predicateBuilderView, symbolicModelCheckAlgorithmChoiceBox);
+		switch (type) {
 			case CHECK_REFINEMENT:
 			case CHECK_STATIC_ASSERTIONS:
 			case CHECK_DYNAMIC_ASSERTIONS:
 			case CHECK_WELL_DEFINEDNESS:
 			case FIND_REDUNDANT_INVARIANTS:
-				return SymbolicGUIType.NONE;
+				break;
 			
 			case INVARIANT:
-				return SymbolicGUIType.CHOICE_BOX;
+				formulaInput.getChildren().add(0, cbOperations);
+				break;
 			
 			case DEADLOCK:
-				return SymbolicGUIType.PREDICATE;
+				formulaInput.getChildren().add(0, predicateBuilderView);
+				break;
 			
 			case SYMBOLIC_MODEL_CHECK:
-				return SymbolicGUIType.SYMBOLIC_MODEL_CHECK_ALGORITHM;
+				formulaInput.getChildren().add(0, symbolicModelCheckAlgorithmChoiceBox);
+				break;
 			
 			default:
-				throw new AssertionError();
+				throw new AssertionError("Unhandled symbolic checking type: " + cbChoice.getValue());
+		}
+		this.sizeToScene();
+	}
+	
+	private String extractFormula() {
+		switch (cbChoice.getValue()) {
+			case CHECK_REFINEMENT:
+			case CHECK_STATIC_ASSERTIONS:
+			case CHECK_DYNAMIC_ASSERTIONS:
+			case CHECK_WELL_DEFINEDNESS:
+			case FIND_REDUNDANT_INVARIANTS:
+				return "";
+			
+			case INVARIANT:
+				if (this.checkAllOperations.equals(cbOperations.getSelectionModel().getSelectedItem())) {
+					return "";
+				} else {
+					return cbOperations.getSelectionModel().getSelectedItem();
+				}
+			
+			case DEADLOCK:
+				return predicateBuilderView.getPredicate();
+			
+			case SYMBOLIC_MODEL_CHECK:
+				return symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().getSelectedItem().name();
+			
+			default:
+				throw new AssertionError("Unhandled symbolic checking type: " + cbChoice.getValue());
 		}
 	}
 	
-	@Override
-	protected SymbolicCheckingFormulaItem extractItem() {
-		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
-		return new SymbolicCheckingFormulaItem(id, this.extractFormula(), this.getExecutionType());
+	public void setData(SymbolicCheckingFormulaItem item) {
+		cbChoice.getSelectionModel().select(item.getType());
+		switch (item.getType()) {
+			case CHECK_REFINEMENT:
+			case CHECK_STATIC_ASSERTIONS:
+			case CHECK_DYNAMIC_ASSERTIONS:
+			case CHECK_WELL_DEFINEDNESS:
+			case FIND_REDUNDANT_INVARIANTS:
+				break;
+			
+			case INVARIANT:
+				if (item.getCode().isEmpty()) {
+					cbOperations.getSelectionModel().select(this.checkAllOperations);
+				} else {
+					cbOperations.getSelectionModel().select(item.getCode());
+				}
+				break;
+			
+			case DEADLOCK:
+				predicateBuilderView.setFromPredicate(item.getCode());
+				break;
+			
+			case SYMBOLIC_MODEL_CHECK:
+				symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode()));
+				break;
+			
+			default:
+				throw new AssertionError("Unhandled symbolic checking type: " + cbChoice.getValue());
+		}
+		this.idTextField.setText(item.getId() == null ? "" : item.getId());
 	}
 	
-	@Override
-	public void setData(final SymbolicCheckingFormulaItem item) {
-		super.setData(item);
-		this.idTextField.setText(item.getId() == null ? "" : item.getId());
+	@FXML
+	private void ok() {
+		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
+		this.result = new SymbolicCheckingFormulaItem(id, this.extractFormula(), cbChoice.getValue());
+		this.close();
+	}
+	
+	@FXML
+	public void cancel() {
+		this.result = null;
+		this.close();
+	}
+	
+	public SymbolicCheckingFormulaItem getResult() {
+		return result;
 	}
 }
