@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -63,7 +64,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> {
 				final SymbolicAnimationItem oldItem = row.getItem();
-				final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
+				final SymbolicAnimationChoosingStage choosingStage = choosingStageProvider.get();
 				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 				choosingStage.setData(oldItem);
 				choosingStage.showAndWait();
@@ -108,6 +109,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
 	private final StageManager stageManager;
 	private final SymbolicAnimationItemHandler formulaHandler;
+	private final Provider<SymbolicAnimationChoosingStage> choosingStageProvider;
 	
 	@FXML
 	private TableColumn<SymbolicAnimationItem, String> typeColumn;
@@ -117,10 +119,11 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
-	                             final CliTaskExecutor cliExecutor, final Injector injector) {
-		super(i18n, currentTrace, currentProject, injector, cliExecutor);
+	                             final CliTaskExecutor cliExecutor, final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
+		super(i18n, currentTrace, currentProject, disablePropertyController, cliExecutor);
 		this.stageManager = stageManager;
 		this.formulaHandler = symbolicCheckHandler;
+		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
 	
@@ -140,7 +143,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
 	@FXML
 	public void addFormula() {
-		final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
+		final SymbolicAnimationChoosingStage choosingStage = choosingStageProvider.get();
 		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 		choosingStage.showAndWait();
 		final SymbolicAnimationItem newItem = choosingStage.getResult();
