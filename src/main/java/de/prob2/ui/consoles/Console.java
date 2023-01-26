@@ -80,7 +80,7 @@ public abstract class Console extends StyleClassedTextArea {
                 }
             } else {
                 if (lineContinuation.get()) {
-                    return lineContinuationPrompt.get().length();
+                    return translatedLineContinuationPrompt.get().length();
                 } else {
                     return translatedPrompt.get().length();
                 }
@@ -97,7 +97,7 @@ public abstract class Console extends StyleClassedTextArea {
                 }
             } else {
                 if (lineContinuation.get()) {
-                    return lineContinuationPrompt.get() + input.get();
+                    return translatedLineContinuationPrompt.get() + input.get();
                 } else {
                     return translatedPrompt.get() + input.get();
                 }
@@ -350,14 +350,18 @@ public abstract class Console extends StyleClassedTextArea {
 
     public void reset() {
         this.searchHandler.deactivateSearch();
+        this.lineContinuation.set(false);
         this.clear();
         this.input.set("");
         this.update();
+        this.moveCaretToInputIfRequired();
     }
 
     protected void handleEnter() {
-        moveCaretToInputIfRequired();
-        String command = input.get();
+        this.moveCaretToInputIfRequired();
+
+        String command = this.input.get();
+        boolean activateLineContinuation = command.endsWith("\\");
 
         // TODO: execute input/search result
         // TODO: deactivate search
@@ -368,7 +372,10 @@ public abstract class Console extends StyleClassedTextArea {
         int lastParagraph = this.getParagraphs().size() - 1;
         assert lastParagraph >= 0;
         this.insertText(lastParagraph, 0, this.inputWithPrompt.get() + "\n");
-        input.set("");
+
+        this.input.set("");
+        this.lineContinuation.set(activateLineContinuation);
+        this.moveCaretToInputIfRequired();
 
 		/*charCounterInLine = 0;
 		currentPosInLine = 0;
