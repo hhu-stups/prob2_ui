@@ -25,13 +25,14 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.UIInteraction;
-import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.UIInteraction;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -207,16 +208,16 @@ public final class OperationsView extends VBox {
 	private final DisablePropertyController disablePropertyController;
 	private final StageManager stageManager;
 	private final Config config;
+	private final CliTaskExecutor cliExecutor;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final BackgroundUpdater updater;
-	private final ObjectProperty<Thread> randomExecutionThread;
 	private final AtomicBoolean needsUpdateAfterBusy;
 
 	@Inject
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
 						   final Injector injector, final I18n i18n, final StatusBar statusBar,
 						   final DisablePropertyController disablePropertyController, final StopActions stopActions,
-						   final Config config) {
+						   final Config config, final CliTaskExecutor cliExecutor) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
@@ -227,13 +228,12 @@ public final class OperationsView extends VBox {
 		this.disablePropertyController = disablePropertyController;
 		this.stageManager = stageManager;
 		this.config = config;
+		this.cliExecutor = cliExecutor;
 		this.updater = new BackgroundUpdater("OperationsView Updater");
-		this.randomExecutionThread = new SimpleObjectProperty<>(this, "randomExecutionThread", null);
 		this.needsUpdateAfterBusy = new AtomicBoolean(false);
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		disablePropertyController.addDisableExpression(this.updater.runningProperty());
-		disablePropertyController.addDisableExpression(this.randomExecutionThread.isNotNull());
 		stageManager.loadFXML(this, "operations_view.fxml");
 	}
 
@@ -252,9 +252,9 @@ public final class OperationsView extends VBox {
 		searchBox.managedProperty().bind(searchToggle.selectedProperty());
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 
-		randomButton.disableProperty().bind(currentTrace.isNull().or(randomExecutionThread.isNotNull()).or(disablePropertyController.disableProperty()));
-		randomButton.visibleProperty().bind(randomExecutionThread.isNull());
-		cancelButton.visibleProperty().bind(randomExecutionThread.isNotNull());
+		randomButton.disableProperty().bind(currentTrace.isNull().or(cliExecutor.runningProperty()).or(disablePropertyController.disableProperty()));
+		randomButton.visibleProperty().bind(cliExecutor.runningProperty().not());
+		cancelButton.visibleProperty().bind(cliExecutor.runningProperty());
 
 		randomText.textProperty().addListener((observable, from, to) -> {
 			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
@@ -557,27 +557,18 @@ public final class OperationsView extends VBox {
 			throw new AssertionError("Unhandled random animation event source: " + event.getSource());
 		}
 		
-		final Thread executionThread = new Thread(() -> {
-			try {
-				final Trace trace = currentTrace.get();
-				if (trace != null) {
-					currentTrace.set(trace.randomAnimation(operationCount));
-				}
-			} finally {
-				randomExecutionThread.set(null);
+		cliExecutor.submit(() -> {
+			final Trace trace = currentTrace.get();
+			if (trace != null) {
+				currentTrace.set(trace.randomAnimation(operationCount));
 			}
-		}, "Random Operation Executor");
-		randomExecutionThread.set(executionThread);
-		executionThread.start();
+		});
 	}
 
 	@FXML
 	private void cancel() {
+		cliExecutor.interruptAll();
 		currentTrace.getStateSpace().sendInterrupt();
-		if(randomExecutionThread.get() != null) {
-			randomExecutionThread.get().interrupt();
-			randomExecutionThread.set(null);
-		}
 	}
 
 	private OperationsView.SortMode getSortMode() {
