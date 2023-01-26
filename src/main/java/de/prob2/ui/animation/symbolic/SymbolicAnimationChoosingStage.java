@@ -8,7 +8,6 @@ import javax.inject.Inject;
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
@@ -34,18 +33,11 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	
 	private final I18n i18n;
 	
-	private final CurrentTrace currentTrace;
-	
 	private SymbolicAnimationItem result;
 	
 	@Inject
-	private SymbolicAnimationChoosingStage(
-		final StageManager stageManager,
-		final I18n i18n,
-		final CurrentTrace currentTrace
-	) {
+	private SymbolicAnimationChoosingStage(final StageManager stageManager, final I18n i18n) {
 		this.i18n = i18n;
-		this.currentTrace = currentTrace;
 		
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "symbolic_animation_choice.fxml");
@@ -53,8 +45,6 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	
 	@FXML
 	public void initialize() {
-		this.update();
-		currentTrace.addListener((observable, from, to) -> update());
 		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if(to == null) {
@@ -67,14 +57,11 @@ public class SymbolicAnimationChoosingStage extends Stage {
 		this.setResizable(true);
 	}
 	
-	protected void update() {
+	public void setMachine(final LoadedMachine loadedMachine) {
 		final List<PredicateBuilderTableItem> items = new ArrayList<>();
-		if (currentTrace.get() != null) {
-			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
-			if (loadedMachine != null) {
-				loadedMachine.getConstantNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.CONSTANT)));
-				loadedMachine.getVariableNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.VARIABLE)));
-			}
+		if (loadedMachine != null) {
+			loadedMachine.getConstantNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.CONSTANT)));
+			loadedMachine.getVariableNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.VARIABLE)));
 		}
 		predicateBuilderView.setItems(items);
 	}

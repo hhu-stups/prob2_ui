@@ -9,7 +9,6 @@ import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
 
@@ -41,20 +40,13 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 	
 	private final I18n i18n;
 	
-	private final CurrentTrace currentTrace;
-	
 	private final String checkAllOperations;
 	
 	private SymbolicCheckingFormulaItem result;
 	
 	@Inject
-	private SymbolicCheckingChoosingStage(
-		final StageManager stageManager,
-		final I18n i18n,
-		final CurrentTrace currentTrace
-	) {
+	private SymbolicCheckingChoosingStage(final StageManager stageManager, final I18n i18n) {
 		this.i18n = i18n;
-		this.currentTrace = currentTrace;
 		this.checkAllOperations = i18n.translate("verifications.symbolicchecking.choice.checkAllOperations");
 		
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -63,8 +55,6 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 	
 	@FXML
 	private void initialize() {
-		this.update();
-		currentTrace.addListener((observable, from, to) -> update());
 		formulaInput.visibleProperty().bind(cbChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		cbChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if(to == null) {
@@ -79,17 +69,14 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 		this.setResizable(true);
 	}
 	
-	private void update() {
+	public void setMachine(final LoadedMachine loadedMachine) {
 		cbOperations.getItems().setAll(this.checkAllOperations);
 		cbOperations.getSelectionModel().select(this.checkAllOperations);
 		final List<PredicateBuilderTableItem> items = new ArrayList<>();
-		if (currentTrace.get() != null) {
-			final LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
-			if (loadedMachine != null) {
-				cbOperations.getItems().addAll(loadedMachine.getOperationNames());
-				loadedMachine.getConstantNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.CONSTANT)));
-				loadedMachine.getVariableNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.VARIABLE)));
-			}
+		if (loadedMachine != null) {
+			cbOperations.getItems().addAll(loadedMachine.getOperationNames());
+			loadedMachine.getConstantNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.CONSTANT)));
+			loadedMachine.getVariableNames().forEach(s -> items.add(new PredicateBuilderTableItem(s, "", PredicateBuilderTableItem.VariableType.VARIABLE)));
 		}
 		predicateBuilderView.setItems(items);
 	}

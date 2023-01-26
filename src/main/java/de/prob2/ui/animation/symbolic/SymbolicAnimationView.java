@@ -63,6 +63,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			changeItem.setOnAction(e -> {
 				final SymbolicAnimationItem oldItem = row.getItem();
 				final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
+				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 				choosingStage.setData(oldItem);
 				choosingStage.showAndWait();
 				final SymbolicAnimationItem newItem = choosingStage.getResult();
@@ -136,6 +137,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@FXML
 	public void addFormula() {
 		final SymbolicAnimationChoosingStage choosingStage = injector.getInstance(SymbolicAnimationChoosingStage.class);
+		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 		choosingStage.showAndWait();
 		final SymbolicAnimationItem newItem = choosingStage.getResult();
 		if (newItem == null) {

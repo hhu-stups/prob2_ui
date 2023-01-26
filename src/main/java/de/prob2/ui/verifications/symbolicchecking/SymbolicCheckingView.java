@@ -67,6 +67,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			changeItem.setOnAction(e -> {
 				final SymbolicCheckingFormulaItem oldItem = row.getItem();
 				final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
+				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 				choosingStage.setData(oldItem);
 				choosingStage.showAndWait();
 				final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
@@ -160,6 +161,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	@FXML
 	public void addFormula() {
 		final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
+		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 		choosingStage.showAndWait();
 		final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
 		if (newItem == null) {
