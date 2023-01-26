@@ -1,9 +1,8 @@
 package de.prob2.ui.animation.symbolic;
 
-import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.internal.Translatable;
 
-public enum SymbolicAnimationType implements SymbolicExecutionType {
-
+public enum SymbolicAnimationType implements Translatable {
 	SEQUENCE("animation.type.sequence"),
 	FIND_VALID_STATE("animation.type.findValidState"),
 	;

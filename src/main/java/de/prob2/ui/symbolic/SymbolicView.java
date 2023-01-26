@@ -30,7 +30,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
-public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane {
+public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane {
 	@FXML
 	protected HelpButton helpButton;
 		
@@ -39,9 +39,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	
 	@FXML
 	protected TableColumn<IExecutableItem, Checked> statusColumn;
-	
-	@FXML
-	protected TableColumn<SymbolicItem<?>, String> configurationColumn;
 	
 	@FXML
 	protected TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -110,7 +107,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 		tvFormula.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 	}

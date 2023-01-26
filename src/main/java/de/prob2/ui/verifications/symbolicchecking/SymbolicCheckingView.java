@@ -133,6 +133,8 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	private TableColumn<SymbolicCheckingFormulaItem, String> idColumn;
 	@FXML
 	private TableColumn<SymbolicCheckingFormulaItem, String> typeColumn;
+	@FXML
+	private TableColumn<SymbolicCheckingFormulaItem, String> configurationColumn;
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
@@ -150,6 +152,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		tvFormula.setRowFactory(new SymbolicCheckingCellFactory());
 		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
+		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		helpButton.setHelpContent("verification", "Symbolic");
 	}
 	
