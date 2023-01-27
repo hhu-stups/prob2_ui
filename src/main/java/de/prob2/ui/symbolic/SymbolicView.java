@@ -63,8 +63,8 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 				noFormulas.set(true);
 			}
 		});
-		checkMachineButton.disableProperty().bind(partOfDisableBinding.or(noFormulas.or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty()))));
-		tvFormula.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
+		checkMachineButton.disableProperty().bind(noFormulas.or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
+		tvFormula.disableProperty().bind(disablePropertyController.disableProperty());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
