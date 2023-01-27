@@ -76,8 +76,6 @@ public class LTLView extends ScrollPane {
 	@FXML
 	private Button checkMachineButton;
 	@FXML
-	private Button cancelButton;
-	@FXML
 	private Button saveLTLButton;
 	@FXML
 	private Button loadLTLButton;
@@ -215,7 +213,7 @@ public class LTLView extends ScrollPane {
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					checkItem.disableProperty().bind(checker.runningProperty().or(to.selectedProperty().not()));
+					checkItem.disableProperty().bind(injector.getInstance(DisablePropertyController.class).disableProperty().or(to.selectedProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
 				}
@@ -266,7 +264,6 @@ public class LTLView extends ScrollPane {
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		addMenuButton.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		cancelButton.disableProperty().bind(checker.runningProperty().not());
 		final BooleanProperty noLtlFormulas = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			noLtlFormulas.unbind();
@@ -383,11 +380,6 @@ public class LTLView extends ScrollPane {
 	@FXML
 	public void checkMachine() {
 		checker.checkMachine();
-	}
-	
-	@FXML
-	public void cancel() {
-		checker.cancel();
 	}
 	
 	@FXML

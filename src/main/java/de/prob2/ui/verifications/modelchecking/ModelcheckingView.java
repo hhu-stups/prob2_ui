@@ -12,7 +12,6 @@ import com.google.inject.Singleton;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -37,7 +36,17 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -57,8 +66,7 @@ public final class ModelcheckingView extends ScrollPane {
 	private Button addModelCheckButton;
 	@FXML
 	private Button checkMachineButton;
-	@FXML
-	private Button cancelButton;
+
 	@FXML
 	private HelpButton helpButton;
 
@@ -107,20 +115,18 @@ public final class ModelcheckingView extends ScrollPane {
 	private final Injector injector;
 	private final I18n i18n;
 	private final Modelchecker checker;
-	private CliTaskExecutor cliExecutor;
 	private final CheckBox selectAll;
 
 	@Inject
 	private ModelcheckingView(final CurrentTrace currentTrace,
 			final CurrentProject currentProject, final StageManager stageManager, final Injector injector,
-			final I18n i18n, final Modelchecker checker, final CliTaskExecutor cliExecutor) {
+			final I18n i18n, final Modelchecker checker) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.i18n = i18n;
 		this.checker = checker;
-		this.cliExecutor = cliExecutor;
 		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 	}
@@ -149,7 +155,6 @@ public final class ModelcheckingView extends ScrollPane {
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 		checkMachineButton.disableProperty().bind(currentTrace.isNull().or(noModelcheckingItems.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
-		cancelButton.disableProperty().bind(cliExecutor.runningProperty().not());
 
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvItems, selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
@@ -306,7 +311,7 @@ public final class ModelcheckingView extends ScrollPane {
 						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
 					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
 					checkItem.disableProperty().bind(anySucceeded
-						.or(cliExecutor.runningProperty())
+						.or(injector.getInstance(DisablePropertyController.class).disableProperty())
 						.or(to.selectedProperty().not()));
 				} else {
 					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
@@ -396,11 +401,6 @@ public final class ModelcheckingView extends ScrollPane {
 				return null;
 			});
 		}
-	}
-
-	@FXML
-	public void cancelModelcheck() {
-		checker.cancelModelcheck();
 	}
 
 	private void showStats(final long timeElapsed, final StateSpaceStats stats, final BigInteger memory) {

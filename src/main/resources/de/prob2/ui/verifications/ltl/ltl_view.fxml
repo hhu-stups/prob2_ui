@@ -3,6 +3,7 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.verifications.ltl.LTLView?>
 <?import javafx.scene.control.Button?>
@@ -21,22 +22,19 @@
 	</fx:define>
 	<VBox>
 		<HBox styleClass="border" alignment="CENTER">
-			<Button fx:id="checkMachineButton" disable="true" onAction="#checkMachine">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.checkMachine" />
-				</tooltip>
-			</Button>
-			<Button fx:id="cancelButton" onAction="#cancel">
+			<InterruptIfRunningButton>
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
-				<tooltip>
-					<Tooltip text="%common.buttons.cancel" />
-				</tooltip>
-			</Button>
+				<Button fx:id="checkMachineButton" disable="true" onAction="#checkMachine">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%common.checkMachine" />
+					</tooltip>
+				</Button>
+			</InterruptIfRunningButton>
 			<Spacer/>
 			<Button fx:id="saveLTLButton" onAction="#saveLTL">
 				<graphic>

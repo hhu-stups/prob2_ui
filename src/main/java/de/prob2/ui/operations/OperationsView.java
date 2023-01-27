@@ -190,8 +190,6 @@ public final class OperationsView extends VBox {
 	@FXML
 	private HelpButton helpButton;
 	@FXML
-	private Button cancelButton;
-	@FXML
 	private Button btComputeUnsatCore;
 	@FXML
 	private ToggleButton searchToggle;
@@ -253,12 +251,9 @@ public final class OperationsView extends VBox {
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
 
 		randomButton.disableProperty().bind(currentTrace.isNull().or(cliExecutor.runningProperty()).or(disablePropertyController.disableProperty()));
-		randomButton.visibleProperty().bind(cliExecutor.runningProperty().not());
-		cancelButton.visibleProperty().bind(cliExecutor.runningProperty());
 
 		helpButton.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
 		searchToggle.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
-		cancelButton.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
 		randomButton.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
 		disabledOpsToggle.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
 		unambiguousToggle.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
@@ -570,12 +565,6 @@ public final class OperationsView extends VBox {
 				currentTrace.set(trace.randomAnimation(operationCount));
 			}
 		});
-	}
-
-	@FXML
-	private void cancel() {
-		cliExecutor.interruptAll();
-		currentTrace.getStateSpace().sendInterrupt();
 	}
 
 	private OperationsView.SortMode getSortMode() {

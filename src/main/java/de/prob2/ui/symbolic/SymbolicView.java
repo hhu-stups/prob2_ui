@@ -5,7 +5,6 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -47,9 +46,6 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 	@FXML
 	protected Button checkMachineButton;
 	
-	@FXML
-	protected Button cancelButton;
-					
 	protected final I18n i18n;
 	
 	protected final CurrentTrace currentTrace;
@@ -58,16 +54,13 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 
 	protected final DisablePropertyController disablePropertyController;
 	
-	protected CliTaskExecutor cliExecutor;
-
 	protected final CheckBox selectAll;
 	
-	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace, final CurrentProject currentProject, final DisablePropertyController disablePropertyController, final CliTaskExecutor cliExecutor) {
+	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace, final CurrentProject currentProject, final DisablePropertyController disablePropertyController) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.disablePropertyController = disablePropertyController;
-		this.cliExecutor = cliExecutor;
 		this.selectAll = new CheckBox();
 	}
 	
@@ -101,17 +94,10 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 			}
 		});
 		checkMachineButton.disableProperty().bind(partOfDisableBinding.or(noFormulas.or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty()))));
-		cancelButton.disableProperty().bind(cliExecutor.runningProperty().not());
 		tvFormula.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
-	}
-	
-	@FXML
-	public void cancel() {
-		cliExecutor.interruptAll();
-		currentTrace.getStateSpace().sendInterrupt();
 	}
 }
