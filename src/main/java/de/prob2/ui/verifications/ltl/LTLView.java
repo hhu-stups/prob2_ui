@@ -48,12 +48,12 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
@@ -61,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class LTLView extends AnchorPane {
+public class LTLView extends ScrollPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(LTLView.class);
 	
 	private static final String LTL_FILE_EXTENSION = "prob2ltl";

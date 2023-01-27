@@ -7,7 +7,7 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="PredicateBuilderView" stylesheets="@/prob.css" spacing="5.0" xmlns:fx="http://javafx.com/fxml/1">
-	<TableView fx:id="table" minHeight="150.0" prefHeight="200.0" minWidth="600.0" prefWidth="600.0" VBox.vgrow="ALWAYS">
+	<TableView fx:id="table" minHeight="150.0" prefHeight="200.0" minWidth="400.0" prefWidth="400.0" VBox.vgrow="ALWAYS">
 		<columns>
 			<TableColumn fx:id="nameColumn" minWidth="150.0" maxWidth="150.0" text="%internal.predicateBuilderView.columns.name"/>
 			<TableColumn fx:id="valueColumn" minWidth="150.0" maxWidth="150.0" text="%internal.predicateBuilderView.columns.value"/>

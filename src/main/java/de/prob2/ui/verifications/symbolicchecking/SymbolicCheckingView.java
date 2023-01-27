@@ -4,11 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -66,7 +67,8 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> {
 				final SymbolicCheckingFormulaItem oldItem = row.getItem();
-				final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
+				final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
+				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 				choosingStage.setData(oldItem);
 				choosingStage.showAndWait();
 				final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
@@ -127,19 +129,23 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 
 	private final StageManager stageManager;
 	private final SymbolicCheckingFormulaHandler formulaHandler;
+	private final Provider<SymbolicCheckingChoosingStage> choosingStageProvider;
 
 	@FXML
 	private TableColumn<SymbolicCheckingFormulaItem, String> idColumn;
 	@FXML
 	private TableColumn<SymbolicCheckingFormulaItem, String> typeColumn;
+	@FXML
+	private TableColumn<SymbolicCheckingFormulaItem, String> configurationColumn;
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
-	                            final CliTaskExecutor cliExecutor, final Injector injector) {
-		super(i18n, currentTrace, currentProject, injector, cliExecutor);
+	                            final CliTaskExecutor cliExecutor, final DisablePropertyController disablePropertyController, final Provider<SymbolicCheckingChoosingStage> choosingStageProvider) {
+		super(i18n, currentTrace, currentProject, disablePropertyController, cliExecutor);
 		this.stageManager = stageManager;
 		this.formulaHandler = symbolicCheckHandler;
+		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
 	
@@ -149,6 +155,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		tvFormula.setRowFactory(new SymbolicCheckingCellFactory());
 		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
+		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		helpButton.setHelpContent("verification", "Symbolic");
 	}
 	
@@ -159,7 +166,8 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	
 	@FXML
 	public void addFormula() {
-		final SymbolicCheckingChoosingStage choosingStage = injector.getInstance(SymbolicCheckingChoosingStage.class);
+		final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
+		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 		choosingStage.showAndWait();
 		final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
 		if (newItem == null) {

@@ -1,7 +1,5 @@
 package de.prob2.ui.symbolic;
 
-import com.google.inject.Injector;
-
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -30,7 +28,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
-public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane {
+public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane {
 	@FXML
 	protected HelpButton helpButton;
 		
@@ -39,9 +37,6 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	
 	@FXML
 	protected TableColumn<IExecutableItem, Checked> statusColumn;
-	
-	@FXML
-	protected TableColumn<SymbolicItem<?>, String> configurationColumn;
 	
 	@FXML
 	protected TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
@@ -61,17 +56,17 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	
 	protected final CurrentProject currentProject;
 
-	protected final Injector injector;
+	protected final DisablePropertyController disablePropertyController;
 	
 	protected CliTaskExecutor cliExecutor;
 
 	protected final CheckBox selectAll;
 	
-	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector, final CliTaskExecutor cliExecutor) {
+	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace, final CurrentProject currentProject, final DisablePropertyController disablePropertyController, final CliTaskExecutor cliExecutor) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.injector = injector;
+		this.disablePropertyController = disablePropertyController;
 		this.cliExecutor = cliExecutor;
 		this.selectAll = new CheckBox();
 	}
@@ -95,7 +90,7 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 	
 	protected void setBindings() {
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
-		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
 		final BooleanProperty noFormulas = new SimpleBooleanProperty();
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			noFormulas.unbind();
@@ -105,12 +100,11 @@ public abstract class SymbolicView<T extends SymbolicItem<?>> extends ScrollPane
 				noFormulas.set(true);
 			}
 		});
-		checkMachineButton.disableProperty().bind(partOfDisableBinding.or(noFormulas.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
+		checkMachineButton.disableProperty().bind(partOfDisableBinding.or(noFormulas.or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty()))));
 		cancelButton.disableProperty().bind(cliExecutor.runningProperty().not());
-		tvFormula.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		tvFormula.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 	}

@@ -9,7 +9,6 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -27,9 +26,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 
 	@FXML
 	private OperationCoverageInputView operationCoverageInputView;
-
-	@FXML
-	private Button btCheck;
 
 	private final StageManager stageManager;
 
@@ -63,7 +59,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 				}
 			}
 		});
-		setCheckListeners();
 		input.visibleProperty().bind(testChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		testChoice.getItems().setAll(TestCaseGenerationType.values());
 		testChoice.setConverter(i18n.translateConverter());
@@ -117,16 +112,6 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		}
 	}
 
-	private void setCheckListeners() {
-		btCheck.setOnAction(e -> {
-			if (!checkValid()) {
-				return;
-			}
-			this.close();
-			this.setItem(extractItem());
-		});
-	}
-
 	public void changeType(final TestCaseGenerationType type) {
 		input.getChildren().removeAll(mcdcInputView, operationCoverageInputView);
 		switch (type) {
@@ -149,8 +134,13 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		testChoice.getSelectionModel().select(item.getType());
 	}
 
-	public void useChangeButtons() {
-		btCheck.setText(i18n.translate("testcase.input.buttons.change"));
+	@FXML
+	private void ok() {
+		if (!checkValid()) {
+			return;
+		}
+		this.close();
+		this.setItem(extractItem());
 	}
 
 	@FXML
