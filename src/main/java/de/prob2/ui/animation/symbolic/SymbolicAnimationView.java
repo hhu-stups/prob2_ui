@@ -7,6 +7,7 @@ import javax.inject.Provider;
 
 import com.google.inject.Singleton;
 
+import de.prob.statespace.FormalismType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -20,6 +21,7 @@ import de.prob2.ui.symbolic.SymbolicView;
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -106,10 +108,13 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
 	private final StageManager stageManager;
 	private final I18n i18n;
+	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final SymbolicAnimationItemHandler formulaHandler;
 	private final Provider<SymbolicAnimationChoosingStage> choosingStageProvider;
 	
+	@FXML
+	private Button addFormulaButton;
 	@FXML
 	private HelpButton helpButton;
 	@FXML
@@ -121,9 +126,10 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
 	                             final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
-		super(currentTrace, disablePropertyController);
+		super(disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
+		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.formulaHandler = symbolicCheckHandler;
 		this.choosingStageProvider = choosingStageProvider;
@@ -148,6 +154,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 		
+		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
 		helpButton.setHelpContent("animation", "Symbolic");
 	}
 	
