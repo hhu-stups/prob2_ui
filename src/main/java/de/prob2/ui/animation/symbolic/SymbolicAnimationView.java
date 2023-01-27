@@ -18,7 +18,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.symbolic.SymbolicView;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ListProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -107,6 +107,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	}
 	
 	private final StageManager stageManager;
+	private final CurrentProject currentProject;
 	private final SymbolicAnimationItemHandler formulaHandler;
 	private final Provider<SymbolicAnimationChoosingStage> choosingStageProvider;
 	
@@ -119,8 +120,9 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
 	                             final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
-		super(i18n, currentTrace, currentProject, disablePropertyController);
+		super(i18n, currentTrace, disablePropertyController);
 		this.stageManager = stageManager;
+		this.currentProject = currentProject;
 		this.formulaHandler = symbolicCheckHandler;
 		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
@@ -132,12 +134,19 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		tvFormula.setRowFactory(new SymbolicAnimationCellFactory());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
+		
+		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
+			tvFormula.itemsProperty().unbind();
+			if (to != null) {
+				tvFormula.itemsProperty().bind(to.symbolicAnimationFormulasProperty());
+			} else {
+				tvFormula.getItems().clear();
+			}
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
+		
 		helpButton.setHelpContent("animation", "Symbolic");
-	}
-	
-	@Override
-	protected ListProperty<SymbolicAnimationItem> formulasProperty(Machine machine) {
-		return machine.symbolicAnimationFormulasProperty();
 	}
 	
 	@FXML

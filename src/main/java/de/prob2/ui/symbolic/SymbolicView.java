@@ -5,9 +5,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -15,9 +13,8 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
+import javafx.beans.property.SimpleListProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -50,16 +47,13 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 	
 	protected final CurrentTrace currentTrace;
 	
-	protected final CurrentProject currentProject;
-
 	protected final DisablePropertyController disablePropertyController;
 	
 	protected final CheckBox selectAll;
 	
-	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace, final CurrentProject currentProject, final DisablePropertyController disablePropertyController) {
+	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.disablePropertyController = disablePropertyController;
 		this.selectAll = new CheckBox();
 	}
@@ -67,28 +61,16 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 	@FXML
 	public void initialize() {
 		setBindings();
-		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
-			tvFormula.itemsProperty().unbind();
-			if(newValue != null) {
-				tvFormula.itemsProperty().bind(formulasProperty(newValue));
-			} else {
-				tvFormula.getItems().clear();
-			}
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
-	
-	protected abstract ListProperty<T> formulasProperty(Machine machine);
 	
 	protected void setBindings() {
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
 		final BooleanProperty noFormulas = new SimpleBooleanProperty();
-		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+		tvFormula.itemsProperty().addListener((o, from, to) -> {
 			noFormulas.unbind();
 			if (to != null) {
-				noFormulas.bind(formulasProperty(to).emptyProperty());
+				noFormulas.bind(new SimpleListProperty<>(to).emptyProperty());
 			} else {
 				noFormulas.set(true);
 			}
