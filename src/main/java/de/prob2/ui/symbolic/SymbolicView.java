@@ -52,10 +52,6 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 	
 	@FXML
 	public void initialize() {
-		setBindings();
-	}
-	
-	protected void setBindings() {
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
 		final BooleanProperty noFormulas = new SimpleBooleanProperty();
