@@ -10,9 +10,9 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -42,11 +42,16 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 	
 	protected final DisablePropertyController disablePropertyController;
 	
+	// This is a proper ListProperty, so it supports emptyProperty(),
+	// unlike TableView.itemsProperty(), which is only an ObjectProperty.
+	protected final ListProperty<T> items;
+	
 	protected final CheckBox selectAll;
 	
 	public SymbolicView(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.disablePropertyController = disablePropertyController;
+		this.items = new SimpleListProperty<>(this, "items", FXCollections.emptyObservableList());
 		this.selectAll = new CheckBox();
 	}
 	
@@ -54,16 +59,8 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 	public void initialize() {
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
-		final BooleanProperty noFormulas = new SimpleBooleanProperty();
-		tvFormula.itemsProperty().addListener((o, from, to) -> {
-			noFormulas.unbind();
-			if (to != null) {
-				noFormulas.bind(new SimpleListProperty<>(to).emptyProperty());
-			} else {
-				noFormulas.set(true);
-			}
-		});
-		checkMachineButton.disableProperty().bind(noFormulas.or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
+		checkMachineButton.disableProperty().bind(this.items.emptyProperty().or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
+		tvFormula.itemsProperty().bind(this.items);
 		tvFormula.disableProperty().bind(disablePropertyController.disableProperty());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));

@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -56,9 +55,8 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> {
-				Machine machine = currentProject.getCurrentMachine();
 				SymbolicAnimationItem item = tvFormula.getSelectionModel().getSelectedItem();
-				machine.getSymbolicAnimationFormulas().remove(item);
+				items.remove(item);
 			});
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
@@ -73,7 +71,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 					// User cancelled/closed the window
 					return;
 				}
-				final List<SymbolicAnimationItem> items = currentProject.getCurrentMachine().getSymbolicAnimationFormulas();
 				final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
 				if (!existingItem.isPresent()) {
 					items.set(items.indexOf(oldItem), newItem);
@@ -141,11 +138,11 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
-			tvFormula.itemsProperty().unbind();
+			this.items.unbind();
 			if (to != null) {
-				tvFormula.itemsProperty().bind(to.symbolicAnimationFormulasProperty());
+				this.items.bind(to.symbolicAnimationFormulasProperty());
 			} else {
-				tvFormula.getItems().clear();
+				this.items.clear();
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -164,7 +161,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			// User cancelled/closed the window
 			return;
 		}
-		final List<SymbolicAnimationItem> items = currentProject.getCurrentMachine().getSymbolicAnimationFormulas();
 		final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
 		if (!existingItem.isPresent()) {
 			items.add(newItem);
@@ -174,6 +170,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
 	@FXML
 	public void checkMachine() {
-		currentProject.getCurrentMachine().getSymbolicAnimationFormulas().forEach(item -> formulaHandler.handleItem(item, true));
+		items.forEach(item -> formulaHandler.handleItem(item, true));
 	}
 }

@@ -59,9 +59,8 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> {
-				Machine machine = currentProject.getCurrentMachine();
 				SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
-				machine.getSymbolicCheckingFormulas().remove(item);
+				items.remove(item);
 			});
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
@@ -76,7 +75,6 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 					// User cancelled/closed the window
 					return;
 				}
-				final List<SymbolicCheckingFormulaItem> items = currentProject.getCurrentMachine().getSymbolicCheckingFormulas();
 				final Optional<SymbolicCheckingFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
 				if (!existingItem.isPresent()) {
 					items.set(items.indexOf(oldItem), newItem);
@@ -164,11 +162,11 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
-			tvFormula.itemsProperty().unbind();
+			this.items.unbind();
 			if (to != null) {
-				tvFormula.itemsProperty().bind(to.symbolicCheckingFormulasProperty());
+				this.items.bind(to.symbolicCheckingFormulasProperty());
 			} else {
-				tvFormula.getItems().clear();
+				this.items.clear();
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -187,7 +185,6 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			// User cancelled/closed the window
 			return;
 		}
-		final List<SymbolicCheckingFormulaItem> items = currentProject.getCurrentMachine().getSymbolicCheckingFormulas();
 		final Optional<SymbolicCheckingFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
 		if (!existingItem.isPresent()) {
 			items.add(newItem);
@@ -197,6 +194,6 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	
 	@FXML
 	public void checkMachine() {
-		currentProject.getCurrentMachine().getSymbolicCheckingFormulas().forEach(item -> formulaHandler.handleItem(item, true));
+		items.forEach(item -> formulaHandler.handleItem(item, true));
 	}
 }
