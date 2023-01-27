@@ -256,6 +256,13 @@ public final class OperationsView extends VBox {
 		randomButton.visibleProperty().bind(cliExecutor.runningProperty().not());
 		cancelButton.visibleProperty().bind(cliExecutor.runningProperty());
 
+		helpButton.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
+		searchToggle.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
+		cancelButton.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
+		randomButton.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
+		disabledOpsToggle.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
+		unambiguousToggle.setMinSize(Button.USE_PREF_SIZE,Button.USE_PREF_SIZE);
+
 		randomText.textProperty().addListener((observable, from, to) -> {
 			if (!NUMBER_OR_EMPTY_PATTERN.matcher(to).matches() && NUMBER_OR_EMPTY_PATTERN.matcher(from).matches()) {
 				((StringProperty) observable).set(from);
