@@ -59,7 +59,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 			
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> {
-				SymbolicCheckingFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
+				SymbolicCheckingFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
 				items.remove(item);
 			});
 			
@@ -156,7 +156,7 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	@Override
 	public void initialize() {
 		super.initialize();
-		tvFormula.setRowFactory(new SymbolicCheckingCellFactory());
+		itemsTable.setRowFactory(new SymbolicCheckingCellFactory());
 		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));

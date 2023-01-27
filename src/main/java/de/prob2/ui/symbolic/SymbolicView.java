@@ -24,7 +24,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 @FXMLInjected
 public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane {
 	@FXML
-	protected TableView<T> tvFormula;
+	protected TableView<T> itemsTable;
 	
 	@FXML
 	protected TableColumn<IExecutableItem, Checked> statusColumn;
@@ -60,11 +60,11 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		addFormulaButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
 		checkMachineButton.disableProperty().bind(this.items.emptyProperty().or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
-		tvFormula.itemsProperty().bind(this.items);
-		tvFormula.disableProperty().bind(disablePropertyController.disableProperty());
+		itemsTable.itemsProperty().bind(this.items);
+		itemsTable.disableProperty().bind(disablePropertyController.disableProperty());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvFormula,  selectAll));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(itemsTable,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 	}
 }

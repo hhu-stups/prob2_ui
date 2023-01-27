@@ -55,7 +55,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> {
-				SymbolicAnimationItem item = tvFormula.getSelectionModel().getSelectedItem();
+				SymbolicAnimationItem item = itemsTable.getSelectionModel().getSelectedItem();
 				items.remove(item);
 			});
 			
@@ -133,7 +133,7 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@Override
 	public void initialize() {
 		super.initialize();
-		tvFormula.setRowFactory(new SymbolicAnimationCellFactory());
+		itemsTable.setRowFactory(new SymbolicAnimationCellFactory());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		

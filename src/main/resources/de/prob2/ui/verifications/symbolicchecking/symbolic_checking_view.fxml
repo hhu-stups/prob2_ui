@@ -42,7 +42,7 @@
 			</Button>
 			<HelpButton fx:id="helpButton" />
 		</HBox>
-		<TableView fx:id="tvFormula" VBox.vgrow="ALWAYS">
+		<TableView fx:id="itemsTable" VBox.vgrow="ALWAYS">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
