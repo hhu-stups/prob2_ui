@@ -9,6 +9,7 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -127,10 +128,13 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	}
 
 	private final StageManager stageManager;
+	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final SymbolicCheckingFormulaHandler formulaHandler;
 	private final Provider<SymbolicCheckingChoosingStage> choosingStageProvider;
 
+	@FXML
+	private HelpButton helpButton;
 	@FXML
 	private TableColumn<SymbolicCheckingFormulaItem, String> idColumn;
 	@FXML
@@ -142,8 +146,9 @@ public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaIt
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
 	                            final DisablePropertyController disablePropertyController, final Provider<SymbolicCheckingChoosingStage> choosingStageProvider) {
-		super(i18n, currentTrace, disablePropertyController);
+		super(currentTrace, disablePropertyController);
 		this.stageManager = stageManager;
+		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.formulaHandler = symbolicCheckHandler;
 		this.choosingStageProvider = choosingStageProvider;

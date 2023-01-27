@@ -8,6 +8,7 @@ import javax.inject.Provider;
 
 import com.google.inject.Singleton;
 
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -107,10 +108,13 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	}
 	
 	private final StageManager stageManager;
+	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final SymbolicAnimationItemHandler formulaHandler;
 	private final Provider<SymbolicAnimationChoosingStage> choosingStageProvider;
 	
+	@FXML
+	private HelpButton helpButton;
 	@FXML
 	private TableColumn<SymbolicAnimationItem, String> typeColumn;
 	@FXML
@@ -120,8 +124,9 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
 	                             final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
-		super(i18n, currentTrace, disablePropertyController);
+		super(currentTrace, disablePropertyController);
 		this.stageManager = stageManager;
+		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.formulaHandler = symbolicCheckHandler;
 		this.choosingStageProvider = choosingStageProvider;

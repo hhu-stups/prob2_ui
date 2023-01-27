@@ -1,10 +1,8 @@
 package de.prob2.ui.symbolic;
 
 import de.prob.statespace.FormalismType;
-import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
@@ -26,9 +24,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 @FXMLInjected
 public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane {
 	@FXML
-	protected HelpButton helpButton;
-		
-	@FXML
 	protected TableView<T> tvFormula;
 	
 	@FXML
@@ -43,16 +38,13 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 	@FXML
 	protected Button checkMachineButton;
 	
-	protected final I18n i18n;
-	
 	protected final CurrentTrace currentTrace;
 	
 	protected final DisablePropertyController disablePropertyController;
 	
 	protected final CheckBox selectAll;
 	
-	public SymbolicView(final I18n i18n, final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
-		this.i18n = i18n;
+	public SymbolicView(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.disablePropertyController = disablePropertyController;
 		this.selectAll = new CheckBox();
