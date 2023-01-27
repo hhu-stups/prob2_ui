@@ -1,4 +1,4 @@
-package de.prob2.ui.symbolic;
+package de.prob2.ui.sharedviews;
 
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -19,7 +19,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
-public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane {
+public abstract class CheckingViewBase<T extends IExecutableItem> extends ScrollPane {
 	@FXML
 	protected TableView<T> itemsTable;
 	
@@ -40,7 +40,7 @@ public abstract class SymbolicView<T extends IExecutableItem> extends ScrollPane
 	
 	protected final CheckBox selectAll;
 	
-	public SymbolicView(final DisablePropertyController disablePropertyController) {
+	protected CheckingViewBase(final DisablePropertyController disablePropertyController) {
 		this.disablePropertyController = disablePropertyController;
 		this.items = new SimpleListProperty<>(this, "items", FXCollections.emptyObservableList());
 		this.selectAll = new CheckBox();

@@ -16,7 +16,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.symbolic.SymbolicView;
+import de.prob2.ui.sharedviews.CheckingViewBase;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -32,7 +32,7 @@ import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
-public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
+public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationItem> {
 	private class SymbolicAnimationCellFactory implements Callback<TableView<SymbolicAnimationItem>, TableRow<SymbolicAnimationItem>> {
 		@Override
 		public TableRow<SymbolicAnimationItem> call(TableView<SymbolicAnimationItem> param) {

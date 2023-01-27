@@ -18,7 +18,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.symbolic.SymbolicView;
+import de.prob2.ui.sharedviews.CheckingViewBase;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -36,7 +36,7 @@ import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
-public class SymbolicCheckingView extends SymbolicView<SymbolicCheckingFormulaItem> {
+public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormulaItem> {
 	private class SymbolicCheckingCellFactory implements Callback<TableView<SymbolicCheckingFormulaItem>, TableRow<SymbolicCheckingFormulaItem>> {
 		@Override
 		public TableRow<SymbolicCheckingFormulaItem> call(TableView<SymbolicCheckingFormulaItem> param) {
