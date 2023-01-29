@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -8,19 +7,21 @@ import javax.inject.Provider;
 
 import com.google.inject.Singleton;
 
+import de.prob.statespace.FormalismType;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.symbolic.SymbolicView;
+import de.prob2.ui.sharedviews.CheckingViewBase;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ListProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -31,7 +32,7 @@ import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
-public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
+public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationItem> {
 	private class SymbolicAnimationCellFactory implements Callback<TableView<SymbolicAnimationItem>, TableRow<SymbolicAnimationItem>> {
 		@Override
 		public TableRow<SymbolicAnimationItem> call(TableView<SymbolicAnimationItem> param) {
@@ -50,15 +51,14 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					checkItem.disableProperty().bind(cliExecutor.runningProperty().or(to.selectedProperty().not()));
+					checkItem.disableProperty().bind(disablePropertyController.disableProperty().or(to.selectedProperty().not()));
 				}
 			});
 
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> {
-				Machine machine = currentProject.getCurrentMachine();
-				SymbolicAnimationItem item = tvFormula.getSelectionModel().getSelectedItem();
-				machine.getSymbolicAnimationFormulas().remove(item);
+				SymbolicAnimationItem item = itemsTable.getSelectionModel().getSelectedItem();
+				items.remove(item);
 			});
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
@@ -73,7 +73,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 					// User cancelled/closed the window
 					return;
 				}
-				final List<SymbolicAnimationItem> items = currentProject.getCurrentMachine().getSymbolicAnimationFormulas();
 				final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
 				if (!existingItem.isPresent()) {
 					items.set(items.indexOf(oldItem), newItem);
@@ -108,9 +107,16 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	}
 	
 	private final StageManager stageManager;
+	private final I18n i18n;
+	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
 	private final SymbolicAnimationItemHandler formulaHandler;
 	private final Provider<SymbolicAnimationChoosingStage> choosingStageProvider;
 	
+	@FXML
+	private Button addFormulaButton;
+	@FXML
+	private HelpButton helpButton;
 	@FXML
 	private TableColumn<SymbolicAnimationItem, String> typeColumn;
 	@FXML
@@ -119,9 +125,12 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
-	                             final CliTaskExecutor cliExecutor, final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
-		super(i18n, currentTrace, currentProject, disablePropertyController, cliExecutor);
+	                             final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
+		super(disablePropertyController);
 		this.stageManager = stageManager;
+		this.i18n = i18n;
+		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.formulaHandler = symbolicCheckHandler;
 		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
@@ -130,15 +139,23 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	@Override
 	public void initialize() {
 		super.initialize();
-		tvFormula.setRowFactory(new SymbolicAnimationCellFactory());
+		itemsTable.setRowFactory(new SymbolicAnimationCellFactory());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
+		
+		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
+			this.items.unbind();
+			if (to != null) {
+				this.items.bind(to.symbolicAnimationFormulasProperty());
+			} else {
+				this.items.clear();
+			}
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
+		
+		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
 		helpButton.setHelpContent("animation", "Symbolic");
-	}
-	
-	@Override
-	protected ListProperty<SymbolicAnimationItem> formulasProperty(Machine machine) {
-		return machine.symbolicAnimationFormulasProperty();
 	}
 	
 	@FXML
@@ -151,7 +168,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 			// User cancelled/closed the window
 			return;
 		}
-		final List<SymbolicAnimationItem> items = currentProject.getCurrentMachine().getSymbolicAnimationFormulas();
 		final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
 		if (!existingItem.isPresent()) {
 			items.add(newItem);
@@ -161,6 +177,6 @@ public class SymbolicAnimationView extends SymbolicView<SymbolicAnimationItem> {
 	
 	@FXML
 	public void checkMachine() {
-		currentProject.getCurrentMachine().getSymbolicAnimationFormulas().forEach(item -> formulaHandler.handleItem(item, true));
+		items.forEach(item -> formulaHandler.handleItem(item, true));
 	}
 }

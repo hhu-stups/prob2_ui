@@ -4,6 +4,7 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.operations.OperationsView?>
+<?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
 <?import de.prob2.ui.sharedviews.NavigationButtons?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
@@ -18,7 +19,6 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <fx:root type="OperationsView" minHeight="200.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -55,7 +55,10 @@
 					<Tooltip text="%operations.operationsView.tooltips.showUnambiguous"/>
 				</tooltip>
 			</ToggleButton>
-			<StackPane>
+			<InterruptIfRunningButton>
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="STOP" bindableFontSize="${fontSize.fontSize + 2}"/>
+				</graphic>
 				<MenuButton fx:id="randomButton">
 					<items>
 						<MenuItem fx:id="oneRandomEvent" onAction="#random" text="%operations.operationsView.random.one" />
@@ -77,15 +80,7 @@
 						<Tooltip text="%operations.operationsView.tooltips.random" />
 					</tooltip>
 				</MenuButton>
-				<Button fx:id="cancelButton" visible="false" onAction="#cancel">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="STOP" bindableFontSize="${fontSize.fontSize + 2}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%operations.operationsView.tooltips.cancelRandom"/>
-					</tooltip>
-				</Button>
-			</StackPane>
+			</InterruptIfRunningButton>
 
 			<ToggleButton fx:id="searchToggle" onAction="#clearSearchbarWhenHidden">
 				<graphic>

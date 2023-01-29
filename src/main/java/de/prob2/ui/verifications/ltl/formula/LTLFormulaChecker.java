@@ -36,8 +36,6 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
 import de.prob2.ui.verifications.ltl.LTLParseListener;
 
-import javafx.beans.binding.BooleanExpression;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -190,18 +188,5 @@ public class LTLFormulaChecker {
 			checkFormula(item, machine);
 			return item;
 		});
-	}
-	
-	public void cancel() {
-		cliExecutor.interruptAll();
-		currentTrace.getStateSpace().sendInterrupt();
-	}
-	
-	public BooleanExpression runningProperty() {
-		return cliExecutor.runningProperty();
-	}
-	
-	public boolean isRunning() {
-		return this.runningProperty().get();
 	}
 }

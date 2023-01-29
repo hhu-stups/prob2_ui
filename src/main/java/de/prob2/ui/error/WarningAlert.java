@@ -52,7 +52,7 @@ public final class WarningAlert extends Alert {
 		return warnings;
 	}
 
-	public void setLevelOfAlert() {
+	private void setLevelOfAlert() {
 		this.setAlertType(getHighestAlertType());
 		this.label.setText(i18n.translate(messageKeyForBundle));
 	}
@@ -64,16 +64,16 @@ public final class WarningAlert extends Alert {
 			switch (errorItem.getType()) {
 				case INTERNAL_ERROR:
 				case ERROR:
-					errorItemAlertType = AlertType.ERROR;
-					break;
+					// No higher information level, return immediately
+					messageKeyForBundle = "error.warningAlert.ERROR.content";
+					return AlertType.ERROR;
 				case WARNING:
 					errorItemAlertType = AlertType.WARNING;
 					break;
 				case MESSAGE:
+				default:
 					errorItemAlertType = AlertType.INFORMATION;
 					break;
-				default:
-					errorItemAlertType = AlertType.NONE;
 			}
 			if (highestAlertType.compareTo(errorItemAlertType) < 0) {
 				highestAlertType = errorItemAlertType;

@@ -3,6 +3,7 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
 <?import de.prob2.ui.sharedviews.SimpleStatsView?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
@@ -22,22 +23,19 @@
 	</fx:define>
 	<VBox>
 		<HBox styleClass="border" alignment="CENTER">
-			<Button fx:id="checkMachineButton" onAction="#checkMachine">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.checkMachine" />
-				</tooltip>
-			</Button>
-			<Button fx:id="cancelButton" onAction="#cancelModelcheck">
+			<InterruptIfRunningButton>
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
-				<tooltip>
-					<Tooltip text="%common.buttons.cancel" />
-				</tooltip>
-			</Button>
+				<Button fx:id="checkMachineButton" onAction="#checkMachine">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%common.checkMachine" />
+					</tooltip>
+				</Button>
+			</InterruptIfRunningButton>
 			<Spacer/>
 			<Button fx:id="addModelCheckButton" disable="true"
 				contentDisplay="GRAPHIC_ONLY" onAction="#addModelCheck">

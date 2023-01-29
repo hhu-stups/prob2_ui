@@ -70,8 +70,6 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private Button checkButton;
 	@FXML
-	private Button cancelButton;
-	@FXML
 	private Button loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
@@ -110,7 +108,6 @@ public class TraceReplayView extends ScrollPane {
 
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
-		cancelButton.disableProperty().bind(traceChecker.runningProperty().not());
 		checkButton.disableProperty().bind(partOfDisableBinding.or(currentTrace.isNull().or(traceViewHandler.getTraces().emptyProperty().or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
@@ -203,11 +200,6 @@ public class TraceReplayView extends ScrollPane {
 	@FXML
 	private void checkMachine() {
 		traceChecker.checkAll(traceTableView.getItems());
-	}
-
-	@FXML
-	public void cancel() {
-		traceChecker.cancelReplay();
 	}
 
 	@FXML

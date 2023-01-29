@@ -28,7 +28,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanExpression;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,18 +140,6 @@ public class TraceChecker {
 			currentTrace.set(trace);
 			alert.setErrorMessage();
 		});
-	}
-
-	public void cancelReplay() {
-		cliExecutor.interruptAll();
-	}
-
-	public BooleanExpression runningProperty() {
-		return cliExecutor.runningProperty();
-	}
-
-	public boolean isRunning() {
-		return this.runningProperty().get();
 	}
 
 	@Deprecated

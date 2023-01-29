@@ -4,6 +4,8 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
+<?import de.prob2.ui.sharedviews.RefactorButton?>
 <?import de.prob2.ui.sharedviews.ReloadButton?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.scene.control.Button?>
@@ -14,7 +16,6 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import de.prob2.ui.sharedviews.RefactorButton?>
 <fx:root type="TraceReplayView" fitToHeight="true" fitToWidth="true"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -23,24 +24,21 @@
 	<SplitPane fx:id="splitPane" orientation="VERTICAL">
 		<VBox>
 			<HBox styleClass="border" alignment="CENTER">
-				<Button fx:id="checkButton" onAction="#checkMachine" disable="true">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT"
-									   bindableFontSize="${fontSize.fontSize * 2}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%animation.tracereplay.view.tooltips.checkMachine"/>
-					</tooltip>
-				</Button>
-				<Button fx:id="cancelButton" onAction="#cancel" disable="true">
+				<InterruptIfRunningButton>
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT"
-									   bindableFontSize="${fontSize.fontSize * 2}"/>
+							bindableFontSize="${fontSize.fontSize * 2}"/>
 					</graphic>
-					<tooltip>
-						<Tooltip text="%common.buttons.cancel"/>
-					</tooltip>
-				</Button>
+					<Button fx:id="checkButton" onAction="#checkMachine" disable="true">
+						<graphic>
+							<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT"
+								bindableFontSize="${fontSize.fontSize * 2}"/>
+						</graphic>
+						<tooltip>
+							<Tooltip text="%animation.tracereplay.view.tooltips.checkMachine"/>
+						</tooltip>
+					</Button>
+				</InterruptIfRunningButton>
 				<Spacer/>
 				<RefactorButton fx:id="refactorButton" HBox.hgrow="NEVER" />
 				<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
