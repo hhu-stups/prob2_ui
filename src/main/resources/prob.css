@@ -1038,6 +1038,12 @@
 .machines-item {
 	-fx-cell-size: 2.8em;
 }
+
+.machines-item:odd:selected .name,
+.machines-item:odd:selected .location{
+	-fx-text-fill: white;
+}
+
 .machines-item .name {
 	-fx-font-family: ARIAL;
 	-fx-font-weight: bold;
