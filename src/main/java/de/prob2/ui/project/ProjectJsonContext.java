@@ -797,10 +797,14 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 
 	private static void updateV34Machine(final ObjectNode machine) {
 		final ArrayNode proofObligations = checkArray(machine.get("proofObligationItems"));
-		for (final JsonNode poNode : proofObligations) {
+		for (final Iterator<JsonNode> iterator = proofObligations.iterator(); iterator.hasNext();) {
+			final JsonNode poNode = iterator.next();
 			final ObjectNode po = checkObject(poNode);
 			po.remove("selected");
 			po.remove("description");
+			if (poNode.get("id").isNull()) {
+				iterator.remove();
+			}
 		}
 	}
 
