@@ -24,7 +24,6 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.MenuItem;
@@ -37,14 +36,9 @@ import javafx.scene.paint.Color;
 import javafx.util.Callback;
 
 import org.controlsfx.glyphfont.FontAwesome;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Singleton
 public class TraceViewHandler {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(TraceViewHandler.class);
-
 	private final TraceChecker traceChecker;
 
 	private final CurrentProject currentProject;
@@ -66,17 +60,6 @@ public class TraceViewHandler {
 	}
 
 	private void initialize() {
-		final ListChangeListener<ReplayTrace> listener = c -> {
-			while (c.next()) {
-				if (c.wasAdded()) {
-					for (final ReplayTrace trace : c.getAddedSubList()) {
-						// TODO Remove this and instead call the trace checker manually where needed
-						this.traceChecker.check(trace, true);
-					}
-				}
-			}
-		};
-
 		currentProject.addListener((observable, from, to) -> {
 			//When saving the project, the listener for the current project property is triggered
 			//even though it is the same project. This again resets the status of all traces (which is not the desired behavior).
@@ -85,28 +68,23 @@ public class TraceViewHandler {
 			//In this case, the statuses of all traces are reset by the current machine property (as no machine is chosen after switching the project).
 			if(from == null || to == null || !to.getLocation().equals(from.getLocation())) {
 				traces.unbind();
-				traces.setValue(FXCollections.observableArrayList());
-				if (to != null) {
-					bindTraces(currentProject.getCurrentMachine(), listener);
+				Machine machine = currentProject.getCurrentMachine();
+				if (machine != null) {
+					traces.bind(machine.tracesProperty());
+				} else {
+					traces.set(FXCollections.observableArrayList());
 				}
 			}
 		});
 
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if (from != null) {
-				from.getTraces().removeListener(listener);
-			}
 			traces.unbind();
-			traces.setValue(FXCollections.observableArrayList());
-			bindTraces(to, listener);
+			if (to != null) {
+				traces.bind(to.tracesProperty());
+			} else {
+				traces.set(FXCollections.observableArrayList());
+			}
 		});
-	}
-
-	private void bindTraces(Machine machine, ListChangeListener<ReplayTrace> listener) {
-		if (machine != null) {
-			traces.bind(machine.tracesProperty());
-			machine.getTraces().addListener(listener);
-		}
 	}
 
 	public Callback<TableColumn.CellDataFeatures<ReplayTrace, Node>, ObservableValue<Node>> getTraceStatusFactory() {

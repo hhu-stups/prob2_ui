@@ -190,7 +190,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
 		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
-			traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), traceFile);
+			final ReplayTrace replayTrace = traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), traceFile);
+			traceChecker.check(replayTrace, true);
 		}
 
 	}
