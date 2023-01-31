@@ -26,10 +26,10 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	protected TableView<T> itemsTable;
 	
 	@FXML
-	protected TableColumn<IExecutableItem, Checked> statusColumn;
+	protected TableColumn<T, Checked> statusColumn;
 	
 	@FXML
-	protected TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
+	protected TableColumn<T, CheckBox> shouldExecuteColumn;
 	
 	@FXML
 	protected TableColumn<T, String> configurationColumn;
@@ -58,7 +58,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		itemsTable.disableProperty().bind(disablePropertyController.disableProperty());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(itemsTable,  selectAll));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory<>(itemsTable,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		configurationColumn.setCellValueFactory(features -> {
 			String configuration = configurationForItem(features.getValue());
