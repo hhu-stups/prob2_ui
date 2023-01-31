@@ -29,7 +29,7 @@
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT"
 							bindableFontSize="${fontSize.fontSize * 2}"/>
 					</graphic>
-					<Button fx:id="checkButton" onAction="#checkMachine" disable="true">
+					<Button fx:id="checkMachineButton" onAction="#checkMachine" disable="true">
 						<graphic>
 							<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT"
 								bindableFontSize="${fontSize.fontSize * 2}"/>
@@ -53,16 +53,22 @@
 				</Button>
 				<HelpButton fx:id="helpButton"/>
 			</HBox>
-			<TableView fx:id="traceTableView" VBox.vgrow="ALWAYS">
+			<TableView fx:id="itemsTable" VBox.vgrow="ALWAYS">
 				<columnResizePolicy>
 					<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 				</columnResizePolicy>
 				<columns>
 					<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;"
 								 minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
-					<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}"
+					<!--
+						statusColumn is an invisible dummy to make CheckingViewBase happy.
+						TraceReplayView uses statusProgressColumn instead,
+						which can also contain a progress bar.
+					-->
+					<TableColumn fx:id="statusColumn" visible="false"/>
+					<TableColumn fx:id="statusProgressColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}"
 								 maxWidth="${fontSize.fontSize * 6}" text="%animation.tracereplay.view.columns.status"/>
-					<TableColumn fx:id="nameColumn" text="%animation.tracereplay.view.columns.name"/>
+					<TableColumn fx:id="configurationColumn" text="%animation.tracereplay.view.columns.name"/>
 				</columns>
 				<placeholder>
 					<Label text="%animation.tracereplay.view.placeholder"/>

@@ -22,34 +22,29 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.RefactorButton;
 import de.prob2.ui.sharedviews.TraceViewHandler;
-import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 
 @FXMLInjected
 @Singleton
-public class TraceReplayView extends ScrollPane {
+public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
@@ -59,33 +54,24 @@ public class TraceReplayView extends ScrollPane {
 	private final Injector injector;
 	private final TraceFileHandler traceFileHandler;
 	private final TraceViewHandler traceViewHandler;
-	private final CheckBox selectAll;
 
 	@FXML
-	private TableView<ReplayTrace> traceTableView;
-	@FXML
-	private TableColumn<ReplayTrace, Node> statusColumn;
-	@FXML
-	private TableColumn<ReplayTrace, String> nameColumn;
-	@FXML
-	private Button checkButton;
+	private TableColumn<ReplayTrace, Node> statusProgressColumn;
 	@FXML
 	private Button loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
 	@FXML
 	private RefactorButton refactorButton;
-
-	@FXML
-	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
 	@FXML
 	private SplitPane splitPane;
 	private boolean showDescription;
 
 	@Inject
-	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject,
+	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
 							final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
 							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler, final TraceViewHandler traceViewHandler) {
+		super(disablePropertyController);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -95,39 +81,28 @@ public class TraceReplayView extends ScrollPane {
 		this.injector = injector;
 		this.traceFileHandler = traceFileHandler;
 		this.traceViewHandler = traceViewHandler;
-		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
+	@Override
 	@FXML
-	private void initialize() {
+	public void initialize() {
+		super.initialize();
 		helpButton.setHelpContent("animation", "Trace");
-		traceTableView.itemsProperty().bind(traceViewHandler.getTraces());
+		items.bind(traceViewHandler.getTraces());
 		initTableColumns();
 		initTableRows();
 
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
-		checkButton.disableProperty().bind(partOfDisableBinding.or(currentTrace.isNull().or(traceViewHandler.getTraces().emptyProperty().or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
-		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
 	private void initTableColumns() {
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(traceTableView, selectAll));
-		shouldExecuteColumn.setGraphic(selectAll);
-		statusColumn.setCellValueFactory(injector.getInstance(TraceViewHandler.class).getTraceStatusFactory());
-		nameColumn.setCellValueFactory(features -> {
-			final ReplayTrace trace = features.getValue();
-			String name = trace.getName();
-			if (trace.getId() != null) {
-				name = "[" + trace.getId() + "] " + name;
-			}
-			return new SimpleStringProperty(name);
-		});
+		statusProgressColumn.setCellValueFactory(injector.getInstance(TraceViewHandler.class).getTraceStatusFactory());
 	}
 
 	private void initTableRows() {
-		this.traceTableView.setRowFactory(param -> {
+		this.itemsTable.setRowFactory(param -> {
 			final TableRow<ReplayTrace> row = new TableRow<>();
 
 			final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
@@ -197,9 +172,14 @@ public class TraceReplayView extends ScrollPane {
 		});
 	}
 
+	@Override
+	protected String configurationForItem(final ReplayTrace item) {
+		return item.getName();
+	}
+
 	@FXML
 	private void checkMachine() {
-		traceChecker.checkAll(traceTableView.getItems());
+		traceChecker.checkAll(items);
 	}
 
 	@FXML
@@ -232,6 +212,6 @@ public class TraceReplayView extends ScrollPane {
 	}
 
 	public void refresh() {
-		this.traceTableView.refresh();
+		this.itemsTable.refresh();
 	}
 }
