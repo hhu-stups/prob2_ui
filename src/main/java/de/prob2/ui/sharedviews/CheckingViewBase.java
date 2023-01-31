@@ -6,9 +6,11 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
+import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -28,6 +30,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	
 	@FXML
 	protected TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
+	
+	@FXML
+	protected TableColumn<T, String> configurationColumn;
 	
 	@FXML
 	protected Button checkMachineButton;
@@ -55,5 +60,26 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(itemsTable,  selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
+		configurationColumn.setCellValueFactory(features -> {
+			String configuration = configurationForItem(features.getValue());
+			if (features.getValue() instanceof IValidationTask) {
+				final IValidationTask task = (IValidationTask)features.getValue();
+				if (task.getId() != null) {
+					configuration = "[" + task.getId() + "] " + configuration;
+				}
+			}
+			return new SimpleStringProperty(configuration);
+		});
 	}
+	
+	/**
+	 * Describe the item's configuration as a string,
+	 * which will be displayed in the {@link #configurationColumn}.
+	 * If the item is an instance of {@link IValidationTask},
+	 * the validation task ID (if any) is automatically prepended to this configuration string.
+	 * 
+	 * @param item the item to describe
+	 * @return a string description of the item's configuration
+	 */
+	protected abstract String configurationForItem(final T item);
 }

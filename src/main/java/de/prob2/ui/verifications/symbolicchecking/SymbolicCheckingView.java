@@ -31,7 +31,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
 @FXMLInjected
@@ -139,11 +138,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	@FXML
 	private HelpButton helpButton;
 	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, String> idColumn;
-	@FXML
 	private TableColumn<SymbolicCheckingFormulaItem, String> typeColumn;
-	@FXML
-	private TableColumn<SymbolicCheckingFormulaItem, String> configurationColumn;
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
@@ -166,9 +161,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
 		
 		itemsTable.setRowFactory(new SymbolicCheckingCellFactory());
-		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
-		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			this.items.unbind();
@@ -182,6 +175,11 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 		
 		helpButton.setHelpContent("verification", "Symbolic");
+	}
+	
+	@Override
+	protected String configurationForItem(final SymbolicCheckingFormulaItem item) {
+		return item.getCode();
 	}
 	
 	@FXML

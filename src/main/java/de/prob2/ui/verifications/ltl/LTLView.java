@@ -77,10 +77,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	@FXML
 	private TableView<LTLPatternItem> tvPattern;
 	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaIdColumn;
-	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaColumn;
-	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, Checked> patternStatusColumn;
@@ -239,8 +235,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 
 	private void setBindings() {
-		formulaIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		patternStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -252,6 +246,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		loadLTLButton.disableProperty().bind(currentTrace.isNull());
 
 		itemsTable.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
+	}
+	
+	@Override
+	protected String configurationForItem(final LTLFormulaItem item) {
+		return item.getCode();
 	}
 	
 	@FXML

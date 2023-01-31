@@ -27,7 +27,6 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
 @FXMLInjected
@@ -119,8 +118,6 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	private HelpButton helpButton;
 	@FXML
 	private TableColumn<SymbolicAnimationItem, String> typeColumn;
-	@FXML
-	private TableColumn<SymbolicAnimationItem, String> configurationColumn;
 	
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
@@ -141,7 +138,6 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 		super.initialize();
 		itemsTable.setRowFactory(new SymbolicAnimationCellFactory());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
-		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			this.items.unbind();
@@ -156,6 +152,11 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 		
 		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
 		helpButton.setHelpContent("animation", "Symbolic");
+	}
+	
+	@Override
+	protected String configurationForItem(final SymbolicAnimationItem item) {
+		return item.getCode();
 	}
 	
 	@FXML
