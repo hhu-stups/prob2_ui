@@ -80,9 +80,6 @@ public final class ModelcheckingView extends ScrollPane {
 	private TableColumn<ModelCheckingItem, Checked> statusColumn;
 
 	@FXML
-	private TableColumn<ModelCheckingItem, String> strategyColumn;
-
-	@FXML
 	private TableColumn<ModelCheckingItem, String> descriptionColumn;
 
 	@FXML
