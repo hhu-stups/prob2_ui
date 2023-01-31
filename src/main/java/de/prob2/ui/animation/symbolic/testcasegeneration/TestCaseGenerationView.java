@@ -19,59 +19,36 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ItemSelectedFactory;
+import de.prob2.ui.sharedviews.CheckingViewBase;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
-public class TestCaseGenerationView extends ScrollPane {
+public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationItem> {
 
 	@FXML
 	private HelpButton helpButton;
 
 	@FXML
-	private TableView<TestCaseGenerationItem> tvTestCases;
-
-	@FXML
-	private TableColumn<TestCaseGenerationItem, Checked> statusColumn;
-
-	@FXML
-	private TableColumn<TestCaseGenerationItem, String> configurationColumn;
-
-	@FXML
 	private TableColumn<TestCaseGenerationItem, String> typeColumn;
 
 	@FXML
-	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
-
-	@FXML
 	private Button addTestCaseButton;
-
-	@FXML
-	private Button generateButton;
 
 	@FXML
 	private Button cancelButton;
@@ -89,8 +66,6 @@ public class TestCaseGenerationView extends ScrollPane {
 	private final TestCaseGenerator testCaseGenerator;
 
 	private final TestCaseGenerationItemHandler itemHandler;
-
-	private final CheckBox selectAll;
 
 	private class TestCaseGenerationCellFactory implements Callback<TableView<TestCaseGenerationItem>, TableRow<TestCaseGenerationItem>> {
 		@Override
@@ -170,8 +145,9 @@ public class TestCaseGenerationView extends ScrollPane {
 
 	@Inject
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
-	                              final CurrentProject currentProject, final TestCaseGenerationItemHandler itemHandler,
+	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController, final TestCaseGenerationItemHandler itemHandler,
 	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
+		super(disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -179,21 +155,22 @@ public class TestCaseGenerationView extends ScrollPane {
 		this.injector = injector;
 		this.itemHandler = itemHandler;
 		this.testCaseGenerator = testCaseGenerator;
-		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "test_case_generation_view.fxml");
 	}
 
+	@Override
 	@FXML
 	public void initialize() {
+		super.initialize();
 		helpButton.setHelpContent("animation", "testCases");
 		setBindings();
-		tvTestCases.setRowFactory(new TestCaseGenerationCellFactory());
+		itemsTable.setRowFactory(new TestCaseGenerationCellFactory());
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
-			tvTestCases.itemsProperty().unbind();
+			items.unbind();
 			if (newValue != null) {
-				tvTestCases.itemsProperty().bind(newValue.testCasesProperty());
+				items.bind(newValue.testCasesProperty());
 			} else {
-				tvTestCases.setItems(FXCollections.emptyObservableList());
+				items.set(FXCollections.emptyObservableList());
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -202,31 +179,20 @@ public class TestCaseGenerationView extends ScrollPane {
 
 	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
-		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		final BooleanProperty noTestCases = new SimpleBooleanProperty();
-		currentProject.currentMachineProperty().addListener((o, from, to) -> {
-			noTestCases.unbind();
-			if (to != null) {
-				noTestCases.bind(to.testCasesProperty().emptyProperty());
-			} else {
-				noTestCases.set(true);
-			}
-		});
-		generateButton.disableProperty().bind(partOfDisableBinding.or(noTestCases.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
+		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
 		cancelButton.disableProperty().bind(testCaseGenerator.runningProperty().not());
-		statusColumn.setCellFactory(col -> new CheckedCell<>());
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		configurationColumn.setCellValueFactory(new PropertyValueFactory<>("configurationDescription"));
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvTestCases, selectAll));
-		shouldExecuteColumn.setGraphic(selectAll);
-		tvTestCases.setOnMouseClicked(e -> {
-			TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
+		itemsTable.setOnMouseClicked(e -> {
+			TestCaseGenerationItem item = itemsTable.getSelectionModel().getSelectedItem();
 			if (e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
 				itemHandler.handleItem(item);
 			}
 		});
-		tvTestCases.disableProperty().bind(partOfDisableBinding.or(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty())));
+	}
+
+	@Override
+	protected String configurationForItem(final TestCaseGenerationItem item) {
+		return item.getConfigurationDescription();
 	}
 
 	@FXML
@@ -243,7 +209,7 @@ public class TestCaseGenerationView extends ScrollPane {
 
 	private void removeFormula() {
 		Machine machine = currentProject.getCurrentMachine();
-		TestCaseGenerationItem item = tvTestCases.getSelectionModel().getSelectedItem();
+		TestCaseGenerationItem item = itemsTable.getSelectionModel().getSelectedItem();
 		machine.getTestCases().remove(item);
 	}
 

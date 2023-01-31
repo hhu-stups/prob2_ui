@@ -19,7 +19,7 @@
 	</fx:define>
 	<VBox>
 		<HBox styleClass="border" alignment="CENTER">
-			<Button fx:id="generateButton" onAction="#generate">
+			<Button fx:id="checkMachineButton" onAction="#generate">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
@@ -47,7 +47,7 @@
 			</Button>
 			<HelpButton fx:id="helpButton" />
 		</HBox>
-		<TableView fx:id="tvTestCases" VBox.vgrow="ALWAYS">
+		<TableView fx:id="itemsTable" VBox.vgrow="ALWAYS">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
