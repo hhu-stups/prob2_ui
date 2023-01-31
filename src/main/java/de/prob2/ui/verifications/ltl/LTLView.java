@@ -136,6 +136,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
+	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();
