@@ -49,14 +49,14 @@
 			</Button>
 			<HelpButton fx:id="helpButton" />
 		</HBox>
-		<TableView fx:id="tvItems" minHeight="85.0" prefWidth="240.0">
+		<TableView fx:id="itemsTable" minHeight="85.0" prefWidth="240.0">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}" />
 				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
-				<TableColumn fx:id="descriptionColumn" text="%verifications.common.columns.description" />
+				<TableColumn fx:id="configurationColumn" text="%verifications.common.columns.description" />
 			</columns>
 			<placeholder>
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />

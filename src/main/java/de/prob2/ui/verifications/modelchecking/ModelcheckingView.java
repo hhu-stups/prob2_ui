@@ -19,30 +19,25 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ItemSelectedFactory;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -58,29 +53,15 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public final class ModelcheckingView extends ScrollPane {
+public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingView.class);
 	private static final BigInteger MIB_FACTOR = new BigInteger("1024").pow(2);
 
 	@FXML
 	private Button addModelCheckButton;
-	@FXML
-	private Button checkMachineButton;
 
 	@FXML
 	private HelpButton helpButton;
-
-	@FXML
-	private TableView<ModelCheckingItem> tvItems;
-
-	@FXML
-	private TableColumn<IExecutableItem, CheckBox> shouldExecuteColumn;
-
-	@FXML
-	private TableColumn<ModelCheckingItem, Checked> statusColumn;
-
-	@FXML
-	private TableColumn<ModelCheckingItem, String> descriptionColumn;
 
 	@FXML
 	private TableView<ModelCheckingJobItem> tvChecks;
@@ -112,52 +93,44 @@ public final class ModelcheckingView extends ScrollPane {
 	private final Injector injector;
 	private final I18n i18n;
 	private final Modelchecker checker;
-	private final CheckBox selectAll;
 
 	@Inject
 	private ModelcheckingView(final CurrentTrace currentTrace,
-			final CurrentProject currentProject, final StageManager stageManager, final Injector injector,
+			final CurrentProject currentProject,
+			final DisablePropertyController disablePropertyController,
+			final StageManager stageManager, final Injector injector,
 			final I18n i18n, final Modelchecker checker) {
+		super(disablePropertyController);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.i18n = i18n;
 		this.checker = checker;
-		this.selectAll = new CheckBox();
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 	}
 
+	@Override
 	@FXML
 	public void initialize() {
+		super.initialize();
 		helpButton.setHelpContent("verification", "Model");
 		setBindings();
 		setContextMenus();
 	}
 
 	private void setBindings() {
-		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		final BooleanProperty noModelcheckingItems = new SimpleBooleanProperty();
+		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
-			tvItems.itemsProperty().unbind();
-			noModelcheckingItems.unbind();
+			items.unbind();
 			if (to != null) {
-				tvItems.itemsProperty().bind(to.modelcheckingItemsProperty());
-				noModelcheckingItems.bind(to.modelcheckingItemsProperty().emptyProperty());
+				items.bind(to.modelcheckingItemsProperty());
 			} else {
-				tvItems.setItems(FXCollections.observableArrayList());
-				noModelcheckingItems.set(true);
+				items.set(FXCollections.observableArrayList());
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
-		checkMachineButton.disableProperty().bind(currentTrace.isNull().or(noModelcheckingItems.or(selectAll.selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()))));
-
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory(tvItems, selectAll));
-		shouldExecuteColumn.setGraphic(selectAll);
-		statusColumn.setCellFactory(col -> new CheckedCell<>());
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		descriptionColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> toUIString(features.getValue())));
 
 		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -180,11 +153,9 @@ public final class ModelcheckingView extends ScrollPane {
 			return cell;
 		});
 
-		tvItems.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
-		tvChecks.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
+		tvChecks.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
 
-
-		tvItems.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+		itemsTable.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			tvChecks.itemsProperty().unbind();
 			if (to != null) {
 				tvChecks.itemsProperty().bind(to.itemsProperty());
@@ -239,12 +210,9 @@ public final class ModelcheckingView extends ScrollPane {
 		return container;
 	}
 
-	private String toUIString(ModelCheckingItem item) {
-		String description = item.getTaskDescription(i18n);
-		if (item.getId() != null) {
-			description = "[" + item.getId() + "] " + description;
-		}
-		return description;
+	@Override
+	protected String configurationForItem(final ModelCheckingItem item) {
+		return item.getTaskDescription(i18n);
 	}
 
 	private void showModelCheckException(final Throwable t) {
@@ -280,7 +248,7 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	private void tvItemsClicked(MouseEvent e) {
-		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+		ModelCheckingItem item = itemsTable.getSelectionModel().getSelectedItem();
 		if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
 			if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
 				this.checkSingleItem(item);
@@ -289,12 +257,12 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	private void setContextMenus() {
-		tvItems.setRowFactory(table -> {
+		itemsTable.setRowFactory(table -> {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
 			row.setOnMouseClicked(this::tvItemsClicked);
 
 			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-			checkItem.setOnAction(e -> this.checkSingleItem(tvItems.getSelectionModel().getSelectedItem()));
+			checkItem.setOnAction(e -> this.checkSingleItem(row.getItem()));
 
 			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
@@ -308,7 +276,7 @@ public final class ModelcheckingView extends ScrollPane {
 						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
 					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
 					checkItem.disableProperty().bind(anySucceeded
-						.or(injector.getInstance(DisablePropertyController.class).disableProperty())
+						.or(disablePropertyController.disableProperty())
 						.or(to.selectedProperty().not()));
 				} else {
 					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
@@ -381,7 +349,7 @@ public final class ModelcheckingView extends ScrollPane {
 
 	private void removeItem() {
 		Machine machine = currentProject.getCurrentMachine();
-		ModelCheckingItem item = tvItems.getSelectionModel().getSelectedItem();
+		ModelCheckingItem item = itemsTable.getSelectionModel().getSelectedItem();
 		machine.getModelcheckingItems().remove(item);
 	}
 
@@ -423,7 +391,7 @@ public final class ModelcheckingView extends ScrollPane {
 	}
 
 	public void selectItem(ModelCheckingItem item) {
-		tvItems.getSelectionModel().select(item);
+		itemsTable.getSelectionModel().select(item);
 	}
 
 	public void selectJobItem(ModelCheckingJobItem item) {
