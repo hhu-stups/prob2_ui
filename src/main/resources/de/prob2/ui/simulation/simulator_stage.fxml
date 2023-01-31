@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
+<?import de.prob2.ui.sharedviews.NavigationButtons?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.simulation.SimulatorStage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
@@ -18,10 +22,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import de.prob2.ui.sharedviews.NavigationButtons?>
-<?import javafx.scene.control.MenuItem?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.ChoiceBox?>
 <fx:root title="Simulator" type="SimulatorStage" width="1200" height="500" minHeight="500" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -53,22 +53,19 @@
 									</tooltip>
 								</Button>
 								<Spacer/>
-								<Button fx:id="btCheckMachine" disable="true" onAction="#checkMachine">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
-									</graphic>
-									<tooltip>
-										<Tooltip text="%common.checkMachine" />
-									</tooltip>
-								</Button>
-								<Button fx:id="btCancel" onAction="#cancel">
+								<InterruptIfRunningButton fx:id="btCancel">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 									</graphic>
-									<tooltip>
-										<Tooltip text="%common.buttons.cancel" />
-									</tooltip>
-								</Button>
+									<Button fx:id="btCheckMachine" disable="true" onAction="#checkMachine">
+										<graphic>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+										</graphic>
+										<tooltip>
+											<Tooltip text="%common.checkMachine" />
+										</tooltip>
+									</Button>
+								</InterruptIfRunningButton>
 								<Spacer/>
 								<NavigationButtons/>
 								<Spacer/>

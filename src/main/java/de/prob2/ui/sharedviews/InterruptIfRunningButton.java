@@ -8,7 +8,9 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -33,12 +35,16 @@ import javafx.util.Builder;
  */
 @FXMLInjected
 public final class InterruptIfRunningButton extends StackPane implements Builder<InterruptIfRunningButton> {
+	private final BooleanProperty running;
 	private final Button interruptButton;
 	
 	@Inject
 	private InterruptIfRunningButton(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace, final I18n i18n) {
+		this.running = new SimpleBooleanProperty(this, "running", false);
+		this.running.bind(cliExecutor.runningProperty());
+		
 		this.interruptButton = new Button();
-		this.interruptButton.visibleProperty().bind(cliExecutor.runningProperty());
+		this.interruptButton.visibleProperty().bind(this.running);
 		this.interruptButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		this.interruptButton.setTooltip(new Tooltip(i18n.translate("common.buttons.cancel")));
 		this.interruptButton.setOnAction(e -> {
@@ -56,7 +62,7 @@ public final class InterruptIfRunningButton extends StackPane implements Builder
 			while (change.next()) {
 				for (final Node node : change.getAddedSubList()) {
 					if (node != this.interruptButton) {
-						node.visibleProperty().bind(cliExecutor.runningProperty().not());
+						node.visibleProperty().bind(this.running.not());
 					}
 				}
 				
@@ -72,6 +78,10 @@ public final class InterruptIfRunningButton extends StackPane implements Builder
 	@Override
 	public InterruptIfRunningButton build() {
 		return this;
+	}
+	
+	public BooleanProperty runningProperty() {
+		return this.running;
 	}
 	
 	public Button getInterruptButton() {

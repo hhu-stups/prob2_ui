@@ -20,6 +20,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -51,7 +52,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	private Button addTestCaseButton;
 
 	@FXML
-	private Button cancelButton;
+	private InterruptIfRunningButton cancelButton;
 
 	private final StageManager stageManager;
 
@@ -180,7 +181,8 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
-		cancelButton.disableProperty().bind(testCaseGenerator.runningProperty().not());
+		cancelButton.runningProperty().bind(testCaseGenerator.runningProperty());
+		cancelButton.getInterruptButton().setOnAction(e -> testCaseGenerator.interrupt());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		itemsTable.setOnMouseClicked(e -> {
 			TestCaseGenerationItem item = itemsTable.getSelectionModel().getSelectedItem();
@@ -234,10 +236,5 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	public void generate() {
 		Machine machine = currentProject.getCurrentMachine();
 		itemHandler.handleMachine(machine);
-	}
-
-	@FXML
-	public void cancel() {
-		testCaseGenerator.interrupt();
 	}
 }
