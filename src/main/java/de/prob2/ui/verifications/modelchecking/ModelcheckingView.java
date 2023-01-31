@@ -44,7 +44,6 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -247,19 +246,17 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	}
 
-	private void tvItemsClicked(MouseEvent e) {
-		ModelCheckingItem item = itemsTable.getSelectionModel().getSelectedItem();
-		if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-			if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-				this.checkSingleItem(item);
-			}
-		}
-	}
-
 	private void setContextMenus() {
 		itemsTable.setRowFactory(table -> {
 			final TableRow<ModelCheckingItem> row = new TableRow<>();
-			row.setOnMouseClicked(this::tvItemsClicked);
+			row.setOnMouseClicked(e -> {
+				ModelCheckingItem item = row.getItem();
+				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
+					if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
+						this.checkSingleItem(item);
+					}
+				}
+			});
 
 			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 			checkItem.setOnAction(e -> this.checkSingleItem(row.getItem()));
@@ -285,7 +282,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			});
 
 			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
-			removeItem.setOnAction(e -> removeItem());
+			removeItem.setOnAction(e -> items.remove(row.getItem()));
 			removeItem.disableProperty().bind(row.emptyProperty());
 
 			row.contextMenuProperty().bind(
@@ -345,12 +342,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			// (unless it's an existing configuration that has already been run)
 			this.checkSingleItem(toCheck);
 		}
-	}
-
-	private void removeItem() {
-		Machine machine = currentProject.getCurrentMachine();
-		ModelCheckingItem item = itemsTable.getSelectionModel().getSelectedItem();
-		machine.getModelcheckingItems().remove(item);
 	}
 
 	@FXML

@@ -178,7 +178,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		itemsTable.setRowFactory(table -> {
 			final TableRow<LTLFormulaItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
-			removeItem.setOnAction(e -> removeFormula());
+			removeItem.setOnAction(e -> items.remove(row.getItem()));
 						
 			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e-> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
@@ -214,7 +214,12 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removePattern"));
-			removeItem.setOnAction(e -> removePattern());
+			removeItem.setOnAction(e -> {
+				Machine machine = currentProject.getCurrentMachine();
+				LTLPatternItem item = row.getItem();
+				machine.getLTLPatterns().remove(item);
+				patternParser.removePattern(item, machine);
+			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
@@ -275,11 +280,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		checker.checkFormula(toCheck);
 	}
 	
-	private void removeFormula() {
-		LTLFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
-		items.remove(item);
-	}
-	
 	@FXML
 	public void addPattern() {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
@@ -298,13 +298,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
 				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
 		}
-	}
-	
-	private void removePattern() {
-		Machine machine = currentProject.getCurrentMachine();
-		LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
-		machine.getLTLPatterns().remove(item);
-		patternParser.removePattern(item, machine);
 	}
 	
 	private void showCurrentItemDialog(LTLFormulaItem oldItem) {

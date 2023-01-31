@@ -78,7 +78,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 			checkItem.setOnAction(e -> itemHandler.handleItem(row.getItem()));
 
 			MenuItem removeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> removeFormula());
+			removeItem.setOnAction(e -> items.remove(row.getItem()));
 
 			MenuItem changeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> changeItem(row.getItem()));
@@ -207,12 +207,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		}
 		final Optional<TestCaseGenerationItem> existingItem = itemHandler.addItem(newItem);
 		itemHandler.generateTestCases(existingItem.orElse(newItem));
-	}
-
-	private void removeFormula() {
-		Machine machine = currentProject.getCurrentMachine();
-		TestCaseGenerationItem item = itemsTable.getSelectionModel().getSelectedItem();
-		machine.getTestCases().remove(item);
 	}
 
 	private void changeItem(TestCaseGenerationItem item) {
