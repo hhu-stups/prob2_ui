@@ -79,7 +79,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				try {
 					traceFile = this.getItem().load();
 				} catch (IOException e) {
-					injector.getInstance(TraceFileHandler.class).showLoadError(this.getItem().getAbsoluteLocation(), e);
+					traceFileHandler.showLoadError(this.getItem().getAbsoluteLocation(), e);
 					return;
 				}
 				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(traceFile, currentMachinePath, null, this.getItem().getAbsoluteLocation(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
@@ -166,7 +166,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	private void initTableColumns() {
-		statusProgressColumn.setCellValueFactory(injector.getInstance(TraceViewHandler.class).getTraceStatusFactory());
+		statusProgressColumn.setCellValueFactory(traceViewHandler.getTraceStatusFactory());
 	}
 
 	private void initTableRows() {
@@ -208,7 +208,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (showDescription) {
 			closeDescription();
 		}
-		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, injector));
+		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, i18n));
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
 	}

@@ -1,8 +1,6 @@
 package de.prob2.ui.sharedviews;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -42,18 +40,15 @@ public final class TraceSelectionView extends ScrollPane {
 	private final CurrentTrace currentTrace;
 	private final TraceChecker traceChecker;
 	private final I18n i18n;
-	private final Injector injector;
 	private final TraceViewHandler traceViewHandler;
 	private boolean showDescription;
 
 	@Inject
-	public TraceSelectionView(final StageManager stageManager, final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
-			final Injector injector, final TraceViewHandler traceViewHandler) {
+	public TraceSelectionView(final StageManager stageManager, final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n, final TraceViewHandler traceViewHandler) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
 		this.i18n = i18n;
-		this.injector = injector;
 		this.traceViewHandler = traceViewHandler;
 		stageManager.loadFXML(this, "trace_selection_view.fxml");
 	}
@@ -78,7 +73,7 @@ public final class TraceSelectionView extends ScrollPane {
 	}
 
 	private void initTableColumns() {
-		statusColumn.setCellValueFactory(injector.getInstance(TraceViewHandler.class).getTraceStatusFactory());
+		statusColumn.setCellValueFactory(traceViewHandler.getTraceStatusFactory());
 		nameColumn.setCellValueFactory(
 				features -> new SimpleStringProperty(features.getValue().getName()));
 	}
@@ -129,7 +124,7 @@ public final class TraceSelectionView extends ScrollPane {
 		if(showDescription) {
 			closeDescription();
 		}
-		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, injector));
+		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, i18n));
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
 	}

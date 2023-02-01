@@ -16,6 +16,7 @@ import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
@@ -195,6 +196,7 @@ public class MachinesTab extends Tab {
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
+	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
 
@@ -205,12 +207,14 @@ public class MachinesTab extends Tab {
 		final CurrentTrace currentTrace,
 		final CurrentProject currentProject,
 		final StageManager stageManager,
+		final I18n i18n,
 		final FileChooserManager fileChooserManager,
 		final Injector injector
 	) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
+		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.injector = injector;
 		stageManager.loadFXML(this, "machines_tab.fxml");
@@ -432,7 +436,7 @@ public class MachinesTab extends Tab {
 		if(showMachineView) {
 			closeMachineView();
 		}
-		splitPane.getItems().add(0, new DescriptionView(machine, this::closeMachineView, stageManager, injector));
+		splitPane.getItems().add(0, new DescriptionView(machine, this::closeMachineView, stageManager, i18n));
 		showMachineView = true;
 	}
 
