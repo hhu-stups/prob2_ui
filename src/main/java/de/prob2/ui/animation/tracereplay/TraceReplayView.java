@@ -36,7 +36,6 @@ import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextInputDialog;
-import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 
 @FXMLInjected
@@ -44,8 +43,7 @@ import javafx.stage.FileChooser;
 public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final class Row extends RowBase {
 		private Row() {
-			final MenuItem replayTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
-			replayTraceItem.setDisable(true);
+			executeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
 			final MenuItem editIdItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
 			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
@@ -56,7 +54,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			final MenuItem recheckTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.refactorTrace"));
 
 			// Set listeners for menu items
-			traceViewHandler.initializeRow(this.getScene(), this, addTestsItem, replayTraceItem, showStatusItem, openInExternalEditorItem, revealInExplorerItem);
+			traceViewHandler.initializeRow(this, addTestsItem, showStatusItem, openInExternalEditorItem, revealInExplorerItem);
 			editIdItem.setOnAction(event -> {
 				final ReplayTrace trace = this.getItem();
 				final TextInputDialog dialog = new TextInputDialog(trace.getId() == null ? "" : trace.getId());
@@ -90,17 +88,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			});
 			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
 
-			contextMenu.getItems().addAll(replayTraceItem, addTestsItem, editIdItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
-
-			this.setOnMouseClicked(event -> {
-				ReplayTrace item = this.getItem();
-				if (item == null) {
-					return;
-				}
-				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					traceChecker.check(item, true);
-				}
-			});
+			contextMenu.getItems().addAll(addTestsItem, editIdItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
 		}
 	}
 
@@ -168,6 +156,11 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@Override
 	protected String configurationForItem(final ReplayTrace item) {
 		return item.getName();
+	}
+
+	@Override
+	protected void executeItem(final ReplayTrace item) {
+		traceChecker.check(item, true);
 	}
 
 	@FXML

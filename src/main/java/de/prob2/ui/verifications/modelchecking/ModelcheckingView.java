@@ -43,7 +43,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -55,33 +54,16 @@ import org.slf4j.LoggerFactory;
 public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem> {
 	private final class Row extends RowBase {
 		private Row() {
-			this.setOnMouseClicked(e -> {
-				ModelCheckingItem item = this.getItem();
-				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-					if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-						checkSingleItem(item);
-					}
-				}
-			});
-
-			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-			checkItem.setOnAction(e -> checkSingleItem(this.getItem()));
-			contextMenu.getItems().add(checkItem);
+			executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 
 			this.itemProperty().addListener((o, from, to) -> {
-				checkItem.textProperty().unbind();
-				checkItem.disableProperty().unbind();
+				executeMenuItem.textProperty().unbind();
 				if (to != null) {
-					checkItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
+					executeMenuItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
 						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
 						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
-					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
-					checkItem.disableProperty().bind(anySucceeded
-						.or(disablePropertyController.disableProperty())
-						.or(to.selectedProperty().not()));
 				} else {
-					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-					checkItem.setDisable(true);
+					executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 				}
 			});
 
@@ -264,6 +246,23 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			LOGGER.error("Exception while running model check job", t);
 			Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
 		}
+	}
+	
+	@Override
+	protected BooleanExpression disableItemBinding(final ModelCheckingItem item) {
+		return super.disableItemBinding(item).or(Bindings.createBooleanBinding(
+			() -> item.getItems().stream().anyMatch(jobItem -> jobItem.getChecked() == Checked.SUCCESS),
+			item.itemsProperty()
+		));
+	}
+	
+	@Override
+	protected void executeItem(final ModelCheckingItem item) {
+		if (item.getItems().stream().anyMatch(job -> job.getChecked() == Checked.SUCCESS)) {
+			return;
+		}
+
+		this.checkSingleItem(item);
 	}
 
 	private void checkSingleItem(final ModelCheckingItem item) {

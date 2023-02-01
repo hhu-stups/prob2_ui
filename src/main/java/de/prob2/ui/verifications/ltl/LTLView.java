@@ -48,7 +48,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
@@ -59,10 +58,7 @@ import org.slf4j.LoggerFactory;
 public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
-			MenuItem checkItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
-			checkItem.setDisable(true);
-			checkItem.setOnAction(e -> checker.checkFormula(this.getItem()));
-			contextMenu.getItems().add(checkItem);
+			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
 			
 			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(this.getItem()));
@@ -83,7 +79,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 			
 			this.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					checkItem.disableProperty().bind(disablePropertyController.disableProperty().or(to.selectedProperty().not()));
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
 				}
@@ -175,7 +170,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	public void initialize() {
 		super.initialize();
 		helpButton.setHelpContent("verification", "LTL");
-		setOnItemClicked();
 		setContextMenus();
 		setBindings();
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
@@ -196,15 +190,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 	
-	private void setOnItemClicked() {
-		itemsTable.setOnMouseClicked(e-> {
-			LTLFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
-				checker.checkFormula(item);
-			}
-		});
-	}
-
 	/**
 	 * Sets the context menus for the items LTLFormula and LTLPatterns
 	 */
@@ -257,6 +242,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	@Override
 	protected String configurationForItem(final LTLFormulaItem item) {
 		return item.getCode();
+	}
+	
+	@Override
+	protected void executeItem(final LTLFormulaItem item) {
+		checker.checkFormula(item);
 	}
 	
 	@FXML

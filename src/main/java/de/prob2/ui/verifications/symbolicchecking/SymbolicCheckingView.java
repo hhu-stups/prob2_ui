@@ -33,23 +33,7 @@ import javafx.scene.control.TableColumn;
 public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
-			this.setOnMouseClicked(e -> {
-				final SymbolicCheckingFormulaItem item = this.getItem();
-				if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
-					formulaHandler.handleItem(item, false);
-				}
-			});
-			
-			MenuItem checkItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.check"));
-			checkItem.setDisable(true);
-			checkItem.setOnAction(e -> formulaHandler.handleItem(this.getItem(), false));
-			contextMenu.getItems().add(checkItem);
-			
-			this.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					checkItem.disableProperty().bind(disablePropertyController.disableProperty().or(to.selectedProperty().not()));
-				}
-			});
+			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> {
@@ -168,6 +152,11 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	@Override
 	protected String configurationForItem(final SymbolicCheckingFormulaItem item) {
 		return item.getCode();
+	}
+	
+	@Override
+	protected void executeItem(final SymbolicCheckingFormulaItem item) {
+		formulaHandler.handleItem(item, false);
 	}
 	
 	@FXML

@@ -6,10 +6,7 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.ReplayedTraceStatusAlert;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.animation.tracereplay.TraceTestView;
-import de.prob2.ui.internal.DisablePropertyController;
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
@@ -25,7 +22,6 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
-import javafx.scene.Scene;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
@@ -39,22 +35,16 @@ import org.controlsfx.glyphfont.FontAwesome;
 
 @Singleton
 public class TraceViewHandler {
-	private final TraceChecker traceChecker;
-
 	private final CurrentProject currentProject;
 
 	private final Injector injector;
 
-	private final I18n i18n;
-
 	private final ListProperty<ReplayTrace> traces;
 
 	@Inject
-	public TraceViewHandler(final TraceChecker traceChecker, final CurrentProject currentProject, final Injector injector, final I18n i18n) {
-		this.traceChecker = traceChecker;
+	private TraceViewHandler(final CurrentProject currentProject, final Injector injector) {
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.i18n = i18n;
 		this.traces = new SimpleListProperty<>(this, "replayTraces", FXCollections.observableArrayList());
 		initialize();
 	}
@@ -105,8 +95,7 @@ public class TraceViewHandler {
 		};
 	}
 
-	public void initializeRow(final Scene scene, final TableRow<ReplayTrace> row, final MenuItem addTestsItem, final MenuItem replayTraceItem, final MenuItem showStatusItem, final MenuItem openInExternalEditorItem, final MenuItem revealInExplorerItem) {
-		replayTraceItem.setOnAction(event -> this.traceChecker.check(row.getItem(), true));
+	public void initializeRow(final TableRow<ReplayTrace> row, final MenuItem addTestsItem, final MenuItem showStatusItem, final MenuItem openInExternalEditorItem, final MenuItem revealInExplorerItem) {
 		addTestsItem.setOnAction(event -> {
 			TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
 			traceTestView.loadReplayTrace(row.getItem());
@@ -124,7 +113,6 @@ public class TraceViewHandler {
 		);
 		row.itemProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				replayTraceItem.disableProperty().bind(row.getItem().selectedProperty().not().or(injector.getInstance(DisablePropertyController.class).disableProperty()));
 				row.setTooltip(new Tooltip(row.getItem().getLocation().toString()));
 			}
 		});

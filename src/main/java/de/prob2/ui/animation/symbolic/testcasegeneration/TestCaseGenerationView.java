@@ -25,6 +25,7 @@ import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -39,10 +40,7 @@ import javafx.scene.control.TableColumn;
 public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationItem> {
 	private final class Row extends RowBase {
 		private Row() {
-			MenuItem checkItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.generate"));
-			checkItem.setDisable(true);
-			checkItem.setOnAction(e -> itemHandler.handleItem(this.getItem()));
-			contextMenu.getItems().add(checkItem);
+			executeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.generate"));
 
 			MenuItem changeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> changeItem(this.getItem()));
@@ -91,7 +89,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					to.examplesProperty().addListener(updateExamplesListener);
 					updateExamplesListener.invalidated(null);
-					checkItem.disableProperty().bind(testCaseGenerator.runningProperty().or(to.selectedProperty().not()));
 					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
 					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
@@ -187,6 +184,16 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	@Override
 	protected String configurationForItem(final TestCaseGenerationItem item) {
 		return item.getConfigurationDescription();
+	}
+
+	@Override
+	protected BooleanExpression disableItemBinding(final TestCaseGenerationItem item) {
+		return testCaseGenerator.runningProperty().or(item.selectedProperty().not());
+	}
+
+	@Override
+	protected void executeItem(final TestCaseGenerationItem item) {
+		itemHandler.handleItem(item);
 	}
 
 	@FXML

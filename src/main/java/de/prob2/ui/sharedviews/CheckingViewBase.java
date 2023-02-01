@@ -9,6 +9,7 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -17,19 +18,45 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseButton;
 
 @FXMLInjected
 public abstract class CheckingViewBase<T extends IExecutableItem> extends ScrollPane {
 	protected class RowBase extends TableRow<T> {
 		protected final ContextMenu contextMenu;
+		protected final MenuItem executeMenuItem;
 		
 		protected RowBase() {
+			// Execute item (if possible) when double-clicked.
+			this.setOnMouseClicked(event -> {
+				if (!this.isEmpty() && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+					final T item = this.getItem();
+					if (!disableItemBinding(item).get()) {
+						executeItem(item);
+					}
+				}
+			});
+			
 			this.contextMenu = new ContextMenu();
+			
+			this.executeMenuItem = new MenuItem();
+			this.executeMenuItem.setOnAction(e -> executeItem(this.getItem()));
+			this.contextMenu.getItems().add(this.executeMenuItem);
+			
+			this.itemProperty().addListener((o, from, to) -> {
+				if (to == null) {
+					executeMenuItem.disableProperty().unbind();
+					executeMenuItem.disableProperty().set(true);
+				} else {
+					executeMenuItem.disableProperty().bind(disableItemBinding(to));
+				}
+			});
 			
 			this.contextMenuProperty().bind(Bindings.when(this.emptyProperty())
 				.then((ContextMenu)null)
@@ -98,4 +125,10 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	 * @return a string description of the item's configuration
 	 */
 	protected abstract String configurationForItem(final T item);
+	
+	protected BooleanExpression disableItemBinding(final T item) {
+		return disablePropertyController.disableProperty().or(item.selectedProperty().not());
+	}
+	
+	protected abstract void executeItem(final T item);
 }
