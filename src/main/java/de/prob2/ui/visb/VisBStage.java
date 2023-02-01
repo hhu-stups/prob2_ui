@@ -43,7 +43,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DefaultPathDialog;
-import de.prob2.ui.sharedviews.TraceSelectionView;
+import de.prob2.ui.sharedviews.TraceSelectionStage;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
@@ -71,11 +71,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
@@ -521,7 +521,7 @@ public class VisBStage extends Stage {
 
 	@FXML
 	private void openTraceSelection() {
-		TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
+		TraceSelectionStage traceSelectionView = injector.getInstance(TraceSelectionStage.class);
 		traceSelectionView.show();
 		traceSelectionView.toFront();
 	}
