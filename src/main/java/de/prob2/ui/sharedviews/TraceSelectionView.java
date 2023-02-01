@@ -59,6 +59,16 @@ public class TraceSelectionView extends Stage {
 		traceTableView.itemsProperty().bind(traceViewHandler.getTraces());
 		initTableColumns();
 		initTableRows();
+
+		traceTableView.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
+			if (showDescription) {
+				closeDescription();
+				if (to != null) {
+					showDescription(to);
+				}
+			}
+		});
+
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
@@ -96,9 +106,6 @@ public class TraceSelectionView extends Stage {
 				}
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					this.traceChecker.check(item, true);
-				} else if(showDescription && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 1) {
-					showDescription(row.getItem());
-					row.updateSelected(true);
 				}
 			});
 
