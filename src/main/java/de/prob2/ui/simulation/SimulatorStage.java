@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -193,6 +194,9 @@ public class SimulatorStage extends Stage {
 	private InterruptIfRunningButton btCancel;
 
 	@FXML
+	private HelpButton helpButton;
+
+	@FXML
 	private Button btAddSimulation;
 
 	@FXML
@@ -325,6 +329,7 @@ public class SimulatorStage extends Stage {
 		);
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
+		helpButton.setHelpContent("mainmenu.advanced.simB", null);
 		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow()));
 		saveTimedTraceItem.setOnAction(e -> {
 			try {
