@@ -93,6 +93,15 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		initTableColumns();
 		initTableRows();
 
+		itemsTable.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
+			if (showDescription) {
+				closeDescription();
+				if (to != null) {
+					showDescription(to);
+				}
+			}
+		});
+
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
 	}
@@ -162,9 +171,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				}
 				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					this.traceChecker.check(item, true);
-				} else if (showDescription && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 1) {
-					showDescription(row.getItem());
-					row.updateSelected(true);
 				}
 			});
 
@@ -210,9 +216,5 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, injector));
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
-	}
-
-	public void refresh() {
-		this.itemsTable.refresh();
 	}
 }
