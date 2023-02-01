@@ -48,7 +48,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
@@ -57,6 +56,36 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 @Singleton
 public class LTLView extends CheckingViewBase<LTLFormulaItem> {
+	private final class Row extends RowBase {
+		private Row() {
+			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
+			
+			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
+			openEditor.setOnAction(e -> showCurrentItemDialog(this.getItem()));
+			contextMenu.getItems().add(openEditor);
+			
+			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
+			removeItem.setOnAction(e -> items.remove(this.getItem()));
+			contextMenu.getItems().add(removeItem);
+			
+			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
+			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
+			showCounterExampleItem.setDisable(true);
+			contextMenu.getItems().add(showCounterExampleItem);
+			
+			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
+			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			contextMenu.getItems().add(showMessage);
+			
+			this.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
+				}
+			});
+		}
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(LTLView.class);
 	
 	private static final String LTL_FILE_EXTENSION = "prob2ltl";
@@ -76,10 +105,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private HelpButton helpButton;
 	@FXML
 	private TableView<LTLPatternItem> tvPattern;
-	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaIdColumn;
-	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaColumn;
 	@FXML
 	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
 	@FXML
@@ -140,11 +165,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		stageManager.loadFXML(this, "ltl_view.fxml");
 	}
 	
+	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();
 		helpButton.setHelpContent("verification", "LTL");
-		setOnItemClicked();
 		setContextMenus();
 		setBindings();
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
@@ -165,59 +190,21 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 	
-	private void setOnItemClicked() {
-		itemsTable.setOnMouseClicked(e-> {
-			LTLFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null) {
-				checker.checkFormula(item);
-			}
-		});
-	}
-
 	/**
 	 * Sets the context menus for the items LTLFormula and LTLPatterns
 	 */
 	private void setContextMenus() {
-		itemsTable.setRowFactory(table -> {
-			final TableRow<LTLFormulaItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
-			removeItem.setOnAction(e -> removeFormula());
-						
-			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
-			showCounterExampleItem.setOnAction(e-> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
-			showCounterExampleItem.setDisable(true);
-
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
-			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
-			
-			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
-
-			MenuItem checkItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
-			checkItem.setDisable(true);
-			checkItem.setOnAction(e-> {
-				checker.checkFormula(row.getItem());
-			});
-			
-			row.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					checkItem.disableProperty().bind(disablePropertyController.disableProperty().or(to.selectedProperty().not()));
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
-					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
-				}
-			});
-			
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(checkItem, openEditor, removeItem, showCounterExampleItem, showMessage)));
-			return row;
-		});
+		itemsTable.setRowFactory(table -> new Row());
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
 			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removePattern"));
-			removeItem.setOnAction(e -> removePattern());
+			removeItem.setOnAction(e -> {
+				Machine machine = currentProject.getCurrentMachine();
+				LTLPatternItem item = row.getItem();
+				machine.getLTLPatterns().remove(item);
+				patternParser.removePattern(item, machine);
+			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
@@ -239,8 +226,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 
 	private void setBindings() {
-		formulaIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("code"));
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 		patternStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -252,6 +237,16 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		loadLTLButton.disableProperty().bind(currentTrace.isNull());
 
 		itemsTable.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
+	}
+	
+	@Override
+	protected String configurationForItem(final LTLFormulaItem item) {
+		return item.getCode();
+	}
+	
+	@Override
+	protected void executeItem(final LTLFormulaItem item) {
+		checker.checkFormula(item);
 	}
 	
 	@FXML
@@ -275,11 +270,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		checker.checkFormula(toCheck);
 	}
 	
-	private void removeFormula() {
-		LTLFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
-		items.remove(item);
-	}
-	
 	@FXML
 	public void addPattern() {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
@@ -298,13 +288,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
 				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
 		}
-	}
-	
-	private void removePattern() {
-		Machine machine = currentProject.getCurrentMachine();
-		LTLPatternItem item = tvPattern.getSelectionModel().getSelectedItem();
-		machine.getLTLPatterns().remove(item);
-		patternParser.removePattern(item, machine);
 	}
 	
 	private void showCurrentItemDialog(LTLFormulaItem oldItem) {

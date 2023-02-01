@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -26,23 +27,38 @@ public class UIInteraction {
 
 	private final CurrentTrace currentTrace;
 
-	private int interactionCounter;
+	private final CurrentProject currentProject;
 
 	private final List<Transition> userTransitions;
 
 	private final List<Integer> timestamps;
 
 	@Inject
-	public UIInteraction(final CurrentTrace currentTrace) {
+	public UIInteraction(final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		this.currentTrace = currentTrace;
 		this.uiListener = new SimpleObjectProperty<>(null);
 		this.userTransitions = new ArrayList<>();
 		this.timestamps = new ArrayList<>();
-		this.interactionCounter = 0;
+		this.currentProject = currentProject;
+		initialize();
+	}
+
+	private void initialize() {
+		currentProject.addListener((observable, from, to) -> reset());
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
+	}
+
+	public void reset() {
+		userTransitions.clear();
+		timestamps.clear();
 	}
 
 	public void addUIInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
 		if(!realTimeSimulator.isRunning()) {
+			return;
+		}
+		String name = transition.getName();
+		if ("$setup_constants".equals(name) || "$initialse_machine".equals(name)) {
 			return;
 		}
 		uiListener.set(transition);
@@ -86,10 +102,6 @@ public class UIInteraction {
 
 	public Transition getLastUIChange() {
 		return uiListener.get();
-	}
-
-	public void clearUserInteractions() {
-		interactionCounter = 0;
 	}
 
 	public SimulationConfiguration createAutomaticSimulation(RealTimeSimulator realTimeSimulator) {

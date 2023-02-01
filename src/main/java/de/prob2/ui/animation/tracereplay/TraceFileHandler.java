@@ -136,9 +136,11 @@ public class TraceFileHandler extends ProBFileHandler {
 		});
 	}
 
-	public void addTraceFile(final Machine machine, final Path traceFilePath) {
+	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
 		final Path relativeLocation = currentProject.getLocation().relativize(traceFilePath);
-		machine.getTraces().add(new ReplayTrace(null, relativeLocation, traceFilePath, traceManager));
+		final ReplayTrace replayTrace = new ReplayTrace(null, relativeLocation, traceFilePath, traceManager);
+		machine.getTraces().add(replayTrace);
+		return replayTrace;
 	}
 
 	public void save(SimulationItem item, Machine machine) {

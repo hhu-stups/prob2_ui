@@ -31,6 +31,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
@@ -190,7 +191,7 @@ public class SimulatorStage extends Stage {
 	private Button btCheckMachine;
 
 	@FXML
-	private Button btCancel;
+	private InterruptIfRunningButton btCancel;
 
 	@FXML
 	private Button btAddSimulation;
@@ -308,7 +309,11 @@ public class SimulatorStage extends Stage {
 		final BooleanProperty noSimulations = new SimpleBooleanProperty();
 
 		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(simulationItemHandler.runningProperty().or(noSimulations.or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
-		btCancel.disableProperty().bind(simulationItemHandler.runningProperty().not());
+		btCancel.runningProperty().bind(simulationItemHandler.runningProperty());
+		btCancel.getInterruptButton().setOnAction(e -> {
+			simulationItemHandler.interrupt();
+			currentTrace.getStateSpace().sendInterrupt();
+		});
 		this.titleProperty().bind(
 				Bindings.when(configurationPath.isNull())
 						.then(i18n.translateBinding("simulation.stage.title"))
@@ -386,6 +391,7 @@ public class SimulatorStage extends Stage {
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 			noSimulations.unbind();
+			injector.getInstance(UIInteraction.class).reset();
 
 			this.loadSimulationIntoSimulator(to);
 			if(to != null) {
@@ -554,12 +560,6 @@ public class SimulatorStage extends Stage {
 	@FXML
 	private void checkMachine() {
 		simulationItemHandler.handleMachine(cbSimulation.getSelectionModel().getSelectedItem());
-	}
-
-	@FXML
-	private void cancel() {
-		simulationItemHandler.interrupt();
-		currentTrace.getStateSpace().sendInterrupt();
 	}
 
 	@FXML

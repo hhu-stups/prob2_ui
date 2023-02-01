@@ -1,7 +1,5 @@
 package de.prob2.ui.sharedviews;
 
-import com.google.inject.Injector;
-
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
@@ -31,10 +29,10 @@ public class DescriptionView extends AnchorPane {
 	private final Runnable closeMethod;
 	private final I18n i18n;
 	
-	public DescriptionView(final Describable describable, final Runnable closeMethod, final StageManager stageManager, final Injector injector) {
+	public DescriptionView(final Describable describable, final Runnable closeMethod, final StageManager stageManager, final I18n i18n) {
 		this.describable = describable;
 		this.closeMethod = closeMethod;
-		this.i18n = injector.getInstance(I18n.class);
+		this.i18n = i18n;
 		stageManager.loadFXML(this, "description_view.fxml");
 	}
 

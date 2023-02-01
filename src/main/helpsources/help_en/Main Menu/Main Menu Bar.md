@@ -14,7 +14,7 @@ The menu bar contains the various commands to access the features of ProB. It in
 
 The File submenu allows you to create a new [Project](../Project.md), open an existing project or open or clear the list of recent projects.
 
-You can save your project or machine, reload it, run an extended statistics analysis or take a look at the current machine in a formatted manner.
+You can save your project or machine, reload it, run an extended statistics analysis or take a look at the internal representation of the current machine.
 
 Furthermore, it is possible to export the model in different types.
 

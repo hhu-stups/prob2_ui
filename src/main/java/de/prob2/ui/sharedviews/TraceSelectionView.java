@@ -1,109 +1,94 @@
 package de.prob2.ui.sharedviews;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
+
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.beans.binding.Bindings;
+
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.input.MouseButton;
-import javafx.stage.Stage;
 
 @FXMLInjected
-@Singleton
-public class TraceSelectionView extends Stage {
+public final class TraceSelectionView extends CheckingViewBase<ReplayTrace> {
+	private final class Row extends RowBase {
+		private Row() {
+			executeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
+			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
+			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
+			final MenuItem showStatusItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
+			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+			final MenuItem revealInExplorerItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
+
+			// Set listeners for menu items
+			traceViewHandler.initializeRow(this, addTestsItem, showStatusItem, openInExternalEditorItem, revealInExplorerItem);
+			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
+
+			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem);
+		}
+	}
+
 	@FXML
-	private TableView<ReplayTrace> traceTableView;
-	@FXML
-	private TableColumn<ReplayTrace, Node> statusColumn;
-	@FXML
-	private TableColumn<ReplayTrace, String> nameColumn;
+	private TableColumn<ReplayTrace, Node> statusProgressColumn;
 	@FXML
 	private SplitPane splitPane;
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final TraceChecker traceChecker;
-	private final Injector injector;
+	private final I18n i18n;
 	private final TraceViewHandler traceViewHandler;
 	private boolean showDescription;
 
 	@Inject
-	public TraceSelectionView(final StageManager stageManager, final CurrentTrace currentTrace, final TraceChecker traceChecker,
-			final Injector injector, final TraceViewHandler traceViewHandler) {
+	public TraceSelectionView(final StageManager stageManager, final DisablePropertyController disablePropertyController, final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n, final TraceViewHandler traceViewHandler) {
+		super(disablePropertyController);
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
-		this.injector = injector;
+		this.i18n = i18n;
 		this.traceViewHandler = traceViewHandler;
 		stageManager.loadFXML(this, "trace_selection_view.fxml");
 	}
 
 	@FXML
-	private void initialize() {
-		traceTableView.itemsProperty().bind(traceViewHandler.getTraces());
-		initTableColumns();
-		initTableRows();
-		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
-		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
-	}
+	public void initialize() {
+		super.initialize();
+		items.bind(traceViewHandler.getTraces());
+		statusProgressColumn.setCellValueFactory(traceViewHandler.getTraceStatusFactory());
 
-	private void initTableColumns() {
-		statusColumn.setCellValueFactory(injector.getInstance(TraceViewHandler.class).getTraceStatusFactory());
-		nameColumn.setCellValueFactory(
-				features -> new SimpleStringProperty(features.getValue().getName()));
-	}
-
-	private void initTableRows() {
-		this.traceTableView.setRowFactory(param -> {
-			final TableRow<ReplayTrace> row = new TableRow<>();
-
-			final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
-			final MenuItem addTestsItem = traceViewHandler.createAddTestsItem();
-			final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
-			final MenuItem showStatusItem = traceViewHandler.createShowStatusItem();
-			final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
-			final MenuItem revealInExplorerItem = traceViewHandler.createRevealInExplorerItem();
-
-			// Set listeners for menu items
-			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showStatusItem, openInExternalEditorItem, revealInExplorerItem);
-			showDescriptionItem.setOnAction(event -> showDescription(row.getItem()));
-
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(replayTraceItem, addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem)));
-
-			row.setOnMouseClicked(event -> {
-				ReplayTrace item = row.getItem();
-				if(item == null) {
-					return;
+		itemsTable.setRowFactory(table -> new Row());
+		itemsTable.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
+			if (showDescription) {
+				closeDescription();
+				if (to != null) {
+					showDescription(to);
 				}
-				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					this.traceChecker.check(item, true);
-				} else if(showDescription && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 1) {
-					showDescription(row.getItem());
-					row.updateSelected(true);
-				}
-			});
-
-			return row;
+			}
 		});
+
+		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
+		itemsTable.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
+	}
+
+	@Override
+	protected String configurationForItem(final ReplayTrace item) {
+		return item.getName();
+	}
+
+	@Override
+	protected void executeItem(final ReplayTrace item) {
+		traceChecker.check(item, true);
 	}
 
 	public void closeDescription() {
@@ -117,7 +102,7 @@ public class TraceSelectionView extends Stage {
 		if(showDescription) {
 			closeDescription();
 		}
-		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, injector));
+		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, i18n));
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
 	}
