@@ -18,27 +18,19 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
 public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationItem> {
-	private class SymbolicAnimationCellFactory implements Callback<TableView<SymbolicAnimationItem>, TableRow<SymbolicAnimationItem>> {
-		@Override
-		public TableRow<SymbolicAnimationItem> call(TableView<SymbolicAnimationItem> param) {
-			TableRow<SymbolicAnimationItem> row = new TableRow<>();
-			
-			row.setOnMouseClicked(e -> {
-				final SymbolicAnimationItem item = row.getItem();
+	private final class Row extends RowBase {
+		private Row() {
+			this.setOnMouseClicked(e -> {
+				final SymbolicAnimationItem item = this.getItem();
 				if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
 					formulaHandler.handleItem(item, false);
 				}
@@ -46,23 +38,18 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 			
 			MenuItem checkItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.check"));
 			checkItem.setDisable(true);
-			checkItem.setOnAction(e -> formulaHandler.handleItem(row.getItem(), false));
+			checkItem.setOnAction(e -> formulaHandler.handleItem(this.getItem(), false));
+			contextMenu.getItems().add(checkItem);
 			
-			row.itemProperty().addListener((observable, from, to) -> {
+			this.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
 					checkItem.disableProperty().bind(disablePropertyController.disableProperty().or(to.selectedProperty().not()));
 				}
 			});
-
-			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> {
-				SymbolicAnimationItem item = itemsTable.getSelectionModel().getSelectedItem();
-				items.remove(item);
-			});
 			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> {
-				final SymbolicAnimationItem oldItem = row.getItem();
+				final SymbolicAnimationItem oldItem = this.getItem();
 				final SymbolicAnimationChoosingStage choosingStage = choosingStageProvider.get();
 				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 				choosingStage.setData(oldItem);
@@ -78,30 +65,29 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 				}
 				formulaHandler.handleItem(existingItem.orElse(newItem), false);
 			});
-			
+			contextMenu.getItems().add(changeItem);
 
-			MenuItem showStateItem = new MenuItem(i18n.translate("animation.symbolic.view.contextMenu.showFoundTrace"));
-			showStateItem.setOnAction(e -> currentTrace.set(row.getItem().getExample()));
+			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
+			removeItem.setOnAction(e -> {
+				SymbolicAnimationItem item = itemsTable.getSelectionModel().getSelectedItem();
+				items.remove(item);
+			});
+			contextMenu.getItems().add(removeItem);
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
+			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			contextMenu.getItems().add(showMessage);
 
+			MenuItem showStateItem = new MenuItem(i18n.translate("animation.symbolic.view.contextMenu.showFoundTrace"));
+			showStateItem.setOnAction(e -> currentTrace.set(this.getItem().getExample()));
+			contextMenu.getItems().add(showStateItem);
 
-			row.itemProperty().addListener((observable, from, to) -> {
+			this.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
 					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
 					showStateItem.disableProperty().bind(to.exampleProperty().isNull());
 				}
 			});
-			
-			ContextMenu contextMenu = new ContextMenu(checkItem, changeItem, removeItem, showMessage, showStateItem);
-			
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-					.then((ContextMenu) null)
-					.otherwise(contextMenu));			
-
-			return row;
 		}
 	}
 	
@@ -136,7 +122,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	@Override
 	public void initialize() {
 		super.initialize();
-		itemsTable.setRowFactory(new SymbolicAnimationCellFactory());
+		itemsTable.setRowFactory(table -> new Row());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {

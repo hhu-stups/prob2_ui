@@ -57,6 +57,40 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 @Singleton
 public class LTLView extends CheckingViewBase<LTLFormulaItem> {
+	private final class Row extends RowBase {
+		private Row() {
+			MenuItem checkItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
+			checkItem.setDisable(true);
+			checkItem.setOnAction(e -> checker.checkFormula(this.getItem()));
+			contextMenu.getItems().add(checkItem);
+			
+			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
+			openEditor.setOnAction(e -> showCurrentItemDialog(this.getItem()));
+			contextMenu.getItems().add(openEditor);
+			
+			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
+			removeItem.setOnAction(e -> items.remove(this.getItem()));
+			contextMenu.getItems().add(removeItem);
+			
+			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
+			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
+			showCounterExampleItem.setDisable(true);
+			contextMenu.getItems().add(showCounterExampleItem);
+			
+			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
+			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			contextMenu.getItems().add(showMessage);
+			
+			this.itemProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					checkItem.disableProperty().bind(disablePropertyController.disableProperty().or(to.selectedProperty().not()));
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
+				}
+			});
+		}
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(LTLView.class);
 	
 	private static final String LTL_FILE_EXTENSION = "prob2ltl";
@@ -175,41 +209,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	 * Sets the context menus for the items LTLFormula and LTLPatterns
 	 */
 	private void setContextMenus() {
-		itemsTable.setRowFactory(table -> {
-			final TableRow<LTLFormulaItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
-			removeItem.setOnAction(e -> items.remove(row.getItem()));
-						
-			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
-			showCounterExampleItem.setOnAction(e-> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
-			showCounterExampleItem.setDisable(true);
-
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
-			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
-			
-			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
-
-			MenuItem checkItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
-			checkItem.setDisable(true);
-			checkItem.setOnAction(e-> {
-				checker.checkFormula(row.getItem());
-			});
-			
-			row.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					checkItem.disableProperty().bind(disablePropertyController.disableProperty().or(to.selectedProperty().not()));
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
-					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
-				}
-			});
-			
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-					.then((ContextMenu) null)
-					.otherwise(new ContextMenu(checkItem, openEditor, removeItem, showCounterExampleItem, showMessage)));
-			return row;
-		});
+		itemsTable.setRowFactory(table -> new Row());
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();

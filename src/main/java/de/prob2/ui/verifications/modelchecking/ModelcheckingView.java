@@ -53,6 +53,49 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 @Singleton
 public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem> {
+	private final class Row extends RowBase {
+		private Row() {
+			this.setOnMouseClicked(e -> {
+				ModelCheckingItem item = this.getItem();
+				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
+					if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
+						checkSingleItem(item);
+					}
+				}
+			});
+
+			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
+			checkItem.setOnAction(e -> checkSingleItem(this.getItem()));
+			contextMenu.getItems().add(checkItem);
+
+			this.itemProperty().addListener((o, from, to) -> {
+				checkItem.textProperty().unbind();
+				checkItem.disableProperty().unbind();
+				if (to != null) {
+					checkItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
+						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
+						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
+					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
+					checkItem.disableProperty().bind(anySucceeded
+						.or(disablePropertyController.disableProperty())
+						.or(to.selectedProperty().not()));
+				} else {
+					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
+					checkItem.setDisable(true);
+				}
+			});
+
+			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
+			removeItem.setOnAction(e -> items.remove(this.getItem()));
+			removeItem.disableProperty().bind(this.emptyProperty());
+			contextMenu.getItems().add(removeItem);
+
+			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
+			openEditor.setOnAction(e -> showCurrentItemDialog(this.getItem()));
+			contextMenu.getItems().add(openEditor);
+		}
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingView.class);
 	private static final BigInteger MIB_FACTOR = new BigInteger("1024").pow(2);
 
@@ -247,50 +290,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 
 	private void setContextMenus() {
-		itemsTable.setRowFactory(table -> {
-			final TableRow<ModelCheckingItem> row = new TableRow<>();
-			row.setOnMouseClicked(e -> {
-				ModelCheckingItem item = row.getItem();
-				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-					if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-						this.checkSingleItem(item);
-					}
-				}
-			});
-
-			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-			checkItem.setOnAction(e -> this.checkSingleItem(row.getItem()));
-
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
-			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
-
-			row.itemProperty().addListener((o, from, to) -> {
-				checkItem.textProperty().unbind();
-				checkItem.disableProperty().unbind();
-				if (to != null) {
-					checkItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
-						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
-						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
-					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
-					checkItem.disableProperty().bind(anySucceeded
-						.or(disablePropertyController.disableProperty())
-						.or(to.selectedProperty().not()));
-				} else {
-					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-					checkItem.setDisable(true);
-				}
-			});
-
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
-			removeItem.setOnAction(e -> items.remove(row.getItem()));
-			removeItem.disableProperty().bind(row.emptyProperty());
-
-			row.contextMenuProperty().bind(
-				Bindings.when(row.emptyProperty())
-				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(checkItem, removeItem, openEditor)));
-			return row;
-		});
+		itemsTable.setRowFactory(table -> new Row());
 
 		tvChecks.setRowFactory(table -> {
 			final TableRow<ModelCheckingJobItem> row = new TableRow<>();

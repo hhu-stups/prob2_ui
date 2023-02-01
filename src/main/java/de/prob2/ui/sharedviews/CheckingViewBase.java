@@ -8,6 +8,7 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.vomanager.IValidationTask;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -15,13 +16,27 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
 public abstract class CheckingViewBase<T extends IExecutableItem> extends ScrollPane {
+	protected class RowBase extends TableRow<T> {
+		protected final ContextMenu contextMenu;
+		
+		protected RowBase() {
+			this.contextMenu = new ContextMenu();
+			
+			this.contextMenuProperty().bind(Bindings.when(this.emptyProperty())
+				.then((ContextMenu)null)
+				.otherwise(this.contextMenu));
+		}
+	}
+	
 	@FXML
 	protected TableView<T> itemsTable;
 	
@@ -54,6 +69,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	@FXML
 	public void initialize() {
 		checkMachineButton.disableProperty().bind(this.items.emptyProperty().or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
+		itemsTable.setRowFactory(table -> new RowBase());
 		itemsTable.itemsProperty().bind(this.items);
 		itemsTable.disableProperty().bind(disablePropertyController.disableProperty());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());

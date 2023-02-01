@@ -21,28 +21,20 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
 public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormulaItem> {
-	private class SymbolicCheckingCellFactory implements Callback<TableView<SymbolicCheckingFormulaItem>, TableRow<SymbolicCheckingFormulaItem>> {
-		@Override
-		public TableRow<SymbolicCheckingFormulaItem> call(TableView<SymbolicCheckingFormulaItem> param) {
-			TableRow<SymbolicCheckingFormulaItem> row = new TableRow<>();
-			
-			row.setOnMouseClicked(e -> {
-				final SymbolicCheckingFormulaItem item = row.getItem();
+	private final class Row extends RowBase {
+		private Row() {
+			this.setOnMouseClicked(e -> {
+				final SymbolicCheckingFormulaItem item = this.getItem();
 				if(e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
 					formulaHandler.handleItem(item, false);
 				}
@@ -50,23 +42,18 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 			
 			MenuItem checkItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.check"));
 			checkItem.setDisable(true);
-			checkItem.setOnAction(e -> formulaHandler.handleItem(row.getItem(), false));
+			checkItem.setOnAction(e -> formulaHandler.handleItem(this.getItem(), false));
+			contextMenu.getItems().add(checkItem);
 			
-			row.itemProperty().addListener((observable, from, to) -> {
+			this.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
 					checkItem.disableProperty().bind(disablePropertyController.disableProperty().or(to.selectedProperty().not()));
 				}
 			});
 			
-			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> {
-				SymbolicCheckingFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
-				items.remove(item);
-			});
-			
 			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			changeItem.setOnAction(e -> {
-				final SymbolicCheckingFormulaItem oldItem = row.getItem();
+				final SymbolicCheckingFormulaItem oldItem = this.getItem();
 				final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
 				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
 				choosingStage.setData(oldItem);
@@ -82,14 +69,24 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 				}
 				formulaHandler.handleItem(existingItem.orElse(newItem), false);
 			});
+			contextMenu.getItems().add(changeItem);
+			
+			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
+			removeItem.setOnAction(e -> {
+				SymbolicCheckingFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
+				items.remove(item);
+			});
+			contextMenu.getItems().add(removeItem);
+			
+			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
+			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			contextMenu.getItems().add(showMessage);
 			
 			Menu showCounterExampleItem = new Menu(i18n.translate("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
+			contextMenu.getItems().add(showCounterExampleItem);
 			
-			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
-			
-			row.itemProperty().addListener((observable, from, to) -> {
+			this.itemProperty().addListener((observable, from, to) -> {
 				final InvalidationListener updateCounterExamplesListener = o -> showCounterExamples(to, showCounterExampleItem);
 
 				if (from != null) {
@@ -103,15 +100,6 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 					updateCounterExamplesListener.invalidated(null);
 				}
 			});
-			
-			ContextMenu contextMenu = new ContextMenu(checkItem, changeItem, removeItem, showMessage, showCounterExampleItem);
-			
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-					.then((ContextMenu) null)
-					.otherwise(contextMenu));			
-			
-			return row;
 		}
 		
 		private void showCounterExamples(SymbolicCheckingFormulaItem item, Menu counterExampleItem) {
@@ -160,7 +148,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		
 		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
 		
-		itemsTable.setRowFactory(new SymbolicCheckingCellFactory());
+		itemsTable.setRowFactory(table -> new Row());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 		
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
