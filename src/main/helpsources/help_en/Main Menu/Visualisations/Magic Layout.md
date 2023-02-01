@@ -3,6 +3,7 @@
 Magic Layout View provides the possibility for interactive and customizable state visualization.
 The view is divided into the [Settings View](#settings) on the left side and the [Graph View](#graph) on the right side.
 
+
 ## <a name="settings"></a>Settings View
 Settings View is divided into two tabs, one for node groups and one for edge groups. Both however are identical with regard to their functionality.
 
@@ -21,6 +22,7 @@ The settings are applied to the graph in the order they appear in the list view.
 New node and edge groups are added at the bottom of the list. The order of the groups in the list can be changed via drag-and-drop.
 
 In the file-menu you can save and load layout settings and save the graph as image.
+
 
 
 ## <a name="graph"></a>Graph View

@@ -13,9 +13,10 @@ Die Menüleiste enthält die diversen Kommandos, um auf die Funktionen von ProB 
 ## <a name="Datei"> Datei</a>
 ![Dateimenü](../../screenshots/Menu/File.png)
 
-Das Dateiuntermenü erlaubt es ein neues [Projekt](../Projekt.md) anzulegen, das aktuell geöffnete Projekt zu speichern und neu zu laden oder die Liste der zuletzt geöffneten Projekte zu verwalten.
+Das Dateiuntermenü erlaubt es ein neues [Projekt](../Projekt.md) anzulegen, das aktuell geöffnete Projekt zu speichern und neu zu laden 
+oder die Liste der zuletzt geöffneten Projekte zu verwalten.
 
-Die derzeitig laufende Maschine kann formatiert angezeigt werden oder exportiert werden.
+Die derzeitig laufende Maschine kann exportiert werden oder ihre interne Repräsentation angezeigt werden.
 
 Im Untermenü "Einstellungen" können die Darstellung des UI und die Präferenzen des aktuellen Projekts geändert werden.
 "Schließen" beendet das Programm.

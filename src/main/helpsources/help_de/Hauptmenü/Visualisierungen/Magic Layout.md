@@ -3,7 +3,8 @@
 
 
 Die Magic Layout Ansicht ermöglicht eine interaktive und individualisierbare Zustandsvisualisierung.
-Die Ansicht teilt sich auf in die [Einstellungsansicht](#einstellungen) auf der linken Seite und die [Graph Ansicht](#graph) auf der rechten Seite.
+Die Ansicht teilt sich auf in die [Einstellungsansicht](#einstellungen) auf der linken Seite und die [Graph-Ansicht](#graph) auf der rechten Seite.
+
 
 ## <a name="einstellungen"></a>Einstellungsansicht
 
@@ -25,6 +26,7 @@ in der die deﬁnierten Knoten- bzw. Kantengruppen in der Listenansicht aufgelis
 Neue Knoten- bzw. Kantengruppen werden zunächst ganz unten in der Liste platziert. Die Reihenfolge lässt sich per Drag-and-Drop anpassen.
 
 Über das Datei-Menü am oberen Bildschirmrand können Layout-Einstellungen gespeichert und geladen werden, sowie der Graph als Bild-Datei abgespeichert werden.
+
 
 
 ## <a name="graph"></a>Graph Ansicht

@@ -3,11 +3,11 @@
 In der Voreinstellung ist das Hauptfenster in drei vertikale Felder unterteilt:
 
 * Auf der linken Seite 
-  * die [Operationen-Ansicht](../Operationen.md), welche die Operationen anzeigt, deren Vor- und Schutzbedingungen in diesem Zustand wahr sind und 
-  * die [Animationsansicht](../Animation.md), die verschiedene Arten der Animation für die aktuelle Maschine zur Verfügung stellt
+  * die [Operationen-Ansicht](Operationen.md), welche die Operationen anzeigt, deren Vor- und Schutzbedingungen in diesem Zustand wahr sind und 
+  * die [Animationsansicht](Animation.md), die verschiedene Arten der Animation für die aktuelle Maschine zur Verfügung stellt
 
 * In der Mitte
-	* die [Zustandsansicht](../Zentrale%20Ansicht/Zustandsansicht.md), die den aktuellen Zustand der B-Maschine anzeigt
+	* die [Zustandsansicht](Zentrale%20Ansicht/Zustandsansicht.md), die den aktuellen Zustand der B-Maschine anzeigt
 	* die [Zustandsvisualisierung](Zentrale%20Ansicht/Zustandsvisualisierung.md), die eine Visualisierung der Zustände anzeigt,
     * den [Editor](Zentrale%20Ansicht/Editor.md), um aktuell geöffnete Maschinen zu bearbeiten und zu speichern
     * die [B Konsole](Zentrale%20Ansicht/B%20Konsole.md), eine eingebaute Konsole, um B-Formeln zu evaluieren
@@ -22,7 +22,7 @@ Im unteren linken Bildschirmrand zeigt die [Zustandsfehleransicht](Zentrale%20An
 
 Die [Hauptmenüleiste](Hauptmenü/Hauptmenü.md) bietet unter anderem Möglichkeiten zur Verwaltung der Projekte, Einstellen eigener Perspektiven und zur Zustandsvisualisierung.
 
-![ProB2 JavaFX UI Übersicht](../../screenshots/Overview.png)
+![ProB2 JavaFX UI Übersicht](../screenshots/Overview.png)
 
 
 [Mehr über ProB](https://www3.hhu.de/stups/prob/index.php/Main_Page)

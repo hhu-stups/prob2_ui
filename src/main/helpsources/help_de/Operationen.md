@@ -19,3 +19,4 @@ Die Icons am oberen rechten Rand der Ansicht ermöglichen es,
  * Operationen zu filtern
 
 Mithilfe der (Doppel-)Pfeile auf der linken Seite kann man im Verlauf nach hinten (zum Anfang) oder vorne (zum Ende) gehen und die Maschine neu laden.
+Via Rechtsklick auf eine Operation, können Details zu dieser angezeigt werden oder ein Prädikat hinzugefügt werden, mit dem die Operation ausgeführt werden soll.
