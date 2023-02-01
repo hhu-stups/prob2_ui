@@ -26,4 +26,4 @@ The [Main Menu Bar](Main%20Menu/Main%20Menu%20Bar.md) offers further options, in
 
 ![ProB2 JavaFX UI Overview](../screenshots/Overview.png)
 
-[More on ProB](https://www3.hhu.de/stups/prob/index.php/Main_Page)
+[More on ProB](https://prob.hhu.de/w/)

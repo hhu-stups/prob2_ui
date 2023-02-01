@@ -25,4 +25,4 @@ Die [Hauptmenüleiste](Hauptmenü/Hauptmenü.md) bietet unter anderem Möglichke
 ![ProB2 JavaFX UI Übersicht](../screenshots/Overview.png)
 
 
-[Mehr über ProB](https://www3.hhu.de/stups/prob/index.php/Main_Page)
+[Mehr über ProB](https://prob.hhu.de/w/)
