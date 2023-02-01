@@ -77,9 +77,9 @@ public final class TraceSelectionView extends CheckingViewBase<ReplayTrace> {
 	public void initialize() {
 		super.initialize();
 		items.bind(traceViewHandler.getTraces());
-		initTableColumns();
-		initTableRows();
+		statusProgressColumn.setCellValueFactory(traceViewHandler.getTraceStatusFactory());
 
+		itemsTable.setRowFactory(table -> new Row());
 		itemsTable.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (showDescription) {
 				closeDescription();
@@ -91,14 +91,6 @@ public final class TraceSelectionView extends CheckingViewBase<ReplayTrace> {
 
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		itemsTable.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
-	}
-
-	private void initTableColumns() {
-		statusProgressColumn.setCellValueFactory(traceViewHandler.getTraceStatusFactory());
-	}
-
-	private void initTableRows() {
-		this.itemsTable.setRowFactory(table -> new Row());
 	}
 
 	@Override

@@ -149,9 +149,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		super.initialize();
 		helpButton.setHelpContent("animation", "Trace");
 		items.bind(traceViewHandler.getTraces());
-		initTableColumns();
-		initTableRows();
+		statusProgressColumn.setCellValueFactory(traceViewHandler.getTraceStatusFactory());
 
+		itemsTable.setRowFactory(table -> new Row());
 		itemsTable.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (showDescription) {
 				closeDescription();
@@ -163,14 +163,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
-	}
-
-	private void initTableColumns() {
-		statusProgressColumn.setCellValueFactory(traceViewHandler.getTraceStatusFactory());
-	}
-
-	private void initTableRows() {
-		this.itemsTable.setRowFactory(table -> new Row());
 	}
 
 	@Override
