@@ -40,7 +40,6 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -146,7 +145,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Override
 	protected void initialize() {
 		super.initialize();
-		helpButton.setHelpContent("visualisations.formulaTableVisualisation", null);
+		helpButton.setHelpContent("mainmenu.visualisations.formulaTableVisualisation", null);
 		currentTable.addListener((observable, from, to) -> {
 			if(to != null) {
 				fillTable(to);
@@ -194,7 +193,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				if(item == null) {
 					return;
 				}
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "", ""));
+				item.setChecked(Checked.SUCCESS);
 			});
 
 			MenuItem failItem = new MenuItem(i18n.translate("dynamic.formulaView.fail"));
@@ -203,7 +202,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				if(item == null) {
 					return;
 				}
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "", ""));
+				item.setChecked(Checked.FAIL);
 			});
 
 			MenuItem unknownItem = new MenuItem(i18n.translate("dynamic.formulaView.unknown"));
@@ -212,7 +211,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				if(item == null) {
 					return;
 				}
-				item.setResultItem(new CheckingResultItem(Checked.NOT_CHECKED, "", ""));
+				item.setChecked(Checked.NOT_CHECKED);
 			});
 
 			row.contextMenuProperty().bind(

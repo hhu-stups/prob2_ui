@@ -19,3 +19,5 @@ The icons in the upper right corner of the view allow you to
 * filter operations
 
 Using the arrow in the upper left corner, you can jump back and forth in history or reload the machine.
+By right-clicking on an operation, you can inspect details about it or add a formula, that should be considered when executing the operation.
+

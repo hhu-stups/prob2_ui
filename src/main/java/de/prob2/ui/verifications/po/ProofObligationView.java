@@ -66,9 +66,9 @@ public class ProofObligationView extends AnchorPane {
 		poIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		poColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		currentTrace.addListener((observable, from, to) -> {
+		currentTrace.modelProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				currentProject.getCurrentMachine().updateProofObligationsFromModel(to.getModel());
+				currentProject.getCurrentMachine().updateAllProofObligationsFromModel(to);
 			}
 		});
 
@@ -86,11 +86,8 @@ public class ProofObligationView extends AnchorPane {
 				res.ifPresent(idText -> {
 					final String id = idText.trim().isEmpty() ? null : idText;
 					Machine machine = currentProject.getCurrentMachine();
-					item.setId(id);
-					// This is necessary to force updating ids for VO Manager
-					machine.getProofObligationItems().set(machine.getProofObligationItems().indexOf(item), item);
+					machine.getAllProofObligationItems().set(machine.getAllProofObligationItems().indexOf(item), item.withId(id));
 				});
-				tvProofObligations.refresh();
 			});
 
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -111,7 +108,7 @@ public class ProofObligationView extends AnchorPane {
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvProofObligations.itemsProperty().unbind();
 			if(to != null) {
-				tvProofObligations.itemsProperty().bind(to.proofObligationItemsProperty());
+				tvProofObligations.itemsProperty().bind(to.allProofObligationItemsProperty());
 			} else {
 				tvProofObligations.setItems(FXCollections.emptyObservableList());
 			}

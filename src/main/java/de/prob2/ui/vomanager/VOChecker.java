@@ -1,15 +1,13 @@
 package de.prob2.ui.vomanager;
 
-import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.check.ModelCheckingOptions;
-import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOException;
 import de.prob.voparser.VOParser;
 import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -34,6 +32,9 @@ import de.prob2.ui.vomanager.ast.OrValidationExpression;
 import de.prob2.ui.vomanager.ast.SequentialValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
+import javafx.beans.InvalidationListener;
+import javafx.beans.property.ReadOnlyProperty;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -53,6 +54,8 @@ public class VOChecker {
 
 	private final SimulationItemHandler simulationItemHandler;
 
+	private final InvalidationListener tasksUpdateListener;
+
 	@Inject
 	public VOChecker(final CurrentProject currentProject, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
@@ -64,7 +67,14 @@ public class VOChecker {
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
 
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> updateOnMachine(to));
+		tasksUpdateListener = o -> updateOnMachine((Machine)((ReadOnlyProperty<?>)o).getBean());
+
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if (from != null) {
+				from.validationTasksProperty().removeListener(tasksUpdateListener);
+			}
+			updateOnMachine(to);
+		});
 		updateOnMachine(currentProject.getCurrentMachine());
 	}
 
@@ -73,24 +83,26 @@ public class VOChecker {
 			return;
 		}
 
+		machine.validationTasksProperty().addListener(tasksUpdateListener);
+
 		for (final Requirement requirement : currentProject.getRequirements()) {
 			requirement.getValidationObligation(machine).ifPresent(vo -> {
 				try {
 					parseVO(machine, vo);
-				} catch (VOParseException e) {
-					LOGGER.warn("Parse error in validation expression", e);
+				} catch (VOException e) {
+					LOGGER.warn("Error in validation expression", e);
 				}
 			});
 		}
 	}
 
-	public void checkRequirement(Requirement requirement) throws VOParseException {
+	public void checkRequirement(Requirement requirement) {
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
 			this.checkVO(vo);
 		}
 	}
 
-	public void parseVO(Machine machine, ValidationObligation vo) throws VOParseException {
+	public void parseVO(Machine machine, ValidationObligation vo) {
 		final VOParser voParser = new VOParser();
 		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
 		try {
@@ -99,21 +111,13 @@ public class VOChecker {
 				IValidationTask validationTask;
 				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
 					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
-				} else if(machine.getProofObligationItems().stream()
-						.map(ProofObligationItem::getId)
-						.filter(Objects::nonNull)
-						.anyMatch(id -> id.equals(taskExpr.getIdentifier()))) {
-					validationTask = machine.getProofObligationItems().stream()
-							.filter(po -> po.getId() != null)
-							.filter(po -> po.getId().equals(taskExpr.getIdentifier()))
-							.collect(Collectors.toList()).get(0);
 				} else {
 					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
 				}
 				taskExpr.setTask(validationTask);
 			});
 			vo.setParsedExpression(expression);
-		} catch (VOParseException e) {
+		} catch (VOException e) {
 			vo.setParsedExpression(null);
 			throw e;
 		}
@@ -201,7 +205,7 @@ public class VOChecker {
 	}
 
 
-	public void checkVO(ValidationObligation validationObligation) throws VOParseException {
+	public void checkVO(ValidationObligation validationObligation) {
 		if (validationObligation.getParsedExpression() == null) {
 			final Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
 			this.parseVO(machine, validationObligation);

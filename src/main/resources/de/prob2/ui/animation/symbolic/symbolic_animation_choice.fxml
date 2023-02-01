@@ -16,9 +16,7 @@
 <fx:root type="SymbolicAnimationChoosingStage" fx:id="cbcChoice" title="%animation.symbolic.choice.title" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<TextField fx:id="tfFormula" VBox.vgrow="NEVER"/>
-		<ChoiceBox fx:id="cbOperations" VBox.vgrow="NEVER"/>
 		<PredicateBuilderView fx:id="predicateBuilderView" VBox.vgrow="NEVER"/>
-		<ChoiceBox fx:id="symbolicModelCheckAlgorithmChoiceBox" VBox.vgrow="NEVER"/>
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -40,8 +38,8 @@
 					</HBox>
 					<VBox spacing="10.0" fx:id="formulaInput">
 						<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
-							<Button fx:id="btCheck" text="%common.buttons.add" styleClass="button-blue"/>
-							<Button fx:id="btCancel" onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>
+							<Button onAction="#ok" text="%common.buttons.ok" styleClass="button-blue"/>
+							<Button onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>
 						</HBox>
 					</VBox>
 				</VBox>

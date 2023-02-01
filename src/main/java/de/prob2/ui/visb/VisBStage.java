@@ -33,6 +33,9 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.helpsystem.HelpSystem;
+import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
@@ -40,7 +43,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DefaultPathDialog;
-import de.prob2.ui.sharedviews.TraceSelectionView;
+import de.prob2.ui.sharedviews.TraceSelectionStage;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
@@ -68,11 +71,11 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
@@ -131,6 +134,8 @@ public class VisBStage extends Stage {
 	@FXML
 	private MenuItem helpMenu_userManual;
 	@FXML
+	private MenuItem helpMenu_helpPage;
+	@FXML
 	private MenuItem saveTraceItem;
 	@FXML
 	private MenuItem saveTraceAndAddTestsItem;
@@ -144,6 +149,8 @@ public class VisBStage extends Stage {
 	private Label information;
 	@FXML
 	private VBox placeholder;
+	@FXML
+	private HelpButton helpButton;
 
 	/**
 	 * The public constructor of this class is injected with the ProB2-UI injector.
@@ -174,6 +181,8 @@ public class VisBStage extends Stage {
 	public void initialize(){
 		this.stageManager.setMacMenuBar(this, visbMenuBar);
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
+		this.helpMenu_helpPage.setOnAction(e -> openHelpPage());
+		this.helpButton.setHelpContent("mainmenu.visualisations.visB", null);
 		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
 		this.fileMenu_visB.setOnAction(e -> loadVisBFile());
 		this.fileMenu_close.setOnAction(e -> sendCloseRequest());
@@ -269,6 +278,15 @@ public class VisBStage extends Stage {
 		});
 
 		injector.getInstance(VisBDebugStage.class).initOwner(this);
+	}
+
+	@FXML
+	public void openHelpPage() {
+		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
+		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
+		helpSystem.openHelpForKeyAndAnchor("mainmenu.visualisations.visB", null);
+		helpSystemStage.show();
+		helpSystemStage.toFront();
 	}
 
 	private void updateUIOnMachine(Machine machine) {
@@ -503,7 +521,7 @@ public class VisBStage extends Stage {
 
 	@FXML
 	private void openTraceSelection() {
-		TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
+		TraceSelectionStage traceSelectionView = injector.getInstance(TraceSelectionStage.class);
 		traceSelectionView.show();
 		traceSelectionView.toFront();
 	}

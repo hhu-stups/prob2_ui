@@ -2,7 +2,6 @@ package de.prob2.ui.vomanager.ast;
 
 import java.util.stream.Stream;
 
-import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
 import de.prob.voparser.node.AAndVo;
 import de.prob.voparser.node.AIdentifierVo;
@@ -27,9 +26,9 @@ public interface IValidationExpression {
 		}
 	}
 	
-	public static IValidationExpression parse(final VOParser parser, final String expression) throws VOParseException {
+	public static IValidationExpression parse(final VOParser parser, final String expression) {
 		final Start ast = parser.parseFormula(expression);
-		parser.semanticCheck(ast);
+		parser.typeCheck(ast);
 		return fromAst(ast.getPVo());
 	}
 	

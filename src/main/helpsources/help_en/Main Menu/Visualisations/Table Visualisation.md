@@ -1,4 +1,4 @@
-![Table](../../screenshots/Visualisations/Formula%20Table.png)
+![Table](../../../screenshots/Visualisations/Formula%20Table.png)
 
 Using this view, one is able to view several properties about the loaded machine as a table.
 

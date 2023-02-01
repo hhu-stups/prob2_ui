@@ -32,8 +32,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.symbolic.SymbolicFormulaHandler;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
@@ -41,7 +39,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<SymbolicCheckingFormulaItem> {
+public final class SymbolicCheckingFormulaHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicCheckingFormulaHandler.class);
 	
 	private final CurrentTrace currentTrace;
@@ -51,11 +49,6 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 	public SymbolicCheckingFormulaHandler(final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor) {
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
-	}
-	
-	@Override
-	public List<SymbolicCheckingFormulaItem> getItems(final Machine machine) {
-		return machine.getSymbolicCheckingFormulas();
 	}
 	
 	private void updateTrace(SymbolicCheckingFormulaItem item) {
@@ -231,7 +224,6 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		});
 	}
 	
-	@Override
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleItemNoninteractive(final SymbolicCheckingFormulaItem item) {
 		switch(item.getType()) {
 			case INVARIANT:
@@ -255,7 +247,6 @@ public class SymbolicCheckingFormulaHandler implements SymbolicFormulaHandler<Sy
 		}
 	}
 	
-	@Override
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleItem(SymbolicCheckingFormulaItem item, boolean checkAll) {
 		if(!item.selected()) {
 			return CompletableFuture.completedFuture(item);

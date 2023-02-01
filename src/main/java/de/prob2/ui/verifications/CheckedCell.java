@@ -22,7 +22,7 @@ public final class CheckedCell<T> extends TableCell<T, Checked> {
 		super.updateItem(item, empty);
 		
 		final BindableGlyph graphic = (BindableGlyph)this.getGraphic();
-		graphic.getStyleClass().removeAll("not-checked", "success", "fail", "interrupted", "parse-error");
+		graphic.getStyleClass().removeAll("not-checked", "success", "fail", "interrupted", "timeout", "parse-error");
 		if (empty || item == null) {
 			graphic.setVisible(false);
 		} else {

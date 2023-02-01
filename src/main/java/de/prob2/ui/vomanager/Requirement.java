@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.project.machines.Machine;
 
-public class Requirement implements INameable {
+public class Requirement {
 
 	private final String name;
 
@@ -84,7 +84,7 @@ public class Requirement implements INameable {
 	public List<Requirement> getPreviousVersions(){
 		return previousVersions;
 	}
-	@Override
+
 	public String getName() {
 		return name;
 	}

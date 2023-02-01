@@ -7,10 +7,10 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
-public class ItemSelectedFactory implements Callback<TableColumn.CellDataFeatures<IExecutableItem, CheckBox>, ObservableValue<CheckBox>> {
+public class ItemSelectedFactory<T extends IExecutableItem> implements Callback<TableColumn.CellDataFeatures<T, CheckBox>, ObservableValue<CheckBox>> {
 	private final CheckBox selectAll;
 	
-	public ItemSelectedFactory(final TableView<? extends IExecutableItem> tableView, final CheckBox selectAll) {
+	public ItemSelectedFactory(final TableView<T> tableView, final CheckBox selectAll) {
 		this.selectAll = selectAll;
 		
 		this.selectAll.setSelected(true);
@@ -30,7 +30,7 @@ public class ItemSelectedFactory implements Callback<TableColumn.CellDataFeature
 	}
 	
 	@Override
-	public ObservableValue<CheckBox> call(TableColumn.CellDataFeatures<IExecutableItem, CheckBox> param) {
+	public ObservableValue<CheckBox> call(TableColumn.CellDataFeatures<T, CheckBox> param) {
 		IExecutableItem item = param.getValue();
 		CheckBox checkBox = new CheckBox();
 		checkBox.selectedProperty().bindBidirectional(item.selectedProperty());

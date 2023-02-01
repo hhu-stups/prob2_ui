@@ -1,9 +1,8 @@
 package de.prob2.ui.verifications.symbolicchecking;
 
-import de.prob2.ui.symbolic.SymbolicExecutionType;
+import de.prob2.ui.internal.Translatable;
 
-public enum SymbolicCheckingType implements SymbolicExecutionType {
-
+public enum SymbolicCheckingType implements Translatable {
 	INVARIANT("verifications.symbolicchecking.type.invariant"),
 	DEADLOCK("verifications.symbolicchecking.type.deadlock"),
 	CHECK_REFINEMENT("verifications.symbolicchecking.type.refinementChecking"),
