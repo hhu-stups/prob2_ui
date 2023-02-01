@@ -211,8 +211,4 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
 	}
-
-	public void refresh() {
-		this.itemsTable.refresh();
-	}
 }
