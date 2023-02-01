@@ -7,6 +7,7 @@ import de.prob.statespace.FormalismType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.binding.Bindings;
@@ -39,16 +40,18 @@ public class TraceSelectionView extends Stage {
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final TraceChecker traceChecker;
+	private final I18n i18n;
 	private final Injector injector;
 	private final TraceViewHandler traceViewHandler;
 	private boolean showDescription;
 
 	@Inject
-	public TraceSelectionView(final StageManager stageManager, final CurrentTrace currentTrace, final TraceChecker traceChecker,
+	public TraceSelectionView(final StageManager stageManager, final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
 			final Injector injector, final TraceViewHandler traceViewHandler) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.traceChecker = traceChecker;
+		this.i18n = i18n;
 		this.injector = injector;
 		this.traceViewHandler = traceViewHandler;
 		stageManager.loadFXML(this, "trace_selection_view.fxml");
@@ -83,12 +86,13 @@ public class TraceSelectionView extends Stage {
 		this.traceTableView.setRowFactory(param -> {
 			final TableRow<ReplayTrace> row = new TableRow<>();
 
-			final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
-			final MenuItem addTestsItem = traceViewHandler.createAddTestsItem();
-			final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
-			final MenuItem showStatusItem = traceViewHandler.createShowStatusItem();
-			final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
-			final MenuItem revealInExplorerItem = traceViewHandler.createRevealInExplorerItem();
+			final MenuItem replayTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
+			replayTraceItem.setDisable(true);
+			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
+			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
+			final MenuItem showStatusItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
+			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+			final MenuItem revealInExplorerItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
 
 			// Set listeners for menu items
 			traceViewHandler.initializeRow(this.getScene(), row, addTestsItem, replayTraceItem, showStatusItem, openInExternalEditorItem, revealInExplorerItem);

@@ -134,45 +134,6 @@ public class TraceViewHandler {
 		return traces;
 	}
 
-	public MenuItem createReplayTraceItem() {
-		final MenuItem replayTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
-		replayTraceItem.setDisable(true);
-		return replayTraceItem;
-	}
-
-	public MenuItem createAddTestsItem() {
-		final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
-		return addTestsItem;
-	}
-
-	public MenuItem createEditIdItem() {
-		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
-	}
-
-	public MenuItem createDeleteTraceItem() {
-		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.removeTrace"));
-	}
-
-	public MenuItem createShowDescriptionItem() {
-		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
-	}
-
-	public MenuItem createShowStatusItem() {
-		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
-	}
-
-	public MenuItem createOpenInExternalEditorItem() {
-		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
-	}
-
-	public MenuItem createRevealInExplorerItem() {
-		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
-	}
-
-	public MenuItem createRecheckTraceForChangesItem(){
-		return new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.refactorTrace"));
-	}
-
 	public static void updateStatusIcon(final BindableGlyph iconView, final Checked status) {
 		switch (status) {
 			case SUCCESS:

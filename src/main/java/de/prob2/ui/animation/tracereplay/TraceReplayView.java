@@ -44,15 +44,16 @@ import javafx.stage.FileChooser;
 public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final class Row extends RowBase {
 		private Row() {
-			final MenuItem replayTraceItem = traceViewHandler.createReplayTraceItem();
-			final MenuItem addTestsItem = traceViewHandler.createAddTestsItem();
-			final MenuItem editIdItem = traceViewHandler.createEditIdItem();
-			final MenuItem showDescriptionItem = traceViewHandler.createShowDescriptionItem();
-			final MenuItem showStatusItem = traceViewHandler.createShowStatusItem();
-			final MenuItem openInExternalEditorItem = traceViewHandler.createOpenInExternalEditorItem();
-			final MenuItem deleteTraceItem = traceViewHandler.createDeleteTraceItem();
-			final MenuItem revealInExplorerItem = traceViewHandler.createRevealInExplorerItem();
-			final MenuItem recheckTraceItem = traceViewHandler.createRecheckTraceForChangesItem();
+			final MenuItem replayTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
+			replayTraceItem.setDisable(true);
+			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
+			final MenuItem editIdItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
+			final MenuItem showStatusItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
+			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+			final MenuItem deleteTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.removeTrace"));
+			final MenuItem revealInExplorerItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
+			final MenuItem recheckTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.refactorTrace"));
 
 			// Set listeners for menu items
 			traceViewHandler.initializeRow(this.getScene(), this, addTestsItem, replayTraceItem, showStatusItem, openInExternalEditorItem, revealInExplorerItem);
