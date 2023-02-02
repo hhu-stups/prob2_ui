@@ -4,6 +4,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
@@ -13,17 +14,14 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
+import de.prob2.ui.project.machines.Machine;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Dialog;
+import javafx.scene.control.*;
+import javafx.scene.paint.Color;
 import javafx.stage.FileChooser;
 
 public class RefactorSetupView extends Dialog<RefactorSetup> {
@@ -44,6 +42,9 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 
 	@FXML
 	CheckBox checkBox;
+
+	@FXML
+	Label label;
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
@@ -129,6 +130,34 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 				this.getDialogPane().lookupButton(buttonTypeS).disableProperty().setValue(false);
 			}
 		});
+
+
+		ChangeListener<Path> validTarget = (observable, oldValue, newValue) -> {
+			if(whatToDo.get() == RefactorSetup.WhatToDo.OPTION_REPLAY){
+				if(!currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toList()).contains(alpha.getName())){
+					label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult.Warning"));
+					//label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult"));
+					label.setTextFill(Color.color(1, 0, 0));
+				}else{
+					label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult"));
+					label.setTextFill(Color.color(0, 0, 0));
+				}
+			}else{
+				if(whatToDo.get() == RefactorSetup.WhatToDo.REFINEMENT_REPLAY){
+					if(!beta.getName().equals("") && !currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toList()).contains(beta.getName())){
+						label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult.Warning"));
+						label.setTextFill(Color.color(1, 0, 0));
+					}
+				}else{
+					label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult"));
+					label.setTextFill(Color.color(0, 0, 0));
+				}
+			}
+		};
+
+		alpha.addListener(validTarget);
+		beta.addListener(validTarget);
+
 	}
 
 	private void addPathSelectionAction(Button button, Property<Path> pathProperty, String extensionKey, List<String> extensions) {

@@ -7,6 +7,8 @@
 <?import javafx.scene.control.Dialog?>
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
 <fx:root type="Dialog" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane prefHeight="284.0" prefWidth="414.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
@@ -33,7 +35,10 @@
 								<Insets top="10.0" />
 							</VBox.margin>
 						</Button>
-						<CheckBox fx:id="checkBox" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" text="%traceModification.traceRefactorSetup.checkBox.setResult" />
+						<HBox>
+							<CheckBox fx:id="checkBox" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" />
+							<Label fx:id="label" minHeight="-Infinity" minWidth="-Infinity"  prefHeight="40.0" prefWidth="320.0" text="%traceModification.traceRefactorSetup.checkBox.setResult" />
+						</HBox>
 					</children>
 				</VBox>
 			</content>
