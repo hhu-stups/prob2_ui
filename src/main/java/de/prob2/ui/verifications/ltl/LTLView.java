@@ -59,10 +59,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
-			
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
-			openEditor.setOnAction(e -> showCurrentItemDialog(this.getItem()));
-			contextMenu.getItems().add(openEditor);
+			editMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
 			
 			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
 			removeItem.setOnAction(e -> items.remove(this.getItem()));
@@ -290,24 +287,12 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		}
 	}
 	
-	private void showCurrentItemDialog(LTLFormulaItem oldItem) {
+	@Override
+	protected Optional<LTLFormulaItem> editItem(final LTLFormulaItem oldItem) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
 		formulaStage.setData(oldItem);
 		formulaStage.showAndWait();
-		final LTLFormulaItem changedItem = formulaStage.getResult();
-		if (changedItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		if (items.stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
-			items.set(items.indexOf(oldItem), changedItem);
-			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
-			checker.checkFormula(changedItem);
-		} else {
-			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.formula").show();
-		}
+		return Optional.ofNullable(formulaStage.getResult());
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem oldItem) {

@@ -1,5 +1,7 @@
 package de.prob2.ui.sharedviews;
 
+import java.util.Optional;
+
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.verifications.Checked;
@@ -31,6 +33,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	protected class RowBase extends TableRow<T> {
 		protected final ContextMenu contextMenu;
 		protected final MenuItem executeMenuItem;
+		protected final MenuItem editMenuItem;
 		
 		protected RowBase() {
 			// Execute item (if possible) when double-clicked.
@@ -48,6 +51,23 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			this.executeMenuItem = new MenuItem();
 			this.executeMenuItem.setOnAction(e -> executeItem(this.getItem()));
 			this.contextMenu.getItems().add(this.executeMenuItem);
+			
+			this.editMenuItem = new MenuItem();
+			this.editMenuItem.setOnAction(e -> {
+				final T oldItem = this.getItem();
+				editItem(oldItem).ifPresent(newItem -> {
+					final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+					if (!existingItem.isPresent()) {
+						items.set(items.indexOf(oldItem), newItem);
+					}
+					// FIXME Do we always want to re-execute the item after editing?
+					final T itemToExecute = existingItem.orElse(newItem);
+					if (!disableItemBinding(itemToExecute).get()) {
+						executeItem(itemToExecute);
+					}
+				});
+			});
+			this.contextMenu.getItems().add(this.editMenuItem);
 			
 			this.itemProperty().addListener((o, from, to) -> {
 				if (to == null) {
@@ -131,4 +151,6 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	}
 	
 	protected abstract void executeItem(final T item);
+	
+	protected abstract Optional<T> editItem(final T oldItem);
 }

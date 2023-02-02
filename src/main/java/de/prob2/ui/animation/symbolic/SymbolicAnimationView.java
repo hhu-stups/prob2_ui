@@ -30,26 +30,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
-			
-			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e -> {
-				final SymbolicAnimationItem oldItem = this.getItem();
-				final SymbolicAnimationChoosingStage choosingStage = choosingStageProvider.get();
-				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
-				choosingStage.setData(oldItem);
-				choosingStage.showAndWait();
-				final SymbolicAnimationItem newItem = choosingStage.getResult();
-				if (newItem == null) {
-					// User cancelled/closed the window
-					return;
-				}
-				final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-				if (!existingItem.isPresent()) {
-					items.set(items.indexOf(oldItem), newItem);
-				}
-				formulaHandler.handleItem(existingItem.orElse(newItem), false);
-			});
-			contextMenu.getItems().add(changeItem);
+			editMenuItem.setText(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> {
@@ -149,6 +130,15 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 			items.add(newItem);
 		}
 		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
+	}
+	
+	@Override
+	protected Optional<SymbolicAnimationItem> editItem(final SymbolicAnimationItem oldItem) {
+		final SymbolicAnimationChoosingStage choosingStage = choosingStageProvider.get();
+		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
+		choosingStage.setData(oldItem);
+		choosingStage.showAndWait();
+		return Optional.ofNullable(choosingStage.getResult());
 	}
 	
 	@FXML

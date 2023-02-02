@@ -67,14 +67,12 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 				}
 			});
 
+			editMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
+
 			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 			removeItem.setOnAction(e -> items.remove(this.getItem()));
 			removeItem.disableProperty().bind(this.emptyProperty());
 			contextMenu.getItems().add(removeItem);
-
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
-			openEditor.setOnAction(e -> showCurrentItemDialog(this.getItem()));
-			contextMenu.getItems().add(openEditor);
 		}
 	}
 	
@@ -318,6 +316,14 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		});
 	}
 
+	@Override
+	protected Optional<ModelCheckingItem> editItem(final ModelCheckingItem oldItem) {
+		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
+		modelcheckingStage.setData(oldItem);
+		modelcheckingStage.showAndWait();
+		return Optional.ofNullable(modelcheckingStage.getResult());
+	}
+
 	@FXML
 	public void addModelCheck() {
 		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
@@ -387,19 +393,4 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	public void selectJobItem(ModelCheckingJobItem item) {
 		tvChecks.getSelectionModel().select(item);
 	}
-
-	private void showCurrentItemDialog(ModelCheckingItem oldItem) {
-		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-		modelcheckingStage.setData(oldItem);
-		modelcheckingStage.showAndWait();
-		final ModelCheckingItem changedItem = modelcheckingStage.getResult();
-		Machine machine = currentProject.getCurrentMachine();
-		if(machine.getModelcheckingItems().stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
-			machine.getModelcheckingItems().set(machine.getModelcheckingItems().indexOf(oldItem), changedItem);
-			// This is a new configuration and so should have no history of previous checks
-			assert changedItem.getItems().isEmpty();
-			this.checkSingleItem(changedItem);
-		}
-	}
-
 }

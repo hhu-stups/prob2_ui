@@ -34,26 +34,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
-			
-			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e -> {
-				final SymbolicCheckingFormulaItem oldItem = this.getItem();
-				final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
-				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
-				choosingStage.setData(oldItem);
-				choosingStage.showAndWait();
-				final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
-				if (newItem == null) {
-					// User cancelled/closed the window
-					return;
-				}
-				final Optional<SymbolicCheckingFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-				if (!existingItem.isPresent()) {
-					items.set(items.indexOf(oldItem), newItem);
-				}
-				formulaHandler.handleItem(existingItem.orElse(newItem), false);
-			});
-			contextMenu.getItems().add(changeItem);
+			editMenuItem.setText(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
 			
 			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> {
@@ -174,6 +155,15 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 			items.add(newItem);
 		}
 		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
+	}
+	
+	@Override
+	protected Optional<SymbolicCheckingFormulaItem> editItem(final SymbolicCheckingFormulaItem oldItem) {
+		final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
+		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
+		choosingStage.setData(oldItem);
+		choosingStage.showAndWait();
+		return Optional.ofNullable(choosingStage.getResult());
 	}
 	
 	@FXML

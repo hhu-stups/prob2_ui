@@ -1,5 +1,7 @@
 package de.prob2.ui.sharedviews;
 
+import java.util.Optional;
+
 import com.google.inject.Inject;
 
 import de.prob.statespace.FormalismType;
@@ -24,6 +26,7 @@ public final class TraceSelectionView extends CheckingViewBase<ReplayTrace> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
+			contextMenu.getItems().remove(editMenuItem);
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
 			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
 			final MenuItem showStatusItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
@@ -89,6 +92,11 @@ public final class TraceSelectionView extends CheckingViewBase<ReplayTrace> {
 	@Override
 	protected void executeItem(final ReplayTrace item) {
 		traceChecker.check(item, true);
+	}
+
+	@Override
+	protected Optional<ReplayTrace> editItem(final ReplayTrace oldItem) {
+		throw new UnsupportedOperationException("Editing validation task ID not supported in TraceSelectionView");
 	}
 
 	public void closeDescription() {

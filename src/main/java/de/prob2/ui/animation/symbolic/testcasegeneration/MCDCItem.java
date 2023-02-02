@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorMCDCSettings;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
+import de.prob2.ui.verifications.IExecutableItem;
 
 public final class MCDCItem extends TestCaseGenerationItem {
 	private final int level;
@@ -39,11 +40,11 @@ public final class MCDCItem extends TestCaseGenerationItem {
 	}
 	
 	@Override
-	public boolean settingsEqual(final TestCaseGenerationItem other) {
-		if (!(other instanceof MCDCItem)) {
+	public boolean settingsEqual(final IExecutableItem obj) {
+		if (!(obj instanceof MCDCItem)) {
 			return false;
 		}
-		final MCDCItem o = (MCDCItem)other;
-		return super.settingsEqual(o) && this.getLevel() == o.getLevel();
+		final MCDCItem other = (MCDCItem)obj;
+		return super.settingsEqual(other) && this.getLevel() == other.getLevel();
 	}
 }
