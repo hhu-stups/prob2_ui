@@ -65,8 +65,7 @@ public class BInterpreter implements Executable {
 	}
 
 	@Override
-	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
-		final String source = instruction.getInstruction();
+	public ConsoleExecResult exec(String source) {
 		if (":clear".equals(source)) {
 			return new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR);
 		}

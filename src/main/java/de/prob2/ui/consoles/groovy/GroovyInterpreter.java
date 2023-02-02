@@ -32,18 +32,18 @@ public final class GroovyInterpreter implements Executable {
 	}
 
 	@Override
-	public ConsoleExecResult exec(final ConsoleInstruction instruction) {
-		if ("inspect".equals(instruction.getInstruction())) {
+	public ConsoleExecResult exec(String instruction) {
+		if ("inspect".equals(instruction)) {
 			groovyObjectStage.showObjects(engine);
 			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
-		} else if ("clear".equals(instruction.getInstruction())) {
+		} else if ("clear".equals(instruction)) {
 			return new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR);
 		} else {
 			final StringBuilder console = new StringBuilder();
 			engine.put("__console", console);
 			final Object evalResult;
 			try {
-				evalResult = engine.eval(instruction.getInstruction());
+				evalResult = engine.eval(instruction);
 			} catch (ScriptException e) {
 				LOGGER.debug("Groovy console user code threw an exception", e);
 				return new ConsoleExecResult(console.toString(), e.getCause().toString(), ConsoleExecResultType.ERROR);

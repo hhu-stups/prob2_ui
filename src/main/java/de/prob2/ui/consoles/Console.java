@@ -63,6 +63,7 @@ public abstract class Console extends StyleClassedTextArea {
 
 	private final ConsoleHistoryHandler historyHandler;
 	private final ConsoleSearchHandler searchHandler;
+	private final StringBuilder commandBuffer;
 
 	protected Console(I18n i18n, Executable interpreter, String header, String prompt) {
 		this.i18n = Objects.requireNonNull(i18n, "i18n");
@@ -78,6 +79,7 @@ public abstract class Console extends StyleClassedTextArea {
 
 		this.historyHandler = new ConsoleHistoryHandler(this);
 		this.searchHandler = new ConsoleSearchHandler(this);
+		this.commandBuffer = new StringBuilder();
 
 		this.requestFollowCaret();
 		initializeContextMenu();
@@ -387,75 +389,57 @@ public abstract class Console extends StyleClassedTextArea {
 		this.moveCaretToInputEndIfRequired();
 
 		String command = this.input.get();
-		boolean activateLineContinuation = command.endsWith("\\");
-
-		// TODO: execute input/search result
-		// TODO: deactivate search
-		// TODO: append executed command and output to text area
-		// TODO: mind line continuations!
-		System.out.println("'" + command + "'");
+		boolean activateLineContinuation = command.endsWith("\\") && !command.endsWith("\\\\");
 
 		int lastParagraph = this.getParagraphs().size() - 1;
 		assert lastParagraph >= 0;
 		this.insertText(lastParagraph, 0, this.inputWithPrompt.get() + "\n");
 
+		// TODO: maybe cut off trailing backslash?
+		historyHandler.enter(command);
+
+		if (commandBuffer.length() > 0) {
+			commandBuffer.append('\n');
+		}
+
 		this.input.set("");
 		this.lineContinuation.set(activateLineContinuation);
-		this.moveCaretToInputEndIfRequired();
 
-		/*charCounterInLine = 0;
-		currentPosInLine = 0;
-		String currentLine;
-		if (searchHandler.isActive()) {
-			currentLine = searchHandler.getCurrentSearchResult();
-		} else {
-			currentLine = this.getInput();
-		}
-		boolean endsWithNewline = currentLine.endsWith("\\");
-		if (endsWithNewline) {
-			currentLine = currentLine.substring(0, currentLine.length() - 1);
-		}
-		if (!history.isEmpty() && history.get(history.size() - 1).getOption() != ConsoleInstructionOption.ENTER) {
-			history.set(history.size() - 1, new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
-		} else {
-			history.add(new ConsoleInstruction(currentLine, ConsoleInstructionOption.ENTER));
-		}
-		if (endsWithNewline) {
-			instructionLengthInLine++;
-			this.appendText("\n" + EMPTY_PROMPT + " ");
-			return;
-		}
+		commandBuffer.append(command);
+		if (!activateLineContinuation) {
+			String realCommand = commandBuffer.toString();
+			commandBuffer.setLength(0);
 
-		posInList = history.size() - 1;
-
-		ConsoleInstruction instruction;
-		if (instructionLengthInLine > 1) {
-			StringBuilder actualInstructionBuilder = new StringBuilder();
-			for (int i = 0; i < instructionLengthInLine; i++) {
-				ConsoleInstruction listInstruction = history.get(history.size() - instructionLengthInLine + i);
-				actualInstructionBuilder.append(listInstruction.getInstruction()).append('\n');
+			// TODO: handle search
+			ConsoleExecResult result = interpreter.exec(realCommand);
+			if (result.getResultType() == ConsoleExecResultType.CLEAR) {
+				reset();
+				return;
 			}
 
-			instruction = new ConsoleInstruction(actualInstructionBuilder.toString(), ConsoleInstructionOption.ENTER);
-		} else {
-			instruction = history.get(posInList);
+			// TODO: set style for error messages
+			lastParagraph = this.getParagraphs().size() - 1;
+			assert lastParagraph >= 0;
+			this.insertText(lastParagraph, 0, result + "\n");
+
+			/*ConsoleExecResult execResult = interpreter.exec(instruction);
+			int from = this.getLength();
+			if (execResult.getResultType() == ConsoleExecResultType.CLEAR) {
+				reset();
+				return;
+			}
+			this.appendText("\n" + execResult);
+			if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
+				this.setStyle(from, from + execResult.toString().length() + 1, Collections.singletonList("error"));
+			}
+			instructionLengthInLine = 1;
+			searchHandler.handleEnter();
+			this.appendText('\n' + prompt.get() + ' ');
+			this.setStyle(getLineNumber(), Collections.emptyList());
+			goToLastPos();*/
 		}
 
-		ConsoleExecResult execResult = interpreter.exec(instruction);
-		int from = this.getLength();
-		if (execResult.getResultType() == ConsoleExecResultType.CLEAR) {
-			reset();
-			return;
-		}
-		this.appendText("\n" + execResult);
-		if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
-			this.setStyle(from, from + execResult.toString().length() + 1, Collections.singletonList("error"));
-		}
-		instructionLengthInLine = 1;
-		searchHandler.handleEnter();
-		this.appendText('\n' + prompt.get() + ' ');
-		this.setStyle(getLineNumber(), Collections.emptyList());
-		goToLastPos();*/
+		this.moveCaretToInputEndIfRequired();
 	}
 
 	private void handleDown() {
