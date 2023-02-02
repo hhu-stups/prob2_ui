@@ -44,8 +44,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
+			editMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
-			final MenuItem editIdItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
 			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
 			final MenuItem showStatusItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
 			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
@@ -55,20 +55,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 			// Set listeners for menu items
 			traceViewHandler.initializeRow(this, addTestsItem, showStatusItem, openInExternalEditorItem, revealInExplorerItem);
-			editIdItem.setOnAction(event -> {
-				final ReplayTrace trace = this.getItem();
-				final TextInputDialog dialog = new TextInputDialog(trace.getId() == null ? "" : trace.getId());
-				stageManager.register(dialog);
-				dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
-				dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
-				dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
-				final Optional<String> res = dialog.showAndWait();
-				res.ifPresent(idText -> {
-					final String id = idText.trim().isEmpty() ? null : idText;
-					final List<ReplayTrace> traces = currentProject.getCurrentMachine().getTraces();
-					traces.set(traces.indexOf(trace), trace.withId(id));
-				});
-			});
 			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().getTraces().remove(this.getItem()));
 			recheckTraceItem.setOnAction(event -> {
 				final Machine currentMachine = currentProject.getCurrentMachine();
@@ -88,7 +74,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			});
 			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
 
-			contextMenu.getItems().addAll(addTestsItem, editIdItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
+			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
 		}
 	}
 
@@ -161,6 +147,21 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@Override
 	protected void executeItem(final ReplayTrace item) {
 		traceChecker.check(item, true);
+	}
+
+	@Override
+	protected Optional<ReplayTrace> editItem(final ReplayTrace oldItem) {
+		// This only implements editing the validation task ID.
+		// Editing the trace itself is a different menu item (addTestsItem).
+		final TextInputDialog dialog = new TextInputDialog(oldItem.getId() == null ? "" : oldItem.getId());
+		stageManager.register(dialog);
+		dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+		dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
+		dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
+		return dialog.showAndWait().map(idText -> {
+			final String id = idText.trim().isEmpty() ? null : idText;
+			return oldItem.withId(id);
+		});
 	}
 
 	@FXML

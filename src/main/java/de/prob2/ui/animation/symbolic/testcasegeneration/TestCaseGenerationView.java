@@ -29,7 +29,6 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -41,10 +40,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.generate"));
-
-			MenuItem changeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e -> changeItem(this.getItem()));
-			contextMenu.getItems().add(changeItem);
+			editMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
 
 			MenuItem removeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
 			removeItem.setOnAction(e -> items.remove(this.getItem()));
@@ -208,21 +204,12 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		itemHandler.generateTestCases(existingItem.orElse(newItem));
 	}
 
-	private void changeItem(TestCaseGenerationItem item) {
+	@Override
+	protected Optional<TestCaseGenerationItem> editItem(final TestCaseGenerationItem oldItem) {
 		TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
-		choosingStage.setItem(item);
+		choosingStage.setItem(oldItem);
 		choosingStage.showAndWait();
-		final TestCaseGenerationItem newItem = choosingStage.getItem();
-		if (newItem == null) {
-			return;
-		}
-		if (!itemHandler.replaceItem(item, newItem).isPresent()) {
-			itemHandler.generateTestCases(newItem);
-		} else {
-			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.configuration").show();
-		}
+		return Optional.ofNullable(choosingStage.getItem());
 	}
 
 	@FXML
