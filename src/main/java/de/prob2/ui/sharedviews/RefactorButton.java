@@ -25,6 +25,7 @@ import de.prob.check.tracereplay.check.traceConstruction.AdvancedTraceConstructo
 import de.prob.check.tracereplay.check.traceConstruction.TraceConstructionError;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.json.JsonMetadataBuilder;
 import de.prob.model.eventb.EventBModel;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
@@ -181,7 +182,9 @@ public class RefactorButton extends Button {
 		}
 	}
 	private void saveRefinedTrace(List<PersistentTransition> resultTrace, TraceJsonFile fileObject, RefactorSetup userInput, String adaptedFor) throws IOException {
-		TraceJsonFile newFileObject = fileObject.changeTransitionList(resultTrace).changeModelName(adaptedFor);
+
+		//TraceJsonFile newFileObject = new TraceJsonFile(resultTrace, , TraceJsonFile.metadataBuilder());
+		TraceJsonFile newFileObject = fileObject.changeTransitionList(resultTrace).changeModelName(adaptedFor); //TODO this can cause error as all the meta data are not updated
 		Path path = userInput.getTraceFile().getParent().resolve(userInput.traceFile.getFileName().toString().replaceFirst("[.][^.]+$", "")  + "___refined_from___"+adaptedFor+".prob2trace" );
 		traceFileHandler.save(newFileObject, path);
 
@@ -241,7 +244,7 @@ public class RefactorButton extends Button {
 
 		if (refactorButton.getFileBeta().toString().endsWith(EventBFactory.RODIN_MACHINE_EXTENSION)) {
 			try {
-				return new TraceRefinerEventB(injector, fileObject.getTransitionList(), refactorButton.getFileBeta());
+				return new TraceRefinerEventB(injector, fileObject.getTransitionList(), refactorButton.getFileBeta(), refactorButton.getMaxBreadth(), refactorButton.getMaxDepth());
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

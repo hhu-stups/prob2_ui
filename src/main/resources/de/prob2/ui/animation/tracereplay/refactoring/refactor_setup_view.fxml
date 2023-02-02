@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Spinner?>
 <fx:root type="Dialog" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane prefHeight="284.0" prefWidth="414.0" xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1">
@@ -38,6 +39,13 @@
 						<HBox>
 							<CheckBox fx:id="checkBox" minHeight="-Infinity" minWidth="-Infinity" mnemonicParsing="false" prefHeight="40.0" prefWidth="320.0" />
 							<Label fx:id="label" minHeight="-Infinity" minWidth="-Infinity"  prefHeight="40.0" prefWidth="320.0" text="%traceModification.traceRefactorSetup.checkBox.setResult" />
+						</HBox>
+						<HBox>
+							<Spinner fx:id="maxDepth" minHeight="-Infinity" minWidth="-Infinity"   />
+							<Label fx:id="labelMaxDepth" minHeight="-Infinity" minWidth="-Infinity" text="%traceModification.traceRefactorSetup.depth" />
+							<Spinner fx:id="maxBreadth" minHeight="-Infinity" minWidth="-Infinity"  />
+							<Label fx:id="labelMaxBreadth" minHeight="-Infinity" minWidth="-Infinity"   text="%traceModification.traceRefactorSetup.breadth" />
+
 						</HBox>
 					</children>
 				</VBox>
