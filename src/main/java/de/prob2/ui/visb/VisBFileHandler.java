@@ -53,8 +53,8 @@ public class VisBFileHandler {
 		currentTrace.getStateSpace().execute(svgCmd);
 
 		Path svgPath = jsonPath.resolveSibling(svgCmd.getSvgPath()).toRealPath();
-		if (!Files.isRegularFile(svgPath)) {
-			throw new IOException("given svg path is not a regular file: " + svgPath);
+		if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
+			throw new IOException("given svg path is not a non-empty regular file: " + svgPath);
 		}
 
 		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
