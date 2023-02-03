@@ -25,22 +25,83 @@ import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.util.Callback;
 
 @FXMLInjected
 @Singleton
 public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationItem> {
+	private final class Row extends RowBase {
+		private Row() {
+			executeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.generate"));
+			editMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
+
+			MenuItem removeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
+			removeItem.setOnAction(e -> items.remove(this.getItem()));
+			contextMenu.getItems().add(removeItem);
+
+			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
+			showDetails.setDisable(true);
+			showDetails.setOnAction(e -> {
+				TestCaseGenerationItem item = this.getItem();
+				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
+				stage.setTraces(item.getTraceInformation());
+				stage.setUncoveredOperations(item.getUncoveredOperations());
+				stage.show();
+				stage.toFront();
+			});
+			contextMenu.getItems().add(showDetails);
+
+			MenuItem showMessage = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showGenerationMessage"));
+			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			contextMenu.getItems().add(showMessage);
+
+			Menu showStateItem = new Menu(i18n.translate("animation.testcase.view.contextMenu.showFoundPaths"));
+			showStateItem.setDisable(true);
+			contextMenu.getItems().add(showStateItem);
+
+			MenuItem saveTraces = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.savePaths"));
+			saveTraces.setOnAction(e -> {
+				TestCaseGenerationItem item = this.getItem();
+				injector.getInstance(TestCaseGenerationResultHandler.class).saveTraces(item);
+			});
+			contextMenu.getItems().add(saveTraces);
+
+			this.itemProperty().addListener((observable, from, to) -> {
+				final InvalidationListener updateExamplesListener = o -> showExamples(to, showStateItem);
+				
+				if (from != null) {
+					from.examplesProperty().removeListener(updateExamplesListener);
+				}
+				
+				if (to != null) {
+					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
+					to.examplesProperty().addListener(updateExamplesListener);
+					updateExamplesListener.invalidated(null);
+					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
+					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
+				}
+			});
+		}
+
+		private void showExamples(TestCaseGenerationItem item, Menu exampleItem) {
+			exampleItem.getItems().clear();
+			List<Trace> examples = item.getExamples();
+			for (int i = 0; i < examples.size(); i++) {
+				MenuItem traceItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showExample", i + 1));
+				final int index = i;
+				traceItem.setOnAction(e -> currentTrace.set((examples.get(index))));
+				exampleItem.getItems().add(traceItem);
+			}
+		}
+	}
 
 	@FXML
 	private HelpButton helpButton;
@@ -68,82 +129,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	private final TestCaseGenerationItemHandler itemHandler;
 
-	private class TestCaseGenerationCellFactory implements Callback<TableView<TestCaseGenerationItem>, TableRow<TestCaseGenerationItem>> {
-		@Override
-		public TableRow<TestCaseGenerationItem> call(TableView<TestCaseGenerationItem> param) {
-			TableRow<TestCaseGenerationItem> row = new TableRow<>();
-
-			MenuItem checkItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.generate"));
-			checkItem.setDisable(true);
-			checkItem.setOnAction(e -> itemHandler.handleItem(row.getItem()));
-
-			MenuItem removeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> items.remove(row.getItem()));
-
-			MenuItem changeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e -> changeItem(row.getItem()));
-
-			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
-			showDetails.setDisable(true);
-			showDetails.setOnAction(e -> {
-				TestCaseGenerationItem item = row.getItem();
-				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
-				stage.setTraces(item.getTraceInformation());
-				stage.setUncoveredOperations(item.getUncoveredOperations());
-				stage.show();
-				stage.toFront();
-			});
-
-			Menu showStateItem = new Menu(i18n.translate("animation.testcase.view.contextMenu.showFoundPaths"));
-			showStateItem.setDisable(true);
-
-			MenuItem showMessage = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showGenerationMessage"));
-			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
-
-			MenuItem saveTraces = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.savePaths"));
-			saveTraces.setOnAction(e -> {
-				TestCaseGenerationItem item = row.getItem();
-				injector.getInstance(TestCaseGenerationResultHandler.class).saveTraces(item);
-			});
-
-			row.itemProperty().addListener((observable, from, to) -> {
-				final InvalidationListener updateExamplesListener = o -> showExamples(to, showStateItem);
-
-				if (from != null) {
-					from.examplesProperty().removeListener(updateExamplesListener);
-				}
-
-				if (to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
-					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
-					to.examplesProperty().addListener(updateExamplesListener);
-					updateExamplesListener.invalidated(null);
-					checkItem.disableProperty().bind(testCaseGenerator.runningProperty().or(to.selectedProperty().not()));
-					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
-					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
-				}
-			});
-
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(checkItem, changeItem, removeItem, showDetails, showMessage, showStateItem, saveTraces)));
-
-			return row;
-		}
-
-		private void showExamples(TestCaseGenerationItem item, Menu exampleItem) {
-			exampleItem.getItems().clear();
-			List<Trace> examples = item.getExamples();
-			for (int i = 0; i < examples.size(); i++) {
-				MenuItem traceItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showExample", i + 1));
-				final int index = i;
-				traceItem.setOnAction(e -> currentTrace.set((examples.get(index))));
-				exampleItem.getItems().add(traceItem);
-			}
-		}
-	}
-
 	@Inject
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController, final TestCaseGenerationItemHandler itemHandler,
@@ -165,7 +150,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		super.initialize();
 		helpButton.setHelpContent("animation", "testCases");
 		setBindings();
-		itemsTable.setRowFactory(new TestCaseGenerationCellFactory());
+		itemsTable.setRowFactory(table -> new Row());
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
 			items.unbind();
 			if (newValue != null) {
@@ -197,6 +182,16 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		return item.getConfigurationDescription();
 	}
 
+	@Override
+	protected BooleanExpression disableItemBinding(final TestCaseGenerationItem item) {
+		return testCaseGenerator.runningProperty().or(item.selectedProperty().not());
+	}
+
+	@Override
+	protected void executeItem(final TestCaseGenerationItem item) {
+		itemHandler.handleItem(item);
+	}
+
 	@FXML
 	public void addTestCase() {
 		final TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
@@ -209,21 +204,12 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		itemHandler.generateTestCases(existingItem.orElse(newItem));
 	}
 
-	private void changeItem(TestCaseGenerationItem item) {
+	@Override
+	protected Optional<TestCaseGenerationItem> editItem(final TestCaseGenerationItem oldItem) {
 		TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
-		choosingStage.setItem(item);
+		choosingStage.setItem(oldItem);
 		choosingStage.showAndWait();
-		final TestCaseGenerationItem newItem = choosingStage.getItem();
-		if (newItem == null) {
-			return;
-		}
-		if (!itemHandler.replaceItem(item, newItem).isPresent()) {
-			itemHandler.generateTestCases(newItem);
-		} else {
-			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.configuration").show();
-		}
+		return Optional.ofNullable(choosingStage.getItem());
 	}
 
 	@FXML

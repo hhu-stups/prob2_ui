@@ -16,7 +16,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationDetailsStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.sharedviews.TraceSelectionView;
+import de.prob2.ui.sharedviews.TraceSelectionStage;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -172,7 +172,7 @@ public final class HistoryView extends VBox {
 
 	@FXML
 	private void openTraceSelection() {
-		TraceSelectionView traceSelectionView = injector.getInstance(TraceSelectionView.class);
+		TraceSelectionStage traceSelectionView = injector.getInstance(TraceSelectionStage.class);
 		traceSelectionView.show();
 		traceSelectionView.toFront();
 	}

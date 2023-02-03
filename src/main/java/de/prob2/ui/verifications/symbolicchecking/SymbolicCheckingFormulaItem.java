@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
@@ -72,7 +73,12 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem implement
 		return counterExamples;
 	}
 	
-	public boolean settingsEqual(final SymbolicCheckingFormulaItem other) {
+	@Override
+	public boolean settingsEqual(final IExecutableItem obj) {
+		if (!(obj instanceof SymbolicCheckingFormulaItem)) {
+			return false;
+		}
+		final SymbolicCheckingFormulaItem other = (SymbolicCheckingFormulaItem)obj;
 		return Objects.equals(this.getId(), other.getId())
 			&& this.getType().equals(other.getType())
 			&& this.getCode().equals(other.getCode());

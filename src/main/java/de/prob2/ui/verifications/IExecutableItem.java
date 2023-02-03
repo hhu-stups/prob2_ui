@@ -9,4 +9,5 @@ public interface IExecutableItem {
 	void setSelected(boolean selected);
 	ReadOnlyObjectProperty<Checked> checkedProperty();
 	Checked getChecked();
+	boolean settingsEqual(IExecutableItem obj);
 }

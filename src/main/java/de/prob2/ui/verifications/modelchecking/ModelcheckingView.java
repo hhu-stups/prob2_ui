@@ -43,7 +43,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.MouseButton;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
@@ -53,6 +52,30 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 @Singleton
 public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem> {
+	private final class Row extends RowBase {
+		private Row() {
+			executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
+
+			this.itemProperty().addListener((o, from, to) -> {
+				executeMenuItem.textProperty().unbind();
+				if (to != null) {
+					executeMenuItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
+						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
+						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
+				} else {
+					executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
+				}
+			});
+
+			editMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
+
+			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
+			removeItem.setOnAction(e -> items.remove(this.getItem()));
+			removeItem.disableProperty().bind(this.emptyProperty());
+			contextMenu.getItems().add(removeItem);
+		}
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModelcheckingView.class);
 	private static final BigInteger MIB_FACTOR = new BigInteger("1024").pow(2);
 
@@ -222,6 +245,23 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
 		}
 	}
+	
+	@Override
+	protected BooleanExpression disableItemBinding(final ModelCheckingItem item) {
+		return super.disableItemBinding(item).or(Bindings.createBooleanBinding(
+			() -> item.getItems().stream().anyMatch(jobItem -> jobItem.getChecked() == Checked.SUCCESS),
+			item.itemsProperty()
+		));
+	}
+	
+	@Override
+	protected void executeItem(final ModelCheckingItem item) {
+		if (item.getItems().stream().anyMatch(job -> job.getChecked() == Checked.SUCCESS)) {
+			return;
+		}
+
+		this.checkSingleItem(item);
+	}
 
 	private void checkSingleItem(final ModelCheckingItem item) {
 		if(!item.selected()) {
@@ -247,50 +287,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 
 	private void setContextMenus() {
-		itemsTable.setRowFactory(table -> {
-			final TableRow<ModelCheckingItem> row = new TableRow<>();
-			row.setOnMouseClicked(e -> {
-				ModelCheckingItem item = row.getItem();
-				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() >= 2) {
-					if (item.getItems().stream().noneMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-						this.checkSingleItem(item);
-					}
-				}
-			});
-
-			MenuItem checkItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-			checkItem.setOnAction(e -> this.checkSingleItem(row.getItem()));
-
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
-			openEditor.setOnAction(e->showCurrentItemDialog(row.getItem()));
-
-			row.itemProperty().addListener((o, from, to) -> {
-				checkItem.textProperty().unbind();
-				checkItem.disableProperty().unbind();
-				if (to != null) {
-					checkItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
-						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
-						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
-					final BooleanExpression anySucceeded = Bindings.createBooleanBinding(() -> to.getItems().stream().anyMatch(item -> item.getChecked() == Checked.SUCCESS), to.itemsProperty());
-					checkItem.disableProperty().bind(anySucceeded
-						.or(disablePropertyController.disableProperty())
-						.or(to.selectedProperty().not()));
-				} else {
-					checkItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-					checkItem.setDisable(true);
-				}
-			});
-
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
-			removeItem.setOnAction(e -> items.remove(row.getItem()));
-			removeItem.disableProperty().bind(row.emptyProperty());
-
-			row.contextMenuProperty().bind(
-				Bindings.when(row.emptyProperty())
-				.then((ContextMenu)null)
-				.otherwise(new ContextMenu(checkItem, removeItem, openEditor)));
-			return row;
-		});
+		itemsTable.setRowFactory(table -> new Row());
 
 		tvChecks.setRowFactory(table -> {
 			final TableRow<ModelCheckingJobItem> row = new TableRow<>();
@@ -317,6 +314,14 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 					.otherwise(new ContextMenu(showTraceItem)));
 			return row;
 		});
+	}
+
+	@Override
+	protected Optional<ModelCheckingItem> editItem(final ModelCheckingItem oldItem) {
+		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
+		modelcheckingStage.setData(oldItem);
+		modelcheckingStage.showAndWait();
+		return Optional.ofNullable(modelcheckingStage.getResult());
 	}
 
 	@FXML
@@ -388,19 +393,4 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	public void selectJobItem(ModelCheckingJobItem item) {
 		tvChecks.getSelectionModel().select(item);
 	}
-
-	private void showCurrentItemDialog(ModelCheckingItem oldItem) {
-		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-		modelcheckingStage.setData(oldItem);
-		modelcheckingStage.showAndWait();
-		final ModelCheckingItem changedItem = modelcheckingStage.getResult();
-		Machine machine = currentProject.getCurrentMachine();
-		if(machine.getModelcheckingItems().stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
-			machine.getModelcheckingItems().set(machine.getModelcheckingItems().indexOf(oldItem), changedItem);
-			// This is a new configuration and so should have no history of previous checks
-			assert changedItem.getItems().isEmpty();
-			this.checkSingleItem(changedItem);
-		}
-	}
-
 }

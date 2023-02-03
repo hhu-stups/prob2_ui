@@ -12,12 +12,19 @@ public class RefactorSetup {
 	public final Path traceFile;
 	public final boolean setResult;
 
-	public RefactorSetup(WhatToDo whatToDo, Path fileAlpha, Path fileBeta, Path traceFile, boolean setResult) {
+	public final int maxDepth;
+
+	public final int maxBreadth;
+
+
+	public RefactorSetup(WhatToDo whatToDo, Path fileAlpha, Path fileBeta, Path traceFile, boolean setResult, int maxDepth, int maxBreadth) {
 		this.fileAlpha = fileAlpha;
 		this.fileBeta = fileBeta;
 		this.whatToDo = whatToDo;
 		this.traceFile = traceFile;
 		this.setResult = setResult;
+		this.maxDepth = maxDepth;
+		this.maxBreadth = maxBreadth;
 	}
 
 	public WhatToDo getWhatToDo() {
@@ -38,6 +45,15 @@ public class RefactorSetup {
 
 	public boolean setResult() {
 		return setResult;
+	}
+
+
+	public int getMaxDepth() {
+		return maxDepth;
+	}
+
+	public int getMaxBreadth() {
+		return maxBreadth;
 	}
 
 

@@ -254,6 +254,18 @@ public class ReplayTrace implements IExecutableItem, IValidationTask, Descriptio
 	}
 	
 	@Override
+	public boolean settingsEqual(final IExecutableItem obj) {
+		if (!(obj instanceof ReplayTrace)) {
+			return false;
+		}
+		final ReplayTrace other = (ReplayTrace)obj;
+		return Objects.equals(this.getId(), other.getId())
+			&& this.getLocation().equals(other.getLocation());
+	}
+	
+	// FIXME Is it safe to not consider id, selected, etc. in equals/hashCode? This may cause view update problems if JavaFX can't tell if fields other than location have changed.
+	
+	@Override
 	public int hashCode() {
 		return Objects.hash(location);
 	}
