@@ -52,7 +52,13 @@ public class VisBFileHandler {
 
 		currentTrace.getStateSpace().execute(svgCmd);
 
-		Path svgPath = jsonPath.resolveSibling(svgCmd.getSvgPath()).toRealPath();
+		String svgPathString = svgCmd.getSvgPath();
+		if (svgPathString.isEmpty()) {
+			// TODO: support empty svg paths
+			throw new UnsupportedOperationException("empty svg paths not yet implemented");
+		}
+
+		Path svgPath = jsonPath.resolveSibling(svgPathString).toRealPath();
 		if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
 			throw new IOException("given svg path is not a non-empty regular file: " + svgPath);
 		}
