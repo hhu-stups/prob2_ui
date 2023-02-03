@@ -75,27 +75,26 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 
 		this.getDialogPane().lookupButton(buttonTypeS).disableProperty().setValue(true);
 
+		firstMachine.disableProperty().bind(options.getSelectionModel().selectedItemProperty().isNull());
+		secondMachine.disableProperty().bind(options.getSelectionModel().selectedItemProperty().isNotEqualTo(RefactorSetup.WhatToDo.REFINEMENT_REPLAY));
+		traceFile.disableProperty().bind(options.getSelectionModel().selectedItemProperty().isNull());
 		options.setItems(FXCollections.observableArrayList(RefactorSetup.WhatToDo.validValues()));
 		options.setConverter(i18n.translateConverter());
 		options.setPromptText(i18n.translate("traceModification.traceRefactorSetup.whatToDo.prompt"));
 		options.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue == null) {
 				whatToDo.set(RefactorSetup.WhatToDo.NOTHING);
-				secondMachine.disableProperty().setValue(false);
 			} else {
 				switch (newValue) {
 					case REFINEMENT_REPLAY:
 						firstMachine.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.file1.refinement"));
 						secondMachine.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.file2.refinement"));
 						traceFile.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.trace.refinement"));
-						secondMachine.disableProperty().setValue(false);
-
 						break;
 					case OPTION_REPLAY:
 						firstMachine.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.file1.replay"));
 						secondMachine.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.file2.replay"));
 						traceFile.textProperty().set(i18n.translate("traceModification.traceRefactorSetup.trace.replay"));
-						secondMachine.disableProperty().setValue(true);
 						break;
 				}
 			}
