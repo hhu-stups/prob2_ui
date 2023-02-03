@@ -36,6 +36,7 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ListProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -178,6 +179,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				}
 				items.bind(to.ltlFormulasProperty());
 				tvPattern.itemsProperty().bind(to.ltlPatternsProperty());
+				managePatternTable(to.ltlPatternsProperty());
 			} else {
 				items.set(FXCollections.emptyObservableList());
 				tvPattern.setItems(FXCollections.emptyObservableList());
@@ -201,6 +203,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				LTLPatternItem item = row.getItem();
 				machine.getLTLPatterns().remove(item);
 				patternParser.removePattern(item, machine);
+				managePatternTable(machine.ltlPatternsProperty());
 			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
@@ -220,6 +223,17 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 					.otherwise(new ContextMenu(openEditor, showMessage, removeItem)));
 			return row;
 		});
+	}
+
+	private void managePatternTable(ListProperty<LTLPatternItem> ltlPatternItems){
+		if (ltlPatternItems.isEmpty()){
+			tvPattern.setVisible(false);
+			tvPattern.setManaged(false);
+		}
+		else {
+			tvPattern.setVisible(true);
+			tvPattern.setManaged(true);
+		}
 	}
 
 	private void setBindings() {
@@ -280,6 +294,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		if (machine.getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
 			patternParser.addPattern(newItem, machine);
 			machine.getLTLPatterns().add(newItem);
+			managePatternTable(machine.ltlPatternsProperty());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
