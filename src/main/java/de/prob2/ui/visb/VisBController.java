@@ -260,8 +260,9 @@ public class VisBController {
 	private void setupVisualisation(final Path visBPath){
 		try {
 			this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
-		} catch (IOException | UncheckedIOException | ProBError e) {
+		} catch (Exception e) {
 			this.visBVisualisation.set(null);
+			LOGGER.warn("error while loading visb file", e);
 			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;
