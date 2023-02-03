@@ -1,9 +1,7 @@
-
-![Magic Layout](../../../screenshots/Visualisations/MagicLayout.png)
-
-
 Die Magic Layout Ansicht ermöglicht eine interaktive und individualisierbare Zustandsvisualisierung.
 Die Ansicht teilt sich auf in die [Einstellungsansicht](#einstellungen) auf der linken Seite und die [Graph-Ansicht](#graph) auf der rechten Seite.
+
+![Magic Layout](../../../screenshots/Visualisations/MagicLayout.png)
 
 
 ## <a name="einstellungen"></a>Einstellungsansicht
@@ -27,7 +25,7 @@ Neue Knoten- bzw. Kantengruppen werden zunächst ganz unten in der Liste platzie
 
 Über das Datei-Menü am oberen Bildschirmrand können Layout-Einstellungen gespeichert und geladen werden, sowie der Graph als Bild-Datei abgespeichert werden.
 
-
+<br>
 
 ## <a name="graph"></a>Graph Ansicht
 

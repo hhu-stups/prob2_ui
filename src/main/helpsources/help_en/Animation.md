@@ -1,16 +1,29 @@
 # <a name="top"></a>
 The Animation View is divided in three sections: [Replay](#Trace), [Symbolic](#Symbolic) and [Test Case Generation](#testCases).
+Each animation that is added will be shown in the table with the chosen configuration.
+The state shows, if the animation was successfully (<span style="color:green">green</span> checkmark) or not successfully (<span style="color:red">red</span> X) replayed,
+or if the status is unknown (<span style="color:darkblue">blue</span> questionmark).
+The contextmenu of each entry allows you to edit, remove or replay the trace or show further information.
+
+<br>
+
 ## <a id="Trace"> Replay </a>
 
 ![Trace](../screenshots/Animation/Replay.png)
 
 With this tab you can add and load traces of machines.
 
-By hitting the check button every selected trace will be executed and checked without rewriting your current history of operations. The x button will cancel an ongoing execution of a trace. The folder button allows you to add traces. The questionsmark button will open the help page regarding Trace Replay.
+By hitting the check button every selected trace will be executed and checked without rewriting your current history of operations. 
+The x button will cancel an ongoing execution of a trace. The folder button allows you to add traces. 
 
-If you check your traces by double-clicking or selecting Replay Trace after clicking right on a trace, the history of operations will be overwritten by the operations stored in the trace.
+If you check your traces by double-clicking or selecting Replay Trace after clicking right on a trace, 
+the history of operations will be overwritten by the operations stored in the trace.
 
-If errors occur, you can inspect them by clicking right and selecting Show Error.
+The circular arrow reloads the current machine and resets the status of the traces.
+
+In the contextmenu of a trace, each transition can be edited.
+
+<br>
 
 ## <a id="Symbolic"> Symbolic</a> 
 
@@ -28,6 +41,8 @@ When executing this animation, ProB tries to execute the given sequence of opera
 With the `find valid state` animation, you can define the values of the variables and an additional predicate. 
 ProB will then try to find a reachable state where the variables hold the given values and the additional predicate 
 is true. The animation also replays the path from the initialisation to the found state.
+
+<br>
 
 ## <a id="testCases"> Test Case Generation </a>
 

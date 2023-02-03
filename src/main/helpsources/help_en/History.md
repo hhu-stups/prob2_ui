@@ -1,5 +1,3 @@
-![History View](../screenshots/History.png)
-
 The History View shows a list of already executed operations.
 The view ist linked to the operation- and visualisation-options and the [state-view](Main%20View/State%20View.md) of ProB.
 So when executing a transition via [VisB](Main%20Menu/Visualisations/VisB.md) or the [operations-view](Operations.md) for example, it will be added to the history automatically. 
@@ -11,3 +9,4 @@ Attention! When reloading the machine or going back in the history and then exec
 
 With the buttons in the top right corner you can save executed traces (as .csv-file oder a .prob2trace) and load traces for replay.
 
+![History View](../screenshots/History.png)
