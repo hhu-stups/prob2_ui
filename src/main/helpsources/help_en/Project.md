@@ -7,6 +7,8 @@ The Project View contains four tabs:
 * [Preferences](#Preferences), containing custom preferences
 * [Project](#Project), shows an overview of the current project
 
+<br>
+
 ## <a id="Machines"> Machines Tab </a>
 
 ![Machines Tab](../screenshots/Project/Machines%20Tab.png)
@@ -17,15 +19,18 @@ The order of the machines in the project can be changed with the arrow-buttons.
 A small green circle next to the machine indicates, that this machine is currently loaded. Right-Clicking on one of the machines
 opens the context-menu, offering several methods to edit machines, start animations (with customized preferences, if those are added), or remove machines from the list.
 
+<br>
 
 ## <a id="Verifications"> Status Tab </a>
 
 ![Status Tab](../screenshots/Project/Verifications%20Tab.png)
 
 This tab shows the status of each type of verification run on the machines contained by the project. 
-If no test of a specific verification type has been run, a grey circle is shown. 
-If the verification type could not recognize any failures, a green check will be displayed. 
-If a test failed, a red x sign will be shown.
+If no test of a specific verification type has been run, a <span style="color:darkgrey">grey</span> circle is shown. 
+If the verification type could not recognize any failures, a <span style="color:green">green</span> checkmark will be displayed. 
+If a test failed, a <span style="color:red">red</span> X  will be shown.
+
+<br>
 
 ## <a id="Preferences"> Preferences Tab </a>
 
@@ -40,6 +45,8 @@ Each preference will be shown in a list in the tab and can be removed or edited 
 ![Add Preference](../screenshots/Project/Add%20Preference.png)
 
 The screenshot above shows the window for adding and editing preferences.
+
+<br>
 
 ## <a id="Project"> Project Tab </a>
 

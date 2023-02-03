@@ -1,5 +1,4 @@
 # <a name="top"></a>
-# The ProB2 JavaFX Main Menu Bar
 
 The menu bar contains the various commands to access the features of ProB. It includes the menus
 * [File](#File),
@@ -15,7 +14,6 @@ The menu bar contains the various commands to access the features of ProB. It in
 The File submenu allows you to create a new [Project](../Project.md), open an existing project or open or clear the list of recent projects.
 
 You can save your project or machine, reload it, run an extended statistics analysis or take a look at the internal representation of the current machine.
-
 Furthermore, it is possible to export the model in different types.
 
 In the menu "Preferences" you can customize the settings of the UI and the current project itself. The "Close Window" allows you to close the ProB 2 UI.
@@ -42,14 +40,20 @@ Furthermore, the [history chart](Visualisations/History%20Chart.md) shows a char
 
 This submenu provides a Groovy and a ProB core console and allows you to manage your plugins and own visualisations.
 
-The [SimB]-option provides simulations for formal models.
+The [SimB]-option provides automatic simulations for formal models.
+
+
+
 
 ## <a name="Window"> Window</a>
 ![Window Menu](../../screenshots/Menu/Window.png)
 
 The Window submenu allows you to change perspectives and [detach components](Window/Detaching%20of%20Components.md) as described above.
 
-This UI comes with 3 different preset perspectives. It allows you to [use your own perspective](Window/Perspectives.md) as well by providing a FXML file containing the views but be aware that this might ruin the ability to detach components.
+This UI comes with 3 different preset perspectives. 
+It allows you to [use your own perspective](Window/Perspectives.md) as well by providing a FXML file containing the views 
+but be aware that this might ruin the ability to detach components.
+
 
 
 ## <a name="Help"> Help</a>

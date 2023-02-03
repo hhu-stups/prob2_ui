@@ -1,5 +1,3 @@
-![Operationen](../screenshots/Operations.png)
-
 The Operations View shows the operations on a machine, if a machine is loaded.
 If you click on an operation shown in the list, it will be executed if possible.
 The icons and marks next to the operations show, if an operations is executable and which state will be reached.
@@ -21,3 +19,4 @@ The icons in the upper right corner of the view allow you to
 Using the arrow in the upper left corner, you can jump back and forth in history or reload the machine.
 By right-clicking on an operation, you can inspect details about it or add a formula, that should be considered when executing the operation.
 
+![Operationen](../screenshots/Operations.png)

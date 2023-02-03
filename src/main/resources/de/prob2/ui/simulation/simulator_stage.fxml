@@ -22,6 +22,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root title="Simulator" type="SimulatorStage" width="1200" height="500" minHeight="500" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -101,6 +102,7 @@
 										<MenuItem fx:id="saveAutomaticSimulationItem" text="Save Automatic Simulation"/>
 									</items>
 								</MenuButton>
+								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
 								<TableView fx:id="simulationItems">

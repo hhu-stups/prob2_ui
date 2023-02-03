@@ -1,5 +1,3 @@
-![VisB](../../../screenshots/Visualisations/VisB.png)
-
 Das VisB PlugIn ermöglicht es, eine interaktive Visualisierung der aktuellen Maschine zu erstellen. Hierfür werden zwei Dateien,
 nämlich die VisB-Datei im .json-Format, sowie eine svg-Datei benötigt. Nähere Informationen zu Erstellung dieser sind im VisB-Benutzerhandbuch zu finden.
 
@@ -20,6 +18,8 @@ Des Weiteren können mithilfe des i-Buttons die aktuellen Items und Events angez
 
 Mit den Buttons in der Mitte der oberen Leiste kann man durch die Transitionen navigieren (analog zur Navigation im Verlauf).
 
-Die Buttons am oberen rechten Rand dienen zum Auswählen von nachzuspielenden Pfaden, zum Öffnen von [SimB]() sowie zum Speichern des aktuellen Pfades oder des aktuellen Zustandes als html-Datei.
+Die Buttons am oberen rechten Rand dienen zum Auswählen von nachzuspielenden Pfaden, zum Öffnen von [SimB](../Erweitert/SimB.md) sowie zum Speichern des aktuellen Pfades oder des aktuellen Zustandes als html-Datei.
+
+![VisB](../../../screenshots/Visualisations/VisB.png)
 
 Einige Beispiele zur Visualisierung mit VisB können [hier](https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples) heruntergeladen werden.

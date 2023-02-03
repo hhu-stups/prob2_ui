@@ -1,22 +1,33 @@
 # <a name="top"></a>
+
 Die Animationsansicht ist in drei Teile geteilt: [Nachspielen](#Trace), [Symbolisch](#Symbolic) und [Testfallgenerierung](#testCases).
+Jede hinzugefügte Animation wird, ggf. mit der gewählten Konfiguration in der Tabelle angezeigt.
+Der Status zeigt an, ob eine Animation erfolgreich (<span style="color:green">grünes</span> Häkchen) oder nicht erfolgreich (<span style="color:red">rotes</span> X) nachgespielt wurde,
+oder ob der Status unbekannt ist (<span style="color:darkblue">blaues</span> Fragezeichen).
+Im Kontextmenü der einzelnen Einträge können diese bearbeitet, entfernt oder neu überprüft werden sowie weitere Informationen angezeigt werden.
+
+<br>
+
 ## <a id="Trace"> Nachspielen </a>
 
 ![Pfad](../screenshots/Animation/Replay.png)
 
-Mit diesem Tab kann man Pfade von Maschinen hinzufügen und laden.
+Mit diesem Tab kann man Pfade von Maschinen laden und nachspielen.
 
-Durch Drücken des Häkchenknopfes wird jeder ausgewählter Pfad ausgeführt und geprüft, ohne den derzeitigen Verlauf an Operationen zu überschreiben. Der X-Knopf kann eine derzeit laufende Ausführung eines Pfades anhalten. Der Ordnerknopf erlaubt es Pfade hinzuzufügen. Der Fragenzeichenknopf öffnet die zum Pfad nachspielen gehörende Hilfeseite.
+Durch Drücken des Häkchen-Buttons wird jeder ausgewählter Pfad ausgeführt und geprüft, ohne den derzeitigen Verlauf an Operationen zu überschreiben. Dies kann mit dem
+x-Button unterbrochen werden. Weitere Pfade können mithilfe des Ordner-Buttons hinzugefügt werden.
+Der Kreispfeil läd die gesamte Maschine neu und setzt hierdurch den Status der Pfade zurück.
 
-Wenn man Pfade durch Doppelklicken oder Auswählen von Pfad nachspielen nach einem Rechtsklick überprüft, wird der Verlauf der Operationen durch die im Pfad gespeicherten Operationen überschrieben.
+Wenn man Pfade durch Doppelklicken oder im Kontextmenü durch "Pfad nachspielen" überprüft, wird der Verlauf der Operationen durch die im Pfad gespeicherten Operationen überschrieben.
+Im Kontextmenü eines einzelnen Pfades können zusätzlich einzelne Transitionen des Pfades bearbeitet werden.
 
-Treten Fehler auf, kann man diese durch Rechtsklick und Auswahl von Fehler anzeigen inspizieren.
+<br>
 
 ## <a id="Symbolic"> Symbolisch </a>
 
 ![Symbolic](../screenshots/Animation/Symbolic.png)
 
-Bei der symbolischen Animation kann man Animationsbefehle wie `Sequenz`, `Gültigen Zustand suchen` verwenden.
+Bei der symbolischen Animation kann man mithilfe des Plus-Buttons Animationsbefehle wie `Sequenz`, `Gültigen Zustand suchen` verwenden. 
 
 ![Sequence](../screenshots/Animation/Sequence.png)
 
@@ -30,7 +41,9 @@ Initialisierung auszuführen.
 Mit der `Gültigen Zustand Suchen` Animation ist es möglich, Werte für die einzelnen Variablen sowie ein zusätzliches Prädikat
 anzugeben. Bei der Ausführung versucht ProB einen erreichbaren Zustand zu finden, in dem die Variablen die angegebenen Werte
 annehmen und das zusätzliche Prädikat erfüllt ist. Die Animation zeigt letztlich den Pfad von der Initialisierung bis zu
-dem gefunden Zustand an.
+dem gefundenen Zustand an.
+
+<br>
 
 ## <a id="testCases"> Testfallgenerierung </a>
 

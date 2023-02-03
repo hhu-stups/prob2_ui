@@ -1,5 +1,7 @@
 package de.prob2.ui.visb;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -37,19 +39,22 @@ public class VisBFileHandler {
 	 * @param jsonPath path to the VisB JSON file
 	 * @return VisBVisualisation object
 	 */
-	public VisBVisualisation constructVisualisationFromJSON(final Path jsonPath) {
+	public VisBVisualisation constructVisualisationFromJSON(Path jsonPath) throws IOException {
+		jsonPath = jsonPath.toRealPath();
+		if (!Files.isRegularFile(jsonPath)) {
+			throw new IOException("given json path is not a regular file: " + jsonPath);
+		}
+
 		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPath.toString());
 
 		currentTrace.getStateSpace().execute(loadCmd);
 		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.toString());
 
 		currentTrace.getStateSpace().execute(svgCmd);
-		String parentFile = jsonPath.getParent().toString();
 
-		String filePath = svgCmd.getSvgPath();
-		Path svgPath = Paths.get(filePath);
-		if (!svgPath.isAbsolute()) {
-			svgPath = Paths.get(parentFile, filePath);
+		Path svgPath = jsonPath.resolveSibling(svgCmd.getSvgPath()).toRealPath();
+		if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
+			throw new IOException("given svg path is not a non-empty regular file: " + svgPath);
 		}
 
 		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
