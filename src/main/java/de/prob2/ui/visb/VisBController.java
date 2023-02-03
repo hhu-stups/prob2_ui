@@ -1,5 +1,6 @@
 package de.prob2.ui.visb;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -259,7 +260,7 @@ public class VisBController {
 	private void setupVisualisation(final Path visBPath){
 		try {
 			this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
-		} catch (UncheckedIOException | ProBError e) {
+		} catch (IOException | UncheckedIOException | ProBError e) {
 			this.visBVisualisation.set(null);
 			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");

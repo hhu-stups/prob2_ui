@@ -358,6 +358,10 @@ public class VisBStage extends Stage {
 
 	private void loadSvgFile(final VisBVisualisation visBVisualisation) throws IOException {
 		final Path path = visBVisualisation.getSvgPath();
+		if (!Files.isRegularFile(path) || Files.size(path) <= 0) {
+			throw new IOException("given svg file '" + path + "' is not a file or is empty");
+		}
+
 		String svgContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 		this.initialiseWebView(svgContent, path.getParent().toUri().toString());
 	}
@@ -394,7 +398,7 @@ public class VisBStage extends Stage {
 	 * the {@link Runnable} is executed immediately.
 	 * If the {@link WebView} fails to load,
 	 * the {@link Runnable} is never executed.
-	 * 
+	 *
 	 * @param runnable the code to run once the {@link WebView} has finished loading
 	 */
 	private void runWhenLoaded(final Runnable runnable) {
@@ -572,15 +576,15 @@ public class VisBStage extends Stage {
 				case LOAD_DEFAULT:
 					this.loadVisBFileFromMachine(currentMachine, currentTrace.getStateSpace());
 					break;
-				
+
 				case SET_CURRENT_AS_DEFAULT:
 					currentMachine.setVisBVisualisation(loadedPathRelative);
 					break;
-				
+
 				case UNSET_DEFAULT:
 					currentMachine.setVisBVisualisation(null);
 					break;
-				
+
 				default:
 					throw new AssertionError("Unhandled action: " + action);
 			}
