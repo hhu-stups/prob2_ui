@@ -142,11 +142,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 			// User cancelled/closed the window
 			return;
 		}
-		final Optional<SymbolicCheckingFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		if (!existingItem.isPresent()) {
-			items.add(newItem);
-		}
-		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
+		this.formulaHandler.handleItem(this.addItem(newItem), false);
 	}
 	
 	@Override

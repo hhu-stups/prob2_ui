@@ -117,11 +117,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 			// User cancelled/closed the window
 			return;
 		}
-		final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		if (!existingItem.isPresent()) {
-			items.add(newItem);
-		}
-		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
+		this.formulaHandler.handleItem(this.addItem(newItem), false);
 	}
 	
 	@Override

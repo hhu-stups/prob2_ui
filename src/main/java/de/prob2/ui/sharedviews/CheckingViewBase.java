@@ -134,6 +134,16 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		});
 	}
 	
+	protected T addItem(final T newItem) {
+		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+		if (!existingItem.isPresent()) {
+			items.add(newItem);
+			return newItem;
+		} else {
+			return existingItem.get();
+		}
+	}
+	
 	protected T replaceItem(final T oldItem, final T newItem) {
 		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
 		if (!existingItem.isPresent()) {

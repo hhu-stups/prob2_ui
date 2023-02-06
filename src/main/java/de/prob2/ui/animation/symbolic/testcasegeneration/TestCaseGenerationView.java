@@ -195,8 +195,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		if (newItem == null) {
 			return;
 		}
-		final Optional<TestCaseGenerationItem> existingItem = itemHandler.addItem(newItem);
-		itemHandler.generateTestCases(existingItem.orElse(newItem));
+		itemHandler.generateTestCases(this.addItem(newItem));
 	}
 
 	@Override

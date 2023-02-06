@@ -264,15 +264,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 			// User cancelled/closed the window
 			return;
 		}
-		final Optional<LTLFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		final LTLFormulaItem toCheck;
-		if (existingItem.isPresent()) {
-			// Identical existing formula found - reuse it instead of creating another one
-			toCheck = existingItem.get();
-		} else {
-			items.add(newItem);
-			toCheck = newItem;
-		}
+		final LTLFormulaItem toCheck = this.addItem(newItem);
 		checker.checkFormula(toCheck);
 	}
 	

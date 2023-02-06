@@ -318,15 +318,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			// User cancelled/closed the window
 			return;
 		}
-		final Optional<ModelCheckingItem> existingItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(newItem::settingsEqual).findAny();
-		final ModelCheckingItem toCheck;
-		if (existingItem.isPresent()) {
-			// Identical existing configuration found - reuse it instead of creating another one
-			toCheck = existingItem.get();
-		} else {
-			currentProject.getCurrentMachine().getModelcheckingItems().add(newItem);
-			toCheck = newItem;
-		}
+		final ModelCheckingItem toCheck = this.addItem(newItem);
 		if (toCheck.getItems().isEmpty()) {
 			// Start checking with this configuration
 			// (unless it's an existing configuration that has already been run)
