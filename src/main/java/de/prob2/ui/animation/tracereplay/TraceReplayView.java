@@ -139,7 +139,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
 							final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
 							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;

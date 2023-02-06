@@ -60,8 +60,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
-			editMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
-			removeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
 			
 			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
@@ -128,7 +126,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 					final FileChooserManager fileChooserManager,
 					final ObjectMapper objectMapper,
 					final JacksonManager<LTLData> jacksonManager) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.injector = injector;
@@ -194,7 +192,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removePattern"));
+			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
 			removeItem.setOnAction(e -> {
 				Machine machine = currentProject.getCurrentMachine();
 				LTLPatternItem item = row.getItem();
@@ -203,7 +201,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				managePatternTable(machine.ltlPatternsProperty());
 			});
 
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
+			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showParsingMessage"));

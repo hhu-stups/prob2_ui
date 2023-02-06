@@ -34,8 +34,6 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
-			editMenuItem.setText(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
-			removeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
@@ -91,7 +89,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
 	                            final DisablePropertyController disablePropertyController, final Provider<SymbolicCheckingChoosingStage> choosingStageProvider) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;

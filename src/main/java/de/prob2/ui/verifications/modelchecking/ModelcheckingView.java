@@ -66,9 +66,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 					executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 				}
 			});
-
-			editMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
-			removeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 		}
 	}
 	
@@ -118,7 +115,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			final DisablePropertyController disablePropertyController,
 			final StageManager stageManager, final Injector injector,
 			final I18n i18n, final Modelchecker checker) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;

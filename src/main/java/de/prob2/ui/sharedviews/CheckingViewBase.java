@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -49,11 +50,11 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			
 			this.contextMenu = new ContextMenu();
 			
-			this.executeMenuItem = new MenuItem();
+			this.executeMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.execute"));
 			this.executeMenuItem.setOnAction(e -> executeItem(this.getItem()));
 			this.contextMenu.getItems().add(this.executeMenuItem);
 			
-			this.editMenuItem = new MenuItem();
+			this.editMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			this.editMenuItem.setOnAction(e -> {
 				final T oldItem = this.getItem();
 				editItem(oldItem).ifPresent(newItem -> {
@@ -70,7 +71,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			});
 			this.contextMenu.getItems().add(this.editMenuItem);
 			
-			this.removeMenuItem = new MenuItem();
+			this.removeMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
 			this.removeMenuItem.setOnAction(e -> items.remove(this.getItem()));
 			this.contextMenu.getItems().add(removeMenuItem);
 			
@@ -104,6 +105,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	@FXML
 	protected Button checkMachineButton;
 	
+	private final I18n i18n;
 	protected final DisablePropertyController disablePropertyController;
 	
 	// This is a proper ListProperty, so it supports emptyProperty(),
@@ -112,7 +114,8 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	
 	protected final CheckBox selectAll;
 	
-	protected CheckingViewBase(final DisablePropertyController disablePropertyController) {
+	protected CheckingViewBase(final I18n i18n, final DisablePropertyController disablePropertyController) {
+		this.i18n = i18n;
 		this.disablePropertyController = disablePropertyController;
 		this.items = new SimpleListProperty<>(this, "items", FXCollections.emptyObservableList());
 		this.selectAll = new CheckBox();

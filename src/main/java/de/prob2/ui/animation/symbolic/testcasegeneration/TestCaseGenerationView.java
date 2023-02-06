@@ -40,8 +40,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.generate"));
-			editMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
-			removeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
 
 			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
@@ -130,7 +128,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController, final TestCaseGenerationItemHandler itemHandler,
 	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
