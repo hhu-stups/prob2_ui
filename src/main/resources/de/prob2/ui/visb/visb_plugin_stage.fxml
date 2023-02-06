@@ -1,14 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.animation.tracereplay.TraceReplayMenuButton?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.NavigationButtons?>
 <?import de.prob2.ui.sharedviews.Spacer?>
+<?import de.prob2.ui.visb.VisBStage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Tooltip?>
@@ -20,10 +24,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.web.WebView?>
-<?import de.prob2.ui.visb.VisBStage?>
-
-<?import javafx.scene.control.MenuButton?>
-<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root title="%visb.title" type="VisBStage" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" width="1000" height="500" minHeight="160" minWidth="480">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -121,14 +121,7 @@
 							<Spacer/>
 							<NavigationButtons/>
 							<Spacer/>
-							<Button fx:id="openTraceSelectionButton" onAction="#openTraceSelection">
-								<graphic>
-									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILE" bindableFontSize="${fontSize.fontSize + 2}" />
-								</graphic>
-								<tooltip>
-									<Tooltip text="%common.buttons.openTraceSelection" />
-								</tooltip>
-							</Button>
+							<TraceReplayMenuButton/>
 							<Button fx:id="openSimulationButton" onAction="#openSimulation">
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY" bindableFontSize="${fontSize.fontSize + 2}" />
