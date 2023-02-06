@@ -21,6 +21,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.error.ErrorTableView;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.executor.CompletableExecutorService;
 import de.prob2.ui.internal.executor.CompletableThreadPoolExecutor;
@@ -56,7 +57,8 @@ public class ReplayedTraceStatusAlert extends Alert {
 		this.traceFileHandler = injector.getInstance(TraceFileHandler.class);
 		this.i18n = injector.getInstance(I18n.class);
 		this.cliExecutor = injector.getInstance(CliTaskExecutor.class);
-		this.executor = CompletableThreadPoolExecutor.newSingleThreadedExecutor();
+		this.executor = CompletableThreadPoolExecutor.newSingleThreadedExecutor(r -> new Thread(r, "Trace replay status thread"));
+		injector.getInstance(StopActions.class).add(this.executor::shutdownNow);
 		this.replayTrace = Objects.requireNonNull(replayTrace, "replayTrace");
 
 		stageManager.loadFXML(this, "trace_replay_status_alert.fxml");
