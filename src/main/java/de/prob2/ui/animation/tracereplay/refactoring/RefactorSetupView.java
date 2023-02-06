@@ -169,9 +169,9 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 		alpha.addListener(validTarget);
 		beta.addListener(validTarget);
 
-		maxBreadth.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(5,1000));
+		maxBreadth.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(2,1000));
 		maxBreadth.setEditable(true);
-		maxDepth.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(5,1000));
+		maxDepth.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1,1000));
 		maxDepth.setEditable(true);
 
 	}

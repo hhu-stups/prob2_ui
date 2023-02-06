@@ -43,13 +43,11 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DefaultPathDialog;
-import de.prob2.ui.sharedviews.TraceSelectionStage;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
@@ -105,8 +103,6 @@ public class VisBStage extends Stage {
 	private Button reloadVisualisationButton;
 	@FXML
 	private Button manageDefaultVisualisationButton;
-	@FXML
-	private Button openTraceSelectionButton;
 	@FXML
 	private Button openSimulationButton;
 	@FXML
@@ -207,9 +203,8 @@ public class VisBStage extends Stage {
 		);
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
-			openTraceSelectionButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().unbind();
-			updateUIOnMachine(to);
+			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
@@ -246,7 +241,6 @@ public class VisBStage extends Stage {
 			this.currentProject.currentMachineProperty().addListener(machineListener);
 			this.visBController.visBVisualisationProperty().addListener(visBListener);
 			this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
-			updateUIOnMachine(currentProject.getCurrentMachine());
 			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
 
 			machineListener.changed(null, null, currentProject.getCurrentMachine());
@@ -287,16 +281,6 @@ public class VisBStage extends Stage {
 		helpSystem.openHelpForKeyAndAnchor("mainmenu.visualisations.visB", null);
 		helpSystemStage.show();
 		helpSystemStage.toFront();
-	}
-
-	private void updateUIOnMachine(Machine machine) {
-		final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
-		manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
-		if(machine != null) {
-			openTraceSelectionButton.disableProperty().bind(machine.tracesProperty().emptyProperty());
-		} else {
-			openTraceSelectionButton.disableProperty().bind(openTraceDefaultDisableProperty);
-		}
 	}
 
 	private static Path getPathFromDefinitions(final StateSpace stateSpace) {
@@ -521,13 +505,6 @@ public class VisBStage extends Stage {
 	@FXML
 	public void zoomOut() {
 		webView.setZoom(webView.getZoom()/1.2);
-	}
-
-	@FXML
-	private void openTraceSelection() {
-		TraceSelectionStage traceSelectionView = injector.getInstance(TraceSelectionStage.class);
-		traceSelectionView.show();
-		traceSelectionView.toFront();
 	}
 
 	@FXML

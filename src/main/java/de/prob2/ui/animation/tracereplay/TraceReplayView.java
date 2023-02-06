@@ -19,23 +19,33 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.FontSize;
+import de.prob2.ui.menu.ExternalEditor;
+import de.prob2.ui.menu.RevealInExplorer;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.RefactorButton;
-import de.prob2.ui.sharedviews.TraceViewHandler;
+import de.prob2.ui.verifications.CheckedIcon;
 
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
 import javafx.stage.FileChooser;
 
 @FXMLInjected
@@ -43,19 +53,46 @@ import javafx.stage.FileChooser;
 public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final class Row extends RowBase {
 		private Row() {
+			itemProperty().addListener((o, from, to) -> {
+				if (to != null) {
+					setTooltip(new Tooltip(this.getItem().getLocation().toString()));
+				}
+			});
+
 			executeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
 			editMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
-			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
+			addTestsItem.setOnAction(event -> {
+				TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
+				traceTestView.loadReplayTrace(this.getItem());
+				traceTestView.show();
+			});
+
 			final MenuItem showStatusItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
-			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+			showStatusItem.setOnAction(event -> {
+				ReplayedTraceStatusAlert alert = new ReplayedTraceStatusAlert(injector, this.getItem());
+				alert.show();
+			});
+
+			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
+			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
+
 			final MenuItem deleteTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.removeTrace"));
+			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().getTraces().remove(this.getItem()));
+
+			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
+			openInExternalEditorItem.setOnAction(event ->
+				injector.getInstance(ExternalEditor.class).open(this.getItem().getAbsoluteLocation())
+			);
+
 			final MenuItem revealInExplorerItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
+			revealInExplorerItem.setOnAction(event ->
+				injector.getInstance(RevealInExplorer.class).revealInExplorer(this.getItem().getAbsoluteLocation())
+			);
+
 			final MenuItem recheckTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.refactorTrace"));
 
-			// Set listeners for menu items
-			traceViewHandler.initializeRow(this, addTestsItem, showStatusItem, openInExternalEditorItem, revealInExplorerItem);
-			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().getTraces().remove(this.getItem()));
 			recheckTraceItem.setOnAction(event -> {
 				final Machine currentMachine = currentProject.getCurrentMachine();
 				Path currentMachinePath = currentProject.getLocation().resolve(currentMachine.getLocation());
@@ -72,7 +109,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				persistentTraceList.remove(this.getItem().getLocation());
 				persistentTraceList.forEach(trace -> traceFileHandler.addTraceFile(currentMachine, trace));
 			});
-			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
 
 			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
 		}
@@ -86,7 +122,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
 	private final TraceFileHandler traceFileHandler;
-	private final TraceViewHandler traceViewHandler;
 
 	@FXML
 	private TableColumn<ReplayTrace, Node> statusProgressColumn;
@@ -103,7 +138,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
 							final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
-							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler, final TraceViewHandler traceViewHandler) {
+							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
 		super(disablePropertyController);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -113,7 +148,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		this.fileChooserManager = fileChooserManager;
 		this.injector = injector;
 		this.traceFileHandler = traceFileHandler;
-		this.traceViewHandler = traceViewHandler;
 		stageManager.loadFXML(this, "trace_replay_view.fxml");
 	}
 
@@ -122,8 +156,32 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	public void initialize() {
 		super.initialize();
 		helpButton.setHelpContent("animation", "Trace");
-		items.bind(traceViewHandler.getTraces());
-		statusProgressColumn.setCellValueFactory(traceViewHandler.getTraceStatusFactory());
+
+		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			items.unbind();
+			if (to != null) {
+				items.bind(to.tracesProperty());
+			} else {
+				items.set(FXCollections.observableArrayList());
+			}
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
+
+		statusProgressColumn.setCellValueFactory(features -> {
+			final ReplayTrace trace = features.getValue();
+			
+			final CheckedIcon statusIcon = new CheckedIcon();
+			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
+			trace.checkedProperty().addListener((o, from, to) -> Platform.runLater(() -> statusIcon.setChecked(to)));
+			statusIcon.setChecked(trace.getChecked());
+			
+			final ProgressIndicator replayProgress = new ProgressBar();
+			replayProgress.progressProperty().bind(trace.progressProperty());
+			
+			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon)
+				.otherwise(replayProgress);
+		});
 
 		itemsTable.setRowFactory(table -> new Row());
 		itemsTable.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
