@@ -19,7 +19,6 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.RevealInExplorer;
@@ -29,7 +28,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.RefactorButton;
-import de.prob2.ui.sharedviews.TraceViewHandler;
+import de.prob2.ui.verifications.CheckedIcon;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -48,8 +47,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.stage.FileChooser;
-
-import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
@@ -174,11 +171,10 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		statusProgressColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
 			
-			final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-			statusIcon.getStyleClass().add("status-icon");
+			final CheckedIcon statusIcon = new CheckedIcon();
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
-			trace.checkedProperty().addListener((o, from, to) -> Platform.runLater(() -> TraceViewHandler.updateStatusIcon(statusIcon, to)));
-			TraceViewHandler.updateStatusIcon(statusIcon, trace.getChecked());
+			trace.checkedProperty().addListener((o, from, to) -> Platform.runLater(() -> statusIcon.setChecked(to)));
+			statusIcon.setChecked(trace.getChecked());
 			
 			final ProgressIndicator replayProgress = new ProgressBar();
 			replayProgress.progressProperty().bind(trace.progressProperty());
