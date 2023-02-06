@@ -204,7 +204,7 @@ public class VisBStage extends Stage {
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			manageDefaultVisualisationButton.disableProperty().unbind();
-			updateUIOnMachine(to);
+			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
@@ -241,7 +241,6 @@ public class VisBStage extends Stage {
 			this.currentProject.currentMachineProperty().addListener(machineListener);
 			this.visBController.visBVisualisationProperty().addListener(visBListener);
 			this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
-			updateUIOnMachine(currentProject.getCurrentMachine());
 			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
 
 			machineListener.changed(null, null, currentProject.getCurrentMachine());
@@ -282,10 +281,6 @@ public class VisBStage extends Stage {
 		helpSystem.openHelpForKeyAndAnchor("mainmenu.visualisations.visB", null);
 		helpSystemStage.show();
 		helpSystemStage.toFront();
-	}
-
-	private void updateUIOnMachine(Machine machine) {
-		manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
 	}
 
 	private static Path getPathFromDefinitions(final StateSpace stateSpace) {
