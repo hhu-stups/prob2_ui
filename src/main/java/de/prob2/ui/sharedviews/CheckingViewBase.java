@@ -41,10 +41,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			// Execute item (if possible) when double-clicked.
 			this.setOnMouseClicked(event -> {
 				if (!this.isEmpty() && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					final T item = this.getItem();
-					if (!disableItemBinding(item).get()) {
-						executeItem(item);
-					}
+					executeItemIfEnabled(this.getItem());
 				}
 			});
 			
@@ -58,15 +55,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			this.editMenuItem.setOnAction(e -> {
 				final T oldItem = this.getItem();
 				editItem(oldItem).ifPresent(newItem -> {
-					final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-					if (!existingItem.isPresent()) {
-						items.set(items.indexOf(oldItem), newItem);
-					}
+					final T itemToExecute = replaceItem(oldItem, newItem);
 					// FIXME Do we always want to re-execute the item after editing?
-					final T itemToExecute = existingItem.orElse(newItem);
-					if (!disableItemBinding(itemToExecute).get()) {
-						executeItem(itemToExecute);
-					}
+					executeItemIfEnabled(itemToExecute);
 				});
 			});
 			this.contextMenu.getItems().add(this.editMenuItem);
@@ -143,6 +134,16 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		});
 	}
 	
+	protected T replaceItem(final T oldItem, final T newItem) {
+		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+		if (!existingItem.isPresent()) {
+			items.set(items.indexOf(oldItem), newItem);
+			return newItem;
+		} else {
+			return existingItem.get();
+		}
+	}
+	
 	/**
 	 * Describe the item's configuration as a string,
 	 * which will be displayed in the {@link #configurationColumn}.
@@ -159,6 +160,12 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	}
 	
 	protected abstract void executeItem(final T item);
+	
+	protected void executeItemIfEnabled(final T item) {
+		if (!disableItemBinding(item).get()) {
+			executeItem(item);
+		}
+	}
 	
 	protected abstract Optional<T> editItem(final T oldItem);
 }
