@@ -249,14 +249,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	
 	@Override
 	protected void executeItem(final ModelCheckingItem item) {
-		if (item.getItems().stream().anyMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-			return;
-		}
-
-		this.checkSingleItem(item);
-	}
-
-	private void checkSingleItem(final ModelCheckingItem item) {
 		if(!item.selected()) {
 			return;
 		}
@@ -338,7 +330,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		if (toCheck.getItems().isEmpty()) {
 			// Start checking with this configuration
 			// (unless it's an existing configuration that has already been run)
-			this.checkSingleItem(toCheck);
+			this.executeItem(toCheck);
 		}
 	}
 
