@@ -256,19 +256,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 	
 	@FXML
-	public void addFormula() {
-		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.showAndWait();
-		final LTLFormulaItem newItem = formulaStage.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		final LTLFormulaItem toCheck = this.addItem(newItem);
-		checker.checkFormula(toCheck);
-	}
-	
-	@FXML
 	public void addPattern() {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
 		patternStage.showAndWait();
@@ -290,9 +277,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 	
 	@Override
-	protected Optional<LTLFormulaItem> editItem(final LTLFormulaItem oldItem) {
+	protected Optional<LTLFormulaItem> showItemDialog(final LTLFormulaItem oldItem) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.setData(oldItem);
+		if (oldItem != null) {
+			formulaStage.setData(oldItem);
+		}
 		formulaStage.showAndWait();
 		return Optional.ofNullable(formulaStage.getResult());
 	}

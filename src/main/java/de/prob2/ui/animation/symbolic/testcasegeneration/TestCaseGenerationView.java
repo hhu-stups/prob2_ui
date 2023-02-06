@@ -187,21 +187,12 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		itemHandler.handleItem(item);
 	}
 
-	@FXML
-	public void addTestCase() {
-		final TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
-		choosingStage.showAndWait();
-		final TestCaseGenerationItem newItem = choosingStage.getItem();
-		if (newItem == null) {
-			return;
-		}
-		itemHandler.generateTestCases(this.addItem(newItem));
-	}
-
 	@Override
-	protected Optional<TestCaseGenerationItem> editItem(final TestCaseGenerationItem oldItem) {
+	protected Optional<TestCaseGenerationItem> showItemDialog(final TestCaseGenerationItem oldItem) {
 		TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
-		choosingStage.setItem(oldItem);
+		if (oldItem != null) {
+			choosingStage.setItem(oldItem);
+		}
 		choosingStage.showAndWait();
 		return Optional.ofNullable(choosingStage.getItem());
 	}

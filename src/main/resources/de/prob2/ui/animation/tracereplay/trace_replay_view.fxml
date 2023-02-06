@@ -42,7 +42,7 @@
 				<Spacer/>
 				<RefactorButton fx:id="refactorButton" HBox.hgrow="NEVER" />
 				<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
-				<Button fx:id="loadTraceButton" onAction="#loadTraceFromFile" disable="true">
+				<Button fx:id="loadTraceButton" onAction="#askToAddItem" disable="true">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
 									   bindableFontSize="${fontSize.fontSize + 2}"/>

@@ -208,37 +208,38 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected Optional<ReplayTrace> editItem(final ReplayTrace oldItem) {
-		// This only implements editing the validation task ID.
-		// Editing the trace itself is a different menu item (addTestsItem).
-		final TextInputDialog dialog = new TextInputDialog(oldItem.getId() == null ? "" : oldItem.getId());
-		stageManager.register(dialog);
-		dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
-		dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
-		dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
-		return dialog.showAndWait().map(idText -> {
-			final String id = idText.trim().isEmpty() ? null : idText;
-			return oldItem.withId(id);
-		});
+	protected Optional<ReplayTrace> showItemDialog(final ReplayTrace oldItem) {
+		if (oldItem == null) {
+			// Adding a trace - ask the user to select a trace file.
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.loadTrace.title"));
+			fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
+			fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
+			Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
+			if (traceFile == null) {
+				return Optional.empty();
+			} else {
+				return Optional.of(traceFileHandler.createReplayTraceForPath(traceFile));
+			}
+		} else {
+			// This only implements editing the validation task ID.
+			// Editing the trace itself is a different menu item (addTestsItem).
+			// TODO Make this a proper dialog and perhaps allow viewing/changing the trace file path?
+			final TextInputDialog dialog = new TextInputDialog(oldItem.getId() == null ? "" : oldItem.getId());
+			stageManager.register(dialog);
+			dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+			dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
+			dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
+			return dialog.showAndWait().map(idText -> {
+				final String id = idText.trim().isEmpty() ? null : idText;
+				return oldItem.withId(id);
+			});
+		}
 	}
 
 	@FXML
 	private void checkMachine() {
 		traceChecker.checkAll(items);
-	}
-
-	@FXML
-	private void loadTraceFromFile() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.loadTrace.title"));
-		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
-		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
-		if (traceFile != null) {
-			final ReplayTrace replayTrace = traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), traceFile);
-			traceChecker.check(replayTrace, true);
-		}
-
 	}
 
 	public void closeDescription() {

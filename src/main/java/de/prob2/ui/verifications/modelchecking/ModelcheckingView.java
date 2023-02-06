@@ -302,28 +302,13 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 
 	@Override
-	protected Optional<ModelCheckingItem> editItem(final ModelCheckingItem oldItem) {
+	protected Optional<ModelCheckingItem> showItemDialog(final ModelCheckingItem oldItem) {
 		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-		modelcheckingStage.setData(oldItem);
+		if (oldItem != null) {
+			modelcheckingStage.setData(oldItem);
+		}
 		modelcheckingStage.showAndWait();
 		return Optional.ofNullable(modelcheckingStage.getResult());
-	}
-
-	@FXML
-	public void addModelCheck() {
-		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
-		stageController.showAndWait();
-		final ModelCheckingItem newItem = stageController.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		final ModelCheckingItem toCheck = this.addItem(newItem);
-		if (toCheck.getItems().isEmpty()) {
-			// Start checking with this configuration
-			// (unless it's an existing configuration that has already been run)
-			this.executeItem(toCheck);
-		}
 	}
 
 	@FXML

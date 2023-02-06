@@ -132,24 +132,13 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		formulaHandler.handleItem(item, false);
 	}
 	
-	@FXML
-	public void addFormula() {
-		final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
-		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
-		choosingStage.showAndWait();
-		final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		this.formulaHandler.handleItem(this.addItem(newItem), false);
-	}
-	
 	@Override
-	protected Optional<SymbolicCheckingFormulaItem> editItem(final SymbolicCheckingFormulaItem oldItem) {
+	protected Optional<SymbolicCheckingFormulaItem> showItemDialog(final SymbolicCheckingFormulaItem oldItem) {
 		final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
 		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
-		choosingStage.setData(oldItem);
+		if (oldItem != null) {
+			choosingStage.setData(oldItem);
+		}
 		choosingStage.showAndWait();
 		return Optional.ofNullable(choosingStage.getResult());
 	}

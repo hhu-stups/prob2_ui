@@ -54,7 +54,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			this.editMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			this.editMenuItem.setOnAction(e -> {
 				final T oldItem = this.getItem();
-				editItem(oldItem).ifPresent(newItem -> {
+				showItemDialog(oldItem).ifPresent(newItem -> {
 					final T itemToExecute = replaceItem(oldItem, newItem);
 					// FIXME Do we always want to re-execute the item after editing?
 					executeItemIfEnabled(itemToExecute);
@@ -177,5 +177,25 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		}
 	}
 	
-	protected abstract Optional<T> editItem(final T oldItem);
+	/**
+	 * Show a dialog asking the user to input a new item or edit an existing one.
+	 * 
+	 * @param oldItem the existing item to edit, or {@code null} to ask the user to create a new item
+	 * @return the created/edited item, or {@link Optional#empty()} if the user cancelled/closed the dialog
+	 */
+	protected abstract Optional<T> showItemDialog(final T oldItem);
+	
+	@FXML
+	protected Optional<T> askToAddItem() {
+		return this.showItemDialog(null).map(newItem -> {
+			final T toCheck = this.addItem(newItem);
+			// The returned item might already be checked
+			// if there was already another item with the same configuration as newItem
+			// and that existing item was already checked previously.
+			if (toCheck.getChecked() == Checked.NOT_CHECKED) {
+				this.executeItemIfEnabled(toCheck);
+			}
+			return toCheck;
+		});
+	}
 }
