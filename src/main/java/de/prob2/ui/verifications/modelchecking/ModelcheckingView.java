@@ -68,11 +68,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			});
 
 			editMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
-
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
-			removeItem.setOnAction(e -> items.remove(this.getItem()));
-			removeItem.disableProperty().bind(this.emptyProperty());
-			contextMenu.getItems().add(removeItem);
+			removeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
 		}
 	}
 	

@@ -41,10 +41,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		private Row() {
 			executeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.generate"));
 			editMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
-
-			MenuItem removeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> items.remove(this.getItem()));
-			contextMenu.getItems().add(removeItem);
+			removeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
 
 			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);

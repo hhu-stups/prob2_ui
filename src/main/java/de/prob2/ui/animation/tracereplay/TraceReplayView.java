@@ -61,6 +61,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 			executeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
 			editMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+			removeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.removeTrace"));
+			// Will be re-added in a different place later.
+			contextMenu.getItems().remove(removeMenuItem);
 
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
 			addTestsItem.setOnAction(event -> {
@@ -77,9 +80,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
 			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
-
-			final MenuItem deleteTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.removeTrace"));
-			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().getTraces().remove(this.getItem()));
 
 			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
 			openInExternalEditorItem.setOnAction(event ->
@@ -110,7 +110,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				persistentTraceList.forEach(trace -> traceFileHandler.addTraceFile(currentMachine, trace));
 			});
 
-			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
+			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, removeMenuItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
 		}
 	}
 

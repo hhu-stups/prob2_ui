@@ -35,13 +35,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		private Row() {
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
 			editMenuItem.setText(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
-			
-			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> {
-				SymbolicCheckingFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
-				items.remove(item);
-			});
-			contextMenu.getItems().add(removeItem);
+			removeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));

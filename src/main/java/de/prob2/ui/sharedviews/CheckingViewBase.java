@@ -34,6 +34,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		protected final ContextMenu contextMenu;
 		protected final MenuItem executeMenuItem;
 		protected final MenuItem editMenuItem;
+		protected final MenuItem removeMenuItem;
 		
 		protected RowBase() {
 			// Execute item (if possible) when double-clicked.
@@ -68,6 +69,10 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 				});
 			});
 			this.contextMenu.getItems().add(this.editMenuItem);
+			
+			this.removeMenuItem = new MenuItem();
+			this.removeMenuItem.setOnAction(e -> items.remove(this.getItem()));
+			this.contextMenu.getItems().add(removeMenuItem);
 			
 			this.itemProperty().addListener((o, from, to) -> {
 				if (to == null) {

@@ -61,10 +61,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
 			editMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
-			
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
-			removeItem.setOnAction(e -> items.remove(this.getItem()));
-			contextMenu.getItems().add(removeItem);
+			removeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
 			
 			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
