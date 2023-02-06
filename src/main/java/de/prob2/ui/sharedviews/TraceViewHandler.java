@@ -19,6 +19,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.scene.Node;
@@ -50,31 +51,16 @@ public class TraceViewHandler {
 	}
 
 	private void initialize() {
-		currentProject.addListener((observable, from, to) -> {
-			//When saving the project, the listener for the current project property is triggered
-			//even though it is the same project. This again resets the status of all traces (which is not the desired behavior).
-			//So this is why there is the additional check for the locations of the previous and the current project
-			//It is also possible for the user to switch to the same project (without saving).
-			//In this case, the statuses of all traces are reset by the current machine property (as no machine is chosen after switching the project).
-			if(from == null || to == null || !to.getLocation().equals(from.getLocation())) {
-				traces.unbind();
-				Machine machine = currentProject.getCurrentMachine();
-				if (machine != null) {
-					traces.bind(machine.tracesProperty());
-				} else {
-					traces.set(FXCollections.observableArrayList());
-				}
-			}
-		});
-
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			traces.unbind();
 			if (to != null) {
 				traces.bind(to.tracesProperty());
 			} else {
 				traces.set(FXCollections.observableArrayList());
 			}
-		});
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 
 	public Callback<TableColumn.CellDataFeatures<ReplayTrace, Node>, ObservableValue<Node>> getTraceStatusFactory() {
