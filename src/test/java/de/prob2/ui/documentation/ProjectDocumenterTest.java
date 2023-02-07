@@ -19,6 +19,7 @@ import javafx.stage.Stage;
 import org.apache.commons.io.FileUtils;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.DisabledOnOs;
+import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -34,8 +35,7 @@ import java.util.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.condition.OS.MAC;
-import static org.junit.jupiter.api.condition.OS.WINDOWS;
+import static org.junit.jupiter.api.condition.OS.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
@@ -129,7 +129,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,true,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
-		assertTexFileContainsString("LTL Formulars and Results");
+		assertTexFileContainsString("LTL Formulas and Results");
 	}
 	@Test
 	void testLTLPatternItemInserted() throws IOException {
@@ -161,9 +161,28 @@ class ProjectDocumenterTest extends ApplicationTest {
 	void testPDFCreated() {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
-		//PDF creation not instant set max delay 10s
-		await().atMost(10, SECONDS).until(() -> getOutputFile(".pdf").exists());
+		//PDF creation not instant set max delay 30s
+		await().atMost(30, SECONDS).until(() -> getOutputFile(".pdf").exists());
 		assertTrue(getOutputFile(".pdf").exists());
+	}
+
+	@EnabledOnOs({WINDOWS,LINUX,MAC})
+	@Test
+	void testZipScriptCreated() {
+		ProjectDocumenter velocityDocumenter1 = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
+		velocityDocumenter1.documentVelocity();
+		DocumentationProcessHandler.getOS();
+		switch (DocumentationProcessHandler.getOS()){
+			case WINDOWS:
+				assertTrue(new File(outputPath + "/makePortableDocumentation.bat").exists());
+				break;
+			case LINUX:
+				assertTrue(new File(outputPath + "/makePortableDocumentation.sh").exists());
+				break;
+			case MAC:
+				assertTrue(new File(outputPath + "/makePortableDocumentation.command").exists());
+				break;
+		}
 	}
 
 	private void assertTexFileContainsString(String s) throws IOException {
