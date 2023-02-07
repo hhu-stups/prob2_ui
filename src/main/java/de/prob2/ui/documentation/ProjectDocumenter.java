@@ -122,7 +122,7 @@ public class ProjectDocumenter {
 		TraceChecker traceChecker = injector.getInstance(TraceChecker.class);
 		String filename = Transition.prettifyName(trace.getName())+".html";
 		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
-		* To solve this Problem the completable future is saved as an field an can be accessed to be synced  */
+		* To solve this Problem the completable future is saved as an field that can be accessed to be synced  */
 		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
 		project.getLoadFuture().join();
 		traceChecker.check(trace,true).join();
@@ -166,6 +166,23 @@ public class ProjectDocumenter {
 				.filter(task -> task.selected() && (!task.getChecked().equals(Checked.NOT_CHECKED) && !task.getChecked().equals(Checked.SUCCESS)))
 				.count();
 		return Math.toIntExact(countFailed);
+	}
+
+	public boolean ltlDescriptionColumnNecessary(List<LTLFormulaItem> ltlFormulas){
+		for (LTLFormulaItem formula : ltlFormulas) {
+			if (!formula.getDescription().isEmpty()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	public boolean symbolicConfigurationColumnNecessary(List<SymbolicCheckingFormulaItem> symbolicFormulas){
+		for (SymbolicCheckingFormulaItem formula : symbolicFormulas) {
+			if (!formula.getCode().isEmpty()) {
+				return true;
+			}
+		}
+		return false;
 	}
 	/*---------------------------------*/
 }

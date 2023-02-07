@@ -2,6 +2,7 @@ package de.prob2.ui.project;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import de.prob2.ui.beditor.BLexerSyntaxHighlighting;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.documentation.DocumentationProcessHandler;
 import de.prob2.ui.documentation.MachineDocumentationItem;
@@ -88,13 +89,13 @@ public class SaveDocumentationStage extends Stage {
 		finishButton.disableProperty().bind(filename.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
 		filename.setText(this.currentProject.getName());
+		// connect machines with checkboxes this helped: https://stackoverflow.com/questions/7217625/how-to-add-checkboxs-to-a-tableview-in-javafx
 		tvMachines.setCellValueFactory(cell -> cell.getValue().getMachineItem().nameProperty());
 		tvChecked.setCellFactory(tc -> new CheckBoxTableCell<>());
 		tvChecked.setCellValueFactory(c -> {
 			SimpleBooleanProperty property = new SimpleBooleanProperty(c.getValue().getDocument());
 			property.addListener((observable, oldValue, newValue) -> c.getValue().setDocument(newValue));
 			return property;
-
 		});
 		tvDocumentation.setItems(machineDocumentationItems);
 	}
