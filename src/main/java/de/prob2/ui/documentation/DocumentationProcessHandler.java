@@ -7,6 +7,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 
+import static de.prob2.ui.documentation.DocumentationProcessHandler.OS.OTHER;
+
 //TODO REFACTOR TO DOCUMENTATIONPROCESSHANDLER
 public class DocumentationProcessHandler {
 	public enum OS {
@@ -37,6 +39,7 @@ public class DocumentationProcessHandler {
 		return content;
 	}
 
+	//this method is from  https://stackoverflow.com/questions/8488118/how-to-programatically-check-if-a-software-utility-is-installed-on-ubuntu-using
 	public static boolean packageInstalled(String binaryName) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder("/usr/bin/which", binaryName);
 		builder.redirectErrorStream(true);
@@ -51,26 +54,9 @@ public class DocumentationProcessHandler {
 		return (line != null && !line.isEmpty());
 	}
 	public static void createPdf(String filename, Path directory) {
-		switch (DocumentationProcessHandler.getOS()){
-			case LINUX:
-				createPdfLinux(filename,directory);
-				break;
-			case MAC:
-				createPdfMac(filename,directory);
-				break;
-			case WINDOWS:
-				createPdfWindows(filename,directory);
-				break;
+		if(getOS()!= OTHER){
+			executeCommand(directory,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
 		}
-	}
-	public static void createPdfLinux(String filename, Path dir) {
-		executeCommand(dir,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
-	}
-	public static void createPdfWindows(String filename, Path dir) {
-		executeCommand(dir,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
-	}
-	public static void createPdfMac(String filename, Path dir) {
-		executeCommand(dir,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
 	}
 	public static void createPortableDocumentationScriptLinux(String filename, Path dir) {
 		String shellScriptContent = readResourceWithFilename("makeZipShell.txt");
@@ -92,7 +78,7 @@ public class DocumentationProcessHandler {
 
 	private static void executeCommand(Path dir, String command) {
 		OS os = getOS();
-		if(os != OS.OTHER){
+		if(os != OTHER){
 			ProcessBuilder builder = new ProcessBuilder();
 			builder.directory(new File(dir.toString()));
 			switch(os){
@@ -114,6 +100,7 @@ public class DocumentationProcessHandler {
 		}
 	}
 
+	//this method is from https://stackoverflow.com/questions/228477/how-do-i-programmatically-determine-operating-system-in-java
 	public static OS getOS() {
 		String operSys = System.getProperty("os.name").toLowerCase();
 		if (operSys.contains("win")) {
@@ -123,7 +110,7 @@ public class DocumentationProcessHandler {
 		} else if (operSys.contains("mac")) {
 			return OS.MAC;
 		}
-		return OS.OTHER;
+		return OTHER;
 	}
 
 }
