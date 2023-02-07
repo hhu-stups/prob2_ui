@@ -16,11 +16,21 @@ import static de.prob2.ui.documentation.DocumentationUtility.getAbsoluteHtmlPath
 
 public class DocumentationResourceBuilder {
 	public static void buildLatexResources(Path directory, List<Machine> machines) {
-		createImageDirectoryStructure(directory,machines);
+		createTraceVisualisationDirectoryStructure(directory,machines);
+		createAndFillResourceDirectory(directory);
+	}
+
+	private static void createAndFillResourceDirectory(Path directory) {
+		try {
+			Files.createDirectories(Paths.get(directory + "/latex_resources"));
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		saveProBLogo(directory);
 		saveLatexCls(directory);
 	}
-	private static void createImageDirectoryStructure(Path directory, List<Machine> machines) {
+
+	private static void createTraceVisualisationDirectoryStructure(Path directory, List<Machine> machines) {
 		for (Machine machine : machines) {
 			for (ReplayTrace trace : machine.getTraces()) {
 				try {
@@ -33,11 +43,11 @@ public class DocumentationResourceBuilder {
 		}
 	}
 	private static void saveProBLogo(Path directory) {
-		String pathname = directory +"/html_files/ProB_Logo.png";
+		String pathname = directory +"/latex_resources/ProB_Logo.png";
 		copyFile(pathname,  Main.class.getResourceAsStream("ProB_Logo.png"));
 	}
 	private static void saveLatexCls(Path directory) {
-		String pathname = directory +"/autodoc.cls";
+		String pathname = directory +"/latex_resources/autodoc.cls";
 		copyFile(pathname, ProjectDocumenter.class.getResourceAsStream("autodoc.cls"));
 	}
 
@@ -46,7 +56,7 @@ public class DocumentationResourceBuilder {
 			assert resourceAsStream != null;
 			Files.copy(resourceAsStream, Paths.get(pathname), StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
-			// An error occurred copying the resource
+			//
 		}
 	}
 }
