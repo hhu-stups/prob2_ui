@@ -8,13 +8,7 @@ import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.visb.VisBStage;
-import de.prob2.ui.vomanager.IValidationTask;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.exception.MethodInvocationException;
@@ -30,13 +24,11 @@ import java.util.*;
 
 import static de.prob2.ui.documentation.DocumentationProcessHandler.*;
 import static de.prob2.ui.documentation.DocumentationResourceBuilder.*;
-import static de.prob2.ui.documentation.DocumentationUtility.getAbsoluteHtmlPath;
-import static de.prob2.ui.documentation.DocumentationUtility.getHtmlPath;
 
 public class ProjectDocumenter {
 	private final String filename;
 	private final I18n i18n;
-	private final Path dir;
+	private final Path directory;
 	private final boolean modelchecking;
 	private final boolean ltl;
 	private final boolean symbolic;
@@ -63,7 +55,7 @@ public class ProjectDocumenter {
 		this.makePdf = makePdf;
 		this.printHtmlCode = printHtmlCode;
 		this.machines = machines;
-		this.dir = dir;
+		this.directory = dir;
 		this.filename = filename;
 		this.injector = injector;
 		tracesHtmlPaths = new HashMap<>();
@@ -75,9 +67,9 @@ public class ProjectDocumenter {
 		VelocityContext context = getVelocityContext();
 		StringWriter writer = new StringWriter();
 		Velocity.mergeTemplate("de/prob2/ui/documentation/velocity_template.tex", String.valueOf(StandardCharsets.UTF_8),context,writer);
-		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, dir, ".tex");
+		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, directory, ".tex");
 		if(makePdf)
-			createPdf(filename,dir);
+			createPdf(filename, directory);
 		saveMakeZipBash();
 	}
 
@@ -97,7 +89,7 @@ public class ProjectDocumenter {
 		context.put("ltl", ltl);
 		context.put("symbolic", symbolic);
 		context.put("printHtmlCode",printHtmlCode);
-		context.put("documentationUtility", DocumentationUtility.class);
+		context.put("util", TemplateUtility.class);
 		context.put("Transition", Transition.class);
 		context.put("i18n", i18n);
 		context.put("traceHtmlPaths",tracesHtmlPaths);
@@ -107,13 +99,13 @@ public class ProjectDocumenter {
 	private void saveMakeZipBash() {
 		switch (DocumentationProcessHandler.getOS()){
 			case LINUX:
-				createPortableDocumentationScriptLinux(filename,dir);
+				createPortableDocumentationScriptLinux(filename, directory);
 				break;
 			case MAC:
-				createPortableDocumentationScriptMac(filename,dir);
+				createPortableDocumentationScriptMac(filename, directory);
 				break;
 			case WINDOWS:
-				createPortableDocumentationScriptWindows(filename,dir);
+				createPortableDocumentationScriptWindows(filename, directory);
 				break;
 		}
 	}
@@ -127,62 +119,21 @@ public class ProjectDocumenter {
 		project.getLoadFuture().join();
 		traceChecker.check(trace,true).join();
 		stage.show();
-		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(dir,machine,trace)+filename));
+		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(directory,machine,trace)+filename));
 		stage.close();
 		return getHtmlPath(machine,trace)+filename;
 	}
 
-	/*--- exclusive used by Template ---*/
-	public String getMachineCode(Machine elem) {
-		return readFile(project.getLocation().resolve(elem.getLocation()));
-	}
-	public String getTraceHtmlCode(String relativePath){
-		return readFile(Paths.get(dir +"/"+ relativePath));
-	}
-	public boolean formulaHasResult(LTLFormulaItem formula){return (formula.getResultItem() != null);}
-	public boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
-	public boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
-
-	public int getNumberSelectedTasks(List<IValidationTask> validationTasks){
-		long selectedTasksCount = validationTasks.stream()
-				.filter(IExecutableItem::selected)
-				.count();
-		return Math.toIntExact(selectedTasksCount);
-	}
-	public int getNumberSuccessfulTasks(List<IValidationTask> validationTasks){
-		long countSuccessful = validationTasks.stream()
-											  .filter(task -> task.selected() && task.getChecked().equals(Checked.SUCCESS))
-										      .count();
-		return Math.toIntExact(countSuccessful);
-	}
-	public int getNumberNotCheckedTasks(List<IValidationTask> validationTasks){
-		long countNotChecked = validationTasks.stream()
-				.filter(task -> task.selected() && task.getChecked().equals(Checked.NOT_CHECKED))
-				.count();
-		return Math.toIntExact(countNotChecked);
-	}
-	public int getNumberFailedTasks(List<IValidationTask> validationTasks){
-		long countFailed= validationTasks.stream()
-				.filter(task -> task.selected() && (!task.getChecked().equals(Checked.NOT_CHECKED) && !task.getChecked().equals(Checked.SUCCESS)))
-				.count();
-		return Math.toIntExact(countFailed);
+	public Path getDirectory() {
+		return directory;
 	}
 
-	public boolean ltlDescriptionColumnNecessary(List<LTLFormulaItem> ltlFormulas){
-		for (LTLFormulaItem formula : ltlFormulas) {
-			if (!formula.getDescription().isEmpty()) {
-				return true;
-			}
-		}
-		return false;
+	public static String getAbsoluteHtmlPath(Path directory, Machine machine, ReplayTrace trace) {
+		return directory+"/" + getHtmlPath(machine,trace);
 	}
-	public boolean symbolicConfigurationColumnNecessary(List<SymbolicCheckingFormulaItem> symbolicFormulas){
-		for (SymbolicCheckingFormulaItem formula : symbolicFormulas) {
-			if (!formula.getCode().isEmpty()) {
-				return true;
-			}
-		}
-		return false;
+
+	public static String getHtmlPath(Machine machine, ReplayTrace trace) {
+		return "html_files/" + machine.getName() + "/";
 	}
-	/*---------------------------------*/
+
 }

@@ -74,7 +74,7 @@
 											<Tooltip text="%verifications.documentation.pdf" />
 										</tooltip>
 									</CheckBox>
-									<CheckBox fx:id="printHtmlCode" selected="true"
+									<CheckBox fx:id="printHtmlCode" selected="false"
 											  text="%verifications.documentation.printhtml">
 										<tooltip>
 											<Tooltip text="%verifications.documentation.printhtml" />

@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static de.prob2.ui.documentation.DocumentationUtility.getAbsoluteHtmlPath;
+import static de.prob2.ui.documentation.ProjectDocumenter.getAbsoluteHtmlPath;
 
 public class DocumentationResourceBuilder {
 	public static void buildLatexResources(Path directory, List<Machine> machines) {
