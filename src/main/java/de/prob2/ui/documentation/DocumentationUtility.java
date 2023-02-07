@@ -15,7 +15,7 @@ public class DocumentationUtility {
 	}
 
 	public static String getHtmlPath(Machine machine, ReplayTrace trace) {
-		return "html_files/" + machine.getName() + "/" + Transition.prettifyName(trace.getName()) +"/";
+		return "html_files/" + machine.getName() + "/";
 	}
 
 	public static String toUIString(ModelCheckingItem item, I18n i18n) {
@@ -23,8 +23,9 @@ public class DocumentationUtility {
 		if (item.getId() != null) {
 			description = "[" + item.getId() + "] " + description;
 		}
-		return description;
+		return description.replaceAll(",", ",\\\\newline");
 	}
+
 
 	public static String latexSafe(String text) {
 		return text.replace("_", "\\_");
