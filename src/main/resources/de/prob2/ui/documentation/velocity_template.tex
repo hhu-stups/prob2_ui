@@ -1,10 +1,13 @@
 #macro( call $this )#set( $stfu = $this )#end
-\documentclass{autodoc}
-% Document
+#* This template is written with Apache Velocity Template Engine.
+If you use text which has underscores u can use the latexSafe method of documentationUtility to escape them. *#
+%Package and Style edits can be made in autodoc.cls%
+\documentclass{latex_resources/autodoc}
 \begin{document}
+%Titlepage%
 \begin{titlepage}
 	\begin{center}
-	\includegraphics[width=0.50\textwidth]{html_files/ProB_Logo.png}\par\vspace{1cm}
+	\includegraphics[width=0.50\textwidth]{latex_resources/ProB_Logo.png}\par\vspace{1cm}
 	{\scshape\LARGE Automated Documentation \par}
 	\vspace{1cm}
 	{\scshape\Large of Project \par}
@@ -12,103 +15,110 @@
 	{\huge\bfseries $documentationUtility.latexSafe($project.getName()) \par}
 	\vspace{2cm}
 	\vfill
-
 	% Bottom of the page
 	{\large \today\par}
-\end{center}
+	\end{center}
 \end{titlepage}
 
 \section{Introduction}
 This is an automatically created documentation of the ProB2-UI project: $documentationUtility.latexSafe($project.getName()).
 The $documentationUtility.latexSafe($project.getName()) project consists of  $project.getMachines().size() machines, $machines.size() of which were chosen for documentation.\\
-#if(!$project.getDescription().isEmpty()) The Project Description is: $documentationUtility.latexSafe($project.getDescription()) #end
-
-%LOOP OVER ALL MACHINES
-#foreach($machine in $machines)
-	% MACHINE CODE
-	%Unicodes in MCH Code can be added in autodoc.cls as Literate of MCH Style
+#if(!$project.getDescription().isEmpty())
+The Project Description is: $documentationUtility.latexSafe($project.getDescription())
+#end
+#foreach($machine in $machines) ##LOOP OVER ALL MACHINES
+%Unicodes in MCH Code can be added in autodoc.cls as Literate of MCH Style
 \section{$documentationUtility.latexSafe($machine.getName()) }
-The B Machine $documentationUtility.latexSafe($machine.getName()) is defined by its Code, shown in Listing \ref{lst:code$velocityCount}
+The B Machine $documentationUtility.latexSafe($machine.getName()) is defined by its Code, shown in Listing \ref{lst:code$foreach.index}
 \subsection{Code of B Machine $documentationUtility.latexSafe($machine.getName()) }
-	\begin{lstlisting}[style=MCH, caption = $documentationUtility.latexSafe($machine.getName()) MCH Code, label = lst:code$velocityCount]
+\begin{lstlisting}[style=MCH, caption = $documentationUtility.latexSafe($machine.getName()) MCH Code, label = lst:code$foreach.index]
 $documenter.getMachineCode($machine)
-	\end{lstlisting}
-%MODELCHECKING
+\end{lstlisting}
+
 #if($modelchecking && !$machine.getModelcheckingItems().isEmpty())
 \subsection{Model Checking}
-\begin{flushleft}
-The B Machine $documentationUtility.latexSafe($machine.getName()) has $documenter.getNumberSelectedTasks($machine.getModelcheckingItems())  Modelchecking Tasks of which $documenter.getNumberSuccessfulTasks($machine.getModelcheckingItems()) were checked successfully
-$documenter.getNumberFailedTasks($machine.getModelcheckingItems()) failed and $documenter.getNumberNotCheckedTasks($machine.getModelcheckingItems()) were not checked at all.
-\end{flushleft}
-\tablestyle[sansbold]
-	\begin{longtable}{*{2}{p{0.45\textwidth}}}
-	\theadstart
-		\thead Modelchecking Item &
-		\thead Modelchecking Result\\
-	\endfirsthead
-	\tsubheadstart
-		\thead Modelchecking Item &
-		\thead Modelchecking Result\\
-	\endhead
-		\rowcolor{white}\caption{Modelchecking Tasks and Results}\\
-	\endlastfoot
-	\tbody
-#foreach($item in $machine.getModelcheckingItems())
-#if($item.selected())
-#if($item.getItems().isEmpty())
-	$documentationUtility.toUIString($item,$i18n) & Modelchecking not solved\\
-#else
-	$documentationUtility.toUIString($item,$i18n) & #foreach($result in $item.getItems()) $result.getMessage() #end \\
-#end
-#end
-#end
-	\tend
+	\begin{flushleft}
+		The B Machine $documentationUtility.latexSafe($machine.getName()) has $documenter.getNumberSelectedTasks($machine.getModelcheckingItems())  Modelchecking Tasks of which $documenter.getNumberSuccessfulTasks($machine.getModelcheckingItems()) were checked successfully
+		$documenter.getNumberFailedTasks($machine.getModelcheckingItems()) failed and $documenter.getNumberNotCheckedTasks($machine.getModelcheckingItems()) were not checked at all.
+	\end{flushleft}
+	\tablestyle[sansbold]
+	\begin{longtable}{*{2}{p{0.5\textwidth}}}
+		\theadstart
+			\thead Modelchecking Task &
+			\thead Modelchecking Result\\
+		\endfirsthead
+		\tsubheadstart
+			\thead Modelchecking Task &
+			\thead Modelchecking Result\\
+		\endhead
+			\rowcolor{white}\caption{Modelchecking Tasks and Results}\\
+		\endlastfoot
+		\tbody
+		#foreach($item in $machine.getModelcheckingItems())
+			#if($item.selected())
+				#if($item.getItems().isEmpty())
+			$documentationUtility.toUIString($item,$i18n) & $i18n.translate("verifications.result.notChecked.header")\\
+				#else
+			$documentationUtility.toUIString($item,$i18n) & #foreach($result in $item.getItems()) $result.getMessage() #end \\
+				#end
+			#end
+		#end
+		\tend
 	\end{longtable}
 #end
-	%LTL
-	#if($ltl)
-	#if(!$machine.getLTLFormulas().isEmpty() || !$machine.getLTLPatterns().isEmpty() )\subsection{LTL Model Checking} #end
-	#if(!$machine.getLTLFormulas().isEmpty())
+
+#if($ltl)
+#if(!$machine.getLTLFormulas().isEmpty() || !$machine.getLTLPatterns().isEmpty() )
+\subsection{LTL Model Checking}
+#end
+#if(!$machine.getLTLFormulas().isEmpty())
 	\begin{flushleft}
-	The B Machine $documentationUtility.latexSafe($machine.getName()) has $documenter.getNumberSelectedTasks($machine.getLTLFormulas()) LTL Formulas of which $documenter.getNumberSuccessfulTasks($machine.getLTLFormulas()) were checked successfully
-	$documenter.getNumberFailedTasks($machine.getLTLFormulas()) failed and $documenter.getNumberNotCheckedTasks($machine.getLTLFormulas()) were not checked at all.
+		The B Machine $documentationUtility.latexSafe($machine.getName()) has $documenter.getNumberSelectedTasks($machine.getLTLFormulas()) LTL Formulas of which $documenter.getNumberSuccessfulTasks($machine.getLTLFormulas()) were checked successfully
+		$documenter.getNumberFailedTasks($machine.getLTLFormulas()) failed and $documenter.getNumberNotCheckedTasks($machine.getLTLFormulas()) were not checked at all.
 	\end{flushleft}
-\tablestyle[sansbold]
-		\begin{longtable}{*{2}{p{0.45\textwidth}}}
+	\tablestyle[sansbold]
+	\begingroup
+	\setlength{\LTleft}{-\textwidth plus -1fill}
+	\setlength{\LTright}{\LTleft}
+ 	#* checks if descriptions exist so that extra column can be generated *#
+	#set($createDescriptionColumn = $documenter.ltlDescriptionColumnNecessary($machine.getLTLFormulas()))
+	\begin{longtable}{p{0.5\textwidth} #if($createDescriptionColumn) p{0.25\textwidth}p{0.25\textwidth} #else p{0.4\textwidth} #end}
 		\theadstart
-			\thead LTL Formular &
+			\thead LTL Formula &
+			#if($createDescriptionColumn) \thead Description & #end
 			\thead Status\\
 		\endfirsthead
 		\tsubheadstart
-			\thead LTL Formular &
+			\thead LTL Formula &
+			#if($createDescriptionColumn) \thead Description &  #end
 			\thead Status\\
 		\endhead
-			\rowcolor{white}\caption{LTL Formulars and Results}\\
+			\rowcolor{white}\caption{LTL Formulas and Results}\\
 		\endlastfoot
 		\tbody
-	#foreach($formula in $machine.getLTLFormulas())
-	#if($formula.selected())
-	#if($documenter.formulaHasResult($formula))
-\begin{tabularlstlisting}
+		#foreach($formula in $machine.getLTLFormulas())
+			#if($formula.selected())
+				#if($documenter.formulaHasResult($formula))
+\begin{tabularlstlisting}[linewidth=0.5\textwidth ]
 $formula.getCode()
-\end{tabularlstlisting} &  $i18n.translate($formula.getResultItem().getHeaderBundleKey())\\
-#else
-\begin{tabularlstlisting}
+\end{tabularlstlisting} & #if($createDescriptionColumn) $formula.getDescription() & #end $i18n.translate($formula.getResultItem().getHeaderBundleKey())\\
+				#else
+\begin{tabularlstlisting}[linewidth=0.5\textwidth ]
 $formula.getCode()
-\end{tabularlstlisting} & Formula not solved \\
-	#end
-	#end
-	#end
-		\tend
-		\end{longtable}
-		\justifying
+\end{tabularlstlisting} & #if($createDescriptionColumn) $formula.getDescription() & #end $i18n.translate("verifications.result.notChecked.header") \\
+				#end
 			#end
-			#if(!$machine.getLTLPatterns().isEmpty())
-		\tablestyle[sansbold]
-		\begingroup
-		\setlength{\LTleft}{-\textwidth plus -1fill}
-		\setlength{\LTright}{\LTleft}
-		\begin{longtable}{p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
+		#end
+		\tend
+	\end{longtable}
+	\justifying
+#end
+#if(!$machine.getLTLPatterns().isEmpty())
+	\tablestyle[sansbold]
+	\begingroup
+	\setlength{\LTleft}{-\textwidth plus -1fill}
+	\setlength{\LTright}{\LTleft}
+	\begin{longtable}{L{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
 		\theadstart
 			\thead Pattern Name &
 			\thead Code &
@@ -122,107 +132,116 @@ $formula.getCode()
 			\rowcolor{white}\caption{LTL Patterns and Results}\\
 		\endlastfoot
 		\tbody
-	#foreach($pattern in $machine.getLTLPatterns())
-	#if($documenter.patternHasResult($pattern))
-		$pattern.getName() &
-\begin{tabularlstlisting}
+		#*tabularlstlisting cannot be indented *#
+		#foreach($pattern in $machine.getLTLPatterns())
+			#if($documenter.patternHasResult($pattern))
+$pattern.getName() &
+\begin{tabularlstlisting}[linewidth=0.29\textwidth]
 $pattern.getCode()
 \end{tabularlstlisting} & $i18n.translate($pattern.getResultItem().getHeaderBundleKey()) \\
-	#else
-		$pattern.getName() &
-\begin{tabularlstlisting}
+			#else
+				$pattern.getName() &
+\begin{tabularlstlisting}[linewidth=0.29\textwidth]
 $pattern.getCode()
-\end{tabularlstlisting} & Pattern not solved \\
-	#end
-	#end
+\end{tabularlstlisting} & $i18n.translate("verifications.result.notChecked.header")\\
+			#end
+		#end
+		\tend
+		\end{longtable}
+	\justifying
+#end
+#end
+
+#if($symbolic && !$machine.getSymbolicCheckingFormulas().isEmpty())
+	%SYMBOLIC
+	\subsection{Symbolic Model Checking}
+	\begin{flushleft}
+		The B Machine $documentationUtility.latexSafe($machine.getName()) has $documenter.getNumberSelectedTasks($machine.getSymbolicCheckingFormulas()) Symbolic Model Checking Formulas of which $documenter.getNumberSuccessfulTasks($machine.getSymbolicCheckingFormulas()) were checked successfully
+		$documenter.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) failed and $documenter.getNumberNotCheckedTasks($machine.getSymbolicCheckingFormulas()) were not checked at all.
+	\end{flushleft}
+	\tablestyle[sansbold]
+		\begingroup
+		\setlength{\LTleft}{-\textwidth plus -1fill}
+		\setlength{\LTright}{\LTleft}
+		#* checks if descriptions exist so that extra column can be generated *#
+		#set($createConfigurationColumn = $documenter.symbolicConfigurationColumnNecessary($machine.getSymbolicCheckingFormulas()))
+		\begin{longtable}{p{0.5\textwidth}#if($createConfigurationColumn) p{0.25\textwidth} #end p{0.25\textwidth}}
+		\theadstart
+			\thead Symbolic Check&
+			#if($createConfigurationColumn) \thead Configuration &  #end
+			\thead Result\\
+		\endfirsthead
+		\tsubheadstart
+			\thead Symbolic Check&
+		#if($createConfigurationColumn) \thead Configuration &  #end
+			\thead Result\\
+		\endhead
+			\rowcolor{white}\caption{Symbolic Formulars and Results}\\
+		\endlastfoot
+		\tbody
+		#foreach($sitem in $machine.getSymbolicCheckingFormulas())
+			#if($sitem.selected())
+				#if($documenter.symbolicHasResult($sitem))
+					$documentationUtility.latexSafe($sitem.getType().toString()) & #if($createConfigurationColumn) $documentationUtility.latexSafe($sitem.getCode()) & #end $i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
+				#else
+					$documentationUtility.latexSafe($sitem.getType().toString()) & #if($createConfigurationColumn) $documentationUtility.latexSafe($sitem.getCode()) & #end $i18n.translate("verifications.result.notChecked.header") \\
+				#end
+			#end
+		#end
+		\tend
+		\end{longtable}
+		\endgroup
+		\justifying
+#end
+#if(!$machine.getTraces().isEmpty())
+	\subsection{Traces}
+	\begin{flushleft}
+		A Trace refers to a sequence of state transitions, operations, and events that occur during the execution of a system.
+		The trace can be visualized as a table that lists the operations chronologically, with the position column indicating the index of the order, and the transition
+		column indicating the name of the operation. This can be useful for understanding the behavior of the system and identifying any errors or issues that may be present.
+		Traces are orders of operations. The B Machine $documentationUtility.latexSafe($machine.getName()) has $machine.getTraces().size() Traces.
+		In addition to the table, a visualization of every trace is generated via VisB. The visualization provides an interactive and visual
+		representation of the system's behavior during the trace transitions.
+		#if($printHtmlCode)
+			The HTML code for these visualization files is also included in the appendix.
+		#end
+	\end{flushleft}
+	#foreach($trace in $machine.getTraces())
+		#call($trace.load())
+		\tablestyle[sansbold]
+		\begin{longtable}{p{0.1\textwidth}p{0.6\textwidth}}
+		\rowcolor{white}\caption{$documentationUtility.latexSafe($trace.getName())} \\
+		\theadstart
+			\thead Step &
+			\thead Transition\\
+		\endfirsthead
+		\theadstart
+			\thead Step &
+			\thead Transition\\
+		\endhead
+		\tbody
+		#foreach($transition in $trace.getLoadedTrace().getTransitionList())
+			$foreach.index & $documentationUtility.latexSafe($Transition.prettifyName($transition.getOperationName())) \\
+		#end
 		\tend
 		\end{longtable}
 		\justifying
+		#*each trace visualization is created and its path is saved in a hashmap with the name as the key.
+		  This is so that the result can be referenced accordingly in the appendix.*#
+		#call( $traceHtmlPaths.put($trace.getName(), $documenter.saveTraceHtml($machine,$trace)) )
+		\IfFileExists{$traceHtmlPaths.get($trace.getName())}{
+			For the HTML Trace Visualization of $documentationUtility.latexSafe($trace.getName()) \href{run:$traceHtmlPaths.get($trace.getName())}{[click here!]}\\
+		}{
+		The HTML file for the Trace Visualization isn't available.
+		}
+		#if($printHtmlCode)
+			For the HTML Source Code \hyperref[lst:$trace.getName()]{[click here!]}  \\
+		#end
 	#end
-	#end
-
-
-	%SYMBOLIC
-	#if($symbolic && !$machine.getSymbolicCheckingFormulas().isEmpty())
-\subsection{Symbolic Model Checking}
-\begin{flushleft}
-The B Machine $documentationUtility.latexSafe($machine.getName()) has $documenter.getNumberSelectedTasks($machine.getSymbolicCheckingFormulas()) Symbolic Model Checking Formulas of which $documenter.getNumberSuccessfulTasks($machine.getSymbolicCheckingFormulas()) were checked successfully
-$documenter.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) failed and $documenter.getNumberNotCheckedTasks($machine.getSymbolicCheckingFormulas()) were not checked at all.
-\end{flushleft}
-\tablestyle[sansbold]
-	\begingroup
-	\setlength{\LTleft}{-\textwidth plus -1fill}
-	\setlength{\LTright}{\LTleft}
-	\begin{longtable}{p{0.45\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
-	\theadstart
-		\thead Symbolic Type&
-		\thead Configuration &
-		\thead Result\\
-	\endfirsthead
-	\tsubheadstart
-		\thead Symbolic Type&
-		\thead Configuration &
-		\thead Result\\
-	\endhead
-		\rowcolor{white}\caption{Symbolic Formulars and Results}\\
-	\endlastfoot
-	\tbody
-#foreach($sitem in $machine.getSymbolicCheckingFormulas())
-#if($sitem.selected())
-#if($documenter.symbolicHasResult($sitem))
-	$documentationUtility.latexSafe($sitem.getType().toString()) & $documentationUtility.latexSafe($sitem.getCode()) &  $i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
-#else
-	$documentationUtility.latexSafe($sitem.getType().toString()) & $documentationUtility.latexSafe($sitem.getCode())  & Formula not solved \\
-#end
-#end
-#end
-	\tend
-	\end{longtable}
-	\endgroup
-	\justifying
-	#end
-#if(!$machine.getTraces().isEmpty())
-\subsection{Traces}
-\begin{flushleft}
-A Trace refers to a sequence of state transitions, operations, and events that occur during the execution of a system.
-The trace can be visualized as a table that lists the operations chronologically, with the position column indicating the index of the order, and the transition
-column indicating the name of the operation. This can be useful for understanding the behavior of the system and identifying any errors or issues that may be present.
-Traces are orders of operations. The B Machine $documentationUtility.latexSafe($machine.getName()) has $machine.getTraces().size() Traces.
-In addition to the table, a visualization of every trace is generated via VisB. The visualization provides an interactive and visual
-representation of the system's behavior during the trace transitions. #if($printHtmlCode) The HTML code for these visualization files is also included in the appendix. #end
-\end{flushleft}
-#foreach($trace in $machine.getTraces())
-		#call($trace.load())
-	\tablestyle[sansbold]
-	\begin{longtable}{ll}
-	\rowcolor{white}\caption{$documentationUtility.latexSafe($trace.getName())} \\
-	\theadstart
-		\thead Position &
-		\thead Transition\\
-	\endfirsthead
-	\theadstart
-		\thead Position &
-		\thead Transition\\
-	\endhead
-	\tbody
-#foreach($transition in $trace.getLoadedTrace().getTransitionList())
-	$velocityCount & $documentationUtility.latexSafe($Transition.prettifyName($transition.getOperationName())) \\
-#end
-	\tend
-	\end{longtable}
-	#call( $traceHtmlPaths.put($trace.getName(), $documenter.saveTraceHtml($machine,$trace)) )
-	\IfFileExists{$traceHtmlPaths.get($trace.getName())}{
-		For the HTML Trace Visualization of $documentationUtility.latexSafe($trace.getName()) \href{run:$traceHtmlPaths.get($trace.getName())}{[click here!]}\\
-	}{
-	The HTML file for the Trace Visualization isn't available.
-	}
-	#if($printHtmlCode) For the HTML Source Code \hyperref[lst:$trace.getName()]{[click here!]}  \\ #end
-	\justifying
-#end
 #end
 #end
 
-#if(!$traceHtmlPaths.isEmpty() && $printHtmlCode)
+#if(!$traceHtmlPaths.isEmpty() && $printHtmlCode) ## optional appendix which will print html source code of trace visualization
 \appendix
 \justifying
 	\section{Traces Visualization HTML Code}
