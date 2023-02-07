@@ -169,8 +169,8 @@ class ProjectDocumenterTest extends ApplicationTest {
 	@EnabledOnOs({WINDOWS,LINUX,MAC})
 	@Test
 	void testZipScriptCreated() {
-		ProjectDocumenter velocityDocumenter1 = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
-		velocityDocumenter1.documentVelocity();
+		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
+		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		DocumentationProcessHandler.getOS();
 		switch (DocumentationProcessHandler.getOS()){
 			case WINDOWS:
