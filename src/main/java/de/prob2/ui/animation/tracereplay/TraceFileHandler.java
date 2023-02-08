@@ -131,7 +131,7 @@ public class TraceFileHandler extends ProBFileHandler {
 		).showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();
-				currentMachine.getTraces().removeIf(trace -> trace.getLocation().equals(path));
+				currentMachine.getTraces().removeIf(trace -> trace.getAbsoluteLocation().equals(path));
 			}
 		});
 	}
