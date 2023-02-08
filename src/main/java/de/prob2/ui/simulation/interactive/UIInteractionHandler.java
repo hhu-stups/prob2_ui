@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.interactive;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
+import de.prob.statespace.State;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -11,6 +12,7 @@ import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+import de.prob2.ui.simulation.simulators.Scheduler;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -25,6 +27,8 @@ public class UIInteractionHandler {
 
 	private final ObjectProperty<Transition> uiListener;
 
+	private final Scheduler scheduler;
+
 	private final CurrentTrace currentTrace;
 
 	private final CurrentProject currentProject;
@@ -34,7 +38,8 @@ public class UIInteractionHandler {
 	private final List<Integer> timestamps;
 
 	@Inject
-	public UIInteractionHandler(final CurrentTrace currentTrace, final CurrentProject currentProject) {
+	public UIInteractionHandler(final Scheduler scheduler, final CurrentTrace currentTrace, final CurrentProject currentProject) {
+		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiListener = new SimpleObjectProperty<>(null);
 		this.userTransitions = new ArrayList<>();
@@ -46,6 +51,31 @@ public class UIInteractionHandler {
 	private void initialize() {
 		currentProject.addListener((observable, from, to) -> reset());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
+	}
+
+	public void handleUIInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
+		if(transition == null) {
+			return;
+		}
+		List<UIListenerConfiguration> uiListenerConfigurations = realTimeSimulator.getConfig().getUiListenerConfigurations();
+		boolean anyActivated = false;
+		State destinationState = transition.getDestination();
+		for(UIListenerConfiguration uiListener : uiListenerConfigurations) {
+			String event = uiListener.getEvent();
+			// TODO: handle predicate
+			List<String> activating = uiListener.getActivating();
+			if(event.equals(transition.getName())) {
+				// TODO: Handle parameter predicates
+				for(String activatingEvent : activating) {
+					realTimeSimulator.handleOperationConfiguration(destinationState,  realTimeSimulator.getActivationConfigurationMap().get(activatingEvent), new ArrayList<>(), "1=1");
+					anyActivated = true;
+				}
+				break;
+			}
+		}
+		if(anyActivated) {
+			scheduler.runWithoutInitialisation();
+		}
 	}
 
 	public void reset() {
