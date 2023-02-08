@@ -161,7 +161,7 @@ public class UIInteractionHandler {
 		}
 
 		activationConfigurationsForResult.addAll(userInteractions);
-		return new SimulationConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationConfiguration.metadataBuilder("Automatic_Simulation_with_User_Interaction").withSavedNow().withUserCreator().build());
+		return new SimulationConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationConfiguration.metadataBuilder(SimulationConfiguration.SimulationFileType.INTERACTION_REPLAY).withSavedNow().withUserCreator().build());
 	}
 
 	public ObjectProperty<Transition> getLastUiInteraction() {

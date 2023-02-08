@@ -15,6 +15,23 @@ import de.prob.json.JsonMetadataBuilder;
 	"metadata",
 })
 public class SimulationConfiguration implements HasMetadata {
+
+	public static enum SimulationFileType {
+		SIMULATION("Simulation"),
+		TIMED_TRACE("Timed_Trace"),
+		INTERACTION_REPLAY("Interaction_Replay");
+
+		private final String name;
+
+		SimulationFileType(String name) {
+			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+	}
+
 	public static final int CURRENT_FORMAT_VERSION = 2;
 
 	private final List<ActivationConfiguration> activations;
@@ -27,8 +44,8 @@ public class SimulationConfiguration implements HasMetadata {
 		this.metadata = metadata;
 	}
 
-	public static JsonMetadataBuilder metadataBuilder(String fileType) {
-		return new JsonMetadataBuilder(fileType, CURRENT_FORMAT_VERSION)
+	public static JsonMetadataBuilder metadataBuilder(SimulationFileType fileType) {
+		return new JsonMetadataBuilder(fileType.getName(), CURRENT_FORMAT_VERSION)
 			.withSavedNow()
 			.withUserCreator();
 	}
