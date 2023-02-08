@@ -26,7 +26,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteraction;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;

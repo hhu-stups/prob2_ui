@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.simulation.interactive;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
