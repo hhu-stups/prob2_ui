@@ -22,23 +22,23 @@ public class RealTimeSimulator extends Simulator {
 	private final ChangeListener<Transition> uiListener;
 
 	@Inject
-	public RealTimeSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, final UIInteractionHandler uiInteraction) {
+	public RealTimeSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
 		super(currentTrace);
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
-		this.uiInteractionHandler = uiInteraction;
+		this.uiInteractionHandler = uiInteractionHandler;
 		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUIInteraction(this, to);
 	}
 
 	@Override
 	public void run() {
 		scheduler.run();
-		uiInteractionHandler.getUiListener().addListener(uiListener);
+		uiInteractionHandler.getLastUiInteraction().addListener(uiListener);
 	}
 
 	@FXML
 	public void stop() {
-		uiInteractionHandler.getUiListener().removeListener(uiListener);
+		uiInteractionHandler.getLastUiInteraction().removeListener(uiListener);
 		scheduler.stop();
 	}
 

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Singleton
 public class UIInteractionHandler {
 
-	private final ObjectProperty<Transition> uiListener;
+	private final ObjectProperty<Transition> lastUiInteraction;
 
 	private final Scheduler scheduler;
 
@@ -41,7 +41,7 @@ public class UIInteractionHandler {
 	public UIInteractionHandler(final Scheduler scheduler, final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
-		this.uiListener = new SimpleObjectProperty<>(null);
+		this.lastUiInteraction = new SimpleObjectProperty<>(null);
 		this.userTransitions = new ArrayList<>();
 		this.timestamps = new ArrayList<>();
 		this.currentProject = currentProject;
@@ -91,7 +91,7 @@ public class UIInteractionHandler {
 		if ("$setup_constants".equals(name) || "$initialise_machine".equals(name)) {
 			return;
 		}
-		uiListener.set(transition);
+		lastUiInteraction.set(transition);
 		userTransitions.add(transition);
 		timestamps.add(realTimeSimulator.getTime());
 	}
@@ -164,8 +164,8 @@ public class UIInteractionHandler {
 		return new SimulationConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationConfiguration.metadataBuilder("Automatic_Simulation_with_User_Interaction").withSavedNow().withUserCreator().build());
 	}
 
-	public ObjectProperty<Transition> getUiListener() {
-		return uiListener;
+	public ObjectProperty<Transition> getLastUiInteraction() {
+		return lastUiInteraction;
 	}
 
 }
