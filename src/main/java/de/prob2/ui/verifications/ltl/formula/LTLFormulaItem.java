@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
@@ -91,7 +92,12 @@ public class LTLFormulaItem extends AbstractCheckableItem implements IValidation
 		return counterExample;
 	}
 	
-	public boolean settingsEqual(final LTLFormulaItem other) {
+	@Override
+	public boolean settingsEqual(final IExecutableItem obj) {
+		if (!(obj instanceof LTLFormulaItem)) {
+			return false;
+		}
+		final LTLFormulaItem other = (LTLFormulaItem)obj;
 		return Objects.equals(this.getId(), other.getId())
 			&& this.getCode().equals(other.getCode())
 			&& this.getDescription().equals(other.getDescription())

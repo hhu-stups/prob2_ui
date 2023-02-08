@@ -101,7 +101,7 @@ public class HelpSystem extends StackPane {
 			}
 		});
 
-		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://www3.hhu.de/stups/prob/index.php/Main_Page"));
+		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://prob.hhu.de/w/"));
 
 		this.openHelpForKeyAndAnchor("proB2UI", null);
 	}

@@ -38,7 +38,7 @@
 			</InterruptIfRunningButton>
 			<Spacer/>
 			<Button fx:id="addModelCheckButton" disable="true"
-				contentDisplay="GRAPHIC_ONLY" onAction="#addModelCheck">
+				contentDisplay="GRAPHIC_ONLY" onAction="#askToAddItem">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>

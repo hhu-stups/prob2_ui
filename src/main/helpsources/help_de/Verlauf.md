@@ -1,5 +1,3 @@
-![Verlaufsansicht](../screenshots/History.png)
-
 Die Verlaufs-Ansicht zeigt eine Liste von bereits ausgeführten Operationen. 
 Die Ansicht korrespondiert mit den Animations-Möglichkeiten und der [Zustandsansicht](Zentrale%20Ansicht/Zustandsansicht.md) von ProB. 
 Wenn also eine Transition über z.B. [VisB](Hauptmenü/Visualisierungen/VisB.md) oder die [Operations-Ansicht](Operationen.md)
@@ -12,4 +10,5 @@ dann eine Operation ausführt, wird der bisherige Verlauf überschrieben/gelösc
 
 Mit den Buttons am oberen rechten Rand können ausgeführte Pfade abgespeichert werden (wahlweise als .csv oder als .prob2trace) und zum Nachspielen geladen werden.
 
+![Verlaufsansicht](../screenshots/History.png)
 

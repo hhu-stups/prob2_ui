@@ -1,7 +1,10 @@
 package de.prob2.ui.sharedviews;
 
+import java.util.Optional;
+
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -31,23 +34,37 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	protected class RowBase extends TableRow<T> {
 		protected final ContextMenu contextMenu;
 		protected final MenuItem executeMenuItem;
+		protected final MenuItem editMenuItem;
+		protected final MenuItem removeMenuItem;
 		
 		protected RowBase() {
 			// Execute item (if possible) when double-clicked.
 			this.setOnMouseClicked(event -> {
 				if (!this.isEmpty() && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					final T item = this.getItem();
-					if (!disableItemBinding(item).get()) {
-						executeItem(item);
-					}
+					executeItemIfEnabled(this.getItem());
 				}
 			});
 			
 			this.contextMenu = new ContextMenu();
 			
-			this.executeMenuItem = new MenuItem();
+			this.executeMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.execute"));
 			this.executeMenuItem.setOnAction(e -> executeItem(this.getItem()));
 			this.contextMenu.getItems().add(this.executeMenuItem);
+			
+			this.editMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
+			this.editMenuItem.setOnAction(e -> {
+				final T oldItem = this.getItem();
+				showItemDialog(oldItem).ifPresent(newItem -> {
+					final T itemToExecute = replaceItem(oldItem, newItem);
+					// FIXME Do we always want to re-execute the item after editing?
+					executeItemIfEnabled(itemToExecute);
+				});
+			});
+			this.contextMenu.getItems().add(this.editMenuItem);
+			
+			this.removeMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
+			this.removeMenuItem.setOnAction(e -> items.remove(this.getItem()));
+			this.contextMenu.getItems().add(removeMenuItem);
 			
 			this.itemProperty().addListener((o, from, to) -> {
 				if (to == null) {
@@ -79,6 +96,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	@FXML
 	protected Button checkMachineButton;
 	
+	private final I18n i18n;
 	protected final DisablePropertyController disablePropertyController;
 	
 	// This is a proper ListProperty, so it supports emptyProperty(),
@@ -87,7 +105,8 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	
 	protected final CheckBox selectAll;
 	
-	protected CheckingViewBase(final DisablePropertyController disablePropertyController) {
+	protected CheckingViewBase(final I18n i18n, final DisablePropertyController disablePropertyController) {
+		this.i18n = i18n;
 		this.disablePropertyController = disablePropertyController;
 		this.items = new SimpleListProperty<>(this, "items", FXCollections.emptyObservableList());
 		this.selectAll = new CheckBox();
@@ -115,6 +134,26 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		});
 	}
 	
+	protected T addItem(final T newItem) {
+		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+		if (!existingItem.isPresent()) {
+			items.add(newItem);
+			return newItem;
+		} else {
+			return existingItem.get();
+		}
+	}
+	
+	protected T replaceItem(final T oldItem, final T newItem) {
+		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+		if (!existingItem.isPresent()) {
+			items.set(items.indexOf(oldItem), newItem);
+			return newItem;
+		} else {
+			return existingItem.get();
+		}
+	}
+	
 	/**
 	 * Describe the item's configuration as a string,
 	 * which will be displayed in the {@link #configurationColumn}.
@@ -131,4 +170,32 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	}
 	
 	protected abstract void executeItem(final T item);
+	
+	protected void executeItemIfEnabled(final T item) {
+		if (!disableItemBinding(item).get()) {
+			executeItem(item);
+		}
+	}
+	
+	/**
+	 * Show a dialog asking the user to input a new item or edit an existing one.
+	 * 
+	 * @param oldItem the existing item to edit, or {@code null} to ask the user to create a new item
+	 * @return the created/edited item, or {@link Optional#empty()} if the user cancelled/closed the dialog
+	 */
+	protected abstract Optional<T> showItemDialog(final T oldItem);
+	
+	@FXML
+	protected Optional<T> askToAddItem() {
+		return this.showItemDialog(null).map(newItem -> {
+			final T toCheck = this.addItem(newItem);
+			// The returned item might already be checked
+			// if there was already another item with the same configuration as newItem
+			// and that existing item was already checked previously.
+			if (toCheck.getChecked() == Checked.NOT_CHECKED) {
+				this.executeItemIfEnabled(toCheck);
+			}
+			return toCheck;
+		});
+	}
 }

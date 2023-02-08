@@ -29,7 +29,6 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -41,14 +40,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.generate"));
-
-			MenuItem changeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e -> changeItem(this.getItem()));
-			contextMenu.getItems().add(changeItem);
-
-			MenuItem removeItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> items.remove(this.getItem()));
-			contextMenu.getItems().add(removeItem);
 
 			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
@@ -137,7 +128,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController, final TestCaseGenerationItemHandler itemHandler,
 	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -196,33 +187,14 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		itemHandler.handleItem(item);
 	}
 
-	@FXML
-	public void addTestCase() {
-		final TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
-		choosingStage.showAndWait();
-		final TestCaseGenerationItem newItem = choosingStage.getItem();
-		if (newItem == null) {
-			return;
-		}
-		final Optional<TestCaseGenerationItem> existingItem = itemHandler.addItem(newItem);
-		itemHandler.generateTestCases(existingItem.orElse(newItem));
-	}
-
-	private void changeItem(TestCaseGenerationItem item) {
+	@Override
+	protected Optional<TestCaseGenerationItem> showItemDialog(final TestCaseGenerationItem oldItem) {
 		TestCaseGenerationChoosingStage choosingStage = injector.getInstance(TestCaseGenerationChoosingStage.class);
-		choosingStage.setItem(item);
+		if (oldItem != null) {
+			choosingStage.setItem(oldItem);
+		}
 		choosingStage.showAndWait();
-		final TestCaseGenerationItem newItem = choosingStage.getItem();
-		if (newItem == null) {
-			return;
-		}
-		if (!itemHandler.replaceItem(item, newItem).isPresent()) {
-			itemHandler.generateTestCases(newItem);
-		} else {
-			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.configuration").show();
-		}
+		return Optional.ofNullable(choosingStage.getItem());
 	}
 
 	@FXML

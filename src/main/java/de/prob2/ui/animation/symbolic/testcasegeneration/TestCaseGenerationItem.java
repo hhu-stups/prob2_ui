@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.IExecutableItem;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -77,7 +78,12 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonIgnore
 	public abstract String getConfigurationDescription();
 	
-	public boolean settingsEqual(final TestCaseGenerationItem other) {
+	@Override
+	public boolean settingsEqual(final IExecutableItem obj) {
+		if (!(obj instanceof TestCaseGenerationItem)) {
+			return false;
+		}
+		final TestCaseGenerationItem other = (TestCaseGenerationItem)obj;
 		return this.getType().equals(other.getType())
 			&& this.getMaxDepth() == other.getMaxDepth();
 	}

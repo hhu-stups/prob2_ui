@@ -81,7 +81,7 @@ public class TraceChecker {
 		// ReplayTraceFileCommand doesn't support progress updates yet,
 		// so set an indeterminate status for now.
 		// We cannot use -1, because it is already used to say that no replay is currently running
-		// (this is special-cased in TraceViewHandler).
+		// (this is special-cased in TraceReplayView).
 		replayTrace.setProgress(-2);
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		final CompletableFuture<ReplayTrace> future = cliExecutor.submit(() -> {

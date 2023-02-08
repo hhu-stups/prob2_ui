@@ -16,7 +16,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationDetailsStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.sharedviews.TraceSelectionStage;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -134,17 +133,6 @@ public final class HistoryView extends VBox {
 		currentTrace.addListener(traceChangeListener);
 
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
-
-		final BooleanBinding openTraceDefaultDisableProperty = currentProject.currentMachineProperty().isNull();
-		openTraceSelectionButton.disableProperty().bind(openTraceDefaultDisableProperty);
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			openTraceSelectionButton.disableProperty().unbind();
-			if(to != null) {
-				openTraceSelectionButton.disableProperty().bind(to.tracesProperty().emptyProperty());
-			} else {
-				openTraceSelectionButton.disableProperty().bind(openTraceDefaultDisableProperty);
-			}
-		});
 		saveTraceButton.disableProperty()
 				.bind(partOfDisableBinding.or(currentProject.isNotNull().and(currentTrace.isNotNull()).not()));
 	}
@@ -168,13 +156,4 @@ public final class HistoryView extends VBox {
 	private void saveTraceAsTable() {
 		injector.getInstance(TraceSaver.class).saveTraceAsTable(this.getScene().getWindow());
 	}
-
-
-	@FXML
-	private void openTraceSelection() {
-		TraceSelectionStage traceSelectionView = injector.getInstance(TraceSelectionStage.class);
-		traceSelectionView.show();
-		traceSelectionView.toFront();
-	}
-
 }

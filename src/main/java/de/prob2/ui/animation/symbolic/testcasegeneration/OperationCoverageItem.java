@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorOperationCoverageSettings;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
+import de.prob2.ui.verifications.IExecutableItem;
 
 public final class OperationCoverageItem extends TestCaseGenerationItem {
 	private final List<String> operations;
@@ -42,11 +43,11 @@ public final class OperationCoverageItem extends TestCaseGenerationItem {
 	}
 	
 	@Override
-	public boolean settingsEqual(final TestCaseGenerationItem other) {
-		if (!(other instanceof OperationCoverageItem)) {
+	public boolean settingsEqual(final IExecutableItem obj) {
+		if (!(obj instanceof OperationCoverageItem)) {
 			return false;
 		}
-		final OperationCoverageItem o = (OperationCoverageItem)other;
-		return super.settingsEqual(o) && this.getOperations().equals(o.getOperations());
+		final OperationCoverageItem other = (OperationCoverageItem)obj;
+		return super.settingsEqual(other) && this.getOperations().equals(other.getOperations());
 	}
 }

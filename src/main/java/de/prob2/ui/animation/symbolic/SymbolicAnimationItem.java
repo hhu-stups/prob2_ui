@@ -8,6 +8,7 @@ import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.IExecutableItem;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -44,7 +45,12 @@ public class SymbolicAnimationItem extends AbstractCheckableItem {
 		return this.code;
 	}
 
-	public boolean settingsEqual(final SymbolicAnimationItem other) {
+	@Override
+	public boolean settingsEqual(final IExecutableItem obj) {
+		if (!(obj instanceof SymbolicAnimationItem)) {
+			return false;
+		}
+		final SymbolicAnimationItem other = (SymbolicAnimationItem)obj;
 		return this.getType().equals(other.getType())
 			&& this.getCode().equals(other.getCode());
 	}

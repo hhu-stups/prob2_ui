@@ -35,33 +35,6 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		private Row() {
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
 			
-			MenuItem changeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
-			changeItem.setOnAction(e -> {
-				final SymbolicCheckingFormulaItem oldItem = this.getItem();
-				final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
-				choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
-				choosingStage.setData(oldItem);
-				choosingStage.showAndWait();
-				final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
-				if (newItem == null) {
-					// User cancelled/closed the window
-					return;
-				}
-				final Optional<SymbolicCheckingFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-				if (!existingItem.isPresent()) {
-					items.set(items.indexOf(oldItem), newItem);
-				}
-				formulaHandler.handleItem(existingItem.orElse(newItem), false);
-			});
-			contextMenu.getItems().add(changeItem);
-			
-			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> {
-				SymbolicCheckingFormulaItem item = itemsTable.getSelectionModel().getSelectedItem();
-				items.remove(item);
-			});
-			contextMenu.getItems().add(removeItem);
-			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
@@ -116,7 +89,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
 	                            final DisablePropertyController disablePropertyController, final Provider<SymbolicCheckingChoosingStage> choosingStageProvider) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -159,21 +132,15 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		formulaHandler.handleItem(item, false);
 	}
 	
-	@FXML
-	public void addFormula() {
+	@Override
+	protected Optional<SymbolicCheckingFormulaItem> showItemDialog(final SymbolicCheckingFormulaItem oldItem) {
 		final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();
 		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
+		if (oldItem != null) {
+			choosingStage.setData(oldItem);
+		}
 		choosingStage.showAndWait();
-		final SymbolicCheckingFormulaItem newItem = choosingStage.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		final Optional<SymbolicCheckingFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		if (!existingItem.isPresent()) {
-			items.add(newItem);
-		}
-		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
+		return Optional.ofNullable(choosingStage.getResult());
 	}
 	
 	@FXML

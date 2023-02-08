@@ -36,6 +36,7 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ListProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -59,14 +60,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
-			
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
-			openEditor.setOnAction(e -> showCurrentItemDialog(this.getItem()));
-			contextMenu.getItems().add(openEditor);
-			
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
-			removeItem.setOnAction(e -> items.remove(this.getItem()));
-			contextMenu.getItems().add(removeItem);
 			
 			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
@@ -133,7 +126,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 					final FileChooserManager fileChooserManager,
 					final ObjectMapper objectMapper,
 					final JacksonManager<LTLData> jacksonManager) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.injector = injector;
@@ -181,6 +174,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				}
 				items.bind(to.ltlFormulasProperty());
 				tvPattern.itemsProperty().bind(to.ltlPatternsProperty());
+				managePatternTable(to.ltlPatternsProperty());
 			} else {
 				items.set(FXCollections.emptyObservableList());
 				tvPattern.setItems(FXCollections.emptyObservableList());
@@ -198,15 +192,16 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removePattern"));
+			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
 			removeItem.setOnAction(e -> {
 				Machine machine = currentProject.getCurrentMachine();
 				LTLPatternItem item = row.getItem();
 				machine.getLTLPatterns().remove(item);
 				patternParser.removePattern(item, machine);
+				managePatternTable(machine.ltlPatternsProperty());
 			});
 
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
+			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showParsingMessage"));
@@ -223,6 +218,17 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 					.otherwise(new ContextMenu(openEditor, showMessage, removeItem)));
 			return row;
 		});
+	}
+
+	private void managePatternTable(ListProperty<LTLPatternItem> ltlPatternItems){
+		if (ltlPatternItems.isEmpty()){
+			tvPattern.setVisible(false);
+			tvPattern.setManaged(false);
+		}
+		else {
+			tvPattern.setVisible(true);
+			tvPattern.setManaged(true);
+		}
 	}
 
 	private void setBindings() {
@@ -250,27 +256,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 	
 	@FXML
-	public void addFormula() {
-		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.showAndWait();
-		final LTLFormulaItem newItem = formulaStage.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		final Optional<LTLFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		final LTLFormulaItem toCheck;
-		if (existingItem.isPresent()) {
-			// Identical existing formula found - reuse it instead of creating another one
-			toCheck = existingItem.get();
-		} else {
-			items.add(newItem);
-			toCheck = newItem;
-		}
-		checker.checkFormula(toCheck);
-	}
-	
-	@FXML
 	public void addPattern() {
 		LTLPatternStage patternStage = injector.getInstance(LTLPatternStage.class);
 		patternStage.showAndWait();
@@ -283,6 +268,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		if (machine.getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
 			patternParser.addPattern(newItem, machine);
 			machine.getLTLPatterns().add(newItem);
+			managePatternTable(machine.ltlPatternsProperty());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
@@ -290,24 +276,14 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		}
 	}
 	
-	private void showCurrentItemDialog(LTLFormulaItem oldItem) {
+	@Override
+	protected Optional<LTLFormulaItem> showItemDialog(final LTLFormulaItem oldItem) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.setData(oldItem);
+		if (oldItem != null) {
+			formulaStage.setData(oldItem);
+		}
 		formulaStage.showAndWait();
-		final LTLFormulaItem changedItem = formulaStage.getResult();
-		if (changedItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		if (items.stream().noneMatch(existing -> !oldItem.settingsEqual(existing) && changedItem.settingsEqual(existing))) {
-			items.set(items.indexOf(oldItem), changedItem);
-			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
-			checker.checkFormula(changedItem);
-		} else {
-			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.formula").show();
-		}
+		return Optional.ofNullable(formulaStage.getResult());
 	}
 	
 	private void showCurrentItemDialog(LTLPatternItem oldItem) {

@@ -1,5 +1,3 @@
-![VisB](../../../screenshots/Visualisations/VisB.png)
-
 The VisB Plugin provides an interactive Visualisation of the current machine. To use this plugin, two files are needed, the VisB-file in .json-format and a svg-file.
 You can find further information on how to create those files in the user manual.
 
@@ -18,7 +16,8 @@ Furthermore, the i-Button shows current items and events. Via the cogwheel-Butto
 
 Similar to the history- or operations-view, you can use the button in the middle to navigate through the executed transitions.
 
-The buttons in the top right corner allow you to open selected traces for replay, open [SimB]() and save current traces or states as html-file.
+The buttons in the top right corner allow you to open selected traces for replay, open [SimB](../Advanced/SimB.md) and save current traces or states as html-file.
 
+![VisB](../../../screenshots/Visualisations/VisB.png)
 
 Some examples for visualisation with VisB can be found [here](https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples).

@@ -1,5 +1,3 @@
-![HistoryChart](../../../screenshots/Visualisations/History%20Chart.png)
-
 Das Zeitdiagramm zeigt gewünschte Werte der Maschine als Diagramm. 
 
 Mit einem Klick auf den Plus-Button auf der linken Seite können B Formel hinzugefügt werden.
@@ -10,3 +8,5 @@ In der Mitte werden die Werte dieser Formeln in Diagrammen angezeigt. Hierbei st
 
 Nach Bedarf können die Graphen als Stufendiagramme ("Rechteckkurve") und als separate Diagramme angezeigt. Durch "Starte bei Position:" kann ein bestimmter Zeitschritt gewählt werden,
 der als Startwert des Diagramms dienen soll.
+
+![HistoryChart](../../../screenshots/Visualisations/History%20Chart.png)
