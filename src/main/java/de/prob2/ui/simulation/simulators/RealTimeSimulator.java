@@ -32,30 +32,7 @@ public class RealTimeSimulator extends Simulator {
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiInteraction = uiInteraction;
-		this.uiListener = (observable, from, to) -> {
-			if(to == null) {
-				return;
-			}
-			List<UIListenerConfiguration> uiListenerConfigurations = config.getUiListenerConfigurations();
-			boolean anyActivated = false;
-			State destinationState = to.getDestination();
-			for(UIListenerConfiguration uiListener : uiListenerConfigurations) {
-				String event = uiListener.getEvent();
-				// TODO: handle predicate
-				List<String> activating = uiListener.getActivating();
-				if(event.equals(to.getName())) {
-					// TODO: Handle parameter predicates
-					for(String activatingEvent : activating) {
-						simulationEventHandler.handleOperationConfiguration(destinationState,  activationConfigurationMap.get(activatingEvent), new ArrayList<>(), "1=1");
-						anyActivated = true;
-					}
-					break;
-				}
-			}
-			if(anyActivated) {
-				scheduler.runWithoutInitialisation();
-			}
-		};
+		this.uiListener = (observable, from, to) -> handleUIInteraction(to);
 	}
 
 	@Override
@@ -96,5 +73,30 @@ public class RealTimeSimulator extends Simulator {
 	@Override
 	public boolean endingConditionReached(Trace trace) {
 		return super.endingConditionReached(trace) && config.getUiListenerConfigurations().isEmpty();
+	}
+
+	private void handleUIInteraction(Transition transition) {
+		if(transition == null) {
+			return;
+		}
+		List<UIListenerConfiguration> uiListenerConfigurations = config.getUiListenerConfigurations();
+		boolean anyActivated = false;
+		State destinationState = transition.getDestination();
+		for(UIListenerConfiguration uiListener : uiListenerConfigurations) {
+			String event = uiListener.getEvent();
+			// TODO: handle predicate
+			List<String> activating = uiListener.getActivating();
+			if(event.equals(transition.getName())) {
+				// TODO: Handle parameter predicates
+				for(String activatingEvent : activating) {
+					simulationEventHandler.handleOperationConfiguration(destinationState,  activationConfigurationMap.get(activatingEvent), new ArrayList<>(), "1=1");
+					anyActivated = true;
+				}
+				break;
+			}
+		}
+		if(anyActivated) {
+			scheduler.runWithoutInitialisation();
+		}
 	}
 }
