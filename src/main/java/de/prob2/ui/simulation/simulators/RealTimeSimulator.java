@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.interactive.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import javafx.beans.property.BooleanProperty;
@@ -22,12 +22,12 @@ public class RealTimeSimulator extends Simulator {
 
 	private final CurrentTrace currentTrace;
 
-	private final UIInteraction uiInteraction;
+	private final UIInteractionHandler uiInteraction;
 
 	private final ChangeListener<Transition> uiListener;
 
 	@Inject
-	public RealTimeSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, final UIInteraction uiInteraction) {
+	public RealTimeSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, final UIInteractionHandler uiInteraction) {
 		super(currentTrace);
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;

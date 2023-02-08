@@ -17,7 +17,7 @@ import java.nio.file.Path;
 
 public class UIInteractionSaver extends ProBFileHandler {
 
-	private final UIInteraction uiInteraction;
+	private final UIInteractionHandler uiInteraction;
 
 	private final RealTimeSimulator realTimeSimulator;
 
@@ -25,7 +25,7 @@ public class UIInteractionSaver extends ProBFileHandler {
 
 	@Inject
 	public UIInteractionSaver(final VersionInfo versionInfo, final CurrentProject currentProject, final StageManager stageManager,
-							  final FileChooserManager fileChooserManager, final I18n i18n, final UIInteraction uiInteraction,
+							  final FileChooserManager fileChooserManager, final I18n i18n, final UIInteractionHandler uiInteraction,
 							  final RealTimeSimulator realTimeSimulator, final JacksonManager<SimulationConfiguration> jsonManager,
 							  final ObjectMapper objectMapper) {
 		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);

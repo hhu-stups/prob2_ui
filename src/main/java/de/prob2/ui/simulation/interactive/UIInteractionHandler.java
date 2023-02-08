@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Singleton
-public class UIInteraction {
+public class UIInteractionHandler {
 
 	private final ObjectProperty<Transition> uiListener;
 
@@ -34,7 +34,7 @@ public class UIInteraction {
 	private final List<Integer> timestamps;
 
 	@Inject
-	public UIInteraction(final CurrentTrace currentTrace, final CurrentProject currentProject) {
+	public UIInteractionHandler(final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		this.currentTrace = currentTrace;
 		this.uiListener = new SimpleObjectProperty<>(null);
 		this.userTransitions = new ArrayList<>();
@@ -96,14 +96,6 @@ public class UIInteraction {
 		return userInteractions;
 	}
 
-	public ObjectProperty<Transition> getUiListener() {
-		return uiListener;
-	}
-
-	public Transition getLastUIChange() {
-		return uiListener.get();
-	}
-
 	public SimulationConfiguration createAutomaticSimulation(RealTimeSimulator realTimeSimulator) {
 		SimulationConfiguration config = realTimeSimulator.getConfig();
 		List<ActivationConfiguration> activationConfigurations = config.getActivationConfigurations();
@@ -142,5 +134,8 @@ public class UIInteraction {
 		return new SimulationConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationConfiguration.metadataBuilder("Automatic_Simulation_with_User_Interaction").withSavedNow().withUserCreator().build());
 	}
 
+	public ObjectProperty<Transition> getUiListener() {
+		return uiListener;
+	}
 
 }

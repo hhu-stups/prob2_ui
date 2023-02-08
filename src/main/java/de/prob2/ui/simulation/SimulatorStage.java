@@ -25,7 +25,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.simulation.interactive.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -396,7 +396,7 @@ public class SimulatorStage extends Stage {
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 			noSimulations.unbind();
-			injector.getInstance(UIInteraction.class).reset();
+			injector.getInstance(UIInteractionHandler.class).reset();
 
 			this.loadSimulationIntoSimulator(to);
 			if(to != null) {
