@@ -139,7 +139,8 @@ public class SimulatorStage extends Stage {
 						currentTrace.set(item.getTraces().get(0));
 					} else {
 						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
-						tracesView.setSimulatorStage(simulatorStage);
+						SimulationScenarioHandler simulationScenarioHandler = injector.getInstance(SimulationScenarioHandler.class);
+						simulationScenarioHandler.setSimulatorStage(simulatorStage);
 						tracesView.setItems(item, item.getTraces(), item.getTimestamps(), item.getStatuses());
 						tracesView.show();
 					}
