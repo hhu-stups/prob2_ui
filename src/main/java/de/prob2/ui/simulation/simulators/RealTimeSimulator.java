@@ -5,7 +5,7 @@ import com.google.inject.Singleton;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.internal.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteraction;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import javafx.beans.property.BooleanProperty;

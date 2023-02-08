@@ -1,4 +1,4 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.simulation.interactive;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -58,7 +58,7 @@ public class UIInteraction {
 			return;
 		}
 		String name = transition.getName();
-		if ("$setup_constants".equals(name) || "$initialse_machine".equals(name)) {
+		if ("$setup_constants".equals(name) || "$initialise_machine".equals(name)) {
 			return;
 		}
 		uiListener.set(transition);

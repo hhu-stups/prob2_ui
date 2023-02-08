@@ -1,5 +1,6 @@
 package de.prob2.ui.visb;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteraction;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
@@ -259,8 +260,9 @@ public class VisBController {
 	private void setupVisualisation(final Path visBPath){
 		try {
 			this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
-		} catch (UncheckedIOException | ProBError e) {
+		} catch (Exception e) {
 			this.visBVisualisation.set(null);
+			LOGGER.warn("error while loading visb file", e);
 			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			updateInfo("visb.infobox.visualisation.error");
 			return;

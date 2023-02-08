@@ -66,13 +66,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 					executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 				}
 			});
-
-			editMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
-
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
-			removeItem.setOnAction(e -> items.remove(this.getItem()));
-			removeItem.disableProperty().bind(this.emptyProperty());
-			contextMenu.getItems().add(removeItem);
 		}
 	}
 	
@@ -122,7 +115,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			final DisablePropertyController disablePropertyController,
 			final StageManager stageManager, final Injector injector,
 			final I18n i18n, final Modelchecker checker) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
@@ -256,14 +249,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	
 	@Override
 	protected void executeItem(final ModelCheckingItem item) {
-		if (item.getItems().stream().anyMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-			return;
-		}
-
-		this.checkSingleItem(item);
-	}
-
-	private void checkSingleItem(final ModelCheckingItem item) {
 		if(!item.selected()) {
 			return;
 		}
@@ -317,36 +302,13 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 
 	@Override
-	protected Optional<ModelCheckingItem> editItem(final ModelCheckingItem oldItem) {
+	protected Optional<ModelCheckingItem> showItemDialog(final ModelCheckingItem oldItem) {
 		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-		modelcheckingStage.setData(oldItem);
+		if (oldItem != null) {
+			modelcheckingStage.setData(oldItem);
+		}
 		modelcheckingStage.showAndWait();
 		return Optional.ofNullable(modelcheckingStage.getResult());
-	}
-
-	@FXML
-	public void addModelCheck() {
-		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
-		stageController.showAndWait();
-		final ModelCheckingItem newItem = stageController.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		final Optional<ModelCheckingItem> existingItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(newItem::settingsEqual).findAny();
-		final ModelCheckingItem toCheck;
-		if (existingItem.isPresent()) {
-			// Identical existing configuration found - reuse it instead of creating another one
-			toCheck = existingItem.get();
-		} else {
-			currentProject.getCurrentMachine().getModelcheckingItems().add(newItem);
-			toCheck = newItem;
-		}
-		if (toCheck.getItems().isEmpty()) {
-			// Start checking with this configuration
-			// (unless it's an existing configuration that has already been run)
-			this.checkSingleItem(toCheck);
-		}
 	}
 
 	@FXML

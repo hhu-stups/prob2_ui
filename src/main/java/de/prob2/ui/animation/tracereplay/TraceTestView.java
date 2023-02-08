@@ -25,8 +25,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.sharedviews.TraceViewHandler;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedIcon;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
@@ -448,14 +448,6 @@ public class TraceTestView extends Stage {
 		return textField;
 	}
 
-	private BindableGlyph buildStatusIcon() {
-		final BindableGlyph statusIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
-		statusIcon.getStyleClass().add("status-icon");
-		statusIcon.setPrefHeight(fontSize.getFontSize());
-		statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
-		return statusIcon;
-	}
-
 	private MenuButton buildAddButton(VBox box, int index) {
 		final MenuButton btAddTest = new MenuButton("", new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
 		btAddTest.getStyleClass().add("icon-dark");
@@ -499,17 +491,19 @@ public class TraceTestView extends Stage {
 		));
 		final TextField postconditionTextField = buildPostconditionTextField(postcondition);
 		final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
-		final BindableGlyph statusIcon = buildStatusIcon();
+		final CheckedIcon statusIcon = new CheckedIcon();
+		statusIcon.setPrefHeight(fontSize.getFontSize());
+		statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
 
 		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
 		if (transitionErrorMessages.size() <= index || isNewBox) {
-			TraceViewHandler.updateStatusIcon(statusIcon, Checked.NOT_CHECKED);
+			statusIcon.setChecked(Checked.NOT_CHECKED);
 		} else {
 			// TODO There's currently no good way to tell which errors belong to which postcondition.
 			// For now, we display all postconditions as failed if there are any errors for the relevant transition.
 			Checked status = transitionErrorMessages.get(index).isEmpty() ? Checked.SUCCESS : Checked.FAIL;
-			replayTrace.get().checkedProperty().addListener((o, from, to) -> TraceViewHandler.updateStatusIcon(statusIcon, status));
-			TraceViewHandler.updateStatusIcon(statusIcon, status);
+			replayTrace.get().checkedProperty().addListener((o, from, to) -> statusIcon.setChecked(status));
+			statusIcon.setChecked(status);
 		}
 
 		innerBox.getChildren().add(typeLabel);

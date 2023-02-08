@@ -1,9 +1,13 @@
-package de.prob2.ui.internal;
+package de.prob2.ui.simulation.interactive;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import de.prob.json.JacksonManager;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.ProBFileHandler;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;

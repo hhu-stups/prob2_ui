@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.animation.tracereplay.TraceReplayMenuButton?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.control.Tooltip?>
+<fx:root type="TraceReplayMenuButton" disable="true" xmlns:fx="http://javafx.com/fxml">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<graphic>
+		<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILE" bindableFontSize="${fontSize.fontSize + 2}" />
+	</graphic>
+	<tooltip>
+		<Tooltip text="%animation.tracereplay.menuButton.tooltip" />
+	</tooltip>
+</fx:root>

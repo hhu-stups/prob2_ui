@@ -30,7 +30,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.internal.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteraction;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
