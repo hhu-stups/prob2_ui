@@ -130,8 +130,8 @@ public class SimulationTracesView extends Stage {
 
 	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps, List<Checked> status) {
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
-		for (int i = 1; i <= traces.size(); i++) {
-			items.add(new SimulationTraceItem(item, traces.get(i - 1), timestamps.get(i - 1), status.get(i - 1), i));
+		for (int i = 0; i < traces.size(); i++) {
+			items.add(new SimulationTraceItem(item, traces.get(i), timestamps.get(i), status.get(i), i+1));
 		}
 		traceTableView.setItems(items);
 	}
@@ -147,72 +147,16 @@ public class SimulationTracesView extends Stage {
 			final TableRow<SimulationTraceItem> row = new TableRow<>();
 
 			final MenuItem loadTraceItem = new MenuItem(i18n.translate("simulation.contextMenu.loadTrace"));
-
-			loadTraceItem.setOnAction(e -> {
-				SimulationTraceItem item = row.getItem();
-				if (item == null) {
-					return;
-				}
-				this.currentTrace.set(item.getTrace());
-			});
-
+			loadTraceItem.setOnAction(e -> loadTrace(row.getItem()));
 
 			final MenuItem playTraceItem = new MenuItem(i18n.translate("simulation.contextMenu.play"));
-
-			playTraceItem.setOnAction(e -> {
-				Trace trace = new Trace(currentTrace.getStateSpace());
-				currentTrace.set(trace);
-				SimulationTraceItem traceItem = row.getItem();
-				SimulationConfiguration config = injector.getInstance(SimulationCreator.class).createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false, SimulationConfiguration.metadataBuilder("Timed_Trace").build());
-				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-
-				try {
-					realTimeSimulator.initSimulator(config);
-				} catch (IOException exception) {
-					exception.printStackTrace();
-					// TODO: Handle error
-				}
-				realTimeSimulator.setupBeforeSimulation(trace);
-				trace.setExploreStateByDefault(false);
-				simulatorStage.simulate();
-				trace.setExploreStateByDefault(true);
-			});
+			playTraceItem.setOnAction(e -> playTrace(row.getItem()));
 
 			final MenuItem saveTraceItem = new MenuItem(i18n.translate("simulation.contextMenu.saveTrace"));
-
-			saveTraceItem.setOnAction(e -> {
-				SimulationTraceItem item = row.getItem();
-				if (item == null) {
-					return;
-				}
-				TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
-				if (currentTrace.get() != null) {
-					Trace trace = item.getTrace();
-					try {
-						traceSaver.save(trace, currentProject.getCurrentMachine());
-					} catch (IOException exception) {
-						exception.printStackTrace();
-						// TODO: Handle error
-					}
-				}
-			});
+			saveTraceItem.setOnAction(e -> saveTrace(row.getItem()));
 
 			final MenuItem saveTimedTraceItem = new MenuItem(i18n.translate("simulation.contextMenu.saveTimedTrace"));
-
-			saveTimedTraceItem.setOnAction(e -> {
-				SimulationTraceItem item = row.getItem();
-				if (item == null) {
-					return;
-				}
-				SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
-				try {
-					String createdBy = "Simulation: " + item.getParent().getTypeAsName() + "; " + item.getParent().getConfiguration();
-					simulationSaver.saveConfiguration(item.getTrace(), item.getTimestamps(), createdBy);
-				} catch (IOException exception) {
-					exception.printStackTrace();
-					// TODO: Handle error
-				}
-			});
+			saveTimedTraceItem.setOnAction(e -> saveTimedTrace(row.getItem()));
 
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
@@ -231,6 +175,61 @@ public class SimulationTracesView extends Stage {
 
 			return row;
 		});
+	}
+
+	private void loadTrace(SimulationTraceItem item) {
+		if (item == null) {
+			return;
+		}
+		this.currentTrace.set(item.getTrace());
+	}
+
+	private void playTrace(SimulationTraceItem traceItem) {
+		Trace trace = new Trace(currentTrace.getStateSpace());
+		currentTrace.set(trace);
+		SimulationConfiguration config = injector.getInstance(SimulationCreator.class).createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false, SimulationConfiguration.metadataBuilder("Timed_Trace").build());
+		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
+
+		try {
+			realTimeSimulator.initSimulator(config);
+		} catch (IOException exception) {
+			exception.printStackTrace();
+			// TODO: Handle error
+		}
+		realTimeSimulator.setupBeforeSimulation(trace);
+		trace.setExploreStateByDefault(false);
+		simulatorStage.simulate();
+		trace.setExploreStateByDefault(true);
+	}
+
+	private void saveTrace(SimulationTraceItem item) {
+		if (item == null) {
+			return;
+		}
+		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
+		if (currentTrace.get() != null) {
+			Trace trace = item.getTrace();
+			try {
+				traceSaver.save(trace, currentProject.getCurrentMachine());
+			} catch (IOException exception) {
+				exception.printStackTrace();
+				// TODO: Handle error
+			}
+		}
+	}
+
+	private void saveTimedTrace(SimulationTraceItem item) {
+		if (item == null) {
+			return;
+		}
+		SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
+		try {
+			String createdBy = "Simulation: " + item.getParent().getTypeAsName() + "; " + item.getParent().getConfiguration();
+			simulationSaver.saveConfiguration(item.getTrace(), item.getTimestamps(), createdBy);
+		} catch (IOException exception) {
+			exception.printStackTrace();
+			// TODO: Handle error
+		}
 	}
 
 	public void setSimulatorStage(final SimulatorStage simulatorStage) {
