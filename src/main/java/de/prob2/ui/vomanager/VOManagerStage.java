@@ -47,6 +47,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
@@ -220,6 +221,26 @@ public class VOManagerStage extends Stage {
 			}
 		});
 
+		vtTable.setRowFactory(table -> {
+			final TableRow<IValidationTask> row = new TableRow<>();
+			
+			row.setOnMouseClicked(e -> {
+				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
+					checkSingleTask(row.getItem());
+				}
+			});
+			
+			final MenuItem checkMenuItem = new MenuItem(i18n.translate("vomanager.validationTasksInMachine.contextMenu.check"));
+			checkMenuItem.setOnAction(e -> checkSingleTask(row.getItem()));
+			
+			final ContextMenu contextMenu = new ContextMenu(checkMenuItem);
+			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty())
+				.then((ContextMenu)null)
+				.otherwise(contextMenu));
+			
+			return row;
+		});
+
 		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		vtIdColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getId()));
@@ -271,6 +292,11 @@ public class VOManagerStage extends Stage {
 		} catch (VOException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}
+	}
+
+	private void checkSingleTask(final IValidationTask task) {
+		// FIXME This parses the ID as a validation expression - we should simplify this once we have a proper way to check a generic IValidationTask
+		voChecker.checkVO(new ValidationObligation(currentProject.getCurrentMachine().getName(), task.getId()));
 	}
 
 	private void initializeEditingBoxes() {
