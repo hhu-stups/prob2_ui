@@ -90,7 +90,7 @@ public class UIInteractionHandler {
 		if(uiListenersForEvent == null) {
 			return false;
 		}
-		
+
 		// TODO: Handle parameter predicates
 		for(UIListenerConfiguration uiListener : uiListenersForEvent) {
 			for(String activatingEvent : uiListener.getActivating()) {
@@ -170,7 +170,7 @@ public class UIInteractionHandler {
 				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) activationConfiguration;
 				activations = new ArrayList<>(initializationConfiguration.getActivating());
 				activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
-				activationConfigurations.add(new ActivationOperationConfiguration("$initialise_machine", "$initialise_machine", initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), activations));
+				activationConfigurationsForResult.add(new ActivationOperationConfiguration("$initialise_machine", "$initialise_machine", initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), activations));
 			} else if("$setup_constants".equals(activationConfiguration.getId())) {
 				hasSetupConstants = true;
 			} else {
