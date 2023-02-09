@@ -139,23 +139,20 @@ public class UIInteractionHandler {
 		return activations;
 	}
 
-	public SimulationConfiguration createAutomaticSimulation(RealTimeSimulator realTimeSimulator) {
-		SimulationConfiguration config = realTimeSimulator.getConfig();
-		List<ActivationConfiguration> activationConfigurations = config.getActivationConfigurations();
+	private List<ActivationConfiguration> createActivationConfigurationsFromUserInteraction(List<ActivationConfiguration> activationConfigurations, List<ActivationConfiguration> userInteractions) {
 		List<ActivationConfiguration> activationConfigurationsForResult = new ArrayList<>();
 
-		List<ActivationConfiguration> userInteractions = createUserInteractions(realTimeSimulator);
 		boolean hasSetupConstants = false;
 		boolean hasInitialization = false;
 		List<String> activations = new ArrayList<>();
 		for(ActivationConfiguration activationConfiguration : activationConfigurations) {
-			if(activationConfiguration.getId().equals("$initialise_machine")) {
+			if("$initialise_machine".equals(activationConfiguration.getId())) {
 				hasInitialization = true;
 				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) activationConfiguration;
 				activations = new ArrayList<>(initializationConfiguration.getActivating());
 				activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
 				activationConfigurations.add(new ActivationOperationConfiguration("$initialise_machine", "$initialise_machine", initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), activations));
-			} else if(activationConfiguration.getId().equals("$setup_constants")) {
+			} else if("$setup_constants".equals(activationConfiguration.getId())) {
 				hasSetupConstants = true;
 			} else {
 				activationConfigurationsForResult.add(activationConfiguration);
@@ -174,6 +171,13 @@ public class UIInteractionHandler {
 		}
 
 		activationConfigurationsForResult.addAll(userInteractions);
+		return activationConfigurationsForResult;
+	}
+
+	public SimulationConfiguration createUserInteractionSimulation(RealTimeSimulator realTimeSimulator) {
+		List<ActivationConfiguration> activationConfigurations = realTimeSimulator.getConfig().getActivationConfigurations();
+		List<ActivationConfiguration> userInteractions = createUserInteractions(realTimeSimulator);
+		List<ActivationConfiguration> activationConfigurationsForResult = createActivationConfigurationsFromUserInteraction(activationConfigurations, userInteractions);
 		return new SimulationConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationConfiguration.metadataBuilder(SimulationConfiguration.SimulationFileType.INTERACTION_REPLAY).withSavedNow().withUserCreator().build());
 	}
 

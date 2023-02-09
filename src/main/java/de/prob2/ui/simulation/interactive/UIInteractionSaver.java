@@ -38,7 +38,7 @@ public class UIInteractionSaver extends ProBFileHandler {
 	public void saveUIInteractions() throws IOException {
 		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveUIReplay.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, "json");
 		if (path != null) {
-			SimulationConfiguration configuration = uiInteraction.createAutomaticSimulation(realTimeSimulator);
+			SimulationConfiguration configuration = uiInteraction.createUserInteractionSimulation(realTimeSimulator);
 			this.jsonManager.writeToFile(path, configuration);
 		}
 
