@@ -42,9 +42,9 @@ import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -64,7 +64,7 @@ import se.sawano.java.text.AlphanumericComparator;
 @Singleton
 public class VOManagerStage extends Stage {
 	public enum Mode {
-		NONE, REQUIREMENT, VO
+		NONE, REQUIREMENT
 	}
 
 	@FXML
@@ -77,16 +77,13 @@ public class VOManagerStage extends Stage {
 	private TreeTableColumn<VOManagerItem, Checked> requirementStatusColumn;
 
 	@FXML
-	private MenuButton btAddRequirementVO;
+	private Button btAddRequirement;
 
 	@FXML
 	private MenuItem btAddVO;
 
 	@FXML
 	private RequirementsEditingBox requirementEditingBox;
-
-	@FXML
-	private VOEditingBox voEditingBox;
 
 	@FXML
 	private ChoiceBox<VOManagerSetting> cbViewSetting;
@@ -215,9 +212,6 @@ public class VOManagerStage extends Stage {
 				if (item.getRequirement() != null) {
 					requirementEditingBox.showRequirement(item.getRequirement());
 					switchMode(Mode.REQUIREMENT);
-				} else if (item.getVo() != null) {
-					voEditingBox.showValidationObligation(item.getVo(), item.getRequirement());
-					switchMode(Mode.VO);
 				} else {
 					switchMode(Mode.NONE);
 				}
@@ -281,10 +275,7 @@ public class VOManagerStage extends Stage {
 
 	private void initializeEditingBoxes() {
 		requirementEditingBox.setVoManagerStage(this);
-		voEditingBox.setVoManagerStage(this);
-
 		requirementEditingBox.visibleProperty().bind(modeProperty.isEqualTo(Mode.REQUIREMENT));
-		voEditingBox.visibleProperty().bind(modeProperty.isEqualTo(Mode.VO));
 	}
 
 	private void initializeChoiceBoxes() {
@@ -294,19 +285,16 @@ public class VOManagerStage extends Stage {
 
 	private void initializeListenerOnProjectChange() {
 		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
-			btAddVO.disableProperty().unbind();
 			final List<Machine> machines = to == null ? Collections.emptyList() : to.getMachines();
 			requirementEditingBox.updateLinkedMachines(machines);
-			voEditingBox.updateLinkedMachines(machines);
 
 			if (to != null) {
-				btAddVO.setDisable(to.getRequirements().isEmpty());
 				updateRequirementsTable();
 			} else {
 				tvRequirements.setRoot(null);
 			}
 
-			btAddRequirementVO.setDisable(to == null);
+			btAddRequirement.setDisable(to == null);
 		};
 		currentProject.addListener(projectChangeListener);
 		projectChangeListener.changed(null, null, currentProject.get());
@@ -433,12 +421,6 @@ public class VOManagerStage extends Stage {
 	public void addRequirement() {
 		requirementEditingBox.resetRequirementEditing();
 		switchMode(Mode.REQUIREMENT);
-	}
-
-	@FXML
-	public void addVO() {
-		voEditingBox.resetVOEditing();
-		switchMode(Mode.VO);
 	}
 
 	private void removeItem(final VOManagerItem item) {

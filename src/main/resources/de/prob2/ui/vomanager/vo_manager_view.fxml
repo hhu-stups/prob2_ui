@@ -4,19 +4,18 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.vomanager.RequirementsEditingBox?>
-<?import de.prob2.ui.vomanager.VOEditingBox?>
 <?import de.prob2.ui.vomanager.VOManagerSetting?>
 <?import de.prob2.ui.vomanager.VOManagerStage?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.HBox?>
@@ -46,15 +45,14 @@
 								</items>
 							</ChoiceBox>
 							<Spacer/>
-							<MenuButton fx:id="btAddRequirementVO">
+							<Button fx:id="btAddRequirement" onAction="#addRequirement">
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
 								</graphic>
-								<items>
-									<MenuItem fx:id="btAddRequirement" text="%vomanager.menu.requirements.add" onAction="#addRequirement"/>
-									<MenuItem fx:id="btAddVO" text="%vomanager.menu.vo.add" onAction="#addVO"/>
-								</items>
-							</MenuButton>
+								<tooltip>
+									<Tooltip text="%vomanager.menu.requirements.add"/>
+								</tooltip>
+							</Button>
 						</HBox>
 						<TreeTableView fx:id="tvRequirements" showRoot="false" VBox.vgrow="ALWAYS">
 							<columnResizePolicy>
@@ -75,7 +73,6 @@
 					<VBox spacing="5.0">
 						<StackPane>
 							<RequirementsEditingBox fx:id="requirementEditingBox" VBox.vgrow="NEVER"/>
-							<VOEditingBox fx:id="voEditingBox" VBox.vgrow="NEVER"/>
 						</StackPane>
 						<VBox styleClass="border" spacing="5.0">
 							<Label text="%vomanager.feedback.validation.title"/>
