@@ -11,7 +11,7 @@
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="VOEditingBox" styleClass="border" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="VOEditingBox" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>

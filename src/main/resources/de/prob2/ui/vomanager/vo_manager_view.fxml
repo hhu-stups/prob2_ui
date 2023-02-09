@@ -75,7 +75,7 @@
 							<RequirementsEditingBox fx:id="requirementEditingBox" VBox.vgrow="NEVER"/>
 							<VOEditingBox fx:id="voEditingBox" VBox.vgrow="NEVER"/>
 						</StackPane>
-						<VBox spacing="5.0">
+						<VBox styleClass="border" spacing="5.0">
 							<Label text="%vomanager.feedback.validation.title"/>
 							<TextArea editable="false" fx:id="taFeedback"/>
 						</VBox>
