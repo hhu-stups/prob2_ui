@@ -397,9 +397,13 @@ public class SimulatorStage extends Stage {
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 			noSimulations.unbind();
-			injector.getInstance(UIInteractionHandler.class).reset();
+
+			UIInteractionHandler uiInteractionHandler = injector.getInstance(UIInteractionHandler.class);
+			uiInteractionHandler.reset();
 
 			this.loadSimulationIntoSimulator(to);
+			uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
+
 			if(to != null) {
 				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());

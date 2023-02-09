@@ -17,6 +17,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +38,9 @@ public class UIInteractionHandler {
 
 	private final List<Integer> timestamps;
 
+	// maps from event to list of corresponding UI listeners
+	private final Map<String, List<UIListenerConfiguration>> uiListenerConfigurationMap;
+
 	@Inject
 	public UIInteractionHandler(final Scheduler scheduler, final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		this.scheduler = scheduler;
@@ -44,6 +48,7 @@ public class UIInteractionHandler {
 		this.lastUserInteraction = new SimpleObjectProperty<>(null);
 		this.userTransitions = new ArrayList<>();
 		this.timestamps = new ArrayList<>();
+		this.uiListenerConfigurationMap = new HashMap<>();
 		this.currentProject = currentProject;
 		initialize();
 	}
@@ -51,6 +56,20 @@ public class UIInteractionHandler {
 	private void initialize() {
 		currentProject.addListener((observable, from, to) -> reset());
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
+	}
+
+	public void loadUIListenersIntoSimulator(RealTimeSimulator realTimeSimulator) {
+		SimulationConfiguration config = realTimeSimulator.getConfig();
+		List<UIListenerConfiguration> uiListeners = config.getUiListenerConfigurations();
+		for(UIListenerConfiguration uiListener : uiListeners) {
+			String event = uiListener.getEvent();
+			List<UIListenerConfiguration> uiListenersForEvent = uiListenerConfigurationMap.get(uiListener.getEvent());
+			if(uiListenersForEvent == null) {
+				uiListenerConfigurationMap.put(event, Collections.singletonList(uiListener));
+			} else {
+				uiListenerConfigurationMap.get(event).add(uiListener);
+			}
+		}
 	}
 
 	public void handleUserInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
@@ -64,22 +83,22 @@ public class UIInteractionHandler {
 	}
 
 	private boolean triggerSimulationBasedOnUserInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
-		List<UIListenerConfiguration> uiListenerConfigurations = realTimeSimulator.getConfig().getUiListenerConfigurations();
-		State destinationState = transition.getDestination();
 		boolean anyActivated = false;
-		for(UIListenerConfiguration uiListener : uiListenerConfigurations) {
-			String event = uiListener.getEvent();
-			// TODO: handle predicate
-			List<String> activating = uiListener.getActivating();
-			if(event.equals(transition.getName())) {
-				// TODO: Handle parameter predicates
-				for(String activatingEvent : activating) {
-					realTimeSimulator.handleOperationConfiguration(destinationState,  realTimeSimulator.getActivationConfigurationMap().get(activatingEvent), new ArrayList<>(), "1=1");
-					anyActivated = true;
-				}
-				break;
+
+		List<UIListenerConfiguration> uiListenersForEvent = uiListenerConfigurationMap.get(transition.getName());
+
+		if(uiListenersForEvent == null) {
+			return false;
+		}
+		
+		// TODO: Handle parameter predicates
+		for(UIListenerConfiguration uiListener : uiListenersForEvent) {
+			for(String activatingEvent : uiListener.getActivating()) {
+				realTimeSimulator.handleOperationConfiguration(transition.getDestination(),  realTimeSimulator.getActivationConfigurationMap().get(activatingEvent), new ArrayList<>(), "1=1");
+				anyActivated = true;
 			}
 		}
+
 		return anyActivated;
 	}
 
