@@ -205,7 +205,7 @@ public class VisBController {
 				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 				for(Transition transition : transitions) {
 					UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-					uiInteraction.addUIInteraction(realTimeSimulator, transition);
+					uiInteraction.addUserInteraction(realTimeSimulator, transition);
 				}
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			}
@@ -235,7 +235,7 @@ public class VisBController {
 			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 			for(Transition transition : nextTransitions) {
 				UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-				uiInteraction.addUIInteraction(realTimeSimulator, transition);
+				uiInteraction.addUserInteraction(realTimeSimulator, transition);
 			}
 		} else {
 			updateInfo("visb.infobox.events.not.initialise");

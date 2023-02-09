@@ -180,7 +180,7 @@ public final class ExecuteByPredicateStage extends Stage {
 		assert transitions.size() == 1;
 		Transition transition = transitions.get(0);
 		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-		injector.getInstance(UIInteractionHandler.class).addUIInteraction(realTimeSimulator, transition);
+		injector.getInstance(UIInteractionHandler.class).addUserInteraction(realTimeSimulator, transition);
 		this.currentTrace.set(this.currentTrace.get().add(transition));
 		this.hide();
 	}

@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @Singleton
 public class UIInteractionHandler {
 
-	private final ObjectProperty<Transition> lastUiInteraction;
+	private final ObjectProperty<Transition> lastUserInteraction;
 
 	private final Scheduler scheduler;
 
@@ -41,7 +41,7 @@ public class UIInteractionHandler {
 	public UIInteractionHandler(final Scheduler scheduler, final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
-		this.lastUiInteraction = new SimpleObjectProperty<>(null);
+		this.lastUserInteraction = new SimpleObjectProperty<>(null);
 		this.userTransitions = new ArrayList<>();
 		this.timestamps = new ArrayList<>();
 		this.currentProject = currentProject;
@@ -53,7 +53,7 @@ public class UIInteractionHandler {
 		currentProject.currentMachineProperty().addListener((observable, from, to) -> reset());
 	}
 
-	public void handleUIInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
+	public void handleUserInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
 		if(transition == null) {
 			return;
 		}
@@ -83,7 +83,7 @@ public class UIInteractionHandler {
 		timestamps.clear();
 	}
 
-	public void addUIInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
+	public void addUserInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
 		if(!realTimeSimulator.isRunning()) {
 			return;
 		}
@@ -91,7 +91,7 @@ public class UIInteractionHandler {
 		if ("$setup_constants".equals(name) || "$initialise_machine".equals(name)) {
 			return;
 		}
-		lastUiInteraction.set(transition);
+		lastUserInteraction.set(transition);
 		userTransitions.add(transition);
 		timestamps.add(realTimeSimulator.getTime());
 	}
@@ -172,8 +172,8 @@ public class UIInteractionHandler {
 		return new SimulationConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationConfiguration.metadataBuilder(SimulationConfiguration.SimulationFileType.INTERACTION_REPLAY).withSavedNow().withUserCreator().build());
 	}
 
-	public ObjectProperty<Transition> getLastUiInteraction() {
-		return lastUiInteraction;
+	public ObjectProperty<Transition> getLastUserInteraction() {
+		return lastUserInteraction;
 	}
 
 }

@@ -359,11 +359,11 @@ public final class OperationsView extends VBox {
 			Trace forward = trace.forward();
 			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
 				currentTrace.set(trace.forward());
-				uiInteraction.addUIInteraction(realTimeSimulator, forward.getCurrentTransition());
+				uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
 				return;
 			}
 			currentTrace.set(trace.add(item.getTransition()));
-			uiInteraction.addUIInteraction(realTimeSimulator, item.getTransition());
+			uiInteraction.addUserInteraction(realTimeSimulator, item.getTransition());
 		}
 	}
 
