@@ -100,30 +100,38 @@ public class UIInteractionHandler {
 		List<UIListenerConfiguration> uiListeners = realTimeSimulator.getConfig().getUiListenerConfigurations();
 		List<ActivationConfiguration> userInteractions = new ArrayList<>();
 		for(int interactionCounter = 0; interactionCounter < userTransitions.size(); interactionCounter++) {
-			Transition transition = userTransitions.get(interactionCounter);
-			int time = timestamps.get(interactionCounter);
-
-			String id = "user_interaction_" + interactionCounter;
-			String op = transition.getName();
-			Map<String, String> fixedVariables = new HashMap<>();
-			for (int i = 0; i < transition.getParameterNames().size(); i++) {
-				String name = transition.getParameterNames().get(i);
-				String value = transition.getParameterValues().get(i);
-				fixedVariables.put(name, value);
-			}
-
-			List<String> activations = new ArrayList<>();
-			for (UIListenerConfiguration uiListener : uiListeners) {
-				// TODO: Handle predicate
-				if (uiListener.getEvent().equals(op)) {
-					activations = uiListener.getActivating();
-					break;
-				}
-			}
-			ActivationConfiguration activation = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, null, fixedVariables, null, activations);
-			userInteractions.add(activation);
+			userInteractions.add(createUserInteraction(interactionCounter, uiListeners));
 		}
 		return userInteractions;
+	}
+
+	private ActivationConfiguration createUserInteraction(int interactionCounter, List<UIListenerConfiguration> uiListeners) {
+		Transition transition = userTransitions.get(interactionCounter);
+		int time = timestamps.get(interactionCounter);
+
+		String id = "user_interaction_" + interactionCounter;
+		String op = transition.getName();
+		Map<String, String> fixedVariables = new HashMap<>();
+		for (int i = 0; i < transition.getParameterNames().size(); i++) {
+			String name = transition.getParameterNames().get(i);
+			String value = transition.getParameterValues().get(i);
+			fixedVariables.put(name, value);
+		}
+		List<String> activations = resolveActivations(op, uiListeners);
+
+		return new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, null, fixedVariables, null, activations);
+	}
+
+	private List<String> resolveActivations(String op, List<UIListenerConfiguration> uiListeners) {
+		List<String> activations = new ArrayList<>();
+		for (UIListenerConfiguration uiListener : uiListeners) {
+			// TODO: Handle predicate
+			if (uiListener.getEvent().equals(op)) {
+				activations = uiListener.getActivating();
+				break;
+			}
+		}
+		return activations;
 	}
 
 	public SimulationConfiguration createAutomaticSimulation(RealTimeSimulator realTimeSimulator) {
