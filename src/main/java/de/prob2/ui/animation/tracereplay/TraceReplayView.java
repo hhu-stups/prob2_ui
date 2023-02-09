@@ -20,6 +20,7 @@ import de.prob.statespace.FormalismType;
 import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
+import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -43,6 +44,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -279,8 +281,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 						.filter(p -> p.toString().toLowerCase().endsWith(TraceFileHandler.TRACE_FILE_EXTENSION))
 						.collect(Collectors.toList());
 			} catch (IOException e) {
-				// TODO: Show error dialog
-				e.printStackTrace();
+				final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.traceDirectoryError.header", "animation.tracereplay.alerts.traceDirectoryError.error");
+				alert.initOwner(this.getScene().getWindow());
+				alert.show();
 			}
 			for(Path path : paths) {
 				traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
