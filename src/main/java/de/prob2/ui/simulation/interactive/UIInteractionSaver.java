@@ -32,11 +32,11 @@ public class UIInteractionSaver extends ProBFileHandler {
 		this.uiInteraction = uiInteraction;
 		this.realTimeSimulator = realTimeSimulator;
 		this.jsonManager = jsonManager;
-		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationConfiguration.class, "Automatic_Simulation_with_User_Interaction", SimulationConfiguration.CURRENT_FORMAT_VERSION));
+		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationConfiguration.class, SimulationConfiguration.SimulationFileType.INTERACTION_REPLAY.getName(), SimulationConfiguration.CURRENT_FORMAT_VERSION));
 	}
 
-	public void saveAsAutomaticSimulation() throws IOException {
-		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveTimedTrace.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, "json");
+	public void saveUIInteractions() throws IOException {
+		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveUIReplay.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, "json");
 		if (path != null) {
 			SimulationConfiguration configuration = uiInteraction.createAutomaticSimulation(realTimeSimulator);
 			this.jsonManager.writeToFile(path, configuration);

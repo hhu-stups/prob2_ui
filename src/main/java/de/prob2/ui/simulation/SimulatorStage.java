@@ -343,7 +343,7 @@ public class SimulatorStage extends Stage {
 		});
 		saveAutomaticSimulationItem.setOnAction(e -> {
 			try {
-				injector.getInstance(UIInteractionSaver.class).saveAsAutomaticSimulation();
+				injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
 			} catch (IOException exception) {
 				exception.printStackTrace();
 				//TODO: Handle error
