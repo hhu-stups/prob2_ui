@@ -14,13 +14,15 @@
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.control.TextArea?>
 <fx:root title="%vomanager.title" type="VOManagerStage" width="1200" height="800" minHeight="600" minWidth="800" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -28,7 +30,7 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<StackPane>
-				<SplitPane dividerPositions="0.35">
+				<SplitPane dividerPositions="0.3,0.7">
 					<VBox>
 						<HBox styleClass="border" spacing="5.0" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
 							<padding>
@@ -79,6 +81,28 @@
 							<Label text="%vomanager.feedback.validation.title"/>
 							<TextArea editable="false" fx:id="taFeedback"/>
 						</VBox>
+					</VBox>
+					<VBox>
+						<HBox styleClass="border" VBox.vgrow="NEVER">
+							<padding>
+								<Insets left="5.0"/>
+							</padding>
+							<Label fx:id="requirementTitleLabel" text="%vomanager.validationTasksInMachine.title" styleClass="title" maxWidth="Infinity"/>
+						</HBox>
+						<TableView fx:id="vtTable" VBox.vgrow="ALWAYS">
+							<columns>
+								<TableColumn fx:id="vtStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status"/>
+								<TableColumn fx:id="vtIdColumn" prefWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.id"/>
+								<TableColumn fx:id="vtTypeColumn" prefWidth="${fontSize.fontSize * 8}" text="%common.columns.type"/>
+								<TableColumn fx:id="vtConfigurationColumn" prefWidth="${fontSize.fontSize * 10}" text="%common.columns.configuration"/>
+							</columns>
+							<sortOrder>
+								<fx:reference source="vtIdColumn"/>
+							</sortOrder>
+							<placeholder>
+								<Label text="%vomanager.validationTasksInMachine.placeholder"/>
+							</placeholder>
+						</TableView>
 					</VBox>
 				</SplitPane>
 			</StackPane>

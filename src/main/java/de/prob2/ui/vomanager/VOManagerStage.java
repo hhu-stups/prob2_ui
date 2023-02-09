@@ -24,16 +24,21 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.TreeCheckedCell;
 import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -41,11 +46,14 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -86,6 +94,21 @@ public class VOManagerStage extends Stage {
 	@FXML
 	private TextArea taFeedback;
 
+	@FXML
+	private TableView<IValidationTask> vtTable;
+
+	@FXML
+	private TableColumn<IValidationTask, Checked> vtStatusColumn;
+
+	@FXML
+	private TableColumn<IValidationTask, String> vtIdColumn;
+
+	@FXML
+	private TableColumn<IValidationTask, String> vtTypeColumn;
+
+	@FXML
+	private TableColumn<IValidationTask, String> vtConfigurationColumn;
+
 	private final CurrentProject currentProject;
 
 	private final CurrentTrace currentTrace;
@@ -104,6 +127,8 @@ public class VOManagerStage extends Stage {
 
 	private Map<String, VOValidationFeedback> currentFeedback;
 
+	private final MapProperty<String, IValidationTask> currentMachineVTs;
+
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final VOChecker voChecker, final VOErrorHandler voErrorHandler,
@@ -117,6 +142,7 @@ public class VOManagerStage extends Stage {
 		this.i18n = i18n;
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.relatedMachineNames = FXCollections.observableSet();
+		this.currentMachineVTs = new SimpleMapProperty<>(this, "currentMachineVTs", FXCollections.emptyObservableMap());
 		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
 	}
 
@@ -200,13 +226,39 @@ public class VOManagerStage extends Stage {
 			}
 		});
 
+		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		vtIdColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getId()));
+		vtTypeColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskType(i18n)));
+		vtConfigurationColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskDescription(i18n)));
+
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
-			if (to != null) {
-				for (final IValidationTask vt : to.getValidationTasks().values()) {
-					vt.checkedProperty().addListener(o1 -> showFeedback());
-				}
+			currentMachineVTs.unbind();
+			if (to == null) {
+				currentMachineVTs.clear();
+			} else {
+				currentMachineVTs.bind(to.validationTasksProperty());
 			}
 		});
+
+		final InvalidationListener validationFeedbackListener = o -> showFeedback();
+		currentMachineVTs.addListener((MapChangeListener<String, IValidationTask>)change -> {
+			if (change.wasRemoved()) {
+				vtTable.getItems().remove(change.getValueRemoved());
+				change.getValueRemoved().checkedProperty().removeListener(validationFeedbackListener);
+			}
+			if (change.wasAdded()) {
+				vtTable.getItems().add(change.getValueAdded());
+				vtTable.sort();
+				change.getValueAdded().checkedProperty().addListener(validationFeedbackListener);
+			}
+		});
+
+		final Machine currentMachine = currentProject.getCurrentMachine();
+		if (currentMachine != null) {
+			currentMachineVTs.bind(currentMachine.validationTasksProperty());
+		}
+
 		relatedMachineNames.addListener((InvalidationListener)o -> updateRequirementsTable());
 		currentTrace.modelProperty().addListener((o, from, to) -> this.updateRelatedMachines(to));
 		this.updateRelatedMachines(currentTrace.getModel());
