@@ -38,8 +38,13 @@ public final class ValidationTaskNotFound implements IValidationTask {
 	}
 	
 	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate("vomanager.validationTaskNotFound.type");
+	}
+	
+	@Override
 	public String getTaskDescription(final I18n i18n) {
-		return i18n.translate("vomanager.validationTaskNotFound");
+		return i18n.translate("vomanager.validationTaskNotFound.description");
 	}
 
 	@Override

@@ -163,6 +163,11 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	}
 	
 	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate("verifications.modelchecking.type");
+	}
+	
+	@Override
 	public String getTaskDescription(final I18n i18n) {
 		final StringJoiner s = new StringJoiner(", ");
 		final String strategyKey = ModelcheckingStage.getSearchStrategyNameKey(this.getSearchStrategy());

@@ -65,6 +65,9 @@ public class VOEditingBox extends VBox {
 	private TableColumn<IValidationTask, String> idColumn;
 
 	@FXML
+	private TableColumn<IValidationTask, String> typeColumn;
+
+	@FXML
 	private TableColumn<IValidationTask, String> configurationColumn;
 
 	private final StageManager stageManager;
@@ -140,6 +143,7 @@ public class VOEditingBox extends VBox {
 		statusColumn.setCellFactory(features -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getTaskType(this.i18n)));
 		configurationColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getTaskDescription(this.i18n)));
 	}
 

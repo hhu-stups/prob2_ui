@@ -72,6 +72,11 @@ public class LTLFormulaItem extends AbstractCheckableItem implements IValidation
 	}
 	
 	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate("verifications.ltl.type");
+	}
+	
+	@Override
 	public String getTaskDescription(final I18n i18n) {
 		if (this.getDescription().isEmpty()) {
 			return this.getCode();

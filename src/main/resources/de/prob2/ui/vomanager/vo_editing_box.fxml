@@ -49,6 +49,7 @@
 			<columns>
 				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status"/>
 				<TableColumn fx:id="idColumn" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.id"/>
+				<TableColumn fx:id="typeColumn" text="%common.columns.type"/>
 				<TableColumn fx:id="configurationColumn" text="%common.columns.configuration"/>
 			</columns>
 		</TableView>

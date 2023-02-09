@@ -45,12 +45,13 @@ public class DynamicCommandFormulaItem implements IValidationTask {
 	}
 
 	@Override
+	public String getTaskType(final I18n i18n) {
+		return this.getCommandType();
+	}
+
+	@Override
 	public String getTaskDescription(I18n i18n) {
-		if (this.getCommandType().isEmpty()) {
-			return this.getCommandType();
-		} else {
-			return this.getCommandType() + " // " + getFormula();
-		}
+		return this.getFormula();
 	}
 
 	public String getCommandType() {

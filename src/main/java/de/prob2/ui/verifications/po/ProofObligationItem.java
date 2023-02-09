@@ -46,6 +46,11 @@ public class ProofObligationItem implements IValidationTask {
 	}
 
 	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate("verifications.po.type");
+	}
+
+	@Override
 	public String getTaskDescription(I18n i18n) {
 		if (this.getDescription().isEmpty()) {
 			return this.getName();
