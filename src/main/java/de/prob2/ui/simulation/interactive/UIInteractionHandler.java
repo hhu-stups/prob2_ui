@@ -57,9 +57,16 @@ public class UIInteractionHandler {
 		if(transition == null) {
 			return;
 		}
+		boolean anyActivated = triggerSimulationBasedOnUserInteraction(realTimeSimulator, transition);
+		if(anyActivated) {
+			scheduler.runWithoutInitialisation();
+		}
+	}
+
+	private boolean triggerSimulationBasedOnUserInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
 		List<UIListenerConfiguration> uiListenerConfigurations = realTimeSimulator.getConfig().getUiListenerConfigurations();
-		boolean anyActivated = false;
 		State destinationState = transition.getDestination();
+		boolean anyActivated = false;
 		for(UIListenerConfiguration uiListener : uiListenerConfigurations) {
 			String event = uiListener.getEvent();
 			// TODO: handle predicate
@@ -73,9 +80,7 @@ public class UIInteractionHandler {
 				break;
 			}
 		}
-		if(anyActivated) {
-			scheduler.runWithoutInitialisation();
-		}
+		return anyActivated;
 	}
 
 	public void reset() {
