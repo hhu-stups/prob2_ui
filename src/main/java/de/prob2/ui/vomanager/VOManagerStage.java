@@ -35,6 +35,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableSet;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -46,6 +47,7 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import se.sawano.java.text.AlphanumericComparator;
@@ -140,7 +142,14 @@ public class VOManagerStage extends Stage {
 				this.getStyleClass().remove("unrelated");
 				if (empty) {
 					this.setContextMenu(null);
+					this.setOnMouseClicked(null);
 				} else {
+					final EventHandler<MouseEvent> doubleClickHandler = e -> {
+						if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && this.getTreeItem().getChildren().isEmpty()) {
+							checkItem(item);
+						}
+					};
+					
 					if (item.getVo() != null) {
 						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.check"));
 						checkItem.setOnAction(e -> checkItem(item));
@@ -149,6 +158,7 @@ public class VOManagerStage extends Stage {
 						removeItem.setOnAction(e -> removeItem(item));
 						
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
+						this.setOnMouseClicked(doubleClickHandler);
 					} else if (item.getRequirement() != null) {
 						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.check", item.getRequirement().getValidationObligations().size()));
 						checkItem.setOnAction(e -> checkItem(item));
@@ -158,9 +168,11 @@ public class VOManagerStage extends Stage {
 						removeItem.setOnAction(e -> removeItem(item));
 						
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
+						this.setOnMouseClicked(doubleClickHandler);
 					} else {
 						// TODO Allow checking (but not removing) machines from VO manager tree
 						this.setContextMenu(null);
+						this.setOnMouseClicked(null);
 					}
 					
 					// Gray out items belonging to machines that are not in the current machine's refinement chain.
@@ -168,13 +180,6 @@ public class VOManagerStage extends Stage {
 						this.getStyleClass().add("unrelated");
 					}
 				}
-			}
-		});
-
-		tvRequirements.setOnMouseClicked(e-> {
-			TreeItem<VOManagerItem> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-			if (treeItem != null && e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
-				checkItem(treeItem.getValue());
 			}
 		});
 
