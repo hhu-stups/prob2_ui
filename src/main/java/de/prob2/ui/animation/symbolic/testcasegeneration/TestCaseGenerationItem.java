@@ -91,6 +91,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	}
 
 	public String createdByForMetadata(int index) {
-		return "Test Case Generation: " + this.getConfigurationDescription() + "; " + getTraceInformation().get(index);
+		final Target target = getTraceInformation().get(index).getTarget();
+		return "Test Case Generation: " + this.getConfigurationDescription() + "; OPERATION: " + target.getOperation() + ", GUARD: " + target.getGuardString();
 	}
 }
