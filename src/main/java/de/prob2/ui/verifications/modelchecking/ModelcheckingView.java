@@ -29,8 +29,10 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -137,6 +139,33 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
+
+		final ChangeListener<ModelCheckingStep> showCurrentStepListener = (o, from, to) -> {
+			// When currentStep changes from null to non-null,
+			// i. e. a new checking step was started,
+			// select the newly started step so that the checking progress is visible.
+			if (from == null && to != null) {
+				final ModelCheckingItem item = (ModelCheckingItem)((ReadOnlyProperty<?>)o).getBean();
+				Platform.runLater(() -> {
+					itemsTable.getSelectionModel().select(item);
+					stepsTable.getSelectionModel().select(to);
+				});
+			}
+		};
+		items.addListener((ListChangeListener<ModelCheckingItem>)change -> {
+			while (change.next()) {
+				if (change.wasAdded()) {
+					for (final ModelCheckingItem item : change.getRemoved()) {
+						item.currentStepProperty().removeListener(showCurrentStepListener);
+					}
+
+					for (final ModelCheckingItem item : change.getAddedSubList()) {
+						item.currentStepProperty().addListener(showCurrentStepListener);
+					}
+				}
+			}
+		});
+
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			items.unbind();
 			if (to != null) {
@@ -344,10 +373,5 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	public void hideStats() {
 		statsBox.setVisible(false);
-	}
-
-	public void showCurrentStep(ModelCheckingItem item) {
-		itemsTable.getSelectionModel().select(item);
-		stepsTable.getSelectionModel().select(item.getCurrentStep());
 	}
 }

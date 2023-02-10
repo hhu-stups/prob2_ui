@@ -26,13 +26,10 @@ public class Modelchecker {
 
 	private final StatsView statsView;
 
-	private final Injector injector;
-
 	@Inject
-	private Modelchecker(final CliTaskExecutor executor, final StatsView statsView, final Injector injector) {
+	private Modelchecker(final CliTaskExecutor executor, final StatsView statsView) {
 		this.executor = executor;
 		this.statsView = statsView;
-		this.injector = injector;
 	}
 
 	/**
@@ -59,9 +56,7 @@ public class Modelchecker {
 		
 		final int stepIndex = item.getSteps().size();
 		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
-		item.setCurrentStep(initialStep);
 		item.getSteps().add(initialStep);
-		injector.getInstance(ModelcheckingView.class).showCurrentStep(item);
 		
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
@@ -86,6 +81,7 @@ public class Modelchecker {
 
 		return this.executor.submit(() -> {
 			try {
+				item.setCurrentStep(initialStep);
 				checker.call();
 				return item.getCurrentStep();
 			} finally {
