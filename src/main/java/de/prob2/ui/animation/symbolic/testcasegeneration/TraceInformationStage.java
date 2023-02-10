@@ -5,10 +5,13 @@ import java.util.List;
 
 import com.google.inject.Inject;
 
+import de.prob.analysis.testcasegeneration.Target;
+import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.WrappedTextTableCell;
 
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.TableColumn;
@@ -20,13 +23,13 @@ import javafx.stage.Stage;
 
 public final class TraceInformationStage extends Stage {
 
-	private final class TraceInformationRow extends TableRow<TraceInformationItem> {
+	private final class TraceInformationRow extends TableRow<TestTrace> {
 		private TraceInformationRow() {
 			super();
 			this.getStyleClass().add("trace-information-row");
 			this.setOnMouseClicked(e -> {
-				TraceInformationItem item = this.getItem();
-				if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && item.getTrace() != null) {
+				TestTrace item = this.getItem();
+				if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item.getTrace() != null) {
 					currentTrace.set(item.getTrace());
 				}
 			});
@@ -40,11 +43,34 @@ public final class TraceInformationStage extends Stage {
 		}
 
 		@Override
-		protected void updateItem(TraceInformationItem item, boolean empty) {
+		protected void updateItem(TestTrace item, boolean empty) {
 			super.updateItem(item, empty);
+
 			this.getStyleClass().removeAll(Arrays.asList("replayable", "not-replayable"));
-			if(item != null) {
-				if (item.isEnabled()) {
+
+			if (!empty) {
+				if (item.getTarget().getFeasible()) {
+					this.getStyleClass().add("replayable");
+				} else {
+					this.getStyleClass().add("not-replayable");
+				}
+			}
+		}
+	}
+
+	private static final class UncoveredOperationRow extends TableRow<Target> {
+		private UncoveredOperationRow() {
+			this.getStyleClass().add("trace-information-row");
+		}
+
+		@Override
+		protected void updateItem(final Target item, final boolean empty) {
+			super.updateItem(item, empty);
+
+			this.getStyleClass().removeAll(Arrays.asList("replayable", "not-replayable"));
+
+			if (!empty) {
+				if (item.getFeasible()) {
 					this.getStyleClass().add("replayable");
 				} else {
 					this.getStyleClass().add("not-replayable");
@@ -54,31 +80,31 @@ public final class TraceInformationStage extends Stage {
 	}
 
 	@FXML
-	private TableView<TraceInformationItem> tvTraces;
+	private TableView<TestTrace> tvTraces;
 
 	@FXML
-	private TableColumn<TraceInformationItem, String> depth;
+	private TableColumn<TestTrace, String> depth;
 
 	@FXML
-	private TableColumn<TraceInformationItem, String> operations;
+	private TableColumn<TestTrace, String> operations;
 
 	@FXML
-	private TableColumn<TraceInformationItem, String> coveredOperation;
+	private TableColumn<TestTrace, String> coveredOperation;
 	
 	@FXML
-	private TableColumn<TraceInformationItem, String> guard;
+	private TableColumn<TestTrace, String> guard;
 	
 	@FXML
-	private TableColumn<TraceInformationItem, String> enabled;
+	private TableColumn<TestTrace, String> enabled;
 	
 	@FXML
-	private TableView<TraceInformationItem> tvUncovered;
+	private TableView<Target> tvUncovered;
 	
 	@FXML
-	private TableColumn<TraceInformationItem, String> uncoveredOperation;
+	private TableColumn<Target, String> uncoveredOperation;
 	
 	@FXML
-	private TableColumn<TraceInformationItem, String> uncoveredGuard;
+	private TableColumn<Target, String> uncoveredGuard;
 
 	private final CurrentTrace currentTrace;
 
@@ -88,11 +114,11 @@ public final class TraceInformationStage extends Stage {
 		this.currentTrace = currentTrace;
 	}
 
-	public void setTraces(List<TraceInformationItem> traces) {
+	public void setTraces(List<TestTrace> traces) {
 		this.tvTraces.getItems().setAll(traces);
 	}
 	
-	public void setUncoveredOperations(List<TraceInformationItem> uncoveredOperations) {
+	public void setUncoveredOperations(List<Target> uncoveredOperations) {
 		this.tvUncovered.getItems().setAll(uncoveredOperations);
 	}
 
@@ -100,17 +126,24 @@ public final class TraceInformationStage extends Stage {
 	public void initialize() {
 		tvTraces.setRowFactory(item -> new TraceInformationRow());
 		depth.setCellValueFactory(new PropertyValueFactory<>("depth"));
-		operations.setCellValueFactory(new PropertyValueFactory<>("operations"));
-		coveredOperation.setCellValueFactory(new PropertyValueFactory<>("operation"));
-		guard.setCellFactory(WrappedTextTableCell<TraceInformationItem>::new);
-		guard.setCellValueFactory(new PropertyValueFactory<>("guard"));
+		operations.setCellValueFactory(features -> Bindings.createStringBinding(() ->
+			String.join(",\n", features.getValue().getTransitionNames())
+		));
+		coveredOperation.setCellValueFactory(features -> Bindings.createStringBinding(() -> 
+			features.getValue().getTarget().getOperation()
+		));
+		guard.setCellFactory(WrappedTextTableCell::new);
+		guard.setCellValueFactory(features -> Bindings.createStringBinding(() ->
+			features.getValue().getTarget().getGuardString()
+		));
+		enabled.setCellValueFactory(features -> Bindings.createStringBinding(() ->
+			String.valueOf(features.getValue().getTarget().getFeasible())
+		));
 		
-		enabled.setCellValueFactory(new PropertyValueFactory<>("enabled"));
-		
-		tvUncovered.setRowFactory(item -> new TraceInformationRow());
+		tvUncovered.setRowFactory(item -> new UncoveredOperationRow());
 		uncoveredOperation.setCellValueFactory(new PropertyValueFactory<>("operation"));
-		uncoveredGuard.setCellFactory(WrappedTextTableCell<TraceInformationItem>::new);
-		uncoveredGuard.setCellValueFactory(new PropertyValueFactory<>("guard"));
+		uncoveredGuard.setCellFactory(WrappedTextTableCell::new);
+		uncoveredGuard.setCellValueFactory(new PropertyValueFactory<>("guardString"));
 	}
 
 }

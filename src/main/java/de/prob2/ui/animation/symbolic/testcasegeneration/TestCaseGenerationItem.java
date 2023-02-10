@@ -5,7 +5,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
+import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -32,9 +34,9 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonIgnore
 	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 	@JsonIgnore
-	private final ObservableList<TraceInformationItem> traceInformation = FXCollections.observableArrayList();
+	private final ObservableList<TestTrace> traceInformation = FXCollections.observableArrayList();
 	@JsonIgnore
-	private final ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList();
+	private final ObservableList<Target> uncoveredOperations = FXCollections.observableArrayList();
 	
 	protected TestCaseGenerationItem(final int maxDepth) {
 		super();
@@ -67,11 +69,11 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 		return examples.get();
 	}
 	
-	public ObservableList<TraceInformationItem> getTraceInformation() {
+	public ObservableList<TestTrace> getTraceInformation() {
 		return this.traceInformation;
 	}
 	
-	public ObservableList<TraceInformationItem> getUncoveredOperations() {
+	public ObservableList<Target> getUncoveredOperations() {
 		return this.uncoveredOperations;
 	}
 	

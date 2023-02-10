@@ -2,7 +2,6 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -26,31 +25,24 @@ public class TestCaseGenerationResultHandler {
 		}
 		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
 		
-		List<TraceInformationItem> traceInformation = new ArrayList<>();
 		List<Trace> traces = new ArrayList<>();
-		
 		for (final TestTrace trace : testCaseGeneratorResult.getTestTraces()) {
-			traceInformation.add(new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.getTarget().getOperation(), trace.getTarget().getGuardString(), trace.getTarget().getFeasible(), trace.getTrace()));
 			if (trace.getTrace() != null) {
 				traces.add(trace.getTrace());
 			}
 		}
 		
-		List<TraceInformationItem> uncoveredOperations = testCaseGeneratorResult.getUncoveredTargets().stream()
-			.map(target -> new TraceInformationItem(-1, new ArrayList<>(), target.getOperation(), target.getGuardString(), target.getFeasible(), null))
-			.collect(Collectors.toList());
-
 		if(testCaseGeneratorResult.isInterrupted()) {
 			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted"));
 		} else if(traces.isEmpty()) {
 			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
-		} else if(!uncoveredOperations.isEmpty()) {
+		} else if(!testCaseGeneratorResult.getUncoveredTargets().isEmpty()) {
 			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated"));
 		} else {
 			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
 		}
 		item.getExamples().addAll(traces);
-		item.getTraceInformation().setAll(traceInformation);
-		item.getUncoveredOperations().setAll(uncoveredOperations);
+		item.getTraceInformation().setAll(testCaseGeneratorResult.getTestTraces());
+		item.getUncoveredOperations().setAll(testCaseGeneratorResult.getUncoveredTargets());
 	}
 }
