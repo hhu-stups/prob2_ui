@@ -3,7 +3,6 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 import java.util.Arrays;
 
 import com.google.inject.Inject;
-import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -20,7 +19,6 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 
-@Singleton
 public final class TraceInformationStage extends Stage {
 
 	private final class TraceInformationRow extends TableRow<TraceInformationItem> {
@@ -91,7 +89,7 @@ public final class TraceInformationStage extends Stage {
 
 	@Inject
 	private TraceInformationStage(final StageManager stageManager, final CurrentTrace currentTrace) {
-		stageManager.loadFXML(this, "test_case_generation_trace_information.fxml", this.getClass().getName());
+		stageManager.loadFXML(this, "test_case_generation_trace_information.fxml");
 		this.currentTrace = currentTrace;
 	}
 
