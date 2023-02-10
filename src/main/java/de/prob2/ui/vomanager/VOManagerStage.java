@@ -282,7 +282,7 @@ public class VOManagerStage extends Stage {
 			for (final Requirement requirement : currentProject.getRequirements()) {
 				requirement.getValidationObligation(machine).ifPresent(vo -> {
 					try {
-						voChecker.parseVO(machine, vo);
+						vo.parse(machine);
 					} catch (VOException e) {
 						LOGGER.warn("Error in validation expression", e);
 					}

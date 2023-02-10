@@ -1,31 +1,23 @@
 package de.prob2.ui.vomanager;
 
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.check.ModelCheckingOptions;
 import de.prob.statespace.StateSpace;
-import de.prob.voparser.VOException;
-import de.prob.voparser.VOParser;
-import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
-import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
-import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
@@ -67,58 +59,6 @@ public class VOChecker {
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
 			this.checkVO(vo);
 		}
-	}
-
-	public void parseVO(Machine machine, ValidationObligation vo) {
-		final VOParser voParser = new VOParser();
-		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
-		try {
-			final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
-			expression.getAllTasks().forEach(taskExpr -> {
-				IValidationTask validationTask;
-				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
-					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
-				} else {
-					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
-				}
-				taskExpr.setTask(validationTask);
-			});
-			vo.setParsedExpression(expression);
-		} catch (VOException e) {
-			vo.setParsedExpression(null);
-			throw e;
-		}
-	}
-
-	public VTType extractType(IValidationTask validationTask) {
-		if(validationTask instanceof ReplayTrace) {
-			return VTType.TRACE;
-		} else if(validationTask instanceof SimulationItem) {
-			SimulationType simulationType = ((SimulationItem) validationTask).getType();
-			if(simulationType == SimulationType.MONTE_CARLO_SIMULATION || simulationType == SimulationType.HYPOTHESIS_TEST || simulationType == SimulationType.ESTIMATION) {
-				return VTType.EXPLORE;
-			}
-			// TODO: Implement a single simulation
-			return VTType.TRACE;
-		} else if(validationTask instanceof LTLFormulaItem) {
-			return VTType.EXPLORE;
-		} else if(validationTask instanceof ModelCheckingItem) {
-			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
-			if(options.contains(ModelCheckingOptions.Options.FIND_GOAL) ||
-				((ModelCheckingItem) validationTask).getGoal() == null ||
-				!((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
-				return VTType.TRACE;
-			}
-			// Otherwise invariant/deadlock checking, or just covering state space
-			return VTType.EXPLORE;
-		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
-			return VTType.STATIC;
-		} else if(validationTask instanceof ProofObligationItem) {
-			return VTType.STATIC;
-		} else if(validationTask instanceof DynamicCommandFormulaItem) {
-			return VTType.STATE_SPACE;
-		}
-		return null;
 	}
 
 	private CompletableFuture<?> checkVOExpression(IValidationExpression expression) {
@@ -175,7 +115,7 @@ public class VOChecker {
 	public void checkVO(ValidationObligation validationObligation) {
 		if (validationObligation.getParsedExpression() == null) {
 			final Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
-			this.parseVO(machine, validationObligation);
+			validationObligation.parse(machine);
 		}
 		checkVOExpression(validationObligation.getParsedExpression());
 	}
