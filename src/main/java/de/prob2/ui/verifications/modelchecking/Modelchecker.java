@@ -17,7 +17,6 @@ import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
@@ -28,16 +27,13 @@ import javafx.beans.property.SimpleObjectProperty;
 public class Modelchecker {
 	private final CliTaskExecutor executor;
 
-	private final CurrentTrace currentTrace;
-
 	private final StatsView statsView;
 
 	private final Injector injector;
 
 	@Inject
-	private Modelchecker(final CliTaskExecutor executor, final CurrentTrace currentTrace, final StatsView statsView, final Injector injector) {
+	private Modelchecker(final CliTaskExecutor executor, final StatsView statsView, final Injector injector) {
 		this.executor = executor;
-		this.currentTrace = currentTrace;
 		this.statsView = statsView;
 		this.injector = injector;
 	}
@@ -50,16 +46,15 @@ public class Modelchecker {
 	 * @param item the model checking configuration to run
 	 * @return result of the model check
 	 */
-	public CompletableFuture<ModelCheckingJobItem> startCheckIfNeeded(final ModelCheckingItem item) {
+	public CompletableFuture<ModelCheckingJobItem> startCheckIfNeeded(final ModelCheckingItem item, final StateSpace stateSpace) {
 		if (item.getItems().isEmpty()) {
-			return this.startNextCheckStep(item);
+			return this.startNextCheckStep(item, stateSpace);
 		} else {
 			return CompletableFuture.completedFuture(item.getItems().get(0));
 		}
 	}
 
-	public CompletableFuture<ModelCheckingJobItem> startNextCheckStep(ModelCheckingItem item) {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
+	public CompletableFuture<ModelCheckingJobItem> startNextCheckStep(ModelCheckingItem item, StateSpace stateSpace) {
 		// The options must be calculated before adding the ModelCheckingJobItem,
 		// so that the recheckExisting/INSPECT_EXISTING_NODES option is set correctly,
 		// which depends on whether any job items were already added.

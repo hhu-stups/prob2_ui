@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 import de.prob.json.JsonMetadata;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -253,7 +254,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	
 	@Override
 	protected void executeItem(final LTLFormulaItem item) {
-		checker.checkFormulaNoninteractive(item).thenAccept(it -> {
+		checker.checkFormula(item, currentProject.getCurrentMachine(), currentTrace.getStateSpace()).thenAccept(it -> {
 			if (it.getCounterExample() != null) {
 				currentTrace.set(it.getCounterExample());
 			}
@@ -315,9 +316,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	
 	@FXML
 	public void checkMachine() {
+		final Machine machine = currentProject.getCurrentMachine();
+		final StateSpace stateSpace = currentTrace.getStateSpace();
 		items.stream()
 			.filter(AbstractCheckableItem::selected)
-			.forEach(checker::checkFormulaNoninteractive);
+			.forEach(item -> checker.checkFormula(item, machine, stateSpace));
 	}
 	
 	@FXML

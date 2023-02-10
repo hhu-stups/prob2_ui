@@ -8,6 +8,7 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -106,7 +107,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	
 	@Override
 	protected void executeItem(final SymbolicAnimationItem item) {
-		formulaHandler.handleItemNoninteractive(item).thenAccept(r -> {
+		formulaHandler.executeItem(item, currentTrace.getStateSpace()).thenAccept(r -> {
 			final Trace example = item.getExample();
 			if (example != null) {
 				currentTrace.set(example);
@@ -127,8 +128,9 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	
 	@FXML
 	public void checkMachine() {
+		final StateSpace stateSpace = currentTrace.getStateSpace();
 		items.stream()
 			.filter(AbstractCheckableItem::selected)
-			.forEach(formulaHandler::handleItemNoninteractive);
+			.forEach(item -> formulaHandler.executeItem(item, stateSpace));
 	}
 }

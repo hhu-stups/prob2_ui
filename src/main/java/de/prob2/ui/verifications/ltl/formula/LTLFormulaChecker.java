@@ -26,10 +26,10 @@ import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob.parserbase.ProBParserBase;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -46,15 +46,9 @@ public class LTLFormulaChecker {
 	
 	private final CliTaskExecutor cliExecutor;
 	
-	private final CurrentTrace currentTrace;
-	
-	private final CurrentProject currentProject;
-	
 	@Inject
-	private LTLFormulaChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace, final CurrentProject currentProject) {
+	private LTLFormulaChecker(final CliTaskExecutor cliExecutor) {
 		this.cliExecutor = cliExecutor;
-		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 	}
 	
 	public static LTL parseFormula(final String code, final ProBParserBase languageSpecificParser, final PatternManager patternManager) {
@@ -87,10 +81,10 @@ public class LTLFormulaChecker {
 		}
 	}
 	
-	public LTL parseFormula(final String code, final Machine machine) {
+	public LTL parseFormula(final String code, final Machine machine, final AbstractModel model) {
 		BParser bParser = new BParser();
-		if (currentTrace.get().getModel() instanceof ClassicalBModel) {
-			IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
+		if (model instanceof ClassicalBModel) {
+			IDefinitions definitions = ((ClassicalBModel) model).getDefinitions();
 			bParser.setDefinitions(definitions);
 		}
 		return LTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser), machine.getPatternManager());
@@ -133,15 +127,16 @@ public class LTLFormulaChecker {
 		item.setResultItem(new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.message", errorMessage));
 	}
 	
-	public void checkFormula(LTLFormulaItem item, Machine machine) {
+	public void checkFormulaSync(LTLFormulaItem item, Machine machine, StateSpace stateSpace) {
 		BParser bParser = new BParser();
-		if (currentTrace.get().getModel() instanceof ClassicalBModel) {
-			IDefinitions definitions = ((ClassicalBModel) currentTrace.get().getModel()).getDefinitions();
+		final AbstractModel model = stateSpace.getModel();
+		if (model instanceof ClassicalBModel) {
+			IDefinitions definitions = ((ClassicalBModel) model).getDefinitions();
 			bParser.setDefinitions(definitions);
 		}
 		try {
-			final LTL formula = this.parseFormula(item.getCode(), machine);
-			final LTLChecker checker = new LTLChecker(currentTrace.getStateSpace(), formula);
+			final LTL formula = this.parseFormula(item.getCode(), machine, stateSpace.getModel());
+			final LTLChecker checker = new LTLChecker(stateSpace, formula);
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {
 				handleFormulaParseErrors(item, ((LTLError)result).getErrors());
@@ -154,10 +149,9 @@ public class LTLFormulaChecker {
 		}
 	}
 	
-	public CompletableFuture<LTLFormulaItem> checkFormulaNoninteractive(LTLFormulaItem item) {
-		Machine machine = currentProject.getCurrentMachine();
+	public CompletableFuture<LTLFormulaItem> checkFormula(LTLFormulaItem item, Machine machine, StateSpace stateSpace) {
 		return this.cliExecutor.submit(() -> {
-			checkFormula(item, machine);
+			checkFormulaSync(item, machine, stateSpace);
 			return item;
 		});
 	}

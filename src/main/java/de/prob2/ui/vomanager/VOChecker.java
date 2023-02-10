@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.check.ModelCheckingOptions;
+import de.prob.statespace.StateSpace;
 import de.prob.voparser.VOException;
 import de.prob.voparser.VOParser;
 import de.prob.voparser.VTType;
@@ -14,6 +15,7 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.choice.SimulationType;
@@ -44,6 +46,8 @@ public class VOChecker {
 
 	private final CurrentProject currentProject;
 
+	private final CurrentTrace currentTrace;
+
 	private final Modelchecker modelchecker;
 
 	private final LTLFormulaChecker ltlChecker;
@@ -57,10 +61,11 @@ public class VOChecker {
 	private final InvalidationListener tasksUpdateListener;
 
 	@Inject
-	public VOChecker(final CurrentProject currentProject, final Modelchecker modelchecker,
+	public VOChecker(final CurrentProject currentProject, final CurrentTrace currentTrace, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
 					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
 		this.modelchecker = modelchecker;
 		this.ltlChecker = ltlChecker;
 		this.symbolicChecker = symbolicChecker;
@@ -214,15 +219,17 @@ public class VOChecker {
 	}
 
 	private CompletableFuture<?> checkVT(IValidationTask validationTask) {
+		final Machine machine = currentProject.getCurrentMachine();
+		final StateSpace stateSpace = currentTrace.getStateSpace();
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
 			return CompletableFuture.completedFuture(null);
 		} else if (validationTask instanceof ModelCheckingItem) {
-			return modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask);
+			return modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask, stateSpace);
 		} else if (validationTask instanceof LTLFormulaItem) {
-			return ltlChecker.checkFormulaNoninteractive((LTLFormulaItem) validationTask);
+			return ltlChecker.checkFormula((LTLFormulaItem) validationTask, machine, stateSpace);
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
-			return symbolicChecker.handleItemNoninteractive((SymbolicCheckingFormulaItem) validationTask);
+			return symbolicChecker.checkItem((SymbolicCheckingFormulaItem) validationTask, stateSpace);
 		} else if (validationTask instanceof ReplayTrace) {
 			return traceChecker.checkNoninteractive((ReplayTrace) validationTask);
 		} else if (validationTask instanceof SimulationItem) {

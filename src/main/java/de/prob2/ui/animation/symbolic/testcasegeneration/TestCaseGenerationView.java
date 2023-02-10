@@ -10,6 +10,7 @@ import com.google.inject.Singleton;
 
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -168,7 +169,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		itemsTable.setOnMouseClicked(e -> {
 			TestCaseGenerationItem item = itemsTable.getSelectionModel().getSelectedItem();
 			if (e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
-				itemHandler.generateTestCases(item);
+				itemHandler.generateTestCases(item, currentTrace.getStateSpace());
 			}
 		});
 	}
@@ -185,7 +186,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@Override
 	protected void executeItem(final TestCaseGenerationItem item) {
-		itemHandler.generateTestCases(item);
+		itemHandler.generateTestCases(item, currentTrace.getStateSpace());
 	}
 
 	@Override
@@ -200,8 +201,9 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@FXML
 	public void generate() {
+		final StateSpace stateSpace = currentTrace.getStateSpace();
 		items.stream()
 			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> itemHandler.generateTestCases(item));
+			.forEach(item -> itemHandler.generateTestCases(item, stateSpace));
 	}
 }

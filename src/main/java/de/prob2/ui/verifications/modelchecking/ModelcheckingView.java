@@ -11,6 +11,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -250,7 +251,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	@Override
 	protected void executeItem(final ModelCheckingItem item) {
 		try {
-			final CompletableFuture<ModelCheckingJobItem> future = checker.startNextCheckStep(item);
+			final CompletableFuture<ModelCheckingJobItem> future = checker.startNextCheckStep(item, currentTrace.getStateSpace());
 			future.whenComplete((r, t) -> {
 				if (t == null) {
 					if (r.getResult() instanceof ITraceDescription) {
@@ -309,12 +310,13 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	@FXML
 	public void checkMachine() {
+		final StateSpace stateSpace = currentTrace.getStateSpace();
 		for (ModelCheckingItem item : items) {
 			if (!item.selected()) {
 				continue;
 			}
 
-			final CompletableFuture<ModelCheckingJobItem> future = checker.startCheckIfNeeded(item);
+			final CompletableFuture<ModelCheckingJobItem> future = checker.startCheckIfNeeded(item, stateSpace);
 			future.exceptionally(t -> {
 				showModelCheckException(t);
 				return null;

@@ -10,27 +10,23 @@ import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
-import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob.statespace.StateSpace;
 
 @Singleton
 public class TestCaseGenerationItemHandler {
-
-	private final CurrentTrace currentTrace;
-
 	private final TestCaseGenerator testCaseGenerator;
 	
 	@Inject
-	private TestCaseGenerationItemHandler(final CurrentTrace currentTrace, final TestCaseGenerator testCaseGenerator) {
-		this.currentTrace = currentTrace;
+	private TestCaseGenerationItemHandler(final TestCaseGenerator testCaseGenerator) {
 		this.testCaseGenerator = testCaseGenerator;
 	}
 
-	public void generateTestCases(TestCaseGenerationItem item) {
-		AbstractModel model = currentTrace.getModel();
+	public void generateTestCases(TestCaseGenerationItem item, StateSpace stateSpace) {
+		AbstractModel model = stateSpace.getModel();
 		if(!(model instanceof ClassicalBModel) && !(model instanceof EventBModel)) {
 			return;
 		}
-		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = new ConstraintBasedTestCaseGenerator(currentTrace.getStateSpace(), item.getTestCaseGeneratorSettings(), new ArrayList<>());
+		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = new ConstraintBasedTestCaseGenerator(stateSpace, item.getTestCaseGeneratorSettings(), new ArrayList<>());
 		testCaseGenerator.generateTestCases(item, cbTestCaseGenerator);
 	}
 }

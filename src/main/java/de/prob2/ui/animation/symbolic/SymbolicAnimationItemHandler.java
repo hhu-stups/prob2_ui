@@ -14,7 +14,6 @@ import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
@@ -25,12 +24,10 @@ import org.slf4j.LoggerFactory;
 public final class SymbolicAnimationItemHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicAnimationItemHandler.class);
 
-	private final CurrentTrace currentTrace;
 	private final CliTaskExecutor cliExecutor;
 
 	@Inject
-	private SymbolicAnimationItemHandler(final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor) {
-		this.currentTrace = currentTrace;
+	private SymbolicAnimationItemHandler(final CliTaskExecutor cliExecutor) {
 		this.cliExecutor = cliExecutor;
 	}
 
@@ -42,11 +39,11 @@ public final class SymbolicAnimationItemHandler {
 		});
 	}
 
-	public CompletableFuture<SymbolicAnimationItem> handleSequence(SymbolicAnimationItem item) {
+	public CompletableFuture<SymbolicAnimationItem> handleSequence(SymbolicAnimationItem item, StateSpace stateSpace) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
-		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(currentTrace.getStateSpace(), events, new ClassicalB("1=1", FormulaExpand.EXPAND));
+		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(stateSpace, events, new ClassicalB("1=1", FormulaExpand.EXPAND));
 		return checkItem(item, () -> {
-			currentTrace.getStateSpace().execute(cmd);
+			stateSpace.execute(cmd);
 			ConstraintBasedSequenceCheckCommand.ResultType result = cmd.getResult();
 			item.setExample(null);
 			switch(result) {
@@ -72,8 +69,7 @@ public final class SymbolicAnimationItemHandler {
 		});
 	}
 
-	public CompletableFuture<SymbolicAnimationItem> findValidState(SymbolicAnimationItem item) {
-		StateSpace stateSpace = currentTrace.getStateSpace();
+	public CompletableFuture<SymbolicAnimationItem> findValidState(SymbolicAnimationItem item, StateSpace stateSpace) {
 		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode(), FormulaExpand.EXPAND), true);
 		return checkItem(item, () -> {
 			stateSpace.execute(cmd);
@@ -93,12 +89,12 @@ public final class SymbolicAnimationItemHandler {
 		});
 	}
 
-	public CompletableFuture<SymbolicAnimationItem> handleItemNoninteractive(final SymbolicAnimationItem item) {
+	public CompletableFuture<SymbolicAnimationItem> executeItem(final SymbolicAnimationItem item, StateSpace stateSpace) {
 		switch(item.getType()) {
 			case SEQUENCE:
-				return handleSequence(item);
+				return handleSequence(item, stateSpace);
 			case FIND_VALID_STATE:
-				return findValidState(item);
+				return findValidState(item, stateSpace);
 			default:
 				throw new AssertionError("Unhandled symbolic animation type: " + item.getType());
 		}

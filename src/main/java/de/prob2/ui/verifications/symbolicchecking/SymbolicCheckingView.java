@@ -9,6 +9,7 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -130,7 +131,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	
 	@Override
 	protected void executeItem(final SymbolicCheckingFormulaItem item) {
-		formulaHandler.handleItemNoninteractive(item).thenAccept(r -> {
+		formulaHandler.checkItem(item, currentTrace.getStateSpace()).thenAccept(r -> {
 			List<Trace> counterExamples = item.getCounterExamples();
 			if (!counterExamples.isEmpty()) {
 				currentTrace.set(counterExamples.get(0));
@@ -151,8 +152,9 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	
 	@FXML
 	public void checkMachine() {
+		final StateSpace stateSpace = currentTrace.getStateSpace();
 		items.stream()
 			.filter(AbstractCheckableItem::selected)
-			.forEach(formulaHandler::handleItemNoninteractive);
+			.forEach(item -> formulaHandler.checkItem(item, stateSpace));
 	}
 }
