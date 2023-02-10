@@ -98,11 +98,6 @@ public class Modelchecker {
 		});
 	}
 
-	public void cancelModelcheck() {
-		this.executor.interruptAll();
-		currentTrace.getStateSpace().sendInterrupt();
-	}
-
 	private void showResult(ModelCheckingItem item, ModelCheckingJobItem jobItem) {
 		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
 		List<ModelCheckingJobItem> jobItems = item.getItems();
