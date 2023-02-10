@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
@@ -20,8 +19,6 @@ import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 @Singleton
 public class Modelchecker {
@@ -62,8 +59,9 @@ public class Modelchecker {
 		
 		final int stepIndex = item.getSteps().size();
 		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
-		final ObjectProperty<ModelCheckingStep> lastStep = new SimpleObjectProperty<>(initialStep);
-		showResult(item, initialStep);
+		item.setCurrentStep(initialStep);
+		item.getSteps().add(initialStep);
+		injector.getInstance(ModelcheckingView.class).showCurrentStep(item);
 		
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
@@ -75,7 +73,7 @@ public class Modelchecker {
 					statsView.updateSimpleStats(stats);
 				}
 				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, cmd.getResult(), stateSpace);
-				lastStep.set(step);
+				item.setCurrentStep(step);
 				Platform.runLater(() -> item.getSteps().set(stepIndex, step));
 			}
 
@@ -87,16 +85,12 @@ public class Modelchecker {
 		final ConsistencyChecker checker = new ConsistencyChecker(stateSpace, options, listener);
 
 		return this.executor.submit(() -> {
-			checker.call();
-			return lastStep.get();
+			try {
+				checker.call();
+				return item.getCurrentStep();
+			} finally {
+				item.setCurrentStep(null);
+			}
 		});
-	}
-
-	private void showResult(ModelCheckingItem item, ModelCheckingStep step) {
-		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
-		List<ModelCheckingStep> steps = item.getSteps();
-		steps.add(step);
-		modelCheckingView.selectItem(item);
-		modelCheckingView.selectStep(step);
 	}
 }

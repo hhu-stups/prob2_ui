@@ -346,11 +346,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		statsBox.setVisible(false);
 	}
 
-	public void selectItem(ModelCheckingItem item) {
+	public void showCurrentStep(ModelCheckingItem item) {
 		itemsTable.getSelectionModel().select(item);
-	}
-
-	public void selectStep(ModelCheckingStep step) {
-		stepsTable.getSelectionModel().select(step);
+		stepsTable.getSelectionModel().select(item.getCurrentStep());
 	}
 }

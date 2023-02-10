@@ -65,6 +65,9 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	
 	@JsonIgnore
 	private final ListProperty<ModelCheckingStep> steps = new SimpleListProperty<>(this, "steps", FXCollections.observableArrayList());
+	
+	@JsonIgnore
+	private final ObjectProperty<ModelCheckingStep> currentStep = new SimpleObjectProperty<>(this, "currentStep", null);
 
 	@JsonCreator
 	public ModelCheckingItem(
@@ -222,6 +225,18 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	
 	public List<ModelCheckingStep> getSteps() {
 		return steps.get();
+	}
+	
+	public ObjectProperty<ModelCheckingStep> currentStepProperty() {
+		return this.currentStep;
+	}
+	
+	public ModelCheckingStep getCurrentStep() {
+		return this.currentStepProperty().get();
+	}
+	
+	public void setCurrentStep(final ModelCheckingStep currentStep) {
+		this.currentStepProperty().set(currentStep);
 	}
 
 	@Override
