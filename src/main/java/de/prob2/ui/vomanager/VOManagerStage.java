@@ -59,6 +59,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
@@ -67,6 +70,8 @@ public class VOManagerStage extends Stage {
 	public enum Mode {
 		NONE, REQUIREMENT
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(VOManagerStage.class);
 
 	@FXML
 	private TreeTableView<VOManagerItem> tvRequirements;
@@ -266,6 +271,22 @@ public class VOManagerStage extends Stage {
 				vtTable.getItems().add(change.getValueAdded());
 				vtTable.sort();
 				change.getValueAdded().checkedProperty().addListener(validationFeedbackListener);
+			}
+		});
+		currentMachineVTs.addListener((InvalidationListener)o -> {
+			final Machine machine = currentProject.getCurrentMachine();
+			if (machine == null) {
+				return;
+			}
+			// Re-parse all VOs any time the validation tasks change.
+			for (final Requirement requirement : currentProject.getRequirements()) {
+				requirement.getValidationObligation(machine).ifPresent(vo -> {
+					try {
+						voChecker.parseVO(machine, vo);
+					} catch (VOException e) {
+						LOGGER.warn("Error in validation expression", e);
+					}
+				});
 			}
 		});
 
