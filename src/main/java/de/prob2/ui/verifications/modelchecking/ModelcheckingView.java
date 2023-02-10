@@ -249,10 +249,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	
 	@Override
 	protected void executeItem(final ModelCheckingItem item) {
-		if(!item.selected()) {
-			return;
-		}
-
 		try {
 			final CompletableFuture<ModelCheckingJobItem> future = checker.startNextCheckStep(item);
 			future.whenComplete((r, t) -> {

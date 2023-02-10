@@ -248,9 +248,6 @@ public final class SymbolicCheckingFormulaHandler {
 	}
 	
 	public CompletableFuture<SymbolicCheckingFormulaItem> handleItem(SymbolicCheckingFormulaItem item, boolean checkAll) {
-		if(!item.selected()) {
-			return CompletableFuture.completedFuture(item);
-		}
 		return handleItemNoninteractive(item).thenApply(r -> {
 			if(!checkAll) {
 				updateTrace(item);

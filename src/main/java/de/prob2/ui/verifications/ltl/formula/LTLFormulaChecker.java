@@ -170,10 +170,6 @@ public class LTLFormulaChecker {
 	}
 	
 	public CompletableFuture<LTLFormulaItem> checkFormula(LTLFormulaItem item) {
-		if (!item.selected()) {
-			return CompletableFuture.completedFuture(item);
-		}
-
 		return this.checkFormulaNoninteractive(item).thenApply(it -> {
 			if (it.getCounterExample() != null) {
 				currentTrace.set(it.getCounterExample());

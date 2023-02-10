@@ -12,6 +12,7 @@ import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 
 @Singleton
 public class TestCaseGenerationItemHandler {
@@ -37,14 +38,13 @@ public class TestCaseGenerationItemHandler {
 
 
 	public void handleItem(TestCaseGenerationItem item) {
-		if(!item.selected()) {
-			return;
-		}
 		generateTestCases(item);
 	}
 	
 	public void handleMachine(Machine machine) {
-		machine.getTestCases().forEach(this::handleItem);
+		machine.getTestCases().stream()
+			.filter(AbstractCheckableItem::selected)
+			.forEach(this::handleItem);
 	}
 	
 }

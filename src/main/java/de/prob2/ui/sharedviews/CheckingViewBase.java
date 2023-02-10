@@ -166,7 +166,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	protected abstract String configurationForItem(final T item);
 	
 	protected BooleanExpression disableItemBinding(final T item) {
-		return disablePropertyController.disableProperty().or(item.selectedProperty().not());
+		return disablePropertyController.disableProperty();
 	}
 	
 	protected abstract void executeItem(final T item);

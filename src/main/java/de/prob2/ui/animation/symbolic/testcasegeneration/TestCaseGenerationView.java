@@ -179,7 +179,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@Override
 	protected BooleanExpression disableItemBinding(final TestCaseGenerationItem item) {
-		return testCaseGenerator.runningProperty().or(item.selectedProperty().not());
+		return testCaseGenerator.runningProperty();
 	}
 
 	@Override

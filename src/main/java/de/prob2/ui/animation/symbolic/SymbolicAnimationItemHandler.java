@@ -106,9 +106,6 @@ public final class SymbolicAnimationItemHandler {
 	}
 
 	public CompletableFuture<SymbolicAnimationItem> handleItem(SymbolicAnimationItem item, boolean checkAll) {
-		if(!item.selected()) {
-			return CompletableFuture.completedFuture(item);
-		}
 		return handleItemNoninteractive(item).thenApply(r -> {
 			if(!checkAll) {
 				final Trace example = item.getExample();

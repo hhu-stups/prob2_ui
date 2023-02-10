@@ -52,14 +52,12 @@ public class TraceChecker {
 	}
 
 	public void checkAll(List<ReplayTrace> replayTraces) {
-		replayTraces.forEach(trace -> check(trace, false));
+		replayTraces.stream()
+			.filter(ReplayTrace::selected)
+			.forEach(trace -> check(trace, false));
 	}
 
 	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		if (!replayTrace.selected()) {
-			return CompletableFuture.completedFuture(replayTrace);
-		}
-
 		return checkNoninteractive(replayTrace).whenComplete((r, e) -> {
 			if (e == null) {
 				if (setCurrentAnimation) {

@@ -17,6 +17,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -120,6 +121,8 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	
 	@FXML
 	public void checkMachine() {
-		items.forEach(item -> formulaHandler.handleItem(item, true));
+		items.stream()
+			.filter(AbstractCheckableItem::selected)
+			.forEach(item -> formulaHandler.handleItem(item, true));
 	}
 }
