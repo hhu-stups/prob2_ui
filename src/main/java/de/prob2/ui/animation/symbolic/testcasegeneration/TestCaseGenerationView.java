@@ -124,11 +124,9 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	private final TestCaseGenerator testCaseGenerator;
 
-	private final TestCaseGenerationItemHandler itemHandler;
-
 	@Inject
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
-	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController, final TestCaseGenerationItemHandler itemHandler,
+	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
 	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
 		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
@@ -136,7 +134,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.itemHandler = itemHandler;
 		this.testCaseGenerator = testCaseGenerator;
 		stageManager.loadFXML(this, "test_case_generation_view.fxml");
 	}
@@ -180,7 +177,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@Override
 	protected void executeItem(final TestCaseGenerationItem item) {
-		itemHandler.generateTestCases(item, currentTrace.getStateSpace());
+		testCaseGenerator.generateTestCases(item, currentTrace.getStateSpace());
 	}
 
 	@Override
@@ -198,6 +195,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		items.stream()
 			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> itemHandler.generateTestCases(item, stateSpace));
+			.forEach(item -> testCaseGenerator.generateTestCases(item, stateSpace));
 	}
 }
