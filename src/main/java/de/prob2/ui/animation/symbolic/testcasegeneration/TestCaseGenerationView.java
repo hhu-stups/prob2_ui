@@ -12,6 +12,7 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -66,7 +67,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 			MenuItem saveTraces = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.savePaths"));
 			saveTraces.setOnAction(e -> {
 				TestCaseGenerationItem item = this.getItem();
-				injector.getInstance(TestCaseGenerationResultHandler.class).saveTraces(item);
+				injector.getInstance(TraceFileHandler.class).save(item, currentProject.getCurrentMachine());
 			});
 			contextMenu.getItems().add(saveTraces);
 

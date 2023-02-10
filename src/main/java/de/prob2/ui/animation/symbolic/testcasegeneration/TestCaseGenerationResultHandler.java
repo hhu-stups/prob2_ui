@@ -6,31 +6,18 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 @Singleton
 public class TestCaseGenerationResultHandler {
-	private final CurrentTrace currentTrace;
-	private final CurrentProject currentProject;
-	private final Injector injector;
-
-	
 	@Inject
-	public TestCaseGenerationResultHandler(final CurrentTrace currentTrace, final CurrentProject currentProject, final Injector injector) {
-		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
-		this.injector = injector;
-	}
+	public TestCaseGenerationResultHandler() {}
 	
 	public void handleTestCaseGenerationResult(TestCaseGenerationItem item, Object result) {
 		item.getExamples().clear();
@@ -75,12 +62,4 @@ public class TestCaseGenerationResultHandler {
 				.map(trace -> new TraceInformationItem(trace.getDepth(), trace.getTransitionNames(), trace.getTarget().getOperation(), trace.getTarget().getGuardString(), trace.getTarget().getFeasible(), trace.getTrace()))
 				.collect(Collectors.toList());
 	}
-
-	public void saveTraces(TestCaseGenerationItem item) {
-		TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
-		if (currentTrace.get() != null) {
-			traceSaver.save(item, currentProject.getCurrentMachine());
-		}
-	}
-
 }
