@@ -169,15 +169,6 @@ public class LTLFormulaChecker {
 		}
 	}
 	
-	public CompletableFuture<LTLFormulaItem> checkFormula(LTLFormulaItem item) {
-		return this.checkFormulaNoninteractive(item).thenApply(it -> {
-			if (it.getCounterExample() != null) {
-				currentTrace.set(it.getCounterExample());
-			}
-			return it;
-		});
-	}
-	
 	public CompletableFuture<LTLFormulaItem> checkFormulaNoninteractive(LTLFormulaItem item) {
 		Machine machine = currentProject.getCurrentMachine();
 		return this.cliExecutor.submit(() -> {

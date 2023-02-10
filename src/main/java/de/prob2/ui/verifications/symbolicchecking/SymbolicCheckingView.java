@@ -130,7 +130,12 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	
 	@Override
 	protected void executeItem(final SymbolicCheckingFormulaItem item) {
-		formulaHandler.handleItem(item, false);
+		formulaHandler.handleItemNoninteractive(item).thenAccept(r -> {
+			List<Trace> counterExamples = item.getCounterExamples();
+			if (!counterExamples.isEmpty()) {
+				currentTrace.set(counterExamples.get(0));
+			}
+		});
 	}
 	
 	@Override
@@ -148,6 +153,6 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	public void checkMachine() {
 		items.stream()
 			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> formulaHandler.handleItem(item, true));
+			.forEach(formulaHandler::handleItemNoninteractive);
 	}
 }

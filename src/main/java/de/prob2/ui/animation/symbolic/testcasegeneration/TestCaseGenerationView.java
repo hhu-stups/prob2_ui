@@ -21,6 +21,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.InterruptIfRunningButton;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -167,7 +168,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		itemsTable.setOnMouseClicked(e -> {
 			TestCaseGenerationItem item = itemsTable.getSelectionModel().getSelectedItem();
 			if (e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
-				itemHandler.handleItem(item);
+				itemHandler.generateTestCases(item);
 			}
 		});
 	}
@@ -184,7 +185,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@Override
 	protected void executeItem(final TestCaseGenerationItem item) {
-		itemHandler.handleItem(item);
+		itemHandler.generateTestCases(item);
 	}
 
 	@Override
@@ -199,7 +200,8 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@FXML
 	public void generate() {
-		Machine machine = currentProject.getCurrentMachine();
-		itemHandler.handleMachine(machine);
+		items.stream()
+			.filter(AbstractCheckableItem::selected)
+			.forEach(item -> itemHandler.generateTestCases(item));
 	}
 }

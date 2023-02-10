@@ -8,6 +8,7 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
+import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -105,7 +106,12 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	
 	@Override
 	protected void executeItem(final SymbolicAnimationItem item) {
-		formulaHandler.handleItem(item, false);
+		formulaHandler.handleItemNoninteractive(item).thenAccept(r -> {
+			final Trace example = item.getExample();
+			if (example != null) {
+				currentTrace.set(example);
+			}
+		});
 	}
 	
 	@Override
@@ -123,6 +129,6 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	public void checkMachine() {
 		items.stream()
 			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> formulaHandler.handleItem(item, true));
+			.forEach(formulaHandler::handleItemNoninteractive);
 	}
 }

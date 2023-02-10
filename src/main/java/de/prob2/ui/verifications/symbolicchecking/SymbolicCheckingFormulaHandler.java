@@ -51,13 +51,6 @@ public final class SymbolicCheckingFormulaHandler {
 		this.cliExecutor = cliExecutor;
 	}
 	
-	private void updateTrace(SymbolicCheckingFormulaItem item) {
-		List<Trace> counterExamples = item.getCounterExamples();
-		if(!counterExamples.isEmpty()) {
-			currentTrace.set(counterExamples.get(0));
-		}
-	}
-	
 	private CompletableFuture<SymbolicCheckingFormulaItem> checkItem(final SymbolicCheckingFormulaItem item, final Runnable task) {
 		return cliExecutor.submit(task, item).exceptionally(e -> {
 			LOGGER.error("Exception during symbolic checking", e);
@@ -245,14 +238,5 @@ public final class SymbolicCheckingFormulaHandler {
 			default:
 				throw new AssertionError("Unhandled symbolic checking type: " + item.getType());
 		}
-	}
-	
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleItem(SymbolicCheckingFormulaItem item, boolean checkAll) {
-		return handleItemNoninteractive(item).thenApply(r -> {
-			if(!checkAll) {
-				updateTrace(item);
-			}
-			return r;
-		});
 	}
 }

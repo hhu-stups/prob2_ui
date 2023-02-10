@@ -11,8 +11,6 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.AbstractCheckableItem;
 
 @Singleton
 public class TestCaseGenerationItemHandler {
@@ -35,16 +33,4 @@ public class TestCaseGenerationItemHandler {
 		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = new ConstraintBasedTestCaseGenerator(currentTrace.getStateSpace(), item.getTestCaseGeneratorSettings(), new ArrayList<>());
 		testCaseGenerator.generateTestCases(item, cbTestCaseGenerator);
 	}
-
-
-	public void handleItem(TestCaseGenerationItem item) {
-		generateTestCases(item);
-	}
-	
-	public void handleMachine(Machine machine) {
-		machine.getTestCases().stream()
-			.filter(AbstractCheckableItem::selected)
-			.forEach(this::handleItem);
-	}
-	
 }

@@ -3,10 +3,8 @@ package de.prob2.ui.animation.tracereplay;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -20,7 +18,6 @@ import de.prob.statespace.FormalismType;
 import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
-import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -45,7 +42,6 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
@@ -249,7 +245,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@FXML
 	private void checkMachine() {
-		traceChecker.checkAll(items);
+		items.stream()
+			.filter(ReplayTrace::selected)
+			.forEach(trace -> traceChecker.check(trace, false));
 	}
 
 	public void closeDescription() {

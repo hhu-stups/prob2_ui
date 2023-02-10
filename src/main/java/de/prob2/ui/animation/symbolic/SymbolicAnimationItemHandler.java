@@ -13,7 +13,6 @@ import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
@@ -103,17 +102,5 @@ public final class SymbolicAnimationItemHandler {
 			default:
 				throw new AssertionError("Unhandled symbolic animation type: " + item.getType());
 		}
-	}
-
-	public CompletableFuture<SymbolicAnimationItem> handleItem(SymbolicAnimationItem item, boolean checkAll) {
-		return handleItemNoninteractive(item).thenApply(r -> {
-			if(!checkAll) {
-				final Trace example = item.getExample();
-				if (example != null) {
-					currentTrace.set(example);
-				}
-			}
-			return r;
-		});
 	}
 }

@@ -252,7 +252,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	
 	@Override
 	protected void executeItem(final LTLFormulaItem item) {
-		checker.checkFormula(item);
+		checker.checkFormulaNoninteractive(item).thenAccept(it -> {
+			if (it.getCounterExample() != null) {
+				currentTrace.set(it.getCounterExample());
+			}
+		});
 	}
 	
 	@FXML
