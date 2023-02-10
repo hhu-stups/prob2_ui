@@ -166,12 +166,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		cancelButton.runningProperty().bind(testCaseGenerator.runningProperty());
 		cancelButton.getInterruptButton().setOnAction(e -> testCaseGenerator.interrupt());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
-		itemsTable.setOnMouseClicked(e -> {
-			TestCaseGenerationItem item = itemsTable.getSelectionModel().getSelectedItem();
-			if (e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
-				itemHandler.generateTestCases(item, currentTrace.getStateSpace());
-			}
-		});
 	}
 
 	@Override
