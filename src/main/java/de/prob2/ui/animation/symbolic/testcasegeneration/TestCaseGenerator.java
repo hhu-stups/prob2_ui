@@ -8,9 +8,14 @@ import javax.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
+import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -28,16 +33,42 @@ public class TestCaseGenerator {
 	
 	private final CurrentTrace currentTrace;
 	
-	private final TestCaseGenerationResultHandler resultHandler;
-	
 	private final ListProperty<Thread> currentJobThreads;
 
 	@Inject
-	public TestCaseGenerator(final CurrentTrace currentTrace, final TestCaseGenerationResultHandler resultHandler, final DisablePropertyController disablePropertyController) {
+	public TestCaseGenerator(final CurrentTrace currentTrace, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
-		this.resultHandler = resultHandler;
 		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
 		disablePropertyController.addDisableExpression(this.runningProperty());
+	}
+
+	private static void handleResult(TestCaseGenerationItem item, Object result) {
+		item.getExamples().clear();
+		if(!(result instanceof TestCaseGeneratorResult)) {
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
+			return;
+		}
+		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
+		
+		List<Trace> traces = new ArrayList<>();
+		for (final TestTrace trace : testCaseGeneratorResult.getTestTraces()) {
+			if (trace.getTrace() != null) {
+				traces.add(trace.getTrace());
+			}
+		}
+		
+		if(testCaseGeneratorResult.isInterrupted()) {
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted"));
+		} else if(traces.isEmpty()) {
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
+		} else if(!testCaseGeneratorResult.getUncoveredTargets().isEmpty()) {
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated"));
+		} else {
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
+		}
+		item.getExamples().addAll(traces);
+		item.getTraceInformation().setAll(testCaseGeneratorResult.getTestTraces());
+		item.getUncoveredOperations().setAll(testCaseGeneratorResult.getUncoveredTargets());
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator) {
@@ -51,7 +82,7 @@ public class TestCaseGenerator {
 			}
 			final Object finalResult = result;
 			Platform.runLater(() -> {
-				resultHandler.handleTestCaseGenerationResult(item, finalResult);
+				handleResult(item, finalResult);
 			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "Test Case Generation Thread");
