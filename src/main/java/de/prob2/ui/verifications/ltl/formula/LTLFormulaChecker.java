@@ -128,12 +128,6 @@ public class LTLFormulaChecker {
 	}
 	
 	public void checkFormulaSync(LTLFormulaItem item, Machine machine, StateSpace stateSpace) {
-		BParser bParser = new BParser();
-		final AbstractModel model = stateSpace.getModel();
-		if (model instanceof ClassicalBModel) {
-			IDefinitions definitions = ((ClassicalBModel) model).getDefinitions();
-			bParser.setDefinitions(definitions);
-		}
 		try {
 			final LTL formula = this.parseFormula(item.getCode(), machine, stateSpace.getModel());
 			final LTLChecker checker = new LTLChecker(stateSpace, formula);
