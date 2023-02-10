@@ -61,8 +61,7 @@ public class Modelchecker {
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel());
 		
 		final int jobItemListIndex = item.getItems().size();
-		final int jobItemDisplayIndex = jobItemListIndex + 1;
-		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(jobItemDisplayIndex, new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
+		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
 		final ObjectProperty<ModelCheckingJobItem> lastJobItem = new SimpleObjectProperty<>(initialJobItem);
 		showResult(item, initialJobItem);
 		
@@ -75,7 +74,7 @@ public class Modelchecker {
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
-				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItemDisplayIndex, result, timeElapsed, stats, cmd.getResult(), stateSpace);
+				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(result, timeElapsed, stats, cmd.getResult(), stateSpace);
 				lastJobItem.set(jobItem);
 				Platform.runLater(() -> item.getItems().set(jobItemListIndex, jobItem));
 			}
