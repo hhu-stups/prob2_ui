@@ -42,48 +42,39 @@ public class TestCaseGenerator {
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
-	private static void handleResult(TestCaseGenerationItem item, Object result) {
+	private static void handleResult(TestCaseGenerationItem item, TestCaseGeneratorResult result) {
 		item.getExamples().clear();
-		if(!(result instanceof TestCaseGeneratorResult)) {
-			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
-			return;
-		}
-		TestCaseGeneratorResult testCaseGeneratorResult = (TestCaseGeneratorResult) result;
 		
 		List<Trace> traces = new ArrayList<>();
-		for (final TestTrace trace : testCaseGeneratorResult.getTestTraces()) {
+		for (final TestTrace trace : result.getTestTraces()) {
 			if (trace.getTrace() != null) {
 				traces.add(trace.getTrace());
 			}
 		}
 		
-		if(testCaseGeneratorResult.isInterrupted()) {
+		if(result.isInterrupted()) {
 			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted"));
 		} else if(traces.isEmpty()) {
 			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
-		} else if(!testCaseGeneratorResult.getUncoveredTargets().isEmpty()) {
+		} else if(!result.getUncoveredTargets().isEmpty()) {
 			item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated"));
 		} else {
 			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
 		}
 		item.getExamples().addAll(traces);
-		item.getTraceInformation().setAll(testCaseGeneratorResult.getTestTraces());
-		item.getUncoveredOperations().setAll(testCaseGeneratorResult.getUncoveredTargets());
+		item.getTraceInformation().setAll(result.getTestTraces());
+		item.getUncoveredOperations().setAll(result.getUncoveredTargets());
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator) {
 		Thread checkingThread = new Thread(() -> {
-			Object result;
 			try {
-				result = testCaseGenerator.generateTestCases();
+				final TestCaseGeneratorResult result = testCaseGenerator.generateTestCases();
+				Platform.runLater(() -> handleResult(item, result));
 			} catch (RuntimeException e) {
 				LOGGER.error("Exception during generating test cases", e);
-				result = e;
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
 			}
-			final Object finalResult = result;
-			Platform.runLater(() -> {
-				handleResult(item, finalResult);
-			});
 			currentJobThreads.remove(Thread.currentThread());
 		}, "Test Case Generation Thread");
 		currentJobThreads.add(checkingThread);
