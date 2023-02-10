@@ -51,16 +51,11 @@ public class VisBFileHandler {
 		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.toString());
 
 		currentTrace.getStateSpace().execute(svgCmd);
-
 		String svgPathString = svgCmd.getSvgPath();
-		if (svgPathString.isEmpty()) {
-			// TODO: support empty svg paths
-			throw new UnsupportedOperationException("empty svg paths not yet implemented");
-		}
 
 		Path svgPath = jsonPath.resolveSibling(svgPathString).toRealPath();
-		if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
-			throw new IOException("given svg path is not a non-empty regular file: " + svgPath);
+		if (!svgPathString.isEmpty() && (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0)) {
+			throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
 		}
 
 		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
