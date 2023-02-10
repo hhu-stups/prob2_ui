@@ -309,7 +309,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	@FXML
 	public void checkMachine() {
-		for (ModelCheckingItem item : currentProject.currentMachineProperty().get().getModelcheckingItems()) {
+		for (ModelCheckingItem item : items) {
 			if (!item.selected()) {
 				continue;
 			}
