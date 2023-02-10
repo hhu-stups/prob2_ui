@@ -8,9 +8,6 @@ import javax.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.eventb.EventBModel;
-import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -63,10 +60,6 @@ public class TestCaseGenerator {
 	}
 	
 	public void generateTestCases(TestCaseGenerationItem item, StateSpace stateSpace) {
-		AbstractModel model = stateSpace.getModel();
-		if(!(model instanceof ClassicalBModel) && !(model instanceof EventBModel)) {
-			return;
-		}
 		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = new ConstraintBasedTestCaseGenerator(stateSpace, item.getTestCaseGeneratorSettings(), new ArrayList<>());
 		generateTestCases(item, cbTestCaseGenerator);
 	}
