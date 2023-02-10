@@ -26,6 +26,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
@@ -314,7 +315,9 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	
 	@FXML
 	public void checkMachine() {
-		checker.checkMachine();
+		items.stream()
+			.filter(AbstractCheckableItem::selected)
+			.forEach(checker::checkFormulaNoninteractive);
 	}
 	
 	@FXML

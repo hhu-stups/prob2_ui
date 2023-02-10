@@ -57,21 +57,6 @@ public class LTLFormulaChecker {
 		this.currentProject = currentProject;
 	}
 	
-	public void checkMachine() {
-		Machine machine = currentProject.getCurrentMachine();
-		this.cliExecutor.submit(() -> {
-			for (LTLFormulaItem item : machine.getLTLFormulas()) {
-				if (!item.selected()) {
-					continue;
-				}
-				this.checkFormula(item, machine);
-				if(Thread.currentThread().isInterrupted()) {
-					break;
-				}
-			}
-		});
-	}
-	
 	public static LTL parseFormula(final String code, final ProBParserBase languageSpecificParser, final PatternManager patternManager) {
 		LtlParser parser = new LtlParser(code);
 		parser.setPatternManager(patternManager);
