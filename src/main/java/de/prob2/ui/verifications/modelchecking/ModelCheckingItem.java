@@ -64,7 +64,7 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	private final BooleanProperty shouldExecute;
 	
 	@JsonIgnore
-	private final ListProperty<ModelCheckingJobItem> items = new SimpleListProperty<>(this, "jobItems", FXCollections.observableArrayList());
+	private final ListProperty<ModelCheckingStep> steps = new SimpleListProperty<>(this, "steps", FXCollections.observableArrayList());
 
 	@JsonCreator
 	public ModelCheckingItem(
@@ -87,15 +87,15 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	}
 	
 	private void initListeners() {
-		this.itemsProperty().addListener((o, from, to) -> {
+		this.stepsProperty().addListener((o, from, to) -> {
 			if (to.isEmpty()) {
 				this.checked.set(Checked.NOT_CHECKED);
 			} else {
 				final boolean failed = to.stream()
-					.map(ModelCheckingJobItem::getChecked)
+					.map(ModelCheckingStep::getChecked)
 					.anyMatch(Checked.FAIL::equals);
 				final boolean success = !failed && to.stream()
-					.map(ModelCheckingJobItem::getChecked)
+					.map(ModelCheckingStep::getChecked)
 					.anyMatch(Checked.SUCCESS::equals);
 				
 				if (success) {
@@ -149,7 +149,7 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 			.searchStrategy(this.getSearchStrategy())
 			// Start checking from the beginning if this item hasn't been checked yet,
 			// otherwise continue checking from the last error.
-			.recheckExisting(this.getItems().isEmpty());
+			.recheckExisting(this.getSteps().isEmpty());
 		if (this.getGoal() != null) {
 			fullOptions = fullOptions.customGoal(model.parseFormula(this.getGoal()));
 		}
@@ -213,15 +213,15 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	}
 	
 	public void reset() {
-		this.itemsProperty().clear();
+		this.stepsProperty().clear();
 	}
 	
-	public ListProperty<ModelCheckingJobItem> itemsProperty() {
-		return items;
+	public ListProperty<ModelCheckingStep> stepsProperty() {
+		return steps;
 	}
 	
-	public List<ModelCheckingJobItem> getItems() {
-		return items.get();
+	public List<ModelCheckingStep> getSteps() {
+		return steps.get();
 	}
 
 	@Override

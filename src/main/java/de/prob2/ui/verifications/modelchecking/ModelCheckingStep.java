@@ -12,7 +12,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.Checked;
 
-public class ModelCheckingJobItem {
+public class ModelCheckingStep {
 	private final IModelCheckingResult result;
 	private final Checked checked;
 	private final long timeElapsed;
@@ -21,7 +21,7 @@ public class ModelCheckingJobItem {
 	private final StateSpace stateSpace;
 	private Trace trace;
 	
-	public ModelCheckingJobItem(final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final BigInteger memoryUsed, final StateSpace stateSpace) {
+	public ModelCheckingStep(final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final BigInteger memoryUsed, final StateSpace stateSpace) {
 		this.result = result;
 		if (result instanceof ModelCheckOk || result instanceof ModelCheckGoalFound) {
 			this.checked = Checked.SUCCESS;

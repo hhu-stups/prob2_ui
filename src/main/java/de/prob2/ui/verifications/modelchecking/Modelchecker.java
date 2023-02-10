@@ -46,24 +46,24 @@ public class Modelchecker {
 	 * @param item the model checking configuration to run
 	 * @return result of the model check
 	 */
-	public CompletableFuture<ModelCheckingJobItem> startCheckIfNeeded(final ModelCheckingItem item, final StateSpace stateSpace) {
-		if (item.getItems().isEmpty()) {
+	public CompletableFuture<ModelCheckingStep> startCheckIfNeeded(final ModelCheckingItem item, final StateSpace stateSpace) {
+		if (item.getSteps().isEmpty()) {
 			return this.startNextCheckStep(item, stateSpace);
 		} else {
-			return CompletableFuture.completedFuture(item.getItems().get(0));
+			return CompletableFuture.completedFuture(item.getSteps().get(0));
 		}
 	}
 
-	public CompletableFuture<ModelCheckingJobItem> startNextCheckStep(ModelCheckingItem item, StateSpace stateSpace) {
-		// The options must be calculated before adding the ModelCheckingJobItem,
+	public CompletableFuture<ModelCheckingStep> startNextCheckStep(ModelCheckingItem item, StateSpace stateSpace) {
+		// The options must be calculated before adding the ModelCheckingStep,
 		// so that the recheckExisting/INSPECT_EXISTING_NODES option is set correctly,
-		// which depends on whether any job items were already added.
+		// which depends on whether any steps were already added.
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel());
 		
-		final int jobItemListIndex = item.getItems().size();
-		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
-		final ObjectProperty<ModelCheckingJobItem> lastJobItem = new SimpleObjectProperty<>(initialJobItem);
-		showResult(item, initialJobItem);
+		final int stepIndex = item.getSteps().size();
+		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
+		final ObjectProperty<ModelCheckingStep> lastStep = new SimpleObjectProperty<>(initialStep);
+		showResult(item, initialStep);
 		
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
@@ -74,9 +74,9 @@ public class Modelchecker {
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
-				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(result, timeElapsed, stats, cmd.getResult(), stateSpace);
-				lastJobItem.set(jobItem);
-				Platform.runLater(() -> item.getItems().set(jobItemListIndex, jobItem));
+				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, cmd.getResult(), stateSpace);
+				lastStep.set(step);
+				Platform.runLater(() -> item.getSteps().set(stepIndex, step));
 			}
 
 			@Override
@@ -88,15 +88,15 @@ public class Modelchecker {
 
 		return this.executor.submit(() -> {
 			checker.call();
-			return lastJobItem.get();
+			return lastStep.get();
 		});
 	}
 
-	private void showResult(ModelCheckingItem item, ModelCheckingJobItem jobItem) {
+	private void showResult(ModelCheckingItem item, ModelCheckingStep step) {
 		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
-		List<ModelCheckingJobItem> jobItems = item.getItems();
-		jobItems.add(jobItem);
+		List<ModelCheckingStep> steps = item.getSteps();
+		steps.add(step);
 		modelCheckingView.selectItem(item);
-		modelCheckingView.selectJobItem(jobItem);
+		modelCheckingView.selectStep(step);
 	}
 }
