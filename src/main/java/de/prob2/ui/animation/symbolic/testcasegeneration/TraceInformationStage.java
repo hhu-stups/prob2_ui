@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.Arrays;
+import java.util.List;
 
 import com.google.inject.Inject;
 
@@ -8,8 +9,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.WrappedTextTableCell;
 
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.TableColumn;
@@ -81,10 +80,6 @@ public final class TraceInformationStage extends Stage {
 	@FXML
 	private TableColumn<TraceInformationItem, String> uncoveredGuard;
 
-	private ObservableList<TraceInformationItem> traces = FXCollections.observableArrayList();
-	
-	private ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList();
-
 	private final CurrentTrace currentTrace;
 
 	@Inject
@@ -93,14 +88,12 @@ public final class TraceInformationStage extends Stage {
 		this.currentTrace = currentTrace;
 	}
 
-	public void setTraces(ObservableList<TraceInformationItem> traces) {
-		this.traces.setAll(traces);
-		tvTraces.refresh();
+	public void setTraces(List<TraceInformationItem> traces) {
+		this.tvTraces.getItems().setAll(traces);
 	}
 	
-	public void setUncoveredOperations(ObservableList<TraceInformationItem> uncoveredOperations) {
-		this.uncoveredOperations.setAll(uncoveredOperations);
-		tvUncovered.refresh();
+	public void setUncoveredOperations(List<TraceInformationItem> uncoveredOperations) {
+		this.tvUncovered.getItems().setAll(uncoveredOperations);
 	}
 
 	@FXML
@@ -114,14 +107,10 @@ public final class TraceInformationStage extends Stage {
 		
 		enabled.setCellValueFactory(new PropertyValueFactory<>("enabled"));
 		
-		tvTraces.setItems(traces);
-		
 		tvUncovered.setRowFactory(item -> new TraceInformationRow());
 		uncoveredOperation.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		uncoveredGuard.setCellFactory(WrappedTextTableCell<TraceInformationItem>::new);
 		uncoveredGuard.setCellValueFactory(new PropertyValueFactory<>("guard"));
-		
-		tvUncovered.setItems(uncoveredOperations);
 	}
 
 }
