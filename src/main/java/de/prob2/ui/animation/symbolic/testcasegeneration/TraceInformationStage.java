@@ -1,11 +1,11 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.Arrays;
-import java.util.List;
 
 import com.google.inject.Inject;
 
 import de.prob.analysis.testcasegeneration.Target;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -114,12 +114,9 @@ public final class TraceInformationStage extends Stage {
 		this.currentTrace = currentTrace;
 	}
 
-	public void setTraces(List<TestTrace> traces) {
-		this.tvTraces.getItems().setAll(traces);
-	}
-	
-	public void setUncoveredOperations(List<Target> uncoveredOperations) {
-		this.tvUncovered.getItems().setAll(uncoveredOperations);
+	public void setResult(final TestCaseGeneratorResult result) {
+		this.tvTraces.getItems().setAll(result.getTestTraces());
+		this.tvUncovered.getItems().setAll(result.getUncoveredTargets());
 	}
 
 	@FXML

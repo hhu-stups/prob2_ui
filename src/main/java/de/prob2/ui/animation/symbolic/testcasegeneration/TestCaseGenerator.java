@@ -43,6 +43,7 @@ public class TestCaseGenerator {
 	}
 
 	private static void handleResult(TestCaseGenerationItem item, TestCaseGeneratorResult result) {
+		item.setResult(result);
 		item.getExamples().clear();
 		
 		List<Trace> traces = new ArrayList<>();
@@ -62,8 +63,6 @@ public class TestCaseGenerator {
 			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
 		}
 		item.getExamples().addAll(traces);
-		item.getTraceInformation().setAll(result.getTestTraces());
-		item.getUncoveredOperations().setAll(result.getUncoveredTargets());
 	}
 
 	public void generateTestCases(TestCaseGenerationItem item, ConstraintBasedTestCaseGenerator testCaseGenerator) {

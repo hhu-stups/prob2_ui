@@ -47,10 +47,8 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
 			showDetails.setOnAction(e -> {
-				TestCaseGenerationItem item = this.getItem();
 				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
-				stage.setTraces(item.getTraceInformation());
-				stage.setUncoveredOperations(item.getUncoveredOperations());
+				stage.setResult(this.getItem().getResult());
 				stage.show();
 				stage.toFront();
 			});
@@ -83,7 +81,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					to.examplesProperty().addListener(updateExamplesListener);
 					updateExamplesListener.invalidated(null);
-					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
+					showDetails.disableProperty().bind(to.resultProperty().isNull());
 					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
 			});
