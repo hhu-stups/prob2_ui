@@ -17,7 +17,7 @@
 \usepackage{hyperref}
 \usepackage{hypgotoe}
 \usepackage{amsfonts}
-
+\usepackage{seqsplit}
 %\catcode`\_=12 % underscores can be used without escaping them but  mathmode underscore where it serves to initiate a subscript term doesnt work anymore
 
 
