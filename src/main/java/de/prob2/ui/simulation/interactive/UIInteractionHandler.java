@@ -195,9 +195,7 @@ public class UIInteractionHandler {
 				OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.SETUP_CONSTANTS_NAME);
 				// Somehow the constructor with 1 argument always sets using destination state to false
 				Map<String, String> fixedVariables = new PersistentTransition(setupConstantsTransition, null).getDestinationStateVariables();
-				System.out.println(setupConstantsTransition.getDestination());
 				Map<String, String> newFixedVariables = new HashMap<>(fixedVariables);
-				System.out.println("!!!!!!!!");
 				if(opInfo != null) {
 					for (String key : fixedVariables.keySet()) {
 						if (!opInfo.getNonDetWrittenVariables().contains(key) && !opInfo.getParameterNames().contains(key)) {
