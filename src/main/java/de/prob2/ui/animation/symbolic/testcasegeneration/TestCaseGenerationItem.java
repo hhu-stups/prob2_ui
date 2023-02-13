@@ -5,13 +5,17 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import de.prob.analysis.testcasegeneration.Target;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.IExecutableItem;
 
 import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -30,11 +34,10 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	private final int maxDepth;
 	
 	@JsonIgnore
+	private final ObjectProperty<TestCaseGeneratorResult> result = new SimpleObjectProperty<>(this, "result", null);
+	
+	@JsonIgnore
 	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
-	@JsonIgnore
-	private final ObservableList<TraceInformationItem> traceInformation = FXCollections.observableArrayList();
-	@JsonIgnore
-	private final ObservableList<TraceInformationItem> uncoveredOperations = FXCollections.observableArrayList();
 	
 	protected TestCaseGenerationItem(final int maxDepth) {
 		super();
@@ -44,9 +47,8 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@Override
 	public void reset() {
 		super.reset();
+		this.setResult(null);
 		this.examples.clear();
-		this.getTraceInformation().clear();
-		this.getUncoveredOperations().clear();
 	}
 	
 	@JsonIgnore
@@ -59,20 +61,24 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonIgnore
 	public abstract TestCaseGeneratorSettings getTestCaseGeneratorSettings();
 	
+	public ObjectProperty<TestCaseGeneratorResult> resultProperty() {
+		return this.result;
+	}
+	
+	public TestCaseGeneratorResult getResult() {
+		return this.resultProperty().get();
+	}
+	
+	public void setResult(final TestCaseGeneratorResult result) {
+		this.resultProperty().set(result);
+	}
+	
 	public ListProperty<Trace> examplesProperty() {
 		return examples;
 	}
 	
 	public ObservableList<Trace> getExamples() {
 		return examples.get();
-	}
-	
-	public ObservableList<TraceInformationItem> getTraceInformation() {
-		return this.traceInformation;
-	}
-	
-	public ObservableList<TraceInformationItem> getUncoveredOperations() {
-		return this.uncoveredOperations;
 	}
 	
 	@JsonIgnore
@@ -89,6 +95,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	}
 
 	public String createdByForMetadata(int index) {
-		return "Test Case Generation: " + this.getConfigurationDescription() + "; " + getTraceInformation().get(index);
+		final Target target = this.getResult().getTestTraces().get(index).getTarget();
+		return "Test Case Generation: " + this.getConfigurationDescription() + "; OPERATION: " + target.getOperation() + ", GUARD: " + target.getGuardString();
 	}
 }

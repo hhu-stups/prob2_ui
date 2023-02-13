@@ -10,7 +10,9 @@ import com.google.inject.Singleton;
 
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -21,6 +23,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.InterruptIfRunningButton;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -44,10 +47,8 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
 			showDetails.setOnAction(e -> {
-				TestCaseGenerationItem item = this.getItem();
 				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
-				stage.setTraces(item.getTraceInformation());
-				stage.setUncoveredOperations(item.getUncoveredOperations());
+				stage.setResult(this.getItem().getResult());
 				stage.show();
 				stage.toFront();
 			});
@@ -64,7 +65,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 			MenuItem saveTraces = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.savePaths"));
 			saveTraces.setOnAction(e -> {
 				TestCaseGenerationItem item = this.getItem();
-				injector.getInstance(TestCaseGenerationResultHandler.class).saveTraces(item);
+				injector.getInstance(TraceFileHandler.class).save(item, currentProject.getCurrentMachine());
 			});
 			contextMenu.getItems().add(saveTraces);
 
@@ -80,7 +81,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					to.examplesProperty().addListener(updateExamplesListener);
 					updateExamplesListener.invalidated(null);
-					showDetails.disableProperty().bind(to.examplesProperty().emptyProperty());
+					showDetails.disableProperty().bind(to.resultProperty().isNull());
 					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
 			});
@@ -122,11 +123,9 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	private final TestCaseGenerator testCaseGenerator;
 
-	private final TestCaseGenerationItemHandler itemHandler;
-
 	@Inject
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
-	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController, final TestCaseGenerationItemHandler itemHandler,
+	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
 	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
 		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
@@ -134,7 +133,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.itemHandler = itemHandler;
 		this.testCaseGenerator = testCaseGenerator;
 		stageManager.loadFXML(this, "test_case_generation_view.fxml");
 	}
@@ -164,12 +162,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		cancelButton.runningProperty().bind(testCaseGenerator.runningProperty());
 		cancelButton.getInterruptButton().setOnAction(e -> testCaseGenerator.interrupt());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
-		itemsTable.setOnMouseClicked(e -> {
-			TestCaseGenerationItem item = itemsTable.getSelectionModel().getSelectedItem();
-			if (e.getClickCount() == 2 && item != null && currentTrace.get() != null) {
-				itemHandler.handleItem(item);
-			}
-		});
 	}
 
 	@Override
@@ -179,12 +171,12 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@Override
 	protected BooleanExpression disableItemBinding(final TestCaseGenerationItem item) {
-		return testCaseGenerator.runningProperty().or(item.selectedProperty().not());
+		return testCaseGenerator.runningProperty();
 	}
 
 	@Override
 	protected void executeItem(final TestCaseGenerationItem item) {
-		itemHandler.handleItem(item);
+		testCaseGenerator.generateTestCases(item, currentTrace.getStateSpace());
 	}
 
 	@Override
@@ -199,7 +191,9 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@FXML
 	public void generate() {
-		Machine machine = currentProject.getCurrentMachine();
-		itemHandler.handleMachine(machine);
+		final StateSpace stateSpace = currentTrace.getStateSpace();
+		items.stream()
+			.filter(AbstractCheckableItem::selected)
+			.forEach(item -> testCaseGenerator.generateTestCases(item, stateSpace));
 	}
 }

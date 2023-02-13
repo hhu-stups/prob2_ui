@@ -1,29 +1,23 @@
 package de.prob2.ui.vomanager;
 
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.check.ModelCheckingOptions;
-import de.prob.voparser.VOException;
-import de.prob.voparser.VOParser;
-import de.prob.voparser.VTType;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
-import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
-import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
@@ -32,17 +26,11 @@ import de.prob2.ui.vomanager.ast.OrValidationExpression;
 import de.prob2.ui.vomanager.ast.SequentialValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
-import javafx.beans.InvalidationListener;
-import javafx.beans.property.ReadOnlyProperty;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @Singleton
 public class VOChecker {
-	private static final Logger LOGGER = LoggerFactory.getLogger(VOChecker.class);
-
 	private final CurrentProject currentProject;
+
+	private final CurrentTrace currentTrace;
 
 	private final Modelchecker modelchecker;
 
@@ -54,104 +42,23 @@ public class VOChecker {
 
 	private final SimulationItemHandler simulationItemHandler;
 
-	private final InvalidationListener tasksUpdateListener;
-
 	@Inject
-	public VOChecker(final CurrentProject currentProject, final Modelchecker modelchecker,
+	public VOChecker(final CurrentProject currentProject, final CurrentTrace currentTrace, final Modelchecker modelchecker,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
 					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
 		this.modelchecker = modelchecker;
 		this.ltlChecker = ltlChecker;
 		this.symbolicChecker = symbolicChecker;
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
-
-		tasksUpdateListener = o -> updateOnMachine((Machine)((ReadOnlyProperty<?>)o).getBean());
-
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
-			if (from != null) {
-				from.validationTasksProperty().removeListener(tasksUpdateListener);
-			}
-			updateOnMachine(to);
-		});
-		updateOnMachine(currentProject.getCurrentMachine());
-	}
-
-	private void updateOnMachine(Machine machine) {
-		if (machine == null) {
-			return;
-		}
-
-		machine.validationTasksProperty().addListener(tasksUpdateListener);
-
-		for (final Requirement requirement : currentProject.getRequirements()) {
-			requirement.getValidationObligation(machine).ifPresent(vo -> {
-				try {
-					parseVO(machine, vo);
-				} catch (VOException e) {
-					LOGGER.warn("Error in validation expression", e);
-				}
-			});
-		}
 	}
 
 	public void checkRequirement(Requirement requirement) {
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
 			this.checkVO(vo);
 		}
-	}
-
-	public void parseVO(Machine machine, ValidationObligation vo) {
-		final VOParser voParser = new VOParser();
-		machine.getValidationTasks().forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
-		try {
-			final IValidationExpression expression = IValidationExpression.parse(voParser, vo.getExpression());
-			expression.getAllTasks().forEach(taskExpr -> {
-				IValidationTask validationTask;
-				if (machine.getValidationTasks().containsKey(taskExpr.getIdentifier())) {
-					validationTask = machine.getValidationTasks().get(taskExpr.getIdentifier());
-				} else {
-					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
-				}
-				taskExpr.setTask(validationTask);
-			});
-			vo.setParsedExpression(expression);
-		} catch (VOException e) {
-			vo.setParsedExpression(null);
-			throw e;
-		}
-	}
-
-	public VTType extractType(IValidationTask validationTask) {
-		if(validationTask instanceof ReplayTrace) {
-			return VTType.TRACE;
-		} else if(validationTask instanceof SimulationItem) {
-			SimulationType simulationType = ((SimulationItem) validationTask).getType();
-			if(simulationType == SimulationType.MONTE_CARLO_SIMULATION || simulationType == SimulationType.HYPOTHESIS_TEST || simulationType == SimulationType.ESTIMATION) {
-				return VTType.EXPLORE;
-			}
-			// TODO: Implement a single simulation
-			return VTType.TRACE;
-		} else if(validationTask instanceof LTLFormulaItem) {
-			return VTType.EXPLORE;
-		} else if(validationTask instanceof ModelCheckingItem) {
-			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
-			if(options.contains(ModelCheckingOptions.Options.FIND_GOAL) ||
-				((ModelCheckingItem) validationTask).getGoal() == null ||
-				!((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
-				return VTType.TRACE;
-			}
-			// Otherwise invariant/deadlock checking, or just covering state space
-			return VTType.EXPLORE;
-		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
-			return VTType.STATIC;
-		} else if(validationTask instanceof ProofObligationItem) {
-			return VTType.STATIC;
-		} else if(validationTask instanceof DynamicCommandFormulaItem) {
-			return VTType.STATE_SPACE;
-		}
-		return null;
 	}
 
 	private CompletableFuture<?> checkVOExpression(IValidationExpression expression) {
@@ -208,21 +115,23 @@ public class VOChecker {
 	public void checkVO(ValidationObligation validationObligation) {
 		if (validationObligation.getParsedExpression() == null) {
 			final Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
-			this.parseVO(machine, validationObligation);
+			validationObligation.parse(machine);
 		}
 		checkVOExpression(validationObligation.getParsedExpression());
 	}
 
 	private CompletableFuture<?> checkVT(IValidationTask validationTask) {
+		final Machine machine = currentProject.getCurrentMachine();
+		final StateSpace stateSpace = currentTrace.getStateSpace();
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
 			return CompletableFuture.completedFuture(null);
 		} else if (validationTask instanceof ModelCheckingItem) {
-			return modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask);
+			return modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask, stateSpace);
 		} else if (validationTask instanceof LTLFormulaItem) {
-			return ltlChecker.checkFormulaNoninteractive((LTLFormulaItem) validationTask);
+			return ltlChecker.checkFormula((LTLFormulaItem) validationTask, machine, stateSpace);
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
-			return symbolicChecker.handleItemNoninteractive((SymbolicCheckingFormulaItem) validationTask);
+			return symbolicChecker.checkItem((SymbolicCheckingFormulaItem) validationTask, stateSpace);
 		} else if (validationTask instanceof ReplayTrace) {
 			return traceChecker.checkNoninteractive((ReplayTrace) validationTask);
 		} else if (validationTask instanceof SimulationItem) {

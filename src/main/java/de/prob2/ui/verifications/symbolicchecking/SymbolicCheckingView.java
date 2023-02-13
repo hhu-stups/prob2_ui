@@ -9,6 +9,7 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -19,6 +20,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
@@ -129,7 +131,12 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	
 	@Override
 	protected void executeItem(final SymbolicCheckingFormulaItem item) {
-		formulaHandler.handleItem(item, false);
+		formulaHandler.checkItem(item, currentTrace.getStateSpace()).thenAccept(r -> {
+			List<Trace> counterExamples = item.getCounterExamples();
+			if (!counterExamples.isEmpty()) {
+				currentTrace.set(counterExamples.get(0));
+			}
+		});
 	}
 	
 	@Override
@@ -145,6 +152,9 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	
 	@FXML
 	public void checkMachine() {
-		items.forEach(item -> formulaHandler.handleItem(item, true));
+		final StateSpace stateSpace = currentTrace.getStateSpace();
+		items.stream()
+			.filter(AbstractCheckableItem::selected)
+			.forEach(item -> formulaHandler.checkItem(item, stateSpace));
 	}
 }

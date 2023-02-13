@@ -62,6 +62,14 @@ public abstract class ProBFileHandler {
 		return this.fileChooserManager.showSaveFileChooser(fileChooser, kind, stageManager.getCurrent());
 	}
 
+	protected Path openSaveFileChooserWithCustomFilename(String titleKey, String extensionKey, FileChooserManager.Kind kind, String extension, String filename) {
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate(titleKey));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + filename + "." + extension);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter(extensionKey, extension));
+		return this.fileChooserManager.showSaveFileChooser(fileChooser, kind, stageManager.getCurrent());
+	}
+
 	protected JsonMetadataBuilder updateMetadataBuilder(final JsonMetadataBuilder builder) {
 		return builder
 			.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())

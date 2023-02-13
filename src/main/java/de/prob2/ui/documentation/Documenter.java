@@ -85,11 +85,11 @@ public class Documenter {
 		StringBuilder modelcheckingString = new StringBuilder();
 		for (ModelCheckingItem item : elem.getModelcheckingItems()) {
 			StringBuilder resultString = new StringBuilder();
-			if (item.getItems().isEmpty()){
+			if (item.getSteps().isEmpty()){
 				resultString.append("Modelchecking not solved");
 			}
 			else {
-				item.getItems().forEach(result ->  resultString.append(result.getMessage()));
+				item.getSteps().forEach(result ->  resultString.append(result.getMessage()));
 			}
 			valuesMap.put("modname", toUIString(item));
 			valuesMap.put("modresult",String.valueOf(resultString));

@@ -41,8 +41,6 @@ import org.slf4j.LoggerFactory;
 
 public class TraceFileHandler extends ProBFileHandler {
 
-	public static final String TEST_CASE_TRACE_PREFIX = "TestCaseGeneration_";
-	public static final String SIMULATION_TRACE_PREFIX = "Simulation_";
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
 	public static final String TRACE_TABLE_EXTENSION = "csv";
 
@@ -148,19 +146,19 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public void save(SimulationItem item, Machine machine) {
-		final Path path = chooseDirectory(FileChooserManager.Kind.TRACES, "animation.tracereplay.fileChooser.savePaths.title");
+		final Path path = openSaveFileChooserWithCustomFilename("animation.tracereplay.fileChooser.savePaths.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION, "Simulation");
 		if (path == null) {
 			return;
 		}
 
 		try {
-			if (checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "animation.testcase.save.directoryAlreadyContainsTestCases")) {
+			if (checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
 			for (Trace trace : item.getTraces()) {
-				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + numberGeneratedTraces + ".prob2trace");
+				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + numberGeneratedTraces + ".prob2trace");
 				save(trace, traceFilePath, item.createdByForMetadata());
 				this.addTraceFile(machine, traceFilePath);
 				numberGeneratedTraces++;
@@ -172,22 +170,22 @@ public class TraceFileHandler extends ProBFileHandler {
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
 		List<Trace> traces = item.getExamples();
+		Path path = openSaveFileChooserWithCustomFilename("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION, "TestCase");
 
-		Path path = chooseDirectory(FileChooserManager.Kind.TRACES, "animation.tracereplay.fileChooser.savePaths.title");
 		if (path == null) {
 			return;
 		}
 
 		try {
 
-			if (checkIfPathAlreadyContainsFiles(path, TEST_CASE_TRACE_PREFIX, "animation.testcase.save.directoryAlreadyContainsTestCases")) {
+			if (checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
 			int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 			//Starts counting with 1 in the file name
 			for (int i = 0; i < numberGeneratedTraces; i++) {
-				final Path traceFilePath = path.resolve(TEST_CASE_TRACE_PREFIX + (i + 1) + ".prob2trace");
+				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + (i+1) + ".prob2trace");
 				save(traces.get(i), traceFilePath, item.createdByForMetadata(i));
 				this.addTraceFile(machine, traceFilePath);
 			}

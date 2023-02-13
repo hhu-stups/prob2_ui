@@ -51,15 +51,7 @@ public class TraceChecker {
 		this.stageManager = stageManager;
 	}
 
-	public void checkAll(List<ReplayTrace> replayTraces) {
-		replayTraces.forEach(trace -> check(trace, false));
-	}
-
 	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		if (!replayTrace.selected()) {
-			return CompletableFuture.completedFuture(replayTrace);
-		}
-
 		return checkNoninteractive(replayTrace).whenComplete((r, e) -> {
 			if (e == null) {
 				if (setCurrentAnimation) {
