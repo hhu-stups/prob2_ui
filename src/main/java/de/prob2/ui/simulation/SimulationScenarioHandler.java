@@ -46,7 +46,7 @@ public class SimulationScenarioHandler {
 	public void playTrace(SimulationTracesView.SimulationTraceItem traceItem) {
 		Trace trace = new Trace(currentTrace.getStateSpace());
 		currentTrace.set(trace);
-		SimulationConfiguration config = injector.getInstance(SimulationCreator.class).createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false, SimulationConfiguration.metadataBuilder(SimulationConfiguration.SimulationFileType.TIMED_TRACE).build());
+		SimulationConfiguration config = SimulationCreator.createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false, SimulationConfiguration.metadataBuilder(SimulationConfiguration.SimulationFileType.TIMED_TRACE).build());
 		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 
 		try {

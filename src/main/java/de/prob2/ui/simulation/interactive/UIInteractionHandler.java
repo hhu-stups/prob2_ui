@@ -14,6 +14,7 @@ import de.prob2.ui.simulation.configuration.SimulationConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
+import de.prob2.ui.simulation.simulators.SimulationCreator;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -194,16 +195,7 @@ public class UIInteractionHandler {
 			if(Transition.SETUP_CONSTANTS_NAME.equals(persistentTrace.getTransitionList().get(0).getOperationName())) {
 				OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.SETUP_CONSTANTS_NAME);
 				// Somehow the constructor with 1 argument always sets using destination state to false
-				Map<String, String> fixedVariables = new PersistentTransition(setupConstantsTransition, null).getDestinationStateVariables();
-				Map<String, String> newFixedVariables = new HashMap<>(fixedVariables);
-				if(opInfo != null) {
-					for (String key : fixedVariables.keySet()) {
-						if (!opInfo.getNonDetWrittenVariables().contains(key) && !opInfo.getParameterNames().contains(key)) {
-							newFixedVariables.remove(key);
-						}
-					}
-				}
-				fixedVariables = newFixedVariables.isEmpty() ? null : newFixedVariables;
+				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, null).getDestinationStateVariables(), opInfo);
 				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, null, fixedVariables, null, new ArrayList<>()));
 			}
 		}
@@ -212,16 +204,7 @@ public class UIInteractionHandler {
 			activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
 			OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.INITIALISE_MACHINE_NAME);
 			// Somehow the constructor with 1 argument always sets using destination state to false
-			Map<String, String> fixedVariables = new PersistentTransition(initializationTransition, null).getDestinationStateVariables();
-			Map<String, String> newFixedVariables = new HashMap<>(fixedVariables);
-			if(opInfo != null) {
-				for (String key : fixedVariables.keySet()) {
-					if (!opInfo.getNonDetWrittenVariables().contains(key) && !opInfo.getParameterNames().contains(key)) {
-						newFixedVariables.remove(key);
-					}
-				}
-			}
-			fixedVariables = newFixedVariables.isEmpty() ? null : newFixedVariables;
+			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, null).getDestinationStateVariables(), opInfo);
 			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, null, fixedVariables, null, activations));
 		}
 
