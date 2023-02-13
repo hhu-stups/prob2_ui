@@ -87,8 +87,6 @@ public class RequirementsEditingBox extends VBox {
 
 	private final CurrentProject currentProject;
 
-	private final VOChecker voChecker;
-
 	private final VOErrorHandler voErrorHandler;
 
 	private VOManagerStage voManagerStage;
@@ -98,11 +96,10 @@ public class RequirementsEditingBox extends VBox {
 	private final ObjectProperty<Requirement> oldRequirement;
 
 	@Inject
-	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOChecker voChecker, final VOErrorHandler voErrorHandler) {
+	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOErrorHandler voErrorHandler) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
-		this.voChecker = voChecker;
 		this.voErrorHandler = voErrorHandler;
 
 		this.linkedMachineNames = FXCollections.observableArrayList();
@@ -191,7 +188,7 @@ public class RequirementsEditingBox extends VBox {
 	private void tryParseVo(final ValidationObligation vo) {
 		final Machine machine = currentProject.get().getMachine(vo.getMachine());
 		try {
-			voChecker.parseVO(machine, vo);
+			vo.parse(machine);
 		} catch (VOException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}

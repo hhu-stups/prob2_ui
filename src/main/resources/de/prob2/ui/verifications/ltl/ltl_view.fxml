@@ -54,7 +54,7 @@
 			</Button>
 			<MenuButton fx:id="addMenuButton">
 				<items>
-					<MenuItem fx:id="addFormulaButton" onAction="#addFormula"
+					<MenuItem fx:id="addFormulaButton" onAction="#askToAddItem"
 						text="%verifications.ltl.ltlView.addFormula" />
 					<MenuItem fx:id="addPatternButton" onAction="#addPattern"
 						text="%verifications.ltl.ltlView.addPattern" />

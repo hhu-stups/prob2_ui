@@ -38,7 +38,7 @@
 			</InterruptIfRunningButton>
 			<Spacer/>
 			<Button fx:id="addModelCheckButton" disable="true"
-				contentDisplay="GRAPHIC_ONLY" onAction="#addModelCheck">
+				contentDisplay="GRAPHIC_ONLY" onAction="#askToAddItem">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
@@ -59,19 +59,19 @@
 				<TableColumn fx:id="configurationColumn" text="%verifications.common.columns.description" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
+				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingTasks" />
 			</placeholder>
 		</TableView>
-		<TableView fx:id="tvChecks" minHeight="60.0">
+		<TableView fx:id="stepsTable" minHeight="60.0">
 			<columnResizePolicy>
 				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 			</columnResizePolicy>
 			<columns>
-				<TableColumn fx:id="jobStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
-				<TableColumn fx:id="messageColumn" minWidth="120.0" text="%common.columns.message" />
+				<TableColumn fx:id="stepStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
+				<TableColumn fx:id="stepMessageColumn" minWidth="120.0" text="%common.columns.message" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingJobs" />
+				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingSteps" />
 			</placeholder>
 		</TableView>
 		<VBox fx:id="statsBox" spacing="5.0" visible="false">

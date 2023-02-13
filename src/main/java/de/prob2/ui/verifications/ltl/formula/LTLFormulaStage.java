@@ -6,6 +6,7 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.ltl.LTLItemStage;
 import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 
@@ -24,16 +25,18 @@ public class LTLFormulaStage extends LTLItemStage {
 	@FXML
 	private ChoiceBox<Boolean> cbExpectedResult;
 	
+	private final CurrentTrace currentTrace;
 	private final LTLFormulaChecker formulaChecker;
 
 	private LTLFormulaItem result;
 	
 	@Inject
 	public LTLFormulaStage(
-		final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize,
+		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final FontSize fontSize,
 		final LTLFormulaChecker formulaChecker, final LTLBuiltinsStage builtinsStage
 	) {
 		super(currentProject, fontSize, builtinsStage);
+		this.currentTrace = currentTrace;
 		this.formulaChecker = formulaChecker;
 		this.result = null;
 		stageManager.loadFXML(this, "ltlformula_stage.fxml");
@@ -59,7 +62,7 @@ public class LTLFormulaStage extends LTLItemStage {
 		String code = taCode.getText();
 		final LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), cbExpectedResult.getValue());
 		try {
-			formulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine());
+			formulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 		} catch (ProBError e) {
 			this.showErrors(e.getErrors());
 			return;

@@ -10,6 +10,8 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 public interface IValidationTask {
 	String getId();
 	@JsonIgnore
+	String getTaskType(I18n i18n);
+	@JsonIgnore
 	String getTaskDescription(I18n i18n);
 	ReadOnlyObjectProperty<Checked> checkedProperty();
 	@JsonIgnore

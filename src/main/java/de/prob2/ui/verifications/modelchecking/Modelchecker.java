@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
@@ -17,29 +16,20 @@ import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 @Singleton
 public class Modelchecker {
 	private final CliTaskExecutor executor;
 
-	private final CurrentTrace currentTrace;
-
 	private final StatsView statsView;
 
-	private final Injector injector;
-
 	@Inject
-	private Modelchecker(final CliTaskExecutor executor, final CurrentTrace currentTrace, final StatsView statsView, final Injector injector) {
+	private Modelchecker(final CliTaskExecutor executor, final StatsView statsView) {
 		this.executor = executor;
-		this.currentTrace = currentTrace;
 		this.statsView = statsView;
-		this.injector = injector;
 	}
 
 	/**
@@ -50,26 +40,23 @@ public class Modelchecker {
 	 * @param item the model checking configuration to run
 	 * @return result of the model check
 	 */
-	public CompletableFuture<ModelCheckingJobItem> startCheckIfNeeded(final ModelCheckingItem item) {
-		if (item.getItems().isEmpty()) {
-			return this.startNextCheckStep(item);
+	public CompletableFuture<ModelCheckingStep> startCheckIfNeeded(final ModelCheckingItem item, final StateSpace stateSpace) {
+		if (item.getSteps().isEmpty()) {
+			return this.startNextCheckStep(item, stateSpace);
 		} else {
-			return CompletableFuture.completedFuture(item.getItems().get(0));
+			return CompletableFuture.completedFuture(item.getSteps().get(0));
 		}
 	}
 
-	public CompletableFuture<ModelCheckingJobItem> startNextCheckStep(ModelCheckingItem item) {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		// The options must be calculated before adding the ModelCheckingJobItem,
+	public CompletableFuture<ModelCheckingStep> startNextCheckStep(ModelCheckingItem item, StateSpace stateSpace) {
+		// The options must be calculated before adding the ModelCheckingStep,
 		// so that the recheckExisting/INSPECT_EXISTING_NODES option is set correctly,
-		// which depends on whether any job items were already added.
+		// which depends on whether any steps were already added.
 		final ModelCheckingOptions options = item.getFullOptions(stateSpace.getModel());
 		
-		final int jobItemListIndex = item.getItems().size();
-		final int jobItemDisplayIndex = jobItemListIndex + 1;
-		final ModelCheckingJobItem initialJobItem = new ModelCheckingJobItem(jobItemDisplayIndex, new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
-		final ObjectProperty<ModelCheckingJobItem> lastJobItem = new SimpleObjectProperty<>(initialJobItem);
-		showResult(item, initialJobItem);
+		final int stepIndex = item.getSteps().size();
+		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
+		item.getSteps().add(initialStep);
 		
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
@@ -80,9 +67,9 @@ public class Modelchecker {
 				if (stats != null) {
 					statsView.updateSimpleStats(stats);
 				}
-				final ModelCheckingJobItem jobItem = new ModelCheckingJobItem(jobItemDisplayIndex, result, timeElapsed, stats, cmd.getResult(), stateSpace);
-				lastJobItem.set(jobItem);
-				Platform.runLater(() -> item.getItems().set(jobItemListIndex, jobItem));
+				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, cmd.getResult(), stateSpace);
+				item.setCurrentStep(step);
+				Platform.runLater(() -> item.getSteps().set(stepIndex, step));
 			}
 
 			@Override
@@ -93,21 +80,13 @@ public class Modelchecker {
 		final ConsistencyChecker checker = new ConsistencyChecker(stateSpace, options, listener);
 
 		return this.executor.submit(() -> {
-			checker.call();
-			return lastJobItem.get();
+			try {
+				item.setCurrentStep(initialStep);
+				checker.call();
+				return item.getCurrentStep();
+			} finally {
+				item.setCurrentStep(null);
+			}
 		});
-	}
-
-	public void cancelModelcheck() {
-		this.executor.interruptAll();
-		currentTrace.getStateSpace().sendInterrupt();
-	}
-
-	private void showResult(ModelCheckingItem item, ModelCheckingJobItem jobItem) {
-		ModelcheckingView modelCheckingView = injector.getInstance(ModelcheckingView.class);
-		List<ModelCheckingJobItem> jobItems = item.getItems();
-		jobItems.add(jobItem);
-		modelCheckingView.selectItem(item);
-		modelCheckingView.selectJobItem(jobItem);
 	}
 }

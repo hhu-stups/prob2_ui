@@ -25,8 +25,8 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.internal.UIInteraction;
-import de.prob2.ui.internal.UIInteractionSaver;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
+import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -139,7 +139,8 @@ public class SimulatorStage extends Stage {
 						currentTrace.set(item.getTraces().get(0));
 					} else {
 						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
-						tracesView.setSimulatorStage(simulatorStage);
+						SimulationScenarioHandler simulationScenarioHandler = injector.getInstance(SimulationScenarioHandler.class);
+						simulationScenarioHandler.setSimulatorStage(simulatorStage);
 						tracesView.setItems(item, item.getTraces(), item.getTimestamps(), item.getStatuses());
 						tracesView.show();
 					}
@@ -342,7 +343,7 @@ public class SimulatorStage extends Stage {
 		});
 		saveAutomaticSimulationItem.setOnAction(e -> {
 			try {
-				injector.getInstance(UIInteractionSaver.class).saveAsAutomaticSimulation();
+				injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
 			} catch (IOException exception) {
 				exception.printStackTrace();
 				//TODO: Handle error
@@ -396,9 +397,13 @@ public class SimulatorStage extends Stage {
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 			noSimulations.unbind();
-			injector.getInstance(UIInteraction.class).reset();
+
+			UIInteractionHandler uiInteractionHandler = injector.getInstance(UIInteractionHandler.class);
+			uiInteractionHandler.reset();
 
 			this.loadSimulationIntoSimulator(to);
+			uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
+
 			if(to != null) {
 				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());

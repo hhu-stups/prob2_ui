@@ -1,6 +1,7 @@
 package de.prob2.ui.persistence;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -74,7 +75,11 @@ public final class UIPersistence {
 	}
 	
 	public void open() {
-		for (final String id : new HashSet<>(uiState.getSavedVisibleStages())) {
+		final Set<String> visibleStages = new HashSet<>(uiState.getSavedVisibleStages());
+		// Clear the set of visible stages and let it get re-populated as the stages are shown.
+		// This ensures that old, no longer existing stage IDs are removed from the set.
+		uiState.getSavedVisibleStages().clear();
+		for (final String id : visibleStages) {
 			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
 		}
 

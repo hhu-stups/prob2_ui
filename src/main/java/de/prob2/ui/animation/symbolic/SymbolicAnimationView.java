@@ -8,6 +8,8 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
+import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -17,6 +19,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -30,14 +33,6 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
-			editMenuItem.setText(i18n.translate("symbolic.view.contextMenu.changeConfiguration"));
-
-			MenuItem removeItem = new MenuItem(i18n.translate("symbolic.view.contextMenu.removeConfiguration"));
-			removeItem.setOnAction(e -> {
-				SymbolicAnimationItem item = itemsTable.getSelectionModel().getSelectedItem();
-				items.remove(item);
-			});
-			contextMenu.getItems().add(removeItem);
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
@@ -74,7 +69,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
 	                             final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -112,37 +107,30 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	
 	@Override
 	protected void executeItem(final SymbolicAnimationItem item) {
-		formulaHandler.handleItem(item, false);
-	}
-	
-	@FXML
-	public void addFormula() {
-		final SymbolicAnimationChoosingStage choosingStage = choosingStageProvider.get();
-		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
-		choosingStage.showAndWait();
-		final SymbolicAnimationItem newItem = choosingStage.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		final Optional<SymbolicAnimationItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		if (!existingItem.isPresent()) {
-			items.add(newItem);
-		}
-		this.formulaHandler.handleItem(existingItem.orElse(newItem), false);
+		formulaHandler.executeItem(item, currentTrace.getStateSpace()).thenAccept(r -> {
+			final Trace example = item.getExample();
+			if (example != null) {
+				currentTrace.set(example);
+			}
+		});
 	}
 	
 	@Override
-	protected Optional<SymbolicAnimationItem> editItem(final SymbolicAnimationItem oldItem) {
+	protected Optional<SymbolicAnimationItem> showItemDialog(final SymbolicAnimationItem oldItem) {
 		final SymbolicAnimationChoosingStage choosingStage = choosingStageProvider.get();
 		choosingStage.setMachine(currentTrace.getStateSpace().getLoadedMachine());
-		choosingStage.setData(oldItem);
+		if (oldItem != null) {
+			choosingStage.setData(oldItem);
+		}
 		choosingStage.showAndWait();
 		return Optional.ofNullable(choosingStage.getResult());
 	}
 	
 	@FXML
 	public void checkMachine() {
-		items.forEach(item -> formulaHandler.handleItem(item, true));
+		final StateSpace stateSpace = currentTrace.getStateSpace();
+		items.stream()
+			.filter(AbstractCheckableItem::selected)
+			.forEach(item -> formulaHandler.executeItem(item, stateSpace));
 	}
 }

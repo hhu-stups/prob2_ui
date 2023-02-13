@@ -11,6 +11,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -28,8 +29,10 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -59,20 +62,13 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			this.itemProperty().addListener((o, from, to) -> {
 				executeMenuItem.textProperty().unbind();
 				if (to != null) {
-					executeMenuItem.textProperty().bind(Bindings.when(to.itemsProperty().emptyProperty())
+					executeMenuItem.textProperty().bind(Bindings.when(to.stepsProperty().emptyProperty())
 						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
 						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
 				} else {
 					executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 				}
 			});
-
-			editMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.openInEditor"));
-
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.remove"));
-			removeItem.setOnAction(e -> items.remove(this.getItem()));
-			removeItem.disableProperty().bind(this.emptyProperty());
-			contextMenu.getItems().add(removeItem);
 		}
 	}
 	
@@ -86,13 +82,13 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private HelpButton helpButton;
 
 	@FXML
-	private TableView<ModelCheckingJobItem> tvChecks;
+	private TableView<ModelCheckingStep> stepsTable;
 
 	@FXML
-	private TableColumn<ModelCheckingJobItem, Checked> jobStatusColumn;
+	private TableColumn<ModelCheckingStep, Checked> stepStatusColumn;
 
 	@FXML
-	private TableColumn<ModelCheckingJobItem, String> messageColumn;
+	private TableColumn<ModelCheckingStep, String> stepMessageColumn;
 
 	@FXML
 	private VBox statsBox;
@@ -122,7 +118,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			final DisablePropertyController disablePropertyController,
 			final StageManager stageManager, final Injector injector,
 			final I18n i18n, final Modelchecker checker) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
@@ -143,6 +139,33 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
+
+		final ChangeListener<ModelCheckingStep> showCurrentStepListener = (o, from, to) -> {
+			// When currentStep changes from null to non-null,
+			// i. e. a new checking step was started,
+			// select the newly started step so that the checking progress is visible.
+			if (from == null && to != null) {
+				final ModelCheckingItem item = (ModelCheckingItem)((ReadOnlyProperty<?>)o).getBean();
+				Platform.runLater(() -> {
+					itemsTable.getSelectionModel().select(item);
+					stepsTable.getSelectionModel().select(to);
+				});
+			}
+		};
+		items.addListener((ListChangeListener<ModelCheckingItem>)change -> {
+			while (change.next()) {
+				if (change.wasAdded()) {
+					for (final ModelCheckingItem item : change.getRemoved()) {
+						item.currentStepProperty().removeListener(showCurrentStepListener);
+					}
+
+					for (final ModelCheckingItem item : change.getAddedSubList()) {
+						item.currentStepProperty().addListener(showCurrentStepListener);
+					}
+				}
+			}
+		});
+
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			items.unbind();
 			if (to != null) {
@@ -154,17 +177,17 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
-		jobStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		jobStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		jobStatusColumn.setSortable(false);
-		messageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
-		messageColumn.setSortable(false);
+		stepStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		stepStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		stepStatusColumn.setSortable(false);
+		stepMessageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
+		stepMessageColumn.setSortable(false);
 
-		messageColumn.setCellFactory(col -> {
-			TableCell<ModelCheckingJobItem, String> cell = new TableCell<>();
+		stepMessageColumn.setCellFactory(col -> {
+			TableCell<ModelCheckingStep, String> cell = new TableCell<>();
 			cell.itemProperty().addListener((obs, old, newVal) -> {
 				if (newVal != null) {
-					TableRow<ModelCheckingJobItem> row = cell.getTableRow();
+					TableRow<ModelCheckingStep> row = cell.getTableRow();
 					BooleanBinding buttonBinding = Bindings.createBooleanBinding(
 						() -> !row.isEmpty() && !(row.getItem() == null) && !(row.getItem().getStats() == null) && row.getItem().getResult() instanceof ITraceDescription,
 						row.emptyProperty(), row.itemProperty());
@@ -175,25 +198,25 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			return cell;
 		});
 
-		tvChecks.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
+		stepsTable.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
 
 		itemsTable.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			tvChecks.itemsProperty().unbind();
+			stepsTable.itemsProperty().unbind();
 			if (to != null) {
-				tvChecks.itemsProperty().bind(to.itemsProperty());
-				if(to.getItems().isEmpty()) {
+				stepsTable.itemsProperty().bind(to.stepsProperty());
+				if(to.getSteps().isEmpty()) {
 					hideStats();
 				} else {
-					tvChecks.getSelectionModel().selectLast();
+					stepsTable.getSelectionModel().selectLast();
 				}
 			} else {
-				// Because of the previous binding, the tvChecks items list is the same object as the job items list of one of the ModelcheckingItems.
-				// This means that we can't just clear tvChecks.getItems(), because that would also clear the ModelcheckingItem's job items, which resets the item's status.
-				tvChecks.setItems(FXCollections.observableArrayList());
+				// Because of the previous binding, the stepsTable items list is the same object as the steps list of one of the ModelcheckingItems.
+				// This means that we can't just clear stepsTable.getItems(), because that would also clear the ModelcheckingItem's steps, which resets the item's status.
+				stepsTable.setItems(FXCollections.observableArrayList());
 			}
 		});
 
-		tvChecks.getSelectionModel().selectedItemProperty().addListener((observable, from, to) ->
+		stepsTable.getSelectionModel().selectedItemProperty().addListener((observable, from, to) ->
 			Platform.runLater(() -> {
 				if(to != null && to.getStats() != null) {
 					showStats(to.getTimeElapsed(), to.getStats(), to.getMemoryUsed());
@@ -203,12 +226,12 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			})
 		);
 
-		tvChecks.itemsProperty().addListener(o -> {
-			if (tvChecks.getSelectionModel().getSelectedIndex() == -1) {
+		stepsTable.itemsProperty().addListener(o -> {
+			if (stepsTable.getSelectionModel().getSelectedIndex() == -1) {
 				// Auto-select current/last model checking job if selection gets cleared.
 				// This usually happens when a running job updates its progress/stats
 				// (replacing an item in a list view will deselect it).
-				tvChecks.getSelectionModel().selectLast();
+				stepsTable.getSelectionModel().selectLast();
 			}
 		});
 	}
@@ -222,8 +245,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		Button button = new Button(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
 		button.getStyleClass().add("button-blue");
 		button.setOnAction(actionEvent -> {
-			ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
-			injector.getInstance(CurrentTrace.class).set(item.getTrace());
+			ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
+			injector.getInstance(CurrentTrace.class).set(step.getTrace());
 		});
 
 		button.managedProperty().bind(buttonBinding);
@@ -249,27 +272,15 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	@Override
 	protected BooleanExpression disableItemBinding(final ModelCheckingItem item) {
 		return super.disableItemBinding(item).or(Bindings.createBooleanBinding(
-			() -> item.getItems().stream().anyMatch(jobItem -> jobItem.getChecked() == Checked.SUCCESS),
-			item.itemsProperty()
+			() -> item.getSteps().stream().anyMatch(step -> step.getChecked() == Checked.SUCCESS),
+			item.stepsProperty()
 		));
 	}
 	
 	@Override
 	protected void executeItem(final ModelCheckingItem item) {
-		if (item.getItems().stream().anyMatch(job -> job.getChecked() == Checked.SUCCESS)) {
-			return;
-		}
-
-		this.checkSingleItem(item);
-	}
-
-	private void checkSingleItem(final ModelCheckingItem item) {
-		if(!item.selected()) {
-			return;
-		}
-
 		try {
-			final CompletableFuture<ModelCheckingJobItem> future = checker.startNextCheckStep(item);
+			final CompletableFuture<ModelCheckingStep> future = checker.startNextCheckStep(item, currentTrace.getStateSpace());
 			future.whenComplete((r, t) -> {
 				if (t == null) {
 					if (r.getResult() instanceof ITraceDescription) {
@@ -289,20 +300,20 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private void setContextMenus() {
 		itemsTable.setRowFactory(table -> new Row());
 
-		tvChecks.setRowFactory(table -> {
-			final TableRow<ModelCheckingJobItem> row = new TableRow<>();
+		stepsTable.setRowFactory(table -> {
+			final TableRow<ModelCheckingStep> row = new TableRow<>();
 
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (!(row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription)))){
-					ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
-					injector.getInstance(CurrentTrace.class).set(item.getTrace());
+					ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
+					injector.getInstance(CurrentTrace.class).set(step.getTrace());
 				}
 			});
 
 			MenuItem showTraceItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
 			showTraceItem.setOnAction(e-> {
-				ModelCheckingJobItem item = tvChecks.getSelectionModel().getSelectedItem();
-				injector.getInstance(CurrentTrace.class).set(item.getTrace());
+				ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
+				injector.getInstance(CurrentTrace.class).set(step.getTrace());
 			});
 			showTraceItem.disableProperty().bind(Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription),
@@ -317,46 +328,24 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 
 	@Override
-	protected Optional<ModelCheckingItem> editItem(final ModelCheckingItem oldItem) {
+	protected Optional<ModelCheckingItem> showItemDialog(final ModelCheckingItem oldItem) {
 		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
-		modelcheckingStage.setData(oldItem);
+		if (oldItem != null) {
+			modelcheckingStage.setData(oldItem);
+		}
 		modelcheckingStage.showAndWait();
 		return Optional.ofNullable(modelcheckingStage.getResult());
 	}
 
 	@FXML
-	public void addModelCheck() {
-		ModelcheckingStage stageController = injector.getInstance(ModelcheckingStage.class);
-		stageController.showAndWait();
-		final ModelCheckingItem newItem = stageController.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		final Optional<ModelCheckingItem> existingItem = currentProject.getCurrentMachine().getModelcheckingItems().stream().filter(newItem::settingsEqual).findAny();
-		final ModelCheckingItem toCheck;
-		if (existingItem.isPresent()) {
-			// Identical existing configuration found - reuse it instead of creating another one
-			toCheck = existingItem.get();
-		} else {
-			currentProject.getCurrentMachine().getModelcheckingItems().add(newItem);
-			toCheck = newItem;
-		}
-		if (toCheck.getItems().isEmpty()) {
-			// Start checking with this configuration
-			// (unless it's an existing configuration that has already been run)
-			this.checkSingleItem(toCheck);
-		}
-	}
-
-	@FXML
 	public void checkMachine() {
-		for (ModelCheckingItem item : currentProject.currentMachineProperty().get().getModelcheckingItems()) {
+		final StateSpace stateSpace = currentTrace.getStateSpace();
+		for (ModelCheckingItem item : items) {
 			if (!item.selected()) {
 				continue;
 			}
 
-			final CompletableFuture<ModelCheckingJobItem> future = checker.startCheckIfNeeded(item);
+			final CompletableFuture<ModelCheckingStep> future = checker.startCheckIfNeeded(item, stateSpace);
 			future.exceptionally(t -> {
 				showModelCheckException(t);
 				return null;
@@ -384,13 +373,5 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	public void hideStats() {
 		statsBox.setVisible(false);
-	}
-
-	public void selectItem(ModelCheckingItem item) {
-		itemsTable.getSelectionModel().select(item);
-	}
-
-	public void selectJobItem(ModelCheckingJobItem item) {
-		tvChecks.getSelectionModel().select(item);
 	}
 }

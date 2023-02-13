@@ -30,7 +30,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.internal.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
@@ -355,15 +355,15 @@ public final class OperationsView extends VBox {
 			&& item.getStatus() == OperationItem.Status.ENABLED
 			&& item.getTransition().getSource().equals(trace.getCurrentState())
 		) {
-			UIInteraction uiInteraction = injector.getInstance(UIInteraction.class);
+			UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
 			Trace forward = trace.forward();
 			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
 				currentTrace.set(trace.forward());
-				uiInteraction.addUIInteraction(realTimeSimulator, forward.getCurrentTransition());
+				uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
 				return;
 			}
 			currentTrace.set(trace.add(item.getTransition()));
-			uiInteraction.addUIInteraction(realTimeSimulator, item.getTransition());
+			uiInteraction.addUserInteraction(realTimeSimulator, item.getTransition());
 		}
 	}
 

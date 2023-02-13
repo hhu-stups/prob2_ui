@@ -34,7 +34,7 @@
 				</Button>
 			</InterruptIfRunningButton>
 			<Spacer/>
-			<Button fx:id="addTestCaseButton" disable="true" onAction="#addTestCase"
+			<Button fx:id="addTestCaseButton" disable="true" onAction="#askToAddItem"
 				contentDisplay="GRAPHIC_ONLY">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />

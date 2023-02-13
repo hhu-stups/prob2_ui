@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 import de.prob.json.JsonMetadata;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -26,6 +27,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
@@ -60,11 +62,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
-			editMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
-			
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removeFormula"));
-			removeItem.setOnAction(e -> items.remove(this.getItem()));
-			contextMenu.getItems().add(removeItem);
 			
 			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
@@ -131,7 +128,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 					final FileChooserManager fileChooserManager,
 					final ObjectMapper objectMapper,
 					final JacksonManager<LTLData> jacksonManager) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.injector = injector;
@@ -197,7 +194,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		
 		tvPattern.setRowFactory(table -> {
 			final TableRow<LTLPatternItem> row = new TableRow<>();
-			MenuItem removeItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.removePattern"));
+			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
 			removeItem.setOnAction(e -> {
 				Machine machine = currentProject.getCurrentMachine();
 				LTLPatternItem item = row.getItem();
@@ -206,7 +203,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				managePatternTable(machine.ltlPatternsProperty());
 			});
 
-			MenuItem openEditor = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.openInEditor"));
+			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showParsingMessage"));
@@ -257,28 +254,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	
 	@Override
 	protected void executeItem(final LTLFormulaItem item) {
-		checker.checkFormula(item);
-	}
-	
-	@FXML
-	public void addFormula() {
-		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.showAndWait();
-		final LTLFormulaItem newItem = formulaStage.getResult();
-		if (newItem == null) {
-			// User cancelled/closed the window
-			return;
-		}
-		final Optional<LTLFormulaItem> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		final LTLFormulaItem toCheck;
-		if (existingItem.isPresent()) {
-			// Identical existing formula found - reuse it instead of creating another one
-			toCheck = existingItem.get();
-		} else {
-			items.add(newItem);
-			toCheck = newItem;
-		}
-		checker.checkFormula(toCheck);
+		checker.checkFormula(item, currentProject.getCurrentMachine(), currentTrace.getStateSpace()).thenAccept(it -> {
+			if (it.getCounterExample() != null) {
+				currentTrace.set(it.getCounterExample());
+			}
+		});
 	}
 	
 	@FXML
@@ -303,9 +283,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 	
 	@Override
-	protected Optional<LTLFormulaItem> editItem(final LTLFormulaItem oldItem) {
+	protected Optional<LTLFormulaItem> showItemDialog(final LTLFormulaItem oldItem) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
-		formulaStage.setData(oldItem);
+		if (oldItem != null) {
+			formulaStage.setData(oldItem);
+		}
 		formulaStage.showAndWait();
 		return Optional.ofNullable(formulaStage.getResult());
 	}
@@ -334,7 +316,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	
 	@FXML
 	public void checkMachine() {
-		checker.checkMachine();
+		final Machine machine = currentProject.getCurrentMachine();
+		final StateSpace stateSpace = currentTrace.getStateSpace();
+		items.stream()
+			.filter(AbstractCheckableItem::selected)
+			.forEach(item -> checker.checkFormula(item, machine, stateSpace));
 	}
 	
 	@FXML

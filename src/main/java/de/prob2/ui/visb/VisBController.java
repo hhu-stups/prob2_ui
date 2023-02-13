@@ -1,7 +1,5 @@
 package de.prob2.ui.visb;
 
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +25,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
@@ -206,8 +204,8 @@ public class VisBController {
 				currentTrace.set(trace);
 				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 				for(Transition transition : transitions) {
-					UIInteraction uiInteraction = injector.getInstance(UIInteraction.class);
-					uiInteraction.addUIInteraction(realTimeSimulator, transition);
+					UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
+					uiInteraction.addUserInteraction(realTimeSimulator, transition);
 				}
 				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			}
@@ -236,8 +234,8 @@ public class VisBController {
 			currentTrace.set(trace);
 			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 			for(Transition transition : nextTransitions) {
-				UIInteraction uiInteraction = injector.getInstance(UIInteraction.class);
-				uiInteraction.addUIInteraction(realTimeSimulator, transition);
+				UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
+				uiInteraction.addUserInteraction(realTimeSimulator, transition);
 			}
 		} else {
 			updateInfo("visb.infobox.events.not.initialise");

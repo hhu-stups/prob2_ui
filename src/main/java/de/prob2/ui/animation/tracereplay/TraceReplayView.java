@@ -1,9 +1,13 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -37,7 +41,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
@@ -46,6 +51,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 @FXMLInjected
@@ -61,6 +67,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 			executeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
 			editMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+			removeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.removeTrace"));
+			// Will be re-added in a different place later.
+			contextMenu.getItems().remove(removeMenuItem);
 
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
 			addTestsItem.setOnAction(event -> {
@@ -77,9 +86,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
 			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
-
-			final MenuItem deleteTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.removeTrace"));
-			deleteTraceItem.setOnAction(event -> currentProject.getCurrentMachine().getTraces().remove(this.getItem()));
 
 			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
 			openInExternalEditorItem.setOnAction(event ->
@@ -110,7 +116,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				persistentTraceList.forEach(trace -> traceFileHandler.addTraceFile(currentMachine, trace));
 			});
 
-			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, deleteTraceItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
+			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, removeMenuItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
 		}
 	}
 
@@ -126,7 +132,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@FXML
 	private TableColumn<ReplayTrace, Node> statusProgressColumn;
 	@FXML
-	private Button loadTraceButton;
+	private MenuButton loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
 	@FXML
@@ -139,7 +145,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
 							final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
 							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
-		super(disablePropertyController);
+		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -208,37 +214,40 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected Optional<ReplayTrace> editItem(final ReplayTrace oldItem) {
-		// This only implements editing the validation task ID.
-		// Editing the trace itself is a different menu item (addTestsItem).
-		final TextInputDialog dialog = new TextInputDialog(oldItem.getId() == null ? "" : oldItem.getId());
-		stageManager.register(dialog);
-		dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
-		dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
-		dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
-		return dialog.showAndWait().map(idText -> {
-			final String id = idText.trim().isEmpty() ? null : idText;
-			return oldItem.withId(id);
-		});
+	protected Optional<ReplayTrace> showItemDialog(final ReplayTrace oldItem) {
+		if (oldItem == null) {
+			// Adding a trace - ask the user to select a trace file.
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.loadTrace.title"));
+			fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
+			fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
+			Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
+			if (traceFile == null) {
+				return Optional.empty();
+			} else {
+				return Optional.of(traceFileHandler.createReplayTraceForPath(traceFile));
+			}
+		} else {
+			// This only implements editing the validation task ID.
+			// Editing the trace itself is a different menu item (addTestsItem).
+			// TODO Make this a proper dialog and perhaps allow viewing/changing the trace file path?
+			final TextInputDialog dialog = new TextInputDialog(oldItem.getId() == null ? "" : oldItem.getId());
+			stageManager.register(dialog);
+			dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+			dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
+			dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
+			return dialog.showAndWait().map(idText -> {
+				final String id = idText.trim().isEmpty() ? null : idText;
+				return oldItem.withId(id);
+			});
+		}
 	}
 
 	@FXML
 	private void checkMachine() {
-		traceChecker.checkAll(items);
-	}
-
-	@FXML
-	private void loadTraceFromFile() {
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.loadTrace.title"));
-		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
-		Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
-		if (traceFile != null) {
-			final ReplayTrace replayTrace = traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), traceFile);
-			traceChecker.check(replayTrace, true);
-		}
-
+		items.stream()
+			.filter(ReplayTrace::selected)
+			.forEach(trace -> traceChecker.check(trace, false));
 	}
 
 	public void closeDescription() {
@@ -255,5 +264,28 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, i18n));
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
+	}
+
+	@FXML
+	public void loadTracesDirectory() {
+		DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.loadTracesDirectory.title"));
+		directoryChooser.setInitialDirectory(currentProject.getLocation().toFile());
+		Path directory = fileChooserManager.showDirectoryChooser(directoryChooser, Kind.TRACES, stageManager.getCurrent());
+		List<Path> paths = new ArrayList<>();
+		if(directory != null) {
+			try(Stream<Path> walk = Files.walk(directory)) {
+				paths = walk.filter(p -> !Files.isDirectory(p))
+						.filter(p -> p.toString().toLowerCase().endsWith(TraceFileHandler.TRACE_FILE_EXTENSION))
+						.collect(Collectors.toList());
+			} catch (IOException e) {
+				final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.traceDirectoryError.header", "animation.tracereplay.alerts.traceDirectoryError.error");
+				alert.initOwner(this.getScene().getWindow());
+				alert.show();
+			}
+			for(Path path : paths) {
+				traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
+			}
+		}
 	}
 }
