@@ -1,9 +1,13 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -37,7 +41,8 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.ProgressIndicator;
@@ -46,6 +51,7 @@ import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 @FXMLInjected
@@ -126,7 +132,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@FXML
 	private TableColumn<ReplayTrace, Node> statusProgressColumn;
 	@FXML
-	private Button loadTraceButton;
+	private MenuButton loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
 	@FXML
@@ -239,7 +245,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@FXML
 	private void checkMachine() {
-		traceChecker.checkAll(items);
+		items.stream()
+			.filter(ReplayTrace::selected)
+			.forEach(trace -> traceChecker.check(trace, false));
 	}
 
 	public void closeDescription() {
@@ -256,5 +264,28 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, i18n));
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
+	}
+
+	@FXML
+	public void loadTracesDirectory() {
+		DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.loadTracesDirectory.title"));
+		directoryChooser.setInitialDirectory(currentProject.getLocation().toFile());
+		Path directory = fileChooserManager.showDirectoryChooser(directoryChooser, Kind.TRACES, stageManager.getCurrent());
+		List<Path> paths = new ArrayList<>();
+		if(directory != null) {
+			try(Stream<Path> walk = Files.walk(directory)) {
+				paths = walk.filter(p -> !Files.isDirectory(p))
+						.filter(p -> p.toString().toLowerCase().endsWith(TraceFileHandler.TRACE_FILE_EXTENSION))
+						.collect(Collectors.toList());
+			} catch (IOException e) {
+				final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.traceDirectoryError.header", "animation.tracereplay.alerts.traceDirectoryError.error");
+				alert.initOwner(this.getScene().getWindow());
+				alert.show();
+			}
+			for(Path path : paths) {
+				traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
+			}
+		}
 	}
 }

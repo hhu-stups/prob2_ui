@@ -17,6 +17,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.json.TraceManager;
+import de.prob.json.InvalidJsonFormatException;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -258,6 +259,11 @@ public class ProjectManager {
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				Platform.runLater(() -> this.getRecentProjects().remove(path));
 			}
+			return null;
+		} catch (InvalidJsonFormatException exc) {
+			LOGGER.warn("Invalid Json format", exc);
+			Alert alert = stageManager.makeAlert(AlertType.ERROR, "project.projectManager.alerts.formatVersionNotSupported.header", "project.projectManager.alerts.formatVersionNotSupported.content");
+			alert.show();
 			return null;
 		}
 	}

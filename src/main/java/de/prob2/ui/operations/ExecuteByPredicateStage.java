@@ -25,7 +25,7 @@ import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.interactive.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
@@ -180,7 +180,7 @@ public final class ExecuteByPredicateStage extends Stage {
 		assert transitions.size() == 1;
 		Transition transition = transitions.get(0);
 		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-		injector.getInstance(UIInteraction.class).addUIInteraction(realTimeSimulator, transition);
+		injector.getInstance(UIInteractionHandler.class).addUserInteraction(realTimeSimulator, transition);
 		this.currentTrace.set(this.currentTrace.get().add(transition));
 		this.hide();
 	}

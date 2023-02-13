@@ -16,6 +16,8 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <fx:root type="TraceReplayView" fitToHeight="true" fitToWidth="true"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -42,15 +44,19 @@
 				<Spacer/>
 				<RefactorButton fx:id="refactorButton" HBox.hgrow="NEVER" />
 				<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
-				<Button fx:id="loadTraceButton" onAction="#askToAddItem" disable="true">
+				<MenuButton fx:id="loadTraceButton">
 					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
 					</graphic>
 					<tooltip>
 						<Tooltip text="%animation.tracereplay.view.tooltips.loadTrace"/>
 					</tooltip>
-				</Button>
+					<items>
+						<MenuItem fx:id="loadTraceItem" text="%animation.tracereplay.loadButton.loadTrace" onAction="#askToAddItem"/>
+						<MenuItem fx:id="loadTraceDirectoryItem" text="%animation.tracereplay.loadButton.loadTracesDirectory" onAction="#loadTracesDirectory"/>
+					</items>
+				</MenuButton>
+
 				<HelpButton fx:id="helpButton"/>
 			</HBox>
 			<TableView fx:id="itemsTable" VBox.vgrow="ALWAYS">

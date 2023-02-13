@@ -24,29 +24,43 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.TreeCheckedCell;
 import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableSet;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import se.sawano.java.text.AlphanumericComparator;
 
@@ -54,8 +68,10 @@ import se.sawano.java.text.AlphanumericComparator;
 @Singleton
 public class VOManagerStage extends Stage {
 	public enum Mode {
-		NONE, REQUIREMENT, VO
+		NONE, REQUIREMENT
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(VOManagerStage.class);
 
 	@FXML
 	private TreeTableView<VOManagerItem> tvRequirements;
@@ -67,7 +83,7 @@ public class VOManagerStage extends Stage {
 	private TreeTableColumn<VOManagerItem, Checked> requirementStatusColumn;
 
 	@FXML
-	private MenuButton btAddRequirementVO;
+	private Button btAddRequirement;
 
 	@FXML
 	private MenuItem btAddVO;
@@ -76,13 +92,25 @@ public class VOManagerStage extends Stage {
 	private RequirementsEditingBox requirementEditingBox;
 
 	@FXML
-	private VOEditingBox voEditingBox;
-
-	@FXML
 	private ChoiceBox<VOManagerSetting> cbViewSetting;
 
 	@FXML
 	private TextArea taFeedback;
+
+	@FXML
+	private TableView<IValidationTask> vtTable;
+
+	@FXML
+	private TableColumn<IValidationTask, Checked> vtStatusColumn;
+
+	@FXML
+	private TableColumn<IValidationTask, String> vtIdColumn;
+
+	@FXML
+	private TableColumn<IValidationTask, String> vtTypeColumn;
+
+	@FXML
+	private TableColumn<IValidationTask, String> vtConfigurationColumn;
 
 	private final CurrentProject currentProject;
 
@@ -102,6 +130,8 @@ public class VOManagerStage extends Stage {
 
 	private Map<String, VOValidationFeedback> currentFeedback;
 
+	private final MapProperty<String, IValidationTask> currentMachineVTs;
+
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final VOChecker voChecker, final VOErrorHandler voErrorHandler,
@@ -115,6 +145,7 @@ public class VOManagerStage extends Stage {
 		this.i18n = i18n;
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.relatedMachineNames = FXCollections.observableSet();
+		this.currentMachineVTs = new SimpleMapProperty<>(this, "currentMachineVTs", FXCollections.emptyObservableMap());
 		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
 	}
 
@@ -140,7 +171,14 @@ public class VOManagerStage extends Stage {
 				this.getStyleClass().remove("unrelated");
 				if (empty) {
 					this.setContextMenu(null);
+					this.setOnMouseClicked(null);
 				} else {
+					final EventHandler<MouseEvent> doubleClickHandler = e -> {
+						if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && this.getTreeItem().getChildren().isEmpty()) {
+							checkItem(item);
+						}
+					};
+					
 					if (item.getVo() != null) {
 						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.check"));
 						checkItem.setOnAction(e -> checkItem(item));
@@ -149,6 +187,7 @@ public class VOManagerStage extends Stage {
 						removeItem.setOnAction(e -> removeItem(item));
 						
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
+						this.setOnMouseClicked(doubleClickHandler);
 					} else if (item.getRequirement() != null) {
 						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.check", item.getRequirement().getValidationObligations().size()));
 						checkItem.setOnAction(e -> checkItem(item));
@@ -158,9 +197,11 @@ public class VOManagerStage extends Stage {
 						removeItem.setOnAction(e -> removeItem(item));
 						
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
+						this.setOnMouseClicked(doubleClickHandler);
 					} else {
 						// TODO Allow checking (but not removing) machines from VO manager tree
 						this.setContextMenu(null);
+						this.setOnMouseClicked(null);
 					}
 					
 					// Gray out items belonging to machines that are not in the current machine's refinement chain.
@@ -171,22 +212,12 @@ public class VOManagerStage extends Stage {
 			}
 		});
 
-		tvRequirements.setOnMouseClicked(e-> {
-			TreeItem<VOManagerItem> treeItem = tvRequirements.getSelectionModel().getSelectedItem();
-			if (treeItem != null && e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && treeItem.getChildren().isEmpty() && currentTrace.get() != null) {
-				checkItem(treeItem.getValue());
-			}
-		});
-
 		tvRequirements.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to != null && to.getValue() != null) {
 				VOManagerItem item = to.getValue();
 				if (item.getRequirement() != null) {
 					requirementEditingBox.showRequirement(item.getRequirement());
 					switchMode(Mode.REQUIREMENT);
-				} else if (item.getVo() != null) {
-					voEditingBox.showValidationObligation(item.getVo(), item.getRequirement());
-					switchMode(Mode.VO);
 				} else {
 					switchMode(Mode.NONE);
 				}
@@ -195,13 +226,75 @@ public class VOManagerStage extends Stage {
 			}
 		});
 
-		currentProject.currentMachineProperty().addListener((o, from, to) -> {
-			if (to != null) {
-				for (final IValidationTask vt : to.getValidationTasks().values()) {
-					vt.checkedProperty().addListener(o1 -> showFeedback());
+		vtTable.setRowFactory(table -> {
+			final TableRow<IValidationTask> row = new TableRow<>();
+			
+			row.setOnMouseClicked(e -> {
+				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
+					checkSingleTask(row.getItem());
 				}
+			});
+			
+			final MenuItem checkMenuItem = new MenuItem(i18n.translate("vomanager.validationTasksInMachine.contextMenu.check"));
+			checkMenuItem.setOnAction(e -> checkSingleTask(row.getItem()));
+			
+			final ContextMenu contextMenu = new ContextMenu(checkMenuItem);
+			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty())
+				.then((ContextMenu)null)
+				.otherwise(contextMenu));
+			
+			return row;
+		});
+
+		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
+		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		vtIdColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getId()));
+		vtTypeColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskType(i18n)));
+		vtConfigurationColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskDescription(i18n)));
+
+		currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			currentMachineVTs.unbind();
+			if (to == null) {
+				currentMachineVTs.clear();
+			} else {
+				currentMachineVTs.bind(to.validationTasksProperty());
 			}
 		});
+
+		final InvalidationListener validationFeedbackListener = o -> showFeedback();
+		currentMachineVTs.addListener((MapChangeListener<String, IValidationTask>)change -> {
+			if (change.wasRemoved()) {
+				vtTable.getItems().remove(change.getValueRemoved());
+				change.getValueRemoved().checkedProperty().removeListener(validationFeedbackListener);
+			}
+			if (change.wasAdded()) {
+				vtTable.getItems().add(change.getValueAdded());
+				vtTable.sort();
+				change.getValueAdded().checkedProperty().addListener(validationFeedbackListener);
+			}
+		});
+		currentMachineVTs.addListener((InvalidationListener)o -> {
+			final Machine machine = currentProject.getCurrentMachine();
+			if (machine == null) {
+				return;
+			}
+			// Re-parse all VOs any time the validation tasks change.
+			for (final Requirement requirement : currentProject.getRequirements()) {
+				requirement.getValidationObligation(machine).ifPresent(vo -> {
+					try {
+						vo.parse(machine);
+					} catch (VOException e) {
+						LOGGER.warn("Error in validation expression", e);
+					}
+				});
+			}
+		});
+
+		final Machine currentMachine = currentProject.getCurrentMachine();
+		if (currentMachine != null) {
+			currentMachineVTs.bind(currentMachine.validationTasksProperty());
+		}
+
 		relatedMachineNames.addListener((InvalidationListener)o -> updateRequirementsTable());
 		currentTrace.modelProperty().addListener((o, from, to) -> this.updateRelatedMachines(to));
 		this.updateRelatedMachines(currentTrace.getModel());
@@ -222,12 +315,14 @@ public class VOManagerStage extends Stage {
 		}
 	}
 
+	private void checkSingleTask(final IValidationTask task) {
+		// FIXME This parses the ID as a validation expression - we should simplify this once we have a proper way to check a generic IValidationTask
+		voChecker.checkVO(new ValidationObligation(currentProject.getCurrentMachine().getName(), task.getId()));
+	}
+
 	private void initializeEditingBoxes() {
 		requirementEditingBox.setVoManagerStage(this);
-		voEditingBox.setVoManagerStage(this);
-
 		requirementEditingBox.visibleProperty().bind(modeProperty.isEqualTo(Mode.REQUIREMENT));
-		voEditingBox.visibleProperty().bind(modeProperty.isEqualTo(Mode.VO));
 	}
 
 	private void initializeChoiceBoxes() {
@@ -237,19 +332,16 @@ public class VOManagerStage extends Stage {
 
 	private void initializeListenerOnProjectChange() {
 		final ChangeListener<Project> projectChangeListener = (observable, from, to) -> {
-			btAddVO.disableProperty().unbind();
 			final List<Machine> machines = to == null ? Collections.emptyList() : to.getMachines();
 			requirementEditingBox.updateLinkedMachines(machines);
-			voEditingBox.updateLinkedMachines(machines);
 
 			if (to != null) {
-				btAddVO.setDisable(to.getRequirements().isEmpty());
 				updateRequirementsTable();
 			} else {
 				tvRequirements.setRoot(null);
 			}
 
-			btAddRequirementVO.setDisable(to == null);
+			btAddRequirement.setDisable(to == null);
 		};
 		currentProject.addListener(projectChangeListener);
 		projectChangeListener.changed(null, null, currentProject.get());
@@ -376,12 +468,6 @@ public class VOManagerStage extends Stage {
 	public void addRequirement() {
 		requirementEditingBox.resetRequirementEditing();
 		switchMode(Mode.REQUIREMENT);
-	}
-
-	@FXML
-	public void addVO() {
-		voEditingBox.resetVOEditing();
-		switchMode(Mode.VO);
 	}
 
 	private void removeItem(final VOManagerItem item) {

@@ -342,11 +342,26 @@ public class VisBStage extends Stage {
 
 	private void loadSvgFile(final VisBVisualisation visBVisualisation) throws IOException {
 		final Path path = visBVisualisation.getSvgPath();
-		if (!Files.isRegularFile(path) || Files.size(path) <= 0) {
-			throw new IOException("given svg file '" + path + "' is not a file or is empty");
+		String svgContent = "";
+		if(path.equals(currentProject.getLocation())) {
+			// TODO: Discuss whether to generate an empty SVG or provide the SVG content from Prolog with width and height. Furthermore adapt width and height to size provided in VisB file.
+			svgContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+					"<svg\n" +
+					"   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n" +
+					"   xmlns:cc=\"http://creativecommons.org/ns#\"\n" +
+					"   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" +
+					"   xmlns:svg=\"http://www.w3.org/2000/svg\"\n" +
+					"   xmlns=\"http://www.w3.org/2000/svg\"\n" +
+					"   width=\"1000\"\n" +
+					"   height=\"500\"\n" +
+					"   viewBox=\"0 0 1000.0 500.0\"\n" +
+					"   version=\"1.1\"\n" +
+					"</svg>";
+		} else if (!Files.isRegularFile(path) || Files.size(path) <= 0) {
+			throw new IOException("Given svg file '" + path + "' is not a file or is empty");
+		} else {
+			svgContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 		}
-
-		String svgContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
 		this.initialiseWebView(svgContent, path.getParent().toUri().toString());
 	}
 

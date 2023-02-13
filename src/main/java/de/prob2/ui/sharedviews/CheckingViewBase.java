@@ -117,7 +117,6 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		checkMachineButton.disableProperty().bind(this.items.emptyProperty().or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
 		itemsTable.setRowFactory(table -> new RowBase());
 		itemsTable.itemsProperty().bind(this.items);
-		itemsTable.disableProperty().bind(disablePropertyController.disableProperty());
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory<>(itemsTable,  selectAll));
@@ -166,7 +165,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	protected abstract String configurationForItem(final T item);
 	
 	protected BooleanExpression disableItemBinding(final T item) {
-		return disablePropertyController.disableProperty().or(item.selectedProperty().not());
+		return disablePropertyController.disableProperty();
 	}
 	
 	protected abstract void executeItem(final T item);

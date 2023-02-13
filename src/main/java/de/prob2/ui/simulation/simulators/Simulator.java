@@ -226,6 +226,10 @@ public abstract class Simulator {
 		// This is used in Monte Carlo Simulation to check when the starting condition is reached
 	}
 
+	public void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
+		simulationEventHandler.handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
+	}
+
 	public boolean endingConditionReached(Trace trace) {
 		return noActivationQueued;
 	}

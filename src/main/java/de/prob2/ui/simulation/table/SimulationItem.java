@@ -209,6 +209,12 @@ public class SimulationItem implements IValidationTask {
 	public SimulationType getType() {
 		return type;
 	}
+
+	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate(this.getType());
+	}
+
 	@Override
 	public int hashCode() {
 		return Objects.hash(type, information);

@@ -61,8 +61,13 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem implement
 	}
 	
 	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate(this.getType());
+	}
+	
+	@Override
 	public String getTaskDescription(final I18n i18n) {
-		return this.getType() + ": " + this.getCode();
+		return this.getCode();
 	}
 	
 	public ObservableList<Trace> getCounterExamples() {

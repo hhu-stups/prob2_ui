@@ -212,6 +212,11 @@ public class ReplayTrace implements IExecutableItem, IValidationTask, Descriptio
 	}
 
 	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate("animation.tracereplay.type");
+	}
+
+	@Override
 	public String getTaskDescription(final I18n i18n) {
 		return this.getName();
 	}

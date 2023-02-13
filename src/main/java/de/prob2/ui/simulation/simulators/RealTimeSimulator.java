@@ -2,18 +2,13 @@ package de.prob2.ui.simulation.simulators;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.interactive.UIInteraction;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Singleton
 public class RealTimeSimulator extends Simulator {
@@ -22,51 +17,28 @@ public class RealTimeSimulator extends Simulator {
 
 	private final CurrentTrace currentTrace;
 
-	private final UIInteraction uiInteraction;
+	private final UIInteractionHandler uiInteractionHandler;
 
 	private final ChangeListener<Transition> uiListener;
 
 	@Inject
-	public RealTimeSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, final UIInteraction uiInteraction) {
+	public RealTimeSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
 		super(currentTrace);
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
-		this.uiInteraction = uiInteraction;
-		this.uiListener = (observable, from, to) -> {
-			if(to == null) {
-				return;
-			}
-			List<UIListenerConfiguration> uiListenerConfigurations = config.getUiListenerConfigurations();
-			boolean anyActivated = false;
-			State destinationState = to.getDestination();
-			for(UIListenerConfiguration uiListener : uiListenerConfigurations) {
-				String event = uiListener.getEvent();
-				// TODO: handle predicate
-				List<String> activating = uiListener.getActivating();
-				if(event.equals(to.getName())) {
-					// TODO: Handle parameter predicates
-					for(String activatingEvent : activating) {
-						simulationEventHandler.handleOperationConfiguration(destinationState,  activationConfigurationMap.get(activatingEvent), new ArrayList<>(), "1=1");
-						anyActivated = true;
-					}
-					break;
-				}
-			}
-			if(anyActivated) {
-				scheduler.runWithoutInitialisation();
-			}
-		};
+		this.uiInteractionHandler = uiInteractionHandler;
+		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
 	}
 
 	@Override
 	public void run() {
 		scheduler.run();
-		uiInteraction.getUiListener().addListener(uiListener);
+		uiInteractionHandler.getLastUserInteraction().addListener(uiListener);
 	}
 
 	@FXML
 	public void stop() {
-		uiInteraction.getUiListener().removeListener(uiListener);
+		uiInteractionHandler.getLastUserInteraction().removeListener(uiListener);
 		scheduler.stop();
 	}
 
@@ -97,4 +69,5 @@ public class RealTimeSimulator extends Simulator {
 	public boolean endingConditionReached(Trace trace) {
 		return super.endingConditionReached(trace) && config.getUiListenerConfigurations().isEmpty();
 	}
+
 }
