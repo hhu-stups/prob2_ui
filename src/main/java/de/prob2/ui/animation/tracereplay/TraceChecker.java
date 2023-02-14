@@ -52,7 +52,7 @@ public class TraceChecker {
 	}
 
 	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace) {
-		return checkNoninteractive(replayTrace).whenComplete((r, e) -> {
+		return checkNoninteractive(replayTrace, currentTrace.getStateSpace()).whenComplete((r, e) -> {
 			if (e == null) {
 				// set the current trace if no error has occurred. Otherwise leave the decision to the user
 				if (!r.getReplayedTrace().getErrors().isEmpty()) {
@@ -66,14 +66,13 @@ public class TraceChecker {
 		});
 	}
 
-	public CompletableFuture<ReplayTrace> checkNoninteractive(ReplayTrace replayTrace) {
+	public CompletableFuture<ReplayTrace> checkNoninteractive(ReplayTrace replayTrace, StateSpace stateSpace) {
 		replayTrace.reset();
 		// ReplayTraceFileCommand doesn't support progress updates yet,
 		// so set an indeterminate status for now.
 		// We cannot use -1, because it is already used to say that no replay is currently running
 		// (this is special-cased in TraceReplayView).
 		replayTrace.setProgress(-2);
-		StateSpace stateSpace = currentTrace.getStateSpace();
 		final CompletableFuture<ReplayTrace> future = cliExecutor.submit(() -> {
 			ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
 			List<ErrorItem> errors = replayed.getErrors();

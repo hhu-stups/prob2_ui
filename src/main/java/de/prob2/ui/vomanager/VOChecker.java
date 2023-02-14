@@ -133,7 +133,7 @@ public class VOChecker {
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
 			return symbolicChecker.checkItem((SymbolicCheckingFormulaItem) validationTask, stateSpace);
 		} else if (validationTask instanceof ReplayTrace) {
-			return traceChecker.checkNoninteractive((ReplayTrace) validationTask);
+			return traceChecker.checkNoninteractive((ReplayTrace) validationTask, stateSpace);
 		} else if (validationTask instanceof SimulationItem) {
 			simulationItemHandler.checkItem((SimulationItem) validationTask);
 			// TODO Make SimulationItemHandler return a correct CompletableFuture!
