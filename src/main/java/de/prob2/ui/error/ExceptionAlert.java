@@ -19,6 +19,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -42,7 +43,7 @@ public final class ExceptionAlert extends Alert {
 	
 	@Inject
 	private ExceptionAlert(final StageManager stageManager, final ErrorDisplayFilter errorDisplayFilter, final I18n i18n) {
-		super(Alert.AlertType.NONE); // Alert type is set in FXML
+		super(Alert.AlertType.NONE, null, ButtonType.OK); // Alert type is set in FXML, DefaultButtons will be overwritten to make x-Button functional
 
 		this.stageManager = stageManager;
 		this.errorDisplayFilter = errorDisplayFilter;
@@ -59,39 +60,44 @@ public final class ExceptionAlert extends Alert {
 	private void initialize() {
 		stageManager.register(this);
 		this.label.textProperty().bind(Bindings.concat(this.textProperty(), ":\n", this.exceptionMessage));
-		this.exceptionProperty().addListener((o, from, to) -> {
-			ProBError proBError = null;
-			CliError cliError = null;
-			for (Throwable e = to; e != null; e = e.getCause()) {
-				if (e instanceof ProBError) {
-					proBError = (ProBError)e;
-					break;
-				} else if (e instanceof CliError) {
-					cliError = (CliError)e;
-					break;
-				}
-			}
-			final String message;
-			if (cliError != null) {
-				message = this.i18n.translate("error.exceptionAlert.cliErrorExplanation", cliError.getMessage());
-			} else if (proBError != null) {
-				message = proBError.getOriginalMessage();
-			} else if (to != null) {
-				message = to.getMessage();
-			} else {
-				message = null;
-			}
-			this.exceptionMessage.set(message == null ? "" : message);
-			this.stackTraceTextArea.setText(to == null ? null : getExceptionStackTrace(to));
-			
-			this.contentVBox.getChildren().remove(this.proBErrorTable);
-			if (proBError != null) {
-				this.contentVBox.getChildren().add(this.proBErrorTable);
-				final List<ErrorItem> filteredErrors = this.errorDisplayFilter.filterErrors(proBError.getErrors());
-				this.proBErrorTable.getErrorItems().setAll(filteredErrors);
-			}
-		});
+		this.exceptionProperty().addListener(this::createAndShowExceptionMessage);
+		this.setButtons();
+	}
 
+	private void createAndShowExceptionMessage(ObservableValue<? extends Throwable> o, Throwable from, Throwable to) {
+		ProBError proBError = null;
+		CliError cliError = null;
+		for (Throwable e = to; e != null; e = e.getCause()) {
+			if (e instanceof ProBError) {
+				proBError = (ProBError) e;
+				break;
+			} else if (e instanceof CliError) {
+				cliError = (CliError) e;
+				break;
+			}
+		}
+		final String message;
+		if (cliError != null) {
+			message = this.i18n.translate("error.exceptionAlert.cliErrorExplanation", cliError.getMessage());
+		} else if (proBError != null) {
+			message = proBError.getOriginalMessage();
+		} else if (to != null) {
+			message = to.getMessage();
+		} else {
+			message = null;
+		}
+		this.exceptionMessage.set(message == null ? "" : message);
+		this.stackTraceTextArea.setText(to == null ? null : getExceptionStackTrace(to));
+
+		this.contentVBox.getChildren().remove(this.proBErrorTable);
+		if (proBError != null) {
+			this.contentVBox.getChildren().add(this.proBErrorTable);
+			final List<ErrorItem> filteredErrors = this.errorDisplayFilter.filterErrors(proBError.getErrors());
+			this.proBErrorTable.getErrorItems().setAll(filteredErrors);
+		}
+	}
+
+	private void setButtons() {
 		ButtonType copyToClipBoardButtonType = new ButtonType(this.i18n.translate("common.buttons.copyToClipboard"));
 		this.getDialogPane().getButtonTypes().add(copyToClipBoardButtonType);
 		this.getDialogPane().lookupButton(copyToClipBoardButtonType).addEventFilter(ActionEvent.ACTION, ae -> {
@@ -100,8 +106,11 @@ public final class ExceptionAlert extends Alert {
 			this.stackTraceTextArea.deselect();
 			ae.consume();
 		});
+
+		ButtonType okButton = new ButtonType("OK", ButtonType.CANCEL.getButtonData());
+		this.getDialogPane().getButtonTypes().add(okButton);
 	}
-	
+
 	public static String getExceptionStackTrace(final Throwable throwable) {
 		try (final StringWriter sw = new StringWriter(); final PrintWriter pw = new PrintWriter(sw)) {
 			throwable.printStackTrace(pw);
