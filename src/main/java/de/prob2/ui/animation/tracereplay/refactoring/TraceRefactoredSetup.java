@@ -21,10 +21,10 @@ import de.prob.check.tracereplay.check.TraceCheckerUtils;
 import de.prob.check.tracereplay.check.TraceModifier;
 import de.prob.check.tracereplay.check.exploration.ReplayOptions;
 import de.prob.check.tracereplay.check.renamig.DeltaCalculationException;
+import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -215,9 +215,9 @@ public class TraceRefactoredSetup {
 
 		Path saveAt = currentProject.getLocation().resolve(Paths.get(modified));
 
-		TraceFileHandler traceManager = injector.getInstance(TraceFileHandler.class);
+		TraceManager traceManager = injector.getInstance(TraceManager.class);
 		//Todo, what about Vars, Const, Sets?
-		traceManager.save(traceJsonFile.changeTrace(persistentTrace).changeModelName(newMachineName).changeMachineInfos(currentMachineOperations), saveAt);
+		traceManager.save(saveAt, traceJsonFile.changeTrace(persistentTrace).changeModelName(newMachineName).changeMachineInfos(currentMachineOperations));
 
 		return saveAt;
 	}

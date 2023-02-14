@@ -25,7 +25,6 @@ import de.prob.check.tracereplay.check.traceConstruction.AdvancedTraceConstructo
 import de.prob.check.tracereplay.check.traceConstruction.TraceConstructionError;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
-import de.prob.json.JsonMetadataBuilder;
 import de.prob.model.eventb.EventBModel;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
@@ -35,14 +34,12 @@ import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetup;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
 import de.prob2.ui.animation.tracereplay.refactoring.ReplayOptionsOverview;
-import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visualisation.traceDifference.TracePlotter;
 
@@ -175,7 +172,7 @@ public class RefactorButton extends Button {
 	private void saveAdaptedTrace(List<PersistentTransition> resultTrace, TraceJsonFile fileObject, RefactorSetup userInput) throws IOException {
 		TraceJsonFile newFileObject = fileObject.changeTransitionList(resultTrace);
 		Path path = userInput.getTraceFile().getParent().resolve(userInput.traceFile.getFileName().toString().replaceFirst("[.][^.]+$", "") + "_adapted_with_options.prob2trace" );
-		traceFileHandler.save(newFileObject, path);
+		traceManager.save(path, newFileObject);
 
 		if(userInput.setResult){
 			traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
@@ -186,7 +183,7 @@ public class RefactorButton extends Button {
 		//TraceJsonFile newFileObject = new TraceJsonFile(resultTrace, , TraceJsonFile.metadataBuilder());
 		TraceJsonFile newFileObject = fileObject.changeTransitionList(resultTrace).changeModelName(adaptedFor); //TODO this can cause error as all the meta data are not updated
 		Path path = userInput.getTraceFile().getParent().resolve(userInput.traceFile.getFileName().toString().replaceFirst("[.][^.]+$", "")  + "___refined_from___"+adaptedFor+".prob2trace" );
-		traceFileHandler.save(newFileObject, path);
+		traceManager.save(path, newFileObject);
 
 		if(userInput.setResult){
 			traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
