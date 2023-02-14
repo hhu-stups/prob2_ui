@@ -2,9 +2,12 @@ package de.prob2.ui.simulation.configuration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonValue;
 
 @JsonPropertyOrder({
 	"id",
@@ -14,7 +17,22 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 public class ActivationOperationConfiguration extends ActivationConfiguration {
 
 	public enum ActivationKind {
-		SINGLE, SINGLE_MIN, SINGLE_MAX, MULTI
+		SINGLE("single"),
+		SINGLE_MIN("single:min"),
+		SINGLE_MAX("single:max"),
+		MULTI("multi");
+
+		private final String name;
+
+		ActivationKind(String name) {
+			this.name = name;
+		}
+
+		@JsonValue
+		public String getName() {
+			return name;
+		}
+
 	}
 
 	private final String execute;
@@ -62,7 +80,7 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 	public String getAdditionalGuards() {
 		return additionalGuards;
 	}
-
+	
 	public ActivationKind getActivationKind() {
 		return activationKind;
 	}

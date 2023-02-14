@@ -155,7 +155,7 @@ public class UIInteractionHandler {
 		}
 		List<String> activations = resolveActivations(op, uiListeners);
 
-		return new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, null, fixedVariables, null, activations);
+		return new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations);
 	}
 
 	private List<String> resolveActivations(String op, List<UIListenerConfiguration> uiListeners) {
@@ -196,7 +196,7 @@ public class UIInteractionHandler {
 				OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.SETUP_CONSTANTS_NAME);
 				// Somehow the constructor with 1 argument always sets using destination state to false
 				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, null).getDestinationStateVariables(), opInfo);
-				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, null, fixedVariables, null, new ArrayList<>()));
+				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, new ArrayList<>()));
 			}
 		}
 
@@ -205,7 +205,7 @@ public class UIInteractionHandler {
 			OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.INITIALISE_MACHINE_NAME);
 			// Somehow the constructor with 1 argument always sets using destination state to false
 			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, null).getDestinationStateVariables(), opInfo);
-			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, null, fixedVariables, null, activations));
+			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations));
 		}
 
 		activationConfigurationsForResult.addAll(userInteractions);
