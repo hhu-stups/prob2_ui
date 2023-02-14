@@ -210,7 +210,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Override
 	protected void executeItem(final ReplayTrace item) {
-		traceChecker.check(item, true);
+		traceChecker.check(item);
 	}
 
 	@Override
@@ -247,7 +247,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private void checkMachine() {
 		items.stream()
 			.filter(ReplayTrace::selected)
-			.forEach(trace -> traceChecker.check(trace, false));
+			.forEach(trace -> traceChecker.checkNoninteractive(trace));
 	}
 
 	public void closeDescription() {

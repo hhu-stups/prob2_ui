@@ -280,7 +280,7 @@ public class TraceTestView extends Stage {
 			}
 		} else {
 			this.saveTrace();
-			injector.getInstance(TraceChecker.class).check(replayTrace.get(), true).thenAccept(r -> {
+			injector.getInstance(TraceChecker.class).check(replayTrace.get()).thenAccept(r -> {
 				if (index < r.getLoadedTrace().getTransitionList().size()) {
 					currentTrace.set(r.getAnimatedReplayedTrace().gotoPosition(index));
 				}
@@ -345,7 +345,7 @@ public class TraceTestView extends Stage {
 	@FXML
 	private void applyTest() {
 		this.saveTrace();
-		injector.getInstance(TraceChecker.class).check(replayTrace.get(), true);
+		injector.getInstance(TraceChecker.class).check(replayTrace.get());
 		this.close();
 	}
 

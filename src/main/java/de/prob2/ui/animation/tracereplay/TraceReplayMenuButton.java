@@ -62,7 +62,7 @@ public final class TraceReplayMenuButton extends MenuButton {
 				for (final ReplayTrace trace : change.getList()) {
 					final MenuItem menuItem = new MenuItem(trace.getName());
 					menuItem.setMnemonicParsing(false);
-					menuItem.setOnAction(e -> traceChecker.check(trace, true));
+					menuItem.setOnAction(e -> traceChecker.check(trace));
 					menuItems.add(menuItem);
 				}
 				this.getItems().setAll(menuItems);

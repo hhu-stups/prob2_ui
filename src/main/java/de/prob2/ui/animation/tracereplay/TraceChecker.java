@@ -51,16 +51,14 @@ public class TraceChecker {
 		this.stageManager = stageManager;
 	}
 
-	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
+	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace) {
 		return checkNoninteractive(replayTrace).whenComplete((r, e) -> {
 			if (e == null) {
-				if (setCurrentAnimation) {
-					// set the current trace if no error has occurred. Otherwise leave the decision to the user
-					if (!r.getReplayedTrace().getErrors().isEmpty()) {
-						showTraceReplayCompleteFailed(replayTrace);
-					} else {
-						currentTrace.set(r.getAnimatedReplayedTrace());
-					}
+				// set the current trace if no error has occurred. Otherwise leave the decision to the user
+				if (!r.getReplayedTrace().getErrors().isEmpty()) {
+					showTraceReplayCompleteFailed(replayTrace);
+				} else {
+					currentTrace.set(r.getAnimatedReplayedTrace());
 				}
 			} else {
 				Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, e));
