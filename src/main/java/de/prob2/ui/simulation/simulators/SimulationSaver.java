@@ -27,14 +27,11 @@ public class SimulationSaver extends ProBFileHandler {
 	public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
 	private final JacksonManager<SimulationConfiguration> jsonManager;
-	private final SimulationCreator simulationCreator;
 
 	@Inject
-	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final ObjectMapper objectMapper, final JacksonManager<SimulationConfiguration> jsonManager, final SimulationCreator simulationCreator,
-	                       final CurrentProject currentProject, final I18n i18n) {
+	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final ObjectMapper objectMapper, final JacksonManager<SimulationConfiguration> jsonManager, final CurrentProject currentProject, final I18n i18n) {
 		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);
 		this.jsonManager = jsonManager;
-		this.simulationCreator = simulationCreator;
 
 		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationConfiguration.class, SimulationConfiguration.SimulationFileType.TIMED_TRACE.getName(), SimulationConfiguration.CURRENT_FORMAT_VERSION));
 	}
@@ -53,7 +50,7 @@ public class SimulationSaver extends ProBFileHandler {
 	}
 
 	private void saveConfiguration(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
-		SimulationConfiguration configuration = simulationCreator.createConfiguration(trace, timestamps, true, jsonMetadata);
+		SimulationConfiguration configuration = SimulationCreator.createConfiguration(trace, timestamps, true, jsonMetadata);
 		this.jsonManager.writeToFile(location, configuration);
 	}
 
