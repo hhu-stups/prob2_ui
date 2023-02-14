@@ -4,7 +4,6 @@ import java.math.BigInteger;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetStatisticsCommand;
@@ -16,7 +15,6 @@ import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
-import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
 
@@ -24,12 +22,9 @@ import javafx.application.Platform;
 public class Modelchecker {
 	private final CliTaskExecutor executor;
 
-	private final StatsView statsView;
-
 	@Inject
-	private Modelchecker(final CliTaskExecutor executor, final StatsView statsView) {
+	private Modelchecker(final CliTaskExecutor executor) {
 		this.executor = executor;
-		this.statsView = statsView;
 	}
 
 	/**
@@ -64,9 +59,6 @@ public class Modelchecker {
 				// Command must be executed outside of Platform.runLater to avoid blocking the UI thread!
 				GetStatisticsCommand cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
 				stateSpace.execute(cmd);
-				if (stats != null) {
-					statsView.updateSimpleStats(stats);
-				}
 				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, cmd.getResult(), stateSpace);
 				item.setCurrentStep(step);
 				Platform.runLater(() -> item.getSteps().set(stepIndex, step));
