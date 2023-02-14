@@ -99,7 +99,7 @@ public class ReplayedTraceStatusAlert extends Alert {
 			if (exc != null) {
 				Platform.runLater(() -> {
 					this.close();
-					traceFileHandler.showLoadError(replayTrace.getAbsoluteLocation(), exc);
+					traceFileHandler.showLoadError(replayTrace, exc);
 				});
 			} else if (items != null) {
 				Platform.runLater(() -> this.traceTable.setItems(items));

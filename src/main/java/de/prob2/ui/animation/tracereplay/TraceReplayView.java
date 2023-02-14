@@ -106,7 +106,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				try {
 					traceFile = this.getItem().load();
 				} catch (IOException e) {
-					traceFileHandler.showLoadError(this.getItem().getAbsoluteLocation(), e);
+					traceFileHandler.showLoadError(this.getItem(), e);
 					return;
 				}
 				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(traceFile, currentMachinePath, null, this.getItem().getAbsoluteLocation(), currentTrace.getStateSpace(), injector, currentProject, stageManager);

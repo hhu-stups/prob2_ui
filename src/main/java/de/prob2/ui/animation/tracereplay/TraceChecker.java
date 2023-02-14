@@ -63,7 +63,7 @@ public class TraceChecker {
 					}
 				}
 			} else {
-				Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace.getAbsoluteLocation(), e));
+				Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, e));
 			}
 		});
 	}

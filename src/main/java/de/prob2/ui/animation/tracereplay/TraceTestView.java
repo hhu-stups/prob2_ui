@@ -325,7 +325,7 @@ public class TraceTestView extends Stage {
 		try {
 			traceJsonFile = replayTrace.load();
 		} catch (IOException e) {
-			injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace.getAbsoluteLocation(), e);
+			injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, e);
 			return;
 		}
 
