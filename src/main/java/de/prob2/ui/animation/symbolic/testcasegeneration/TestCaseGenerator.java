@@ -16,8 +16,6 @@ import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
-import javafx.application.Platform;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +58,7 @@ public class TestCaseGenerator {
 		cliExecutor.submit(() -> {
 			try {
 				final TestCaseGeneratorResult result = testCaseGenerator.generateTestCases();
-				Platform.runLater(() -> handleResult(item, result));
+				handleResult(item, result);
 			} catch (RuntimeException e) {
 				LOGGER.error("Exception during generating test cases", e);
 				item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
