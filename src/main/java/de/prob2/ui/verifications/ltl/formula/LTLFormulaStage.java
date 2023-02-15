@@ -26,18 +26,16 @@ public class LTLFormulaStage extends LTLItemStage {
 	private ChoiceBox<Boolean> cbExpectedResult;
 	
 	private final CurrentTrace currentTrace;
-	private final LTLFormulaChecker formulaChecker;
 
 	private LTLFormulaItem result;
 	
 	@Inject
 	public LTLFormulaStage(
 		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final FontSize fontSize,
-		final LTLFormulaChecker formulaChecker, final LTLBuiltinsStage builtinsStage
+		final LTLBuiltinsStage builtinsStage
 	) {
 		super(currentProject, fontSize, builtinsStage);
 		this.currentTrace = currentTrace;
-		this.formulaChecker = formulaChecker;
 		this.result = null;
 		stageManager.loadFXML(this, "ltlformula_stage.fxml");
 	}
@@ -62,7 +60,7 @@ public class LTLFormulaStage extends LTLItemStage {
 		String code = taCode.getText();
 		final LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), cbExpectedResult.getValue());
 		try {
-			formulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
+			LTLFormulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 		} catch (ProBError e) {
 			this.showErrors(e.getErrors());
 			return;

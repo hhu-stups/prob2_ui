@@ -23,6 +23,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -115,7 +116,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final CurrentTrace currentTrace;
 	private final VersionInfo versionInfo;
 	private final CurrentProject currentProject;
-	private final LTLFormulaChecker checker;
+	private final CliTaskExecutor cliExecutor;
 	private final LTLPatternParser patternParser;
 	private final FileChooserManager fileChooserManager;
 	private final JacksonManager<LTLData> jacksonManager;
@@ -124,7 +125,8 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private LTLView(final StageManager stageManager, final I18n i18n, final Injector injector,
 					final CurrentTrace currentTrace, final VersionInfo versionInfo, final CurrentProject currentProject,
 					final DisablePropertyController disablePropertyController,
-					final LTLFormulaChecker checker, final LTLPatternParser patternParser,
+					final CliTaskExecutor cliExecutor,
+					final LTLPatternParser patternParser,
 					final FileChooserManager fileChooserManager,
 					final ObjectMapper objectMapper,
 					final JacksonManager<LTLData> jacksonManager) {
@@ -135,7 +137,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		this.currentTrace = currentTrace;
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
-		this.checker = checker;
+		this.cliExecutor = cliExecutor;
 		this.patternParser = patternParser;
 		this.fileChooserManager = fileChooserManager;
 		this.jacksonManager = jacksonManager;
@@ -254,9 +256,10 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	
 	@Override
 	protected void executeItem(final LTLFormulaItem item) {
-		checker.checkFormula(item, currentProject.getCurrentMachine(), currentTrace.getStateSpace()).thenAccept(it -> {
-			if (it.getCounterExample() != null) {
-				currentTrace.set(it.getCounterExample());
+		cliExecutor.submit(() -> {
+			LTLFormulaChecker.checkFormula(item, currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+			if (item.getCounterExample() != null) {
+				currentTrace.set(item.getCounterExample());
 			}
 		});
 	}
@@ -318,9 +321,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	public void checkMachine() {
 		final Machine machine = currentProject.getCurrentMachine();
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		items.stream()
-			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> checker.checkFormula(item, machine, stateSpace));
+		cliExecutor.submit(() ->
+			items.stream()
+				.filter(AbstractCheckableItem::selected)
+				.forEach(item -> LTLFormulaChecker.checkFormula(item, machine, stateSpace))
+		);
 	}
 	
 	@FXML
