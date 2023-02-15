@@ -35,20 +35,16 @@ public class VOChecker {
 
 	private final CliTaskExecutor cliExecutor;
 
-	private final SymbolicCheckingFormulaHandler symbolicChecker;
-
 	private final TraceChecker traceChecker;
 
 	private final SimulationItemHandler simulationItemHandler;
 
 	@Inject
 	public VOChecker(final CurrentProject currentProject, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor,
-					 final SymbolicCheckingFormulaHandler symbolicChecker,
 					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
-		this.symbolicChecker = symbolicChecker;
 		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
 	}
@@ -129,7 +125,7 @@ public class VOChecker {
 		} else if (validationTask instanceof LTLFormulaItem) {
 			return cliExecutor.submit(() -> LTLFormulaChecker.checkFormula((LTLFormulaItem) validationTask, machine, stateSpace));
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
-			return symbolicChecker.checkItem((SymbolicCheckingFormulaItem) validationTask, stateSpace);
+			return cliExecutor.submit(() -> SymbolicCheckingFormulaHandler.checkItem((SymbolicCheckingFormulaItem) validationTask, stateSpace));
 		} else if (validationTask instanceof ReplayTrace) {
 			return traceChecker.checkNoninteractive((ReplayTrace) validationTask, stateSpace);
 		} else if (validationTask instanceof SimulationItem) {

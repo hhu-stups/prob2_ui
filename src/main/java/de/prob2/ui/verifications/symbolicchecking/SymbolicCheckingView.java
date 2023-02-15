@@ -16,6 +16,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -77,7 +78,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-	private final SymbolicCheckingFormulaHandler formulaHandler;
+	private final CliTaskExecutor cliExecutor;
 	private final Provider<SymbolicCheckingChoosingStage> choosingStageProvider;
 
 	@FXML
@@ -89,14 +90,14 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
-	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
+	                            final CurrentProject currentProject, final CliTaskExecutor cliExecutor,
 	                            final DisablePropertyController disablePropertyController, final Provider<SymbolicCheckingChoosingStage> choosingStageProvider) {
 		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.formulaHandler = symbolicCheckHandler;
+		this.cliExecutor = cliExecutor;
 		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
@@ -131,7 +132,8 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	
 	@Override
 	protected void executeItem(final SymbolicCheckingFormulaItem item) {
-		formulaHandler.checkItem(item, currentTrace.getStateSpace()).thenAccept(r -> {
+		cliExecutor.submit(() -> {
+			SymbolicCheckingFormulaHandler.checkItem(item, currentTrace.getStateSpace());
 			List<Trace> counterExamples = item.getCounterExamples();
 			if (!counterExamples.isEmpty()) {
 				currentTrace.set(counterExamples.get(0));
@@ -153,8 +155,10 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	@FXML
 	public void checkMachine() {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		items.stream()
-			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> formulaHandler.checkItem(item, stateSpace));
+		cliExecutor.submit(() ->
+			items.stream()
+				.filter(AbstractCheckableItem::selected)
+				.forEach(item -> SymbolicCheckingFormulaHandler.checkItem(item, stateSpace))
+		);
 	}
 }
