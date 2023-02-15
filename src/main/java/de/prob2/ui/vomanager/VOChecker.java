@@ -5,9 +5,6 @@ import java.util.concurrent.CompletableFuture;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.StateSpace;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -15,12 +12,8 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
-import de.prob2.ui.verifications.modelchecking.Modelchecker;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaHandler;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.OrValidationExpression;
@@ -111,19 +104,12 @@ public class VOChecker {
 	}
 
 	private CompletableFuture<?> checkVT(IValidationTask validationTask) {
-		final Machine machine = currentProject.getCurrentMachine();
-		final StateSpace stateSpace = currentTrace.getStateSpace();
+		final ExecutionContext context = new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), currentTrace.getStateSpace());
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
 			return CompletableFuture.completedFuture(null);
-		} else if (validationTask instanceof ModelCheckingItem) {
-			return cliExecutor.submit(() -> Modelchecker.executeIfNeeded((ModelCheckingItem) validationTask, stateSpace));
-		} else if (validationTask instanceof LTLFormulaItem) {
-			return cliExecutor.submit(() -> LTLFormulaChecker.checkFormula((LTLFormulaItem) validationTask, machine, stateSpace));
-		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
-			return cliExecutor.submit(() -> SymbolicCheckingFormulaHandler.checkItem((SymbolicCheckingFormulaItem) validationTask, stateSpace));
-		} else if (validationTask instanceof ReplayTrace) {
-			return cliExecutor.submit(() -> TraceChecker.checkNoninteractive((ReplayTrace) validationTask, stateSpace));
+		} else if (validationTask instanceof IExecutableItem) {
+			return cliExecutor.submit(() -> ((IExecutableItem)validationTask).execute(context));
 		} else if (validationTask instanceof SimulationItem) {
 			simulationItemHandler.checkItem((SimulationItem) validationTask);
 			// TODO Make SimulationItemHandler return a correct CompletableFuture!
