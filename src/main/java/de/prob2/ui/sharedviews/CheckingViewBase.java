@@ -5,8 +5,12 @@ import java.util.Optional;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -98,6 +102,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	
 	private final I18n i18n;
 	protected final DisablePropertyController disablePropertyController;
+	private final CurrentTrace currentTrace;
+	private final CurrentProject currentProject;
+	private final CliTaskExecutor cliExecutor;
 	
 	// This is a proper ListProperty, so it supports emptyProperty(),
 	// unlike TableView.itemsProperty(), which is only an ObjectProperty.
@@ -105,9 +112,13 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	
 	protected final CheckBox selectAll;
 	
-	protected CheckingViewBase(final I18n i18n, final DisablePropertyController disablePropertyController) {
+	protected CheckingViewBase(final I18n i18n, final DisablePropertyController disablePropertyController, final CurrentTrace currentTrace, final CurrentProject currentProject, final CliTaskExecutor cliExecutor) {
 		this.i18n = i18n;
 		this.disablePropertyController = disablePropertyController;
+		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
+		this.cliExecutor = cliExecutor;
+		
 		this.items = new SimpleListProperty<>(this, "items", FXCollections.emptyObservableList());
 		this.selectAll = new CheckBox();
 	}
@@ -168,7 +179,16 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		return disablePropertyController.disableProperty();
 	}
 	
-	protected abstract void executeItem(final T item);
+	protected ExecutionContext getCurrentExecutionContext() {
+		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+	}
+	
+	protected abstract void executeItemSync(final T item, final ExecutionContext context);
+	
+	protected void executeItem(final T item) {
+		final ExecutionContext context = getCurrentExecutionContext();
+		cliExecutor.submit(() -> executeItemSync(item, context));
+	}
 	
 	protected void executeItemIfEnabled(final T item) {
 		if (!disableItemBinding(item).get()) {

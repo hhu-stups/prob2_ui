@@ -31,6 +31,7 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
@@ -130,7 +131,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 					final FileChooserManager fileChooserManager,
 					final ObjectMapper objectMapper,
 					final JacksonManager<LTLData> jacksonManager) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.injector = injector;
@@ -255,13 +256,11 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 	
 	@Override
-	protected void executeItem(final LTLFormulaItem item) {
-		cliExecutor.submit(() -> {
-			LTLFormulaChecker.checkFormula(item, currentProject.getCurrentMachine(), currentTrace.getStateSpace());
-			if (item.getCounterExample() != null) {
-				currentTrace.set(item.getCounterExample());
-			}
-		});
+	protected void executeItemSync(final LTLFormulaItem item, final ExecutionContext context) {
+		item.execute(context);
+		if (item.getCounterExample() != null) {
+			currentTrace.set(item.getCounterExample());
+		}
 	}
 	
 	@FXML

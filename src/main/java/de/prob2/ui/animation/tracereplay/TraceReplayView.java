@@ -35,6 +35,7 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.RefactorButton;
 import de.prob2.ui.verifications.CheckedIcon;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -148,7 +149,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
 							final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final TraceChecker traceChecker, final I18n i18n,
 							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -213,8 +214,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected void executeItem(final ReplayTrace item) {
-		cliExecutor.submit(() -> traceChecker.check(item));
+	protected void executeItemSync(final ReplayTrace item, final ExecutionContext context) {
+		// FIXME Respect execution context
+		traceChecker.check(item);
 	}
 
 	@Override

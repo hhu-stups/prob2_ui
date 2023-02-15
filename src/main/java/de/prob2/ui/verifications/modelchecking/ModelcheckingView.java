@@ -25,6 +25,7 @@ import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -32,7 +33,6 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -124,7 +124,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			final CliTaskExecutor cliExecutor,
 			final StatsView statsView
 	) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
@@ -285,18 +285,16 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 	
 	@Override
-	protected void executeItem(final ModelCheckingItem item) {
-		cliExecutor.submit(() -> {
-			statsView.updateWhileModelChecking(item);
-			try {
-				final ModelCheckingStep r = Modelchecker.execute(item, currentTrace.getStateSpace());
-				if (r.getResult() instanceof ITraceDescription) {
-					currentTrace.set(r.getTrace());
-				}
-			} catch (RuntimeException e) {
-				showModelCheckException(e);
+	protected void executeItemSync(final ModelCheckingItem item, final ExecutionContext context) {
+		statsView.updateWhileModelChecking(item);
+		try {
+			final ModelCheckingStep r = Modelchecker.execute(item, context.getStateSpace());
+			if (r.getResult() instanceof ITraceDescription) {
+				currentTrace.set(r.getTrace());
 			}
-		});
+		} catch (RuntimeException e) {
+			showModelCheckException(e);
+		}
 	}
 
 	private void setContextMenus() {

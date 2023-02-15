@@ -24,6 +24,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -123,7 +124,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
 	                              final CliTaskExecutor cliExecutor, final Injector injector) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -164,8 +165,8 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	}
 
 	@Override
-	protected void executeItem(final TestCaseGenerationItem item) {
-		cliExecutor.submit(() -> TestCaseGenerator.generateTestCases(item, currentTrace.getStateSpace()));
+	protected void executeItemSync(final TestCaseGenerationItem item, final ExecutionContext context) {
+		item.execute(context);
 	}
 
 	@Override

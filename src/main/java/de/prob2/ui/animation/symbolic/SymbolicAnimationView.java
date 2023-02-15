@@ -21,6 +21,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -70,7 +71,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final CliTaskExecutor cliExecutor,
 	                             final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -107,14 +108,12 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	}
 	
 	@Override
-	protected void executeItem(final SymbolicAnimationItem item) {
-		cliExecutor.submit(() -> {
-			SymbolicAnimationItemHandler.executeItem(item, currentTrace.getStateSpace());
-			final Trace example = item.getExample();
-			if (example != null) {
-				currentTrace.set(example);
-			}
-		});
+	protected void executeItemSync(final SymbolicAnimationItem item, final ExecutionContext context) {
+		item.execute(context);
+		final Trace example = item.getExample();
+		if (example != null) {
+			currentTrace.set(example);
+		}
 	}
 	
 	@Override

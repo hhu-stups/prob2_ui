@@ -22,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
@@ -92,7 +93,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                            final CurrentProject currentProject, final CliTaskExecutor cliExecutor,
 	                            final DisablePropertyController disablePropertyController, final Provider<SymbolicCheckingChoosingStage> choosingStageProvider) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -131,14 +132,12 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	}
 	
 	@Override
-	protected void executeItem(final SymbolicCheckingFormulaItem item) {
-		cliExecutor.submit(() -> {
-			SymbolicCheckingFormulaHandler.checkItem(item, currentTrace.getStateSpace());
-			List<Trace> counterExamples = item.getCounterExamples();
-			if (!counterExamples.isEmpty()) {
-				currentTrace.set(counterExamples.get(0));
-			}
-		});
+	protected void executeItemSync(final SymbolicCheckingFormulaItem item, final ExecutionContext context) {
+		item.execute(context);
+		List<Trace> counterExamples = item.getCounterExamples();
+		if (!counterExamples.isEmpty()) {
+			currentTrace.set(counterExamples.get(0));
+		}
 	}
 	
 	@Override
