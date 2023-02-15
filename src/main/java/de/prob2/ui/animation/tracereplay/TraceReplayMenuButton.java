@@ -8,6 +8,7 @@ import com.google.inject.Inject;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 
@@ -24,14 +25,16 @@ import javafx.scene.control.MenuItem;
 public final class TraceReplayMenuButton extends MenuButton {
 	private final I18n i18n;
 	private final CurrentProject currentProject;
+	private final CliTaskExecutor cliExecutor;
 	private final TraceChecker traceChecker;
 	
 	private final ListProperty<ReplayTrace> traces;
 	
 	@Inject
-	private TraceReplayMenuButton(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final TraceChecker traceChecker) {
+	private TraceReplayMenuButton(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CliTaskExecutor cliExecutor, final TraceChecker traceChecker) {
 		this.i18n = i18n;
 		this.currentProject = currentProject;
+		this.cliExecutor = cliExecutor;
 		this.traceChecker = traceChecker;
 		
 		this.traces = new SimpleListProperty<>(this, "traces", FXCollections.emptyObservableList());
@@ -62,7 +65,7 @@ public final class TraceReplayMenuButton extends MenuButton {
 				for (final ReplayTrace trace : change.getList()) {
 					final MenuItem menuItem = new MenuItem(trace.getName());
 					menuItem.setMnemonicParsing(false);
-					menuItem.setOnAction(e -> traceChecker.check(trace));
+					menuItem.setOnAction(e -> cliExecutor.submit(() -> traceChecker.check(trace)));
 					menuItems.add(menuItem);
 				}
 				this.getItems().setAll(menuItems);

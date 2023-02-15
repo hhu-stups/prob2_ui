@@ -214,7 +214,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Override
 	protected void executeItem(final ReplayTrace item) {
-		traceChecker.check(item);
+		cliExecutor.submit(() -> traceChecker.check(item));
 	}
 
 	@Override

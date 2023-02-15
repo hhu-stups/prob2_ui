@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -23,7 +22,6 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.Checked;
 
@@ -38,33 +36,25 @@ public class TraceChecker {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
 
-	private final CliTaskExecutor cliExecutor;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
 
 	@Inject
-	private TraceChecker(final CliTaskExecutor cliExecutor, final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
-		this.cliExecutor = cliExecutor;
+	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.stageManager = stageManager;
 	}
 
-	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace) {
+	public void check(ReplayTrace replayTrace) {
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		return cliExecutor.submit(() -> checkNoninteractive(replayTrace, stateSpace), replayTrace).whenComplete((r, e) -> {
-			if (e == null) {
-				// set the current trace if no error has occurred. Otherwise leave the decision to the user
-				if (!r.getReplayedTrace().getErrors().isEmpty()) {
-					showTraceReplayCompleteFailed(replayTrace);
-				} else {
-					currentTrace.set(r.getAnimatedReplayedTrace());
-				}
-			} else {
-				Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, e));
-			}
-		});
+		try {
+			checkNoninteractive(replayTrace, stateSpace);
+			setCurrentTraceAfterReplay(replayTrace);
+		} catch (RuntimeException exc) {
+			Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, exc));
+		}
 	}
 
 	private static void checkNoninteractiveInternal(ReplayTrace replayTrace, StateSpace stateSpace) {
@@ -125,6 +115,15 @@ public class TraceChecker {
 			currentTrace.set(trace);
 			alert.setErrorMessage();
 		});
+	}
+
+	public void setCurrentTraceAfterReplay(final ReplayTrace replayTrace) {
+		// set the current trace if no error has occurred. Otherwise leave the decision to the user
+		if (!replayTrace.getReplayedTrace().getErrors().isEmpty()) {
+			showTraceReplayCompleteFailed(replayTrace);
+		} else {
+			currentTrace.set(replayTrace.getAnimatedReplayedTrace());
+		}
 	}
 
 	@Deprecated
