@@ -10,6 +10,7 @@ import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 
 import javafx.beans.property.ListProperty;
@@ -97,5 +98,10 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	public String createdByForMetadata(int index) {
 		final Target target = this.getResult().getTestTraces().get(index).getTarget();
 		return "Test Case Generation: " + this.getConfigurationDescription() + "; OPERATION: " + target.getOperation() + ", GUARD: " + target.getGuardString();
+	}
+	
+	@Override
+	public void execute(final ExecutionContext context) {
+		TestCaseGenerator.generateTestCases(this, context.getStateSpace());
 	}
 }
