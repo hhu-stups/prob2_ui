@@ -18,9 +18,13 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.SimpleStatsView;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.modelchecking.ModelCheckingStep;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -144,6 +148,25 @@ public class StatsView extends ScrollPane {
 
 	public void updateSimpleStats(StateSpaceStats result) {
 		Platform.runLater(() -> simpleStatsView.setStats(result));
+	}
+
+	public void updateWhileModelChecking(final ModelCheckingItem item) {
+		item.currentStepProperty().addListener(new ChangeListener<ModelCheckingStep>() {
+			@Override
+			public void changed(final ObservableValue<? extends ModelCheckingStep> o, final ModelCheckingStep from, final ModelCheckingStep to) {
+				if (to == null) {
+					// Model check has finished - stop updating stats based on this task.
+					o.removeListener(this);
+				} else {
+					// While the model check is running, probcli is blocked, so StatsView cannot update itself normally.
+					// Instead, update it based on the stats returned by the model checker.
+					final StateSpaceStats stats = to.getStats();
+					if (stats != null) {
+						updateSimpleStats(stats);
+					}
+				}
+			}
+		});
 	}
 
 	private static void showStats(List<String> packedStats, GridPane grid) {

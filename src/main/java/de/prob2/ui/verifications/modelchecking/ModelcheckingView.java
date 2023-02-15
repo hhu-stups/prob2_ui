@@ -286,24 +286,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	
 	@Override
 	protected void executeItem(final ModelCheckingItem item) {
-		item.currentStepProperty().addListener(new ChangeListener<ModelCheckingStep>() {
-			@Override
-			public void changed(final ObservableValue<? extends ModelCheckingStep> o, final ModelCheckingStep from, final ModelCheckingStep to) {
-				if (to == null) {
-					// Model check has finished - stop updating stats based on this task.
-					o.removeListener(this);
-				} else {
-					// While the model check is running, probcli is blocked, so StatsView cannot update itself normally.
-					// Instead, update it based on the stats returned by the model checker.
-					final StateSpaceStats stats = to.getStats();
-					if (stats != null) {
-						statsView.updateSimpleStats(stats);
-					}
-				}
-			}
-		});
-		
 		cliExecutor.submit(() -> {
+			statsView.updateWhileModelChecking(item);
 			try {
 				final ModelCheckingStep r = Modelchecker.execute(item, currentTrace.getStateSpace());
 				if (r.getResult() instanceof ITraceDescription) {
@@ -364,6 +348,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 					continue;
 				}
 
+				statsView.updateWhileModelChecking(item);
 				try {
 					Modelchecker.execute(item, stateSpace);
 				} catch (RuntimeException exc) {
