@@ -8,6 +8,7 @@ import com.google.inject.Singleton;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -32,7 +33,7 @@ public class VOChecker {
 
 	private final CurrentTrace currentTrace;
 
-	private final Modelchecker modelchecker;
+	private final CliTaskExecutor cliExecutor;
 
 	private final LTLFormulaChecker ltlChecker;
 
@@ -43,12 +44,12 @@ public class VOChecker {
 	private final SimulationItemHandler simulationItemHandler;
 
 	@Inject
-	public VOChecker(final CurrentProject currentProject, final CurrentTrace currentTrace, final Modelchecker modelchecker,
+	public VOChecker(final CurrentProject currentProject, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor,
 					 final LTLFormulaChecker ltlChecker, final SymbolicCheckingFormulaHandler symbolicChecker,
 					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.modelchecker = modelchecker;
+		this.cliExecutor = cliExecutor;
 		this.ltlChecker = ltlChecker;
 		this.symbolicChecker = symbolicChecker;
 		this.traceChecker = traceChecker;
@@ -127,7 +128,7 @@ public class VOChecker {
 			// Nothing to be done - it already shows an error status
 			return CompletableFuture.completedFuture(null);
 		} else if (validationTask instanceof ModelCheckingItem) {
-			return modelchecker.startCheckIfNeeded((ModelCheckingItem) validationTask, stateSpace);
+			return cliExecutor.submit(() -> Modelchecker.executeIfNeeded((ModelCheckingItem) validationTask, stateSpace));
 		} else if (validationTask instanceof LTLFormulaItem) {
 			return ltlChecker.checkFormula((LTLFormulaItem) validationTask, machine, stateSpace);
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
