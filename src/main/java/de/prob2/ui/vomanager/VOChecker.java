@@ -35,17 +35,13 @@ public class VOChecker {
 
 	private final CliTaskExecutor cliExecutor;
 
-	private final TraceChecker traceChecker;
-
 	private final SimulationItemHandler simulationItemHandler;
 
 	@Inject
-	public VOChecker(final CurrentProject currentProject, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor,
-					 final TraceChecker traceChecker, final SimulationItemHandler simulationItemHandler) {
+	public VOChecker(final CurrentProject currentProject, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final SimulationItemHandler simulationItemHandler) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
-		this.traceChecker = traceChecker;
 		this.simulationItemHandler = simulationItemHandler;
 	}
 
@@ -127,7 +123,7 @@ public class VOChecker {
 		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
 			return cliExecutor.submit(() -> SymbolicCheckingFormulaHandler.checkItem((SymbolicCheckingFormulaItem) validationTask, stateSpace));
 		} else if (validationTask instanceof ReplayTrace) {
-			return traceChecker.checkNoninteractive((ReplayTrace) validationTask, stateSpace);
+			return cliExecutor.submit(() -> TraceChecker.checkNoninteractive((ReplayTrace) validationTask, stateSpace));
 		} else if (validationTask instanceof SimulationItem) {
 			simulationItemHandler.checkItem((SimulationItem) validationTask);
 			// TODO Make SimulationItemHandler return a correct CompletableFuture!

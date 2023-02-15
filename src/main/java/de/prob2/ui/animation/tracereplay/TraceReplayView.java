@@ -24,6 +24,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.RevealInExplorer;
@@ -124,6 +125,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
 	private final TraceChecker traceChecker;
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
@@ -144,12 +146,13 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-							final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
+							final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final TraceChecker traceChecker, final I18n i18n,
 							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
 		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
 		this.traceChecker = traceChecker;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
@@ -247,9 +250,11 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@FXML
 	private void checkMachine() {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		items.stream()
-			.filter(ReplayTrace::selected)
-			.forEach(trace -> traceChecker.checkNoninteractive(trace, stateSpace));
+		cliExecutor.submit(() ->
+			items.stream()
+				.filter(ReplayTrace::selected)
+				.forEach(trace -> TraceChecker.checkNoninteractive(trace, stateSpace))
+		);
 	}
 
 	public void closeDescription() {

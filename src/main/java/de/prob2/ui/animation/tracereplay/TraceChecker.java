@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
@@ -13,6 +12,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.ReplayedTrace;
@@ -52,7 +52,8 @@ public class TraceChecker {
 	}
 
 	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace) {
-		return checkNoninteractive(replayTrace, currentTrace.getStateSpace()).whenComplete((r, e) -> {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		return cliExecutor.submit(() -> checkNoninteractive(replayTrace, stateSpace), replayTrace).whenComplete((r, e) -> {
 			if (e == null) {
 				// set the current trace if no error has occurred. Otherwise leave the decision to the user
 				if (!r.getReplayedTrace().getErrors().isEmpty()) {
@@ -66,45 +67,40 @@ public class TraceChecker {
 		});
 	}
 
-	public CompletableFuture<ReplayTrace> checkNoninteractive(ReplayTrace replayTrace, StateSpace stateSpace) {
-		replayTrace.reset();
-		// ReplayTraceFileCommand doesn't support progress updates yet,
-		// so set an indeterminate status for now.
-		// We cannot use -1, because it is already used to say that no replay is currently running
-		// (this is special-cased in TraceReplayView).
-		replayTrace.setProgress(-2);
-		final CompletableFuture<ReplayTrace> future = cliExecutor.submit(() -> {
-			ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
-			List<ErrorItem> errors = replayed.getErrors();
-			if (errors.isEmpty() && replayed.getReplayStatus() != TraceReplayStatus.PERFECT) {
-				// FIXME Should this case be reported as an error on the Prolog side?
-				final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
-				errors = new ArrayList<>(errors);
-				errors.add(error);
-			}
-			replayed = replayed.withErrors(errors);
-			replayTrace.setReplayedTrace(replayed);
-			Trace trace = replayed.getTrace(stateSpace);
-			replayTrace.setAnimatedReplayedTrace(trace);
-			return replayTrace;
-		});
-		return future.whenComplete((r, e) -> {
-			final Checked res;
-			if (e == null) {
-				if (replayTrace.getReplayedTrace().getErrors().isEmpty()) {
-					res = Checked.SUCCESS;
-				} else {
-					res = Checked.FAIL;
-				}
-			} else if (e instanceof CancellationException) {
-				// Trace check was interrupted by user
-				res = Checked.NOT_CHECKED;
-			} else {
-				res = Checked.PARSE_ERROR;
-			}
-			replayTrace.setChecked(res);
+	private static void checkNoninteractiveInternal(ReplayTrace replayTrace, StateSpace stateSpace) {
+		ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
+		List<ErrorItem> errors = replayed.getErrors();
+		if (errors.isEmpty() && replayed.getReplayStatus() != TraceReplayStatus.PERFECT) {
+			// FIXME Should this case be reported as an error on the Prolog side?
+			final ErrorItem error = new ErrorItem("Trace could not be replayed completely", ErrorItem.Type.ERROR, Collections.emptyList());
+			errors = new ArrayList<>(errors);
+			errors.add(error);
+		}
+		replayed = replayed.withErrors(errors);
+		replayTrace.setReplayedTrace(replayed);
+		Trace trace = replayed.getTrace(stateSpace);
+		replayTrace.setAnimatedReplayedTrace(trace);
+		replayTrace.setChecked(errors.isEmpty() ? Checked.SUCCESS : Checked.FAIL);
+	}
+
+	public static void checkNoninteractive(ReplayTrace replayTrace, StateSpace stateSpace) {
+		try {
+			replayTrace.reset();
+			// ReplayTraceFileCommand doesn't support progress updates yet,
+			// so set an indeterminate status for now.
+			// We cannot use -1, because it is already used to say that no replay is currently running
+			// (this is special-cased in TraceReplayView).
+			Platform.runLater(() -> replayTrace.setProgress(-2));
+			checkNoninteractiveInternal(replayTrace, stateSpace);
+		} catch (CommandInterruptedException exc) {
+			LOGGER.info("Trace check interrupted by user", exc);
+			replayTrace.setChecked(Checked.NOT_CHECKED);
+		} catch (RuntimeException exc) {
+			replayTrace.setChecked(Checked.PARSE_ERROR);
+			throw exc;
+		} finally {
 			Platform.runLater(() -> replayTrace.setProgress(-1));
-		});
+		}
 	}
 
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
