@@ -22,13 +22,11 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -108,9 +106,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	@FXML
 	private Button addTestCaseButton;
 
-	@FXML
-	private InterruptIfRunningButton cancelButton;
-
 	private final StageManager stageManager;
 
 	private final I18n i18n;
@@ -159,19 +154,12 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
-		cancelButton.runningProperty().bind(testCaseGenerator.runningProperty());
-		cancelButton.getInterruptButton().setOnAction(e -> testCaseGenerator.interrupt());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 	}
 
 	@Override
 	protected String configurationForItem(final TestCaseGenerationItem item) {
 		return item.getConfigurationDescription();
-	}
-
-	@Override
-	protected BooleanExpression disableItemBinding(final TestCaseGenerationItem item) {
-		return testCaseGenerator.runningProperty();
 	}
 
 	@Override

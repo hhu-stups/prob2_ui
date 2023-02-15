@@ -51,31 +51,28 @@ public class TraceChecker {
 		this.stageManager = stageManager;
 	}
 
-	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace, final boolean setCurrentAnimation) {
-		return checkNoninteractive(replayTrace).whenComplete((r, e) -> {
+	public CompletableFuture<ReplayTrace> check(ReplayTrace replayTrace) {
+		return checkNoninteractive(replayTrace, currentTrace.getStateSpace()).whenComplete((r, e) -> {
 			if (e == null) {
-				if (setCurrentAnimation) {
-					// set the current trace if no error has occurred. Otherwise leave the decision to the user
-					if (!r.getReplayedTrace().getErrors().isEmpty()) {
-						showTraceReplayCompleteFailed(replayTrace);
-					} else {
-						currentTrace.set(r.getAnimatedReplayedTrace());
-					}
+				// set the current trace if no error has occurred. Otherwise leave the decision to the user
+				if (!r.getReplayedTrace().getErrors().isEmpty()) {
+					showTraceReplayCompleteFailed(replayTrace);
+				} else {
+					currentTrace.set(r.getAnimatedReplayedTrace());
 				}
 			} else {
-				Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace.getAbsoluteLocation(), e));
+				Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, e));
 			}
 		});
 	}
 
-	public CompletableFuture<ReplayTrace> checkNoninteractive(ReplayTrace replayTrace) {
+	public CompletableFuture<ReplayTrace> checkNoninteractive(ReplayTrace replayTrace, StateSpace stateSpace) {
 		replayTrace.reset();
 		// ReplayTraceFileCommand doesn't support progress updates yet,
 		// so set an indeterminate status for now.
 		// We cannot use -1, because it is already used to say that no replay is currently running
 		// (this is special-cased in TraceReplayView).
 		replayTrace.setProgress(-2);
-		StateSpace stateSpace = currentTrace.getStateSpace();
 		final CompletableFuture<ReplayTrace> future = cliExecutor.submit(() -> {
 			ReplayedTrace replayed = TraceReplay.replayTraceFile(stateSpace, replayTrace.getAbsoluteLocation());
 			List<ErrorItem> errors = replayed.getErrors();

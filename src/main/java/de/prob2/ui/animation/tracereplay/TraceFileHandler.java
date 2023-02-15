@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CancellationException;
@@ -95,11 +94,11 @@ public class TraceFileHandler extends ProBFileHandler {
 		return e.getCause() != null && isInvalidJSON(e.getCause());
 	}
 
-	public void showLoadError(Path path, Throwable e) {
+	private Alert makeTraceLoadErrorAlert(Path path, Throwable e) {
 		if (e instanceof CancellationException) {
 			// Trace check was interrupted by user, this isn't really an error.
 			LOGGER.trace("Trace check interrupted", e);
-			return;
+			return null;
 		}
 
 		LOGGER.warn("Failed to load trace file", e);
@@ -120,16 +119,35 @@ public class TraceFileHandler extends ProBFileHandler {
 			contentBundleKey = "animation.tracereplay.traceChecker.alerts.traceCouldNotBeLoaded.content";
 			messageContent.add(path);
 		}
-		stageManager.makeAlert(
+		return stageManager.makeAlert(
 				Alert.AlertType.ERROR,
-				Arrays.asList(ButtonType.YES, ButtonType.NO),
 				headerBundleKey,
 				contentBundleKey,
 				messageContent.toArray()
-		).showAndWait().ifPresent(buttonType -> {
+		);
+	}
+
+	public void showLoadError(Path path, Throwable e) {
+		Alert alert = makeTraceLoadErrorAlert(path, e);
+		if (alert == null) {
+			// No alert should be shown for this exception type (e. g. interruption).
+			return;
+		}
+		alert.showAndWait();
+	}
+
+	public void showLoadError(ReplayTrace trace, Throwable e) {
+		Alert alert = makeTraceLoadErrorAlert(trace.getAbsoluteLocation(), e);
+		if (alert == null) {
+			// No alert should be shown for this exception type (e. g. interruption).
+			return;
+		}
+		alert.setContentText(alert.getContentText() + "\n\n" + i18n.translate("animation.tracereplay.traceChecker.alerts.askRemoveFromProject"));
+		alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
+		alert.showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();
-				currentMachine.getTraces().removeIf(trace -> trace.getAbsoluteLocation().equals(path));
+				currentMachine.getTraces().remove(trace);
 			}
 		});
 	}
@@ -207,10 +225,6 @@ public class TraceFileHandler extends ProBFileHandler {
 				                            .withCreator(createdBy)
 				                            .build();
 		traceManager.save(location, new TraceJsonFile(trace, jsonMetadata));
-	}
-
-	public void save(TraceJsonFile traceFile, Path location) throws IOException {
-		traceManager.save(location, traceFile);
 	}
 
 	public Path save(Trace trace, Machine machine) throws IOException {

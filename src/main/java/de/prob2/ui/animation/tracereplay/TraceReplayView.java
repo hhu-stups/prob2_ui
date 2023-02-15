@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
@@ -106,7 +107,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				try {
 					traceFile = this.getItem().load();
 				} catch (IOException e) {
-					traceFileHandler.showLoadError(this.getItem().getAbsoluteLocation(), e);
+					traceFileHandler.showLoadError(this.getItem(), e);
 					return;
 				}
 				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(traceFile, currentMachinePath, null, this.getItem().getAbsoluteLocation(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
@@ -210,7 +211,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Override
 	protected void executeItem(final ReplayTrace item) {
-		traceChecker.check(item, true);
+		traceChecker.check(item);
 	}
 
 	@Override
@@ -245,9 +246,10 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@FXML
 	private void checkMachine() {
+		final StateSpace stateSpace = currentTrace.getStateSpace();
 		items.stream()
 			.filter(ReplayTrace::selected)
-			.forEach(trace -> traceChecker.check(trace, false));
+			.forEach(trace -> traceChecker.checkNoninteractive(trace, stateSpace));
 	}
 
 	public void closeDescription() {

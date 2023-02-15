@@ -22,6 +22,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.SimpleStatsView;
+import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
@@ -31,6 +32,7 @@ import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
@@ -111,13 +113,16 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private final Injector injector;
 	private final I18n i18n;
 	private final Modelchecker checker;
+	private final StatsView statsView;
 
 	@Inject
 	private ModelcheckingView(final CurrentTrace currentTrace,
 			final CurrentProject currentProject,
 			final DisablePropertyController disablePropertyController,
 			final StageManager stageManager, final Injector injector,
-			final I18n i18n, final Modelchecker checker) {
+			final I18n i18n, final Modelchecker checker,
+			final StatsView statsView
+	) {
 		super(i18n, disablePropertyController);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
@@ -125,6 +130,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		this.injector = injector;
 		this.i18n = i18n;
 		this.checker = checker;
+		this.statsView = statsView;
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 	}
 
@@ -279,6 +285,23 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	
 	@Override
 	protected void executeItem(final ModelCheckingItem item) {
+		item.currentStepProperty().addListener(new ChangeListener<ModelCheckingStep>() {
+			@Override
+			public void changed(final ObservableValue<? extends ModelCheckingStep> o, final ModelCheckingStep from, final ModelCheckingStep to) {
+				if (to == null) {
+					// Model check has finished - stop updating stats based on this task.
+					o.removeListener(this);
+				} else {
+					// While the model check is running, probcli is blocked, so StatsView cannot update itself normally.
+					// Instead, update it based on the stats returned by the model checker.
+					final StateSpaceStats stats = to.getStats();
+					if (stats != null) {
+						statsView.updateSimpleStats(stats);
+					}
+				}
+			}
+		});
+		
 		try {
 			final CompletableFuture<ModelCheckingStep> future = checker.startNextCheckStep(item, currentTrace.getStateSpace());
 			future.whenComplete((r, t) -> {
