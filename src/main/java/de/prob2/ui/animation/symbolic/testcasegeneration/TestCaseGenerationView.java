@@ -18,6 +18,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -114,21 +115,21 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	private final CurrentProject currentProject;
 
-	private final Injector injector;
+	private final CliTaskExecutor cliExecutor;
 
-	private final TestCaseGenerator testCaseGenerator;
+	private final Injector injector;
 
 	@Inject
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
+	                              final CliTaskExecutor cliExecutor, final Injector injector) {
 		super(i18n, disablePropertyController);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.testCaseGenerator = testCaseGenerator;
+		this.cliExecutor = cliExecutor;
 		stageManager.loadFXML(this, "test_case_generation_view.fxml");
 	}
 
@@ -164,7 +165,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@Override
 	protected void executeItem(final TestCaseGenerationItem item) {
-		testCaseGenerator.generateTestCases(item, currentTrace.getStateSpace());
+		cliExecutor.submit(() -> TestCaseGenerator.generateTestCases(item, currentTrace.getStateSpace()));
 	}
 
 	@Override
@@ -180,8 +181,10 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	@FXML
 	public void generate() {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
-		items.stream()
-			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> testCaseGenerator.generateTestCases(item, stateSpace));
+		cliExecutor.submit(() ->
+			items.stream()
+				.filter(AbstractCheckableItem::selected)
+				.forEach(item -> TestCaseGenerator.generateTestCases(item, stateSpace))
+		);
 	}
 }
