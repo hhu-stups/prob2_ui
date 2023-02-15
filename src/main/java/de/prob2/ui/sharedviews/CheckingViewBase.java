@@ -126,6 +126,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	@FXML
 	public void initialize() {
 		checkMachineButton.disableProperty().bind(this.items.emptyProperty().or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
+		checkMachineButton.setOnAction(e -> this.executeAllSelectedItems());
 		itemsTable.setRowFactory(table -> new RowBase());
 		itemsTable.itemsProperty().bind(this.items);
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -194,6 +195,19 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		if (!disableItemBinding(item).get()) {
 			executeItem(item);
 		}
+	}
+	
+	protected void executeAllSelectedItems() {
+		final ExecutionContext context = getCurrentExecutionContext();
+		cliExecutor.submit(() -> {
+			for (final T item : items) {
+				if (!item.selected()) {
+					continue;
+				}
+				
+				item.execute(context);
+			}
+		});
 	}
 	
 	/**

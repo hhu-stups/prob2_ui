@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
@@ -126,7 +125,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
-	private final CliTaskExecutor cliExecutor;
 	private final TraceChecker traceChecker;
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
@@ -153,7 +151,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.cliExecutor = cliExecutor;
 		this.traceChecker = traceChecker;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
@@ -247,16 +244,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				return oldItem.withId(id);
 			});
 		}
-	}
-
-	@FXML
-	private void checkMachine() {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		cliExecutor.submit(() ->
-			items.stream()
-				.filter(ReplayTrace::selected)
-				.forEach(trace -> TraceChecker.checkNoninteractive(trace, stateSpace))
-		);
 	}
 
 	public void closeDescription() {

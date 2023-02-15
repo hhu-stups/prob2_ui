@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -337,9 +336,9 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		return Optional.ofNullable(modelcheckingStage.getResult());
 	}
 
-	@FXML
-	public void checkMachine() {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
+	@Override
+	protected void executeAllSelectedItems() {
+		final ExecutionContext context = this.getCurrentExecutionContext();
 		cliExecutor.submit(() -> {
 			for (ModelCheckingItem item : items) {
 				if (!item.selected() || !item.getSteps().isEmpty()) {
@@ -348,7 +347,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 				statsView.updateWhileModelChecking(item);
 				try {
-					Modelchecker.execute(item, stateSpace);
+					item.execute(context);
 				} catch (RuntimeException exc) {
 					showModelCheckException(exc);
 				}

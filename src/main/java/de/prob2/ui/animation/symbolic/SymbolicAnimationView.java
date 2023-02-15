@@ -8,7 +8,6 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -20,7 +19,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.value.ChangeListener;
@@ -57,7 +55,6 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-	private final CliTaskExecutor cliExecutor;
 	private final Provider<SymbolicAnimationChoosingStage> choosingStageProvider;
 	
 	@FXML
@@ -76,7 +73,6 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.cliExecutor = cliExecutor;
 		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
@@ -125,15 +121,5 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 		}
 		choosingStage.showAndWait();
 		return Optional.ofNullable(choosingStage.getResult());
-	}
-	
-	@FXML
-	public void checkMachine() {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		cliExecutor.submit(() ->
-			items.stream()
-				.filter(AbstractCheckableItem::selected)
-				.forEach(item -> SymbolicAnimationItemHandler.executeItem(item, stateSpace))
-		);
 	}
 }

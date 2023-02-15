@@ -15,7 +15,6 @@ import com.google.inject.Singleton;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 import de.prob.json.JsonMetadata;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -28,11 +27,9 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
@@ -117,7 +114,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final CurrentTrace currentTrace;
 	private final VersionInfo versionInfo;
 	private final CurrentProject currentProject;
-	private final CliTaskExecutor cliExecutor;
 	private final LTLPatternParser patternParser;
 	private final FileChooserManager fileChooserManager;
 	private final JacksonManager<LTLData> jacksonManager;
@@ -138,7 +134,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		this.currentTrace = currentTrace;
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
-		this.cliExecutor = cliExecutor;
 		this.patternParser = patternParser;
 		this.fileChooserManager = fileChooserManager;
 		this.jacksonManager = jacksonManager;
@@ -314,17 +309,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
 				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
 		}
-	}
-	
-	@FXML
-	public void checkMachine() {
-		final Machine machine = currentProject.getCurrentMachine();
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		cliExecutor.submit(() ->
-			items.stream()
-				.filter(AbstractCheckableItem::selected)
-				.forEach(item -> LTLFormulaChecker.checkFormula(item, machine, stateSpace))
-		);
 	}
 	
 	@FXML

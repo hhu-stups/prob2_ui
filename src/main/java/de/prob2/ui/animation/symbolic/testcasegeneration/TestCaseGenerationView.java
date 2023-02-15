@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -23,7 +22,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.InvalidationListener;
@@ -116,8 +114,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	private final CurrentProject currentProject;
 
-	private final CliTaskExecutor cliExecutor;
-
 	private final Injector injector;
 
 	@Inject
@@ -130,7 +126,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.cliExecutor = cliExecutor;
 		stageManager.loadFXML(this, "test_case_generation_view.fxml");
 	}
 
@@ -177,15 +172,5 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		}
 		choosingStage.showAndWait();
 		return Optional.ofNullable(choosingStage.getItem());
-	}
-
-	@FXML
-	public void generate() {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		cliExecutor.submit(() ->
-			items.stream()
-				.filter(AbstractCheckableItem::selected)
-				.forEach(item -> TestCaseGenerator.generateTestCases(item, stateSpace))
-		);
 	}
 }
