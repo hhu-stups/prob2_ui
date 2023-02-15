@@ -76,6 +76,8 @@ class ProjectDocumenterTest extends ApplicationTest {
 		Mockito.when(currentProject.getDescription()).thenReturn("");
 		Mockito.when(currentProject.get()).thenReturn(Mockito.mock(Project.class));
 		Mockito.when(currentProject.get().getPreference(any(String.class))).thenReturn(Preference.DEFAULT);
+
+		Mockito.when(injector.getInstance(Locale.class)).thenReturn(new Locale("en"));
 	}
 
 	@BeforeEach

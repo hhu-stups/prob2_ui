@@ -1,15 +1,12 @@
 package de.prob2.ui.documentation;
 
 import java.io.*;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Objects;
 
 import static de.prob2.ui.documentation.DocumentationProcessHandler.OS.OTHER;
 
-//TODO REFACTOR TO DOCUMENTATIONPROCESSHANDLER
 public class DocumentationProcessHandler {
 	public enum OS {
 		LINUX, WINDOWS, MAC, OTHER
@@ -40,6 +37,7 @@ public class DocumentationProcessHandler {
 	}
 
 	//this method is from  https://stackoverflow.com/questions/8488118/how-to-programatically-check-if-a-software-utility-is-installed-on-ubuntu-using
+	//it checks if a command line package is installed
 	public static boolean packageInstalled(String binaryName) throws IOException {
 		ProcessBuilder builder = new ProcessBuilder("/usr/bin/which", binaryName);
 		builder.redirectErrorStream(true);

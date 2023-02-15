@@ -2,7 +2,7 @@ package de.prob2.ui.documentation;
 
 import de.prob2.ui.project.machines.Machine;
 
-//Wrapper for Machine to let User decide Machines to be documented in DocumentSaveStage
+//Wrapper for Machine to let User decide Machines to be documented in SaveDocumentationStage
 public class MachineDocumentationItem {
 	Boolean document;
 	Machine machineItem;
