@@ -66,11 +66,35 @@ public class ProjectDocumenter {
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
 		StringWriter writer = new StringWriter();
-		Velocity.mergeTemplate("de/prob2/ui/documentation/velocity_template.tex", String.valueOf(StandardCharsets.UTF_8),context,writer);
+		String templateName = getLanguageTemplate();
+		Velocity.mergeTemplate(templateName, String.valueOf(StandardCharsets.UTF_8),context,writer);
 		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, directory, ".tex");
 		if(makePdf)
 			createPdf(filename, directory);
 		saveMakeZipBash();
+	}
+
+	//only proof of concept for bachelor thesis. can be deleted later
+	public void documentModelcheckingTableMarkdown() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
+		initVelocityEngine();
+		VelocityContext context = new VelocityContext();
+		context.put("machines", machines);
+		context.put("util", TemplateUtility.class);
+		context.put("i18n", i18n);
+		StringWriter writer = new StringWriter();
+		Velocity.mergeTemplate("de/prob2/ui/documentation/modelchecking_table.md", String.valueOf(StandardCharsets.UTF_8),context,writer);
+		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, directory, ".md");
+	}
+
+	// future translations can be added here
+	private String getLanguageTemplate() {
+		String language = injector.getInstance(Locale.class).getLanguage();
+		switch (language){
+			case "de":
+				return "de/prob2/ui/documentation/velocity_template_german.tex";
+			default:
+				return "de/prob2/ui/documentation/velocity_template_english.tex";
+		}
 	}
 
 	private static void initVelocityEngine() {
