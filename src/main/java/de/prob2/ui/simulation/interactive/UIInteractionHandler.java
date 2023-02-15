@@ -19,6 +19,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -71,7 +72,10 @@ public class UIInteractionHandler {
 			String event = uiListener.getEvent();
 			List<UIListenerConfiguration> uiListenersForEvent = uiListenerConfigurationMap.get(event);
 			if(uiListenersForEvent == null) {
-				uiListenerConfigurationMap.put(event, Collections.singletonList(uiListener));
+				// Do not use Collections.singletonList or Arrays.asList as suggested by IntelliJ as those lists are unmodifiable and lead to an UnsupportedOperationException
+				List<UIListenerConfiguration> entries = new ArrayList<>();
+				entries.add(uiListener);
+				uiListenerConfigurationMap.put(event, entries);
 			} else {
 				uiListenerConfigurationMap.get(event).add(uiListener);
 			}

@@ -80,7 +80,7 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 	public String getAdditionalGuards() {
 		return additionalGuards;
 	}
-	
+
 	public ActivationKind getActivationKind() {
 		return activationKind;
 	}
