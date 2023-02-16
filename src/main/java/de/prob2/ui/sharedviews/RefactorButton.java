@@ -116,7 +116,7 @@ public class RefactorButton extends Button {
 
 					if(abstractTraceRefinement != null){
 						try {
-							List<PersistentTransition> resultingTrace = abstractTraceRefinement.refineTrace();
+							List<PersistentTransition> resultingTrace = abstractTraceRefinement.refineTraceExtendedFeedback().getResultTracePersistentTransition();
 							Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Refinement Successful", ButtonType.OK, new ButtonType("Show"));
 							Optional<ButtonType> buttonPressed = alert.showAndWait();
 							if(buttonPressed.isPresent() && buttonPressed.get().getButtonData().equals(ButtonBar.ButtonData.OTHER)){
