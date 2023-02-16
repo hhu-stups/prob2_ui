@@ -1,7 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -188,24 +187,6 @@ public class ReplayTrace implements IExecutableItem, IValidationTask {
 	@JsonIgnore
 	public String getName() {
 		return MoreFiles.getNameWithoutExtension(location.getFileName());
-	}
-
-	@JsonIgnore
-	public String getDescription() {
-		try {
-			return this.load().getDescription();
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-	public void setDescription(String description) {
-		try {
-			TraceJsonFile file = this.load();
-			this.saveModified(file.changeDescription(description));
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
 	}
 
 	@Override
