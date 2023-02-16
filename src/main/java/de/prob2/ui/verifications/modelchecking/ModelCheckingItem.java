@@ -18,6 +18,7 @@ import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
@@ -256,5 +257,10 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	@Override
 	public String toString() {
 		return String.format(Locale.ROOT, "%s(%s,%s,%s,%s,%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getSearchStrategy(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
+	}
+	
+	@Override
+	public void execute(final ExecutionContext context) {
+		Modelchecker.executeIfNeeded(this, context.getStateSpace());
 	}
 }

@@ -3,7 +3,6 @@ package de.prob2.ui.verifications.modelchecking;
 import java.math.BigInteger;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
-import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -11,19 +10,21 @@ import com.google.inject.Singleton;
 
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.SimpleStatsView;
+import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -110,21 +111,26 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private final StageManager stageManager;
 	private final Injector injector;
 	private final I18n i18n;
-	private final Modelchecker checker;
+	private final CliTaskExecutor cliExecutor;
+	private final StatsView statsView;
 
 	@Inject
 	private ModelcheckingView(final CurrentTrace currentTrace,
 			final CurrentProject currentProject,
 			final DisablePropertyController disablePropertyController,
 			final StageManager stageManager, final Injector injector,
-			final I18n i18n, final Modelchecker checker) {
-		super(i18n, disablePropertyController);
+			final I18n i18n,
+			final CliTaskExecutor cliExecutor,
+			final StatsView statsView
+	) {
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.injector = injector;
 		this.i18n = i18n;
-		this.checker = checker;
+		this.cliExecutor = cliExecutor;
+		this.statsView = statsView;
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 	}
 
@@ -278,23 +284,16 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 	
 	@Override
-	protected void executeItem(final ModelCheckingItem item) {
+	protected void executeItemSync(final ModelCheckingItem item, final ExecutionContext context) {
+		statsView.updateWhileModelChecking(item);
 		try {
-			final CompletableFuture<ModelCheckingStep> future = checker.startNextCheckStep(item, currentTrace.getStateSpace());
-			future.whenComplete((r, t) -> {
-				if (t == null) {
-					if (r.getResult() instanceof ITraceDescription) {
-						currentTrace.set(r.getTrace());
-					}
-				} else {
-					showModelCheckException(t);
-				}
-			});
+			final ModelCheckingStep r = Modelchecker.execute(item, context.getStateSpace());
+			if (r.getResult() instanceof ITraceDescription) {
+				currentTrace.set(r.getTrace());
+			}
+		} catch (RuntimeException e) {
+			showModelCheckException(e);
 		}
-		catch (IllegalArgumentException e){
-			stageManager.makeExceptionAlert(e, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show();
-		}
-
 	}
 
 	private void setContextMenus() {
@@ -337,20 +336,23 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		return Optional.ofNullable(modelcheckingStage.getResult());
 	}
 
-	@FXML
-	public void checkMachine() {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		for (ModelCheckingItem item : items) {
-			if (!item.selected()) {
-				continue;
-			}
+	@Override
+	protected void executeAllSelectedItems() {
+		final ExecutionContext context = this.getCurrentExecutionContext();
+		cliExecutor.submit(() -> {
+			for (ModelCheckingItem item : items) {
+				if (!item.selected()) {
+					continue;
+				}
 
-			final CompletableFuture<ModelCheckingStep> future = checker.startCheckIfNeeded(item, stateSpace);
-			future.exceptionally(t -> {
-				showModelCheckException(t);
-				return null;
-			});
-		}
+				statsView.updateWhileModelChecking(item);
+				try {
+					item.execute(context);
+				} catch (RuntimeException exc) {
+					showModelCheckException(exc);
+				}
+			}
+		});
 	}
 
 	private void showStats(final long timeElapsed, final StateSpaceStats stats, final BigInteger memory) {

@@ -414,6 +414,10 @@ public class SimulatorStage extends Stage {
 		});
 
 		btRemoveSimulation.disableProperty().bind(cbSimulation.getSelectionModel().selectedItemProperty().isNull());
+
+		setOnCloseRequest(e -> {
+			if(realTimeSimulator.isRunning()) stopSimulator(realTimeSimulator);
+		});
 	}
 
 

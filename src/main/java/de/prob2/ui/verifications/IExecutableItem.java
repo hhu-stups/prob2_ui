@@ -10,4 +10,5 @@ public interface IExecutableItem {
 	ReadOnlyObjectProperty<Checked> checkedProperty();
 	Checked getChecked();
 	boolean settingsEqual(IExecutableItem obj);
+	void execute(ExecutionContext context);
 }

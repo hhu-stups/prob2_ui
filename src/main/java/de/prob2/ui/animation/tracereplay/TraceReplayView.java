@@ -23,6 +23,7 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.RevealInExplorer;
@@ -33,6 +34,7 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.sharedviews.RefactorButton;
 import de.prob2.ui.verifications.CheckedIcon;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -106,7 +108,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				try {
 					traceFile = this.getItem().load();
 				} catch (IOException e) {
-					traceFileHandler.showLoadError(this.getItem().getAbsoluteLocation(), e);
+					traceFileHandler.showLoadError(this.getItem(), e);
 					return;
 				}
 				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(traceFile, currentMachinePath, null, this.getItem().getAbsoluteLocation(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
@@ -143,9 +145,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-							final CurrentTrace currentTrace, final TraceChecker traceChecker, final I18n i18n,
+							final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final TraceChecker traceChecker, final I18n i18n,
 							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -209,8 +211,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected void executeItem(final ReplayTrace item) {
-		traceChecker.check(item, true);
+	protected void executeItemSync(final ReplayTrace item, final ExecutionContext context) {
+		// FIXME Respect execution context
+		traceChecker.check(item);
 	}
 
 	@Override
@@ -241,13 +244,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				return oldItem.withId(id);
 			});
 		}
-	}
-
-	@FXML
-	private void checkMachine() {
-		items.stream()
-			.filter(ReplayTrace::selected)
-			.forEach(trace -> traceChecker.check(trace, false));
 	}
 
 	public void closeDescription() {

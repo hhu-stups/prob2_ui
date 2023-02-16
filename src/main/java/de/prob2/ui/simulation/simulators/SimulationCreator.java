@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.simulators;
 
-import com.google.inject.Singleton;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.json.JsonMetadata;
@@ -18,10 +17,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Singleton
 public class SimulationCreator {
 
-	public SimulationConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
+	public static SimulationConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
 		PersistentTrace persistentTrace = new PersistentTrace(trace);
 		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
 
@@ -41,16 +39,8 @@ public class SimulationCreator {
 			String id = Transition.isArtificialTransitionName(op) ? op : op + "_" + i;
 
 			int time = timestamps.get(i) - currentTimestamp;
-			Map<String, String> fixedVariables = SimulationHelperFunctions.mergeValues(transition.getParameters(), transition.getDestinationStateVariables());
-			Map<String, String> newFixedVariables = new HashMap<>(fixedVariables);
-			if(opInfo != null) {
-				for (String key : fixedVariables.keySet()) {
-					if (!opInfo.getNonDetWrittenVariables().contains(key) && !opInfo.getParameterNames().contains(key)) {
-						newFixedVariables.remove(key);
-					}
-				}
-			}
-			fixedVariables = newFixedVariables.isEmpty() ? null : newFixedVariables;
+			Map<String, String> fixedVariables = createFixedVariables(SimulationHelperFunctions.mergeValues(transition.getParameters(), transition.getDestinationStateVariables()), opInfo);
+			fixedVariables = fixedVariables.isEmpty() ? null : fixedVariables;
 
 			List<String> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
 			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations);
@@ -58,6 +48,19 @@ public class SimulationCreator {
 			currentTimestamp = timestamps.get(i);
 		}
 		return new SimulationConfiguration(activationConfigurations, new ArrayList<>(), metadata);
+	}
+
+	public static Map<String, String> createFixedVariables(Map<String, String> fixedVariables, OperationInfo opInfo) {
+		Map<String, String> newFixedVariables = new HashMap<>(fixedVariables);
+		if(opInfo != null) {
+			for (String key : fixedVariables.keySet()) {
+				if (!opInfo.getNonDetWrittenVariables().contains(key) && !opInfo.getParameterNames().contains(key)) {
+					newFixedVariables.remove(key);
+				}
+			}
+		}
+		fixedVariables = newFixedVariables.isEmpty() ? null : newFixedVariables;
+		return fixedVariables;
 	}
 
 }

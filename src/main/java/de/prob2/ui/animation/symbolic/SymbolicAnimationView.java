@@ -8,18 +8,18 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -55,7 +55,6 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-	private final SymbolicAnimationItemHandler formulaHandler;
 	private final Provider<SymbolicAnimationChoosingStage> choosingStageProvider;
 	
 	@FXML
@@ -67,14 +66,13 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
-	                             final CurrentProject currentProject, final SymbolicAnimationItemHandler symbolicCheckHandler,
+	                             final CurrentProject currentProject, final CliTaskExecutor cliExecutor,
 	                             final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.formulaHandler = symbolicCheckHandler;
 		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
@@ -106,13 +104,12 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	}
 	
 	@Override
-	protected void executeItem(final SymbolicAnimationItem item) {
-		formulaHandler.executeItem(item, currentTrace.getStateSpace()).thenAccept(r -> {
-			final Trace example = item.getExample();
-			if (example != null) {
-				currentTrace.set(example);
-			}
-		});
+	protected void executeItemSync(final SymbolicAnimationItem item, final ExecutionContext context) {
+		item.execute(context);
+		final Trace example = item.getExample();
+		if (example != null) {
+			currentTrace.set(example);
+		}
 	}
 	
 	@Override
@@ -124,13 +121,5 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 		}
 		choosingStage.showAndWait();
 		return Optional.ofNullable(choosingStage.getResult());
-	}
-	
-	@FXML
-	public void checkMachine() {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		items.stream()
-			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> formulaHandler.executeItem(item, stateSpace));
 	}
 }

@@ -22,6 +22,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -210,6 +211,8 @@ public class TraceTestView extends Stage {
 
 	private final CurrentTrace currentTrace;
 
+	private final CliTaskExecutor cliExecutor;
+
 	private final Injector injector;
 
 	private SimpleObjectProperty<ReplayTrace> replayTrace;
@@ -222,11 +225,12 @@ public class TraceTestView extends Stage {
 
 	@Inject
 	public TraceTestView(final StageManager stageManager, final FontSize fontSize,
-						 final I18n i18n, final CurrentTrace currentTrace, final Injector injector) {
+						 final I18n i18n, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final Injector injector) {
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
 		this.injector = injector;
 		this.replayTrace = new SimpleObjectProperty<>();
 		stageManager.loadFXML(this, "trace_test_view.fxml");
@@ -280,11 +284,15 @@ public class TraceTestView extends Stage {
 			}
 		} else {
 			this.saveTrace();
-			injector.getInstance(TraceChecker.class).check(replayTrace.get(), true).thenAccept(r -> {
-				if (index < r.getLoadedTrace().getTransitionList().size()) {
-					currentTrace.set(r.getAnimatedReplayedTrace().gotoPosition(index));
+			final ReplayTrace r = replayTrace.get();
+			cliExecutor.submit(() -> {
+				injector.getInstance(TraceChecker.class).check(r);
+				if (r.getAnimatedReplayedTrace() != null) {
+					if (index < r.getLoadedTrace().getTransitionList().size()) {
+						currentTrace.set(r.getAnimatedReplayedTrace().gotoPosition(index));
+					}
+					traceTableView.refresh();
 				}
-				traceTableView.refresh();
 			});
 		}
 	}
@@ -325,7 +333,7 @@ public class TraceTestView extends Stage {
 		try {
 			traceJsonFile = replayTrace.load();
 		} catch (IOException e) {
-			injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace.getAbsoluteLocation(), e);
+			injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, e);
 			return;
 		}
 
@@ -345,7 +353,7 @@ public class TraceTestView extends Stage {
 	@FXML
 	private void applyTest() {
 		this.saveTrace();
-		injector.getInstance(TraceChecker.class).check(replayTrace.get(), true);
+		cliExecutor.submit(() -> injector.getInstance(TraceChecker.class).check(replayTrace.get()));
 		this.close();
 	}
 

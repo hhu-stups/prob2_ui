@@ -3,11 +3,6 @@ package de.prob2.ui.verifications.symbolicchecking;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-
-import javax.inject.Inject;
-
-import com.google.inject.Singleton;
 
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.CheckWellDefinednessCommand;
@@ -30,39 +25,20 @@ import de.prob.check.NotYetFinished;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
 public final class SymbolicCheckingFormulaHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SymbolicCheckingFormulaHandler.class);
 	
-	private final CliTaskExecutor cliExecutor;
-	
-	@Inject
-	public SymbolicCheckingFormulaHandler(final CliTaskExecutor cliExecutor) {
-		this.cliExecutor = cliExecutor;
+	private SymbolicCheckingFormulaHandler() {
+		throw new AssertionError("Utility class");
 	}
 	
-	private CompletableFuture<SymbolicCheckingFormulaItem> checkItem(final SymbolicCheckingFormulaItem item, final Runnable task) {
-		return cliExecutor.submit(task, item).exceptionally(e -> {
-			LOGGER.error("Exception during symbolic checking", e);
-			CheckingResultItem res;
-			if (e instanceof CommandInterruptedException) {
-				res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", e.getMessage());
-			} else {
-				res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", e.getMessage());
-			}
-			item.setResultItem(res);
-			return item;
-		});
-	}
-	
-	private void handleFormulaResult(SymbolicCheckingFormulaItem item, StateSpace stateSpace, IModelCheckingResult result) {
+	private static void handleFormulaResult(SymbolicCheckingFormulaItem item, StateSpace stateSpace, IModelCheckingResult result) {
 		CheckingResultItem res;
 		if (result instanceof ModelCheckOk) {
 			res = new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success");
@@ -93,7 +69,7 @@ public final class SymbolicCheckingFormulaHandler {
 		item.getCounterExamples().setAll(counterExamples);
 	}
 	
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleInvariant(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void handleInvariant(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
 		final ArrayList<String> eventNames;
 		if (item.getCode().isEmpty()) {
 			// Check all operations/events
@@ -104,131 +80,141 @@ public final class SymbolicCheckingFormulaHandler {
 			eventNames.add(item.getCode());
 		}
 		CBCInvariantChecker checker = new CBCInvariantChecker(stateSpace, eventNames);
-		return checkItem(item, () -> handleFormulaResult(item, stateSpace, checker.call()));
+		handleFormulaResult(item, stateSpace, checker.call());
 	}
 		
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleRefinement(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void handleRefinement(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
 		ConstraintBasedRefinementCheckCommand cmd = new ConstraintBasedRefinementCheckCommand();
-		return checkItem(item, () -> {
-			stateSpace.execute(cmd);
-			ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
-			String msg = cmd.getResultsString();
-			if (result == null) {
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message"));
-			} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.refinementChecking.result.noViolationFound", msg));
-			} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.refinementChecking.result.violationFound", msg));
-			} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.INTERRUPTED) {
-				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.refinementChecking.result.interrupted", msg));
-			}
-		});
+		stateSpace.execute(cmd);
+		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
+		String msg = cmd.getResultsString();
+		if (result == null) {
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message"));
+		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.refinementChecking.result.noViolationFound", msg));
+		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.refinementChecking.result.violationFound", msg));
+		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.INTERRUPTED) {
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.refinementChecking.result.interrupted", msg));
+		}
 	}
 	
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleAssertions(SymbolicCheckingFormulaItem item, ConstraintBasedAssertionCheckCommand.CheckingType type, StateSpace stateSpace) {
+	private static void handleAssertions(SymbolicCheckingFormulaItem item, ConstraintBasedAssertionCheckCommand.CheckingType type, StateSpace stateSpace) {
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(type, stateSpace);
-		return checkItem(item, () -> {
-			stateSpace.execute(cmd);
-			ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
-			switch(result) {
-				case NO_COUNTER_EXAMPLE_EXISTS:
-					item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleExists"));
-					break;
-				case NO_COUNTER_EXAMPLE_FOUND:
-					item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleFound"));
-					break;
-				case COUNTER_EXAMPLE:
-					item.getCounterExamples().add(cmd.getTrace(stateSpace));
-					item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.assertionChecking.result.counterExampleFound"));
-					break;
-				case INTERRUPTED:
-					item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.assertionChecking.result.interrupted"));
-					break;
-				default:
-					break;
-			}
-		});
+		stateSpace.execute(cmd);
+		ConstraintBasedAssertionCheckCommand.ResultType result = cmd.getResult();
+		switch(result) {
+			case NO_COUNTER_EXAMPLE_EXISTS:
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleExists"));
+				break;
+			case NO_COUNTER_EXAMPLE_FOUND:
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleFound"));
+				break;
+			case COUNTER_EXAMPLE:
+				item.getCounterExamples().add(cmd.getTrace(stateSpace));
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.assertionChecking.result.counterExampleFound"));
+				break;
+			case INTERRUPTED:
+				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.assertionChecking.result.interrupted"));
+				break;
+			default:
+				break;
+		}
 	}
 	
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleWellDefinedness(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void handleWellDefinedness(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
 		CheckWellDefinednessCommand cmd = new CheckWellDefinednessCommand();
-		return checkItem(item, () -> {
-			stateSpace.execute(cmd);
-			if (cmd.getDischargedCount().equals(cmd.getTotalCount())) {
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", cmd.getTotalCount()));
-			} else {
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount())));
-			}
-		});
+		stateSpace.execute(cmd);
+		if (cmd.getDischargedCount().equals(cmd.getTotalCount())) {
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", cmd.getTotalCount()));
+		} else {
+			item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount())));
+		}
 	}
 	
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleSymbolic(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void handleSymbolic(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
 		final SymbolicModelcheckCommand.Algorithm algorithm = SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode());
 		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(algorithm);
-		return checkItem(item, () -> {
-			stateSpace.execute(cmd);
-			SymbolicModelcheckCommand.ResultType result = cmd.getResult();
-			switch(result) {
-				case SUCCESSFUL:
-					item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success"));
-					break;
-				case COUNTER_EXAMPLE:
-					item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample"));
-					break;
-				case TIMEOUT:
-					item.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout"));
-					break;
-				case INTERRUPTED:
-					item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.interrupted"));
-					break;
-				case LIMIT_REACHED:
-					item.setResultItem(new CheckingResultItem(Checked.LIMIT_REACHED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached"));
-					break;
-				default:
-					break;
-			}
-		});
+		stateSpace.execute(cmd);
+		SymbolicModelcheckCommand.ResultType result = cmd.getResult();
+		switch(result) {
+			case SUCCESSFUL:
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success"));
+				break;
+			case COUNTER_EXAMPLE:
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample"));
+				break;
+			case TIMEOUT:
+				item.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout"));
+				break;
+			case INTERRUPTED:
+				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.interrupted"));
+				break;
+			case LIMIT_REACHED:
+				item.setResultItem(new CheckingResultItem(Checked.LIMIT_REACHED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached"));
+				break;
+			default:
+				break;
+		}
 	}
 	
-	public CompletableFuture<SymbolicCheckingFormulaItem> handleDeadlock(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void handleDeadlock(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
 		IEvalElement constraint = new ClassicalB(item.getCode(), FormulaExpand.EXPAND);
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(stateSpace, constraint);
-		return checkItem(item, () -> handleFormulaResult(item, stateSpace, checker.call()));
+		handleFormulaResult(item, stateSpace, checker.call());
 	}
 	
-	public CompletableFuture<SymbolicCheckingFormulaItem> findRedundantInvariants(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void findRedundantInvariants(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
-		return checkItem(item, () -> {
-			stateSpace.execute(cmd);
-			List<String> result = cmd.getRedundantInvariants();
-			if (result.isEmpty()) {
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound"));
-			} else {
-				item.setResultItem(new CheckingResultItem(cmd.isTimeout() ? Checked.TIMEOUT : Checked.FAIL, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found", String.join("\n", result)));
-			}
-		});
+		stateSpace.execute(cmd);
+		List<String> result = cmd.getRedundantInvariants();
+		if (result.isEmpty()) {
+			item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound"));
+		} else {
+			item.setResultItem(new CheckingResultItem(cmd.isTimeout() ? Checked.TIMEOUT : Checked.FAIL, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found", String.join("\n", result)));
+		}
 	}
 	
-	public CompletableFuture<SymbolicCheckingFormulaItem> checkItem(final SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void checkItemInternal(final SymbolicCheckingFormulaItem item, final StateSpace stateSpace) {
 		switch(item.getType()) {
 			case INVARIANT:
-				return handleInvariant(item, stateSpace);
+				handleInvariant(item, stateSpace);
+				break;
 			case CHECK_REFINEMENT:
-				return handleRefinement(item, stateSpace);
+				handleRefinement(item, stateSpace);
+				break;
 			case CHECK_STATIC_ASSERTIONS:
-				return handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
+				handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
+				break;
 			case CHECK_DYNAMIC_ASSERTIONS:
-				return handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
+				handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
+				break;
 			case CHECK_WELL_DEFINEDNESS:
-				return handleWellDefinedness(item, stateSpace);
+				handleWellDefinedness(item, stateSpace);
+				break;
 			case DEADLOCK:
-				return handleDeadlock(item, stateSpace);
+				handleDeadlock(item, stateSpace);
+				break;
 			case FIND_REDUNDANT_INVARIANTS:
-				return findRedundantInvariants(item, stateSpace);
+				findRedundantInvariants(item, stateSpace);
+				break;
 			case SYMBOLIC_MODEL_CHECK:
-				return handleSymbolic(item, stateSpace);
+				handleSymbolic(item, stateSpace);
+				break;
 			default:
 				throw new AssertionError("Unhandled symbolic checking type: " + item.getType());
+		}
+	}
+	
+	public static void checkItem(final SymbolicCheckingFormulaItem item, final StateSpace stateSpace) {
+		try {
+			checkItemInternal(item, stateSpace);
+		} catch (CommandInterruptedException exc) {
+			LOGGER.info("Symbolic checking interrupted by user", exc);
+			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+		} catch (RuntimeException exc) {
+			LOGGER.error("Exception during symbolic checking", exc);
+			item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", exc.getMessage()));
 		}
 	}
 }

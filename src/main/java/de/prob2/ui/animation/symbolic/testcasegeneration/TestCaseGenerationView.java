@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -18,17 +17,16 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.sharedviews.InterruptIfRunningButton;
-import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.BooleanExpression;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -108,9 +106,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	@FXML
 	private Button addTestCaseButton;
 
-	@FXML
-	private InterruptIfRunningButton cancelButton;
-
 	private final StageManager stageManager;
 
 	private final I18n i18n;
@@ -121,19 +116,16 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	private final Injector injector;
 
-	private final TestCaseGenerator testCaseGenerator;
-
 	@Inject
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-	                              final TestCaseGenerator testCaseGenerator, final Injector injector) {
-		super(i18n, disablePropertyController);
+	                              final CliTaskExecutor cliExecutor, final Injector injector) {
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.testCaseGenerator = testCaseGenerator;
 		stageManager.loadFXML(this, "test_case_generation_view.fxml");
 	}
 
@@ -159,8 +151,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
-		cancelButton.runningProperty().bind(testCaseGenerator.runningProperty());
-		cancelButton.getInterruptButton().setOnAction(e -> testCaseGenerator.interrupt());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 	}
 
@@ -170,13 +160,8 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	}
 
 	@Override
-	protected BooleanExpression disableItemBinding(final TestCaseGenerationItem item) {
-		return testCaseGenerator.runningProperty();
-	}
-
-	@Override
-	protected void executeItem(final TestCaseGenerationItem item) {
-		testCaseGenerator.generateTestCases(item, currentTrace.getStateSpace());
+	protected void executeItemSync(final TestCaseGenerationItem item, final ExecutionContext context) {
+		item.execute(context);
 	}
 
 	@Override
@@ -187,13 +172,5 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		}
 		choosingStage.showAndWait();
 		return Optional.ofNullable(choosingStage.getItem());
-	}
-
-	@FXML
-	public void generate() {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		items.stream()
-			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> testCaseGenerator.generateTestCases(item, stateSpace));
 	}
 }

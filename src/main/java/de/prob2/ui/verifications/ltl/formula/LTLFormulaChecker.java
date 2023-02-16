@@ -2,12 +2,7 @@ package de.prob2.ui.verifications.ltl.formula;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-
-import com.google.inject.Singleton;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ClassicalBParser;
@@ -29,7 +24,6 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.parserbase.ProBParserBase;
 import de.prob.statespace.StateSpace;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -39,16 +33,12 @@ import de.prob2.ui.verifications.ltl.LTLParseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@Singleton
-public class LTLFormulaChecker {
+public final class LTLFormulaChecker {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(LTLFormulaChecker.class);
 	
-	private final CliTaskExecutor cliExecutor;
-	
-	@Inject
-	private LTLFormulaChecker(final CliTaskExecutor cliExecutor) {
-		this.cliExecutor = cliExecutor;
+	private LTLFormulaChecker() {
+		throw new AssertionError("Utility class");
 	}
 	
 	public static LTL parseFormula(final String code, final ProBParserBase languageSpecificParser, final PatternManager patternManager) {
@@ -81,7 +71,7 @@ public class LTLFormulaChecker {
 		}
 	}
 	
-	public LTL parseFormula(final String code, final Machine machine, final AbstractModel model) {
+	public static LTL parseFormula(final String code, final Machine machine, final AbstractModel model) {
 		BParser bParser = new BParser();
 		if (model instanceof ClassicalBModel) {
 			IDefinitions definitions = ((ClassicalBModel) model).getDefinitions();
@@ -127,9 +117,9 @@ public class LTLFormulaChecker {
 		item.setResultItem(new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.message", errorMessage));
 	}
 	
-	public void checkFormulaSync(LTLFormulaItem item, Machine machine, StateSpace stateSpace) {
+	public static void checkFormula(LTLFormulaItem item, Machine machine, StateSpace stateSpace) {
 		try {
-			final LTL formula = this.parseFormula(item.getCode(), machine, stateSpace.getModel());
+			final LTL formula = LTLFormulaChecker.parseFormula(item.getCode(), machine, stateSpace.getModel());
 			final LTLChecker checker = new LTLChecker(stateSpace, formula);
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {
@@ -141,12 +131,5 @@ public class LTLFormulaChecker {
 			LOGGER.error("Could not parse LTL formula: ", error);
 			handleFormulaParseErrors(item, error.getErrors());
 		}
-	}
-	
-	public CompletableFuture<LTLFormulaItem> checkFormula(LTLFormulaItem item, Machine machine, StateSpace stateSpace) {
-		return this.cliExecutor.submit(() -> {
-			checkFormulaSync(item, machine, stateSpace);
-			return item;
-		});
 	}
 }

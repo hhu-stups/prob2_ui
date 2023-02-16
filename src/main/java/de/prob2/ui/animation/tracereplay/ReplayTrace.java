@@ -21,6 +21,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
@@ -290,5 +291,10 @@ public class ReplayTrace implements IExecutableItem, IValidationTask, Descriptio
 	@JsonIgnore
 	public String toString() {
 		return String.format(Locale.ROOT, "%s(%s)", this.getClass().getSimpleName(), this.getId());
+	}
+	
+	@Override
+	public void execute(final ExecutionContext context) {
+		TraceChecker.checkNoninteractive(this, context.getStateSpace());
 	}
 }

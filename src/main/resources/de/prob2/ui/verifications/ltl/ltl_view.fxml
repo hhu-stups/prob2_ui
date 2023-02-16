@@ -26,7 +26,7 @@
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
-				<Button fx:id="checkMachineButton" disable="true" onAction="#checkMachine">
+				<Button fx:id="checkMachineButton" disable="true">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 					</graphic>

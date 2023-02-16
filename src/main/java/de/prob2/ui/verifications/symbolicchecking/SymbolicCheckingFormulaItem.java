@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
@@ -99,5 +100,10 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem implement
 	@JsonIgnore
 	public String toString() {
 		return String.format(Locale.ROOT, "%s(%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getCode());
+	}
+	
+	@Override
+	public void execute(final ExecutionContext context) {
+		SymbolicCheckingFormulaHandler.checkItem(this, context.getStateSpace());
 	}
 }

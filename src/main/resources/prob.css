@@ -220,15 +220,23 @@
 }
 
 .combo-box-popup > .list-view {
-	-fx-background-color: -prob-grey-75;
+	-fx-background-color: rgba(85, 85, 96, 0.95); /*increased opacity to 95, was prob-grey-75 before*/
 }
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell {
-	-fx-background: transparent;
+	-fx-background-color: transparent;
+	-fx-text-fill: -prob-white;
 }
+
 .combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:filled:hover {
 	-fx-background: -fx-accent;
 	-fx-background-color: -prob-white-20;
 }
+
+.combo-box-popup > .list-view > .virtual-flow > .clipped-container > .sheet > .list-cell:selected {
+	-fx-background-color: -prob-aqua;
+}
+
+
 
 .table-view .combo-box,
 .list-view .combo-box,
@@ -278,7 +286,7 @@
 	-fx-padding: 0em 1em 0.05em 1em;
 }
 .list-cell:odd {
-	-fx-background: -prob-grey-odd;
+	-fx-background-color: -prob-grey-odd;
 }
 .list-cell:selected {
 	-fx-background-color: -prob-aqua;
@@ -1037,11 +1045,6 @@
 }
 .machines-item {
 	-fx-cell-size: 2.8em;
-}
-
-.machines-item:odd:selected .name,
-.machines-item:odd:selected .location{
-	-fx-text-fill: white;
 }
 
 .machines-item .name {

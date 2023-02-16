@@ -8,6 +8,7 @@ import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 
 import javafx.beans.property.ObjectProperty;
@@ -79,5 +80,10 @@ public class SymbolicAnimationItem extends AbstractCheckableItem {
 			.add("type", this.getType())
 			.add("code", this.getCode())
 			.toString();
+	}
+	
+	@Override
+	public void execute(final ExecutionContext context) {
+		SymbolicAnimationItemHandler.executeItem(this, context.getStateSpace());
 	}
 }

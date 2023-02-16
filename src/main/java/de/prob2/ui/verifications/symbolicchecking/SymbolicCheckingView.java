@@ -9,18 +9,18 @@ import javax.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ChangeListener;
@@ -77,7 +77,6 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-	private final SymbolicCheckingFormulaHandler formulaHandler;
 	private final Provider<SymbolicCheckingChoosingStage> choosingStageProvider;
 
 	@FXML
@@ -89,14 +88,13 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
-	                            final CurrentProject currentProject, final SymbolicCheckingFormulaHandler symbolicCheckHandler,
+	                            final CurrentProject currentProject, final CliTaskExecutor cliExecutor,
 	                            final DisablePropertyController disablePropertyController, final Provider<SymbolicCheckingChoosingStage> choosingStageProvider) {
-		super(i18n, disablePropertyController);
+		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.formulaHandler = symbolicCheckHandler;
 		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
@@ -130,13 +128,12 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	}
 	
 	@Override
-	protected void executeItem(final SymbolicCheckingFormulaItem item) {
-		formulaHandler.checkItem(item, currentTrace.getStateSpace()).thenAccept(r -> {
-			List<Trace> counterExamples = item.getCounterExamples();
-			if (!counterExamples.isEmpty()) {
-				currentTrace.set(counterExamples.get(0));
-			}
-		});
+	protected void executeItemSync(final SymbolicCheckingFormulaItem item, final ExecutionContext context) {
+		item.execute(context);
+		List<Trace> counterExamples = item.getCounterExamples();
+		if (!counterExamples.isEmpty()) {
+			currentTrace.set(counterExamples.get(0));
+		}
 	}
 	
 	@Override
@@ -148,13 +145,5 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		}
 		choosingStage.showAndWait();
 		return Optional.ofNullable(choosingStage.getResult());
-	}
-	
-	@FXML
-	public void checkMachine() {
-		final StateSpace stateSpace = currentTrace.getStateSpace();
-		items.stream()
-			.filter(AbstractCheckableItem::selected)
-			.forEach(item -> formulaHandler.checkItem(item, stateSpace));
 	}
 }
