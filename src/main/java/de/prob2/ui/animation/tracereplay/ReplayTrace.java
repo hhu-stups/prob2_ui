@@ -19,7 +19,6 @@ import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -33,7 +32,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ReplayTrace implements IExecutableItem, IValidationTask, DescriptionView.Describable {
+public class ReplayTrace implements IExecutableItem, IValidationTask {
 	private final String id;
 	private final ObjectProperty<Checked> status;
 	@JsonIgnore
@@ -187,13 +186,11 @@ public class ReplayTrace implements IExecutableItem, IValidationTask, Descriptio
 	}
 
 	@JsonIgnore
-	@Override
 	public String getName() {
 		return MoreFiles.getNameWithoutExtension(location.getFileName());
 	}
 
 	@JsonIgnore
-	@Override
 	public String getDescription() {
 		try {
 			return this.load().getDescription();
@@ -202,7 +199,6 @@ public class ReplayTrace implements IExecutableItem, IValidationTask, Descriptio
 		}
 	}
 
-	@Override
 	public void setDescription(String description) {
 		try {
 			TraceJsonFile file = this.load();
