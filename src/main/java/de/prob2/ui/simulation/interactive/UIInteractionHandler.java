@@ -197,7 +197,7 @@ public class UIInteractionHandler {
 			if(Transition.SETUP_CONSTANTS_NAME.equals(persistentTrace.getTransitionList().get(0).getOperationName())) {
 				OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.SETUP_CONSTANTS_NAME);
 				// Somehow the constructor with 1 argument always sets using destination state to false
-				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, null).getDestinationStateVariables(), opInfo);
+				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, true, null).getDestinationStateVariables(), opInfo);
 				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, new ArrayList<>()));
 			}
 		}
@@ -206,7 +206,7 @@ public class UIInteractionHandler {
 			activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
 			OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.INITIALISE_MACHINE_NAME);
 			// Somehow the constructor with 1 argument always sets using destination state to false
-			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, null).getDestinationStateVariables(), opInfo);
+			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, true, null).getDestinationStateVariables(), opInfo);
 			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations));
 		}
 
