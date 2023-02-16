@@ -4,10 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
-
-import com.google.inject.Singleton;
-
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.ltl.parser.LtlParser.NumVarParamContext;
 import de.prob.ltl.parser.LtlParser.Pattern_defContext;
@@ -24,10 +20,10 @@ import de.prob2.ui.verifications.ltl.LTLParseListener;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 
-@Singleton
-public class LTLPatternParser {
-	@Inject
-	private LTLPatternParser() {}
+public final class LTLPatternParser {
+	private LTLPatternParser() {
+		throw new AssertionError("Utility class");
+	}
 	
 	private static void handlePatternResult(LTLParseListener parseListener, LTLPatternItem item) {
 		CheckingResultItem resultItem;
@@ -46,7 +42,7 @@ public class LTLPatternParser {
 		item.setResultItem(resultItem);
 	}
 	
-	public LTLPatternItem parsePattern(final String description, final String code, final Machine machine) {
+	public static LTLPatternItem parsePattern(final String description, final String code, final Machine machine) {
 		final Pattern pattern = makePattern(description, code);
 		final LTLParseListener parseListener = checkDefinition(pattern, machine);
 		final LTLPatternItem item = new LTLPatternItem(pattern.getName(), pattern.getDescription(), pattern.getCode());
@@ -54,13 +50,13 @@ public class LTLPatternParser {
 		return item;
 	}
 	
-	public void addPattern(LTLPatternItem item, Machine machine) {
+	public static void addPattern(LTLPatternItem item, Machine machine) {
 		Pattern pattern = makePattern(item.getDescription(), item.getCode());
 		handlePatternResult(checkDefinition(pattern, machine), item);
 		machine.getPatternManager().getPatterns().add(pattern);
 	}
 	
-	private LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
+	private static LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
 		LTLParseListener parseListener = initializeParseListener(pattern);
 		pattern.updateDefinitions(machine.getPatternManager());
 		ParseTree ast = pattern.getAst();
@@ -75,19 +71,19 @@ public class LTLPatternParser {
 		return parseListener;
 	}
 	
-	private String extractPatternSignature(ParseTree tree) {
+	private static String extractPatternSignature(ParseTree tree) {
 		StringBuilder signature = new StringBuilder();
 		String name = ((Pattern_defContext) tree).ID().getText();
 		signature.append(name);
 		signature.append("(");
 		signature.append(String.join(", ", ((Pattern_defContext) tree).pattern_def_param().stream()
-			.map(this::extractParameterFromContext)
+			.map(LTLPatternParser::extractParameterFromContext)
 			.collect(Collectors.toList())));
 		signature.append(")");
 		return signature.toString();
 	}
 	
-	private String extractParameterFromContext(Pattern_def_paramContext ctx) {
+	private static String extractParameterFromContext(Pattern_def_paramContext ctx) {
 		if(ctx instanceof VarParamContext) {
 			return ((VarParamContext) ctx).ID().getText();
 		} else if(ctx instanceof NumVarParamContext) {
@@ -98,7 +94,7 @@ public class LTLPatternParser {
 		return "";
 	}
 	
-	private LTLParseListener initializeParseListener(Pattern pattern) {
+	private static LTLParseListener initializeParseListener(Pattern pattern) {
 		LTLParseListener parseListener = new LTLParseListener();
 		pattern.removeErrorListeners();
 		pattern.removeWarningListeners();
@@ -107,7 +103,7 @@ public class LTLPatternParser {
 		return parseListener;
 	}
 	
-	public void removePattern(LTLPatternItem item, Machine machine) {
+	public static void removePattern(LTLPatternItem item, Machine machine) {
 		PatternManager patternManager = machine.getPatternManager();
 		Pattern pattern = patternManager.getUserPattern(item.getName());
 		if(pattern != null) {
@@ -123,8 +119,8 @@ public class LTLPatternParser {
 		return pattern;
 	}
 	
-	public void parseMachine(Machine machine) {
-		machine.getLTLPatterns().forEach(item -> this.addPattern(item, machine));
+	public static void parseMachine(Machine machine) {
+		machine.getLTLPatterns().forEach(item -> LTLPatternParser.addPattern(item, machine));
 	}
 	
 }

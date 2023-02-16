@@ -13,15 +13,11 @@ import de.prob2.ui.verifications.ltl.patterns.builtins.LTLBuiltinsStage;
 import javafx.fxml.FXML;
 
 public class LTLPatternStage extends LTLItemStage {
-	private final LTLPatternParser patternParser;
-	
 	private LTLPatternItem result;
 	
 	@Inject
-	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize,
-			final LTLPatternParser patternParser, final LTLBuiltinsStage builtinsStage) {
+	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize, final LTLBuiltinsStage builtinsStage) {
 		super(currentProject, fontSize, builtinsStage);
-		this.patternParser = patternParser;
 		this.result = null;
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}
@@ -39,7 +35,7 @@ public class LTLPatternStage extends LTLItemStage {
 	private void applyPattern() {
 		this.result = null;
 		String code = taCode.getText();
-		LTLPatternItem item = patternParser.parsePattern(taDescription.getText(), code, currentProject.getCurrentMachine());
+		LTLPatternItem item = LTLPatternParser.parsePattern(taDescription.getText(), code, currentProject.getCurrentMachine());
 		final LTLCheckingResultItem resultItem = (LTLCheckingResultItem) item.getResultItem();
 		if (resultItem.getChecked() == Checked.PARSE_ERROR) {
 			showErrors(resultItem.getErrorMarkers());
