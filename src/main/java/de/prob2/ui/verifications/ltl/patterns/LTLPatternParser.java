@@ -55,7 +55,7 @@ public class LTLPatternParser {
 	}
 	
 	public void addPattern(LTLPatternItem item, Machine machine) {
-		Pattern pattern = itemToPattern(item);
+		Pattern pattern = makePattern(item.getDescription(), item.getCode());
 		handlePatternResult(checkDefinition(pattern, machine), item);
 		machine.getPatternManager().getPatterns().add(pattern);
 	}
@@ -121,10 +121,6 @@ public class LTLPatternParser {
 		pattern.setDescription(description);
 		pattern.setCode(code);
 		return pattern;
-	}
-	
-	private Pattern itemToPattern(LTLPatternItem item) {
-		return makePattern(item.getDescription(), item.getCode());
 	}
 	
 	public void parseMachine(Machine machine) {
