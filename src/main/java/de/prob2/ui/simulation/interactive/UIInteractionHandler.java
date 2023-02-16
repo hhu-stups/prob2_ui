@@ -2,9 +2,11 @@ package de.prob2.ui.simulation.interactive;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.statespace.OperationInfo;
+import de.prob.statespace.State;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -196,8 +198,9 @@ public class UIInteractionHandler {
 			PersistentTrace persistentTrace = new PersistentTrace(currentTrace.get());
 			if(Transition.SETUP_CONSTANTS_NAME.equals(persistentTrace.getTransitionList().get(0).getOperationName())) {
 				OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.SETUP_CONSTANTS_NAME);
+				State destination = setupConstantsTransition.getDestination();
 				// Somehow the constructor with 1 argument always sets using destination state to false
-				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, true, null).getDestinationStateVariables(), opInfo);
+				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(SimulationCreator.computeFixedVariablesFromDestinationValues(destination.getConstantValues(FormulaExpand.EXPAND)), opInfo);
 				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, new ArrayList<>()));
 			}
 		}
@@ -206,7 +209,8 @@ public class UIInteractionHandler {
 			activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
 			OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.INITIALISE_MACHINE_NAME);
 			// Somehow the constructor with 1 argument always sets using destination state to false
-			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(new PersistentTransition(initializationTransition, true, null).getDestinationStateVariables(), opInfo);
+			State destination = initializationTransition.getDestination();
+			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(SimulationCreator.computeFixedVariablesFromDestinationValues(destination.getVariableValues(FormulaExpand.EXPAND)), opInfo);
 			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations));
 		}
 
