@@ -1,5 +1,7 @@
 package de.prob2.ui.sharedviews;
 
+import java.util.Objects;
+
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
@@ -26,12 +28,12 @@ public class DescriptionView extends AnchorPane {
 	private Button saveButton;
 
 	private final Describable describable;
-	private final Runnable closeMethod;
 	private final I18n i18n;
 	
-	public DescriptionView(final Describable describable, final Runnable closeMethod, final StageManager stageManager, final I18n i18n) {
+	private Runnable onClose;
+	
+	public DescriptionView(final Describable describable, final StageManager stageManager, final I18n i18n) {
 		this.describable = describable;
-		this.closeMethod = closeMethod;
 		this.i18n = i18n;
 		stageManager.loadFXML(this, "description_view.fxml");
 	}
@@ -48,9 +50,13 @@ public class DescriptionView extends AnchorPane {
 		saveButton.visibleProperty().bind(descriptionText.editableProperty());
 	}
 
+	public void setOnClose(final Runnable onClose) {
+		this.onClose = Objects.requireNonNull(onClose, "onClose");
+	}
+
 	@FXML
 	public void closeDescriptionView() {
-		closeMethod.run();
+		onClose.run();
 	}
 
 	@FXML

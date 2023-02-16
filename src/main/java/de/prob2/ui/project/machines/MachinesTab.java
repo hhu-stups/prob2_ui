@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
@@ -436,7 +435,9 @@ public class MachinesTab extends Tab {
 		if(showMachineView) {
 			closeMachineView();
 		}
-		splitPane.getItems().add(0, new DescriptionView(machine, this::closeMachineView, stageManager, i18n));
+		final DescriptionView descriptionView = new DescriptionView(machine, stageManager, i18n);
+		descriptionView.setOnClose(this::closeMachineView);
+		splitPane.getItems().add(0, descriptionView);
 		showMachineView = true;
 	}
 

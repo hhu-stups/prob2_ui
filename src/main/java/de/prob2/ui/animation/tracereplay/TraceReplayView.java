@@ -257,7 +257,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (showDescription) {
 			closeDescription();
 		}
-		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, i18n));
+		final DescriptionView descriptionView = new DescriptionView(trace, stageManager, i18n);
+		descriptionView.setOnClose(this::closeDescription);
+		splitPane.getItems().add(1, descriptionView);
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
 	}
