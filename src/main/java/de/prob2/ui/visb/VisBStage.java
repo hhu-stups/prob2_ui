@@ -343,7 +343,7 @@ public class VisBStage extends Stage {
 	private void loadSvgFile(final VisBVisualisation visBVisualisation) throws IOException {
 		final Path path = visBVisualisation.getSvgPath();
 		String svgContent = "";
-		if(path.equals(currentProject.getLocation())) {
+		if(path.toFile().isDirectory()) {
 			// TODO: Discuss whether to generate an empty SVG or provide the SVG content from Prolog with width and height. Furthermore adapt width and height to size provided in VisB file.
 			svgContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
 					"<svg\n" +
