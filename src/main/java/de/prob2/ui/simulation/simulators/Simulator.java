@@ -217,6 +217,10 @@ public abstract class Simulator {
 				String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
 				timestamps.add(time.get());
+			} else if("skip".equals(activation.getOperation())) {
+				updateStartingInformation(newTrace);
+				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
+				timestamps.add(time.get());
 			}
 		}
 		return newTrace;
