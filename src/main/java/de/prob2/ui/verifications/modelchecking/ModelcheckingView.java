@@ -341,7 +341,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		final ExecutionContext context = this.getCurrentExecutionContext();
 		cliExecutor.submit(() -> {
 			for (ModelCheckingItem item : items) {
-				if (!item.selected() || !item.getSteps().isEmpty()) {
+				if (!item.selected()) {
 					continue;
 				}
 

@@ -1,5 +1,7 @@
 package de.prob2.ui.simulation.simulators;
 
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.json.JsonMetadata;
@@ -48,6 +50,15 @@ public class SimulationCreator {
 			currentTimestamp = timestamps.get(i);
 		}
 		return new SimulationConfiguration(activationConfigurations, new ArrayList<>(), metadata);
+	}
+
+	public static Map<String, String> computeFixedVariablesFromDestinationValues(Map<IEvalElement, AbstractEvalResult> destinationValueMap) {
+		Map<String, String> fixedVariables = new HashMap<>();
+		for(IEvalElement key : destinationValueMap.keySet()) {
+			String val = destinationValueMap.get(key).toString();
+			fixedVariables.put(key.getCode(), val);
+		}
+		return fixedVariables;
 	}
 
 	public static Map<String, String> createFixedVariables(Map<String, String> fixedVariables, OperationInfo opInfo) {

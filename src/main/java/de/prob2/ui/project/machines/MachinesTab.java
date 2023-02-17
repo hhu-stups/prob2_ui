@@ -3,9 +3,14 @@ package de.prob2.ui.project.machines;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
@@ -35,7 +40,17 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 
@@ -253,7 +268,7 @@ public class MachinesTab extends Tab {
 		});
 		currentProject.machinesProperty().addListener((observable, from, to) -> {
 			Node node = splitPane.getItems().get(0);
-			if (node instanceof DescriptionView && !to.contains((Machine) ((DescriptionView) node).getDescribable())) {
+			if (node instanceof DescriptionView) {
 				closeMachineView();
 			}
 		});
@@ -436,7 +451,12 @@ public class MachinesTab extends Tab {
 		if(showMachineView) {
 			closeMachineView();
 		}
-		splitPane.getItems().add(0, new DescriptionView(machine, this::closeMachineView, stageManager, i18n));
+		final DescriptionView descriptionView = new DescriptionView(stageManager, i18n);
+		descriptionView.setOnClose(this::closeMachineView);
+		descriptionView.setName(machine.getName());
+		descriptionView.setDescription(machine.getDescription());
+		descriptionView.descriptionProperty().addListener((o, from, to) -> machine.setDescription(to));
+		splitPane.getItems().add(0, descriptionView);
 		showMachineView = true;
 	}
 

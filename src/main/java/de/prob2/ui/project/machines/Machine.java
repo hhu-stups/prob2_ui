@@ -26,7 +26,6 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.simulation.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
@@ -80,7 +79,7 @@ import javafx.collections.ObservableMap;
 	"dotVisualizationItems",
 	"tableVisualizationItems"
 })
-public class Machine implements DescriptionView.Describable {
+public class Machine {
 	public enum CheckingStatus {
 		UNKNOWN, SUCCESSFUL, FAILED, NONE
 	}
@@ -429,7 +428,6 @@ public class Machine implements DescriptionView.Describable {
 		return this.name;
 	}
 
-	@Override
 	public String getName() {
 		return this.nameProperty().get();
 	}
@@ -442,12 +440,10 @@ public class Machine implements DescriptionView.Describable {
 		return this.description;
 	}
 
-	@Override
 	public String getDescription() {
 		return this.descriptionProperty().get();
 	}
 	
-	@Override
 	public void setDescription(final String description) {
 		this.descriptionProperty().set(description);
 	}

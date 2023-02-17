@@ -261,6 +261,6 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	
 	@Override
 	public void execute(final ExecutionContext context) {
-		Modelchecker.execute(this, context.getStateSpace());
+		Modelchecker.executeIfNeeded(this, context.getStateSpace());
 	}
 }
