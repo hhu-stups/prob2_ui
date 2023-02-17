@@ -257,7 +257,25 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (showDescription) {
 			closeDescription();
 		}
-		splitPane.getItems().add(1, new DescriptionView(trace, this::closeDescription, stageManager, i18n));
+		final DescriptionView descriptionView = new DescriptionView(stageManager, i18n);
+		descriptionView.setOnClose(this::closeDescription);
+		descriptionView.setName(trace.getName());
+
+		try {
+			descriptionView.setDescription(trace.load().getDescription());
+		} catch (IOException exc) {
+			traceFileHandler.showLoadError(trace, exc);
+		}
+
+		descriptionView.descriptionProperty().addListener((o, from, to) -> {
+			try {
+				trace.saveModified(trace.load().changeDescription(to));
+			} catch (IOException exc) {
+				stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
+			}
+		});
+
+		splitPane.getItems().add(1, descriptionView);
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
 	}

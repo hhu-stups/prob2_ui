@@ -161,7 +161,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
-		injector.getInstance(LTLPatternParser.class).parseMachine(m);
+		LTLPatternParser.parseMachine(m);
 	}
 
 	public void reloadCurrentMachine() {

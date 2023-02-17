@@ -12,12 +12,13 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import org.fxmisc.richtext.StyleClassedTextArea?>
-<fx:root type="Stage" minWidth="240" minHeight="160" width="480" height="320" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.control.TabPane?>
+<fx:root type="Stage" minWidth="240" minHeight="160" width="500" height="320" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
 			<BorderPane stylesheets="@/prob.css" styleClass="dialog">
 				<center>
-					<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+					<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
 						<Tab fx:id="formulaTab" text="%states.fullValueStage.tabs.formula">
 							<TextArea fx:id="formulaTextarea" editable="false" wrapText="true"/>
 						</Tab>
@@ -33,7 +34,7 @@
 						<Tab fx:id="diffTab" text="%states.fullValueStage.tabs.diff">
 							<StyleClassedTextArea fx:id="diffTextarea" editable="false" wrapText="true" styleClass="difftextarea"/>
 						</Tab>
-					</BetterTabPane>
+					</TabPane>
 				</center>
 				<bottom>
 					<HBox spacing="10.0" alignment="CENTER">

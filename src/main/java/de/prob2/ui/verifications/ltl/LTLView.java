@@ -114,7 +114,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final CurrentTrace currentTrace;
 	private final VersionInfo versionInfo;
 	private final CurrentProject currentProject;
-	private final LTLPatternParser patternParser;
 	private final FileChooserManager fileChooserManager;
 	private final JacksonManager<LTLData> jacksonManager;
 				
@@ -123,7 +122,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 					final CurrentTrace currentTrace, final VersionInfo versionInfo, final CurrentProject currentProject,
 					final DisablePropertyController disablePropertyController,
 					final CliTaskExecutor cliExecutor,
-					final LTLPatternParser patternParser,
 					final FileChooserManager fileChooserManager,
 					final ObjectMapper objectMapper,
 					final JacksonManager<LTLData> jacksonManager) {
@@ -134,7 +132,6 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		this.currentTrace = currentTrace;
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
-		this.patternParser = patternParser;
 		this.fileChooserManager = fileChooserManager;
 		this.jacksonManager = jacksonManager;
 		jacksonManager.initContext(new JacksonManager.Context<LTLData>(objectMapper, LTLData.class, LTLData.FILE_TYPE, LTLData.CURRENT_FORMAT_VERSION) {
@@ -197,7 +194,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				Machine machine = currentProject.getCurrentMachine();
 				LTLPatternItem item = row.getItem();
 				machine.getLTLPatterns().remove(item);
-				patternParser.removePattern(item, machine);
+				LTLPatternParser.removePattern(item, machine);
 				managePatternTable(machine.ltlPatternsProperty());
 			});
 
@@ -269,7 +266,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		}
 		final Machine machine = currentProject.getCurrentMachine();
 		if (machine.getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
-			patternParser.addPattern(newItem, machine);
+			LTLPatternParser.addPattern(newItem, machine);
 			machine.getLTLPatterns().add(newItem);
 			managePatternTable(machine.ltlPatternsProperty());
 		} else {
@@ -299,10 +296,10 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 			return;
 		}
 		final Machine machine = currentProject.getCurrentMachine();
-		patternParser.removePattern(oldItem, machine);
+		LTLPatternParser.removePattern(oldItem, machine);
 		if(machine.getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(oldItem) && existing.settingsEqual(changedItem))) {
 			machine.getLTLPatterns().set(machine.getLTLPatterns().indexOf(oldItem), changedItem);
-			patternParser.addPattern(changedItem, machine);
+			LTLPatternParser.addPattern(changedItem, machine);
 			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
@@ -363,7 +360,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {
 					machine.getLTLPatterns().add(pattern);
-					patternParser.addPattern(pattern, machine);
+					LTLPatternParser.addPattern(pattern, machine);
 				});
 	}
 }
