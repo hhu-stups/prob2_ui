@@ -43,6 +43,7 @@ $util.getMachineCode($machine,$project)
 	Die B-Maschine $util.latexSafe($machine.getName()) hat $util.getNumberSelectedTasks($machine.getModelcheckingItems()) Modelchecking Tasks,
 	wovon $util.getNumberSuccessfulTasks($machine.getModelcheckingItems()) erfolgreich geprüft wurden, $util.getNumberFailedTasks($machine.getModelcheckingItems())
 	fehlgeschlagen sind und $util.getNumberNotCheckedTasks($machine.getModelcheckingItems()) überhaupt nicht geprüft wurden.
+
 	\begin{tablestyling}
 	\begin{longtable}{p{0.4\textwidth} P{0.4\textwidth}}
 		\toprule
@@ -76,6 +77,7 @@ $util.getMachineCode($machine,$project)
 	scheiterten und $util.getNumberNotCheckedTasks($machine.getLTLFormulas()) wurden überhaupt nicht überprüft.
  	#* checks if descriptions exist so that extra column can be generated *#
 	#set($createDescriptionColumn = $util.ltlDescriptionColumnNecessary($machine.getLTLFormulas()))
+
 	\begin{tablestyling}
 	\begin{longtable}{p{0.5\textwidth} #if($createDescriptionColumn) p{0.25\textwidth}P{0.25\textwidth} #else P{0.4\textwidth} #end}
 		\toprule
@@ -136,6 +138,7 @@ Die B Maschine $util.latexSafe($machine.getName()) hat $util.getNumberSelectedTa
 $util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgeschlagen und $util.getNumberNotCheckedTasks($machine.getSymbolicCheckingFormulas()) wurden überhaupt nicht überprüft.
 	#* checks if descriptions exist so that extra column can be generated *#
 	#set($createConfigurationColumn = $util.symbolicConfigurationColumnNecessary($machine.getSymbolicCheckingFormulas()))
+
 	\begin{tablestyling}
 	\begin{longtable}{p{0.3\textwidth}#if($createConfigurationColumn) P{0.4\textwidth} #end p{0.25\textwidth}}
 	\toprule
@@ -171,6 +174,7 @@ $util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgesc
 	#end
 	#foreach($trace in $machine.getTraces())
 	#call($trace.load())
+
 	\begin{tablestyling}
 	\begin{longtable}{c P{0.6\textwidth}}
 	\toprule
