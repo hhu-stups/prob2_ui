@@ -4,9 +4,11 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
 import javafx.beans.NamedArg;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -113,71 +115,73 @@ public class SimulationMonteCarloChoice extends GridPane {
 		}
 	}
 
-	protected SimulationChoosingStage choosingStage;
+	private SimulationChoosingStage choosingStage;
 
 	@FXML
-	protected TextField tfSimulations;
+	private TextField tfSimulations;
 
 	@FXML
-	protected Label lbStartAfter;
+	private Label lbStartAfter;
 
 	@FXML
-	protected TextField tfStartAfter;
+	private TextField tfStartAfter;
 
 	@FXML
-	protected Label lbStartingPredicate;
+	private Label lbStartingPredicate;
 
 	@FXML
-	protected TextField tfStartingPredicate;
+	private TextField tfStartingPredicate;
 
 	@FXML
-	protected Label lbStartingTime;
+	private Label lbStartingTime;
 
 	@FXML
-	protected TextField tfStartingTime;
+	private TextField tfStartingTime;
 
 	@FXML
-	protected Label lbSteps;
+	private Label lbSteps;
 
 	@FXML
-	protected TextField tfSteps;
+	private TextField tfSteps;
 
 	@FXML
-	protected TextField tfMaxStepsBeforeProperty;
+	private TextField tfMaxStepsBeforeProperty;
 
 	@FXML
-	protected Label lbEndingPredicate;
+	private Label lbEndingPredicate;
 
 	@FXML
-	protected TextField tfEndingPredicate;
+	private TextField tfEndingPredicate;
 
 	@FXML
-	protected Label lbEndingTime;
+	private Label lbEndingTime;
 
 	@FXML
-	protected TextField tfEndingTime;
+	private TextField tfEndingTime;
 
 	@FXML
-	protected ChoiceBox<SimulationStartingItem> startingChoice;
+	private ChoiceBox<SimulationStartingItem> startingChoice;
 
 	@FXML
-	protected ChoiceBox<SimulationEndingItem> endingChoice;
+	private ChoiceBox<SimulationEndingItem> endingChoice;
+
+	@FXML
+	private CheckBox cbCheckProperty;
 
 
 	@Inject
-	protected SimulationMonteCarloChoice(final StageManager stageManager) {
+	private SimulationMonteCarloChoice(final StageManager stageManager) {
 		super();
 		stageManager.loadFXML(this, "simulation_monte_carlo_choice.fxml");
 	}
 
-	protected SimulationMonteCarloChoice() {
+	private SimulationMonteCarloChoice() {
 		super();
 		//Default constructor for super classes using other FXML file
 	}
 
 	@FXML
-	protected void initialize() {
-
+	private void initialize() {
 		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.getChildren().removeAll(lbStartAfter, tfStartAfter, lbStartingPredicate, tfStartingPredicate, lbStartingTime, tfStartingTime);
 			if(to != null) {
@@ -185,17 +189,17 @@ public class SimulationMonteCarloChoice extends GridPane {
 					case NO_CONDITION:
 						break;
 					case START_AFTER_STEPS:
-						this.add(lbStartAfter, 1, 4);
-						this.add(tfStartAfter, 2, 4);
+						this.add(lbStartAfter, 1, 5);
+						this.add(tfStartAfter, 2, 5);
 						break;
 					case STARTING_PREDICATE:
 					case STARTING_PREDICATE_ACTIVATED:
-						this.add(lbStartingPredicate, 1, 4);
-						this.add(tfStartingPredicate, 2, 4);
+						this.add(lbStartingPredicate, 1, 5);
+						this.add(tfStartingPredicate, 2, 5);
 						break;
 					case STARTING_TIME:
-						this.add(lbStartingTime, 1, 4);
-						this.add(tfStartingTime, 2, 4);
+						this.add(lbStartingTime, 1, 5);
+						this.add(tfStartingTime, 2, 5);
 						break;
 					default:
 						break;
@@ -209,16 +213,16 @@ public class SimulationMonteCarloChoice extends GridPane {
 			if(to != null) {
 				switch (to.getEndingType()) {
 					case NUMBER_STEPS:
-						this.add(lbSteps, 1, 6);
-						this.add(tfSteps, 2, 6);
+						this.add(lbSteps, 1, 7);
+						this.add(tfSteps, 2, 7);
 						break;
 					case ENDING_PREDICATE:
-						this.add(lbEndingPredicate, 1, 6);
-						this.add(tfEndingPredicate, 2, 6);
+						this.add(lbEndingPredicate, 1, 7);
+						this.add(tfEndingPredicate, 2, 7);
 						break;
 					case ENDING_TIME:
-						this.add(lbEndingTime, 1, 6);
-						this.add(tfEndingTime, 2, 6);
+						this.add(lbEndingTime, 1, 7);
+						this.add(tfEndingTime, 2, 7);
 						break;
 					default:
 						break;
@@ -340,57 +344,15 @@ public class SimulationMonteCarloChoice extends GridPane {
 		return information;
 	}
 
-	public void setSimulationChoosingStage(SimulationChoosingStage choosingStage) {
+	public BooleanProperty checkPropertyProperty() {
+		return cbCheckProperty.selectedProperty();
+	}
+
+	public boolean checkProperty() {
+		return cbCheckProperty.isSelected();
+	}
+
+	public void setChoosingStage(SimulationChoosingStage choosingStage) {
 		this.choosingStage = choosingStage;
 	}
-
-	public void bindMaxStepsBeforePropertyProperty(SimpleStringProperty property) {
-		tfMaxStepsBeforeProperty.textProperty().bindBidirectional(property);
-	}
-
-	public void bindSimulationsProperty(SimpleStringProperty property) {
-		tfSimulations.textProperty().bindBidirectional(property);
-	}
-
-	public void bindStartingProperty(SimpleStringProperty startAfterProperty, SimpleStringProperty startingPredicateProperty, SimpleStringProperty startingTimeProperty) {
-		tfStartAfter.textProperty().bindBidirectional(startAfterProperty);
-		tfStartingPredicate.textProperty().bindBidirectional(startingPredicateProperty);
-		tfStartingTime.textProperty().bindBidirectional(startingTimeProperty);
-	}
-
-	public void bindEndingProperty(SimpleStringProperty stepsProperty, SimpleStringProperty endingPredicateProperty, SimpleStringProperty endingTimeProperty) {
-		tfSteps.textProperty().bindBidirectional(stepsProperty);
-		tfEndingPredicate.textProperty().bindBidirectional(endingPredicateProperty);
-		tfEndingTime.textProperty().bindBidirectional(endingTimeProperty);
-	}
-
-	public void bindStartingItemProperty(SimpleObjectProperty<SimulationStartingItem> property) {
-		// Bind bidirectional does not work on ReadOnlyObjectProperty
-		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(!Objects.equals(from, to)) {
-				property.set(to);
-			}
-		});
-		property.addListener((observable, from, to) -> {
-			if(!Objects.equals(from, to)) {
-				startingChoice.getSelectionModel().select(to);
-			}
-		});
-	}
-
-	public void bindEndingItemProperty(SimpleObjectProperty<SimulationEndingItem> property) {
-		// Bind bidirectional does not work on ReadOnlyObjectProperty
-		endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(!Objects.equals(from, to)) {
-				property.set(to);
-			}
-		});
-		property.addListener((observable, from, to) -> {
-			if(!Objects.equals(from, to)) {
-				endingChoice.getSelectionModel().select(to);
-			}
-		});
-	}
-
-
 }

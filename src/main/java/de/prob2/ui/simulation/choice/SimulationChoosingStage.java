@@ -26,6 +26,7 @@ import javafx.stage.Stage;
 
 @Singleton
 public class SimulationChoosingStage extends Stage {
+
 	@FXML
 	private Button btCheck;
 
@@ -34,6 +35,9 @@ public class SimulationChoosingStage extends Stage {
 
 	@FXML
 	private SimulationMonteCarloChoice simulationMonteCarloChoice;
+
+	@FXML
+	private SimulationPropertyChoice simulationPropertyChoice;
 
 	@FXML
 	private SimulationHypothesisChoice simulationHypothesisChoice;
@@ -45,9 +49,6 @@ public class SimulationChoosingStage extends Stage {
 	private VBox inputBox;
 
 	@FXML
-	private ChoiceBox<SimulationType> simulationChoice;
-
-	@FXML
 	private TextField idTextField;
 
 	private final I18n i18n;
@@ -56,38 +57,44 @@ public class SimulationChoosingStage extends Stage {
 
 	private final SimulationItemHandler simulationItemHandler;
 
-	private final SimulationChoiceBindings simulationChoiceBindings;
-
 	private SimulationModel simulation;
 
 	private SimulationItem lastItem;
 
 	@Inject
-	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationChoiceBindings simulationChoiceBindings) {
+	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler) {
 		this.i18n = i18n;
 		this.stageManager = stageManager;
 		this.simulationItemHandler = simulationItemHandler;
-		this.simulationChoiceBindings = simulationChoiceBindings;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "simulation_choice.fxml");
 	}
 
 	@FXML
 	private void initialize() {
-		inputBox.visibleProperty().bind(simulationChoice.getSelectionModel().selectedItemProperty().isNotNull());
 		setCheckListeners();
-		simulationChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+		simulationMonteCarloChoice.checkPropertyProperty().addListener((observable, from, to) -> {
+			if(!to) {
+				changeGUIType(SimulationType.MONTE_CARLO_SIMULATION);
+			} else {
+				SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+				changeGUIType(simulationType == null ? SimulationType.MONTE_CARLO_SIMULATION : simulationType);
+			}
+			this.sizeToScene();
+		});
+		simulationPropertyChoice.simulationChoice().getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			if(to == null) {
 				return;
 			}
 			changeGUIType(to);
 			this.sizeToScene();
 		});
-		simulationChoice.setConverter(i18n.translateConverter());
-		simulationMonteCarloChoice.setSimulationChoosingStage(this);
-		simulationHypothesisChoice.setSimulationChoosingStage(this);
-		simulationEstimationChoice.setSimulationChoosingStage(this);
-		bindCommonProperties();
+		simulationPropertyChoice.simulationChoice().setConverter(i18n.translateConverter());
+		simulationHypothesisChoice.visibleProperty().bind(simulationMonteCarloChoice.checkPropertyProperty());
+		simulationEstimationChoice.visibleProperty().bind(simulationMonteCarloChoice.checkPropertyProperty());
+		simulationPropertyChoice.setChoosingStage(this);
+		simulationMonteCarloChoice.setChoosingStage(this);
+		this.sizeToScene();
 	}
 
 	private void setCheckListeners() {
@@ -107,10 +114,11 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	private boolean checkSelection() {
-		SimulationType type = simulationChoice.getSelectionModel().getSelectedItem();
+		if(!simulationMonteCarloChoice.checkProperty()) {
+			return simulationMonteCarloChoice.checkSelection();
+		}
+		SimulationType type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
 		switch (type) {
-			case MONTE_CARLO_SIMULATION:
-				return simulationMonteCarloChoice.checkSelection();
 			case ESTIMATION:
 				return simulationEstimationChoice.checkSelection();
 			case HYPOTHESIS_TEST:
@@ -130,39 +138,47 @@ public class SimulationChoosingStage extends Stage {
 
 	private SimulationItem extractItem() {
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
-		SimulationItem simulationItem = new SimulationItem(id, simulationChoice.getSelectionModel().getSelectedItem(), this.extractInformation());
+		SimulationType type = !simulationMonteCarloChoice.checkProperty() ? SimulationType.MONTE_CARLO_SIMULATION : simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+		SimulationItem simulationItem = new SimulationItem(id, type, this.extractInformation());
 		simulationItem.setSimulationModel(simulation);
 		return simulationItem;
 	}
 
 	private Map<String, Object> extractInformation() {
-		SimulationType simulationType = simulationChoice.getSelectionModel().getSelectedItem();
-		Map<String, Object> information = new HashMap<>();
-		switch (simulationType) {
-			case MONTE_CARLO_SIMULATION:
-				information = simulationMonteCarloChoice.extractInformation();
-				break;
-			case ESTIMATION:
-				information = simulationEstimationChoice.extractInformation();
-				break;
-			case HYPOTHESIS_TEST:
-				information = simulationHypothesisChoice.extractInformation();
-				break;
+		Map<String, Object> information;
+		if(!simulationMonteCarloChoice.checkProperty()) {
+			information = simulationMonteCarloChoice.extractInformation();
+		} else {
+			SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+			information = simulationMonteCarloChoice.extractInformation();
+			information.putAll(simulationPropertyChoice.extractInformation());
+			switch (simulationType) {
+				case ESTIMATION:
+					information.putAll(simulationEstimationChoice.extractInformation());
+					break;
+				case HYPOTHESIS_TEST:
+					information.putAll(simulationHypothesisChoice.extractInformation());
+					break;
+			}
 		}
 		return information;
 	}
 
 	private void changeGUIType(final SimulationType type) {
-		inputBox.getChildren().removeAll(timeBox, simulationMonteCarloChoice, simulationHypothesisChoice, simulationEstimationChoice);
+		inputBox.getChildren().removeAll(timeBox, simulationPropertyChoice, simulationHypothesisChoice, simulationEstimationChoice);
+		if(simulationMonteCarloChoice.checkProperty()) {
+			inputBox.getChildren().add(0, simulationPropertyChoice);
+		}
 		switch (type) {
 			case MONTE_CARLO_SIMULATION:
-				inputBox.getChildren().add(0, simulationMonteCarloChoice);
 				break;
 			case ESTIMATION:
-				inputBox.getChildren().add(0, simulationEstimationChoice);
+				inputBox.getChildren().add(1, simulationEstimationChoice);
 				break;
 			case HYPOTHESIS_TEST:
-				inputBox.getChildren().add(0, simulationHypothesisChoice);
+				inputBox.getChildren().add(1, simulationHypothesisChoice);
+				break;
+			default:
 				break;
 		}
 	}
@@ -174,42 +190,6 @@ public class SimulationChoosingStage extends Stage {
 
 	public void setPath(Path path) {
 		simulationItemHandler.setPath(path);
-	}
-
-	private void bindCommonProperties() {
-		// These bindings are used to synchronize the labels in SimulationMonteCarloChoice, SimulationHypothesisChoice, and SimulationEstimationChoice
-		simulationMonteCarloChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
-		simulationHypothesisChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
-		simulationEstimationChoice.bindSimulationsProperty(simulationChoiceBindings.simulationsProperty());
-
-		simulationMonteCarloChoice.bindMaxStepsBeforePropertyProperty(simulationChoiceBindings.maxStepsBeforePropertyProperty());
-		simulationHypothesisChoice.bindMaxStepsBeforePropertyProperty(simulationChoiceBindings.maxStepsBeforePropertyProperty());
-		simulationEstimationChoice.bindMaxStepsBeforePropertyProperty(simulationChoiceBindings.maxStepsBeforePropertyProperty());
-
-		simulationMonteCarloChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
-		simulationHypothesisChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
-		simulationEstimationChoice.bindStartingProperty(simulationChoiceBindings.startAfterProperty(), simulationChoiceBindings.startingPredicateProperty(), simulationChoiceBindings.startingTimeProperty());
-
-		simulationMonteCarloChoice.bindStartingItemProperty(simulationChoiceBindings.startingItemProperty());
-		simulationHypothesisChoice.bindStartingItemProperty(simulationChoiceBindings.startingItemProperty());
-		simulationEstimationChoice.bindStartingItemProperty(simulationChoiceBindings.startingItemProperty());
-
-		simulationMonteCarloChoice.bindEndingProperty(simulationChoiceBindings.stepsProperty(), simulationChoiceBindings.endingPredicateProperty(), simulationChoiceBindings.endingTimeProperty());
-		simulationHypothesisChoice.bindEndingProperty(simulationChoiceBindings.stepsProperty(), simulationChoiceBindings.endingPredicateProperty(), simulationChoiceBindings.endingTimeProperty());
-		simulationEstimationChoice.bindEndingProperty(simulationChoiceBindings.stepsProperty(), simulationChoiceBindings.endingPredicateProperty(), simulationChoiceBindings.endingTimeProperty());
-
-		simulationMonteCarloChoice.bindEndingItemProperty(simulationChoiceBindings.endingItemProperty());
-		simulationHypothesisChoice.bindEndingItemProperty(simulationChoiceBindings.endingItemProperty());
-		simulationEstimationChoice.bindEndingItemProperty(simulationChoiceBindings.endingItemProperty());
-
-		simulationHypothesisChoice.bindMonteCarloTimeProperty(simulationChoiceBindings.monteCarloTimeProperty());
-		simulationEstimationChoice.bindMonteCarloTimeProperty(simulationChoiceBindings.monteCarloTimeProperty());
-
-		simulationHypothesisChoice.bindPredicateProperty(simulationChoiceBindings.predicateProperty());
-		simulationEstimationChoice.bindPredicateProperty(simulationChoiceBindings.predicateProperty());
-
-		simulationHypothesisChoice.bindCheckingProperty(simulationChoiceBindings.checkingProperty());
-		simulationEstimationChoice.bindCheckingProperty(simulationChoiceBindings.checkingProperty());
 	}
 
 	public SimulationItem getLastItem() {

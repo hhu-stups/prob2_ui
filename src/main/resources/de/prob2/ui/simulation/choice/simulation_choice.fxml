@@ -16,18 +16,27 @@
 <?import de.prob2.ui.simulation.choice.SimulationEstimationChoice?>
 <?import de.prob2.ui.simulation.choice.SimulationType?>
 
-<fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
-		 resizable="false" maxWidth="400.0" maxHeight="600.0" xmlns:fx="http://javafx.com/fxml/1">
-	<fx:define>
+<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationPropertyItem?>
+<?import de.prob2.ui.simulation.choice.SimulationEstimationChoice.SimulationEstimationChoiceItem?>
+<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationStartingItem?>
+<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationEndingItem?>
 
+
+<?import de.prob2.ui.simulation.choice.SimulationPropertyChoice?>
+<?import de.prob2.ui.sharedviews.Spacer?>
+
+<fx:root type="SimulationChoosingStage" title="%simulation.choice.title"
+		 resizable="false" maxWidth="800.0" maxHeight="1000.0" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
 		<HBox fx:id="timeBox" spacing="5.0">
 			<Label fx:id="lbTime" text="%simulation.choice.time" />
 			<TextField fx:id="tfTime" VBox.vgrow="NEVER"/>
 		</HBox>
-		<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
 		<SimulationHypothesisChoice fx:id="simulationHypothesisChoice"/>
 		<SimulationEstimationChoice fx:id="simulationEstimationChoice"/>
+		<SimulationPropertyChoice fx:id="simulationPropertyChoice"/>
 	</fx:define>
+
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane styleClass="dialog">
@@ -35,18 +44,13 @@
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
-					<Label text="%simulation.choice.text"/>
-					<HBox alignment="CENTER">
-						<ChoiceBox fx:id="simulationChoice">
-							<items>
-								<FXCollections fx:factory="observableArrayList">
-									<SimulationType fx:constant="MONTE_CARLO_SIMULATION"/>
-									<SimulationType fx:constant="HYPOTHESIS_TEST"/>
-									<SimulationType fx:constant="ESTIMATION"/>
-								</FXCollections>
-							</items>
-						</ChoiceBox>
-					</HBox>
+
+
+					<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
+
+
+					<Spacer/>
+
 					<VBox spacing="10.0" fx:id="inputBox">
 						<HBox alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
 							<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>

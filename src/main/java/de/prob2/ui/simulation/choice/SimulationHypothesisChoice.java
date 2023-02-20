@@ -5,14 +5,18 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.Map;
 
 @FXMLInjected
-public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoice {
+public class SimulationHypothesisChoice extends GridPane {
 
 	public static class SimulationHypothesisChoiceItem {
 
@@ -44,15 +48,11 @@ public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoi
 
 	@Inject
 	protected SimulationHypothesisChoice(final StageManager stageManager) {
-		super(stageManager, "simulation_hypothesis_choice.fxml");
+		super();
+		stageManager.loadFXML(this, "simulation_hypothesis_choice.fxml");
 	}
 
-	@Override
 	public boolean checkSelection() {
-		boolean selection = super.checkSelection();
-		if(!selection) {
-			return selection;
-		}
 		try {
 			double probability = Double.parseDouble(tfProbability.getText());
 			double significance = Double.parseDouble(tfSignificance.getText());
@@ -75,9 +75,8 @@ public class SimulationHypothesisChoice extends SimulationAbstractMonteCarloChoi
 		return true;
 	}
 
-	@Override
 	public Map<String, Object> extractInformation() {
-		Map<String, Object> information = super.extractInformation();
+		Map<String, Object> information = new HashMap<>();
 		information.put("HYPOTHESIS_CHECKING_TYPE", hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType());
 		information.put("PROBABILITY", Double.parseDouble(tfProbability.getText()));
 		information.put("SIGNIFICANCE", Double.parseDouble(tfSignificance.getText()));
