@@ -43,7 +43,7 @@
 		<ColumnConstraints hgrow="ALWAYS" />
 	</columnConstraints>
 
-	<Text text="Monte Carlo Simulation" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+	<Text text="%simulation.choice.header.montecarlo" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
 	<Label text="%simulation.choice.numberSimulations" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 	<TextField fx:id="tfSimulations" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
@@ -74,6 +74,6 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="Check Property" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+	<Label text="%simulation.choice.checkProperty" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
 	<CheckBox fx:id="cbCheckProperty" GridPane.rowIndex="8" GridPane.columnIndex="2"/>
 </fx:root>

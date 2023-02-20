@@ -18,11 +18,9 @@
 
 <?import de.prob2.ui.simulation.choice.SimulationPropertyChoice?>
 
-<?import javafx.scene.layout.ColumnConstraints?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.layout.HBox?>
 <?import de.prob2.ui.simulation.choice.SimulationType?>
 <fx:root type="SimulationPropertyChoice" styleClass="border" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="TOP_LEFT" xmlns:fx="http://javafx.com/fxml/1">
 
@@ -35,7 +33,7 @@
 		<TextField fx:id="tfMonteCarloTime" VBox.vgrow="NEVER"/>
 	</fx:define>
 
-	<Text text="Property" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+	<Text text="%simulation.choice.header.property" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
 	<Label text="%simulation.choice.check" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 	<ChoiceBox fx:id="checkingChoice" GridPane.rowIndex="2" GridPane.columnIndex="2">
@@ -51,7 +49,7 @@
 	</ChoiceBox>
 	<Spacer/>
 
-	<Label text="Test: " GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+	<Label text="%simulation.choice.test" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
 	<ChoiceBox fx:id="simulationChoice" GridPane.rowIndex="4" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">

@@ -45,9 +45,7 @@
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
 
-
 					<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
-
 
 					<Spacer/>
 
