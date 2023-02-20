@@ -3,7 +3,6 @@ package de.prob2.ui.visb;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -41,14 +40,14 @@ public class VisBFileHandler {
 	 */
 	public VisBVisualisation constructVisualisationFromJSON(Path jsonPath) throws IOException {
 		jsonPath = jsonPath.toRealPath();
-		if (!Files.isRegularFile(jsonPath)) {
-			throw new IOException("given json path is not a regular file: " + jsonPath);
+		if (!Files.isRegularFile(jsonPath) && !jsonPath.toFile().isDirectory()) {
+			throw new IOException("Given json path is not a regular file: " + jsonPath);
 		}
 
-		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPath.toString());
+		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPath.toFile().isDirectory() ? "" : jsonPath.toString());
 
 		currentTrace.getStateSpace().execute(loadCmd);
-		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.toString());
+		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.toFile().isDirectory() ? "" : jsonPath.toString());
 
 		currentTrace.getStateSpace().execute(svgCmd);
 		String svgPathString = svgCmd.getSvgPath();

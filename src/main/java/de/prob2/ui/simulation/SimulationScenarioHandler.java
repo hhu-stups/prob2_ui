@@ -27,12 +27,11 @@ public class SimulationScenarioHandler {
 	private SimulatorStage simulatorStage;
 
 	@Inject
-	public SimulationScenarioHandler(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
+	public SimulationScenarioHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
 									final Injector injector) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		stageManager.loadFXML(this, "simulation_generated_traces.fxml");
 	}
 
 

@@ -45,14 +45,16 @@ public class SimulationConfigurationChecker {
 		}
 		//Check whether given operation name exists
 		OperationInfo opInfo = stateSpace.getLoadedMachine().getMachineOperationInfo(activatedOp);
-		if(opInfo == null) {
+		if(!"skip".equals(activatedOp) && opInfo == null) {
 			errors.add(new ConfigurationCheckingError(String.format("Used operation %s does not exist", activatedOp)));
 			return;
 		}
 
 		Set<String> operationVariables = new HashSet<>();
-		operationVariables.addAll(opInfo.getNonDetWrittenVariables());
-		operationVariables.addAll(opInfo.getParameterNames());
+		if(opInfo != null) {
+			operationVariables.addAll(opInfo.getNonDetWrittenVariables());
+			operationVariables.addAll(opInfo.getParameterNames());
+		}
 
 		if(probability == null) {
 			// Check whether given variables cover all non-deterministic variables and parameters of the operation
