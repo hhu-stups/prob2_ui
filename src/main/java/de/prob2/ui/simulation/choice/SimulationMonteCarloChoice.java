@@ -145,6 +145,9 @@ public class SimulationMonteCarloChoice extends GridPane {
 	private TextField tfSteps;
 
 	@FXML
+	private CheckBox cbMaxStepsBeforeProperty;
+
+	@FXML
 	private TextField tfMaxStepsBeforeProperty;
 
 	@FXML
@@ -158,6 +161,9 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 	@FXML
 	private TextField tfEndingTime;
+
+	@FXML
+	private CheckBox cbStartingChoice;
 
 	@FXML
 	private ChoiceBox<SimulationStartingItem> startingChoice;
@@ -182,12 +188,12 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 	@FXML
 	private void initialize() {
+		tfMaxStepsBeforeProperty.visibleProperty().bind(cbMaxStepsBeforeProperty.selectedProperty());
+		startingChoice.visibleProperty().bind(cbStartingChoice.selectedProperty());
 		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.getChildren().removeAll(lbStartAfter, tfStartAfter, lbStartingPredicate, tfStartingPredicate, lbStartingTime, tfStartingTime);
 			if(to != null) {
 				switch (to.getStartingType()) {
-					case NO_CONDITION:
-						break;
 					case START_AFTER_STEPS:
 						this.add(lbStartAfter, 1, 5);
 						this.add(tfStartAfter, 2, 5);
@@ -236,38 +242,38 @@ public class SimulationMonteCarloChoice extends GridPane {
 		SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
 		SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
 
-		if(startingItem == null || endingItem == null) {
+		if(endingItem == null) {
 			return false;
 		}
 		try {
 			int numberSimulations = Integer.parseInt(tfSimulations.getText());
-			int stepsBeforeProperty = Integer.parseInt(tfMaxStepsBeforeProperty.getText());
+			int stepsBeforeProperty = cbMaxStepsBeforeProperty.isSelected() ? Integer.parseInt(tfMaxStepsBeforeProperty.getText()) : 0;
 			if(numberSimulations < 0 || stepsBeforeProperty < 0) {
 				return false;
 			}
-			switch (startingItem.getStartingType()) {
-				case NO_CONDITION:
-					break;
-				case START_AFTER_STEPS:
-					int startAfterSteps = Integer.parseInt(tfStartAfter.getText());
-					if(startAfterSteps < 0) {
-						return false;
-					}
-					break;
-				case STARTING_PREDICATE:
-				case STARTING_PREDICATE_ACTIVATED:
-					if(tfStartingPredicate.getText().isEmpty()) {
-						return false;
-					}
-					break;
-				case STARTING_TIME:
-					int startingTime = Integer.parseInt(tfStartingTime.getText());
-					if(startingTime < 0) {
-						return false;
-					}
-					break;
-				default:
-					break;
+			if(startingItem != null) {
+				switch (startingItem.getStartingType()) {
+					case START_AFTER_STEPS:
+						int startAfterSteps = Integer.parseInt(tfStartAfter.getText());
+						if (startAfterSteps < 0) {
+							return false;
+						}
+						break;
+					case STARTING_PREDICATE:
+					case STARTING_PREDICATE_ACTIVATED:
+						if (tfStartingPredicate.getText().isEmpty()) {
+							return false;
+						}
+						break;
+					case STARTING_TIME:
+						int startingTime = Integer.parseInt(tfStartingTime.getText());
+						if (startingTime < 0) {
+							return false;
+						}
+						break;
+					default:
+						break;
+				}
 			}
 
 			switch(endingItem.getEndingType()) {
@@ -301,13 +307,11 @@ public class SimulationMonteCarloChoice extends GridPane {
 	public Map<String, Object> extractInformation() {
 		Map<String, Object> information = new HashMap<>();
 		information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
-		information.put("MAX_STEPS_BEFORE_PROPERTY", Integer.parseInt(tfMaxStepsBeforeProperty.getText()));
+		information.put("MAX_STEPS_BEFORE_PROPERTY", cbMaxStepsBeforeProperty.isSelected() ? Integer.parseInt(tfMaxStepsBeforeProperty.getText()): 0);
 
 		SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
 		if(startingItem != null) {
 			switch (startingItem.getStartingType()) {
-				case NO_CONDITION:
-					break;
 				case START_AFTER_STEPS:
 					information.put("START_AFTER_STEPS", Integer.parseInt(tfStartAfter.getText()));
 					break;
