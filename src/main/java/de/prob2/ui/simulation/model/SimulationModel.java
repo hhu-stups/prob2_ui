@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;

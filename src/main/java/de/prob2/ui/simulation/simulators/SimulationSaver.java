@@ -17,7 +17,7 @@ import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.table.SimulationItem;
 
 @Singleton
@@ -26,14 +26,14 @@ public class SimulationSaver extends ProBFileHandler {
 	public static final String SIMULATION_EXTENSION = "json";
 	public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
-	private final JacksonManager<SimulationConfiguration> jsonManager;
+	private final JacksonManager<SimulationModelConfiguration> jsonManager;
 
 	@Inject
-	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final ObjectMapper objectMapper, final JacksonManager<SimulationConfiguration> jsonManager, final CurrentProject currentProject, final I18n i18n) {
+	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final ObjectMapper objectMapper, final JacksonManager<SimulationModelConfiguration> jsonManager, final CurrentProject currentProject, final I18n i18n) {
 		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);
 		this.jsonManager = jsonManager;
 
-		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationConfiguration.class, SimulationConfiguration.SimulationFileType.TIMED_TRACE.getName(), SimulationConfiguration.CURRENT_FORMAT_VERSION));
+		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationModelConfiguration.class, SimulationModelConfiguration.SimulationFileType.TIMED_TRACE.getName(), SimulationModelConfiguration.CURRENT_FORMAT_VERSION));
 	}
 
 	public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
@@ -44,13 +44,13 @@ public class SimulationSaver extends ProBFileHandler {
 	}
 
 	private JsonMetadata createMetadata(String createdBy) {
-		return updateMetadataBuilder(SimulationConfiguration.metadataBuilder(SimulationConfiguration.SimulationFileType.TIMED_TRACE))
+		return updateMetadataBuilder(SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.TIMED_TRACE))
 				.withCreator(createdBy)
 				.build();
 	}
 
 	private void saveConfiguration(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
-		SimulationConfiguration configuration = SimulationCreator.createConfiguration(trace, timestamps, true, jsonMetadata);
+		SimulationModelConfiguration configuration = SimulationCreator.createConfiguration(trace, timestamps, true, jsonMetadata);
 		this.jsonManager.writeToFile(location, configuration);
 	}
 

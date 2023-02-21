@@ -11,7 +11,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class SimulationCreator {
 
-	public static SimulationConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
+	public static SimulationModelConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
 		PersistentTrace persistentTrace = new PersistentTrace(trace);
 		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
 
@@ -42,14 +42,14 @@ public class SimulationCreator {
 
 			int time = timestamps.get(i) - currentTimestamp;
 			Map<String, String> fixedVariables = createFixedVariables(SimulationHelperFunctions.mergeValues(transition.getParameters(), transition.getDestinationStateVariables()), opInfo);
-			fixedVariables = fixedVariables.isEmpty() ? null : fixedVariables;
+			fixedVariables = fixedVariables == null || fixedVariables.isEmpty() ? null : fixedVariables;
 
 			List<String> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
 			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations);
 			activationConfigurations.add(activationConfig);
 			currentTimestamp = timestamps.get(i);
 		}
-		return new SimulationConfiguration(activationConfigurations, new ArrayList<>(), metadata);
+		return new SimulationModelConfiguration(activationConfigurations, new ArrayList<>(), metadata);
 	}
 
 	public static Map<String, String> computeFixedVariablesFromDestinationValues(Map<IEvalElement, AbstractEvalResult> destinationValueMap) {

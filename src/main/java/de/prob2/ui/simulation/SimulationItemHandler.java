@@ -18,6 +18,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;

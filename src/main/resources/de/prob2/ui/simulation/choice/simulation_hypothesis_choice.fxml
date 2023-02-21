@@ -5,10 +5,7 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-
 
 <!-- Do not remove the following imports as they are detected as unused accidentally -->
 
@@ -17,82 +14,15 @@
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationEndingItem?>
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationStartingItem?>
 
-<fx:root type="SimulationHypothesisChoice" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1">
-	<fx:define>
+<?import javafx.scene.text.Text?>
 
-		<Label fx:id="lbStartAfter" text="%simulation.choice.startAfterSteps"/>
-		<TextField fx:id="tfStartAfter"/>
+<?import de.prob2.ui.sharedviews.Spacer?>
+<fx:root type="SimulationHypothesisChoice" styleClass="border" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="TOP_LEFT" xmlns:fx="http://javafx.com/fxml/1">
 
-		<Label fx:id="lbStartingPredicate" text="%simulation.choice.startingPredicate"/>
-		<TextField fx:id="tfStartingPredicate"/>
+	<Text text="%simulation.choice.header.test" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-		<Label fx:id="lbStartingTime" text="%simulation.choice.startingTime"/>
-		<TextField fx:id="tfStartingTime"/>
-
-		<Label fx:id="lbSteps" text="%simulation.choice.stepsPerSimulation"/>
-		<TextField fx:id="tfSteps"/>
-
-		<Label fx:id="lbEndingPredicate" text="%simulation.choice.endingPredicate"/>
-		<TextField fx:id="tfEndingPredicate"/>
-
-		<Label fx:id="lbEndingTime" text="%simulation.choice.endingTime"/>
-		<TextField fx:id="tfEndingTime"/>
-
-		<Label fx:id="lbPredicate" text="%simulation.choice.predicate" />
-		<TextField fx:id="tfPredicate" VBox.vgrow="NEVER"/>
-
-		<Label fx:id="lbMonteCarloTime" text="%simulation.choice.time" />
-		<TextField fx:id="tfMonteCarloTime" VBox.vgrow="NEVER"/>
-	</fx:define>
-	<columnConstraints>
-		<ColumnConstraints hgrow="ALWAYS" />
-	</columnConstraints>
-	<Label text="%simulation.choice.numberSimulations" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfSimulations" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
-
-	<Label text="%simulation.choice.maxStepsBeforeProperty" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfMaxStepsBeforeProperty" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
-
-	<Label text="%simulation.choice.startingCondition" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="3" GridPane.columnIndex="2">
-		<items>
-			<FXCollections fx:factory="observableArrayList">
-				<SimulationMonteCarloChoice.SimulationStartingItem startingType="NO_CONDITION"/>
-				<SimulationMonteCarloChoice.SimulationStartingItem startingType="START_AFTER_STEPS"/>
-				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE"/>
-				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE_ACTIVATED"/>
-				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_TIME"/>
-			</FXCollections>
-		</items>
-	</ChoiceBox>
-
-	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="5" GridPane.columnIndex="2">
-		<items>
-			<FXCollections fx:factory="observableArrayList">
-				<SimulationMonteCarloChoice.SimulationEndingItem endingType="NUMBER_STEPS"/>
-				<SimulationMonteCarloChoice.SimulationEndingItem endingType="ENDING_PREDICATE"/>
-				<SimulationMonteCarloChoice.SimulationEndingItem endingType="ENDING_TIME"/>
-			</FXCollections>
-		</items>
-	</ChoiceBox>
-
-
-	<Label text="%simulation.choice.check" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="checkingChoice" GridPane.rowIndex="7" GridPane.columnIndex="2">
-		<items>
-			<FXCollections fx:factory="observableArrayList">
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="ALL_INVARIANTS"/>
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="PREDICATE_INVARIANT"/>
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="PREDICATE_FINAL"/>
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="PREDICATE_EVENTUALLY"/>
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="TIMING"/>
-			</FXCollections>
-		</items>
-	</ChoiceBox>
-
-	<Label text="%simulation.choice.hypothesis" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="hypothesisCheckingChoice" GridPane.rowIndex="9" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.hypothesis" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="hypothesisCheckingChoice" GridPane.rowIndex="2" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationHypothesisChoice.SimulationHypothesisChoiceItem checkingType="LEFT_TAILED"/>
@@ -102,9 +32,12 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.probability" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfProbability" GridPane.rowIndex="10" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.probability" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfProbability" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.significance" GridPane.rowIndex="11" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfSignificance" GridPane.rowIndex="11" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.significance" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfSignificance" GridPane.rowIndex="4" GridPane.columnIndex="2"/>
+
+
+	<Spacer/>
 </fx:root>

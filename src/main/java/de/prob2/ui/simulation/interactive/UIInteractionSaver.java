@@ -9,7 +9,7 @@ import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
 import java.io.IOException;
@@ -21,24 +21,24 @@ public class UIInteractionSaver extends ProBFileHandler {
 
 	private final RealTimeSimulator realTimeSimulator;
 
-	private final JacksonManager<SimulationConfiguration> jsonManager;
+	private final JacksonManager<SimulationModelConfiguration> jsonManager;
 
 	@Inject
 	public UIInteractionSaver(final VersionInfo versionInfo, final CurrentProject currentProject, final StageManager stageManager,
 							  final FileChooserManager fileChooserManager, final I18n i18n, final UIInteractionHandler uiInteraction,
-							  final RealTimeSimulator realTimeSimulator, final JacksonManager<SimulationConfiguration> jsonManager,
+							  final RealTimeSimulator realTimeSimulator, final JacksonManager<SimulationModelConfiguration> jsonManager,
 							  final ObjectMapper objectMapper) {
 		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);
 		this.uiInteraction = uiInteraction;
 		this.realTimeSimulator = realTimeSimulator;
 		this.jsonManager = jsonManager;
-		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationConfiguration.class, SimulationConfiguration.SimulationFileType.INTERACTION_REPLAY.getName(), SimulationConfiguration.CURRENT_FORMAT_VERSION));
+		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationModelConfiguration.class, SimulationModelConfiguration.SimulationFileType.INTERACTION_REPLAY.getName(), SimulationModelConfiguration.CURRENT_FORMAT_VERSION));
 	}
 
 	public void saveUIInteractions() throws IOException {
 		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveUIReplay.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, "json");
 		if (path != null) {
-			SimulationConfiguration configuration = uiInteraction.createUserInteractionSimulation(realTimeSimulator);
+			SimulationModelConfiguration configuration = uiInteraction.createUserInteractionSimulation(realTimeSimulator);
 			this.jsonManager.writeToFile(path, configuration);
 		}
 

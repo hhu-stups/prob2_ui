@@ -5,14 +5,18 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 
 import javax.inject.Inject;
+import java.util.HashMap;
 import java.util.Map;
 
 @FXMLInjected
-public class SimulationEstimationChoice extends SimulationAbstractMonteCarloChoice {
+public class SimulationEstimationChoice extends GridPane {
 
 	public static class SimulationEstimationChoiceItem {
 
@@ -44,15 +48,11 @@ public class SimulationEstimationChoice extends SimulationAbstractMonteCarloChoi
 
 	@Inject
 	protected SimulationEstimationChoice(final StageManager stageManager) {
-		super(stageManager, "simulation_estimation_choice.fxml");
+		super();
+		stageManager.loadFXML(this, "simulation_estimation_choice.fxml");
 	}
 
-	@Override
 	public boolean checkSelection() {
-		boolean selection = super.checkSelection();
-		if(!selection) {
-			return selection;
-		}
 		try {
 			double desiredValue = Double.parseDouble(tfDesiredValue.getText());
 			double epsilon = Double.parseDouble(tfEpsilon.getText());
@@ -73,9 +73,8 @@ public class SimulationEstimationChoice extends SimulationAbstractMonteCarloChoi
 		return true;
 	}
 
-	@Override
 	public Map<String, Object> extractInformation() {
-		Map<String, Object> information = super.extractInformation();
+		Map<String, Object> information = new HashMap<>();
 		information.put("ESTIMATION_TYPE", estimationChoice.getSelectionModel().getSelectedItem().getEstimationType());
 		information.put("DESIRED_VALUE", Double.parseDouble(tfDesiredValue.getText()));
 		information.put("EPSILON", Double.parseDouble(tfEpsilon.getText()));

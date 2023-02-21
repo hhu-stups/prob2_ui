@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.check.tracereplay.PersistentTrace;
-import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
@@ -12,7 +11,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
@@ -66,7 +65,10 @@ public class UIInteractionHandler {
 	}
 
 	public void loadUIListenersIntoSimulator(RealTimeSimulator realTimeSimulator) {
-		SimulationConfiguration config = realTimeSimulator.getConfig();
+		if(!(realTimeSimulator.getConfig() instanceof SimulationModelConfiguration)) {
+			return;
+		}
+		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		List<UIListenerConfiguration> uiListeners = config.getUiListenerConfigurations();
 		for(UIListenerConfiguration uiListener : uiListeners) {
 			String event = uiListener.getEvent();
@@ -137,7 +139,8 @@ public class UIInteractionHandler {
 	}
 
 	private List<ActivationConfiguration> createUserInteractions(RealTimeSimulator realTimeSimulator) {
-		List<UIListenerConfiguration> uiListeners = realTimeSimulator.getConfig().getUiListenerConfigurations();
+		SimulationModelConfiguration simulationModelConfiguration = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+		List<UIListenerConfiguration> uiListeners = simulationModelConfiguration.getUiListenerConfigurations();
 		List<ActivationConfiguration> userInteractions = new ArrayList<>();
 		for(int interactionCounter = 0; interactionCounter < userTransitions.size(); interactionCounter++) {
 			userInteractions.add(createUserInteraction(interactionCounter, uiListeners));
@@ -218,11 +221,12 @@ public class UIInteractionHandler {
 		return activationConfigurationsForResult;
 	}
 
-	public SimulationConfiguration createUserInteractionSimulation(RealTimeSimulator realTimeSimulator) {
-		List<ActivationConfiguration> activationConfigurations = realTimeSimulator.getConfig().getActivationConfigurations();
+	public SimulationModelConfiguration createUserInteractionSimulation(RealTimeSimulator realTimeSimulator) {
+		SimulationModelConfiguration simulationModelConfiguration = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+		List<ActivationConfiguration> activationConfigurations = simulationModelConfiguration.getActivationConfigurations();
 		List<ActivationConfiguration> userInteractions = createUserInteractions(realTimeSimulator);
 		List<ActivationConfiguration> activationConfigurationsForResult = createActivationConfigurationsFromUserInteraction(activationConfigurations, userInteractions);
-		return new SimulationConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationConfiguration.metadataBuilder(SimulationConfiguration.SimulationFileType.INTERACTION_REPLAY).withSavedNow().withUserCreator().build());
+		return new SimulationModelConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.INTERACTION_REPLAY).withSavedNow().withUserCreator().build());
 	}
 
 	public ObjectProperty<Transition> getLastUserInteraction() {

@@ -26,7 +26,7 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.simulation.SimulationModel;
+import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;

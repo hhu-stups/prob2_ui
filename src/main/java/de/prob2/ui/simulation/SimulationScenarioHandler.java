@@ -5,10 +5,9 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.SimulationCreator;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
@@ -45,7 +44,7 @@ public class SimulationScenarioHandler {
 	public void playTrace(SimulationTracesView.SimulationTraceItem traceItem) {
 		Trace trace = new Trace(currentTrace.getStateSpace());
 		currentTrace.set(trace);
-		SimulationConfiguration config = SimulationCreator.createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false, SimulationConfiguration.metadataBuilder(SimulationConfiguration.SimulationFileType.TIMED_TRACE).build());
+		SimulationModelConfiguration config = SimulationCreator.createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false, SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.TIMED_TRACE).build());
 		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 
 		try {

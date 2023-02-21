@@ -4,9 +4,11 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
 import javafx.beans.NamedArg;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -113,89 +115,97 @@ public class SimulationMonteCarloChoice extends GridPane {
 		}
 	}
 
-	protected SimulationChoosingStage choosingStage;
+	private SimulationChoosingStage choosingStage;
 
 	@FXML
-	protected TextField tfSimulations;
+	private TextField tfSimulations;
 
 	@FXML
-	protected Label lbStartAfter;
+	private Label lbStartAfter;
 
 	@FXML
-	protected TextField tfStartAfter;
+	private TextField tfStartAfter;
 
 	@FXML
-	protected Label lbStartingPredicate;
+	private Label lbStartingPredicate;
 
 	@FXML
-	protected TextField tfStartingPredicate;
+	private TextField tfStartingPredicate;
 
 	@FXML
-	protected Label lbStartingTime;
+	private Label lbStartingTime;
 
 	@FXML
-	protected TextField tfStartingTime;
+	private TextField tfStartingTime;
 
 	@FXML
-	protected Label lbSteps;
+	private Label lbSteps;
 
 	@FXML
-	protected TextField tfSteps;
+	private TextField tfSteps;
 
 	@FXML
-	protected TextField tfMaxStepsBeforeProperty;
+	private CheckBox cbMaxStepsBeforeProperty;
 
 	@FXML
-	protected Label lbEndingPredicate;
+	private TextField tfMaxStepsBeforeProperty;
 
 	@FXML
-	protected TextField tfEndingPredicate;
+	private Label lbEndingPredicate;
 
 	@FXML
-	protected Label lbEndingTime;
+	private TextField tfEndingPredicate;
 
 	@FXML
-	protected TextField tfEndingTime;
+	private Label lbEndingTime;
 
 	@FXML
-	protected ChoiceBox<SimulationStartingItem> startingChoice;
+	private TextField tfEndingTime;
 
 	@FXML
-	protected ChoiceBox<SimulationEndingItem> endingChoice;
+	private CheckBox cbStartingChoice;
+
+	@FXML
+	private ChoiceBox<SimulationStartingItem> startingChoice;
+
+	@FXML
+	private ChoiceBox<SimulationEndingItem> endingChoice;
+
+	@FXML
+	private CheckBox cbCheckProperty;
 
 
 	@Inject
-	protected SimulationMonteCarloChoice(final StageManager stageManager) {
+	private SimulationMonteCarloChoice(final StageManager stageManager) {
 		super();
 		stageManager.loadFXML(this, "simulation_monte_carlo_choice.fxml");
 	}
 
-	protected SimulationMonteCarloChoice() {
+	private SimulationMonteCarloChoice() {
 		super();
 		//Default constructor for super classes using other FXML file
 	}
 
 	@FXML
-	protected void initialize() {
-
+	private void initialize() {
+		tfMaxStepsBeforeProperty.visibleProperty().bind(cbMaxStepsBeforeProperty.selectedProperty());
+		startingChoice.visibleProperty().bind(cbStartingChoice.selectedProperty());
 		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.getChildren().removeAll(lbStartAfter, tfStartAfter, lbStartingPredicate, tfStartingPredicate, lbStartingTime, tfStartingTime);
 			if(to != null) {
 				switch (to.getStartingType()) {
-					case NO_CONDITION:
-						break;
 					case START_AFTER_STEPS:
-						this.add(lbStartAfter, 1, 4);
-						this.add(tfStartAfter, 2, 4);
+						this.add(lbStartAfter, 1, 5);
+						this.add(tfStartAfter, 2, 5);
 						break;
 					case STARTING_PREDICATE:
 					case STARTING_PREDICATE_ACTIVATED:
-						this.add(lbStartingPredicate, 1, 4);
-						this.add(tfStartingPredicate, 2, 4);
+						this.add(lbStartingPredicate, 1, 5);
+						this.add(tfStartingPredicate, 2, 5);
 						break;
 					case STARTING_TIME:
-						this.add(lbStartingTime, 1, 4);
-						this.add(tfStartingTime, 2, 4);
+						this.add(lbStartingTime, 1, 5);
+						this.add(tfStartingTime, 2, 5);
 						break;
 					default:
 						break;
@@ -209,16 +219,16 @@ public class SimulationMonteCarloChoice extends GridPane {
 			if(to != null) {
 				switch (to.getEndingType()) {
 					case NUMBER_STEPS:
-						this.add(lbSteps, 1, 6);
-						this.add(tfSteps, 2, 6);
+						this.add(lbSteps, 1, 7);
+						this.add(tfSteps, 2, 7);
 						break;
 					case ENDING_PREDICATE:
-						this.add(lbEndingPredicate, 1, 6);
-						this.add(tfEndingPredicate, 2, 6);
+						this.add(lbEndingPredicate, 1, 7);
+						this.add(tfEndingPredicate, 2, 7);
 						break;
 					case ENDING_TIME:
-						this.add(lbEndingTime, 1, 6);
-						this.add(tfEndingTime, 2, 6);
+						this.add(lbEndingTime, 1, 7);
+						this.add(tfEndingTime, 2, 7);
 						break;
 					default:
 						break;
@@ -232,38 +242,38 @@ public class SimulationMonteCarloChoice extends GridPane {
 		SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
 		SimulationEndingItem endingItem = endingChoice.getSelectionModel().getSelectedItem();
 
-		if(startingItem == null || endingItem == null) {
+		if(endingItem == null) {
 			return false;
 		}
 		try {
 			int numberSimulations = Integer.parseInt(tfSimulations.getText());
-			int stepsBeforeProperty = Integer.parseInt(tfMaxStepsBeforeProperty.getText());
+			int stepsBeforeProperty = cbMaxStepsBeforeProperty.isSelected() ? Integer.parseInt(tfMaxStepsBeforeProperty.getText()) : 0;
 			if(numberSimulations < 0 || stepsBeforeProperty < 0) {
 				return false;
 			}
-			switch (startingItem.getStartingType()) {
-				case NO_CONDITION:
-					break;
-				case START_AFTER_STEPS:
-					int startAfterSteps = Integer.parseInt(tfStartAfter.getText());
-					if(startAfterSteps < 0) {
-						return false;
-					}
-					break;
-				case STARTING_PREDICATE:
-				case STARTING_PREDICATE_ACTIVATED:
-					if(tfStartingPredicate.getText().isEmpty()) {
-						return false;
-					}
-					break;
-				case STARTING_TIME:
-					int startingTime = Integer.parseInt(tfStartingTime.getText());
-					if(startingTime < 0) {
-						return false;
-					}
-					break;
-				default:
-					break;
+			if(startingItem != null) {
+				switch (startingItem.getStartingType()) {
+					case START_AFTER_STEPS:
+						int startAfterSteps = Integer.parseInt(tfStartAfter.getText());
+						if (startAfterSteps < 0) {
+							return false;
+						}
+						break;
+					case STARTING_PREDICATE:
+					case STARTING_PREDICATE_ACTIVATED:
+						if (tfStartingPredicate.getText().isEmpty()) {
+							return false;
+						}
+						break;
+					case STARTING_TIME:
+						int startingTime = Integer.parseInt(tfStartingTime.getText());
+						if (startingTime < 0) {
+							return false;
+						}
+						break;
+					default:
+						break;
+				}
 			}
 
 			switch(endingItem.getEndingType()) {
@@ -297,13 +307,11 @@ public class SimulationMonteCarloChoice extends GridPane {
 	public Map<String, Object> extractInformation() {
 		Map<String, Object> information = new HashMap<>();
 		information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
-		information.put("MAX_STEPS_BEFORE_PROPERTY", Integer.parseInt(tfMaxStepsBeforeProperty.getText()));
+		information.put("MAX_STEPS_BEFORE_PROPERTY", cbMaxStepsBeforeProperty.isSelected() ? Integer.parseInt(tfMaxStepsBeforeProperty.getText()): 0);
 
 		SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
 		if(startingItem != null) {
 			switch (startingItem.getStartingType()) {
-				case NO_CONDITION:
-					break;
 				case START_AFTER_STEPS:
 					information.put("START_AFTER_STEPS", Integer.parseInt(tfStartAfter.getText()));
 					break;
@@ -340,57 +348,15 @@ public class SimulationMonteCarloChoice extends GridPane {
 		return information;
 	}
 
-	public void setSimulationChoosingStage(SimulationChoosingStage choosingStage) {
+	public BooleanProperty checkPropertyProperty() {
+		return cbCheckProperty.selectedProperty();
+	}
+
+	public boolean checkProperty() {
+		return cbCheckProperty.isSelected();
+	}
+
+	public void setChoosingStage(SimulationChoosingStage choosingStage) {
 		this.choosingStage = choosingStage;
 	}
-
-	public void bindMaxStepsBeforePropertyProperty(SimpleStringProperty property) {
-		tfMaxStepsBeforeProperty.textProperty().bindBidirectional(property);
-	}
-
-	public void bindSimulationsProperty(SimpleStringProperty property) {
-		tfSimulations.textProperty().bindBidirectional(property);
-	}
-
-	public void bindStartingProperty(SimpleStringProperty startAfterProperty, SimpleStringProperty startingPredicateProperty, SimpleStringProperty startingTimeProperty) {
-		tfStartAfter.textProperty().bindBidirectional(startAfterProperty);
-		tfStartingPredicate.textProperty().bindBidirectional(startingPredicateProperty);
-		tfStartingTime.textProperty().bindBidirectional(startingTimeProperty);
-	}
-
-	public void bindEndingProperty(SimpleStringProperty stepsProperty, SimpleStringProperty endingPredicateProperty, SimpleStringProperty endingTimeProperty) {
-		tfSteps.textProperty().bindBidirectional(stepsProperty);
-		tfEndingPredicate.textProperty().bindBidirectional(endingPredicateProperty);
-		tfEndingTime.textProperty().bindBidirectional(endingTimeProperty);
-	}
-
-	public void bindStartingItemProperty(SimpleObjectProperty<SimulationStartingItem> property) {
-		// Bind bidirectional does not work on ReadOnlyObjectProperty
-		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(!Objects.equals(from, to)) {
-				property.set(to);
-			}
-		});
-		property.addListener((observable, from, to) -> {
-			if(!Objects.equals(from, to)) {
-				startingChoice.getSelectionModel().select(to);
-			}
-		});
-	}
-
-	public void bindEndingItemProperty(SimpleObjectProperty<SimulationEndingItem> property) {
-		// Bind bidirectional does not work on ReadOnlyObjectProperty
-		endingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(!Objects.equals(from, to)) {
-				property.set(to);
-			}
-		});
-		property.addListener((observable, from, to) -> {
-			if(!Objects.equals(from, to)) {
-				endingChoice.getSelectionModel().select(to);
-			}
-		});
-	}
-
-
 }

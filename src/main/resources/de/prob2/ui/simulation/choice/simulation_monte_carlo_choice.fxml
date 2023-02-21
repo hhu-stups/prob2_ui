@@ -14,8 +14,9 @@
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationEndingItem?>
 
 
-
-<fx:root type="SimulationMonteCarloChoice" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="CENTER" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.CheckBox?>
+<fx:root type="SimulationMonteCarloChoice" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="TOP_LEFT" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 
 		<Label fx:id="lbStartAfter" text="%simulation.choice.startAfterSteps"/>
@@ -41,17 +42,19 @@
 	<columnConstraints>
 		<ColumnConstraints hgrow="ALWAYS" />
 	</columnConstraints>
-	<Label text="%simulation.choice.numberSimulations" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfSimulations" GridPane.rowIndex="1" GridPane.columnIndex="2"/>
 
-	<Label text="%simulation.choice.maxStepsBeforeProperty" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
-	<TextField fx:id="tfMaxStepsBeforeProperty" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+	<Text text="%simulation.choice.header.montecarlo" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-	<Label text="%simulation.choice.startingCondition" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="3" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.numberSimulations" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfSimulations" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
+
+	<CheckBox fx:id="cbMaxStepsBeforeProperty" text="%simulation.choice.maxStepsBeforeProperty" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+	<TextField fx:id="tfMaxStepsBeforeProperty" GridPane.rowIndex="3" GridPane.columnIndex="2"/>
+
+	<CheckBox fx:id="cbStartingChoice" text="%simulation.choice.startingCondition" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="startingChoice" GridPane.rowIndex="4" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
-				<SimulationMonteCarloChoice.SimulationStartingItem startingType="NO_CONDITION"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="START_AFTER_STEPS"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE"/>
 				<SimulationMonteCarloChoice.SimulationStartingItem startingType="STARTING_PREDICATE_ACTIVATED"/>
@@ -60,8 +63,8 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="5" GridPane.columnIndex="2">
+	<Label text="%simulation.choice.endingCondition" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="endingChoice" GridPane.rowIndex="6" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
 				<SimulationMonteCarloChoice.SimulationEndingItem endingType="NUMBER_STEPS"/>
@@ -70,4 +73,7 @@
 			</FXCollections>
 		</items>
 	</ChoiceBox>
+
+	<Label text="%simulation.choice.checkProperty" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+	<CheckBox fx:id="cbCheckProperty" GridPane.rowIndex="8" GridPane.columnIndex="2"/>
 </fx:root>

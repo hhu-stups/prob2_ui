@@ -25,7 +25,6 @@ import java.util.Map;
 public class SimulationMonteCarlo extends Simulator {
 
 	public enum StartingType {
-		NO_CONDITION("No Condition"),
 		START_AFTER_STEPS("Start after Number of Steps"),
 		STARTING_PREDICATE("Starting Predicate"),
 		STARTING_PREDICATE_ACTIVATED("Starting Predicate (activated)"),
