@@ -43,7 +43,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		@Override
 		public void traceChange(final Trace currentTrace, final boolean currentAnimationChanged) {
 			try {
-				if (currentTrace != null && !currentTrace.getCurrentState().isExplored()) {
+				if (currentTrace != null) {
 					exploreState(currentTrace.getCurrentState());
 				}
 				// Has to be a lambda. For some reason, using a method reference here causes an IllegalAccessError at runtime.
@@ -57,7 +57,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 
 		private void exploreState(State currentState) {
 			try {
-				currentState.explore();
+				currentState.exploreIfNeeded();
 			} catch (RuntimeException e) {
 				LOGGER.error("Exception while exploring new state", e);
 				//Casting currentState.getId() is necessary because it returns a String so that the wrong makeExceptionAlert function is invoked
