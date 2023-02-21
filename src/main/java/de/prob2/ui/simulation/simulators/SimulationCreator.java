@@ -11,7 +11,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,7 +21,7 @@ import java.util.Map;
 
 public class SimulationCreator {
 
-	public static SimulationConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
+	public static SimulationModelConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
 		PersistentTrace persistentTrace = new PersistentTrace(trace);
 		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
 
@@ -49,7 +49,7 @@ public class SimulationCreator {
 			activationConfigurations.add(activationConfig);
 			currentTimestamp = timestamps.get(i);
 		}
-		return new SimulationConfiguration(activationConfigurations, new ArrayList<>(), metadata);
+		return new SimulationModelConfiguration(activationConfigurations, new ArrayList<>(), metadata);
 	}
 
 	public static Map<String, String> computeFixedVariablesFromDestinationValues(Map<IEvalElement, AbstractEvalResult> destinationValueMap) {

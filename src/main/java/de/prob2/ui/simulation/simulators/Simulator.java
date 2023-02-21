@@ -7,8 +7,8 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationConfigurationChecker;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfigurationChecker;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 public abstract class Simulator {
 
-	protected SimulationConfiguration config;
+	protected SimulationModelConfiguration config;
 
 	protected IntegerProperty time;
 
@@ -72,7 +72,7 @@ public abstract class Simulator {
 	}
 
 
-	public void initSimulator(SimulationConfiguration config) throws IOException {
+	public void initSimulator(SimulationModelConfiguration config) throws IOException {
 		this.config = config;
 		if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
 			setPreferences(currentTrace.get());
@@ -117,7 +117,7 @@ public abstract class Simulator {
 	}
 
 	protected void setPreferences(Trace trace) {
-		SimulationConfigurationChecker simulationConfigurationChecker = new SimulationConfigurationChecker(trace.getStateSpace(), this.config);
+		SimulationModelConfigurationChecker simulationConfigurationChecker = new SimulationModelConfigurationChecker(trace.getStateSpace(), this.config);
 		simulationConfigurationChecker.check();
 		if(!simulationConfigurationChecker.getErrors().isEmpty()) {
 			throw new RuntimeException(simulationConfigurationChecker.getErrors().stream().map(Throwable::getMessage).collect(Collectors.joining("\n")));
@@ -238,7 +238,7 @@ public abstract class Simulator {
 		return noActivationQueued;
 	}
 
-	public SimulationConfiguration getConfig() {
+	public SimulationModelConfiguration getConfig() {
 		return config;
 	}
 

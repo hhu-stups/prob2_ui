@@ -37,7 +37,7 @@ import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
@@ -516,7 +516,7 @@ public class SimulatorStage extends Stage {
 	}
 
 	private void loadSimulationItems() {
-		SimulationConfiguration config = realTimeSimulator.getConfig();
+		SimulationModelConfiguration config = realTimeSimulator.getConfig();
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 		if(config != null) {
 			for(ActivationConfiguration activationConfig : config.getActivationConfigurations()) {
@@ -612,9 +612,7 @@ public class SimulatorStage extends Stage {
 			lbTime.setText("");
 			this.time = 0;
 			simulation.reset();
-			if(!configurationPath.get().toFile().isDirectory()) {
-				SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
-			}
+			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
 			loadSimulationItems();
 		}
 	}

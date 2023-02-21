@@ -29,7 +29,7 @@ public class SimulationFileHandler {
 			.setPrettyPrinting()
 			.create();
 
-	public static SimulationConfiguration constructConfigurationFromJSON(Path inputFile) throws IOException, JsonSyntaxException {
+	public static SimulationModelConfiguration constructConfigurationFromJSON(Path inputFile) throws IOException, JsonSyntaxException {
 		Gson gson = new Gson();
 		final JsonObject simulationFile;
 		try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
@@ -38,7 +38,7 @@ public class SimulationFileHandler {
 		List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
 		List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
 		final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
-		return new SimulationConfiguration(activationConfigurations, uiListenerConfigurations, metadata);
+		return new SimulationModelConfiguration(activationConfigurations, uiListenerConfigurations, metadata);
 	}
 
 	private static List<ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {

@@ -10,15 +10,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class SimulationConfigurationChecker {
+public class SimulationModelConfigurationChecker {
 
 	private final StateSpace stateSpace;
 
-	private final SimulationConfiguration simulationConfiguration;
+	private final SimulationModelConfiguration simulationConfiguration;
 
 	private final List<ConfigurationCheckingError> errors;
 
-	public SimulationConfigurationChecker(StateSpace stateSpace, SimulationConfiguration simulationConfiguration) {
+	public SimulationModelConfigurationChecker(StateSpace stateSpace, SimulationModelConfiguration simulationConfiguration) {
 		this.stateSpace = stateSpace;
 		this.simulationConfiguration = simulationConfiguration;
 		this.errors = new ArrayList<>();
