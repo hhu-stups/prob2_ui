@@ -27,6 +27,8 @@ import javafx.scene.control.Alert;
 
 public class SimulationFileHandler {
 
+	public static final String TRACE_FILE_EXTENSION = "json";
+
 	private static final Gson METADATA_GSON = Converters.registerAll(new GsonBuilder())
 			.disableHtmlEscaping()
 			.serializeNulls()
@@ -47,7 +49,7 @@ public class SimulationFileHandler {
 		}
 
 		List<Path> timedTraces = Files.walk(inputFile).filter(p -> !Files.isDirectory(p))
-				.filter(p -> p.toString().toLowerCase().endsWith(TraceFileHandler.TRACE_FILE_EXTENSION))
+				.filter(p -> p.toString().toLowerCase().endsWith(SimulationFileHandler.TRACE_FILE_EXTENSION))
 				.collect(Collectors.toList());
 		return new SimulationBlackBoxModelConfiguration(timedTraces);
 	}

@@ -15,6 +15,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
@@ -26,6 +27,8 @@ import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.layout.BindableGlyph;
@@ -440,13 +443,38 @@ public class SimulatorStage extends Stage {
 	private void runSimulator(RealTimeSimulator realTimeSimulator) {
 		Path path = configurationPath.get();
 		if(path != null) {
-			injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
-			if (lastSimulator.isNull().get() || !lastSimulator.get().equals(realTimeSimulator)) {
-				this.time = 0;
-				SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
+			ISimulationModelConfiguration config = realTimeSimulator.getConfig();
+			Path configPath = null;
+			if(config instanceof SimulationModelConfiguration) {
+				configPath = configurationPath.get();
+				injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
+				if (lastSimulator.isNull().get() || !lastSimulator.get().equals(realTimeSimulator)) {
+					this.time = 0;
+					SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configPath);
+				}
+				realTimeSimulator.run();
+				startTimer(realTimeSimulator);
+			} else { //  SimulationBlackBoxModelConfiguration
+				List<Path> timedTraces = ((SimulationBlackBoxModelConfiguration) config).getTimedTraces();
+				configPath = timedTraces.get((int) (Math.random() * timedTraces.size()));
+				injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
+				try {
+					this.time = 0;
+					ISimulationModelConfiguration modelConfiguration = SimulationFileHandler.constructConfigurationFromJSON(configPath);
+					realTimeSimulator.initSimulator(modelConfiguration);
+				} catch (IOException e) {
+					e.printStackTrace();
+					// TODO
+				}
+
+				Trace trace = new Trace(currentTrace.getStateSpace());
+				currentTrace.set(trace);
+				realTimeSimulator.setupBeforeSimulation(trace);
+				trace.setExploreStateByDefault(false);
+				realTimeSimulator.run();
+				startTimer(realTimeSimulator);
+				trace.setExploreStateByDefault(true);
 			}
-			realTimeSimulator.run();
-			startTimer(realTimeSimulator);
 		}
 	}
 
