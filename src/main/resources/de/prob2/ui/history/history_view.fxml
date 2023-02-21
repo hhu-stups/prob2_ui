@@ -52,7 +52,7 @@
 			<fx:reference source="positionColumn" />
 		</sortOrder>
 		<placeholder>
-			<Label text="%common.noModelLoaded" />
+			<Label fx:id="placeholder" text="%common.noModelLoaded" />
 		</placeholder>
 	</TableView>
 </fx:root>

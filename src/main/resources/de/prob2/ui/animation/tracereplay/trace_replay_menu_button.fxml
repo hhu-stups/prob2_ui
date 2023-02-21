@@ -4,7 +4,7 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.Tooltip?>
-<fx:root type="TraceReplayMenuButton" disable="true" xmlns:fx="http://javafx.com/fxml">
+<fx:root fx:id="TraceReplayMenuButton" type="TraceReplayMenuButton" disable="true" xmlns:fx="http://javafx.com/fxml">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
