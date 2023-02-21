@@ -400,12 +400,6 @@ public class SimulatorStage extends Stage {
 			simulationItems.itemsProperty().unbind();
 			noSimulations.unbind();
 
-			UIInteractionHandler uiInteractionHandler = injector.getInstance(UIInteractionHandler.class);
-			uiInteractionHandler.reset();
-
-			this.loadSimulationIntoSimulator(to);
-			uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
-
 			if(to != null) {
 				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
 				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
@@ -413,6 +407,12 @@ public class SimulatorStage extends Stage {
 				noSimulations.set(true);
 				simulationItems.setItems(FXCollections.observableArrayList());
 			}
+
+			UIInteractionHandler uiInteractionHandler = injector.getInstance(UIInteractionHandler.class);
+			uiInteractionHandler.reset();
+
+			this.loadSimulationIntoSimulator(to);
+			uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
 		});
 
 		btRemoveSimulation.disableProperty().bind(cbSimulation.getSelectionModel().selectedItemProperty().isNull());
@@ -612,7 +612,9 @@ public class SimulatorStage extends Stage {
 			lbTime.setText("");
 			this.time = 0;
 			simulation.reset();
-			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
+			if(!configurationPath.get().toFile().isDirectory()) {
+				SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
+			}
 			loadSimulationItems();
 		}
 	}
