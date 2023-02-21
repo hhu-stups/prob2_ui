@@ -38,6 +38,7 @@ import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationConfiguration;
+import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
@@ -75,6 +76,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -184,7 +186,7 @@ public class SimulatorStage extends Stage {
 
 
 	@FXML
-	private Button btLoadConfiguration;
+	private MenuButton btLoadConfiguration;
 
 	@FXML
 	private Button btSimulate;
@@ -461,13 +463,24 @@ public class SimulatorStage extends Stage {
 	}
 
 	@FXML
-	public void loadConfiguration() {
+	public void loadSimBModel() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("simulation.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().addAll(
 				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json")
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
+		if(path != null) {
+			Path resolvedPath = currentProject.getLocation().relativize(path);
+			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+		}
+	}
+
+	@FXML
+	public void loadSimBTraces() {
+		DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle(i18n.translate("simulation.stage.filechooser.title"));
+		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
 			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));

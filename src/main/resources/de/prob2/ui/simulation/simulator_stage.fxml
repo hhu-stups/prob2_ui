@@ -37,14 +37,18 @@
 								<padding>
 									<Insets left="5.0"/>
 								</padding>
-								<Button fx:id="btLoadConfiguration" onAction="#loadConfiguration">
+								<MenuButton fx:id="btLoadConfiguration">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
 									</graphic>
 									<tooltip>
 										<Tooltip text="%simulation.file.open" />
 									</tooltip>
-								</Button>
+									<items>
+										<MenuItem fx:id="loadSimBModelItem" text="Load SimB Model" onAction="#loadSimBModel"/>
+										<MenuItem fx:id="loadSimBTraces" text="Load SimB Traces (Black Box)" onAction="#loadSimBTraces"/>
+									</items>
+								</MenuButton>
 								<Button fx:id="btSimulate" onAction="#simulate">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY" bindableFontSize="${fontSize.fontSize + 2}" />

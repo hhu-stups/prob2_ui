@@ -42,7 +42,7 @@ public class SimulationCreator {
 
 			int time = timestamps.get(i) - currentTimestamp;
 			Map<String, String> fixedVariables = createFixedVariables(SimulationHelperFunctions.mergeValues(transition.getParameters(), transition.getDestinationStateVariables()), opInfo);
-			fixedVariables = fixedVariables.isEmpty() ? null : fixedVariables;
+			fixedVariables = fixedVariables == null || fixedVariables.isEmpty() ? null : fixedVariables;
 
 			List<String> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
 			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations);

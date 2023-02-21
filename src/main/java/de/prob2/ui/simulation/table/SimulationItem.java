@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.simulation.SimulationModel;
+import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
