@@ -9,6 +9,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
@@ -20,6 +22,8 @@ import com.google.gson.JsonSyntaxException;
 
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.Transition;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import javafx.scene.control.Alert;
 
 public class SimulationFileHandler {
 
@@ -29,16 +33,23 @@ public class SimulationFileHandler {
 			.setPrettyPrinting()
 			.create();
 
-	public static SimulationModelConfiguration constructConfigurationFromJSON(Path inputFile) throws IOException, JsonSyntaxException {
-		Gson gson = new Gson();
-		final JsonObject simulationFile;
-		try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
-			simulationFile = gson.fromJson(reader, JsonObject.class);
+	public static ISimulationModelConfiguration constructConfigurationFromJSON(Path inputFile) throws IOException, JsonSyntaxException {
+		if(!inputFile.toFile().isDirectory()) {
+			Gson gson = new Gson();
+			final JsonObject simulationFile;
+			try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
+				simulationFile = gson.fromJson(reader, JsonObject.class);
+			}
+			List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
+			List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
+			final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
+			return new SimulationModelConfiguration(activationConfigurations, uiListenerConfigurations, metadata);
 		}
-		List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
-		List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
-		final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
-		return new SimulationModelConfiguration(activationConfigurations, uiListenerConfigurations, metadata);
+
+		List<Path> timedTraces = Files.walk(inputFile).filter(p -> !Files.isDirectory(p))
+				.filter(p -> p.toString().toLowerCase().endsWith(TraceFileHandler.TRACE_FILE_EXTENSION))
+				.collect(Collectors.toList());
+		return new SimulationBlackBoxModelConfiguration(timedTraces);
 	}
 
 	private static List<ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {

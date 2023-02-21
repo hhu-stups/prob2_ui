@@ -65,7 +65,10 @@ public class UIInteractionHandler {
 	}
 
 	public void loadUIListenersIntoSimulator(RealTimeSimulator realTimeSimulator) {
-		SimulationModelConfiguration config = realTimeSimulator.getConfig();
+		if(!(realTimeSimulator.getConfig() instanceof SimulationModelConfiguration)) {
+			return;
+		}
+		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		List<UIListenerConfiguration> uiListeners = config.getUiListenerConfigurations();
 		for(UIListenerConfiguration uiListener : uiListeners) {
 			String event = uiListener.getEvent();
@@ -136,7 +139,8 @@ public class UIInteractionHandler {
 	}
 
 	private List<ActivationConfiguration> createUserInteractions(RealTimeSimulator realTimeSimulator) {
-		List<UIListenerConfiguration> uiListeners = realTimeSimulator.getConfig().getUiListenerConfigurations();
+		SimulationModelConfiguration simulationModelConfiguration = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+		List<UIListenerConfiguration> uiListeners = simulationModelConfiguration.getUiListenerConfigurations();
 		List<ActivationConfiguration> userInteractions = new ArrayList<>();
 		for(int interactionCounter = 0; interactionCounter < userTransitions.size(); interactionCounter++) {
 			userInteractions.add(createUserInteraction(interactionCounter, uiListeners));
@@ -218,7 +222,8 @@ public class UIInteractionHandler {
 	}
 
 	public SimulationModelConfiguration createUserInteractionSimulation(RealTimeSimulator realTimeSimulator) {
-		List<ActivationConfiguration> activationConfigurations = realTimeSimulator.getConfig().getActivationConfigurations();
+		SimulationModelConfiguration simulationModelConfiguration = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+		List<ActivationConfiguration> activationConfigurations = simulationModelConfiguration.getActivationConfigurations();
 		List<ActivationConfiguration> userInteractions = createUserInteractions(realTimeSimulator);
 		List<ActivationConfiguration> activationConfigurationsForResult = createActivationConfigurationsFromUserInteraction(activationConfigurations, userInteractions);
 		return new SimulationModelConfiguration(activationConfigurationsForResult, new ArrayList<>(), SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.INTERACTION_REPLAY).withSavedNow().withUserCreator().build());

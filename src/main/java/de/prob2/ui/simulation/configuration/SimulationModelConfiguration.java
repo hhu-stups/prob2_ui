@@ -14,7 +14,7 @@ import de.prob.json.JsonMetadataBuilder;
 	"listeners",
 	"metadata",
 })
-public class SimulationModelConfiguration implements HasMetadata, ISimulationModel {
+public class SimulationModelConfiguration implements HasMetadata, ISimulationModelConfiguration {
 
 	public static enum SimulationFileType {
 		SIMULATION("Simulation"),

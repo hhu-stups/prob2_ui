@@ -25,6 +25,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.layout.BindableGlyph;
@@ -516,14 +517,18 @@ public class SimulatorStage extends Stage {
 	}
 
 	private void loadSimulationItems() {
-		SimulationModelConfiguration config = realTimeSimulator.getConfig();
+		ISimulationModelConfiguration config = realTimeSimulator.getConfig();
+
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 		if(config != null) {
-			for(ActivationConfiguration activationConfig : config.getActivationConfigurations()) {
-				if(activationConfig instanceof ActivationOperationConfiguration) {
-					observableList.add(createOperationDebugItem(activationConfig));
-				} else {
-					observableList.add(createChoiceDebugItem(activationConfig));
+			if(config instanceof SimulationModelConfiguration) {
+				SimulationModelConfiguration modelConfig = (SimulationModelConfiguration) config;
+				for (ActivationConfiguration activationConfig : modelConfig.getActivationConfigurations()) {
+					if (activationConfig instanceof ActivationOperationConfiguration) {
+						observableList.add(createOperationDebugItem(activationConfig));
+					} else {
+						observableList.add(createChoiceDebugItem(activationConfig));
+					}
 				}
 			}
 		}

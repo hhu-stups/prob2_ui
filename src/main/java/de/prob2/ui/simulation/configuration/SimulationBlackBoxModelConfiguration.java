@@ -1,20 +1,21 @@
 package de.prob2.ui.simulation.configuration;
 
+import java.nio.file.Path;
 import java.util.List;
 
-public class SimulationBlackBoxModelConfiguration implements ISimulationModel {
+public class SimulationBlackBoxModelConfiguration implements ISimulationModelConfiguration {
 
-	private List<SimulationModelConfiguration> timedTraces;
+	private List<Path> timedTraces;
 
-	public SimulationBlackBoxModelConfiguration(List<SimulationModelConfiguration> timedTraces) {
+	public SimulationBlackBoxModelConfiguration(List<Path> timedTraces) {
 		this.timedTraces = timedTraces;
 	}
 
-	public List<SimulationModelConfiguration> getTimedTraces() {
+	public List<Path> getTimedTraces() {
 		return timedTraces;
 	}
 
-	public void setTimedTraces(List<SimulationModelConfiguration> timedTraces) {
+	public void setTimedTraces(List<Path> timedTraces) {
 		this.timedTraces = timedTraces;
 	}
 }

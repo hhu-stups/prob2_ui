@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
@@ -67,7 +68,11 @@ public class RealTimeSimulator extends Simulator {
 
 	@Override
 	public boolean endingConditionReached(Trace trace) {
-		return super.endingConditionReached(trace) && config.getUiListenerConfigurations().isEmpty();
+		boolean endingConditionReached = super.endingConditionReached(trace);
+		if(config instanceof SimulationModelConfiguration) {
+			return endingConditionReached && ((SimulationModelConfiguration) config).getUiListenerConfigurations().isEmpty();
+		}
+		return endingConditionReached;
 	}
 
 }
