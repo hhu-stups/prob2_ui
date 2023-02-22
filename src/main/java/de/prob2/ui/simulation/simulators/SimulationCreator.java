@@ -45,11 +45,11 @@ public class SimulationCreator {
 			fixedVariables = fixedVariables == null || fixedVariables.isEmpty() ? null : fixedVariables;
 
 			List<String> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
-			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations, true);
+			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations, true, null);
 			activationConfigurations.add(activationConfig);
 			currentTimestamp = timestamps.get(i);
 		}
-		return new SimulationModelConfiguration(activationConfigurations, new ArrayList<>(), metadata);
+		return new SimulationModelConfiguration(new HashMap<>(), activationConfigurations, new ArrayList<>(), metadata);
 	}
 
 	public static Map<String, String> computeFixedVariablesFromDestinationValues(Map<IEvalElement, AbstractEvalResult> destinationValueMap) {
