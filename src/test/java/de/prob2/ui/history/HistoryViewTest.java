@@ -5,13 +5,11 @@ import com.google.inject.Injector;
 
 
 import de.prob2.ui.ProB2;
+import de.prob2.ui.ProjectBuilder;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ProB2Module;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.ProjectManager;
-import de.prob2.ui.project.preferences.Preference;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.web.WebView;
@@ -21,7 +19,6 @@ import org.junit.jupiter.api.Test;
 import org.testfx.api.FxAssert;
 import org.testfx.framework.junit5.ApplicationTest;
 import org.testfx.matcher.base.WindowMatchers;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -34,7 +31,7 @@ public class HistoryViewTest extends ApplicationTest {
 	HistoryView historyView;
 	HelpSystem helpSystem;
 	I18n i18n;
-	ProjectManager projectManager;
+
 	RuntimeOptions runtimeOptions;
 	Injector injector;
 
@@ -46,8 +43,6 @@ public class HistoryViewTest extends ApplicationTest {
 		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
 
 		i18n = injector.getInstance(I18n.class);
-		projectManager = injector.getInstance(ProjectManager.class);
-
 		historyView = injector.getInstance(HistoryView.class);
 		helpSystem = injector.getInstance(HelpSystem.class);
 		stage.setScene(new Scene(historyView));
@@ -88,11 +83,7 @@ public class HistoryViewTest extends ApplicationTest {
 	@DisplayName("When a machine is loaded, the table shows the correct entries")
 	@Test
 	void test3() throws InterruptedException {
-
-		projectManager.openAutomaticProjectFromMachine(Paths.get("/home/ina/Arbeit/prob2_ui/src/test/resources/Lift.mch"));
-		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		currentProject.startAnimation(currentProject.get().getMachine("Lift"), Preference.DEFAULT);
-		Thread.sleep(3000);
+		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").withAnimatedMachine("Lift").build();
 
 		TableView<HistoryItem> tableView = lookup("#historyTableView").queryTableView();
 		TableColumn<HistoryItem, ?> indexColumn = tableView.getVisibleLeafColumn(0);
@@ -107,16 +98,16 @@ public class HistoryViewTest extends ApplicationTest {
 	@DisplayName("When a machine is loaded, the forward-button and the save trace button are enabled")
 	@Test
 	void test4() throws InterruptedException {
-		projectManager.openAutomaticProjectFromMachine(Paths.get("src/test/resources/Lift.mch"));
-		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		currentProject.startAnimation(currentProject.get().getMachine("Lift"), Preference.DEFAULT);
-		Thread.sleep(3000);
+		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").withAnimatedMachine("Lift").build();
 
 		MenuButton traceReplayButton = lookup("#TraceReplayMenuButton").query();
 		assertThat(traceReplayButton).isEnabled();
 
-		Button button = lookup("#forwardButton").queryButton();
-		assertThat(button).isEnabled();
+		Button forwardButton = lookup("#forwardButton").queryButton();
+		assertThat(forwardButton).isEnabled();
+
+		Button reloadButton = lookup("#reloadButton").queryButton();
+		assertThat(reloadButton).isEnabled();
 
 		MenuButton saveButton = lookup("#saveTraceButton").query();
 		assertThat(saveButton).isEnabled();
@@ -124,5 +115,5 @@ public class HistoryViewTest extends ApplicationTest {
 		List<String> menuItems = saveButton.getItems().stream().map(MenuItem::getText).collect(Collectors.toList());
 		assertThat(menuItems).containsExactlyInAnyOrder(i18n.translate(ResourceBundle.getBundle("de.prob2.ui.prob2").getString("common.buttons.saveTrace")),
 														i18n.translate(ResourceBundle.getBundle("de.prob2.ui.prob2").getString("history.buttons.saveAsTable")));
-		}
 	}
+}
