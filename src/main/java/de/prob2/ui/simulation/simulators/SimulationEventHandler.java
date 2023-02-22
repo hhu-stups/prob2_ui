@@ -2,8 +2,6 @@ package de.prob2.ui.simulation.simulators;
 
 
 import de.prob.formula.PredicateBuilder;
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -17,7 +15,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
-import java.util.Set;
 
 
 public class SimulationEventHandler {

@@ -51,8 +51,10 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
 	private final List<String> activating;
 
+	private final boolean onlyWhenExecuted;
+
 	public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
-			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations) {
+			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean onlyWhenExecuted) {
 		super(id);
 		this.execute = op;
 		this.after = time;
@@ -62,6 +64,7 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 		this.fixedVariables = fixedVariables;
 		this.probabilisticVariables = probabilisticVariables;
 		this.activating = activations;
+		this.onlyWhenExecuted = onlyWhenExecuted;
 	}
 
 	@JsonProperty("execute")
@@ -95,6 +98,10 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
 	public List<String> getActivating() {
 		return activating;
+	}
+
+	public boolean isOnlyWhenExecuted() {
+		return onlyWhenExecuted;
 	}
 
 	@Override
@@ -147,6 +154,10 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 			sb.append("=");
 			sb.append(activating);
 		}
+		sb.append(", ");
+		sb.append("onlyWhenExecuted");
+		sb.append("=");
+		sb.append(onlyWhenExecuted);
 		sb.append(")");
 		return sb.toString();
 	}

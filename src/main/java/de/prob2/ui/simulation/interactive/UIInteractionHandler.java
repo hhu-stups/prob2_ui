@@ -162,7 +162,7 @@ public class UIInteractionHandler {
 		}
 		List<String> activations = resolveActivations(op, uiListeners);
 
-		return new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations);
+		return new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations, true);
 	}
 
 	private List<String> resolveActivations(String op, List<UIListenerConfiguration> uiListeners) {
@@ -189,7 +189,7 @@ public class UIInteractionHandler {
 				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) activationConfiguration;
 				activations = new ArrayList<>(initializationConfiguration.getActivating());
 				activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
-				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), activations));
+				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), activations, true));
 			} else if(Transition.SETUP_CONSTANTS_NAME.equals(activationConfiguration.getId())) {
 				hasSetupConstants = true;
 			} else {
@@ -204,7 +204,7 @@ public class UIInteractionHandler {
 				State destination = setupConstantsTransition.getDestination();
 				// Somehow the constructor with 1 argument always sets using destination state to false
 				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(SimulationCreator.computeFixedVariablesFromDestinationValues(destination.getConstantValues(FormulaExpand.EXPAND)), opInfo);
-				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, new ArrayList<>()));
+				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, new ArrayList<>(), true));
 			}
 		}
 
@@ -214,7 +214,7 @@ public class UIInteractionHandler {
 			// Somehow the constructor with 1 argument always sets using destination state to false
 			State destination = initializationTransition.getDestination();
 			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(SimulationCreator.computeFixedVariablesFromDestinationValues(destination.getVariableValues(FormulaExpand.EXPAND)), opInfo);
-			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations));
+			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations, true));
 		}
 
 		activationConfigurationsForResult.addAll(userInteractions);
