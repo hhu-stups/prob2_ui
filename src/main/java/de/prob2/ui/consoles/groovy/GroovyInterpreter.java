@@ -8,7 +8,6 @@ import com.google.inject.Inject;
 import de.prob.scripting.ScriptEngineProvider;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
-import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
 import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;

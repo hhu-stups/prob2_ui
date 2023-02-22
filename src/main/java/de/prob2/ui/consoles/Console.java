@@ -385,15 +385,24 @@ public abstract class Console extends StyleClassedTextArea {
 		this.moveCaretToInputEndIfRequired();
 	}
 
+	/**
+	 * Insert text above the current prompt.
+	 *
+	 * @param text text to insert
+	 */
+	public void addParagraph(String text) {
+		int lastParagraph = this.getParagraphs().size() - 1;
+		assert lastParagraph >= 0;
+		this.insertText(lastParagraph, 0, text + "\n");
+	}
+
 	protected void handleEnter() {
 		this.moveCaretToInputEndIfRequired();
 
 		String command = this.input.get();
 		boolean activateLineContinuation = command.endsWith("\\") && !command.endsWith("\\\\");
 
-		int lastParagraph = this.getParagraphs().size() - 1;
-		assert lastParagraph >= 0;
-		this.insertText(lastParagraph, 0, this.inputWithPrompt.get() + "\n");
+		this.addParagraph(this.inputWithPrompt.get());
 
 		// TODO: maybe cut off trailing backslash?
 		historyHandler.enter(command);
@@ -418,9 +427,7 @@ public abstract class Console extends StyleClassedTextArea {
 			}
 
 			// TODO: set style for error messages
-			lastParagraph = this.getParagraphs().size() - 1;
-			assert lastParagraph >= 0;
-			this.insertText(lastParagraph, 0, result + "\n");
+			this.addParagraph(result.toString());
 
 			/*ConsoleExecResult execResult = interpreter.exec(instruction);
 			int from = this.getLength();

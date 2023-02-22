@@ -13,7 +13,6 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
-import de.prob2.ui.consoles.ConsoleInstruction;
 import de.prob2.ui.consoles.Executable;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
