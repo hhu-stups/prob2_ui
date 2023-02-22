@@ -129,6 +129,7 @@ dependencies {
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.assertj:assertj-core:3.24.2'
 	testImplementation 'org.testfx:testfx-junit5:4.0.16-alpha'
+	testImplementation 'org.testfx:testfx-core:4.0.16-alpha'
 }
 
 if (!project.hasProperty("javafxVersion")) {

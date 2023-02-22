@@ -264,18 +264,21 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 			// User cancelled/closed the window
 			return;
 		}
-		final Machine machine = currentProject.getCurrentMachine();
+		addPatternToMachine(newItem, currentProject.getCurrentMachine());
+	}
+
+	void addPatternToMachine(LTLPatternItem newItem, Machine machine) {
 		if (machine.getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
 			LTLPatternParser.addPattern(newItem, machine);
 			machine.getLTLPatterns().add(newItem);
 			managePatternTable(machine.ltlPatternsProperty());
 		} else {
-			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
+			stageManager.makeAlert(Alert.AlertType.INFORMATION,
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
 				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
 		}
 	}
-	
+
 	@Override
 	protected Optional<LTLFormulaItem> showItemDialog(final LTLFormulaItem oldItem) {
 		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
