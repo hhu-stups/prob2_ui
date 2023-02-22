@@ -22,8 +22,6 @@ import com.google.gson.JsonSyntaxException;
 
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.Transition;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import javafx.scene.control.Alert;
 
 public class SimulationFileHandler {
 
