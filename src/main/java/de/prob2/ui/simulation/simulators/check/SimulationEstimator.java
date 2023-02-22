@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
 
-public class SimulationEstimator extends AbstractSimulationMonteCarlo {
+public class SimulationEstimator extends SimulationMonteCarloChecker {
 
 	public enum EstimationType {
 		MINIMUM("Minimum estimator"),

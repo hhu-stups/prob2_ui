@@ -12,14 +12,14 @@ import de.prob2.ui.verifications.Checked;
 
 import java.util.Map;
 
-public class AbstractSimulationMonteCarlo extends SimulationMonteCarlo {
+public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 
 	protected final SimulationCheckingType type;
 
 	protected int numberSuccess;
 
-	public AbstractSimulationMonteCarlo(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
-										SimulationCheckingType type, Map<String, Object> additionalInformation) {
+	public SimulationMonteCarloChecker(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
+									   SimulationCheckingType type, Map<String, Object> additionalInformation) {
 		super(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.type = type;
 		this.numberSuccess = 0;
