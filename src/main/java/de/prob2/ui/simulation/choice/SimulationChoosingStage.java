@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.choice;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -10,6 +11,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.SimulationItemHandler;
+import de.prob2.ui.simulation.SimulationMode;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 
@@ -27,9 +29,6 @@ public class SimulationChoosingStage extends Stage {
 
 	@FXML
 	private Button btCheck;
-
-	@FXML
-	private HBox timeBox;
 
 	@FXML
 	private SimulationMonteCarloChoice simulationMonteCarloChoice;
@@ -55,15 +54,18 @@ public class SimulationChoosingStage extends Stage {
 
 	private final SimulationItemHandler simulationItemHandler;
 
+	private final SimulationMode simulationMode;
+
 	private SimulationModel simulation;
 
 	private SimulationItem lastItem;
 
 	@Inject
-	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler) {
+	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode) {
 		this.i18n = i18n;
 		this.stageManager = stageManager;
 		this.simulationItemHandler = simulationItemHandler;
+		this.simulationMode = simulationMode;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "simulation_choice.fxml");
 	}
@@ -71,27 +73,15 @@ public class SimulationChoosingStage extends Stage {
 	@FXML
 	private void initialize() {
 		setCheckListeners();
-		simulationMonteCarloChoice.checkPropertyProperty().addListener((observable, from, to) -> {
-			if(!to) {
-				changeGUIType(SimulationType.MONTE_CARLO_SIMULATION);
-			} else {
-				SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
-				changeGUIType(simulationType == null ? SimulationType.MONTE_CARLO_SIMULATION : simulationType);
-			}
-			this.sizeToScene();
-		});
-		simulationPropertyChoice.simulationChoice().getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if(to == null) {
-				return;
-			}
-			changeGUIType(to);
-			this.sizeToScene();
-		});
+		simulationMonteCarloChoice.checkPropertyProperty().addListener((observable, from, to) -> updateGUI());
+		simulationPropertyChoice.simulationChoice().getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateGUI());
 		simulationPropertyChoice.simulationChoice().setConverter(i18n.translateConverter());
-		simulationHypothesisChoice.visibleProperty().bind(simulationMonteCarloChoice.checkPropertyProperty());
-		simulationEstimationChoice.visibleProperty().bind(simulationMonteCarloChoice.checkPropertyProperty());
 		simulationPropertyChoice.setChoosingStage(this);
 		simulationMonteCarloChoice.setChoosingStage(this);
+	}
+
+	private void updateGUI() {
+		changeGUIType();
 		this.sizeToScene();
 	}
 
@@ -112,7 +102,7 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	private boolean checkSelection() {
-		if(!simulationMonteCarloChoice.checkProperty()) {
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationMonteCarloChoice.checkProperty()) {
 			return simulationMonteCarloChoice.checkSelection();
 		}
 		SimulationType type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
@@ -136,19 +126,24 @@ public class SimulationChoosingStage extends Stage {
 
 	private SimulationItem extractItem() {
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
-		SimulationType type = !simulationMonteCarloChoice.checkProperty() ? SimulationType.MONTE_CARLO_SIMULATION : simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+		SimulationType type = null;
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationMonteCarloChoice.checkProperty()) {
+			type = SimulationType.MONTE_CARLO_SIMULATION;
+		} else {
+			type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+		}
 		SimulationItem simulationItem = new SimulationItem(id, type, this.extractInformation());
 		simulationItem.setSimulationModel(simulation);
 		return simulationItem;
 	}
 
 	private Map<String, Object> extractInformation() {
-		Map<String, Object> information;
-		if(!simulationMonteCarloChoice.checkProperty()) {
-			information = simulationMonteCarloChoice.extractInformation();
-		} else {
+		Map<String, Object> information = new HashMap<>();
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
+			information.putAll(simulationMonteCarloChoice.extractInformation());
+		}
+		if(simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationMonteCarloChoice.checkProperty()) {
 			SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
-			information = simulationMonteCarloChoice.extractInformation();
 			information.putAll(simulationPropertyChoice.extractInformation());
 			switch (simulationType) {
 				case ESTIMATION:
@@ -159,26 +154,32 @@ public class SimulationChoosingStage extends Stage {
 					break;
 			}
 		}
+
 		return information;
 	}
 
-	private void changeGUIType(final SimulationType type) {
-		inputBox.getChildren().removeAll(timeBox, simulationPropertyChoice, simulationHypothesisChoice, simulationEstimationChoice);
-		if(simulationMonteCarloChoice.checkProperty()) {
+	private void changeGUIType() {
+		inputBox.getChildren().removeAll(simulationMonteCarloChoice, simulationPropertyChoice, simulationHypothesisChoice, simulationEstimationChoice);
+		SimulationMode.Mode mode = simulationMode.getMode();
+
+		SimulationType type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+		if(type != null) {
+			if(type == SimulationType.ESTIMATION) {
+				inputBox.getChildren().add(0, simulationEstimationChoice);
+			} else if(type == SimulationType.HYPOTHESIS_TEST) {
+				inputBox.getChildren().add(0, simulationHypothesisChoice);
+			}
+		}
+
+		if(simulationMonteCarloChoice.checkProperty() || mode == SimulationMode.Mode.BLACK_BOX) {
 			inputBox.getChildren().add(0, simulationPropertyChoice);
 		}
-		switch (type) {
-			case MONTE_CARLO_SIMULATION:
-				break;
-			case ESTIMATION:
-				inputBox.getChildren().add(1, simulationEstimationChoice);
-				break;
-			case HYPOTHESIS_TEST:
-				inputBox.getChildren().add(1, simulationHypothesisChoice);
-				break;
-			default:
-				break;
-		}
+
+		if(mode == SimulationMode.Mode.MONTE_CARLO) {
+			inputBox.getChildren().add(0, simulationMonteCarloChoice);
+		} // ELSE BLACK_BOX
+
+		// Change order so that validation task id is always at the bottom
 	}
 
 	@FXML
@@ -196,5 +197,6 @@ public class SimulationChoosingStage extends Stage {
 
 	public void setSimulation(SimulationModel simulation) {
 		this.simulation = simulation;
+		updateGUI();
 	}
 }

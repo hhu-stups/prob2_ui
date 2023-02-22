@@ -443,7 +443,7 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void tryEvalFormulas(final List<List<XYChart.Data<Number, Number>>> newDatas, final int xPos, final TraceElement element, final boolean showErrors) {
-		final List<AbstractEvalResult> results = this.currentTrace.getStateSpace().eval(element.getCurrentState(), this.formulaList.getItems());
+		final List<AbstractEvalResult> results = element.getCurrentState().eval(this.formulaList.getItems());
 		for (int i = 0; i < results.size(); i++) {
 			final AbstractEvalResult result = results.get(i);
 			if (result instanceof IdentifierNotInitialised) {

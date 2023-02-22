@@ -228,6 +228,8 @@ public abstract class Simulator {
 				updateStartingInformation(newTrace);
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
 				timestamps.add(time.get());
+			} else if(!activationConfig.isOnlyWhenExecuted()) {
+				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");;
 			}
 		}
 		return newTrace;

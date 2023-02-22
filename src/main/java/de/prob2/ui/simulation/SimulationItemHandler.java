@@ -34,6 +34,8 @@ import javafx.collections.FXCollections;
 @Singleton
 public class SimulationItemHandler {
 
+	private final SimulationMode simulationMode;
+
 	private final CurrentTrace currentTrace;
 
 	private final StageManager stageManager;
@@ -45,8 +47,9 @@ public class SimulationItemHandler {
 	private final ListProperty<Thread> currentJobThreads;
 
 	@Inject
-	private SimulationItemHandler(final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector,
+	private SimulationItemHandler(final SimulationMode simulationMode, final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector,
 								  final DisablePropertyController disablePropertyController) {
+		this.simulationMode = simulationMode;
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.injector = injector;
@@ -163,7 +166,6 @@ public class SimulationItemHandler {
 	}
 
 	private void handleEstimation(SimulationItem item) {
-		Trace trace = currentTrace.get();
 		int executions = (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);

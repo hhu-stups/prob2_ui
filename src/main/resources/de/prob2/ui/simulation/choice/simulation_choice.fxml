@@ -32,6 +32,7 @@
 			<Label fx:id="lbTime" text="%simulation.choice.time" />
 			<TextField fx:id="tfTime" VBox.vgrow="NEVER"/>
 		</HBox>
+		<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
 		<SimulationHypothesisChoice fx:id="simulationHypothesisChoice"/>
 		<SimulationEstimationChoice fx:id="simulationEstimationChoice"/>
 		<SimulationPropertyChoice fx:id="simulationPropertyChoice"/>
@@ -44,8 +45,6 @@
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
-
-					<SimulationMonteCarloChoice fx:id="simulationMonteCarloChoice"/>
 
 					<Spacer/>
 

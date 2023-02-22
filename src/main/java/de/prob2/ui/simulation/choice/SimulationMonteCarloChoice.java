@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.choice;
 
+import com.google.inject.Singleton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
@@ -20,6 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @FXMLInjected
+@Singleton
 public class SimulationMonteCarloChoice extends GridPane {
 
 	public static class SimulationStartingItem {
@@ -179,11 +181,6 @@ public class SimulationMonteCarloChoice extends GridPane {
 	private SimulationMonteCarloChoice(final StageManager stageManager) {
 		super();
 		stageManager.loadFXML(this, "simulation_monte_carlo_choice.fxml");
-	}
-
-	private SimulationMonteCarloChoice() {
-		super();
-		//Default constructor for super classes using other FXML file
 	}
 
 	@FXML

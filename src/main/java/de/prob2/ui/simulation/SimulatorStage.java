@@ -3,6 +3,7 @@ package de.prob2.ui.simulation;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -269,6 +270,8 @@ public class SimulatorStage extends Stage {
 
 	private final SimulationItemHandler simulationItemHandler;
 
+	private final SimulationMode simulationMode;
+
 	private int time;
 
 	private Timer timer;
@@ -280,7 +283,7 @@ public class SimulatorStage extends Stage {
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
-						  final SimulationItemHandler simulationItemHandler, final I18n i18n, final FileChooserManager fileChooserManager,
+						  final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode, final I18n i18n, final FileChooserManager fileChooserManager,
 						  final StopActions stopActions) {
 		super();
 		this.stageManager = stageManager;
@@ -290,6 +293,7 @@ public class SimulatorStage extends Stage {
 		this.realTimeSimulator = realTimeSimulator;
 		this.machineLoader = machineLoader;
 		this.simulationItemHandler = simulationItemHandler;
+		this.simulationMode = simulationMode;
 		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
@@ -399,6 +403,9 @@ public class SimulatorStage extends Stage {
 
 		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			configurationPath.set(null);
+			simulationMode.setMode(to == null ? null :
+					currentProject.getLocation().resolve(to.getPath()).toFile().isDirectory() ? SimulationMode.Mode.BLACK_BOX :
+							SimulationMode.Mode.MONTE_CARLO);
 			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();

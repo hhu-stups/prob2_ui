@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
 
-public class SimulationHypothesisChecker extends AbstractSimulationMonteCarlo {
+public class SimulationHypothesisChecker extends SimulationMonteCarloChecker {
 
 	public static class DistributionFunction {
 

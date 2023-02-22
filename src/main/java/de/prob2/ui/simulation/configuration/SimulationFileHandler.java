@@ -22,8 +22,6 @@ import com.google.gson.JsonSyntaxException;
 
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.Transition;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import javafx.scene.control.Alert;
 
 public class SimulationFileHandler {
 
@@ -105,7 +103,8 @@ public class SimulationFileHandler {
 		ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
 		Map<String, String> fixedVariables = buildParameters(activationAsObject.get("fixedVariables"));
 		Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
-		return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations);
+		boolean onlyWhenExecuted = activationAsObject.get("onlyWhenExecuted") == null || Boolean.parseBoolean(String.valueOf(activationAsObject.get("onlyWhenExecuted")));
+		return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, onlyWhenExecuted);
 	}
 
 	private static ActivationConfiguration buildActivationConfiguration(JsonElement activationElement) {
