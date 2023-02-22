@@ -69,7 +69,7 @@ public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
-				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, invariant, mode);
+				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, this.getVariables(), invariant, mode);
 				if (i >= startAtStep && "FALSE".equals(evalResult)) {
 					invariantOk = false;
 					break;
@@ -91,7 +91,7 @@ public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 		State destination = transition.getDestination();
 		if(destination.isInitialised()) {
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-			String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, finalPredicate, mode);
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, this.getVariables(), finalPredicate, mode);
 			if ("FALSE".equals(evalResult)) {
 				predicateOk = false;
 			}
@@ -111,7 +111,7 @@ public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
-				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, predicate, mode);
+				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, this.getVariables(), predicate, mode);
 				if (i >= startAtStep && "TRUE".equals(evalResult)) {
 					predicateOk = true;
 					break;

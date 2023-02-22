@@ -40,7 +40,7 @@ public class SimulationFileHandler {
 			try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
 				simulationFile = gson.fromJson(reader, JsonObject.class);
 			}
-			Map<String, String> variables = buildVariables(simulationFile.get("updating"));
+			Map<String, String> variables = buildVariables(simulationFile.get("variables"));
 			List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
 			List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
 			final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
@@ -104,7 +104,7 @@ public class SimulationFileHandler {
 		ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
 		Map<String, String> fixedVariables = buildParameters(activationAsObject.get("fixedVariables"));
 		Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
-		boolean onlyWhenExecuted = activationAsObject.get("onlyWhenExecuted") == null || Boolean.parseBoolean(String.valueOf(activationAsObject.get("onlyWhenExecuted")));
+		boolean onlyWhenExecuted = activationAsObject.get("activatingOnlyWhenExecuted") == null || Boolean.parseBoolean(String.valueOf(activationAsObject.get("activatingOnlyWhenExecuted")));
 		Map<String, String> updating = buildUpdating(activationAsObject.get("updating"));
 		return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, onlyWhenExecuted, updating);
 	}

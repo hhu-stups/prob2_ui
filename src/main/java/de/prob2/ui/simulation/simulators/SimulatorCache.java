@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class SimulatorCache {
@@ -22,7 +23,7 @@ public class SimulatorCache {
 
 	private final Map<String, Set<String>> enabledOperationsCache = new HashMap<>();
 
-	public String readValueWithCaching(State bState, String expression, SimulationHelperFunctions.EvaluationMode mode) {
+	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, SimulationHelperFunctions.EvaluationMode mode) {
 		if(valuesCache.keySet().size() > MAXIMUM_CACHE_SIZE) {
 			valuesCache.clear();
 		}
@@ -38,7 +39,14 @@ public class SimulatorCache {
 			if(!valuesCache.containsKey(stateID)) {
 				valuesCache.put(stateID, new HashMap<>());
 			}
-			AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, expression, mode);
+			if(variables != null && !variables.isEmpty() && expression.contains("$")) {
+				for(Map.Entry<String, String> entry : variables.entrySet()) {
+					String key = entry.getKey();
+					String val = entry.getValue();
+					expression = expression.replaceAll(Pattern.quote("$") + key, val);
+				}
+			}
+			AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, variables, expression, mode);
 			value = evalResult.toString();
 			valuesCache.get(stateID).put(expression, value);
 		}
