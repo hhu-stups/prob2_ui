@@ -102,7 +102,7 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	private boolean checkSelection() {
-		if(!simulationMonteCarloChoice.checkProperty()) {
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationMonteCarloChoice.checkProperty()) {
 			return simulationMonteCarloChoice.checkSelection();
 		}
 		SimulationType type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
@@ -126,7 +126,12 @@ public class SimulationChoosingStage extends Stage {
 
 	private SimulationItem extractItem() {
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
-		SimulationType type = !simulationMonteCarloChoice.checkProperty() ? SimulationType.MONTE_CARLO_SIMULATION : simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+		SimulationType type = null;
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationMonteCarloChoice.checkProperty()) {
+			type = SimulationType.MONTE_CARLO_SIMULATION;
+		} else {
+			type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+		}
 		SimulationItem simulationItem = new SimulationItem(id, type, this.extractInformation());
 		simulationItem.setSimulationModel(simulation);
 		return simulationItem;
