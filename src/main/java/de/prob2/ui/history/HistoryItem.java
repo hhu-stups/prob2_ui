@@ -18,7 +18,7 @@ public class HistoryItem {
 	}
 	
 	public static List<HistoryItem> itemsForTrace(final Trace trace) {
-		final Map<Transition, OperationItem> operations = OperationItem.forTransitions(trace.getStateSpace(), trace.getTransitionList());
+		final Map<Transition, OperationItem> operations = OperationItem.forTransitionsFast(trace.getStateSpace(), trace.getTransitionList());
 		final List<HistoryItem> items = new ArrayList<>();
 		items.add(new HistoryItem(null, -1)); // Root state
 		int i = 0;
