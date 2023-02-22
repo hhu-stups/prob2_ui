@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.choice;
 
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -132,12 +133,12 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 	private Map<String, Object> extractInformation() {
-		Map<String, Object> information;
-		if(!simulationMonteCarloChoice.checkProperty()) {
-			information = simulationMonteCarloChoice.extractInformation();
-		} else {
+		Map<String, Object> information = new HashMap<>();
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
+			information.putAll(simulationMonteCarloChoice.extractInformation());
+		}
+		if(simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationMonteCarloChoice.checkProperty()) {
 			SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
-			information = simulationMonteCarloChoice.extractInformation();
 			information.putAll(simulationPropertyChoice.extractInformation());
 			switch (simulationType) {
 				case ESTIMATION:
@@ -148,28 +149,32 @@ public class SimulationChoosingStage extends Stage {
 					break;
 			}
 		}
+
 		return information;
 	}
 
 	private void changeGUIType() {
 		inputBox.getChildren().removeAll(simulationMonteCarloChoice, simulationPropertyChoice, simulationHypothesisChoice, simulationEstimationChoice);
 		SimulationMode.Mode mode = simulationMode.getMode();
-		if(mode == SimulationMode.Mode.MONTE_CARLO) {
-			inputBox.getChildren().add(0, simulationMonteCarloChoice);
-		} // ELSE BLACK_BOX
-
-		if(simulationMonteCarloChoice.checkProperty() || mode == SimulationMode.Mode.BLACK_BOX) {
-			inputBox.getChildren().add(1, simulationPropertyChoice);
-		}
 
 		SimulationType type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
 		if(type != null) {
 			if(type == SimulationType.ESTIMATION) {
-				inputBox.getChildren().add(2, simulationEstimationChoice);
+				inputBox.getChildren().add(0, simulationEstimationChoice);
 			} else if(type == SimulationType.HYPOTHESIS_TEST) {
-				inputBox.getChildren().add(2, simulationHypothesisChoice);
+				inputBox.getChildren().add(0, simulationHypothesisChoice);
 			}
 		}
+
+		if(simulationMonteCarloChoice.checkProperty() || mode == SimulationMode.Mode.BLACK_BOX) {
+			inputBox.getChildren().add(0, simulationPropertyChoice);
+		}
+
+		if(mode == SimulationMode.Mode.MONTE_CARLO) {
+			inputBox.getChildren().add(0, simulationMonteCarloChoice);
+		} // ELSE BLACK_BOX
+
+		// Change order so that validation task id is always at the bottom
 	}
 
 	@FXML
