@@ -7,7 +7,6 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.*;
 import java.util.List;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import static org.testfx.assertions.api.Assertions.assertThat;
@@ -31,7 +30,7 @@ public class HistoryViewTest extends TestBase {
 		assertThat(historyTable).hasExactlyNumRows(0);
 
 		Label placeholder = lookup("#placeholder").query();
-		assertThat(placeholder.getText()).isEqualTo(i18n.translate(ResourceBundle.getBundle("de.prob2.ui.prob2").getString("common.noModelLoaded")));
+		assertThat(placeholder.getText()).isEqualTo("No model loaded");
 
 		MenuButton traceReplayButton = lookup("#TraceReplayMenuButton").query();
 		assertThat(traceReplayButton).isDisabled();
@@ -69,8 +68,7 @@ public class HistoryViewTest extends TestBase {
 			assertThat(saveButton).isEnabled();
 			clickOn(saveButton);
 			List<String> menuItems = saveButton.getItems().stream().map(MenuItem::getText).collect(Collectors.toList());
-			assertThat(menuItems).containsExactlyInAnyOrder(i18n.translate(ResourceBundle.getBundle("de.prob2.ui.prob2").getString("common.buttons.saveTrace")),
-															i18n.translate(ResourceBundle.getBundle("de.prob2.ui.prob2").getString("history.buttons.saveAsTable")));
+			assertThat(menuItems).containsExactlyInAnyOrder("Save Trace", "Save Trace as CSV Table");
 		}
 	}
 }
