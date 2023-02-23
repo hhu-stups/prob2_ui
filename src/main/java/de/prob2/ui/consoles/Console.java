@@ -1,6 +1,8 @@
 package de.prob2.ui.consoles;
 
 import java.io.File;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.OptionalInt;
@@ -391,9 +393,20 @@ public abstract class Console extends StyleClassedTextArea {
 	 * @param text text to insert
 	 */
 	public void addParagraph(String text) {
+		this.addParagraph(text, Collections.emptyList());
+	}
+
+	/**
+	 * Insert text above the current prompt.
+	 *
+	 * @param text  text to insert
+	 * @param style text style
+	 */
+	public void addParagraph(String text, Collection<String> style) {
 		int lastParagraph = this.getParagraphs().size() - 1;
 		assert lastParagraph >= 0;
-		this.insertText(lastParagraph, 0, text + "\n");
+		int pos = this.getAbsolutePosition(lastParagraph, 0);
+		this.insert(pos, text + "\n", style);
 	}
 
 	protected void handleEnter() {
@@ -426,24 +439,7 @@ public abstract class Console extends StyleClassedTextArea {
 				return;
 			}
 
-			// TODO: set style for error messages
-			this.addParagraph(result.toString());
-
-			/*ConsoleExecResult execResult = interpreter.exec(instruction);
-			int from = this.getLength();
-			if (execResult.getResultType() == ConsoleExecResultType.CLEAR) {
-				reset();
-				return;
-			}
-			this.appendText("\n" + execResult);
-			if (execResult.getResultType() == ConsoleExecResultType.ERROR) {
-				this.setStyle(from, from + execResult.toString().length() + 1, Collections.singletonList("error"));
-			}
-			instructionLengthInLine = 1;
-			searchHandler.handleEnter();
-			this.appendText('\n' + prompt.get() + ' ');
-			this.setStyle(getLineNumber(), Collections.emptyList());
-			goToLastPos();*/
+			this.addParagraph(result.toString(), result.getResultType() == ConsoleExecResultType.ERROR ? Collections.singletonList("error") : Collections.emptyList());
 		}
 
 		this.moveCaretToInputEndIfRequired();
