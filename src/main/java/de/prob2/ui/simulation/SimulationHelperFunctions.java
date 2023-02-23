@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ClassicalB;
@@ -37,7 +38,7 @@ public class SimulationHelperFunctions {
 				model instanceof EventBModel? SimulationHelperFunctions.EvaluationMode.EVENT_B : null;
 	}
 
-	public static AbstractEvalResult evaluateForSimulation(State state, String formula, EvaluationMode mode) {
+	public static AbstractEvalResult evaluateForSimulation(State state, Map<String, String> variables, String formula, EvaluationMode mode) {
 		// TODO: Handle mode for other formalisms
 		switch (mode) {
 			case CLASSICAL_B:

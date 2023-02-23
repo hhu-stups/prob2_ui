@@ -46,7 +46,7 @@ public class SimulationEventHandler {
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		for(String key : values.keySet()) {
 			String value = values.get(key);
-			String evalResult  = cache.readValueWithCaching(currentState, value, mode);
+			String evalResult  = cache.readValueWithCaching(currentState, simulator.getVariables(), value, mode);
 			predicateBuilder.add(key, evalResult);
 		}
 		return predicateBuilder.toString();
@@ -85,9 +85,9 @@ public class SimulationEventHandler {
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 			for(String value : probabilityValueMap.keySet()) {
 				String valueProbability = probabilityValueMap.get(value);
-				double evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, valueProbability, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
+				double evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, simulator.getVariables(), valueProbability, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
 				if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
-					String evalValue = cache.readValueWithCaching(currentState, value, mode);
+					String evalValue = cache.readValueWithCaching(currentState, simulator.getVariables(), value, mode);
 					values.put(variable, evalValue);
 				}
 				probabilityMinimum += evalProbability;
@@ -126,12 +126,12 @@ public class SimulationEventHandler {
 			}
 
 		}
-		return cache.readValueWithCaching(state, newExpression, mode);
+		return cache.readValueWithCaching(state, simulator.getVariables(), newExpression, mode);
 	}
 
 	private String buildPredicateForTransition(State state, Activation activation) {
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-		String additionalGuardsResult = activation.getAdditionalGuards() == null ? "TRUE" : cache.readValueWithCaching(state, activation.getAdditionalGuards(), mode);
+		String additionalGuardsResult = activation.getAdditionalGuards() == null ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.getAdditionalGuards(), mode);
 		if("FALSE".equals(additionalGuardsResult)) {
 			return "1=2";
 		}
@@ -238,7 +238,7 @@ public class SimulationEventHandler {
 		double randomDouble = random.nextDouble();
 		for(String id : activationChoiceConfiguration.getActivations().keySet()) {
 			ActivationConfiguration activationConfiguration = simulator.getActivationConfigurationMap().get(id);
-			double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, activationChoiceConfiguration.getActivations().get(id), SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
+			double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, simulator.getVariables(), activationChoiceConfiguration.getActivations().get(id), SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
 			if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
 				handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
 			}
@@ -262,7 +262,7 @@ public class SimulationEventHandler {
 		String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
 		Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
 		Object probability = activationOperationConfiguration.getProbabilisticVariables();
-		int evaluatedTime = Integer.parseInt(cache.readValueWithCaching(state, time, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
+		int evaluatedTime = Integer.parseInt(cache.readValueWithCaching(state, simulator.getVariables(), time, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
 
 		switch (activationKind) {
 			case MULTI:
@@ -273,6 +273,19 @@ public class SimulationEventHandler {
 			case SINGLE_MIN:
 				activateSingleOperations(id, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
 				break;
+		}
+	}
+
+	public void updateVariables(State state, Map<String, String> variables, Map<String, String> updating) {
+		if(updating == null) {
+			return;
+		}
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		for(Map.Entry<String, String> entry : updating.entrySet()) {
+			String key = entry.getKey();
+			String value = entry.getValue();
+			String newValue = cache.readValueWithCaching(state, variables, value, mode);
+			variables.put(key, newValue);
 		}
 	}
 

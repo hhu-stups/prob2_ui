@@ -28,6 +28,8 @@ public abstract class Simulator {
 
 	protected ISimulationModelConfiguration config;
 
+	protected Map<String, String> variables;
+
 	protected IntegerProperty time;
 
 	protected int delay;
@@ -84,6 +86,7 @@ public abstract class Simulator {
 	}
 
 	public void resetSimulator() {
+		this.variables = new HashMap<>();
 		this.configurationToActivation = new HashMap<>();
 		this.activationConfigurationMap = new HashMap<>();
 		this.activationConfigurationsSorted = new ArrayList<>();
@@ -99,6 +102,7 @@ public abstract class Simulator {
 			if(config instanceof SimulationModelConfiguration) {
 				SimulationModelConfiguration modelConfig = (SimulationModelConfiguration) config;
 				// sort after priority
+				this.variables = modelConfig.getVariables() != null ? new HashMap<>(modelConfig.getVariables()) : new HashMap<>();
 				this.activationConfigurationsSorted = modelConfig.getActivationConfigurations().stream()
 						.filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
 						.map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
@@ -224,11 +228,13 @@ public abstract class Simulator {
 				String parameterPredicate = transition.getParameterPredicate() == null ? "1=1" : transition.getParameterPredicate();
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
 				timestamps.add(time.get());
+				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 			} else if("skip".equals(activation.getOperation())) {
 				updateStartingInformation(newTrace);
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
 				timestamps.add(time.get());
-			} else if(!activationConfig.isOnlyWhenExecuted()) {
+				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
+			} else if(!activationConfig.isActivatingOnlyWhenExecuted()) {
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");;
 			}
 		}
@@ -249,6 +255,10 @@ public abstract class Simulator {
 
 	public ISimulationModelConfiguration getConfig() {
 		return config;
+	}
+
+	public Map<String, String> getVariables() {
+		return variables;
 	}
 
 	public IntegerProperty timeProperty() {

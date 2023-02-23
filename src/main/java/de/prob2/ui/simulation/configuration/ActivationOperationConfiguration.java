@@ -51,10 +51,13 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
 	private final List<String> activating;
 
-	private final boolean onlyWhenExecuted;
+	private final boolean activatingOnlyWhenExecuted;
+
+	private final Map<String, String> updating;
 
 	public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
-			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean onlyWhenExecuted) {
+			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
+			Map<String, String> updating) {
 		super(id);
 		this.execute = op;
 		this.after = time;
@@ -64,7 +67,8 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 		this.fixedVariables = fixedVariables;
 		this.probabilisticVariables = probabilisticVariables;
 		this.activating = activations;
-		this.onlyWhenExecuted = onlyWhenExecuted;
+		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted;
+		this.updating = updating;
 	}
 
 	@JsonProperty("execute")
@@ -100,8 +104,12 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 		return activating;
 	}
 
-	public boolean isOnlyWhenExecuted() {
-		return onlyWhenExecuted;
+	public boolean isActivatingOnlyWhenExecuted() {
+		return activatingOnlyWhenExecuted;
+	}
+
+	public Map<String, String> getUpdating() {
+		return updating;
 	}
 
 	@Override
@@ -155,10 +163,16 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 			sb.append(activating);
 		}
 		sb.append(", ");
-		sb.append("onlyWhenExecuted");
+		sb.append("activatingOnlyWhenExecuted");
 		sb.append("=");
-		sb.append(onlyWhenExecuted);
+		sb.append(activatingOnlyWhenExecuted);
 		sb.append(")");
+		if(updating != null) {
+			sb.append(", ");
+			sb.append("updating");
+			sb.append("=");
+			sb.append(updating);
+		}
 		return sb.toString();
 	}
 }

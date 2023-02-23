@@ -128,7 +128,7 @@ public class SimulationMonteCarlo extends Simulator {
 			String predicate = (String) additionalInformation.get("ENDING_PREDICATE");
 			State state = trace.getCurrentState();
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate, mode);
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), predicate, mode);
 			if("TRUE".equals(evalResult)) {
 				return true;
 			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
@@ -156,7 +156,7 @@ public class SimulationMonteCarlo extends Simulator {
 			String predicate = (String) additionalInformation.get("STARTING_PREDICATE");
 			State state = trace.getCurrentState();
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, predicate, mode);
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), predicate, mode);
 			if ("TRUE".equals(evalResult)) {
 				setStartingInformation();
 			} else if (!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
@@ -172,11 +172,11 @@ public class SimulationMonteCarlo extends Simulator {
 
 			String predicate = (String) additionalInformation.get("STARTING_PREDICATE_ACTIVATED");
 			SimulationHelperFunctions.EvaluationMode previousMode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-			String previousEvalResult = simulationEventHandler.getCache().readValueWithCaching(previousState, predicate, previousMode);
+			String previousEvalResult = simulationEventHandler.getCache().readValueWithCaching(previousState, this.getVariables(), predicate, previousMode);
 
 			State currentState = trace.getCurrentState();
 			SimulationHelperFunctions.EvaluationMode currentMode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-			String currentEvalResult = simulationEventHandler.getCache().readValueWithCaching(currentState, predicate, currentMode);
+			String currentEvalResult = simulationEventHandler.getCache().readValueWithCaching(currentState, this.getVariables(), predicate, currentMode);
 
 
 			if ("TRUE".equals(currentEvalResult)) {
