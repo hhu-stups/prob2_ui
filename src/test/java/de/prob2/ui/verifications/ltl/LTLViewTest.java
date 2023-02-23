@@ -1,11 +1,7 @@
 package de.prob2.ui.verifications.ltl;
 
-import com.google.inject.Guice;
-import com.google.inject.Injector;
-import de.prob2.ui.ProB2;
 import de.prob2.ui.ProjectBuilder;
-import de.prob2.ui.config.RuntimeOptions;
-import de.prob2.ui.internal.ProB2Module;
+import de.prob2.ui.TestBase;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.scene.Scene;
@@ -13,25 +9,16 @@ import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.testfx.framework.junit5.ApplicationTest;
 
 import static org.testfx.assertions.api.Assertions.assertThat;
 
-class LTLViewTest extends ApplicationTest {
-
-	Injector injector;
-
+class LTLViewTest extends TestBase {
 	LTLView ltlView;
 
 	@Override
 	public void start(final Stage stage) {
-		RuntimeOptions runtimeOptions =new RuntimeOptions(null, null, null, null, false, false);
-		ProB2Module module = new ProB2Module(new ProB2(), runtimeOptions);
-
-		injector = Guice.createInjector(com.google.inject.Stage.PRODUCTION, module);
-
-		ltlView = injector.getInstance(LTLView.class);
-		ltlView.initialize();
+		super.start(stage);
+		ltlView = super.injector.getInstance(LTLView.class);
 		stage.setScene(new Scene(ltlView));
 		stage.show();
 	}
