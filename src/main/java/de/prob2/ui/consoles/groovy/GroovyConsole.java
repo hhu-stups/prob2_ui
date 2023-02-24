@@ -16,7 +16,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
@@ -51,11 +50,10 @@ public class GroovyConsole extends Console {
 
 	@Override
 	protected void onEnterSingleLineText(String text) {
+		super.onEnterSingleLineText(text);
 		if (!isSearching() && ".".equals(text)) {
 			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
 		}
-
-		super.onEnterSingleLineText(text);
 	}
 
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
