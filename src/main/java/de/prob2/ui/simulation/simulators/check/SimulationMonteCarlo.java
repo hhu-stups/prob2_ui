@@ -61,37 +61,37 @@ public class SimulationMonteCarlo extends Simulator implements ISimulationProper
 		NOT_FINISHED, SUCCESS, FAIL
 	}
 
-	protected final Injector injector;
+	private final Injector injector;
 
-	protected Map<String, List<Integer>> operationExecutions;
+	private final Map<String, List<Integer>> operationExecutions;
 
-	protected Map<String, List<Integer>> operationEnablings;
+	private final Map<String, List<Integer>> operationEnablings;
 
-	protected Map<String, List<Integer>> operationExecutionPercentage;
+	private final Map<String, List<Integer>> operationExecutionPercentage;
 
-	protected List<List<Integer>> resultingTimestamps;
+	private final List<List<Integer>> resultingTimestamps;
 
-	protected List<Trace> resultingTraces;
+	private final List<Trace> resultingTraces;
 
-	protected List<Checked> resultingStatus;
+	private final List<Checked> resultingStatus;
 
-	protected int numberExecutions;
+	private final int numberExecutions;
 
-	protected int maxStepsBeforeProperty;
+	private final int maxStepsBeforeProperty;
 
-	protected int currentNumberStepsBeforeChecking;
+	private int currentNumberStepsBeforeChecking;
 
-	protected boolean startingConditionReached;
+	private boolean startingConditionReached;
 
-	protected int startAtStep;
+	private int startAtStep;
 
-	protected int startAtTime;
+	private int startAtTime;
 
-	protected Map<String, Object> additionalInformation;
+	private final Map<String, Object> additionalInformation;
 
-	protected SimulationStats stats;
+	private SimulationStats stats;
 
-	protected MonteCarloCheckResult result;
+	private MonteCarloCheckResult result;
 
 	public SimulationMonteCarlo(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
 		super(currentTrace);
