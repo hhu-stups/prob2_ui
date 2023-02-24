@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
-	private final SimulationCheckingSimulator simulationMonteCarlo;
+	private final SimulationCheckingSimulator simulationCheckingSimulator;
 
 	private final CurrentTrace currentTrace;
 
@@ -26,7 +26,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	public SimulationPropertyChecker(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
 									 SimulationCheckingType type, Map<String, Object> additionalInformation) {
-		this.simulationMonteCarlo = new SimulationCheckingSimulator(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
+		this.simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
 		this.numberSuccess = 0;
@@ -55,7 +55,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
-			if(i >= simulationMonteCarlo.getStartAtStep() && !destination.isInvariantOk()) {
+			if(i >= simulationCheckingSimulator.getStartAtStep() && !destination.isInvariantOk()) {
 				invariantOk = false;
 				break;
 			}
@@ -75,8 +75,8 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
-				String evalResult = simulationMonteCarlo.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationMonteCarlo.getVariables(), invariant, mode);
-				if (i >= simulationMonteCarlo.getStartAtStep() && "FALSE".equals(evalResult)) {
+				String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), invariant, mode);
+				if (i >= simulationCheckingSimulator.getStartAtStep() && "FALSE".equals(evalResult)) {
 					invariantOk = false;
 					break;
 				}
@@ -97,7 +97,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		State destination = transition.getDestination();
 		if(destination.isInitialised()) {
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-			String evalResult = simulationMonteCarlo.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationMonteCarlo.getVariables(), finalPredicate, mode);
+			String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), finalPredicate, mode);
 			if ("FALSE".equals(evalResult)) {
 				predicateOk = false;
 			}
@@ -117,8 +117,8 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
-				String evalResult = simulationMonteCarlo.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationMonteCarlo.getVariables(), predicate, mode);
-				if (i >= simulationMonteCarlo.getStartAtStep() && "TRUE".equals(evalResult)) {
+				String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), predicate, mode);
+				if (i >= simulationCheckingSimulator.getStartAtStep() && "TRUE".equals(evalResult)) {
 					predicateOk = true;
 					break;
 				}
@@ -133,7 +133,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	public Checked checkTiming(int time) {
 		int maximumTime = (int) this.getAdditionalInformation().get("TIME");
-		if(time - simulationMonteCarlo.getStartAtTime() <= maximumTime) {
+		if(time - simulationCheckingSimulator.getStartAtTime() <= maximumTime) {
 			numberSuccess++;
 			return Checked.SUCCESS;
 		}
@@ -142,41 +142,41 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	@Override
 	public List<Trace> getResultingTraces() {
-		return simulationMonteCarlo.getResultingTraces();
+		return simulationCheckingSimulator.getResultingTraces();
 	}
 
 	@Override
 	public List<List<Integer>> getResultingTimestamps() {
-		return simulationMonteCarlo.getResultingTimestamps();
+		return simulationCheckingSimulator.getResultingTimestamps();
 	}
 
 	@Override
 	public List<Checked> getResultingStatus() {
-		return simulationMonteCarlo.getResultingStatus();
+		return simulationCheckingSimulator.getResultingStatus();
 	}
 
 	@Override
 	public SimulationStats getStats() {
-		return simulationMonteCarlo.getStats();
+		return simulationCheckingSimulator.getStats();
 	}
 
 	@Override
 	public void setStats(SimulationStats stats) {
-		simulationMonteCarlo.setStats(stats);
+		simulationCheckingSimulator.setStats(stats);
 	}
 
 	public Map<String, Object> getAdditionalInformation() {
-		return simulationMonteCarlo.getAdditionalInformation();
+		return simulationCheckingSimulator.getAdditionalInformation();
 	}
 
 	@Override
 	public SimulationCheckingSimulator.MonteCarloCheckResult getResult() {
-		return simulationMonteCarlo.getResult();
+		return simulationCheckingSimulator.getResult();
 	}
 
 	@Override
 	public void setResult(SimulationCheckingSimulator.MonteCarloCheckResult result) {
-		simulationMonteCarlo.setResult(result);
+		simulationCheckingSimulator.setResult(result);
 	}
 
 	@Override
@@ -186,28 +186,28 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	@Override
 	public SimulationExtendedStats calculateExtendedStats() {
-		return simulationMonteCarlo.calculateExtendedStats();
+		return simulationCheckingSimulator.calculateExtendedStats();
 	}
 
 	public void calculateStatistics(long time) {
-		simulationMonteCarlo.calculateStatistics(time);
+		simulationCheckingSimulator.calculateStatistics(time);
 	}
 
 	@Override
 	public void run() {
-		simulationMonteCarlo.run(this);
+		simulationCheckingSimulator.run(this);
 	}
 
 	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
-		simulationMonteCarlo.run(simulationPropertyChecker);
+		simulationCheckingSimulator.run(simulationPropertyChecker);
 	}
 
 	@Override
 	public void check() {
-		simulationMonteCarlo.check();
+		simulationCheckingSimulator.check();
 	}
 
 	public Simulator getSimulator() {
-		return simulationMonteCarlo;
+		return simulationCheckingSimulator;
 	}
 }
