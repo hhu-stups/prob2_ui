@@ -144,8 +144,8 @@ public class SimulationItemHandler {
 	}
 
 	private void handleHypothesisTest(SimulationItem item) {
-		int executions = (int) item.getField("EXECUTIONS");
-		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
+		int executions = item.getField("EXECUTIONS") == null ? 0 : (int) item.getField("EXECUTIONS");
+		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
 		SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getField("HYPOTHESIS_CHECKING_TYPE");
@@ -166,17 +166,13 @@ public class SimulationItemHandler {
 	}
 
 	private void initializeHypothesisChecker(SimulationHypothesisChecker simulationHypothesisChecker, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
-			simulationHypothesisChecker.initializeMonteCarlo(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
-			SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), path);
-		} else { // Black Box {
-			// TODO
-		}
+		simulationHypothesisChecker.initializeMonteCarlo(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), path);
 	}
 
 	private void handleEstimation(SimulationItem item) {
-		int executions = (int) item.getField("EXECUTIONS");
-		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
+		int executions = item.getField("EXECUTIONS") == null ? 0 : (int) item.getField("EXECUTIONS");
+		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
 		SimulationEstimator.EstimationType estimationType = (SimulationEstimator.EstimationType) item.getField("ESTIMATION_TYPE");
@@ -197,12 +193,8 @@ public class SimulationItemHandler {
 	}
 
 	private void initializeEstimator(SimulationEstimator simulationEstimator, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
-			simulationEstimator.initializeMonteCarlo(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
-			SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), path);
-		} else { // Black Box {
-			// TODO
-		}
+		simulationEstimator.initializeMonteCarlo(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), path);
 	}
 
 	public void checkItem(SimulationItem item) {

@@ -10,6 +10,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationError;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.SimulatorStage;
+import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
@@ -17,6 +19,7 @@ import javafx.scene.control.Alert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -209,13 +212,26 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	@Override
 	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
+		boolean isBlackBox = config instanceof SimulationBlackBoxModelConfiguration;
+		List<Path> timedTraces = new ArrayList<>();
+		if(isBlackBox) {
+			timedTraces = ((SimulationBlackBoxModelConfiguration) config).getTimedTraces();
+		}
 		Trace startTrace = new Trace(currentTrace.get().getStateSpace());
+		int executions = isBlackBox ? timedTraces.size() : numberExecutions;
 
 		long wallTime = 0;
 		try {
 			startTrace.getStateSpace().startTransaction();
 			wallTime = System.currentTimeMillis();
-			for (int i = 0; i < numberExecutions; i++) {
+			for (int i = 0; i < executions; i++) {
+				if(isBlackBox) {
+					try {
+						this.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(timedTraces.get(i)));
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
 				currentNumberStepsBeforeChecking = (int) (Math.random() * maxStepsBeforeProperty);
 				Trace newTrace = startTrace;
 				setupBeforeSimulation(newTrace);
