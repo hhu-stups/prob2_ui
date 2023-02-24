@@ -230,6 +230,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 						this.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(timedTraces.get(i)));
 					} catch (Exception e) {
 						e.printStackTrace();
+						// TODO
 					}
 				}
 				currentNumberStepsBeforeChecking = (int) (Math.random() * maxStepsBeforeProperty);
