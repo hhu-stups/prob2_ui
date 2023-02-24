@@ -114,8 +114,6 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 
 	private ISimulationPropertyChecker simulationPropertyChecker;
 
-	// TODO: BlackBoxChecker
-
 	private final Injector injector;
 
 	private final HypothesisCheckingType hypothesisCheckingType;
@@ -132,7 +130,7 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	}
 
 	public void initializeMonteCarlo(final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationMonteCarloChecker(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		this.simulationPropertyChecker = new SimulationPropertyChecker(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	@Override
@@ -221,14 +219,14 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	public void run() {
 		if(simulationPropertyChecker instanceof Simulator) {
 			((Simulator) simulationPropertyChecker).run(this);
-		} else if(simulationPropertyChecker instanceof SimulationMonteCarloChecker) {
-			((SimulationMonteCarloChecker) simulationPropertyChecker).run(this);
+		} else if(simulationPropertyChecker instanceof SimulationPropertyChecker) {
+			((SimulationPropertyChecker) simulationPropertyChecker).run(this);
 		}
 	}
 
 	public Simulator getSimulator() {
-		if(simulationPropertyChecker instanceof SimulationMonteCarloChecker) {
-			return ((SimulationMonteCarloChecker) simulationPropertyChecker).getSimulator();
+		if(simulationPropertyChecker instanceof SimulationPropertyChecker) {
+			return ((SimulationPropertyChecker) simulationPropertyChecker).getSimulator();
 		}
 		return null;
 	}

@@ -11,12 +11,10 @@ import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
-public class SimulationMonteCarloChecker implements ISimulationPropertyChecker {
+public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	private final SimulationMonteCarlo simulationMonteCarlo;
 
@@ -26,8 +24,8 @@ public class SimulationMonteCarloChecker implements ISimulationPropertyChecker {
 
 	private int numberSuccess;
 
-	public SimulationMonteCarloChecker(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
-									   SimulationCheckingType type, Map<String, Object> additionalInformation) {
+	public SimulationPropertyChecker(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
+									 SimulationCheckingType type, Map<String, Object> additionalInformation) {
 		this.simulationMonteCarlo = new SimulationMonteCarlo(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
