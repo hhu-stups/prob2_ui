@@ -11,6 +11,8 @@ import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -160,6 +162,11 @@ public class SimulationMonteCarloChecker implements ISimulationPropertyChecker {
 		return simulationMonteCarlo.getStats();
 	}
 
+	@Override
+	public void setStats(SimulationStats stats) {
+		simulationMonteCarlo.setStats(stats);
+	}
+
 	public Map<String, Object> getAdditionalInformation() {
 		return simulationMonteCarlo.getAdditionalInformation();
 	}
@@ -184,9 +191,17 @@ public class SimulationMonteCarloChecker implements ISimulationPropertyChecker {
 		return simulationMonteCarlo.calculateExtendedStats();
 	}
 
+	public void calculateStatistics(long time) {
+		simulationMonteCarlo.calculateStatistics(time);
+	}
+
 	@Override
 	public void run() {
 		simulationMonteCarlo.run(this);
+	}
+
+	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
+		simulationMonteCarlo.run(simulationPropertyChecker);
 	}
 
 	@Override

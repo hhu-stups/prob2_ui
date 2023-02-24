@@ -8,6 +8,8 @@ import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 import org.apache.commons.math3.special.Erf;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -122,10 +124,6 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 
 	private final double significance;
 
-	private SimulationStats stats;
-
-	private SimulationMonteCarlo.MonteCarloCheckResult result;
-
 	public SimulationHypothesisChecker(final Injector injector, final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance) {
 		this.injector = injector;
 		this.hypothesisCheckingType = hypothesisCheckingType;
@@ -153,9 +151,9 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 		}
 
 		if(distribution.isSuccess(hypothesisCheckingType, simulationPropertyChecker.getNumberSuccess(), range)) {
-			this.result = SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS;
+			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS);
 		} else {
-			this.result = SimulationMonteCarlo.MonteCarloCheckResult.FAIL;
+			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.FAIL);
 		}
 	}
 
@@ -191,7 +189,7 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 
 	@Override
 	public void setResult(SimulationMonteCarlo.MonteCarloCheckResult result) {
-		this.result = result;
+		simulationPropertyChecker.setResult(result);
 	}
 
 	@Override
@@ -204,12 +202,28 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 		return simulationPropertyChecker.calculateExtendedStats();
 	}
 
+	@Override
+	public void calculateStatistics(long time) {
+		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
+		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
+		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
+		int n = resultingTraces.size();
+		double ratio = (double) numberSuccess / n;
+		this.setStats(new SimulationStats(n, numberSuccess, ratio, wallTime, this.calculateExtendedStats()));
+	}
+
+	@Override
+	public void setStats(SimulationStats stats) {
+		simulationPropertyChecker.setStats(stats);
+	}
+
+	@Override
 	public void run() {
 		if(simulationPropertyChecker instanceof Simulator) {
 			((Simulator) simulationPropertyChecker).run(this);
-			return;
+		} else if(simulationPropertyChecker instanceof SimulationMonteCarloChecker) {
+			((SimulationMonteCarloChecker) simulationPropertyChecker).run(this);
 		}
-		simulationPropertyChecker.run();
 	}
 
 	public Simulator getSimulator() {

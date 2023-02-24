@@ -241,7 +241,7 @@ public class SimulationMonteCarlo extends Simulator implements ISimulationProper
 			wallTime = System.currentTimeMillis() - wallTime;
 			startTrace.getStateSpace().endTransaction();
 		}
-		calculateStatistics(wallTime);
+		simulationPropertyChecker.calculateStatistics(wallTime);
 	}
 
 	public void check() {
@@ -297,6 +297,7 @@ public class SimulationMonteCarlo extends Simulator implements ISimulationProper
 		this.startAtTime = Integer.MAX_VALUE;
 	}
 
+	@Override
 	public void calculateStatistics(long time) {
 		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
 		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, calculateExtendedStats());
@@ -332,6 +333,11 @@ public class SimulationMonteCarlo extends Simulator implements ISimulationProper
 
 	public SimulationStats getStats() {
 		return stats;
+	}
+
+	@Override
+	public void setStats(SimulationStats stats) {
+		this.stats = stats;
 	}
 
 	public MonteCarloCheckResult getResult() {

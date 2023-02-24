@@ -12,9 +12,11 @@ public interface ISimulationPropertyChecker {
 	SimulationStats getStats();
 	SimulationMonteCarlo.MonteCarloCheckResult getResult();
 	void setResult(SimulationMonteCarlo.MonteCarloCheckResult result);
+	void setStats(SimulationStats stats);
 	int getNumberSuccess();
 	SimulationExtendedStats calculateExtendedStats();
 	void run();
 	void check();
 	Checked checkTrace(Trace trace, int time);
+	void calculateStatistics(long time);
 }

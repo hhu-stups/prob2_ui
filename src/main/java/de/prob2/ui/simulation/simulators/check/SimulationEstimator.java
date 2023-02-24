@@ -7,6 +7,8 @@ import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -40,10 +42,6 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 
 	private final double epsilon;
 
-	private SimulationStats stats;
-
-	private SimulationMonteCarlo.MonteCarloCheckResult result;
-
 	public SimulationEstimator(final Injector injector, final EstimationType estimationType, final double desiredValue, final double epsilon) {
 		this.injector = injector;
 		this.estimationType = estimationType;
@@ -61,9 +59,9 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
 		if(ratio >= desiredValue - epsilon) {
-			this.result = SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS;
+			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS);
 		} else {
-			this.result = SimulationMonteCarlo.MonteCarloCheckResult.FAIL;
+			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.FAIL);
 		}
 	}
 
@@ -73,9 +71,9 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
 		if(ratio <= desiredValue + epsilon) {
-			this.result = SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS;
+			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS);
 		} else {
-			this.result = SimulationMonteCarlo.MonteCarloCheckResult.FAIL;
+			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.FAIL);
 		}
 	}
 
@@ -85,9 +83,9 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
 		if(ratio >= desiredValue - epsilon && ratio <= desiredValue + epsilon) {
-			this.result = SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS;
+			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS);
 		} else {
-			this.result = SimulationMonteCarlo.MonteCarloCheckResult.FAIL;
+			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.FAIL);
 		}
 	}
 
@@ -134,8 +132,9 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		return simulationPropertyChecker.getResult();
 	}
 
+	@Override
 	public void setResult(SimulationMonteCarlo.MonteCarloCheckResult result) {
-		this.result = result;
+		simulationPropertyChecker.setResult(result);
 	}
 
 	@Override
@@ -148,14 +147,27 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		return simulationPropertyChecker.calculateExtendedStats();
 	}
 
+	public void calculateStatistics(long time) {
+		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
+		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
+		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
+		int n = resultingTraces.size();
+		double ratio = (double) numberSuccess / n;
+		this.setStats(new SimulationStats(n, numberSuccess, ratio, wallTime, this.calculateExtendedStats()));
+	}
+
+	@Override
+	public void setStats(SimulationStats stats) {
+		simulationPropertyChecker.setStats(stats);
+	}
+
 	@Override
 	public void run() {
 		if(simulationPropertyChecker instanceof Simulator) {
 			((Simulator) simulationPropertyChecker).run(this);
-			return;
+		} else if(simulationPropertyChecker instanceof SimulationMonteCarloChecker) {
+			((SimulationMonteCarloChecker) simulationPropertyChecker).run(this);
 		}
-		simulationPropertyChecker.run();
-		setResult(simulationPropertyChecker.getResult());
 	}
 
 	@Override
