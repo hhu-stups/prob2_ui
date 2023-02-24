@@ -37,6 +37,11 @@ final class ConsoleHistoryAndSearchHandler {
 				this.savedInput = this.parent.getInput();
 				this.parent.setInput("");
 			} else {
+				String searchText = this.parent.getInput();
+				if (!searchText.isEmpty()) {
+					this.lastSearch = searchText;
+				}
+
 				this.searchFailed.set(false);
 				this.parent.setInput(this.getCurrentSearchResult());
 				this.savedInput = this.parent.getInput();
@@ -66,9 +71,6 @@ final class ConsoleHistoryAndSearchHandler {
 		}
 
 		this.searchFailed.set(failed);
-		if (!searchText.isEmpty()) {
-			this.lastSearch = searchText;
-		}
 	}
 
 	public BooleanProperty searchActiveProperty() {
