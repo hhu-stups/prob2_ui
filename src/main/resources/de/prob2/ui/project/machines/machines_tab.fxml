@@ -48,12 +48,10 @@
 			</Button>
 			<HelpButton fx:id="helpButton" />
 		</HBox>
-		<SplitPane fx:id="splitPane" VBox.vgrow="ALWAYS">
-			<ListView fx:id="machinesList" styleClass="no-border" prefHeight="200.0">
-				<placeholder>
-					<Label text="%project.machines.machinesTab.noMachines" />
-				</placeholder>
-			</ListView>
-		</SplitPane>
+		<ListView fx:id="machinesList" styleClass="no-border" prefHeight="200.0">
+			<placeholder>
+				<Label text="%project.machines.machinesTab.noMachines" />
+			</placeholder>
+		</ListView>
 	</VBox>
 </fx:root>

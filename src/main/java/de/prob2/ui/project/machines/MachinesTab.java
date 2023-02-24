@@ -21,7 +21,6 @@ import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
@@ -32,14 +31,12 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.sharedviews.DescriptionView;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -49,7 +46,6 @@ import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -86,9 +82,6 @@ public class MachinesTab extends Tab {
 						return;
 					}
 					startMachine(this.machineProperty.get());
-				} else if(showMachineView && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 1) {
-					showMachineView(this.machineProperty.get());
-					this.updateSelected(true);
 				}
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
@@ -112,16 +105,10 @@ public class MachinesTab extends Tab {
 		}
 
 		@FXML
-		private void handleShowDescription() {
-			showMachineView(this.machineProperty.get());
-			machinesList.getSelectionModel().select(this.machineProperty.get());
-		}
-
-		@FXML
 		private void handleEditConfiguration() {
 			final EditMachinesDialog editDialog = injector.getInstance(EditMachinesDialog.class);
 			editDialog.initOwner(MachinesTab.this.getTabPane().getScene().getWindow());
-			editDialog.editAndShow(this.machineProperty.get()).ifPresent(result -> showMachineView(this.machineProperty.get()));
+			editDialog.editAndShow(this.machineProperty.get());
 		}
 
 		@FXML
@@ -203,7 +190,6 @@ public class MachinesTab extends Tab {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachinesTab.class);
 
 	@FXML private ListView<Machine> machinesList;
-	@FXML private SplitPane splitPane;
 	@FXML private Button moveUpBtn;
 	@FXML private Button moveDownBtn;
 	@FXML private HelpButton helpButton;
@@ -211,25 +197,20 @@ public class MachinesTab extends Tab {
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
-
-	private boolean showMachineView;
 
 	@Inject
 	private MachinesTab(
 		final CurrentTrace currentTrace,
 		final CurrentProject currentProject,
 		final StageManager stageManager,
-		final I18n i18n,
 		final FileChooserManager fileChooserManager,
 		final Injector injector
 	) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.injector = injector;
 		stageManager.loadFXML(this, "machines_tab.fxml");
@@ -239,8 +220,7 @@ public class MachinesTab extends Tab {
 	public void initialize() {
 		helpButton.setHelpContent("project", "Machines");
 
-		splitPane.disableProperty().bind(injector.getInstance(MachineLoader.class).loadingProperty());
-
+		machinesList.disableProperty().bind(injector.getInstance(MachineLoader.class).loadingProperty());
 		machinesList.setCellFactory(lv -> this.new MachinesItem());
 		machinesList.itemsProperty().bind(currentProject.machinesProperty());
 		machinesList.setOnKeyPressed(event -> {
@@ -265,12 +245,6 @@ public class MachinesTab extends Tab {
 
 			moveUpBtn.setDisable(n == 0);
 			moveDownBtn.setDisable(n == (size - 1));
-		});
-		currentProject.machinesProperty().addListener((observable, from, to) -> {
-			Node node = splitPane.getItems().get(0);
-			if (node instanceof DescriptionView) {
-				closeMachineView();
-			}
 		});
 	}
 
@@ -437,27 +411,6 @@ public class MachinesTab extends Tab {
 		final Machine machine = new Machine(name, "", relative);
 		currentProject.addMachine(machine);
 		currentProject.startAnimation(machine, Preference.DEFAULT);
-	}
-
-	public void closeMachineView() {
-		if (showMachineView) {
-			splitPane.getItems().remove(0);
-			machinesList.getSelectionModel().clearSelection();
-			showMachineView = false;
-		}
-	}
-
-	void showMachineView(final Machine machine) {
-		if(showMachineView) {
-			closeMachineView();
-		}
-		final DescriptionView descriptionView = new DescriptionView(stageManager, i18n);
-		descriptionView.setOnClose(this::closeMachineView);
-		descriptionView.setName(machine.getName());
-		descriptionView.setDescription(machine.getDescription());
-		descriptionView.descriptionProperty().addListener((o, from, to) -> machine.setDescription(to));
-		splitPane.getItems().add(0, descriptionView);
-		showMachineView = true;
 	}
 
 	private void startMachine(final Machine machine) {

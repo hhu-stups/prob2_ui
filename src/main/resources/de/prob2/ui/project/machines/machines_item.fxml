@@ -22,7 +22,6 @@
 				<Menu fx:id="startAnimationWithPreferencesMenu" text="%project.machines.machinesItem.contextMenu.items.startAnimationWithPreferences"/>
 				<SeparatorMenuItem />
 				<MenuItem text="%project.machines.machinesItem.contextMenu.items.editMachineConfiguration" onAction="#handleEditConfiguration"/>
-				<MenuItem text="%project.machines.machinesItem.contextMenu.items.showMachineDescription" onAction="#handleShowDescription"/>
 				<MenuItem text="%project.machines.machinesItem.contextMenu.items.removeMachine" onAction="#handleRemove"/>
 			</items>
 		</ContextMenu>
