@@ -7,6 +7,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -31,7 +32,6 @@ public class RealTimeSimulator extends Simulator {
 		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
 	}
 
-	@Override
 	public void run() {
 		scheduler.run();
 		uiInteractionHandler.getLastUserInteraction().addListener(uiListener);
@@ -73,6 +73,11 @@ public class RealTimeSimulator extends Simulator {
 			return endingConditionReached && ((SimulationModelConfiguration) config).getUiListenerConfigurations().isEmpty();
 		}
 		return endingConditionReached;
+	}
+
+	@Override
+	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
+		throw new UnsupportedOperationException();
 	}
 
 }

@@ -645,7 +645,6 @@ public class SimulatorStage extends Stage {
 	}
 
 	public void loadSimulationIntoSimulator(SimulationModel simulation) {
-		configurationPath.set(null);
 		configurationPath.set(simulation == null ? null : currentProject.getLocation().resolve(simulation.getPath()));
 		if(simulation != null) {
 			injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
@@ -654,6 +653,7 @@ public class SimulatorStage extends Stage {
 			simulation.reset();
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
 			loadSimulationItems();
+			simulationItemHandler.setSimulationModelConfiguration(realTimeSimulator.getConfig());
 		}
 	}
 

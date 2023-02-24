@@ -10,6 +10,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationError;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.SimulatorStage;
+import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 import javafx.application.Platform;
@@ -17,12 +19,13 @@ import javafx.scene.control.Alert;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimulationMonteCarlo extends Simulator {
+public class SimulationCheckingSimulator extends Simulator implements ISimulationPropertyChecker {
 
 	public enum StartingType {
 		START_AFTER_STEPS("Start after Number of Steps"),
@@ -61,49 +64,49 @@ public class SimulationMonteCarlo extends Simulator {
 		NOT_FINISHED, SUCCESS, FAIL
 	}
 
-	protected final Injector injector;
+	private final Injector injector;
 
-	protected Map<String, List<Integer>> operationExecutions;
+	private final Map<String, List<Integer>> operationExecutions;
 
-	protected Map<String, List<Integer>> operationEnablings;
+	private final Map<String, List<Integer>> operationEnablings;
 
-	protected Map<String, List<Integer>> operationExecutionPercentage;
+	private final List<List<Integer>> resultingTimestamps;
 
-	protected List<List<Integer>> resultingTimestamps;
+	private final List<Trace> resultingTraces;
 
-	protected List<Trace> resultingTraces;
+	private final List<Checked> resultingStatus;
 
-	protected List<Checked> resultingStatus;
+	private final int numberExecutions;
 
-	protected int numberExecutions;
+	private final int maxStepsBeforeProperty;
 
-	protected int maxStepsBeforeProperty;
+	private List<Path> blackBoxTimedTraces;
 
-	protected int currentNumberStepsBeforeChecking;
+	private int currentNumberStepsBeforeChecking;
 
-	protected boolean startingConditionReached;
+	private boolean startingConditionReached;
 
-	protected int startAtStep;
+	private int startAtStep;
 
-	protected int startAtTime;
+	private int startAtTime;
 
-	protected Map<String, Object> additionalInformation;
+	private final Map<String, Object> additionalInformation;
 
-	protected SimulationStats stats;
+	private SimulationStats stats;
 
-	protected MonteCarloCheckResult result;
+	private MonteCarloCheckResult result;
 
-	public SimulationMonteCarlo(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
+	public SimulationCheckingSimulator(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
 		super(currentTrace);
 		this.injector = injector;
 		this.operationExecutions = new HashMap<>();
 		this.operationEnablings = new HashMap<>();
-		this.operationExecutionPercentage = new HashMap<>();
 		this.resultingTraces = new ArrayList<>();
 		this.resultingTimestamps = new ArrayList<>();
 		this.resultingStatus = new ArrayList<>();
 		this.numberExecutions = numberExecutions;
 		this.maxStepsBeforeProperty = maxStepsBeforeProperty;
+		this.blackBoxTimedTraces = new ArrayList<>();
 		this.startingConditionReached = false;
 		this.currentNumberStepsBeforeChecking = Integer.MAX_VALUE;
 		this.startAtStep = Integer.MAX_VALUE;
@@ -204,13 +207,39 @@ public class SimulationMonteCarlo extends Simulator {
 
 	@Override
 	public void run() {
+		run(this);
+	}
+
+	private void initBlackBoxBeforeSimulation(boolean isBlackBox) {
+		blackBoxTimedTraces.clear();
+		if(isBlackBox) {
+			blackBoxTimedTraces = ((SimulationBlackBoxModelConfiguration) config).getTimedTraces();
+		}
+	}
+
+	private void initForBlackBoxValidationIfNecessary(boolean isBlackBox, int index) {
+		if(isBlackBox) {
+			try {
+				this.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(blackBoxTimedTraces.get(index)));
+			} catch (Exception e) {
+				e.printStackTrace();
+				// TODO
+			}
+		}
+	}
+
+	@Override
+	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
+		boolean isBlackBox = config instanceof SimulationBlackBoxModelConfiguration;
 		Trace startTrace = new Trace(currentTrace.get().getStateSpace());
+		initBlackBoxBeforeSimulation(isBlackBox);
 
 		long wallTime = 0;
 		try {
 			startTrace.getStateSpace().startTransaction();
 			wallTime = System.currentTimeMillis();
 			for (int i = 0; i < numberExecutions; i++) {
+				initForBlackBoxValidationIfNecessary(isBlackBox, i);
 				currentNumberStepsBeforeChecking = (int) (Math.random() * maxStepsBeforeProperty);
 				Trace newTrace = startTrace;
 				setupBeforeSimulation(newTrace);
@@ -219,14 +248,14 @@ public class SimulationMonteCarlo extends Simulator {
 				}
 				resultingTraces.add(newTrace);
 				resultingTimestamps.add(getTimestamps());
-				Checked checked = checkTrace(newTrace, time.get());
+				Checked checked = simulationPropertyChecker.checkTrace(newTrace, time.get());
 				resultingStatus.add(checked);
 				collectOperationStatistics(newTrace);
 				resetSimulator();
 			}
-			check();
+			simulationPropertyChecker.check();
 		} catch (SimulationError e) {
-			this.result = MonteCarloCheckResult.FAIL;
+			simulationPropertyChecker.setResult(MonteCarloCheckResult.FAIL);
 			Platform.runLater(() -> {
 				final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "simulation.error.header.runtime", "simulation.error.body.runtime");
 				alert.initOwner(injector.getInstance(SimulatorStage.class));
@@ -236,7 +265,7 @@ public class SimulationMonteCarlo extends Simulator {
 			wallTime = System.currentTimeMillis() - wallTime;
 			startTrace.getStateSpace().endTransaction();
 		}
-		calculateStatistics(wallTime);
+		simulationPropertyChecker.calculateStatistics(wallTime);
 	}
 
 	public void check() {
@@ -247,6 +276,7 @@ public class SimulationMonteCarlo extends Simulator {
 		}
 	}
 
+	@Override
 	public Checked checkTrace(Trace trace, int time) {
 		// Monte Carlo Simulation does not apply any checks on a trace. But classes inheriting from SimulationMonteCarlo might apply some checks
 		return Checked.SUCCESS;
@@ -291,9 +321,10 @@ public class SimulationMonteCarlo extends Simulator {
 		this.startAtTime = Integer.MAX_VALUE;
 	}
 
-	protected void calculateStatistics(long time) {
+	@Override
+	public void calculateStatistics(long time) {
 		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
-		stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, calculateExtendedStats());
+		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, calculateExtendedStats());
 	}
 
 	public SimulationExtendedStats calculateExtendedStats() {
@@ -328,7 +359,34 @@ public class SimulationMonteCarlo extends Simulator {
 		return stats;
 	}
 
+	@Override
+	public void setStats(SimulationStats stats) {
+		this.stats = stats;
+	}
+
 	public MonteCarloCheckResult getResult() {
 		return result;
+	}
+
+	@Override
+	public void setResult(SimulationCheckingSimulator.MonteCarloCheckResult result) {
+		this.result = result;
+	}
+
+	@Override
+	public int getNumberSuccess() {
+		return resultingTraces.size();
+	}
+
+	public Map<String, Object> getAdditionalInformation() {
+		return additionalInformation;
+	}
+
+	public int getStartAtStep() {
+		return startAtStep;
+	}
+
+	public int getStartAtTime() {
+		return startAtTime;
 	}
 }

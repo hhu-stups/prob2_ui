@@ -12,16 +12,18 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
 import de.prob2.ui.simulation.model.SimulationModel;
+import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
-import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
+import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 
@@ -34,8 +36,6 @@ import javafx.collections.FXCollections;
 @Singleton
 public class SimulationItemHandler {
 
-	private final SimulationMode simulationMode;
-
 	private final CurrentTrace currentTrace;
 
 	private final StageManager stageManager;
@@ -46,10 +46,10 @@ public class SimulationItemHandler {
 
 	private final ListProperty<Thread> currentJobThreads;
 
+	private ISimulationModelConfiguration simulationModelConfiguration;
+
 	@Inject
-	private SimulationItemHandler(final SimulationMode simulationMode, final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector,
-								  final DisablePropertyController disablePropertyController) {
-		this.simulationMode = simulationMode;
+	private SimulationItemHandler(final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.injector = injector;
@@ -102,13 +102,13 @@ public class SimulationItemHandler {
 		return additionalInformation;
 	}
 
-	private void setResult(SimulationItem item, SimulationMonteCarlo monteCarlo) {
-		item.setTraces(monteCarlo.getResultingTraces());
-		item.setTimestamps(monteCarlo.getResultingTimestamps());
-		item.setStatuses(monteCarlo.getResultingStatus());
-		item.setSimulationStats(monteCarlo.getStats());
+	private void setResult(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
+		item.setTraces(simulationPropertyChecker.getResultingTraces());
+		item.setTimestamps(simulationPropertyChecker.getResultingTimestamps());
+		item.setStatuses(simulationPropertyChecker.getResultingStatus());
+		item.setSimulationStats(simulationPropertyChecker.getStats());
 		Platform.runLater(() -> {
-			switch (monteCarlo.getResult()) {
+			switch (simulationPropertyChecker.getResult()) {
 				case SUCCESS:
 					item.setChecked(Checked.SUCCESS);
 					break;
@@ -124,10 +124,10 @@ public class SimulationItemHandler {
 		});
 	}
 
-	private void runAndCheck(SimulationItem item, SimulationMonteCarlo monteCarlo) {
+	private void runAndCheck(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
 		Thread thread = new Thread(() -> {
-			monteCarlo.run();
-			setResult(item, monteCarlo);
+			simulationPropertyChecker.run();
+			setResult(item, simulationPropertyChecker);
 			currentJobThreads.remove(Thread.currentThread());
 		});
 		currentJobThreads.add(thread);
@@ -138,14 +138,14 @@ public class SimulationItemHandler {
 		int executions = (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationMonteCarlo monteCarlo = new SimulationMonteCarlo(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), monteCarlo, path);
-		runAndCheck(item, monteCarlo);
+		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, path);
+		runAndCheck(item, simulationCheckingSimulator);
 	}
 
 	private void handleHypothesisTest(SimulationItem item) {
-		int executions = (int) item.getField("EXECUTIONS");
-		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
+		int executions = item.getField("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) simulationModelConfiguration).getTimedTraces().size() : (int) item.getField("EXECUTIONS");
+		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
 		SimulationHypothesisChecker.HypothesisCheckingType hypothesisCheckingType = (SimulationHypothesisChecker.HypothesisCheckingType) item.getField("HYPOTHESIS_CHECKING_TYPE");
@@ -160,14 +160,19 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, currentTrace, executions, maxStepsBeforeProperty, checkingType, hypothesisCheckingType, probability, significance, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path);
+		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector,hypothesisCheckingType, probability, significance);
+		initializeHypothesisChecker(hypothesisChecker, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, hypothesisChecker);
 	}
 
+	private void initializeHypothesisChecker(SimulationHypothesisChecker simulationHypothesisChecker, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		simulationHypothesisChecker.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), path);
+	}
+
 	private void handleEstimation(SimulationItem item) {
-		int executions = (int) item.getField("EXECUTIONS");
-		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
+		int executions = item.getField("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) simulationModelConfiguration).getTimedTraces().size() : (int) item.getField("EXECUTIONS");
+		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
 		SimulationEstimator.EstimationType estimationType = (SimulationEstimator.EstimationType) item.getField("ESTIMATION_TYPE");
@@ -182,9 +187,14 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, currentTrace, executions, maxStepsBeforeProperty, checkingType, estimationType, desiredValue, epsilon, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator, path);
+		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, estimationType, desiredValue, epsilon);
+		initializeEstimator(simulationEstimator, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, simulationEstimator);
+	}
+
+	private void initializeEstimator(SimulationEstimator simulationEstimator, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		simulationEstimator.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), path);
 	}
 
 	public void checkItem(SimulationItem item) {
@@ -242,5 +252,9 @@ public class SimulationItemHandler {
 
 	public void setPath(Path path) {
 		this.path = path;
+	}
+
+	public void setSimulationModelConfiguration(ISimulationModelConfiguration simulationModelConfiguration) {
+		this.simulationModelConfiguration = simulationModelConfiguration;
 	}
 }

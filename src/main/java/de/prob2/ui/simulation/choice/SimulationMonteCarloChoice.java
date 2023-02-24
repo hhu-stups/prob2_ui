@@ -3,11 +3,9 @@ package de.prob2.ui.simulation.choice;
 import com.google.inject.Singleton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
+import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import javafx.beans.NamedArg;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
@@ -26,9 +24,9 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 	public static class SimulationStartingItem {
 
-		private final SimulationMonteCarlo.StartingType startingType;
+		private final SimulationCheckingSimulator.StartingType startingType;
 
-		public SimulationStartingItem(@NamedArg("startingType") SimulationMonteCarlo.StartingType startingType) {
+		public SimulationStartingItem(@NamedArg("startingType") SimulationCheckingSimulator.StartingType startingType) {
 			this.startingType = startingType;
 		}
 
@@ -37,7 +35,7 @@ public class SimulationMonteCarloChoice extends GridPane {
 			return startingType.getName();
 		}
 
-		public SimulationMonteCarlo.StartingType getStartingType() {
+		public SimulationCheckingSimulator.StartingType getStartingType() {
 			return startingType;
 		}
 
@@ -57,9 +55,9 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 	public static class SimulationEndingItem {
 
-		private final SimulationMonteCarlo.EndingType endingType;
+		private final SimulationCheckingSimulator.EndingType endingType;
 
-		public SimulationEndingItem(@NamedArg("endingType") SimulationMonteCarlo.EndingType endingType) {
+		public SimulationEndingItem(@NamedArg("endingType") SimulationCheckingSimulator.EndingType endingType) {
 			this.endingType = endingType;
 		}
 
@@ -68,7 +66,7 @@ public class SimulationMonteCarloChoice extends GridPane {
 			return endingType.getName();
 		}
 
-		public SimulationMonteCarlo.EndingType getEndingType() {
+		public SimulationCheckingSimulator.EndingType getEndingType() {
 			return endingType;
 		}
 
