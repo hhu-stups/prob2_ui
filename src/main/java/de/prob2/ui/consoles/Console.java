@@ -462,7 +462,7 @@ public abstract class Console extends StyleClassedTextArea {
 
 		int caretColumn = this.getCaretColumn();
 		int inputPosition = caretColumn - this.inputStart.get();
-		if (inputPosition < 0 || inputPosition > this.inputEnd.get()) {
+		if (inputPosition < 0 || inputPosition > this.input.get().length()) {
 			return OptionalInt.empty();
 		}
 

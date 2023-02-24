@@ -18,6 +18,7 @@ final class ConsoleHistoryAndSearchHandler {
 	private final ObservableList<String> historyView;
 	private int historyPosition;
 	private String savedInput;
+	private String lastSearch;
 
 	ConsoleHistoryAndSearchHandler(Console parent) {
 		this.parent = parent;
@@ -28,6 +29,7 @@ final class ConsoleHistoryAndSearchHandler {
 		this.historyView = FXCollections.unmodifiableObservableList(this.history);
 		this.historyPosition = 0;
 		this.savedInput = "";
+		this.lastSearch = "";
 
 		this.searchActive.addListener((o, from, to) -> {
 			if (to) {
@@ -64,6 +66,9 @@ final class ConsoleHistoryAndSearchHandler {
 		}
 
 		this.searchFailed.set(failed);
+		if (!searchText.isEmpty()) {
+			this.lastSearch = searchText;
+		}
 	}
 
 	public BooleanProperty searchActiveProperty() {
@@ -149,7 +154,9 @@ final class ConsoleHistoryAndSearchHandler {
 			return;
 		}
 
-		if (this.historyPosition > 0) {
+		if (this.parent.getInput().isEmpty()) {
+			this.parent.setInput(this.lastSearch);
+		} else if (this.historyPosition > 0) {
 			this.historyPosition--;
 			this.updateSearch();
 		} else {
