@@ -17,6 +17,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
@@ -43,6 +45,8 @@ public class SimulationItemHandler {
 	private Path path;
 
 	private final ListProperty<Thread> currentJobThreads;
+
+	private ISimulationModelConfiguration simulationModelConfiguration;
 
 	@Inject
 	private SimulationItemHandler(final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector, final DisablePropertyController disablePropertyController) {
@@ -134,13 +138,13 @@ public class SimulationItemHandler {
 		int executions = (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationCheckingSimulator monteCarlo = new SimulationCheckingSimulator(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), monteCarlo, path);
-		runAndCheck(item, monteCarlo);
+		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, path);
+		runAndCheck(item, simulationCheckingSimulator);
 	}
 
 	private void handleHypothesisTest(SimulationItem item) {
-		int executions = item.getField("EXECUTIONS") == null ? 0 : (int) item.getField("EXECUTIONS");
+		int executions = item.getField("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) simulationModelConfiguration).getTimedTraces().size() : (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
@@ -167,7 +171,7 @@ public class SimulationItemHandler {
 	}
 
 	private void handleEstimation(SimulationItem item) {
-		int executions = item.getField("EXECUTIONS") == null ? 0 : (int) item.getField("EXECUTIONS");
+		int executions = item.getField("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) simulationModelConfiguration).getTimedTraces().size() : (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingType checkingType = (SimulationCheckingType) item.getField("CHECKING_TYPE");
@@ -248,5 +252,9 @@ public class SimulationItemHandler {
 
 	public void setPath(Path path) {
 		this.path = path;
+	}
+
+	public void setSimulationModelConfiguration(ISimulationModelConfiguration simulationModelConfiguration) {
+		this.simulationModelConfiguration = simulationModelConfiguration;
 	}
 }

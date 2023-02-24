@@ -218,13 +218,12 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			timedTraces = ((SimulationBlackBoxModelConfiguration) config).getTimedTraces();
 		}
 		Trace startTrace = new Trace(currentTrace.get().getStateSpace());
-		int executions = isBlackBox ? timedTraces.size() : numberExecutions;
 
 		long wallTime = 0;
 		try {
 			startTrace.getStateSpace().startTransaction();
 			wallTime = System.currentTimeMillis();
-			for (int i = 0; i < executions; i++) {
+			for (int i = 0; i < numberExecutions; i++) {
 				if(isBlackBox) {
 					try {
 						this.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(timedTraces.get(i)));

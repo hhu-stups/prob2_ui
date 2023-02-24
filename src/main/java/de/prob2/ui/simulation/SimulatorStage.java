@@ -653,6 +653,7 @@ public class SimulatorStage extends Stage {
 			simulation.reset();
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
 			loadSimulationItems();
+			simulationItemHandler.setSimulationModelConfiguration(realTimeSimulator.getConfig());
 		}
 	}
 
