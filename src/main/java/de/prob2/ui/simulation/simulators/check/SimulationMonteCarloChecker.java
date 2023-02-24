@@ -8,24 +8,30 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 
+import java.util.List;
 import java.util.Map;
 
-public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
+public class SimulationMonteCarloChecker implements ISimulationPropertyChecker {
 
-	protected final SimulationCheckingType type;
+	private final SimulationMonteCarlo simulationMonteCarlo;
 
-	protected int numberSuccess;
+	private final CurrentTrace currentTrace;
+
+	private final SimulationCheckingType type;
+
+	private int numberSuccess;
 
 	public SimulationMonteCarloChecker(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
 									   SimulationCheckingType type, Map<String, Object> additionalInformation) {
-		super(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
+		this.simulationMonteCarlo = new SimulationMonteCarlo(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
+		this.currentTrace = currentTrace;
 		this.type = type;
 		this.numberSuccess = 0;
 	}
 
-	@Override
 	public Checked checkTrace(Trace trace, int time) {
 		switch (type) {
 			case ALL_INVARIANTS:
@@ -49,7 +55,7 @@ public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
-			if(i >= startAtStep && !destination.isInvariantOk()) {
+			if(i >= simulationMonteCarlo.getStartAtStep() && !destination.isInvariantOk()) {
 				invariantOk = false;
 				break;
 			}
@@ -63,14 +69,14 @@ public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 
 	public Checked checkPredicateInvariant(Trace trace) {
 		boolean invariantOk = true;
-		String invariant = (String) additionalInformation.get("PREDICATE");
+		String invariant = (String) this.getAdditionalInformation().get("PREDICATE");
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
-				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, this.getVariables(), invariant, mode);
-				if (i >= startAtStep && "FALSE".equals(evalResult)) {
+				String evalResult = simulationMonteCarlo.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationMonteCarlo.getVariables(), invariant, mode);
+				if (i >= simulationMonteCarlo.getStartAtStep() && "FALSE".equals(evalResult)) {
 					invariantOk = false;
 					break;
 				}
@@ -85,13 +91,13 @@ public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 
 	public Checked checkPredicateFinal(Trace trace) {
 		boolean predicateOk = true;
-		String finalPredicate = (String) additionalInformation.get("PREDICATE");
+		String finalPredicate = (String) this.getAdditionalInformation().get("PREDICATE");
 		int size = trace.getTransitionList().size();
 		Transition transition = trace.getTransitionList().get(size - 1);
 		State destination = transition.getDestination();
 		if(destination.isInitialised()) {
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
-			String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, this.getVariables(), finalPredicate, mode);
+			String evalResult = simulationMonteCarlo.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationMonteCarlo.getVariables(), finalPredicate, mode);
 			if ("FALSE".equals(evalResult)) {
 				predicateOk = false;
 			}
@@ -105,14 +111,14 @@ public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 
 	public Checked checkPredicateEventually(Trace trace) {
 		boolean predicateOk = false;
-		String predicate = (String) additionalInformation.get("PREDICATE");
+		String predicate = (String) this.getAdditionalInformation().get("PREDICATE");
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
-				String evalResult = simulationEventHandler.getCache().readValueWithCaching(destination, this.getVariables(), predicate, mode);
-				if (i >= startAtStep && "TRUE".equals(evalResult)) {
+				String evalResult = simulationMonteCarlo.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationMonteCarlo.getVariables(), predicate, mode);
+				if (i >= simulationMonteCarlo.getStartAtStep() && "TRUE".equals(evalResult)) {
 					predicateOk = true;
 					break;
 				}
@@ -126,12 +132,69 @@ public class SimulationMonteCarloChecker extends SimulationMonteCarlo {
 	}
 
 	public Checked checkTiming(int time) {
-		int maximumTime = (int) additionalInformation.get("TIME");
-		if(time - startAtTime <= maximumTime) {
+		int maximumTime = (int) this.getAdditionalInformation().get("TIME");
+		if(time - simulationMonteCarlo.getStartAtTime() <= maximumTime) {
 			numberSuccess++;
 			return Checked.SUCCESS;
 		}
 		return Checked.FAIL;
 	}
 
+	@Override
+	public List<Trace> getResultingTraces() {
+		return simulationMonteCarlo.getResultingTraces();
+	}
+
+	@Override
+	public List<List<Integer>> getResultingTimestamps() {
+		return simulationMonteCarlo.getResultingTimestamps();
+	}
+
+	@Override
+	public List<Checked> getResultingStatus() {
+		return simulationMonteCarlo.getResultingStatus();
+	}
+
+	@Override
+	public SimulationStats getStats() {
+		return simulationMonteCarlo.getStats();
+	}
+
+	public Map<String, Object> getAdditionalInformation() {
+		return simulationMonteCarlo.getAdditionalInformation();
+	}
+
+	@Override
+	public SimulationMonteCarlo.MonteCarloCheckResult getResult() {
+		return simulationMonteCarlo.getResult();
+	}
+
+	@Override
+	public void setResult(SimulationMonteCarlo.MonteCarloCheckResult result) {
+		simulationMonteCarlo.setResult(result);
+	}
+
+	@Override
+	public int getNumberSuccess() {
+		return numberSuccess;
+	}
+
+	@Override
+	public SimulationExtendedStats calculateExtendedStats() {
+		return simulationMonteCarlo.calculateExtendedStats();
+	}
+
+	@Override
+	public void run() {
+		simulationMonteCarlo.run(this);
+	}
+
+	@Override
+	public void check() {
+		simulationMonteCarlo.check();
+	}
+
+	public Simulator getSimulator() {
+		return simulationMonteCarlo;
+	}
 }

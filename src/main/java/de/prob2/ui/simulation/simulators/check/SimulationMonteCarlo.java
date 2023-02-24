@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimulationMonteCarlo extends Simulator {
+public class SimulationMonteCarlo extends Simulator implements ISimulationPropertyChecker {
 
 	public enum StartingType {
 		START_AFTER_STEPS("Start after Number of Steps"),
@@ -204,6 +204,11 @@ public class SimulationMonteCarlo extends Simulator {
 
 	@Override
 	public void run() {
+		run(this);
+	}
+
+	@Override
+	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
 		Trace startTrace = new Trace(currentTrace.get().getStateSpace());
 
 		long wallTime = 0;
@@ -219,14 +224,14 @@ public class SimulationMonteCarlo extends Simulator {
 				}
 				resultingTraces.add(newTrace);
 				resultingTimestamps.add(getTimestamps());
-				Checked checked = checkTrace(newTrace, time.get());
+				Checked checked = simulationPropertyChecker.checkTrace(newTrace, time.get());
 				resultingStatus.add(checked);
 				collectOperationStatistics(newTrace);
 				resetSimulator();
 			}
-			check();
+			simulationPropertyChecker.check();
 		} catch (SimulationError e) {
-			this.result = MonteCarloCheckResult.FAIL;
+			simulationPropertyChecker.setResult(MonteCarloCheckResult.FAIL);
 			Platform.runLater(() -> {
 				final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "simulation.error.header.runtime", "simulation.error.body.runtime");
 				alert.initOwner(injector.getInstance(SimulatorStage.class));
@@ -247,6 +252,7 @@ public class SimulationMonteCarlo extends Simulator {
 		}
 	}
 
+	@Override
 	public Checked checkTrace(Trace trace, int time) {
 		// Monte Carlo Simulation does not apply any checks on a trace. But classes inheriting from SimulationMonteCarlo might apply some checks
 		return Checked.SUCCESS;
@@ -291,9 +297,9 @@ public class SimulationMonteCarlo extends Simulator {
 		this.startAtTime = Integer.MAX_VALUE;
 	}
 
-	protected void calculateStatistics(long time) {
+	public void calculateStatistics(long time) {
 		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
-		stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, calculateExtendedStats());
+		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, calculateExtendedStats());
 	}
 
 	public SimulationExtendedStats calculateExtendedStats() {
@@ -330,5 +336,27 @@ public class SimulationMonteCarlo extends Simulator {
 
 	public MonteCarloCheckResult getResult() {
 		return result;
+	}
+
+	@Override
+	public void setResult(SimulationMonteCarlo.MonteCarloCheckResult result) {
+		this.result = result;
+	}
+
+	@Override
+	public int getNumberSuccess() {
+		return resultingTraces.size();
+	}
+
+	public Map<String, Object> getAdditionalInformation() {
+		return additionalInformation;
+	}
+
+	public int getStartAtStep() {
+		return startAtStep;
+	}
+
+	public int getStartAtTime() {
+		return startAtTime;
 	}
 }

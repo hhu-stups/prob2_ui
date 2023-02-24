@@ -12,13 +12,13 @@ import javax.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.model.SimulationModel;
+import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
@@ -102,13 +102,13 @@ public class SimulationItemHandler {
 		return additionalInformation;
 	}
 
-	private void setResult(SimulationItem item, SimulationMonteCarlo monteCarlo) {
-		item.setTraces(monteCarlo.getResultingTraces());
-		item.setTimestamps(monteCarlo.getResultingTimestamps());
-		item.setStatuses(monteCarlo.getResultingStatus());
-		item.setSimulationStats(monteCarlo.getStats());
+	private void setResult(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
+		item.setTraces(simulationPropertyChecker.getResultingTraces());
+		item.setTimestamps(simulationPropertyChecker.getResultingTimestamps());
+		item.setStatuses(simulationPropertyChecker.getResultingStatus());
+		item.setSimulationStats(simulationPropertyChecker.getStats());
 		Platform.runLater(() -> {
-			switch (monteCarlo.getResult()) {
+			switch (simulationPropertyChecker.getResult()) {
 				case SUCCESS:
 					item.setChecked(Checked.SUCCESS);
 					break;
@@ -124,10 +124,10 @@ public class SimulationItemHandler {
 		});
 	}
 
-	private void runAndCheck(SimulationItem item, SimulationMonteCarlo monteCarlo) {
+	private void runAndCheck(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
 		Thread thread = new Thread(() -> {
-			monteCarlo.run();
-			setResult(item, monteCarlo);
+			simulationPropertyChecker.run();
+			setResult(item, simulationPropertyChecker);
 			currentJobThreads.remove(Thread.currentThread());
 		});
 		currentJobThreads.add(thread);
@@ -160,9 +160,18 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, currentTrace, executions, maxStepsBeforeProperty, checkingType, hypothesisCheckingType, probability, significance, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), hypothesisChecker, path);
+		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector,hypothesisCheckingType, probability, significance);
+		initializeHypothesisChecker(hypothesisChecker, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, hypothesisChecker);
+	}
+
+	private void initializeHypothesisChecker(SimulationHypothesisChecker simulationHypothesisChecker, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
+			simulationHypothesisChecker.initializeMonteCarlo(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+			SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), path);
+		} else { // Black Box {
+			// TODO
+		}
 	}
 
 	private void handleEstimation(SimulationItem item) {
@@ -182,9 +191,18 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, currentTrace, executions, maxStepsBeforeProperty, checkingType, estimationType, desiredValue, epsilon, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator, path);
+		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, estimationType, desiredValue, epsilon);
+		initializeEstimator(simulationEstimator, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, simulationEstimator);
+	}
+
+	private void initializeEstimator(SimulationEstimator simulationEstimator, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
+			simulationEstimator.initializeMonteCarlo(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+			SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), path);
+		} else { // Black Box {
+			// TODO
+		}
 	}
 
 	public void checkItem(SimulationItem item) {

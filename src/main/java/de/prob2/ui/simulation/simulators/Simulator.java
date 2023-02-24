@@ -10,6 +10,7 @@ import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfigurationChecker;
+import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
@@ -269,7 +270,7 @@ public abstract class Simulator {
 		return time.get();
 	}
 
-	protected abstract void run();
+	public abstract void run(ISimulationPropertyChecker simulationPropertyChecker);
 
 	public int getDelay() {
 		return delay;
@@ -301,5 +302,9 @@ public abstract class Simulator {
 
 	public boolean hasNoActivationQueued() {
 		return noActivationQueued;
+	}
+
+	public SimulationEventHandler getSimulationEventHandler() {
+		return simulationEventHandler;
 	}
 }
