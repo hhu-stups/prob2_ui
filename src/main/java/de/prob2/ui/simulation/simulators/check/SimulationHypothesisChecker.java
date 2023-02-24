@@ -8,8 +8,6 @@ import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 import org.apache.commons.math3.special.Erf;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -164,16 +162,6 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	@Override
 	public Checked checkTrace(Trace trace, int time) {
 		return simulationPropertyChecker.checkTrace(trace, time);
-	}
-
-	//@Override
-	protected void calculateStatistics(long time) {
-		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
-		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
-		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
-		int n = resultingTraces.size();
-		double ratio = (double) numberSuccess / n;
-		this.stats = new SimulationStats(n, numberSuccess, ratio, wallTime, simulationPropertyChecker.calculateExtendedStats());
 	}
 
 	@Override

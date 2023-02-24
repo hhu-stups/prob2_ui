@@ -7,8 +7,6 @@ import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 
@@ -109,15 +107,6 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 				break;
 		}
 
-	}
-
-	protected void calculateStatistics(long time) {
-		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
-		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
-		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
-		int n = resultingTraces.size();
-		double ratio = (double) numberSuccess / n;
-		this.stats = new SimulationStats(n, numberSuccess, ratio, wallTime, simulationPropertyChecker.calculateExtendedStats());
 	}
 
 	@Override
