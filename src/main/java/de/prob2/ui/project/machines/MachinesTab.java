@@ -86,7 +86,7 @@ public class MachinesTab extends Tab {
 				}
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
-			this.startAnimationMenu.setOnAction(e -> currentProject.startAnimation(this.machineProperty.get(), Preference.DEFAULT));
+			this.startAnimationMenu.setOnAction(e -> startMachine(this.machineProperty.get()));
 			this.startAnimationWithPreferencesMenu.disableProperty().bind(currentProject.preferencesProperty().emptyProperty());
 			this.updatePreferences(currentProject.getPreferences());
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
