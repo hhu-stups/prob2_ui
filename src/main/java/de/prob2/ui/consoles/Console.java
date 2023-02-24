@@ -41,8 +41,7 @@ public abstract class Console extends StyleClassedTextArea {
 	private final IntegerExpression inputStart;
 	private final IntegerExpression inputEnd;
 
-	private final ConsoleHistoryHandler historyHandler;
-	private final ConsoleSearchHandler searchHandler;
+	private final ConsoleHistoryAndSearchHandler historyAndSearchHandler;
 	private final StringBuilder commandBuffer;
 
 	protected Console(I18n i18n, Executable interpreter, String header, String prompt) {
@@ -57,8 +56,7 @@ public abstract class Console extends StyleClassedTextArea {
 		this.failedSearchPrompt = new SimpleStringProperty(this, "failedSearchPrompt", "consoles.prompt.backwardSearchFailed");
 		this.input = new SimpleStringProperty(this, "input", "");
 
-		this.historyHandler = new ConsoleHistoryHandler(this);
-		this.searchHandler = new ConsoleSearchHandler(this);
+		this.historyAndSearchHandler = new ConsoleHistoryAndSearchHandler(this);
 		this.commandBuffer = new StringBuilder();
 
 		this.requestFollowCaret();
@@ -73,9 +71,8 @@ public abstract class Console extends StyleClassedTextArea {
 		StringBinding translatedSuccessfulSearchPrompt = i18n.translateBinding(this.successfulSearchPrompt);
 		StringBinding translatedFailedSearchPrompt = i18n.translateBinding(this.failedSearchPrompt);
 		this.inputStart = Bindings.createIntegerBinding(() -> {
-			if (searchHandler.isActive()) {
-				String result = searchHandler.currentSearchResultProperty().get();
-				if (result == null) {
+			if (historyAndSearchHandler.isSearchActive()) {
+				if (historyAndSearchHandler.isSearchFailed()) {
 					return translatedFailedSearchPrompt.get().length() + 1;
 				} else {
 					return translatedSuccessfulSearchPrompt.get().length() + 1;
@@ -87,13 +84,13 @@ public abstract class Console extends StyleClassedTextArea {
 					return translatedPrompt.get().length();
 				}
 			}
-		}, this.lineContinuation, translatedPrompt, translatedLineContinuationPrompt, translatedSuccessfulSearchPrompt, translatedFailedSearchPrompt, this.input, this.searchHandler.searchActiveProperty(), this.searchHandler.currentSearchResultProperty());
+		}, this.lineContinuation, translatedPrompt, translatedLineContinuationPrompt, translatedSuccessfulSearchPrompt, translatedFailedSearchPrompt, this.input, this.historyAndSearchHandler.searchActiveProperty(), this.historyAndSearchHandler.searchFailedProperty());
 		this.inputEnd = Bindings.createIntegerBinding(() -> this.inputStart.get() + this.input.get().length(), this.inputStart, this.input);
 		this.inputWithPrompt = Bindings.createStringBinding(() -> {
-			if (searchHandler.isActive()) {
-				String result = searchHandler.currentSearchResultProperty().get();
-				if (result == null) {
-					return translatedFailedSearchPrompt.get() + "`" + input.get() + "': ";
+			if (historyAndSearchHandler.isSearchActive()) {
+				String result = historyAndSearchHandler.getCurrentSearchResult();
+				if (historyAndSearchHandler.isSearchFailed()) {
+					return translatedFailedSearchPrompt.get() + "`" + input.get() + "': " + result;
 				} else {
 					return translatedSuccessfulSearchPrompt.get() + "`" + input.get() + "': " + result;
 				}
@@ -104,7 +101,7 @@ public abstract class Console extends StyleClassedTextArea {
 					return translatedPrompt.get() + input.get();
 				}
 			}
-		}, this.lineContinuation, translatedPrompt, translatedLineContinuationPrompt, translatedSuccessfulSearchPrompt, translatedFailedSearchPrompt, this.input, this.searchHandler.searchActiveProperty(), this.searchHandler.currentSearchResultProperty());
+		}, this.lineContinuation, translatedPrompt, translatedLineContinuationPrompt, translatedSuccessfulSearchPrompt, translatedFailedSearchPrompt, this.input, this.historyAndSearchHandler.searchActiveProperty(), this.historyAndSearchHandler.currentSearchResultProperty(), this.historyAndSearchHandler.searchFailedProperty());
 		this.inputWithPrompt.addListener((o, from, to) -> this.update(from, to));
 
 		this.reset();
@@ -170,7 +167,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public void setEvents() {
-		Nodes.addInputMap(this, consume(mouseClicked(MouseButton.PRIMARY), e -> this.onMouseClicked()));
+		Nodes.addInputMap(this, consume(mouseClicked(MouseButton.PRIMARY)));
 		Nodes.addInputMap(this, consume(keyPressed()));
 		Nodes.addInputMap(this, consume(keyReleased()));
 		Nodes.addInputMap(this, consume(keyTyped()));
@@ -194,6 +191,7 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("e", CONTROL_DOWN)), e -> this.moveToInputEnd()));
 		Nodes.addInputMap(this, consume(keyPressed(new KeyCharacterCombination("k", CONTROL_DOWN)), e -> this.reset()));
 
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.ESCAPE), e -> this.deactivateSearch()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.UP), e -> this.handleUp()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.DOWN), e -> this.handleDown()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.LEFT), e -> this.handleLeft()));
@@ -201,15 +199,6 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.DELETE), e -> this.handleDelete()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.BACK_SPACE), e -> handleBackspace()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.ENTER), e -> this.handleEnter()));
-
-		/*Nodes.addInputMap(this, InputMap.process(KeyEvent.KEY_PRESSED, e -> {
-			System.out.printf("[%s, text=%s, char=%s, code=%s%s%s%s%s%s]%n", e.getEventType(), escapeNonAscii(e.getText()), escapeNonAscii(e.getCharacter()), e.getCode(), e.isShiftDown() ? " SHIFT" : "", e.isControlDown() ? " CTRL" : "", e.isAltDown() ? " ALT" : "", e.isMetaDown() ? " META" : "", e.isShortcutDown() ? " SHRTCT" : "");
-			return InputHandler.Result.PROCEED;
-		}));
-		Nodes.addInputMap(this, InputMap.process(KeyEvent.KEY_TYPED, e -> {
-			System.out.printf("[%s, text=%s, char=%s, code=%s%s%s%s%s%s]%n", e.getEventType(), escapeNonAscii(e.getText()), escapeNonAscii(e.getCharacter()), e.getCode(), e.isShiftDown() ? " SHIFT" : "", e.isControlDown() ? " CTRL" : "", e.isAltDown() ? " ALT" : "", e.isMetaDown() ? " META" : "", e.isShortcutDown() ? " SHRTCT" : "");
-			return InputHandler.Result.PROCEED;
-		}));*/
 	}
 
 	private void setDragDrop() {
@@ -259,22 +248,14 @@ public abstract class Console extends StyleClassedTextArea {
 		}
 	}
 
-	private void onMouseClicked() {
-		// System.out.printf("mouseClicked: %d %d%n", this.getLength(), this.getCaretPosition());
-		int caretParagraph = this.getCurrentParagraph();
-		int caretColumn = this.getCaretColumn();
-
-		/*if (this.getLength() - 1 - this.getCaretPosition() < charCounterInLine) {
-			currentPosInLine = charCounterInLine - (this.getLength() - this.getCaretPosition());
-		}*/
-	}
-
 	public void reverseSearch() {
-		if (searchHandler.isActive()) {
-			searchHandler.searchNext();
+		if (this.historyAndSearchHandler.isSearchActive()) {
+			this.historyAndSearchHandler.searchNext();
 		} else {
 			activateSearch();
 		}
+
+		this.moveToInputEnd();
 	}
 
 	protected void onEnterText(String text) {
@@ -306,16 +287,16 @@ public abstract class Console extends StyleClassedTextArea {
 		assert text.indexOf('\n') < 0 && text.indexOf('\r') < 0;
 
 		int inputPosition = getPositionInInput().orElseThrow(() -> new AssertionError("caret not in input"));
-		int caretPos = this.getCaretPosition();
 		String prefix = this.input.get().substring(0, inputPosition);
 		String suffix = this.input.get().substring(inputPosition);
 		this.input.set(prefix + text + suffix);
-		this.moveTo(caretPos + text.length());
+		this.moveCaretToPosInInput(inputPosition + text.length());
 	}
 
 	private void moveCaretToPosInInput(int pos) {
 		assert this.getParagraphs().size() >= 1;
 		this.moveTo(this.getParagraphs().size() - 1, this.inputStart.get() + pos);
+		this.requestFollowCaret();
 	}
 
 	private void moveToInputStart() {
@@ -333,31 +314,15 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	protected void activateSearch() {
-		// TODO: fix reverse search
-		/*final String input = this.getInput();
-		this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
-		this.appendText(i18n.translate("consoles.prompt.backwardSearch", "", input));
-		this.moveTo(getLineNumber(), this.getLine().lastIndexOf('\''));
-		currentPosInLine = 0;
-		charCounterInLine = 0;
-		searchHandler.activateSearch();*/
+		this.historyAndSearchHandler.setSearchActive(true);
 	}
 
 	protected void deactivateSearch() {
-		// TODO: fix reverse search
-		/*if (searchHandler.isActive()) {
-			String searchResult = searchHandler.getCurrentSearchResult();
-			this.deleteText(getLineNumber(), 0, getLineNumber(), this.getParagraphLength(getLineNumber()));
-			this.appendText((instructionLengthInLine > 1 ? EMPTY_PROMPT : prompt.get()) + " " + searchResult);
-			this.moveTo(this.getLength());
-			charCounterInLine = searchResult.length();
-			currentPosInLine = charCounterInLine;
-			searchHandler.deactivateSearch();
-		}*/
+		this.historyAndSearchHandler.setSearchActive(false);
 	}
 
 	public void reset() {
-		this.searchHandler.deactivateSearch();
+		this.historyAndSearchHandler.setSearchActive(false);
 		this.lineContinuation.set(false);
 		this.clear();
 		this.input.set("");
@@ -385,39 +350,44 @@ public abstract class Console extends StyleClassedTextArea {
 		assert lastParagraph >= 0;
 		int pos = this.getAbsolutePosition(lastParagraph, 0);
 		this.insert(pos, text + "\n", style);
+		this.requestFollowCaret();
 	}
 
 	protected void handleEnter() {
 		this.moveCaretToInputEndIfRequired();
 
+		this.deactivateSearch();
 		String command = this.input.get();
-		boolean activateLineContinuation = command.endsWith("\\") && !command.endsWith("\\\\");
-
 		this.addParagraph(this.inputWithPrompt.get());
 
-		// TODO: maybe cut off trailing backslash?
-		historyHandler.enter(command);
-
-		if (commandBuffer.length() > 0) {
-			commandBuffer.append('\n');
-		}
-
 		this.input.set("");
+		boolean activateLineContinuation = command != null && command.endsWith("\\") && !command.endsWith("\\\\");
 		this.lineContinuation.set(activateLineContinuation);
 
-		commandBuffer.append(command);
+		// TODO: maybe cut off trailing backslash?
+		historyAndSearchHandler.enter(command);
+
+		if (command != null && !command.isEmpty()) {
+			if (commandBuffer.length() > 0) {
+				commandBuffer.append('\n');
+			}
+
+			commandBuffer.append(command);
+		}
+
 		if (!activateLineContinuation) {
 			String realCommand = commandBuffer.toString();
 			commandBuffer.setLength(0);
 
-			// TODO: handle search
-			ConsoleExecResult result = interpreter.exec(realCommand);
-			if (result.getResultType() == ConsoleExecResultType.CLEAR) {
-				reset();
-				return;
-			}
+			if (!realCommand.isEmpty()) {
+				ConsoleExecResult result = interpreter.exec(realCommand);
+				if (result.getResultType() == ConsoleExecResultType.CLEAR) {
+					reset();
+					return;
+				}
 
-			this.addParagraph(result.toString(), result.getResultType() == ConsoleExecResultType.ERROR ? Collections.singletonList("error") : Collections.emptyList());
+				this.addParagraph(result.toString(), result.getResultType() == ConsoleExecResultType.ERROR ? Arrays.asList("error", "output") : Collections.singletonList("output"));
+			}
 		}
 
 		this.moveCaretToInputEndIfRequired();
@@ -425,16 +395,20 @@ public abstract class Console extends StyleClassedTextArea {
 
 	private void handleDown() {
 		deactivateSearch();
-		historyHandler.down();
+		historyAndSearchHandler.down();
 	}
 
 	private void handleUp() {
 		deactivateSearch();
-		historyHandler.up();
+		historyAndSearchHandler.up();
 	}
 
 	private void handleLeft() {
-		// TODO: search interaction
+		if (this.isSearching()) {
+			this.historyAndSearchHandler.setSearchActive(false);
+			return;
+		}
+
 		OptionalInt inputPos = this.getPositionInInput();
 		if (inputPos.isPresent()) {
 			this.moveCaretToPosInInput(Math.max(0, inputPos.getAsInt() - 1));
@@ -444,7 +418,11 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	private void handleRight() {
-		// TODO: search interaction
+		if (this.isSearching()) {
+			this.historyAndSearchHandler.setSearchActive(false);
+			return;
+		}
+
 		OptionalInt inputPos = this.getPositionInInput();
 		if (inputPos.isPresent()) {
 			this.moveCaretToPosInInput(Math.min(this.input.get().length(), inputPos.getAsInt() + 1));
@@ -454,7 +432,6 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	private void handleBackspace() {
-		// TODO: search interaction
 		this.getPositionInInput().ifPresent(end -> {
 			if (end > 0) {
 				String input = this.input.get();
@@ -466,7 +443,6 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	private void handleDelete() {
-		// TODO: search interaction
 		this.getPositionInInput().ifPresent(start -> {
 			if (start < this.input.get().length()) {
 				String input = this.input.get();
@@ -494,15 +470,15 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public boolean isSearching() {
-		return searchHandler.isActive();
+		return this.historyAndSearchHandler.isSearchActive();
 	}
 
 	public ObservableList<String> getHistory() {
-		return historyHandler.getHistory();
+		return historyAndSearchHandler.getHistory();
 	}
 
 	public void setHistory(List<String> history) {
-		historyHandler.setHistory(history);
+		historyAndSearchHandler.setHistory(history);
 	}
 
 	public StringProperty promptProperty() {
@@ -522,7 +498,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public String getInput() {
-		return this.input.get();
+		return this.inputProperty().get();
 	}
 
 	public void setInput(String input) {
