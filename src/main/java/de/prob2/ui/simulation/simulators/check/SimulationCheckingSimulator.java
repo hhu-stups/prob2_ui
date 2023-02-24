@@ -70,8 +70,6 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	private final Map<String, List<Integer>> operationEnablings;
 
-	private final Map<String, List<Integer>> operationExecutionPercentage;
-
 	private final List<List<Integer>> resultingTimestamps;
 
 	private final List<Trace> resultingTraces;
@@ -81,6 +79,8 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	private final int numberExecutions;
 
 	private final int maxStepsBeforeProperty;
+
+	private List<Path> blackBoxTimedTraces;
 
 	private int currentNumberStepsBeforeChecking;
 
@@ -101,12 +101,12 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		this.injector = injector;
 		this.operationExecutions = new HashMap<>();
 		this.operationEnablings = new HashMap<>();
-		this.operationExecutionPercentage = new HashMap<>();
 		this.resultingTraces = new ArrayList<>();
 		this.resultingTimestamps = new ArrayList<>();
 		this.resultingStatus = new ArrayList<>();
 		this.numberExecutions = numberExecutions;
 		this.maxStepsBeforeProperty = maxStepsBeforeProperty;
+		this.blackBoxTimedTraces = new ArrayList<>();
 		this.startingConditionReached = false;
 		this.currentNumberStepsBeforeChecking = Integer.MAX_VALUE;
 		this.startAtStep = Integer.MAX_VALUE;
@@ -210,28 +210,36 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		run(this);
 	}
 
+	private void initBlackBoxBeforeSimulation(boolean isBlackBox) {
+		blackBoxTimedTraces.clear();
+		if(isBlackBox) {
+			blackBoxTimedTraces = ((SimulationBlackBoxModelConfiguration) config).getTimedTraces();
+		}
+	}
+
+	private void initForBlackBoxValidationIfNecessary(boolean isBlackBox, int index) {
+		if(isBlackBox) {
+			try {
+				this.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(blackBoxTimedTraces.get(index)));
+			} catch (Exception e) {
+				e.printStackTrace();
+				// TODO
+			}
+		}
+	}
+
 	@Override
 	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
 		boolean isBlackBox = config instanceof SimulationBlackBoxModelConfiguration;
-		List<Path> timedTraces = new ArrayList<>();
-		if(isBlackBox) {
-			timedTraces = ((SimulationBlackBoxModelConfiguration) config).getTimedTraces();
-		}
 		Trace startTrace = new Trace(currentTrace.get().getStateSpace());
+		initBlackBoxBeforeSimulation(isBlackBox);
 
 		long wallTime = 0;
 		try {
 			startTrace.getStateSpace().startTransaction();
 			wallTime = System.currentTimeMillis();
 			for (int i = 0; i < numberExecutions; i++) {
-				if(isBlackBox) {
-					try {
-						this.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(timedTraces.get(i)));
-					} catch (Exception e) {
-						e.printStackTrace();
-						// TODO
-					}
-				}
+				initForBlackBoxValidationIfNecessary(isBlackBox, i);
 				currentNumberStepsBeforeChecking = (int) (Math.random() * maxStepsBeforeProperty);
 				Trace newTrace = startTrace;
 				setupBeforeSimulation(newTrace);
