@@ -79,6 +79,7 @@ public class ReplayedTraceStatusAlert extends Alert {
 
 		this.errorTable.dontSyncWithEditor();
 		this.errorTable.visibleProperty().bind(Bindings.createBooleanBinding(() -> !this.errorTable.getErrorItems().isEmpty(), this.errorTable.getErrorItems()));
+		this.errorTable.managedProperty().bind(this.errorTable.visibleProperty());
 
 		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
 		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();

@@ -1,7 +1,12 @@
 package de.prob2.ui.consoles;
 
 import java.io.File;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.I18n;
@@ -11,18 +16,36 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.IntegerExpression;
 import javafx.beans.binding.StringBinding;
 import javafx.beans.binding.StringExpression;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.MenuItem;
-import javafx.scene.input.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCharacterCombination;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.TransferMode;
+
 import org.controlsfx.tools.Platform;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.wellbehaved.event.Nodes;
 
-import static javafx.scene.input.KeyCombination.*;
-import static org.fxmisc.wellbehaved.event.EventPattern.*;
+import static javafx.scene.input.KeyCombination.CONTROL_DOWN;
+import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
+import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
+import static org.fxmisc.wellbehaved.event.EventPattern.anyOf;
+import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
+import static org.fxmisc.wellbehaved.event.EventPattern.keyReleased;
+import static org.fxmisc.wellbehaved.event.EventPattern.keyTyped;
+import static org.fxmisc.wellbehaved.event.EventPattern.mouseClicked;
 import static org.fxmisc.wellbehaved.event.InputMap.consume;
 
 public abstract class Console extends StyleClassedTextArea {
