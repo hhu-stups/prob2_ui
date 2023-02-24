@@ -16,7 +16,7 @@ import java.util.Map;
 
 public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
-	private final SimulationMonteCarlo simulationMonteCarlo;
+	private final SimulationCheckingSimulator simulationMonteCarlo;
 
 	private final CurrentTrace currentTrace;
 
@@ -26,7 +26,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	public SimulationPropertyChecker(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
 									 SimulationCheckingType type, Map<String, Object> additionalInformation) {
-		this.simulationMonteCarlo = new SimulationMonteCarlo(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
+		this.simulationMonteCarlo = new SimulationCheckingSimulator(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
 		this.numberSuccess = 0;
@@ -170,12 +170,12 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 	}
 
 	@Override
-	public SimulationMonteCarlo.MonteCarloCheckResult getResult() {
+	public SimulationCheckingSimulator.MonteCarloCheckResult getResult() {
 		return simulationMonteCarlo.getResult();
 	}
 
 	@Override
-	public void setResult(SimulationMonteCarlo.MonteCarloCheckResult result) {
+	public void setResult(SimulationCheckingSimulator.MonteCarloCheckResult result) {
 		simulationMonteCarlo.setResult(result);
 	}
 

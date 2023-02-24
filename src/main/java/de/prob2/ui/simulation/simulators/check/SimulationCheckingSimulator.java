@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimulationMonteCarlo extends Simulator implements ISimulationPropertyChecker {
+public class SimulationCheckingSimulator extends Simulator implements ISimulationPropertyChecker {
 
 	public enum StartingType {
 		START_AFTER_STEPS("Start after Number of Steps"),
@@ -93,7 +93,7 @@ public class SimulationMonteCarlo extends Simulator implements ISimulationProper
 
 	private MonteCarloCheckResult result;
 
-	public SimulationMonteCarlo(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
+	public SimulationCheckingSimulator(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
 		super(currentTrace);
 		this.injector = injector;
 		this.operationExecutions = new HashMap<>();
@@ -345,7 +345,7 @@ public class SimulationMonteCarlo extends Simulator implements ISimulationProper
 	}
 
 	@Override
-	public void setResult(SimulationMonteCarlo.MonteCarloCheckResult result) {
+	public void setResult(SimulationCheckingSimulator.MonteCarloCheckResult result) {
 		this.result = result;
 	}
 

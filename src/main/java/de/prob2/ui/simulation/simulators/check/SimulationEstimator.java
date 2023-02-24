@@ -57,9 +57,9 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
 		if(ratio >= desiredValue - epsilon) {
-			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS);
+			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
-			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.FAIL);
+			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
 		}
 	}
 
@@ -69,9 +69,9 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
 		if(ratio <= desiredValue + epsilon) {
-			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS);
+			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
-			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.FAIL);
+			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
 		}
 	}
 
@@ -81,9 +81,9 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
 		if(ratio >= desiredValue - epsilon && ratio <= desiredValue + epsilon) {
-			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS);
+			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
-			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.FAIL);
+			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
 		}
 	}
 
@@ -126,12 +126,12 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	}
 
 	@Override
-	public SimulationMonteCarlo.MonteCarloCheckResult getResult() {
+	public SimulationCheckingSimulator.MonteCarloCheckResult getResult() {
 		return simulationPropertyChecker.getResult();
 	}
 
 	@Override
-	public void setResult(SimulationMonteCarlo.MonteCarloCheckResult result) {
+	public void setResult(SimulationCheckingSimulator.MonteCarloCheckResult result) {
 		simulationPropertyChecker.setResult(result);
 	}
 

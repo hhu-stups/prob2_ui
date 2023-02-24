@@ -10,8 +10,8 @@ public interface ISimulationPropertyChecker {
 	List<List<Integer>> getResultingTimestamps();
 	List<Checked> getResultingStatus();
 	SimulationStats getStats();
-	SimulationMonteCarlo.MonteCarloCheckResult getResult();
-	void setResult(SimulationMonteCarlo.MonteCarloCheckResult result);
+	SimulationCheckingSimulator.MonteCarloCheckResult getResult();
+	void setResult(SimulationCheckingSimulator.MonteCarloCheckResult result);
 	void setStats(SimulationStats stats);
 	int getNumberSuccess();
 	SimulationExtendedStats calculateExtendedStats();

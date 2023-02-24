@@ -21,7 +21,7 @@ import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
-import de.prob2.ui.simulation.simulators.check.SimulationMonteCarlo;
+import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 
@@ -138,7 +138,7 @@ public class SimulationItemHandler {
 		int executions = (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationMonteCarlo monteCarlo = new SimulationMonteCarlo(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
+		SimulationCheckingSimulator monteCarlo = new SimulationCheckingSimulator(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), monteCarlo, path);
 		runAndCheck(item, monteCarlo);
 	}

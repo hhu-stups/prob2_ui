@@ -149,9 +149,9 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 		}
 
 		if(distribution.isSuccess(hypothesisCheckingType, simulationPropertyChecker.getNumberSuccess(), range)) {
-			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.SUCCESS);
+			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
-			this.setResult(SimulationMonteCarlo.MonteCarloCheckResult.FAIL);
+			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
 		}
 	}
 
@@ -181,12 +181,12 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	}
 
 	@Override
-	public SimulationMonteCarlo.MonteCarloCheckResult getResult() {
+	public SimulationCheckingSimulator.MonteCarloCheckResult getResult() {
 		return simulationPropertyChecker.getResult();
 	}
 
 	@Override
-	public void setResult(SimulationMonteCarlo.MonteCarloCheckResult result) {
+	public void setResult(SimulationCheckingSimulator.MonteCarloCheckResult result) {
 		simulationPropertyChecker.setResult(result);
 	}
 
