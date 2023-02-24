@@ -1,6 +1,7 @@
 package de.prob2.ui.consoles.b;
 
 import java.io.File;
+import java.util.Collections;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -25,7 +26,7 @@ public final class BConsole extends Console {
 				final File modelFile = to.getModel().getModelFile();
 				final String name = modelFile == null ? to.getMainComponent().toString() : modelFile.getName();
 				final String message = i18n.translate("consoles.b.message.modelLoaded", name);
-				this.addParagraph(message);
+				this.addParagraph(message, Collections.singletonList("message"));
 			}
 		});
 

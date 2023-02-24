@@ -480,8 +480,16 @@
 	-fx-font-family: monospace;
 }
 
+.console .header{
+	-fx-font-weight: bold;
+}
+
 .console .error{
-	-fx-fill:red;
+	-fx-fill: red;
+}
+
+.console .message{
+	-fx-fill: gray;
 }
 
 /************************************************************************************
