@@ -11,6 +11,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
@@ -142,7 +143,7 @@ public class MachinesTab extends Tab {
 		}
 
 		private void updatePreferences(final List<Preference> prefs) {
-			startAnimationWithPreferencesMenu.getItems().setAll(prefs.stream()
+			startAnimationWithPreferencesMenu.getItems().setAll(Stream.concat(Stream.of(Preference.DEFAULT), prefs.stream())
 				.map(preference -> {
 					final MenuItem menuItem = new MenuItem();
 					menuItem.textProperty().bind(preference.nameProperty());
