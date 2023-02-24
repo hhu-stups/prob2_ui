@@ -112,7 +112,7 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 		}
 	}
 
-	private ISimulationPropertyChecker simulationPropertyChecker;
+	private SimulationPropertyChecker simulationPropertyChecker;
 
 	private final Injector injector;
 
@@ -129,7 +129,7 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 		this.significance = significance;
 	}
 
-	public void initializeMonteCarlo(final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+	public void initialize(final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
 		this.simulationPropertyChecker = new SimulationPropertyChecker(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
@@ -217,17 +217,10 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 
 	@Override
 	public void run() {
-		if(simulationPropertyChecker instanceof Simulator) {
-			((Simulator) simulationPropertyChecker).run(this);
-		} else if(simulationPropertyChecker instanceof SimulationPropertyChecker) {
-			((SimulationPropertyChecker) simulationPropertyChecker).run(this);
-		}
+		simulationPropertyChecker.run(this);
 	}
 
 	public Simulator getSimulator() {
-		if(simulationPropertyChecker instanceof SimulationPropertyChecker) {
-			return ((SimulationPropertyChecker) simulationPropertyChecker).getSimulator();
-		}
-		return null;
+		return simulationPropertyChecker.getSimulator();
 	}
 }

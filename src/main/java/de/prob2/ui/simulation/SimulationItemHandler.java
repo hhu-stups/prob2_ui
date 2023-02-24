@@ -34,8 +34,6 @@ import javafx.collections.FXCollections;
 @Singleton
 public class SimulationItemHandler {
 
-	private final SimulationMode simulationMode;
-
 	private final CurrentTrace currentTrace;
 
 	private final StageManager stageManager;
@@ -47,9 +45,7 @@ public class SimulationItemHandler {
 	private final ListProperty<Thread> currentJobThreads;
 
 	@Inject
-	private SimulationItemHandler(final SimulationMode simulationMode, final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector,
-								  final DisablePropertyController disablePropertyController) {
-		this.simulationMode = simulationMode;
+	private SimulationItemHandler(final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector, final DisablePropertyController disablePropertyController) {
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.injector = injector;
@@ -166,7 +162,7 @@ public class SimulationItemHandler {
 	}
 
 	private void initializeHypothesisChecker(SimulationHypothesisChecker simulationHypothesisChecker, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		simulationHypothesisChecker.initializeMonteCarlo(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		simulationHypothesisChecker.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), path);
 	}
 
@@ -193,7 +189,7 @@ public class SimulationItemHandler {
 	}
 
 	private void initializeEstimator(SimulationEstimator simulationEstimator, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		simulationEstimator.initializeMonteCarlo(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		simulationEstimator.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), path);
 	}
 
