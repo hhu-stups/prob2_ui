@@ -155,7 +155,11 @@ final class ConsoleHistoryAndSearchHandler {
 		}
 
 		if (this.parent.getInput().isEmpty()) {
-			this.parent.setInput(this.lastSearch);
+			if (lastSearch.isEmpty()) {
+				this.searchFailed.set(true);
+			} else {
+				this.parent.setInput(this.lastSearch);
+			}
 		} else if (this.historyPosition > 0) {
 			this.historyPosition--;
 			this.updateSearch();
