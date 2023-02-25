@@ -3,12 +3,16 @@ package de.prob2.ui.verifications.ltl;
 import de.prob2.ui.ProjectBuilder;
 import de.prob2.ui.TestBase;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
 import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.testfx.api.FxAssert;
+import org.testfx.matcher.base.WindowMatchers;
+
 
 import static org.testfx.assertions.api.Assertions.assertThat;
 
@@ -24,7 +28,7 @@ class LTLViewTest extends TestBase {
 	}
 
 	@Test
-	@DisplayName("PatternTable ist invisible and unmanaged if empty with loaded Project")
+	@DisplayName("PatternTable is invisible and unmanaged if empty with loaded Project")
 	void PatternTable1() throws InterruptedException {
 		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
 
@@ -34,7 +38,7 @@ class LTLViewTest extends TestBase {
 	}
 
 	@Test
-	@DisplayName("PatternTable ist Visible if Project has Patterns")
+	@DisplayName("PatternTable is Visible if Project has Patterns")
 	void PatternTable2() throws InterruptedException {
 		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
 		LTLPatternItem item = new LTLPatternItem("", "", "");
@@ -44,5 +48,39 @@ class LTLViewTest extends TestBase {
 		assertThat(patternTable.isManaged()).isTrue();
 		assertThat(patternTable.isVisible()).isTrue();
 		assertThat(patternTable).hasExactlyNumRows(1);
+	}
+
+	@Test
+	@DisplayName("FormluarTable shows all created LTL Formulas")
+	void FormulaTable1() throws InterruptedException {
+		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+
+		LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "",  false);
+		CurrentProject project = injector.getInstance(CurrentProject.class);
+		project.getCurrentMachine().ltlFormulasProperty().add(ltlFormulaItem);
+
+		TableView<LTLPatternItem> patternTable = lookup("#itemsTable").query();
+		assertThat(patternTable.isVisible()).isTrue();
+		assertThat(patternTable).hasExactlyNumRows(1);
+	}
+
+	@Test
+	@DisplayName("Stage to introduce new Patterns can be opened")
+	void buttons1() throws InterruptedException {
+		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+
+		this.clickOn("#addMenuButton").clickOn("#addPatternButton");
+
+		FxAssert.verifyThat(window("LTL Pattern"), WindowMatchers.isShowing());
+	}
+
+	@Test
+	@DisplayName("Stage to introduce new Formula can be opened")
+	void buttons2() throws InterruptedException {
+		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+
+		this.clickOn("#addMenuButton").clickOn("#addFormulaButton");
+
+		FxAssert.verifyThat(window("LTL Formula"), WindowMatchers.isShowing());
 	}
 }
