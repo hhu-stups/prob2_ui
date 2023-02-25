@@ -181,7 +181,10 @@ public class ReplayedTraceStatusAlert extends Alert {
 			String errorMessage = transitionErrorMessages != null ? String.join("; ", transitionErrorMessages) : ""; // TODO: prettify
 
 			Collection<String> styleClasses;
-			if (transitionReplayPrecision != null && transitionReplayPrecision != TransitionReplayPrecision.PRECISE) {
+			if (
+					(transitionReplayPrecision != null && transitionReplayPrecision != TransitionReplayPrecision.PRECISE)
+							|| (transitionErrorMessages != null && !transitionErrorMessages.isEmpty())
+			) {
 				styleClasses = Collections.singletonList("FAULTY");
 			} else {
 				styleClasses = Collections.emptyList();
