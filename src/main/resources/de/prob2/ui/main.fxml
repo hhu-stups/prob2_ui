@@ -22,14 +22,14 @@
 				<Accordion fx:id="leftAccordion1" expandedPane="$operationsTP">
 					<panes>
 						<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
-							<OperationsView/>
+							<OperationsView fx:id="operationsView"/>
 						</TitledPane>
 					</panes>
 				</Accordion>
 				<Accordion fx:id="leftAccordion2" expandedPane="$animationTP">
 					<panes>
 						<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
-							<AnimationView/>
+							<AnimationView  fx:id="animationView"/>
 						</TitledPane>
 					</panes>
 				</Accordion>
@@ -44,7 +44,7 @@
 							<StatsView fx:id="statsView"/>
 						</TitledPane>
 						<TitledPane text="%common.views.verifications" id="verificationsTP" fx:id="verificationsTP">
-							<VerificationsView/>
+							<VerificationsView  fx:id="verificationsView"/>
 						</TitledPane>
 						<TitledPane text="%common.views.project" id="projectTP" fx:id="projectTP">
 							<ProjectView fx:id="projectView"/>
