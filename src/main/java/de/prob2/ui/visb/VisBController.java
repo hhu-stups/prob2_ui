@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,6 +61,8 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class VisBController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBController.class);
+
+	public static final Path NO_PATH = Paths.get("");
 
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
@@ -269,30 +272,37 @@ public class VisBController {
 	 * @return VisBVisualisation object
 	 */
 	private VisBVisualisation constructVisualisationFromJSON(Path jsonPath) throws IOException {
-		jsonPath = jsonPath.toRealPath();
-		if (!Files.isRegularFile(jsonPath) && !jsonPath.toFile().isDirectory()) {
-			throw new IOException("Given json path is not a regular file: " + jsonPath);
+		if (!jsonPath.equals(NO_PATH)) {
+			jsonPath = jsonPath.toRealPath();
+			if (!Files.isRegularFile(jsonPath)) {
+				throw new IOException("Given json path is not a regular file: " + jsonPath);
+			}
 		}
 		
-		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPath.toFile().isDirectory() ? "" : jsonPath.toString());
+		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPath.equals(NO_PATH) ? "" : jsonPath.toString());
 		
 		currentTrace.getStateSpace().execute(loadCmd);
-		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.toFile().isDirectory() ? "" : jsonPath.toString());
+		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.equals(NO_PATH) ? "" : jsonPath.toString());
 		
 		currentTrace.getStateSpace().execute(svgCmd);
 		String svgPathString = svgCmd.getSvgPath();
 		
-		Path svgPath = jsonPath.resolveSibling(svgPathString).toRealPath();
-		if (!svgPathString.isEmpty() && (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0)) {
-			throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
-		}
-		
+		final Path svgPath;
 		final String svgContent;
-		if (svgPath.toFile().isDirectory()) {
+		if (svgPathString.isEmpty()) {
+			svgPath = NO_PATH;
 			final GetVisBDefaultSVGCommand defaultSVGCmd = new GetVisBDefaultSVGCommand();
 			currentTrace.getStateSpace().execute(defaultSVGCmd);
 			svgContent = defaultSVGCmd.getSVGFileContents();
 		} else {
+			if (jsonPath.equals(NO_PATH)) {
+				svgPath = Paths.get(svgPathString).toRealPath();
+			} else {
+				svgPath = jsonPath.resolveSibling(svgPathString).toRealPath();
+			}
+			if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
+				throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
+			}
 			svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
 		}
 		

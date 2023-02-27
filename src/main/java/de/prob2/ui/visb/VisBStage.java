@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
@@ -282,7 +281,16 @@ public class VisBStage extends Stage {
 	private static Path getPathFromDefinitions(final StateSpace stateSpace) {
 		ReadVisBPathFromDefinitionsCommand cmd = new ReadVisBPathFromDefinitionsCommand();
 		stateSpace.execute(cmd);
-		return cmd.getPath() == null ? null : stateSpace.getModel().getModelFile().toPath().resolveSibling(cmd.getPath());
+		if (cmd.getPath() == null) {
+			// null means that there is no VISB_JSON_FILE in the model's DEFINITIONS.
+			return null;
+		} else if (cmd.getPath().isEmpty()) {
+			// VISB_JSON_FILE == "" means that there is no separate JSON file
+			// and the VisB items/events are written as DEFINITIONS.
+			return VisBController.NO_PATH;
+		} else {
+			return stateSpace.getModel().getModelFile().toPath().resolveSibling(cmd.getPath());
+		}
 	}
 
 	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
@@ -338,7 +346,13 @@ public class VisBStage extends Stage {
 
 	private void loadSvgFile(final VisBVisualisation visBVisualisation) {
 		final Path path = visBVisualisation.getSvgPath();
-		this.initialiseWebView(visBVisualisation.getSvgContent(), path.getParent().toUri().toString());
+		final String baseUrl;
+		if (path.equals(VisBController.NO_PATH)) {
+			baseUrl = "";
+		} else {
+			baseUrl = path.getParent().toUri().toString();
+		}
+		this.initialiseWebView(visBVisualisation.getSvgContent(), baseUrl);
 	}
 
 	private void treatJavascriptError(WebErrorEvent event) {
