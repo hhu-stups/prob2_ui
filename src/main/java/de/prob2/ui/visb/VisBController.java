@@ -285,19 +285,19 @@ public class VisBController {
 			throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
 		}
 		
-		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
-		currentTrace.getStateSpace().execute(readEventsCmd);
-		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
-		
 		ReadVisBItemsCommand readVisBItemsCommand = new ReadVisBItemsCommand();
 		currentTrace.getStateSpace().execute(readVisBItemsCommand);
 		List<VisBItem> items = readVisBItemsCommand.getItems();
+		
+		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
+		currentTrace.getStateSpace().execute(readEventsCmd);
+		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
 		
 		GetVisBSVGObjectsCommand command = new GetVisBSVGObjectsCommand();
 		currentTrace.getStateSpace().execute(command);
 		List<VisBSVGObject> visBSVGObjects = command.getSvgObjects();
 		
-		return new VisBVisualisation(visBEvents, items, svgPath, visBSVGObjects);
+		return new VisBVisualisation(svgPath, items, visBEvents, visBSVGObjects);
 	}
 
 	private void setupVisualisation(final Path visBPath){
