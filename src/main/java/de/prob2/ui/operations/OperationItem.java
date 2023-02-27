@@ -15,8 +15,9 @@ import java.util.stream.Stream;
 import com.google.common.base.MoreObjects;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalExpandMode;
+import de.prob.animator.domainobjects.EvalOptions;
 import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.LoadedMachine;
@@ -79,6 +80,8 @@ public class OperationItem {
 				.toString();
 		}
 	}
+	
+	private static final EvalOptions TRANSITION_EVAL_OPTIONS = EvalOptions.DEFAULT.withEvalExpand(EvalExpandMode.EFFICIENT);
 	
 	private final Transition transition;
 	private final String name;
@@ -143,13 +146,13 @@ public class OperationItem {
 			final List<IEvalElement> variableEvalElements;
 			switch (name) {
 				case Transition.SETUP_CONSTANTS_NAME:
-					constantEvalElements = loadedMachine.getConstantEvalElements(FormulaExpand.TRUNCATE);
+					constantEvalElements = loadedMachine.getConstantEvalElements();
 					variableEvalElements = Collections.emptyList();
 					break;
 				
 				case Transition.INITIALISE_MACHINE_NAME:
 					constantEvalElements = Collections.emptyList();
-					variableEvalElements = loadedMachine.getVariableEvalElements(FormulaExpand.TRUNCATE);
+					variableEvalElements = loadedMachine.getVariableEvalElements();
 					break;
 				
 				default:
@@ -158,7 +161,7 @@ public class OperationItem {
 						variableEvalElements = Collections.emptyList();
 					} else {
 						variableEvalElements = opInfo.getNonDetWrittenVariables().stream()
-							.map(var -> stateSpace.getModel().parseFormula(var, FormulaExpand.TRUNCATE))
+							.map(var -> stateSpace.getModel().parseFormula(var))
 							.collect(Collectors.toList());
 					}
 			}
@@ -172,7 +175,7 @@ public class OperationItem {
 				final List<State> destinationStates = transitionsWithName.stream()
 					.map(Transition::getDestination)
 					.collect(Collectors.toList());
-				valuesByState = stateSpace.evaluateForGivenStates(destinationStates, allEvalElements);
+				valuesByState = stateSpace.evaluateForGivenStates(destinationStates, allEvalElements, TRANSITION_EVAL_OPTIONS);
 			}
 			
 			for (final Transition transition : transitionsWithName) {
