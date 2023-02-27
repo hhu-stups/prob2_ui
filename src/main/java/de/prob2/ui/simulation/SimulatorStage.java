@@ -63,6 +63,7 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -237,12 +238,6 @@ public class SimulatorStage extends Stage {
 	private TableColumn<SimulationItem, Checked> simulationStatusColumn;
 
 	@FXML
-	private TableColumn<SimulationItem, String> simulationIdColumn;
-
-	@FXML
-	private TableColumn<SimulationItem, String> simulationTypeColumn;
-
-	@FXML
 	private TableColumn<SimulationItem, String> simulationConfigurationColumn;
 
 	@FXML
@@ -383,9 +378,9 @@ public class SimulatorStage extends Stage {
 
 		simulationStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		simulationIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-		simulationTypeColumn.setCellValueFactory(new PropertyValueFactory<>("typeAsName"));
-		simulationConfigurationColumn.setCellValueFactory(new PropertyValueFactory<>("configuration"));
+		simulationConfigurationColumn.setCellFactory(lv -> new SimulationTaskItem(stageManager, i18n));
+		simulationConfigurationColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+
 
 		simulationItems.setRowFactory(table -> new SimulationItemRow(this));
 

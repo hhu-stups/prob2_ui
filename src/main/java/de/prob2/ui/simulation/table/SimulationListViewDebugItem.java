@@ -19,6 +19,7 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 	private final I18n i18n;
 
 	public SimulationListViewDebugItem(final StageManager stageManager, final I18n i18n) {
+		super();
 		stageManager.loadFXML(this,"simulation_list_view_item.fxml");
 		this.item = null;
 		this.i18n = i18n;
