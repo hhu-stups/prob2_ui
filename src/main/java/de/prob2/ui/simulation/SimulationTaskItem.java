@@ -130,16 +130,9 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 		}
 
 		if(item.getType() == SimulationType.ESTIMATION || item.getType() == SimulationType.HYPOTHESIS_TEST) {
-			Label lbProperty = new Label(i18n.translate("simulation.task.property"));
+			Label lbProperty = new Label(i18n.translate("simulation.task.property", SimulationCheckingType.valueOf(information.get("CHECKING_TYPE").toString()).getName()));
 			lbProperty.getStyleClass().add("id");
 			this.itemBox.getChildren().add(lbProperty);
-		}
-
-
-		if(information.containsKey("CHECKING_TYPE")) {
-			Label lbCheckingType = new Label(i18n.translate("simulation.task.checkingType", SimulationCheckingType.valueOf(information.get("CHECKING_TYPE").toString()).getName()));
-			lbCheckingType.getStyleClass().add("information");
-			this.itemBox.getChildren().add(lbCheckingType);
 		}
 
 		if(information.containsKey("PREDICATE")) {
