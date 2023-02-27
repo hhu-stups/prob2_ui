@@ -15,6 +15,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableRow;
 import javafx.scene.layout.VBox;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 
 public class SimulationTaskItem extends TableCell<SimulationItem, String> {
@@ -157,13 +159,13 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 			}
 
 			if(information.containsKey("PROBABILITY")) {
-				Label lbProbability = new Label(i18n.translate("simulation.task.probability", information.get("PROBABILITY")));
+				Label lbProbability = new Label(i18n.translate("simulation.task.probability", BigDecimal.valueOf((double) information.get("PROBABILITY") * 100.0).setScale(3, RoundingMode.HALF_UP).doubleValue()));
 				lbProbability.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbProbability);
 			}
 
 			if(information.containsKey("SIGNIFICANCE")) {
-				Label lbSignificance = new Label(i18n.translate("simulation.task.significance", information.get("SIGNIFICANCE")));
+				Label lbSignificance = new Label(i18n.translate("simulation.task.significance", BigDecimal.valueOf((double) information.get("SIGNIFICANCE") * 100.0).setScale(3, RoundingMode.HALF_UP).doubleValue()));
 				lbSignificance.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbSignificance);
 			}
@@ -178,13 +180,13 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 			}
 
 			if (information.containsKey("DESIRED_VALUE")) {
-				Label lbDesiredValue = new Label(i18n.translate("simulation.task.desiredValue", information.get("DESIRED_VALUE")));
+				Label lbDesiredValue = new Label(i18n.translate("simulation.task.desiredValue", BigDecimal.valueOf((double) information.get("DESIRED_VALUE") * 100.0).setScale(3, RoundingMode.HALF_UP).doubleValue()));
 				lbDesiredValue.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbDesiredValue);
 			}
 
 			if (information.containsKey("EPSILON")) {
-				Label lbEpsilon = new Label(i18n.translate("simulation.task.epsilon", information.get("EPSILON")));
+				Label lbEpsilon = new Label(i18n.translate("simulation.task.epsilon", BigDecimal.valueOf((double) information.get("EPSILON") * 100.0).setScale(3, RoundingMode.HALF_UP).doubleValue()));
 				lbEpsilon.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbEpsilon);
 			}
