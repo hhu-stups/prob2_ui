@@ -222,8 +222,9 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			try {
 				this.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(blackBoxTimedTraces.get(index)));
 			} catch (Exception e) {
-				e.printStackTrace();
-				// TODO
+				final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");
+				alert.initOwner(injector.getInstance(SimulatorStage.class));
+				alert.showAndWait();
 			}
 		}
 	}
