@@ -18,6 +18,7 @@ import com.google.inject.Injector;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.command.GetVisBAttributeValuesCommand;
+import de.prob.animator.command.GetVisBDefaultSVGCommand;
 import de.prob.animator.command.GetVisBSVGObjectsCommand;
 import de.prob.animator.command.LoadVisBCommand;
 import de.prob.animator.command.ReadVisBEventsHoversCommand;
@@ -288,19 +289,9 @@ public class VisBController {
 		
 		final String svgContent;
 		if (svgPath.toFile().isDirectory()) {
-			// TODO: Discuss whether to generate an empty SVG or provide the SVG content from Prolog with width and height. Furthermore adapt width and height to size provided in VisB file.
-			svgContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-				"<svg\n" +
-				"   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n" +
-				"   xmlns:cc=\"http://creativecommons.org/ns#\"\n" +
-				"   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" +
-				"   xmlns:svg=\"http://www.w3.org/2000/svg\"\n" +
-				"   xmlns=\"http://www.w3.org/2000/svg\"\n" +
-				"   width=\"1000\"\n" +
-				"   height=\"500\"\n" +
-				"   viewBox=\"0 0 1000.0 500.0\"\n" +
-				"   version=\"1.1\"\n" +
-				"</svg>";
+			final GetVisBDefaultSVGCommand defaultSVGCmd = new GetVisBDefaultSVGCommand();
+			currentTrace.getStateSpace().execute(defaultSVGCmd);
+			svgContent = defaultSVGCmd.getSVGFileContents();
 		} else {
 			svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
 		}
