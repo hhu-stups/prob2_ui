@@ -314,7 +314,7 @@ public class VisBController {
 	private void setupVisualisation(final Path visBPath){
 		try {
 			this.visBVisualisation.set(constructVisualisationFromJSON(visBPath));
-		} catch (Exception e) {
+		} catch (IOException | RuntimeException e) {
 			this.visBVisualisation.set(null);
 			LOGGER.warn("error while loading visb file", e);
 			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
