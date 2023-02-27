@@ -80,4 +80,8 @@ public class RealTimeSimulator extends Simulator {
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public SimulationEventHandler getSimulationEventHandler() {
+		return super.getSimulationEventHandler();
+	}
 }

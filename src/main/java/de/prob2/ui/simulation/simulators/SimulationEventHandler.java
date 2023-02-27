@@ -99,7 +99,7 @@ public class SimulationEventHandler {
 		return values;
 	}
 
-	private String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate, SimulationHelperFunctions.EvaluationMode mode) {
+	public String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate, SimulationHelperFunctions.EvaluationMode mode) {
 		String newExpression;
 		if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
 			newExpression = expression;
