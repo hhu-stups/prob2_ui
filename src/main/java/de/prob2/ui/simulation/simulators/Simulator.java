@@ -76,7 +76,7 @@ public abstract class Simulator {
 	}
 
 
-	public void initSimulator(ISimulationModelConfiguration config) throws IOException {
+	public void initSimulator(ISimulationModelConfiguration config) {
 		this.config = config;
 		if(currentTrace.get() != null && currentTrace.getStateSpace() != null) {
 			setPreferences(currentTrace.get());

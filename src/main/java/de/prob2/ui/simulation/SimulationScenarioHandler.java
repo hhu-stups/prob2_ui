@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
@@ -17,6 +18,8 @@ import java.io.IOException;
 @Singleton
 public class SimulationScenarioHandler {
 
+	private final StageManager stageManager;
+
 	private final CurrentTrace currentTrace;
 
 	private final CurrentProject currentProject;
@@ -26,8 +29,9 @@ public class SimulationScenarioHandler {
 	private SimulatorStage simulatorStage;
 
 	@Inject
-	public SimulationScenarioHandler(final CurrentTrace currentTrace, final CurrentProject currentProject,
+	public SimulationScenarioHandler(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
 									final Injector injector) {
+		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.injector = injector;
@@ -47,12 +51,7 @@ public class SimulationScenarioHandler {
 		SimulationModelConfiguration config = SimulationCreator.createConfiguration(traceItem.getTrace(), traceItem.getTimestamps(), false, SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.TIMED_TRACE).build());
 		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 
-		try {
-			realTimeSimulator.initSimulator(config);
-		} catch (IOException exception) {
-			exception.printStackTrace();
-			// TODO: Handle error
-		}
+		realTimeSimulator.initSimulator(config);
 		realTimeSimulator.setupBeforeSimulation(trace);
 		trace.setExploreStateByDefault(false);
 		simulatorStage.simulate();
@@ -68,9 +67,8 @@ public class SimulationScenarioHandler {
 			Trace trace = item.getTrace();
 			try {
 				traceSaver.save(trace, currentProject.getCurrentMachine());
-			} catch (IOException exception) {
-				exception.printStackTrace();
-				// TODO: Handle error
+			} catch (IOException e) {
+				stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.saveError").showAndWait();
 			}
 		}
 	}
@@ -83,9 +81,8 @@ public class SimulationScenarioHandler {
 		try {
 			String createdBy = "Simulation: " + item.getParent().getTypeAsName() + "; " + item.getParent().getConfiguration();
 			simulationSaver.saveConfiguration(item.getTrace(), item.getTimestamps(), createdBy);
-		} catch (IOException exception) {
-			exception.printStackTrace();
-			// TODO: Handle error
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();
 		}
 	}
 
