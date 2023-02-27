@@ -221,7 +221,7 @@ public class VisBStage extends Stage {
 					final JSObject window = this.getJSWindow();
 					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
 					updateDynamicSVGObjects(to);
-					for (final VisBEvent event : to.getVisBEvents()) {
+					for (final VisBEvent event : to.getEvents()) {
 						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 					}
 				});
@@ -319,15 +319,15 @@ public class VisBStage extends Stage {
 	}
 
 	private void updateDynamicSVGObjects(VisBVisualisation visBVisualisation) {
-		List<VisBSVGObject> visBSVGObjects = visBVisualisation.getVisBSVGObjects();
+		List<VisBSVGObject> svgObjects = visBVisualisation.getSVGObjects();
 		// TODO: Maybe use templates
-		if(!visBSVGObjects.isEmpty()) {
+		if(!svgObjects.isEmpty()) {
 			StringBuilder scriptString = new StringBuilder();
 			scriptString.append("if(document.querySelector(\"svg\") != null) {\n");
-			for(VisBSVGObject visBSVGObject : visBSVGObjects) {
-				String id = visBSVGObject.getId();
-				String object = visBSVGObject.getObject();
-				Map<String, String> attributes = visBSVGObject.getAttributes();
+			for(VisBSVGObject svgObject : svgObjects) {
+				String id = svgObject.getId();
+				String object = svgObject.getObject();
+				Map<String, String> attributes = svgObject.getAttributes();
 				scriptString.append(String.format(Locale.ROOT, "var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
 				scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"id\",\"%s\");\n", id, id));
 				for(Map.Entry<String, String> entry : attributes.entrySet()) {

@@ -193,7 +193,7 @@ public class VisBController {
 			return;
 		}
 		LOGGER.debug("Finding event for id: " + id);
-		VisBEvent event = this.getVisBVisualisation().getVisBEventsById().get(id);
+		VisBEvent event = this.getVisBVisualisation().getEventsById().get(id);
 
 		try {
 			StateSpace stateSpace = currentTrace.getStateSpace();

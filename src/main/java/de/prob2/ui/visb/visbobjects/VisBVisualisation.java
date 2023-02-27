@@ -15,38 +15,38 @@ import de.prob.animator.domainobjects.VisBSVGObject;
  */
 public class VisBVisualisation {
 	private final Path svgPath;
-	private final List<VisBItem> visBItems;
-	private final List<VisBEvent> visBEvents;
-	private final Map<String, VisBEvent> visBEventsById;
-	private final List<VisBSVGObject> visBSVGObjects;
+	private final List<VisBItem> items;
+	private final List<VisBEvent> events;
+	private final Map<String, VisBEvent> eventsById;
+	private final List<VisBSVGObject> svgObjects;
 
-	public VisBVisualisation(Path svgPath, List<VisBItem> visBItems, List<VisBEvent> visBEvents, List<VisBSVGObject> visBSVGObjects) {
+	public VisBVisualisation(Path svgPath, List<VisBItem> items, List<VisBEvent> events, List<VisBSVGObject> svgObjects) {
 		this.svgPath = Objects.requireNonNull(svgPath, "svgPath");
-		this.visBItems = Objects.requireNonNull(visBItems, "visBItems");
-		this.visBEvents = Objects.requireNonNull(visBEvents, "visBEvents");
-		this.visBEventsById = this.visBEvents.stream()
+		this.items = Objects.requireNonNull(items, "items");
+		this.events = Objects.requireNonNull(events, "events");
+		this.eventsById = this.events.stream()
 			.collect(Collectors.toMap(VisBEvent::getId, event -> event));
-		this.visBSVGObjects = Objects.requireNonNull(visBSVGObjects, "visBSVGObjects");
+		this.svgObjects = Objects.requireNonNull(svgObjects, "svgObjects");
 	}
 
 	public Path getSvgPath() {
 		return svgPath;
 	}
 
-	public List<VisBItem> getVisBItems() {
-		return visBItems;
+	public List<VisBItem> getItems() {
+		return items;
 	}
 
-	public List<VisBEvent> getVisBEvents() {
-		return visBEvents;
+	public List<VisBEvent> getEvents() {
+		return events;
 	}
 
-	public Map<String, VisBEvent> getVisBEventsById() {
-		return this.visBEventsById;
+	public Map<String, VisBEvent> getEventsById() {
+		return this.eventsById;
 	}
 
-	public List<VisBSVGObject> getVisBSVGObjects() {
-		return visBSVGObjects;
+	public List<VisBSVGObject> getSVGObjects() {
+		return svgObjects;
 	}
 
 	@Override
@@ -55,11 +55,11 @@ public class VisBVisualisation {
 		stringBuilder.append("SVG: \n");
 		appendObject(stringBuilder, svgPath);
 		stringBuilder.append("Visualisation Item List:\n");
-		appendList(stringBuilder, visBItems);
+		appendList(stringBuilder, items);
 		stringBuilder.append("Visualisation Events List:\n");
-		appendList(stringBuilder, visBEvents);
+		appendList(stringBuilder, events);
 		stringBuilder.append("Visualisation Dynamics SVG Objects: \n");
-		appendObject(stringBuilder, visBSVGObjects);
+		appendObject(stringBuilder, svgObjects);
 		return stringBuilder.toString();
 	}
 
