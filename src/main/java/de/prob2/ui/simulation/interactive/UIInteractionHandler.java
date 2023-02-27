@@ -148,12 +148,12 @@ public class UIInteractionHandler {
 		List<UIListenerConfiguration> uiListeners = simulationModelConfiguration.getUiListenerConfigurations();
 		List<ActivationConfiguration> userInteractions = new ArrayList<>();
 		for(int interactionCounter = 0; interactionCounter < userTransitions.size(); interactionCounter++) {
-			userInteractions.add(createUserInteraction(interactionCounter, uiListeners));
+			userInteractions.add(createUserInteraction(realTimeSimulator, interactionCounter, uiListeners));
 		}
 		return userInteractions;
 	}
 
-	private ActivationConfiguration createUserInteraction(int interactionCounter, List<UIListenerConfiguration> uiListeners) {
+	private ActivationConfiguration createUserInteraction(RealTimeSimulator realTimeSimulator, int interactionCounter, List<UIListenerConfiguration> uiListeners) {
 		Transition transition = userTransitions.get(interactionCounter);
 		int time = timestamps.get(interactionCounter);
 
@@ -165,18 +165,21 @@ public class UIInteractionHandler {
 			String value = transition.getParameterValues().get(i);
 			fixedVariables.put(name, value);
 		}
-		List<String> activations = resolveActivations(op, uiListeners);
+		List<String> activations = resolveActivations(realTimeSimulator, transition, uiListeners);
 
 		return new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, fixedVariables, null, activations, true, null);
 	}
 
-	private List<String> resolveActivations(String op, List<UIListenerConfiguration> uiListeners) {
+	private List<String> resolveActivations(RealTimeSimulator realTimeSimulator, Transition transition, List<UIListenerConfiguration> uiListeners) {
+		String op = transition.getName();
 		List<String> activations = new ArrayList<>();
 		for (UIListenerConfiguration uiListener : uiListeners) {
-			// TODO: Handle predicate
 			if (uiListener.getEvent().equals(op)) {
-				activations = uiListener.getActivating();
-				break;
+				State destination = transition.getDestination();
+				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, uiListener.getPredicate(), transition.getParameterNames(), transition.getParameterPredicate(), SimulationHelperFunctions.extractMode(currentTrace.getModel()));
+				if(parameterRes.startsWith("TRUE")) {
+					activations.addAll(uiListener.getActivating());
+				}
 			}
 		}
 		return activations;
