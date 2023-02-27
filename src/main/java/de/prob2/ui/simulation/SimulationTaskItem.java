@@ -3,7 +3,10 @@ package de.prob2.ui.simulation;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
+import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.table.SimulationChoiceDebugItem;
 import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -134,7 +137,7 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 
 
 		if(information.containsKey("CHECKING_TYPE")) {
-			Label lbCheckingType = new Label(i18n.translate("simulation.task.checkingType", information.get("CHECKING_TYPE")));
+			Label lbCheckingType = new Label(i18n.translate("simulation.task.checkingType", SimulationCheckingType.valueOf(information.get("CHECKING_TYPE").toString()).getName()));
 			lbCheckingType.getStyleClass().add("information");
 			this.itemBox.getChildren().add(lbCheckingType);
 		}
@@ -153,7 +156,7 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 
 		if(item.getType() == SimulationType.HYPOTHESIS_TEST) {
 			if(information.containsKey("HYPOTHESIS_CHECKING_TYPE")) {
-				Label lbHypothesisTest = new Label(i18n.translate("simulation.task.hypothesistest", information.get("HYPOTHESIS_CHECKING_TYPE")));
+				Label lbHypothesisTest = new Label(i18n.translate("simulation.task.hypothesistest", SimulationHypothesisChecker.HypothesisCheckingType.valueOf(information.get("HYPOTHESIS_CHECKING_TYPE").toString()).getShortName()));
 				lbHypothesisTest.getStyleClass().add("id");
 				this.itemBox.getChildren().add(lbHypothesisTest);
 			}
@@ -174,7 +177,7 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 
 		if(item.getType() == SimulationType.ESTIMATION) {
 			if (information.containsKey("ESTIMATION_TYPE")) {
-				Label lbEstimationType = new Label(i18n.translate("simulation.task.estimationType", information.get("ESTIMATION_TYPE")));
+				Label lbEstimationType = new Label(i18n.translate("simulation.task.estimationType", SimulationEstimator.EstimationType.valueOf(information.get("ESTIMATION_TYPE").toString()).getShortName()));
 				lbEstimationType.getStyleClass().add("id");
 				this.itemBox.getChildren().add(lbEstimationType);
 			}

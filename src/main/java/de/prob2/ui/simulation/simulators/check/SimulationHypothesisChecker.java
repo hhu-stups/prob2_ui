@@ -110,6 +110,20 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 		public String getName() {
 			return name;
 		}
+
+		public String getShortName() {
+			switch (this) {
+				case LEFT_TAILED:
+					return "Left-tailed";
+				case RIGHT_TAILED:
+					return "Right-tailed";
+				case TWO_TAILED:
+					return "Two-tailed";
+				default:
+					break;
+			}
+			return "";
+		}
 	}
 
 	private SimulationPropertyChecker simulationPropertyChecker;

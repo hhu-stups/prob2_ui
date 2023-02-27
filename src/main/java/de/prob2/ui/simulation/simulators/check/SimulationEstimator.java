@@ -28,6 +28,20 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		public String getName() {
 			return name;
 		}
+
+		public String getShortName() {
+			switch (this) {
+				case MINIMUM:
+					return "Minimum";
+				case MAXIMUM:
+					return "Maximum";
+				case MEAN:
+					return "Mean";
+				default:
+					break;
+			}
+			return "";
+		}
 	}
 
 	private SimulationPropertyChecker simulationPropertyChecker;
