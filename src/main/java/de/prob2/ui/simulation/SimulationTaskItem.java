@@ -1,19 +1,14 @@
 package de.prob2.ui.simulation;
 
-import de.prob.check.tracereplay.PersistentTransition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
-import de.prob2.ui.simulation.table.SimulationChoiceDebugItem;
-import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.simulation.table.SimulationOperationDebugItem;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableRow;
 import javafx.scene.layout.VBox;
