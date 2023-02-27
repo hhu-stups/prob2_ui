@@ -1,6 +1,7 @@
 package de.prob2.ui.visb;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -285,6 +286,25 @@ public class VisBController {
 			throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
 		}
 		
+		final String svgContent;
+		if (svgPath.toFile().isDirectory()) {
+			// TODO: Discuss whether to generate an empty SVG or provide the SVG content from Prolog with width and height. Furthermore adapt width and height to size provided in VisB file.
+			svgContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+				"<svg\n" +
+				"   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n" +
+				"   xmlns:cc=\"http://creativecommons.org/ns#\"\n" +
+				"   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" +
+				"   xmlns:svg=\"http://www.w3.org/2000/svg\"\n" +
+				"   xmlns=\"http://www.w3.org/2000/svg\"\n" +
+				"   width=\"1000\"\n" +
+				"   height=\"500\"\n" +
+				"   viewBox=\"0 0 1000.0 500.0\"\n" +
+				"   version=\"1.1\"\n" +
+				"</svg>";
+		} else {
+			svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
+		}
+		
 		ReadVisBItemsCommand readVisBItemsCommand = new ReadVisBItemsCommand();
 		currentTrace.getStateSpace().execute(readVisBItemsCommand);
 		List<VisBItem> items = readVisBItemsCommand.getItems();
@@ -297,7 +317,7 @@ public class VisBController {
 		currentTrace.getStateSpace().execute(command);
 		List<VisBSVGObject> visBSVGObjects = command.getSvgObjects();
 		
-		return new VisBVisualisation(svgPath, items, visBEvents, visBSVGObjects);
+		return new VisBVisualisation(svgPath, svgContent, items, visBEvents, visBSVGObjects);
 	}
 
 	private void setupVisualisation(final Path visBPath){

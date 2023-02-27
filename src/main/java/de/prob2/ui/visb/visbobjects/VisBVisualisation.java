@@ -15,13 +15,15 @@ import de.prob.animator.domainobjects.VisBSVGObject;
  */
 public class VisBVisualisation {
 	private final Path svgPath;
+	private final String svgContent;
 	private final List<VisBItem> items;
 	private final List<VisBEvent> events;
 	private final Map<String, VisBEvent> eventsById;
 	private final List<VisBSVGObject> svgObjects;
 
-	public VisBVisualisation(Path svgPath, List<VisBItem> items, List<VisBEvent> events, List<VisBSVGObject> svgObjects) {
+	public VisBVisualisation(Path svgPath, String svgContent, List<VisBItem> items, List<VisBEvent> events, List<VisBSVGObject> svgObjects) {
 		this.svgPath = Objects.requireNonNull(svgPath, "svgPath");
+		this.svgContent = Objects.requireNonNull(svgContent, "svgContent");
 		this.items = Objects.requireNonNull(items, "items");
 		this.events = Objects.requireNonNull(events, "events");
 		this.eventsById = this.events.stream()
@@ -31,6 +33,10 @@ public class VisBVisualisation {
 
 	public Path getSvgPath() {
 		return svgPath;
+	}
+
+	public String getSvgContent() {
+		return svgContent;
 	}
 
 	public List<VisBItem> getItems() {
