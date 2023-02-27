@@ -67,6 +67,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -347,16 +348,14 @@ public class SimulatorStage extends Stage {
 			try {
 				injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
 			} catch (IOException exception) {
-				exception.printStackTrace();
-				//TODO: Handle error
+				injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.error").showAndWait();
 			}
 		});
 		saveAutomaticSimulationItem.setOnAction(e -> {
 			try {
 				injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
 			} catch (IOException exception) {
-				exception.printStackTrace();
-				//TODO: Handle error
+				injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
 			}
 		});
 
@@ -469,18 +468,18 @@ public class SimulatorStage extends Stage {
 					this.time = 0;
 					ISimulationModelConfiguration modelConfiguration = SimulationFileHandler.constructConfigurationFromJSON(configPath);
 					realTimeSimulator.initSimulator(modelConfiguration);
+					Trace trace = new Trace(currentTrace.getStateSpace());
+					currentTrace.set(trace);
+					realTimeSimulator.setupBeforeSimulation(trace);
+					trace.setExploreStateByDefault(false);
+					realTimeSimulator.run();
+					startTimer(realTimeSimulator);
+					trace.setExploreStateByDefault(true);
 				} catch (IOException e) {
-					e.printStackTrace();
-					// TODO
+					final Alert alert = stageManager.makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");
+					alert.initOwner(this);
+					alert.showAndWait();
 				}
-
-				Trace trace = new Trace(currentTrace.getStateSpace());
-				currentTrace.set(trace);
-				realTimeSimulator.setupBeforeSimulation(trace);
-				trace.setExploreStateByDefault(false);
-				realTimeSimulator.run();
-				startTimer(realTimeSimulator);
-				trace.setExploreStateByDefault(true);
 			}
 		}
 	}
