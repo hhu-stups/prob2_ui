@@ -208,13 +208,24 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	 */
 	public void set(final Trace trace) {
 		final Trace oldTrace = this.get();
-		if (trace != null) {
-			this.animationSelector.addNewAnimation(trace);
-		}
-		if (oldTrace != null) {
-			this.animationSelector.removeTrace(oldTrace);
-			if (trace == null || !trace.getStateSpace().equals(oldTrace.getStateSpace())) {
-				oldTrace.getStateSpace().kill();
+		if (trace != null && oldTrace != null && trace.getStateSpace().equals(oldTrace.getStateSpace()) && trace.getUUID().equals(oldTrace.getUUID())) {
+			// Simple case: old and new trace have same state space and UUID.
+			// In this case, the trace can be changed in-place.
+			this.animationSelector.traceChange(trace);
+		} else {
+			// All other cases: old and new traces have different state spaces and/or UUIDs or one of them is null.
+			if (trace != null) {
+				// Add the new trace (if any).
+				// This also makes it the current trace.
+				this.animationSelector.addNewAnimation(trace);
+			}
+			if (oldTrace != null) {
+				// Remove the old trace (if any).
+				this.animationSelector.removeTrace(oldTrace);
+				if (trace == null || !trace.getStateSpace().equals(oldTrace.getStateSpace())) {
+					// The old state space is no longer current - shut down the corresponding animator.
+					oldTrace.getStateSpace().kill();
+				}
 			}
 		}
 	}
