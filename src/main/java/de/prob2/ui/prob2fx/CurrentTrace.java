@@ -142,7 +142,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	
 	private final BooleanProperty animatorBusy;
 
-	private final CurrentState currentState;
+	private final ReadOnlyObjectProperty<State> currentState;
 	private final ROObjProp<StateSpace> stateSpace;
 	private final CurrentModel model;
 
@@ -163,7 +163,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		
 		this.animatorBusy = new SimpleBooleanProperty(this, "animatorBusy", false);
 
-		this.currentState = new CurrentState(this);
+		this.currentState = new ROObjProp<>("currentState", Trace::getCurrentState, null);
 		this.stateSpace = new ROObjProp<>("stateSpace", Trace::getStateSpace, null);
 		this.model = new CurrentModel(this);
 
@@ -276,12 +276,11 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 	}
 
 	/**
-	 * A {@link CurrentState} holding the current {@link Trace}'s {@link State}.
+	 * A read-only property holding the current {@link Trace}'s {@link State}.
 	 *
-	 * @return a {@link CurrentState} holding the current {@link Trace}'s
-	 *         {@link State}
+	 * @return a read-only property holding the current {@link Trace}'s {@link State}
 	 */
-	public CurrentState currentStateProperty() {
+	public ReadOnlyObjectProperty<State> currentStateProperty() {
 		return this.currentState;
 	}
 
