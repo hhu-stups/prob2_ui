@@ -51,13 +51,18 @@ class LTLViewTest extends TestBase {
 	}
 
 	@Test
-	@DisplayName("FormluarTable shows all created LTL Formulas")
+	@DisplayName("FormularTable shows all created LTL Formulas")
 	void FormulaTable1() throws InterruptedException {
-		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+		new ProjectBuilder(injector)
+				.fromFile("src/test/resources/Lift.mch")
+				.withLTLFormula(new LTLFormulaItem("", "", "",  false))
+				.build();
 
-		LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "",  false);
-		CurrentProject project = injector.getInstance(CurrentProject.class);
-		project.getCurrentMachine().ltlFormulasProperty().add(ltlFormulaItem);
+//		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+//
+//		LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "",  false);
+//		CurrentProject project = injector.getInstance(CurrentProject.class);
+//		project.getCurrentMachine().ltlFormulasProperty().add(ltlFormulaItem);
 
 		TableView<LTLPatternItem> patternTable = lookup("#itemsTable").query();
 		assertThat(patternTable.isVisible()).isTrue();
