@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.simulators.check;
 
 import com.google.inject.Injector;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -97,28 +98,28 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	}
 
 	public enum HypothesisCheckingType {
-		LEFT_TAILED("Left-tailed hypothesis test"),
-		RIGHT_TAILED("Right-tailed hypothesis test"),
-		TWO_TAILED("Two-tailed hypothesis test");
+		LEFT_TAILED("simulation.type.hypothesis.left"),
+		RIGHT_TAILED("simulation.type.hypothesis.right"),
+		TWO_TAILED("simulation.type.hypothesis.two");
 
-		private final String name;
+		private final String key;
 
-		HypothesisCheckingType(String name) {
-			this.name = name;
+		HypothesisCheckingType(String key) {
+			this.key = key;
 		}
 
-		public String getName() {
-			return name;
+		public String getKey() {
+			return key;
 		}
 
-		public String getShortName() {
+		public String getShortKey() {
 			switch (this) {
 				case LEFT_TAILED:
-					return "Left-tailed";
+					return "simulation.type.hypothesis.left.short";
 				case RIGHT_TAILED:
-					return "Right-tailed";
+					return "simulation.type.hypothesis.right.short";
 				case TWO_TAILED:
-					return "Two-tailed";
+					return "simulation.type.hypothesis.two.short";
 				default:
 					break;
 			}
@@ -130,14 +131,17 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 
 	private final Injector injector;
 
+	private final I18n i18n;
+
 	private final HypothesisCheckingType hypothesisCheckingType;
 
 	private final double probability;
 
 	private final double significance;
 
-	public SimulationHypothesisChecker(final Injector injector, final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance) {
+	public SimulationHypothesisChecker(final Injector injector, final I18n i18n, final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance) {
 		this.injector = injector;
+		this.i18n = i18n;
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.significance = significance;

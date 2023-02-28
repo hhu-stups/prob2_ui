@@ -144,7 +144,7 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 
 		if(item.getType() == SimulationType.HYPOTHESIS_TEST) {
 			if(information.containsKey("HYPOTHESIS_CHECKING_TYPE")) {
-				Label lbHypothesisTest = new Label(i18n.translate("simulation.task.hypothesistest", SimulationHypothesisChecker.HypothesisCheckingType.valueOf(information.get("HYPOTHESIS_CHECKING_TYPE").toString()).getShortName()));
+				Label lbHypothesisTest = new Label(i18n.translate("simulation.task.hypothesistest", i18n.translate(SimulationHypothesisChecker.HypothesisCheckingType.valueOf(information.get("HYPOTHESIS_CHECKING_TYPE").toString()).getShortKey())));
 				lbHypothesisTest.getStyleClass().add("id");
 				this.itemBox.getChildren().add(lbHypothesisTest);
 			}
@@ -165,7 +165,7 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 
 		if(item.getType() == SimulationType.ESTIMATION) {
 			if (information.containsKey("ESTIMATION_TYPE")) {
-				Label lbEstimationType = new Label(i18n.translate("simulation.task.estimationType", SimulationEstimator.EstimationType.valueOf(information.get("ESTIMATION_TYPE").toString()).getShortName()));
+				Label lbEstimationType = new Label(i18n.translate("simulation.task.estimationType",i18n.translate(SimulationEstimator.EstimationType.valueOf(information.get("ESTIMATION_TYPE").toString()).getShortKey())));
 				lbEstimationType.getStyleClass().add("id");
 				this.itemBox.getChildren().add(lbEstimationType);
 			}

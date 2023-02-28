@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.simulators.check;
 
 import com.google.inject.Injector;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -15,28 +16,32 @@ import java.util.Map;
 public class SimulationEstimator implements ISimulationPropertyChecker {
 
 	public enum EstimationType {
-		MINIMUM("Minimum estimator"),
-		MAXIMUM("Maximum estimator"),
-		MEAN("Mean estimator");
+		MINIMUM("simulation.type.estimation.minimum"),
+		MAXIMUM("simulation.type.estimation.maximum"),
+		MEAN("simulation.type.estimation.mean");
 
-		private final String name;
+		private final String key;
 
-		EstimationType(String name) {
-			this.name = name;
+		EstimationType(String key) {
+			this.key = key;
 		}
 
-		public String getName() {
-			return name;
+		public String getKey() {
+			return key;
 		}
 
-		public String getShortName() {
+		public String getName(I18n i18n) {
+			return i18n.translate(key);
+		}
+
+		public String getShortKey() {
 			switch (this) {
 				case MINIMUM:
-					return "Minimum";
+					return "simulation.type.estimation.minimum.short";
 				case MAXIMUM:
-					return "Maximum";
+					return "simulation.type.estimation.maximum.short";
 				case MEAN:
-					return "Mean";
+					return "simulation.type.estimation.mean.short";
 				default:
 					break;
 			}
@@ -48,14 +53,17 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 
 	private final Injector injector;
 
+	private final I18n i18n;
+
 	private final EstimationType estimationType;
 
 	private final double desiredValue;
 
 	private final double epsilon;
 
-	public SimulationEstimator(final Injector injector, final EstimationType estimationType, final double desiredValue, final double epsilon) {
+	public SimulationEstimator(final Injector injector, final I18n i18n, final EstimationType estimationType, final double desiredValue, final double epsilon) {
 		this.injector = injector;
+		this.i18n = i18n;
 		this.estimationType = estimationType;
 		this.desiredValue = desiredValue;
 		this.epsilon = epsilon;

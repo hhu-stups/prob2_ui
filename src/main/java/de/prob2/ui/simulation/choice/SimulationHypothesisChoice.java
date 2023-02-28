@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.choice;
 
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import javafx.beans.NamedArg;
@@ -10,6 +11,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -28,7 +30,11 @@ public class SimulationHypothesisChoice extends GridPane {
 
 		@Override
 		public String toString() {
-			return checkingType.getName();
+			return checkingType.name();
+		}
+
+		public String getName(I18n i18n) {
+			return i18n.translate(checkingType.getKey());
 		}
 
 		public SimulationHypothesisChecker.HypothesisCheckingType getCheckingType() {
@@ -36,6 +42,8 @@ public class SimulationHypothesisChoice extends GridPane {
 		}
 
 	}
+
+	private final I18n i18n;
 
 	@FXML
 	private ChoiceBox<SimulationHypothesisChoiceItem> hypothesisCheckingChoice;
@@ -47,9 +55,28 @@ public class SimulationHypothesisChoice extends GridPane {
 	private TextField tfSignificance;
 
 	@Inject
-	protected SimulationHypothesisChoice(final StageManager stageManager) {
+	private SimulationHypothesisChoice(final StageManager stageManager, final I18n i18n) {
 		super();
 		stageManager.loadFXML(this, "simulation_hypothesis_choice.fxml");
+		this.i18n = i18n;
+	}
+
+	@FXML
+	private void initialize() {
+		hypothesisCheckingChoice.setConverter(new StringConverter<SimulationHypothesisChoiceItem>() {
+			@Override
+			public String toString(SimulationHypothesisChoiceItem object) {
+				if(object == null) {
+					return "";
+				}
+				return object.getName(i18n);
+			}
+
+			@Override
+			public SimulationHypothesisChoiceItem fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to SimulationHypothesisChoiceItem not supported");
+			}
+		});
 	}
 
 	public boolean checkSelection() {

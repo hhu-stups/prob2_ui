@@ -13,6 +13,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.DisablePropertyController;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
@@ -160,7 +161,7 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector,hypothesisCheckingType, probability, significance);
+		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, injector.getInstance(I18n.class), hypothesisCheckingType, probability, significance);
 		initializeHypothesisChecker(hypothesisChecker, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, hypothesisChecker);
 	}
@@ -187,7 +188,7 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, estimationType, desiredValue, epsilon);
+		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, injector.getInstance(I18n.class), estimationType, desiredValue, epsilon);
 		initializeEstimator(simulationEstimator, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, simulationEstimator);
 	}
