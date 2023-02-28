@@ -356,14 +356,21 @@ public final class OperationsView extends VBox {
 			&& item.getTransition().getSource().equals(trace.getCurrentState())
 		) {
 			UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-			Trace forward = trace.forward();
-			if(forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
-				currentTrace.set(trace.forward());
-				uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
-				return;
-			}
-			currentTrace.set(trace.add(item.getTransition()));
-			uiInteraction.addUserInteraction(realTimeSimulator, item.getTransition());
+			// Use the CLI executor for executing the operation to avoid blocking the UI thread.
+			// Executing the operation itself isn't slow (because the transition is already known),
+			// but changing the current trace can be slow,
+			// because the destination state may not be explored yet.
+			// TODO This might be better solved by moving the state exploring out of CurrentTrace.
+			cliExecutor.submit(() -> {
+				Trace forward = trace.forward();
+				if (forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
+					currentTrace.set(forward);
+					uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
+				} else {
+					currentTrace.set(trace.add(item.getTransition()));
+					uiInteraction.addUserInteraction(realTimeSimulator, item.getTransition());
+				}
+			});
 		}
 	}
 
