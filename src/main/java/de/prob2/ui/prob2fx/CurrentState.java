@@ -1,13 +1,12 @@
 package de.prob2.ui.prob2fx;
 
+import java.util.function.BooleanSupplier;
+
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 
-import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;
 import javafx.beans.property.ReadOnlyObjectPropertyBase;
-
-import java.util.function.BooleanSupplier;
 
 /**
  * A singleton read-only property representing the current {@link State}. It also provides convenience properties and methods for easy interaction with JavaFX components using property binding.
@@ -43,14 +42,12 @@ public final class CurrentState extends ReadOnlyObjectPropertyBase<State> {
 	}
 	
 	private final CurrentTrace currentTrace;
-	private final ReadOnlyBooleanProperty initialized;
 	
 	CurrentState(final CurrentTrace currentTrace) {
 		super();
 		
 		this.currentTrace = currentTrace;
 		currentTrace.addListener(o -> this.fireValueChangedEvent());
-		this.initialized = new ROBoolProp("initialized", () -> this.get() != null && this.get().isInitialised());
 	}
 	
 	@Override
@@ -67,23 +64,5 @@ public final class CurrentState extends ReadOnlyObjectPropertyBase<State> {
 	public State get() {
 		final Trace trace = this.currentTrace.get();
 		return trace != null ? trace.getCurrentState() : null;
-	}
-	
-	/**
-	 * A read-only boolean property indicating whether the current state is initialized.
-	 * 
-	 * @return a read-only boolean property indicating whether the current state is initialized.
-	 */
-	public ReadOnlyBooleanProperty initializedProperty() {
-		return this.initialized;
-	}
-	
-	/**
-	 * Return whether the current state is initialized.
-	 * 
-	 * @return whether the current state is initialized
-	 */
-	public boolean isInitialized() {
-		return this.initializedProperty().get();
 	}
 }
