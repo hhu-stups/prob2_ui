@@ -1,6 +1,10 @@
 package de.prob2.ui.visb;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,18 +19,25 @@ import com.google.inject.Injector;
 import de.prob.animator.command.ExecuteOperationException;
 import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.command.GetVisBAttributeValuesCommand;
+import de.prob.animator.command.GetVisBDefaultSVGCommand;
+import de.prob.animator.command.GetVisBSVGObjectsCommand;
+import de.prob.animator.command.LoadVisBCommand;
+import de.prob.animator.command.ReadVisBEventsHoversCommand;
+import de.prob.animator.command.ReadVisBItemsCommand;
+import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.command.VisBPerformClickCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
+import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
@@ -38,20 +49,21 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.scene.control.Alert;
 
+import netscape.javascript.JSException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import netscape.javascript.JSException;
-
 /**
- * The VisBController controls the {@link VisBStage}, as well as using the {@link VisBFileHandler}.
+ * The VisBController controls the {@link VisBStage}.
  * Everything that can be done in Java only and uses interaction with ProB2-UI should be in here, not in the other classes.
  */
 @Singleton
 public class VisBController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBController.class);
 
-	private final VisBFileHandler visBFileHandler;
+	public static final Path NO_PATH = Paths.get("");
+
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
@@ -69,8 +81,7 @@ public class VisBController {
 	 * @param i18n used to access string resources
 	 */
 	@Inject
-	public VisBController(final VisBFileHandler visBFileHandler, final Injector injector, final StageManager stageManager, final CurrentTrace currentTrace, final I18n i18n) {
-		this.visBFileHandler = visBFileHandler;
+	public VisBController(final Injector injector, final StageManager stageManager, final CurrentTrace currentTrace, final I18n i18n) {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
@@ -187,7 +198,7 @@ public class VisBController {
 			return;
 		}
 		LOGGER.debug("Finding event for id: " + id);
-		VisBEvent event = this.getVisBVisualisation().getVisBEventsById().get(id);
+		VisBEvent event = this.getVisBVisualisation().getEventsById().get(id);
 
 		try {
 			StateSpace stateSpace = currentTrace.getStateSpace();
@@ -255,10 +266,65 @@ public class VisBController {
 		LOGGER.debug("Visualisation has been reloaded.");
 	}
 
+	/**
+	 * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
+	 * @param jsonPath path to the VisB JSON file
+	 * @return VisBVisualisation object
+	 */
+	private VisBVisualisation constructVisualisationFromJSON(Path jsonPath) throws IOException {
+		if (!jsonPath.equals(NO_PATH)) {
+			jsonPath = jsonPath.toRealPath();
+			if (!Files.isRegularFile(jsonPath)) {
+				throw new IOException("Given json path is not a regular file: " + jsonPath);
+			}
+		}
+		
+		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPath.equals(NO_PATH) ? "" : jsonPath.toString());
+		
+		currentTrace.getStateSpace().execute(loadCmd);
+		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.equals(NO_PATH) ? "" : jsonPath.toString());
+		
+		currentTrace.getStateSpace().execute(svgCmd);
+		String svgPathString = svgCmd.getSvgPath();
+		
+		final Path svgPath;
+		final String svgContent;
+		if (svgPathString.isEmpty()) {
+			svgPath = NO_PATH;
+			final GetVisBDefaultSVGCommand defaultSVGCmd = new GetVisBDefaultSVGCommand();
+			currentTrace.getStateSpace().execute(defaultSVGCmd);
+			svgContent = defaultSVGCmd.getSVGFileContents();
+		} else {
+			if (jsonPath.equals(NO_PATH)) {
+				svgPath = Paths.get(svgPathString).toRealPath();
+			} else {
+				svgPath = jsonPath.resolveSibling(svgPathString).toRealPath();
+			}
+			if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
+				throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
+			}
+			svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
+		}
+		
+		ReadVisBItemsCommand readVisBItemsCommand = new ReadVisBItemsCommand();
+		currentTrace.getStateSpace().execute(readVisBItemsCommand);
+		List<VisBItem> items = readVisBItemsCommand.getItems();
+		
+		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
+		currentTrace.getStateSpace().execute(readEventsCmd);
+		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
+		
+		GetVisBSVGObjectsCommand command = new GetVisBSVGObjectsCommand();
+		currentTrace.getStateSpace().execute(command);
+		List<VisBSVGObject> visBSVGObjects = command.getSvgObjects();
+		
+		return new VisBVisualisation(svgPath, svgContent, items, visBEvents, visBSVGObjects);
+	}
+
 	private void setupVisualisation(final Path visBPath){
 		try {
-			this.visBVisualisation.set(visBFileHandler.constructVisualisationFromJSON(visBPath));
-		} catch (Exception e) {
+			this.visBVisualisation.set(constructVisualisationFromJSON(visBPath));
+		} catch (IOException | RuntimeException e) {
 			this.visBVisualisation.set(null);
 			LOGGER.warn("error while loading visb file", e);
 			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");

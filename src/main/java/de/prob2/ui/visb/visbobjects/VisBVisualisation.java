@@ -15,51 +15,57 @@ import de.prob.animator.domainobjects.VisBSVGObject;
  */
 public class VisBVisualisation {
 	private final Path svgPath;
-	private final List<VisBEvent> visBEvents;
-	private final List<VisBItem> visBItems;
-	private final Map<String, VisBEvent> visBEventsById;
-	private final List<VisBSVGObject> visBSVGObjects;
+	private final String svgContent;
+	private final List<VisBItem> items;
+	private final List<VisBEvent> events;
+	private final Map<String, VisBEvent> eventsById;
+	private final List<VisBSVGObject> svgObjects;
 
-	public VisBVisualisation(List<VisBEvent> visBEvents, List<VisBItem> visBItems, Path svgPath, List<VisBSVGObject> visBSVGObjects) {
-		this.visBEvents = Objects.requireNonNull(visBEvents, "visBEvents");
-		this.visBItems = Objects.requireNonNull(visBItems, "visBItems");
+	public VisBVisualisation(Path svgPath, String svgContent, List<VisBItem> items, List<VisBEvent> events, List<VisBSVGObject> svgObjects) {
 		this.svgPath = Objects.requireNonNull(svgPath, "svgPath");
-		this.visBEventsById = this.visBEvents.stream()
+		this.svgContent = Objects.requireNonNull(svgContent, "svgContent");
+		this.items = Objects.requireNonNull(items, "items");
+		this.events = Objects.requireNonNull(events, "events");
+		this.eventsById = this.events.stream()
 			.collect(Collectors.toMap(VisBEvent::getId, event -> event));
-		this.visBSVGObjects = Objects.requireNonNull(visBSVGObjects, "visBSVGObjects");
-	}
-
-	public List<VisBEvent> getVisBEvents() {
-		return visBEvents;
-	}
-
-	public List<VisBItem> getVisBItems() {
-		return visBItems;
+		this.svgObjects = Objects.requireNonNull(svgObjects, "svgObjects");
 	}
 
 	public Path getSvgPath() {
 		return svgPath;
 	}
 
-	public Map<String, VisBEvent> getVisBEventsById() {
-		return this.visBEventsById;
+	public String getSvgContent() {
+		return svgContent;
 	}
 
-	public List<VisBSVGObject> getVisBSVGObjects() {
-		return visBSVGObjects;
+	public List<VisBItem> getItems() {
+		return items;
+	}
+
+	public List<VisBEvent> getEvents() {
+		return events;
+	}
+
+	public Map<String, VisBEvent> getEventsById() {
+		return this.eventsById;
+	}
+
+	public List<VisBSVGObject> getSVGObjects() {
+		return svgObjects;
 	}
 
 	@Override
 	public String toString(){
 		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.append("Visualisation Events List:\n");
-		appendList(stringBuilder, visBEvents);
-		stringBuilder.append("Visualisation Item List:\n");
-		appendList(stringBuilder, visBItems);
 		stringBuilder.append("SVG: \n");
 		appendObject(stringBuilder, svgPath);
+		stringBuilder.append("Visualisation Item List:\n");
+		appendList(stringBuilder, items);
+		stringBuilder.append("Visualisation Events List:\n");
+		appendList(stringBuilder, events);
 		stringBuilder.append("Visualisation Dynamics SVG Objects: \n");
-		appendObject(stringBuilder, visBSVGObjects);
+		appendObject(stringBuilder, svgObjects);
 		return stringBuilder.toString();
 	}
 

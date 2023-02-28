@@ -7,7 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
@@ -211,17 +210,13 @@ public class VisBStage extends Stage {
 			if (to == null) {
 				this.clear();
 			} else {
-				try {
-					this.loadSvgFile(to);
-				} catch (final IOException e) {
-					throw new UncheckedIOException(e);
-				}
+				this.loadSvgFile(to);
 				updateInfo(i18n.translate("visb.infobox.visualisation.svg.loaded"));
 				this.runWhenLoaded(() -> {
 					final JSObject window = this.getJSWindow();
 					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
 					updateDynamicSVGObjects(to);
-					for (final VisBEvent event : to.getVisBEvents()) {
+					for (final VisBEvent event : to.getEvents()) {
 						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 					}
 				});
@@ -286,7 +281,16 @@ public class VisBStage extends Stage {
 	private static Path getPathFromDefinitions(final StateSpace stateSpace) {
 		ReadVisBPathFromDefinitionsCommand cmd = new ReadVisBPathFromDefinitionsCommand();
 		stateSpace.execute(cmd);
-		return cmd.getPath() == null ? null : stateSpace.getModel().getModelFile().toPath().resolveSibling(cmd.getPath());
+		if (cmd.getPath() == null) {
+			// null means that there is no VISB_JSON_FILE in the model's DEFINITIONS.
+			return null;
+		} else if (cmd.getPath().isEmpty()) {
+			// VISB_JSON_FILE == "" means that there is no separate JSON file
+			// and the VisB items/events are written as DEFINITIONS.
+			return VisBController.NO_PATH;
+		} else {
+			return stateSpace.getModel().getModelFile().toPath().resolveSibling(cmd.getPath());
+		}
 	}
 
 	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
@@ -319,15 +323,15 @@ public class VisBStage extends Stage {
 	}
 
 	private void updateDynamicSVGObjects(VisBVisualisation visBVisualisation) {
-		List<VisBSVGObject> visBSVGObjects = visBVisualisation.getVisBSVGObjects();
+		List<VisBSVGObject> svgObjects = visBVisualisation.getSVGObjects();
 		// TODO: Maybe use templates
-		if(!visBSVGObjects.isEmpty()) {
+		if(!svgObjects.isEmpty()) {
 			StringBuilder scriptString = new StringBuilder();
 			scriptString.append("if(document.querySelector(\"svg\") != null) {\n");
-			for(VisBSVGObject visBSVGObject : visBSVGObjects) {
-				String id = visBSVGObject.getId();
-				String object = visBSVGObject.getObject();
-				Map<String, String> attributes = visBSVGObject.getAttributes();
+			for(VisBSVGObject svgObject : svgObjects) {
+				String id = svgObject.getId();
+				String object = svgObject.getObject();
+				Map<String, String> attributes = svgObject.getAttributes();
 				scriptString.append(String.format(Locale.ROOT, "var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
 				scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"id\",\"%s\");\n", id, id));
 				for(Map.Entry<String, String> entry : attributes.entrySet()) {
@@ -340,29 +344,15 @@ public class VisBStage extends Stage {
 		}
 	}
 
-	private void loadSvgFile(final VisBVisualisation visBVisualisation) throws IOException {
+	private void loadSvgFile(final VisBVisualisation visBVisualisation) {
 		final Path path = visBVisualisation.getSvgPath();
-		String svgContent = "";
-		if(path.toFile().isDirectory()) {
-			// TODO: Discuss whether to generate an empty SVG or provide the SVG content from Prolog with width and height. Furthermore adapt width and height to size provided in VisB file.
-			svgContent = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-					"<svg\n" +
-					"   xmlns:dc=\"http://purl.org/dc/elements/1.1/\"\n" +
-					"   xmlns:cc=\"http://creativecommons.org/ns#\"\n" +
-					"   xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\"\n" +
-					"   xmlns:svg=\"http://www.w3.org/2000/svg\"\n" +
-					"   xmlns=\"http://www.w3.org/2000/svg\"\n" +
-					"   width=\"1000\"\n" +
-					"   height=\"500\"\n" +
-					"   viewBox=\"0 0 1000.0 500.0\"\n" +
-					"   version=\"1.1\"\n" +
-					"</svg>";
-		} else if (!Files.isRegularFile(path) || Files.size(path) <= 0) {
-			throw new IOException("Given svg file '" + path + "' is not a file or is empty");
+		final String baseUrl;
+		if (path.equals(VisBController.NO_PATH)) {
+			baseUrl = "";
 		} else {
-			svgContent = new String(Files.readAllBytes(path), StandardCharsets.UTF_8);
+			baseUrl = path.getParent().toUri().toString();
 		}
-		this.initialiseWebView(svgContent, path.getParent().toUri().toString());
+		this.initialiseWebView(visBVisualisation.getSvgContent(), baseUrl);
 	}
 
 	private void treatJavascriptError(WebErrorEvent event) {
