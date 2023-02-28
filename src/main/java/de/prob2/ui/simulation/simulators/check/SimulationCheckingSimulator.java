@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationError;
@@ -28,35 +29,43 @@ import java.util.Map;
 public class SimulationCheckingSimulator extends Simulator implements ISimulationPropertyChecker {
 
 	public enum StartingType {
-		START_AFTER_STEPS("Start after Number of Steps"),
-		STARTING_PREDICATE("Starting Predicate"),
-		STARTING_PREDICATE_ACTIVATED("Starting Predicate (activated)"),
-		STARTING_TIME("Starting Time");
+		START_AFTER_STEPS("simulation.type.start.afterSteps"),
+		STARTING_PREDICATE("simulation.type.start.predicate"),
+		STARTING_PREDICATE_ACTIVATED("simulation.type.start.predicateActivated"),
+		STARTING_TIME("simulation.type.start.time");
 
-		private final String name;
+		private final String key;
 
-		StartingType(String name) {
-			this.name = name;
+		StartingType(String key) {
+			this.key = key;
 		}
 
-		public String getName() {
-			return name;
+		public String getKey() {
+			return key;
+		}
+
+		public String getName(I18n i18n) {
+			return i18n.translate(key);
 		}
 	}
 
 	public enum EndingType {
-		NUMBER_STEPS("Number Steps"),
-		ENDING_PREDICATE("Ending Predicate"),
-		ENDING_TIME("Ending Time");
+		NUMBER_STEPS("simulation.type.end.steps"),
+		ENDING_PREDICATE("simulation.type.end.predicate"),
+		ENDING_TIME("simulation.type.end.time");
 
-		private final String name;
+		private final String key;
 
-		EndingType(String name) {
-			this.name = name;
+		EndingType(String key) {
+			this.key = key;
 		}
 
-		public String getName() {
-			return name;
+		public String getKey() {
+			return key;
+		}
+
+		public String getName(I18n i18n) {
+			return i18n.translate(key);
 		}
 	}
 

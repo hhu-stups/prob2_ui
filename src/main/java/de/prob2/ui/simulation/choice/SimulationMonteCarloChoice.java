@@ -13,6 +13,7 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
+import javafx.util.StringConverter;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -33,7 +34,11 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 		@Override
 		public String toString() {
-			return startingType.getName();
+			return startingType.name();
+		}
+
+		public String getName(I18n i18n) {
+			return i18n.translate(startingType.getKey());
 		}
 
 		public SimulationCheckingSimulator.StartingType getStartingType() {
@@ -64,7 +69,11 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 		@Override
 		public String toString() {
-			return endingType.getName();
+			return endingType.name();
+		}
+
+		public String getName(I18n i18n) {
+			return i18n.translate(endingType.getKey());
 		}
 
 		public SimulationCheckingSimulator.EndingType getEndingType() {
@@ -144,11 +153,14 @@ public class SimulationMonteCarloChoice extends GridPane {
 	@FXML
 	private CheckBox cbCheckProperty;
 
+	private final I18n i18n;
+
 
 	@Inject
-	private SimulationMonteCarloChoice(final StageManager stageManager) {
+	private SimulationMonteCarloChoice(final StageManager stageManager, final I18n i18n) {
 		super();
 		stageManager.loadFXML(this, "simulation_monte_carlo_choice.fxml");
+		this.i18n = i18n;
 	}
 
 	@FXML
@@ -200,6 +212,37 @@ public class SimulationMonteCarloChoice extends GridPane {
 				}
 			}
 			choosingStage.sizeToScene();
+		});
+
+		startingChoice.setConverter(new StringConverter<SimulationStartingItem>() {
+			@Override
+			public String toString(SimulationStartingItem object) {
+				if(object == null) {
+					return "";
+				}
+				return object.getStartingType().getName(i18n);
+			}
+
+			@Override
+			public SimulationStartingItem fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to SimulationStartingItem not supported");
+			}
+		});
+
+
+		endingChoice.setConverter(new StringConverter<SimulationEndingItem>() {
+			@Override
+			public String toString(SimulationEndingItem object) {
+				if(object == null) {
+					return "";
+				}
+				return object.getEndingType().getName(i18n);
+			}
+
+			@Override
+			public SimulationEndingItem fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to SimulationEndingItem not supported");
+			}
 		});
 	}
 
