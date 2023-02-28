@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
 <?import de.prob2.ui.sharedviews.PredicateBuilderView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -9,7 +10,6 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-
 <fx:root type="Stage" minWidth="600" minHeight="400" maxHeight="400" width="600" height="400" xmlns:fx="http://javafx.com/fxml/1" title="%operations.executeByPredicate.stage.title">
 	<scene>
 		<Scene>
@@ -21,7 +21,9 @@
 					<Label fx:id="operationLabel"/>
 					<Label fx:id="paramsLabel" text="%operations.executeByPredicate.parameters"/>
 					<PredicateBuilderView fx:id="predicateBuilderView"/>
-					<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute"/>
+					<InterruptIfRunningButton fx:id="interruptButton">
+						<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute"/>
+					</InterruptIfRunningButton>
 					<HBox alignment="TOP_CENTER" fx:id="executeFailedBox" visible="false" spacing="5.0">
 						<Label fx:id="warningLabel" styleClass="warning" text="%operations.executeByPredicate.alerts.failedToExecuteOperation.content"/>
 						<Button fx:id="visualizeButton" alignment="CENTER_RIGHT" styleClass="button-blue" text="%operations.executeByPredicate.visualize" onAction="#visualizePredicate"/>

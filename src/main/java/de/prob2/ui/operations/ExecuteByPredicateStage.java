@@ -25,12 +25,15 @@ import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.interactive.UIInteractionHandler;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
-
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -63,6 +66,9 @@ public final class ExecuteByPredicateStage extends Stage {
 	
 	@FXML 
 	private Button executeButton;
+	
+	@FXML
+	private InterruptIfRunningButton interruptButton;
 
 	@FXML
 	private Button visualizeButton;
@@ -74,18 +80,20 @@ public final class ExecuteByPredicateStage extends Stage {
 	private final StageManager stageManager;
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
 	private final ObjectProperty<OperationItem> item;
 
 	private String lastFailedPredicate;
 	
 	@Inject
-	private ExecuteByPredicateStage(final Injector injector, final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
+	private ExecuteByPredicateStage(final Injector injector, final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor) {
 		super();
 
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
 		this.item = new SimpleObjectProperty<>(this, "item", null);
 		
 		this.initModality(Modality.APPLICATION_MODAL);
@@ -116,6 +124,8 @@ public final class ExecuteByPredicateStage extends Stage {
 				this.predicateBuilderView.setItems(items);
 			}
 		});
+		this.interruptButton.getInterruptButton().getStyleClass().add("button-blue");
+		this.interruptButton.getInterruptButton().setText(i18n.translate("common.buttons.cancel"));
 	}
 
 	private void buildParameters(List<String> parameterValues, List<String> parameterNames, List<PredicateBuilderTableItem> items, PredicateBuilderTableItem.VariableType type) {
@@ -143,8 +153,7 @@ public final class ExecuteByPredicateStage extends Stage {
 		this.itemProperty().set(item);
 	}
 	
-	@FXML
-	private void handleExecute() {
+	private void executeSync() {
 		final List<Transition> transitions;
 		try {
 			transitions = this.currentTrace.getStateSpace().transitionFromPredicate(
@@ -165,16 +174,20 @@ public final class ExecuteByPredicateStage extends Stage {
 				}
 			} else {
 				LOGGER.error("Execute by predicate failed", e);
-				Alert alert = stageManager.makeExceptionAlert(e, "operations.executeByPredicate.alerts.parseError.header", "operations.executeByPredicate.alerts.parseError.content");
-				alert.initOwner(this);
-				alert.showAndWait();
+				Platform.runLater(() -> {
+					Alert alert = stageManager.makeExceptionAlert(e, "operations.executeByPredicate.alerts.parseError.header", "operations.executeByPredicate.alerts.parseError.content");
+					alert.initOwner(this);
+					alert.showAndWait();
+				});
 			}
 			return;
 		} catch (IllegalArgumentException | ProBError | EvaluationException e) {
 			LOGGER.error("Execute by predicate failed", e);
-			Alert alert = stageManager.makeExceptionAlert(e, "operations.executeByPredicate.alerts.parseError.header", "operations.executeByPredicate.alerts.parseError.content");
-			alert.initOwner(this);
-			alert.showAndWait();
+			Platform.runLater(() -> {
+				Alert alert = stageManager.makeExceptionAlert(e, "operations.executeByPredicate.alerts.parseError.header", "operations.executeByPredicate.alerts.parseError.content");
+				alert.initOwner(this);
+				alert.showAndWait();
+			});
 			return;
 		}
 		assert transitions.size() == 1;
@@ -182,7 +195,12 @@ public final class ExecuteByPredicateStage extends Stage {
 		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 		injector.getInstance(UIInteractionHandler.class).addUserInteraction(realTimeSimulator, transition);
 		this.currentTrace.set(this.currentTrace.get().add(transition));
-		this.hide();
+		Platform.runLater(this::hide);
+	}
+
+	@FXML
+	private void handleExecute() {
+		cliExecutor.submit(this::executeSync);
 	}
 
 	@FXML
