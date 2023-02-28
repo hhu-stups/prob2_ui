@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.choice;
 
 import com.google.inject.Singleton;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import javafx.beans.NamedArg;
@@ -81,37 +82,6 @@ public class SimulationMonteCarloChoice extends GridPane {
 		@Override
 		public int hashCode() {
 			return Objects.hash(endingType);
-		}
-	}
-
-	public static class SimulationPropertyItem {
-
-		private final SimulationCheckingType checkingType;
-
-		public SimulationPropertyItem(@NamedArg("checkingType") SimulationCheckingType checkingType) {
-			this.checkingType = checkingType;
-		}
-
-		@Override
-		public String toString() {
-			return checkingType.getName();
-		}
-
-		public SimulationCheckingType getCheckingType() {
-			return checkingType;
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			SimulationPropertyItem that = (SimulationPropertyItem) o;
-			return checkingType == that.checkingType;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(checkingType);
 		}
 	}
 

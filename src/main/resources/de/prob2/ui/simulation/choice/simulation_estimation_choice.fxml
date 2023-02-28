@@ -8,7 +8,6 @@
 <?import javafx.scene.layout.GridPane?>
 <!-- Do not remove the following imports as they are detected as unused accidentally -->
 
-<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationPropertyItem?>
 <?import de.prob2.ui.simulation.choice.SimulationEstimationChoice.SimulationEstimationChoiceItem?>
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationStartingItem?>
 <?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationEndingItem?>

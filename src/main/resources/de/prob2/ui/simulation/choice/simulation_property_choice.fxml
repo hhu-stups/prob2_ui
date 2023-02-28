@@ -8,10 +8,6 @@
 <?import javafx.collections.FXCollections?>
 
 
-<!-- Do not remove the following imports as they are detected as unused accidentally -->
-
-<?import de.prob2.ui.simulation.choice.SimulationMonteCarloChoice.SimulationPropertyItem?>
-
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.layout.GridPane?>
@@ -22,6 +18,12 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.VBox?>
 <?import de.prob2.ui.simulation.choice.SimulationType?>
+
+<!-- Do not remove the following imports as they are detected as unused accidentally -->
+
+<?import de.prob2.ui.simulation.choice.SimulationPropertyChoice.SimulationPropertyItem?>
+
+
 <fx:root type="SimulationPropertyChoice" styleClass="border" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="TOP_LEFT" xmlns:fx="http://javafx.com/fxml/1">
 
 	<fx:define>
@@ -39,11 +41,11 @@
 	<ChoiceBox fx:id="checkingChoice" GridPane.rowIndex="2" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="ALL_INVARIANTS"/>
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="PREDICATE_INVARIANT"/>
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="PREDICATE_FINAL"/>
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="PREDICATE_EVENTUALLY"/>
-				<SimulationMonteCarloChoice.SimulationPropertyItem checkingType="TIMING"/>
+				<SimulationPropertyChoice.SimulationPropertyItem checkingType="ALL_INVARIANTS"/>
+				<SimulationPropertyChoice.SimulationPropertyItem checkingType="PREDICATE_INVARIANT"/>
+				<SimulationPropertyChoice.SimulationPropertyItem checkingType="PREDICATE_FINAL"/>
+				<SimulationPropertyChoice.SimulationPropertyItem checkingType="PREDICATE_EVENTUALLY"/>
+				<SimulationPropertyChoice.SimulationPropertyItem checkingType="TIMING"/>
 			</FXCollections>
 		</items>
 	</ChoiceBox>
