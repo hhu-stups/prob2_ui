@@ -81,6 +81,7 @@ public final class GroovyInterpreter implements Executable {
 
 	public void triggerCodeCompletion(String currentLine, CodeCompletionTriggerAction action) {
 		if (!codeCompletion.isVisible()) {
+			System.out.println("GroovyInterpreter.triggerCodeCompletion: " + currentLine);
 			codeCompletion.activate(currentLine, action);
 		}
 	}

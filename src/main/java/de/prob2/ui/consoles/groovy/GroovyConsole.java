@@ -14,9 +14,7 @@ import de.prob2.ui.internal.I18n;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
-
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
@@ -24,6 +22,7 @@ import org.fxmisc.wellbehaved.event.Nodes;
 @FXMLInjected
 @Singleton
 public class GroovyConsole extends Console {
+
 	private final GroovyInterpreter groovyInterpreter;
 
 	@Inject
@@ -58,11 +57,7 @@ public class GroovyConsole extends Console {
 	}
 
 	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
-		// TODO: fix code completion
-		/*if (getCaretPosition() >= this.getInputStart()) {
-			int caretPosInLine = getCaretPosition() - getInputStart();
-			groovyInterpreter.triggerCodeCompletion(getInput().substring(0, caretPosInLine), action);
-		}*/
+		this.getPositionInInput().ifPresent(pos -> groovyInterpreter.triggerCodeCompletion(getInput().substring(0, pos), action));
 	}
 
 	private void setCodeCompletionEvent() {
@@ -71,18 +66,22 @@ public class GroovyConsole extends Console {
 	}
 
 	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
+		System.out.println("GroovyConsole.handleCodeCompletionEvent: " + e.getEvent().getClass());
+		handleChooseSuggestion(e);
+		requestFollowCaret(); //This forces the text area to scroll to the bottom. Invoking scrollYToPixel does not have the expected effect
 		// TODO: handle different key event types
-		if (e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent) e.getEvent()).getText())) {
+		/*if (e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent) e.getEvent()).getText())) {
 			handleChooseSuggestion(e);
 			requestFollowCaret(); //This forces the text area to scroll to the bottom. Invoking scrollYToPixel does not have the expected effect
 		} else if (e.getCode() == KeyCode.SPACE) {
 			// handle Space in Code Completion
 			onEnterText(" ");
 			e.consume();
-		}
+		}*/
 	}
 
 	private void handleChooseSuggestion(CodeCompletionEvent e) {
+		System.out.println("GroovyConsole.handleChooseSuggestion: '" + e.getChoice() + "' '" + e.getCurrentSuggestion() + "'");
 		// TODO: fix
 		/*String choice = e.getChoice();
 		String suggestion = e.getCurrentSuggestion();
