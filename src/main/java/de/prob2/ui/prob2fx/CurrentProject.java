@@ -21,7 +21,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
+import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.vomanager.Requirement;
 
 import javafx.beans.binding.Bindings;

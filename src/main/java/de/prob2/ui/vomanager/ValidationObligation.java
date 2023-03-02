@@ -20,7 +20,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
+import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
@@ -114,7 +114,7 @@ public final class ValidationObligation {
 			}
 			// TODO: Implement a single simulation
 			return VTType.TRACE;
-		} else if(validationTask instanceof LTLFormulaItem) {
+		} else if(validationTask instanceof TemporalFormulaItem) {
 			return VTType.EXPLORE;
 		} else if(validationTask instanceof ModelCheckingItem) {
 			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();

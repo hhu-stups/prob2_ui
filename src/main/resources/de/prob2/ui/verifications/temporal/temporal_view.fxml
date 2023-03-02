@@ -5,7 +5,7 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
 <?import de.prob2.ui.sharedviews.Spacer?>
-<?import de.prob2.ui.verifications.ltl.LTLView?>
+<?import de.prob2.ui.verifications.temporal.TemporalView?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
@@ -15,8 +15,13 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="LTLView" fitToHeight="true" fitToWidth="true"
-	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+
+<!-- Do not remove the following imports as they are detected as unused accidentally -->
+<?import de.prob2.ui.verifications.temporal.TemporalFormulaItem.TemporalType?>
+
+
+<fx:root type="TemporalView" fitToHeight="true" fitToWidth="true"
+		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
@@ -55,7 +60,7 @@
 			<MenuButton fx:id="addMenuButton">
 				<items>
 					<MenuItem fx:id="addFormulaButton" onAction="#askToAddItem"
-						text="%verifications.ltl.ltlView.addFormula" />
+							  text="%verifications.ltl.ltlView.addFormula" />
 					<MenuItem fx:id="addPatternButton" onAction="#addPattern"
 						text="%verifications.ltl.ltlView.addPattern" />
 				</items>

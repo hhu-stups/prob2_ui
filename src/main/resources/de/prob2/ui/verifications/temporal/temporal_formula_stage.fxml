@@ -3,7 +3,7 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import de.prob2.ui.sharedviews.Spacer?>
-<?import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage?>
+<?import de.prob2.ui.verifications.temporal.TemporalFormulaStage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -17,7 +17,11 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.collections.FXCollections?>
 <?import java.lang.Boolean?>
-<fx:root type="LTLFormulaStage" title="%verifications.ltl.formula.ltlFormulaStage.title" minWidth="800" minHeight="600" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
+
+<!-- Do not remove the following imports as they are detected as unused accidentally -->
+<?import de.prob2.ui.verifications.temporal.TemporalItemStage.TemporalFormulaChoiceItem?>
+
+<fx:root type="TemporalFormulaStage" title="%verifications.ltl.formula.ltlFormulaStage.title" minWidth="800" minHeight="600" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>
@@ -26,18 +30,29 @@
 						<padding>
 							<Insets topRightBottomLeft="15.0"/>
 						</padding>
+						<HBox alignment="CENTER_LEFT" spacing="5.0">
+							<Label text="Type" HBox.hgrow="NEVER"/>
+							<ChoiceBox fx:id="cbType" HBox.hgrow="NEVER">
+								<items>
+									<FXCollections fx:factory="observableArrayList">
+										<TemporalItemStage.TemporalFormulaChoiceItem type="LTL"/>
+										<TemporalItemStage.TemporalFormulaChoiceItem type="CTL"/>
+									</FXCollections>
+								</items>
+							</ChoiceBox>
+						</HBox>
 						<HBox alignment="CENTER_LEFT">
 							<Label text="%verifications.ltl.formula.ltlFormulaStage.formula" HBox.hgrow="ALWAYS"/>
 							<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 							<Spacer/>
-							<Button styleClass="button-blue" text="%verifications.ltl.formula.ltlFormulaStage.showBuiltins" onAction="#showBuiltins" HBox.hgrow="NEVER"/>
+							<Button fx:id="btShowBuiltins" styleClass="button-blue" text="%verifications.ltl.formula.ltlFormulaStage.showBuiltins" onAction="#showBuiltins" HBox.hgrow="NEVER"/>
 						</HBox>
 						<VirtualizedScrollPane fx:id="virtualizedScrollPane">
 							<content>
 								<ExtendedCodeArea fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 							</content>
 						</VirtualizedScrollPane>
-						<HBox alignment="CENTER_LEFT" spacing="5.0">
+						<HBox fx:id="expectedResultBox" alignment="CENTER_LEFT" spacing="5.0">
 							<Label text="%verifications.ltl.formula.ltlFormulaStage.expectedResult" HBox.hgrow="NEVER"/>
 							<ChoiceBox fx:id="cbExpectedResult" HBox.hgrow="NEVER">
 								<items>

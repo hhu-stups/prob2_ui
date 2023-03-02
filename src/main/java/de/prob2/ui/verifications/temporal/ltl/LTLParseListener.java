@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.ltl;
+package de.prob2.ui.verifications.temporal.ltl;
 
 import java.util.Collections;
 import java.util.LinkedList;

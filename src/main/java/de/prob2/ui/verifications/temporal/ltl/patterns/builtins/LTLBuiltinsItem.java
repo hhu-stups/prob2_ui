@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.ltl.patterns.builtins;
+package de.prob2.ui.verifications.temporal.ltl.patterns.builtins;
 
 public class LTLBuiltinsItem {
 

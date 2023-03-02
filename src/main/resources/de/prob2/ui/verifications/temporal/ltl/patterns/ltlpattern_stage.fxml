@@ -3,7 +3,7 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import de.prob2.ui.sharedviews.Spacer?>
-<?import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage?>
+<?import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>

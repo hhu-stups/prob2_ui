@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.ltl;
+package de.prob2.ui.verifications.temporal;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -30,11 +30,10 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaStage;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternParser;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternStage;
+import de.prob2.ui.verifications.temporal.ltl.LTLData;
+import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
+import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
@@ -57,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class LTLView extends CheckingViewBase<LTLFormulaItem> {
+public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
@@ -80,7 +79,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		}
 	}
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(LTLView.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TemporalView.class);
 	
 	private static final String LTL_FILE_EXTENSION = "prob2ltl";
 	private static final String OLD_LTL_FILE_EXTENSION = "ltl";
@@ -100,7 +99,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	@FXML
 	private TableView<LTLPatternItem> tvPattern;
 	@FXML
-	private TableColumn<LTLFormulaItem, String> formulaDescriptionColumn;
+	private TableColumn<TemporalFormulaItem, String> formulaDescriptionColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, Checked> patternStatusColumn;
 	@FXML
@@ -118,13 +117,13 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	private final JacksonManager<LTLData> jacksonManager;
 				
 	@Inject
-	private LTLView(final StageManager stageManager, final I18n i18n, final Injector injector,
-					final CurrentTrace currentTrace, final VersionInfo versionInfo, final CurrentProject currentProject,
-					final DisablePropertyController disablePropertyController,
-					final CliTaskExecutor cliExecutor,
-					final FileChooserManager fileChooserManager,
-					final ObjectMapper objectMapper,
-					final JacksonManager<LTLData> jacksonManager) {
+	private TemporalView(final StageManager stageManager, final I18n i18n, final Injector injector,
+						 final CurrentTrace currentTrace, final VersionInfo versionInfo, final CurrentProject currentProject,
+						 final DisablePropertyController disablePropertyController,
+						 final CliTaskExecutor cliExecutor,
+						 final FileChooserManager fileChooserManager,
+						 final ObjectMapper objectMapper,
+						 final JacksonManager<LTLData> jacksonManager) {
 		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
@@ -152,7 +151,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				return oldObject;
 			}
 		});
-		stageManager.loadFXML(this, "ltl_view.fxml");
+		stageManager.loadFXML(this, "temporal_view.fxml");
 	}
 	
 	@Override
@@ -169,7 +168,7 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 				if(from != null) {
 					from.clearPatternManager();
 				}
-				items.bind(to.ltlFormulasProperty());
+				items.bind(to.temporalFormulasProperty());
 				tvPattern.itemsProperty().bind(to.ltlPatternsProperty());
 				managePatternTable(to.ltlPatternsProperty());
 			} else {
@@ -243,12 +242,12 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 	
 	@Override
-	protected String configurationForItem(final LTLFormulaItem item) {
+	protected String configurationForItem(final TemporalFormulaItem item) {
 		return item.getCode();
 	}
 	
 	@Override
-	protected void executeItemSync(final LTLFormulaItem item, final ExecutionContext context) {
+	protected void executeItemSync(final TemporalFormulaItem item, final ExecutionContext context) {
 		item.execute(context);
 		if (item.getCounterExample() != null) {
 			currentTrace.set(item.getCounterExample());
@@ -277,8 +276,8 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 	}
 	
 	@Override
-	protected Optional<LTLFormulaItem> showItemDialog(final LTLFormulaItem oldItem) {
-		LTLFormulaStage formulaStage = injector.getInstance(LTLFormulaStage.class);
+	protected Optional<TemporalFormulaItem> showItemDialog(final TemporalFormulaItem oldItem) {
+		TemporalFormulaStage formulaStage = injector.getInstance(TemporalFormulaStage.class);
 		if (oldItem != null) {
 			formulaStage.setData(oldItem);
 		}
@@ -317,8 +316,9 @@ public class LTLView extends CheckingViewBase<LTLFormulaItem> {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if (path != null) {
-			List<LTLFormulaItem> formulas = items.stream()
-				.filter(LTLFormulaItem::selected)
+			List<TemporalFormulaItem> formulas = items.stream()
+				.filter(item -> item.getType() == TemporalFormulaItem.TemporalType.LTL)
+				.filter(TemporalFormulaItem::selected)
 				.collect(Collectors.toList());
 			List<LTLPatternItem> patterns = machine.getLTLPatterns();
 			try {

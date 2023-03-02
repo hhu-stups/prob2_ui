@@ -94,7 +94,7 @@ public class MachineTableView extends TableView<Machine> {
 	@FXML
 	private TableColumn<Machine, String> machineNameColumn;
 
-	private CurrentProject currentProject;
+	private final CurrentProject currentProject;
 
 	@Inject
 	private MachineTableView(final StageManager stageManager, final CurrentProject currentProject, I18n i18n) {
@@ -108,7 +108,7 @@ public class MachineTableView extends TableView<Machine> {
 		machineTraceReplayColumn.setCellFactory(col -> new StatusIconCell(i18n));
 		machineTraceReplayColumn.setCellValueFactory(features -> features.getValue().traceReplayStatusProperty());
 		machineLTLColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineLTLColumn.setCellValueFactory(features -> features.getValue().ltlStatusProperty());
+		machineLTLColumn.setCellValueFactory(features -> features.getValue().temporalStatusProperty());
 		machineSymbolicColumn.setCellFactory(col -> new StatusIconCell(i18n));
 		machineSymbolicColumn.setCellValueFactory(features -> features.getValue().symbolicCheckingStatusProperty());
 		machineModelcheckColumn.setCellFactory(col -> new StatusIconCell(i18n));

@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.ltl.patterns;
+package de.prob2.ui.verifications.temporal.ltl.patterns;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,8 +15,8 @@ import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
-import de.prob2.ui.verifications.ltl.LTLCheckingResultItem;
-import de.prob2.ui.verifications.ltl.LTLParseListener;
+import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
+import de.prob2.ui.verifications.temporal.ltl.LTLParseListener;
 
 import org.antlr.v4.runtime.tree.ParseTree;
 
@@ -29,14 +29,14 @@ public final class LTLPatternParser {
 		CheckingResultItem resultItem;
 		// Empty Patterns do not have parse errors which is a little bit confusing
 		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
-			resultItem = new LTLCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully");
+			resultItem = new TemporalCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully");
 		} else {
 			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {
-				resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.ltl.pattern.empty");
+				resultItem = new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.ltl.pattern.empty");
 			} else {
 				final String msg = parseListener.getErrorMarkers().stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
-				resultItem = new LTLCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.ltl.pattern.couldNotParsePattern", msg);
+				resultItem = new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.ltl.pattern.couldNotParsePattern", msg);
 			}
 		}
 		item.setResultItem(resultItem);
