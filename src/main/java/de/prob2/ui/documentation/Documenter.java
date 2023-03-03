@@ -8,8 +8,8 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
+import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import org.apache.commons.text.StringSubstitutor;
 
@@ -106,7 +106,7 @@ public class Documenter {
 		StringSubstitutor sub = new StringSubstitutor(valuesMap);
 		StringBuilder ltlFormulars = new StringBuilder();
 		StringBuilder ltlPatterns = new StringBuilder();
-		for (LTLFormulaItem formular : elem.getLTLFormulas()) {
+		for (TemporalFormulaItem formular : elem.getTemporalFormulas()) {
 			if (formular.selected()) {
 				valuesMap.put("fcode", formular.getCode());
 				valuesMap.put("fresult", (formular.getResultItem() != null) ? i18n.translate(formular.getResultItem().getHeaderBundleKey()) : "Formular not Solved");

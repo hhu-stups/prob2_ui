@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.ltl.patterns;
+package de.prob2.ui.verifications.temporal.ltl.patterns;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;

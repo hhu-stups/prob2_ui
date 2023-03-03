@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.sharedviews.BetterTabPane?>
-<?import de.prob2.ui.verifications.ltl.LTLView?>
+<?import de.prob2.ui.verifications.temporal.TemporalView?>
 <?import de.prob2.ui.verifications.modelchecking.ModelcheckingView?>
 <?import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingView?>
 <?import de.prob2.ui.verifications.po.ProofObligationView?>
@@ -14,8 +14,8 @@
 		<Tab fx:id="tabModelchecking" id="modelchecking" text="%verifications.verificationsView.tabs.modelchecking">
 			<ModelcheckingView />
 		</Tab>
-		<Tab fx:id="tabLTL" id="ltl" text="%verifications.verificationsView.tabs.ltl">
-			<LTLView />
+		<Tab fx:id="tabLTL" id="ltl" text="%verifications.verificationsView.tabs.temporal">
+			<TemporalView />
 		</Tab>
 		<Tab fx:id="tabSymbolic" id="symbolic" text="%verifications.verificationsView.tabs.symbolic">
 			<SymbolicCheckingView />

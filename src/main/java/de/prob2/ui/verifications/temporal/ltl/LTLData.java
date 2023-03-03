@@ -1,4 +1,4 @@
-package de.prob2.ui.verifications.ltl;
+package de.prob2.ui.verifications.temporal.ltl;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.prob.json.HasMetadata;
 import de.prob.json.JsonMetadata;
 import de.prob.json.JsonMetadataBuilder;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 
 import java.util.List;
 
@@ -15,7 +15,7 @@ public class LTLData implements HasMetadata {
 	public static final String FILE_TYPE = "LTL";
 	public static final int CURRENT_FORMAT_VERSION = 1;
 
-	private List<LTLFormulaItem> formulas;
+	private List<TemporalFormulaItem> formulas;
 
 	private List<LTLPatternItem> patterns;
 
@@ -23,7 +23,7 @@ public class LTLData implements HasMetadata {
 
 	@JsonCreator
 	public LTLData(
-		@JsonProperty("formulas") final List<LTLFormulaItem> formulas,
+		@JsonProperty("formulas") final List<TemporalFormulaItem> formulas,
 		@JsonProperty("patterns") final List<LTLPatternItem> patterns,
 		@JsonProperty("metadata") final JsonMetadata metadata
 	) {
@@ -38,7 +38,7 @@ public class LTLData implements HasMetadata {
 			.withSavedNow();
 	}
 
-	public List<LTLFormulaItem> getFormulas() {
+	public List<TemporalFormulaItem> getFormulas() {
 		return formulas;
 	}
 

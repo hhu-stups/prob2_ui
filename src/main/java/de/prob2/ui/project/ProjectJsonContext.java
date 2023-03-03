@@ -810,9 +810,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 
 	private static void updateV35Machine(final ObjectNode machine) {
 		checkArray(machine.get("ltlPatterns")).forEach(patternNode ->
-			checkObject(patternNode).remove("selected")
+				checkObject(patternNode).remove("selected")
 		);
-		
+
 		for (final String key : new String[] {"dotVisualizationItems", "tableVisualizationItems"}) {
 			final ObjectNode itemsByType = checkObject(machine.get(key));
 			itemsByType.fields().forEachRemaining(e -> {
@@ -822,6 +822,15 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				}
 			});
 		}
+	}
+
+	private static void updateV36Machine(final ObjectNode machine) {
+		JsonNode ltlFormulas = machine.get("ltlFormulas");
+		machine.set("temporalFormulas", ltlFormulas);
+		machine.remove("ltlFormulas");
+		checkArray(machine.get("temporalFormulas")).forEach(temporalNode ->
+				checkObject(temporalNode).put("type", "LTL")
+		);
 	}
 	
 	@Override
@@ -955,6 +964,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 35) {
 				updateV35Machine(machine);
+			}
+			if (oldVersion <= 36) {
+				updateV36Machine(machine);
 			}
 		});
 		

@@ -30,8 +30,8 @@ import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.ltl.formula.LTLFormulaItem;
-import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
+import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.po.SavedProofObligationItem;
@@ -65,7 +65,7 @@ import javafx.collections.ObservableMap;
 	"location",
 	"lastUsedPreferenceName",
 	"validationTasks",
-	"ltlFormulas",
+	"temporalFormulas",
 	"ltlPatterns",
 	"symbolicCheckingFormulas",
 	"symbolicAnimationFormulas",
@@ -117,7 +117,7 @@ public class Machine {
 	@JsonIgnore
 	private final ObjectProperty<MachineCheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus(CheckingStatus.NONE));
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> ltlStatus = new SimpleObjectProperty<>(this, "ltlStatus", new MachineCheckingStatus(CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> temporalStatus = new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus(CheckingStatus.NONE));
 	@JsonIgnore
 	private final ObjectProperty<MachineCheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus(CheckingStatus.NONE));
 	@JsonIgnore
@@ -126,7 +126,7 @@ public class Machine {
 	private final StringProperty description;
 	private final Path location;
 	private final StringProperty lastUsedPreferenceName;
-	private final ListProperty<LTLFormulaItem> ltlFormulas;
+	private final ListProperty<TemporalFormulaItem> temporalFormulas;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
@@ -167,7 +167,7 @@ public class Machine {
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = location;
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
-		this.ltlFormulas = new SimpleListProperty<>(this, "ltlFormulas", FXCollections.observableArrayList());
+		this.temporalFormulas = new SimpleListProperty<>(this, "temporalFormulas", FXCollections.observableArrayList());
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
 		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
@@ -275,7 +275,7 @@ public class Machine {
 		this.nameProperty().addListener(changedListener);
 		this.descriptionProperty().addListener(changedListener);
 		this.lastUsedPreferenceNameProperty().addListener(changedListener);
-		this.ltlFormulasProperty().addListener(changedListener);
+		this.temporalFormulasProperty().addListener(changedListener);
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicCheckingFormulasProperty().addListener(changedListener);
 		this.symbolicAnimationFormulasProperty().addListener(changedListener);
@@ -301,13 +301,13 @@ public class Machine {
 		this.dotVisualizationItemsProperty().addListener(changedListener);
 		this.tableVisualizationItemsProperty().addListener(changedListener);
 
-		addCheckingStatusListener(this.ltlFormulasProperty(), this.ltlStatusProperty());
+		addCheckingStatusListener(this.temporalFormulasProperty(), this.temporalStatusProperty());
 		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolicCheckingStatusProperty());
 		addCheckingStatusListener(this.tracesProperty(), this.traceReplayStatusProperty());
 		addCheckingStatusListener(this.modelcheckingItemsProperty(), this.modelcheckingStatusProperty());
 
 		// Collect all validation tasks that have a non-null ID
-		this.addValidationTaskListener(this.ltlFormulasProperty());
+		this.addValidationTaskListener(this.temporalFormulasProperty());
 		this.addValidationTaskListener(this.symbolicCheckingFormulasProperty());
 		this.addValidationTaskListener(this.tracesProperty());
 		this.addValidationTaskListener(this.modelcheckingItemsProperty());
@@ -365,7 +365,7 @@ public class Machine {
 	}
 	
 	public void resetStatus() {
-		ltlFormulas.forEach(LTLFormulaItem::reset);
+		temporalFormulas.forEach(TemporalFormulaItem::reset);
 		ltlPatterns.forEach(LTLPatternItem::reset);
 		patternManager = new PatternManager();
 		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::reset);
@@ -388,16 +388,16 @@ public class Machine {
 		this.traceReplayStatusProperty().set(status);
 	}
 
-	public ObjectProperty<MachineCheckingStatus> ltlStatusProperty() {
-		return this.ltlStatus;
+	public ObjectProperty<MachineCheckingStatus> temporalStatusProperty() {
+		return this.temporalStatus;
 	}
 	
-	public MachineCheckingStatus getLtlStatus() {
-		return this.ltlStatusProperty().get();
+	public MachineCheckingStatus getTemporalStatus() {
+		return this.temporalStatusProperty().get();
 	}
 	
-	public void setLtlStatus(final MachineCheckingStatus status) {
-		this.ltlStatusProperty().set(status);
+	public void setTemporalStatus(final MachineCheckingStatus status) {
+		this.temporalStatusProperty().set(status);
 	}
 
 	public ObjectProperty<MachineCheckingStatus> symbolicCheckingStatusProperty() {
@@ -457,18 +457,18 @@ public class Machine {
 		return this.validationTasksProperty().get();
 	}
 
-	public ListProperty<LTLFormulaItem> ltlFormulasProperty() {
-		return ltlFormulas;
+	public ListProperty<TemporalFormulaItem> temporalFormulasProperty() {
+		return temporalFormulas;
 	}
 	
-	@JsonProperty("ltlFormulas")
-	public List<LTLFormulaItem> getLTLFormulas() {
-		return ltlFormulasProperty().get();
+	@JsonProperty("temporalFormulas")
+	public List<TemporalFormulaItem> getTemporalFormulas() {
+		return temporalFormulasProperty().get();
 	}
 	
-	@JsonProperty("ltlFormulas")
-	private void setLTLFormulas(final List<LTLFormulaItem> ltlFormulas) {
-		this.ltlFormulasProperty().setAll(ltlFormulas);
+	@JsonProperty("temporalFormulas")
+	private void setTemporalFormulas(final List<TemporalFormulaItem> temporalFormulas) {
+		this.temporalFormulasProperty().setAll(temporalFormulas);
 	}
 	
 	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
