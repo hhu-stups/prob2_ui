@@ -60,15 +60,15 @@
 			<MenuButton fx:id="addMenuButton">
 				<items>
 					<MenuItem fx:id="addFormulaButton" onAction="#askToAddItem"
-							  text="%verifications.ltl.ltlView.addFormula" />
+							  text="%verifications.temporal.temporalView.addFormula" />
 					<MenuItem fx:id="addPatternButton" onAction="#addPattern"
-						text="%verifications.ltl.ltlView.addPattern" />
+						text="%verifications.temporal.temporalView.addPattern" />
 				</items>
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%verifications.ltl.ltlView.tooltips.addFormulaOrPattern" />
+					<Tooltip text="%verifications.temporal.temporalView.tooltips.addFormulaOrPattern" />
 				</tooltip>
 			</MenuButton>
 			<HelpButton fx:id="helpButton" />
@@ -84,7 +84,7 @@
 				<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.ltl.ltlView.noFormulas" />
+				<Label text="%verifications.temporal.temporalView.noFormulas" />
 			</placeholder>
 		</TableView>
 		<TableView fx:id="tvPattern" minHeight="80.0" VBox.vgrow="ALWAYS">
@@ -97,7 +97,7 @@
 				<TableColumn fx:id="patternDescriptionColumn" minWidth="120.0" text="%common.columns.description" />
 			</columns>
 			<placeholder>
-				<Label text="%verifications.ltl.ltlView.noPattern" />
+				<Label text="%verifications.temporal.temporalView.noPattern" />
 			</placeholder>
 		</TableView>
 	</VBox>

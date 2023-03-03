@@ -14,7 +14,7 @@
 		<Tab fx:id="tabModelchecking" id="modelchecking" text="%verifications.verificationsView.tabs.modelchecking">
 			<ModelcheckingView />
 		</Tab>
-		<Tab fx:id="tabLTL" id="ltl" text="%verifications.verificationsView.tabs.ltl">
+		<Tab fx:id="tabLTL" id="ltl" text="%verifications.verificationsView.tabs.temporal">
 			<TemporalView />
 		</Tab>
 		<Tab fx:id="tabSymbolic" id="symbolic" text="%verifications.verificationsView.tabs.symbolic">

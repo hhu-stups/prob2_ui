@@ -89,7 +89,7 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 	
 	@Override
 	public String getTaskType(final I18n i18n) {
-		return i18n.translate("verifications.ltl.type");
+		return i18n.translate("verifications.temporal.type");
 	}
 	
 	@Override

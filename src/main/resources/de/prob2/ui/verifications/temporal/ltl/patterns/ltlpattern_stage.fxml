@@ -13,7 +13,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<fx:root type="LTLPatternStage" title="%verifications.ltl.pattern.ltlPatternStage.title" minWidth="800" minHeight="600" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="LTLPatternStage" title="%verifications.temporal.ltl.pattern.ltlPatternStage.title" minWidth="800" minHeight="600" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane>
@@ -23,19 +23,19 @@
 							<Insets topRightBottomLeft="15.0"/>
 						</padding>
 						<HBox alignment="CENTER_LEFT">
-							<Label text="%verifications.ltl.pattern.ltlPatternStage.pattern" HBox.hgrow="ALWAYS"/>
+							<Label text="%verifications.temporal.ltl.pattern.ltlPatternStage.pattern" HBox.hgrow="ALWAYS"/>
 							<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 							<Spacer/>
-							<Button styleClass="button-blue" text="%verifications.ltl.pattern.ltlPatternStage.showBuiltins" onAction="#showBuiltins" HBox.hgrow="NEVER"/>
+							<Button styleClass="button-blue" text="%verifications.temporal.ltl.pattern.ltlPatternStage.showBuiltins" onAction="#showBuiltins" HBox.hgrow="NEVER"/>
 						</HBox>
 						<VirtualizedScrollPane fx:id="virtualizedScrollPane">
 							<content>
 								<ExtendedCodeArea fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 							</content>
 						</VirtualizedScrollPane>
-						<Label text="%verifications.ltl.pattern.ltlPatternStage.description" VBox.vgrow="NEVER"/>
+						<Label text="%verifications.temporal.ltl.pattern.ltlPatternStage.description" VBox.vgrow="NEVER"/>
 						<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
-						<Label text="%verifications.ltl.pattern.ltlPatternStage.errors" VBox.vgrow="NEVER"/>
+						<Label text="%verifications.temporal.ltl.pattern.ltlPatternStage.errors" VBox.vgrow="NEVER"/>
 						<TextArea fx:id="taErrors" editable="false" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
 						<HBox>
 							<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyPattern"/>

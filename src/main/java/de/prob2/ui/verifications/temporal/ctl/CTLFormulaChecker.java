@@ -67,16 +67,16 @@ public final class CTLFormulaChecker {
 
 		if (result instanceof CTLOk) {
 			if(item.getExpectedResult()) {
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.ltl.result.succeeded.message"));
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.temporal.result.succeeded.message"));
 			} else {
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.ltl.result.counterExampleFound.message"));
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.temporal.result.counterExampleFound.message"));
 			}
 		} else if (result instanceof CTLCounterExample) {
 			item.setCounterExample(null); // TODO
 			if(item.getExpectedResult()) {
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.ltl.result.counterExampleFound.message"));
+				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.temporal.result.counterExampleFound.message"));
 			} else {
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.ltl.result.succeeded.example.message"));
+				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.temporal.result.succeeded.example.message"));
 			}
 		} else if (result instanceof CTLNotYetFinished || result instanceof CheckInterrupted || result instanceof  CTLCouldNotDecide) {
 			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage()));

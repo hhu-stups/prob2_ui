@@ -59,14 +59,14 @@ import org.slf4j.LoggerFactory;
 public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
-			executeMenuItem.setText(i18n.translate("verifications.ltl.ltlView.contextMenu.check"));
+			executeMenuItem.setText(i18n.translate("verifications.temporal.temporalView.contextMenu.check"));
 			
-			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCounterExample"));
+			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
 			showCounterExampleItem.setDisable(true);
 			contextMenu.getItems().add(showCounterExampleItem);
 			
-			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showCheckingMessage"));
+			MenuItem showMessage = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
 			
@@ -200,7 +200,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			
-			MenuItem showMessage = new MenuItem(i18n.translate("verifications.ltl.ltlView.contextMenu.showParsingMessage"));
+			MenuItem showMessage = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showParsingMessage"));
 			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
@@ -311,7 +311,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private void saveLTL() {
 		Machine machine = currentProject.getCurrentMachine();
 		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("verifications.ltl.ltlView.fileChooser.saveLTL.title"));
+		fileChooser.setTitle(i18n.translate("verifications.temporal.temporalView.fileChooser.saveLTL.title"));
 		fileChooser.setInitialFileName(machine.getName() + "." + LTL_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
@@ -328,7 +328,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 					.build();
 				this.jacksonManager.writeToFile(path, new LTLData(formulas, patterns, metadata));
 			} catch (IOException e) {
-				final Alert alert = stageManager.makeExceptionAlert(e, "verifications.ltl.ltlView.saveLTL.error");
+				final Alert alert = stageManager.makeExceptionAlert(e, "verifications.temporal.temporalView.saveLTL.error");
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 			}
@@ -339,7 +339,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private void loadLTL() {
 		Machine machine = currentProject.getCurrentMachine();
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("verifications.ltl.ltlView.fileChooser.loadLTL.title"));
+		fileChooser.setTitle(i18n.translate("verifications.temporal.temporalView.fileChooser.loadLTL.title"));
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION, OLD_LTL_FILE_EXTENSION));
 		Path ltlFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());

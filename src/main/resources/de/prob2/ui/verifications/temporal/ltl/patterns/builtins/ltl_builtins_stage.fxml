@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<fx:root type="Stage" title="%verifications.ltl.pattern.builtins.title" minHeight="400.0" minWidth="600.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" title="%verifications.temporal.ltl.pattern.builtins.title" minHeight="400.0" minWidth="600.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css" height="400.0" width="600.0">
 			<!-- TableView does not extend Pane, so we have to wrap it in a Pane so we can add the menu bar to it on Mac. -->
@@ -16,8 +16,8 @@
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 					</columnResizePolicy>
 					<columns>
-						<TableColumn fx:id="pattern" editable="false" prefWidth="20.0" text="%verifications.ltl.pattern.builtins.pattern" />
-						<TableColumn fx:id="description" editable="false" prefWidth="200.0" text="%verifications.ltl.pattern.builtins.description" />
+						<TableColumn fx:id="pattern" editable="false" prefWidth="20.0" text="%verifications.temporal.ltl.pattern.builtins.pattern" />
+						<TableColumn fx:id="description" editable="false" prefWidth="200.0" text="%verifications.temporal.ltl.pattern.builtins.description" />
 					</columns>
 				</TableView>
 			</AnchorPane>
