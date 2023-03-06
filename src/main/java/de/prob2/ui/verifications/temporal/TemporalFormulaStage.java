@@ -58,7 +58,6 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	public void initialize() {
 		super.initialize();
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get().getType() == TemporalFormulaItem.TemporalType.LTL, cbType.getSelectionModel().selectedItemProperty());
-		expectedResultBox.visibleProperty().bind(binding);
 		btShowBuiltins.visibleProperty().bind(binding);
 		cbType.getSelectionModel().select(cbType.getItems().get(0));
 		cbExpectedResult.getSelectionModel().select(true);
