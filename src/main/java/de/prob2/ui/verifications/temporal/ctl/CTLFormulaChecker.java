@@ -18,6 +18,7 @@ import de.prob.check.CTLNotYetFinished;
 import de.prob.check.CTLOk;
 import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
+import de.prob.check.LTLCounterExample;
 import de.prob.exception.ProBError;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
@@ -65,6 +66,12 @@ public final class CTLFormulaChecker {
 	private static void handleFormulaResult(TemporalFormulaItem item, IModelCheckingResult result) {
 		assert !(result instanceof CTLError);
 
+		if (result instanceof CTLCounterExample) {
+			item.setCounterExample(((CTLCounterExample) result).getTrace());
+		} else {
+			item.setCounterExample(null);
+		}
+
 		if (result instanceof CTLOk) {
 			if(item.getExpectedResult()) {
 				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.temporal.result.succeeded.message"));
@@ -72,7 +79,6 @@ public final class CTLFormulaChecker {
 				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.temporal.result.counterExampleFound.message"));
 			}
 		} else if (result instanceof CTLCounterExample) {
-			item.setCounterExample(null); // TODO
 			if(item.getExpectedResult()) {
 				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.temporal.result.counterExampleFound.message"));
 			} else {
