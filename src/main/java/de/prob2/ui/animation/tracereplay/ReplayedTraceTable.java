@@ -68,10 +68,11 @@ public class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
 				getStyleClass().removeAll("FAULTY", "FOLLOWING");
 				if (item != null) {
 					TableRow<ReplayedTraceRow> row = getTableRow();
-					ReplayedTraceRow rowItem = row.getItem();
-
-					if (rowItem != null) {
-						getStyleClass().addAll(rowItem.getStyleClasses());
+					if (row != null) {
+						ReplayedTraceRow rowItem = row.getItem();
+						if (rowItem != null) {
+							getStyleClass().addAll(rowItem.getStyleClasses());
+						}
 					}
 				}
 			}
