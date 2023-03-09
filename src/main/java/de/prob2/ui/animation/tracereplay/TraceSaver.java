@@ -1,7 +1,10 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.nio.file.Path;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -9,10 +12,9 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.scene.control.Alert;
 import javafx.stage.Window;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.file.Path;
 
 public class TraceSaver {
 
@@ -38,11 +40,9 @@ public class TraceSaver {
 			try {
 				return traceSaver.save(possiblyLostTrace, currentProject.getCurrentMachine());
 			} catch (Exception e) {
-				LOGGER.error("", e);
-				TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg", TraceReplayErrorAlert.Trigger.TRIGGER_SAVE_TRACE);
+				LOGGER.error("error while saving trace", e);
+				TraceSaveErrorAlert alert = new TraceSaveErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg");
 				alert.initOwner(window);
-				alert.setAttemptedReplayOrLostTrace(possiblyLostTrace);
-				// TODO set history
 				alert.setErrorMessage();
 			}
 		}

@@ -26,6 +26,7 @@ import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.executor.CompletableExecutorService;
 import de.prob2.ui.internal.executor.CompletableThreadPoolExecutor;
 import de.prob2.ui.operations.OperationItem;
+import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -33,6 +34,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.layout.Region;
 
@@ -41,11 +43,16 @@ import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 public class ReplayedTraceStatusAlert extends Alert {
 
 	private final StageManager stageManager;
+	private final CurrentTrace currentTrace;
 	private final TraceFileHandler traceFileHandler;
 	private final CliTaskExecutor cliExecutor;
 	private final I18n i18n;
 	private final CompletableExecutorService executor;
 	private final ReplayTrace replayTrace;
+
+	private ButtonType accept;
+	private ButtonType discard;
+
 	@FXML
 	private ReplayedTraceTable traceTable;
 	@FXML
@@ -54,6 +61,7 @@ public class ReplayedTraceStatusAlert extends Alert {
 	public ReplayedTraceStatusAlert(Injector injector, ReplayTrace replayTrace) {
 		super(AlertType.NONE);
 		this.stageManager = injector.getInstance(StageManager.class);
+		this.currentTrace = injector.getInstance(CurrentTrace.class);
 		this.traceFileHandler = injector.getInstance(TraceFileHandler.class);
 		this.i18n = injector.getInstance(I18n.class);
 		this.cliExecutor = injector.getInstance(CliTaskExecutor.class);
@@ -70,6 +78,9 @@ public class ReplayedTraceStatusAlert extends Alert {
 
 	@FXML
 	private void initialize() {
+		this.accept = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.accept"), ButtonBar.ButtonData.OK_DONE);
+		this.discard = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.discard"), ButtonBar.ButtonData.CANCEL_CLOSE);
+
 		stageManager.register(this);
 
 		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
@@ -194,5 +205,13 @@ public class ReplayedTraceStatusAlert extends Alert {
 		}
 
 		return items;
+	}
+
+	public void handleAcceptDiscard() {
+		this.getButtonTypes().setAll(this.accept, this.discard);
+		ButtonType response = this.showAndWait().orElse(null);
+		if (response == this.accept) {
+			this.currentTrace.set(this.replayTrace.getAnimatedReplayedTrace());
+		}
 	}
 }

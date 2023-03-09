@@ -1,11 +1,8 @@
 package de.prob2.ui.animation.tracereplay;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Scanner;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -13,11 +10,9 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.ReplayedTrace;
 import de.prob.check.tracereplay.TraceReplay;
 import de.prob.check.tracereplay.TraceReplayStatus;
-import de.prob.check.tracereplay.TransitionReplayPrecision;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
@@ -94,26 +89,9 @@ public class TraceChecker {
 	}
 
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
-		final Trace trace = replayTrace.getAnimatedReplayedTrace();
 		Platform.runLater(() -> {
-			// TODO: switch this to ReplayedTraceStatusAlert once ready
-			final String errorMessage = replayTrace.getReplayedTrace().getErrors().stream()
-					                            .map(ErrorItem::toString)
-					                            .collect(Collectors.joining("\n"));
-			TraceReplayErrorAlert alert = new TraceReplayErrorAlert(injector, "common.literal", TraceReplayErrorAlert.Trigger.TRIGGER_TRACE_CHECKER, errorMessage);
-
-			stageManager.register(alert);
-			try {
-				alert.setLineNumber(lineNumber(replayTrace, trace.size()));
-			} catch (IOException e) {
-				LOGGER.error("error while trying to read trace file after the replay failed", e);
-			}
-			alert.setReplayTrace(replayTrace);
-			alert.setAttemptedReplayOrLostTrace(trace);
-			alert.setStoredTrace(replayTrace.getLoadedTrace());
-			alert.setHistory(currentTrace.get());
-			currentTrace.set(trace);
-			alert.setErrorMessage();
+			ReplayedTraceStatusAlert alert = new ReplayedTraceStatusAlert(injector, replayTrace);
+			alert.handleAcceptDiscard();
 		});
 	}
 
@@ -125,45 +103,4 @@ public class TraceChecker {
 			currentTrace.set(replayTrace.getAnimatedReplayedTrace());
 		}
 	}
-
-	@Deprecated
-	private static int lineNumber(ReplayTrace replayTrace, int failedTraceLength) throws IOException {
-		final List<TransitionReplayPrecision> precisions = replayTrace.getReplayedTrace().getTransitionReplayPrecisions();
-		int firstTransitionWithError = failedTraceLength;
-		for (int i = 0; i < precisions.size(); i++) {
-			if (precisions.get(i) != TransitionReplayPrecision.PRECISE) {
-				firstTransitionWithError = i;
-				break;
-			}
-		}
-
-		replayTrace.load();
-		final List<PersistentTransition> transitionList = replayTrace.getLoadedTrace().getTransitionList();
-		if (firstTransitionWithError >= transitionList.size()) {
-			// Every transition was replayed, and each one was precise, but we still got a replay error...
-			// We have no other way to figure out which transition failed, so just give up.
-			return -1;
-		}
-		PersistentTransition failedTransition = transitionList.get(firstTransitionWithError);
-		int lineNumber = 0;
-		int operationNumber = 0;
-		try {
-			Scanner scanner = new Scanner(replayTrace.getAbsoluteLocation());
-			while (scanner.hasNext()) {
-				// Error messages should have already been set at this point so there is no possibility of a NPE
-				lineNumber++;
-				String nextLine = scanner.nextLine();
-				if (nextLine.contains("name")) {
-					operationNumber++;
-					if (nextLine.contains(failedTransition.getOperationName()) && operationNumber > firstTransitionWithError) {
-						break;
-					}
-				}
-			}
-		} catch (IOException e) {
-			// Not possible at this position since a persistent trace already exists
-		}
-		return lineNumber;
-	}
-
 }
