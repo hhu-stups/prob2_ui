@@ -15,13 +15,13 @@
 		<StackPane>
 			<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
 				<Tab fx:id="statesTab" id="states" text="%menu.mainView.tabs.states">
-					<StatesView/>
+					<StatesView fx:id="statesView"/>
 				</Tab>
 				<Tab fx:id="visualisationTab" id="visualisation" text="%menu.mainView.tabs.visualisation">
 					<VisualisationView/>
 				</Tab>
 				<Tab fx:id="beditorTab" id="beditorTab" text="%menu.mainView.tabs.beditor">
-					<BEditorView/>
+					<BEditorView fx:id="beditorView"/>
 				</Tab>
 			</BetterTabPane>
 		</StackPane>
