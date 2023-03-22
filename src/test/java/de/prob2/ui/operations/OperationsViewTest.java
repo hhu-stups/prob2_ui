@@ -1,10 +1,22 @@
 package de.prob2.ui.operations;
 
 
+import static org.testfx.assertions.api.Assertions.assertThat;
+
 import de.prob2.ui.ProjectBuilder;
 import de.prob2.ui.TestBase;
+import java.util.List;
+import java.util.stream.Collectors;
+import javafx.application.Platform;
+import javafx.collections.ObservableList;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.CustomMenuItem;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
@@ -12,12 +24,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.testfx.api.FxAssert;
 import org.testfx.assertions.api.Assertions;
-
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.testfx.assertions.api.Assertions.assertThat;
+import org.testfx.matcher.base.WindowMatchers;
 
 public class OperationsViewTest extends TestBase {
 
@@ -60,10 +69,12 @@ public class OperationsViewTest extends TestBase {
 		@Test
 		void test1() {
 			List<MenuItem> menuItems = randomButton.getItems();
-			List<String> menuItemTexts = menuItems.stream().map(MenuItem::getText).collect(Collectors.toList());
+			List<String> menuItemTexts =
+					menuItems.stream().map(MenuItem::getText).collect(Collectors.toList());
 
 			assertThat(menuItems).hasSize(4);
-			assertThat(menuItemTexts).containsExactly("Execute 1 Operation", "Execute 5 Operations", "Execute 10 Operations", null);
+			assertThat(menuItemTexts).containsExactly("Execute 1 Operation", "Execute 5 Operations",
+					"Execute 10 Operations", null);
 			assertThat(menuItems.get(3)).isInstanceOf(CustomMenuItem.class);
 		}
 
@@ -106,7 +117,8 @@ public class OperationsViewTest extends TestBase {
 
 			clickOn(textfield).write("decrement").type(KeyCode.ENTER);
 			assertThat(lookup("#opsListView").queryListView()).hasExactlyNumItems(1);
-			assertThat(lookup("#opsListView").queryListView().getItems().get(0).toString()).contains("decrement");
+			assertThat(lookup("#opsListView").queryListView().getItems().get(0).toString()).contains(
+					"decrement");
 
 			clickOn(toggleButton);
 			Assertions.assertThat(searchBox.isVisible()).isFalse();
@@ -124,12 +136,24 @@ public class OperationsViewTest extends TestBase {
 
 		@Test
 		@DisplayName("the context menu of the listitems works correctly")
-		void test5() throws InterruptedException {
-			clickOn("#forwardButton");
-			ListView<OperationItem> opsListView = lookup("#opsListView").query();
-			// clickOn(opsListView.menuItem)
-			/* TODO: Variante da oben funktioniert offensichtlich nicht, finde aber auch keine, die funktioniert,
-			     da die MenuItems keine eigene Id haben und auch nicht über query() zugegriffen werden können */
+		void test5() {
+			Platform.runLater(() -> {
+				clickOn("#forwardButton");
+				ListView<OperationItem> opsListView = lookup("#opsListView").queryListView();
+				ObservableList<MenuItem>
+						list = opsListView.getCellFactory().call(opsListView).getContextMenu().getItems();
+				assertThat(list).hasSize(2);
+				MenuItem details = list.get(0);
+				assertThat(details.getText()).isEqualTo("Show Details");
+				list.get(0).fire();
+				FxAssert.verifyThat(window("Operation Details"), WindowMatchers.isShowing());
+
+				MenuItem predicate = list.get(1);
+				assertThat(predicate.getText()).isEqualTo("Execute by Predicate...");
+				predicate.fire();
+				FxAssert.verifyThat(window("Execute by Predicate"), WindowMatchers.isShowing());
+			});
+
 		}
 
 	}
