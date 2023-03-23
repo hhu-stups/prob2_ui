@@ -9,7 +9,6 @@ import de.prob.scripting.ScriptEngineProvider;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.Executable;
-import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
 import de.prob2.ui.internal.StageManager;
@@ -79,15 +78,16 @@ public final class GroovyInterpreter implements Executable {
 		codeCompletion.setParent(parent);
 	}
 
-	public void triggerCodeCompletion(String currentLine, CodeCompletionTriggerAction action) {
-		if (!codeCompletion.isVisible()) {
-			System.out.println("GroovyInterpreter.triggerCodeCompletion: " + currentLine);
-			codeCompletion.activate(currentLine, action);
+	public void triggerCodeCompletion(String currentLine) {
+		if (codeCompletion != null && !codeCompletion.isVisible()) {
+			codeCompletion.activate(currentLine);
 		}
 	}
 
 	public void triggerCloseCodeCompletion() {
-		codeCompletion.deactivate();
+		if (codeCompletion != null) {
+			codeCompletion.deactivate();
+		}
 	}
 
 	public void closeObjectStage() {

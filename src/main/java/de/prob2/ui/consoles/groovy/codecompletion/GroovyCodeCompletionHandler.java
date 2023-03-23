@@ -35,7 +35,7 @@ public class GroovyCodeCompletionHandler {
 		this.currentSuggestions = new ArrayList<>();
 	}
 
-	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
+	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, ScriptEngine engine) {
 		String[] methods = getMethodsFromCurrentLine(currentLine);
 		if (methods.length == 0) {
 			return;
@@ -58,12 +58,12 @@ public class GroovyCodeCompletionHandler {
 			}
 		}
 		showSuggestions(clazz, GroovyMethodOption.NONSTATIC);
-		if (action == CodeCompletionTriggerAction.TRIGGER) {
+		/*if (action == CodeCompletionTriggerAction.TRIGGER) {
 			refresh(currentSuggestion);
-		}
+		}*/
 	}
 
-	public void handleStaticClasses(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action) {
+	public void handleStaticClasses(String currentLine, String currentSuggestion) {
 		final String[] methods = getMethodsFromCurrentLine(currentLine);
 		if (methods.length == 0) {
 			return;
@@ -86,18 +86,18 @@ public class GroovyCodeCompletionHandler {
 				classNameBuilder.append(methods[i]);
 			}
 		}
-		if (action == CodeCompletionTriggerAction.TRIGGER) {
+		/*if (action == CodeCompletionTriggerAction.TRIGGER) {
 			refresh(currentSuggestion);
-		}
+		}*/
 	}
 
-	public void handleObjects(String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
-		if (action == CodeCompletionTriggerAction.TRIGGER && suggestions.isEmpty()) {
+	public void handleObjects(String currentSuggestion, ScriptEngine engine) {
+		/*if (action == CodeCompletionTriggerAction.TRIGGER && suggestions.isEmpty()) {
 			currentSuggestions.clear();
 			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
 			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
 			refresh(currentSuggestion);
-		}
+		}*/
 	}
 
 	private void fillAllMethodsAndProperties(Class<?> clazz, GroovyMethodOption option) {
@@ -200,6 +200,4 @@ public class GroovyCodeCompletionHandler {
 	public void clear() {
 		currentSuggestions.clear();
 	}
-
-
 }

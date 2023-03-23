@@ -15,11 +15,11 @@ import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.geometry.Bounds;
 import javafx.scene.control.ListView;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Popup;
 
 public class GroovyCodeCompletion extends Popup {
+
 	private final ObservableList<GroovyAbstractItem> suggestions;
 	private final ScriptEngine engine;
 	private final GroovyCodeCompletionHandler completionHandler;
@@ -47,26 +47,18 @@ public class GroovyCodeCompletion extends Popup {
 		setListeners();
 	}
 
-	public void activate(String currentLine, CodeCompletionTriggerAction action) {
-		String newCurrentLine = currentLine;
-		if (action == CodeCompletionTriggerAction.POINT) {
-			newCurrentLine += ".";
-			if (currentLine.endsWith(".")) {
-				return;
-			}
-		}
-		String currentPrefix = handleActivation(newCurrentLine);
-		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, action, engine);
-		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion, action);
-		completionHandler.handleObjects(currentSuggestion, action, engine);
+	public void activate(String currentLine) {
+		String currentPrefix = handleActivation(currentLine);
+		completionHandler.handleMethodsFromObjects(currentPrefix, currentSuggestion, engine);
+		completionHandler.handleStaticClasses(currentPrefix, currentSuggestion);
+		completionHandler.handleObjects(currentSuggestion, engine);
 		showPopup();
 	}
 
 	private String handleActivation(String currentLine) {
 		String currentPrefix;
 		String newCurrentLine = currentLine.replace("\\s", "");
-		int indexOfPoint = newCurrentLine.lastIndexOf('.');
-		int index = Math.max(-1, indexOfPoint);
+		int index = newCurrentLine.lastIndexOf('.');
 		currentSuggestion = newCurrentLine.substring(index + 1);
 		currentPosInSuggestion = currentSuggestion.length();
 		charCounterInSuggestion = currentPosInSuggestion;
@@ -78,6 +70,7 @@ public class GroovyCodeCompletion extends Popup {
 		if (suggestions.isEmpty()) {
 			return;
 		}
+
 		sortSuggestions();
 		lvSuggestions.getSelectionModel().selectFirst();
 		this.show(parent.getScene().getWindow());
@@ -96,8 +89,8 @@ public class GroovyCodeCompletion extends Popup {
 		this.hide();
 	}
 
-	public void filterSuggestions(String addition, CodeCompletionAction action) {
-		String currentInstruction = currentSuggestion;
+	public void filterSuggestions(String addition) {
+		/*String currentInstruction = currentSuggestion;
 		if (action.equals(CodeCompletionAction.ARROWKEY)) {
 			//handle Arrow Key
 			currentInstruction = currentSuggestion.substring(0, currentPosInSuggestion);
@@ -109,7 +102,7 @@ public class GroovyCodeCompletion extends Popup {
 		lvSuggestions.getSelectionModel().selectFirst();
 		if (suggestions.isEmpty()) {
 			this.deactivate();
-		}
+		}*/
 	}
 
 	private String handleInsertChar(String addition) {
@@ -119,14 +112,13 @@ public class GroovyCodeCompletion extends Popup {
 		return currentSuggestion;
 	}
 
-
 	private void setListeners() {
 		lvSuggestions.setOnMouseClicked(this::chooseMethod);
 		lvSuggestions.setOnKeyPressed(this::keyPressed);
 	}
 
 	private void keyPressed(KeyEvent e) {
-		if (e.getCode().equals(KeyCode.SPACE)) {
+		/*if (e.getCode().equals(KeyCode.SPACE)) {
 			getParent().fireEvent(new CodeCompletionEvent(e));
 		}
 		if (";".equals(e.getText()) || e.getCode().equals(KeyCode.ENTER)) {
@@ -150,12 +142,11 @@ public class GroovyCodeCompletion extends Popup {
 
 		if (".".equals(e.getText())) {
 			deactivate();
-		}
-
+		}*/
 	}
 
 	private void handleArrowKey(KeyEvent e) {
-		boolean needReturn;
+		/*boolean needReturn;
 		if (e.getCode().equals(KeyCode.LEFT)) {
 			needReturn = handleLeft();
 			if (needReturn) {
@@ -173,7 +164,7 @@ public class GroovyCodeCompletion extends Popup {
 			handleDown(e);
 			return;
 		}
-		filterSuggestions("", CodeCompletionAction.ARROWKEY);
+		filterSuggestions("");*/
 	}
 
 	private boolean handleLeft() {
@@ -199,28 +190,28 @@ public class GroovyCodeCompletion extends Popup {
 	}
 
 	private void handleUp(KeyEvent e) {
-		if (lvSuggestions.getSelectionModel().getSelectedIndex() == 0) {
+		/*if (lvSuggestions.getSelectionModel().getSelectedIndex() == 0) {
 			lvSuggestions.getSelectionModel().selectLast();
 			lvSuggestions.scrollTo(suggestions.size() - 1);
 			e.consume();
-		}
+		}*/
 	}
 
 	private void handleDown(KeyEvent e) {
-		if (lvSuggestions.getSelectionModel().getSelectedIndex() == suggestions.size() - 1) {
+		/*if (lvSuggestions.getSelectionModel().getSelectedIndex() == suggestions.size() - 1) {
 			lvSuggestions.getSelectionModel().selectFirst();
 			lvSuggestions.scrollTo(0);
 			e.consume();
-		}
+		}*/
 	}
 
 	private void handleRemove(KeyEvent e) {
-		if (e.getCode().equals(KeyCode.DELETE)) {
+		/*if (e.getCode().equals(KeyCode.DELETE)) {
 			handleDeletion();
 		} else if (e.getCode().equals(KeyCode.BACK_SPACE)) {
 			handleBackspace();
 		}
-		filterSuggestions("", CodeCompletionAction.DELETION);
+		filterSuggestions("");*/
 	}
 
 	private void handleDeletion() {
@@ -245,11 +236,11 @@ public class GroovyCodeCompletion extends Popup {
 	}
 
 	private void chooseMethod(Event e) {
-		if (lvSuggestions.getSelectionModel().getSelectedItem() != null) {
+		/*if (lvSuggestions.getSelectionModel().getSelectedItem() != null) {
 			String choice = lvSuggestions.getSelectionModel().getSelectedItem().getNameAndParams();
 			getParent().fireEvent(new CodeCompletionEvent(e, choice, choice.substring(0, currentPosInSuggestion)));
 		}
-		deactivate();
+		deactivate();*/
 	}
 
 	public GroovyConsole getParent() {
