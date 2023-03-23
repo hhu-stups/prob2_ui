@@ -40,6 +40,9 @@ wrapper {
 test {
 	useJUnitPlatform()
 	systemProperty("logback.configurationFile", "de/prob/logging/production.xml")
+	if (project.hasProperty('headless') ? project.headless : false) {
+		jvmArgs = ['-Dtestfx.headless=true', '-Djava.awt.headless=true', '-Dtestfx.robot=glass', '-Dprism.order=sw', '-Dprism.text=t2k']
+	}
 	testLogging {
 		exceptionFormat = 'full'
 	}
@@ -130,6 +133,7 @@ dependencies {
 	testImplementation 'org.assertj:assertj-core:3.24.2'
 	testImplementation 'org.testfx:testfx-junit5:4.0.16-alpha'
 	testImplementation 'org.testfx:testfx-core:4.0.16-alpha'
+	testImplementation 'org.testfx:openjfx-monocle:jdk-11+26'
 }
 
 if (!project.hasProperty("javafxVersion")) {
