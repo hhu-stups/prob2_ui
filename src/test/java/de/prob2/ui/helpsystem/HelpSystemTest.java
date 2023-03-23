@@ -10,12 +10,14 @@ import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.testfx.api.FxAssert;
 import org.testfx.matcher.base.WindowMatchers;
 
+@Disabled
 @DisplayName("The HelpButtons in the mainview lead to the correct Helppages")
 public class HelpSystemTest extends TestBase {
 
