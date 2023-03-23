@@ -17,7 +17,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class GroovyInterpreter implements Executable {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(GroovyInterpreter.class);
+
 	private final ScriptEngine engine;
 	private final GroovyCodeCompletion codeCompletion;
 	private final GroovyObjectStage groovyObjectStage;
