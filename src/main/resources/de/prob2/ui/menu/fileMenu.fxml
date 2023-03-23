@@ -5,9 +5,9 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <fx:root type="Menu" text="%menu.file" xmlns:fx="http://javafx.com/fxml/1">
-	<MenuItem text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
+	<MenuItem fx:id="newProjectItem" text="%menu.file.items.newProject" accelerator="Alt+Shortcut+N"
 		onAction="#createNewProject" />
-	<MenuItem text="%menu.file.items.open"
+	<MenuItem fx:id="openProjectItem" text="%menu.file.items.open"
 			accelerator="Shortcut+O" onAction="#handleOpen" />
 	<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject"/>
 	<SeparatorMenuItem />
@@ -28,6 +28,6 @@
 	<MenuItem fx:id="preferencesItem" text="%menu.file.items.preferences"
 			  accelerator="Shortcut+," onAction="#handlePreferences" />
 	<SeparatorMenuItem/>
-	<CloseWindowMenuItem/>
+	<CloseWindowMenuItem fx:id="closeWindowMenuItem"/>
 </fx:root>
 
