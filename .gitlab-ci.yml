@@ -6,7 +6,7 @@ stages:
   stage: test
   variables:
     GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
-    GRADLE_OPTIONS: --no-daemon --info --stacktrace --warning-mode=all
+    GRADLE_OPTIONS: -Pheadless=true --no-daemon --info --stacktrace --warning-mode=all
   cache:
     paths:
       - .gradle/caches
