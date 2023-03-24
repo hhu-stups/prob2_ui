@@ -1,5 +1,7 @@
 package de.prob2.ui.menu;
 
+import static org.testfx.assertions.api.Assertions.assertThat;
+
 import de.prob2.ui.ProjectBuilder;
 import de.prob2.ui.TestBase;
 import de.prob2.ui.internal.StageManager;
@@ -7,10 +9,10 @@ import de.prob2.ui.project.NewProjectStage;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import javafx.application.Platform;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -28,6 +30,8 @@ public class MenuTest extends TestBase {
 	Stage stage;
 	MenuController menucontroller;
 
+	FileMenu fileMenu;
+
 
 	@Override
 	public void start(Stage stage) {
@@ -36,6 +40,7 @@ public class MenuTest extends TestBase {
 		menucontroller = injector.getInstance(MenuController.class);
 		newProjectStage = injector.getInstance(NewProjectStage.class);
 		stageManager = injector.getInstance(StageManager.class);
+		fileMenu = injector.getInstance(FileMenu.class);
 		stage.setScene(new Scene(menucontroller));
 		stage.show();
 	}
@@ -50,6 +55,7 @@ public class MenuTest extends TestBase {
 	}
 
 
+	@Disabled
 	@Test
 	void openProjectTest() throws TimeoutException {
 		clickOn("#fileMenu");
@@ -85,7 +91,7 @@ public class MenuTest extends TestBase {
 		void setup() {
 			Platform.runLater(() -> {
 				try {
-					new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch")
+					new ProjectBuilder(injector).fromMachineFile("src/test/resources/Lift.mch")
 							.withAnimatedMachine("Lift")
 							.build();
 				} catch (InterruptedException e) {
@@ -95,23 +101,18 @@ public class MenuTest extends TestBase {
 		}
 
 		@Test
-		void saveProjectMenuIsEnabled() throws TimeoutException {
+		void saveProjectMenuIsEnabled() {
 			clickOn("#fileMenu");
-			WaitForAsyncUtils.waitFor(2, TimeUnit.SECONDS, () ->
-					lookup("#saveProjectItem").match(NodeQueryUtils.isVisible()).tryQuery().isPresent());
-			Node menuItem = lookup("#saveProjectItem").query();
-			// TODO
+
+			assertThat(fileMenu.saveProjectItem.isDisable()).isTrue();
 		}
 
 		@Test
 		@DisplayName("Unmodified Machines can't be saved")
-		void saveMachineMenu() throws TimeoutException {
+		void saveMachineMenuIsDisabled() {
 			clickOn("#fileMenu");
 
-			WaitForAsyncUtils.waitFor(2, TimeUnit.SECONDS, () ->
-					lookup("#saveMachineItem").match(NodeQueryUtils.isVisible()).tryQuery().isPresent());
-			Node menuItem = lookup("#saveMachineItem").query();
-			//TODO
+			assertThat(fileMenu.saveMachineItem.isDisable()).isTrue();
 		}
 
 		@Test

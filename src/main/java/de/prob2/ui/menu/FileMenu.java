@@ -54,9 +54,9 @@ public class FileMenu extends Menu {
 	@FXML
 	private Menu recentProjectsMenu;
 	@FXML
-	private MenuItem saveMachineItem;
+	MenuItem saveMachineItem;
 	@FXML
-	private MenuItem saveProjectItem;
+	MenuItem saveProjectItem;
 	@FXML
 	private MenuItem extendedStaticAnalysisItem;
 	@FXML
