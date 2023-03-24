@@ -25,8 +25,7 @@ stages:
     - apt-get update
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
-    - apt-get install --assume-yes git pandoc
-    - apt-get install xvfb
+    - apt-get install --assume-yes git pandoc xvfb
     - export DISPLAY=:99
 
 test:jdk-8-linux:
