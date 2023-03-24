@@ -81,7 +81,7 @@ public class HelpSystemTest extends TestBase {
 			{
 				try {
 					new ProjectBuilder(injector)
-							.fromFile("src/test/resources/Lift.mch")
+							.fromMachineFile("src/test/resources/Lift.mch")
 							.withAnimatedMachine("Lift")
 							.build();
 				} catch (InterruptedException e) {
