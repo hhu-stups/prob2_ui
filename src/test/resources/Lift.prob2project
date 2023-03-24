@@ -1,0 +1,42 @@
+{
+  "name": "Lift",
+  "description": "(this project was created automatically from file src/test/resources/Lift.mch)",
+  "machines": [
+    {
+      "name": "Lift",
+      "description": "",
+      "location": "Lift.mch",
+      "lastUsedPreferenceName": "default",
+      "ltlFormulas": [],
+      "ltlPatterns": [],
+      "symbolicCheckingFormulas": [],
+      "symbolicAnimationFormulas": [],
+      "testCases": [],
+      "traces": [
+        {
+          "id": null,
+          "location": "Lift.prob2trace",
+          "selected": true
+        }
+      ],
+      "modelcheckingItems": [],
+      "proofObligationItems": [],
+      "simulations": [],
+      "visBVisualisation": null,
+      "historyChartItems": [],
+      "dotVisualizationItems": {},
+      "tableVisualizationItems": {}
+    }
+  ],
+  "requirements": [],
+  "preferences": [],
+  "metadata": {
+    "fileType": "Project",
+    "formatVersion": 36,
+    "savedAt": "2023-03-24T13:15:14.549161620Z",
+    "creator": "User",
+    "proB2KernelVersion": "4.0.0-SNAPSHOT",
+    "proBCliVersion": null,
+    "modelName": null
+  }
+}
