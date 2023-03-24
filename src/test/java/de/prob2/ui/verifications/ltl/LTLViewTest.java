@@ -30,7 +30,7 @@ class LTLViewTest extends TestBase {
 	@Test
 	@DisplayName("PatternTable is invisible and unmanaged if empty with loaded Project")
 	void PatternTable1() throws InterruptedException {
-		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+		new ProjectBuilder(injector).fromMachineFile("src/test/resources/Lift.mch").build();
 
 		TableView<LTLPatternItem> patternTable = lookup("#tvPattern").query();
 		assertThat(patternTable.isManaged()).isFalse();
@@ -40,7 +40,7 @@ class LTLViewTest extends TestBase {
 	@Test
 	@DisplayName("PatternTable is Visible if Project has Patterns")
 	void PatternTable2() throws InterruptedException {
-		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+		new ProjectBuilder(injector).fromMachineFile("src/test/resources/Lift.mch").build();
 		LTLPatternItem item = new LTLPatternItem("", "", "");
 		ltlView.addPatternToMachine(item, injector.getInstance(CurrentProject.class).getCurrentMachine());
 
@@ -54,7 +54,7 @@ class LTLViewTest extends TestBase {
 	@DisplayName("FormularTable shows all created LTL Formulas")
 	void FormulaTable1() throws InterruptedException {
 		new ProjectBuilder(injector)
-				.fromFile("src/test/resources/Lift.mch")
+				.fromMachineFile("src/test/resources/Lift.mch")
 				.withLTLFormula(new LTLFormulaItem("", "", "",  false))
 				.build();
 
@@ -72,7 +72,7 @@ class LTLViewTest extends TestBase {
 	@Test
 	@DisplayName("Stage to introduce new Patterns can be opened")
 	void buttons1() throws InterruptedException {
-		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+		new ProjectBuilder(injector).fromMachineFile("src/test/resources/Lift.mch").build();
 
 		this.clickOn("#addMenuButton").clickOn("#addPatternButton");
 
@@ -82,7 +82,7 @@ class LTLViewTest extends TestBase {
 	@Test
 	@DisplayName("Stage to introduce new Formula can be opened")
 	void buttons2() throws InterruptedException {
-		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+		new ProjectBuilder(injector).fromMachineFile("src/test/resources/Lift.mch").build();
 
 		this.clickOn("#addMenuButton").clickOn("#addFormulaButton");
 

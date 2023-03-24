@@ -59,7 +59,7 @@ public class OperationsViewTest extends TestBase {
 		@BeforeEach
 		void setup() throws InterruptedException {
 			new ProjectBuilder(injector)
-					.fromFile("src/test/resources/Lift.mch")
+					.fromMachineFile("src/test/resources/Lift.mch")
 					.withAnimatedMachine("Lift")
 					.build();
 			randomButton = lookup("#randomButton").query();

@@ -37,7 +37,7 @@ public class NavigationButtonsTest extends TestBase {
 	void test2() {
 		Platform.runLater(() -> {
 			try {
-				new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch")
+				new ProjectBuilder(injector).fromMachineFile("src/test/resources/Lift.mch")
 						.withAnimatedMachine("Lift")
 						.build();
 			} catch (InterruptedException e) {

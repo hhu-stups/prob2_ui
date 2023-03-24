@@ -24,7 +24,7 @@ class LTLPatternStageTest extends TestBase {
 	@Test
 	@DisplayName("Error TextArea is Empty when Stage is closed with valid Pattern")
 	void PatternStage1() throws InterruptedException {
-		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+		new ProjectBuilder(injector).fromMachineFile("src/test/resources/Lift.mch").build();
 
 		this.clickOn("#taCode").write("def test():GF([increment])");
 		this.clickOn("#applyButton");
@@ -36,7 +36,7 @@ class LTLPatternStageTest extends TestBase {
 	@Test
 	@DisplayName("Error TextArea shows Error when Stage is closed with invalid Pattern")
 	void PatternStage2() throws InterruptedException {
-		new ProjectBuilder(injector).fromFile("src/test/resources/Lift.mch").build();
+		new ProjectBuilder(injector).fromMachineFile("src/test/resources/Lift.mch").build();
 
 		this.clickOn("#taCode").write("test");
 		this.clickOn("#applyButton");

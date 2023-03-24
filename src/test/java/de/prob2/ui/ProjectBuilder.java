@@ -3,7 +3,6 @@ package de.prob2.ui;
 import com.google.inject.Injector;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectManager;
@@ -33,8 +32,13 @@ public class ProjectBuilder {
 		this.injector = injector;
 	}
 
-	public ProjectBuilder fromFile(String filepath) {
+	public ProjectBuilder fromMachineFile(String filepath) {
 		projectManager.openAutomaticProjectFromMachine(Paths.get(filepath));
+		return this;
+	}
+
+	public ProjectBuilder fromProjectFile(String filepath) {
+		projectManager.openProject(Paths.get(filepath));
 		return this;
 	}
 
