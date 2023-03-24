@@ -16,9 +16,7 @@ stages:
     expire_in: 1 week
     paths:
       - build/distributions
-      - build/libs
-  services:
-    - xvfb    
+      - build/libs   
 
 .test-linux:
   extends: .test-common
@@ -28,6 +26,7 @@ stages:
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
     - apt-get install --assume-yes git pandoc
+    - apt-get install xvfb
     - export DISPLAY=:99
 
 test:jdk-8-linux:
