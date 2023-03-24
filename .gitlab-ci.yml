@@ -25,7 +25,7 @@ stages:
     - apt-get update
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
-    - apt-get install --assume-yes git libpango-1.0-0 pandoc xvfb
+    - apt-get install --assume-yes git libpangoft2-1.0-0 pandoc xvfb
     - export DISPLAY=:99
 
 test:jdk-8-linux:
