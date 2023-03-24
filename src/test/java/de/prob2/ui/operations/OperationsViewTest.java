@@ -36,7 +36,10 @@ public class OperationsViewTest extends TestBase {
 	public void start(Stage stage) {
 		super.start(stage);
 		operationsView = injector.getInstance(OperationsView.class);
-		stage.setScene(new Scene(operationsView));
+		Scene scene = new Scene(operationsView);
+		scene.getStylesheets().add("prob.css");
+		operationsView.getStyleClass().add("root");
+		stage.setScene(scene);
 		stage.show();
 	}
 
@@ -79,7 +82,7 @@ public class OperationsViewTest extends TestBase {
 		}
 
 		@Test
-		@DisplayName("the correct number of operations is executed")
+		@DisplayName("the navigation buttons correspond the the number of random executed transitions")
 		void test2() {
 			clickOn(randomButton);
 			TextField textField = lookup("#randomText").query();
@@ -133,7 +136,8 @@ public class OperationsViewTest extends TestBase {
 			clickOn("#disabledOpsToggle");
 		}
 
-
+	// does not specifiy, which menuItem is clicked. Just shows the availability and
+	// reaction of the context menu in general, that is set for the operationItems.
 		@Test
 		@DisplayName("the context menu of the listitems works correctly")
 		void test5() {
@@ -142,16 +146,18 @@ public class OperationsViewTest extends TestBase {
 				ListView<OperationItem> opsListView = lookup("#opsListView").queryListView();
 				ObservableList<MenuItem>
 						list = opsListView.getCellFactory().call(opsListView).getContextMenu().getItems();
+
 				assertThat(list).hasSize(2);
+
 				MenuItem details = list.get(0);
 				assertThat(details.getText()).isEqualTo("Show Details");
 				list.get(0).fire();
-				FxAssert.verifyThat(window("Operation Details"), WindowMatchers.isShowing());
+				FxAssert.verifyThat(window(p -> p instanceof OperationDetailsStage), WindowMatchers.isShowing());
 
 				MenuItem predicate = list.get(1);
 				assertThat(predicate.getText()).isEqualTo("Execute by Predicate...");
 				predicate.fire();
-				FxAssert.verifyThat(window("Execute by Predicate"), WindowMatchers.isShowing());
+				FxAssert.verifyThat(window(p -> p instanceof ExecuteByPredicateStage), WindowMatchers.isShowing());
 			});
 
 		}
