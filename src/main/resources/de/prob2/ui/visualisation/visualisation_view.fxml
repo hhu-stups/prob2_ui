@@ -5,23 +5,17 @@
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.*?>
-<fx:root type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
-	<StackPane fx:id="probLogoStackPane" AnchorPane.bottomAnchor="0.0"
-		AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-		AnchorPane.topAnchor="0.0">
-		<VBox spacing="10" alignment="CENTER">
-			<ImageView preserveRatio="true" fitWidth="250.0">
-				<Image url="@/de/prob2/ui/ProB_Logo.png"/>
-			</ImageView>
-			<Label fx:id="placeholderLabel" text="%common.noModelLoaded"
-				alignment="CENTER" />
-		</VBox>
-	</StackPane>
-	<ScrollPane fx:id="visualisationScrollPane"
-		AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-		AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" visible="false"
-		fitToWidth="TRUE" fitToHeight="TRUE">
+<?import javafx.scene.layout.FlowPane?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<fx:root type="StackPane" xmlns:fx="http://javafx.com/fxml/1">
+	<VBox fx:id="probLogoView" spacing="10" alignment="CENTER">
+		<ImageView preserveRatio="true" fitWidth="250.0">
+			<Image url="@/de/prob2/ui/ProB_Logo.png"/>
+		</ImageView>
+		<Label fx:id="placeholderLabel" text="%common.noModelLoaded" alignment="CENTER" />
+	</VBox>
+	<ScrollPane fx:id="visualisationScrollPane" visible="false" fitToWidth="TRUE" fitToHeight="TRUE">
 		<FlowPane alignment="CENTER" hgap="20" vgap="20">
 			<VBox spacing="5" alignment="CENTER">
 				<Label text="%visualisation.view.currentState" alignment="CENTER"

@@ -31,15 +31,14 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
 @FXMLInjected
 @Singleton
-public class VisualisationView extends AnchorPane {
+public class VisualisationView extends StackPane {
 	@FXML
-	private StackPane probLogoStackPane;
+	private VBox probLogoView;
 	@FXML
 	private ScrollPane visualisationScrollPane;
 	@FXML
@@ -73,8 +72,8 @@ public class VisualisationView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		visualisationScrollPane.visibleProperty().bind(probLogoStackPane.visibleProperty().not());
-		probLogoStackPane.visibleProperty().bind(currentStateVisualisation.visualisationPossibleProperty().not());
+		visualisationScrollPane.visibleProperty().bind(probLogoView.visibleProperty().not());
+		probLogoView.visibleProperty().bind(currentStateVisualisation.visualisationPossibleProperty().not());
 		previousStateVBox.managedProperty().bind(previousStateVisualisation.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
