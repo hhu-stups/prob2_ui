@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
+import de.prob.scripting.EventBPackageFactory;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
@@ -26,7 +27,7 @@ import javafx.stage.FileChooser;
 
 public class RefactorSetupView extends Dialog<RefactorSetup> {
 
-	private static final List<String> CLASSICAL_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(EventBFactory.RODIN_MACHINE_EXTENSION, EventBFactory.ATELIER_B_EXTENSION, ClassicalBFactory.CLASSICAL_B_MACHINE_EXTENSION, ClassicalBFactory.CLASSICAL_B_REFINEMENT_EXTENSION));
+	private static final List<String> CLASSICAL_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(EventBFactory.RODIN_MACHINE_EXTENSION, EventBPackageFactory.EXTENSION, ClassicalBFactory.CLASSICAL_B_MACHINE_EXTENSION, ClassicalBFactory.CLASSICAL_B_REFINEMENT_EXTENSION));
 
 	@FXML
 	ComboBox<RefactorSetup.WhatToDo> options;
