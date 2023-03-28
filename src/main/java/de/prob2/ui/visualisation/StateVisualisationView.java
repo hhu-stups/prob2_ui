@@ -1,5 +1,6 @@
 package de.prob2.ui.visualisation;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.Map;
 import com.google.inject.Inject;
 
 import de.prob.animator.command.ExecuteRightClickCommand;
+import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.statespace.State;
@@ -17,6 +19,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.Node;
@@ -117,5 +120,25 @@ public class StateVisualisationView extends GridPane {
 		} else {
 			return null;
 		}
+	}
+
+	public void visualiseState(final State state) {
+		final List<List<AnimationMatrixEntry>> matrix;
+		if (state == null) {
+			matrix = Collections.emptyList();
+		} else {
+			final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
+			state.getStateSpace().execute(cmd);
+			matrix = cmd.getMatrix();
+		}
+		
+		Platform.runLater(() -> {
+			this.getChildren().clear();
+			final boolean it = !matrix.isEmpty();
+			this.visualisationPossibleProperty().set(it);
+			if (it) {
+				this.showMatrix(state, matrix);
+			}
+		});
 	}
 }

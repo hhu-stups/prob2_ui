@@ -3,7 +3,6 @@ package de.prob2.ui.visualisation;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,11 +10,8 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
-import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.annotations.Home;
-import de.prob.statespace.State;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -94,8 +90,8 @@ public class VisualisationView extends StackPane {
 			}
 			
 			updater.execute(() -> {
-				visualiseState(currentStateVisualisation, to != null ? to.getCurrentState() : null);
-				visualiseState(previousStateVisualisation, to != null && to.canGoBack() ? to.getPreviousState() : null);
+				currentStateVisualisation.visualiseState(to != null ? to.getCurrentState() : null);
+				previousStateVisualisation.visualiseState(to != null && to.canGoBack() ? to.getPreviousState() : null);
 			});
 		});
 
@@ -150,25 +146,5 @@ public class VisualisationView extends StackPane {
 		}
 
 		return machineImages;
-	}
-
-	private static void visualiseState(final StateVisualisationView view, final State state) {
-		final List<List<AnimationMatrixEntry>> matrix;
-		if (state == null) {
-			matrix = Collections.emptyList();
-		} else {
-			final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
-			state.getStateSpace().execute(cmd);
-			matrix = cmd.getMatrix();
-		}
-		
-		Platform.runLater(() -> {
-			view.getChildren().clear();
-			final boolean it = !matrix.isEmpty();
-			view.visualisationPossibleProperty().set(it);
-			if (it) {
-				view.showMatrix(state, matrix);
-			}
-		});
 	}
 }
