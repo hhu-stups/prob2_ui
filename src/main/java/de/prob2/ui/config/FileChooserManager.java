@@ -1,6 +1,7 @@
 package de.prob2.ui.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,7 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -33,6 +36,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -113,6 +117,19 @@ public class FileChooserManager {
 				configData.fileChooserInitialDirectories.putAll(getInitialDirectories());
 			}
 		});
+	}
+	
+	public boolean checkIfPathAlreadyContainsFiles(Path path, String prefix, String contentBundleKey) throws IOException {
+		try (final Stream<Path> children = Files.list(path)) {
+			if (children.anyMatch(p -> p.getFileName().toString().startsWith(prefix))) {
+				// Directory already contains test case trace - ask if the user really wants to save here.
+				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", contentBundleKey, path).showAndWait();
+				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	/**

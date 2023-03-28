@@ -1,11 +1,6 @@
 package de.prob2.ui.internal;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 
@@ -13,8 +8,6 @@ import de.prob.json.JsonMetadataBuilder;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
@@ -33,19 +26,6 @@ public abstract class ProBFileHandler {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
-	}
-
-	public boolean checkIfPathAlreadyContainsFiles(Path path, String prefix, String contentBundleKey) throws IOException {
-		try (final Stream<Path> children = Files.list(path)) {
-			if (children.anyMatch(p -> p.getFileName().toString().startsWith(prefix))) {
-				// Directory already contains test case trace - ask if the user really wants to save here.
-				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", contentBundleKey, path).showAndWait();
-				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	protected Path chooseDirectory(FileChooserManager.Kind kind, String titleKey) {

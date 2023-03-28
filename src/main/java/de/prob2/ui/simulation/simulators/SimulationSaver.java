@@ -64,7 +64,7 @@ public class SimulationSaver extends ProBFileHandler {
 		}
 
 		try {
-			if (checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "simulation.save.directoryAlreadyContainsSimulations")) {
+			if (fileChooserManager.checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "simulation.save.directoryAlreadyContainsSimulations")) {
 				return;
 			}
 

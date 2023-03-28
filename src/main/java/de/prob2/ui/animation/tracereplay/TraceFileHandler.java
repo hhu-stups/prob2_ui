@@ -175,7 +175,7 @@ public class TraceFileHandler extends ProBFileHandler {
 		}
 
 		try {
-			if (checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
+			if (fileChooserManager.checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
@@ -201,7 +201,7 @@ public class TraceFileHandler extends ProBFileHandler {
 
 		try {
 
-			if (checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
+			if (fileChooserManager.checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
