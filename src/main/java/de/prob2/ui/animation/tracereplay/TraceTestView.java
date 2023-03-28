@@ -363,9 +363,14 @@ public class TraceTestView extends Stage {
 	public void saveTrace() {
 		List<PersistentTransition> transitions = replayTrace.get().getLoadedTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
+			List<Postcondition> nonEmptyConditions = postconditions.get(i)
+					.stream()
+					.filter(p-> !(p.toString().contains("operation = , predicate = }")
+								|| p.toString().contains("Predicate{predicate = ")))
+					.collect(Collectors.toList());
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
-			transition.getPostconditions().addAll(postconditions.get(i));
+			transition.getPostconditions().addAll(nonEmptyConditions);
 			transition.setDescription(descriptions.get(i));
 		}
 
