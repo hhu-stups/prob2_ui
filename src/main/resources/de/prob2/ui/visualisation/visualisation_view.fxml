@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.visualisation.StateVisualisationView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.Image?>
@@ -8,7 +7,7 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="StackPane" xmlns:fx="http://javafx.com/fxml/1">
+<StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.visualisation.VisualisationController">
 	<VBox fx:id="probLogoView" spacing="10" alignment="CENTER">
 		<ImageView preserveRatio="true" fitWidth="250.0">
 			<Image url="@/de/prob2/ui/ProB_Logo.png"/>
@@ -20,14 +19,14 @@
 			<VBox spacing="5" alignment="CENTER">
 				<Label text="%visualisation.view.currentState" alignment="CENTER"
 					styleClass="title" />
-				<StateVisualisationView fx:id="currentStateVisualisation" />
+				<fx:include source="state_visualisation_view.fxml" fx:id="currentStateVisualisation" />
 			</VBox>
 			<VBox fx:id="previousStateVBox" spacing="5" alignment="CENTER">
 				<Label text="%visualisation.view.previousState" alignment="CENTER"
 					styleClass="title" />
-				<StateVisualisationView fx:id="previousStateVisualisation" />
+				<fx:include source="state_visualisation_view.fxml" fx:id="previousStateVisualisation" />
 			</VBox>
 		</FlowPane>
 	</ScrollPane>
-</fx:root>
+</StackPane>
 

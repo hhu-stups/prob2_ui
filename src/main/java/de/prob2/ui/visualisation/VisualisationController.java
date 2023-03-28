@@ -12,7 +12,6 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetImagesForMachineCommand;
 import de.prob.annotations.Home;
-import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -23,24 +22,27 @@ import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-@FXMLInjected
 @Singleton
-public class VisualisationView extends StackPane {
+public final class VisualisationController {
 	@FXML
 	private VBox probLogoView;
 	@FXML
 	private ScrollPane visualisationScrollPane;
 	@FXML
-	private StateVisualisationView currentStateVisualisation;
+	private Node currentStateVisualisation;
 	@FXML
-	private StateVisualisationView previousStateVisualisation;
+	private StateVisualisationController currentStateVisualisationController;
+	@FXML
+	private Node previousStateVisualisation;
+	@FXML
+	private StateVisualisationController previousStateVisualisationController;
 	@FXML
 	private VBox previousStateVBox;
 	@FXML
@@ -54,23 +56,22 @@ public class VisualisationView extends StackPane {
 	private final BackgroundUpdater updater;
 
 	@Inject
-	private VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final I18n i18n, final @Home Path proBHomePath, final StopActions stopActions, final StatusBar statusBar) {
+	private VisualisationController(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final I18n i18n, final @Home Path proBHomePath, final StopActions stopActions, final StatusBar statusBar) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.proBHomePath = proBHomePath;
-		this.updater = new BackgroundUpdater("VisualisationView Updater");
+		this.updater = new BackgroundUpdater("State visualisation updater");
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
-		stageManager.loadFXML(this, "visualisation_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
 		visualisationScrollPane.visibleProperty().bind(probLogoView.visibleProperty().not());
-		probLogoView.visibleProperty().bind(currentStateVisualisation.visualisationPossibleProperty().not());
-		previousStateVBox.managedProperty().bind(previousStateVisualisation.visualisationPossibleProperty());
+		probLogoView.visibleProperty().bind(currentStateVisualisationController.visualisationPossibleProperty().not());
+		previousStateVBox.managedProperty().bind(previousStateVisualisationController.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
 		this.updater.runningProperty().addListener((o, from, to) -> {
@@ -90,20 +91,20 @@ public class VisualisationView extends StackPane {
 			}
 			
 			updater.execute(() -> {
-				currentStateVisualisation.visualiseState(to);
-				previousStateVisualisation.visualiseState(to != null && to.canGoBack() ? to.back() : null);
+				currentStateVisualisationController.visualiseState(to);
+				previousStateVisualisationController.visualiseState(to != null && to.canGoBack() ? to.back() : null);
 			});
 		});
 
 		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			this.currentStateVisualisation.getMachineImages().clear();
-			this.previousStateVisualisation.getMachineImages().clear();
+			this.currentStateVisualisationController.getMachineImages().clear();
+			this.previousStateVisualisationController.getMachineImages().clear();
 			if (to != null) {
 				final GetImagesForMachineCommand cmd = new GetImagesForMachineCommand();
 				to.execute(cmd);
 				final Map<Integer, Image> machineImages = this.loadMachineImages(cmd.getImages());
-				this.currentStateVisualisation.getMachineImages().putAll(machineImages);
-				this.previousStateVisualisation.getMachineImages().putAll(machineImages);
+				this.currentStateVisualisationController.getMachineImages().putAll(machineImages);
+				this.previousStateVisualisationController.getMachineImages().putAll(machineImages);
 			}
 		});
 	}
@@ -141,7 +142,7 @@ public class VisualisationView extends StackPane {
 				projectDirectory,
 				proBHomePath
 			);
-			alert.initOwner(this.getScene().getWindow());
+			alert.initOwner(probLogoView.getScene().getWindow());
 			alert.show();
 		}
 

@@ -13,14 +13,13 @@ import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -29,19 +28,20 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 
-@FXMLInjected
-public class StateVisualisationView extends GridPane {
+public class StateVisualisationController {
+	@FXML
+	private GridPane matrixPane;
+
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private BooleanProperty visualisationPossible = new SimpleBooleanProperty(false);
 	private final Map<Integer, Image> machineImages;
 
 	@Inject
-	public StateVisualisationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
+	public StateVisualisationController(final I18n i18n, final CurrentTrace currentTrace) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.machineImages = new HashMap<>();
-		stageManager.loadFXML(this, "state_visualisation_view.fxml");
 	}
 
 	public BooleanProperty visualisationPossibleProperty() {
@@ -76,7 +76,7 @@ public class StateVisualisationView extends GridPane {
 				if (view != null) {
 					view.setOnContextMenuRequested(e -> getContextMenu(trace, entry)
 						.show(view, e.getScreenX(), e.getScreenY()));
-					this.add(view, c, r);
+					matrixPane.add(view, c, r);
 				}
 			}
 		}
@@ -118,7 +118,7 @@ public class StateVisualisationView extends GridPane {
 		}
 		
 		Platform.runLater(() -> {
-			this.getChildren().clear();
+			matrixPane.getChildren().clear();
 			final boolean it = !matrix.isEmpty();
 			this.visualisationPossibleProperty().set(it);
 			if (it) {

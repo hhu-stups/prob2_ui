@@ -4,7 +4,6 @@
 <?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import de.prob2.ui.states.StatesView?>
-<?import de.prob2.ui.visualisation.VisualisationView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TitledPane?>
@@ -18,7 +17,7 @@
 					<StatesView/>
 				</Tab>
 				<Tab fx:id="visualisationTab" id="visualisation" text="%menu.mainView.tabs.visualisation">
-					<VisualisationView/>
+					<fx:include source="../visualisation/visualisation_view.fxml"/>
 				</Tab>
 				<Tab fx:id="beditorTab" id="beditorTab" text="%menu.mainView.tabs.beditor">
 					<BEditorView/>
