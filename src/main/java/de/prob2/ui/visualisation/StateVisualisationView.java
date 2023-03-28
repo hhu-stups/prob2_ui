@@ -11,7 +11,6 @@ import de.prob.animator.command.ExecuteRightClickCommand;
 import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetRightClickOptionsForStateVisualizationCommand;
 import de.prob.animator.domainobjects.AnimationMatrixEntry;
-import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
@@ -53,7 +52,7 @@ public class StateVisualisationView extends GridPane {
 		return this.machineImages;
 	}
 
-	public void showMatrix(final State state, final List<List<AnimationMatrixEntry>> matrix) {
+	public void showMatrix(final Trace trace, final List<List<AnimationMatrixEntry>> matrix) {
 		for (int r = 0; r < matrix.size(); r++) {
 			final List<AnimationMatrixEntry> row = matrix.get(r);
 			for (int c = 0; c < row.size(); c++) {
@@ -75,7 +74,7 @@ public class StateVisualisationView extends GridPane {
 				}
 
 				if (view != null) {
-					view.setOnContextMenuRequested(e -> getContextMenu(state, entry)
+					view.setOnContextMenuRequested(e -> getContextMenu(trace, entry)
 						.show(view, e.getScreenX(), e.getScreenY()));
 					this.add(view, c, r);
 				}
@@ -83,21 +82,17 @@ public class StateVisualisationView extends GridPane {
 		}
 	}
 
-	private ContextMenu getContextMenu(State state, AnimationMatrixEntry entry) {
+	private ContextMenu getContextMenu(Trace trace, AnimationMatrixEntry entry) {
 		ContextMenu contextMenu = new ContextMenu();
-		StateSpace stateSpace = state.getStateSpace();
+		StateSpace stateSpace = trace.getStateSpace();
 		GetRightClickOptionsForStateVisualizationCommand getOptionsCommand = new GetRightClickOptionsForStateVisualizationCommand(
-				state.getId(), entry.getRow(), entry.getColumn());
+				trace.getCurrentState().getId(), entry.getRow(), entry.getColumn());
 		stateSpace.execute(getOptionsCommand);
 		List<String> options = getOptionsCommand.getOptions();
 		for (String opt : options) {
 			final MenuItem item = new MenuItem(opt);
-			Trace trace = getTraceToState(currentTrace.get(), state);
-			if (trace == null) {
-				item.setDisable(true);
-			}
 			item.setOnAction(e -> {
-				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(state.getId(), entry.getRow(), entry.getColumn(), opt);
+				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(trace.getCurrentState().getId(), entry.getRow(), entry.getColumn(), opt);
 				stateSpace.execute(executeCommand);
 				String transitionId = executeCommand.getTransitionID();
 				currentTrace.set(trace.add(transitionId));
@@ -112,23 +107,13 @@ public class StateVisualisationView extends GridPane {
 		return contextMenu;
 	}
 
-	private Trace getTraceToState(Trace trace, State state) {
-		if (trace.getCurrentState().equals(state)) {
-			return trace;
-		} else if (trace.canGoBack()) {
-			return getTraceToState(trace.back(), state);
-		} else {
-			return null;
-		}
-	}
-
-	public void visualiseState(final State state) {
+	public void visualiseState(final Trace trace) {
 		final List<List<AnimationMatrixEntry>> matrix;
-		if (state == null) {
+		if (trace == null) {
 			matrix = Collections.emptyList();
 		} else {
-			final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
-			state.getStateSpace().execute(cmd);
+			final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(trace.getCurrentState());
+			trace.getStateSpace().execute(cmd);
 			matrix = cmd.getMatrix();
 		}
 		
@@ -137,7 +122,7 @@ public class StateVisualisationView extends GridPane {
 			final boolean it = !matrix.isEmpty();
 			this.visualisationPossibleProperty().set(it);
 			if (it) {
-				this.showMatrix(state, matrix);
+				this.showMatrix(trace, matrix);
 			}
 		});
 	}

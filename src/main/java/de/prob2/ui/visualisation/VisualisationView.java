@@ -90,8 +90,8 @@ public class VisualisationView extends StackPane {
 			}
 			
 			updater.execute(() -> {
-				currentStateVisualisation.visualiseState(to != null ? to.getCurrentState() : null);
-				previousStateVisualisation.visualiseState(to != null && to.canGoBack() ? to.getPreviousState() : null);
+				currentStateVisualisation.visualiseState(to);
+				previousStateVisualisation.visualiseState(to != null && to.canGoBack() ? to.back() : null);
 			});
 		});
 
