@@ -1,5 +1,8 @@
 package de.prob2.ui.sharedviews;
 
+import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import java.io.IOException;
 import java.util.Objects;
 
 import de.prob2.ui.internal.I18n;
@@ -100,5 +103,31 @@ public class DescriptionView extends AnchorPane {
 		if(descriptionText.getText().isEmpty()) {
 			descriptionText.setText(i18n.translate("project.machines.machineDescriptionView.placeholder"));
 		}
+	}
+
+	public static DescriptionView getTraceDescriptionView(ReplayTrace trace,
+																									 StageManager stageManager,
+																									 TraceFileHandler traceFileHandler,
+																									 I18n i18n,
+																												Runnable handleClose) {
+		final DescriptionView descriptionView = new DescriptionView(stageManager, i18n);
+
+		descriptionView.setName(trace.getName());
+		descriptionView.setOnClose(handleClose);
+		try {
+			descriptionView.setDescription(trace.load().getDescription());
+		} catch (IOException exc) {
+			traceFileHandler.showLoadError(trace, exc);
+		}
+
+		descriptionView.descriptionProperty().addListener((o, from, to) -> {
+			try {
+				trace.saveModified(trace.load().changeDescription(to));
+			} catch (IOException exc) {
+				stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
+			}
+		});
+
+		return descriptionView;
 	}
 }
