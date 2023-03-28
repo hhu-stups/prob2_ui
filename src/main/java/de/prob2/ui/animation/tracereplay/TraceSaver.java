@@ -41,9 +41,9 @@ public class TraceSaver {
 				return traceSaver.save(possiblyLostTrace, currentProject.getCurrentMachine());
 			} catch (Exception e) {
 				LOGGER.error("error while saving trace", e);
-				TraceSaveErrorAlert alert = new TraceSaveErrorAlert(injector, "traceSave.buttons.saveTrace.error.msg");
+				Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg");
 				alert.initOwner(window);
-				alert.setErrorMessage();
+				alert.showAndWait();
 			}
 		}
 		return null;
