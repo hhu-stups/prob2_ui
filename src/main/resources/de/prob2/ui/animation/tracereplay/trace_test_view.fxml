@@ -10,22 +10,23 @@
 <?import javafx.scene.Scene?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.control.Button?>
-<fx:root type="TraceTestView" minWidth="600" minHeight="400" width="1000.0" height="600.0" xmlns:fx="http://javafx.com/fxml/1">
+<?import de.prob2.ui.sharedviews.Spacer?>
+<fx:root type="TraceTestView" minWidth="600" minHeight="400" width="1100.0" height="600.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<ScrollPane fitToHeight="true" fitToWidth="true">
-				<VBox spacing="5.0">
+				<VBox spacing="5.0" fx:id="vBox">
 					<TableView fx:id="traceTableView" VBox.vgrow="ALWAYS">
 						<columnResizePolicy>
 							<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 						</columnResizePolicy>
 						<columns>
-							<TableColumn fx:id="positionColumn" minWidth="80.0" maxWidth="120.0" text="%animation.tracereplay.test.view.columns.position" sortable="false"/>
+							<TableColumn fx:id="positionColumn" minWidth="60.0" maxWidth="120.0" text="%animation.tracereplay.test.view.columns.position" sortable="false"/>
 							<TableColumn fx:id="transitionColumn" text="%animation.tracereplay.test.view.columns.transition" sortable="false"/>
-							<TableColumn fx:id="testColumn" minWidth="350.0" text="%animation.tracereplay.test.view.columns.test" sortable="false"/>
+							<TableColumn fx:id="testColumn" minWidth="400.0" text="%animation.tracereplay.test.view.columns.test" sortable="false"/>
 							<TableColumn fx:id="descriptionColumn" minWidth="250.0" text="%animation.tracereplay.test.view.columns.description" sortable="false"/>
 						</columns>
 						<placeholder>
@@ -35,6 +36,9 @@
 					<HBox spacing="10.0">
 						<Button fx:id="btRecord" text="%animation.trace.replay.test.postcondition.record" styleClass="button-blue" onAction="#recordPostconditions"/>
 						<Button fx:id="btApply" text="%common.buttons.apply" styleClass="button-blue" onAction="#applyTest"/>
+						<Button fx:id="btShowDescription" text="%animation.tracereplay.view.contextMenu.showDescription" styleClass="button-blue" onAction="#handleTraceDescription"/>
+						<Spacer/>
+						<Button fx:id="btCancel" text="%common.buttons.cancel" styleClass="button-blue" onAction="#cancel"/>
 					</HBox>
 				</VBox>
 			</ScrollPane>

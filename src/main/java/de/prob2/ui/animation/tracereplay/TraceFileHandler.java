@@ -152,6 +152,11 @@ public class TraceFileHandler extends ProBFileHandler {
 		});
 	}
 
+	public void showSaveError(Throwable e) {
+		Alert alert = stageManager.makeExceptionAlert(e, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg");
+		alert.showAndWait();
+	}
+
 	public ReplayTrace createReplayTraceForPath(final Path traceFilePath) {
 		final Path relativeLocation = currentProject.getLocation().relativize(traceFilePath);
 		return new ReplayTrace(null, relativeLocation, traceFilePath, traceManager);

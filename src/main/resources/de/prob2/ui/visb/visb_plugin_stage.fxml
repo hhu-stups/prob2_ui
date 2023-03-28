@@ -151,7 +151,7 @@
 									<Insets topRightBottomLeft="4" />
 								</padding>
 								<ImageView preserveRatio="true" fitWidth="200.0">
-									<Image url="/de/prob2/ui/ProB_Logo.png" />
+									<Image url="@/de/prob2/ui/ProB_Logo.png" />
 								</ImageView>
 								<Label text="%visb.placeholder.text" textAlignment="CENTER" />
 							</VBox>

@@ -3,7 +3,6 @@ package de.prob2.ui.visualisation;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,12 +10,8 @@ import java.util.Map;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetAnimationMatrixForStateCommand;
 import de.prob.animator.command.GetImagesForMachineCommand;
-import de.prob.animator.domainobjects.AnimationMatrixEntry;
 import de.prob.annotations.Home;
-import de.prob.statespace.State;
-import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -27,25 +22,27 @@ import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-@FXMLInjected
 @Singleton
-public class VisualisationView extends AnchorPane {
+public final class VisualisationController {
 	@FXML
-	private StackPane probLogoStackPane;
+	private VBox probLogoView;
 	@FXML
 	private ScrollPane visualisationScrollPane;
 	@FXML
-	private StateVisualisationView currentStateVisualisation;
+	private Node currentStateVisualisation;
 	@FXML
-	private StateVisualisationView previousStateVisualisation;
+	private StateVisualisationController currentStateVisualisationController;
+	@FXML
+	private Node previousStateVisualisation;
+	@FXML
+	private StateVisualisationController previousStateVisualisationController;
 	@FXML
 	private VBox previousStateVBox;
 	@FXML
@@ -59,23 +56,22 @@ public class VisualisationView extends AnchorPane {
 	private final BackgroundUpdater updater;
 
 	@Inject
-	private VisualisationView(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final I18n i18n, final @Home Path proBHomePath, final StopActions stopActions, final StatusBar statusBar) {
+	private VisualisationController(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final I18n i18n, final @Home Path proBHomePath, final StopActions stopActions, final StatusBar statusBar) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.proBHomePath = proBHomePath;
-		this.updater = new BackgroundUpdater("VisualisationView Updater");
+		this.updater = new BackgroundUpdater("State visualisation updater");
 		stopActions.add(this.updater::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
-		stageManager.loadFXML(this, "visualisation_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
-		visualisationScrollPane.visibleProperty().bind(probLogoStackPane.visibleProperty().not());
-		probLogoStackPane.visibleProperty().bind(currentStateVisualisation.visualisationPossibleProperty().not());
-		previousStateVBox.managedProperty().bind(previousStateVisualisation.visualisationPossibleProperty());
+		visualisationScrollPane.visibleProperty().bind(probLogoView.visibleProperty().not());
+		probLogoView.visibleProperty().bind(currentStateVisualisationController.visualisationPossibleProperty().not());
+		previousStateVBox.managedProperty().bind(previousStateVisualisationController.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
 		this.updater.runningProperty().addListener((o, from, to) -> {
@@ -95,20 +91,20 @@ public class VisualisationView extends AnchorPane {
 			}
 			
 			updater.execute(() -> {
-				visualiseState(currentStateVisualisation, to != null ? to.getCurrentState() : null);
-				visualiseState(previousStateVisualisation, to != null && to.canGoBack() ? to.getPreviousState() : null);
+				currentStateVisualisationController.visualiseState(to);
+				previousStateVisualisationController.visualiseState(to != null && to.canGoBack() ? to.back() : null);
 			});
 		});
 
 		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			this.currentStateVisualisation.getMachineImages().clear();
-			this.previousStateVisualisation.getMachineImages().clear();
+			this.currentStateVisualisationController.getMachineImages().clear();
+			this.previousStateVisualisationController.getMachineImages().clear();
 			if (to != null) {
 				final GetImagesForMachineCommand cmd = new GetImagesForMachineCommand();
 				to.execute(cmd);
 				final Map<Integer, Image> machineImages = this.loadMachineImages(cmd.getImages());
-				this.currentStateVisualisation.getMachineImages().putAll(machineImages);
-				this.previousStateVisualisation.getMachineImages().putAll(machineImages);
+				this.currentStateVisualisationController.getMachineImages().putAll(machineImages);
+				this.previousStateVisualisationController.getMachineImages().putAll(machineImages);
 			}
 		});
 	}
@@ -146,30 +142,10 @@ public class VisualisationView extends AnchorPane {
 				projectDirectory,
 				proBHomePath
 			);
-			alert.initOwner(this.getScene().getWindow());
+			alert.initOwner(probLogoView.getScene().getWindow());
 			alert.show();
 		}
 
 		return machineImages;
-	}
-
-	private static void visualiseState(final StateVisualisationView view, final State state) {
-		final List<List<AnimationMatrixEntry>> matrix;
-		if (state == null) {
-			matrix = Collections.emptyList();
-		} else {
-			final GetAnimationMatrixForStateCommand cmd = new GetAnimationMatrixForStateCommand(state);
-			state.getStateSpace().execute(cmd);
-			matrix = cmd.getMatrix();
-		}
-		
-		Platform.runLater(() -> {
-			view.getChildren().clear();
-			final boolean it = !matrix.isEmpty();
-			view.visualisationPossibleProperty().set(it);
-			if (it) {
-				view.showMatrix(state, matrix);
-			}
-		});
 	}
 }

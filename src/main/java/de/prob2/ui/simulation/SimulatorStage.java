@@ -3,7 +3,6 @@ package de.prob2.ui.simulation;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,7 +17,6 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import de.prob2.ui.animation.tracereplay.TraceSaver;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -27,11 +25,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationFileHandler;
-import de.prob2.ui.simulation.interactive.UIInteractionHandler;
-import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -42,7 +35,12 @@ import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
+import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
@@ -169,9 +167,8 @@ public class SimulatorStage extends Stage {
 				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
 						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
 				saveTraces.setOnAction(e -> {
-					TraceFileHandler traceSaver = injector.getInstance(TraceFileHandler.class);
 					if (currentTrace.get() != null) {
-						traceSaver.save(item, currentProject.getCurrentMachine());
+						traceFileHandler.save(item, currentProject.getCurrentMachine());
 					}
 				});
 				menuItems.add(saveTraces);
@@ -262,6 +259,8 @@ public class SimulatorStage extends Stage {
 
 	private final FileChooserManager fileChooserManager;
 
+	private final TraceFileHandler traceFileHandler;
+
 	private final ObjectProperty<Path> configurationPath;
 
 	private final SimulationItemHandler simulationItemHandler;
@@ -279,7 +278,7 @@ public class SimulatorStage extends Stage {
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
-						  final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode, final I18n i18n, final FileChooserManager fileChooserManager,
+						  final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode, final I18n i18n, final FileChooserManager fileChooserManager, final TraceFileHandler traceFileHandler,
 						  final StopActions stopActions) {
 		super();
 		this.stageManager = stageManager;
@@ -293,6 +292,7 @@ public class SimulatorStage extends Stage {
 		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
+		this.traceFileHandler = traceFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
 		this.time = 0;
 		this.timer = new Timer(true);
@@ -338,7 +338,13 @@ public class SimulatorStage extends Stage {
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
 		helpButton.setHelpContent("mainmenu.advanced.simB", null);
-		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow()));
+		saveTraceItem.setOnAction(e -> {
+			try {
+				traceFileHandler.save(currentTrace.get(), currentProject.getCurrentMachine());
+			} catch (IOException | RuntimeException exc) {
+				traceFileHandler.showSaveError(exc);
+			}
+		});
 		saveTimedTraceItem.setOnAction(e -> {
 			try {
 				injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");

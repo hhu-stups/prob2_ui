@@ -30,7 +30,7 @@ import de.prob.animator.domainobjects.VisBItem;
 import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.animation.tracereplay.TraceSaver;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.helpsystem.HelpSystem;
@@ -93,6 +93,7 @@ public class VisBStage extends Stage {
 	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
 	private final FileChooserManager fileChooserManager;
+	private final TraceFileHandler traceFileHandler;
 
 	@FXML
 	private MenuBar visbMenuBar;
@@ -156,7 +157,7 @@ public class VisBStage extends Stage {
 	@Inject
 	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
 					 final CurrentTrace currentTrace, final I18n i18n, final FileChooserManager fileChooserManager,
-					 final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController) {
+					 final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController, final TraceFileHandler traceFileHandler) {
 		super();
 		this.injector = injector;
 		this.i18n = i18n;
@@ -166,6 +167,7 @@ public class VisBStage extends Stage {
 		this.fileChooserManager = fileChooserManager;
 		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.visBController = visBController;
+		this.traceFileHandler = traceFileHandler;
 		this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
 	}
 
@@ -245,7 +247,13 @@ public class VisBStage extends Stage {
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
-		saveTraceItem.setOnAction(e -> injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow()));
+		saveTraceItem.setOnAction(e -> {
+			try {
+				traceFileHandler.save(currentTrace.get(), currentProject.getCurrentMachine());
+			} catch (IOException | RuntimeException exc) {
+				traceFileHandler.showSaveError(exc);
+			}
+		});
 		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
 		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
 

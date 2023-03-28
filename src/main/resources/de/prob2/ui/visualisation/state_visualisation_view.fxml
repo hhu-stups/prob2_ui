@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.visualisation.StateVisualisationView?>
-<fx:root type="StateVisualisationView" styleClass="state-visualisation-view" xmlns:fx="http://javafx.com/fxml/1"/>
+<?import javafx.scene.layout.GridPane?>
+<GridPane
+	xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="de.prob2.ui.visualisation.StateVisualisationController"
+	fx:id="matrixPane"
+	styleClass="state-visualisation-view"
+/>
 

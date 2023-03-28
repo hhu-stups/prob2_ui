@@ -1,5 +1,7 @@
 package de.prob2.ui.animation.tracereplay;
 
+import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -257,24 +259,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (showDescription) {
 			closeDescription();
 		}
-		final DescriptionView descriptionView = new DescriptionView(stageManager, i18n);
-		descriptionView.setOnClose(this::closeDescription);
-		descriptionView.setName(trace.getName());
-
-		try {
-			descriptionView.setDescription(trace.load().getDescription());
-		} catch (IOException exc) {
-			traceFileHandler.showLoadError(trace, exc);
-		}
-
-		descriptionView.descriptionProperty().addListener((o, from, to) -> {
-			try {
-				trace.saveModified(trace.load().changeDescription(to));
-			} catch (IOException exc) {
-				stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
-			}
-		});
-
+		final DescriptionView descriptionView =
+				getTraceDescriptionView(trace, this.stageManager, traceFileHandler, this.i18n, this::closeDescription);
 		splitPane.getItems().add(1, descriptionView);
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;

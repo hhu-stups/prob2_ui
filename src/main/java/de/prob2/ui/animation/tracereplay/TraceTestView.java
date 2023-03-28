@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.tracereplay;
 
+import de.prob2.ui.sharedviews.DescriptionView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,10 +36,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -56,6 +57,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
+import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
 
 @FXMLInjected
 public class TraceTestView extends Stage {
@@ -201,8 +203,9 @@ public class TraceTestView extends Stage {
 	@FXML
 	private TableColumn<PersistentTransition, String> descriptionColumn;
 	@FXML
-	private SplitPane splitPane;
-
+	private VBox vBox;
+	@FXML
+	private Button btShowDescription;
 	private final StageManager stageManager;
 
 	private final FontSize fontSize;
@@ -360,9 +363,14 @@ public class TraceTestView extends Stage {
 	public void saveTrace() {
 		List<PersistentTransition> transitions = replayTrace.get().getLoadedTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
+			List<Postcondition> nonEmptyConditions = postconditions.get(i)
+					.stream()
+					.filter(p-> !(p.toString().contains("operation = , predicate = }")
+								|| p.toString().contains("Predicate{predicate = ")))
+					.collect(Collectors.toList());
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
-			transition.getPostconditions().addAll(postconditions.get(i));
+			transition.getPostconditions().addAll(nonEmptyConditions);
 			transition.setDescription(descriptions.get(i));
 		}
 
@@ -527,6 +535,25 @@ public class TraceTestView extends Stage {
 		innerBox.getChildren().add(statusIcon);
 		innerBox.getChildren().add(btRemoveTest);
 		return innerBox;
+	}
+
+	@FXML
+	void cancel() {
+		this.close();
+	}
+
+	@FXML
+	void handleTraceDescription() {
+		if (vBox.getChildren().stream().anyMatch(p -> p instanceof DescriptionView)) {
+			vBox.getChildren().remove(1);
+			btShowDescription.setText(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
+			return;
+		}
+		TraceFileHandler fileHandler = injector.getInstance(TraceFileHandler.class);
+		final DescriptionView descriptionView = getTraceDescriptionView(this.replayTrace.get(), stageManager,
+				fileHandler, i18n, this::handleTraceDescription);
+		btShowDescription.setText(i18n.translate("animation.tracereplay.test.view.hidePathDescription"));
+		vBox.getChildren().add(1, descriptionView);
 	}
 
 }
