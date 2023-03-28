@@ -56,7 +56,8 @@ public class TraceSaver {
 			try {
 				return traceSaver.saveAsTable(possiblyLostTrace);
 			} catch (Exception e) {
-				final Alert alert = injector.getInstance(StageManager.class).makeAlert(Alert.AlertType.WARNING, "simulation.error.header.invalid", "simulation.error.body.invalid");
+				LOGGER.error("Exception while saving trace as table", e);
+				Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg");
 				alert.initOwner(window);
 				alert.showAndWait();
 			}
