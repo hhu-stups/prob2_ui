@@ -31,6 +31,7 @@ import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob.scripting.ZFuzzFactory;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
@@ -186,6 +187,26 @@ public class FileChooserManager {
 	public FileChooser.ExtensionFilter getAllExtensionsFilter() {
 		return new FileChooser.ExtensionFilter(i18n.translate("common.fileChooser.fileTypes.all"), "*.*");
 	}
+	
+	public FileChooser.ExtensionFilter getProB2ProjectFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", ProjectManager.PROJECT_FILE_EXTENSION);
+	}
+	
+	public FileChooser.ExtensionFilter getProB2TraceFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION);
+	}
+	
+	public FileChooser.ExtensionFilter getPlainTextFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.text", "txt");
+	}
+	
+	public FileChooser.ExtensionFilter getCsvFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv");
+	}
+	
+	public FileChooser.ExtensionFilter getPngFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.png", "png");
+	}
 
 	public Path showOpenFileChooser(final FileChooser fileChooser, final Kind kind, final Window window) {
 		if (containsValidInitialDirectory(kind)) {
@@ -253,7 +274,7 @@ public class FileChooserManager {
 		final List<String> allExtensionPatterns = new ArrayList<>();
 		if (projects) {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + ProjectManager.PROJECT_FILE_EXTENSION);
-			fileChooser.getExtensionFilters().add(this.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", ProjectManager.PROJECT_FILE_EXTENSION));
+			fileChooser.getExtensionFilters().add(this.getProB2ProjectFilter());
 		}
 		
 		if (machines) {

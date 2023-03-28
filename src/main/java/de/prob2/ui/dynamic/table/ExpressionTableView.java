@@ -358,7 +358,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		}
 
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv"));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
 		fileChooser.setTitle(i18n.translate("common.fileChooser.saveAsCSV.title"));
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this);
 		if (path == null) {

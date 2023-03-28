@@ -249,9 +249,7 @@ public final class HistoryChartStage extends Stage {
 		saveImageItem.setOnAction(e -> {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle(i18n.translate("chart.historyChart.fileChooser.saveAsImage"));
-			fileChooser.getExtensionFilters().addAll(
-					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
-			);
+			fileChooser.getExtensionFilters().add(fileChooserManager.getPngFilter());
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
 			if (path == null) {
 				return;
@@ -271,9 +269,7 @@ public final class HistoryChartStage extends Stage {
 		saveCSVItem.setOnAction(e -> {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle(i18n.translate("chart.historyChart.fileChooser.saveAsCSV"));
-			fileChooser.getExtensionFilters().addAll(
-					fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv")
-			);
+			fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
 			if (path == null) {
 				return;

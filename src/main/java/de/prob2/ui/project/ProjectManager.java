@@ -175,7 +175,7 @@ public class ProjectManager {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 				fileChooser.setInitialFileName(project.getName() + "." + PROJECT_FILE_EXTENSION);
-				fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", PROJECT_FILE_EXTENSION));
+				fileChooser.getExtensionFilters().add(fileChooserManager.getProB2ProjectFilter());
 				final Path selected = fileChooserManager.showSaveFileChooser(fileChooser, null, stageManager.getCurrent());
 				if (selected == null) {
 					return;

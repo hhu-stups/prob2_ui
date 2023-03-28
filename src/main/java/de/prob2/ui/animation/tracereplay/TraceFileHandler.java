@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 public final class TraceFileHandler {
 
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
-	public static final String TRACE_TABLE_EXTENSION = "csv";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
@@ -181,7 +180,7 @@ public final class TraceFileHandler {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.savePaths.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "Simulation." + TRACE_FILE_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TRACE_FILE_EXTENSION));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path == null) {
 			return;
@@ -209,7 +208,7 @@ public final class TraceFileHandler {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TRACE_FILE_EXTENSION));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 
 		if (path == null) {
@@ -255,7 +254,7 @@ public final class TraceFileHandler {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + TRACE_FILE_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TRACE_FILE_EXTENSION));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			save(trace, path, "traceReplay");
@@ -267,8 +266,8 @@ public final class TraceFileHandler {
 	public Path saveAsTable(Trace trace) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + TRACE_TABLE_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TRACE_TABLE_EXTENSION));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".csv");
+		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {

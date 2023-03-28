@@ -225,7 +225,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.loadTrace.title"));
 			fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-			fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION));
+			fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 			Path traceFile = fileChooserManager.showOpenFileChooser(fileChooser, Kind.TRACES, stageManager.getCurrent());
 			if (traceFile == null) {
 				return Optional.empty();
