@@ -1,5 +1,6 @@
 package de.prob2.ui.history;
 
+import java.io.IOException;
 import java.util.Arrays;
 
 import com.google.inject.Inject;
@@ -8,7 +9,7 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
-import de.prob2.ui.animation.tracereplay.TraceSaver;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -102,14 +103,22 @@ public final class HistoryView extends VBox {
 	private final I18n i18n;
 	private final Injector injector;
 	private final CurrentProject currentProject;
+	private final TraceFileHandler traceFileHandler;
 
 	@Inject
-	private HistoryView(StageManager stageManager, CurrentTrace currentTrace, I18n i18n, Injector injector,
-			CurrentProject currentProject) {
+	private HistoryView(
+		StageManager stageManager,
+		I18n i18n,
+		CurrentTrace currentTrace,
+		Injector injector,
+		CurrentProject currentProject,
+		TraceFileHandler traceFileHandler
+	) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.injector = injector;
 		this.currentProject = currentProject;
+		this.traceFileHandler = traceFileHandler;
 		stageManager.loadFXML(this, "history_view.fxml");
 	}
 
@@ -149,11 +158,19 @@ public final class HistoryView extends VBox {
 
 	@FXML
 	private void saveTrace() {
-		injector.getInstance(TraceSaver.class).saveTrace(this.getScene().getWindow());
+		try {
+			traceFileHandler.save(currentTrace.get(), currentProject.getCurrentMachine());
+		} catch (IOException | RuntimeException e) {
+			traceFileHandler.showSaveError(e);
+		}
 	}
 
 	@FXML
 	private void saveTraceAsTable() {
-		injector.getInstance(TraceSaver.class).saveTraceAsTable(this.getScene().getWindow());
+		try {
+			traceFileHandler.saveAsTable(currentTrace.get());
+		} catch (IOException | RuntimeException e) {
+			traceFileHandler.showSaveError(e);
+		}
 	}
 }
