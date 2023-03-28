@@ -13,40 +13,57 @@ import de.prob.json.JsonMetadata;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.table.SimulationItem;
 
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+
 @Singleton
-public class SimulationSaver extends ProBFileHandler {
+public final class SimulationSaver {
 
 	public static final String SIMULATION_EXTENSION = "json";
 	public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
+	private final VersionInfo versionInfo;
+	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final JacksonManager<SimulationModelConfiguration> jsonManager;
+	private final CurrentProject currentProject;
+	private final I18n i18n;
 
 	@Inject
 	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final ObjectMapper objectMapper, final JacksonManager<SimulationModelConfiguration> jsonManager, final CurrentProject currentProject, final I18n i18n) {
-		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);
+		this.versionInfo = versionInfo;
+		this.currentProject = currentProject;
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
+		this.i18n = i18n;
 		this.jsonManager = jsonManager;
 
 		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationModelConfiguration.class, SimulationModelConfiguration.SimulationFileType.TIMED_TRACE.getName(), SimulationModelConfiguration.CURRENT_FORMAT_VERSION));
 	}
 
 	public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
-		final Path path = openSaveFileChooser("simulation.tracereplay.fileChooser.saveTimedTrace.title", "common.fileChooser.fileTypes.proB2Simulation", FileChooserManager.Kind.SIMULATION, SIMULATION_EXTENSION);
+		final FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveTimedTrace.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + SIMULATION_EXTENSION);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Simulation", SIMULATION_EXTENSION));
+		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			saveConfiguration(trace, timestamps, path, createMetadata(createdBy));
 		}
 	}
 
 	private JsonMetadata createMetadata(String createdBy) {
-		return updateMetadataBuilder(SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.TIMED_TRACE))
-				.withCreator(createdBy)
-				.build();
+		return SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.TIMED_TRACE)
+			.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+			.withModelName(currentProject.getCurrentMachine().getName())
+			.withCreator(createdBy)
+			.build();
 	}
 
 	private void saveConfiguration(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
@@ -58,7 +75,9 @@ public class SimulationSaver extends ProBFileHandler {
 		List<Trace> traces = item.getTraces();
 		List<List<Integer>> timestamps = item.getTimestamps();
 
-		final Path path = chooseDirectory(FileChooserManager.Kind.SIMULATION, "simulation.tracereplay.fileChooser.saveTimedPaths.title");
+		final DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveTimedPaths.title"));
+		final Path path = this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path == null) {
 			return;
 		}
