@@ -14,7 +14,7 @@
 			<VBox alignment="TOP_CENTER">
 				<ImageView preserveRatio="true" fitWidth="350.0" VBox.vgrow="NEVER">
 					<!-- The logo image already contains a transparent border, so we don't need to add a margin here. -->
-					<Image url="/de/prob2/ui/ProB_Logo.png"/>
+					<Image url="@/de/prob2/ui/ProB_Logo.png"/>
 				</ImageView>
 				<TextArea fx:id="versionInfoTextArea" editable="false" wrapText="true" VBox.vgrow="ALWAYS"/>
 				<Button styleClass="button-blue" text="%common.contextMenu.copy" VBox.vgrow="NEVER" onAction="#copyVersionInfo">
