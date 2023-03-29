@@ -27,10 +27,15 @@ stages:
     # pandoc is needed to build the ProB 2 UI docs.
     - apt-get install --assume-yes git libpangoft2-1.0-0 pandoc xvfb
     - Xvfb :99 &
-    - export xvfb_pid="$!"
+    - echo "$!" > xvfb.pid
     - export DISPLAY=:99
   after_script:
-    - kill "${xvfb_pid}"
+    - |
+      if [ -f xvfb.pid ]
+      then
+        kill "$(< xvfb.pid)"
+        rm xvfb.pid
+      fi
 
 test:jdk-8-linux:
   extends: .test-linux
