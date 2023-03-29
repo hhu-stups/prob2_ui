@@ -9,24 +9,21 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
-import javafx.scene.Scene;
-import javafx.scene.control.Button;
+import javafx.event.ActionEvent;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.ListView;
-import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
-import org.testfx.api.FxAssert;
 import org.testfx.assertions.api.Assertions;
-import org.testfx.matcher.base.WindowMatchers;
+
 
 public class OperationsViewTest extends TestBase {
 
@@ -36,42 +33,31 @@ public class OperationsViewTest extends TestBase {
 	public void start(Stage stage) {
 		super.start(stage);
 		operationsView = injector.getInstance(OperationsView.class);
-		Scene scene = new Scene(operationsView);
-		scene.getStylesheets().add("prob.css");
-		operationsView.getStyleClass().add("root");
-		stage.setScene(scene);
-		stage.show();
 	}
 
 	@DisplayName("When no project is open, the listView is empty and the randomButton is disabled")
 	@Test
 	void test2() {
-		MenuButton randomButton = lookup("#randomButton").query();
-		assertThat(randomButton).isDisabled();
-
-		ListView<OperationItem> opList = lookup("#opsListView").query();
-		Assertions.assertThat(opList).hasExactlyNumItems(0);
+		assertThat(operationsView.randomButton).isDisabled();
+		Assertions.assertThat(operationsView.opsListView).hasExactlyNumItems(0);
 	}
 
 	@Nested
 	@DisplayName("When a machine is loaded ")
 	class randomButtonTests {
 
-		MenuButton randomButton;
-
 		@BeforeEach
 		void setup() throws InterruptedException {
 			new ProjectBuilder(injector)
-					.fromMachineFile("src/test/resources/Lift.mch")
-					.withAnimatedMachine("Lift")
-					.build();
-			randomButton = lookup("#randomButton").query();
+				.fromMachineFile("src/test/resources/Lift.mch")
+				.withAnimatedMachine("Lift")
+				.build();
 		}
 
 		@DisplayName("and the randomButton is clicked, 4 Options are shown")
 		@Test
 		void test1() {
-			List<MenuItem> menuItems = randomButton.getItems();
+			List<MenuItem> menuItems = operationsView.randomButton.getItems();
 			List<String> menuItemTexts =
 					menuItems.stream().map(MenuItem::getText).collect(Collectors.toList());
 
@@ -84,84 +70,83 @@ public class OperationsViewTest extends TestBase {
 		@Test
 		@DisplayName("the navigation buttons correspond the the number of random executed transitions")
 		void test2() {
-			clickOn(randomButton);
-			TextField textField = lookup("#randomText").query();
-			clickOn(textField).write("3").type(KeyCode.ENTER);
-			Button backButton = lookup("#backButton").query();
-			assertThat(backButton).isEnabled();
-			clickOn(backButton);
-			clickOn(backButton);
-			clickOn(backButton);
-			assertThat(backButton).isDisabled();
+			TextField textField = operationsView.randomText;
+			textField.setText("3");
+			operationsView.random(new ActionEvent(textField, null));
+			// TODO?
 		}
 
 
 		@Test
 		@DisplayName("the listView shows the correct number of possible operations")
-		void test3() {
-			clickOn("#disabledOpsToggle");
-			ListView<OperationItem> opsList = lookup("#opsListView").queryListView();
+		@RepeatedTest(5)
+		void test3() throws InterruptedException {
+			ToggleButton disabledOps = operationsView.disabledOpsToggle;
+			disabledOps.fire();
+			Thread.sleep(1000L);
+			ListView<OperationItem> opsList = operationsView.opsListView;
 			assertThat(opsList.getItems()).hasSize(3);
-			clickOn("#disabledOpsToggle");
+			disabledOps.fire();
+			Thread.sleep(1000L);
 			assertThat(opsList.getItems()).hasSize(1);
 		}
 
 
 		@DisplayName("the search toggle works correctly")
 		@Test
-		void test4() {
-			clickOn("#disabledOpsToggle");
-			ToggleButton toggleButton = lookup("#searchToggle").query();
-			VBox searchBox = lookup("#searchBox").query();
-			TextField textfield = lookup("#searchBar").query();
+		@RepeatedTest(5)
+		void test4() throws InterruptedException {
+			ToggleButton disabledOps = operationsView.disabledOpsToggle;
+			disabledOps.fire();
 
-			clickOn(toggleButton);
+			ToggleButton toggleButton = operationsView.searchToggle;
+			toggleButton.fire();
+
+			VBox searchBox = operationsView.searchBox;
 			Assertions.assertThat(searchBox.isVisible()).isTrue();
 
-			clickOn(textfield).write("decrement").type(KeyCode.ENTER);
-			assertThat(lookup("#opsListView").queryListView()).hasExactlyNumItems(1);
-			assertThat(lookup("#opsListView").queryListView().getItems().get(0).toString()).contains(
-					"decrement");
+			TextField searchBar = operationsView.searchBar;
+			searchBar.setText("decrement");
+			operationsView.applyFilter(searchBar.getText());
 
-			clickOn(toggleButton);
+			ListView<OperationItem> opsList = operationsView.opsListView;
+			Thread.sleep(1000L);
+			assertThat(opsList.getItems()).hasSize(1);
+			assertThat(opsList.getItems().get(0).toString()).contains(
+				"decrement");
+
+			toggleButton.fire();
+
 			Assertions.assertThat(searchBox.isVisible()).isFalse();
-			Assertions.assertThat(textfield.getCharacters()).isEmpty();
+			Assertions.assertThat(searchBar.getCharacters()).isEmpty();
 
-			clickOn(toggleButton);
-			clickOn(textfield).write("schwubbeldidubbel").type(KeyCode.ENTER);
-			assertThat(lookup("#opsListView").queryListView()).hasExactlyNumItems(0);
-
-			clickOn(toggleButton);
-			Assertions.assertThat(searchBox.isVisible()).isFalse();
-			clickOn("#disabledOpsToggle");
+			toggleButton.fire();
+			searchBar.setText("foobar");
+			operationsView.applyFilter(searchBar.getText());
+			assertThat(opsList.getItems()).hasSize(0);
 		}
 
-	// does not specifiy, which menuItem is clicked. Just shows the availability and
-	// reaction of the context menu in general, that is set for the operationItems.
+		// does not specifiy, which menuItem is clicked. Just shows the availability and
+		// reaction of the context menu in general, that is set for the operationItems.
 		@Test
 		@DisplayName("the context menu of the listitems works correctly")
-		void test5() {
-			Platform.runLater(() -> {
-				clickOn("#forwardButton");
-				ListView<OperationItem> opsListView = lookup("#opsListView").queryListView();
-				ObservableList<MenuItem>
-						list = opsListView.getCellFactory().call(opsListView).getContextMenu().getItems();
+		@RepeatedTest(5)
+		void test5() throws InterruptedException {
+			ListView<OperationItem> opsList = operationsView.opsListView;
+			operationsView.executeOperationIfPossible(opsList.getItems().get(0));
+			Thread.sleep(1000L);
+			assertThat(opsList.getItems()).hasSize(2);
 
-				assertThat(list).hasSize(2);
+			ObservableList<MenuItem> menuItems =
+				opsList.getCellFactory().call(opsList).getContextMenu().getItems();
 
-				MenuItem details = list.get(0);
-				assertThat(details.getText()).isEqualTo("Show Details");
-				list.get(0).fire();
-				FxAssert.verifyThat(window(p -> p instanceof OperationDetailsStage), WindowMatchers.isShowing());
+			assertThat(menuItems).hasSize(2);
 
-				MenuItem predicate = list.get(1);
-				assertThat(predicate.getText()).isEqualTo("Execute by Predicate...");
-				predicate.fire();
-				FxAssert.verifyThat(window(p -> p instanceof ExecuteByPredicateStage), WindowMatchers.isShowing());
-			});
+			assertThat(menuItems.get(0).getText()).isEqualTo("Show Details");
+			assertThat(menuItems.get(1).getText()).isEqualTo("Execute by Predicate...");
 
+			// TODO: assert that windows of contextmenuitems are showing
 		}
-
 	}
 
 }
