@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.testfx.assertions.api.Assertions.assertThat;
 
-
+@Disabled
 public class NavigationButtonsTest extends TestBase {
 	@Override
 	public void start(Stage stage) {

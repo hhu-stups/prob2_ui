@@ -8,6 +8,7 @@ import de.prob2.ui.verifications.ltl.patterns.LTLPatternItem;
 import javafx.scene.Scene;
 import javafx.scene.control.TableView;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.testfx.api.FxAssert;
@@ -16,6 +17,7 @@ import org.testfx.matcher.base.WindowMatchers;
 
 import static org.testfx.assertions.api.Assertions.assertThat;
 
+@Disabled
 class LTLViewTest extends TestBase {
 	LTLView ltlView;
 

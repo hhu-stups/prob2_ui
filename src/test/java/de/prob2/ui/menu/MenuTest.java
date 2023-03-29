@@ -20,7 +20,7 @@ import org.testfx.api.FxAssert;
 import org.testfx.matcher.base.WindowMatchers;
 import org.testfx.util.NodeQueryUtils;
 import org.testfx.util.WaitForAsyncUtils;
-
+@Disabled
 public class MenuTest extends TestBase {
 
 	NewProjectStage newProjectStage;

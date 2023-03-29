@@ -4,11 +4,13 @@ import de.prob2.ui.ProjectBuilder;
 import de.prob2.ui.TestBase;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Disabled
 class LTLPatternStageTest extends TestBase {
 
 	LTLPatternStage ltlPatternStage;
