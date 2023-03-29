@@ -484,9 +484,7 @@ public class VisBStage extends Stage {
 	private void exportImage() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));
-		fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.png", "png")
-		);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getPngFilter());
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if(path != null) {
 			File file = path.toFile();

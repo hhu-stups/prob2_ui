@@ -1,6 +1,7 @@
 package de.prob2.ui.config;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -11,7 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,11 +31,13 @@ import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
 import de.prob.scripting.ZFuzzFactory;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
 
 import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -115,6 +120,19 @@ public class FileChooserManager {
 		});
 	}
 	
+	public boolean checkIfPathAlreadyContainsFiles(Path path, String prefix, String contentBundleKey) throws IOException {
+		try (final Stream<Path> children = Files.list(path)) {
+			if (children.anyMatch(p -> p.getFileName().toString().startsWith(prefix))) {
+				// Directory already contains test case trace - ask if the user really wants to save here.
+				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", contentBundleKey, path).showAndWait();
+				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * <p>Create a {@link FileChooser.ExtensionFilter} with the list of extensions automatically appended to the description.</p>
 	 * <p>Note: The extension strings passed into this method should be plain extensions and not patterns, unlike with the {@link FileChooser.ExtensionFilter#ExtensionFilter(String, List)} constructor. The extension strings should <i>not</i> include a {@code *.} prefix (it is added automatically by this method).</p>
@@ -168,6 +186,26 @@ public class FileChooserManager {
 	 */
 	public FileChooser.ExtensionFilter getAllExtensionsFilter() {
 		return new FileChooser.ExtensionFilter(i18n.translate("common.fileChooser.fileTypes.all"), "*.*");
+	}
+	
+	public FileChooser.ExtensionFilter getProB2ProjectFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", ProjectManager.PROJECT_FILE_EXTENSION);
+	}
+	
+	public FileChooser.ExtensionFilter getProB2TraceFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION);
+	}
+	
+	public FileChooser.ExtensionFilter getPlainTextFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.text", "txt");
+	}
+	
+	public FileChooser.ExtensionFilter getCsvFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv");
+	}
+	
+	public FileChooser.ExtensionFilter getPngFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.png", "png");
 	}
 
 	public Path showOpenFileChooser(final FileChooser fileChooser, final Kind kind, final Window window) {
@@ -236,7 +274,7 @@ public class FileChooserManager {
 		final List<String> allExtensionPatterns = new ArrayList<>();
 		if (projects) {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + ProjectManager.PROJECT_FILE_EXTENSION);
-			fileChooser.getExtensionFilters().add(this.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", ProjectManager.PROJECT_FILE_EXTENSION));
+			fileChooser.getExtensionFilters().add(this.getProB2ProjectFilter());
 		}
 		
 		if (machines) {

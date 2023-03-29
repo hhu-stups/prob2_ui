@@ -23,7 +23,6 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.ProBFileHandler;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.internal.csv.CSVWriter;
@@ -34,25 +33,34 @@ import de.prob2.ui.simulation.table.SimulationItem;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TraceFileHandler extends ProBFileHandler {
+public final class TraceFileHandler {
 
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
-	public static final String TRACE_TABLE_EXTENSION = "csv";
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceFileHandler.class);
 	private static final int NUMBER_MAXIMUM_GENERATED_TRACES = 500;
 
 	private final TraceManager traceManager;
+	private final VersionInfo versionInfo;
+	private final CurrentProject currentProject;
+	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
+	private final I18n i18n;
 
 	@Inject
 	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject,
 	                        StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n) {
-		super(versionInfo, currentProject, stageManager, fileChooserManager, i18n);
 		this.traceManager = traceManager;
+		this.versionInfo = versionInfo;
+		this.currentProject = currentProject;
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
+		this.i18n = i18n;
 	}
 
 	private static boolean isFileNotFound(Throwable e) {
@@ -169,13 +177,17 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public void save(SimulationItem item, Machine machine) {
-		final Path path = openSaveFileChooserWithCustomFilename("animation.tracereplay.fileChooser.savePaths.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION, "Simulation");
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.savePaths.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "Simulation." + TRACE_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path == null) {
 			return;
 		}
 
 		try {
-			if (checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
+			if (fileChooserManager.checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
@@ -193,7 +205,11 @@ public class TraceFileHandler extends ProBFileHandler {
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
 		List<Trace> traces = item.getExamples();
-		Path path = openSaveFileChooserWithCustomFilename("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION, "TestCase");
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 
 		if (path == null) {
 			return;
@@ -201,7 +217,7 @@ public class TraceFileHandler extends ProBFileHandler {
 
 		try {
 
-			if (checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
+			if (fileChooserManager.checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
@@ -226,14 +242,20 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public void save(Trace trace, Path location, String createdBy) throws IOException {
-		JsonMetadata jsonMetadata = updateMetadataBuilder(TraceJsonFile.metadataBuilder())
-				                            .withCreator(createdBy)
-				                            .build();
+		JsonMetadata jsonMetadata = TraceJsonFile.metadataBuilder()
+			.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+			.withModelName(currentProject.getCurrentMachine().getName())
+			.withCreator(createdBy)
+			.build();
 		traceManager.save(location, new TraceJsonFile(trace, jsonMetadata));
 	}
 
 	public Path save(Trace trace, Machine machine) throws IOException {
-		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_FILE_EXTENSION);
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + TRACE_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			save(trace, path, "traceReplay");
 			this.addTraceFile(machine, path);
@@ -242,7 +264,11 @@ public class TraceFileHandler extends ProBFileHandler {
 	}
 
 	public Path saveAsTable(Trace trace) throws IOException {
-		final Path path = openSaveFileChooser("animation.tracereplay.fileChooser.saveTrace.title", "common.fileChooser.fileTypes.proB2Trace", FileChooserManager.Kind.TRACES, TRACE_TABLE_EXTENSION);
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".csv");
+		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
 				csvWriter.header("Position", "Transition");

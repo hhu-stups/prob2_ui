@@ -217,7 +217,7 @@ public class FullValueStage extends Stage {
 	private void saveAs() {
 		final FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().setAll(
-			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.text", "txt"),
+			fileChooserManager.getPlainTextFilter(),
 			fileChooserManager.getAllExtensionsFilter()
 		);
 		final String defaultExtension;
