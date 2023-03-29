@@ -164,21 +164,21 @@ public final class OperationsView extends VBox {
 	private static final Pattern NUMBER_OR_EMPTY_PATTERN = Pattern.compile("^$|^\\d+$");
 
 	@FXML
-	private ListView<OperationItem> opsListView;
+	ListView<OperationItem> opsListView;
 	@FXML
 	private Label warningLabel;
 	@FXML
 	private Button sortButton;
 	@FXML
-	private ToggleButton disabledOpsToggle;
+	ToggleButton disabledOpsToggle;
 	@FXML
 	private ToggleButton unambiguousToggle;
 	@FXML
-	private TextField searchBar;
+	TextField searchBar;
 	@FXML
-	private TextField randomText;
+	TextField randomText;
 	@FXML
-	private MenuButton randomButton;
+	MenuButton randomButton;
 	@FXML
 	private MenuItem oneRandomEvent;
 	@FXML
@@ -192,9 +192,9 @@ public final class OperationsView extends VBox {
 	@FXML
 	private Button btComputeUnsatCore;
 	@FXML
-	private ToggleButton searchToggle;
+	ToggleButton searchToggle;
 	@FXML
-	private VBox searchBox;
+	VBox searchBox;
 
 	private final List<OperationItem> events = new ArrayList<>();
 	private final BooleanProperty showDisabledOps;
@@ -347,7 +347,7 @@ public final class OperationsView extends VBox {
 		});
 	}
 
-	private void executeOperationIfPossible(final OperationItem item) {
+	void executeOperationIfPossible(final OperationItem item) {
 		final Trace trace = currentTrace.get();
 		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 		if (
@@ -483,7 +483,7 @@ public final class OperationsView extends VBox {
 		this.setShowUnambiguous(unambiguousToggle.isSelected());
 	}
 
-	private List<OperationItem> applyFilter(final String filter) {
+	List<OperationItem> applyFilter(final String filter) {
 		return events.stream().filter(op -> op.getPrettyName().toLowerCase().contains(filter.toLowerCase()))
 				.collect(Collectors.toList());
 	}
