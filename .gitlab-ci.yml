@@ -26,7 +26,11 @@ stages:
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
     - apt-get install --assume-yes git libpangoft2-1.0-0 pandoc xvfb
+    - Xvfb :99 &
+    - xvfb_pid="$!"
     - export DISPLAY=:99
+  after_script:
+    - kill "${xvfb_pid}"
 
 test:jdk-8-linux:
   extends: .test-linux
