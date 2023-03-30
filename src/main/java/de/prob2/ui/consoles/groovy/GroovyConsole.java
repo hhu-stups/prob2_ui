@@ -41,7 +41,14 @@ public class GroovyConsole extends Console {
 		this.groovyInterpreter = groovyInterpreter;
 		// this.groovyInterpreter.setCodeCompletion(this);
 
-		ObservableValue<Optional<Point2D>> caretPos = Bindings.createObjectBinding(() -> this.caretBoundsProperty().getValue().map(bounds -> new Point2D(bounds.getCenterX(), bounds.getMaxY())), this.caretBoundsProperty());
+		ObservableValue<Optional<Point2D>> caretPos = Bindings.createObjectBinding(
+				() -> this.caretBoundsProperty().getValue()
+						      .map(bounds -> new Point2D(
+								      (bounds.getMinX() + bounds.getMaxX()) / 2.0,
+								      bounds.getMaxY()
+						      )),
+				this.caretBoundsProperty()
+		);
 		ObservableValue<Optional<String>> textBeforeCaret = Bindings.createObjectBinding(() -> {
 			OptionalInt positionInInput = this.getPositionInInput();
 			if (positionInInput.isPresent()) {
