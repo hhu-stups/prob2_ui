@@ -27,7 +27,6 @@ public class GroovyCodeCompletionHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GroovyCodeCompletionHandler.class);
 
 	private final List<GroovyAbstractItem> currentSuggestions;
-
 	private final ObservableList<GroovyAbstractItem> suggestions;
 
 	public GroovyCodeCompletionHandler(ObservableList<GroovyAbstractItem> suggestions) {
@@ -35,7 +34,54 @@ public class GroovyCodeCompletionHandler {
 		this.currentSuggestions = new ArrayList<>();
 	}
 
-	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, ScriptEngine engine) {
+	private static boolean isNonstatic(GroovyMethodOption option, Method m) {
+		return option == GroovyMethodOption.NONSTATIC && !Modifier.isStatic(m.getModifiers());
+	}
+
+	private static boolean isStatic(GroovyMethodOption option, Method m) {
+		return option == GroovyMethodOption.STATIC && Modifier.isStatic(m.getModifiers());
+	}
+
+	private static Object getObjectFromScope(String currentLine, ScriptEngine engine) {
+		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
+		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
+		Object object = null;
+		if (currentLine.length() == 0) {
+			return null;
+		}
+		if (engineScope.containsKey(currentLine)) {
+			object = engineScope.get(currentLine);
+		} else if (globalScope.containsKey(currentLine)) {
+			object = globalScope.get(currentLine);
+		}
+		return object;
+	}
+
+	private static String[] getMethodsFromCurrentLine(String currentLine) {
+		String currentInstruction = currentLine;
+		if (!currentInstruction.contains(".")) {
+			return new String[] {};
+		}
+		currentInstruction = currentInstruction.replaceAll("\\s", "");
+		currentInstruction = currentInstruction.replaceAll("=", ";");
+		currentInstruction = splitBraces(currentInstruction);
+		String[] currentObjects = currentInstruction.split(";");
+		return currentObjects[currentObjects.length - 1].split("\\.");
+	}
+
+	private static String splitBraces(String currentInstruction) {
+		StringBuilder result = new StringBuilder();
+		for (int i = 1; i < currentInstruction.length(); i++) {
+			if (currentInstruction.charAt(i - 1) == '(' && currentInstruction.charAt(i) != ')') {
+				result.append(";");
+			} else {
+				result.append(currentInstruction.charAt(i - 1));
+			}
+		}
+		return result.toString();
+	}
+
+	public void handleMethodsFromObjects(String currentLine, ScriptEngine engine) {
 		String[] methods = getMethodsFromCurrentLine(currentLine);
 		if (methods.length == 0) {
 			return;
@@ -58,12 +104,9 @@ public class GroovyCodeCompletionHandler {
 			}
 		}
 		showSuggestions(clazz, GroovyMethodOption.NONSTATIC);
-		/*if (action == CodeCompletionTriggerAction.TRIGGER) {
-			refresh(currentSuggestion);
-		}*/
 	}
 
-	public void handleStaticClasses(String currentLine, String currentSuggestion) {
+	public void handleStaticClasses(String currentLine) {
 		final String[] methods = getMethodsFromCurrentLine(currentLine);
 		if (methods.length == 0) {
 			return;
@@ -86,18 +129,11 @@ public class GroovyCodeCompletionHandler {
 				classNameBuilder.append(methods[i]);
 			}
 		}
-		/*if (action == CodeCompletionTriggerAction.TRIGGER) {
-			refresh(currentSuggestion);
-		}*/
 	}
 
-	public void handleObjects(String currentSuggestion, ScriptEngine engine) {
-		/*if (action == CodeCompletionTriggerAction.TRIGGER && suggestions.isEmpty()) {
-			currentSuggestions.clear();
-			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
-			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
-			refresh(currentSuggestion);
-		}*/
+	public void handleObjects(ScriptEngine engine) {
+		fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
+		fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
 	}
 
 	private void fillAllMethodsAndProperties(Class<?> clazz, GroovyMethodOption option) {
@@ -129,14 +165,6 @@ public class GroovyCodeCompletionHandler {
 		}
 	}
 
-	private boolean isNonstatic(GroovyMethodOption option, Method m) {
-		return option == GroovyMethodOption.NONSTATIC && !Modifier.isStatic(m.getModifiers());
-	}
-
-	private boolean isStatic(GroovyMethodOption option, Method m) {
-		return option == GroovyMethodOption.STATIC && Modifier.isStatic(m.getModifiers());
-	}
-
 	private void showSuggestions(Class<?> clazz, GroovyMethodOption option) {
 		currentSuggestions.clear();
 		suggestions.clear();
@@ -146,7 +174,6 @@ public class GroovyCodeCompletionHandler {
 		suggestions.addAll(currentSuggestions);
 	}
 
-
 	public void refresh(String filter) {
 		suggestions.clear();
 		for (GroovyAbstractItem suggestion : currentSuggestions) {
@@ -154,50 +181,5 @@ public class GroovyCodeCompletionHandler {
 				suggestions.add(suggestion);
 			}
 		}
-	}
-
-
-	private Object getObjectFromScope(String currentLine, ScriptEngine engine) {
-		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
-		Object object = null;
-		if (currentLine.length() == 0) {
-			return null;
-		}
-		if (engineScope.containsKey(currentLine)) {
-			object = engineScope.get(currentLine);
-		} else if (globalScope.containsKey(currentLine)) {
-			object = globalScope.get(currentLine);
-		}
-		return object;
-	}
-
-
-	private String[] getMethodsFromCurrentLine(String currentLine) {
-		String currentInstruction = currentLine;
-		if (!currentInstruction.contains(".")) {
-			return new String[] {};
-		}
-		currentInstruction = currentInstruction.replaceAll("\\s", "");
-		currentInstruction = currentInstruction.replaceAll("=", ";");
-		currentInstruction = splitBraces(currentInstruction);
-		String[] currentObjects = currentInstruction.split(";");
-		return currentObjects[currentObjects.length - 1].split("\\.");
-	}
-
-	private String splitBraces(String currentInstruction) {
-		StringBuilder result = new StringBuilder();
-		for (int i = 1; i < currentInstruction.length(); i++) {
-			if (currentInstruction.charAt(i - 1) == '(' && currentInstruction.charAt(i) != ')') {
-				result.append(";");
-			} else {
-				result.append(currentInstruction.charAt(i - 1));
-			}
-		}
-		return result.toString();
-	}
-
-	public void clear() {
-		currentSuggestions.clear();
 	}
 }

@@ -84,6 +84,10 @@ exports += [
 		"javafx.graphics/com.sun.javafx.css",
 ]
 
+exports += [
+		"javafx.base/com.sun.javafx.event",
+]
+
 application {
 	// Our actual application class is de.prob2.ui.ProB2.
 	// See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
