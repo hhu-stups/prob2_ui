@@ -139,9 +139,9 @@ public class SimulationChoosingStage extends Stage {
 
 	private Map<String, Object> extractInformation() {
 		Map<String, Object> information = new HashMap<>();
-		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
-			information.putAll(simulationMonteCarloChoice.extractInformation());
-		}
+
+		information.putAll(simulationMonteCarloChoice.extractInformation());
+
 		if(simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationMonteCarloChoice.checkProperty()) {
 			SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
 			information.putAll(simulationPropertyChoice.extractInformation());
@@ -175,9 +175,7 @@ public class SimulationChoosingStage extends Stage {
 			inputBox.getChildren().add(0, simulationPropertyChoice);
 		}
 
-		if(mode == SimulationMode.Mode.MONTE_CARLO) {
-			inputBox.getChildren().add(0, simulationMonteCarloChoice);
-		} // ELSE BLACK_BOX
+		inputBox.getChildren().add(0, simulationMonteCarloChoice);
 
 		// Change order so that validation task id is always at the bottom
 	}

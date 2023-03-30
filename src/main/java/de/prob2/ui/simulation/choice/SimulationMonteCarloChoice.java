@@ -4,8 +4,11 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.simulation.SimulationMode;
 import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import javafx.beans.NamedArg;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -97,6 +100,9 @@ public class SimulationMonteCarloChoice extends GridPane {
 	private SimulationChoosingStage choosingStage;
 
 	@FXML
+	private Label lbSimulations;
+
+	@FXML
 	private TextField tfSimulations;
 
 	@FXML
@@ -151,22 +157,37 @@ public class SimulationMonteCarloChoice extends GridPane {
 	private ChoiceBox<SimulationEndingItem> endingChoice;
 
 	@FXML
+	private Label lbCheckProperty;
+
+	@FXML
 	private CheckBox cbCheckProperty;
 
 	private final I18n i18n;
 
+	private final SimulationMode simulationMode;
+
 
 	@Inject
-	private SimulationMonteCarloChoice(final StageManager stageManager, final I18n i18n) {
+	private SimulationMonteCarloChoice(final StageManager stageManager, final I18n i18n, final SimulationMode simulationMode) {
 		super();
-		stageManager.loadFXML(this, "simulation_monte_carlo_choice.fxml");
 		this.i18n = i18n;
+		this.simulationMode = simulationMode;
+		stageManager.loadFXML(this, "simulation_monte_carlo_choice.fxml");
 	}
 
 	@FXML
 	private void initialize() {
 		tfMaxStepsBeforeProperty.visibleProperty().bind(cbMaxStepsBeforeProperty.selectedProperty());
+		lbCheckProperty.visibleProperty().bind(Bindings.createBooleanBinding(() -> simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO, simulationMode.modeProperty()));
+		cbCheckProperty.visibleProperty().bind(Bindings.createBooleanBinding(() -> simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO, simulationMode.modeProperty()));
+		lbSimulations.visibleProperty().bind(Bindings.createBooleanBinding(() -> simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO, simulationMode.modeProperty()));
+		tfSimulations.visibleProperty().bind(Bindings.createBooleanBinding(() -> simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO, simulationMode.modeProperty()));
+
 		startingChoice.visibleProperty().bind(cbStartingChoice.selectedProperty());
+		cbStartingChoice.selectedProperty().addListener((observable, from, to) -> {
+			startingChoice.getSelectionModel().clearSelection();
+			startingChoice.getSelectionModel().select(startingChoice.getSelectionModel().getSelectedItem());
+		});
 		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.getChildren().removeAll(lbStartAfter, tfStartAfter, lbStartingPredicate, tfStartingPredicate, lbStartingTime, tfStartingTime);
 			if(to != null) {
@@ -314,7 +335,9 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 	public Map<String, Object> extractInformation() {
 		Map<String, Object> information = new HashMap<>();
-		information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
+			information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
+		}
 		information.put("MAX_STEPS_BEFORE_PROPERTY", cbMaxStepsBeforeProperty.isSelected() ? Integer.parseInt(tfMaxStepsBeforeProperty.getText()): 0);
 
 		SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();
