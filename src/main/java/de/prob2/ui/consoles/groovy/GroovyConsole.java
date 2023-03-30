@@ -39,7 +39,6 @@ public class GroovyConsole extends Console {
 	private GroovyConsole(StageManager stageManager, GroovyInterpreter groovyInterpreter, I18n i18n, Config config) {
 		super(i18n, groovyInterpreter, "consoles.groovy.header", "consoles.groovy.prompt");
 		this.groovyInterpreter = groovyInterpreter;
-		// this.groovyInterpreter.setCodeCompletion(this);
 
 		ObservableValue<Optional<Point2D>> caretPos = Bindings.createObjectBinding(
 				() -> this.caretBoundsProperty().getValue()
