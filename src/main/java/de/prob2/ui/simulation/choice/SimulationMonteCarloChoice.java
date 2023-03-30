@@ -184,6 +184,10 @@ public class SimulationMonteCarloChoice extends GridPane {
 		tfSimulations.visibleProperty().bind(Bindings.createBooleanBinding(() -> simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO, simulationMode.modeProperty()));
 
 		startingChoice.visibleProperty().bind(cbStartingChoice.selectedProperty());
+		cbStartingChoice.selectedProperty().addListener((observable, from, to) -> {
+			startingChoice.getSelectionModel().clearSelection();
+			startingChoice.getSelectionModel().select(startingChoice.getSelectionModel().getSelectedItem());
+		});
 		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.getChildren().removeAll(lbStartAfter, tfStartAfter, lbStartingPredicate, tfStartingPredicate, lbStartingTime, tfStartingTime);
 			if(to != null) {
