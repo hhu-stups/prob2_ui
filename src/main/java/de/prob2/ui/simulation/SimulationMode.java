@@ -8,7 +8,7 @@ import javafx.beans.property.SimpleObjectProperty;
 @Singleton
 public class SimulationMode {
 
-	public static enum Mode {
+	public enum Mode {
 		MONTE_CARLO,
 		BLACK_BOX
 	}

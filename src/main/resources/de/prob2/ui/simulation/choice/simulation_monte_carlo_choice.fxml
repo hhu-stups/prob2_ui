@@ -45,7 +45,7 @@
 
 	<Text text="%simulation.choice.header.montecarlo" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-	<Label text="%simulation.choice.numberSimulations" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+	<Label fx:id="lbSimulations" text="%simulation.choice.numberSimulations" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 	<TextField fx:id="tfSimulations" GridPane.rowIndex="2" GridPane.columnIndex="2"/>
 
 	<CheckBox fx:id="cbMaxStepsBeforeProperty" text="%simulation.choice.maxStepsBeforeProperty" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
@@ -74,6 +74,6 @@
 		</items>
 	</ChoiceBox>
 
-	<Label text="%simulation.choice.checkProperty" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+	<Label fx:id="lbCheckProperty" text="%simulation.choice.checkProperty" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
 	<CheckBox fx:id="cbCheckProperty" GridPane.rowIndex="8" GridPane.columnIndex="2"/>
 </fx:root>
