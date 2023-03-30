@@ -331,7 +331,9 @@ public class SimulationMonteCarloChoice extends GridPane {
 
 	public Map<String, Object> extractInformation() {
 		Map<String, Object> information = new HashMap<>();
-		information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
+		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
+			information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
+		}
 		information.put("MAX_STEPS_BEFORE_PROPERTY", cbMaxStepsBeforeProperty.isSelected() ? Integer.parseInt(tfMaxStepsBeforeProperty.getText()): 0);
 
 		SimulationStartingItem startingItem = startingChoice.getSelectionModel().getSelectedItem();

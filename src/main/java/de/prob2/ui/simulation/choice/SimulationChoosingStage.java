@@ -139,9 +139,9 @@ public class SimulationChoosingStage extends Stage {
 
 	private Map<String, Object> extractInformation() {
 		Map<String, Object> information = new HashMap<>();
-		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO) {
-			information.putAll(simulationMonteCarloChoice.extractInformation());
-		}
+
+		information.putAll(simulationMonteCarloChoice.extractInformation());
+
 		if(simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationMonteCarloChoice.checkProperty()) {
 			SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
 			information.putAll(simulationPropertyChoice.extractInformation());
