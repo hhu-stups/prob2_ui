@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -36,7 +37,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -63,6 +66,7 @@ import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
 public class TraceTestView extends Stage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceTestView.class);
+	private boolean postconditionsChanged = false;
 
 	private class TracePositionHighlightCell<S, T> extends TableCell<S, T> {
 		private TracePositionHighlightCell() {
@@ -353,6 +357,15 @@ public class TraceTestView extends Stage {
 		}
 	}
 
+	private boolean confirmCancel() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+			"common.alerts.unsavedTraceChanges.header",
+			"common.alerts.unsavedTraceChanges.content");
+		alert.initOwner(null);
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
+	}
+
 	@FXML
 	private void applyTest() {
 		this.saveTrace();
@@ -363,11 +376,10 @@ public class TraceTestView extends Stage {
 	public void saveTrace() {
 		List<PersistentTransition> transitions = replayTrace.get().getLoadedTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
-			List<Postcondition> nonEmptyConditions = postconditions.get(i)
-					.stream()
-					.filter(p-> !(p.toString().contains("operation = , predicate = }")
-								|| p.toString().contains("Predicate{predicate = ")))
-					.collect(Collectors.toList());
+			List<Postcondition> nonEmptyConditions = postconditions.get(i).stream()
+				.filter(p-> !(p.toString().contains("operation = , predicate = }")))
+				.filter(p-> !(p.toString().contains("Predicate{predicate = }")))
+				.collect(Collectors.toList());
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
 			transition.getPostconditions().addAll(nonEmptyConditions);
@@ -413,6 +425,7 @@ public class TraceTestView extends Stage {
 		btRemoveTest.setOnMouseClicked(e2 -> {
 			box.getChildren().remove(innerBox);
 			postconditions.get(index).remove(postcondition);
+			this.postconditionsChanged = true;
 		});
 		return btRemoveTest;
 	}
@@ -444,6 +457,7 @@ public class TraceTestView extends Stage {
 					if (to != null) {
 						((PostconditionPredicate) postcondition).setPredicate(to);
 					}
+					this.postconditionsChanged = true;
 				});
 				break;
 			}
@@ -455,6 +469,7 @@ public class TraceTestView extends Stage {
 					if (to != null) {
 						((OperationExecutability) postcondition).setOperation(to);
 					}
+					this.postconditionsChanged = true;
 				});
 				break;
 			}
@@ -476,18 +491,21 @@ public class TraceTestView extends Stage {
 			postconditions.get(index).add(postcondition);
 			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 			box.getChildren().add(box.getChildren().size() - 1, innerBox);
+			this.postconditionsChanged = true;
 		});
 		addOperationEnabled.setOnAction(e1 -> {
 			OperationEnabledness postcondition = new OperationEnabledness();
 			postconditions.get(index).add(postcondition);
 			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 			box.getChildren().add(box.getChildren().size() - 1, innerBox);
+			this.postconditionsChanged = true;
 		});
 		addOperationDisabled.setOnAction(e1 -> {
 			OperationDisabledness postcondition = new OperationDisabledness();
 			postconditions.get(index).add(postcondition);
 			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 			box.getChildren().add(box.getChildren().size() - 1, innerBox);
+			this.postconditionsChanged = true;
 		});
 
 		btAddTest.getItems().add(addPredicate);
@@ -539,9 +557,13 @@ public class TraceTestView extends Stage {
 
 	@FXML
 	void cancel() {
+		if (postconditionsChanged) {
+			if (!confirmCancel()) {
+				return;
+			}
+		}
 		this.close();
 	}
-
 	@FXML
 	void handleTraceDescription() {
 		if (vBox.getChildren().stream().anyMatch(p -> p instanceof DescriptionView)) {
