@@ -72,6 +72,7 @@ exports += [
 		"javafx.graphics/com.sun.glass.ui",
 		"javafx.graphics/com.sun.javafx.menu",
 		"javafx.graphics/com.sun.javafx.tk",
+		"javafx.base/com.sun.javafx.collections"
 ]
 opens += [
 		"javafx.graphics/com.sun.glass.ui.mac",
