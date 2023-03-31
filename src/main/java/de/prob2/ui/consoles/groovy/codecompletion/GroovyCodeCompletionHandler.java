@@ -131,9 +131,11 @@ public class GroovyCodeCompletionHandler {
 		}
 	}
 
-	public void handleObjects(ScriptEngine engine) {
-		fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
-		fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
+	public void handleObjectsFromEngineScopes(String currentPrefix, ScriptEngine engine) {
+		if (currentPrefix.isEmpty()) {
+			fillObjectsFromBindings(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
+			fillObjectsFromBindings(engine.getBindings(ScriptContext.ENGINE_SCOPE));
+		}
 	}
 
 	private void fillAllMethodsAndProperties(Class<?> clazz, GroovyMethodOption option) {
@@ -143,15 +145,13 @@ public class GroovyCodeCompletionHandler {
 		GroovyClassHandler.handleProperties(clazz, currentSuggestions);
 	}
 
-	public void fillObjects(Bindings bindings) {
-		suggestions.clear();
+	private void fillObjectsFromBindings(Bindings bindings) {
 		for (final Map.Entry<String, Object> entry : bindings.entrySet()) {
 			if (entry == null || entry.getKey() == null || entry.getValue() == null) {
 				continue;
 			}
 			currentSuggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null));
 		}
-		suggestions.addAll(currentSuggestions);
 	}
 
 	private void fillMethodsAndProperties(Class<?> clazz, GroovyMethodOption option) {

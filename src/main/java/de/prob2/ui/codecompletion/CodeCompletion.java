@@ -64,19 +64,22 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 
 	public void trigger() {
 		System.out.println("CodeCompletion.trigger");
-
-		update();
-		if (isShowing() || this.lvSuggestions.getItems().isEmpty()) {
+		if (this.isShowing()) {
 			return;
 		}
 
-		lvSuggestions.getSelectionModel().selectFirst();
+		this.recalculateAnchorPosition();
+		this.show(this.parent.getWindow());
 
-		recalculateAnchorPosition();
-		show(parent.getWindow());
+		this.update();
+		this.lvSuggestions.getSelectionModel().selectFirst();
 	}
 
 	private void update() {
+		if (!this.isShowing()) {
+			return;
+		}
+
 		Optional<String> text = this.parent.getTextBeforeCaret().getValue();
 		if (text.isPresent()) {
 			Collection<? extends T> suggestions = this.codeCompletionProvider.call(text.get());
@@ -97,6 +100,7 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 	public void hide() {
 		System.out.println("CodeCompletion.hide");
 		super.hide();
+		this.lvSuggestions.getItems().clear();
 	}
 
 	private static String keyEventToString(KeyEvent e) {
@@ -145,7 +149,7 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 		switch (event.getCode()) {
 			case TAB:
 			case ENTER:
-				doCompletion(this.lvSuggestions.getSelectionModel().getSelectedItem());
+				this.doCompletion(this.lvSuggestions.getSelectionModel().getSelectedItem());
 				break;
 			case ESCAPE:
 				if (this.isHideOnEscape()) {
@@ -158,7 +162,7 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 	private void onMouseClicked(MouseEvent event) {
 		System.out.println("CodeCompletion.ListView.onMouseClicked");
 		if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
-			doCompletion(this.lvSuggestions.getSelectionModel().getSelectedItem());
+			this.doCompletion(this.lvSuggestions.getSelectionModel().getSelectedItem());
 		}
 	}
 
@@ -168,7 +172,7 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 			return;
 		}
 
-		codeCompletionCallback.accept(selectedItem);
+		this.codeCompletionCallback.accept(selectedItem);
 		this.hide();
 	}
 }

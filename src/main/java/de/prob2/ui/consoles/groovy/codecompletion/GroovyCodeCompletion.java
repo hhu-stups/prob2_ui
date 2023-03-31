@@ -3,10 +3,15 @@ package de.prob2.ui.consoles.groovy.codecompletion;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 
 import de.prob2.ui.codecompletion.CCItemTest;
+import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
+
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 public class GroovyCodeCompletion {
 
@@ -68,16 +73,20 @@ public class GroovyCodeCompletion {
 
 	public Collection<? extends CCItemTest> getSuggestions(String text) {
 		String currentPrefix = extractPrefix(text);
-		return Collections.singletonList(new CCItemTest("'" + currentPrefix + "'"));
+		System.out.println("GroovyCodeCompletion.getSuggestions: prefix=" + currentPrefix);
+		if (currentPrefix.startsWith(".")) {
+			// if the current expression starts with a dot it is probably malformed, return nothing
+			return Collections.emptyList();
+		}
 
-		/*ObservableList<GroovyAbstractItem> suggestions = FXCollections.observableArrayList();
+		ObservableList<GroovyAbstractItem> suggestions = FXCollections.observableArrayList();
 		GroovyCodeCompletionHandler completionHandler = new GroovyCodeCompletionHandler(suggestions);
-		completionHandler.handleMethodsFromObjects(currentPrefix, engine);
+		completionHandler.handleObjectsFromEngineScopes(currentPrefix, engine);
 		completionHandler.handleStaticClasses(currentPrefix);
-		completionHandler.handleObjects(engine);
+		completionHandler.handleMethodsFromObjects(currentPrefix, engine);
 		completionHandler.refresh(currentPrefix);
 		return suggestions.stream()
 				       .map(x -> new CCItemTest(x.getNameAndParams()))
-				       .collect(Collectors.toList());*/
+				       .collect(Collectors.toList());
 	}
 }
