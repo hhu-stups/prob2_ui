@@ -4,7 +4,6 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.sharedviews.NavigationButtons?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.visb.VisBStage?>
 <?import javafx.geometry.Insets?>
@@ -119,7 +118,7 @@
 							</Button>
 							<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							<Spacer/>
-							<NavigationButtons/>
+							<fx:include source="../sharedviews/navigation_buttons.fxml"/>
 							<Spacer/>
 							<TraceReplayMenuButton/>
 							<Button fx:id="openSimulationButton" onAction="#openSimulation">

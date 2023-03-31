@@ -1,22 +1,20 @@
 package de.prob2.ui.sharedviews;
 
 import com.google.inject.Inject;
+
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
-import javafx.scene.layout.HBox;
 
-@FXMLInjected
-public final class NavigationButtons extends HBox {
+public final class NavigationButtonsController {
 	@FXML private Button backButton;
 	@FXML private Button fastBackButton;
 	@FXML private Button forwardButton;
@@ -28,12 +26,10 @@ public final class NavigationButtons extends HBox {
 	private final RealTimeSimulator realTimeSimulator;
 
 	@Inject
-	private NavigationButtons(final StageManager stageManager, final CurrentTrace currentTrace, final RealTimeSimulator realTimeSimulator) {
+	private NavigationButtonsController(final CurrentTrace currentTrace, final RealTimeSimulator realTimeSimulator) {
 		super();
 		this.currentTrace = currentTrace;
 		this.realTimeSimulator = realTimeSimulator;
-
-		stageManager.loadFXML(this, "navigation_buttons.fxml");
 	}
 
 	@FXML

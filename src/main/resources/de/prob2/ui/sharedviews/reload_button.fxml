@@ -2,9 +2,9 @@
 
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.sharedviews.ReloadButton?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Tooltip?>
-<fx:root type="ReloadButton" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
+<Button xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.sharedviews.ReloadButton" fx:id="button" stylesheets="@/prob.css">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
@@ -14,4 +14,4 @@
 	<tooltip>
 		<Tooltip text="%internal.navigationButtons.reload.tooltip"/>
 	</tooltip>
-</fx:root>
+</Button>

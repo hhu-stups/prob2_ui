@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.MenuItem?>
-<fx:root type="MenuItem" text="%menu.window.items.closeWindow" accelerator="Shortcut+W" onAction="#handleCloseWindow" xmlns:fx="http://javafx.com/fxml/1"/>
+<MenuItem
+	xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="de.prob2.ui.sharedviews.CloseWindowMenuItemController"
+	text="%menu.window.items.closeWindow"
+	accelerator="Shortcut+W"
+	onAction="#handleCloseWindow"
+/>
