@@ -511,7 +511,7 @@ public class TraceTestView extends Stage {
 		statusIcon.setPrefHeight(fontSize.getFontSize());
 		statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
 
-		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
+		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace() == null ? new ArrayList<>() : replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
 		if (transitionErrorMessages.size() <= index || isNewBox) {
 			statusIcon.setChecked(Checked.NOT_CHECKED);
 		} else {
