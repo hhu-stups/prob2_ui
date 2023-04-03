@@ -34,7 +34,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
-import de.prob2.ui.sharedviews.RefactorButton;
 import de.prob2.ui.verifications.CheckedIcon;
 import de.prob2.ui.verifications.ExecutionContext;
 
@@ -139,8 +138,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private MenuButton loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
-	@FXML
-	private RefactorButton refactorButton;
 	@FXML
 	private SplitPane splitPane;
 	private boolean showDescription;

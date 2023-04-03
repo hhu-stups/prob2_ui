@@ -2,9 +2,9 @@
 
 <?import de.prob2.ui.dynamic.dotty.DotView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.sharedviews.CloseWindowMenuItem?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
@@ -14,7 +14,10 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
@@ -22,10 +25,6 @@
 <?import javafx.scene.Scene?>
 <?import javafx.scene.web.WebView?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import de.prob2.ui.internal.ExtendedCodeArea?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.Tooltip?>
 <fx:root type="DotView" title="%dotty.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -43,7 +42,7 @@
 							<MenuItem fx:id="zoomOutMenuButton" text="%menu.view.items.zoomOut" visible="false" onAction="#zoomOut" />
 							<MenuItem fx:id="fakeZoomOutMenuButton" text="%menu.view.items.zoomOut" accelerator="Shortcut+'-'" onAction="#zoomOut" />
 							<SeparatorMenuItem/>
-							<CloseWindowMenuItem/>
+							<fx:include source="../../sharedviews/close_window_menu_item.fxml"/>
 						</Menu>
 					</MenuBar>
 				</top>
