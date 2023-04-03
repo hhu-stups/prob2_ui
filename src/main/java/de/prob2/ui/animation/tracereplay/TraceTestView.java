@@ -66,7 +66,6 @@ import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
 public class TraceTestView extends Stage {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceTestView.class);
-	private boolean postconditionsChanged = false;
 
 	private class TracePositionHighlightCell<S, T> extends TableCell<S, T> {
 		private TracePositionHighlightCell() {
@@ -359,8 +358,8 @@ public class TraceTestView extends Stage {
 
 	private boolean confirmCancel() {
 		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-			"common.alerts.unsavedTraceChanges.header",
-			"common.alerts.unsavedTraceChanges.content");
+			"common.alerts.traceChanges.header",
+			"common.alerts.cancelTraceChanges.content");
 		alert.initOwner(null);
 		Optional<ButtonType> result = alert.showAndWait();
 		return result.isPresent() && ButtonType.OK.equals(result.get());
@@ -368,6 +367,11 @@ public class TraceTestView extends Stage {
 
 	@FXML
 	private void applyTest() {
+		if (postconditionsChanged()) {
+			if (!confirmApply()) {
+				return;
+			}
+		}
 		this.saveTrace();
 		cliExecutor.submit(() -> injector.getInstance(TraceChecker.class).check(replayTrace.get()));
 		this.close();
@@ -376,13 +380,9 @@ public class TraceTestView extends Stage {
 	public void saveTrace() {
 		List<PersistentTransition> transitions = replayTrace.get().getLoadedTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
-			List<Postcondition> nonEmptyConditions = postconditions.get(i).stream()
-				.filter(p-> !(p.toString().contains("operation = , predicate = }")))
-				.filter(p-> !(p.toString().contains("Predicate{predicate = }")))
-				.collect(Collectors.toList());
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
-			transition.getPostconditions().addAll(nonEmptyConditions);
+			transition.getPostconditions().addAll(postconditions.get(i));
 			transition.setDescription(descriptions.get(i));
 		}
 
@@ -425,7 +425,6 @@ public class TraceTestView extends Stage {
 		btRemoveTest.setOnMouseClicked(e2 -> {
 			box.getChildren().remove(innerBox);
 			postconditions.get(index).remove(postcondition);
-			this.postconditionsChanged = true;
 		});
 		return btRemoveTest;
 	}
@@ -457,7 +456,6 @@ public class TraceTestView extends Stage {
 					if (to != null) {
 						((PostconditionPredicate) postcondition).setPredicate(to);
 					}
-					this.postconditionsChanged = true;
 				});
 				break;
 			}
@@ -469,7 +467,6 @@ public class TraceTestView extends Stage {
 					if (to != null) {
 						((OperationExecutability) postcondition).setOperation(to);
 					}
-					this.postconditionsChanged = true;
 				});
 				break;
 			}
@@ -491,21 +488,18 @@ public class TraceTestView extends Stage {
 			postconditions.get(index).add(postcondition);
 			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 			box.getChildren().add(box.getChildren().size() - 1, innerBox);
-			this.postconditionsChanged = true;
 		});
 		addOperationEnabled.setOnAction(e1 -> {
 			OperationEnabledness postcondition = new OperationEnabledness();
 			postconditions.get(index).add(postcondition);
 			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 			box.getChildren().add(box.getChildren().size() - 1, innerBox);
-			this.postconditionsChanged = true;
 		});
 		addOperationDisabled.setOnAction(e1 -> {
 			OperationDisabledness postcondition = new OperationDisabledness();
 			postconditions.get(index).add(postcondition);
 			final HBox innerBox = buildInnerBox(box, postcondition, true, index, postconditions.get(index).size());
 			box.getChildren().add(box.getChildren().size() - 1, innerBox);
-			this.postconditionsChanged = true;
 		});
 
 		btAddTest.getItems().add(addPredicate);
@@ -557,13 +551,23 @@ public class TraceTestView extends Stage {
 
 	@FXML
 	void cancel() {
-		if (postconditionsChanged) {
+		if (postconditionsChanged()) {
 			if (!confirmCancel()) {
 				return;
 			}
 		}
 		this.close();
 	}
+
+	private boolean postconditionsChanged() {
+		for (int i = 0; i <postconditions.size(); i++){
+			if(!postconditions.get(i).equals(replayTrace.get().getLoadedTrace().getTransitionList().get(i).getPostconditions())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@FXML
 	void handleTraceDescription() {
 		if (vBox.getChildren().stream().anyMatch(p -> p instanceof DescriptionView)) {
@@ -578,4 +582,13 @@ public class TraceTestView extends Stage {
 		vBox.getChildren().add(1, descriptionView);
 	}
 
-}
+
+	private boolean confirmApply() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+			"common.alerts.unsavedTraceChanges.header",
+			"common.alerts.applyTraceChanges.content");
+		alert.initOwner(null);
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
+	}
+	}
