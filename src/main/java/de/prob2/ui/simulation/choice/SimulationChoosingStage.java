@@ -183,7 +183,10 @@ public class SimulationChoosingStage extends Stage {
 		}
 
 		inputBox.getChildren().add(0, simulationConditionChoice);
-		inputBox.getChildren().add(0, simulationMonteCarloChoice);
+
+		if(mode == SimulationMode.Mode.MONTE_CARLO) {
+			inputBox.getChildren().add(0, simulationMonteCarloChoice);
+		}
 
 		// Change order so that validation task id is always at the bottom
 	}
