@@ -75,6 +75,10 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 			this.itemBox.getChildren().add(lbExecutions);
 		}
 
+		Label lbConditions = new Label(i18n.translate("simulation.task.condition"));
+		lbConditions.getStyleClass().add("id");
+		this.itemBox.getChildren().add(lbConditions);
+
 		if(information.containsKey("MAX_STEPS_BEFORE_PROPERTY") && (int) information.get("MAX_STEPS_BEFORE_PROPERTY") > 0) {
 			Label lbMaxStepsBeforeProperty = new Label(i18n.translate("simulation.task.stepsBeforeStart", information.get("MAX_STEPS_BEFORE_PROPERTY")));
 			lbMaxStepsBeforeProperty.getStyleClass().add("information");
