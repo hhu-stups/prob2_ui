@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -36,7 +37,9 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -353,8 +356,22 @@ public class TraceTestView extends Stage {
 		}
 	}
 
+	private boolean confirmCancel() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+			"common.alerts.traceChanges.header",
+			"common.alerts.cancelTraceChanges.content");
+		alert.initOwner(null);
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
+	}
+
 	@FXML
 	private void applyTest() {
+		if (postconditionsChanged()) {
+			if (!confirmApply()) {
+				return;
+			}
+		}
 		this.saveTrace();
 		cliExecutor.submit(() -> injector.getInstance(TraceChecker.class).check(replayTrace.get()));
 		this.close();
@@ -363,14 +380,9 @@ public class TraceTestView extends Stage {
 	public void saveTrace() {
 		List<PersistentTransition> transitions = replayTrace.get().getLoadedTrace().getTransitionList();
 		for(int i = 0; i < transitions.size(); i++) {
-			List<Postcondition> nonEmptyConditions = postconditions.get(i)
-					.stream()
-					.filter(p-> !(p.toString().contains("operation = , predicate = }")
-								|| p.toString().contains("Predicate{predicate = ")))
-					.collect(Collectors.toList());
 			PersistentTransition transition = transitions.get(i);
 			transition.getPostconditions().clear();
-			transition.getPostconditions().addAll(nonEmptyConditions);
+			transition.getPostconditions().addAll(postconditions.get(i));
 			transition.setDescription(descriptions.get(i));
 		}
 
@@ -511,7 +523,7 @@ public class TraceTestView extends Stage {
 		statusIcon.setPrefHeight(fontSize.getFontSize());
 		statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
 
-		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
+		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace() == null ? new ArrayList<>() : replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
 		if (transitionErrorMessages.size() <= index || isNewBox) {
 			statusIcon.setChecked(Checked.NOT_CHECKED);
 		} else {
@@ -539,7 +551,21 @@ public class TraceTestView extends Stage {
 
 	@FXML
 	void cancel() {
+		if (postconditionsChanged()) {
+			if (!confirmCancel()) {
+				return;
+			}
+		}
 		this.close();
+	}
+
+	private boolean postconditionsChanged() {
+		for (int i = 0; i <postconditions.size(); i++){
+			if(!postconditions.get(i).equals(replayTrace.get().getLoadedTrace().getTransitionList().get(i).getPostconditions())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@FXML
@@ -556,4 +582,13 @@ public class TraceTestView extends Stage {
 		vBox.getChildren().add(1, descriptionView);
 	}
 
-}
+
+	private boolean confirmApply() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+			"common.alerts.unsavedTraceChanges.header",
+			"common.alerts.applyTraceChanges.content");
+		alert.initOwner(null);
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
+	}
+	}

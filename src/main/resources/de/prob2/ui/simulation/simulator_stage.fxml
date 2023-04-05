@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
-<?import de.prob2.ui.sharedviews.NavigationButtons?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.simulation.SimulatorStage?>
 <?import javafx.geometry.Insets?>
@@ -22,7 +22,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import de.prob2.ui.helpsystem.HelpButton?>
 <fx:root title="Simulator" type="SimulatorStage" width="1200" height="500" minHeight="500" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -72,7 +71,7 @@
 									</Button>
 								</InterruptIfRunningButton>
 								<Spacer/>
-								<NavigationButtons/>
+								<fx:include source="../sharedviews/navigation_buttons.fxml"/>
 								<Spacer/>
 								<Label fx:id="lbTime" prefWidth="${fontSize.fontSize * 10}"  textAlignment="RIGHT"/>
 								<Button fx:id="btAddSimulation" disable="true"

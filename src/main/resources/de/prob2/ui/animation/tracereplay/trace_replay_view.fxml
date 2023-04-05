@@ -5,19 +5,17 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
-<?import de.prob2.ui.sharedviews.RefactorButton?>
-<?import de.prob2.ui.sharedviews.ReloadButton?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.control.MenuItem?>
 <fx:root type="TraceReplayView" fitToHeight="true" fitToWidth="true"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -42,8 +40,8 @@
 					</Button>
 				</InterruptIfRunningButton>
 				<Spacer/>
-				<RefactorButton fx:id="refactorButton" HBox.hgrow="NEVER" />
-				<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
+				<fx:include source="../../sharedviews/refactor_button.fxml" HBox.hgrow="NEVER" />
+				<fx:include source="../../sharedviews/reload_button.fxml" fx:id="reloadButton" HBox.hgrow="NEVER" />
 				<MenuButton fx:id="loadTraceButton">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />

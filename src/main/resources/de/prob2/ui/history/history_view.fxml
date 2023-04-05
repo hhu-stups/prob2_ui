@@ -5,7 +5,6 @@
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.sharedviews.NavigationButtons?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Label?>
@@ -24,7 +23,7 @@
 		<padding>
 			<Insets left="5.0"/>
 		</padding>
-		<NavigationButtons/>
+		<fx:include source="../sharedviews/navigation_buttons.fxml"/>
 		<Spacer/>
 		<TraceReplayMenuButton/>
 		<MenuButton fx:id="saveTraceButton">

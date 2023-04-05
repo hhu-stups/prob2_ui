@@ -2,12 +2,10 @@
 
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
-<?import de.prob2.ui.sharedviews.NavigationButtons?>
-<?import de.prob2.ui.sharedviews.ReloadButton?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
-<fx:root type="NavigationButtons" stylesheets="@/prob.css" alignment="CENTER_LEFT" xmlns:fx="http://javafx.com/fxml/1">
+<HBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.sharedviews.NavigationButtonsController" stylesheets="@/prob.css" alignment="CENTER_LEFT">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
@@ -43,5 +41,5 @@
 			<Tooltip text="%internal.navigationButtons.fastForward.tooltip"/>
 		</tooltip>
 	</Button>
-	<ReloadButton fx:id="reloadButton" HBox.hgrow="NEVER" />
-</fx:root>
+	<fx:include source="reload_button.fxml" HBox.hgrow="NEVER" />
+</HBox>
