@@ -15,10 +15,6 @@ import de.prob2.ui.visb.VisBStage;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
-import org.apache.velocity.exception.MethodInvocationException;
-import org.apache.velocity.exception.ParseErrorException;
-import org.apache.velocity.exception.ResourceNotFoundException;
-import org.apache.velocity.exception.TemplateInitException;
 
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
@@ -66,7 +62,7 @@ public class ProjectDocumenter {
 		buildLatexResources(dir,machines);
 	}
 
-	public void documentVelocity() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
+	public void documentVelocity() {
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
 		StringWriter writer = new StringWriter();
@@ -79,7 +75,7 @@ public class ProjectDocumenter {
 	}
 
 	//only proof of concept for bachelor thesis. can be deleted later
-	public void documentModelcheckingTableMarkdown() throws TemplateInitException, ResourceNotFoundException, MethodInvocationException, ParseErrorException {
+	public void documentModelcheckingTableMarkdown() {
 		initVelocityEngine();
 		VelocityContext context = new VelocityContext();
 		context.put("machines", machines);
