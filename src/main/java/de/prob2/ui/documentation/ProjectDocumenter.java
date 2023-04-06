@@ -2,6 +2,8 @@ package de.prob2.ui.documentation;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
@@ -10,6 +12,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.VisBStage;
+
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.exception.MethodInvocationException;
@@ -141,9 +144,10 @@ public class ProjectDocumenter {
 		* To solve this Problem the completable future is saved as an field that can be accessed to be synced  */
 		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
 		project.getLoadFuture().join();
-		TraceChecker.checkNoninteractive(trace, injector.getInstance(CurrentTrace.class).getStateSpace());
+		final StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
+		TraceChecker.checkNoninteractive(trace, stateSpace);
 		stage.show();
-		stage.saveHTMLExportWithPath(VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(directory,machine,trace)+filename));
+		stage.saveHTMLExportWithPath(trace.getReplayedTrace().getTrace(stateSpace), VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(directory,machine,trace)+filename));
 		stage.close();
 		return getHtmlPath(machine,trace)+filename;
 	}

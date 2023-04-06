@@ -29,6 +29,7 @@ import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
@@ -595,21 +596,21 @@ public class VisBStage extends Stage {
 			fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this);
-			saveHTMLExportWithPath(kind, path);
+			saveHTMLExportWithPath(currentTrace.get(), kind, path);
 		}
 	}
 
-	public void saveHTMLExportWithPath(VisBExportKind kind, Path path) {
+	public void saveHTMLExportWithPath(Trace trace, VisBExportKind kind, Path path) {
 		if(path != null) {
 			if(kind == VisBExportKind.CURRENT_STATE) {
 				ExportVisBForCurrentStateCommand cmd = new ExportVisBForCurrentStateCommand(path.toAbsolutePath().toString());
-				currentTrace.getStateSpace().execute(cmd);
+				trace.getStateSpace().execute(cmd);
 			} else if(kind == VisBExportKind.CURRENT_TRACE) {
-				List<String> transIDs = currentTrace.get().getTransitionList().stream()
+				List<String> transIDs = trace.getTransitionList().stream()
 						.map(Transition::getId)
 						.collect(Collectors.toList());
 				ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(transIDs, path.toAbsolutePath().toString());
-				currentTrace.getStateSpace().execute(cmd);
+				trace.getStateSpace().execute(cmd);
 			}
 		}
 	}
