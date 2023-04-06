@@ -9,14 +9,24 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFileAttributeView;
+import java.nio.file.attribute.PosixFileAttributes;
+import java.nio.file.attribute.PosixFilePermission;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 import com.google.common.io.CharStreams;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DocumentationProcessHandler {
 	public enum OS {
 		LINUX, WINDOWS, MAC, OTHER
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentationProcessHandler.class);
 
 	public static void saveStringWithExtension(String latex, String filename, Path path, String extension) {
 		try (PrintWriter out = new PrintWriter(path.toString() + "/" + filename + extension)) {
@@ -64,22 +74,55 @@ public class DocumentationProcessHandler {
 	public static void createPdf(String filename, Path directory) {
 		executeCommand(directory,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
 	}
-	public static void createPortableDocumentationScriptLinux(String filename, Path dir) {
+
+	/**
+	 * Set or clear the executable bits of the given path.
+	 *
+	 * @param path the path of the file to make (non-)executable
+	 * @param executable whether the file should be executable
+	 */
+	private static void setExecutable(final Path path, final boolean executable) throws IOException {
+		LOGGER.trace("Attempting to set executable status of {} to {}", path, executable);
+		try {
+			final Set<PosixFilePermission> perms = new HashSet<>(Files.readAttributes(path, PosixFileAttributes.class).permissions());
+			final PosixFileAttributeView view = Files.getFileAttributeView(path, PosixFileAttributeView.class);
+			if (view == null) {
+				// If the PosixFileAttributeView is not available, we're probably on Windows, so nothing needs to be done
+				LOGGER.info("Could not get POSIX attribute view for {} (this is usually not an error)", path);
+				return;
+			}
+			if (executable) {
+				perms.add(PosixFilePermission.OWNER_EXECUTE);
+				perms.add(PosixFilePermission.GROUP_EXECUTE);
+				perms.add(PosixFilePermission.OTHERS_EXECUTE);
+			} else {
+				perms.remove(PosixFilePermission.OWNER_EXECUTE);
+				perms.remove(PosixFilePermission.GROUP_EXECUTE);
+				perms.remove(PosixFilePermission.OTHERS_EXECUTE);
+			}
+			view.setPermissions(perms);
+		} catch (UnsupportedOperationException e) {
+			// If POSIX attributes are unsupported, we're probably on Windows, so nothing needs to be done
+			LOGGER.info("Could not set executable status of {} (this is usually not an error)", path);
+		}
+	}
+
+	public static void createPortableDocumentationScriptLinux(String filename, Path dir) throws IOException {
 		String shellScriptContent = readResourceWithFilename("makeZipShell.txt");
 		shellScriptContent = shellScriptContent.replace("${filename}",filename);
 		saveStringWithExtension(shellScriptContent, "makePortableDocumentation", dir, ".sh");
-		executeCommand(dir,"chmod +x makePortableDocumentation.sh");
+		setExecutable(dir.resolve("makePortableDocumentation.sh"), true);
 	}
 	public static void createPortableDocumentationScriptWindows(String filename, Path dir) {
 		String batchScriptContent = readResourceWithFilename("makeZipBatch.txt");
 		batchScriptContent = batchScriptContent.replace("${filename}",filename);
 		saveStringWithExtension(batchScriptContent, "makePortableDocumentation", dir, ".bat");
 	}
-	public static void createPortableDocumentationScriptMac(String filename, Path dir) {
+	public static void createPortableDocumentationScriptMac(String filename, Path dir) throws IOException {
 		String commandScriptContent = readResourceWithFilename("makeZipShell.txt");
 		commandScriptContent = commandScriptContent.replace("${filename}",filename);
 		saveStringWithExtension(commandScriptContent, "makePortableDocumentation", dir, ".command");
-		executeCommand(dir,"chmod +x makePortableDocumentation.command");
+		setExecutable(dir.resolve("makePortableDocumentation.command"), true);
 	}
 
 	private static void executeCommand(Path dir, String command) {

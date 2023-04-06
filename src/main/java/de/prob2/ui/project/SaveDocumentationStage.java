@@ -142,9 +142,13 @@ public class SaveDocumentationStage extends Stage {
 														     makePdf.isSelected(),
 															 printHtmlCode.isSelected(),
 														     checkedMachines, dir, filename.getText(),injector);
-		documenter.documentVelocity();
-		//only proof of concept for bachelor thesis. can be deleted later
-		//documenter.documentModelcheckingTableMarkdown();
+		try {
+			documenter.documentVelocity();
+			//only proof of concept for bachelor thesis. can be deleted later
+			//documenter.documentModelcheckingTableMarkdown();
+		} catch (IOException | RuntimeException exc) {
+			stageManager.makeExceptionAlert(exc, "verifications.documentation.error").showAndWait();
+		}
 		this.close();
 	}
 }

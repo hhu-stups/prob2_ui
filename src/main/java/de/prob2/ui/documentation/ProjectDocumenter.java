@@ -16,6 +16,7 @@ import de.prob2.ui.visb.VisBStage;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
+import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -59,7 +60,7 @@ public class ProjectDocumenter {
 		DocumentationResourceBuilder.buildLatexResources(dir,machines);
 	}
 
-	public void documentVelocity() {
+	public void documentVelocity() throws IOException {
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
 		StringWriter writer = new StringWriter();
@@ -117,7 +118,7 @@ public class ProjectDocumenter {
 		return context;
 	}
 
-	private void saveMakeZipBash() {
+	private void saveMakeZipBash() throws IOException {
 		switch (DocumentationProcessHandler.getOS()){
 			case LINUX:
 				DocumentationProcessHandler.createPortableDocumentationScriptLinux(filename, directory);

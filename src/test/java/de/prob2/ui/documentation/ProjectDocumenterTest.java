@@ -99,13 +99,13 @@ class ProjectDocumenterTest extends ApplicationTest {
 		} catch (NoSuchFileException ignored) {}
 	}
 	@Test
-	void testBlankDocument() {
+	void testBlankDocument() throws IOException {
 		ProjectDocumenter velocityDocumenter1 = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
 		assertTrue(Files.exists(getOutputFile(".tex")));
 	}
 	@Test
-	void testMachineCodeAndTracesInserted() throws Exception {
+	void testMachineCodeAndTracesInserted() throws IOException {
 		machines.add(trafficLight);
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
@@ -170,7 +170,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 	necessary terminal packages*/
 	@DisabledOnOs({OS.WINDOWS, OS.MAC})
 	@Test
-	void testPDFCreated() {
+	void testPDFCreated() throws IOException {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		//PDF creation not instant set max delay 30s
@@ -180,7 +180,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 
 	@EnabledOnOs({OS.WINDOWS, OS.LINUX, OS.MAC})
 	@Test
-	void testZipScriptCreated() {
+	void testZipScriptCreated() throws IOException {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		DocumentationProcessHandler.getOS();
@@ -205,7 +205,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 	}
 
 	/* html trace creation uses many of JavaFX Classes that cannot be easily mocked. So function call Returns dummy html file from test resources*/
-	private static void runDocumentationWithMockedSaveTraceHtml(ProjectDocumenter velocityDocumenter1){
+	private static void runDocumentationWithMockedSaveTraceHtml(ProjectDocumenter velocityDocumenter1) throws IOException {
 		ProjectDocumenter documenterSpy = Mockito.spy(velocityDocumenter1);
 		Mockito.doReturn("src/test/resources/documentation/output/html_files/TrafficLight/TrafficLight_Cars/dummy.html").when(documenterSpy).saveTraceHtml(ArgumentMatchers.any(), ArgumentMatchers.any());
 		documenterSpy.documentVelocity();
