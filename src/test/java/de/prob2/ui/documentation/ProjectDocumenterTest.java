@@ -1,6 +1,21 @@
 package de.prob2.ui.documentation;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+
+import com.google.common.io.CharStreams;
 import com.google.inject.Injector;
+
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -14,23 +29,20 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
+
 import javafx.collections.FXCollections;
 import javafx.stage.Stage;
-import org.apache.commons.io.FileUtils;
-import org.junit.jupiter.api.*;
+
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.testfx.framework.junit.ApplicationTest;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
@@ -189,7 +201,9 @@ class ProjectDocumenterTest extends ApplicationTest {
 
 	private void assertTexFileContainsString(String s) throws IOException {
 		File texOutput = getOutputFile(".tex");
-		assertTrue(FileUtils.readFileToString(texOutput, StandardCharsets.UTF_8).contains(s));
+		try (final Reader reader = Files.newBufferedReader(texOutput.toPath())) {
+			assertTrue(CharStreams.toString(reader).contains(s));
+		}
 	}
 
 	/* html trace creation uses many of JavaFX Classes that cannot be easily mocked. So function call Returns dummy html file from test resources*/
