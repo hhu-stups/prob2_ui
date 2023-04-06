@@ -126,10 +126,8 @@ dependencies {
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
-	testImplementation  platform('org.junit:junit-bom:5.9.2')
-	implementation group: 'org.apache.commons', name: 'commons-text', version: '1.10.0'
 	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.0'
-	testImplementation  platform('org.junit:junit-bom:5.9.0')
+	testImplementation platform('org.junit:junit-bom:5.9.2')
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.assertj:assertj-core:3.24.2'
 	testImplementation group: 'org.testfx', name: 'testfx-core', version: '4.0.15-alpha'
