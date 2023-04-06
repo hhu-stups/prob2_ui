@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.StackPane?>
+<?import de.prob2.ui.visb.VisBView?>
 <fx:root type="StackPane" xmlns:fx="http://javafx.com/fxml/1">
 	<!-- SplitPane is actually a Control and not a Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
 	<SplitPane fx:id="splitPane" orientation="VERTICAL" dividerPositions="0.8">
@@ -17,6 +18,9 @@
 			</Tab>
 			<Tab fx:id="visualisationTab" id="visualisation" text="%menu.mainView.tabs.visualisation">
 				<fx:include source="../visualisation/visualisation_view.fxml"/>
+			</Tab>
+			<Tab fx:id="visb" id="visualisation" text="%menu.visualisation.items.visb">
+				<VisBView/>
 			</Tab>
 			<Tab fx:id="beditorTab" id="beditorTab" text="%menu.mainView.tabs.beditor">
 				<BEditorView/>
