@@ -34,7 +34,7 @@
 						<Label text="%verifications.documentation.checkbox.title" styleClass="title"/>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<padding><Insets left="5"/></padding>
-							<CheckBox fx:id="checkModelchecking" selected="true"
+							<CheckBox fx:id="documentModelchecking" selected="true"
 									  text="%verifications.documentation.modelchecking.checkbox">
 								<tooltip>
 									<Tooltip text="%verifications.documentation.modelchecking.checkbox" />
@@ -43,7 +43,7 @@
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<padding><Insets left="5"/></padding>
-							<CheckBox fx:id="checkLTL" selected="true"
+							<CheckBox fx:id="documentLTL" selected="true"
 									  text="%verifications.documentation.ltl.checkbox">
 								<tooltip>
 									<Tooltip text="%verifications.documentation.ltl.checkbox" />
@@ -52,7 +52,7 @@
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<padding><Insets left="5"/></padding>
-							<CheckBox fx:id="checkSymbolic"
+							<CheckBox fx:id="documentSymbolic" selected="true"
 									  text="%verifications.documentation.symbolic.checkbox">
 								<tooltip>
 									<Tooltip text="%verifications.documentation.symbolic.checkbox" />
@@ -66,12 +66,18 @@
 									<Label text="%verifications.documentation.saveStage.label.name"/>
 									<TextField fx:id="filename" HBox.hgrow="always"/>
 								</HBox>
-								<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+								<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="15.0">
 									<padding><Insets top="5"/></padding>
 									<CheckBox fx:id="makePdf" selected="true"
-											  text="%verifications.documentation.symbolic.pdf">
+											  text="%verifications.documentation.pdf">
 										<tooltip>
-											<Tooltip text="%verifications.documentation.symbolic.pdf" />
+											<Tooltip text="%verifications.documentation.pdf" />
+										</tooltip>
+									</CheckBox>
+									<CheckBox fx:id="printHtmlCode" selected="false"
+											  text="%verifications.documentation.printhtml">
+										<tooltip>
+											<Tooltip text="%verifications.documentation.printhtml" />
 										</tooltip>
 									</CheckBox>
 								</HBox>

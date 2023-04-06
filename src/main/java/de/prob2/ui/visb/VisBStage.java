@@ -486,15 +486,23 @@ public class VisBStage extends Stage {
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getPngFilter());
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		exportImageWithPath(path);
+	}
+
+	public void exportImageWithPath(Path path) {
 		if(path != null) {
 			File file = path.toFile();
+			if(!this.isShowing()) {
+				this.show();
+			}
 			WritableImage snapshot = webView.snapshot(new SnapshotParameters(), null);
-			RenderedImage renderedImage = SwingFXUtils.fromFXImage(snapshot, null);
+			RenderedImage image = SwingFXUtils.fromFXImage(snapshot,null);
 			try {
-				ImageIO.write(renderedImage, "png", file);
-			} catch (IOException e){
+				ImageIO.write(image, "png", file);
+			} catch (IOException e) {
 				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
 			}
+
 		}
 	}
 
@@ -587,17 +595,21 @@ public class VisBStage extends Stage {
 			fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 
 			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this);
-			if(path != null) {
-				if(kind == VisBExportKind.CURRENT_STATE) {
-					ExportVisBForCurrentStateCommand cmd = new ExportVisBForCurrentStateCommand(path.toAbsolutePath().toString());
-					currentTrace.getStateSpace().execute(cmd);
-				} else if(kind == VisBExportKind.CURRENT_TRACE) {
-					List<String> transIDs = currentTrace.get().getTransitionList().stream()
-							.map(Transition::getId)
-							.collect(Collectors.toList());
-					ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(transIDs, path.toAbsolutePath().toString());
-					currentTrace.getStateSpace().execute(cmd);
-				}
+			saveHTMLExportWithPath(kind, path);
+		}
+	}
+
+	public void saveHTMLExportWithPath(VisBExportKind kind, Path path) {
+		if(path != null) {
+			if(kind == VisBExportKind.CURRENT_STATE) {
+				ExportVisBForCurrentStateCommand cmd = new ExportVisBForCurrentStateCommand(path.toAbsolutePath().toString());
+				currentTrace.getStateSpace().execute(cmd);
+			} else if(kind == VisBExportKind.CURRENT_TRACE) {
+				List<String> transIDs = currentTrace.get().getTransitionList().stream()
+						.map(Transition::getId)
+						.collect(Collectors.toList());
+				ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(transIDs, path.toAbsolutePath().toString());
+				currentTrace.getStateSpace().execute(cmd);
 			}
 		}
 	}
