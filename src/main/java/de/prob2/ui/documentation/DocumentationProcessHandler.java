@@ -62,9 +62,7 @@ public class DocumentationProcessHandler {
 		return (line != null && !line.isEmpty());
 	}
 	public static void createPdf(String filename, Path directory) {
-		if(getOS()!= OS.OTHER){
-			executeCommand(directory,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
-		}
+		executeCommand(directory,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
 	}
 	public static void createPortableDocumentationScriptLinux(String filename, Path dir) {
 		String shellScriptContent = readResourceWithFilename("makeZipShell.txt");
