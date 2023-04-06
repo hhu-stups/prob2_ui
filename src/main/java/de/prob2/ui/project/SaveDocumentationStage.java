@@ -87,7 +87,7 @@ public class SaveDocumentationStage extends Stage {
 	}
 
 	@FXML
-	public void initialize() throws IOException {
+	public void initialize() throws IOException, InterruptedException {
 		disableMakePdfIfPackageNotInstalled();
 		finishButton.disableProperty().bind(filename.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
@@ -103,7 +103,7 @@ public class SaveDocumentationStage extends Stage {
 		tvDocumentation.setItems(machineDocumentationItems);
 	}
 
-	private void disableMakePdfIfPackageNotInstalled() throws IOException {
+	private void disableMakePdfIfPackageNotInstalled() throws IOException, InterruptedException {
 		//Windows Script uses Powershell which is installed defaultly, so no check needed
 		if (!ProB2Module.IS_WINDOWS) {
 			if(!DocumentationProcessHandler.packageInstalled("pdflatex")){

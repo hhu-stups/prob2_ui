@@ -26,16 +26,12 @@ public class DocumentationProcessHandler {
 
 	//this method is from  https://stackoverflow.com/questions/8488118/how-to-programatically-check-if-a-software-utility-is-installed-on-ubuntu-using
 	//it checks if a command line package is installed
-	public static boolean packageInstalled(String binaryName) throws IOException {
+	public static boolean packageInstalled(String binaryName) throws IOException, InterruptedException {
 		ProcessBuilder builder = new ProcessBuilder("/usr/bin/which", binaryName);
 		builder.redirectErrorStream(true);
 		Process process = builder.start();
 		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-		try{
-			process.waitFor();
-		}catch(InterruptedException e) {
-			System.out.println(e.getMessage());
-		}
+		process.waitFor();
 		String line = reader.readLine();
 		return (line != null && !line.isEmpty());
 	}
