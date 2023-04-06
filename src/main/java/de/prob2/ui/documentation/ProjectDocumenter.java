@@ -79,7 +79,7 @@ public class ProjectDocumenter {
 		context.put("util", TemplateUtility.class);
 		context.put("i18n", i18n);
 		StringWriter writer = new StringWriter();
-		Velocity.mergeTemplate("de/prob2/ui/documentation/modelchecking_table.md", String.valueOf(StandardCharsets.UTF_8),context,writer);
+		Velocity.mergeTemplate("de/prob2/ui/documentation/modelchecking_table.md.vm", String.valueOf(StandardCharsets.UTF_8),context,writer);
 		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, directory, ".md");
 	}
 
@@ -88,9 +88,9 @@ public class ProjectDocumenter {
 		String language = injector.getInstance(Locale.class).getLanguage();
 		switch (language){
 			case "de":
-				return "de/prob2/ui/documentation/velocity_template_german.tex";
+				return "de/prob2/ui/documentation/velocity_template_german.tex.vm";
 			default:
-				return "de/prob2/ui/documentation/velocity_template_english.tex";
+				return "de/prob2/ui/documentation/velocity_template_english.tex.vm";
 		}
 	}
 
