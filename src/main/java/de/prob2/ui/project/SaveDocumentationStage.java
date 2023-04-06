@@ -1,35 +1,40 @@
 package de.prob2.ui.project;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import de.prob2.ui.beditor.BLexerSyntaxHighlighting;
+
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.documentation.DocumentationProcessHandler;
 import de.prob2.ui.documentation.MachineDocumentationItem;
 import de.prob2.ui.documentation.ProjectDocumenter;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 public class SaveDocumentationStage extends Stage {
@@ -99,9 +104,8 @@ public class SaveDocumentationStage extends Stage {
 	}
 
 	private void disableMakePdfIfPackageNotInstalled() throws IOException {
-		DocumentationProcessHandler.OS os = DocumentationProcessHandler.getOS();
 		//Windows Script uses Powershell which is installed defaultly, so no check needed
-		if(os == DocumentationProcessHandler.OS.LINUX || os == DocumentationProcessHandler.OS.MAC ){
+		if (!ProB2Module.IS_WINDOWS) {
 			if(!DocumentationProcessHandler.packageInstalled("pdflatex")){
 				makePdf.setText(i18n.translate("verifications.documentation.saveStage.pdfPackageNotInstalled"));
 				makePdf.setDisable(true);

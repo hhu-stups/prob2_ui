@@ -16,14 +16,12 @@ import java.util.Set;
 
 import com.google.common.io.CharStreams;
 
+import de.prob2.ui.internal.ProB2Module;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DocumentationProcessHandler {
-	public enum OS {
-		LINUX, WINDOWS, MAC, OTHER
-	}
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentationProcessHandler.class);
 
 	//this method is from  https://stackoverflow.com/questions/8488118/how-to-programatically-check-if-a-software-utility-is-installed-on-ubuntu-using
@@ -81,21 +79,17 @@ public class DocumentationProcessHandler {
 	}
 
 	public static String getPortableDocumentationScriptName() {
-		switch (getOS()) {
-			case WINDOWS:
-				return "makePortableDocumentation.bat";
-			
-			case MAC:
-				return "makePortableDocumentation.command";
-			
-			case LINUX:
-			default:
-				return "makePortableDocumentation.sh";
+		if (ProB2Module.IS_WINDOWS) {
+			return "makePortableDocumentation.bat";
+		} else if (ProB2Module.IS_MAC) {
+			return "makePortableDocumentation.command";
+		} else {
+			return "makePortableDocumentation.sh";
 		}
 	}
 
 	public static void createPortableDocumentationScript(String filename, Path dir) throws IOException {
-		final String scriptResourceName = getOS() == OS.WINDOWS ? "makeZipBatch.txt" : "makeZipShell.txt";
+		final String scriptResourceName = ProB2Module.IS_WINDOWS ? "makeZipBatch.txt" : "makeZipShell.txt";
 		String scriptContent;
 		try (
 			final InputStream is = Objects.requireNonNull(DocumentationProcessHandler.class.getResourceAsStream(scriptResourceName));
@@ -109,18 +103,4 @@ public class DocumentationProcessHandler {
 		Files.write(scriptPath, Collections.singletonList(scriptContent));
 		setExecutable(scriptPath, true);
 	}
-
-	//this method is from https://stackoverflow.com/questions/228477/how-do-i-programmatically-determine-operating-system-in-java
-	public static OS getOS() {
-		String operSys = System.getProperty("os.name").toLowerCase();
-		if (operSys.contains("win")) {
-			return OS.WINDOWS;
-		} else if (operSys.contains("nix") || operSys.contains("nux") || operSys.contains("aix")) {
-			return OS.LINUX;
-		} else if (operSys.contains("mac")) {
-			return OS.MAC;
-		}
-		return OS.OTHER;
-	}
-
 }
