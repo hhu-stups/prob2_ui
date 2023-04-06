@@ -36,15 +36,6 @@ public class DocumentationProcessHandler {
 			throw new RuntimeException(exc);
 		}
 	}
-	public static String readFile(Path path) {
-		String content = "";
-		try {
-			content = new String(Files.readAllBytes(path));
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		return content;
-	}
 
 	//this method is from  https://stackoverflow.com/questions/8488118/how-to-programatically-check-if-a-software-utility-is-installed-on-ubuntu-using
 	//it checks if a command line package is installed

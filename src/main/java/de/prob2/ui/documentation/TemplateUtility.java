@@ -1,5 +1,13 @@
 package de.prob2.ui.documentation;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.google.common.io.MoreFiles;
+
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
@@ -12,11 +20,6 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
-
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 // All Methods of this class are exclusively used by the documentation Template
 public class TemplateUtility {
@@ -52,12 +55,15 @@ public class TemplateUtility {
 		description = description.replaceAll("(\\d),(\\d)", "$1$2");
 		return description.replaceAll(",", ",\\\\newline");
 	}
-	public static String getMachineCode(Machine elem, CurrentProject project) {
-		return DocumentationProcessHandler.readFile(project.getLocation().resolve(elem.getLocation()));
+
+	public static String getMachineCode(Machine elem, CurrentProject project) throws IOException {
+		return MoreFiles.asCharSource(project.getLocation().resolve(elem.getLocation()), StandardCharsets.UTF_8).read();
 	}
-	public static String getTraceHtmlCode(String relativePath, ProjectDocumenter projectDocumenter){
-		return DocumentationProcessHandler.readFile(Paths.get(projectDocumenter.getDirectory() +"/"+ relativePath));
+
+	public static String getTraceHtmlCode(String relativePath, ProjectDocumenter projectDocumenter) throws IOException {
+		return MoreFiles.asCharSource(projectDocumenter.getDirectory().resolve(relativePath), StandardCharsets.UTF_8).read();
 	}
+
 	public static boolean formulaHasResult(TemporalFormulaItem formula){return (formula.getResultItem() != null);}
 	public static boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
 	public static boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
