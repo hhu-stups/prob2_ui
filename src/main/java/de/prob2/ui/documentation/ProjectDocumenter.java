@@ -73,7 +73,7 @@ public class ProjectDocumenter {
 		}
 		if(makePdf)
 			DocumentationProcessHandler.createPdf(filename, directory);
-		saveMakeZipBash();
+		DocumentationProcessHandler.createPortableDocumentationScript(filename, directory);
 	}
 
 	//only proof of concept for bachelor thesis. can be deleted later
@@ -122,19 +122,6 @@ public class ProjectDocumenter {
 		return context;
 	}
 
-	private void saveMakeZipBash() throws IOException {
-		switch (DocumentationProcessHandler.getOS()){
-			case LINUX:
-				DocumentationProcessHandler.createPortableDocumentationScriptLinux(filename, directory);
-				break;
-			case MAC:
-				DocumentationProcessHandler.createPortableDocumentationScriptMac(filename, directory);
-				break;
-			case WINDOWS:
-				DocumentationProcessHandler.createPortableDocumentationScriptWindows(filename, directory);
-				break;
-		}
-	}
 	public String saveTraceHtml(Machine machine, ReplayTrace trace){
 		VisBStage stage = injector.getInstance(VisBStage.class);
 		String filename = Transition.prettifyName(trace.getName())+".html";

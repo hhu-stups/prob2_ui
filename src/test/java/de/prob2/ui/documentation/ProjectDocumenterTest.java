@@ -183,18 +183,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 	void testZipScriptCreated() throws IOException {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
-		DocumentationProcessHandler.getOS();
-		switch (DocumentationProcessHandler.getOS()){
-			case WINDOWS:
-				assertTrue(Files.exists(outputPath.resolve("makePortableDocumentation.bat")));
-				break;
-			case LINUX:
-				assertTrue(Files.exists(outputPath.resolve("makePortableDocumentation.sh")));
-				break;
-			case MAC:
-				assertTrue(Files.exists(outputPath.resolve("makePortableDocumentation.command")));
-				break;
-		}
+		assertTrue(Files.exists(outputPath.resolve(DocumentationProcessHandler.getPortableDocumentationScriptName())));
 	}
 
 	private void assertTexFileContainsString(String s) throws IOException {

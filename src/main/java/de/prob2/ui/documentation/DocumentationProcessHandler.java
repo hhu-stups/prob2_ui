@@ -26,17 +26,6 @@ public class DocumentationProcessHandler {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentationProcessHandler.class);
 
-	public static String readResourceWithFilename(String filename) {
-		try (
-			final InputStream is = Objects.requireNonNull(DocumentationProcessHandler.class.getResourceAsStream(filename));
-			final InputStreamReader reader = new InputStreamReader(is);
-		) {
-			return CharStreams.toString(reader);
-		} catch (IOException exc) {
-			throw new RuntimeException(exc);
-		}
-	}
-
 	//this method is from  https://stackoverflow.com/questions/8488118/how-to-programatically-check-if-a-software-utility-is-installed-on-ubuntu-using
 	//it checks if a command line package is installed
 	public static boolean packageInstalled(String binaryName) throws IOException {
@@ -91,26 +80,33 @@ public class DocumentationProcessHandler {
 		}
 	}
 
-	public static void createPortableDocumentationScriptLinux(String filename, Path dir) throws IOException {
-		String shellScriptContent = readResourceWithFilename("makeZipShell.txt");
-		shellScriptContent = shellScriptContent.replace("${filename}",filename);
-		final Path scriptPath = dir.resolve("makePortableDocumentation.sh");
-		Files.write(scriptPath, Collections.singletonList(shellScriptContent));
-		setExecutable(scriptPath, true);
+	public static String getPortableDocumentationScriptName() {
+		switch (getOS()) {
+			case WINDOWS:
+				return "makePortableDocumentation.bat";
+			
+			case MAC:
+				return "makePortableDocumentation.command";
+			
+			case LINUX:
+			default:
+				return "makePortableDocumentation.sh";
+		}
 	}
 
-	public static void createPortableDocumentationScriptWindows(String filename, Path dir) throws IOException {
-		String batchScriptContent = readResourceWithFilename("makeZipBatch.txt");
-		batchScriptContent = batchScriptContent.replace("${filename}",filename);
-		final Path scriptPath = dir.resolve("makePortableDocumentation.bat");
-		Files.write(scriptPath, Collections.singletonList(batchScriptContent));
-	}
-
-	public static void createPortableDocumentationScriptMac(String filename, Path dir) throws IOException {
-		String commandScriptContent = readResourceWithFilename("makeZipShell.txt");
-		commandScriptContent = commandScriptContent.replace("${filename}",filename);
-		final Path scriptPath = dir.resolve("makePortableDocumentation.command");
-		Files.write(scriptPath, Collections.singletonList(commandScriptContent));
+	public static void createPortableDocumentationScript(String filename, Path dir) throws IOException {
+		final String scriptResourceName = getOS() == OS.WINDOWS ? "makeZipBatch.txt" : "makeZipShell.txt";
+		String scriptContent;
+		try (
+			final InputStream is = Objects.requireNonNull(DocumentationProcessHandler.class.getResourceAsStream(scriptResourceName));
+			final InputStreamReader reader = new InputStreamReader(is);
+		) {
+			scriptContent = CharStreams.toString(reader);
+		}
+		scriptContent = scriptContent.replace("${filename}", filename);
+		
+		final Path scriptPath = dir.resolve(getPortableDocumentationScriptName());
+		Files.write(scriptPath, Collections.singletonList(scriptContent));
 		setExecutable(scriptPath, true);
 	}
 
