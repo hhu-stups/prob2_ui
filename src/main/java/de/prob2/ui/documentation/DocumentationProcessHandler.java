@@ -1,9 +1,17 @@
 package de.prob2.ui.documentation;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
+
+import com.google.common.io.CharStreams;
 
 import static de.prob2.ui.documentation.DocumentationProcessHandler.OS.OTHER;
 
@@ -21,10 +29,14 @@ public class DocumentationProcessHandler {
 	}
 
 	public static String readResourceWithFilename(String filename) {
-		Path path = new File(Objects.requireNonNull(DocumentationProcessHandler.class
-						.getResource(filename))
-				.getFile()).toPath();
-		return readFile(path);
+		try (
+			final InputStream is = Objects.requireNonNull(DocumentationProcessHandler.class.getResourceAsStream(filename));
+			final InputStreamReader reader = new InputStreamReader(is);
+		) {
+			return CharStreams.toString(reader);
+		} catch (IOException exc) {
+			throw new RuntimeException(exc);
+		}
 	}
 	public static String readFile(Path path) {
 		String content = "";
