@@ -1,5 +1,16 @@
 package de.prob2.ui.documentation;
 
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Properties;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -15,13 +26,6 @@ import de.prob2.ui.visb.VisBStage;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
 
 public class ProjectDocumenter {
 	private final String filename;
@@ -63,25 +67,25 @@ public class ProjectDocumenter {
 	public void documentVelocity() throws IOException {
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
-		StringWriter writer = new StringWriter();
 		String templateName = getLanguageTemplate();
-		Velocity.mergeTemplate(templateName, String.valueOf(StandardCharsets.UTF_8),context,writer);
-		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, directory, ".tex");
+		try (final Writer writer = Files.newBufferedWriter(directory.resolve(filename + ".tex"))) {
+			Velocity.mergeTemplate(templateName, String.valueOf(StandardCharsets.UTF_8),context,writer);
+		}
 		if(makePdf)
 			DocumentationProcessHandler.createPdf(filename, directory);
 		saveMakeZipBash();
 	}
 
 	//only proof of concept for bachelor thesis. can be deleted later
-	public void documentModelcheckingTableMarkdown() {
+	public void documentModelcheckingTableMarkdown() throws IOException {
 		initVelocityEngine();
 		VelocityContext context = new VelocityContext();
 		context.put("machines", machines);
 		context.put("util", TemplateUtility.class);
 		context.put("i18n", i18n);
-		StringWriter writer = new StringWriter();
-		Velocity.mergeTemplate("de/prob2/ui/documentation/modelchecking_table.md.vm", String.valueOf(StandardCharsets.UTF_8),context,writer);
-		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, directory, ".md");
+		try (final Writer writer = Files.newBufferedWriter(directory.resolve(filename + ".md"))) {
+			Velocity.mergeTemplate("de/prob2/ui/documentation/modelchecking_table.md.vm", String.valueOf(StandardCharsets.UTF_8),context,writer);
+		}
 	}
 
 	// future translations can be added here

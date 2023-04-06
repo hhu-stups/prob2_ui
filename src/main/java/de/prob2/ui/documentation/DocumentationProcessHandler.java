@@ -1,16 +1,15 @@
 package de.prob2.ui.documentation;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -26,14 +25,6 @@ public class DocumentationProcessHandler {
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DocumentationProcessHandler.class);
-
-	public static void saveStringWithExtension(String latex, String filename, Path path, String extension) {
-		try (PrintWriter out = new PrintWriter(path.toString() + "/" + filename + extension)) {
-			out.println(latex);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
 
 	public static String readResourceWithFilename(String filename) {
 		try (
@@ -112,19 +103,24 @@ public class DocumentationProcessHandler {
 	public static void createPortableDocumentationScriptLinux(String filename, Path dir) throws IOException {
 		String shellScriptContent = readResourceWithFilename("makeZipShell.txt");
 		shellScriptContent = shellScriptContent.replace("${filename}",filename);
-		saveStringWithExtension(shellScriptContent, "makePortableDocumentation", dir, ".sh");
-		setExecutable(dir.resolve("makePortableDocumentation.sh"), true);
+		final Path scriptPath = dir.resolve("makePortableDocumentation.sh");
+		Files.write(scriptPath, Collections.singletonList(shellScriptContent));
+		setExecutable(scriptPath, true);
 	}
-	public static void createPortableDocumentationScriptWindows(String filename, Path dir) {
+
+	public static void createPortableDocumentationScriptWindows(String filename, Path dir) throws IOException {
 		String batchScriptContent = readResourceWithFilename("makeZipBatch.txt");
 		batchScriptContent = batchScriptContent.replace("${filename}",filename);
-		saveStringWithExtension(batchScriptContent, "makePortableDocumentation", dir, ".bat");
+		final Path scriptPath = dir.resolve("makePortableDocumentation.bat");
+		Files.write(scriptPath, Collections.singletonList(batchScriptContent));
 	}
+
 	public static void createPortableDocumentationScriptMac(String filename, Path dir) throws IOException {
 		String commandScriptContent = readResourceWithFilename("makeZipShell.txt");
 		commandScriptContent = commandScriptContent.replace("${filename}",filename);
-		saveStringWithExtension(commandScriptContent, "makePortableDocumentation", dir, ".command");
-		setExecutable(dir.resolve("makePortableDocumentation.command"), true);
+		final Path scriptPath = dir.resolve("makePortableDocumentation.command");
+		Files.write(scriptPath, Collections.singletonList(commandScriptContent));
+		setExecutable(scriptPath, true);
 	}
 
 	//this method is from https://stackoverflow.com/questions/228477/how-do-i-programmatically-determine-operating-system-in-java
