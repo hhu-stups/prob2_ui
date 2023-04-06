@@ -53,7 +53,6 @@ import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
 import de.prob2.ui.simulation.table.SimulationOperationDebugItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.visb.VisBStage;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -627,13 +626,6 @@ public class SimulatorStage extends Stage {
 	@FXML
 	private void checkMachine() {
 		simulationItemHandler.handleMachine(cbSimulation.getSelectionModel().getSelectedItem());
-	}
-
-	@FXML
-	private void openVisB() {
-		VisBStage visBStage = injector.getInstance(VisBStage.class);
-		visBStage.show();
-		visBStage.toFront();
 	}
 
 	public void loadSimulationsFromMachine(Machine machine) {
