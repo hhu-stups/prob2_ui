@@ -9,6 +9,7 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 
@@ -16,9 +17,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static de.prob2.ui.documentation.DocumentationProcessHandler.readFile;
-import static de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType.DEADLOCK;
 
 // All Methods of this class are exclusively used by the documentation Template
 public class TemplateUtility {
@@ -38,7 +36,7 @@ public class TemplateUtility {
 	public static String symbolicConfigString(SymbolicCheckingFormulaItem formula, I18n i18n) {
 		String config = formula.getCode();
 		// no configuration is internally represented as 1=1, but that is not intended in the output
-		if(formula.getType().equals(DEADLOCK) && config.equals("1=1")){
+		if(formula.getType().equals(SymbolicCheckingType.DEADLOCK) && config.equals("1=1")){
 			return latexSafe(i18n.translate("verifications.symbolicchecking.view.deadlock.noPredicate"));
 		}
 		// & is replaced because otherwise a column change takes place in the template table
@@ -55,10 +53,10 @@ public class TemplateUtility {
 		return description.replaceAll(",", ",\\\\newline");
 	}
 	public static String getMachineCode(Machine elem, CurrentProject project) {
-		return readFile(project.getLocation().resolve(elem.getLocation()));
+		return DocumentationProcessHandler.readFile(project.getLocation().resolve(elem.getLocation()));
 	}
 	public static String getTraceHtmlCode(String relativePath, ProjectDocumenter projectDocumenter){
-		return readFile(Paths.get(projectDocumenter.getDirectory() +"/"+ relativePath));
+		return DocumentationProcessHandler.readFile(Paths.get(projectDocumenter.getDirectory() +"/"+ relativePath));
 	}
 	public static boolean formulaHasResult(TemporalFormulaItem formula){return (formula.getResultItem() != null);}
 	public static boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}

@@ -13,8 +13,6 @@ import java.util.Objects;
 
 import com.google.common.io.CharStreams;
 
-import static de.prob2.ui.documentation.DocumentationProcessHandler.OS.OTHER;
-
 public class DocumentationProcessHandler {
 	public enum OS {
 		LINUX, WINDOWS, MAC, OTHER
@@ -64,7 +62,7 @@ public class DocumentationProcessHandler {
 		return (line != null && !line.isEmpty());
 	}
 	public static void createPdf(String filename, Path directory) {
-		if(getOS()!= OTHER){
+		if(getOS()!= OS.OTHER){
 			executeCommand(directory,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
 		}
 	}
@@ -88,7 +86,7 @@ public class DocumentationProcessHandler {
 
 	private static void executeCommand(Path dir, String command) {
 		OS os = getOS();
-		if(os != OTHER){
+		if(os != OS.OTHER){
 			ProcessBuilder builder = new ProcessBuilder();
 			builder.directory(new File(dir.toString()));
 			switch(os){
@@ -120,7 +118,7 @@ public class DocumentationProcessHandler {
 		} else if (operSys.contains("mac")) {
 			return OS.MAC;
 		}
-		return OTHER;
+		return OS.OTHER;
 	}
 
 }

@@ -22,9 +22,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 
-import static de.prob2.ui.documentation.DocumentationProcessHandler.*;
-import static de.prob2.ui.documentation.DocumentationResourceBuilder.*;
-
 public class ProjectDocumenter {
 	private final String filename;
 	private final I18n i18n;
@@ -59,7 +56,7 @@ public class ProjectDocumenter {
 		this.filename = filename;
 		this.injector = injector;
 		tracesHtmlPaths = new HashMap<>();
-		buildLatexResources(dir,machines);
+		DocumentationResourceBuilder.buildLatexResources(dir,machines);
 	}
 
 	public void documentVelocity() {
@@ -70,7 +67,7 @@ public class ProjectDocumenter {
 		Velocity.mergeTemplate(templateName, String.valueOf(StandardCharsets.UTF_8),context,writer);
 		DocumentationProcessHandler.saveStringWithExtension(writer.toString(), filename, directory, ".tex");
 		if(makePdf)
-			createPdf(filename, directory);
+			DocumentationProcessHandler.createPdf(filename, directory);
 		saveMakeZipBash();
 	}
 
@@ -123,13 +120,13 @@ public class ProjectDocumenter {
 	private void saveMakeZipBash() {
 		switch (DocumentationProcessHandler.getOS()){
 			case LINUX:
-				createPortableDocumentationScriptLinux(filename, directory);
+				DocumentationProcessHandler.createPortableDocumentationScriptLinux(filename, directory);
 				break;
 			case MAC:
-				createPortableDocumentationScriptMac(filename, directory);
+				DocumentationProcessHandler.createPortableDocumentationScriptMac(filename, directory);
 				break;
 			case WINDOWS:
-				createPortableDocumentationScriptWindows(filename, directory);
+				DocumentationProcessHandler.createPortableDocumentationScriptWindows(filename, directory);
 				break;
 		}
 	}

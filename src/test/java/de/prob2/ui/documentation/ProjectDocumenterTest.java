@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.CharStreams;
 import com.google.common.io.MoreFiles;
@@ -34,23 +35,21 @@ import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import javafx.collections.FXCollections;
 import javafx.stage.Stage;
 
+import org.awaitility.Awaitility;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.testfx.framework.junit.ApplicationTest;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertTrue;
-import static org.junit.jupiter.api.condition.OS.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doReturn;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @RunWith(MockitoJUnitRunner.class)
@@ -88,7 +87,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 		Mockito.when(currentProject.getLocation()).thenReturn(Paths.get(""));
 		Mockito.when(currentProject.getDescription()).thenReturn("");
 		Mockito.when(currentProject.get()).thenReturn(Mockito.mock(Project.class));
-		Mockito.when(currentProject.get().getPreference(any(String.class))).thenReturn(Preference.DEFAULT);
+		Mockito.when(currentProject.get().getPreference(ArgumentMatchers.any(String.class))).thenReturn(Preference.DEFAULT);
 
 		Mockito.when(injector.getInstance(Locale.class)).thenReturn(new Locale("en"));
 	}
@@ -169,17 +168,17 @@ class ProjectDocumenterTest extends ApplicationTest {
 
 	/* Can be tested localy for all Os's, but is disabled so Gitlab CI dont get blowded with
 	necessary terminal packages*/
-	@DisabledOnOs({ WINDOWS, MAC })
+	@DisabledOnOs({OS.WINDOWS, OS.MAC})
 	@Test
 	void testPDFCreated() {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		//PDF creation not instant set max delay 30s
-		await().atMost(30, SECONDS).until(() -> Files.exists(getOutputFile(".pdf")));
+		Awaitility.await().atMost(30, TimeUnit.SECONDS).until(() -> Files.exists(getOutputFile(".pdf")));
 		assertTrue(Files.exists(getOutputFile(".pdf")));
 	}
 
-	@EnabledOnOs({WINDOWS,LINUX,MAC})
+	@EnabledOnOs({OS.WINDOWS, OS.LINUX, OS.MAC})
 	@Test
 	void testZipScriptCreated() {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
@@ -208,7 +207,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 	/* html trace creation uses many of JavaFX Classes that cannot be easily mocked. So function call Returns dummy html file from test resources*/
 	private static void runDocumentationWithMockedSaveTraceHtml(ProjectDocumenter velocityDocumenter1){
 		ProjectDocumenter documenterSpy = Mockito.spy(velocityDocumenter1);
-		doReturn("src/test/resources/documentation/output/html_files/TrafficLight/TrafficLight_Cars/dummy.html").when(documenterSpy).saveTraceHtml(any(),any());
+		Mockito.doReturn("src/test/resources/documentation/output/html_files/TrafficLight/TrafficLight_Cars/dummy.html").when(documenterSpy).saveTraceHtml(ArgumentMatchers.any(), ArgumentMatchers.any());
 		documenterSpy.documentVelocity();
 	}
 

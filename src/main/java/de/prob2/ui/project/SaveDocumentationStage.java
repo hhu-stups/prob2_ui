@@ -31,8 +31,6 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static de.prob2.ui.documentation.DocumentationProcessHandler.packageInstalled;
-
 @FXMLInjected
 public class SaveDocumentationStage extends Stage {
 	@FXML
@@ -104,7 +102,7 @@ public class SaveDocumentationStage extends Stage {
 		DocumentationProcessHandler.OS os = DocumentationProcessHandler.getOS();
 		//Windows Script uses Powershell which is installed defaultly, so no check needed
 		if(os == DocumentationProcessHandler.OS.LINUX || os == DocumentationProcessHandler.OS.MAC ){
-			if(!packageInstalled("pdflatex")){
+			if(!DocumentationProcessHandler.packageInstalled("pdflatex")){
 				makePdf.setText(i18n.translate("verifications.documentation.saveStage.pdfPackageNotInstalled"));
 				makePdf.setDisable(true);
 			}

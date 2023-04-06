@@ -12,8 +12,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
-import static de.prob2.ui.documentation.ProjectDocumenter.getAbsoluteHtmlPath;
-
 public class DocumentationResourceBuilder {
 	public static void buildLatexResources(Path directory, List<Machine> machines) {
 		createTraceVisualisationDirectoryStructure(directory,machines);
@@ -34,7 +32,7 @@ public class DocumentationResourceBuilder {
 		for (Machine machine : machines) {
 			for (ReplayTrace trace : machine.getTraces()) {
 				try {
-					Files.createDirectories(Paths.get(getAbsoluteHtmlPath(directory,machine, trace))
+					Files.createDirectories(Paths.get(ProjectDocumenter.getAbsoluteHtmlPath(directory,machine, trace))
 					);
 				} catch (IOException e) {
 					throw new RuntimeException(e);
