@@ -1,9 +1,9 @@
 package de.prob2.ui.documentation;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -11,9 +11,10 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Objects;
 
 import com.google.common.io.CharStreams;
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import com.google.inject.Injector;
 
 import de.prob.check.ModelCheckingSearchStrategy;
@@ -61,7 +62,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 	I18n i18n = Mockito.mock(I18n.class);
 	Injector injector = Mockito.mock(Injector.class);
 	CurrentProject currentProject = Mockito.mock(CurrentProject.class);
-	public final Path outputPath = Paths.get("src/test/resources/documentation/output/");
+	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
 	ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1",ModelCheckingSearchStrategy.RANDOM,1,1,"",new HashSet<>());
 	TemporalFormulaItem ltlFormulaItem = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, "","","",true);
@@ -93,18 +94,16 @@ class ProjectDocumenterTest extends ApplicationTest {
 	}
 
 	@BeforeEach
-	public void cleanOutput() {
-		File dir = new File(outputPath.toUri());
-		for (File file: Objects.requireNonNull(dir.listFiles())) {
-			file.delete();
-		}
-		dir.delete();
+	public void cleanOutput() throws IOException {
+		try {
+			MoreFiles.deleteRecursively(outputPath, RecursiveDeleteOption.ALLOW_INSECURE);
+		} catch (NoSuchFileException ignored) {}
 	}
 	@Test
 	void testBlankDocument() {
 		ProjectDocumenter velocityDocumenter1 = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
 		velocityDocumenter1.documentVelocity();
-		assertTrue(getOutputFile(".tex").exists());
+		assertTrue(Files.exists(getOutputFile(".tex")));
 	}
 	@Test
 	void testMachineCodeAndTracesInserted() throws Exception {
@@ -176,8 +175,8 @@ class ProjectDocumenterTest extends ApplicationTest {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,false,machines,outputPath,outputFilename,injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		//PDF creation not instant set max delay 30s
-		await().atMost(30, SECONDS).until(() -> getOutputFile(".pdf").exists());
-		assertTrue(getOutputFile(".pdf").exists());
+		await().atMost(30, SECONDS).until(() -> Files.exists(getOutputFile(".pdf")));
+		assertTrue(Files.exists(getOutputFile(".pdf")));
 	}
 
 	@EnabledOnOs({WINDOWS,LINUX,MAC})
@@ -188,20 +187,20 @@ class ProjectDocumenterTest extends ApplicationTest {
 		DocumentationProcessHandler.getOS();
 		switch (DocumentationProcessHandler.getOS()){
 			case WINDOWS:
-				assertTrue(new File(outputPath + "/makePortableDocumentation.bat").exists());
+				assertTrue(Files.exists(outputPath.resolve("makePortableDocumentation.bat")));
 				break;
 			case LINUX:
-				assertTrue(new File(outputPath + "/makePortableDocumentation.sh").exists());
+				assertTrue(Files.exists(outputPath.resolve("makePortableDocumentation.sh")));
 				break;
 			case MAC:
-				assertTrue(new File(outputPath + "/makePortableDocumentation.command").exists());
+				assertTrue(Files.exists(outputPath.resolve("makePortableDocumentation.command")));
 				break;
 		}
 	}
 
 	private void assertTexFileContainsString(String s) throws IOException {
-		File texOutput = getOutputFile(".tex");
-		try (final Reader reader = Files.newBufferedReader(texOutput.toPath())) {
+		Path texOutput = getOutputFile(".tex");
+		try (final Reader reader = Files.newBufferedReader(texOutput)) {
 			assertTrue(CharStreams.toString(reader).contains(s));
 		}
 	}
@@ -213,8 +212,8 @@ class ProjectDocumenterTest extends ApplicationTest {
 		documenterSpy.documentVelocity();
 	}
 
-	private File getOutputFile(String extension) {
-		return new File(outputPath + "/" + outputFilename + extension);
+	private Path getOutputFile(String extension) {
+		return outputPath.resolve(outputFilename + extension);
 	}
 
 	@Override
