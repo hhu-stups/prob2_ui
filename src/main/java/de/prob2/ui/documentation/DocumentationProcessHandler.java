@@ -1,7 +1,6 @@
 package de.prob2.ui.documentation;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -71,8 +70,11 @@ public class DocumentationProcessHandler {
 		String line = reader.readLine();
 		return (line != null && !line.isEmpty());
 	}
-	public static void createPdf(String filename, Path directory) {
-		executeCommand(directory,"pdflatex --shell-escape -interaction=nonstopmode " + filename + ".tex");
+
+	public static void createPdf(String filename, Path directory) throws IOException {
+		final ProcessBuilder builder = new ProcessBuilder("pdflatex", "--shell-escape", "-interaction=nonstopmode", filename + ".tex");
+		builder.directory(directory.toFile());
+		builder.start();
 	}
 
 	/**
@@ -123,30 +125,6 @@ public class DocumentationProcessHandler {
 		commandScriptContent = commandScriptContent.replace("${filename}",filename);
 		saveStringWithExtension(commandScriptContent, "makePortableDocumentation", dir, ".command");
 		setExecutable(dir.resolve("makePortableDocumentation.command"), true);
-	}
-
-	private static void executeCommand(Path dir, String command) {
-		OS os = getOS();
-		if(os != OS.OTHER){
-			ProcessBuilder builder = new ProcessBuilder();
-			builder.directory(new File(dir.toString()));
-			switch(os){
-				case LINUX:
-					builder.command("bash", "-c",command);
-					break;
-				case MAC:
-					builder.command("/bin/bash", "-c", command);
-					break;
-				case WINDOWS:
-					builder.command("cmd.exe", "/c", command);
-					break;
-			}
-			try {
-				builder.start();
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}
 	}
 
 	//this method is from https://stackoverflow.com/questions/228477/how-do-i-programmatically-determine-operating-system-in-java
