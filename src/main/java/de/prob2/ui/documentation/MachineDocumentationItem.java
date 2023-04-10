@@ -2,7 +2,7 @@ package de.prob2.ui.documentation;
 
 import de.prob2.ui.project.machines.Machine;
 
-//Wrapper for Machine to let User decide Machines to be documented in DocumentSaveStage
+//Wrapper for Machine to let User decide Machines to be documented in SaveDocumentationStage
 public class MachineDocumentationItem {
 	Boolean document;
 	Machine machineItem;
@@ -16,10 +16,6 @@ public class MachineDocumentationItem {
 		return machineItem;
 	}
 
-	public void setMachineItem(Machine machineItem) {
-		this.machineItem = machineItem;
-	}
-
 	public Boolean getDocument() {
 		return document;
 	}
@@ -27,5 +23,4 @@ public class MachineDocumentationItem {
 	public void setDocument(Boolean checked) {
 		this.document = checked;
 	}
-	//vllt UI PRINT METHOD
 }

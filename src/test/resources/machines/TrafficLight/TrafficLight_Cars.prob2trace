@@ -1,0 +1,193 @@
+{
+  "description": "",
+  "transitionList": [
+    {
+      "name": "$initialise_machine",
+      "params": {},
+      "results": {},
+      "destState": {
+        "tl_cars": "red",
+        "tl_peds": "red"
+      },
+      "destStateNotChanged": [],
+      "preds": [],
+      "postconditions": [],
+      "description": ""
+    },
+    {
+      "name": "cars_ry",
+      "params": {},
+      "results": {},
+      "destState": {
+        "tl_cars": "redyellow"
+      },
+      "destStateNotChanged": [
+        "tl_peds"
+      ],
+      "preds": [],
+      "postconditions": [],
+      "description": ""
+    },
+    {
+      "name": "cars_g",
+      "params": {},
+      "results": {},
+      "destState": {
+        "tl_cars": "green"
+      },
+      "destStateNotChanged": [
+        "tl_peds"
+      ],
+      "preds": [],
+      "postconditions": [],
+      "description": ""
+    },
+    {
+      "name": "cars_y",
+      "params": {},
+      "results": {},
+      "destState": {
+        "tl_cars": "yellow"
+      },
+      "destStateNotChanged": [
+        "tl_peds"
+      ],
+      "preds": [],
+      "postconditions": [],
+      "description": ""
+    },
+    {
+      "name": "cars_r",
+      "params": {},
+      "results": {},
+      "destState": {
+        "tl_cars": "red"
+      },
+      "destStateNotChanged": [
+        "tl_peds"
+      ],
+      "preds": [],
+      "postconditions": [],
+      "description": ""
+    }
+  ],
+  "variableNames": [
+    "tl_cars",
+    "tl_peds"
+  ],
+  "constantNames": [],
+  "setNames": [
+    "colors"
+  ],
+  "machineOperationInfos": {
+    "peds_g": {
+      "operationName": "peds_g",
+      "parameterNames": [],
+      "outputParameterNames": [],
+      "topLevel": true,
+      "type": "CLASSICAL_B",
+      "readVariables": [
+        "tl_cars",
+        "tl_peds"
+      ],
+      "writtenVariables": [
+        "tl_peds"
+      ],
+      "nonDetWrittenVariables": [],
+      "typeMap": {}
+    },
+    "cars_y": {
+      "operationName": "cars_y",
+      "parameterNames": [],
+      "outputParameterNames": [],
+      "topLevel": true,
+      "type": "CLASSICAL_B",
+      "readVariables": [
+        "tl_cars",
+        "tl_peds"
+      ],
+      "writtenVariables": [
+        "tl_cars"
+      ],
+      "nonDetWrittenVariables": [],
+      "typeMap": {}
+    },
+    "peds_r": {
+      "operationName": "peds_r",
+      "parameterNames": [],
+      "outputParameterNames": [],
+      "topLevel": true,
+      "type": "CLASSICAL_B",
+      "readVariables": [
+        "tl_cars",
+        "tl_peds"
+      ],
+      "writtenVariables": [
+        "tl_peds"
+      ],
+      "nonDetWrittenVariables": [],
+      "typeMap": {}
+    },
+    "cars_g": {
+      "operationName": "cars_g",
+      "parameterNames": [],
+      "outputParameterNames": [],
+      "topLevel": true,
+      "type": "CLASSICAL_B",
+      "readVariables": [
+        "tl_cars",
+        "tl_peds"
+      ],
+      "writtenVariables": [
+        "tl_cars"
+      ],
+      "nonDetWrittenVariables": [],
+      "typeMap": {}
+    },
+    "cars_ry": {
+      "operationName": "cars_ry",
+      "parameterNames": [],
+      "outputParameterNames": [],
+      "topLevel": true,
+      "type": "CLASSICAL_B",
+      "readVariables": [
+        "tl_cars",
+        "tl_peds"
+      ],
+      "writtenVariables": [
+        "tl_cars"
+      ],
+      "nonDetWrittenVariables": [],
+      "typeMap": {}
+    },
+    "cars_r": {
+      "operationName": "cars_r",
+      "parameterNames": [],
+      "outputParameterNames": [],
+      "topLevel": true,
+      "type": "CLASSICAL_B",
+      "readVariables": [
+        "tl_cars",
+        "tl_peds"
+      ],
+      "writtenVariables": [
+        "tl_cars"
+      ],
+      "nonDetWrittenVariables": [],
+      "typeMap": {}
+    }
+  },
+  "globalIdentifierTypes": {
+    "tl_cars": "global(colors)",
+    "tl_peds": "global(colors)"
+  },
+  "metadata": {
+    "fileType": "Trace",
+    "formatVersion": 5,
+    "savedAt": "2022-09-26T13:40:55.711205Z",
+    "creator": "traceReplay",
+    "proB2KernelVersion": "4.0.0-SNAPSHOT",
+    "proBCliVersion": "1.12.0-nightly",
+    "modelName": "TrafficLight"
+  }
+}

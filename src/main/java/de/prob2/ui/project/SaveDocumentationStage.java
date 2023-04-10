@@ -1,36 +1,43 @@
 package de.prob2.ui.project;
 
-import com.google.inject.Inject;
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.documentation.Documenter;
-import de.prob2.ui.documentation.MachineDocumentationItem;
-import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.control.cell.CheckBoxTableCell;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.google.inject.Inject;
+import com.google.inject.Injector;
+
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.documentation.DocumentationProcessHandler;
+import de.prob2.ui.documentation.MachineDocumentationItem;
+import de.prob2.ui.documentation.ProjectDocumenter;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.ProB2Module;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.machines.Machine;
+
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextField;
+import javafx.scene.control.cell.CheckBoxTableCell;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+
 @FXMLInjected
 public class SaveDocumentationStage extends Stage {
-
 	@FXML
 	private Button finishButton;
 	@FXML
@@ -42,9 +49,6 @@ public class SaveDocumentationStage extends Stage {
 	@FXML
 	private Label errorExplanationLabel;
 
-	private final FileChooserManager fileChooserManager;
-	private final I18n i18n;
-	private final StageManager stageManager;
 	@FXML
 	private TableView<MachineDocumentationItem> tvDocumentation;
 
@@ -55,31 +59,40 @@ public class SaveDocumentationStage extends Stage {
 	private TableColumn<MachineDocumentationItem, String> tvMachines;
 
 	@FXML
-	private CheckBox checkLTL;
+	private CheckBox documentLTL;
 	@FXML
-	private CheckBox checkModelchecking;
+	private CheckBox documentModelchecking;
 	@FXML
-	private CheckBox checkSymbolic;
+	private CheckBox documentSymbolic;
 	@FXML
 	private CheckBox makePdf;
+	@FXML
+	private CheckBox printHtmlCode;
 	private final ObservableList<MachineDocumentationItem> machineDocumentationItems = FXCollections.observableArrayList();
+	private final Injector injector;
+	private final FileChooserManager fileChooserManager;
+	private final I18n i18n;
+	private final StageManager stageManager;
 
 	@Inject
-	private SaveDocumentationStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, final StageManager stageManager, I18n i18n) {
+	private SaveDocumentationStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, final StageManager stageManager, I18n i18n, Injector injector) {
 		this.fileChooserManager = fileChooserManager;
 		this.currentProject = currentProject;
 		this.i18n = i18n;
+		this.injector = injector;
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.stageManager = stageManager;
-		stageManager.loadFXML(this, "save_modelchecking_stage.fxml");
+		stageManager.loadFXML(this, "save_project_documentation_stage.fxml");
 		currentProject.getMachines().forEach(machine -> machineDocumentationItems.add(new MachineDocumentationItem(Boolean.TRUE, machine)));
 	}
 
 	@FXML
-	public void initialize() {
+	public void initialize() throws IOException, InterruptedException {
+		disableMakePdfIfPackageNotInstalled();
 		finishButton.disableProperty().bind(filename.lengthProperty().lessThanOrEqualTo(0));
 		locationField.setText(this.currentProject.getDefaultLocation().toString());
 		filename.setText(this.currentProject.getName());
+		// connect machines with checkboxes this helped: https://stackoverflow.com/questions/7217625/how-to-add-checkboxs-to-a-tableview-in-javafx
 		tvMachines.setCellValueFactory(cell -> cell.getValue().getMachineItem().nameProperty());
 		tvChecked.setCellFactory(tc -> new CheckBoxTableCell<>());
 		tvChecked.setCellValueFactory(c -> {
@@ -89,10 +102,21 @@ public class SaveDocumentationStage extends Stage {
 		});
 		tvDocumentation.setItems(machineDocumentationItems);
 	}
+
+	private void disableMakePdfIfPackageNotInstalled() throws IOException, InterruptedException {
+		//Windows Script uses Powershell which is installed defaultly, so no check needed
+		if (!ProB2Module.IS_WINDOWS) {
+			if(!DocumentationProcessHandler.packageInstalled("pdflatex")){
+				makePdf.setText(i18n.translate("verifications.documentation.saveStage.pdfPackageNotInstalled"));
+				makePdf.setDisable(true);
+			}
+		}
+	}
+
 	@FXML
 	void selectLocation() {
 		DirectoryChooser dirChooser = new DirectoryChooser();
-		dirChooser.setTitle(i18n.translate("verifications.modelchecking.saveModelcheckingStage.label.title"));
+		dirChooser.setTitle(i18n.translate("verifications.documentation.saveStage.label.title"));
 		final Path path = fileChooserManager.showDirectoryChooser(dirChooser, null, this.getOwner());
 		if (path != null) {
 			locationField.setText(path.toString());
@@ -105,18 +129,30 @@ public class SaveDocumentationStage extends Stage {
 	}
 
 	@FXML
-	void finish() throws IOException, IllegalAccessException{
+	void finish(){
 		Path dir = Paths.get(locationField.getText());
 		if (!dir.toFile().isDirectory()) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "", "verifications.modelchecking.saveModelcheckingStage.invalidLocationError").show();
+			stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.newProjectStage.invalidLocationError").show();
 			return;
 		}
-		List<Machine> toDocumentMachines = machineDocumentationItems.stream()
+		List<Machine> checkedMachines = machineDocumentationItems.stream()
 																.filter(MachineDocumentationItem::getDocument)
 																.map(MachineDocumentationItem::getMachineItem)
 																.collect(Collectors.toList());
-		Documenter documenter = new Documenter(currentProject,i18n, checkModelchecking.isSelected(), checkLTL.isSelected(), checkSymbolic.isSelected(),makePdf.isSelected(), toDocumentMachines, dir, filename.getText());
-		documenter.document();
+		ProjectDocumenter documenter = new ProjectDocumenter(currentProject, i18n,
+															 documentModelchecking.isSelected(),
+															 documentLTL.isSelected(),
+														     documentSymbolic.isSelected(),
+														     makePdf.isSelected(),
+															 printHtmlCode.isSelected(),
+														     checkedMachines, dir, filename.getText(),injector);
+		try {
+			documenter.documentVelocity();
+			//only proof of concept for bachelor thesis. can be deleted later
+			//documenter.documentModelcheckingTableMarkdown();
+		} catch (IOException | RuntimeException exc) {
+			stageManager.makeExceptionAlert(exc, "verifications.documentation.error").showAndWait();
+		}
 		this.close();
 	}
 }

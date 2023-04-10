@@ -24,6 +24,7 @@ public class CheckingResultItem {
 	
 	public String getHeaderBundleKey() {
 		switch (this.getChecked()) {
+			case NOT_CHECKED: return "verifications.result.notChecked.header";
 			case SUCCESS: return "verifications.result.succeeded.header";
 			case FAIL: return "verifications.result.failed.header";
 			case TIMEOUT: return "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout";
