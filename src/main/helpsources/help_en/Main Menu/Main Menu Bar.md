@@ -31,8 +31,6 @@ The Visualisation submenu provides different forms of visualisation.
 You can visualize the transition and states of the machine as a [graph](Visualisations/Graph%20Visualisation.md),
 a [table](Visualisations/Table%20Visualisation.md) or by using the [Magic Layout](Visualisations/Magic%20Layout.md), a tool for interactive and customizable state visualisation.
 
-The [Open VisB](Visualisations/VisB.md) option offers a visualisation of the machine, if corresponding .json and .svg-files are provided.
-
 Furthermore, the [history chart](Visualisations/History%20Chart.md) shows a chart of the chosen formulas.
 
 ## <a name="Advanced"> Advanced</a>
