@@ -78,8 +78,7 @@
 							<FlowPane fx:id="chartsPane">
 								<LineChart fx:id="singleChart" styleClass="history-chart">
 									<xAxis>
-										<NumberAxis styleClass="time-axis" autoRanging="false"
-											tickUnit="1.0" upperBound="1.0" />
+										<NumberAxis styleClass="time-axis"/>
 									</xAxis>
 									<yAxis>
 										<NumberAxis />
