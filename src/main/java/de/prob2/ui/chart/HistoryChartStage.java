@@ -454,7 +454,7 @@ public final class HistoryChartStage extends Stage {
 			}
 			// Add additional data point for rectangular shapes in line chart
 			if (rectangularLineChartCheckBox.isSelected()) {
-				newDatas.get(i).add(0, new XYChart.Data<>(xPos + 1, value));
+				newDatas.get(i).add(0, new XYChart.Data<>(xPos - 1, value));
 			}
 			newDatas.get(i).add(0, new XYChart.Data<>(xPos, value));
 		}
