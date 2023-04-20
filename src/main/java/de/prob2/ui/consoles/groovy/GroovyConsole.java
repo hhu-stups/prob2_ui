@@ -6,8 +6,8 @@ import java.util.OptionalInt;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.codecompletion.CCItemTest;
 import de.prob2.ui.codecompletion.CodeCompletion;
+import de.prob2.ui.codecompletion.GroovyCCItem;
 import de.prob2.ui.codecompletion.ParentWithEditableText;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -33,7 +33,7 @@ import org.fxmisc.wellbehaved.event.Nodes;
 public class GroovyConsole extends Console {
 
 	private final GroovyInterpreter groovyInterpreter;
-	private final CodeCompletion<CCItemTest> codeCompletion;
+	private final CodeCompletion<GroovyCCItem> codeCompletion;
 
 	@Inject
 	private GroovyConsole(StageManager stageManager, GroovyInterpreter groovyInterpreter, I18n i18n, Config config) {
@@ -58,7 +58,7 @@ public class GroovyConsole extends Console {
 		}, this.inputProperty(), this.caretPositionProperty());
 		this.codeCompletion = new CodeCompletion<>(
 				stageManager,
-				new ParentWithEditableText() {
+				new ParentWithEditableText<GroovyCCItem>() {
 
 					@Override
 					public Window getWindow() {
@@ -74,9 +74,24 @@ public class GroovyConsole extends Console {
 					public ObservableValue<Optional<String>> getTextBeforeCaret() {
 						return textBeforeCaret;
 					}
+
+					@Override
+					public void doReplacement(GroovyCCItem replacement) {
+						OptionalInt optInputPosition = GroovyConsole.this.getPositionInInput();
+						if (!optInputPosition.isPresent()) {
+							// the cursor is not in the input, we dont have an anchor position for completion
+							return;
+						}
+
+						int inputPosition = optInputPosition.getAsInt();
+						String prefix = GroovyConsole.this.getInput().substring(0, Math.max(0, inputPosition - replacement.getOriginalText().length()));
+						String suffix = GroovyConsole.this.getInput().substring(inputPosition);
+						String text = replacement.getReplacement();
+						GroovyConsole.this.setInput(prefix + text + suffix);
+						GroovyConsole.this.moveCaretToPosInInput(prefix.length() + text.length());
+					}
 				},
-				this.groovyInterpreter::getSuggestions,
-				i -> System.out.println("selected: " + i)
+				this.groovyInterpreter::getSuggestions
 		);
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));
 

@@ -6,7 +6,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.StageManager;
@@ -24,19 +23,17 @@ import javafx.util.Callback;
 
 public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 
-	private final ParentWithEditableText parent;
+	private final ParentWithEditableText<? super T> parent;
 	private final ChangeListener<Optional<Point2D>> caretBoundsChangeListener;
 	private final Callback<String, Collection<? extends T>> codeCompletionProvider;
-	private final Consumer<T> codeCompletionCallback;
 
 	@FXML
 	private ListView<T> lvSuggestions;
 
-	public CodeCompletion(StageManager stageManager, ParentWithEditableText parent, Callback<String, Collection<? extends T>> codeCompletionProvider, Consumer<T> codeCompletionCallback) {
+	public CodeCompletion(StageManager stageManager, ParentWithEditableText<? super T> parent, Callback<String, Collection<? extends T>> codeCompletionProvider) {
 		super();
 		this.parent = parent;
 		this.codeCompletionProvider = codeCompletionProvider;
-		this.codeCompletionCallback = codeCompletionCallback;
 
 		this.caretBoundsChangeListener = (observable, from, to) -> to.ifPresent(pos -> {
 			this.setAnchorX(pos.getX());
@@ -63,7 +60,6 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 	}
 
 	public void trigger() {
-		System.out.println("CodeCompletion.trigger");
 		if (this.isShowing()) {
 			return;
 		}
@@ -98,54 +94,11 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 
 	@Override
 	public void hide() {
-		System.out.println("CodeCompletion.hide");
 		super.hide();
 		this.lvSuggestions.getItems().clear();
 	}
 
-	private static String keyEventToString(KeyEvent e) {
-		List<String> components = new ArrayList<>();
-		if (e.isConsumed()) {
-			components.add("consumed");
-		}
-
-		if (e.getCharacter() != null && !e.getCharacter().isEmpty()) {
-			components.add("character=" + StringHelper.escapeNonAscii(e.getCharacter()));
-		}
-
-		if (e.getText() != null && !e.getText().isEmpty()) {
-			components.add("text=" + StringHelper.escapeNonAscii(e.getText()));
-		}
-
-		if (e.getCode() != null) {
-			components.add("code=" + e.getCode());
-		}
-
-		if (e.isShiftDown()) {
-			components.add("shift");
-		}
-
-		if (e.isControlDown()) {
-			components.add("ctrl");
-		}
-
-		if (e.isAltDown()) {
-			components.add("alt");
-		}
-
-		if (e.isMetaDown()) {
-			components.add("meta");
-		}
-
-		if (e.isShortcutDown()) {
-			components.add("shortcut");
-		}
-
-		return e.getClass().getSimpleName() + '[' + e.getEventType() + ']' + '{' + String.join(",", components) + '}';
-	}
-
 	private void onKeyPressed(KeyEvent event) {
-		System.out.println("CodeCompletion.ListView.onKeyPressed: " + keyEventToString(event));
 		switch (event.getCode()) {
 			case TAB:
 			case ENTER:
@@ -160,19 +113,17 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 	}
 
 	private void onMouseClicked(MouseEvent event) {
-		System.out.println("CodeCompletion.ListView.onMouseClicked");
 		if (event.getButton() == MouseButton.PRIMARY && event.getClickCount() == 2) {
 			this.doCompletion(this.lvSuggestions.getSelectionModel().getSelectedItem());
 		}
 	}
 
 	private void doCompletion(T selectedItem) {
-		System.out.println("CodeCompletion.doCompletion: " + selectedItem);
 		if (selectedItem == null) {
 			return;
 		}
 
-		this.codeCompletionCallback.accept(selectedItem);
+		this.parent.doReplacement(selectedItem);
 		this.hide();
 	}
 }

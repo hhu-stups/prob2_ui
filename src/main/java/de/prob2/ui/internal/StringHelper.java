@@ -1,5 +1,10 @@
 package de.prob2.ui.internal;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javafx.scene.input.KeyEvent;
+
 public final class StringHelper {
 	private StringHelper() {
 	}
@@ -46,5 +51,46 @@ public final class StringHelper {
 		}
 
 		return s.codePoints().noneMatch(Character::isISOControl);
+	}
+
+	public static String keyEventToString(KeyEvent e) {
+		List<String> components = new ArrayList<>();
+		if (e.isConsumed()) {
+			components.add("consumed");
+		}
+
+		if (e.getCharacter() != null && !e.getCharacter().isEmpty()) {
+			components.add("character=" + StringHelper.escapeNonAscii(e.getCharacter()));
+		}
+
+		if (e.getText() != null && !e.getText().isEmpty()) {
+			components.add("text=" + StringHelper.escapeNonAscii(e.getText()));
+		}
+
+		if (e.getCode() != null) {
+			components.add("code=" + e.getCode());
+		}
+
+		if (e.isShiftDown()) {
+			components.add("shift");
+		}
+
+		if (e.isControlDown()) {
+			components.add("ctrl");
+		}
+
+		if (e.isAltDown()) {
+			components.add("alt");
+		}
+
+		if (e.isMetaDown()) {
+			components.add("meta");
+		}
+
+		if (e.isShortcutDown()) {
+			components.add("shortcut");
+		}
+
+		return e.getClass().getSimpleName() + '[' + e.getEventType() + ']' + '{' + String.join(",", components) + '}';
 	}
 }

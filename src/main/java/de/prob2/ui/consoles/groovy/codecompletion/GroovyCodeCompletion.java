@@ -17,7 +17,7 @@ import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
-import de.prob2.ui.codecompletion.CCItemTest;
+import de.prob2.ui.codecompletion.GroovyCCItem;
 import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
@@ -106,10 +106,8 @@ public class GroovyCodeCompletion {
 		return new String[] { "", text };
 	}
 
-	public Collection<? extends CCItemTest> getSuggestions(String text) {
+	public Collection<? extends GroovyCCItem> getSuggestions(String text) {
 		String[] currentPrefixAndSuffix = extractPrefixAndSuffix(text);
-		System.out.println("GroovyCodeCompletion.getSuggestions: prefix=" + Arrays.toString(currentPrefixAndSuffix));
-
 		String namespace = currentPrefixAndSuffix[0];
 		String member = currentPrefixAndSuffix[1];
 
@@ -117,7 +115,7 @@ public class GroovyCodeCompletion {
 		handler.find();
 
 		return handler.suggestions.stream()
-				       .map(x -> new CCItemTest(x.getNameAndParams()))
+				       .map(x -> new GroovyCCItem(member, x.getNameAndParams()))
 				       .collect(Collectors.toList());
 	}
 
@@ -165,11 +163,7 @@ public class GroovyCodeCompletion {
 			}
 
 			value = engine.getBindings(ScriptContext.GLOBAL_SCOPE).get(namespace);
-			if (value != null) {
-				return value;
-			}
-
-			return null;
+			return value;
 		}
 
 		private Class<?> resolveClass(String namespace) {

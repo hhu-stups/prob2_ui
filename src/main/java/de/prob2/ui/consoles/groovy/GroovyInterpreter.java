@@ -8,7 +8,7 @@ import javax.script.ScriptException;
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
-import de.prob2.ui.codecompletion.CCItemTest;
+import de.prob2.ui.codecompletion.GroovyCCItem;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.Executable;
@@ -82,7 +82,7 @@ public final class GroovyInterpreter implements Executable {
 		groovyObjectStage.close();
 	}
 
-	public Collection<? extends CCItemTest> getSuggestions(String text) {
+	public Collection<? extends GroovyCCItem> getSuggestions(String text) {
 		return codeCompletion.getSuggestions(text);
 	}
 }
