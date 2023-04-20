@@ -13,7 +13,6 @@ import de.prob2.ui.persistence.PersistenceUtils;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 
 @FXMLInjected

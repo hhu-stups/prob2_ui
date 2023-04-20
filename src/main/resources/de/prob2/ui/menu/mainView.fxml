@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.beditor.BEditorView?>
-<?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import de.prob2.ui.states.StatesView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.StackPane?>
-<?import de.prob2.ui.visb.VisBView?>
 <fx:root type="StackPane" xmlns:fx="http://javafx.com/fxml/1">
 	<!-- SplitPane is actually a Control and not a Pane, so we have to wrap it in a StackPane so we can add the menu bar to it on Mac. -->
 	<SplitPane fx:id="splitPane" orientation="VERTICAL" dividerPositions="0.8">

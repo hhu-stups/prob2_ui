@@ -1,13 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.beditor.BEditorView?>
-<?import de.prob2.ui.consoles.b.BConsoleView?>
-<?import de.prob2.ui.sharedviews.BetterTabPane?>
-<?import de.prob2.ui.states.StatesView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
-<?import javafx.scene.control.TitledPane?>
-<?import javafx.scene.layout.StackPane?>
 <?import de.prob2.ui.visb.VisBView?>
 <?import de.prob2.ui.visualisation.VisualisationsView?>
 <?import javafx.scene.control.TabPane?>

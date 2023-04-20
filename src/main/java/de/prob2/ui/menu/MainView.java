@@ -13,7 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TitledPane;
+
 import javafx.scene.layout.StackPane;
 
 import java.util.List;
