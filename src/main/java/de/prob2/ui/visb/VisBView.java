@@ -168,6 +168,7 @@ public class VisBView extends BorderPane {
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			manageDefaultVisualisationButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
+			information.setText("");
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
@@ -249,7 +250,7 @@ public class VisBView extends BorderPane {
 	public void openHelpPage() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
-		helpSystem.openHelpForKeyAndAnchor("mainmenu.visualisations.visB", null);
+		helpSystem.openHelpForKeyAndAnchor("mainView.visB", null);
 		helpSystemStage.show();
 		helpSystemStage.toFront();
 	}

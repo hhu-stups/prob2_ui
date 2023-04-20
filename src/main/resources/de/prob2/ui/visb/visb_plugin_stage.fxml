@@ -23,16 +23,16 @@
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<center>
-		<VBox BorderPane.alignment="CENTER">
-			<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+	<top>
+		<VBox>
+		<HBox styleClass="border" alignment="CENTER_LEFT">
 				<padding>
-					<Insets left="5.0"/>
+					<Insets topRightBottomLeft="5.0"/>
 				</padding>
 				<Button fx:id="loadVisualisationButton" onAction="#loadVisBFile">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%visb.menu.file.open"/>
@@ -41,7 +41,7 @@
 				<Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%visb.menu.edit.reload"/>
@@ -50,7 +50,7 @@
 				<Button fx:id="zoomInButton" onAction="#zoomIn">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%visb.menu.view.zoom.in"/>
@@ -59,7 +59,7 @@
 				<Button fx:id="zoomOutButton" onAction="#zoomOut">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%visb.menu.view.zoom.out"/>
@@ -68,7 +68,7 @@
 				<Button fx:id="showVisBItemsAndEventsButton" onAction="#showVisBItemsAndEvents">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="INFO"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%visb.buttons.showItemsAndEvents"/>
@@ -77,7 +77,7 @@
 				<Button fx:id="manageDefaultVisualisationButton" onAction="#manageDefaultVisualisation">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%visb.buttons.manageDefaultVisualisation"/>
@@ -86,7 +86,7 @@
 				<MenuButton>
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%visb.menu.help"/>
@@ -96,12 +96,14 @@
 						<MenuItem fx:id="helpMenu_userManual" text="%visb.menu.help.user.manual"/>
 					</items>
 				</MenuButton>
+			<Spacer/>
+				<Label fx:id="information" alignment="CENTER" BorderPane.alignment="CENTER"/>
 				<Spacer/>
 				<TraceReplayMenuButton/>
 				<Button fx:id="openSimulationButton" onAction="#openSimulation">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%common.buttons.openSimulation"/>
@@ -110,7 +112,7 @@
 				<MenuButton fx:id="saveTraceButton">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
-									   bindableFontSize="${fontSize.fontSize + 2}"/>
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
 					</graphic>
 					<tooltip>
 						<Tooltip text="%common.buttons.saveTrace"/>
@@ -123,6 +125,9 @@
 					</items>
 				</MenuButton>
 			</HBox>
+		</VBox>
+	</top>
+	<center>
 			<StackPane fx:id="zoomingPane" VBox.vgrow="ALWAYS">
 				<VBox fx:id="placeholder" alignment="CENTER" StackPane.alignment="CENTER">
 					<padding>
@@ -134,9 +139,11 @@
 					<Label text="%visb.placeholder.text" textAlignment="CENTER"/>
 				</VBox>
 			</StackPane>
-		</VBox>
 	</center>
+
 	<bottom>
-		<Label fx:id="information" alignment="CENTER" text="%visb.infobox.information" BorderPane.alignment="CENTER"/>
+		<HBox alignment="BOTTOM_CENTER">
+		<fx:include source="../sharedviews/navigation_buttons.fxml"/>
+		</HBox>
 	</bottom>
 </fx:root>
