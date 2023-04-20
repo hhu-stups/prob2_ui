@@ -344,11 +344,17 @@ public class VisBStage extends Stage {
 				scriptString.append(String.format(Locale.ROOT, "var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
 				scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"id\",\"%s\");\n", id, id));
 				for(Map.Entry<String, String> entry : attributes.entrySet()) {
-					scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"%s\",\"%s\");\n", id, entry.getKey(), entry.getValue()));
+					if (entry.getKey().equals("text")) {
+					   // text attribute needs to be set differently:
+					   scriptString.append(String.format(Locale.ROOT, "new__%s.textContent = \"%s\";\n", id, entry.getValue()));
+					} else {
+					   scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"%s\",\"%s\");\n", id, entry.getKey(), entry.getValue()));
+					}
 				}
 				scriptString.append(String.format(Locale.ROOT, "document.querySelector(\"svg\").appendChild(new__%s);\n", id));
 			}
 			scriptString.append("}");
+			//System.out.println("Script: "+ scriptString);
 			webView.getEngine().executeScript(scriptString.toString());
 		}
 	}
