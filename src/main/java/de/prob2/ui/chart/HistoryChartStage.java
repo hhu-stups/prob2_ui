@@ -321,6 +321,24 @@ public final class HistoryChartStage extends Stage {
 		machine.setHistoryChartItems(formulaCodeList);
 	}
 
+	private static void updateXAxisTicks(NumberAxis axis, double upperBound) {
+		// If the range of values is small enough (50 or less),
+		// JavaFX often adds non-integer tick marks to the axis,
+		// even when all values are actually integers.
+		// We always want integer tick marks,
+		// so we disable the automatic tick placing and force a tick unit of 1.
+		// However, if this is done with a too large range of values (2000 or more),
+		// JavaFX complains on stderr about too many tick marks,
+		// so we enable auto-ranging again when there are enough values.
+		if (upperBound <= 50.0) {
+			axis.setAutoRanging(false);
+			axis.setTickUnit(1.0);
+			axis.setUpperBound(upperBound);
+		} else {
+			axis.setAutoRanging(true);
+		}
+	}
+
 	private void removeCharts(final int start, final int end) {
 		this.singleChart.getData().remove(start, end);
 		this.separateCharts.remove(start, end);
@@ -339,9 +357,6 @@ public final class HistoryChartStage extends Stage {
 					FXCollections.observableArrayList());
 			final NumberAxis separateXAxis = new NumberAxis();
 			separateXAxis.getStyleClass().add("time-axis");
-			separateXAxis.setAutoRanging(false);
-			separateXAxis.setTickUnit(1.0);
-			separateXAxis.setUpperBound(0.0);
 			final NumberAxis separateYAxis = new NumberAxis();
 			final LineChart<Number, Number> separateChart = new LineChart<>(separateXAxis, separateYAxis,
 					FXCollections.singletonObservableList(seriesSeparate));
@@ -362,7 +377,7 @@ public final class HistoryChartStage extends Stage {
 				}
 
 				// Update the upper bound of the X axis of the separate chart
-				separateXAxis.setUpperBound(change.getList().isEmpty() ? 1.0
+				updateXAxisTicks(separateXAxis, change.getList().isEmpty() ? 1.0
 					: change.getList().get(change.getList().size() - 1).getXValue().doubleValue());
 			});
 
@@ -454,7 +469,7 @@ public final class HistoryChartStage extends Stage {
 			}
 			// Add additional data point for rectangular shapes in line chart
 			if (rectangularLineChartCheckBox.isSelected()) {
-				newDatas.get(i).add(0, new XYChart.Data<>(xPos + 1, value));
+				newDatas.get(i).add(0, new XYChart.Data<>(xPos - 1, value));
 			}
 			newDatas.get(i).add(0, new XYChart.Data<>(xPos, value));
 		}
@@ -476,7 +491,7 @@ public final class HistoryChartStage extends Stage {
 				}
 			}
 		}
-		((NumberAxis) this.singleChart.getXAxis()).setUpperBound(maxXBound);
+		updateXAxisTicks((NumberAxis) this.singleChart.getXAxis(), maxXBound);
 	}
 
 	private Number resultToNumber(final AbstractEvalResult aer, final boolean showErrors) {

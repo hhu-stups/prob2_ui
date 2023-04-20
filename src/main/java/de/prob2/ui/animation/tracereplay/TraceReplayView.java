@@ -1,7 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,9 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
-import de.prob2.ui.animation.tracereplay.refactoring.TraceRefactoredSetup;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -56,6 +52,8 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+
+import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
 
 @FXMLInjected
 @Singleton
@@ -100,26 +98,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				injector.getInstance(RevealInExplorer.class).revealInExplorer(this.getItem().getAbsoluteLocation())
 			);
 
-			final MenuItem recheckTraceItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.refactorTrace"));
-
-			recheckTraceItem.setOnAction(event -> {
-				final Machine currentMachine = currentProject.getCurrentMachine();
-				Path currentMachinePath = currentProject.getLocation().resolve(currentMachine.getLocation());
-				final TraceJsonFile traceFile;
-				try {
-					traceFile = this.getItem().load();
-				} catch (IOException e) {
-					traceFileHandler.showLoadError(this.getItem(), e);
-					return;
-				}
-				TraceRefactoredSetup traceRefactoredSetup = new TraceRefactoredSetup(traceFile, currentMachinePath, null, this.getItem().getAbsoluteLocation(), currentTrace.getStateSpace(), injector, currentProject, stageManager);
-				traceRefactoredSetup.executeCheck(true);
-				List<Path> persistentTraceList = traceRefactoredSetup.evaluateResults();
-				persistentTraceList.remove(this.getItem().getLocation());
-				persistentTraceList.forEach(trace -> traceFileHandler.addTraceFile(currentMachine, trace));
-			});
-
-			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, removeMenuItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem, recheckTraceItem);
+			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, removeMenuItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem);
 		}
 	}
 
