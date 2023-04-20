@@ -53,6 +53,7 @@ public class MainController extends BorderPane {
 	@FXML private SplitPane horizontalSP;
 	@FXML private SplitPane verticalSP;
 	@FXML private ObservableList<Accordion> accordions;
+	@FXML private TitledPane consolePane;
 
 	private final Injector injector;
 	private final StageManager stageManager;
@@ -112,6 +113,7 @@ public class MainController extends BorderPane {
 				if (configData.verticalDividerPositions != null && verticalSP != null) {
 					verticalSP.setDividerPositions(configData.verticalDividerPositions);
 				}
+				consolePane.setExpanded(configData.bConsoleExpanded);
 			}
 
 			@Override
@@ -127,6 +129,7 @@ public class MainController extends BorderPane {
 				if (verticalSP != null) {
 					configData.verticalDividerPositions = verticalSP.getDividerPositions();
 				}
+				configData.bConsoleExpanded = consolePane.isExpanded();
 			}
 		});
 	}

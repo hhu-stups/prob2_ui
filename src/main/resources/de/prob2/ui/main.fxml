@@ -14,6 +14,8 @@
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TitledPane?>
+<?import de.prob2.ui.consoles.b.BConsoleView?>
+<?import de.prob2.ui.visualisation.VisualisationsView?>
 
 <fx:root type="MainController" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
@@ -36,6 +38,16 @@
 			</SplitPane>
 			<SplitPane fx:id="verticalSP2" dividerPositions="0.9" orientation="VERTICAL">
 				<MainView/>
+				<Accordion fx:id="centerAccordion1" expandedPane="$statsTP">
+					<panes>
+						<TitledPane id="visualisations" fx:id="visPane" text="%menu.visualisation" animated="false">
+							<VisualisationsView/>
+						</TitledPane>
+						<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title" animated="false">
+							<BConsoleView/>
+						</TitledPane>
+					</panes>
+				</Accordion>
 			</SplitPane>
 			<SplitPane fx:id="verticalSP3" dividerPositions="0.5" orientation="VERTICAL">
 				<Accordion fx:id="rightAccordion1" expandedPane="$statsTP">
@@ -74,6 +86,7 @@
 			<fx:reference source="leftAccordion2"/>
 			<fx:reference source="rightAccordion1"/>
 			<fx:reference source="rightAccordion2"/>
+			<fx:reference source="centerAccordion1"/>
 		</FXCollections>
 	</fx:define>
 </fx:root>
