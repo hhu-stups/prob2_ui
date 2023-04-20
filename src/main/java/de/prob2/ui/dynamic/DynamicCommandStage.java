@@ -123,6 +123,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	// e.g. when reloading the current machine.
 	protected T lastItem;
 	
+	private boolean needsUpdateAfterBusy;
+	
 	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 
 	protected final StageManager stageManager;
@@ -144,6 +146,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.i18n = i18n;
 		this.updater = new BackgroundUpdater(threadName);
 		stopActions.add(this.updater::shutdownNow);
+		
+		this.needsUpdateAfterBusy = false;
 	}
 	
 	
@@ -188,8 +192,25 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		});
 		lvChoice.disableProperty().bind(this.updater.runningProperty().or(currentTrace.stateSpaceProperty().isNull()));
 
-		currentTrace.addListener((observable, from, to) -> refresh());
-		currentTrace.addStatesCalculatedListener(newOps -> Platform.runLater(this::refresh));
+		currentTrace.addListener((observable, from, to) -> {
+			if (currentTrace.isAnimatorBusy()) {
+				this.needsUpdateAfterBusy = true;
+			} else {
+				refresh();
+			}
+		});
+		currentTrace.addStatesCalculatedListener(newOps -> {
+			if (currentTrace.isAnimatorBusy()) {
+				this.needsUpdateAfterBusy = true;
+			} else {
+				Platform.runLater(this::refresh);
+			}
+		});
+		currentTrace.animatorBusyProperty().addListener((o, from, to) -> {
+			if (!to && this.needsUpdateAfterBusy) {
+				Platform.runLater(this::refresh);
+			}
+		});
 
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			this.interrupt();

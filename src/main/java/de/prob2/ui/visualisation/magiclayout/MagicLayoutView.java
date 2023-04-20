@@ -150,14 +150,35 @@ public class MagicLayoutView extends Stage {
 
 	@FXML
 	private void layoutGraph() {
-		magicGraphPane.getChildren().setAll(magicGraph.generateMagicGraph(currentTrace.getCurrentState(), layoutChoiceBox.getSelectionModel().getSelectedItem()));
-		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
+		if(isInitializedOrNull()){
+			magicGraphPane.getChildren().setAll(
+				magicGraph.generateMagicGraph(currentTrace.getCurrentState(),
+					layoutChoiceBox.getSelectionModel().getSelectedItem()));
+			magicGraph.setGraphStyle(magicLayoutEditNodes.getNodegroups(),
+				magicLayoutEditEdges.getEdgegroups());
+		}
 	}
 
 	@FXML
 	private void updateGraph() {
-		magicGraph.updateMagicGraph(currentTrace.getCurrentState());
-		magicGraph.setGraphStyle(magicLayoutEditNodes.getNodegroups(), magicLayoutEditEdges.getEdgegroups());
+		if(isInitializedOrNull()){
+			magicGraph.updateMagicGraph(currentTrace.getCurrentState());
+			magicGraph.setGraphStyle(magicLayoutEditNodes.getNodegroups(),
+				magicLayoutEditEdges.getEdgegroups());
+		}
+	}
+
+	private boolean isInitializedOrNull() {
+		if (currentTrace.getCurrentState() == null || currentTrace.getCurrentState().isInitialised()) {
+			return true;
+		} else {
+			Alert alert =
+				stageManager.makeAlert(Alert.AlertType.WARNING, "visualisation.magicLayout.alert.title",
+					"visualisation.magicLayout.alert.content");
+			alert.initOwner(this);
+			alert.showAndWait();
+			return false;
+		}
 	}
 
 	@FXML
