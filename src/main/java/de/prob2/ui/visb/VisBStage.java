@@ -340,22 +340,25 @@ public class VisBStage extends Stage {
 			for(VisBSVGObject svgObject : svgObjects) {
 				String id = svgObject.getId();
 				String object = svgObject.getObject();
-				Map<String, String> attributes = svgObject.getAttributes();
 				scriptString.append(String.format(Locale.ROOT, "var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
-				scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"id\",\"%s\");\n", id, id));
-				for(Map.Entry<String, String> entry : attributes.entrySet()) {
-					if (entry.getKey().equals("text")) {
-						// text attribute needs to be set differently:
-						scriptString.append(String.format(Locale.ROOT, "new__%s.textContent = \"%s\";\n", id, entry.getValue()));
-					} else {
-						scriptString.append(String.format(Locale.ROOT, "new__%s.setAttribute(\"%s\",\"%s\");\n", id, entry.getKey(), entry.getValue()));
-					}
-				}
 				scriptString.append(String.format(Locale.ROOT, "document.querySelector(\"svg\").appendChild(new__%s);\n", id));
 			}
 			scriptString.append("}");
-			//System.out.println("Script: "+ scriptString);
 			webView.getEngine().executeScript(scriptString.toString());
+			for(VisBSVGObject svgObject : svgObjects) {
+				String id = svgObject.getId();
+				Map<String, String> attributes = svgObject.getAttributes();
+				JSObject object = (JSObject) this.webView.getEngine().executeScript(String.format(Locale.ROOT, "new__%s", id));
+				object.call("setAttribute", "id", id);
+				for(Map.Entry<String, String> entry : attributes.entrySet()) {
+					if("text".equals(entry.getKey())) {
+						this.getJSWindow().call("changeText", object, entry.getValue());
+					} else {
+						object.call("setAttribute", entry.getKey(), entry.getValue());
+					}
+				}
+
+			}
 		}
 	}
 

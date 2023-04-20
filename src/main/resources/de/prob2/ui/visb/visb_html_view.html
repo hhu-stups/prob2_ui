@@ -49,6 +49,10 @@
 			return element;
 		}
 
+		function changeText(obj, value) {
+			obj.textContent = value;
+		}
+
 		function changeAttribute(id, attribute, value){
 			runWhenLoaded(function(){
 				const obj = checkSvgId(id, "attribute " + attribute);
