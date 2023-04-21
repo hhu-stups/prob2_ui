@@ -1,5 +1,6 @@
 package de.prob2.ui.visb;
 
+import de.prob2.ui.internal.FXMLInjected;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -13,6 +14,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javafx.application.Platform;
+import javafx.scene.layout.BorderPane;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -33,11 +36,9 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -47,7 +48,6 @@ import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
@@ -66,7 +66,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebErrorEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import netscape.javascript.JSException;
@@ -79,13 +78,14 @@ import org.slf4j.LoggerFactory;
  * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
  */
 @Singleton
-public class VisBStage extends Stage {
+@FXMLInjected
+public class VisBView extends BorderPane {
 
 	public enum VisBExportKind {
 		CURRENT_STATE, CURRENT_TRACE
 	}
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(VisBStage.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(VisBView.class);
 	private final Injector injector;
 	private final I18n i18n;
 	private final StageManager stageManager;
@@ -108,30 +108,14 @@ public class VisBStage extends Stage {
 	private Button openSimulationButton;
 	@FXML
 	private StackPane zoomingPane;
-	@FXML
+
 	private WebView webView;
+
 	@FXML
-	private MenuItem editMenu_reload;
-	@FXML
-	private MenuItem editMenu_close;
-	@FXML
-	private MenuItem fileMenu_close;
-	@FXML
-	private MenuItem fileMenu_visB;
-	@FXML
-	private MenuItem fileMenu_export;
-	@FXML
-	private MenuItem viewMenu_zoomIn;
-	@FXML
-	private MenuItem viewMenu_zoomOut;
-	@FXML
-	private MenuItem viewMenu_zoomFontsIn;
-	@FXML
-	private MenuItem viewMenu_zoomFontsOut;
+	private MenuItem image_export;
+
 	@FXML
 	private MenuItem helpMenu_userManual;
-	@FXML
-	private MenuItem helpMenu_helpPage;
 	@FXML
 	private MenuItem saveTraceItem;
 	@FXML
@@ -147,7 +131,7 @@ public class VisBStage extends Stage {
 	@FXML
 	private VBox placeholder;
 	@FXML
-	private HelpButton helpButton;
+	private MenuItem helpButton;
 
 	/**
 	 * The public constructor of this class is injected with the ProB2-UI injector.
@@ -156,9 +140,9 @@ public class VisBStage extends Stage {
 	 * @param currentProject ProB2-UI currentProject
 	 */
 	@Inject
-	public VisBStage(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
-					 final CurrentTrace currentTrace, final I18n i18n, final FileChooserManager fileChooserManager,
-					 final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController, final TraceFileHandler traceFileHandler) {
+	public VisBView(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
+									final CurrentTrace currentTrace, final I18n i18n, final FileChooserManager fileChooserManager,
+									final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController, final TraceFileHandler traceFileHandler) {
 		super();
 		this.injector = injector;
 		this.i18n = i18n;
@@ -177,36 +161,15 @@ public class VisBStage extends Stage {
 	 */
 	@FXML
 	public void initialize(){
-		this.stageManager.setMacMenuBar(this, visbMenuBar);
+		this.helpButton.setOnAction(e -> openHelpPage());
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
-		this.helpMenu_helpPage.setOnAction(e -> openHelpPage());
-		this.helpButton.setHelpContent("mainmenu.visualisations.visB", null);
 		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
-		this.fileMenu_visB.setOnAction(e -> loadVisBFile());
-		this.fileMenu_close.setOnAction(e -> sendCloseRequest());
-		this.fileMenu_export.setOnAction(e -> exportImage());
-		this.editMenu_reload.setOnAction(e -> reloadVisualisation());
-		this.editMenu_close.setOnAction(e -> closeVisualisation());
-		this.viewMenu_zoomIn.setOnAction(e -> zoomIn());
-		this.viewMenu_zoomOut.setOnAction(e -> zoomOut());
-		// zoom fonts in/out (but only of those that are not given a fixed size):
-		this.viewMenu_zoomFontsIn.setOnAction(e -> webView.setFontScale(webView.getFontScale()*1.25));
-		this.viewMenu_zoomFontsOut.setOnAction(e -> webView.setFontScale(webView.getFontScale()/1.25));
-		this.titleProperty().bind(
-				Bindings.when(visBController.visBPathProperty().isNull())
-						.then(i18n.translateBinding("visb.title"))
-						.otherwise(i18n.translateBinding(
-								"visb.currentVisualisation",
-								SafeBindings.createSafeStringBinding(
-										() -> currentProject.getLocation().relativize(visBController.getVisBPath()).toString(),
-										currentProject, visBController.visBPathProperty()
-								)
-						))
-		);
+		this.image_export.setOnAction(e -> exportImage());
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			manageDefaultVisualisationButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
+			information.setText("");
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
@@ -235,16 +198,16 @@ public class VisBStage extends Stage {
 			visBController.setVisBPath(null);
 		});
 		//Load VisB file from machine, when window is opened and set listener on the current machine
-		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> {
+
 			this.currentProject.currentMachineProperty().addListener(machineListener);
 			this.visBController.visBVisualisationProperty().addListener(visBListener);
 			this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
-			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+
 
 			machineListener.changed(null, null, currentProject.getCurrentMachine());
-			visBListener.changed(null, null, visBController.getVisBVisualisation());
+
 			stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
-		});
+
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
@@ -258,9 +221,17 @@ public class VisBStage extends Stage {
 		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
 		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
 
-		LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
-		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-		this.webView.getEngine().setOnError(this::treatJavascriptError);
+		Platform.runLater(() -> {
+
+			this.webView = new WebView();
+			this.zoomingPane.getChildren().add(webView);
+			LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
+			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+			this.webView.getEngine().setOnError(this::treatJavascriptError);
+			visBListener.changed(null, null, visBController.getVisBVisualisation());
+			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+
+		});
 
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
 			if (change.wasAdded()) {
@@ -274,15 +245,13 @@ public class VisBStage extends Stage {
 				}
 			}
 		});
-
-		injector.getInstance(VisBDebugStage.class).initOwner(this);
 	}
 
 	@FXML
 	public void openHelpPage() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
-		helpSystem.openHelpForKeyAndAnchor("mainmenu.visualisations.visB", null);
+		helpSystem.openHelpForKeyAndAnchor("mainView.visB", null);
 		helpSystemStage.show();
 		helpSystemStage.toFront();
 	}
@@ -316,10 +285,6 @@ public class VisBStage extends Stage {
 		}
 	}
 
-	private void sendCloseRequest(){
-		this.fireEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSE_REQUEST));
-	}
-
 	/**
 	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
 	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
@@ -336,12 +301,11 @@ public class VisBStage extends Stage {
 		// TODO: Maybe use templates
 		if(!svgObjects.isEmpty()) {
 			StringBuilder scriptString = new StringBuilder();
-			scriptString.append("if(document.querySelector(\"svg\") != null) {\n");
+			scriptString.append("if(hasSVG()) {\n");
 			for(VisBSVGObject svgObject : svgObjects) {
 				String id = svgObject.getId();
 				String object = svgObject.getObject();
-				scriptString.append(String.format(Locale.ROOT, "var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
-				scriptString.append(String.format(Locale.ROOT, "document.querySelector(\"svg\").appendChild(new__%s);\n", id));
+				scriptString.append(String.format(Locale.ROOT, "var new__%s = createElement(\"%s\")\n", id, object));
 			}
 			scriptString.append("}");
 			webView.getEngine().executeScript(scriptString.toString());
@@ -381,7 +345,7 @@ public class VisBStage extends Stage {
 	private void showJavascriptAlert(String message) {
 		LOGGER.debug("JavaScript ALERT: " + message);
 		final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
-		alert.initOwner(this);
+		alert.initOwner(this.getScene().getWindow());
 		alert.showAndWait();
 	}
 
@@ -463,7 +427,7 @@ public class VisBStage extends Stage {
 		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
 			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
-			alert.initOwner(this);
+			alert.initOwner(this.getScene().getWindow());
 			alert.showAndWait();
 			return;
 		}
@@ -487,7 +451,7 @@ public class VisBStage extends Stage {
 	 */
 	private void alert(Throwable ex, String header, String body, Object... params){
 		final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
-		alert.initOwner(this);
+		alert.initOwner(this.getScene().getWindow());
 		alert.showAndWait();
 	}
 
@@ -502,9 +466,6 @@ public class VisBStage extends Stage {
 	public void exportImageWithPath(Path path) {
 		if(path != null) {
 			File file = path.toFile();
-			if(!this.isShowing()) {
-				this.show();
-			}
 			WritableImage snapshot = webView.snapshot(new SnapshotParameters(), null);
 			RenderedImage image = SwingFXUtils.fromFXImage(snapshot,null);
 			try {
@@ -565,7 +526,7 @@ public class VisBStage extends Stage {
 	@FXML
 	public void manageDefaultVisualisation() {
 		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
-		defaultPathDialog.initOwner(this);
+		defaultPathDialog.initOwner(this.getScene().getWindow());
 		defaultPathDialog.initStrings(
 			"visb.defaultVisualisation.header",
 			"visb.defaultVisualisation.text",
@@ -604,7 +565,7 @@ public class VisBStage extends Stage {
 			fileChooser.getExtensionFilters().setAll(htmlFilter);
 			fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 
-			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this);
+			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this.getScene().getWindow());
 			saveHTMLExportWithPath(currentTrace.get(), kind, path);
 		}
 	}

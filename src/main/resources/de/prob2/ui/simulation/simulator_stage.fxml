@@ -84,14 +84,6 @@
 												text="%simulation.tooltips.addSimulation" />
 									</tooltip>
 								</Button>
-								<Button fx:id="openVisBButton" onAction="#openVisB">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="IMAGE" bindableFontSize="${fontSize.fontSize + 2}" />
-									</graphic>
-									<tooltip>
-										<Tooltip text="%common.buttons.openVisB" />
-									</tooltip>
-								</Button>
 								<MenuButton fx:id="saveTraceButton">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />

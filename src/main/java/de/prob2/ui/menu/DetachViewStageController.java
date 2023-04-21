@@ -5,6 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob2.ui.MainController;
 import de.prob2.ui.animation.AnimationView;
+import de.prob2.ui.consoles.b.BConsoleView;
 import de.prob2.ui.history.HistoryView;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationsView;
@@ -12,6 +13,7 @@ import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 import de.prob2.ui.verifications.VerificationsView;
+import de.prob2.ui.visualisation.VisualisationsView;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
@@ -45,7 +47,9 @@ public final class DetachViewStageController extends Stage {
 	@FXML private CheckBox detachVerifications;
 	@FXML private CheckBox detachStats;
 	@FXML private CheckBox detachProject;
-	
+	@FXML private CheckBox detachConsole;
+	@FXML private CheckBox detachVisualisations;
+
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final UIState uiState;
@@ -73,6 +77,8 @@ public final class DetachViewStageController extends Stage {
 		checkBoxMap.put(VerificationsView.class, detachVerifications);
 		checkBoxMap.put(StatsView.class, detachStats);
 		checkBoxMap.put(ProjectView.class, detachProject);
+		checkBoxMap.put(BConsoleView.class, detachConsole);
+		checkBoxMap.put(VisualisationsView.class, detachVisualisations);
 		this.setOnCloseRequest(e -> {
 			for (DetachedViewStage stage : wrapperStages) {
 				checkBoxMap.get(stage.getDetachedView().getClass()).setSelected(true);

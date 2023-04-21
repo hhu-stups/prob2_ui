@@ -22,14 +22,21 @@
 							text="%common.views.operations" />
 						<CheckBox fx:id="detachAnimation"
 							text="%common.views.animation" />
-						<CheckBox fx:id="detachHistory"
-							text="%common.views.history" />
+						<Separator/>
+						<CheckBox fx:id="detachVisualisations"
+								  text="%menu.visualisation" />
+						<CheckBox fx:id="detachConsole"
+								  text="%states.statesView.interactiveConsole.titledPane.title" />
+						<Separator/>
+						<CheckBox fx:id="detachStats"
+								  text="%common.views.stats" />
 						<CheckBox fx:id="detachVerifications"
 							text="%common.views.verifications" />
-						<CheckBox fx:id="detachStats"
-							text="%common.views.stats" />
 						<CheckBox fx:id="detachProject"
-							text="%common.views.project" />
+								  text="%common.views.project" />
+						<CheckBox fx:id="detachHistory"
+								  text="%common.views.history" />
+
 					</VBox>
 					<Button fx:id="apply" onAction="#apply"
 						text="%common.buttons.apply">

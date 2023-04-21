@@ -49,6 +49,16 @@
 			return element;
 		}
 
+		function hasSVG() {
+			return document.querySelector("svg") != null;
+		}
+
+		function createElement(element) {
+			let newObject = document.createElementNS("http://www.w3.org/2000/svg",element);
+			document.querySelector("svg").appendChild(newObject);
+			return newObject;
+		}
+
 		function changeText(obj, value) {
 			obj.textContent = value;
 		}

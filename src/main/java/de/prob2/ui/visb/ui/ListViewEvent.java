@@ -6,7 +6,7 @@ import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.visb.VisBStage;
+import de.prob2.ui.visb.VisBView;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -44,7 +44,7 @@ public class ListViewEvent extends ListCell<VisBEvent> {
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if(visBEvent != null) {
 				for (VisBHover hover : visBEvent.getHovers()) {
-					injector.getInstance(VisBStage.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+					injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 				}
 			}
 		});
