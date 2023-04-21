@@ -8,7 +8,7 @@ import javax.script.ScriptEngine;
 
 import de.prob2.ui.codecompletion.GroovyCCItem;
 
-public class GroovyCodeCompletion {
+public final class GroovyCodeCompletion {
 
 	private static final Pattern DOT_WITH_WHITESPACES = Pattern.compile("\\s*\\.\\s*");
 

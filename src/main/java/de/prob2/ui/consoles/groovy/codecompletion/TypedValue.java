@@ -8,7 +8,7 @@ import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 import groovy.lang.MetaClass;
 
-public class TypedValue implements Resolved {
+public final class TypedValue implements Resolved {
 
 	private final Class<?> type;
 	private final Object value;

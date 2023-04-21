@@ -8,7 +8,7 @@ import org.codehaus.groovy.runtime.DefaultGroovyMethods;
 
 import groovy.lang.MetaClass;
 
-public class Clazz implements Resolved {
+public final class Clazz implements Resolved {
 
 	private final Class<?> clazz;
 
