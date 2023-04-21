@@ -336,12 +336,11 @@ public class VisBStage extends Stage {
 		// TODO: Maybe use templates
 		if(!svgObjects.isEmpty()) {
 			StringBuilder scriptString = new StringBuilder();
-			scriptString.append("if(document.querySelector(\"svg\") != null) {\n");
+			scriptString.append("if(hasSVG()) {\n");
 			for(VisBSVGObject svgObject : svgObjects) {
 				String id = svgObject.getId();
 				String object = svgObject.getObject();
-				scriptString.append(String.format(Locale.ROOT, "var new__%s = document.createElementNS(\"http://www.w3.org/2000/svg\",\"%s\");\n", id, object));
-				scriptString.append(String.format(Locale.ROOT, "document.querySelector(\"svg\").appendChild(new__%s);\n", id));
+				scriptString.append(String.format(Locale.ROOT, "var new__%s = createElement(\"%s\")\n", id, object));
 			}
 			scriptString.append("}");
 			webView.getEngine().executeScript(scriptString.toString());
