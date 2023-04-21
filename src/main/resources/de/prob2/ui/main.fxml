@@ -36,14 +36,14 @@
 					</panes>
 				</Accordion>
 			</SplitPane>
-			<SplitPane fx:id="verticalSP2" dividerPositions="0.9" orientation="VERTICAL">
+			<SplitPane fx:id="verticalSP2" dividerPositions="0.5" orientation="VERTICAL">
 				<MainView/>
-				<Accordion fx:id="centerAccordion1" expandedPane="$statsTP">
+				<Accordion fx:id="centerAccordion1" expandedPane="$visPane">
 					<panes>
-						<TitledPane id="visualisations" fx:id="visPane" text="%menu.visualisation" animated="false">
+						<TitledPane id="visualisations" fx:id="visPane" text="%menu.visualisation">
 							<VisualisationsView/>
 						</TitledPane>
-						<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title" animated="false">
+						<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title">
 							<BConsoleView/>
 						</TitledPane>
 					</panes>
