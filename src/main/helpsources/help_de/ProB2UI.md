@@ -10,7 +10,8 @@ In der Voreinstellung ist das Hauptfenster in drei vertikale Felder unterteilt:
 * In der Mitte
 	* die [Zustandsansicht](Zentrale%20Ansicht/Zustandsansicht.md), die den aktuellen Zustand der B-Maschine anzeigt
 	* die [Zustandsvisualisierung](Zentrale%20Ansicht/Zustandsvisualisierung.md), die eine Visualisierung der Zustände anzeigt,
-    * den [Editor](Zentrale%20Ansicht/Editor.md), um aktuell geöffnete Maschinen zu bearbeiten und zu speichern
+    * das [VisB-Plugin](Zentrale%20Ansicht/VisB.md), eine weitere Visualisierungs-Möglichkeit, wenn im Projekt passende .json und .svg-Dateien zur Verfügung stehen.
+    * der [Editor](Zentrale%20Ansicht/Editor.md), um aktuell geöffnete Maschinen zu bearbeiten und zu speichern
     * die [B Konsole](Zentrale%20Ansicht/B%20Konsole.md), eine eingebaute Konsole, um B-Formeln zu evaluieren
   
 

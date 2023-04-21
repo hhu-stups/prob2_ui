@@ -1,5 +1,6 @@
 package de.prob2.ui;
 
+import de.prob2.ui.menu.DetachViewStageController;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -25,11 +26,14 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 
+import javafx.application.Platform;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.layout.BorderPane;
@@ -53,12 +57,14 @@ public class MainController extends BorderPane {
 	@FXML private SplitPane horizontalSP;
 	@FXML private SplitPane verticalSP;
 	@FXML private ObservableList<Accordion> accordions;
+	@FXML private TitledPane consolePane;
 
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final UIState uiState;
 	private final I18n i18n;
 	private final Config config;
+	private DetachViewStageController detacher;
 
 	@Inject
 	public MainController(Injector injector, StageManager stageManager, UIState uiState, I18n i18n, Config config) {
@@ -72,6 +78,10 @@ public class MainController extends BorderPane {
 
 	@FXML
 	private void initialize() {
+		Platform.runLater(() -> {
+			this.detacher = injector.getInstance(DetachViewStageController.class);
+			this.getAccordions().stream().forEach(e -> e.getPanes().stream().forEach(this::addContextMenu));
+		});
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
 		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
@@ -112,6 +122,7 @@ public class MainController extends BorderPane {
 				if (configData.verticalDividerPositions != null && verticalSP != null) {
 					verticalSP.setDividerPositions(configData.verticalDividerPositions);
 				}
+				consolePane.setExpanded(configData.bConsoleExpanded);
 			}
 
 			@Override
@@ -127,8 +138,19 @@ public class MainController extends BorderPane {
 				if (verticalSP != null) {
 					configData.verticalDividerPositions = verticalSP.getDividerPositions();
 				}
+				configData.bConsoleExpanded = consolePane.isExpanded();
 			}
 		});
+	}
+
+	private void addContextMenu(TitledPane tp) {
+		final MenuItem detachItem = new MenuItem(i18n.translate("common.contextMenu.detach"));
+		detachItem.setOnAction(event -> {
+			detacher.selectForDetach(tp.getContent().getClass().getName());
+			detacher.doDetaching();
+		});
+		ContextMenu menu = new ContextMenu(detachItem);
+		tp.setContextMenu(menu);
 	}
 
 	public void reloadMainView() {

@@ -1,6 +1,6 @@
 Die Verlaufs-Ansicht zeigt eine Liste von bereits ausgeführten Operationen. 
 Die Ansicht korrespondiert mit den Animations-Möglichkeiten und der [Zustandsansicht](Zentrale%20Ansicht/Zustandsansicht.md) von ProB. 
-Wenn also eine Transition über z.B. [VisB](Hauptmenü/Visualisierungen/VisB.md) oder die [Operations-Ansicht](Operationen.md)
+Wenn also eine Transition über z.B. [VisB](Zentrale%20Ansicht/VisB.md) oder die [Operations-Ansicht](Operationen.md)
 ausgeführt wird, wird diese automatisch dem Verlauf hinzugefügt. Wenn man im Verlauf zurückgeht, zum Beispiel durch Anklicken einzelner Transitionen oder durch Nutzen der Pfeiltasten,
 ändern sich auch die möglichen Operationen in der Operations-Ansicht, der Zustand der Maschine in der Zustandsansicht sowie die Darstellung in den verschiedenen Visualisierungsmöglichkeiten.
 

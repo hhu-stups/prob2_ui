@@ -9,7 +9,7 @@ import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.visb.VisBStage;
+import de.prob2.ui.visb.VisBView;
 import de.prob2.ui.visb.VisBTableItem;
 
 import javafx.beans.binding.Bindings;
@@ -60,7 +60,7 @@ public class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 				String id = visBItem.getId();
 				if(eventsById.containsKey(id)) {
 					for (VisBHover hover : eventsById.get(id).getHovers()) {
-						injector.getInstance(VisBStage.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+						injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 					}
 				}
 			}

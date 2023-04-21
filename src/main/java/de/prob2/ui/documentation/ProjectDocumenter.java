@@ -22,7 +22,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.visb.VisBStage;
+import de.prob2.ui.visb.VisBView;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -123,7 +123,7 @@ public class ProjectDocumenter {
 	}
 
 	public String saveTraceHtml(Machine machine, ReplayTrace trace){
-		VisBStage stage = injector.getInstance(VisBStage.class);
+		VisBView visBView = injector.getInstance(VisBView.class);
 		String filename = Transition.prettifyName(trace.getName())+".html";
 		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
 		* To solve this Problem the completable future is saved as an field that can be accessed to be synced  */
@@ -131,9 +131,7 @@ public class ProjectDocumenter {
 		project.getLoadFuture().join();
 		final StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
-		stage.show();
-		stage.saveHTMLExportWithPath(trace.getReplayedTrace().getTrace(stateSpace), VisBStage.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(directory,machine,trace)+filename));
-		stage.close();
+		visBView.saveHTMLExportWithPath(trace.getReplayedTrace().getTrace(stateSpace), VisBView.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(directory,machine,trace)+filename));
 		return getHtmlPath(machine,trace)+filename;
 	}
 

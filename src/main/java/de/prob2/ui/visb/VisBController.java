@@ -55,7 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The VisBController controls the {@link VisBStage}.
+ * The VisBController controls the {@link VisBView}.
  * Everything that can be done in Java only and uses interaction with ProB2-UI should be in here, not in the other classes.
  */
 @Singleton
@@ -146,7 +146,7 @@ public class VisBController {
 	}
 
 	private void applySVGChanges() {
-		VisBStage visBStage = injector.getInstance(VisBStage.class);
+		VisBView visBView = injector.getInstance(VisBView.class);
 
 		try {
 			final GetVisBAttributeValuesCommand getAttributesCmd = new GetVisBAttributeValuesCommand(currentTrace.getCurrentState());
@@ -155,12 +155,12 @@ public class VisBController {
 		} catch (ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 			updateInfo("visb.infobox.visualisation.error");
-			visBStage.clear();
+			visBView.clear();
 			return;
 		}
 
 		try {
-			visBStage.resetMessages();
+			visBView.resetMessages();
 		} catch (JSException e){
 			alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 			updateInfo("visb.infobox.visualisation.error");
@@ -172,20 +172,20 @@ public class VisBController {
 	 */
 	private void alert(Throwable ex, String header, String message, Object... params){
 		Alert exceptionAlert = this.stageManager.makeExceptionAlert(ex, header, message, params);
-		exceptionAlert.initOwner(injector.getInstance(VisBStage.class));
+		exceptionAlert.initOwner(injector.getInstance(VisBView.class).getScene().getWindow());
 		exceptionAlert.showAndWait();
 	}
 
 	/**
-	 * This redirects the information to the {@link VisBStage}.
+	 * This redirects the information to the {@link VisBView}.
 	 * @param key bundlekey for string
 	 */
 	private void updateInfo(String key){
-		injector.getInstance(VisBStage.class).updateInfo(i18n.translate(key));
+		injector.getInstance(VisBView.class).updateInfo(i18n.translate(key));
 	}
 
 	private void updateInfo(String key, Object... params){
-		injector.getInstance(VisBStage.class).updateInfo(i18n.translate(key, params));
+		injector.getInstance(VisBView.class).updateInfo(i18n.translate(key, params));
 	}
 
 	/**
@@ -225,14 +225,14 @@ public class VisBController {
 			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			if (e.getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
 				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
-				alert.initOwner(this.injector.getInstance(VisBStage.class));
+				alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
 				alert.show();
 			}
 		} catch (EvaluationException e) {
 			LOGGER.debug("Cannot execute event for id: {}", id, e);
 			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
-			alert.initOwner(this.injector.getInstance(VisBStage.class));
+			alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
 			alert.show();
 		}
 	}
@@ -352,6 +352,6 @@ public class VisBController {
 
 	private void showUpdateVisualisationNotPossible(){
 		updateInfo("visb.infobox.visualisation.updated");
-		injector.getInstance(VisBStage.class).showModelNotInitialised();
+		injector.getInstance(VisBView.class).showModelNotInitialised();
 	}
 }

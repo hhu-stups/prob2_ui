@@ -38,8 +38,6 @@ Das Visualisierungsmenü stellt verschiedene Formen der Visualisierung zur Verf�
 Es ist möglich, die Transitionen und den Zustand der Maschine als [Graph](Visualisierungen/Graphvisualisierung.md),
 als [Tabelle](Visualisierungen/Tabellenvisualisierung.md) oder mithilfe des [Magic Layout](Visualisierungen/Magic%20Layout.md) zu visualisieren.
 
-Durch [VisB öffnen](Visualisierungen/VisB.md) bietet eine weitere Visualisierungs-Möglichkeit, wenn im Projekt passende .json und .svg-Dateien zur Verfügung stehen.
-
 Des Weiteren bietet das [Zeitdiagramm](Visualisierungen/Zeitdiagramm.md) eine Darstellung bestimmter Werte anhand der eingegebenen Formeln.
 
 

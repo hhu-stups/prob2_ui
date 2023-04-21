@@ -146,7 +146,7 @@ public class VisBDebugStage extends Stage {
 		String id = item.getVisBItem().getId();
 		if(eventsById.containsKey(id)) {
 			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				injector.getInstance(VisBStage.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverLeaveVal());
+				injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverLeaveVal());
 			}
 		}
 	}
@@ -155,7 +155,7 @@ public class VisBDebugStage extends Stage {
 		String id = item.getVisBItem().getId();
 		if(eventsById.containsKey(id)) {
 			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				injector.getInstance(VisBStage.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverEnterVal());
+				injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverEnterVal());
 			}
 		}
 	}
