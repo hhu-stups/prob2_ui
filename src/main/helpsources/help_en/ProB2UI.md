@@ -9,8 +9,7 @@ By default, the main window is split into three vertical panes:
 
 * In the middle 
 	* the [State View](Main%20View/State%20View.md), containing the current state of the B machine, 
-    * the [State Visualisation](Main%20View/State%20Visualisation.md), containing a visualisation, 
-    * the [VisB-Plugin](Main%20View/VisB.md), offering further visualisation options, if corresponding .json and .svg-files are provided.
+    * the Visualisationview that offers fast access to two visualisation-options: the [State Visualisation](Main%20View/State%20Visualisation.md) and the [VisB-Plugin](Main%20View/VisB.md)
     * the [Editor](Main%20View/Editor.md), to edit und save currently loaded machines,
 	* the [B Console](Main%20View/B%20Console.md), a built-in console to evaluate B-formulas.
   
@@ -20,7 +19,6 @@ By default, the main window is split into three vertical panes:
 	* the [Project View](Project.md), showing the machines belonging to the project, the verification status, preferences and an overview of the project,
 	* the [Verifications View](Verification.md), offering methods to test a machine,
 	* the [Statistics](Statistics.md) of the current project, providing data about the state and transitions.
-
 
 In the bottom left corner, the [State Errors](Main%20View/State%20Errors.md), such as unsatisfied invariants or deadlocks, are displayed.
 

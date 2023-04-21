@@ -17,30 +17,46 @@ The Window submenu allows you to change perspectives as well as to use your own 
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TitledPane?>
+<?import de.prob2.ui.consoles.b.BConsoleView?>
+<?import de.prob2.ui.visualisation.VisualisationsView?>
 
-<fx:root type="MainController" maxHeight="Infinity"
-		 maxWidth="Infinity" minHeight="700.0" minWidth="1000.0"
-		 prefHeight="400.0" prefWidth="600.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="MainController" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
-		<SplitPane fx:id="horizontalSP" dividerPositions="0.1,0.9">
-			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
-				<panes>
-					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP">
-						<OperationsView/>
-					</TitledPane>
-					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
-						<AnimationView/>
-					</TitledPane>
-				</panes>
-			</Accordion>
-			<SplitPane fx:id="verticalSP" dividerPositions="0.9" orientation="VERTICAL">
-				<MainView/>
+		<SplitPane fx:id="horizontalSP" dividerPositions="0.3,0.7">
+			<SplitPane fx:id="verticalSP" dividerPositions="0.5" orientation="VERTICAL">
+				<Accordion fx:id="leftAccordion1" expandedPane="$operationsTP">
+					<panes>
+						<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP" collapsible="false">
+							<OperationsView/>
+						</TitledPane>
+					</panes>
+				</Accordion>
+				<Accordion fx:id="leftAccordion2" expandedPane="$animationTP">
+					<panes>
+						<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
+							<AnimationView/>
+						</TitledPane>
+					</panes>
+				</Accordion>
 			</SplitPane>
 			<SplitPane fx:id="verticalSP2" dividerPositions="0.5" orientation="VERTICAL">
+				<MainView/>
+				<Accordion fx:id="centerAccordion1" expandedPane="$visPane">
+					<panes>
+						<TitledPane id="visualisations" fx:id="visPane" text="%menu.visualisation">
+							<VisualisationsView/>
+						</TitledPane>
+						<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title">
+							<BConsoleView/>
+						</TitledPane>
+					</panes>
+				</Accordion>
+			</SplitPane>
+			<SplitPane fx:id="verticalSP3" dividerPositions="0.5" orientation="VERTICAL">
 				<Accordion fx:id="rightAccordion1" expandedPane="$statsTP">
 					<panes>
 						<TitledPane text="%common.views.stats" id="statsTP" fx:id="statsTP">
-							<StatsView/>
+							<StatsView fx:id="statsView"/>
 						</TitledPane>
 						<TitledPane text="%common.views.verifications" id="verificationsTP" fx:id="verificationsTP">
 							<VerificationsView/>
@@ -69,9 +85,11 @@ The Window submenu allows you to change perspectives as well as to use your own 
 	</bottom>
 	<fx:define>
 		<FXCollections fx:id="accordions" fx:factory="observableArrayList">
-			<fx:reference source="leftAccordion"/>
+			<fx:reference source="leftAccordion1"/>
+			<fx:reference source="leftAccordion2"/>
 			<fx:reference source="rightAccordion1"/>
 			<fx:reference source="rightAccordion2"/>
+			<fx:reference source="centerAccordion1"/>
 		</FXCollections>
 	</fx:define>
 </fx:root>
@@ -88,29 +106,9 @@ As you can see, the default perspective consists of several components:
 	* VerificationsView
 	* ProjectView
 	* HistoryView
+    * VisualisationsView
+    * BConsole
 * MenuController
 * StatusBar
 
-Every component may be placed as you see fit, but to guarantee certain usability, you need to follow through these rules: Every detachable component needs to be placed in a TitledPane and these TitledPanes need to be put in an Accordion and each of these Accordions need to be registered in a list.
-```XML
-...
-			<Accordion fx:id="leftAccordion" expandedPane="$operationsTP">
-				<panes>
-					<TitledPane text="%common.views.operations" id="operationsTP" fx:id="operationsTP">
-						<OperationsView/>
-					</TitledPane>
-					<TitledPane text="%common.views.animation" id="animationTP" fx:id="animationTP">
-						<AnimationView/>
-					</TitledPane>
-				</panes>
-			</Accordion>
-...
-	<fx:define>
-		<FXCollections fx:id="accordions" fx:factory="observableArrayList">
-			<fx:reference source="leftAccordion"/>
-			<fx:reference source="rightAccordion1"/>
-			<fx:reference source="rightAccordion2"/>
-		</FXCollections>
-	</fx:define>
-...
-```
+Every component may be placed as you see fit, but to guarantee certain usability, you need to follow through these rules: Every detachable component needs to be placed in a TitledPane and these TitledPanes need to be put in an Accordion and each of these Accordions need to be registered in a list as shown at the end of the fxml-file above.

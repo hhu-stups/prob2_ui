@@ -9,8 +9,7 @@ In der Voreinstellung ist das Hauptfenster in drei vertikale Felder unterteilt:
 
 * In der Mitte
 	* die [Zustandsansicht](Zentrale%20Ansicht/Zustandsansicht.md), die den aktuellen Zustand der B-Maschine anzeigt
-	* die [Zustandsvisualisierung](Zentrale%20Ansicht/Zustandsvisualisierung.md), die eine Visualisierung der Zustände anzeigt,
-    * das [VisB-Plugin](Zentrale%20Ansicht/VisB.md), eine weitere Visualisierungs-Möglichkeit, wenn im Projekt passende .json und .svg-Dateien zur Verfügung stehen.
+	* die Visualisierungsansicht, die schnellen Zugriff auf zwei Optionen zur Maschinen-Visualisierung bietet: die [Zustandsvisualisierung](Zentrale%20Ansicht/Zustandsvisualisierung.md) und das [VisB-Plugin](Zentrale%20Ansicht/VisB.md)
     * der [Editor](Zentrale%20Ansicht/Editor.md), um aktuell geöffnete Maschinen zu bearbeiten und zu speichern
     * die [B Konsole](Zentrale%20Ansicht/B%20Konsole.md), eine eingebaute Konsole, um B-Formeln zu evaluieren
   
@@ -20,7 +19,6 @@ In der Voreinstellung ist das Hauptfenster in drei vertikale Felder unterteilt:
 	* Die [Projektansicht](Projekt.md), die zugehörige Maschinen, den Überprüfungsstatus, Einstellungen und eine Projektübersicht anzeigt,
 	* Die [Überprüfungsansicht](Überprüfungen.md), die vMethoden zur Überprüfung einer Maschine anbietet,
 	* Die [Statistik](Statistik.md) des aktuellen Projekts, die verschiedene Daten zu Zuständen und Transitionen bereithält.
-  
 
 Im unteren linken Bildschirmrand zeigt die [Zustandsfehleransicht](Zentrale%20Ansicht/Zustandsfehler.md) mögliche Zustandsfehler wie z.B. Deadlocks an.
 
