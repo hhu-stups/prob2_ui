@@ -1,4 +1,4 @@
-package de.prob2.ui.sharedviews;
+package de.prob2.ui.visb;
 
 import java.nio.file.Path;
 
@@ -36,13 +36,19 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 		super();
 
 		this.i18n = i18n;
-		this.titleKey = new SimpleStringProperty();
-		this.statusWithDefaultKey = new SimpleStringProperty();
-		this.statusWithoutDefaultKey = new SimpleStringProperty();
+		this.titleKey = new SimpleStringProperty("visb.defaultVisualisation.header");
+		this.statusWithDefaultKey = new SimpleStringProperty("visb.defaultVisualisation.text");
+		this.statusWithoutDefaultKey = new SimpleStringProperty("visb.noDefaultVisualisation.text");
 		this.loadedPath = new SimpleObjectProperty<>();
 		this.defaultPath = new SimpleObjectProperty<>();
 
-		this.titleProperty().bind(i18n.translateBinding(this.titleKey));
+		this.loadButtonType = new ButtonType(i18n.translate("visb.defaultVisualisation.load"));
+		this.setButtonType = new ButtonType(i18n.translate(	"visb.defaultVisualisation.set"));
+		this.unsetButtonType = new ButtonType(i18n.translate("visb.defaultVisualisation.reset"));
+
+		this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
+
+		this.titleProperty().bind((i18n.translateBinding(this.titleKey)));
 		this.setResultConverter(buttonType -> {
 			if (buttonType == null || buttonType == ButtonType.CANCEL) {
 				return null;
@@ -56,11 +62,9 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 				throw new AssertionError("Unhandled button type: " + buttonType);
 			}
 		});
-		this.contentTextProperty().bind(
-				Bindings.when(defaultPath.isNull())
-						.then(i18n.translateBinding(this.statusWithoutDefaultKey))
-						.otherwise(i18n.translateBinding(this.statusWithDefaultKey, this.defaultPath))
-		);
+		this.contentTextProperty().bind(Bindings.when(defaultPath.isNull())
+								.then(i18n.translateBinding(this.statusWithoutDefaultKey))
+								.otherwise(i18n.translateBinding(this.statusWithDefaultKey, this.defaultPath)));
 		this.defaultPath.addListener((observable, oldValue, newValue) -> {
 			if (newValue == null) {
 				this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
@@ -76,23 +80,6 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 		stageManager.register(this);
 	}
 
-	public void initStrings(
-			final String titleKey,
-			final String statusWithDefaultKey,
-			final String statusWithoutDefaultKey,
-			final String loadButtonKey,
-			final String setButtonKey,
-			final String unsetButtonKey
-	) {
-		this.titleKey.set(titleKey);
-		this.statusWithDefaultKey.set(statusWithDefaultKey);
-		this.statusWithoutDefaultKey.set(statusWithoutDefaultKey);
-		this.loadButtonType = new ButtonType(i18n.translate(loadButtonKey));
-		this.setButtonType = new ButtonType(i18n.translate(setButtonKey));
-		this.unsetButtonType = new ButtonType(i18n.translate(unsetButtonKey));
-
-		this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
-	}
 
 	public void initPaths(final Path loadedPath, final Path defaultPath) {
 		this.loadedPath.set(loadedPath);

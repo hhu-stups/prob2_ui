@@ -43,7 +43,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.sharedviews.DefaultPathDialog;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
@@ -527,14 +526,6 @@ public class VisBView extends BorderPane {
 	public void manageDefaultVisualisation() {
 		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
 		defaultPathDialog.initOwner(this.getScene().getWindow());
-		defaultPathDialog.initStrings(
-			"visb.defaultVisualisation.header",
-			"visb.defaultVisualisation.text",
-			"visb.noDefaultVisualisation.text",
-			"visb.defaultVisualisation.load",
-			"visb.defaultVisualisation.set",
-			"visb.defaultVisualisation.reset"
-		);
 		final Path loadedPathRelative = currentProject.getLocation().relativize(visBController.getVisBPath());
 		final Machine currentMachine = currentProject.getCurrentMachine();
 		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getVisBVisualisation());
