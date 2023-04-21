@@ -316,21 +316,21 @@ public abstract class Console extends StyleClassedTextArea {
 		this.moveCaretToPosInInput(inputPosition + text.length());
 	}
 
-	private void moveCaretToPosInInput(int pos) {
+	public void moveCaretToPosInInput(int pos) {
 		assert this.getParagraphs().size() >= 1;
 		this.moveTo(this.getParagraphs().size() - 1, this.inputStart.get() + pos);
 		this.requestFollowCaret();
 	}
 
-	private void moveToInputStart() {
+	public void moveToInputStart() {
 		this.moveCaretToPosInInput(0);
 	}
 
-	private void moveToInputEnd() {
+	public void moveToInputEnd() {
 		this.moveCaretToPosInInput(this.input.get().length());
 	}
 
-	private void moveCaretToInputEndIfRequired() {
+	public void moveCaretToInputEndIfRequired() {
 		if (!this.getPositionInInput().isPresent()) {
 			this.moveToInputEnd();
 		}
@@ -476,7 +476,7 @@ public abstract class Console extends StyleClassedTextArea {
 		});
 	}
 
-	private OptionalInt getPositionInInput() {
+	protected OptionalInt getPositionInInput() {
 		int lastParagraph = this.getParagraphs().size() - 1;
 		assert lastParagraph >= 0;
 		if (lastParagraph != this.getCurrentParagraph()) {
@@ -527,5 +527,13 @@ public abstract class Console extends StyleClassedTextArea {
 	public void setInput(String input) {
 		this.input.set(input);
 		this.moveToInputEnd();
+	}
+
+	public int getInputStart() {
+		return this.inputStart.get();
+	}
+
+	public int getInputEnd() {
+		return this.inputEnd.get();
 	}
 }

@@ -1,33 +1,36 @@
 package de.prob2.ui.consoles.groovy;
 
+import java.util.Collection;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
 
 import com.google.inject.Inject;
 
 import de.prob.scripting.ScriptEngineProvider;
+import de.prob2.ui.codecompletion.GroovyCCItem;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.Executable;
-import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.consoles.groovy.codecompletion.GroovyCodeCompletion;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectStage;
-import de.prob2.ui.internal.StageManager;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class GroovyInterpreter implements Executable {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(GroovyInterpreter.class);
+
 	private final ScriptEngine engine;
 	private final GroovyCodeCompletion codeCompletion;
 	private final GroovyObjectStage groovyObjectStage;
 
 	@Inject
-	private GroovyInterpreter(final StageManager stageManager, final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
+	private GroovyInterpreter(final ScriptEngineProvider sep, final GroovyObjectStage groovyObjectStage) {
 		engine = sep.get();
 		this.groovyObjectStage = groovyObjectStage;
-		this.codeCompletion = new GroovyCodeCompletion(stageManager, engine);
+		this.codeCompletion = new GroovyCodeCompletion(engine);
 	}
 
 	@Override
@@ -75,21 +78,11 @@ public final class GroovyInterpreter implements Executable {
 		}
 	}
 
-	public void setCodeCompletion(GroovyConsole parent) {
-		codeCompletion.setParent(parent);
-	}
-
-	public void triggerCodeCompletion(String currentLine, CodeCompletionTriggerAction action) {
-		if (!codeCompletion.isVisible()) {
-			codeCompletion.activate(currentLine, action);
-		}
-	}
-
-	public void triggerCloseCodeCompletion() {
-		codeCompletion.deactivate();
-	}
-
 	public void closeObjectStage() {
 		groovyObjectStage.close();
+	}
+
+	public Collection<? extends GroovyCCItem> getSuggestions(String text) {
+		return codeCompletion.getSuggestions(text);
 	}
 }

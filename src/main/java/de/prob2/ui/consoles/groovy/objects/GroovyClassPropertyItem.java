@@ -86,7 +86,7 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 		this.type.set(p.getType().getSimpleName());
 		this.origin.set("GROOVY");
 		this.modifier.set(Modifier.toString(p.getType().getModifiers()));
-		this.declarer.set(p.getType().getDeclaringClass() == null ? "n/a" : p.getType().getDeclaringClass().getSimpleName());
+		this.declarer.set("n/a");
 		try {
 			if (p.getValue() != null) {
 				this.value.set(p.getValue().toString());
@@ -102,7 +102,7 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 		this.type.set(m.getType().getSimpleName());
 		this.origin.set("GROOVY");
 		this.modifier.set(Modifier.toString(m.getType().getModifiers()));
-		this.declarer.set(m.getType().getDeclaringClass() == null ? "n/a" : m.getType().getDeclaringClass().getSimpleName());
+		this.declarer.set("n/a");
 	}
 
 	public GroovyClassPropertyItem(MetaMethod m) {

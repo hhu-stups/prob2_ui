@@ -1,21 +1,28 @@
 package de.prob2.ui.consoles.groovy;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.codecompletion.CodeCompletion;
+import de.prob2.ui.codecompletion.GroovyCCItem;
+import de.prob2.ui.codecompletion.ParentWithEditableText;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.Console;
-import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionEvent;
-import de.prob2.ui.consoles.groovy.codecompletion.CodeCompletionTriggerAction;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.value.ObservableValue;
+import javafx.geometry.Point2D;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
-import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
+import javafx.stage.Window;
 
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
@@ -24,15 +31,69 @@ import org.fxmisc.wellbehaved.event.Nodes;
 @FXMLInjected
 @Singleton
 public class GroovyConsole extends Console {
+
 	private final GroovyInterpreter groovyInterpreter;
+	private final CodeCompletion<GroovyCCItem> codeCompletion;
 
 	@Inject
-	private GroovyConsole(GroovyInterpreter groovyInterpreter, I18n i18n, Config config) {
+	private GroovyConsole(StageManager stageManager, GroovyInterpreter groovyInterpreter, I18n i18n, Config config) {
 		super(i18n, groovyInterpreter, "consoles.groovy.header", "consoles.groovy.prompt");
 		this.groovyInterpreter = groovyInterpreter;
-		this.groovyInterpreter.setCodeCompletion(this);
-		setCodeCompletionEvent();
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion(CodeCompletionTriggerAction.TRIGGER)));
+
+		ObservableValue<Optional<Point2D>> caretPos = Bindings.createObjectBinding(
+				() -> this.caretBoundsProperty().getValue()
+						      .map(bounds -> new Point2D(
+								      (bounds.getMinX() + bounds.getMaxX()) / 2.0,
+								      bounds.getMaxY()
+						      )),
+				this.caretBoundsProperty()
+		);
+		ObservableValue<Optional<String>> textBeforeCaret = Bindings.createObjectBinding(() -> {
+			OptionalInt positionInInput = this.getPositionInInput();
+			if (positionInInput.isPresent()) {
+				return Optional.of(this.getInput().substring(0, positionInInput.getAsInt()));
+			} else {
+				return Optional.empty();
+			}
+		}, this.inputProperty(), this.caretPositionProperty());
+		this.codeCompletion = new CodeCompletion<>(
+				stageManager,
+				new ParentWithEditableText<GroovyCCItem>() {
+
+					@Override
+					public Window getWindow() {
+						return GroovyConsole.this.getScene().getWindow();
+					}
+
+					@Override
+					public ObservableValue<Optional<Point2D>> getCaretPosition() {
+						return caretPos;
+					}
+
+					@Override
+					public ObservableValue<Optional<String>> getTextBeforeCaret() {
+						return textBeforeCaret;
+					}
+
+					@Override
+					public void doReplacement(GroovyCCItem replacement) {
+						OptionalInt optInputPosition = GroovyConsole.this.getPositionInInput();
+						if (!optInputPosition.isPresent()) {
+							// the cursor is not in the input, we dont have an anchor position for completion
+							return;
+						}
+
+						int inputPosition = optInputPosition.getAsInt();
+						String prefix = GroovyConsole.this.getInput().substring(0, Math.max(0, inputPosition - replacement.getOriginalText().length()));
+						String suffix = GroovyConsole.this.getInput().substring(inputPosition);
+						String text = replacement.getReplacement();
+						GroovyConsole.this.setInput(prefix + text + suffix);
+						GroovyConsole.this.moveCaretToPosInInput(prefix.length() + text.length());
+					}
+				},
+				this.groovyInterpreter::getSuggestions
+		);
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));
 
 		config.addListener(new ConfigListener() {
 			@Override
@@ -53,62 +114,12 @@ public class GroovyConsole extends Console {
 	protected void onEnterSingleLineText(String text) {
 		super.onEnterSingleLineText(text);
 		if (!isSearching() && ".".equals(text)) {
-			triggerCodeCompletion(CodeCompletionTriggerAction.POINT);
+			triggerCodeCompletion();
 		}
 	}
 
-	private void triggerCodeCompletion(CodeCompletionTriggerAction action) {
-		// TODO: fix code completion
-		/*if (getCaretPosition() >= this.getInputStart()) {
-			int caretPosInLine = getCaretPosition() - getInputStart();
-			groovyInterpreter.triggerCodeCompletion(getInput().substring(0, caretPosInLine), action);
-		}*/
-	}
-
-	private void setCodeCompletionEvent() {
-		this.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> groovyInterpreter.triggerCloseCodeCompletion());
-		this.addEventHandler(CodeCompletionEvent.CODECOMPLETION, this::handleCodeCompletionEvent);
-	}
-
-	private void handleCodeCompletionEvent(CodeCompletionEvent e) {
-		// TODO: handle different key event types
-		if (e.getCode() == KeyCode.ENTER || e.getEvent() instanceof MouseEvent || ";".equals(((KeyEvent) e.getEvent()).getText())) {
-			handleChooseSuggestion(e);
-			requestFollowCaret(); //This forces the text area to scroll to the bottom. Invoking scrollYToPixel does not have the expected effect
-		} else if (e.getCode() == KeyCode.SPACE) {
-			// handle Space in Code Completion
-			onEnterText(" ");
-			e.consume();
-		}
-	}
-
-	private void handleChooseSuggestion(CodeCompletionEvent e) {
-		// TODO: fix
-		/*String choice = e.getChoice();
-		String suggestion = e.getCurrentSuggestion();
-		int indexSkipped = getIndexSkipped(this.getText(this.getCaretPosition(), this.getLength()), choice, suggestion);
-		int indexOfRest = this.getCaretPosition() + indexSkipped;
-		int oldLength = this.getLength();
-		String addition = choice + this.getText(indexOfRest, this.getLength());
-		this.deleteText(this.getCaretPosition() - suggestion.length(), this.getLength());
-		this.appendText(addition);
-		int diff = this.getLength() - oldLength;
-		currentPosInLine += diff + indexSkipped;
-		charCounterInLine += diff;
-		this.moveTo(indexOfRest + diff);*/
-	}
-
-	private int getIndexSkipped(String rest, String choice, String suggestion) {
-		String restOfChoice = choice.substring(suggestion.length());
-		int result = 0;
-		for (int i = 0; i < Math.min(rest.length(), restOfChoice.length()); i++) {
-			if (restOfChoice.charAt(i) == rest.charAt(i)) {
-				result++;
-			} else {
-				break;
-			}
-		}
-		return result;
+	private void triggerCodeCompletion() {
+		this.getPositionInInput().ifPresent(pos -> this.codeCompletion.trigger());
 	}
 
 	public void closeObjectStage() {

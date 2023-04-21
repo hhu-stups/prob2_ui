@@ -1,205 +1,170 @@
 package de.prob2.ui.consoles.groovy.codecompletion;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 
 import javax.script.Bindings;
 import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 
-import de.prob2.ui.consoles.groovy.GroovyMethodOption;
 import de.prob2.ui.consoles.groovy.objects.GroovyAbstractItem;
-import de.prob2.ui.consoles.groovy.objects.GroovyClassHandler;
-import de.prob2.ui.consoles.groovy.objects.GroovyClassPropertyItem;
 import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 
-import javafx.collections.ObservableList;
+final class GroovyCodeCompletionHandler {
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+	private static final Map<String, String> GLOBAL_CLASSES = new HashMap<String, String>() {
+		{
+			this.put("BigDecimal", "java.math.BigDecimal");
+			this.put("BigInteger", "java.math.BigInteger");
+		}
+	};
+	private static final Set<String> GLOBAL_PACKAGES = new HashSet<>(Arrays.asList(
+			"java.lang",
+			"java.io",
+			"java.net",
+			"java.util",
+			"groovy.lang",
+			"groovy.util"
+	));
 
-public class GroovyCodeCompletionHandler {
+	private final ScriptEngine engine;
+	private final String namespace;
+	private final String member;
+	private final Set<GroovyAbstractItem> suggestions = new LinkedHashSet<>();
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(GroovyCodeCompletionHandler.class);
-
-	private final List<GroovyAbstractItem> currentSuggestions;
-
-	private final ObservableList<GroovyAbstractItem> suggestions;
-
-	public GroovyCodeCompletionHandler(ObservableList<GroovyAbstractItem> suggestions) {
-		this.suggestions = suggestions;
-		this.currentSuggestions = new ArrayList<>();
+	GroovyCodeCompletionHandler(ScriptEngine engine, String namespace, String member) {
+		this.engine = engine;
+		this.namespace = namespace;
+		this.member = member;
 	}
 
-	public void handleMethodsFromObjects(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
-		String[] methods = getMethodsFromCurrentLine(currentLine);
-		if (methods.length == 0) {
-			return;
-		}
-		Object object = getObjectFromScope(methods[0], engine);
-		if (object == null) {
-			return;
-		}
-		Class<?> clazz = object.getClass();
-		for (int i = 1; i < methods.length; i++) {
-			fillAllMethodsAndProperties(clazz, GroovyMethodOption.NONSTATIC);
-			for (GroovyAbstractItem item : currentSuggestions) {
-				if (item.getNameAndParams().equals(methods[i])) {
-					clazz = ((GroovyClassPropertyItem) item).getReturnTypeClass();
-					break;
-				}
-				if (item.equals(currentSuggestions.get(currentSuggestions.size() - 1))) {
-					return;
-				}
-			}
-		}
-		showSuggestions(clazz, GroovyMethodOption.NONSTATIC);
-		if (action == CodeCompletionTriggerAction.TRIGGER) {
-			refresh(currentSuggestion);
+	void find() {
+		if (namespace.isEmpty()) {
+			findGlobal();
+		} else {
+			findInNamespace(namespace);
 		}
 	}
 
-	public void handleStaticClasses(String currentLine, String currentSuggestion, CodeCompletionTriggerAction action) {
-		final String[] methods = getMethodsFromCurrentLine(currentLine);
-		if (methods.length == 0) {
-			return;
+	private void findGlobal() {
+		for (Bindings b : new Bindings[] {
+				engine.getBindings(ScriptContext.GLOBAL_SCOPE),
+				engine.getBindings(ScriptContext.ENGINE_SCOPE)
+		}) {
+			b.forEach((k, v) -> {
+				if (k != null && v != null && !k.isEmpty()) {
+					addSuggestion(new GroovyObjectItem(k, v, null));
+				}
+			});
 		}
-		final StringBuilder classNameBuilder = new StringBuilder(methods[0]);
-		for (int i = 1; i <= methods.length; i++) {
-			// For each possible prefix of the "methods" array, try to find a class with that name.
-			// For example, when the user types "java.lang.Boolean.FALSE.", this tries to find classes called java, java.lang, java.lang.Boolean, and java.lang.Boolean.FALSE (and stops at the first valid class name, java.lang.Boolean).
+
+		// TODO: suggest classes in GLOBAL_PACKAGES
+
+		for (String name : GLOBAL_CLASSES.values()) {
+			Class<?> c;
 			try {
-				final Class<?> clazz = Class.forName(classNameBuilder.toString());
-				fillAllMethodsAndProperties(clazz, GroovyMethodOption.STATIC);
-				showSuggestions(clazz, GroovyMethodOption.STATIC);
-				break;
-			} catch (ClassNotFoundException e) {
-				LOGGER.trace("{} is not a class name (this is not an error)", e.getMessage());
-			}
-			// Special case for the last iteration
-			if (i < methods.length) {
-				classNameBuilder.append('.');
-				classNameBuilder.append(methods[i]);
-			}
-		}
-		if (action == CodeCompletionTriggerAction.TRIGGER) {
-			refresh(currentSuggestion);
-		}
-	}
-
-	public void handleObjects(String currentSuggestion, CodeCompletionTriggerAction action, ScriptEngine engine) {
-		if (action == CodeCompletionTriggerAction.TRIGGER && suggestions.isEmpty()) {
-			currentSuggestions.clear();
-			fillObjects(engine.getBindings(ScriptContext.ENGINE_SCOPE));
-			fillObjects(engine.getBindings(ScriptContext.GLOBAL_SCOPE));
-			refresh(currentSuggestion);
-		}
-	}
-
-	private void fillAllMethodsAndProperties(Class<?> clazz, GroovyMethodOption option) {
-		currentSuggestions.clear();
-		fillMethodsAndProperties(clazz, option);
-		GroovyClassHandler.handleMethods(clazz, currentSuggestions, option);
-		GroovyClassHandler.handleProperties(clazz, currentSuggestions);
-	}
-
-	public void fillObjects(Bindings bindings) {
-		suggestions.clear();
-		for (final Map.Entry<String, Object> entry : bindings.entrySet()) {
-			if (entry == null || entry.getKey() == null || entry.getValue() == null) {
+				c = Class.forName(name);
+			} catch (ClassNotFoundException ignored) {
 				continue;
 			}
-			currentSuggestions.add(new GroovyObjectItem(entry.getKey(), entry.getValue(), null));
+			addSuggestion(new GroovyObjectItem(c.getSimpleName(), c, null));
 		}
-		suggestions.addAll(currentSuggestions);
 	}
 
-	private void fillMethodsAndProperties(Class<?> clazz, GroovyMethodOption option) {
-		for (Method m : clazz.getMethods()) {
-			if ((option == GroovyMethodOption.ALL) || isNonstatic(option, m) || isStatic(option, m)) {
-				currentSuggestions.add(new GroovyClassPropertyItem(m));
+	private TypedValue resolveGlobalObject(String name) {
+		for (Bindings b : new Bindings[] {
+				engine.getBindings(ScriptContext.ENGINE_SCOPE),
+				engine.getBindings(ScriptContext.GLOBAL_SCOPE)
+		}) {
+			Object value = b.get(name);
+			if (value != null) {
+				return new TypedValue(value);
+			} else if (b.containsKey(name)) {
+				return new TypedValue(Object.class);
 			}
 		}
-		for (Field f : clazz.getFields()) {
-			currentSuggestions.add(new GroovyClassPropertyItem(f));
+
+		return null;
+	}
+
+	private Class<?> resolveClass(String namespace) {
+		try {
+			return Class.forName(namespace);
+		} catch (ClassNotFoundException ignored) {
 		}
-	}
 
-	private boolean isNonstatic(GroovyMethodOption option, Method m) {
-		return option == GroovyMethodOption.NONSTATIC && !Modifier.isStatic(m.getModifiers());
-	}
-
-	private boolean isStatic(GroovyMethodOption option, Method m) {
-		return option == GroovyMethodOption.STATIC && Modifier.isStatic(m.getModifiers());
-	}
-
-	private void showSuggestions(Class<?> clazz, GroovyMethodOption option) {
-		currentSuggestions.clear();
-		suggestions.clear();
-		fillMethodsAndProperties(clazz, option);
-		GroovyClassHandler.handleMethods(clazz, currentSuggestions, option);
-		GroovyClassHandler.handleProperties(clazz, currentSuggestions);
-		suggestions.addAll(currentSuggestions);
-	}
-
-
-	public void refresh(String filter) {
-		suggestions.clear();
-		for (GroovyAbstractItem suggestion : currentSuggestions) {
-			if (suggestion.getNameAndParams().toLowerCase().startsWith(filter.toLowerCase())) {
-				suggestions.add(suggestion);
+		for (String p : GLOBAL_PACKAGES) {
+			try {
+				return Class.forName(p + "." + namespace);
+			} catch (ClassNotFoundException ignored) {
 			}
 		}
+
+		String className = GLOBAL_CLASSES.get(namespace);
+		if (className != null) {
+			try {
+				return Class.forName(className);
+			} catch (ClassNotFoundException ignored) {
+			}
+		}
+
+		return null;
 	}
 
+	private void findInNamespace(String namespace) {
+		Resolved resolved = resolve(namespace);
+		if (resolved != null) {
+			addSuggestions(ResolverUtils.getAllMembers(resolved));
+		}
+	}
 
-	private Object getObjectFromScope(String currentLine, ScriptEngine engine) {
-		Bindings engineScope = engine.getBindings(ScriptContext.ENGINE_SCOPE);
-		Bindings globalScope = engine.getBindings(ScriptContext.GLOBAL_SCOPE);
-		Object object = null;
-		if (currentLine.length() == 0) {
+	private Resolved resolve(String name) {
+		{
+			TypedValue value = resolveGlobalObject(name);
+			if (value != null) {
+				return value;
+			}
+
+			Class<?> c = resolveClass(name);
+			if (c != null) {
+				return new Clazz(c);
+			}
+		}
+
+		int lastDot = name.lastIndexOf('.');
+		if (lastDot < 0) {
 			return null;
 		}
-		if (engineScope.containsKey(currentLine)) {
-			object = engineScope.get(currentLine);
-		} else if (globalScope.containsKey(currentLine)) {
-			object = globalScope.get(currentLine);
+
+		String prefix = name.substring(0, lastDot);
+		String suffix = name.substring(lastDot + 1);
+
+		Resolved prefixResolved = resolve(prefix);
+		if (prefixResolved != null) {
+			return prefixResolved.resolve(suffix);
 		}
-		return object;
+
+		return null;
 	}
 
-
-	private String[] getMethodsFromCurrentLine(String currentLine) {
-		String currentInstruction = currentLine;
-		if (!currentInstruction.contains(".")) {
-			return new String[] {};
+	private void addSuggestion(GroovyAbstractItem item) {
+		if (item.getNameAndParams().toLowerCase(Locale.ROOT).startsWith(member.toLowerCase(Locale.ROOT))) {
+			suggestions.add(item);
 		}
-		currentInstruction = currentInstruction.replaceAll("\\s", "");
-		currentInstruction = currentInstruction.replaceAll("=", ";");
-		currentInstruction = splitBraces(currentInstruction);
-		String[] currentObjects = currentInstruction.split(";");
-		return currentObjects[currentObjects.length - 1].split("\\.");
 	}
 
-	private String splitBraces(String currentInstruction) {
-		StringBuilder result = new StringBuilder();
-		for (int i = 1; i < currentInstruction.length(); i++) {
-			if (currentInstruction.charAt(i - 1) == '(' && currentInstruction.charAt(i) != ')') {
-				result.append(";");
-			} else {
-				result.append(currentInstruction.charAt(i - 1));
-			}
+	private void addSuggestions(Iterable<? extends GroovyAbstractItem> items) {
+		for (GroovyAbstractItem item : items) {
+			addSuggestion(item);
 		}
-		return result.toString();
 	}
 
-	public void clear() {
-		currentSuggestions.clear();
+	public Set<GroovyAbstractItem> getSuggestions() {
+		return suggestions;
 	}
-
-
 }
