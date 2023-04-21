@@ -8,11 +8,11 @@
 <fx:root type="VisualisationsView" xmlns:fx="http://javafx.com/fxml/1">
 	<SplitPane fx:id="splitPane" orientation="VERTICAL" dividerPositions="0.8">
 		<TabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
-			<Tab fx:id="visualisationTab" id="visualisation" text="%menu.mainView.tabs.visualisation">
-				<fx:include source="../visualisation/visualisation_view.fxml"/>
-			</Tab>
 			<Tab fx:id="visb" id="visualisation" text="%menu.visualisation.items.visb">
 				<VisBView/>
+			</Tab>
+			<Tab fx:id="visualisationTab" id="visualisation" text="%menu.mainView.tabs.visualisation">
+				<fx:include source="../visualisation/visualisation_view.fxml"/>
 			</Tab>
 		</TabPane>
 	</SplitPane>
