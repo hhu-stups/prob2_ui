@@ -89,7 +89,7 @@ final class ResolverUtils {
 		}
 
 		for (MetaProperty p : metaClass.getProperties()) {
-			if (option.matches(p.getModifiers())) {
+			if (option.matches(p.getModifiers()) && candidates.stream().noneMatch(i -> p.getName().equals(i.getName()))) {
 				candidates.add(new GroovyClassPropertyItem(p));
 			}
 		}
