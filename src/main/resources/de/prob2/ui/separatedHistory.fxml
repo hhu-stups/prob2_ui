@@ -13,6 +13,8 @@
 <?import javafx.scene.control.Accordion?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TitledPane?>
+<?import de.prob2.ui.visualisation.VisualisationsView?>
+<?import de.prob2.ui.consoles.b.BConsoleView?>
 <fx:root type="MainController" xmlns:fx="http://javafx.com/fxml/1">
 	<center>
 		<SplitPane fx:id="horizontalSP" dividerPositions="0.3,0.7">
@@ -41,7 +43,19 @@
 					</panes>
 				</Accordion>
 			</SplitPane>
-			<MainView/>
+			<SplitPane fx:id="verticalSP2" dividerPositions="0.5" orientation="VERTICAL">
+				<MainView/>
+				<Accordion fx:id="centerAccordion1" expandedPane="$visPane">
+					<panes>
+						<TitledPane id="visualisations" fx:id="visPane" text="%menu.visualisation">
+							<VisualisationsView/>
+						</TitledPane>
+						<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title">
+							<BConsoleView/>
+						</TitledPane>
+					</panes>
+				</Accordion>
+			</SplitPane>
 			<Accordion fx:id="rightAccordion" expandedPane="$historyTP">
 				<panes>
 					<TitledPane text="%common.views.history" fx:id="historyTP" id="historyTP" collapsible="false">
