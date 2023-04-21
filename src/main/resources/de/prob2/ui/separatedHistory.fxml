@@ -73,6 +73,7 @@
 			<fx:reference source="leftAccordion1"/>
 			<fx:reference source="leftAccordion2"/>
 			<fx:reference source="rightAccordion"/>
+			<fx:reference source="centerAccordion1"/>
 		</FXCollections>
 	</fx:define>
 </fx:root>
