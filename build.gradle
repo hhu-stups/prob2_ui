@@ -142,7 +142,7 @@ dependencies {
 
 if (!project.hasProperty("javafxVersion")) {
 	if (System.getProperty("os.arch") == "aarch64") {
-		ext.javafxVersion = "17.0.2"
+		ext.javafxVersion = "17.0.7"
 	} else {
 		ext.javafxVersion = "11.0.2"
 	}
