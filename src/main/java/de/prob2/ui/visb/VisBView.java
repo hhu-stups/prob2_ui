@@ -300,7 +300,9 @@ public class VisBView extends BorderPane {
 			Map<String, String> attributes = svgObject.getAttributes();
 			JSObject object = (JSObject)this.getJSWindow().call("getOrCreateSvgElement", svgObject.getId(), svgObject.getObject());
 			for (Map.Entry<String, String> entry : attributes.entrySet()) {
-				this.getJSWindow().call("changeElementAttribute", object, entry.getKey(), entry.getValue());
+				this.getJSWindow().call("changeCreatedElementAttribute", object, entry.getKey(), entry.getValue());
+				// TODO: provide toggle to specify which value has precedence
+				// calling changeElementAttribute always overrides
 			}
 		}
 	}

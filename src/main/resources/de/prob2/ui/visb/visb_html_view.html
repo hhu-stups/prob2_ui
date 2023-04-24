@@ -54,6 +54,7 @@
 			if (foundElement === null) {
 				const createdElement = document.createElementNS("http://www.w3.org/2000/svg", object);
 				createdElement.setAttribute("id", id);
+				createdElement.setAttribute("__created_by_VisB__", true);
 				document.querySelector("svg").appendChild(createdElement);
 				return createdElement;
 			} else {
@@ -71,6 +72,13 @@
 			obj.textContent = value;
 		}
 
+		function changeCreatedElementAttribute(element, attribute, value) {
+		    // only change attributes of created objects
+		    if (element.getAttribute("__created_by_VisB__") == true) {
+		        changeElementAttribute(element, attribute, value) 
+		    }
+		}
+		
 		function changeElementAttribute(element, attribute, value) {
 			if (attribute === "text") {
 				element.textContent = value;
