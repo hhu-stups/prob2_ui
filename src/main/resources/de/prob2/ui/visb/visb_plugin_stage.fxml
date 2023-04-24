@@ -120,7 +120,7 @@
 						<MenuItem fx:id="saveTraceItem" text="%visb.contextMenu.saveTrace"/>
 						<MenuItem fx:id="exportHistoryItem" text="%visb.contextMenu.exportHistory"/>
 						<MenuItem fx:id="exportCurrentStateItem" text="%visb.contextMenu.exportCurrentState"/>
-						<MenuItem fx:id="image_export" accelerator="Shortcut+s" mnemonicParsing="false" text="%visb.menu.file.export" />
+						<MenuItem fx:id="image_export" mnemonicParsing="false" text="%visb.menu.file.export" />
 					</items>
 				</MenuButton>
 			</HBox>
