@@ -295,14 +295,19 @@ public class VisBView extends BorderPane {
 		this.webView.getEngine().loadContent(htmlFile);
 	}
 
+	/**
+	 * This creates additional SVG objects as specified in the VisB JSON file (under svg_objects)
+	 * or by VISB_SVG_OBJECTS DEFINITIONS in a B machine
+	 */
 	private void updateDynamicSVGObjects(VisBVisualisation visBVisualisation) {
 		for (VisBSVGObject svgObject : visBVisualisation.getSVGObjects()) {
 			Map<String, String> attributes = svgObject.getAttributes();
 			JSObject object = (JSObject)this.getJSWindow().call("getOrCreateSvgElement", svgObject.getId(), svgObject.getObject());
 			for (Map.Entry<String, String> entry : attributes.entrySet()) {
 				this.getJSWindow().call("changeCreatedElementAttribute", object, entry.getKey(), entry.getValue());
-				// TODO: provide toggle to specify which value has precedence
-				// calling changeElementAttribute always overrides
+				// TODO: provide preference to specify which value has precedence: existing one in SVG or this one
+				// calling changeElementAttribute always overrides any existing attribute
+				// calling changeCreatedElementAttribute only sets attributes for objects created by VisB
 			}
 		}
 	}
