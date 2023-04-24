@@ -296,26 +296,11 @@ public class VisBView extends BorderPane {
 	}
 
 	private void updateDynamicSVGObjects(VisBVisualisation visBVisualisation) {
-		List<VisBSVGObject> svgObjects = visBVisualisation.getSVGObjects();
-		// TODO: Maybe use templates
-		if(!svgObjects.isEmpty()) {
-		    webView.getEngine().executeScript("var new__obj;");
-			for(VisBSVGObject svgObject : svgObjects) {
-				String id = svgObject.getId();
-				String cmd = "new__obj = ((document.getElementById(\"" + id + "\") == null) " +
-				                               "? createElement(\"" + svgObject.getObject() + "\")" +
-				                               ": document.getElementById(\"" + id + "\") )\n";
-				Map<String, String> attributes = svgObject.getAttributes();
-				JSObject object = (JSObject) this.webView.getEngine().executeScript(cmd);
-				object.call("setAttribute", "id", id); // not necessary if we called getElementById above
-				for(Map.Entry<String, String> entry : attributes.entrySet()) {
-					if("text".equals(entry.getKey())) {
-						this.getJSWindow().call("changeText", object, entry.getValue());
-					} else {
-						object.call("setAttribute", entry.getKey(), entry.getValue());
-					}
-				}
-
+		for (VisBSVGObject svgObject : visBVisualisation.getSVGObjects()) {
+			Map<String, String> attributes = svgObject.getAttributes();
+			JSObject object = (JSObject)this.getJSWindow().call("getOrCreateSvgElement", svgObject.getId(), svgObject.getObject());
+			for (Map.Entry<String, String> entry : attributes.entrySet()) {
+				this.getJSWindow().call("changeElementAttribute", object, entry.getKey(), entry.getValue());
 			}
 		}
 	}
