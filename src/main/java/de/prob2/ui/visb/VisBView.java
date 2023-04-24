@@ -300,13 +300,11 @@ public class VisBView extends BorderPane {
 		// TODO: Maybe use templates
 		if(!svgObjects.isEmpty()) {
 			StringBuilder scriptString = new StringBuilder();
-			scriptString.append("if(hasSVG()) {\n");
 			for(VisBSVGObject svgObject : svgObjects) {
 				String id = svgObject.getId();
 				String object = svgObject.getObject();
 				scriptString.append(String.format(Locale.ROOT, "var new__%s = createElement(\"%s\")\n", id, object));
 			}
-			scriptString.append("}");
 			webView.getEngine().executeScript(scriptString.toString());
 			for(VisBSVGObject svgObject : svgObjects) {
 				String id = svgObject.getId();
