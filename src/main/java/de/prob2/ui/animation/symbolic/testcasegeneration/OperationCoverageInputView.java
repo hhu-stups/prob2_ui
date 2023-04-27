@@ -94,7 +94,7 @@ public class OperationCoverageInputView extends VBox {
 		depthSpinner.getEditor().textProperty().addListener((observable, from, to) -> {
 			if(to.isEmpty()) {
 				depthSpinner.getEditor().setText("1");
-			} else  if(!to.matches("[1-9]+")){
+			} else  if(!to.matches("[1-9][0-9]*")){
 				depthSpinner.getEditor().setText(from);
 			}
 		});
