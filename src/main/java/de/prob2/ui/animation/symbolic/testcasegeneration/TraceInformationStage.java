@@ -1,5 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
+import de.prob2.ui.internal.I18n;
 import java.util.Arrays;
 
 import com.google.inject.Inject;
@@ -14,6 +15,8 @@ import de.prob2.ui.sharedviews.WrappedTextTableCell;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -40,6 +43,14 @@ public final class TraceInformationStage extends Stage {
 					this.setCursor(Cursor.DEFAULT);
 				}
 			});
+			MenuItem executeTrace = new MenuItem("Show Trace");
+			executeTrace.setOnAction(e -> {
+				TestTrace item = this.getItem();
+				if (item.getTrace() != null) {
+					currentTrace.set(item.getTrace());
+				}
+			});
+			this.setContextMenu(new ContextMenu(executeTrace));
 		}
 
 		@Override
