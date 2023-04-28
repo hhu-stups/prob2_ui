@@ -36,6 +36,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.BorderPane;
 
 import org.slf4j.Logger;
@@ -58,6 +59,7 @@ public class MainController extends BorderPane {
 	@FXML private SplitPane verticalSP;
 	@FXML private ObservableList<Accordion> accordions;
 	@FXML private TitledPane consolePane;
+	@FXML private TitledPane visPane;
 
 	private final Injector injector;
 	private final StageManager stageManager;
@@ -81,6 +83,9 @@ public class MainController extends BorderPane {
 		Platform.runLater(() -> {
 			this.detacher = injector.getInstance(DetachViewStageController.class);
 			this.getAccordions().stream().forEach(e -> e.getPanes().stream().forEach(this::addContextMenu));
+			// the detach-contextmenu does not overwrite the "reload page"-contextmenu of the webview. To avoid that
+			// they are shown at the same time, the detaching-contextmenu-event in the content of ths pane gets consumed.
+			this.visPane.getContent().addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> event.consume());
 		});
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
 		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
