@@ -28,7 +28,6 @@
 			<padding>
 				<Insets left="5.0"/>
 			</padding>
-			<fx:include source="../sharedviews/navigation_buttons.fxml"/>
 			<Spacer/>
 			<Button fx:id="sortButton" onAction="#handleSortButton">
 				<graphic>

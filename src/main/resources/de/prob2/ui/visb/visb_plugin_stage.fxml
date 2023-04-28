@@ -46,24 +46,6 @@
 						<Tooltip text="%visb.menu.edit.reload"/>
 					</tooltip>
 				</Button>
-				<Button fx:id="zoomInButton" onAction="#zoomIn">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%visb.menu.view.zoom.in"/>
-					</tooltip>
-				</Button>
-				<Button fx:id="zoomOutButton" onAction="#zoomOut">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%visb.menu.view.zoom.out"/>
-					</tooltip>
-				</Button>
 				<Button fx:id="showVisBItemsAndEventsButton" onAction="#showVisBItemsAndEvents">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="INFO"
@@ -82,47 +64,54 @@
 						<Tooltip text="%visb.buttons.manageDefaultVisualisation"/>
 					</tooltip>
 				</Button>
-				<MenuButton>
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%visb.menu.help"/>
-					</tooltip>
-					<items>
-						<MenuItem fx:id="helpButton" text="%visb.menu.help.helppages"/>
-						<MenuItem fx:id="helpMenu_userManual" text="%visb.menu.help.user.manual"/>
-					</items>
-				</MenuButton>
+			<MenuButton fx:id="saveTraceButton">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.buttons.saveTrace"/>
+				</tooltip>
+				<items>
+					<MenuItem fx:id="exportHistoryItem" text="%visb.contextMenu.exportHistory"/>
+					<MenuItem fx:id="exportCurrentStateItem" text="%visb.contextMenu.exportCurrentState"/>
+					<MenuItem fx:id="image_export" mnemonicParsing="false" text="%visb.menu.file.export" />
+				</items>
+			</MenuButton>
 			<Spacer/>
 				<Label fx:id="information" alignment="CENTER" BorderPane.alignment="CENTER"/>
 				<Spacer/>
-				<TraceReplayMenuButton/>
-				<Button fx:id="openSimulationButton" onAction="#openSimulation">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%common.buttons.openSimulation"/>
-					</tooltip>
-				</Button>
-				<MenuButton fx:id="saveTraceButton">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%common.buttons.saveTrace"/>
-					</tooltip>
-					<items>
-						<MenuItem fx:id="saveTraceItem" text="%visb.contextMenu.saveTrace"/>
-						<MenuItem fx:id="exportHistoryItem" text="%visb.contextMenu.exportHistory"/>
-						<MenuItem fx:id="exportCurrentStateItem" text="%visb.contextMenu.exportCurrentState"/>
-						<MenuItem fx:id="image_export" mnemonicParsing="false" text="%visb.menu.file.export" />
-					</items>
-				</MenuButton>
+			<Button fx:id="zoomInButton" onAction="#zoomIn">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.view.zoom.in"/>
+				</tooltip>
+			</Button>
+			<Button fx:id="zoomOutButton" onAction="#zoomOut">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.view.zoom.out"/>
+				</tooltip>
+			</Button>
+			<MenuButton>
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.help"/>
+				</tooltip>
+				<items>
+					<MenuItem fx:id="helpButton" text="%visb.menu.help.helppages"/>
+					<MenuItem fx:id="helpMenu_userManual" text="%visb.menu.help.user.manual"/>
+				</items>
+			</MenuButton>
 			</HBox>
 		</VBox>
 	</top>
@@ -139,10 +128,4 @@
 				</VBox>
 			</StackPane>
 	</center>
-
-	<bottom>
-		<HBox alignment="BOTTOM_CENTER">
-		<fx:include source="../sharedviews/navigation_buttons.fxml"/>
-		</HBox>
-	</bottom>
 </fx:root>

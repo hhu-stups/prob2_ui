@@ -116,8 +116,6 @@ public class VisBView extends BorderPane {
 	@FXML
 	private MenuItem helpMenu_userManual;
 	@FXML
-	private MenuItem saveTraceItem;
-	@FXML
 	private MenuItem saveTraceAndAddTestsItem;
 	@FXML
 	private MenuItem saveTraceAndRecordTestsItem;
@@ -210,13 +208,6 @@ public class VisBView extends BorderPane {
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
-		saveTraceItem.setOnAction(e -> {
-			try {
-				traceFileHandler.save(currentTrace.get(), currentProject.getCurrentMachine());
-			} catch (IOException | RuntimeException exc) {
-				traceFileHandler.showSaveError(exc);
-			}
-		});
 		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
 		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
 
@@ -481,13 +472,6 @@ public class VisBView extends BorderPane {
 	@FXML
 	public void zoomOut() {
 		webView.setZoom(webView.getZoom()/1.2);
-	}
-
-	@FXML
-	private void openSimulation() {
-		SimulatorStage simulatorStage = injector.getInstance(SimulatorStage.class);
-		simulatorStage.show();
-		simulatorStage.toFront();
 	}
 
 	private String generateHTMLFileWithSVG(String svgContent, String baseUrl) {
