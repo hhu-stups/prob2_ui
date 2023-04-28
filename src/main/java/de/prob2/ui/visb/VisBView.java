@@ -10,11 +10,11 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import javafx.application.Platform;
+import javafx.scene.control.MenuButton;
 import javafx.scene.layout.BorderPane;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
@@ -43,7 +43,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
@@ -115,6 +114,9 @@ public class VisBView extends BorderPane {
 
 	@FXML
 	private MenuItem helpMenu_userManual;
+
+	@FXML
+	private MenuButton saveTraceButton;
 	@FXML
 	private MenuItem saveTraceAndAddTestsItem;
 	@FXML
@@ -162,6 +164,7 @@ public class VisBView extends BorderPane {
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
 		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
 		this.image_export.setOnAction(e -> exportImage());
+		this.saveTraceButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			manageDefaultVisualisationButton.disableProperty().unbind();
