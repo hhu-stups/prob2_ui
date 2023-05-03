@@ -32,11 +32,6 @@ if (project != rootProject) {
 	)
 }
 
-wrapper {
-	gradleVersion = "7.6"
-}
-
-
 test {
 	useJUnitPlatform()
 	systemProperty("logback.configurationFile", "de/prob/logging/production.xml")
