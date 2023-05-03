@@ -43,7 +43,7 @@ test:jdk-8-linux:
     # Install OpenJFX 8.
     # This downloads the Debian stretch version of the libopenjfx-java package (which is the last version compatible with Java 8) and installs it into the OpenJDK directory.
     # This is a terrible solution, but there's no better alternative - there are apparently no Docker images that have a (non-Oracle) JDK 8 with JavaFX installed.
-    - curl --location -o "libopenjfx-java.deb" "http://security.debian.org/debian-security/pool/updates/main/o/openjfx/libopenjfx-java_8u141-b14-3~deb9u1_all.deb"
+    - curl --location -o "libopenjfx-java.deb" "http://archive.debian.org/debian/pool/main/o/openjfx/libopenjfx-java_8u141-b14-3~deb9u1_all.deb"
     - shasum --algorithm 256 --quiet --check - <<< "716c6ba4c63597d2621025320c894aba6a9cf7059893a1d8a4f6ae45c0c38c46  libopenjfx-java.deb"
     - dpkg-deb --extract "libopenjfx-java.deb" "libopenjfx-java"
     - rsync -a "libopenjfx-java/usr/share/java/openjfx/" "${JAVA_HOME}"
