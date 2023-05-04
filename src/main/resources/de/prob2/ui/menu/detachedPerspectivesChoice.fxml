@@ -5,6 +5,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+<?import de.prob2.ui.sharedviews.Spacer?>
 <fx:root type="Stage" fx:id="detached" title="%menu.detatchView.stage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
@@ -38,12 +39,14 @@
 								  text="%common.views.history" />
 
 					</VBox>
-					<Button fx:id="apply" onAction="#apply"
-						text="%common.buttons.apply">
-						<VBox.margin>
-							<Insets left="10" right="10" />
-						</VBox.margin>
-					</Button>
+						<HBox alignment="CENTER" VBox.vgrow="NEVER">
+							<VBox.margin>
+								<Insets left="10" right="10" />
+							</VBox.margin>
+							<Button fx:id="apply" onAction="#apply" text="%common.buttons.apply"/>
+							<Spacer/>
+							<Button fx:id="attachAll" onAction="#attachAllViews" text="%menu.detatchView.stage.attachAll"/>
+						</HBox>
 				</VBox>
 			</AnchorPane>
 		</Scene>

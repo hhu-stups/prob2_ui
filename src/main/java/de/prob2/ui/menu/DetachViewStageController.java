@@ -41,6 +41,7 @@ public final class DetachViewStageController extends Stage {
 	public static final String PERSISTENCE_ID_PREFIX = DetachViewStageController.class.getName() + " DETACHED ";
 	
 	@FXML private Button apply;
+	@FXML private Button attachAll;
 	@FXML private CheckBox detachOperations;
 	@FXML private CheckBox detachAnimation;
 	@FXML private CheckBox detachHistory;
@@ -84,6 +85,20 @@ public final class DetachViewStageController extends Stage {
 				checkBoxMap.get(stage.getDetachedView().getClass()).setSelected(true);
 			}
 		});
+
+		for (CheckBox checkBox : checkBoxMap.values()) {
+			checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
+						apply.setDisable(false);
+			});
+		}
+		this.setOnShowing(e -> {
+			if (wrapperStages.isEmpty()) {
+				attachAll.setDisable(true);
+			} else {
+				attachAll.setDisable(false);
+			}
+			apply.setDisable(true);
+		});
 	}
 	
 	public void selectForDetach(final String name) {
@@ -115,7 +130,8 @@ public final class DetachViewStageController extends Stage {
 		wrapperStages.clear();
 		injector.getInstance(MainController.class).getAccordions().forEach(this::detachTitledPanes);
 	}
-	
+
+	@FXML
 	public void attachAllViews() {
 		for (CheckBox cb : checkBoxMap.values()) {
 			cb.setSelected(false);
