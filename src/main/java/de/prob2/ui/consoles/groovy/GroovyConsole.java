@@ -94,6 +94,7 @@ public class GroovyConsole extends Console {
 				this.groovyInterpreter::getSuggestions
 		);
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.TAB), e -> this.triggerCodeCompletion()));
 
 		config.addListener(new ConfigListener() {
 			@Override
