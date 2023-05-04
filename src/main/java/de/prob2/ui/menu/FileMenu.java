@@ -50,13 +50,13 @@ public class FileMenu extends Menu {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FileMenu.class);
 	
 	@FXML
-	private MenuItem preferencesItem;
-	@FXML
 	private Menu recentProjectsMenu;
 	@FXML
 	private MenuItem saveMachineItem;
 	@FXML
 	private MenuItem saveProjectItem;
+	@FXML
+	private MenuItem reloadMachineItem;
 	@FXML
 	private MenuItem extendedStaticAnalysisItem;
 	@FXML
@@ -72,7 +72,7 @@ public class FileMenu extends Menu {
 	@FXML
 	private MenuItem exportAsEventBProlog;
 	@FXML
-	private MenuItem reloadMachineItem;
+	private MenuItem preferencesItem;
 
 	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;

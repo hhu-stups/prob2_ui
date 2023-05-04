@@ -13,6 +13,7 @@
 	<MenuItem fx:id="saveMachineItem" text="%menu.file.items.saveMachine" accelerator="Shortcut+S" onAction="#saveMachine"/>
 	<MenuItem fx:id="saveProjectItem" text="%menu.file.items.saveProject"
 			  accelerator="Alt+Shortcut+S" onAction="#saveProject" />
+	<MenuItem fx:id="reloadMachineItem" text="%menu.file.items.reloadMachine" accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 	<SeparatorMenuItem />
 	<MenuItem fx:id="extendedStaticAnalysisItem" text="%menu.file.items.extendedStaticAnalysis" onAction="#handleExtendedStaticAnalysis"/>
 	<MenuItem fx:id="viewFormattedCodeItem" text="%menu.file.items.viewFormattedCode" onAction="#handleViewFormattedCode"/>
@@ -22,11 +23,9 @@
 		<MenuItem fx:id="exportAsRodinProject" text="%menu.file.items.exportEntireModelAs.rodinProject" onAction="#handleExportRodin"/>
 		<MenuItem fx:id="exportAsEventBProlog" text="%menu.file.items.exportEntireModelAs.proBEventBPackage" onAction="#handleExportEventBProlog"/>
 	</Menu>
-	<MenuItem fx:id="reloadMachineItem" text="%menu.file.items.reloadMachine"
-		accelerator="Shortcut+R" onAction="#handleReloadMachine" />
+	<SeparatorMenuItem/>
 	<MenuItem fx:id="preferencesItem" text="%menu.file.items.preferences"
 			  accelerator="Shortcut+," onAction="#handlePreferences" />
-	<SeparatorMenuItem/>
 	<fx:include source="../sharedviews/close_window_menu_item.fxml"/>
 </fx:root>
 
