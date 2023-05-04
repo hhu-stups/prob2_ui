@@ -391,23 +391,25 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void setText(Path path) {
-		String text;
-		try (final Stream<String> lines = Files.lines(path)) {
-			text = lines.collect(Collectors.joining(System.lineSeparator()));
-		} catch (IOException | UncheckedIOException e) {
-			LOGGER.error("Could not read file: {}", path, e);
-			if (e.getCause() instanceof MalformedInputException) {
-				final Alert alert = stageManager.makeExceptionAlert(e, "beditor.encodingError.header", "beditor.encodingError.content", path);
-				alert.initOwner(this.getScene().getWindow());
-				alert.show();
-			} else {
-				final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path);
-				alert.initOwner(this.getScene().getWindow());
-				alert.show();
+		if (path.toFile().exists()) {
+			String text;
+			try (final Stream<String> lines = Files.lines(path)) {
+				text = lines.collect(Collectors.joining(System.lineSeparator()));
+			} catch (IOException | UncheckedIOException e) {
+				LOGGER.error("Could not read file: {}", path, e);
+				if (e.getCause() instanceof MalformedInputException) {
+					final Alert alert = stageManager.makeExceptionAlert(e, "beditor.encodingError.header", "beditor.encodingError.content", path);
+					alert.initOwner(this.getScene().getWindow());
+					alert.show();
+				} else {
+					final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path);
+					alert.initOwner(this.getScene().getWindow());
+					alert.show();
+				}
+				return;
 			}
-			return;
+			this.setEditorText(text, path);
 		}
-		this.setEditorText(text, path);
 	}
 
 	@FXML
