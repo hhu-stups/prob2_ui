@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.project.machines.MachinesTab?>
 <?import de.prob2.ui.project.preferences.PreferencesTab?>
 <?import de.prob2.ui.project.ProjectTab?>
@@ -8,11 +9,8 @@
 <?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.MenuButton?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.AnchorPane?>
-<?import de.prob2.ui.layout.BindableGlyph?>
-<?import de.prob2.ui.layout.FontSize?>
-<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.VBox?>
 <fx:root type="ProjectView" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -34,14 +32,5 @@
 			<PreferencesTab fx:id="preferencesTab" />
 			<ProjectTab fx:id="projectTab" />
 		</BetterTabPane>
-		<Button fx:id="documentButton" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" onAction="#saveDocumentation" bindableFontSize="${fontSize.fontSize * 1.5}">
-			<graphic>
-				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILE"  />
-			</graphic>
-			<tooltip>
-				<Tooltip
-						text="%verifications.documentation.icon" />
-			</tooltip>
-		</Button>
 	</AnchorPane>
 </fx:root>

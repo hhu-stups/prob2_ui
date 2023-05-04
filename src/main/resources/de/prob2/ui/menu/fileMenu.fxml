@@ -23,6 +23,7 @@
 		<MenuItem fx:id="exportAsRodinProject" text="%menu.file.items.exportEntireModelAs.rodinProject" onAction="#handleExportRodin"/>
 		<MenuItem fx:id="exportAsEventBProlog" text="%menu.file.items.exportEntireModelAs.proBEventBPackage" onAction="#handleExportEventBProlog"/>
 	</Menu>
+	<MenuItem fx:id="saveDocumentationItem" text="%menu.file.items.createDocumentation" onAction="#saveDocumentation"/>
 	<SeparatorMenuItem/>
 	<MenuItem fx:id="preferencesItem" text="%menu.file.items.preferences"
 			  accelerator="Shortcut+," onAction="#handlePreferences" />

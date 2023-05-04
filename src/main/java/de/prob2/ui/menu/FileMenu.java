@@ -31,6 +31,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
+import de.prob2.ui.project.SaveDocumentationStage;
 
 import javafx.beans.InvalidationListener;
 import javafx.event.ActionEvent;
@@ -71,6 +72,8 @@ public class FileMenu extends Menu {
 	private MenuItem exportAsRodinProject;
 	@FXML
 	private MenuItem exportAsEventBProlog;
+	@FXML
+	private MenuItem saveDocumentationItem;
 	@FXML
 	private MenuItem preferencesItem;
 
@@ -113,6 +116,7 @@ public class FileMenu extends Menu {
 		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B));
 		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.isNull());
 		this.exportAsMenu.disableProperty().bind(currentTrace.isNull());
+		this.saveDocumentationItem.disableProperty().bind(currentProject.isNull());
 
 		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
 			if (to != null) {
@@ -256,5 +260,12 @@ public class FileMenu extends Menu {
 		final Stage preferencesStage = injector.getInstance(PreferencesStage.class);
 		preferencesStage.show();
 		preferencesStage.toFront();
+	}
+
+	@FXML
+	private void saveDocumentation() {
+		final Stage documentSaveStage = injector.getInstance(SaveDocumentationStage.class);
+		documentSaveStage.showAndWait();
+		documentSaveStage.toFront();
 	}
 }

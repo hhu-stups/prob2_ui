@@ -33,14 +33,12 @@ public final class ProjectView extends StackPane {
 	private MenuButton recentProjectButton;
 	@FXML
 	private MachinesTab machinesTab;
-	@FXML
-	private Button documentButton;
+
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final ProjectManager projectManager;
 	private final Provider<NewProjectStage> newProjectStageProvider;
 	private final CurrentProject currentProject;
-	private final Provider<SaveDocumentationStage> documentSaveStageProvider;
 
 	@Inject
 	private ProjectView(
@@ -48,22 +46,19 @@ public final class ProjectView extends StackPane {
 			final FileChooserManager fileChooserManager,
 			final ProjectManager projectManager,
 			final Provider<NewProjectStage> newProjectStageProvider,
-			final CurrentProject currentProject,
-			Provider<SaveDocumentationStage> documentSaveStageProvider
+			final CurrentProject currentProject
 	) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.projectManager = projectManager;
 		this.newProjectStageProvider = newProjectStageProvider;
 		this.currentProject = currentProject;
-		this.documentSaveStageProvider = documentSaveStageProvider;
 		stageManager.loadFXML(this, "project_view.fxml");
 	}
 
 	@FXML
 	public void initialize() {
 		projectTabPane.visibleProperty().bind(currentProject.isNotNull());
-		documentButton.visibleProperty().bind(currentProject.isNotNull());
 		newProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		recentProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
 		openProjectButton.visibleProperty().bind(projectTabPane.visibleProperty().not());
@@ -92,13 +87,5 @@ public final class ProjectView extends StackPane {
 
 	public void showMachines() {
 		projectTabPane.getSelectionModel().select(machinesTab);
-	}
-
-
-	@FXML
-	public void saveDocumentation() {
-		final Stage documentSaveStage = documentSaveStageProvider.get();
-		documentSaveStage.showAndWait();
-		documentSaveStage.toFront();
 	}
 }
