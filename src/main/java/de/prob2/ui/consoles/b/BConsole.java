@@ -1,7 +1,6 @@
 package de.prob2.ui.consoles.b;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.OptionalInt;
 
@@ -9,11 +8,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.codecompletion.CodeCompletion;
-import de.prob2.ui.codecompletion.CodeCompletionItem;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.Console;
+import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -60,7 +59,7 @@ public final class BConsole extends Console {
 					BConsole.this.replace(inputPosition - replacement.getOriginalText().length(), inputPosition, replacement.getReplacement());
 				}
 			},
-			BConsole.this::getSuggestions
+			bInterpreter::getSuggestions
 		);
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.TAB), e -> this.triggerCodeCompletion()));
@@ -82,35 +81,5 @@ public final class BConsole extends Console {
 
 	private void triggerCodeCompletion() {
 		this.getPositionInInput().ifPresent(pos -> this.codeCompletion.trigger());
-	}
-
-	private Collection<? extends BCCItem> getSuggestions(String text) {
-		return Collections.emptyList();
-	}
-
-	public static class BCCItem implements CodeCompletionItem {
-
-		private final String originalText;
-		private final String replacement;
-
-		public BCCItem(String originalText, String replacement) {
-			this.originalText = originalText;
-			this.replacement = replacement;
-		}
-
-		@Override
-		public String getOriginalText() {
-			return this.originalText;
-		}
-
-		@Override
-		public String getReplacement() {
-			return this.replacement;
-		}
-
-		@Override
-		public String toString() {
-			return this.getReplacement();
-		}
 	}
 }

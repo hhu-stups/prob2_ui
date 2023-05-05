@@ -1,5 +1,7 @@
 package de.prob2.ui.consoles.b;
 
+import java.util.Collection;
+
 import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
@@ -14,6 +16,8 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.Executable;
+import de.prob2.ui.consoles.b.codecompletion.BCCItem;
+import de.prob2.ui.consoles.b.codecompletion.BCodeCompletion;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 
@@ -59,6 +63,42 @@ public class BInterpreter implements Executable {
 		}
 	}
 
+	private static boolean isIdentifierStart(char c) {
+		return Character.isJavaIdentifierStart(c) && !Character.isIdentifierIgnorable(c);
+	}
+
+	private static boolean isIdentifierPart(char c) {
+		return Character.isJavaIdentifierPart(c) && !Character.isIdentifierIgnorable(c);
+	}
+
+	private static boolean isIdentifierChar(String text, int index) {
+		char c = text.charAt(index);
+
+		if (index == 0) {
+			return isIdentifierStart(c);
+		} else {
+			char p = text.charAt(index - 1);
+			if (isIdentifierStart(p) || isIdentifierPart(p)) {
+				return isIdentifierPart(c);
+			} else {
+				return isIdentifierStart(c);
+			}
+		}
+	}
+
+	private static String extractPrefix(String text) {
+		if (text.isEmpty()) {
+			return "";
+		}
+
+		int first = text.length();
+		while (first > 0 && isIdentifierChar(text, first - 1)) {
+			first--;
+		}
+
+		return text.substring(first);
+	}
+
 	private Trace getDefaultTrace() {
 		return new Trace(machineLoader.getActiveStateSpace());
 	}
@@ -90,5 +130,16 @@ public class BInterpreter implements Executable {
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}
 		return new ConsoleExecResult("", res.toString(), res instanceof EvalResult ? ConsoleExecResultType.PASSED : ConsoleExecResultType.ERROR);
+	}
+
+	public Collection<? extends BCCItem> getSuggestions(String text) {
+		Trace trace = this.currentTrace.get();
+		if (trace == null) {
+			trace = this.getDefaultTrace();
+		}
+
+		BCodeCompletion cc = new BCodeCompletion(trace.getModel(), extractPrefix(text));
+		cc.find();
+		return cc.getSuggestions();
 	}
 }

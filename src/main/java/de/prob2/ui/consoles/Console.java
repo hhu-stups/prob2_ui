@@ -518,8 +518,12 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	protected void replace(int start, int end, String text) {
+		if (start > end) {
+			throw new IllegalArgumentException();
+		}
+
 		String prefix = this.getInput().substring(0, Math.max(0, Math.min(this.getInput().length(), start)));
-		String suffix = this.getInput().substring(0, Math.max(0, Math.min(this.getInput().length(), end)));
+		String suffix = this.getInput().substring(Math.max(0, Math.min(this.getInput().length(), end)));
 		this.setInput(prefix + text + suffix);
 		this.moveCaretToPosInInput(prefix.length() + text.length());
 	}
