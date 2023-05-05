@@ -4,16 +4,19 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.plugin.ProBPluginManager;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visualisation.fx.VisualisationController;
-
 import de.prob2.ui.vomanager.VOManagerStage;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -25,6 +28,8 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 @Singleton
 public class AdvancedMenu extends Menu {
+	@FXML
+	private MenuItem refactorTraceItem;
 
 	@FXML
 	private MenuItem openVisualisationItem;
@@ -42,12 +47,19 @@ public class AdvancedMenu extends Menu {
 
 
 	@Inject
-	public AdvancedMenu(final StageManager stageManager, final ProBPluginManager proBPluginManager,
-						final VisualisationController visualisationController, final Injector injector) {
+	public AdvancedMenu(
+		StageManager stageManager,
+		ProBPluginManager proBPluginManager,
+		VisualisationController visualisationController,
+		CurrentProject currentProject,
+		CurrentTrace currentTrace,
+		Injector injector
+	) {
 		this.proBPluginManager = proBPluginManager;
 		this.injector = injector;
 		stageManager.loadFXML(this, "advancedMenu.fxml");
 		this.visualisationController = visualisationController;
+		refactorTraceItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.animatorBusyProperty()));
 		openVisualisationItem.disableProperty().bind(visualisationController.currentMachineProperty().isNull());
 		stopVisualisationItem.disableProperty().bind(visualisationController.visualisationProperty().isNull());
 		detachVisualisationItem.disableProperty()
@@ -107,6 +119,11 @@ public class AdvancedMenu extends Menu {
 		SimulatorStage simulatorStage = injector.getInstance(SimulatorStage.class);
 		simulatorStage.show();
 		simulatorStage.toFront();
+	}
+
+	@FXML
+	private void showRefactorTrace() {
+		injector.getInstance(RefactorSetupView.class).showAndPerformAction();
 	}
 
 	@FXML

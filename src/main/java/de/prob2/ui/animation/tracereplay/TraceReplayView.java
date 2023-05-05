@@ -41,7 +41,6 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
@@ -115,8 +114,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@FXML
 	private TableColumn<ReplayTrace, Node> statusProgressColumn;
 	@FXML
-	private Button refactorButton;
-	@FXML
 	private MenuButton loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
@@ -182,7 +179,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			}
 		});
 
-		refactorButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.animatorBusyProperty()));
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
 	}

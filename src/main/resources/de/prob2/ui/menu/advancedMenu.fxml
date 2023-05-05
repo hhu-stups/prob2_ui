@@ -11,6 +11,7 @@
 	<MenuItem text="%menu.advanced.items.proBCoreConsole" onAction="#handlePrologOutput" />
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.simb" onAction="#openSimulator"/>
+	<MenuItem fx:id="refactorTraceItem" text="%menu.advanced.items.refactorTrace" onAction="#showRefactorTrace"/>
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
 	<SeparatorMenuItem />
