@@ -11,13 +11,12 @@ import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.prob.animator.ReusableAnimator;
 import de.prob.check.tracereplay.PersistentTransition;
-import de.prob.check.tracereplay.check.TraceCheckerUtils;
 import de.prob.check.tracereplay.check.exploration.ReplayOptions;
 import de.prob.check.tracereplay.check.refinement.AbstractTraceRefinement;
 import de.prob.check.tracereplay.check.refinement.TraceConnector;
@@ -31,14 +30,14 @@ import de.prob.model.eventb.EventBModel;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
-import de.prob.statespace.StateSpace;
+import de.prob.scripting.FactoryProvider;
+import de.prob.scripting.ModelFactory;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visualisation.traceDifference.TracePlotter;
 
@@ -50,7 +49,20 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.Scene;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
@@ -247,12 +259,9 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 	}
 
 	private List<String> skipTransitions(RefactorSetup result, AbstractTraceRefinement abstractTraceRefinement) throws IOException {
-		ReusableAnimator animator = injector.getInstance(ReusableAnimator.class);
-		StateSpace stateSpace = animator.createStateSpace();
 		if(abstractTraceRefinement instanceof TraceRefinerEventB){
-			EventBFactory eventBFactory = injector.getInstance(EventBFactory.class);
-			eventBFactory.extract(result.getFileBeta().toString()).loadIntoStateSpace(stateSpace);
-			EventBModel eventBModel = (EventBModel) stateSpace.getModel();
+			// TODO Use already loaded model
+			EventBModel eventBModel = injector.getInstance(EventBFactory.class).extract(result.getFileBeta().toString()).getModel();
 			return eventBModel.introducedBySkip();
 		}else{
 			return Collections.emptyList();
@@ -387,7 +396,9 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 				Optional<ReplayOptions> optionResult = traceOptionChoice.showAndWait();
 				ReplayOptions replayOptions = optionResult.get();
 				try {
-					List<Transition> resultTrace = AdvancedTraceConstructor.constructTraceWithOptions(fileObject.getTransitionList(), TraceCheckerUtils.createStateSpace(result.fileAlpha.toString(), injector), replayOptions);
+					// TODO Use shared animator instead of starting a new one
+					ModelFactory<?> factory = injector.getInstance(FactoryProvider.factoryClassFromExtension(MoreFiles.getFileExtension(result.fileAlpha)));
+					List<Transition> resultTrace = AdvancedTraceConstructor.constructTraceWithOptions(fileObject.getTransitionList(), factory.extract(result.fileAlpha.toString()).load(), replayOptions);
 					createFeedNackMessage("Trace could be fully replayed while enforcing all predicates");
 					saveAdaptedTrace(PersistentTransition.createFromList(resultTrace), fileObject, result);
 				} catch ( IOException e) {
