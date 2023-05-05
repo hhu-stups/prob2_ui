@@ -23,7 +23,7 @@
 		<padding>
 			<Insets left="5.0"/>
 		</padding>
-		<fx:include source="../sharedviews/navigation_buttons.fxml"/>
+		<Label fx:id="historySize"></Label>
 		<Spacer/>
 		<TraceReplayMenuButton/>
 		<MenuButton fx:id="saveTraceButton">

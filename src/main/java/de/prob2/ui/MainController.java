@@ -87,10 +87,6 @@ public class MainController extends BorderPane {
 			// they are shown at the same time, the detaching-contextmenu-event in the content of ths pane gets consumed.
 			this.visPane.getContent().addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> event.consume());
 		});
-		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
-		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
-		this.historyTP.textProperty()
-				.bind(i18n.translateBinding("common.views.historyWithState", currentHistoryValue, historySize));
 
 		statsView.lastResultProperty().addListener((o, from, to) -> {
 			if (to == null) {

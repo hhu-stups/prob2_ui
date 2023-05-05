@@ -28,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -99,6 +100,9 @@ public final class HistoryView extends VBox {
 	@FXML
 	private HelpButton helpButton;
 
+	@FXML
+	private Label historySize;
+
 	private final CurrentTrace currentTrace;
 	private final I18n i18n;
 	private final Injector injector;
@@ -124,6 +128,12 @@ public final class HistoryView extends VBox {
 
 	@FXML
 	public void initialize() {
+		final ObservableIntegerValue historySize = getObservableHistorySize();
+		final ObservableIntegerValue currentHistoryValue = getCurrentHistoryPositionProperty();
+		this.historySize.setVisible(false);
+		this.historySize.textProperty()
+			.bind(i18n.translateBinding("common.views.historyWithState", currentHistoryValue, historySize));
+
 		helpButton.setHelpContent("history", null);
 
 		historyTableView.setRowFactory(item -> new TransitionRow());
@@ -136,6 +146,7 @@ public final class HistoryView extends VBox {
 			if (to != null) {
 				historyTableView.getItems().addAll(HistoryItem.itemsForTrace(to));
 				historyTableView.sort();
+				this.historySize.setVisible(true);
 			}
 		};
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
