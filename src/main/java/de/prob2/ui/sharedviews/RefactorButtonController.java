@@ -38,8 +38,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.MachineLoader;
-import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.visualisation.traceDifference.TracePlotter;
 
 import javafx.embed.swing.SwingFXUtils;
@@ -64,8 +62,6 @@ import javafx.stage.Stage;
 public final class RefactorButtonController {
 
 	private final CurrentProject currentProject;
-	private final MachineLoader machineLoader;
-	private final RealTimeSimulator realTimeSimulator;
 	private final StageManager stageManager;
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
@@ -77,12 +73,10 @@ public final class RefactorButtonController {
 	private Button button;
 
 	@Inject
-	private RefactorButtonController(final StageManager stageManager, final CurrentProject currentProject, final MachineLoader machineLoader, final RealTimeSimulator realTimeSimulator, FileChooserManager fileChooserManager, I18n i18n, TraceFileHandler traceFileHandler, TraceManager traceManager, Injector injector) {
+	private RefactorButtonController(final StageManager stageManager, final CurrentProject currentProject, FileChooserManager fileChooserManager, I18n i18n, TraceFileHandler traceFileHandler, TraceManager traceManager, Injector injector) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
-		this.machineLoader = machineLoader;
-		this.realTimeSimulator = realTimeSimulator;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.traceManager = traceManager;
@@ -92,8 +86,6 @@ public final class RefactorButtonController {
 
 	@FXML
 	private void initialize() {
-		button.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()).or(realTimeSimulator.runningProperty()));
-
 		button.setOnAction(event -> {
 			RefactorSetup result = new RefactorSetupView(stageManager, currentProject, i18n, fileChooserManager).showAndWait().get();
 			if (result.whatToDo == RefactorSetup.WhatToDo.NOTHING) {

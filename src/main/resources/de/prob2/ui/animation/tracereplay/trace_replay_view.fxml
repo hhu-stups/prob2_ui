@@ -40,7 +40,7 @@
 					</Button>
 				</InterruptIfRunningButton>
 				<Spacer/>
-				<fx:include source="../../sharedviews/refactor_button.fxml" HBox.hgrow="NEVER" />
+				<fx:include fx:id="refactorButton" source="../../sharedviews/refactor_button.fxml" HBox.hgrow="NEVER" />
 				<MenuButton fx:id="loadTraceButton">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
