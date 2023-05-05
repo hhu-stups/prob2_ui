@@ -132,6 +132,9 @@ public class VisBView extends BorderPane {
 	@FXML
 	private MenuItem helpButton;
 
+	@FXML
+	private Label placeholderLabel;
+
 	/**
 	 * The public constructor of this class is injected with the ProB2-UI injector.
 	 * @param injector ProB2-UI injector
@@ -170,6 +173,11 @@ public class VisBView extends BorderPane {
 			manageDefaultVisualisationButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
 			information.setText("");
+			if (to == null) {
+				placeholderLabel.setText(i18n.translate("common.noModelLoaded"));
+			} else {
+				placeholderLabel.setText(i18n.translate("visb.placeholder.text"));
+			}
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
