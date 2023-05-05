@@ -6,8 +6,6 @@ import java.util.stream.Collectors;
 
 import javax.script.ScriptEngine;
 
-import de.prob2.ui.codecompletion.GroovyCCItem;
-
 public final class GroovyCodeCompletion {
 
 	private static final Pattern DOT_WITH_WHITESPACES = Pattern.compile("\\s*\\.\\s*");
@@ -80,7 +78,7 @@ public final class GroovyCodeCompletion {
 		handler.find();
 
 		return handler.getSuggestions().stream()
-				       .map(x -> new GroovyCCItem(member, x.getNameAndParams()))
-				       .collect(Collectors.toList());
+			       .map(x -> new GroovyCCItem(member, x.getNameAndParams()))
+			       .collect(Collectors.toList());
 	}
 }

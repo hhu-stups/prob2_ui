@@ -1,6 +1,8 @@
-package de.prob2.ui.codecompletion;
+package de.prob2.ui.consoles.groovy.codecompletion;
 
-public class GroovyCCItem implements CodeCompletionItem {
+import de.prob2.ui.codecompletion.CodeCompletionItem;
+
+public final class GroovyCCItem implements CodeCompletionItem {
 
 	private final String originalText;
 	private final String replacement;
@@ -10,16 +12,18 @@ public class GroovyCCItem implements CodeCompletionItem {
 		this.replacement = replacement;
 	}
 
+	@Override
 	public String getOriginalText() {
 		return originalText;
 	}
 
+	@Override
 	public String getReplacement() {
 		return replacement;
 	}
 
 	@Override
 	public String toString() {
-		return getReplacement();
+		return this.getReplacement();
 	}
 }
