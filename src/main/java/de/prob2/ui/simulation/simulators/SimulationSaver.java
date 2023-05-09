@@ -51,7 +51,7 @@ public final class SimulationSaver {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveTimedTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + SIMULATION_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Simulation", SIMULATION_EXTENSION));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", SIMULATION_EXTENSION));
 		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			saveConfiguration(trace, timestamps, path, createMetadata(createdBy));

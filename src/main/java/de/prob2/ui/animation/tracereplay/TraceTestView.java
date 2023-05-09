@@ -358,7 +358,7 @@ public class TraceTestView extends Stage {
 
 	private boolean confirmCancel() {
 		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-			"common.alerts.traceChanges.header",
+			"common.alerts.unsavedTraceChanges.header",
 			"common.alerts.cancelTraceChanges.content");
 		alert.initOwner(null);
 		Optional<ButtonType> result = alert.showAndWait();
