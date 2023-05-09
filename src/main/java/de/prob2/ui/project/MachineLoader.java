@@ -256,33 +256,37 @@ public class MachineLoader {
 
 	public CompletableFuture<?> loadAsync(Machine machine, Map<String, String> pref) {
 		return this.cliExecutor.submit(() -> {
-			try {
-				this.load(machine, pref);
-			} catch (EventBFileNotFoundException e) {
-				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
-				if(!e.refreshProject()) {
-				    // the source file (e.g. .bum) does not exist
-					Platform.runLater(() -> stageManager
+			this.load(machine, pref);
+			return null;
+		}).whenComplete((r, e) -> {
+			if (e != null) {
+				LOGGER.error("Exception while loading machine {}", machine.getName());
+				if (e instanceof EventBFileNotFoundException) {
+					EventBFileNotFoundException exc = (EventBFileNotFoundException) e;
+					if(!exc.refreshProject()) {
+						// the source file (e.g. .bum) does not exist
+						Platform.runLater(() -> stageManager
 							.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
-									"project.machineLoader.alerts.fileNotFound.content", e.getPath())
+								"project.machineLoader.alerts.fileNotFound.content", exc.getPath())
 							.showAndWait());
-				} else {
-					Platform.runLater(() -> stageManager
+					} else {
+						Platform.runLater(() -> stageManager
 							.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
-									"project.machineLoader.alerts.eventBFileNotFound.content", e.getPath())
+								"project.machineLoader.alerts.eventBFileNotFound.content", exc.getPath())
 							.showAndWait());
-				}
-			} catch (FileNotFoundException e) {
-				LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
-				Platform.runLater(() -> stageManager
+					}
+				} else if (e instanceof FileNotFoundException) {
+					LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
+					Platform.runLater(() -> stageManager
 						.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
-								"project.machineLoader.alerts.fileNotFound.content", currentProject.get().getAbsoluteMachinePath(machine))
+							"project.machineLoader.alerts.fileNotFound.content", currentProject.get().getAbsoluteMachinePath(machine))
 						.showAndWait());
-			} catch (CliError | IOException | ProBError e) {
-				LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
-				Platform.runLater(() -> stageManager
+				} else {
+					LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
+					Platform.runLater(() -> stageManager
 						.makeExceptionAlert(e, "", "project.machineLoader.alerts.couldNotOpen.content", machine.getName())
 						.showAndWait());
+				}
 			}
 		});
 	}
