@@ -38,7 +38,7 @@ public final class SyntaxStage extends Stage {
 			text = lines.collect(Collectors.joining(System.lineSeparator()));
 		} catch (IOException | UncheckedIOException e) {
 			LOGGER.error("Could not read file: {}", path, e);
-			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path);
+			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", path);
 			alert.initOwner(this.getScene().getWindow());
 			alert.show();
 			return;

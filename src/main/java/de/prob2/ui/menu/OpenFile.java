@@ -37,7 +37,7 @@ public abstract class OpenFile {
 			} catch (IOException e) {
 				LOGGER.error("Error trying to resolve file '{}'", file, e);
 				Platform.runLater(() -> {
-					Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotFindFile.content", file);
+					Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", file);
 					if (stageManager.getCurrent() != null) {
 						alert.initOwner(stageManager.getCurrent());
 					}
