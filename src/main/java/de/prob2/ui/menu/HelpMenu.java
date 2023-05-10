@@ -1,5 +1,13 @@
 package de.prob2.ui.menu;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Objects;
+
+import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -7,17 +15,14 @@ import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.URISyntaxException;
-import java.nio.file.Paths;
-import java.util.Objects;
 
 @FXMLInjected
 public class HelpMenu extends Menu {
@@ -80,13 +85,15 @@ public class HelpMenu extends Menu {
 
 	private void handleSyntax(String filename, String title) {
 		SyntaxStage syntaxStage = injector.getInstance(SyntaxStage.class);
-		try {
-			syntaxStage.setTitle(title);
-			syntaxStage.setContent(Paths.get(Objects.requireNonNull(this.getClass().getResource(filename)).toURI()));
-		} catch (URISyntaxException e) {
-			LOGGER.error("Could not create URI of {}", this.getClass().getResource(filename), e);
-			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotCreateURI", this.getClass().getResource(filename));
-			alert.show();
+		syntaxStage.setTitle(title);
+		try (
+			InputStream is = Objects.requireNonNull(this.getClass().getResourceAsStream(filename));
+			InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+		) {
+			syntaxStage.setText(CharStreams.toString(isr));
+		} catch (IOException | UncheckedIOException e) {
+			LOGGER.error("Could not read syntax help file: {}", filename, e);
+			stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", filename).show();
 			return;
 		}
 		syntaxStage.show();
