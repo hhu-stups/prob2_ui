@@ -18,8 +18,10 @@ import de.prob2.ui.visualisation.fx.VisualisationController;
 import de.prob2.ui.vomanager.VOManagerStage;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -40,6 +42,7 @@ public class AdvancedMenu extends Menu {
 	@FXML
 	private MenuItem detachVisualisationItem;
 
+	private final StageManager stageManager;
 	private final ProBPluginManager proBPluginManager;
 	private final VisualisationController visualisationController;
 	private final Injector injector;
@@ -55,6 +58,7 @@ public class AdvancedMenu extends Menu {
 		CurrentTrace currentTrace,
 		Injector injector
 	) {
+		this.stageManager = stageManager;
 		this.proBPluginManager = proBPluginManager;
 		this.injector = injector;
 		stageManager.loadFXML(this, "advancedMenu.fxml");
@@ -131,6 +135,11 @@ public class AdvancedMenu extends Menu {
 		VOManagerStage voManagerStage = injector.getInstance(VOManagerStage.class);
 		voManagerStage.show();
 		voManagerStage.toFront();
+
+		Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "menu.advanced.items.vomanager.warningMessage");
+		alert.initOwner(voManagerStage);
+		alert.initModality(Modality.WINDOW_MODAL);
+		alert.show();
 	}
 
 }
