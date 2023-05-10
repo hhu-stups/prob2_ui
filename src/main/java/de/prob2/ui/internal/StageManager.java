@@ -133,7 +133,7 @@ public final class StageManager {
 		loader.setRoot(controller);
 		loader.setController(controller);
 		if (controller instanceof Dialog<?>) {
-			((Dialog<?>) controller).initOwner(this.getMainStage());
+			this.register((Dialog<?>)controller);
 		}
 		try {
 			loader.load();
