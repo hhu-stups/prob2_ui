@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.text.MessageFormat;
@@ -108,7 +109,7 @@ public final class StageManager {
 		try {
 			loader.load();
 		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
+			throw new UncheckedIOException(e);
 		}
 
 		final FontSize fontSize = injector.getInstance(FontSize.class);
