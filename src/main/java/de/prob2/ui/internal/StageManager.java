@@ -25,8 +25,6 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -46,6 +44,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +102,21 @@ public final class StageManager {
 		this.globalMacMenuBar = null;
 	}
 
+	private static Node getRootNode(Object fxmlRoot) {
+		if (fxmlRoot instanceof Node) {
+			return (Node)fxmlRoot;
+		} else if (fxmlRoot instanceof Scene) {
+			return ((Scene)fxmlRoot).getRoot();
+		} else if (fxmlRoot instanceof Window) {
+			Scene scene = ((Window)fxmlRoot).getScene();
+			return scene == null ? null : scene.getRoot();
+		} else if (fxmlRoot instanceof Dialog<?>) {
+			return ((Dialog<?>)fxmlRoot).getDialogPane();
+		} else {
+			return null;
+		}
+	}
+
 	/**
 	 * Load an FXML file with {@code controller} as the root and controller.
 	 *
@@ -127,16 +141,9 @@ public final class StageManager {
 			throw new UncheckedIOException(e);
 		}
 
-		final StringExpression fontSizeCssValue = Bindings.format("-fx-font-size: %dpx;", fontSize.fontSizeProperty());
-		if (controller instanceof Node) {
-			Node controllerNode = (Node) controller;
-			controllerNode.styleProperty().bind(fontSizeCssValue);
-		} else if (controller instanceof Stage) {
-			Stage controllerStage = (Stage) controller;
-			controllerStage.getScene().getRoot().styleProperty().bind(fontSizeCssValue);
-		} else if (controller instanceof Dialog<?>) {
-			Dialog<?> controllerDialog = (Dialog<?>) controller;
-			controllerDialog.getDialogPane().styleProperty().bind(fontSizeCssValue);
+		Node rootNode = getRootNode(controller);
+		if (rootNode != null) {
+			fontSize.applyTo(rootNode);
 		}
 	}
 

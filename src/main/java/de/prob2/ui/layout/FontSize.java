@@ -8,8 +8,10 @@ import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.FXMLInjected;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.scene.Node;
 
 @FXMLInjected
 @Singleton
@@ -56,5 +58,9 @@ public final class FontSize {
 	
 	public void resetFontSize() {
 		this.setFontSize(DEFAULT_FONT_SIZE);
+	}
+	
+	public void applyTo(Node node) {
+		node.styleProperty().bind(Bindings.format("-fx-font-size: %dpx;", this.fontSizeProperty()));
 	}
 }
