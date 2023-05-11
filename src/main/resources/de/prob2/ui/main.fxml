@@ -16,18 +16,15 @@
 <?import javafx.scene.control.TitledPane?>
 <?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.visualisation.VisualisationsView?>
-
-<?import javafx.scene.layout.HBox?>
 <?import de.prob2.ui.layout.FontSize?>
+
 <fx:root type="MainController" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<center>
 		<SplitPane fx:id="navBarSP" orientation="VERTICAL">
-			<HBox alignment="CENTER" maxHeight="${fontSize.fontSize}">
-				<fx:include source="sharedviews/navigation_buttons.fxml"/>
-			</HBox>
+			<fx:include source="menu/toolbar.fxml"/>
 			<SplitPane fx:id="horizontalSP" dividerPositions="0.3,0.7">
 				<SplitPane fx:id="verticalSP" dividerPositions="0.5" orientation="VERTICAL">
 					<Accordion fx:id="leftAccordion1" expandedPane="$operationsTP">
@@ -49,7 +46,7 @@
 					<MainView/>
 					<Accordion fx:id="centerAccordion1" expandedPane="$visPane">
 						<panes>
-							<TitledPane id="visualisations" fx:id="visPane" text="%menu.visualisation">
+							<TitledPane id="visPane" fx:id="visPane" text="%menu.visualisation">
 								<VisualisationsView/>
 							</TitledPane>
 							<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title">

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import de.prob2.ui.sharedviews.Spacer?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<HBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.menu.ToolBarController" stylesheets="@/prob.css" alignment="CENTER_LEFT" maxHeight="${fontSize.fontSize}">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+		<Spacer/>
+		<fx:include source="../sharedviews/navigation_buttons.fxml"/>
+		<Spacer/>
+
+		<Button fx:id="zoomOutButton" onAction="#zoomOut">
+			<graphic>
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE"
+							   bindableFontSize="${fontSize.fontSize + 4}"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%visb.menu.view.zoom.out"/>
+			</tooltip>
+		</Button>
+
+		<Button fx:id="zoomIn" onAction="#zoomIn">
+			<graphic>
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE"
+							   bindableFontSize="${fontSize.fontSize + 4}"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%visb.menu.view.zoom.in"/>
+			</tooltip>
+		</Button>
+
+		<Button fx:id="preferences" onAction="#handlePreferences">
+			<graphic>
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG"
+							   bindableFontSize="${fontSize.fontSize + 4}"/>
+			</graphic>
+			<tooltip>
+				<Tooltip text="%visb.buttons.manageDefaultVisualisation"/>
+			</tooltip>
+		</Button>
+	</HBox>
