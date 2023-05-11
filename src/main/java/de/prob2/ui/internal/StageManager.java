@@ -1,16 +1,30 @@
 package de.prob2.ui.internal;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.lang.ref.WeakReference;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.WeakHashMap;
+
+import javax.annotation.Nullable;
+
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
 import de.codecentric.centerdevice.MenuToolkit;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.StringExpression;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -30,20 +44,10 @@ import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.stage.Window;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.annotation.Nullable;
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.net.URL;
-import java.text.MessageFormat;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.WeakHashMap;
 
 /**
  * This singleton provides common methods for creating and initializing views,
@@ -65,7 +69,9 @@ public final class StageManager {
 	private static final String STYLESHEET = "prob.css";
 	public static final Image ICON = new Image(StageManager.class.getResource("/de/prob2/ui/ProB_Icon.png").toExternalForm());
 
-	private final Injector injector;
+	private final Provider<FXMLLoader> loaderProvider;
+	private final FontSize fontSize;
+	private final Provider<ExceptionAlert> exceptionAlertProvider;
 	private final MenuToolkit menuToolkit;
 	private final UIState uiState;
 	private final I18n i18n;
@@ -76,8 +82,17 @@ public final class StageManager {
 	private Stage mainStage;
 
 	@Inject
-	private StageManager(final Injector injector, @Nullable final MenuToolkit menuToolkit, final UIState uiState, final I18n i18n) {
-		this.injector = injector;
+	private StageManager(
+		Provider<FXMLLoader> loaderProvider,
+		FontSize fontSize,
+		Provider<ExceptionAlert> exceptionAlertProvider,
+		@Nullable MenuToolkit menuToolkit,
+		UIState uiState,
+		I18n i18n
+	) {
+		this.loaderProvider = loaderProvider;
+		this.fontSize = fontSize;
+		this.exceptionAlertProvider = exceptionAlertProvider;
 		this.menuToolkit = menuToolkit;
 		this.uiState = uiState;
 		this.i18n = i18n;
@@ -85,6 +100,21 @@ public final class StageManager {
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
 		this.globalMacMenuBar = null;
+	}
+
+	private static Node getRootNode(Object fxmlRoot) {
+		if (fxmlRoot instanceof Node) {
+			return (Node)fxmlRoot;
+		} else if (fxmlRoot instanceof Scene) {
+			return ((Scene)fxmlRoot).getRoot();
+		} else if (fxmlRoot instanceof Window) {
+			Scene scene = ((Window)fxmlRoot).getScene();
+			return scene == null ? null : scene.getRoot();
+		} else if (fxmlRoot instanceof Dialog<?>) {
+			return ((Dialog<?>)fxmlRoot).getDialogPane();
+		} else {
+			return null;
+		}
 	}
 
 	/**
@@ -98,30 +128,22 @@ public final class StageManager {
 		Objects.requireNonNull(controller, "controller");
 		Objects.requireNonNull(fxmlUrl, "fxmlUrl");
 		
-		final FXMLLoader loader = injector.getInstance(FXMLLoader.class);
+		final FXMLLoader loader = loaderProvider.get();
 		loader.setLocation(fxmlUrl);
 		loader.setRoot(controller);
 		loader.setController(controller);
 		if (controller instanceof Dialog<?>) {
-			((Dialog<?>) controller).initOwner(this.getMainStage());
+			this.register((Dialog<?>)controller);
 		}
 		try {
 			loader.load();
 		} catch (IOException e) {
-			throw new IllegalArgumentException(e);
+			throw new UncheckedIOException(e);
 		}
 
-		final FontSize fontSize = injector.getInstance(FontSize.class);
-		final StringExpression fontSizeCssValue = Bindings.format("-fx-font-size: %dpx;", fontSize.fontSizeProperty());
-		if (controller instanceof Node) {
-			Node controllerNode = (Node) controller;
-			controllerNode.styleProperty().bind(fontSizeCssValue);
-		} else if (controller instanceof Stage) {
-			Stage controllerStage = (Stage) controller;
-			controllerStage.getScene().getRoot().styleProperty().bind(fontSizeCssValue);
-		} else if (controller instanceof Dialog<?>) {
-			Dialog<?> controllerDialog = (Dialog<?>) controller;
-			controllerDialog.getDialogPane().styleProperty().bind(fontSizeCssValue);
+		Node rootNode = getRootNode(controller);
+		if (rootNode != null) {
+			fontSize.applyTo(rootNode);
 		}
 	}
 
@@ -199,7 +221,7 @@ public final class StageManager {
 		stage.focusedProperty().addListener(e -> {
 			final String stageId = getPersistenceID(stage);
 			if (stageId != null) {
-				injector.getInstance(UIState.class).moveStageToEnd(stageId);
+				uiState.moveStageToEnd(stageId);
 			}
 		});
 
@@ -328,7 +350,7 @@ public final class StageManager {
 	 * @return a new exception alert
 	 */
 	public Alert makeExceptionAlert(final Throwable exc, final String contentBundleKey, final Object... contentParams) {
-		final ExceptionAlert alert = injector.getInstance(ExceptionAlert.class);
+		final ExceptionAlert alert = exceptionAlertProvider.get();
 		alert.setText(contentBundleKey != null && !contentBundleKey.isEmpty() ? i18n.translate(contentBundleKey, contentParams) : "");
 		alert.setException(exc);
 		this.register(alert);

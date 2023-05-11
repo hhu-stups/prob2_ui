@@ -107,7 +107,7 @@ public class MagicLayoutSettingsManager {
 				return this.jsonManager.readFromFile(path);
 			} catch (IOException e) {
 				LOGGER.warn("Failed to read magic layout settings file", e);
-				stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotReadFile.content", path).showAndWait();
+				stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotOpenFile.content", path).showAndWait();
 			}
 		}
 		return null;

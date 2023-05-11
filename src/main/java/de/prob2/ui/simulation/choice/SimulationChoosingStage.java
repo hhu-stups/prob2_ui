@@ -152,6 +152,7 @@ public class SimulationChoosingStage extends Stage {
 		if(simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationConditionChoice.checkProperty()) {
 			SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
 			information.putAll(simulationPropertyChoice.extractInformation());
+			information.putAll(simulationConditionChoice.extractInformation());
 			switch (simulationType) {
 				case ESTIMATION:
 					information.putAll(simulationEstimationChoice.extractInformation());

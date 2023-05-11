@@ -99,15 +99,23 @@ public final class I18n {
 	}
 
 	/**
-	 * First translates the given key to obtain a pattern, then formats the pattern via MessageFormat with the given arguments.
+	 * Translates the given key to a string, then optionally formats the string via {@link MessageFormat} with the given arguments.
 	 * The arguments will be evaluated before use: {@link ObservableValue}s will be queried and {@link Translatable}/{@link Formattable} objects will be resolved.
+	 * If no arguments are given, the translated string is returned literally and not formatted further.
 	 *
 	 * @param key       key to translate
 	 * @param arguments arguments for formatting
-	 * @return formatted and translated string
+	 * @return translated and optionally formatted string
 	 */
 	public String translate(String key, Object... arguments) {
 		String pattern = translate0(key);
+		if (arguments.length == 0) {
+			// Don't apply MessageFormat to strings with no arguments.
+			// This allows single quotes to be used normally and ensures that the behavior is consistent
+			// regardless of whether a string is looked up via I18n, a plain ResourceBundle, an FXML file, etc.
+			return pattern;
+		}
+
 		Object[] evaluatedArguments = evaluateArguments(arguments);
 		try {
 			MessageFormat mf = new MessageFormat(pattern, locale());

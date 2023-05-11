@@ -376,7 +376,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			}
 		} catch (IOException e) {
 			LOGGER.error("Saving as CSV failed", e);
-			final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "common.alerts.couldNotWriteFile.content", path);
+			final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
 			alert.initOwner(this);
 			alert.showAndWait();
 		}

@@ -4,10 +4,10 @@
 
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.TextArea?>
-<fx:root type="SyntaxStage" xmlns:fx="http://javafx.com/fxml" minWidth="640" minHeight="480" >
+<fx:root type="SyntaxStage" xmlns:fx="http://javafx.com/fxml" minWidth="640" minHeight="480" width="1200" height="600">
 	<scene>
 		<Scene>
-			<TextArea fx:id="syntaxText" editable="false"/>
+			<TextArea fx:id="syntaxText" styleClass="code" editable="false"/>
 		</Scene>
 	</scene>
 </fx:root>

@@ -124,7 +124,7 @@
 					<ImageView preserveRatio="true" fitWidth="200.0">
 						<Image url="@/de/prob2/ui/ProB_Logo.png"/>
 					</ImageView>
-					<Label text="%visb.placeholder.text" textAlignment="CENTER"/>
+					<Label text="%common.noModelLoaded" fx:id="placeholderLabel" textAlignment="CENTER"/>
 				</VBox>
 			</StackPane>
 	</center>

@@ -44,7 +44,7 @@ public final class UIInteractionSaver {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveUIReplay.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".json");
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.proB2Simulation", "json"));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json"));
 		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			SimulationModelConfiguration configuration = uiInteraction.createUserInteractionSimulation(realTimeSimulator);

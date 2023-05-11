@@ -13,14 +13,14 @@ import de.prob.animator.domainobjects.FormulaTranslationMode;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.CSPModel;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -54,8 +54,6 @@ public final class ViewCodeStage extends Stage {
 
 	private final CurrentProject currentProject;
 	
-	private final StringProperty code;
-	
 	@Inject
 	private ViewCodeStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final CurrentProject currentProject, final CurrentTrace currentTrace) {
 		super();
@@ -65,51 +63,42 @@ public final class ViewCodeStage extends Stage {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		
-		this.code = new SimpleStringProperty(this, "code", null);
-		
 		this.stageManager.loadFXML(this, "view_code_stage.fxml");
 	}
 	
 	@FXML
 	private void initialize() {
-		this.codeTextArea.textProperty().bind(this.codeProperty());
-		this.cbUnicode.selectedProperty().addListener((observable, from, to) -> setCode());
+		this.cbUnicode.selectedProperty().addListener((observable, from, to) -> updateCode(currentTrace.getStateSpace()));
 
-		this.currentTrace.addListener((observable, from, to) -> {
-			if(to != null) {
-				AbstractModel model = to.getModel();
-				if(model instanceof ClassicalBModel || model instanceof CSPModel) {
-					saveAsButton.setDisable(false);
-				} else {
-					saveAsButton.setDisable(true);
-				}
-				this.setTitle(currentProject.getCurrentMachine().getName());
-				this.setCode();
+		this.currentProject.currentMachineProperty().addListener((o, from, to) -> {
+			if (to != null) {
+				this.setTitle(to.getName());
 			}
 		});
-
-		this.setOnShown(e -> {
-			if(currentTrace.get() != null) {
-				this.setTitle(currentProject.getCurrentMachine().getName());
-				this.setCode();
-			}
-		});
+		Machine currentMachine = currentProject.getCurrentMachine();
+		if (currentMachine != null) {
+			this.setTitle(currentMachine.getName());
+		}
+		
+		this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> this.updateCode(to));
+		this.updateCode(currentTrace.getStateSpace());
 	}
 	
-	public StringProperty codeProperty() {
-		return this.code;
-	}
-	
-	public String getCode() {
-		return this.codeProperty().get();
-	}
-	
-	public void setCode() {
+	private void updateCode(StateSpace stateSpace) {
+		if (stateSpace == null) {
+			this.codeTextArea.clear();
+			this.saveAsButton.setDisable(true);
+			return;
+		}
+		
+		AbstractModel model = stateSpace.getModel();
+		saveAsButton.setDisable(!(model instanceof ClassicalBModel || model instanceof CSPModel));
+		
 		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
 		cmd.setTranslationMode(cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
 		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
-		this.currentTrace.getStateSpace().execute(cmd);
-		this.codeProperty().set(cmd.getPrettyPrint());
+		stateSpace.execute(cmd);
+		this.codeTextArea.setText(cmd.getPrettyPrint());
 	}
 	
 	@FXML
@@ -126,7 +115,7 @@ public final class ViewCodeStage extends Stage {
 		}
 		
 		try (final Writer out = Files.newBufferedWriter(selected)) {
-			out.write(this.getCode());
+			out.write(this.codeTextArea.getText());
 		} catch (IOException e) {
 			LOGGER.error("Failed to save value to file", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", selected);

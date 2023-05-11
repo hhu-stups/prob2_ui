@@ -41,7 +41,7 @@ public abstract class RevealInExplorer {
 				} catch (IOException e) {
 					LOGGER.error("Error trying to resolve file '{}'", file, e);
 					Platform.runLater(() -> {
-						Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotFindFile.content", file);
+						Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", file);
 						if (stageManager.getCurrent() != null) {
 							alert.initOwner(stageManager.getCurrent());
 						}
@@ -56,7 +56,7 @@ public abstract class RevealInExplorer {
 					} catch (Exception e) {
 						LOGGER.error("Error while revealing file '{}' in explorer", fileAsFile, e);
 						Platform.runLater(() -> {
-							Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotRevealFile.content", fileAsFile);
+							Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", fileAsFile);
 							if (stageManager.getCurrent() != null) {
 								alert.initOwner(stageManager.getCurrent());
 							}

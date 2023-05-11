@@ -6,9 +6,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 
+import de.prob2.ui.codecompletion.CodeCompletionItem;
+import de.prob2.ui.codecompletion.ParentWithEditableText;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StringHelper;
 
@@ -21,7 +24,9 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.geometry.Point2D;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.IndexRange;
 import javafx.scene.control.MenuItem;
@@ -33,6 +38,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
+import javafx.stage.Window;
 
 import org.controlsfx.tools.Platform;
 import org.fxmisc.richtext.StyleClassedTextArea;
@@ -63,6 +69,8 @@ public abstract class Console extends StyleClassedTextArea {
 	private final StringExpression inputWithPrompt;
 	private final IntegerExpression inputStart;
 	private final IntegerExpression inputEnd;
+	private final ObservableValue<Optional<Point2D>> caretPos;
+	private final ObservableValue<Optional<String>> textBeforeCaret;
 
 	private final ConsoleHistoryAndSearchHandler historyAndSearchHandler;
 	private final StringBuilder commandBuffer;
@@ -126,6 +134,23 @@ public abstract class Console extends StyleClassedTextArea {
 			}
 		}, this.lineContinuation, translatedPrompt, translatedLineContinuationPrompt, translatedSuccessfulSearchPrompt, translatedFailedSearchPrompt, this.input, this.historyAndSearchHandler.searchActiveProperty(), this.historyAndSearchHandler.currentSearchResultProperty(), this.historyAndSearchHandler.searchFailedProperty());
 		this.inputWithPrompt.addListener((o, from, to) -> this.update(from, to));
+
+		this.caretPos = Bindings.createObjectBinding(
+			() -> this.caretBoundsProperty().getValue()
+				      .map(bounds -> new Point2D(
+					      (bounds.getMinX() + bounds.getMaxX()) / 2.0,
+					      bounds.getMaxY()
+				      )),
+			this.caretBoundsProperty()
+		);
+		this.textBeforeCaret = Bindings.createObjectBinding(() -> {
+			OptionalInt positionInInput = this.getPositionInInput();
+			if (positionInInput.isPresent()) {
+				return Optional.of(this.getInput().substring(0, positionInInput.getAsInt()));
+			} else {
+				return Optional.empty();
+			}
+		}, this.inputProperty(), this.caretPositionProperty());
 
 		this.reset();
 	}
@@ -198,14 +223,14 @@ public abstract class Console extends StyleClassedTextArea {
 
 		// GUI-style shortcuts, these should use the Shortcut key (i. e. Command on Mac, Control on other systems).
 		Nodes.addInputMap(this, consume(anyOf(
-				keyPressed(new KeyCharacterCombination("c", SHORTCUT_DOWN)),
-				keyPressed(KeyCode.COPY),
-				keyPressed(KeyCode.INSERT, SHORTCUT_DOWN)
+			keyPressed(new KeyCharacterCombination("c", SHORTCUT_DOWN)),
+			keyPressed(KeyCode.COPY),
+			keyPressed(KeyCode.INSERT, SHORTCUT_DOWN)
 		), e -> this.copy()));
 		Nodes.addInputMap(this, consume(anyOf(
-				keyPressed(new KeyCharacterCombination("v", SHORTCUT_DOWN)),
-				keyPressed(KeyCode.PASTE),
-				keyPressed(KeyCode.INSERT, SHIFT_DOWN)
+			keyPressed(new KeyCharacterCombination("v", SHORTCUT_DOWN)),
+			keyPressed(KeyCode.PASTE),
+			keyPressed(KeyCode.INSERT, SHIFT_DOWN)
 		), e -> this.paste()));
 
 		// Shell/Emacs-style shortcuts, these should always use Control as the modifier, even on Mac (this is how it works in a normal terminal window).
@@ -240,9 +265,9 @@ public abstract class Console extends StyleClassedTextArea {
 			if (dragboard.hasFiles()) {
 				success = true;
 				onEnterText(
-						dragboard.getFiles().stream()
-								.map(File::getAbsolutePath)
-								.collect(Collectors.joining(" "))
+					dragboard.getFiles().stream()
+						.map(File::getAbsolutePath)
+						.collect(Collectors.joining(" "))
 				);
 			}
 			e.setDropCompleted(success);
@@ -492,6 +517,17 @@ public abstract class Console extends StyleClassedTextArea {
 		return OptionalInt.of(inputPosition);
 	}
 
+	protected void replace(int start, int end, String text) {
+		if (start > end) {
+			throw new IllegalArgumentException();
+		}
+
+		String prefix = this.getInput().substring(0, Math.max(0, Math.min(this.getInput().length(), start)));
+		String suffix = this.getInput().substring(Math.max(0, Math.min(this.getInput().length(), end)));
+		this.setInput(prefix + text + suffix);
+		this.moveCaretToPosInInput(prefix.length() + text.length());
+	}
+
 	public boolean isSearching() {
 		return this.historyAndSearchHandler.isSearchActive();
 	}
@@ -535,5 +571,31 @@ public abstract class Console extends StyleClassedTextArea {
 
 	public int getInputEnd() {
 		return this.inputEnd.get();
+	}
+
+	public ObservableValue<Optional<Point2D>> caretPosProperty() {
+		return caretPos;
+	}
+
+	public ObservableValue<Optional<String>> textBeforeCaretProperty() {
+		return textBeforeCaret;
+	}
+
+	protected abstract class AbstractParentWithEditableText<T extends CodeCompletionItem> implements ParentWithEditableText<T> {
+
+		@Override
+		public Window getWindow() {
+			return Console.this.getScene().getWindow();
+		}
+
+		@Override
+		public ObservableValue<Optional<Point2D>> getCaretPosition() {
+			return Console.this.caretPosProperty();
+		}
+
+		@Override
+		public ObservableValue<Optional<String>> getTextBeforeCaret() {
+			return Console.this.textBeforeCaretProperty();
+		}
 	}
 }

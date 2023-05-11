@@ -259,7 +259,7 @@ public final class HistoryChartStage extends Stage {
 				ImageIO.write(SwingFXUtils.fromFXImage(image, null), "PNG", path.toFile());
 			} catch (IOException ex) {
 				LOGGER.error("Saving as PNG failed", ex);
-				final Alert alert = stageManager.makeExceptionAlert(ex, "common.alerts.couldNotWriteFile.content", path);
+				final Alert alert = stageManager.makeExceptionAlert(ex, "common.alerts.couldNotSaveFile.content", path);
 				alert.initOwner(this);
 				alert.showAndWait();
 			}
@@ -283,7 +283,7 @@ public final class HistoryChartStage extends Stage {
 				}
 			} catch (IOException ex) {
 				LOGGER.error("Saving as CSV failed", ex);
-				final Alert alert = stageManager.makeExceptionAlert(ex, "common.alerts.couldNotWriteFile.content", path);
+				final Alert alert = stageManager.makeExceptionAlert(ex, "common.alerts.couldNotSaveFile.content", path);
 				alert.initOwner(this);
 				alert.showAndWait();
 			}

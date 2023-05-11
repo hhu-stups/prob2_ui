@@ -402,7 +402,7 @@ public class BEditorView extends BorderPane {
 					alert.initOwner(this.getScene().getWindow());
 					alert.show();
 				} else {
-					final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotReadFile.content", path);
+					final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", path);
 					alert.initOwner(this.getScene().getWindow());
 					alert.show();
 				}

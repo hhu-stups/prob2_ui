@@ -136,10 +136,7 @@ public class MachinesTab extends Tab {
 
 		@FXML
 		private void handleShowInternal() {
-			final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
-			stage.setTitle(currentProject.getCurrentMachine().getName());
-			stage.setCode();
-			stage.show();
+			injector.getInstance(ViewCodeStage.class).show();
 		}
 
 		private void updatePreferences(final List<Preference> prefs) {
