@@ -126,9 +126,8 @@ public class ProjectDocumenter {
 		VisBView visBView = injector.getInstance(VisBView.class);
 		String filename = Transition.prettifyName(trace.getName())+".html";
 		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
-		* To solve this Problem the completable future is saved as an field that can be accessed to be synced  */
-		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName()));
-		project.getLoadFuture().join();
+		* To solve this Problem, wait on the CompletableFuture. */
+		project.startAnimation(machine, project.get().getPreference(machine.getLastUsedPreferenceName())).join();
 		final StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
 		visBView.saveHTMLExportWithPath(trace.getReplayedTrace().getTrace(stateSpace), VisBView.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(directory,machine,trace)+filename));
