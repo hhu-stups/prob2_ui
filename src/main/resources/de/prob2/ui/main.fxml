@@ -40,7 +40,7 @@
 				<MainView/>
 				<Accordion fx:id="centerAccordion1" expandedPane="$visPane">
 					<panes>
-						<TitledPane id="visualisations" fx:id="visPane" text="%menu.visualisation">
+						<TitledPane id="visPane" fx:id="visPane" text="%menu.visualisation">
 							<VisualisationsView/>
 						</TitledPane>
 						<TitledPane id="bconsole" fx:id="consolePane" text="%states.statesView.interactiveConsole.titledPane.title">
