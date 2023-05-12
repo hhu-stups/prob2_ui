@@ -18,19 +18,24 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob2.ui.codecompletion.CodeCompletionItem;
+import de.prob2.ui.codecompletion.ParentWithEditableText;
 import de.prob2.ui.layout.FontSize;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.Bounds;
+import javafx.geometry.Point2D;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Popup;
+import javafx.stage.Window;
 import javafx.util.Builder;
 
 import org.fxmisc.richtext.CodeArea;
@@ -65,6 +70,8 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	protected final Label errorPopupLabel;
 	protected final SimpleObjectProperty<ErrorItem.Location> errorHighlight;
 	private final ExecutorService executor;
+	private final ObservableValue<Optional<Point2D>> caretPos;
+	private final ObservableValue<Optional<String>> textBeforeCaret;
 
 	@Inject
 	public ExtendedCodeArea(FontSize fontSize, I18n i18n, StopActions stopActions) {
@@ -79,6 +86,23 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		this.errorPopup.getContent().add(this.errorPopupLabel);
 
 		this.errorHighlight = new SimpleObjectProperty<>(null, "errorHighlight", null);
+
+		this.caretPos = Bindings.createObjectBinding(
+			() -> this.caretBoundsProperty().getValue()
+				      .map(bounds -> new Point2D(
+					      (bounds.getMinX() + bounds.getMaxX()) / 2.0,
+					      bounds.getMaxY()
+				      )),
+			this.caretBoundsProperty()
+		);
+		this.textBeforeCaret = Bindings.createObjectBinding(() -> {
+			int caret = this.getCaretPosition();
+			if (caret < 0 || caret > this.getLength()) {
+				return Optional.empty();
+			} else {
+				return Optional.of(this.getText(0, caret));
+			}
+		}, this.textProperty(), this.caretPositionProperty());
 
 		initialize();
 	}
@@ -99,19 +123,19 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		}
 
 		this.richChanges()
-				.filter(ch -> !ch.isPlainTextIdentity())
-				.successionEnds(Duration.ofMillis(100))
-				.supplyTask(this::computeHighlightingAsync)
-				.awaitLatest(this.richChanges())
-				.filterMap(t -> {
-					if (t.isSuccess()) {
-						return Optional.of(t.get());
-					} else {
-						LOGGER.warn("Highlighting failed", t.getFailure());
-						return Optional.empty();
-					}
-				})
-				.subscribe(this::applyHighlighting);
+			.filter(ch -> !ch.isPlainTextIdentity())
+			.successionEnds(Duration.ofMillis(100))
+			.supplyTask(this::computeHighlightingAsync)
+			.awaitLatest(this.richChanges())
+			.filterMap(t -> {
+				if (t.isSuccess()) {
+					return Optional.of(t.get());
+				} else {
+					LOGGER.warn("Highlighting failed", t.getFailure());
+					return Optional.empty();
+				}
+			})
+			.subscribe(this::applyHighlighting);
 		this.errors.addListener((ListChangeListener<ErrorItem>) change -> this.reloadHighlighting());
 		this.errorHighlight.addListener((observable, oldValue, newValue) -> this.reloadHighlighting());
 
@@ -119,22 +143,22 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
 			// Inefficient, but works - there should never be so many errors that the iteration has a noticeable performance impact.
 			final String errorsText = this.getErrors().stream()
-					                          .filter(error ->
-							                                  error.getLocations().stream()
-									                                  .anyMatch(
-											                                  location -> e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
-													                                              && e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location)
-									                                  )
-					                          )
-					                          .map(ErrorItem::getMessage)
-					                          .collect(Collectors.joining("\n"));
+				                          .filter(error ->
+					                                  error.getLocations().stream()
+						                                  .anyMatch(
+							                                  location -> e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
+								                                              && e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location)
+						                                  )
+				                          )
+				                          .map(ErrorItem::getMessage)
+				                          .collect(Collectors.joining("\n"));
 			if (!errorsText.isEmpty()) {
 				this.errorPopupLabel.setText(errorsText);
 				// Try to position the popup under the text being hovered over,
 				// so that the line in question is not covered by the popup.
 				final double popupY = this.getCharacterBoundsOnScreen(e.getCharacterIndex(), e.getCharacterIndex() + 1)
-						                      .map(Bounds::getMaxY)
-						                      .orElse(e.getScreenPosition().getY());
+					                      .map(Bounds::getMaxY)
+					                      .orElse(e.getScreenPosition().getY());
 				this.errorPopup.show(this, e.getScreenPosition().getX(), popupY);
 			}
 		});
@@ -227,11 +251,11 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 				int startIndex = this.errorLocationAbsoluteStart(location);
 				int endIndex = this.errorLocationAbsoluteEnd(location);
 				highlighting = highlighting.overlay(
-						new StyleSpansBuilder<Collection<String>>()
-								.add(Collections.emptySet(), startIndex)
-								.add(Arrays.asList("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
-								.create(),
-						ExtendedCodeArea::combineCollections
+					new StyleSpansBuilder<Collection<String>>()
+						.add(Collections.emptySet(), startIndex)
+						.add(Arrays.asList("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
+						.create(),
+					ExtendedCodeArea::combineCollections
 				);
 			}
 		}
@@ -240,11 +264,11 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			int startIndex = this.errorLocationAbsoluteStart(errorHighlight.get());
 			int endIndex = this.errorLocationAbsoluteEnd(errorHighlight.get());
 			highlighting = highlighting.overlay(
-					new StyleSpansBuilder<Collection<String>>()
-							.add(Collections.emptySet(), startIndex)
-							.add(Collections.singletonList("errorTable"), endIndex - startIndex)
-							.create(),
-					ExtendedCodeArea::combineCollections
+				new StyleSpansBuilder<Collection<String>>()
+					.add(Collections.emptySet(), startIndex)
+					.add(Collections.singletonList("errorTable"), endIndex - startIndex)
+					.create(),
+				ExtendedCodeArea::combineCollections
 			);
 		}
 
@@ -293,5 +317,31 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	@Override
 	public ExtendedCodeArea build() {
 		return this;
+	}
+
+	public ObservableValue<Optional<Point2D>> caretPosProperty() {
+		return caretPos;
+	}
+
+	public ObservableValue<Optional<String>> textBeforeCaretProperty() {
+		return textBeforeCaret;
+	}
+
+	protected abstract class AbstractParentWithEditableText<T extends CodeCompletionItem> implements ParentWithEditableText<T> {
+
+		@Override
+		public Window getWindow() {
+			return ExtendedCodeArea.this.getScene().getWindow();
+		}
+
+		@Override
+		public ObservableValue<Optional<Point2D>> getCaretPosition() {
+			return ExtendedCodeArea.this.caretPosProperty();
+		}
+
+		@Override
+		public ObservableValue<Optional<String>> getTextBeforeCaret() {
+			return ExtendedCodeArea.this.textBeforeCaretProperty();
+		}
 	}
 }
