@@ -25,7 +25,6 @@
 		</padding>
 		<fx:include source="../sharedviews/navigation_buttons.fxml"/>
 		<Spacer/>
-		<TraceReplayMenuButton/>
 		<MenuButton fx:id="saveTraceButton">
 			<graphic>
 				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
