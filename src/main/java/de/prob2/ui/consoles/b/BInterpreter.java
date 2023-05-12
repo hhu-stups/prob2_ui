@@ -133,12 +133,7 @@ public class BInterpreter implements Executable {
 	}
 
 	public Collection<? extends BCCItem> getSuggestions(String text) {
-		Trace trace = this.currentTrace.get();
-		if (trace == null) {
-			trace = this.getDefaultTrace();
-		}
-
-		BCodeCompletion cc = new BCodeCompletion(trace.getModel(), extractPrefix(text));
+		BCodeCompletion cc = new BCodeCompletion(this.currentTrace.getStateSpace(), extractPrefix(text));
 		cc.find();
 		return cc.getSuggestions();
 	}

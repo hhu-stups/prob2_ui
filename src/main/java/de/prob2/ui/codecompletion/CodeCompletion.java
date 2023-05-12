@@ -1,6 +1,5 @@
 package de.prob2.ui.codecompletion;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StringHelper;
 
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -76,12 +74,13 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 			return;
 		}
 
+		// TODO: update in another thread and use callbacks
 		Optional<String> text = this.parent.getTextBeforeCaret().getValue();
 		if (text.isPresent()) {
 			Collection<? extends T> suggestions = this.codeCompletionProvider.call(text.get());
 			List<? extends T> sortedSuggestions = suggestions.stream()
-					                                      .sorted(Comparator.comparing(Objects::toString, String.CASE_INSENSITIVE_ORDER))
-					                                      .collect(Collectors.toList());
+				                                      .sorted(Comparator.comparing(Objects::toString, String.CASE_INSENSITIVE_ORDER))
+				                                      .collect(Collectors.toList());
 			this.lvSuggestions.getItems().setAll(sortedSuggestions);
 		} else {
 			this.lvSuggestions.getItems().clear();
