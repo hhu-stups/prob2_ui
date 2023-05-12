@@ -267,7 +267,7 @@ public class FileChooserManager {
 	 * @param machines whether machines should be selectable
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
-	private Path showOpenProjectOrMachineChooser(final Window window, final boolean projects, final boolean machines) {
+	private Path showOpenProjectOrMachineChooser(final Window window, final boolean projects, final boolean machines, final boolean traces, final boolean visualisations) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("common.fileChooser.open.title"));
 		
@@ -282,6 +282,10 @@ public class FileChooserManager {
 			fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		}
 
+		if (traces) {
+			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + TraceFileHandler.TRACE_FILE_EXTENSION);
+			fileChooser.getExtensionFilters().addAll(this.getProB2TraceFilter());
+		}
 		// This extension filter is created manually instead of with getExtensionFilter,
 		// so that the list of extensions doesn't get appended (it would be very long).
 		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(i18n.translate("common.fileChooser.fileTypes.allProB"), allExtensionPatterns));
@@ -295,7 +299,7 @@ public class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenProjectChooser(final Window window) {
-		return showOpenProjectOrMachineChooser(window, true, false);
+		return showOpenProjectOrMachineChooser(window, true, false, false, false);
 	}
 	
 	/**
@@ -305,7 +309,11 @@ public class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenMachineChooser(final Window window) {
-		return showOpenProjectOrMachineChooser(window, false, true);
+		return showOpenProjectOrMachineChooser(window, false, true, false, false);
+	}
+
+	public Path showOpenAnythingChooser(final Window window) {
+		return showOpenProjectOrMachineChooser(window, true, true, true, true);
 	}
 	
 	/**
@@ -315,7 +323,7 @@ public class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenProjectOrMachineChooser(final Window window) {
-		return showOpenProjectOrMachineChooser(window, true, true);
+		return showOpenProjectOrMachineChooser(window, true, true, false, false);
 	}
 	
 	/**
