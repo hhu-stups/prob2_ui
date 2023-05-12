@@ -299,7 +299,7 @@ public class ProjectManager {
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if(replacingProject) {
 			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
-			currentProject.startAnimation(machine, Preference.DEFAULT);
+			currentProject.startAnimation(machine);
 		}
 	}
 

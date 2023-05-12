@@ -166,6 +166,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return loadFuture;
 	}
 
+	public CompletableFuture<?> startAnimation(Machine m) {
+		return this.startAnimation(m, this.get().getPreference(m.getLastUsedPreferenceName()));
+	}
+
 	public CompletableFuture<?> reloadCurrentMachine() {
 		final Machine machine = this.getCurrentMachine();
 		final Preference pref = this.getCurrentPreference();
