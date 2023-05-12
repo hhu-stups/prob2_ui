@@ -35,6 +35,7 @@
 					<Tooltip text="%beditor.tooltips.openMachine"/>
 				</tooltip>
 			</Button>
+			<fx:include source="../sharedviews/reload_button.fxml"/>
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 			<Label fx:id="warningLabel" styleClass="warning" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
 			<CheckBox fx:id="cbUnicode" text="%common.checkbox.unicode" visible="false" alignment="CENTER_RIGHT" HBox.hgrow="NEVER"/>
