@@ -50,6 +50,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
 import javafx.scene.control.Label;
@@ -110,7 +111,7 @@ public final class OperationsView extends VBox {
 			super.updateItem(item, empty);
 			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled");
 			if (item != null && !empty) {
-				setText(item.toPrettyString(unambiguousToggle.isSelected()));
+				setText(item.toPrettyString(showUnambiguous.get()));
 				setDisable(false);
 				final FontAwesome.Glyph icon;
 				switch (item.getStatus()) {
@@ -168,11 +169,15 @@ public final class OperationsView extends VBox {
 	@FXML
 	private Label warningLabel;
 	@FXML
-	private Button sortButton;
+	private CheckMenuItem sortModeAToZ;
 	@FXML
-	private ToggleButton disabledOpsToggle;
+	private CheckMenuItem sortModeZToA;
 	@FXML
-	private ToggleButton unambiguousToggle;
+	private CheckMenuItem sortModeModelOrder;
+	@FXML
+	private MenuItem disabledOpsMenuItem;
+	@FXML
+	private MenuItem unambiguousMenuItem;
 	@FXML
 	private TextField searchBar;
 	@FXML
@@ -245,7 +250,7 @@ public final class OperationsView extends VBox {
 			}
 		});
 		opsListView.disableProperty().bind(disablePropertyController.disableProperty());
-
+		this.sortModeAToZ.setSelected(true);
 		searchBox.visibleProperty().bind(searchToggle.selectedProperty());
 		searchBox.managedProperty().bind(searchToggle.selectedProperty());
 		searchBar.textProperty().addListener((o, from, to) -> opsListView.getItems().setAll(applyFilter(to)));
@@ -284,36 +289,36 @@ public final class OperationsView extends VBox {
 		});
 
 		showDisabledOps.addListener((o, from, to) -> {
-			((BindableGlyph)disabledOpsToggle.getGraphic()).setIcon(to ? FontAwesome.Glyph.EYE : FontAwesome.Glyph.EYE_SLASH);
-			disabledOpsToggle.setSelected(to);
+			disabledOpsMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideDisabled") : i18n.translate("operations.operationsView.menu.showDisabled"));
+			showDisabledOps.set(to);
 			update(currentTrace.get());
 		});
 
 		showUnambiguous.addListener((o, from, to) -> {
-			((BindableGlyph)unambiguousToggle.getGraphic()).setIcon(to ? FontAwesome.Glyph.PLUS_SQUARE : FontAwesome.Glyph.MINUS_SQUARE);
-			unambiguousToggle.setSelected(to);
+			unambiguousMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideUnambiguous") : i18n.translate("operations.operationsView.menu.showUnambiguous"));
 			opsListView.refresh();
 		});
 
 		sortMode.addListener((o, from, to) -> {
-			final FontAwesome.Glyph icon;
+			this.sortModeAToZ.setSelected(false);
+			this.sortModeZToA.setSelected(false);
+			this.sortModeModelOrder.setSelected(false);
 			switch (to) {
 				case A_TO_Z:
-					icon = FontAwesome.Glyph.SORT_ALPHA_ASC;
+					this.sortModeAToZ.setSelected(true);
 					break;
-				
+
 				case Z_TO_A:
-					icon = FontAwesome.Glyph.SORT_ALPHA_DESC;
+					this.sortModeZToA.setSelected(true);
 					break;
-				
+
 				case MODEL_ORDER:
-					icon = FontAwesome.Glyph.SORT;
+					this.sortModeModelOrder.setSelected(true);
 					break;
-				
+
 				default:
 					throw new IllegalStateException("Unhandled sort mode: " + to);
 			}
-			((BindableGlyph)sortButton.getGraphic()).setIcon(icon);
 
 			if(currentTrace.get() != null) {
 				doSort(currentTrace.get().getStateSpace().getLoadedMachine());
@@ -476,13 +481,13 @@ public final class OperationsView extends VBox {
 	}
 
 	@FXML
-	private void handleDisabledOpsToggle() {
-		this.setShowDisabledOps(disabledOpsToggle.isSelected());
+	private void handleDisabledOpsMenuItem() {
+		this.setShowDisabledOps(!this.showDisabledOps.get());
 	}
 
 	@FXML
-	private void handleUnambiguousToggle() {
-		this.setShowUnambiguous(unambiguousToggle.isSelected());
+	private void handleUnambiguousMenuItem() {
+		this.setShowUnambiguous(!this.showUnambiguous.get());
 	}
 
 	private List<OperationItem> applyFilter(final String filter) {
@@ -513,23 +518,18 @@ public final class OperationsView extends VBox {
 	}
 
 	@FXML
-	private void handleSortButton() {
-		switch (this.getSortMode()) {
-		case MODEL_ORDER:
-			this.setSortMode(OperationsView.SortMode.A_TO_Z);
-			break;
+	private void setSortModeAToZ(){
+		this.setSortMode(OperationsView.SortMode.A_TO_Z);
+	}
 
-		case A_TO_Z:
-			this.setSortMode(OperationsView.SortMode.Z_TO_A);
-			break;
+	@FXML
+	private void setSortModeZToA(){
+		this.setSortMode(OperationsView.SortMode.Z_TO_A);
+	}
 
-		case Z_TO_A:
-			this.setSortMode(OperationsView.SortMode.MODEL_ORDER);
-			break;
-
-		default:
-			throw new IllegalStateException("Unhandled sort mode: " + this.getSortMode());
-		}
+	@FXML
+	private void setSortModeToModelOrder(){
+		this.setSortMode(OperationsView.SortMode.MODEL_ORDER);
 	}
 
 	@FXML

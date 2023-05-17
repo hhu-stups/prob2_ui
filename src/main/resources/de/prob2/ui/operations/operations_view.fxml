@@ -19,6 +19,8 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.CheckMenuItem?>
 <fx:root type="OperationsView" minHeight="200.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -30,30 +32,25 @@
 			</padding>
 			<fx:include source="../sharedviews/navigation_buttons.fxml"/>
 			<Spacer/>
-			<Button fx:id="sortButton" onAction="#handleSortButton">
+
+			<MenuButton fx:id="customizeViewButton">
 				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SORT" bindableFontSize="${fontSize.fontSize + 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%operations.operationsView.tooltips.sort" />
+					<Tooltip text="%operations.operationsView.tooltips.customizeView" />
 				</tooltip>
-			</Button>
-			<ToggleButton fx:id="disabledOpsToggle" onAction="#handleDisabledOpsToggle" selected="true">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="EYE" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%operations.operationsView.tooltips.showDisabled"/>
-				</tooltip>
-			</ToggleButton>
-			<ToggleButton fx:id="unambiguousToggle" onAction="#handleUnambiguousToggle">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_SQUARE" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%operations.operationsView.tooltips.showUnambiguous"/>
-				</tooltip>
-			</ToggleButton>
+				<items>
+					<Menu fx:id="sortMenuItem" text="%operations.operationsView.menu.sort">
+						<CheckMenuItem fx:id="sortModeAToZ" text="A - Z" onAction="#setSortModeAToZ"/>
+						<CheckMenuItem fx:id="sortModeZToA" text="Z - A" onAction="#setSortModeZToA"/>
+						<CheckMenuItem fx:id="sortModeModelOrder" text="%operations.operationsView.menu.sortModelOrder" onAction="#setSortModeToModelOrder"/>
+					</Menu>
+					<MenuItem fx:id="disabledOpsMenuItem" text="%operations.operationsView.menu.hideDisabled" onAction="#handleDisabledOpsMenuItem"/>
+					<MenuItem fx:id="unambiguousMenuItem" text="%operations.operationsView.menu.showUnambiguous" onAction="#handleUnambiguousMenuItem"/>
+				</items>
+			</MenuButton>
+
 			<InterruptIfRunningButton>
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="STOP" bindableFontSize="${fontSize.fontSize + 2}"/>
