@@ -1,5 +1,13 @@
 package de.prob2.ui.project;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.inject.Injector;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import de.prob2.ui.simulation.SimulatorStage;
+import de.prob2.ui.simulation.model.SimulationModel;
+import de.prob2.ui.visb.VisBView;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -61,10 +69,12 @@ public class ProjectManager {
 	
 	private final ObservableList<Path> recentProjects;
 	private final IntegerProperty maximumRecentProjects;
+	private final Injector injector;
 
 	@Inject
 	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager, final TraceManager traceManager,
-						  I18n i18n, Config config, final FileChooserManager fileChooserManager) {
+												I18n i18n, Config config, final FileChooserManager fileChooserManager, final
+												Injector injector) {
 		this.jacksonManager = jacksonManager;
 		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
 		this.currentProject = currentProject;
@@ -72,7 +82,7 @@ public class ProjectManager {
 		this.traceManager = traceManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
-		
+		this.injector = injector;
 		this.recentProjects = FXCollections.observableArrayList();
 		this.maximumRecentProjects = new SimpleIntegerProperty(this, "maximumRecentProjects");
 		
@@ -310,5 +320,74 @@ public class ProjectManager {
 			this.openAutomaticProjectFromMachine(path);
 		}
 	}
-	
+
+	//TODO: make sure, that no duplicated traces are added
+	public void openTrace(Path selected) {
+		if (currentProject.getCurrentMachine() == null) {
+			stageManager.makeAlert(Alert.AlertType.WARNING, "common.alerts.noMachineLoaded.header",
+				"common.alerts.noMachineLoaded.content").show();
+		} else {
+			injector.getInstance(TraceFileHandler.class).addTraceFile(currentProject.getCurrentMachine(), selected);
+		}
+	}
+
+	public void openJson(Path selected) throws IOException {
+		if (currentProject.getCurrentMachine() == null) {
+			stageManager.makeAlert(Alert.AlertType.WARNING, "common.alerts.noMachineLoaded.header",
+				"common.alerts.noMachineLoaded.content").show();
+			return;
+		}
+		JsonType type = JsonType.NONE;
+		try {
+			ObjectMapper objectMapper = new ObjectMapper();
+			JsonNode rootNode = objectMapper.readTree(new File(selected.toUri()));
+			if (rootNode.has("items") || rootNode.has("events")) {
+				type = JsonType.VISB;
+			}
+			if (rootNode.has("activations")) {
+				type = JsonType.SIMB;
+			} else {
+				type = chooseType();
+			}
+		} catch (JsonParseException e){
+			stageManager.makeAlert(Alert.AlertType.ERROR, "project.projectManager.alerts.couldNotOpenJSON.header",
+				"project.projectManager.alerts.couldNotOpenJSON.content").show();
+		}
+
+		switch(type) {
+			case VISB:
+				injector.getInstance(VisBView.class).loadVisBFile(selected);
+				break;
+			case SIMB:
+				injector.getInstance(SimulatorStage.class).show();
+				injector.getInstance(SimulatorStage.class).toFront();
+				currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(currentProject.getLocation().relativize(selected), Collections.emptyList()));
+				break;
+			case NONE:
+				break;
+		}
+	}
+	private enum JsonType { VISB, SIMB, NONE }
+	private JsonType chooseType() {
+		List<ButtonType> buttons = new ArrayList<>();
+		ButtonType visBButton = new ButtonType("VisB");
+		ButtonType simBButton = new ButtonType("SimB");
+		buttons.add(simBButton);
+		buttons.add(visBButton);
+		buttons.add(ButtonType.CANCEL);
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.INFORMATION, buttons,
+			"project.projectManager.alerts.unknownJSONType.header",
+			"project.projectManager.alerts.unknownJSONType.content");
+		alert.initOwner(null);
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get().equals(visBButton)){
+			return JsonType.VISB;
+		} else if (result.get().equals(simBButton)) {
+			return JsonType.SIMB;
+		} else {
+			return JsonType.NONE;
+		}
+	}
+
+
 }

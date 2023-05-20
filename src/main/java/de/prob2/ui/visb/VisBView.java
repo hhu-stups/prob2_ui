@@ -412,6 +412,10 @@ public class VisBView extends BorderPane {
 	 */
 	@FXML
 	public void loadVisBFile() {
+		loadVisBFile(null);
+	}
+
+	public void loadVisBFile(Path path){
 		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
 			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
@@ -419,12 +423,16 @@ public class VisBView extends BorderPane {
 			alert.showAndWait();
 			return;
 		}
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
-		fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
-		);
-		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		if (path == null) {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
+			fileChooser.getExtensionFilters().addAll(
+				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation",
+					"json")
+			);
+			path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS,
+					stageManager.getCurrent());
+		}
 		if(path != null) {
 			clear();
 			visBController.setVisBPath(path);

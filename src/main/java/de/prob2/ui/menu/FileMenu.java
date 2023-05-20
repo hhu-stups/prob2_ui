@@ -144,14 +144,23 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	private void handleOpen() {
-		final Path selected = fileChooserManager.showOpenProjectOrMachineChooser(stageManager.getMainStage());
+	private void handleOpen() throws IOException {
+		final Path selected = fileChooserManager.showOpenAnyFileChooser(stageManager.getMainStage());
 		if (selected == null) {
+			return;
+		}
+
+		if (selected.toString().endsWith(".prob2trace")) {
+			projectManager.openTrace(selected);
+			return;
+		}
+		if (selected.toString().endsWith(".json")){
+			projectManager.openJson(selected);
 			return;
 		}
 		projectManager.openFile(selected);
 	}
-	
+
 	@FXML
 	private void saveMachine() {
 		this.bEditorView.handleSave();
