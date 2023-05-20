@@ -6,7 +6,6 @@ import java.util.List;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -23,7 +22,7 @@ public final class SymbolicAnimationItemHandler {
 
 	private static void handleSequence(SymbolicAnimationItem item, StateSpace stateSpace) {
 		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
-		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(stateSpace, events, new ClassicalB("1=1", FormulaExpand.EXPAND));
+		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(stateSpace, events, new ClassicalB("1=1"));
 		stateSpace.execute(cmd);
 		ConstraintBasedSequenceCheckCommand.ResultType result = cmd.getResult();
 		item.setExample(null);
@@ -50,7 +49,7 @@ public final class SymbolicAnimationItemHandler {
 	}
 
 	private static void findValidState(SymbolicAnimationItem item, StateSpace stateSpace) {
-		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode(), FormulaExpand.EXPAND), true);
+		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode()), true);
 		stateSpace.execute(cmd);
 		FindStateCommand.ResultType result = cmd.getResult();
 		item.setExample(null);

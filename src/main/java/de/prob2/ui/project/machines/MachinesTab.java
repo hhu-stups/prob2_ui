@@ -77,16 +77,17 @@ public class MachinesTab extends Tab {
 		@FXML
 		private void initialize() {
 			this.setOnMouseClicked(event -> {
-				if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
+				Machine machine = this.machineProperty.get();
+				if (machine != null && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 					boolean saved = injector.getInstance(BEditorView.class).savedProperty().get();
 					if(!saved && !confirmSave()) {
 						return;
 					}
-					startMachine(this.machineProperty.get());
+					currentProject.startAnimation(machine);
 				}
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
-			this.startAnimationMenu.setOnAction(e -> startMachine(this.machineProperty.get()));
+			this.startAnimationMenu.setOnAction(e -> currentProject.startAnimation(this.machineProperty.get()));
 			this.startAnimationWithPreferencesMenu.disableProperty().bind(currentProject.preferencesProperty().emptyProperty());
 			this.updatePreferences(currentProject.getPreferences());
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
@@ -223,7 +224,10 @@ public class MachinesTab extends Tab {
 		machinesList.itemsProperty().bind(currentProject.machinesProperty());
 		machinesList.setOnKeyPressed(event -> {
 			if (event.getCode() == KeyCode.ENTER) {
-				startMachine(machinesList.getSelectionModel().getSelectedItem());
+				final Machine machine = machinesList.getSelectionModel().getSelectedItem();
+				if (machine != null) {
+					currentProject.startAnimation(machine);
+				}
 			}
 		});
 		machinesList.getSelectionModel().selectedIndexProperty().addListener((observable, from, to) -> {
@@ -378,7 +382,7 @@ public class MachinesTab extends Tab {
 			return;
 		}
 		currentProject.addMachine(machine);
-		currentProject.startAnimation(machine, Preference.DEFAULT);
+		currentProject.startAnimation(machine);
 	}
 
 	@FXML
@@ -408,13 +412,7 @@ public class MachinesTab extends Tab {
 		}
 		final Machine machine = new Machine(name, "", relative);
 		currentProject.addMachine(machine);
-		currentProject.startAnimation(machine, Preference.DEFAULT);
-	}
-
-	private void startMachine(final Machine machine) {
-		if (machine != null) {
-			currentProject.startAnimation(machine, currentProject.get().getPreference(machine.getLastUsedPreferenceName()));
-		}
+		currentProject.startAnimation(machine);
 	}
 
 	@FXML

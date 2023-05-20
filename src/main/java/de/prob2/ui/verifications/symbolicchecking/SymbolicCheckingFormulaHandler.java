@@ -11,7 +11,6 @@ import de.prob.animator.command.ConstraintBasedRefinementCheckCommand;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.CBCDeadlockChecker;
 import de.prob.check.CBCDeadlockFound;
@@ -159,7 +158,7 @@ public final class SymbolicCheckingFormulaHandler {
 	}
 	
 	private static void handleDeadlock(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
-		IEvalElement constraint = new ClassicalB(item.getCode(), FormulaExpand.EXPAND);
+		IEvalElement constraint = new ClassicalB(item.getCode());
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(stateSpace, constraint);
 		handleFormulaResult(item, stateSpace, checker.call());
 	}

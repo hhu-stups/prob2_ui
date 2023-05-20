@@ -83,8 +83,8 @@
 				<Spacer/>
 			<Button fx:id="zoomInButton" onAction="#zoomIn">
 				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE"
-								   bindableFontSize="${fontSize.fontSize + 4}"/>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_PLUS"
+								   bindableFontSize="${fontSize.fontSize * 1.5}"/>
 				</graphic>
 				<tooltip>
 					<Tooltip text="%visb.menu.view.zoom.in"/>
@@ -92,8 +92,8 @@
 			</Button>
 			<Button fx:id="zoomOutButton" onAction="#zoomOut">
 				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE"
-								   bindableFontSize="${fontSize.fontSize + 4}"/>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_MINUS"
+								   bindableFontSize="${fontSize.fontSize * 1.5}"/>
 				</graphic>
 				<tooltip>
 					<Tooltip text="%visb.menu.view.zoom.out"/>
@@ -102,7 +102,7 @@
 			<MenuButton>
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
-								   bindableFontSize="${fontSize.fontSize + 4}"/>
+								   bindableFontSize="${fontSize.fontSize * 2}"/>
 				</graphic>
 				<tooltip>
 					<Tooltip text="%visb.menu.help"/>

@@ -327,7 +327,7 @@ task jpackage(type: Exec) {
 			"--name", osdetector.os == "linux" ? applicationNameNoSpaces : applicationName,
 			// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
 			"--app-version", project.version.replaceAll(/-SNAPSHOT/, ""),
-			"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2020",
+			"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2023",
 			"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
 			"--license-file", "LICENSE",
 	]

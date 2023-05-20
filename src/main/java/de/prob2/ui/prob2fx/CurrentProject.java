@@ -62,7 +62,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	private final StageManager stageManager;
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
-	private CompletableFuture<?> loadFuture;
 
 	@Inject
 	private CurrentProject(final StageManager stageManager, final Injector injector, final CurrentTrace currentTrace, final Config config) {
@@ -152,7 +151,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(null, null);
 	}
 
-	public void startAnimation(Machine m, Preference p) {
+	public CompletableFuture<?> startAnimation(Machine m, Preference p) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		if (stateSpace != null) {
 			stateSpace.sendInterrupt();
@@ -160,13 +159,18 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(CliTaskExecutor.class).interruptAll();
 		injector.getInstance(BEditorView.class).getErrors().clear();
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
-		loadFuture = machineLoader.loadAsync(m, p.getPreferences());
+		CompletableFuture<?> loadFuture = machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		LTLPatternParser.parseMachine(m);
+		return loadFuture;
 	}
 
-	public void reloadCurrentMachine() {
+	public CompletableFuture<?> startAnimation(Machine m) {
+		return this.startAnimation(m, this.get().getPreference(m.getLastUsedPreferenceName()));
+	}
+
+	public CompletableFuture<?> reloadCurrentMachine() {
 		final Machine machine = this.getCurrentMachine();
 		final Preference pref = this.getCurrentPreference();
 		if (machine == null) {
@@ -175,7 +179,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		if (pref == null) {
 			throw new IllegalStateException("Cannot reload without current preference");
 		}
-		this.startAnimation(machine, pref);
+		return this.startAnimation(machine, pref);
 	}
 
 	public void addMachine(Machine machine) {
@@ -391,9 +395,5 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		} else {
 			return true;
 		}
-	}
-
-	public CompletableFuture<?> getLoadFuture() {
-		return loadFuture;
 	}
 }

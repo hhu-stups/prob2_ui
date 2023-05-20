@@ -28,6 +28,7 @@ Sets:
  {E}         singleton set
  {E,F}       set enumeration
  {x|P}       comprehension set
+ {x•P|E}     Event-B style comprehension set
  POW(S)      power set
  POW1(S)     set of non-empty subsets
  FIN(S)      set of all finite subsets
@@ -100,6 +101,7 @@ Relations:
  (r1||r2)    parallel product {((x,v),(y,w)) | x,y:r1 & v,w:r2}
  prj1(S,T)     projection function (usage prj1(Dom,Ran)(Pair))
  prj2(S,T)     projection function (usage prj2(Dom,Ran)(Pair))
+               prj1(Pair) or prj2(Pair) are also allowed
  closure1(r)   transitive closure
  closure(r)    reflexive & transitive closure
                (equal to id(TYPEOF_r) \/ closure1(r))
@@ -243,6 +245,7 @@ LET and IF-THEN-ELSE:
 ProB allows the following for predicates and expressions:
    IF P THEN E1 ELSE E2 END    conditional for expressions or predicates E1,E2
                                for expressions we also allow ELSIF branches
+                               (but you always need an ELSE branch)
    LET x1,... BE x1=E1 & ... IN E END
 Note: the expression Ei defining xi is allowed to use x1,...,x(i-1) for predicates/expressions.
       By setting the preference ALLOW_COMPLEX_LETS to TRUE, this is also allowed for substitutions.
@@ -339,6 +342,7 @@ There are a few specific definitions which can be used to influence ProB:
   ASSERT_LTL... == "LTL Formula"  	using X,F,G,U,R LTL operators +
                                    Y,O,H,S Past-LTL operators +
                                    atomic propositions: e(OpName), [OpName], {BPredicate}
+  HEURISTIC_FUNCTION == n          in directed model-checking mode nodes with smalles value will be processed first
 The following definitions allow providing a custom state visualization (n can be empty or a number):
   ANIMATION_FUNCTIONn == e           a function (INT*INT) +-> INT or an INT
   ANIMATION_FUNCTION_DEFAULT == e    a function (INT*INT) +-> INT or an INT
@@ -354,16 +358,32 @@ The following definitions allow providing a custom state visualization (n can be
   SET_PREF_TK_CUSTOM_STATE_VIEW_STRING_PADDING == n   additional padding between text in pixels
 The following definitions allow providing a custom state graph (n can be empty or a number):
   CUSTOM_GRAPH_NODESn == e    define a set of nodes to be shown,
-                              nodes can also be pairs (node,colour) or triples (node,shape,colour)
-                              colours are strings of valid Dot/Tk colors (e.g., "maroon" or "red")
-                              shapes are strings of valid Dot shapes (e.g., "rect" or "hexagon")
-  CUSTOM_GRAPH_EDGESn == e    define a relation to be shown
-                              edges can either be pairs (node1,node2) or triples (node1,label,node2)
-                              where label is either a Dot/Tk color or a string or value representing
+                              nodes can also be pairs (Node,Colour), triples (Node,Shape,Colour) or
+                              records or sets of records like
+                              rec(color:Colour, shape:Shape, style:Style, label:Label, value:Node, ...)
+                              Colours are strings of valid Dot/Tk colors (e.g., "maroon" or "red")
+                              Shapes are strings of valid Dot shapes (e.g., "rect" or "hexagon"), and
+                              Styles are valid Dot shape styles (e.g., "rounded" or "solid" or "dashed")
+  CUSTOM_GRAPH_EDGESn == e    define a relation to be shown as a graph
+                              edges can either be pairs (node1,node2) or triples (node1,Label,node2)
+                              where Label is either a Dot/Tk color or a string or value representing
                               the label to be used for the edges
   In both cases e can also be a record which defines default dot attributes like
-  color, shape, style and description, e.g., rec(color:"red", style:"dotted", edges:Expression)
-  VISB_JSON_FILE == "PATH to .json"  a path to a default VisB JSON file for visualisation
+  color, shape, style and description, e.g.:
+     CUSTOM_GRAPH_NODES == rec(color:"blue", shape:"rect", nodes:e);
+     CUSTOM_GRAPH_EDGES == rec(color:"red", style:"dotted", edges:e)
+  You can now also use a single CUSTOM_GRAPH definition of a record with global graph attributes
+  (like rankdir or layout) and optionally with edges and nodes attributes (replacing
+   CUSTOM_GRAPH_EDGES and CUSTOM_GRAPH_NODES respectively), e.g.:
+    CUSTOM_GRAPH == rec(layout:"circo", nodes:mynodes, edges:myedges)
+These DEFINITIONS affect VisB:
+  VISB_JSON_FILE == "PATH to .json"  a path to a default VisB JSON file for visualisation; 
+                                     if it is "" an empty SVG will be created
+  VISB_SVG_OBJECTSn == define a record or set of records for creating new SVG objects
+  VISB_SVG_UPDATESn == define a record or set of records containing updates of SVG objects
+  VISB_SVG_HOVERSn == define a record or set of records for VisB hover functions
+  VISB_SVG_BOX == record with dimensions (height, width) of a default empty SVG
+  VISB_SVG_CONTENTS == defines a string to be included into a created empty SVG file
 
 Comments and Pragmas:
 --------------------
@@ -431,6 +451,7 @@ Here are the main differences with Atelier B:
     (e.g., IF x<0 THEN -x ELSE x END or LET x BE x=f(y) IN x+x END)
   - ProB's type inference is stronger than Atelier-B's, much less typing predicates
     are required
+  - You can apply prj1 and prj2 without providing the type arguments, e.g., prj2(prj1(1|->2|->3))
   - ProB accepts operations with parameters but without pre-conditions
   - ProB allows identifiers consisting of a single character and identifiers in single backquotes (`id`)
   - ProB allows to use <> for the empty sequence (but this use is deprecated)
@@ -440,6 +461,7 @@ Here are the main differences with Atelier B:
  (If you discover more differences, please let us know!)
   - ProB allows btrue and bfalse as predicates in B machines
   - ProB allows to use the Event-B relation operators <<->, <->>, <<->>
+  - ProB allows set comprehensions with an extra expression like {x•x:1..10|x*x}.
 
 See also our Wiki for documentation:
   http://www.stups.hhu.de/ProB/index.php5/Current_Limitations

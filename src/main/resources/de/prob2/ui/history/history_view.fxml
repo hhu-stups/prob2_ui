@@ -25,7 +25,6 @@
 		</padding>
 		<Label fx:id="historySize"></Label>
 		<Spacer/>
-		<TraceReplayMenuButton/>
 		<MenuButton fx:id="saveTraceButton">
 			<graphic>
 				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />

@@ -15,7 +15,7 @@
 			<StackPane>
 				<Label fx:id="placeholderLabel" text="%common.noModelLoaded"/>
 				<VBox fx:id="errorsBox" visible="false">
-					<VBox spacing="5">
+					<VBox spacing="5" VBox.vgrow="NEVER">
 						<padding>
 							<Insets topRightBottomLeft="5"/>
 						</padding>
@@ -23,7 +23,7 @@
 						<Label fx:id="deadlockLabel" styleClass="status-label"/>
 						<Label fx:id="otherStateErrorsLabel" styleClass="status-label"/>
 					</VBox>
-					<SplitPane fx:id="otherStateErrorsPane">
+					<SplitPane fx:id="otherStateErrorsPane" VBox.vgrow="ALWAYS">
 						<ListView fx:id="errorsList"/>
 						<TextArea fx:id="descriptionTextArea" editable="false" wrapText="true"/>
 					</SplitPane>
