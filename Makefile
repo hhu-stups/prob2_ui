@@ -1,8 +1,9 @@
 PROB2_HOME=$(HOME)/git_root/prob_prolog/ 
 LOCAL=--include-build ../parsers_prob/
+LOCAL2= $(LOCAL) --include-build ../sablecc-stups/
 
 run-with-my-probcli:
-	./gradlew -PprobHome=$(PROB2_HOME) $(LOCAL) run
+	./gradlew -PprobHome=$(PROB2_HOME) $(LOCAL2) run
 offline:
 	./gradlew -PprobHome=$(PROB2_HOME) $(LOCAL) run --offline
 run:
