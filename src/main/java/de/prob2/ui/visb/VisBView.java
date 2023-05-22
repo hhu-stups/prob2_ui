@@ -188,6 +188,20 @@ public class VisBView extends BorderPane {
 				updateInfo(i18n.translate("visb.infobox.visualisation.svg.loaded"));
 				this.runWhenLoaded(() -> {
 					final JSObject window = this.getJSWindow();
+
+					// WebView doesn't have a proper API for detecting e. g. JavaScript syntax errors,
+					// so as a workaround our JavaScript code sets a marker variable that we can check here.
+					// If the marker variable doesn't have the expected value,
+					// assume that the JavaScript code didn't load properly,
+					// and disable VisB to avoid exceptions from code that tries to call the (nonexistant) JavaScript functions.
+					Object loadedMarker = window.getMember("visBJavaScriptLoaded");
+					if (!"VisB JavaScript loaded".equals(loadedMarker)) {
+						LOGGER.error("VisB JavaScript failed to load (marker variable has incorrect value '{}')", loadedMarker);
+						this.clear();
+						stageManager.makeAlert(Alert.AlertType.ERROR, "", "visb.exception.javaScriptFailedToLoad").show();
+						return;
+					}
+
 					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
 					updateDynamicSVGObjects(to);
 					for (final VisBEvent event : to.getEvents()) {
