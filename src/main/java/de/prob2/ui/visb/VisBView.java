@@ -235,7 +235,7 @@ public class VisBView extends BorderPane {
 			// Uncomment to make WebView console errors, warnings, etc. visible in the log.
 			// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
 			// (see the corresponding commented out line in build.gradle).
-			//com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("Console message from WebView: {}:{}: {}", sourceId, lineNumber, message));
+			// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
 		});
 
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
