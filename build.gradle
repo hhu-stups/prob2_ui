@@ -67,7 +67,10 @@ exports += [
 	"javafx.graphics/com.sun.glass.ui",
 	"javafx.graphics/com.sun.javafx.menu",
 	"javafx.graphics/com.sun.javafx.tk",
-	"javafx.base/com.sun.javafx.collections"
+	"javafx.base/com.sun.javafx.collections",
+	// Uncomment when getting WebView console messages with com.sun.javafx.webkit.WebConsoleListener
+	// (see the corresponding commented out code in de.prob2.ui.visb.VisBView).
+	//"javafx.web/com.sun.javafx.webkit",
 ]
 opens += [
 	"javafx.graphics/com.sun.glass.ui.mac",
