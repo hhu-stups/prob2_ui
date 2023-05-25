@@ -83,13 +83,13 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 })
 public class Machine {
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus(MachineCheckingStatus.CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus());
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> temporalStatus = new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus(MachineCheckingStatus.CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> temporalStatus = new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus());
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus(MachineCheckingStatus.CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus());
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus(MachineCheckingStatus.CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus());
 	private final StringProperty name;
 	private final StringProperty description;
 	private final Path location;
