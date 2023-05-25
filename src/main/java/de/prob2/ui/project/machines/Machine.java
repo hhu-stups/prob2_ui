@@ -613,16 +613,20 @@ public class Machine {
 
 	@JsonProperty("dotVisualizationItems")
 	public void setDotVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> dotVisualizationItems) {
+		this.dotVisualizationItems.setValue(convertToObservable(dotVisualizationItems));
+	}
+
+	private ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> convertToObservable(Map<String, List<DynamicCommandFormulaItem>> VisualizationItems) {
 		ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> map = FXCollections.observableHashMap();
-		for(String key : dotVisualizationItems.keySet()) {
+		for(String key : VisualizationItems.keySet()) {
 			ObservableList<DynamicCommandFormulaItem> collections = FXCollections.observableArrayList();
-			collections.addAll(dotVisualizationItems.get(key));
+			collections.addAll(VisualizationItems.get(key));
 			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
 			map.put(key, listProperty);
 			listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
 			this.addValidationTaskListener(listProperty);
 		}
-		this.dotVisualizationItems.setValue(map);
+		return map;
 	}
 
 	public void addDotVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
@@ -658,16 +662,7 @@ public class Machine {
 
 	@JsonProperty("tableVisualizationItems")
 	public void setTableVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> tableVisualizationItems) {
-		ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> map = FXCollections.observableHashMap();
-		for(String key : tableVisualizationItems.keySet()) {
-			ObservableList<DynamicCommandFormulaItem> collections = FXCollections.observableArrayList();
-			collections.addAll(tableVisualizationItems.get(key));
-			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
-			map.put(key, listProperty);
-			listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
-			this.addValidationTaskListener(listProperty);
-		}
-		this.tableVisualizationItems.setValue(map);
+		this.tableVisualizationItems.setValue(convertToObservable(tableVisualizationItems));
 	}
 
 	public void addTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
