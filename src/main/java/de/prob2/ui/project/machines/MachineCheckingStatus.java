@@ -21,8 +21,8 @@ public class MachineCheckingStatus {
 		this.numberTotal = numberTotal;
 	}
 
-	public MachineCheckingStatus(CheckingStatus status) {
-		this.status = status;
+	public MachineCheckingStatus() {
+		this.status = CheckingStatus.NONE;
 		this.numberSuccess = 0;
 		this.numberTotal = 0;
 	}
