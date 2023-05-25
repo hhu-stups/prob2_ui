@@ -10,6 +10,7 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 
+import de.prob2.ui.project.machines.MachineCheckingStatus;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -23,7 +24,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 public class MachineTableView extends TableView<Machine> {
 	private final I18n i18n;
 
-	private static final class StatusIconCell extends TableCell<Machine, Machine.MachineCheckingStatus> {
+	private static final class StatusIconCell extends TableCell<Machine, MachineCheckingStatus> {
 		private final I18n i18n;
 
 		private StatusIconCell(I18n i18n) {
@@ -38,7 +39,7 @@ public class MachineTableView extends TableView<Machine> {
 		}
 
 		@Override
-		protected void updateItem(final Machine.MachineCheckingStatus item, final boolean empty) {
+		protected void updateItem(final MachineCheckingStatus item, final boolean empty) {
 			super.updateItem(item, empty);
 
 			final BindableGlyph graphic = (BindableGlyph) this.getGraphic();
@@ -50,7 +51,7 @@ public class MachineTableView extends TableView<Machine> {
 				graphic.setVisible(true);
 				final String styleClass;
 				final FontAwesome.Glyph icon;
-				final Machine.CheckingStatus status = item.getStatus();
+				final MachineCheckingStatus.CheckingStatus status = item.getStatus();
 				icon = switch (status) {
 					case UNKNOWN -> {
 						styleClass = "unknown";
@@ -72,19 +73,19 @@ public class MachineTableView extends TableView<Machine> {
 				};
 				graphic.getStyleClass().add(styleClass);
 				graphic.setIcon(icon);
-				this.setText(status == Machine.CheckingStatus.NONE ? "" : i18n.format("({0,number,integer}/{1,number,integer})", item.getNumberSuccess(), item.getNumberTotal()));
+				this.setText(status == MachineCheckingStatus.CheckingStatus.NONE ? "" : i18n.format("({0,number,integer}/{1,number,integer})", item.getNumberSuccess(), item.getNumberTotal()));
 			}
 		}
 	}
 
 	@FXML
-	private TableColumn<Machine, Machine.MachineCheckingStatus> machineTraceReplayColumn;
+	private TableColumn<Machine, MachineCheckingStatus> machineTraceReplayColumn;
 	@FXML
-	private TableColumn<Machine, Machine.MachineCheckingStatus> machineLTLColumn;
+	private TableColumn<Machine, MachineCheckingStatus> machineLTLColumn;
 	@FXML
-	private TableColumn<Machine, Machine.MachineCheckingStatus> machineSymbolicColumn;
+	private TableColumn<Machine, MachineCheckingStatus> machineSymbolicColumn;
 	@FXML
-	private TableColumn<Machine, Machine.MachineCheckingStatus> machineModelcheckColumn;
+	private TableColumn<Machine, MachineCheckingStatus> machineModelcheckColumn;
 	@FXML
 	private TableColumn<Machine, String> machineNameColumn;
 

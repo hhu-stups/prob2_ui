@@ -80,48 +80,14 @@ import javafx.collections.ObservableMap;
 	"tableVisualizationItems"
 })
 public class Machine {
-	public enum CheckingStatus {
-		UNKNOWN, SUCCESSFUL, FAILED, NONE
-	}
-
-	public static class MachineCheckingStatus {
-		private final CheckingStatus status;
-		private final int numberSuccess;
-		private final int numberTotal;
-
-		public MachineCheckingStatus(CheckingStatus status, int numberSuccess, int numberTotal) {
-			this.status = status;
-			this.numberSuccess = numberSuccess;
-			this.numberTotal = numberTotal;
-		}
-
-		public MachineCheckingStatus(CheckingStatus status) {
-			this.status = status;
-			this.numberSuccess = 0;
-			this.numberTotal = 0;
-		}
-
-		public CheckingStatus getStatus() {
-			return status;
-		}
-
-		public int getNumberSuccess() {
-			return numberSuccess;
-		}
-
-		public int getNumberTotal() {
-			return numberTotal;
-		}
-	}
-	
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus(CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus(MachineCheckingStatus.CheckingStatus.NONE));
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> temporalStatus = new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus(CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> temporalStatus = new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus(MachineCheckingStatus.CheckingStatus.NONE));
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus(CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus(MachineCheckingStatus.CheckingStatus.NONE));
 	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus(CheckingStatus.NONE));
+	private final ObjectProperty<MachineCheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus(MachineCheckingStatus.CheckingStatus.NONE));
 	private final StringProperty name;
 	private final StringProperty description;
 	private final Path location;
@@ -202,7 +168,7 @@ public class Machine {
 		this.initListeners();
 	}
 	
-	private static Machine.CheckingStatus combineCheckingStatus(final List<? extends IExecutableItem> items) {
+	private MachineCheckingStatus.CheckingStatus combineCheckingStatus(final List<? extends IExecutableItem> items) {
 		boolean anyEnabled = false;
 		boolean anyUnknown = false;
 		for(IExecutableItem item : items) {
@@ -211,16 +177,16 @@ public class Machine {
 			}
 			anyEnabled = true;
 			if(item.getChecked() == Checked.FAIL) {
-				return Machine.CheckingStatus.FAILED;
+				return MachineCheckingStatus.CheckingStatus.FAILED;
 			} else if (item.getChecked() == Checked.NOT_CHECKED) {
 				anyUnknown = true;
 			}
 		}
-		return anyEnabled ? (anyUnknown? CheckingStatus.UNKNOWN :  Machine.CheckingStatus.SUCCESSFUL) : Machine.CheckingStatus.NONE;
+		return anyEnabled ? (anyUnknown? MachineCheckingStatus.CheckingStatus.UNKNOWN :  MachineCheckingStatus.CheckingStatus.SUCCESSFUL) : MachineCheckingStatus.CheckingStatus.NONE;
 	}
 
-	private static Machine.MachineCheckingStatus combineMachineCheckingStatus(final List<? extends IExecutableItem> items) {
-		CheckingStatus status = combineCheckingStatus(items);
+	private MachineCheckingStatus combineMachineCheckingStatus(final List<? extends IExecutableItem> items) {
+		MachineCheckingStatus.CheckingStatus status = combineCheckingStatus(items);
 		int numberSuccess = (int) items.stream()
 				.filter(item -> item.getChecked() == Checked.SUCCESS && item.selected())
 				.count();
@@ -230,7 +196,7 @@ public class Machine {
 		return new MachineCheckingStatus(status, numberSuccess, numberTotal);
 	}
 	
-	public static void addCheckingStatusListener(final ReadOnlyListProperty<? extends IExecutableItem> items, final ObjectProperty<Machine.MachineCheckingStatus> statusProperty) {
+	public void addCheckingStatusListener(final ReadOnlyListProperty<? extends IExecutableItem> items, final ObjectProperty<MachineCheckingStatus> statusProperty) {
 		final InvalidationListener updateListener = o -> Platform.runLater(() -> statusProperty.set(combineMachineCheckingStatus(items)));
 		items.addListener((ListChangeListener<IExecutableItem>)change -> {
 			while (change.next()) {
