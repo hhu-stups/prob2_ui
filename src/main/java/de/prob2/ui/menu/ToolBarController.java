@@ -93,26 +93,8 @@ public class ToolBarController {
 	}
 
 	@FXML
-	private void handleOpen() {
-		final Path selected = fileChooserManager.showOpenAnythingChooser(stageManager.getMainStage());
-		if (selected == null) {
-			return;
-		}
-
-		if (selected.toString().endsWith(".prob2trace")) {
-			handleTrace(selected);
-			return;
-		}
-		projectManager.openFile(selected);
+	private void handleOpen() throws IOException {
+		this.injector.getInstance(FileMenu.class).handleOpen();
 	}
 
-	//TODO: make sure, that no duplicated traces are added
-	private void handleTrace(Path selected) {
-		if (currentProject.getCurrentMachine() == null) {
-			stageManager.makeAlert(Alert.AlertType.WARNING, "common.alerts.noMachineloaded.header",
-				"common.alerts.noMachineloaded.content").show();
-		} else {
-			traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), selected);
-		}
-	}
 }
