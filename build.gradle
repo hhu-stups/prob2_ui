@@ -17,17 +17,17 @@ final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 if (project != rootProject) {
 	throw new GradleException(
-			"""\
-			The prob2-ui Gradle build cannot be included as a subproject.
-			If you are writing a plugin and need to reference the prob2-ui code as a dependency, replace the include statement in your settings.gradle with an includeBuild statement:
-			
-				includeBuild "${rootProject.relativePath(project.projectDir)}"
-			
-			And replace the project(":prob2-ui") dependency in your build.gradle with a compileOnly dependency:
-			
-				dependencies {
-					compileOnly group: "${project.group}", name: "${project.name}", version: "${project.version}"
-				}
+		"""\
+		The prob2-ui Gradle build cannot be included as a subproject.
+		If you are writing a plugin and need to reference the prob2-ui code as a dependency, replace the include statement in your settings.gradle with an includeBuild statement:
+		
+			includeBuild "${rootProject.relativePath(project.projectDir)}"
+		
+		And replace the project(":prob2-ui") dependency in your build.gradle with a compileOnly dependency:
+		
+			dependencies {
+				compileOnly group: "${project.group}", name: "${project.name}", version: "${project.version}"
+			}
 		""".stripIndent()
 	)
 }
@@ -63,25 +63,28 @@ def opens = []
 
 // Required by centerdevice-nsmenufx (as of version 2.1.6; see https://github.com/codecentric/NSMenuFX/issues/29)
 exports += [
-		"javafx.controls/com.sun.javafx.scene.control",
-		"javafx.graphics/com.sun.glass.ui",
-		"javafx.graphics/com.sun.javafx.menu",
-		"javafx.graphics/com.sun.javafx.tk",
-		"javafx.base/com.sun.javafx.collections"
+	"javafx.controls/com.sun.javafx.scene.control",
+	"javafx.graphics/com.sun.glass.ui",
+	"javafx.graphics/com.sun.javafx.menu",
+	"javafx.graphics/com.sun.javafx.tk",
+	"javafx.base/com.sun.javafx.collections",
+	// Uncomment when getting WebView console messages with com.sun.javafx.webkit.WebConsoleListener
+	// (see the corresponding commented out code in de.prob2.ui.visb.VisBView).
+	//"javafx.web/com.sun.javafx.webkit",
 ]
 opens += [
-		"javafx.graphics/com.sun.glass.ui.mac",
-		"javafx.graphics/com.sun.javafx.tk.quantum",
+	"javafx.graphics/com.sun.glass.ui.mac",
+	"javafx.graphics/com.sun.javafx.tk.quantum",
 ]
 
 // Required by controlsfx, because we are still using the Java 8-compatible version.
 // This has been fixed as of ControlsFX 11.0.0 (see https://github.com/controlsfx/controlsfx/issues/1100), but that release is only compatible with Java 11.
 exports += [
-		"javafx.graphics/com.sun.javafx.css",
+	"javafx.graphics/com.sun.javafx.css",
 ]
 
 exports += [
-		"javafx.base/com.sun.javafx.event",
+	"javafx.base/com.sun.javafx.event",
 ]
 
 application {
@@ -149,13 +152,13 @@ if (!project.hasProperty("javafxVersion")) {
 final javafxMajorVersion = javafxVersion.split(/\D/, 2)[0]
 
 final javafxModules = [
-		"javafx.base",
-		"javafx.controls",
-		"javafx.fxml",
-		"javafx.graphics",
-		"javafx.media",
-		"javafx.swing",
-		"javafx.web",
+	"javafx.base",
+	"javafx.controls",
+	"javafx.fxml",
+	"javafx.graphics",
+	"javafx.media",
+	"javafx.swing",
+	"javafx.web",
 ]
 
 if (JavaVersion.current().java11Compatible) {
@@ -172,14 +175,13 @@ if (JavaVersion.current().java11Compatible) {
 	}
 }
 
-eclipse.classpath.file.whenMerged {
-	classpath ->
-		classpath.entries.findResult { entry ->
-			if (entry.kind == 'con' && entry.path.contains('org.eclipse.jdt.launching.JRE_CONTAINER')) {
-				entry.accessRules.add(new AccessRule('accessible', 'javafx/**'))
-				entry.accessRules.add(new AccessRule('accessible', 'netscape/**'))
-			}
+eclipse.classpath.file.whenMerged {classpath ->
+	classpath.entries.findResult { entry ->
+		if (entry.kind == 'con' && entry.path.contains('org.eclipse.jdt.launching.JRE_CONTAINER')) {
+			entry.accessRules.add(new AccessRule('accessible', 'javafx/**'))
+			entry.accessRules.add(new AccessRule('accessible', 'netscape/**'))
 		}
+	}
 }
 
 final generatedResourcesDir = new File(project.buildDir, "generated-src/main/resources")
@@ -212,13 +214,13 @@ task createHelp {
 			exec {
 				executable = "pandoc"
 				args = [
-						"--from=gfm",
-						"--to=html",
-						"--metadata=title=${title}",
-						"--standalone",
-						"--lua-filter=${helpFilterLuaScript}",
-						"--output=${outputFile}",
-						"${inputFile}",
+					"--from=gfm",
+					"--to=html",
+					"--metadata=title=${title}",
+					"--standalone",
+					"--lua-filter=${helpFilterLuaScript}",
+					"--output=${outputFile}",
+					"${inputFile}",
 				]
 			}
 		}
@@ -244,16 +246,16 @@ processResources {
 jar {
 	manifest {
 		attributes([
-				"Add-Exports": exports.join(" "),
-				"Add-Opens": opens.join(" "),
+			"Add-Exports": exports.join(" "),
+			"Add-Opens": opens.join(" "),
 		])
 	}
 }
 
 final probBinariesByOs = [
-		"windows": "win64",
-		"osx": "macos",
-		"linux": "linux64",
+	"windows": "win64",
+	"osx": "macos",
+	"linux": "linux64",
 ].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
 
 shadowJar {
@@ -271,15 +273,15 @@ task multiPlatformShadowJar(type: ShadowJar) {
 	manifest {
 		inheritFrom(jar.manifest)
 		attributes([
-				"Main-Class": application.mainClass.get(),
-				"Multi-Release": "true",
+			"Main-Class": application.mainClass.get(),
+			"Multi-Release": "true",
 		])
 	}
 
 	archiveClassifier = "multi"
 	from(sourceSets.main.output)
 	configurations = [
-			project.configurations.runtimeClasspath,
+		project.configurations.runtimeClasspath,
 	]
 
 	// Java 11 and newer normally don't have JavaFX preinstalled,
@@ -318,52 +320,52 @@ task jpackage(type: Exec) {
 	final shadowJarFile = shadowJar.archiveFile.get().asFile
 	executable = "jpackage"
 	args = [
-			"--verbose",
-			"--dest", project.distsDirectory.get().asFile,
-			"--input", shadowJarFile.parent,
-			"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
-			'--main-class', application.mainClass.get(),
-			// When targetting Linux, jpackage doesn't handle spaces in the application name correctly.
-			"--name", osdetector.os == "linux" ? applicationNameNoSpaces : applicationName,
-			// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
-			"--app-version", project.version.replaceAll(/-SNAPSHOT/, ""),
-			"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2023",
-			"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
-			"--license-file", "LICENSE",
+		"--verbose",
+		"--dest", project.distsDirectory.get().asFile,
+		"--input", shadowJarFile.parent,
+		"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
+		'--main-class', application.mainClass.get(),
+		// When targetting Linux, jpackage doesn't handle spaces in the application name correctly.
+		"--name", osdetector.os == "linux" ? applicationNameNoSpaces : applicationName,
+		// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
+		"--app-version", project.version.replaceAll(/-SNAPSHOT/, ""),
+		"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2023",
+		"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
+		"--license-file", "LICENSE",
 	]
 
 	if (osdetector.os == "windows") {
 		args += [
-				"--icon", new File(jpackageIconsDir, "prob2-ui.ico"),
-				"--win-dir-chooser",
-				"--win-menu",
-				"--win-menu-group", applicationName,
-				"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
-				// The Windows application by default runs without a console,
-				// which makes it impossible to see stdout/stderr output
-				// (even when launched from an existing console window).
-				// There is an option to make the launcher a console application,
-				// which make stdout/stderr visible,
-				// but this also makes a console window appear when the application is launched from the GUI,
-				// which is usually not the desired behavior.
-				// So we leave the main launcher as a non-console application
-				// and add an alternative console launcher that can be used to see stdout/stderr output.
-				"--add-launcher", "${applicationName} (with console)=" + new File(jpackageLaunchersDir, "windows_console.properties"),
+			"--icon", new File(jpackageIconsDir, "prob2-ui.ico"),
+			"--win-dir-chooser",
+			"--win-menu",
+			"--win-menu-group", applicationName,
+			"--win-upgrade-uuid", "9e004b84-41c5-4c95-8aca-32ac44063ef9",
+			// The Windows application by default runs without a console,
+			// which makes it impossible to see stdout/stderr output
+			// (even when launched from an existing console window).
+			// There is an option to make the launcher a console application,
+			// which make stdout/stderr visible,
+			// but this also makes a console window appear when the application is launched from the GUI,
+			// which is usually not the desired behavior.
+			// So we leave the main launcher as a non-console application
+			// and add an alternative console launcher that can be used to see stdout/stderr output.
+			"--add-launcher", "${applicationName} (with console)=" + new File(jpackageLaunchersDir, "windows_console.properties"),
 		]
 	} else if (osdetector.os == "osx") {
 		args += [
-				//"--mac-sign", "--mac-signing-key-user-name", "Michael Leuschel (794LFG5T52)",
-				//"--mac-package-signing-prefix", "de.prob2.ui",
-				"--icon", new File(jpackageIconsDir, "prob2-ui.icns")
+			//"--mac-sign", "--mac-signing-key-user-name", "Michael Leuschel (794LFG5T52)",
+			//"--mac-package-signing-prefix", "de.prob2.ui",
+			"--icon", new File(jpackageIconsDir, "prob2-ui.icns")
 		]
 	} else if (osdetector.os == "linux") {
 		args += [
-				"--icon", new File(jpackageIconsDir, "prob2-ui.png"),
-				// This corresponds to the Categories key in the generated .desktop file.
-				// For a list of standard categories, see:
-				// https://specifications.freedesktop.org/menu-spec/latest/apa.html
-				"--linux-menu-group", "ComputerScience;Development;IDE;Java;Science;",
-				"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
+			"--icon", new File(jpackageIconsDir, "prob2-ui.png"),
+			// This corresponds to the Categories key in the generated .desktop file.
+			// For a list of standard categories, see:
+			// https://specifications.freedesktop.org/menu-spec/latest/apa.html
+			"--linux-menu-group", "ComputerScience;Development;IDE;Java;Science;",
+			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
 		]
 	} else {
 		throw new GradleException("Unsupported OS: ${osdetector.os} (expected windows, osx, or linux)")

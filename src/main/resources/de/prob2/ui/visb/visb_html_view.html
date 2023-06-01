@@ -23,7 +23,7 @@
 		}
 
 		function appendErrorMessage(message) {
-			console.log(message);
+			console.error(message);
 			const entry = document.createElement("li");
 			entry.appendChild(document.createTextNode(message));
 			getErrorMessagesNode().appendChild(entry);
@@ -52,6 +52,7 @@
 		function getOrCreateSvgElement(id, object) {
 			const foundElement = document.getElementById(id);
 			if (foundElement === null) {
+			    // console.log("Create SVG id " + id);
 				const createdElement = document.createElementNS("http://www.w3.org/2000/svg", object);
 				createdElement.setAttribute("id", id);
 				createdElement.setAttribute("__created_by_VisB__", "true");
@@ -96,6 +97,7 @@
 		}
 
 		function changeAttribute(id, attribute, value){
+		    // console.log("changeAttribute: " + id + "." + attribute + " = "+value);
 			runWhenLoaded(function(){
 				const obj = checkSvgId(id, "attribute " + attribute);
 				if (obj == null) {
@@ -163,6 +165,8 @@
 			notInitialisedShown = false;
 		}
 
+		// This marker variable is checked by VisBView to verify that the JavaScript code loaded correctly.
+		window.visBJavaScriptLoaded = "VisB JavaScript loaded";
 	</script>
 	</head>
 

@@ -188,6 +188,20 @@ public class VisBView extends BorderPane {
 				updateInfo(i18n.translate("visb.infobox.visualisation.svg.loaded"));
 				this.runWhenLoaded(() -> {
 					final JSObject window = this.getJSWindow();
+
+					// WebView doesn't have a proper API for detecting e. g. JavaScript syntax errors,
+					// so as a workaround our JavaScript code sets a marker variable that we can check here.
+					// If the marker variable doesn't have the expected value,
+					// assume that the JavaScript code didn't load properly,
+					// and disable VisB to avoid exceptions from code that tries to call the (nonexistant) JavaScript functions.
+					Object loadedMarker = window.getMember("visBJavaScriptLoaded");
+					if (!"VisB JavaScript loaded".equals(loadedMarker)) {
+						LOGGER.error("VisB JavaScript failed to load (marker variable has incorrect value '{}')", loadedMarker);
+						this.clear();
+						stageManager.makeAlert(Alert.AlertType.ERROR, "", "visb.exception.javaScriptFailedToLoad").show();
+						return;
+					}
+
 					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
 					updateDynamicSVGObjects(to);
 					for (final VisBEvent event : to.getEvents()) {
@@ -232,6 +246,10 @@ public class VisBView extends BorderPane {
 			visBListener.changed(null, null, visBController.getVisBVisualisation());
 			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
 
+			// Uncomment to make WebView console errors, warnings, etc. visible in the log.
+			// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
+			// (see the corresponding commented out line in build.gradle).
+			// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
 		});
 
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
@@ -412,6 +430,10 @@ public class VisBView extends BorderPane {
 	 */
 	@FXML
 	public void loadVisBFile() {
+		loadVisBFile(null);
+	}
+
+	public void loadVisBFile(Path path){
 		if(currentProject.getCurrentMachine() == null){
 			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
 			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
@@ -419,12 +441,16 @@ public class VisBView extends BorderPane {
 			alert.showAndWait();
 			return;
 		}
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
-		fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
-		);
-		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		if (path == null) {
+			FileChooser fileChooser = new FileChooser();
+			fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
+			fileChooser.getExtensionFilters().addAll(
+				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation",
+					"json")
+			);
+			path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS,
+					stageManager.getCurrent());
+		}
 		if(path != null) {
 			clear();
 			visBController.setVisBPath(path);

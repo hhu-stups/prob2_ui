@@ -127,8 +127,8 @@ public class ReplayedTraceStatusAlert extends Alert {
 		if (traceFromReplayed != null) {
 			// start cli instantly on another thread, while doing IO on this thread
 			future = cliExecutor.submit(() -> OperationItem.forTransitions(
-					traceFromReplayed.getStateSpace(),
-					traceFromReplayed.getTransitionList()
+				traceFromReplayed.getStateSpace(),
+				traceFromReplayed.getTransitionList()
 			));
 		} else {
 			future = null;
@@ -137,18 +137,15 @@ public class ReplayedTraceStatusAlert extends Alert {
 		// always load newest trace file from disk
 		TraceJsonFile fileTrace = Objects.requireNonNull(replayTrace.load(), "traceJsonFile");
 
-		ObservableList<ReplayedTraceRow> items = FXCollections.observableArrayList();
-
 		int transitionCount = fileTrace.getTransitionList().size();
-		if (traceFromReplayed != null) {
-			transitionCount = Math.min(transitionCount, traceFromReplayed.getTransitionList().size());
-		}
 		if (traceFromReplayed != null) {
 			transitionCount = Math.min(transitionCount, traceFromReplayed.getTransitionList().size());
 		}
 		if (replayedTrace != null) {
 			transitionCount = Math.min(transitionCount, Math.min(replayedTrace.getTransitionReplayPrecisions().size(), replayedTrace.getTransitionErrorMessages().size()));
 		}
+
+		ObservableList<ReplayedTraceRow> items = FXCollections.observableArrayList();
 
 		for (int i = 0; i < transitionCount; i++) {
 			PersistentTransition fileTransitionObj = fileTrace.getTransitionList().get(i);
@@ -162,12 +159,12 @@ public class ReplayedTraceStatusAlert extends Alert {
 				fileTransition = Transition.prettifyName(fileTransitionObj.getOperationName());
 
 				String args = Stream.concat(
-						fileTransitionObj.getParameters().entrySet().stream()
-								.map(e -> e.getKey() + "=" + e.getValue()),
-						Transition.isArtificialTransitionName(fileTransitionObj.getOperationName()) ?
-								fileTransitionObj.getDestinationStateVariables().entrySet().stream()
-										.map(e -> e.getKey() + ":=" + e.getValue()) :
-								Stream.empty()
+					fileTransitionObj.getParameters().entrySet().stream()
+						.map(e -> e.getKey() + "=" + e.getValue()),
+					Transition.isArtificialTransitionName(fileTransitionObj.getOperationName()) ?
+						fileTransitionObj.getDestinationStateVariables().entrySet().stream()
+							.map(e -> e.getKey() + ":=" + e.getValue()) :
+						Stream.empty()
 				).collect(Collectors.joining(", "));
 
 				if (!args.isEmpty()) {
@@ -193,8 +190,8 @@ public class ReplayedTraceStatusAlert extends Alert {
 
 			Collection<String> styleClasses;
 			if (
-					(transitionReplayPrecision != null && transitionReplayPrecision != TransitionReplayPrecision.PRECISE)
-							|| (transitionErrorMessages != null && !transitionErrorMessages.isEmpty())
+				(transitionReplayPrecision != null && transitionReplayPrecision != TransitionReplayPrecision.PRECISE)
+					|| (transitionErrorMessages != null && !transitionErrorMessages.isEmpty())
 			) {
 				styleClasses = Collections.singletonList("FAULTY");
 			} else {

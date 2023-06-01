@@ -281,11 +281,15 @@ public class FileChooserManager {
 			allExtensionPatterns.addAll(this.machineExtensionPatterns);
 			fileChooser.getExtensionFilters().addAll(this.machineExtensionFilters);
 		}
-
 		if (traces) {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + TraceFileHandler.TRACE_FILE_EXTENSION);
 			fileChooser.getExtensionFilters().addAll(this.getProB2TraceFilter());
 		}
+		if(visualisations) {
+			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + "json");
+			fileChooser.getExtensionFilters().addAll(this.getExtensionFilter("common.fileChooser.fileTypes.simOrVisB", "json"));
+		}
+
 		// This extension filter is created manually instead of with getExtensionFilter,
 		// so that the list of extensions doesn't get appended (it would be very long).
 		fileChooser.getExtensionFilters().add(0, new FileChooser.ExtensionFilter(i18n.translate("common.fileChooser.fileTypes.allProB"), allExtensionPatterns));
@@ -311,10 +315,6 @@ public class FileChooserManager {
 	public Path showOpenMachineChooser(final Window window) {
 		return showOpenProjectOrMachineChooser(window, false, true, false, false);
 	}
-
-	public Path showOpenAnythingChooser(final Window window) {
-		return showOpenProjectOrMachineChooser(window, true, true, true, true);
-	}
 	
 	/**
 	 * Show a {@link FileChooser} to ask the user to select a ProB 2 project or a machine file.
@@ -324,6 +324,10 @@ public class FileChooserManager {
 	 */
 	public Path showOpenProjectOrMachineChooser(final Window window) {
 		return showOpenProjectOrMachineChooser(window, true, true, false, false);
+	}
+
+	public Path showOpenAnyFileChooser(final Window window){
+		return showOpenProjectOrMachineChooser(window, true, true, true, true);
 	}
 	
 	/**

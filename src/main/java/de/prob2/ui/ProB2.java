@@ -67,14 +67,17 @@ public class ProB2 extends Application {
 
 	public static final String BUG_REPORT_URL = "https://github.com/hhu-stups/prob-issues/issues/new/choose";
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ProB2.class);
+	// This logger needs to be non-static,
+	// so that the init method can set the custom logging config before creating the logger.
+	// The logging config won't take effect if any logger is created before the config property is set.
+	private Logger logger;
 
 	private RuntimeOptions runtimeOptions;
 	private Injector injector;
 	private I18n i18n;
 	private StopActions stopActions;
 
-	private static boolean isJavaVersionOk(final String javaVersion) {
+	private boolean isJavaVersionOk(final String javaVersion) {
 		final Matcher javaVersionMatcher = Pattern.compile("(?:1\\.)?(\\d+).*_(\\d+).*").matcher(javaVersion);
 		if (javaVersionMatcher.matches()) {
 			final int majorVersion;
@@ -83,13 +86,13 @@ public class ProB2 extends Application {
 				majorVersion = Integer.parseInt(javaVersionMatcher.group(1));
 				updateNumber = Integer.parseInt(javaVersionMatcher.group(2));
 			} catch (NumberFormatException e) {
-				LOGGER.warn("Failed to parse Java version; skipping version check", e);
+				logger.warn("Failed to parse Java version; skipping version check", e);
 				return true;
 			}
 
 			return majorVersion > 8 || (majorVersion == 8 && updateNumber >= 60);
 		} else {
-			LOGGER.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
+			logger.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
 			return true;
 		}
 	}
@@ -128,7 +131,7 @@ public class ProB2 extends Application {
 				}
 			}
 			if (foundPreviousConfigFilePath != null) {
-				LOGGER.info("Found old config file at {} - migrating to {}", foundPreviousConfigFilePath, currentConfigFilePath);
+				logger.info("Found old config file at {} - migrating to {}", foundPreviousConfigFilePath, currentConfigFilePath);
 				Files.copy(foundPreviousConfigFilePath, currentConfigFilePath);
 			}
 		}
@@ -139,6 +142,7 @@ public class ProB2 extends Application {
 		if (!System.getProperties().containsKey(ClassicConstants.CONFIG_FILE_PROPERTY)) {
 			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "de/prob2/ui/logback_config.xml");
 		}
+		logger = LoggerFactory.getLogger(ProB2.class);
 
 		runtimeOptions = parseRuntimeOptions(this.getParameters().getRaw().toArray(new String[0]));
 		if (runtimeOptions.isLoadConfig()) {
@@ -146,7 +150,7 @@ public class ProB2 extends Application {
 			try {
 				this.migrateOldConfigFileIfNeeded(basicConfigInjector);
 			} catch (IOException e) {
-				LOGGER.error("Failed to migrate old config - ignoring", e);
+				logger.error("Failed to migrate old config - ignoring", e);
 			}
 			final BasicConfig basicConfig = basicConfigInjector.getInstance(BasicConfig.class);
 			final Locale localeOverride = basicConfig.getLocaleOverride();
@@ -229,7 +233,7 @@ public class ProB2 extends Application {
 			try {
 				mainScene = this.startInBackground(primaryStage);
 			} catch (RuntimeException | Error t) {
-				LOGGER.error("Uncaught exception during UI startup", t);
+				logger.error("Uncaught exception during UI startup", t);
 				Platform.runLater(() -> this.showStartupError(t, primaryStage));
 				return;
 			}
@@ -243,13 +247,13 @@ public class ProB2 extends Application {
 		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
 		StageManager stageManager = injector.getInstance(StageManager.class);
 		Thread.setDefaultUncaughtExceptionHandler((thread, exc) -> {
-			LOGGER.error("Uncaught exception on thread {}", thread, exc);
+			logger.error("Uncaught exception on thread {}", thread, exc);
 			Platform.runLater(() -> {
 				try {
 					injector.getInstance(RealTimeSimulator.class).stop();
 					stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
 				} catch (Throwable t) {
-					LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
+					logger.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
 				}
 			});
 		});
@@ -335,7 +339,7 @@ public class ProB2 extends Application {
 	}
 
 	private RuntimeOptions parseRuntimeOptions(final String[] args) {
-		LOGGER.info("Parsing arguments: {}", (Object) args);
+		logger.info("Parsing arguments: {}", (Object) args);
 
 		final Options options = new Options();
 
@@ -352,10 +356,10 @@ public class ProB2 extends Application {
 		try {
 			cl = clParser.parse(options, args);
 		} catch (ParseException e) {
-			LOGGER.error("Failed to parse command line", e);
+			logger.error("Failed to parse command line", e);
 			throw die(e.getLocalizedMessage(), 2);
 		}
-		LOGGER.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
+		logger.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
 
 		if (cl.hasOption("help")) {
 			final HelpFormatter hf = new HelpFormatter();
@@ -387,7 +391,7 @@ public class ProB2 extends Application {
 				!cl.hasOption("no-load-config"),
 				!cl.hasOption("no-save-config")
 		);
-		LOGGER.info("Created runtime options: {}", runtimeOpts);
+		logger.info("Created runtime options: {}", runtimeOpts);
 
 		return runtimeOpts;
 	}
