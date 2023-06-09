@@ -136,22 +136,15 @@ public class ReplayedTraceStatusAlert extends Alert {
 
 		// always load newest trace file from disk
 		TraceJsonFile fileTrace = Objects.requireNonNull(replayTrace.load(), "traceJsonFile");
-
 		int transitionCount = fileTrace.getTransitionList().size();
-		if (traceFromReplayed != null) {
-			transitionCount = Math.min(transitionCount, traceFromReplayed.getTransitionList().size());
-		}
-		if (replayedTrace != null) {
-			transitionCount = Math.min(transitionCount, Math.min(replayedTrace.getTransitionReplayPrecisions().size(), replayedTrace.getTransitionErrorMessages().size()));
-		}
 
 		ObservableList<ReplayedTraceRow> items = FXCollections.observableArrayList();
 
 		for (int i = 0; i < transitionCount; i++) {
 			PersistentTransition fileTransitionObj = fileTrace.getTransitionList().get(i);
-			Transition replayedTransitionObj = traceFromReplayed != null ? traceFromReplayed.getTransitionList().get(i) : null;
-			TransitionReplayPrecision transitionReplayPrecision = replayedTrace != null ? replayedTrace.getTransitionReplayPrecisions().get(i) : null;
-			List<String> transitionErrorMessages = replayedTrace != null ? replayedTrace.getTransitionErrorMessages().get(i) : null;
+			Transition replayedTransitionObj = traceFromReplayed != null && i < traceFromReplayed.size() ? traceFromReplayed.getTransitionList().get(i) : null;
+			TransitionReplayPrecision transitionReplayPrecision = replayedTrace != null && i < replayedTrace.getTransitionReplayPrecisions().size() ? replayedTrace.getTransitionReplayPrecisions().get(i) : TransitionReplayPrecision.FAILED;
+			List<String> transitionErrorMessages = replayedTrace != null && i < replayedTrace.getTransitionErrorMessages().size() ? replayedTrace.getTransitionErrorMessages().get(i) : null;
 
 			int step = i + 1;
 			String fileTransition;
@@ -185,13 +178,13 @@ public class ReplayedTraceStatusAlert extends Alert {
 				replayedTransition = "";
 			}
 
-			String precision = transitionReplayPrecision != null ? i18n.translate(enumNameAdapter("animation.tracereplay.replayedStatus.transitionReplayPrecision"), transitionReplayPrecision) : "";
+			String precision = i18n.translate(enumNameAdapter("animation.tracereplay.replayedStatus.transitionReplayPrecision"), transitionReplayPrecision);
 			String errorMessage = transitionErrorMessages != null ? String.join("; ", transitionErrorMessages) : ""; // TODO: prettify
 
 			Collection<String> styleClasses;
 			if (
-				(transitionReplayPrecision != null && transitionReplayPrecision != TransitionReplayPrecision.PRECISE)
-					|| (transitionErrorMessages != null && !transitionErrorMessages.isEmpty())
+				transitionReplayPrecision != TransitionReplayPrecision.PRECISE
+					|| (transitionErrorMessages == null || !transitionErrorMessages.isEmpty())
 			) {
 				styleClasses = Collections.singletonList("FAULTY");
 			} else {
