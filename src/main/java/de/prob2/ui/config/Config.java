@@ -9,7 +9,9 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -43,9 +45,30 @@ public final class Config {
 				if (oldVersion <= 0) {
 					throw new JsonConversionException("Loading config files older than format version 1 is no longer supported (config file uses format version " + oldVersion + ")");
 				}
+
 				if (oldVersion <= 1) {
 					oldObject.put("errorLevel", "WARNING");
 				}
+
+				if (oldVersion <= 2) {
+					JsonNode currentMainTabNode = oldObject.get("currentMainTab");
+					if (currentMainTabNode != null && "visualisation".equals(currentMainTabNode.textValue())) {
+						oldObject.set("currentMainTab", oldObject.nullNode());
+						oldObject.put("currentVisualisationTab", "animationFunction");
+					} else {
+						oldObject.put("currentVisualisationTab", "visb");
+					}
+
+					JsonNode bConsoleExpandedNode = oldObject.remove("bConsoleExpanded");
+					if (bConsoleExpandedNode.isBoolean() && bConsoleExpandedNode.booleanValue()) {
+						JsonNode expandedTitledPanesNode = oldObject.get("expandedTitledPanes");
+						if (expandedTitledPanesNode instanceof ArrayNode) {
+							ArrayNode expandedTitledPanes = (ArrayNode)expandedTitledPanesNode;
+							expandedTitledPanes.add("bconsole");
+						}
+					}
+				}
+
 				return oldObject;
 			}
 		});

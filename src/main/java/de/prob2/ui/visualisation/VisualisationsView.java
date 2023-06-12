@@ -35,14 +35,14 @@ public class VisualisationsView extends StackPane {
 		config.addListener(new ConfigListener() {
 			@Override
 			public void loadConfig(final ConfigData configData) {
-				if (configData.currentVerificationTab != null) {
-					PersistenceUtils.setCurrentTab(tabPane, configData.currentVerificationTab);
+				if (configData.currentVisualisationTab != null) {
+					PersistenceUtils.setCurrentTab(tabPane, configData.currentVisualisationTab);
 				}
 			}
 
 			@Override
 			public void saveConfig(final ConfigData configData) {
-				configData.currentVerificationTab = PersistenceUtils.getCurrentTab(tabPane);
+				configData.currentVisualisationTab = PersistenceUtils.getCurrentTab(tabPane);
 			}
 		});
 	}
