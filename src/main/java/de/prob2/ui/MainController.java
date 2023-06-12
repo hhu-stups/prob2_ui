@@ -57,6 +57,8 @@ public class MainController extends BorderPane {
 	@FXML private ProjectView projectView;
 	@FXML private SplitPane horizontalSP;
 	@FXML private SplitPane verticalSP;
+	@FXML private SplitPane verticalSP2;
+	@FXML private Accordion centerAccordion1;
 	@FXML private ObservableList<Accordion> accordions;
 	@FXML private TitledPane visPane;
 
@@ -90,6 +92,12 @@ public class MainController extends BorderPane {
 		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
 				.bind(i18n.translateBinding("common.views.historyWithState", currentHistoryValue, historySize));
+
+		// Reduce height of bottom accordion if none of its panes are expanded,
+		// so that the top view gets more space instead.
+		// Otherwise the collapsed accordion takes up about half the space with a useless gray background.
+		centerAccordion1.expandedPaneProperty().addListener((o, from, to) -> verticalSP2.setDividerPositions(to == null ? 0.95 : 0.5));
+		verticalSP2.setDividerPositions(centerAccordion1.getExpandedPane() == null ? 0.95 : 0.5);
 
 		statsView.lastResultProperty().addListener((o, from, to) -> {
 			if (to == null) {
