@@ -42,7 +42,7 @@
 			</SplitPane>
 			<SplitPane fx:id="verticalSP2" dividerPositions="0.5" orientation="VERTICAL">
 				<MainView/>
-				<Accordion fx:id="centerAccordion1" expandedPane="$visPane">
+				<Accordion fx:id="centerAccordion1">
 					<panes>
 						<TitledPane id="visualisations" fx:id="visPane" text="%menu.visualisation">
 							<VisualisationsView/>
