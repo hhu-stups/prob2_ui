@@ -88,7 +88,7 @@ public class SimulationHypothesisChoice extends GridPane {
 			}
 			switch (hypothesisCheckingChoice.getSelectionModel().getSelectedItem().getCheckingType()) {
 				case TWO_TAILED:
-					return significance*2 <= Math.min(probability, 1 - probability);
+					return (significance/2 <= probability) && (significance/2 <= 1 - probability);
 				case RIGHT_TAILED:
 					return significance <= 1 - probability;
 				case LEFT_TAILED:
