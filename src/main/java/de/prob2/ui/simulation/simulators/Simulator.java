@@ -166,6 +166,7 @@ public abstract class Simulator {
 				if(activation.getTime() < delay) {
 					delay = activation.getTime();
 				}
+				break;
 			}
 		}
 		this.delay = delay;
@@ -233,7 +234,6 @@ public abstract class Simulator {
 			} else if("skip".equals(activation.getOperation())) {
 				updateStartingInformation(newTrace);
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
-				timestamps.add(time.get());
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 			} else if(!activationConfig.isActivatingOnlyWhenExecuted()) {
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");;
