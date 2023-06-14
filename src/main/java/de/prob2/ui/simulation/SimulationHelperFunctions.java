@@ -42,9 +42,11 @@ public class SimulationHelperFunctions {
 		// TODO: Handle mode for other formalisms
 		switch (mode) {
 			case CLASSICAL_B:
-				return state.eval(new ClassicalB(formula, FormulaExpand.TRUNCATE));
+				// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
+				return state.eval(new ClassicalB(formula, FormulaExpand.EXPAND));
 			case EVENT_B:
-				return state.eval(new EventB(formula, FormulaExpand.TRUNCATE));
+				// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
+				return state.eval(new EventB(formula, FormulaExpand.EXPAND));
 			default:
 				throw new RuntimeException("Evaluation mode is not supported");
 		}
