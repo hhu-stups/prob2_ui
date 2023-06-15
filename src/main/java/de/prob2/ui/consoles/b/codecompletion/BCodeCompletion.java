@@ -56,16 +56,20 @@ public final class BCodeCompletion {
 	}
 
 	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text) {
+		return doCompletion(stateSpace, text, true);
+	}
+
+	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text, boolean includeKeywords) {
 		BCodeCompletion cc = new BCodeCompletion(stateSpace, extractPrefix(text));
-		cc.find();
+		cc.find(true, includeKeywords);
 		return cc.getSuggestions();
 	}
 
-	public void find() {
+	private void find(boolean ignoreCase, boolean includeKeywords) {
 		if (this.stateSpace != null) {
 			CompleteIdentifierCommand cmd = new CompleteIdentifierCommand(this.text);
-			cmd.setIgnoreCase(true);
-			cmd.setIncludeKeywords(true);
+			cmd.setIgnoreCase(ignoreCase);
+			cmd.setIncludeKeywords(includeKeywords);
 			this.stateSpace.execute(cmd);
 			this.suggestions.addAll(
 				cmd.getCompletions().stream()

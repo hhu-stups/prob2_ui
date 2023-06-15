@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.helpsystem.HelpButton?>
-<?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import de.prob2.ui.sharedviews.Spacer?>
+<?import de.prob2.ui.verifications.temporal.TemporalFormulaEditor?>
 <?import de.prob2.ui.verifications.temporal.TemporalFormulaStage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -49,7 +49,7 @@
 						</HBox>
 						<VirtualizedScrollPane fx:id="virtualizedScrollPane">
 							<content>
-								<ExtendedCodeArea fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+								<TemporalFormulaEditor fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 							</content>
 						</VirtualizedScrollPane>
 						<HBox fx:id="expectedResultBox" alignment="CENTER_LEFT" spacing="5.0">
