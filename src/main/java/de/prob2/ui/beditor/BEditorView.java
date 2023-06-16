@@ -447,10 +447,7 @@ public class BEditorView extends BorderPane {
 
 	private boolean isCurrentEditorFile(final String filename) {
 		if (filename == null || filename.isEmpty()) {
-			// TODO This will occur if a VisB json file has an issue since filenames of the corresponding json is
-			//  currently not propagated for some errors (e.g. typos in identifier in value section leads to lines and
-			//  columns of the value section and not of the whole file)
-			throw new IllegalArgumentException("cannot compare current file with empty path");
+			return false;
 		}
 
 		if (getPath() == null) {
