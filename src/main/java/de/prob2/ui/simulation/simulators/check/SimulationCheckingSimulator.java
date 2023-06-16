@@ -303,7 +303,8 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			operationExecutionsTrace.computeIfPresent(opName, (key, val) -> val + 1);
 
 			// update enabled operations
-			simulationEventHandler.getCache().readEnabledOperationsWithCaching(transition.getSource())
+			transition.getSource().getOutTransitions().stream()
+					.map(Transition::getName)
 					.forEach(enabledOp -> {
 						operationEnablingsTrace.putIfAbsent(enabledOp, 0);
 						operationEnablingsTrace.computeIfPresent(enabledOp, (key, val) -> val + 1);
