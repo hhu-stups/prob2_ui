@@ -1,10 +1,5 @@
 package de.prob2.ui.simulation.simulators;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.statespace.State;
-import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.SimulationHelperFunctions;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -13,45 +8,44 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.animator.domainobjects.EventB;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.statespace.State;
+import de.prob.statespace.Transition;
+import de.prob2.ui.simulation.SimulationHelperFunctions;
+
 public class SimulatorCache {
-
-	private static final int MAXIMUM_CACHE_SIZE = 5000;
-
-	private final Map<String, Map<String, String>> valuesCache = new HashMap<>();
+	private final Map<String, IEvalElement> formulasCache = new HashMap<>();
 
 	private final Map<String, Map<String, Map<String, List<Transition>>>> transitionCache = new HashMap<>();
 
 	private final Map<String, Set<String>> enabledOperationsCache = new HashMap<>();
 
 	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, SimulationHelperFunctions.EvaluationMode mode) {
-		if(valuesCache.keySet().size() > MAXIMUM_CACHE_SIZE) {
-			valuesCache.clear();
-		}
-		String stateID = bState.getId();
-		String value;
-
-		// Do not replace these if branches by putIfAbsent invocations on the HashMap
-		// It seems that Java evaluates the value first, before adding it to the HashMap under the condition that the corresponding key is not present
-		// This would destroy the idea of caching, i.e., only evaluating when the key is absent.
-
-		if(!valuesCache.containsKey(stateID) || !valuesCache.get(stateID).containsKey(expression)) {
-			// loads values in cache if necessary
-			if(!valuesCache.containsKey(stateID)) {
-				valuesCache.put(stateID, new HashMap<>());
-			}
-			if(variables != null && !variables.isEmpty() && expression.contains("$")) {
+		IEvalElement formula = formulasCache.computeIfAbsent(expression, expr -> {
+			if(variables != null && !variables.isEmpty() && expr.contains("$")) {
 				for(Map.Entry<String, String> entry : variables.entrySet()) {
 					String key = entry.getKey();
 					String val = entry.getValue();
-					expression = expression.replaceAll(Pattern.quote("$") + key, val);
+					expr = expr.replaceAll(Pattern.quote("$") + key, val);
 				}
 			}
-			AbstractEvalResult evalResult = SimulationHelperFunctions.evaluateForSimulation(bState, variables, expression, mode);
-			value = evalResult.toString();
-			valuesCache.get(stateID).put(expression, value);
-		}
-		// finally get value from cache
-		return valuesCache.get(stateID).get(expression);
+
+			switch (mode) {
+				case CLASSICAL_B:
+					// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
+					return new ClassicalB(expr, FormulaExpand.EXPAND);
+				case EVENT_B:
+					// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
+					return new EventB(expr, FormulaExpand.EXPAND);
+				default:
+					throw new RuntimeException("Evaluation mode is not supported");
+			}
+		});
+
+		return bState.eval(formula).toString();
 	}
 
 	public List<Transition> readTransitionsWithCaching(State bState, String opName, String predicate, int maxTransitions) {
@@ -98,7 +92,7 @@ public class SimulatorCache {
 	}
 
 	public void clear() {
-		valuesCache.clear();
+		formulasCache.clear();
 		transitionCache.clear();
 		enabledOperationsCache.clear();
 	}

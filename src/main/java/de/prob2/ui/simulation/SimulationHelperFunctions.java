@@ -4,16 +4,10 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
-import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.animator.domainobjects.EventB;
-import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
-import de.prob.statespace.State;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -36,20 +30,6 @@ public class SimulationHelperFunctions {
 		// TODO: Handle mode for other formalisms
 		return model instanceof ClassicalBModel ? SimulationHelperFunctions.EvaluationMode.CLASSICAL_B :
 				model instanceof EventBModel? SimulationHelperFunctions.EvaluationMode.EVENT_B : null;
-	}
-
-	public static AbstractEvalResult evaluateForSimulation(State state, Map<String, String> variables, String formula, EvaluationMode mode) {
-		// TODO: Handle mode for other formalisms
-		switch (mode) {
-			case CLASSICAL_B:
-				// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
-				return state.eval(new ClassicalB(formula, FormulaExpand.EXPAND));
-			case EVENT_B:
-				// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
-				return state.eval(new EventB(formula, FormulaExpand.EXPAND));
-			default:
-				throw new RuntimeException("Evaluation mode is not supported");
-		}
 	}
 
 	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, Path path) {
