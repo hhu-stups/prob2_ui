@@ -14,6 +14,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -245,11 +246,12 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void updateErrors() {
-		if (this.savedProperty().get()) {
+		Path currentPath = this.getPath();
+		if (currentPath != null && this.savedProperty().get()) {
 			this.beditor.getErrors().setAll(this.getErrors().stream()
 				.filter(error -> error.getLocations().stream()
 					.map(ErrorItem.Location::getFilename)
-					.anyMatch(this::isCurrentEditorFile))
+					.anyMatch(filename -> fileNameMatchesCurrentPath(filename, currentPath)))
 				.collect(Collectors.toList()));
 		} else {
 			this.beditor.getErrors().clear();
@@ -445,17 +447,15 @@ public class BEditorView extends BorderPane {
 		injector.getInstance(ExternalEditor.class).open(this.getPath());
 	}
 
-	private boolean isCurrentEditorFile(final String filename) {
+	private static boolean fileNameMatchesCurrentPath(String filename, Path currentPath) {
+		Objects.requireNonNull(currentPath, "currentPath");
+
 		if (filename == null || filename.isEmpty()) {
 			return false;
 		}
 
-		if (getPath() == null) {
-			throw new IllegalStateException("cannot compare file " + filename + " to currently opened file because there is no opened file");
-		}
-
 		try {
-			return Files.isSameFile(Paths.get(filename), this.getPath());
+			return Files.isSameFile(Paths.get(filename), currentPath);
 		} catch (IOException e) {
 			LOGGER.warn("Failed to check if file is identical to editor file", e);
 			return false;
