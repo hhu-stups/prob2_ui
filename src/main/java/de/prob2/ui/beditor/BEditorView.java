@@ -6,6 +6,7 @@ import java.nio.charset.Charset;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -456,7 +457,7 @@ public class BEditorView extends BorderPane {
 
 		try {
 			return Files.isSameFile(Paths.get(filename), currentPath);
-		} catch (IOException e) {
+		} catch (IOException | InvalidPathException e) {
 			LOGGER.warn("Failed to check if file is identical to editor file", e);
 			return false;
 		}
