@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
 import de.prob.scripting.EventBFactory;
@@ -136,7 +137,14 @@ public final class RegexSyntaxHighlighting {
 			Pattern pattern = Pattern.compile(key);
 			Matcher matcher = pattern.matcher(text);
 			while (matcher.find()) {
-				range.add(new Range(syntaxClass, matcher.start(), matcher.end()));
+				String adjustedSyntaxClass;
+				if ("editor_identifier".equals(syntaxClass) && Utils.isProBSpecialDefinitionName(matcher.group())) {
+					// Recognize and highlight special identifiers (e. g. ANIMATION_FUNCTION, VISB_JSON_FILE)
+					adjustedSyntaxClass = "editor_special_identifier";
+				} else {
+					adjustedSyntaxClass = syntaxClass;
+				}
+				range.add(new Range(adjustedSyntaxClass, matcher.start(), matcher.end()));
 			}
 		});
 		range.sort(Comparator.comparing(Range::getStart));

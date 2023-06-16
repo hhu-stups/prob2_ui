@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.ParseOptions;
@@ -215,6 +216,7 @@ import de.be4.classicalb.core.parser.node.TWhen;
 import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
 import de.be4.classicalb.core.parser.node.Token;
+import de.be4.classicalb.core.parser.util.Utils;
 
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
@@ -336,8 +338,16 @@ public final class BLexerSyntaxHighlighting {
 			Token t;
 			do {
 				t = lexer.next();
-				String string = syntaxClassesForB.get(t.getClass());
-				spansBuilder.add(string == null ? Collections.emptySet() : Collections.singleton(string), t.getText().length());
+				String syntaxClass;
+				if (t instanceof TIdentifierLiteral && Utils.isProBSpecialDefinitionName(t.getText())) {
+					// Recognize and highlight special identifiers (e. g. ANIMATION_FUNCTION, VISB_JSON_FILE)
+					syntaxClass = "editor_special_identifier";
+				} else {
+					syntaxClass = syntaxClassesForB.get(t.getClass());
+				}
+
+				Set<String> style = syntaxClass == null ? Collections.emptySet() : Collections.singleton(syntaxClass);
+				spansBuilder.add(style, t.getText().length());
 			} while (!(t instanceof EOF));
 		} catch (LexerException | IOException e) {
 			LOGGER.info("Failed to lex", e);

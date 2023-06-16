@@ -518,7 +518,8 @@
 	-fx-fill:#268bd2; /* $blue from https://ethanschoonover.com/solarized/; was darkblue; */
 }
 
-.editor .editor_logical{
+.editor .editor_logical,
+.editor .editor_special_identifier {
 	-fx-fill:#cb4b16; /* $orange, was tomato */
 }
 
