@@ -262,7 +262,7 @@ public class SimulationEventHandler {
 		String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
 		Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
 		Object probability = activationOperationConfiguration.getProbabilisticVariables();
-		int evaluatedTime = Integer.parseInt(cache.readValueWithCaching(state, simulator.getVariables(), time, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
+		int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
 
 		switch (activationKind) {
 			case MULTI:
