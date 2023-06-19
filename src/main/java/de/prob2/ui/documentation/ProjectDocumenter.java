@@ -76,18 +76,6 @@ public class ProjectDocumenter {
 		DocumentationProcessHandler.createPortableDocumentationScript(filename, directory);
 	}
 
-	//only proof of concept for bachelor thesis. can be deleted later
-	public void documentModelcheckingTableMarkdown() throws IOException {
-		initVelocityEngine();
-		VelocityContext context = new VelocityContext();
-		context.put("machines", machines);
-		context.put("util", TemplateUtility.class);
-		context.put("i18n", i18n);
-		try (final Writer writer = Files.newBufferedWriter(directory.resolve(filename + ".md"))) {
-			Velocity.mergeTemplate("de/prob2/ui/documentation/modelchecking_table.md.vm", String.valueOf(StandardCharsets.UTF_8),context,writer);
-		}
-	}
-
 	// future translations can be added here
 	private String getLanguageTemplate() {
 		String language = injector.getInstance(Locale.class).getLanguage();

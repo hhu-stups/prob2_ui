@@ -148,8 +148,6 @@ public class SaveDocumentationStage extends Stage {
 														     checkedMachines, dir, filename.getText(),injector);
 		try {
 			documenter.documentVelocity();
-			//only proof of concept for bachelor thesis. can be deleted later
-			//documenter.documentModelcheckingTableMarkdown();
 		} catch (IOException | RuntimeException exc) {
 			stageManager.makeExceptionAlert(exc, "verifications.documentation.error").showAndWait();
 		}
