@@ -1,6 +1,5 @@
 package de.prob2.ui;
 
-import de.prob2.ui.menu.DetachViewStageController;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collections;
@@ -20,6 +19,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -27,6 +27,7 @@ import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -36,7 +37,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
-import javafx.scene.input.ContextMenuEvent;
 import javafx.scene.layout.BorderPane;
 
 import org.slf4j.Logger;
@@ -84,9 +84,6 @@ public class MainController extends BorderPane {
 		Platform.runLater(() -> {
 			this.detacher = injector.getInstance(DetachViewStageController.class);
 			this.getAccordions().stream().forEach(e -> e.getPanes().stream().forEach(this::addContextMenu));
-			// the detach-contextmenu does not overwrite the "reload page"-contextmenu of the webview. To avoid that
-			// they are shown at the same time, the detaching-contextmenu-event in the content of ths pane gets consumed.
-			this.visPane.getContent().addEventFilter(ContextMenuEvent.CONTEXT_MENU_REQUESTED, event -> event.consume());
 		});
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
 		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
@@ -160,7 +157,24 @@ public class MainController extends BorderPane {
 			detacher.doDetaching();
 		});
 		ContextMenu menu = new ContextMenu(detachItem);
-		tp.setContextMenu(menu);
+		// We want to show the detaching context menu only when right-clicking on the title bar,
+		// not the actual content of the TitledPane,
+		// to avoid conflicting with context menus in the content (e. g. in the visualization views).
+		// Unfortunately there's no API for getting the title bar node,
+		// so we have to wait for it to appear in the TitledPane's children
+		// and then look it up by its CSS class.
+		// I don't know how supported this is, but it seems to work.
+		tp.getChildrenUnmodifiable().addListener((InvalidationListener)o -> {
+			Node tpTitle = tp.lookup(".title");
+			if (tpTitle != null) {
+				tpTitle.setOnContextMenuRequested(e -> {
+					// It's important to use menu.show(tpTitle.getScene().getWindow(), ...) and not just menu.show(tpTitle, ...).
+					// For some reason, the second variant leads to scaling issues on macOS - the context menu is rendered at twice the size.
+					// (Tested on macOS 13.4 with OpenJFX 17.0.7, on a laptop with a retina/HiDPI internal display and a regular scale external monitor.)
+					menu.show(tpTitle.getScene().getWindow(), e.getScreenX(), e.getScreenY());
+				});
+			}
+		});
 	}
 
 	public void reloadMainView() {
