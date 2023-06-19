@@ -104,7 +104,7 @@ public class SimulationFileHandler {
 		ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
 		Map<String, String> fixedVariables = buildParameters(activationAsObject.get("fixedVariables"));
 		Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
-		boolean onlyWhenExecuted = activationAsObject.get("activatingOnlyWhenExecuted") == null || Boolean.parseBoolean(String.valueOf(activationAsObject.get("activatingOnlyWhenExecuted")));
+		boolean onlyWhenExecuted = activationAsObject.get("activatingOnlyWhenExecuted") == null || activationAsObject.get("activatingOnlyWhenExecuted").getAsBoolean();
 		Map<String, String> updating = buildUpdating(activationAsObject.get("updating"));
 		return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, onlyWhenExecuted, updating);
 	}
