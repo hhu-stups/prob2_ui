@@ -34,17 +34,17 @@ stages:
 
 test:jdk-8-linux:
   extends: .test-linux
-  image: openjdk:8-jdk-slim
+  image: eclipse-temurin:8
   before_script:
     - *default_before_script_linux
     # curl, perl (provides shasum) and rsync are needed for the OpenJFX installation below.
     - apt-get install --assume-yes curl perl rsync
     - apt-get install --assume-yes bash
     # Install OpenJFX 8.
-    # This downloads the Debian stretch version of the libopenjfx-java package (which is the last version compatible with Java 8) and installs it into the OpenJDK directory.
+    # This downloads the original Ubuntu bionic version of the libopenjfx-java package (which is the last version compatible with Java 8) and installs it into the OpenJDK directory.
     # This is a terrible solution, but there's no better alternative - there are apparently no Docker images that have a (non-Oracle) JDK 8 with JavaFX installed.
-    - curl --location -o "libopenjfx-java.deb" "http://archive.debian.org/debian/pool/main/o/openjfx/libopenjfx-java_8u141-b14-3~deb9u1_all.deb"
-    - shasum --algorithm 256 --quiet --check - <<< "716c6ba4c63597d2621025320c894aba6a9cf7059893a1d8a4f6ae45c0c38c46  libopenjfx-java.deb"
+    - curl --location -o "libopenjfx-java.deb" "http://archive.ubuntu.com/ubuntu/pool/universe/o/openjfx/libopenjfx-java_8u161-b12-1ubuntu2_all.deb"
+    - shasum --algorithm 256 --quiet --check - <<< "da84306c84304ecbb853503459d58cc9fae77ebf1727fc2baa8cf9643960608e *libopenjfx-java.deb"
     - dpkg-deb --extract "libopenjfx-java.deb" "libopenjfx-java"
     - rsync -a "libopenjfx-java/usr/share/java/openjfx/" "${JAVA_HOME}"
     - rm -r "libopenjfx-java.deb" "libopenjfx-java"
@@ -52,7 +52,7 @@ test:jdk-8-linux:
 
 test:jdk-17-linux:
   extends: .test-linux
-  image: openjdk:17-jdk-slim
+  image: eclipse-temurin:17
   before_script:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
