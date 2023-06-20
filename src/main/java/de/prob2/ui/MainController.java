@@ -124,9 +124,8 @@ public class MainController extends BorderPane {
 					);
 				}
 
-				if (configData.horizontalDividerPositions != null && horizontalSP != null) {
-					horizontalSP.setDividerPositions(configData.horizontalDividerPositions);
-				}
+				// Restoring horizontal divider positions is disabled for now as it doesn't work reliably - see:
+				// https://github.com/hhu-stups/prob-issues/issues/314
 
 				if (configData.verticalDividerPositions != null && verticalSP != null) {
 					verticalSP.setDividerPositions(configData.verticalDividerPositions);
