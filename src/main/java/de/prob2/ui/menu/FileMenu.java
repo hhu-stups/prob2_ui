@@ -22,6 +22,7 @@ import de.prob.scripting.Api;
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.documentation.SaveDocumentationStage;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -31,7 +32,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
-import de.prob2.ui.project.SaveDocumentationStage;
 
 import javafx.beans.InvalidationListener;
 import javafx.event.ActionEvent;

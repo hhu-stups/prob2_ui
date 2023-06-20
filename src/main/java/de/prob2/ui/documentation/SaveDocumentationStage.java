@@ -1,4 +1,4 @@
-package de.prob2.ui.project;
+package de.prob2.ui.documentation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,8 +12,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.documentation.MachineDocumentationItem;
-import de.prob2.ui.documentation.ProjectDocumenter;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ProB2Module;
