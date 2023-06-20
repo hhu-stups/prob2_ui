@@ -4,7 +4,37 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.2.0 (not released yet)
 
-* [SimB](https://prob.hhu.de/w/index.php?title=SimB)
+* Updated the ProB core to version 1.12.1 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
+* Added [SimB](https://prob.hhu.de/w/index.php?title=SimB), a simulator built on top of ProB, supporting interactive simulation and validation of probabilistic and timing properties
+* Added prototype version of VO manager for creating and checking validation obligations, developed as part of the [IVOIRE project](https://isse.jku.at/ivoire/)
+* Added automatic documentation generator that creates a LaTeX/PDF report of a project's models and verification statuses
+* Added support for CTL model checking in addition to LTL
+* Added code completion support in machine editor, B console, and B formulas in LTL/CTL
+* Reworked trace replay to be more flexible regarding model changes and give better feedback about errors and incomplete replay 
+* Trace files support postcondition tests and descriptions for each step
+* Added advanced trace refactoring for adapting traces to machine changes or refinements
+* Integrated VisB into main window (the visualization pane can be detached into a standalone window if desired)
+* VisB visualizations can be exported as static HTML files
+* History of transitions can be exported as CSV
+* State view can be sorted alphabetically
+* Model checking can use a different goal predicate than the machine's `GOAL` definition
+* Test case generation supports Event-B models
+* Verifications view displays status of proof obligations in Rodin projects
+* Graph, table, and history chart visualization formulas are saved in the project file
+* History chart curves can be made rectangular instead of interpolated
+* Rodin projects can be exported as .eventb files (compatible with probcli and ProB Tcl/Tk)
+* Simplified UI layout in various places
+* Improved text editor syntax highlighting (Event-B support, more keywords)
+* Improved error handling when loading missing or invalid files
+* Improved handling of errors during startup
+* ProB core process can be manually interrupted and restarted via ProB Core Console (in case of hangs and internal errors)
+* Fixed UI responsiveness when executing operations and during model checking
+* Fixed inefficient expansion of symbolic sets in some places
+* Fixed various keyboard problems with some OSes and keyboard layouts (Shift on Windows, undo/redo with non-US layouts, zoom shortcuts, consoles)
+* Fixed some toolbar icons becoming invisible for small window/view sizes
+* Fixed errors with the config file when switching between different versions of ProB 2 UI
+
+**Note:** This is the last release to support Java 8 and 11. The next release will require Java 17 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
 
 ## Version 1.1.0 (26th of January 2021)
 
