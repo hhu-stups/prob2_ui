@@ -12,7 +12,7 @@ Pre-built binaries for the ProB 2 UI can be downloaded [here](https://stups.hhu-
 Documentation can be found inside the application (Help menu).
 A short overview can be found [on our wiki](https://prob.hhu.de/w/index.php/ProB2-UI).
 
-![Main Window of ProB2-UI](/src/doc/prob2ui-screenshot2.png?raw=true "Main Window of ProB2-UI")
+![Main Window of ProB2-UI](/doc/prob2ui-screenshot2.png?raw=true "Main Window of ProB2-UI")
 
 ## Requirements
 
