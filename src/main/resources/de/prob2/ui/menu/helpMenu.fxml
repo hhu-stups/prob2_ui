@@ -4,9 +4,6 @@
 <?import javafx.scene.control.MenuItem?>
 <fx:root type="Menu" text="%menu.help" xmlns:fx="http://javafx.com/fxml/1">
 	<MenuItem text="%menu.help.items.openHelp" onAction="#handleOpenHelp" />
-	<MenuItem fx:id="aboutItem" onAction="#handleAboutDialog"
-		text="%menu.help.items.about" />
-	<MenuItem text="%menu.help.items.reportBug" onAction="#handleReportBug" />
 	<Menu text="%menu.help.syntax">
 		<MenuItem text="%menu.help.syntax.b" onAction="#handleBSyntax"/>
 		<MenuItem text="%menu.help.syntax.csp" onAction="#handleCSPSyntax"/>
@@ -14,5 +11,6 @@
 		<MenuItem text="%menu.help.syntax.z" onAction="#handleZSyntax"/>
 		<MenuItem text="%menu.help.syntax.ltl" onAction="#handleLTLSyntax"/>
 	</Menu>
+	<MenuItem text="%menu.help.items.reportBug" onAction="#handleReportBug"/>
+	<MenuItem fx:id="aboutItem" text="%menu.help.items.about" onAction="#handleAboutDialog"/>
 </fx:root>
-
