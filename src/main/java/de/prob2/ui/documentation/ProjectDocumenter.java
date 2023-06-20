@@ -64,6 +64,12 @@ public class ProjectDocumenter {
 		DocumentationResourceBuilder.buildLatexResources(dir,machines);
 	}
 
+	private static void createPdf(String filename, Path directory) throws IOException {
+		final ProcessBuilder builder = new ProcessBuilder("pdflatex", "--shell-escape", "-interaction=nonstopmode", filename + ".tex");
+		builder.directory(directory.toFile());
+		builder.start();
+	}
+
 	public void documentVelocity() throws IOException {
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
@@ -71,8 +77,9 @@ public class ProjectDocumenter {
 		try (final Writer writer = Files.newBufferedWriter(directory.resolve(filename + ".tex"))) {
 			Velocity.mergeTemplate(templateName, String.valueOf(StandardCharsets.UTF_8),context,writer);
 		}
-		if(makePdf)
-			DocumentationProcessHandler.createPdf(filename, directory);
+		if (makePdf) {
+			createPdf(filename, directory);
+		}
 	}
 
 	// future translations can be added here

@@ -1,6 +1,8 @@
 package de.prob2.ui.project;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -10,7 +12,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.documentation.DocumentationProcessHandler;
 import de.prob2.ui.documentation.MachineDocumentationItem;
 import de.prob2.ui.documentation.ProjectDocumenter;
 import de.prob2.ui.internal.FXMLInjected;
@@ -103,10 +104,22 @@ public class SaveDocumentationStage extends Stage {
 		tvDocumentation.setItems(machineDocumentationItems);
 	}
 
+	//this method is from  https://stackoverflow.com/questions/8488118/how-to-programatically-check-if-a-software-utility-is-installed-on-ubuntu-using
+	//it checks if a command line package is installed
+	private static boolean packageInstalled(String binaryName) throws IOException, InterruptedException {
+		ProcessBuilder builder = new ProcessBuilder("/usr/bin/which", binaryName);
+		builder.redirectErrorStream(true);
+		Process process = builder.start();
+		BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+		process.waitFor();
+		String line = reader.readLine();
+		return (line != null && !line.isEmpty());
+	}
+
 	private void disableMakePdfIfPackageNotInstalled() throws IOException, InterruptedException {
 		//Windows Script uses Powershell which is installed defaultly, so no check needed
 		if (!ProB2Module.IS_WINDOWS) {
-			if(!DocumentationProcessHandler.packageInstalled("pdflatex")){
+			if (!packageInstalled("pdflatex")) {
 				makePdf.setText(i18n.translate("verifications.documentation.saveStage.pdfPackageNotInstalled"));
 				makePdf.setDisable(true);
 			}
