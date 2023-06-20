@@ -1,3 +1,0 @@
-@echo off
-powershell Compress-Archive -LiteralPath %cd%'\${filename}.pdf', %cd%'\html_files' -DestinationPath %cd%"\${filename}_Portable.zip"
-pause

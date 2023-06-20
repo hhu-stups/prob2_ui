@@ -178,14 +178,6 @@ class ProjectDocumenterTest extends ApplicationTest {
 		assertTrue(Files.exists(getOutputFile(".pdf")));
 	}
 
-	@EnabledOnOs({OS.WINDOWS, OS.LINUX, OS.MAC})
-	@Test
-	void testZipScriptCreated() throws IOException {
-		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,false,false,machines,outputPath, outputFilename,injector);
-		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
-		assertTrue(Files.exists(outputPath.resolve(DocumentationProcessHandler.getPortableDocumentationScriptName())));
-	}
-
 	private void assertTexFileContainsString(String s) throws IOException {
 		Path texOutput = getOutputFile(".tex");
 		try (final Reader reader = Files.newBufferedReader(texOutput)) {

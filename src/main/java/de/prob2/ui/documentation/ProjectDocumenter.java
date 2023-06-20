@@ -73,7 +73,6 @@ public class ProjectDocumenter {
 		}
 		if(makePdf)
 			DocumentationProcessHandler.createPdf(filename, directory);
-		DocumentationProcessHandler.createPortableDocumentationScript(filename, directory);
 	}
 
 	// future translations can be added here

@@ -1,2 +1,0 @@
-#!/bin/bash
-zip -r ${filename}_Portable.zip html_files ${filename}.pdf
