@@ -5,7 +5,7 @@ In addition to the [B-method](http://en.wikipedia.org/wiki/B-Method), ProB also 
 
 ## Download
 
-Pre-built binaries for the ProB 2 UI can be downloaded [here](https://stups.hhu-hosting.de/downloads/prob2/).
+Pre-built binaries for the ProB 2 UI can be downloaded [here](https://prob.hhu.de/w/index.php?title=Download#ProB2-UI).
 
 ## Main Features
 
