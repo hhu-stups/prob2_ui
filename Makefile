@@ -95,7 +95,7 @@ $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(DMGPROB2)
 	@echo "Step 5: Putting APP into a zipfile for Apple's notarization (into $(ZIP_FILE))"
 	/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
 	
-NOTVERS = 1.2.0-beta1
+NOTVERS = 1.2.0
 notarize-app: $(ZIP_FILE)
 	@echo "Step 6: Sending Notarization request to Apple for APP (in zipfile $(ZIP_FILE))"
 	xcrun altool --notarize-app\
