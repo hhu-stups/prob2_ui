@@ -2,6 +2,10 @@
 
 Downloads of the current release and snapshot development builds can be found on [our main download page](https://prob.hhu.de/w/index.php?title=Download#ProB2-UI).
 
+## Version 1.2.1 (not released yet)
+
+* (no changes yet)
+
 ## Version 1.2.0 (22nd of June 2023)
 
 * Updated the ProB core to version 1.12.1 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)

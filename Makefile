@@ -24,7 +24,7 @@ clean:
 	rm out.prop
 
 # version of ProB2UI without optional SNAPSHOT suffixes:
-PROB2UI_VERSION=1.2.0
+PROB2UI_VERSION=1.2.1
 DMGPROB2=ProB\ 2\ UI
 DMGFILE=build/distributions/$(DMGPROB2)-$(PROB2UI_VERSION).dmg
 ZIP_FILE=build/distributions/ProB2-UI-ForNotarization.zip
@@ -95,7 +95,7 @@ $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(DMGPROB2)
 	@echo "Step 5: Putting APP into a zipfile for Apple's notarization (into $(ZIP_FILE))"
 	/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
 	
-NOTVERS = 1.2.0
+NOTVERS = 1.2.1
 notarize-app: $(ZIP_FILE)
 	@echo "Step 6: Sending Notarization request to Apple for APP (in zipfile $(ZIP_FILE))"
 	xcrun altool --notarize-app\
