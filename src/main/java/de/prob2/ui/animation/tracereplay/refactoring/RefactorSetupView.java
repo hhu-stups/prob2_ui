@@ -268,7 +268,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 		}
 	}
 
-	private void createFeedNackMessage(String messageText){
+	private void createFeedbackMessage(String messageText){
 		Alert alert = new Alert(Alert.AlertType.CONFIRMATION, messageText, ButtonType.OK);
 		alert.getDialogPane().getChildren().stream().filter(node -> node instanceof Label).forEach(node -> ((Label)node).setMinHeight(Region.USE_PREF_SIZE));
 		alert.showAndWait();
@@ -387,7 +387,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 					} catch (IOException | BCompoundException e) {
 						e.printStackTrace();
 					} catch (TraceConstructionError e) {
-						createFeedNackMessage("Trace could be refined while enforcing all predicates");
+						createFeedbackMessage("Trace could be refined while enforcing all predicates");
 					}
 				}
 				break;
@@ -399,12 +399,12 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 					// TODO Use shared animator instead of starting a new one
 					ModelFactory<?> factory = injector.getInstance(FactoryProvider.factoryClassFromExtension(MoreFiles.getFileExtension(result.fileAlpha)));
 					List<Transition> resultTrace = AdvancedTraceConstructor.constructTraceWithOptions(fileObject.getTransitionList(), factory.extract(result.fileAlpha.toString()).load(), replayOptions);
-					createFeedNackMessage("Trace could be fully replayed while enforcing all predicates");
+					createFeedbackMessage("Trace could be fully replayed while enforcing all predicates");
 					saveAdaptedTrace(PersistentTransition.createFromList(resultTrace), fileObject, result);
 				} catch ( IOException e) {
 					e.printStackTrace();
 				} catch (TraceConstructionError e){
-					createFeedNackMessage( "Trace could not fully replayed with all all predicates enforced");
+					createFeedbackMessage( "Trace could not fully replayed with all all predicates enforced");
 				}
 				break;
 		}
