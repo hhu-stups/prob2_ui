@@ -74,6 +74,7 @@ public abstract class Console extends StyleClassedTextArea {
 
 	private final ConsoleHistoryAndSearchHandler historyAndSearchHandler;
 	private final StringBuilder commandBuffer;
+	private CachedMessage lastMessage;
 
 	protected Console(I18n i18n, Executable interpreter, String header, String prompt) {
 		this.i18n = Objects.requireNonNull(i18n, "i18n");
@@ -370,6 +371,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public void reset() {
+		this.lastMessage = null;
 		this.historyAndSearchHandler.setSearchActive(false);
 		this.lineContinuation.set(false);
 		this.clear();
@@ -384,7 +386,7 @@ public abstract class Console extends StyleClassedTextArea {
 	 * @param text text to insert
 	 */
 	public void addParagraph(String text) {
-		this.addParagraph(text, Collections.emptyList());
+		this.addParagraph(text, Collections.emptyList(), true);
 	}
 
 	/**
@@ -393,7 +395,18 @@ public abstract class Console extends StyleClassedTextArea {
 	 * @param text  text to insert
 	 * @param style text style
 	 */
-	public void addParagraph(String text, Collection<String> style) {
+	public void addParagraph(String text, Collection<String> style, boolean allowDuplicates) {
+		if (!allowDuplicates) {
+			CachedMessage newMessage = new CachedMessage(text, style);
+			if (newMessage.equals(this.lastMessage)) {
+				return;
+			}
+
+			this.lastMessage = newMessage;
+		} else {
+			this.lastMessage = null;
+		}
+
 		int lastParagraph = this.getParagraphs().size() - 1;
 		assert lastParagraph >= 0;
 		int pos = this.getAbsolutePosition(lastParagraph, 0);
@@ -406,9 +419,10 @@ public abstract class Console extends StyleClassedTextArea {
 
 		this.deactivateSearch();
 		String command = this.input.get();
-		this.addParagraph(this.inputWithPrompt.get());
-
+		String inputWithPrompt = this.inputWithPrompt.get();
 		this.input.set("");
+		this.addParagraph(inputWithPrompt);
+
 		boolean activateLineContinuation = command != null && command.endsWith("\\") && !command.endsWith("\\\\");
 		this.lineContinuation.set(activateLineContinuation);
 
@@ -434,7 +448,7 @@ public abstract class Console extends StyleClassedTextArea {
 					return;
 				}
 
-				this.addParagraph(result.toString(), result.getResultType() == ConsoleExecResultType.ERROR ? Arrays.asList("error", "output") : Collections.singletonList("output"));
+				this.addParagraph(result.toString(), result.getResultType() == ConsoleExecResultType.ERROR ? Arrays.asList("error", "output") : Collections.singletonList("output"), true);
 			}
 		}
 

@@ -39,7 +39,7 @@ public final class BConsole extends Console {
 				final File modelFile = to.getModel().getModelFile();
 				final String name = modelFile == null ? to.getMainComponent().toString() : modelFile.getName();
 				final String message = i18n.translate("consoles.b.message.modelLoaded", name);
-				this.addParagraph(message, Collections.singletonList("message"));
+				this.addParagraph(message, Collections.singletonList("message"), false);
 			}
 		});
 
