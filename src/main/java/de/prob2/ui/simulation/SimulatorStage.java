@@ -37,6 +37,7 @@ import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
@@ -451,7 +452,7 @@ public class SimulatorStage extends Stage {
 		if(path != null) {
 			ISimulationModelConfiguration config = realTimeSimulator.getConfig();
 			Path configPath = null;
-			if(config instanceof SimulationModelConfiguration) {
+			if(config instanceof SimulationModelConfiguration || config instanceof SimulationExternalConfiguration) {
 				configPath = configurationPath.get();
 				injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
 				if (lastSimulator.isNull().get() || !lastSimulator.get().equals(realTimeSimulator)) {
@@ -466,7 +467,7 @@ public class SimulatorStage extends Stage {
 				injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
 				try {
 					this.time = 0;
-					ISimulationModelConfiguration modelConfiguration = SimulationFileHandler.constructConfigurationFromJSON(configPath);
+					ISimulationModelConfiguration modelConfiguration = SimulationFileHandler.constructConfiguration(configPath);
 					realTimeSimulator.initSimulator(modelConfiguration);
 					Trace trace = new Trace(currentTrace.getStateSpace());
 					currentTrace.set(trace);
@@ -516,6 +517,20 @@ public class SimulatorStage extends Stage {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(i18n.translate("simulation.stage.filechooser.title"));
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
+		if(path != null) {
+			Path resolvedPath = currentProject.getLocation().relativize(path);
+			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+		}
+	}
+
+	@FXML
+	public void loadExternal() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("simulation.stage.filechooser.title"));
+		fileChooser.getExtensionFilters().addAll(
+				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "py")
+		);
+		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
 			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));

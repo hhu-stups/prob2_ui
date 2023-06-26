@@ -25,8 +25,10 @@ public class Activation {
 
 	private final String firingTransitionParametersPredicate;
 
+	private final String withPredicate;
+
 	public Activation(String operation, int time, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
-			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> firingTransitionParameters, String firingTransitionParametersPredicate) {
+			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> firingTransitionParameters, String firingTransitionParametersPredicate, String withPredicate) {
 		this.operation = operation;
 		this.time = time;
 		this.additionalGuards = additionalGuards;
@@ -35,6 +37,7 @@ public class Activation {
 		this.probabilisticVariables = probabilisticVariables;
 		this.firingTransitionParameters = firingTransitionParameters;
 		this.firingTransitionParametersPredicate = firingTransitionParametersPredicate;
+		this.withPredicate = withPredicate;
 	}
 
 	public String getOperation() {
@@ -73,21 +76,25 @@ public class Activation {
 		return firingTransitionParametersPredicate;
 	}
 
+	public String getWithPredicate() {
+		return withPredicate;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Activation that = (Activation) o;
-		return operation.equals(that.operation) && time == that.time && Objects.equals(additionalGuards, that.additionalGuards) && activationKind == that.activationKind && Objects.equals(probabilisticVariables, that.probabilisticVariables) && Objects.equals(firingTransitionParameters, that.firingTransitionParameters) && Objects.equals(firingTransitionParametersPredicate, that.firingTransitionParametersPredicate);
+		return operation.equals(that.operation) && time == that.time && Objects.equals(additionalGuards, that.additionalGuards) && activationKind == that.activationKind && Objects.equals(probabilisticVariables, that.probabilisticVariables) && Objects.equals(firingTransitionParameters, that.firingTransitionParameters) && Objects.equals(firingTransitionParametersPredicate, that.firingTransitionParametersPredicate) && Objects.equals(withPredicate, that.withPredicate);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(operation, time, additionalGuards, activationKind, probabilisticVariables, firingTransitionParameters, firingTransitionParametersPredicate);
+		return Objects.hash(operation, time, additionalGuards, activationKind, probabilisticVariables, firingTransitionParameters, firingTransitionParametersPredicate, withPredicate);
 	}
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ROOT, "Activation{operation = %s, time = %s, probability = %s, additionalGuards = %s, activationKind = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s}", operation, time, probabilisticVariables, additionalGuards, activationKind, firingTransitionParameters, firingTransitionParametersPredicate);
+		return String.format(Locale.ROOT, "Activation{operation = %s, time = %s, probability = %s, additionalGuards = %s, activationKind = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s, withPredicate = %s}", operation, time, probabilisticVariables, additionalGuards, activationKind, firingTransitionParameters, firingTransitionParametersPredicate, withPredicate);
 	}
 }

@@ -55,9 +55,11 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
 	private final Map<String, String> updating;
 
+	private final String withPredicate;
+
 	public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
 			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
-			Map<String, String> updating) {
+			Map<String, String> updating, String withPredicate) {
 		super(id);
 		this.execute = op;
 		this.after = time;
@@ -69,6 +71,7 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 		this.activating = activations;
 		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted;
 		this.updating = updating;
+		this.withPredicate = withPredicate;
 	}
 
 	@JsonProperty("execute")
@@ -110,6 +113,10 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
 	public Map<String, String> getUpdating() {
 		return updating;
+	}
+
+	public String getWithPredicate() {
+		return withPredicate;
 	}
 
 	@Override
@@ -172,6 +179,12 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 			sb.append("updating");
 			sb.append("=");
 			sb.append(updating);
+		}
+		if(withPredicate != null) {
+			sb.append(", ");
+			sb.append("withPredicate");
+			sb.append("=");
+			sb.append(withPredicate);
 		}
 		return sb.toString();
 	}

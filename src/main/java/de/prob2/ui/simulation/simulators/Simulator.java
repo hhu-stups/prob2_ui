@@ -8,8 +8,11 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfigurationChecker;
+import de.prob2.ui.simulation.external.ExternalSimulationStep;
+import de.prob2.ui.simulation.external.ExternalSimulatorExecutor;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -23,6 +26,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 public abstract class Simulator {
@@ -59,6 +65,8 @@ public abstract class Simulator {
 
 	protected boolean noActivationQueued;
 
+	protected ExternalSimulatorExecutor externalSimulatorExecutor;
+
 	public Simulator(final CurrentTrace currentTrace) {
 		super();
 		this.currentTrace = currentTrace;
@@ -87,12 +95,12 @@ public abstract class Simulator {
 	}
 
 	public void resetSimulator() {
-		this.variables = new HashMap<>();
-		this.configurationToActivation = new HashMap<>();
-		this.activationConfigurationMap = new HashMap<>();
-		this.activationConfigurationsSorted = new ArrayList<>();
-		this.operationToActivations = new HashMap<>();
-		this.timestamps = new ArrayList<>();
+		this.variables = new ConcurrentHashMap<>();
+		this.configurationToActivation = new ConcurrentHashMap<>();
+		this.activationConfigurationMap = new ConcurrentHashMap<>();
+		this.activationConfigurationsSorted = new CopyOnWriteArrayList<>();
+		this.operationToActivations = new ConcurrentHashMap<>();
+		this.timestamps = new CopyOnWriteArrayList<>();
 
 		this.delay = 0;
 		this.time.set(0);
@@ -121,8 +129,28 @@ public abstract class Simulator {
 						});
 				activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
 				currentTrace.removeListener(traceListener);
+			} else if(config instanceof SimulationExternalConfiguration) {
+				this.externalSimulatorExecutor = new ExternalSimulatorExecutor(((SimulationExternalConfiguration) config).getExternalPath(), currentTrace);
+				currentTrace.removeListener(traceListener);
 			}
 		}
+	}
+
+	private ActivationOperationConfiguration createDynamicActivation(String id, String op, String time, int priority, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
+										 Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
+										 Map<String, String> updating, String withPredicate) {
+		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, activatingOnlyWhenExecuted, updating, withPredicate);
+		if(!activationConfigurationsSorted.contains(activationConfig)) {
+			this.activationConfigurationsSorted.add(activationConfig);
+		}
+		if (!operationToActivations.containsKey(op)) {
+			operationToActivations.put(op, new HashSet<>());
+			operationToActivations.get(op).add(id);
+		}
+
+		activationConfigurationMap.putIfAbsent(id, activationConfig);
+		configurationToActivation.putIfAbsent(id, new ArrayList<>());
+		return activationConfig;
 	}
 
 	protected void setPreferences(Trace trace) {
@@ -181,6 +209,11 @@ public abstract class Simulator {
 	}
 
 	private void activateBeforeInitialisation(Trace trace, String operation) {
+		if(config instanceof SimulationExternalConfiguration) {
+			createDynamicActivation("$setup_constants", "$setup_constants", "0", 0,
+					null, ActivationOperationConfiguration.ActivationKind.SINGLE, null, null, null,
+					true, null, null);
+		}
 		if(configurationToActivation.containsKey(operation)) {
 			ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get(operation);
 			simulationEventHandler.activateOperation(trace.getCurrentState(), setupConfiguration, new ArrayList<>(), "1=1");
@@ -191,7 +224,9 @@ public abstract class Simulator {
 		updateStartingInformation(trace);
 		if(!trace.getCurrentState().isInitialised()) {
 			activateBeforeInitialisation(trace, Transition.SETUP_CONSTANTS_NAME);
-			activateBeforeInitialisation(trace, Transition.INITIALISE_MACHINE_NAME);
+			if(!(config instanceof SimulationExternalConfiguration)) {
+				activateBeforeInitialisation(trace, Transition.INITIALISE_MACHINE_NAME);
+			}
 		}
 	}
 
@@ -231,6 +266,26 @@ public abstract class Simulator {
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
 				timestamps.add(time.get());
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
+				if(config instanceof SimulationExternalConfiguration) {
+					if(!externalSimulatorExecutor.isStarted()) {
+						externalSimulatorExecutor.start();
+					}
+					if(!externalSimulatorExecutor.isDone()) {
+						FutureTask<ExternalSimulationStep> stepFuture = externalSimulatorExecutor.execute(newTrace);
+
+						ExternalSimulationStep step = null;
+						try {
+							step = stepFuture.get();
+						} catch (Exception e) {
+							e.printStackTrace();
+						}
+
+						ActivationOperationConfiguration newActivation = createDynamicActivation(step.getOp(), step.getOp(), step.getDelta(), 0,
+								null, ActivationOperationConfiguration.ActivationKind.SINGLE, null, null, null,
+								true, null, step.getPredicate());
+						simulationEventHandler.activateOperation(newTrace.getCurrentState(), newActivation, new ArrayList<>(), "1=1");
+					}
+				}
 			} else if("skip".equals(activation.getOperation())) {
 				updateStartingInformation(newTrace);
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");

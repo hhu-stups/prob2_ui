@@ -137,7 +137,7 @@ public class SimulationEventHandler {
 		}
 
 		Map<String, String> values = SimulationHelperFunctions.mergeValues(chooseProbabilistic(activation, state), chooseParameters(activation, state));
-		return chooseVariableValues(state, values);
+		return chooseVariableValues(state, values) + (activation.getWithPredicate() != null && !activation.getWithPredicate().isEmpty() ? " & " + activation.getWithPredicate() : "");
 	}
 
 
@@ -263,15 +263,16 @@ public class SimulationEventHandler {
 		Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
 		Object probability = activationOperationConfiguration.getProbabilisticVariables();
 		int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates, SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
+		String withPredicate = activationOperationConfiguration.getWithPredicate();
 
 		switch (activationKind) {
 			case MULTI:
-				activateMultiOperations(activationsForId, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+				activateMultiOperations(activationsForId, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates, withPredicate));
 				break;
 			case SINGLE:
 			case SINGLE_MAX:
 			case SINGLE_MIN:
-				activateSingleOperations(id, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates));
+				activateSingleOperations(id, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates, withPredicate));
 				break;
 		}
 	}

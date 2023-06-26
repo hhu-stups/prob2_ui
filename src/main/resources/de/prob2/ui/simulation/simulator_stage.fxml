@@ -43,8 +43,9 @@
 									<Tooltip text="%simulation.file.open" />
 								</tooltip>
 								<items>
-									<MenuItem fx:id="loadSimBModelItem" text="Load SimB Model" onAction="#loadSimBModel"/>
-									<MenuItem fx:id="loadSimBTraces" text="Load SimB Traces (Black Box)" onAction="#loadSimBTraces"/>
+									<MenuItem fx:id="loadSimBModelItem" text="%simulation.file.open.model" onAction="#loadSimBModel"/>
+									<MenuItem fx:id="loadSimBTraces" text="%simulation.file.open.blackbox" onAction="#loadSimBTraces"/>
+									<MenuItem fx:id="loadExternalSimulation" text="%simulation.file.open.external" onAction="#loadExternal"/>
 								</items>
 							</MenuButton>
 							<Button fx:id="btSimulate" onAction="#simulate">

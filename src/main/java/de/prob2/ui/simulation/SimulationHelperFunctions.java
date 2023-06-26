@@ -34,7 +34,7 @@ public class SimulationHelperFunctions {
 
 	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, Path path) {
 		try {
-			simulator.initSimulator(SimulationFileHandler.constructConfigurationFromJSON(path));
+			simulator.initSimulator(SimulationFileHandler.constructConfiguration(path));
 		} catch (IOException e) {
 			LOGGER.debug("Tried to load simulation configuration file", e);
 			alert(stageManager, window, e, "simulation.error.header.fileNotFound","simulation.error.body.fileNotFound");

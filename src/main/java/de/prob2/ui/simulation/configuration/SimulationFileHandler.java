@@ -10,7 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import com.fatboyindustrial.gsonjavatime.Converters;
 import com.google.gson.Gson;
@@ -33,18 +32,22 @@ public class SimulationFileHandler {
 			.setPrettyPrinting()
 			.create();
 
-	public static ISimulationModelConfiguration constructConfigurationFromJSON(Path inputFile) throws IOException, JsonSyntaxException {
+	public static ISimulationModelConfiguration constructConfiguration(Path inputFile) throws IOException, JsonSyntaxException {
 		if(!inputFile.toFile().isDirectory()) {
-			Gson gson = new Gson();
-			final JsonObject simulationFile;
-			try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
-				simulationFile = gson.fromJson(reader, JsonObject.class);
+			if(inputFile.endsWith(".json")) {
+				Gson gson = new Gson();
+				final JsonObject simulationFile;
+				try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
+					simulationFile = gson.fromJson(reader, JsonObject.class);
+				}
+				Map<String, String> variables = buildVariables(simulationFile.get("variables"));
+				List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
+				List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
+				final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
+				return new SimulationModelConfiguration(variables, activationConfigurations, uiListenerConfigurations, metadata);
+			} else { // Currently ends with py; more could be supported in the future
+				return new SimulationExternalConfiguration(inputFile);
 			}
-			Map<String, String> variables = buildVariables(simulationFile.get("variables"));
-			List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
-			List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
-			final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
-			return new SimulationModelConfiguration(variables, activationConfigurations, uiListenerConfigurations, metadata);
 		}
 
 		List<Path> timedTraces = Files.walk(inputFile).filter(p -> !Files.isDirectory(p))
@@ -106,7 +109,8 @@ public class SimulationFileHandler {
 		Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
 		boolean onlyWhenExecuted = activationAsObject.get("activatingOnlyWhenExecuted") == null || activationAsObject.get("activatingOnlyWhenExecuted").getAsBoolean();
 		Map<String, String> updating = buildUpdating(activationAsObject.get("updating"));
-		return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, onlyWhenExecuted, updating);
+		String withPredicate = activationAsObject.get("withPredicate") == null ? null : activationAsObject.get("withPredicate").getAsString();
+		return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, onlyWhenExecuted, updating, withPredicate);
 	}
 
 	private static Map<String, String> buildVariables(JsonElement jsonElement) {
