@@ -71,6 +71,8 @@
 					<TableColumn fx:id="statusProgressColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}"
 								 maxWidth="${fontSize.fontSize * 6}" text="%animation.tracereplay.view.columns.status"/>
 					<TableColumn fx:id="configurationColumn" text="%animation.tracereplay.view.columns.name"/>
+					<TableColumn fx:id="stepsColumn" minWidth="${fontSize.fontSize * 5}"
+								 maxWidth="${fontSize.fontSize * 5}" text="%animation.tracereplay.view.columns.steps"/>
 				</columns>
 				<placeholder>
 					<Label text="%animation.tracereplay.view.placeholder"/>

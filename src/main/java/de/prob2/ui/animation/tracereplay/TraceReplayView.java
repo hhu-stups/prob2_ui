@@ -13,6 +13,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
@@ -37,6 +38,7 @@ import de.prob2.ui.verifications.ExecutionContext;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -111,6 +113,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@FXML
 	private TableColumn<ReplayTrace, Node> statusProgressColumn;
 	@FXML
+	private TableColumn<ReplayTrace, String> stepsColumn;
+	@FXML
 	private MenuButton loadTraceButton;
 	@FXML
 	private HelpButton helpButton;
@@ -165,6 +169,27 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			return Bindings.when(trace.progressProperty().isEqualTo(-1))
 				       .<Node>then(statusIcon)
 				       .otherwise(replayProgress);
+		});
+
+		stepsColumn.setCellValueFactory(features -> {
+			ReplayTrace trace = features.getValue();
+			TraceJsonFile traceFile = trace.getLoadedTrace();
+			if (traceFile == null) {
+				try {
+					traceFile = trace.load();
+				} catch (IOException ignore) {
+					// ignore errors, so the user does not get bombarded with errors on startup
+				}
+			}
+
+			String steps;
+			if (traceFile != null) {
+				steps = String.valueOf(traceFile.getTransitionList().size());
+			} else {
+				steps = i18n.translate("common.notAvailable");
+			}
+
+			return new SimpleStringProperty(steps);
 		});
 
 		itemsTable.setRowFactory(table -> new Row());
