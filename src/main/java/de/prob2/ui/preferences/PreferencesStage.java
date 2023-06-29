@@ -73,7 +73,6 @@ public final class PreferencesStage extends Stage {
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
 	@FXML private TextField defaultLocationField;
 	@FXML private ChoiceBox<Locale> localeOverrideBox;
-	@FXML private ChoiceBox<String> traceDiffChoiceBox;
 	@FXML private PreferencesView globalPrefsView;
 	@FXML private Button undoButton;
 	@FXML private Button resetButton;
@@ -161,16 +160,6 @@ public final class PreferencesStage extends Stage {
 		});
 		localeOverrideBox.getItems().setAll(SUPPORTED_LOCALES);
 
-		// TODO: persist tracediffchoice
-		// TODO: change of choice not accepted yet
-		// TODO: change this to enums as well
-		traceDiffChoiceBox.getItems().setAll(FXCollections.observableArrayList(
-				i18n.translate("preferences.stage.tage.general.traceDiffType.singleLines"),
-				i18n.translate("preferences.stage.tage.general.traceDiffType.multipleLines")
-				//,i18n.translate("preferences.stage.tage.general.traceDiffType.treeView")
-		));
-		traceDiffChoiceBox.getSelectionModel().select(0);
-
 		this.globalPrefsView.setState(this.globalPrefsChangeState);
 
 		this.undoButton.disableProperty().bind(this.globalPrefsChangeState.changesAppliedProperty());
@@ -195,18 +184,6 @@ public final class PreferencesStage extends Stage {
 				configData.currentPreference = PersistenceUtils.getCurrentTab(tabPane);
 			}
 		});
-	}
-
-	public String getTraceDiffType() {
-		// TODO: change this to enum
-		String s = traceDiffChoiceBox.getSelectionModel().getSelectedItem();
-		String prefix = "preferences.stage.tage.general.traceDiffType.";
-		for (String t : new String[]{"singleLines", "multipleLines", "treeView"}) {
-			if (i18n.translate(prefix + t).equals(s)) {
-				return t;
-			}
-		}
-		return null;
 	}
 
 	@FXML
