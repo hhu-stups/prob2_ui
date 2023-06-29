@@ -20,6 +20,7 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.IOHelper;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.FontSize;
@@ -89,14 +90,10 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
 
 			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
-			openInExternalEditorItem.setOnAction(event ->
-				injector.getInstance(ExternalEditor.class).open(this.getItem().getAbsoluteLocation())
-			);
+			openInExternalEditorItem.setOnAction(event -> injector.getInstance(ExternalEditor.class).open(this.getItem().getAbsoluteLocation()));
 
 			final MenuItem revealInExplorerItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
-			revealInExplorerItem.setOnAction(event ->
-				injector.getInstance(RevealInExplorer.class).revealInExplorer(this.getItem().getAbsoluteLocation())
-			);
+			revealInExplorerItem.setOnAction(event -> injector.getInstance(RevealInExplorer.class).revealInExplorer(this.getItem().getAbsoluteLocation()));
 
 			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, removeMenuItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem);
 		}
@@ -123,8 +120,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-							final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final TraceChecker traceChecker, final I18n i18n,
-							final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
+	                        final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final TraceChecker traceChecker, final I18n i18n,
+	                        final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
 		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -156,17 +153,18 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 		statusProgressColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
-			
+
 			final CheckedIcon statusIcon = new CheckedIcon();
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
 			trace.checkedProperty().addListener((o, from, to) -> Platform.runLater(() -> statusIcon.setChecked(to)));
 			statusIcon.setChecked(trace.getChecked());
-			
+
 			final ProgressIndicator replayProgress = new ProgressBar();
 			replayProgress.progressProperty().bind(trace.progressProperty());
-			
-			return Bindings.when(trace.progressProperty().isEqualTo(-1)).<Node>then(statusIcon)
-				.otherwise(replayProgress);
+
+			return Bindings.when(trace.progressProperty().isEqualTo(-1))
+				       .<Node>then(statusIcon)
+				       .otherwise(replayProgress);
 		});
 
 		itemsTable.setRowFactory(table -> new Row());
@@ -236,7 +234,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			closeDescription();
 		}
 		final DescriptionView descriptionView =
-				getTraceDescriptionView(trace, this.stageManager, traceFileHandler, this.i18n, this::closeDescription);
+			getTraceDescriptionView(trace, this.stageManager, traceFileHandler, this.i18n, this::closeDescription);
 		splitPane.getItems().add(1, descriptionView);
 		splitPane.setDividerPositions(0.66);
 		showDescription = true;
@@ -249,17 +247,17 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		directoryChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path directory = fileChooserManager.showDirectoryChooser(directoryChooser, Kind.TRACES, stageManager.getCurrent());
 		List<Path> paths = new ArrayList<>();
-		if(directory != null) {
-			try(Stream<Path> walk = Files.walk(directory)) {
-				paths = walk.filter(p -> !Files.isDirectory(p))
-						.filter(p -> p.toString().toLowerCase().endsWith(TraceFileHandler.TRACE_FILE_EXTENSION))
-						.collect(Collectors.toList());
+		if (directory != null) {
+			try (Stream<Path> walk = Files.walk(directory)) {
+				paths = walk.filter(Files::isRegularFile)
+					        .filter(p -> IOHelper.getExtension(p).equals(TraceFileHandler.TRACE_FILE_EXTENSION))
+					        .collect(Collectors.toList());
 			} catch (IOException e) {
 				final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.traceDirectoryError.header", "animation.tracereplay.alerts.traceDirectoryError.error");
 				alert.initOwner(this.getScene().getWindow());
 				alert.show();
 			}
-			for(Path path : paths) {
+			for (Path path : paths) {
 				traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
 			}
 		}
