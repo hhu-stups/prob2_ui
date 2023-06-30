@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.fatboyindustrial.gsonjavatime.Converters;
+import com.google.common.io.MoreFiles;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -51,7 +52,7 @@ public class SimulationFileHandler {
 		}
 
 		List<Path> timedTraces = Files.walk(inputFile).filter(p -> !Files.isDirectory(p))
-				.filter(p -> p.toString().toLowerCase().endsWith(SimulationFileHandler.TRACE_FILE_EXTENSION))
+				.filter(p -> MoreFiles.getFileExtension(p).equals(SimulationFileHandler.TRACE_FILE_EXTENSION))
 				.collect(Collectors.toList());
 		return new SimulationBlackBoxModelConfiguration(timedTraces);
 	}
