@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -21,7 +22,6 @@ import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.IOHelper;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.FontSize;
@@ -275,7 +275,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (directory != null) {
 			try (Stream<Path> walk = Files.walk(directory)) {
 				paths = walk.filter(Files::isRegularFile)
-					        .filter(p -> IOHelper.getExtension(p).equals(TraceFileHandler.TRACE_FILE_EXTENSION))
+					        .filter(p -> MoreFiles.getFileExtension(p).equals(TraceFileHandler.TRACE_FILE_EXTENSION))
 					        .collect(Collectors.toList());
 			} catch (IOException e) {
 				final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.traceDirectoryError.header", "animation.tracereplay.alerts.traceDirectoryError.error");
