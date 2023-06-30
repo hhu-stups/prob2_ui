@@ -275,7 +275,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (directory != null) {
 			try (Stream<Path> walk = Files.walk(directory)) {
 				paths = walk.filter(Files::isRegularFile)
-					        .filter(p -> MoreFiles.getFileExtension(p).equals(TraceFileHandler.TRACE_FILE_EXTENSION))
+					        .filter(p -> MoreFiles.getFileExtension(p).equalsIgnoreCase(TraceFileHandler.TRACE_FILE_EXTENSION))
 					        .collect(Collectors.toList());
 			} catch (IOException e) {
 				final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.traceDirectoryError.header", "animation.tracereplay.alerts.traceDirectoryError.error");
