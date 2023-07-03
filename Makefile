@@ -20,6 +20,8 @@ check-ja:
 build:
 	@echo "Creating a DMG including the macOS App"
 	./gradlew jpackage
+	@echo "For signing execute make macos_sign; make check"
+	@echo "If successful do make notarize-app"
 clean:
 	rm out.prop
 
@@ -28,8 +30,11 @@ PROB2UI_VERSION=1.2.1
 SNAPSH=
 # comment in next line for SNAPSHOT builds
 SNAPSH=-SNAPSHOT
+# this is the name of the App in the DMG as created by jpackage
+# it is set in the build.gradle file (applicationName)
+# if the name differs from the internal app name we get an error
+#  (unsealed contents present in the bundle root) when signing the app
 DMGPROB2=ProB\ 2\ UI
-#DMGPROB2=ProB2-UI
 # internal name within Contents/MacOs:
 APPRPOB2=ProB\ 2\ UI
 DMGFILE=build/distributions/$(DMGPROB2)-$(PROB2UI_VERSION).dmg
@@ -38,7 +43,7 @@ ZIP_FILE=build/distributions/ProB2-UI-ForNotarization.zip
 VOLUME=/Volumes/$(DMGPROB2)/
 DMGAPPFILE=$(VOLUME)$(DMGPROB2).app
 BUILDDIR=build/distributions/
-#APPFILE=$(BUILDDIR)ProB2-UI.app
+#Name of the .app folder:
 APPFILE=$(BUILDDIR)ProB\ 2\ UI.app
 AC_USERNAME = "michael.leuschel@hhu.de"
 ADC_CERTIFICATE_NAME = "Michael Leuschel (794LFG5T52)"
@@ -100,10 +105,11 @@ check:
 
 $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
 	@echo "Step 5: Putting APP into a zipfile for Apple's notarization (into $(ZIP_FILE))"
-	/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
+	#/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
+	zip -vr $(ZIP_FILE) $(APPFILE)
 	
 NOTVERS = 1.2.1
-notarize-app: $(ZIP_FILE)
+notarize-app-old: $(ZIP_FILE)
 	@echo "Step 6: Sending Notarization request to Apple for APP (in zipfile $(ZIP_FILE))"
 	xcrun altool --notarize-app\
                --primary-bundle-id "de.hhu.stups.prob2ui.$(NOTVERS).zip"\
@@ -111,8 +117,15 @@ notarize-app: $(ZIP_FILE)
                --password "@keychain:AC_PASSWORD"\
                --file $(ZIP_FILE)
 
+notarize-app: $(ZIP_FILE)
+	@echo "Step 6: Sending Notarization request to Apple for APP (in zipfile $(ZIP_FILE))"
+	xcrun notarytool submit $(ZIP_FILE) \
+                   --keychain-profile "notarytool" \
+                   --wait
+	echo "In case of errors run:"
+	echo " xcrun notarytool log --keychain-profile \"notarytool\"  HASH"
 
-HASH=8c9fbaca-bdda-494d-928e-cab7ecd1adbb
+HASH=241970b9-c590-46c9-8d4c-71935772aaea
 info:
 	@echo "Step 6b: Obtaining information about a particular notarization request"
 	xcrun altool --notarization-info $(HASH) -u $(AC_USERNAME)
