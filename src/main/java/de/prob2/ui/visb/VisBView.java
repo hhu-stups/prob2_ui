@@ -296,7 +296,11 @@ public class VisBView extends BorderPane {
 			final Path visBVisualisation = machine.getVisBVisualisation();
 			final Path visBPath;
 			if (visBVisualisation != null) {
-				visBPath = currentProject.getLocation().resolve(visBVisualisation);
+				if (VisBController.NO_PATH.equals(visBVisualisation)) {
+					visBPath = VisBController.NO_PATH;
+				} else {
+					visBPath = currentProject.getLocation().resolve(visBVisualisation);
+				}
 			} else {
 				visBPath = getPathFromDefinitions(stateSpace);
 			}
