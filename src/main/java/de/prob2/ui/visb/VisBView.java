@@ -275,7 +275,7 @@ public class VisBView extends BorderPane {
 	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
 		visBController.setVisBPath(null);
 		if(machine != null && stateSpace != null) {
-			final Path visBVisualisation = machine.getVisBVisualisation();
+			final Path visBVisualisation = machine.getMachineProperties().getVisBVisualisation();
 			final Path visBPath;
 			if (visBVisualisation != null) {
 				visBPath = currentProject.getLocation().resolve(visBVisualisation);
@@ -510,7 +510,7 @@ public class VisBView extends BorderPane {
 		defaultPathDialog.initOwner(this.getScene().getWindow());
 		final Path loadedPathRelative = currentProject.getLocation().relativize(visBController.getVisBPath());
 		final Machine currentMachine = currentProject.getCurrentMachine();
-		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getVisBVisualisation());
+		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getMachineProperties().getVisBVisualisation());
 		defaultPathDialog.showAndWait().ifPresent(action -> {
 			switch (action) {
 				case LOAD_DEFAULT:
@@ -518,11 +518,11 @@ public class VisBView extends BorderPane {
 					break;
 
 				case SET_CURRENT_AS_DEFAULT:
-					currentMachine.setVisBVisualisation(loadedPathRelative);
+					currentMachine.getMachineProperties().setVisBVisualisation(loadedPathRelative);
 					break;
 
 				case UNSET_DEFAULT:
-					currentMachine.setVisBVisualisation(null);
+					currentMachine.getMachineProperties().setVisBVisualisation(null);
 					break;
 
 				default:

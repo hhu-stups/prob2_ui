@@ -30,7 +30,7 @@ public class DocumentationResourceBuilder {
 
 	private static void createTraceVisualisationDirectoryStructure(Path directory, List<Machine> machines) {
 		for (Machine machine : machines) {
-			for (ReplayTrace trace : machine.getTraces()) {
+			for (ReplayTrace trace : machine.getMachineProperties().getTraces()) {
 				try {
 					Files.createDirectories(Paths.get(ProjectDocumenter.getAbsoluteHtmlPath(directory,machine, trace))
 					);

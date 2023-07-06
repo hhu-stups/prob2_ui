@@ -86,7 +86,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			this.items.unbind();
 			if (to != null) {
-				this.items.bind(to.symbolicAnimationFormulasProperty());
+				this.items.bind(to.getMachineProperties().symbolicAnimationFormulasProperty());
 			} else {
 				this.items.clear();
 			}

@@ -77,7 +77,7 @@ public final class LTLFormulaChecker {
 			IDefinitions definitions = ((ClassicalBModel) model).getDefinitions();
 			bParser.setDefinitions(definitions);
 		}
-		return LTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser), machine.getPatternManager());
+		return LTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser), machine.getMachineProperties().getPatternManager());
 	}
 	
 	private static void handleFormulaResult(TemporalFormulaItem item, IModelCheckingResult result) {

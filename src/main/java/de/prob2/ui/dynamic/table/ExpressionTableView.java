@@ -159,9 +159,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			if(machine == null || to == null) {
 				return;
 			}
-			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getTableVisualizationItems();
+			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getMachineProperties().getTableVisualizationItems();
 			if(!items.containsKey(to.getCommand())) {
-				machine.addTableVisualizationListProperty(to.getCommand());
+				machine.getMachineProperties().addTableVisualizationListProperty(to.getCommand());
 			}
 			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});
@@ -182,7 +182,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 					Machine machine = currentProject.getCurrentMachine();
 					item.setId(id);
 					// This is necessary to force updating ids for VO Manager
-					machine.getDotVisualizationItems().get(lastItem.getCommand()).set(machine.getDotVisualizationItems().get(lastItem.getCommand()).indexOf(item), item);
+					machine.getMachineProperties().getDotVisualizationItems().get(lastItem.getCommand()).set(machine.getMachineProperties().getDotVisualizationItems().get(lastItem.getCommand()).indexOf(item), item);
 				});
 				tvFormula.refresh();
 			});
@@ -398,7 +398,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		}
 		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
 		Machine machine = currentProject.getCurrentMachine();
-		machine.addTableVisualizationItem(lastItem.getCommand(), formulaItem);
+		machine.getMachineProperties().addTableVisualizationItem(lastItem.getCommand(), formulaItem);
 		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 	}
 
@@ -409,6 +409,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		}
 		DynamicCommandFormulaItem formulaItem = this.tvFormula.getItems().get(this.tvFormula.getSelectionModel().getSelectedIndex());
 		Machine machine = currentProject.getCurrentMachine();
-		machine.removeTableVisualizationItem(lastItem.getCommand(), formulaItem);
+		machine.getMachineProperties().removeTableVisualizationItem(lastItem.getCommand(), formulaItem);
 	}
 }

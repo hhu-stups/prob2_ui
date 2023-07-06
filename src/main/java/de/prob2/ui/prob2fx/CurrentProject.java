@@ -161,7 +161,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		CompletableFuture<?> loadFuture = machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);
-		m.resetStatus();
+		m.getMachineProperties().resetStatus();
 		LTLPatternParser.parseMachine(m);
 		return loadFuture;
 	}

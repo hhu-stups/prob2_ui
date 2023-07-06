@@ -166,11 +166,11 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			tvPattern.itemsProperty().unbind();
 			if(to != null) {
 				if(from != null) {
-					from.clearPatternManager();
+					from.getMachineProperties().clearPatternManager();
 				}
-				items.bind(to.temporalFormulasProperty());
-				tvPattern.itemsProperty().bind(to.ltlPatternsProperty());
-				managePatternTable(to.ltlPatternsProperty());
+				items.bind(to.getMachineProperties().temporalFormulasProperty());
+				tvPattern.itemsProperty().bind(to.getMachineProperties().ltlPatternsProperty());
+				managePatternTable(to.getMachineProperties().ltlPatternsProperty());
 			} else {
 				items.set(FXCollections.emptyObservableList());
 				tvPattern.setItems(FXCollections.emptyObservableList());
@@ -192,9 +192,9 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			removeItem.setOnAction(e -> {
 				Machine machine = currentProject.getCurrentMachine();
 				LTLPatternItem item = row.getItem();
-				machine.getLTLPatterns().remove(item);
+				machine.getMachineProperties().getLTLPatterns().remove(item);
 				LTLPatternParser.removePattern(item, machine);
-				managePatternTable(machine.ltlPatternsProperty());
+				managePatternTable(machine.getMachineProperties().ltlPatternsProperty());
 			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
@@ -264,10 +264,10 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			return;
 		}
 		final Machine machine = currentProject.getCurrentMachine();
-		if (machine.getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
+		if (machine.getMachineProperties().getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
 			LTLPatternParser.addPattern(newItem, machine);
-			machine.getLTLPatterns().add(newItem);
-			managePatternTable(machine.ltlPatternsProperty());
+			machine.getMachineProperties().getLTLPatterns().add(newItem);
+			managePatternTable(machine.getMachineProperties().ltlPatternsProperty());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
@@ -296,8 +296,8 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		}
 		final Machine machine = currentProject.getCurrentMachine();
 		LTLPatternParser.removePattern(oldItem, machine);
-		if(machine.getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(oldItem) && existing.settingsEqual(changedItem))) {
-			machine.getLTLPatterns().set(machine.getLTLPatterns().indexOf(oldItem), changedItem);
+		if(machine.getMachineProperties().getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(oldItem) && existing.settingsEqual(changedItem))) {
+			machine.getMachineProperties().getLTLPatterns().set(machine.getMachineProperties().getLTLPatterns().indexOf(oldItem), changedItem);
 			LTLPatternParser.addPattern(changedItem, machine);
 			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
 		} else {
@@ -320,7 +320,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 				.filter(item -> item.getType() == TemporalFormulaItem.TemporalType.LTL)
 				.filter(TemporalFormulaItem::selected)
 				.collect(Collectors.toList());
-			List<LTLPatternItem> patterns = machine.getLTLPatterns();
+			List<LTLPatternItem> patterns = machine.getMachineProperties().getLTLPatterns();
 			try {
 				final JsonMetadata metadata = LTLData.metadataBuilder()
 					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
@@ -357,9 +357,9 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 				.filter(formula -> !items.contains(formula))
 				.forEach(items::add);
 		data.getPatterns().stream()
-				.filter(pattern -> !machine.getLTLPatterns().contains(pattern))
+				.filter(pattern -> !machine.getMachineProperties().getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {
-					machine.getLTLPatterns().add(pattern);
+					machine.getMachineProperties().getLTLPatterns().add(pattern);
 					LTLPatternParser.addPattern(pattern, machine);
 				});
 	}

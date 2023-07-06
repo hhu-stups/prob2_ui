@@ -257,7 +257,7 @@ public class VOManagerStage extends Stage {
 			if (to == null) {
 				currentMachineVTs.clear();
 			} else {
-				currentMachineVTs.bind(to.validationTasksProperty());
+				currentMachineVTs.bind(to.getMachineProperties().validationTasksProperty());
 			}
 		});
 
@@ -292,7 +292,7 @@ public class VOManagerStage extends Stage {
 
 		final Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
-			currentMachineVTs.bind(currentMachine.validationTasksProperty());
+			currentMachineVTs.bind(currentMachine.getMachineProperties().validationTasksProperty());
 		}
 
 		relatedMachineNames.addListener((InvalidationListener)o -> updateRequirementsTable());
