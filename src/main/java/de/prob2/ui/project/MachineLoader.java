@@ -3,9 +3,11 @@ package de.prob2.ui.project;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
@@ -40,8 +42,10 @@ import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanWrapper;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 
+import javafx.scene.control.ButtonType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -265,10 +269,7 @@ public class MachineLoader {
 					EventBFileNotFoundException exc = (EventBFileNotFoundException) e;
 					if(!exc.refreshProject()) {
 						// the source file (e.g. .bum) does not exist
-						Platform.runLater(() -> stageManager
-							.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
-								"project.machineLoader.alerts.fileNotFound.content", exc.getPath())
-							.showAndWait());
+						showAlert(machine, exc.getPath());
 					} else {
 						Platform.runLater(() -> stageManager
 							.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
@@ -277,16 +278,30 @@ public class MachineLoader {
 					}
 				} else if (e instanceof FileNotFoundException) {
 					LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
-					Platform.runLater(() -> stageManager
-						.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
-							"project.machineLoader.alerts.fileNotFound.content", currentProject.get().getAbsoluteMachinePath(machine))
-						.showAndWait());
+					showAlert(machine, currentProject.get().getAbsoluteMachinePath(machine));
 				} else {
 					LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
 					Platform.runLater(() -> stageManager
 						.makeExceptionAlert(e, "", "project.machineLoader.alerts.couldNotOpen.content", machine.getName())
 						.showAndWait());
 				}
+			}
+		});
+	}
+
+	private void showAlert(Machine machine, Object machinePath) {
+		Platform.runLater(() -> {
+			List<ButtonType> buttons = new ArrayList<>();
+			buttons.add(ButtonType.YES);
+			buttons.add(ButtonType.NO);
+			Alert alert =
+				stageManager.makeAlert(AlertType.ERROR, buttons,
+					"project.machineLoader.alerts.fileNotFound.header",
+					"project.machineLoader.alerts.fileNotFound.content",
+					machinePath);
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+				currentProject.removeMachine(machine);
 			}
 		});
 	}
