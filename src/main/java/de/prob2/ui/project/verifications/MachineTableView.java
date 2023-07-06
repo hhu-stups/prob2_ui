@@ -101,13 +101,13 @@ public class MachineTableView extends TableView<Machine> {
 	@FXML
 	public void initialize() {
 		machineTraceReplayColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineTraceReplayColumn.setCellValueFactory(features -> features.getValue().traceReplayStatusProperty());
+		machineTraceReplayColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().traceReplayStatusProperty());
 		machineLTLColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineLTLColumn.setCellValueFactory(features -> features.getValue().temporalStatusProperty());
+		machineLTLColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().temporalStatusProperty());
 		machineSymbolicColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineSymbolicColumn.setCellValueFactory(features -> features.getValue().symbolicCheckingStatusProperty());
+		machineSymbolicColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().symbolicCheckingStatusProperty());
 		machineModelcheckColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineModelcheckColumn.setCellValueFactory(features -> features.getValue().modelcheckingStatusProperty());
+		machineModelcheckColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().modelcheckingStatusProperty());
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		this.itemsProperty().bind(currentProject.machinesProperty());
 	}

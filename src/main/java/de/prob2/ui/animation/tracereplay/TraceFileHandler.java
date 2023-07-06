@@ -159,7 +159,7 @@ public final class TraceFileHandler {
 		alert.showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();
-				currentMachine.getTraces().remove(trace);
+				currentMachine.getMachineProperties().getTraces().remove(trace);
 			}
 		});
 	}
@@ -176,9 +176,9 @@ public final class TraceFileHandler {
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
 		ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
-		Optional<ReplayTrace> existingItem = machine.getTraces().stream().filter(replayTrace::settingsEqual).findAny();
+		Optional<ReplayTrace> existingItem = machine.getMachineProperties().getTraces().stream().filter(replayTrace::settingsEqual).findAny();
 		if (existingItem.isEmpty()) {
-			machine.getTraces().add(replayTrace);
+			machine.getMachineProperties().getTraces().add(replayTrace);
 			return replayTrace;
 		} else {
 			ReplayTrace t = existingItem.get();

@@ -126,7 +126,7 @@ public class SimulatorStage extends Stage {
 
 				Menu copyMenu = new Menu(i18n.translate("simulation.contextMenu.copy"));
 				copyMenu.getItems().clear();
-				for(SimulationModel model : currentProject.getCurrentMachine().getSimulations()) {
+				for(SimulationModel model : currentProject.getCurrentMachine().getMachineProperties().getSimulations()) {
 					SimulationModel simulationModel = cbSimulation.getSelectionModel().getSelectedItem();
 					if(simulationModel.equals(model)) {
 						continue;
@@ -517,7 +517,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
 	}
 
@@ -528,7 +528,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
 	}
 
@@ -657,7 +657,7 @@ public class SimulatorStage extends Stage {
 			cbSimulation.setItems(FXCollections.observableArrayList());
 			return;
 		}
-		cbSimulation.itemsProperty().bind(machine.simulationsProperty());
+		cbSimulation.itemsProperty().bind(machine.getMachineProperties().simulationsProperty());
 	}
 
 	public void loadSimulationIntoSimulator(SimulationModel simulation) {
@@ -679,6 +679,6 @@ public class SimulatorStage extends Stage {
 		if(simulationModel == null) {
 			return;
 		}
-		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
+		currentProject.getCurrentMachine().getMachineProperties().getSimulations().remove(simulationModel);
 	}
 }

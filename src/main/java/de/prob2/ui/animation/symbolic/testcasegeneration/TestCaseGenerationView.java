@@ -151,7 +151,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
 			items.unbind();
 			if (newValue != null) {
-				items.bind(newValue.testCasesProperty());
+				items.bind(newValue.getMachineProperties().testCasesProperty());
 			} else {
 				items.set(FXCollections.emptyObservableList());
 			}

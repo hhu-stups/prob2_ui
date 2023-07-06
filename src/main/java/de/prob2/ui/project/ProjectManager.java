@@ -244,7 +244,7 @@ public class ProjectManager {
 			project.resetChanged();
 			// Fill in ReplayTrace fields that Jackson cannot set.
 			for (final Machine machine : project.getMachines()) {
-				for (final ReplayTrace trace : machine.getTraces()) {
+				for (final ReplayTrace trace : machine.getMachineProperties().getTraces()) {
 					trace.initAfterLoad(path.resolveSibling(trace.getLocation()), traceManager);
 				}
 			}

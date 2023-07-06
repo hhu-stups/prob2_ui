@@ -146,9 +146,9 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			if(machine == null || to == null) {
 				return;
 			}
-			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getTableVisualizationItems();
+			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getMachineProperties().getTableVisualizationItems();
 			if(!items.containsKey(to.getCommand())) {
-				machine.addTableVisualizationListProperty(to.getCommand());
+				machine.getMachineProperties().addTableVisualizationListProperty(to.getCommand());
 			}
 			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});
@@ -284,7 +284,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		return data;
 	}
 
-
 	@Override
 	protected void addFormulaButton(){
 		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
@@ -292,7 +291,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 		evaluateFormula(item.getFormula());
 	}
-
 
 	@FXML
 	private void save() {
@@ -360,7 +358,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		DynamicCommandFormulaItem item = stage.getItem();
 		Machine machine = currentProject.getCurrentMachine();
 		if(item != null ) {
-			machine.addTableVisualizationItem(lastItem.getCommand(), item);
+			machine.getMachineProperties().addTableVisualizationItem(lastItem.getCommand(), item);
 			this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 			tvFormula.refresh();
 			evaluateFormula(item.getFormula());
@@ -374,6 +372,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		}
 		DynamicCommandFormulaItem formulaItem = this.tvFormula.getItems().get(this.tvFormula.getSelectionModel().getSelectedIndex());
 		Machine machine = currentProject.getCurrentMachine();
-		machine.removeTableVisualizationItem(lastItem.getCommand(), formulaItem);
+		machine.getMachineProperties().removeTableVisualizationItem(lastItem.getCommand(), formulaItem);
 	}
 }

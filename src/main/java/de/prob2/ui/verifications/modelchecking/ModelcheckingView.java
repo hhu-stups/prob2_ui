@@ -175,7 +175,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			items.unbind();
 			if (to != null) {
-				items.bind(to.modelcheckingItemsProperty());
+				items.bind(to.getMachineProperties().modelcheckingItemsProperty());
 			} else {
 				items.set(FXCollections.observableArrayList());
 			}
