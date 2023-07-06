@@ -10,12 +10,14 @@ import de.prob2.ui.internal.StageManager;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 
 public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 	public enum Action {
 		LOAD_DEFAULT,
+		LOAD_DEFINITIONS,
 		SET_CURRENT_AS_DEFAULT,
 		UNSET_DEFAULT,
 	}
@@ -29,6 +31,7 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 	private final SimpleObjectProperty<Path> defaultPath;
 
 	private ButtonType loadButtonType;
+	private ButtonType loadDefinitionsButtonType;
 	private ButtonType setButtonType;
 	private ButtonType unsetButtonType;
 
@@ -45,10 +48,11 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 		this.defaultPath = new SimpleObjectProperty<>();
 
 		this.loadButtonType = new ButtonType(i18n.translate("visb.defaultVisualisation.load"));
-		this.setButtonType = new ButtonType(i18n.translate(	"visb.defaultVisualisation.set"));
+		this.loadDefinitionsButtonType = new ButtonType(i18n.translate("visb.definitionsVisualisation.load"));
+		this.setButtonType = new ButtonType(i18n.translate("visb.defaultVisualisation.set"));
 		this.unsetButtonType = new ButtonType(i18n.translate("visb.defaultVisualisation.reset"));
 
-		this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
+		this.getDialogPane().getButtonTypes().setAll(this.setButtonType, this.loadDefinitionsButtonType, ButtonType.CANCEL);
 
 		this.titleProperty().bind((i18n.translateBinding(this.titleKey)));
 		this.setResultConverter(buttonType -> {
@@ -56,6 +60,8 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 				return null;
 			} else if (buttonType == this.loadButtonType) {
 				return DefaultPathDialog.Action.LOAD_DEFAULT;
+			} else if (buttonType == this.loadDefinitionsButtonType) {
+				return DefaultPathDialog.Action.LOAD_DEFINITIONS;
 			} else if (buttonType == this.setButtonType) {
 				return DefaultPathDialog.Action.SET_CURRENT_AS_DEFAULT;
 			} else if (buttonType == this.unsetButtonType) {
@@ -64,24 +70,32 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 				throw new AssertionError("Unhandled button type: " + buttonType);
 			}
 		});
-		this.contentTextProperty().bind(Bindings.when(this.defaultPath.isNull())
-								.then(i18n.translateBinding(this.statusWithoutDefaultKey))
-								.otherwise(
-									Bindings.when(this.defaultPath.isEqualTo(loadedPath))
-										.then(i18n.translateBinding(this.statusWithCurrentAsDefaultKey, this.defaultPath))
-										.otherwise(i18n.translateBinding(this.statusWithDefaultKey, this.defaultPath))
-								));
-		this.defaultPath.addListener((observable, oldValue, newValue) -> {
-			if (newValue == null) {
-				this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
+		this.contentTextProperty().bind(
+			Bindings.when(this.defaultPath.isNull())
+				.then(i18n.translateBinding(this.statusWithoutDefaultKey))
+				.otherwise(
+					Bindings.when(this.defaultPath.isEqualTo(loadedPath))
+						.then(i18n.translateBinding(this.statusWithCurrentAsDefaultKey, this.defaultPath))
+						.otherwise(i18n.translateBinding(this.statusWithDefaultKey, this.defaultPath))
+				)
+		);
+		ChangeListener<? super Path> changeListener = (observable, oldValue, newValue) -> {
+			this.getDialogPane().getButtonTypes().clear();
+			if (this.defaultPath.get() == null) {
+				this.getDialogPane().getButtonTypes().add(this.setButtonType);
 			} else {
-				this.getDialogPane().getButtonTypes().clear();
-				if (!newValue.equals(this.loadedPath.get())) {
+				if (!this.defaultPath.get().equals(this.loadedPath.get())) {
 					this.getDialogPane().getButtonTypes().addAll(this.loadButtonType, this.setButtonType);
 				}
-				this.getDialogPane().getButtonTypes().addAll(this.unsetButtonType, ButtonType.CANCEL);
+				this.getDialogPane().getButtonTypes().add(this.unsetButtonType);
 			}
-		});
+			if (!VisBController.NO_PATH.equals(this.loadedPath.get())) {
+				this.getDialogPane().getButtonTypes().add(this.loadDefinitionsButtonType);
+			}
+			this.getDialogPane().getButtonTypes().add(ButtonType.CANCEL);
+		};
+		this.defaultPath.addListener(changeListener);
+		this.loadedPath.addListener(changeListener);
 
 		stageManager.register(this);
 	}

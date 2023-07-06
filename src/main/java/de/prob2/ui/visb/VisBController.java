@@ -130,7 +130,9 @@ public class VisBController {
 		// We had a similar issue on a ListProperty listener long time ago.
 		// This was caused by JavaFX not triggering the listener when the old object is equal to the new one
 		this.visBPathProperty().set(null);
-		this.visBPathProperty().set(visBPath);
+		if (visBPath != null) {
+			this.visBPathProperty().set(visBPath);
+		}
 	}
 
 	public ReadOnlyObjectProperty<VisBVisualisation> visBVisualisationProperty() {

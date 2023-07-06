@@ -555,6 +555,10 @@ public class VisBView extends BorderPane {
 					this.loadVisBFileFromMachine(currentMachine, currentTrace.getStateSpace());
 					break;
 
+				case LOAD_DEFINITIONS:
+					visBController.setVisBPath(getPathFromDefinitions(currentTrace.getStateSpace()));
+					break;
+
 				case SET_CURRENT_AS_DEFAULT:
 					currentMachine.setVisBVisualisation(loadedPathRelative);
 					break;
