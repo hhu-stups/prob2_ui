@@ -40,19 +40,19 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 		final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, min));
 		spinner.setEditable(true);
 		spinner.getEditor().textProperty().addListener((o, from, to) -> {
-			this.setPreferenceValue(pti.getPreferenceInfo().name, to);
-			Integer value;
+			int value;
 			try {
-				value = spinner.getValueFactory().getConverter().fromString(to);
+				value = Integer.parseInt(spinner.getEditor().textProperty().get());
+				if (value < min) {
+					value = min;
+				}
+				if (value > max) {
+					value = max;
+				}
+				setPreferenceValue(pti.getPreferenceInfo().name, String.valueOf(value));
 			} catch (NumberFormatException e) {
 				LOGGER.trace("User-entered number is currently invalid", e);
-				value = null;
-			}
-			spinner.getEditor().getStyleClass().remove("text-field-error");
-			if (value == null || value < min || value > max) {
-				spinner.getEditor().getStyleClass().add("text-field-error");
-			} else {
-				spinner.getValueFactory().setValue(value);
+				spinner.getEditor().textProperty().setValue(from);
 			}
 		});
 		spinner.getEditor().setText(pti.getValue());
