@@ -534,7 +534,15 @@ public class VisBView extends BorderPane {
 	public void manageDefaultVisualisation() {
 		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
 		defaultPathDialog.initOwner(this.getScene().getWindow());
-		final Path loadedPathRelative = currentProject.getLocation().relativize(visBController.getVisBPath());
+
+		final Path loadedPathAbsolute = visBController.getVisBPath();
+		final Path loadedPathRelative;
+		if (VisBController.NO_PATH.equals(loadedPathAbsolute)) {
+			loadedPathRelative = VisBController.NO_PATH;
+		} else {
+			loadedPathRelative = currentProject.getLocation().relativize(loadedPathAbsolute);
+		}
+
 		final Machine currentMachine = currentProject.getCurrentMachine();
 		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getVisBVisualisation());
 		defaultPathDialog.showAndWait().ifPresent(action -> {

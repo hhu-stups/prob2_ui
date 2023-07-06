@@ -23,6 +23,7 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 	private final I18n i18n;
 	private final SimpleStringProperty titleKey;
 	private final SimpleStringProperty statusWithDefaultKey;
+	private final SimpleStringProperty statusWithCurrentAsDefaultKey;
 	private final SimpleStringProperty statusWithoutDefaultKey;
 	private final SimpleObjectProperty<Path> loadedPath;
 	private final SimpleObjectProperty<Path> defaultPath;
@@ -38,6 +39,7 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 		this.i18n = i18n;
 		this.titleKey = new SimpleStringProperty("visb.defaultVisualisation.header");
 		this.statusWithDefaultKey = new SimpleStringProperty("visb.defaultVisualisation.text");
+		this.statusWithCurrentAsDefaultKey = new SimpleStringProperty("visb.currentAsDefaultVisualisation.text");
 		this.statusWithoutDefaultKey = new SimpleStringProperty("visb.noDefaultVisualisation.text");
 		this.loadedPath = new SimpleObjectProperty<>();
 		this.defaultPath = new SimpleObjectProperty<>();
@@ -62,9 +64,13 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 				throw new AssertionError("Unhandled button type: " + buttonType);
 			}
 		});
-		this.contentTextProperty().bind(Bindings.when(defaultPath.isNull())
+		this.contentTextProperty().bind(Bindings.when(this.defaultPath.isNull())
 								.then(i18n.translateBinding(this.statusWithoutDefaultKey))
-								.otherwise(i18n.translateBinding(this.statusWithDefaultKey, this.defaultPath)));
+								.otherwise(
+									Bindings.when(this.defaultPath.isEqualTo(loadedPath))
+										.then(i18n.translateBinding(this.statusWithCurrentAsDefaultKey, this.defaultPath))
+										.otherwise(i18n.translateBinding(this.statusWithDefaultKey, this.defaultPath))
+								));
 		this.defaultPath.addListener((observable, oldValue, newValue) -> {
 			if (newValue == null) {
 				this.getDialogPane().getButtonTypes().setAll(this.setButtonType, ButtonType.CANCEL);
