@@ -4,6 +4,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.internal.StageManager;
+
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +39,12 @@ public class VisBConnector {
 			// It seems that JavaScript exceptions are completely ignored if they are thrown back to JavaScript,
 			// so log them manually here.
 			LOGGER.error("Uncaught exception in VisBConnector.click called by JavaScript", t);
-			throw t;
+			Platform.runLater(() -> {
+				StageManager stageManager = this.injector.getInstance(StageManager.class);
+				Alert alert = stageManager.makeExceptionAlert(t, "visb.exception.header", "visb.exception.clickEvent");
+				alert.initOwner(injector.getInstance(VisBView.class).getScene().getWindow());
+				alert.showAndWait();
+			});
 		}
 	}
 }
