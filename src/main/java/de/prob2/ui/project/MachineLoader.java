@@ -269,16 +269,16 @@ public class MachineLoader {
 					EventBFileNotFoundException exc = (EventBFileNotFoundException) e;
 					if(!exc.refreshProject()) {
 						// the source file (e.g. .bum) does not exist
-						showAlert(machine, exc.getPath());
+						showAlert(exc, machine);
 					} else {
 						Platform.runLater(() -> stageManager
 							.makeAlert(AlertType.ERROR, "project.machineLoader.alerts.fileNotFound.header",
-								"project.machineLoader.alerts.eventBFileNotFound.content", exc.getPath())
+								"project.machineLoader.alerts.eventBFileNotFound.content", exc.getLocalizedMessage(), machine.getName())
 							.showAndWait());
 					}
 				} else if (e instanceof FileNotFoundException) {
 					LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
-					showAlert(machine, currentProject.get().getAbsoluteMachinePath(machine));
+					showAlert(e, machine);
 				} else {
 					LOGGER.error("Loading machine \"{}\" failed", machine.getName(), e);
 					Platform.runLater(() -> stageManager
@@ -289,7 +289,7 @@ public class MachineLoader {
 		});
 	}
 
-	private void showAlert(Machine machine, Object machinePath) {
+	private void showAlert(Throwable exception, Machine machine) {
 		Platform.runLater(() -> {
 			List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(ButtonType.YES);
@@ -298,7 +298,8 @@ public class MachineLoader {
 				stageManager.makeAlert(AlertType.ERROR, buttons,
 					"project.machineLoader.alerts.fileNotFound.header",
 					"project.machineLoader.alerts.fileNotFound.content",
-					machinePath);
+					exception.getLocalizedMessage(),
+					machine.getName());
 			Optional<ButtonType> result = alert.showAndWait();
 			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
 				currentProject.removeMachine(machine);
