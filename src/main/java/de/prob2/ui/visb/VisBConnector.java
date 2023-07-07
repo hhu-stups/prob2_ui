@@ -36,7 +36,7 @@ public class VisBConnector {
 		try {
 			this.injector.getInstance(VisBController.class).executeEvent(id,pageX,pageY,shiftKey,metaKey);
 		} catch (Throwable t) {
-			// It seems that JavaScript exceptions are completely ignored if they are thrown back to JavaScript,
+			// It seems that Java exceptions are completely ignored if they are thrown back to JavaScript,
 			// so log them manually here.
 			LOGGER.error("Uncaught exception in VisBConnector.click called by JavaScript", t);
 			Platform.runLater(() -> {
