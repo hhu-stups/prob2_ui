@@ -35,7 +35,7 @@ public class SimulationFileHandler {
 
 	public static ISimulationModelConfiguration constructConfiguration(Path inputFile) throws IOException, JsonSyntaxException {
 		if(!inputFile.toFile().isDirectory()) {
-			if(inputFile.endsWith(".json")) {
+			if(inputFile.toFile().getName().endsWith("json")) {
 				Gson gson = new Gson();
 				final JsonObject simulationFile;
 				try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {

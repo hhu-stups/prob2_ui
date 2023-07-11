@@ -75,6 +75,12 @@ public abstract class Simulator {
 		this.stepCounter = 0;
 		this.delay = 0;
 		this.noActivationQueued = false;
+		this.variables = new ConcurrentHashMap<>();
+		this.configurationToActivation = new ConcurrentHashMap<>();
+		this.activationConfigurationMap = new ConcurrentHashMap<>();
+		this.activationConfigurationsSorted = new CopyOnWriteArrayList<>();
+		this.operationToActivations = new ConcurrentHashMap<>();
+		this.timestamps = new CopyOnWriteArrayList<>();
 
 		this.traceListener = (observable, from, to) -> {
 			if(config != null && to != null && to.getStateSpace() != null) {
