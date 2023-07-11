@@ -1,6 +1,5 @@
 package de.prob2.ui.visb;
 
-import de.prob2.ui.internal.FXMLInjected;
 import java.awt.image.RenderedImage;
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import javafx.application.Platform;
-import javafx.scene.control.MenuButton;
-import javafx.scene.layout.BorderPane;
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -34,10 +30,10 @@ import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.helpsystem.HelpSystemStage;
+import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -46,6 +42,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.help.UserManualStage;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
@@ -57,8 +54,10 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebErrorEvent;
@@ -92,7 +91,6 @@ public class VisBView extends BorderPane {
 	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
 	private final FileChooserManager fileChooserManager;
-	private final TraceFileHandler traceFileHandler;
 
 	@FXML
 	private MenuBar visbMenuBar;
@@ -144,7 +142,7 @@ public class VisBView extends BorderPane {
 	@Inject
 	public VisBView(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
 									final CurrentTrace currentTrace, final I18n i18n, final FileChooserManager fileChooserManager,
-									final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController, final TraceFileHandler traceFileHandler) {
+									final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController) {
 		super();
 		this.injector = injector;
 		this.i18n = i18n;
@@ -154,7 +152,6 @@ public class VisBView extends BorderPane {
 		this.fileChooserManager = fileChooserManager;
 		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.visBController = visBController;
-		this.traceFileHandler = traceFileHandler;
 		this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
 	}
 
