@@ -20,8 +20,8 @@ import com.google.common.io.CharStreams;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 
-import de.prob.animator.command.ExportVisBForCurrentStateCommand;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
+import de.prob.animator.command.ExportVisBHtmlForStates;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
@@ -585,7 +585,7 @@ public class VisBView extends BorderPane {
 	public void saveHTMLExportWithPath(Trace trace, VisBExportKind kind, Path path) {
 		if(path != null) {
 			if(kind == VisBExportKind.CURRENT_STATE) {
-				ExportVisBForCurrentStateCommand cmd = new ExportVisBForCurrentStateCommand(path.toAbsolutePath().toString());
+				ExportVisBHtmlForStates cmd = new ExportVisBHtmlForStates(trace.getCurrentState(), path);
 				trace.getStateSpace().execute(cmd);
 			} else if(kind == VisBExportKind.CURRENT_TRACE) {
 				List<String> transIDs = trace.getTransitionList().stream()
