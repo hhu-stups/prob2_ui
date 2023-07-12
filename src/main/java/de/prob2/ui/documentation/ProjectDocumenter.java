@@ -117,7 +117,7 @@ public class ProjectDocumenter {
 	}
 
 	public String saveTraceHtml(Machine machine, ReplayTrace trace){
-		String filename = Transition.prettifyName(trace.getName())+".html";
+		String filename = trace.getName() + ".html";
 		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
 		* To solve this Problem, wait on the CompletableFuture. */
 		project.startAnimation(machine).join();
