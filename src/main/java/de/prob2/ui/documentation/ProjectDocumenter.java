@@ -14,6 +14,7 @@ import java.util.Properties;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -22,7 +23,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.visb.VisBView;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -117,14 +117,14 @@ public class ProjectDocumenter {
 	}
 
 	public String saveTraceHtml(Machine machine, ReplayTrace trace){
-		VisBView visBView = injector.getInstance(VisBView.class);
 		String filename = Transition.prettifyName(trace.getName())+".html";
 		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
 		* To solve this Problem, wait on the CompletableFuture. */
 		project.startAnimation(machine).join();
 		final StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
-		visBView.saveHTMLExportWithPath(trace.getReplayedTrace().getTrace(stateSpace), VisBView.VisBExportKind.CURRENT_TRACE, Paths.get(getAbsoluteHtmlPath(directory,machine,trace)+filename));
+		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getAnimatedReplayedTrace(), Paths.get(getAbsoluteHtmlPath(directory, machine, trace) + filename));
+		stateSpace.execute(cmd);
 		return getHtmlPath(machine,trace)+filename;
 	}
 
