@@ -61,7 +61,6 @@ public class ProjectDocumenter {
 		this.filename = filename;
 		this.injector = injector;
 		tracesHtmlPaths = new HashMap<>();
-		DocumentationResourceBuilder.buildLatexResources(dir,machines);
 	}
 
 	private static void createPdf(String filename, Path directory) throws IOException {
@@ -71,6 +70,7 @@ public class ProjectDocumenter {
 	}
 
 	public void documentVelocity() throws IOException {
+		DocumentationResourceBuilder.buildLatexResources(directory, machines);
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
 		String templateName = getLanguageTemplate();
