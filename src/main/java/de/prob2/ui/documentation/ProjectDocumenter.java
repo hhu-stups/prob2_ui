@@ -117,27 +117,22 @@ public class ProjectDocumenter {
 	}
 
 	public String saveTraceHtml(Machine machine, ReplayTrace trace){
-		String filename = trace.getName() + ".html";
+		Path htmlPath = getHtmlDirectory(machine).resolve(trace.getName() + ".html");
 		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
 		* To solve this Problem, wait on the CompletableFuture. */
 		project.startAnimation(machine).join();
 		final StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
-		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getAnimatedReplayedTrace(), Paths.get(getAbsoluteHtmlPath(directory, machine, trace) + filename));
+		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getAnimatedReplayedTrace(), directory.resolve(htmlPath));
 		stateSpace.execute(cmd);
-		return getHtmlPath(machine,trace)+filename;
+		return htmlPath.toString();
 	}
 
 	public Path getDirectory() {
 		return directory;
 	}
 
-	public static String getAbsoluteHtmlPath(Path directory, Machine machine, ReplayTrace trace) {
-		return directory+"/" + getHtmlPath(machine,trace);
+	public static Path getHtmlDirectory(Machine machine) {
+		return Paths.get("html_files", machine.getName());
 	}
-
-	public static String getHtmlPath(Machine machine, ReplayTrace trace) {
-		return "html_files/" + machine.getName() + "/";
-	}
-
 }

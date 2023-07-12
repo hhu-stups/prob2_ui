@@ -1,9 +1,5 @@
 package de.prob2.ui.documentation;
 
-import de.prob2.ui.Main;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.project.machines.Machine;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -11,6 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+
+import de.prob2.ui.Main;
+import de.prob2.ui.project.machines.Machine;
 
 public class DocumentationResourceBuilder {
 	public static void buildLatexResources(Path directory, List<Machine> machines) {
@@ -30,13 +29,10 @@ public class DocumentationResourceBuilder {
 
 	private static void createTraceVisualisationDirectoryStructure(Path directory, List<Machine> machines) {
 		for (Machine machine : machines) {
-			for (ReplayTrace trace : machine.getTraces()) {
-				try {
-					Files.createDirectories(Paths.get(ProjectDocumenter.getAbsoluteHtmlPath(directory,machine, trace))
-					);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
+			try {
+				Files.createDirectories(directory.resolve(ProjectDocumenter.getHtmlDirectory(machine)));
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}
 	}
