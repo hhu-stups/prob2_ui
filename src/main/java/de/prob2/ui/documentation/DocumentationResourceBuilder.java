@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 
@@ -18,7 +17,7 @@ public class DocumentationResourceBuilder {
 	}
 
 	private static void createAndFillResourceDirectory(Path directory) throws IOException {
-		Files.createDirectories(Paths.get(directory + "/latex_resources"));
+		Files.createDirectories(directory.resolve("latex_resources"));
 		saveProBLogo(directory);
 		saveLatexCls(directory);
 	}
@@ -29,18 +28,16 @@ public class DocumentationResourceBuilder {
 		}
 	}
 	private static void saveProBLogo(Path directory) throws IOException {
-		String pathname = directory +"/latex_resources/ProB_Logo.png";
-		copyFile(pathname,  Main.class.getResourceAsStream("ProB_Logo.png"));
+		copyFile(directory.resolve("latex_resources/ProB_Logo.png"), Main.class.getResourceAsStream("ProB_Logo.png"));
 	}
 	private static void saveLatexCls(Path directory) throws IOException {
-		String pathname = directory +"/latex_resources/autodoc.cls";
-		copyFile(pathname, ProjectDocumenter.class.getResourceAsStream("autodoc.cls"));
+		copyFile(directory.resolve("latex_resources/autodoc.cls"), ProjectDocumenter.class.getResourceAsStream("autodoc.cls"));
 	}
 
-	private static void copyFile(String pathname, InputStream resource) throws IOException {
+	private static void copyFile(Path path, InputStream resource) throws IOException {
 		try (InputStream resourceAsStream = resource) {
 			assert resourceAsStream != null;
-			Files.copy(resourceAsStream, Paths.get(pathname), StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(resourceAsStream, path, StandardCopyOption.REPLACE_EXISTING);
 		}
 	}
 }
