@@ -8,9 +8,7 @@ import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import javax.imageio.ImageIO;
 import javax.inject.Inject;
@@ -29,7 +27,6 @@ import de.prob.animator.domainobjects.VisBItem;
 import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.helpsystem.HelpSystemStage;
@@ -588,10 +585,7 @@ public class VisBView extends BorderPane {
 				ExportVisBHtmlForStates cmd = new ExportVisBHtmlForStates(trace.getCurrentState(), path);
 				trace.getStateSpace().execute(cmd);
 			} else if(kind == VisBExportKind.CURRENT_TRACE) {
-				List<String> transIDs = trace.getTransitionList().stream()
-						.map(Transition::getId)
-						.collect(Collectors.toList());
-				ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(transIDs, path.toAbsolutePath().toString());
+				ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace, path);
 				trace.getStateSpace().execute(cmd);
 			}
 		}
