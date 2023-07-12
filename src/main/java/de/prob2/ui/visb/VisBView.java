@@ -74,11 +74,6 @@ import org.slf4j.LoggerFactory;
 @Singleton
 @FXMLInjected
 public class VisBView extends BorderPane {
-
-	public enum VisBExportKind {
-		CURRENT_STATE, CURRENT_TRACE
-	}
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBView.class);
 	private final Injector injector;
 	private final I18n i18n;
@@ -227,8 +222,31 @@ public class VisBView extends BorderPane {
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
-		exportHistoryItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_TRACE));
-		exportCurrentStateItem.setOnAction(e -> saveHTMLExport(VisBExportKind.CURRENT_STATE));
+		exportHistoryItem.setOnAction(e -> {
+			Trace trace = currentTrace.get();
+			if (trace == null) {
+				return;
+			}
+			Path path = showHtmlExportFileChooser();
+			if (path == null) {
+				return;
+			}
+			ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace, path);
+			trace.getStateSpace().execute(cmd);
+		});
+
+		exportCurrentStateItem.setOnAction(e -> {
+			Trace trace = currentTrace.get();
+			if (trace == null) {
+				return;
+			}
+			Path path = showHtmlExportFileChooser();
+			if (path == null) {
+				return;
+			}
+			ExportVisBHtmlForStates cmd = new ExportVisBHtmlForStates(trace.getCurrentState(), path);
+			trace.getStateSpace().execute(cmd);
+		});
 
 		Platform.runLater(() -> {
 
@@ -567,30 +585,14 @@ public class VisBView extends BorderPane {
 		});
 	}
 
-	public void saveHTMLExport(VisBExportKind kind) {
-		if (currentTrace.get() != null) {
-			final FileChooser fileChooser = new FileChooser();
-			FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
-			fileChooser.getExtensionFilters().setAll(htmlFilter);
-			fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
+	private Path showHtmlExportFileChooser() {
+		final FileChooser fileChooser = new FileChooser();
+		FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
+		fileChooser.getExtensionFilters().setAll(htmlFilter);
+		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 
-			Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this.getScene().getWindow());
-			saveHTMLExportWithPath(currentTrace.get(), kind, path);
-		}
+		return fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this.getScene().getWindow());
 	}
-
-	public void saveHTMLExportWithPath(Trace trace, VisBExportKind kind, Path path) {
-		if(path != null) {
-			if(kind == VisBExportKind.CURRENT_STATE) {
-				ExportVisBHtmlForStates cmd = new ExportVisBHtmlForStates(trace.getCurrentState(), path);
-				trace.getStateSpace().execute(cmd);
-			} else if(kind == VisBExportKind.CURRENT_TRACE) {
-				ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace, path);
-				trace.getStateSpace().execute(cmd);
-			}
-		}
-	}
-
 }
 
 
