@@ -24,7 +24,7 @@
 						<Button fx:id="startStopButton" styleClass="button-dark2"/>
 					</HBox>
 					<Label text="%proBCoreConsole.output.label"/>
-					<VirtualizedScrollPane minWidth="200.0" minHeight="200.0" prefWidth="800.0" prefHeight="600.0">
+					<VirtualizedScrollPane minWidth="200.0" minHeight="200.0" VBox.vgrow="ALWAYS" prefWidth="800" prefHeight="600">
 						<content>
 							<PrologOutput fx:id="prologOutput"/>
 						</content>
