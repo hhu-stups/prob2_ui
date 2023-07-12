@@ -10,7 +10,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<fx:root type="Stage" title="%proBCoreConsole.title" minWidth="320" minHeight="240" maxWidth="800.0" maxHeight="600.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" title="%proBCoreConsole.title" minWidth="320" minHeight="240" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<StackPane>
