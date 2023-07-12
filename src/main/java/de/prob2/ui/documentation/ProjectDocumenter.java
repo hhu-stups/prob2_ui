@@ -70,7 +70,7 @@ public class ProjectDocumenter {
 	}
 
 	public void documentVelocity() throws IOException {
-		DocumentationResourceBuilder.buildLatexResources(directory, machines);
+		DocumentationResourceBuilder.buildLatexResources(directory);
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
 		String templateName = getLanguageTemplate();
@@ -116,8 +116,10 @@ public class ProjectDocumenter {
 		return context;
 	}
 
-	public String saveTraceHtml(Machine machine, ReplayTrace trace){
-		Path htmlPath = getHtmlDirectory(machine).resolve(trace.getName() + ".html");
+	public String saveTraceHtml(Machine machine, ReplayTrace trace) throws IOException {
+		Path htmlDirectory = getHtmlDirectory(machine);
+		Files.createDirectories(directory.resolve(htmlDirectory));
+		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
 		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
 		* To solve this Problem, wait on the CompletableFuture. */
 		project.startAnimation(machine).join();
