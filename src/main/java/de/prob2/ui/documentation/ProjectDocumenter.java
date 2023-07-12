@@ -1,11 +1,13 @@
 package de.prob2.ui.documentation;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -17,6 +19,7 @@ import com.google.inject.Injector;
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.I18n;
@@ -69,8 +72,22 @@ public class ProjectDocumenter {
 		builder.start();
 	}
 
+	private static void copyFile(Path path, InputStream resource) throws IOException {
+		try (InputStream resourceAsStream = resource) {
+			assert resourceAsStream != null;
+			Files.copy(resourceAsStream, path, StandardCopyOption.REPLACE_EXISTING);
+		}
+	}
+
+	private static void buildLatexResources(Path directory) throws IOException {
+		Path latexResourcesDir = directory.resolve("latex_resources");
+		Files.createDirectories(latexResourcesDir);
+		copyFile(latexResourcesDir.resolve("ProB_Logo.png"), Main.class.getResourceAsStream("ProB_Logo.png"));
+		copyFile(latexResourcesDir.resolve("autodoc.cls"), ProjectDocumenter.class.getResourceAsStream("autodoc.cls"));
+	}
+
 	public void documentVelocity() throws IOException {
-		DocumentationResourceBuilder.buildLatexResources(directory);
+		buildLatexResources(directory);
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
 		String templateName = getLanguageTemplate();
