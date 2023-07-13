@@ -79,15 +79,11 @@ public class MachinesTab extends Tab {
 			this.setOnMouseClicked(event -> {
 				Machine machine = this.machineProperty.get();
 				if (machine != null && event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
-					boolean saved = injector.getInstance(BEditorView.class).savedProperty().get();
-					if(!saved && !confirmSave()) {
-						return;
-					}
-					currentProject.startAnimation(machine);
+					currentProject.reloadMachine(machine);
 				}
 			});
 			currentProject.preferencesProperty().addListener((o, from, to) -> updatePreferences(to));
-			this.startAnimationMenu.setOnAction(e -> currentProject.startAnimation(this.machineProperty.get()));
+			this.startAnimationMenu.setOnAction(e -> currentProject.reloadMachine(this.machineProperty.get()));
 			this.startAnimationWithPreferencesMenu.disableProperty().bind(currentProject.preferencesProperty().emptyProperty());
 			this.updatePreferences(currentProject.getPreferences());
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
@@ -148,7 +144,7 @@ public class MachinesTab extends Tab {
 					// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
 					menuItem.setMnemonicParsing(false);
 					menuItem.setOnAction(e -> {
-						currentProject.startAnimation(this.machineProperty.get(), preference);
+						MachinesTab.this.currentProject.reloadMachine(this.machineProperty.get(), preference);
 						this.machineProperty.get().setLastUsedPreferenceName(preference.getName());
 					});
 					return menuItem;
@@ -174,15 +170,6 @@ public class MachinesTab extends Tab {
 				);
 				this.locationLabel.setText(machineProperty.get().getLocation().toString());
 			}
-		}
-
-		private boolean confirmSave() {
-			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-					"common.alerts.unsavedMachineChanges.header",
-					"common.alerts.unsavedMachineChanges.content");
-			alert.initOwner(MachinesTab.this.getContent().getScene().getWindow());
-			Optional<ButtonType> result = alert.showAndWait();
-			return result.isPresent() && ButtonType.OK.equals(result.get());
 		}
 	}
 
@@ -226,7 +213,7 @@ public class MachinesTab extends Tab {
 			if (event.getCode() == KeyCode.ENTER) {
 				final Machine machine = machinesList.getSelectionModel().getSelectedItem();
 				if (machine != null) {
-					currentProject.startAnimation(machine);
+					currentProject.reloadMachine(machine);
 				}
 			}
 		});
@@ -252,6 +239,10 @@ public class MachinesTab extends Tab {
 
 	@FXML
 	private void createMachine() {
+		if (!currentProject.confirmMachineReplace()) {
+			return;
+		}
+
 		final Path selected = fileChooserManager.showSaveMachineChooser(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
@@ -382,11 +373,16 @@ public class MachinesTab extends Tab {
 			return;
 		}
 		currentProject.addMachine(machine);
+		// call startAnimation directly because we already asked the user for confirmation
 		currentProject.startAnimation(machine);
 	}
 
 	@FXML
 	void addMachine() {
+		if (!currentProject.confirmMachineReplace()) {
+			return;
+		}
+
 		final Path selected = fileChooserManager.showOpenMachineChooser(this.getContent().getScene().getWindow());
 		if (selected == null) {
 			return;
@@ -412,6 +408,7 @@ public class MachinesTab extends Tab {
 		}
 		final Machine machine = new Machine(name, "", relative);
 		currentProject.addMachine(machine);
+		// call startAnimation directly because we already asked the user for confirmation
 		currentProject.startAnimation(machine);
 	}
 

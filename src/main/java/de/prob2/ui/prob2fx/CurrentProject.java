@@ -126,7 +126,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 					setDefaultLocation(Paths.get(configData.defaultProjectLocation));
 				}
 			}
-			
+
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.defaultProjectLocation = getDefaultLocation().toString();
@@ -171,15 +171,34 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public CompletableFuture<?> reloadCurrentMachine() {
-		final Machine machine = this.getCurrentMachine();
-		final Preference pref = this.getCurrentPreference();
+		return this.reloadCurrentMachine(this.getCurrentPreference());
+	}
+
+	public CompletableFuture<?> reloadCurrentMachine(Preference preference) {
+		return this.reloadMachine(this.getCurrentMachine(), preference);
+	}
+
+	public CompletableFuture<?> reloadMachine(Machine machine) {
 		if (machine == null) {
-			throw new IllegalStateException("Cannot reload without current machine");
+			throw new IllegalStateException("Cannot reload without machine");
 		}
-		if (pref == null) {
-			throw new IllegalStateException("Cannot reload without current preference");
+		if (!this.confirmMachineReplace()) {
+			return CompletableFuture.completedFuture(null);
 		}
-		return this.startAnimation(machine, pref);
+		return this.startAnimation(machine);
+	}
+
+	public CompletableFuture<?> reloadMachine(Machine machine, Preference preference) {
+		if (machine == null) {
+			throw new IllegalStateException("Cannot reload without machine");
+		}
+		if (preference == null) {
+			throw new IllegalStateException("Cannot reload without preference");
+		}
+		if (!this.confirmMachineReplace()) {
+			return CompletableFuture.completedFuture(null);
+		}
+		return this.startAnimation(machine, preference);
 	}
 
 	public void addMachine(Machine machine) {
@@ -372,7 +391,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public boolean isSaved() {
 		return this.savedProperty().get();
 	}
-	
+
 	public ReadOnlyBooleanProperty newProjectProperty() {
 		return this.newProject;
 	}
@@ -395,5 +414,18 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		} else {
 			return true;
 		}
+	}
+
+	public boolean confirmMachineReplace() {
+		if (this.getCurrentMachine() == null || this.injector.getInstance(BEditorView.class).savedProperty().get()) {
+			// we can always replace the empty machine
+			return true;
+		}
+
+		final Alert alert = this.stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+			"common.alerts.unsavedMachineChanges.header",
+			"common.alerts.unsavedMachineChanges.content");
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
 	}
 }

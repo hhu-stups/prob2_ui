@@ -137,9 +137,9 @@ public class ProjectDocumenter {
 		Path htmlDirectory = getHtmlDirectory(machine);
 		Files.createDirectories(directory.resolve(htmlDirectory));
 		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
-		/* startAnimation works with completable futures. Project access before its finished Loading, can create null Exceptions.
+		/* reloadMachine works with completable futures. Project access before its finished Loading, can create null Exceptions.
 		* To solve this Problem, wait on the CompletableFuture. */
-		project.startAnimation(machine).join();
+		project.reloadMachine(machine).join();
 		final StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
 		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getAnimatedReplayedTrace(), directory.resolve(htmlPath));

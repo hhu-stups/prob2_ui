@@ -307,8 +307,9 @@ public class ProjectManager {
 		final String description = i18n.translate("menu.file.automaticProjectDescription", path);
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
-		if(replacingProject) {
+		if (replacingProject) {
 			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
+			// call startAnimation directly because we already asked the user for confirmation
 			currentProject.startAnimation(machine);
 		}
 	}

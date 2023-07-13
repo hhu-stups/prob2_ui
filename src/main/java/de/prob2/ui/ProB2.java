@@ -188,7 +188,7 @@ public class ProB2 extends Application {
 								"common.alerts.noPreference.content", runtimeOptions.getPreference(), currentProject.getName())
 						.show();
 			} else {
-				currentProject.startAnimation(foundMachine, foundPreference);
+				currentProject.reloadMachine(foundMachine, foundPreference);
 			}
 		}
 	}
