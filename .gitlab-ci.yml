@@ -56,12 +56,13 @@ test:jdk-17-linux:
   script:
     - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.7 check jpackage
 
-test:jdk-17-macos:
+test:jdk-17-macos-x86_64:
   extends: .test-common
   script:
     - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.7 check jpackage
   tags:
     - macos
+    - x86_64
 
 test:jdk-17-windows64:
   extends: .test-common
