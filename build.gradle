@@ -253,7 +253,7 @@ jar {
 }
 
 final probBinariesByOs = [
-	"windows": "win64",
+	"windows": "windows64",
 	"osx": "macos",
 	"linux": "linux64",
 ].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
