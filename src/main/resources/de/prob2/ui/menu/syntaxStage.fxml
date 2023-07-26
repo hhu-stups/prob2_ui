@@ -1,13 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.menu.SyntaxStage?>
-
 <?import javafx.scene.Scene?>
-<?import javafx.scene.control.TextArea?>
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+
 <fx:root type="SyntaxStage" xmlns:fx="http://javafx.com/fxml" minWidth="640" minHeight="480" width="1200" height="600">
 	<scene>
 		<Scene>
-			<TextArea fx:id="syntaxText" styleClass="code" editable="false"/>
+			<VirtualizedScrollPane fx:id="virtualizedScrollPane">
+				<content>
+					<ExtendedCodeArea fx:id="syntaxText" editable="false"/>
+				</content>
+			</VirtualizedScrollPane>
 		</Scene>
 	</scene>
 </fx:root>

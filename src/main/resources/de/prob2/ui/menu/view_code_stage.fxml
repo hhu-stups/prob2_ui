@@ -4,18 +4,23 @@
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
 
 <fx:root type="ViewCodeStage" minWidth="640" minHeight="480" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
 			<BorderPane minWidth="640" minHeight="480" stylesheets="@/prob.css" styleClass="dialog">
 				<center>
-					<TextArea fx:id="codeTextArea" styleClass="code" editable="false" wrapText="true" minWidth="320" minHeight="240"/>
+					<VirtualizedScrollPane fx:id="virtualizedScrollPane">
+						<content>
+							<ExtendedCodeArea fx:id="codeTextArea" editable="false" minWidth="320" minHeight="240"/>
+						</content>
+					</VirtualizedScrollPane>
 				</center>
 				<bottom>
 					<HBox spacing="10.0">

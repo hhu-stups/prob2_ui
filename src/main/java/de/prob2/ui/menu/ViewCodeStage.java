@@ -15,6 +15,7 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.CSPModel;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -38,7 +39,7 @@ public final class ViewCodeStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ViewCodeStage.class);
 	
 	@FXML 
-	private TextArea codeTextArea;
+	private ExtendedCodeArea codeTextArea;
 	
 	@FXML
 	private CheckBox cbUnicode;
@@ -98,7 +99,7 @@ public final class ViewCodeStage extends Stage {
 		cmd.setTranslationMode(cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
 		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
 		stateSpace.execute(cmd);
-		this.codeTextArea.setText(cmd.getPrettyPrint());
+		this.codeTextArea.replaceText(cmd.getPrettyPrint());
 	}
 	
 	@FXML
