@@ -1,0 +1,179 @@
+DEFINITIONS
+    SET_PREF_DOT_NODE_FONT_SIZE == 5;
+    SET_PREF_DOT_EDGE_FONT_SIZE == 5;
+
+    INCH_FACTOR == 2.54;
+    //SCALING_FACTOR == 0.004;
+
+    //DISPLAY_NAMES == TRUE;
+    LANGUAGE == "en"; // "en"
+
+	BORDERS == IF DISPLAY_BORDERS = TRUE THEN RailML3_IS_OPENEND_IDS ELSE {} END;
+    BUFFERSTOPS == IF DISPLAY_BUFFERSTOPS = TRUE THEN allIdsOfType("bufferStop") ELSE {} END;
+    CROSSINGS == IF DISPLAY_CROSSINGS = TRUE THEN allIdsOfType("crossing") ELSE {} END;
+    DERAILERS == IF DISPLAY_DERAILERS = TRUE THEN allIdsOfType("derailerIS") ELSE {} END;
+    OPERATIONALPOINTS == IF DISPLAY_OPERATIONALPOINTS = TRUE THEN allIdsOfType("operationalPoint") ELSE {} END;
+    SIGNALS == IF DISPLAY_SIGNALS = TRUE THEN allIdsOfType("signalIS") ELSE {} END;
+    SWITCHES == IF DISPLAY_SWITCHES = TRUE THEN allIdsOfType("switchIS") ELSE {} END;
+    TRAINDETECTIONELEMENTS == IF DISPLAY_TRAINDETECTIONELEMENTS = TRUE THEN allIdsOfType("trainDetectionElement") ELSE {} END;
+
+    D4R_customGraph == rec(
+        layout: "neato",
+        directed: FALSE,
+        overlap: "true",
+        `size`: "16,9!",
+        scale: TO_STRING(SCALING_FACTOR),
+        splines: "false",
+        
+        // Bufferstops, Crossings, Openends, TDEs, Signals, Switches:
+        nodes1:
+            UNION(i_e, e_sep).(i_e : BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
+                & e_sep : RailML_spotElementProjection & i_e = MU(e_sep'refersToElement) |
+                    {rec(shape: "point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
+                        pos: TO_STRING(STRING_TO_REAL(MU(MU(e_sep'coordinate)'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(MU(e_sep'coordinate)'y))/INCH_FACTOR)^"!",
+                        height: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
+                        width: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
+                        fontsize: IF i_e : DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
+                )
+            \/
+            UNION(i_e).(i_e : BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ TRAINDETECTIONELEMENTS
+                & !e_sep.(e_sep : RailML_spotElementProjection => i_e /= MU(e_sep'refersToElement)) |
+                    {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
+                    pos: "",
+                    height: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
+                    width: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
+                    fontsize: IF i_e : DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
+                ),
+        // Virtual nodes for netElements (only available with exact position):
+        nodes2:
+            UNION(i_e, e_lep, e_coord).(e_lep : RailML_linearElementProjection & e_coord : e_lep'coordinates & i_e = MU(e_lep'refersToElement)^"_"^TO_STRING(e_coord'recId) |
+                {rec(shape:"point", nodes: i_e, `id`: i_e, pos: TO_STRING(STRING_TO_REAL(MU(e_coord'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(e_coord'y))/INCH_FACTOR)^"!", width:"0")}
+            ),
+        // Labels for tvd sections:
+        nodes3:
+            UNION(i_e, e_sep).(i_e : RailML3_IL_TVD_SECTION_IDS
+                & e_sep : RailML_spotElementProjection & i_e = MU(e_sep'refersToElement) |
+                    {rec(shape: "point", nodes: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, `id`: i_e, pos: TO_STRING(STRING_TO_REAL(MU(MU(e_sep'coordinate)'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(MU(e_sep'coordinate)'y))/INCH_FACTOR)^"!", width:"0")}
+            ),
+        // Nodes for operational points (only for labelling)
+        nodes4:
+            UNION(i_op, e_sep, e_coord).(i_op : OPERATIONALPOINTS & e_sep : RailML_spotElementProjection & i_op = MU(e_sep'refersToElement) & e_coord = MU(e_sep'coordinate) |
+                {rec(shape:"plaintext", nodes: i_op, `id`: i_op, label: IF DISPLAY_NAMES = TRUE & i_op |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_op^" ("^RailML3_CO_NAMES(i_op,LANGUAGE)^")"ELSE i_op END, fontsize: "12", pos: TO_STRING(STRING_TO_REAL(MU(e_coord'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(e_coord'y))/INCH_FACTOR)^"!")}
+            ),
+
+        // netElement paths with exact positions:
+        edges1:
+            UNION(i_ne, f, t).(i_ne : dom(RailML3_VIS_NET_ELEMENT_COORDINATES) & f |-> t : RailML3_VIS_NET_ELEMENT_COORDINATES(i_ne) |
+                {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`:f^"edge", style:"filled", colour:"green", penwidth: IF #(trc,lloc,ane).(trc : RailML3_track & MU(trc'type) = track_mainTrack & lloc : RailML3_linearLocation & lloc'refersTo = MU(trc'Id) & ane : lloc'associatedNetElements & i_ne = MU(ane'netElementRef)) THEN "2.0" ELSE "1.5" END, from: f, to: t) }
+            )
+        );
+
+    DOT_customGraph == rec(
+        layout: "neato",
+        mode: "sgd",
+        overlap: "false",
+        directed: FALSE,
+        splines: "line",
+        ratio: "compress",
+        
+        // Bufferstops, Crossings, Openends, TDEs, Signals, Switches:
+        nodes1:
+            UNION(i_e).(i_e : BUFFERSTOPS \/ CROSSINGS \/ BORDERS \/ SWITCHES//\/ DERAILERS \/ SIGNALS \/ TRAINDETECTIONELEMENTS
+                | //& i_e /: dom(RailML3_IS_LINEAR_COORDINATES) |
+                {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSE "0.025" END, fontsize: IF i_e : CROSSINGS \/ SWITCHES THEN "5" ELSE "4" END)}
+            ),
+        // netElements that are endpoints of tracks
+        nodes2:
+            UNION(i_ne, i_trc, i_ne2).(i_ne : allIdsOfType("netElement") & i_trc : allIdsOfType("track") & ((i_ne = RailML3_IS_TRACK_BEGIN(i_trc) & i_ne2 = prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))) or (i_ne = RailML3_IS_TRACK_END(i_trc) & i_ne2 = prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc)))))) |
+                {rec(shape:"point", nodes: STRING_CONC(SORT({i_ne,i_ne2})), `id`: STRING_CONC(SORT({i_ne,i_ne2})), width: "0.0")}
+            ),
+        // Nodes for netRelations (only if no position available):
+        nodes3:
+            UNION(i_r, r, e1, e2).(r : union(ran(RailML3_IS_TRACKS)) & e1 = prj1(r) & e2 = prj2(r) & {e1, e2} /\ (BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS) = {} & i_r = STRING_CONC(SORT({e1,e2})) |
+                {rec(shape:"point", nodes: i_r, `id`: i_r, width: "0.0")}
+            ),
+
+        // netElement paths without exact positions:
+        // track begin and end are functional infrastructure
+        edges1:
+            UNION(i_ne, i_trc, f, t, f_, t_, minlen).(i_ne : allIdsOfType("netElement") & {f, t} <: RailML3_IS_TRACKS(i_trc) & f /= t & i_ne = prj2(f) & i_ne = prj1(t)
+                & IF prj1(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN f_ = prj1(f)
+                ELSE f_ = STRING_CONC(SORT({prj1(f),prj2(f)})) END
+                & IF prj2(t) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN t_ = prj2(t)
+                ELSE t_ = STRING_CONC(SORT({prj1(t),prj2(t)})) END
+                & IF elementOfId(RailML3_netElement, i_ne)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, i_ne)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
+                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: f_, to: t_, fontsize: "5") } //, minlen: minlen) }
+            ),
+        // track end is an netElement
+        edges2:
+            UNION(i_ne, i_trc, f, minlen).(i_ne : allIdsOfType("netElement") & f : RailML3_IS_TRACKS(i_trc) & i_ne = prj2(f) & i_trc : allIdsOfType("track") & i_ne = RailML3_IS_TRACK_END(i_trc) & IF prj1(f) : allIdsOfType("netElement") THEN prj1(f) /= RailML3_IS_TRACK_BEGIN(i_trc) ELSE btrue END
+                & IF elementOfId(RailML3_netElement, i_ne)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, i_ne)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
+                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: IF prj1(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN prj1(f) ELSE STRING_CONC(SORT({i_ne, prj1(f)})) END, to: STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))})), fontsize: "5" )  } //, minlen: minlen) }
+            ),
+        // track begin is an netElement
+        edges3:
+            UNION(i_ne, i_trc, f, minlen).(i_ne : allIdsOfType("netElement") & f : RailML3_IS_TRACKS(i_trc) & i_ne = prj1(f) & i_trc : allIdsOfType("track") & i_ne = RailML3_IS_TRACK_BEGIN(i_trc) & IF prj2(f) : allIdsOfType("netElement") THEN prj2(f) /= RailML3_IS_TRACK_END(i_trc) ELSE btrue END
+                & IF elementOfId(RailML3_netElement, i_ne)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, i_ne)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
+                {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: IF prj2(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN prj2(f) ELSE STRING_CONC(SORT({i_ne, prj2(f)})) END, to: STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))})), fontsize: "5" )  } //, minlen: minlen) }
+            ),
+        // track begin and end are netElements and it is the same netElement
+        edges4:
+            UNION(i_ne, i_ne2, i_trc, minlen).({i_ne, i_ne2} <: allIdsOfType("netElement") & i_trc : allIdsOfType("track") & card(RailML3_IS_TRACKS(i_trc)) = 0
+                & i_ne = RailML3_IS_TRACK_BEGIN(i_trc) & i_ne2 = RailML3_IS_TRACK_END(i_trc)
+                & IF elementOfId(RailML3_netElement, i_ne)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, i_ne)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
+                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))})), to: STRING_CONC(SORT({i_ne2,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))})), fontsize: "5" )  } //, minlen: minlen) }
+            ),
+        // track begin and end are netElements and there are two netElement (i.e. only one relation)
+        edges5:
+            UNION(i_ne, i_ne2, i_trc, edge, label, minlen).({i_ne, i_ne2} <: allIdsOfType("netElement") & i_trc : allIdsOfType("track") & card(RailML3_IS_TRACKS(i_trc)) = 1
+                & i_ne = RailML3_IS_TRACK_BEGIN(i_trc) & i_ne2 = RailML3_IS_TRACK_END(i_trc)
+                & ((label = i_ne & edge = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))})) |-> STRING_CONC(SORT({i_ne,i_ne2})) )
+                    or
+                    ( label = i_ne2 & edge = STRING_CONC(SORT({i_ne,i_ne2})) |-> STRING_CONC(SORT({i_ne2,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))})) ) )
+                & IF elementOfId(RailML3_netElement, label)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, label)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
+                    {rec(label: IF DISPLAY_NAMES = TRUE & label |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN label^" ("^RailML3_CO_NAMES(label,LANGUAGE)^")" ELSE label END, `id`: label, style:"filled", colour:"green", penwidth:"1.5", edge: edge, fontsize: "5")  } //, minlen: minlen) }
+            )
+        );
+
+    NOR_customGraph == rec(
+        layout: "neato",
+        `size`: "1000,1000",
+        directed: FALSE,
+        overlap: "true",
+        scale: 0.1,//SCALING_FACTOR*10.0,
+        splines: "false",
+        
+        // Bufferstops, Crossings, Openends, TDEs, Signals, Switches:
+        nodes1:
+            UNION(i_e, e_ne, e_sloc, iC1, iC2, e_sep1, e_sep2, x1, y1, x2, y2).(i_e : BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
+                & e_ne : RailML3_netElement & e_sloc : dom(RailML3_IS_SPOT_LOCATIONS(i_e)) & MU(e_ne'Id) = prj1(e_sloc)
+                & {iC1,iC2} <: union(ran(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES(MU(e_ne'Id))))~
+                & prj1(iC1) <= prj2(e_sloc) & IF prj2(e_sloc) = 1.0 THEN prj2(e_sloc) <= prj1(iC2) ELSE prj2(e_sloc) < prj1(iC2) END
+                & #i_aps.(i_aps : dom(RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM(MU(e_ne'Id))) & RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM(MU(e_ne'Id))(i_aps)~(iC1) = pred(RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM(MU(e_ne'Id))(i_aps)~(iC2)))
+                & e_sep1 : RailML_spotElementProjection & prj2(iC1) = MU(e_sep1'refersToElement)
+                & e_sep2 : RailML_spotElementProjection & prj2(iC2) = MU(e_sep2'refersToElement)
+                & x1 = STRING_TO_REAL(MU(MU(e_sep1'coordinate)'x))/INCH_FACTOR & y1 = STRING_TO_REAL(MU(MU(e_sep1'coordinate)'y))/INCH_FACTOR
+                & x2 = STRING_TO_REAL(MU(MU(e_sep2'coordinate)'x))/INCH_FACTOR & y2 = STRING_TO_REAL(MU(MU(e_sep2'coordinate)'y))/INCH_FACTOR
+                |
+                    {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, pos: TO_STRING(x1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (x2-x1) )^","^TO_STRING(y1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (y2-y1) )^"!", height: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END, width: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END, fontsize: IF i_e : SWITCHES \/ DERAILERS \/ SIGNALS THEN "5" ELSE "4" END)}
+                ),
+        // Virtual nodes for netElements (only available with exact position):
+        nodes2:
+            UNION(i_e, e_sep, e_coord).(e_sep : RailML_spotElementProjection & i_e = MU(e_sep'refersToElement) & e_coord = MU(e_sep'coordinate) |
+                {rec(shape:"point", nodes: i_e, `id`: i_e, pos: TO_STRING(STRING_TO_REAL(MU(e_coord'x))/INCH_FACTOR)^","^TO_STRING(STRING_TO_REAL(MU(e_coord'y))/INCH_FACTOR)^"!", width:"0")}
+            ),
+        // Nodes for operational points (only for labelling)
+        nodes3:
+            UNION(i_op, e_sep, e_coord).(i_op : OPERATIONALPOINTS & e_sep : RailML_spotElementProjection & i_op = MU(e_sep'refersToElement) & e_coord = MU(e_sep'coordinate) |
+                {rec(shape:"plaintext", nodes: i_op, `id`: i_op, label: IF DISPLAY_NAMES = TRUE & i_op |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_op^" ("^RailML3_CO_NAMES(i_op,LANGUAGE)^")" ELSE i_op END, fontsize: "12", pos: TO_STRING(STRING_TO_REAL(MU(e_coord'x))/INCH_FACTOR)^","^TO_STRING(STRING_TO_REAL(MU(e_coord'y))/INCH_FACTOR)^"!")}
+            ),
+
+        // netElement paths with exact positions:
+        edges1:
+            UNION(i_ne, e_ne, iC1, iC2, e_sep1, e_sep2).(e_ne : RailML3_netElement & i_ne = MU(e_ne'Id)
+                & {iC1,iC2} <: union(ran(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES(MU(e_ne'Id))))~
+                & #i_aps.(i_aps : dom(RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM(MU(e_ne'Id))) & RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM(MU(e_ne'Id))(i_aps)~(iC1) = pred(RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM(MU(e_ne'Id))(i_aps)~(iC2)))
+                & e_sep1 : RailML_spotElementProjection & e_sep2 : RailML_spotElementProjection & prj2(iC1) = MU(e_sep1'refersToElement) & prj2(iC2) = MU(e_sep2'refersToElement) |
+                {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`:i_ne, style:"filled", colour:"green", edge: prj2(iC1) |-> prj2(iC2), fontsize: "5") }
+            )
+        )

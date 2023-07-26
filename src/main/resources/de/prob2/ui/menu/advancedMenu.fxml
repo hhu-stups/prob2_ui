@@ -13,6 +13,8 @@
 	<MenuItem text="%menu.advanced.items.simb" onAction="#openSimulator"/>
 	<MenuItem fx:id="refactorTraceItem" text="%menu.advanced.items.refactorTrace" onAction="#showRefactorTrace"/>
 	<SeparatorMenuItem />
+	<MenuItem text="%menu.advanced.items.railMLImport" onAction="#openRailMLImport"/>
+	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
 	<SeparatorMenuItem />
 	<Menu text="%menu.advanced.items.useVisualisation" fx:id="visualisationFxMenu">

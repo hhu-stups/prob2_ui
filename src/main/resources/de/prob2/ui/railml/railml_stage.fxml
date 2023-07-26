@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.railml.RailMLStage?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.TextField?>
+
+<?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.ProgressBar?>
+<?import de.prob2.ui.railml.RailMLStage.VisualisationStrategy?>
+<?import javafx.scene.control.ListView?>
+<fx:root title="RailML Import" type="RailMLStage" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<AnchorPane prefWidth="600">
+				<VBox spacing="5" AnchorPane.topAnchor="25"
+					  AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
+					  AnchorPane.rightAnchor="0">
+					<Label text="%railml.stage.title" styleClass="title">
+						<VBox.margin>
+							<Insets left="10" right="10" />
+						</VBox.margin>
+					</Label>
+					<AnchorPane styleClass="border">
+						<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
+							  AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20" alignment="center_right">
+							<HBox spacing="20" alignment="center_left">
+								<Label text="%railml.stage.fileTitle" />
+								<TextField fx:id="fileLocationField" HBox.hgrow="always" disable="true"/>
+								<Button styleClass="button-dark2" text="%project.newProjectStage.buttons.selectLocation"
+										onAction="#selectRailMLFile" />
+								<VBox.margin>
+									<Insets top="10" />
+								</VBox.margin>
+							</HBox>
+							<HBox spacing="20" alignment="center_left">
+								<Label text="%railml.stage.directoryTitle" />
+								<TextField fx:id="locationField" HBox.hgrow="always" disable="true"/>
+								<Button styleClass="button-dark2" text="%project.newProjectStage.buttons.selectLocation"
+										onAction="#selectRailMLDirectory" />
+								<VBox.margin>
+									<Insets top="10" />
+								</VBox.margin>
+							</HBox>
+						</VBox>
+					</AnchorPane>
+					<Label text="%railml.stage.machineChoice">
+						<padding>
+							<Insets left="15" top="10" bottom="5" />
+						</padding>
+					</Label>
+					<HBox alignment="CENTER" fx:id="machineOptions" spacing="20">
+						<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"/>
+						<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"/>
+					</HBox>
+					<Separator>
+						<padding>
+							<Insets top="10" bottom="10"/>
+						</padding>
+					</Separator>
+					<HBox alignment="CENTER" fx:id="visualisationOptions" spacing="20">
+						<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox"/>
+						<Label text="%railml.stage.visualisation.strategy" fx:id="visualisationStrategyField" visible="false"/>
+						<ChoiceBox fx:id="visualisationStrategyChoiceBox" visible="false"/>
+						<padding>
+							<Insets bottom="10"/>
+						</padding>
+					</HBox>
+					<AnchorPane styleClass="border" fx:id="generatedFiles" visible="false">
+						<Label text="%railml.stage.generatedfiles.title">
+							<padding>
+								<Insets left="15" top="15"/>
+							</padding>
+						</Label>
+						<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
+							  AnchorPane.topAnchor="35" AnchorPane.bottomAnchor="20" alignment="center_right">
+							<ListView style="-fx-border-width: 0" fx:id="generateFileListView"/>
+						</VBox>
+					</AnchorPane>
+					<ButtonBar styleClass="dialog">
+						<buttons>
+							<Button text="%common.buttons.cancel" cancelButton="true"
+									onAction="#cancel" />
+							<Button fx:id="btStartImport" text="%railml.stage.button.import"
+									onAction="#startImport" />
+						</buttons>
+						<VBox.margin>
+							<Insets left="10" right="10" top="10" />
+						</VBox.margin>
+					</ButtonBar>
+					<HBox fx:id="progressInfo" prefHeight="30.0" spacing="7.0" visible="false">
+						<ProgressBar fx:id="progressBar" prefHeight="25.0" HBox.hgrow="ALWAYS" progress="0.0"/>
+						<Label fx:id="currentOp" styleClass="bold" />
+					</HBox>
+				</VBox>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>

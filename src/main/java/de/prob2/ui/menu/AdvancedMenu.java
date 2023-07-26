@@ -13,6 +13,7 @@ import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.railml.RailMLStage;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 import de.prob2.ui.vomanager.VOManagerStage;
@@ -140,6 +141,15 @@ public class AdvancedMenu extends Menu {
 		alert.initOwner(voManagerStage);
 		alert.initModality(Modality.WINDOW_MODAL);
 		alert.show();
+	}
+
+	@FXML
+	private void openRailMLImport() {
+		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
+		railMLStage.show();
+		railMLStage.sizeToScene();
+		railMLStage.getScene().setOnMouseMoved(event -> railMLStage.sizeToScene());
+		railMLStage.toFront();
 	}
 
 }

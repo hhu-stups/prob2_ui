@@ -4,16 +4,15 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
+import de.prob2.ui.railml.RailMLFile;
+import de.prob2.ui.railml.RailMLStage;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.visb.VisBView;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.NoSuchFileException;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -367,6 +366,26 @@ public class ProjectManager {
 				break;
 		}
 	}
+
+	public void openRailML(Path selected) throws IOException {
+		/*XMLValidator v = new XMLValidator(selected);
+		try {
+			v.validateXML(selected);
+		} catch (SAXException e) {
+			stageManager.makeAlert(Alert.AlertType.ERROR, "XML invalid!",
+				e.getStackTrace().toString()).show();
+			System.out.println("XML is valid against XSD.");
+		}*/
+		RailMLFile railMLFile = injector.getInstance(RailMLFile.class);
+		railMLFile.setPath(selected);
+		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
+		railMLStage.show();
+		railMLStage.sizeToScene();
+		railMLStage.getScene().setOnMouseMoved(event -> railMLStage.sizeToScene());
+		railMLStage.toFront();
+
+	}
+
 	private enum JsonType { VISB, SIMB, NONE }
 	private JsonType chooseType() {
 		List<ButtonType> buttons = new ArrayList<>();

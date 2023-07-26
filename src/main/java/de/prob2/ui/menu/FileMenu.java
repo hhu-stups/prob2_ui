@@ -158,6 +158,10 @@ public class FileMenu extends Menu {
 			projectManager.openJson(selected);
 			return;
 		}
+		if (selected.toString().endsWith(".railml")){
+			projectManager.openRailML(selected);
+			return;
+		}
 		projectManager.openFile(selected);
 	}
 

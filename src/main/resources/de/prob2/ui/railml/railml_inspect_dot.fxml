@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.railml.RailMLInspectDotStage?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.web.WebView?>
+<?import javafx.geometry.Insets?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import javafx.scene.control.SpinnerValueFactory?>
+<fx:root type="RailMLInspectDotStage" title="%railml.inspectDot.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
+<fx:define>
+	<FontSize fx:id="fontSize" />
+</fx:define>
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<BorderPane>
+				<top>
+					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+						<Menu text="%menu.view">
+							<MenuItem fx:id="zoomResetMenuButton" text="%menu.view.items.zoomDefault" visible="false" onAction="#defaultSize" />
+							<MenuItem fx:id="fakeZoomResetMenuButton" text="%menu.view.items.zoomDefault" accelerator="Shortcut+'0'" onAction="#defaultSize" />
+							<MenuItem fx:id="zoomInMenuButton" text="%menu.view.items.zoomIn" visible="false" onAction="#zoomIn" />
+							<MenuItem fx:id="fakeZoomInMenuButton" text="%menu.view.items.zoomIn" accelerator="Shortcut+'+'" onAction="#zoomIn" />
+							<MenuItem fx:id="zoomOutMenuButton" text="%menu.view.items.zoomOut" visible="false" onAction="#zoomOut" />
+							<MenuItem fx:id="fakeZoomOutMenuButton" text="%menu.view.items.zoomOut" accelerator="Shortcut+'-'" onAction="#zoomOut" />
+						</Menu>
+					</MenuBar>
+				</top>
+				<center>
+					<SplitPane dividerPositions="0.20">
+						<VBox>
+							<CheckBox text="%railml.inspectDot.chooseElements.borders" fx:id="borders"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.bufferstops" fx:id="bufferstops"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.crossings" fx:id="crossings"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.derailers" fx:id="derailers"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.operationalPoints" fx:id="operationalpoints"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.signals" fx:id="signals"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.switches" fx:id="switches"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.tdes" fx:id="traindetectionelements"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.names" fx:id="names"/>
+							<HBox spacing="10">
+								<Label text="%railml.inspectDot.chooseElements.language"/>
+								<ChoiceBox fx:id="languageChoiceBox"/>
+							</HBox>
+							<HBox spacing="10">
+								<Label text="%railml.inspectDot.chooseElements.scaling"/>
+								<Spinner fx:id="scalingSpinner"/>
+							</HBox>
+							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
+								<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />
+								<Button fx:id="saveButton" onAction="#save" HBox.hgrow="NEVER">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.saveAs" />
+									</tooltip>
+								</Button>
+								<Button fx:id="cancelButton" onAction="#cancel" HBox.hgrow="NEVER">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
+								<!--<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />-->
+							</HBox>
+							<Button fx:id="refreshDotView" styleClass="button-blue" text="%railml.inspectDot.button.refresh" onAction="#refreshDotView" />
+							<padding>
+								<Insets left="10" top="10"/>
+							</padding>
+						</VBox>
+						<VBox>
+							<HBox alignment="TOP_RIGHT" styleClass="border">
+								<Button fx:id="zoomInButton" onAction="#zoomIn">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.zoomIn" />
+									</tooltip>
+								</Button>
+								<Button fx:id="zoomOutButton" onAction="#zoomOut">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.zoomOut" />
+									</tooltip>
+								</Button>
+							</HBox>
+							<StackPane VBox.vgrow="ALWAYS">
+								<Label fx:id="placeholderLabel"/>
+								<BorderPane fx:id="errorsView" visible="false">
+									<top>
+										<Label text="%dynamic.errors">
+											<BorderPane.margin>
+												<Insets topRightBottomLeft="5.0"/>
+											</BorderPane.margin>
+										</Label>
+									</top>
+									<center>
+										<TextArea fx:id="taErrors" editable="false" wrapText="true"/>
+									</center>
+								</BorderPane>
+								<WebView fx:id="dotView" visible="false"/>
+							</StackPane>
+							<HBox alignment="BOTTOM_RIGHT">
+								<ButtonBar styleClass="dialog">
+									<buttons>
+										<Button text="%common.buttons.cancel" cancelButton="true"
+												onAction="#cancel" />
+										<Button fx:id="btContinue" text="%railml.inspectDot.button.continue"
+												onAction="#acceptVisualisation" />
+									</buttons>
+									<VBox.margin>
+										<Insets left="10" right="10" top="10" />
+									</VBox.margin>
+								</ButtonBar>
+							</HBox>
+						</VBox>
+					</SplitPane>
+				</center>
+			</BorderPane>
+		</Scene>
+	</scene>
+</fx:root>
