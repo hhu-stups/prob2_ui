@@ -329,14 +329,14 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	private void editPreferences() {
-		final DynamicPreferencesStage preferences = this.preferencesStageProvider.get();
+		/*final DynamicPreferencesStage preferences = this.preferencesStageProvider.get();
 		preferences.initOwner(this);
 		preferences.initModality(Modality.WINDOW_MODAL);
 		//preferences.setToRefresh(this);
 		DotVisualizationCommand currentItem = DotVisualizationCommand.getByName("custom_graph", railMLFile.getState());
 		preferences.setIncludedPreferenceNames(currentItem.getRelevantPreferences(), railMLFile.getState().getStateSpace());
 		preferences.setTitle(i18n.translate("dynamic.preferences.stage.title", currentItem.getName()));
-		preferences.show();
+		preferences.show();*/
 	}
 
 	@FXML
