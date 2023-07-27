@@ -261,6 +261,9 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 				&& location.getStartLine() <= this.getParagraphs().size()
 				&& location.getStartColumn() >= this.getParagraphLength(location.getStartLine() - 1)
 		) {
+			// the styling cannot be displayed on substrings with length 0
+			// thus - when we detect a location with length 0 - we extend it to length 1 to the right
+			// but only if there is space, else extend to the left
 			displayedStartColumn = location.getStartColumn() - 1;
 		} else {
 			displayedStartColumn = location.getStartColumn();
@@ -281,6 +284,9 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 				&& location.getEndLine() <= this.getParagraphs().size()
 				&& location.getEndColumn() < this.getParagraphLength(location.getStartLine() - 1)
 		) {
+			// the styling cannot be displayed on substrings with length 0
+			// thus - when we detect a location with length 0 - we extend it to length 1 to the right
+			// but only if there is space, else extend to the left
 			displayedEndColumn = location.getEndColumn() + 1;
 		} else {
 			displayedEndColumn = location.getEndColumn();
