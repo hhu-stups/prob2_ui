@@ -136,7 +136,11 @@ public abstract class Simulator {
 				activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
 				currentTrace.removeListener(traceListener);
 			} else if(config instanceof SimulationExternalConfiguration) {
-				this.externalSimulatorExecutor = new ExternalSimulatorExecutor(((SimulationExternalConfiguration) config).getExternalPath(), currentTrace);
+				if(this.externalSimulatorExecutor == null || !this.externalSimulatorExecutor.getPythonFile().equals(((SimulationExternalConfiguration) config).getExternalPath())) {
+					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(((SimulationExternalConfiguration) config).getExternalPath());
+				} else if(this.externalSimulatorExecutor != null) {
+					this.externalSimulatorExecutor.reset();
+				}
 				currentTrace.removeListener(traceListener);
 			}
 		}

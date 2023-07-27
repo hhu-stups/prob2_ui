@@ -2,7 +2,6 @@ package de.prob2.ui.simulation.external;
 
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.prob2fx.CurrentTrace;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,9 +19,9 @@ public class ExternalSimulatorExecutor {
 
 	private final ProcessBuilder pb;
 
-	private Process process;
+	private final Path pythonFile;
 
-	private final CurrentTrace currentTrace;
+	private Process process;
 
 	private BufferedReader reader;
 
@@ -34,9 +33,14 @@ public class ExternalSimulatorExecutor {
 
 	private boolean started;
 
-	public ExternalSimulatorExecutor(Path pythonFile, CurrentTrace currentTrace) {
+	public ExternalSimulatorExecutor(Path pythonFile) {
+		this.pythonFile = pythonFile;
 		this.pb = new ProcessBuilder("python3", pythonFile.toString()).directory(pythonFile.getParent().toFile());
-		this.currentTrace = currentTrace;
+		this.done = false;
+		this.started = false;
+	}
+
+	public void reset() {
 		this.done = false;
 		this.started = false;
 	}
@@ -112,5 +116,9 @@ public class ExternalSimulatorExecutor {
 
 	public boolean isStarted() {
 		return started;
+	}
+
+	public Path getPythonFile() {
+		return pythonFile;
 	}
 }
