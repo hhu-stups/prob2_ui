@@ -1,5 +1,6 @@
 package de.prob2.ui.beditor;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
@@ -14,11 +15,10 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
-import java.util.Arrays;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
+import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -144,9 +144,10 @@ public class BEditorView extends BorderPane {
 		});
 		saveButton.disableProperty().bind(saved);
 		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
-		warningLabel.textProperty().bind(Bindings.when(saved)
-			.then("")
-			.otherwise(i18n.translate("beditor.unsavedWarning"))
+		warningLabel.textProperty().bind(
+			Bindings.when(saved)
+				.then("")
+				.otherwise(i18n.translate("beditor.unsavedWarning"))
 		);
 		setHint();
 
@@ -240,7 +241,7 @@ public class BEditorView extends BorderPane {
 				editor = "";
 			}
 
-			newSaved = Arrays.equals(lastSaved.split("(\r)?\n"), editor.split("(\r)?\n"));
+			newSaved = lastSaved.equals(editor);
 		}
 
 		this.saved.set(newSaved);
@@ -249,11 +250,13 @@ public class BEditorView extends BorderPane {
 	private void updateErrors() {
 		Path currentPath = this.getPath();
 		if (currentPath != null && this.savedProperty().get()) {
-			this.beditor.getErrors().setAll(this.getErrors().stream()
-				.filter(error -> error.getLocations().stream()
-					.map(ErrorItem.Location::getFilename)
-					.anyMatch(filename -> fileNameMatchesCurrentPath(filename, currentPath)))
-				.collect(Collectors.toList()));
+			this.beditor.getErrors().setAll(
+				this.getErrors().stream()
+					.filter(error -> error.getLocations().stream()
+						                 .map(ErrorItem.Location::getFilename)
+						                 .anyMatch(filename -> fileNameMatchesCurrentPath(filename, currentPath)))
+					.collect(Collectors.toList())
+			);
 		} else {
 			this.beditor.getErrors().clear();
 		}
@@ -385,10 +388,9 @@ public class BEditorView extends BorderPane {
 	private void setEditorText(String text, Path path) {
 		changingText = true;
 		this.setPath(path);
-		this.lastSavedText.set(text);
-		if (!beditor.getText().equals(text)) {
-			beditor.replaceText(text);
-		}
+		beditor.replaceText(text);
+		lastSavedText.set(beditor.getText());
+		beditor.reloadHighlighting();
 		beditor.setEditable(true);
 		changingText = false;
 	}
@@ -396,8 +398,8 @@ public class BEditorView extends BorderPane {
 	private void setText(Path path) {
 		if (path.toFile().exists()) {
 			String text;
-			try (final Stream<String> lines = Files.lines(path)) {
-				text = lines.collect(Collectors.joining(System.lineSeparator()));
+			try (BufferedReader r = Files.newBufferedReader(path, EDITOR_CHARSET)) {
+				text = CharStreams.toString(r);
 			} catch (IOException | UncheckedIOException e) {
 				LOGGER.error("Could not read file: {}", path, e);
 				if (e.getCause() instanceof MalformedInputException) {
@@ -471,20 +473,21 @@ public class BEditorView extends BorderPane {
 		machineChoice.getSelectionModel().select(path);
 	}
 
-	public void jumpToSource(Path machinePath, int paragraphIndex, int columnIndex) {
+	private void focusAndShowMachine(Path machinePath) {
 		stageManager.getMainStage().toFront();
 		injector.getInstance(MainView.class).switchTabPane("beditorTab");
-
 		this.selectMachine(machinePath);
+		beditor.requestFocus();
+	}
 
-		BEditor bEditor = injector.getInstance(BEditor.class);
-		bEditor.requestFocus();
-		bEditor.moveTo(paragraphIndex, columnIndex);
-		bEditor.requestFollowCaret();
+	public void jumpToSource(Path machinePath, int paragraphIndex, int columnIndex) {
+		this.focusAndShowMachine(machinePath);
+		beditor.moveTo(paragraphIndex, columnIndex);
+		beditor.requestFollowCaret();
 	}
 
 	public void jumpToErrorSource(ErrorItem.Location errorLocation) {
-		beditor.setErrorHighlight(errorLocation);
-		jumpToSource(Paths.get(errorLocation.getFilename()), errorLocation.getStartLine(), errorLocation.getStartColumn());
+		this.focusAndShowMachine(Paths.get(errorLocation.getFilename()));
+		beditor.jumpToErrorSource(errorLocation);
 	}
 }
