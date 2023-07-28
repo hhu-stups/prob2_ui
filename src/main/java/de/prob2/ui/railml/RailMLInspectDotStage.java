@@ -248,6 +248,28 @@ public class RailMLInspectDotStage extends Stage {
 		});
 	}
 
+	@FXML
+	private void save() {
+		final FileChooser fileChooser = new FileChooser();
+		FileChooser.ExtensionFilter svgFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
+		FileChooser.ExtensionFilter pngFilter = fileChooserManager.getPngFilter();
+		FileChooser.ExtensionFilter dotFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.dot", "dot");
+		FileChooser.ExtensionFilter pdfFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.pdf", "pdf");
+		fileChooser.getExtensionFilters().setAll(svgFilter, pngFilter, dotFilter, pdfFilter);
+		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
+		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this.getScene().getWindow());
+		if (path == null) {
+			return;
+		}
+		FileChooser.ExtensionFilter selectedFilter = fileChooser.getSelectedExtensionFilter();
+		if (selectedFilter.equals(dotFilter)) {
+			saveDot(path);
+		} else {
+			final String format = getTargetFormat(selectedFilter, svgFilter, pngFilter, pdfFilter);
+			saveConverted(format, path);
+		}
+	}
+
 	private String getTargetFormat(FileChooser.ExtensionFilter selectedFilter, FileChooser.ExtensionFilter svgFilter, FileChooser.ExtensionFilter pngFilter, FileChooser.ExtensionFilter pdfFilter) {
 		if (selectedFilter.equals(svgFilter)) {
 			return DotOutputFormat.SVG;
