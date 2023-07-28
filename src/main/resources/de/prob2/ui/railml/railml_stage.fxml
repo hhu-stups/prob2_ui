@@ -16,7 +16,6 @@
 <?import javafx.scene.control.ButtonBar?>
 <?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.ProgressBar?>
-<?import de.prob2.ui.railml.RailMLStage.VisualisationStrategy?>
 <?import javafx.scene.control.ListView?>
 <fx:root title="RailML Import" type="RailMLStage" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
@@ -98,7 +97,7 @@
 						</VBox.margin>
 					</ButtonBar>
 					<HBox fx:id="progressInfo" prefHeight="30.0" spacing="7.0" visible="false">
-						<ProgressBar fx:id="progressBar" prefHeight="25.0" HBox.hgrow="ALWAYS" progress="0.0"/>
+						<ProgressBar fx:id="progressBar" prefHeight="10.0" HBox.hgrow="ALWAYS" progress="0.0"/>
 						<Label fx:id="currentOp" styleClass="bold" />
 					</HBox>
 				</VBox>

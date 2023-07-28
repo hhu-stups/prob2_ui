@@ -132,10 +132,10 @@ public class RailMLInspectDotStage extends Stage {
 	@Inject
 	public RailMLInspectDotStage(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
 	                             final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions,
-	                             final String threadName, final RailMLFile railMLFile) {
+	                             final RailMLFile railMLFile) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.updater = new BackgroundUpdater(threadName);
+		this.updater = new BackgroundUpdater("railml dot view updater");
 		stopActions.add(this.updater::shutdownNow);
 		this.preferencesStageProvider = preferencesStageProvider;
 		this.i18n = i18n;
