@@ -3,6 +3,7 @@ package de.prob2.ui.railml;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
@@ -10,6 +11,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.*;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -20,6 +22,7 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
@@ -39,6 +42,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @FXMLInjected
@@ -48,6 +52,12 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	private WebView dotView;
+	@FXML
+	private Label placeholderLabel;
+	@FXML
+	private TextArea taErrors;
+	@FXML
+	private Parent errorsView;
 
 	@FXML
 	private MenuBar menuBar;
@@ -100,6 +110,7 @@ public class RailMLInspectDotStage extends Stage {
 
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
+	private final BackgroundUpdater updater;
 	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 	private final I18n i18n;
 	private final RailMLFile railMLFile;
@@ -120,9 +131,12 @@ public class RailMLInspectDotStage extends Stage {
 
 	@Inject
 	public RailMLInspectDotStage(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
-	                             final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final RailMLFile railMLFile) {
+	                             final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions,
+	                             final String threadName, final RailMLFile railMLFile) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
+		this.updater = new BackgroundUpdater(threadName);
+		stopActions.add(this.updater::shutdownNow);
 		this.preferencesStageProvider = preferencesStageProvider;
 		this.i18n = i18n;
 		this.railMLFile = railMLFile;
@@ -188,6 +202,8 @@ public class RailMLInspectDotStage extends Stage {
 		scalingSpinner.valueProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeScalingFactor", "newFactor = " + scalingSpinner.getValue()));
 		});
+
+		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
 	}
 
 	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
@@ -302,6 +318,15 @@ public class RailMLInspectDotStage extends Stage {
 		}
 	}
 
+	private void updatePlaceholderLabel() {
+		final String text;
+		if (this.updater.isRunning()) {
+			text = i18n.translate("dynamic.placeholder.inProgress");
+		} else {
+			text = "";
+		}
+		placeholderLabel.setText(text);
+	}
 
 	@FXML
 	private void defaultSize() {
@@ -341,7 +366,7 @@ public class RailMLInspectDotStage extends Stage {
 		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y + ")");
 	}
 
-	protected void clearContent() {
+	private void clearContent() {
 		this.dot = null;
 		this.dotEngine = null;
 		this.currentDotContent.set(null);
@@ -362,33 +387,75 @@ public class RailMLInspectDotStage extends Stage {
 	}
 
 	@FXML
-	protected void acceptVisualisation() {
+	private void acceptVisualisation() {
+		final Path tempSvgFile;
+		try {
+			tempSvgFile = Files.createTempFile("railml-", ".svg");
+		} catch (IOException e) {
+			throw new ProBError("Failed to create temporary svg file", e);
+		}
+		saveConverted(DotOutputFormat.SVG, tempSvgFile);
+		// convertSvgVisB
 		this.close();
-		/*currentTrace.getStateSpace().sendInterrupt();
-		interrupt();*/
 	}
 
 	@FXML
 	private void refreshDotView () {
-		DotVisualizationCommand currentItem = DotVisualizationCommand.getByName("custom_graph", railMLFile.getState());
-		try {
-			visualizeInternal(currentItem, Collections.emptyList());
-		} catch (InterruptedException e) {
-			throw new RuntimeException(e);
+		this.updater.execute(() -> {
+			DotVisualizationCommand currentItem = DotVisualizationCommand.getByName("custom_graph", railMLFile.getState());
+			try {
+				visualizeInternal(currentItem, Collections.emptyList());
+			} catch (InterruptedException e) {
+				LOGGER.info("RailML Visualization interrupted", e);
+				Thread.currentThread().interrupt();
+			} catch (ProBError e) {
+				handleProBError(e);
+			} catch (Exception e) {
+				if (e.getCause() instanceof ProBError) {
+					handleProBError((ProBError) e.getCause());
+				} else if (e.getCause() instanceof BCompoundException) {
+					handleProBError(new ProBError((BCompoundException) e.getCause()));
+				} else {
+					LOGGER.error("Visualization failed", e);
+					Platform.runLater(() -> {
+						taErrors.setText(e.getMessage());
+						errorsView.setVisible(true);
+						placeholderLabel.setVisible(false);
+					});
+				}
+			}
+		});
+	}
+
+	private void handleProBError(ProBError e)  {
+		LOGGER.error("Visualization failed with ProBError", e);
+		Platform.runLater(() -> {
+			taErrors.setText(e.getMessage());
+			errorsView.setVisible(true);
+			placeholderLabel.setVisible(false);
+		});
+	}
+
+	@FXML
+	private void interrupt() {
+		railMLFile.getState().getStateSpace().sendInterrupt();
+	}
+
+	@FXML
+	private void cancel() {
+		boolean abortImport = confirmAbortImport();
+		if (abortImport) {
+			updater.shutdownNow();
+			this.interrupt();
+			this.close();
 		}
 	}
 
-	@FXML
-	protected void cancel() {
-		this.close();
-		/*currentTrace.getStateSpace().sendInterrupt();
-		interrupt();*/
+	public boolean confirmAbortImport() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+				"railml.inspectDot.alerts.confirmAbortImport.header",
+				"railml.inspectDot.alerts.confirmAbortImport.content");
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
 	}
-
-	@FXML
-	protected void save() {
-		/*currentTrace.getStateSpace().sendInterrupt();
-		interrupt();*/
-	}
-
 }

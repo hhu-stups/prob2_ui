@@ -59,7 +59,7 @@
 										<Tooltip text="%common.buttons.saveAs" />
 									</tooltip>
 								</Button>
-								<Button fx:id="cancelButton" onAction="#cancel" HBox.hgrow="NEVER">
+								<Button fx:id="cancelButton" onAction="#interrupt" HBox.hgrow="NEVER">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
