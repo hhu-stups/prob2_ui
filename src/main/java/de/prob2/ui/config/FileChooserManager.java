@@ -198,7 +198,7 @@ public class FileChooserManager {
 	}
 	
 	public FileChooser.ExtensionFilter getRailMLFilter() {
-		return this.getExtensionFilter("common.fileChooser.fileTypes.railml", "railml");
+		return this.getExtensionFilter("common.fileChooser.fileTypes.railml", "railml", "xml");
 	}
 	
 	public FileChooser.ExtensionFilter getPlainTextFilter() {
