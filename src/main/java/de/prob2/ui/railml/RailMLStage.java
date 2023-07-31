@@ -284,6 +284,7 @@ public class RailMLStage extends Stage {
 						this.close();
 						if (visualisationCheckbox.isSelected()) {
 							RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
+							railMLInspectDotStage.initializeCheckboxes();
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
 							DotVisualizationCommand customGraph = getByName("custom_graph", currentState);
@@ -304,7 +305,7 @@ public class RailMLStage extends Stage {
 	public void generateMachines(String visualisationDefinition) throws Exception {
 
 		Path path = Paths.get(getClass().getResource("RailML_import.mch").toURI());
-		Path pathDef = Paths.get(getClass().getResource("RailML_CustomGraphs.def").toURI());
+		//Path pathDef = Paths.get(getClass().getResource("RailML_CustomGraphs.def").toURI());
 		/*Machine printMachine = new Machine("short","",path.toAbsolutePath());
 		MachineLoader loader = injector.getInstance(MachineLoader.class);
 		final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
@@ -316,7 +317,10 @@ public class RailMLStage extends Stage {
 
 		currentState = stateSpace.getRoot()
 			//.perform("$setup_constants", "file = \"" + railMLFile + "\" & outputFile = \"" + animationMachine.getAbsolutePath().replace(File.separator, "/") + "\"")
-			.perform("$setup_constants", "file = \"" + railMLpath + "\"")// " & customGraph = " + visualisationDefinition)
+			.perform("$setup_constants", "file = \"" + railMLpath + "\"")// +
+				/*"  & outputFile = \"d:/Users/jangr/OneDrive - hhu.de/[Master] 4. Semester/Masterarbeit/Gitlab/b-railml/Code/RailML_animation_generated.mch\"\n" +
+				"  & visBFile = \"fig/visb_BRB_generated.json\"\n" +
+				"  & machineName = \"RailML_animation_generated\"")*/// " & customGraph = " + visualisationDefinition)
 			.perform("$initialise_machine")
 			.perform("importRailML");
 		System.out.println(stateSpace.printState(currentState));

@@ -160,42 +160,38 @@ public class RailMLInspectDotStage extends Stage {
 		zoomResetMenuButton.setAccelerator(new MultiKeyCombination(zoomResetChar, zoomResetCode, zoomResetKeypad));
 		zoomInMenuButton.setAccelerator(new MultiKeyCombination(zoomInChar, zoomInCode, zoomInKeypad));
 		zoomOutMenuButton.setAccelerator(new MultiKeyCombination(zoomOutChar, zoomOutCode, zoomOutKeypad));
-		borders.setSelected(true);
+
+		initializeCheckboxes();
+
 		borders.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayBorders"));
 		});
-		bufferstops.setSelected(true);
 		bufferstops.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayBufferstops"));
 		});
-		crossings.setSelected(true);
 		crossings.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayCrossings"));
 		});
-		derailers.setSelected(true);
 		derailers.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayDerailers"));
 		});
-		operationalpoints.setSelected(true);
 		operationalpoints.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayOperationalpoints"));
 		});
-		signals.setSelected(true);
 		signals.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplaySignals"));
 		});
-		switches.setSelected(true);
 		switches.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplaySwitches"));
 		});
-		traindetectionelements.setSelected(true);
 		traindetectionelements.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayTraindetectionelements"));
 		});
-		names.setSelected(true);
 		names.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayNames"));
 		});
+
+		// TODO: Language
 		languageChoiceBox.getItems().addAll(RailMLInspectDotStage.Language.values());
 		SpinnerValueFactory<Double> valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0001, 10.0, 0.0004, 0.0001);
 		scalingSpinner.setValueFactory(valueFactory);
@@ -204,6 +200,19 @@ public class RailMLInspectDotStage extends Stage {
 		});
 
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
+	}
+
+	protected void initializeCheckboxes() {
+		// must match INITIALISATION of B model
+		borders.setSelected(true);
+		bufferstops.setSelected(true);
+		crossings.setSelected(true);
+		derailers.setSelected(true);
+		operationalpoints.setSelected(true);
+		signals.setSelected(true);
+		switches.setSelected(true);
+		traindetectionelements.setSelected(true);
+		names.setSelected(true);
 	}
 
 	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
