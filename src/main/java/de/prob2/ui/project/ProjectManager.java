@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.railml.RailMLFile;
+import de.prob2.ui.railml.RailMLInspectDotStage;
 import de.prob2.ui.railml.RailMLStage;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.model.SimulationModel;
@@ -379,11 +380,15 @@ public class ProjectManager {
 		RailMLFile railMLFile = injector.getInstance(RailMLFile.class);
 		railMLFile.setPath(selected);
 		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
+		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
+		if (railMLInspectDotStage.isShowing()) {
+			railMLInspectDotStage.toFront();
+		} else {
 		railMLStage.show();
 		railMLStage.sizeToScene();
 		railMLStage.getScene().setOnMouseMoved(event -> railMLStage.sizeToScene());
 		railMLStage.toFront();
-
+		}
 	}
 
 	private enum JsonType { VISB, SIMB, NONE }
