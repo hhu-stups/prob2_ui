@@ -64,6 +64,14 @@ test:jdk-17-macos-x86_64:
     - macos
     - x86_64
 
+test:jdk-17-macos-arm64:
+  extends: .test-common
+  script:
+    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.7 check jpackage
+  tags:
+    - macos
+    - arm64
+
 test:jdk-17-windows64:
   extends: .test-common
   script:
