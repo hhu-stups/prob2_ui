@@ -170,7 +170,7 @@ public class SimulationChoosingStage extends Stage {
 		inputBox.getChildren().removeAll(simulationMonteCarloChoice, simulationConditionChoice, simulationPropertyChoice, simulationHypothesisChoice, simulationEstimationChoice);
 		SimulationMode.Mode mode = simulationMode.getMode();
 
-		SimulationType type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+		SimulationType type = simulationConditionChoice.checkProperty() ? simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem() : SimulationType.MONTE_CARLO_SIMULATION;
 		if(type != null) {
 			if(type == SimulationType.ESTIMATION) {
 				inputBox.getChildren().add(0, simulationEstimationChoice);
