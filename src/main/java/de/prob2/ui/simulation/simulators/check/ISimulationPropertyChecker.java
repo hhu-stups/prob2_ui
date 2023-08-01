@@ -4,6 +4,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.Checked;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ISimulationPropertyChecker {
 	List<Trace> getResultingTraces();
@@ -19,4 +20,5 @@ public interface ISimulationPropertyChecker {
 	void check();
 	Checked checkTrace(Trace trace, int time);
 	void calculateStatistics(long time);
+	Map<String, List<Integer>> getOperationExecutions();
 }

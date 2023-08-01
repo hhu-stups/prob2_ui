@@ -30,6 +30,10 @@
 					<Label text="%simulation.statistics.wallTime" styleClass="bold" />
 					<Label fx:id="wallTime" />
 				</HBox>
+				<HBox spacing="7.0">
+					<Label text="%simulation.statistics.averageTraceLength" styleClass="bold" />
+					<Label fx:id="averageTraceLength" />
+				</HBox>
 				<ScrollPane>
 					<GridPane fx:id="statisticsPane"/>
 				</ScrollPane>

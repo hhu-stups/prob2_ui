@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SimulationCheckingSimulator extends Simulator implements ISimulationPropertyChecker {
 
@@ -335,7 +336,10 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	@Override
 	public void calculateStatistics(long time) {
 		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
-		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, calculateExtendedStats());
+		double averageTraceLength = operationExecutions.values().stream()
+				.map(l -> l.stream().reduce(0, Integer::sum))
+				.reduce(0, Integer::sum)/(double) numberExecutions;
+		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, averageTraceLength, calculateExtendedStats());
 	}
 
 	public SimulationExtendedStats calculateExtendedStats() {
@@ -352,6 +356,10 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			percentageResult.put(key, (double) absoluteExecutions/absoluteEnablings);
 		}
 		return new SimulationExtendedStats(executionsResult, enablingsResult, percentageResult);
+	}
+
+	public Map<String, List<Integer>> getOperationExecutions() {
+		return operationExecutions;
 	}
 
 	public List<Trace> getResultingTraces() {

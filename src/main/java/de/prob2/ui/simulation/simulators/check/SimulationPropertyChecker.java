@@ -141,6 +141,11 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 	}
 
 	@Override
+	public Map<String, List<Integer>> getOperationExecutions() {
+		return simulationCheckingSimulator.getOperationExecutions();
+	}
+
+	@Override
 	public List<Trace> getResultingTraces() {
 		return simulationCheckingSimulator.getResultingTraces();
 	}

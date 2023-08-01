@@ -173,7 +173,15 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
-		this.setStats(new SimulationStats(n, numberSuccess, ratio, wallTime, this.calculateExtendedStats()));
+		double averageTraceLength = simulationPropertyChecker.getOperationExecutions().values().stream()
+				.map(l -> l.stream().reduce(0, Integer::sum))
+				.reduce(0, Integer::sum) / (double) n;
+		this.setStats(new SimulationStats(n, numberSuccess, ratio, wallTime, averageTraceLength, this.calculateExtendedStats()));
+	}
+
+	@Override
+	public Map<String, List<Integer>> getOperationExecutions() {
+		return simulationPropertyChecker.getOperationExecutions();
 	}
 
 	@Override
