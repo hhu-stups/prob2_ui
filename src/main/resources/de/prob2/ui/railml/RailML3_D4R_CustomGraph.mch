@@ -1,0 +1,89 @@
+MACHINE RailML3_D4R_CustomGraph
+EXTENDS RailML3_printMachines
+DEFINITIONS
+    "CHOOSE.def";
+    "LibraryIO.def";
+	"LibraryStrings.def";
+    "RailML_CustomGraphs.def";
+    CUSTOM_GRAPH == D4R_customGraph
+VARIABLES
+	SCALING_FACTOR, DISPLAY_BALISES, DISPLAY_BUFFERSTOPS, DISPLAY_BORDERS, DISPLAY_CROSSINGS, DISPLAY_DERAILERS, DISPLAY_OPERATIONALPOINTS, DISPLAY_SIGNALS, DISPLAY_SWITCHES, DISPLAY_TRAINDETECTIONELEMENTS, DISPLAY_TVDSECTIONS, DISPLAY_NAMES, LANGUAGE
+INVARIANT
+	SCALING_FACTOR : REAL
+	& {DISPLAY_BALISES, DISPLAY_BUFFERSTOPS, DISPLAY_BORDERS, DISPLAY_CROSSINGS, DISPLAY_DERAILERS, DISPLAY_OPERATIONALPOINTS, DISPLAY_SIGNALS, DISPLAY_SWITCHES, DISPLAY_TRAINDETECTIONELEMENTS, DISPLAY_TVDSECTIONS, DISPLAY_NAMES} <: BOOL
+    & LANGUAGE : STRING
+INITIALISATION
+	SCALING_FACTOR := 0.004 ||
+    DISPLAY_BALISES := TRUE ||
+	DISPLAY_BUFFERSTOPS := TRUE ||
+	DISPLAY_BORDERS := TRUE ||
+	DISPLAY_CROSSINGS := TRUE ||
+	DISPLAY_DERAILERS := TRUE ||
+	DISPLAY_OPERATIONALPOINTS := TRUE ||
+	DISPLAY_SIGNALS := TRUE ||
+	DISPLAY_SWITCHES := TRUE ||
+	DISPLAY_TRAINDETECTIONELEMENTS := TRUE ||
+    DISPLAY_TVDSECTIONS := TRUE ||
+	DISPLAY_NAMES := TRUE ||
+    LANGUAGE := "en"
+OPERATIONS 
+    increaseScalingFactor = SCALING_FACTOR := SCALING_FACTOR + 0.001;
+    decreaseScalingFactor = SCALING_FACTOR := SCALING_FACTOR - 0.001;
+    changeDisplayBalises =
+        ANY b
+        WHERE b /= DISPLAY_BORDERS
+        THEN DISPLAY_BORDERS := b
+        END;
+    changeDisplayBorders =
+        ANY b
+        WHERE b /= DISPLAY_BORDERS
+        THEN DISPLAY_BORDERS := b
+        END;
+    changeDisplayBufferstops =
+        ANY b
+        WHERE b /= DISPLAY_BUFFERSTOPS
+        THEN DISPLAY_BUFFERSTOPS := b
+        END;
+    changeDisplayCrossings =
+        ANY b
+        WHERE b /= DISPLAY_CROSSINGS
+        THEN DISPLAY_CROSSINGS := b
+        END;
+    changeDisplayDerailers =
+        ANY b
+        WHERE b /= DISPLAY_DERAILERS
+        THEN DISPLAY_DERAILERS := b
+        END;
+    changeDisplayOperationalpoints =
+        ANY b
+        WHERE b /= DISPLAY_OPERATIONALPOINTS
+        THEN DISPLAY_OPERATIONALPOINTS := b
+        END;
+    changeDisplaySignals =
+        ANY b
+        WHERE b /= DISPLAY_SIGNALS
+        THEN DISPLAY_SIGNALS := b
+        END;
+    changeDisplaySwitches =
+        ANY b
+        WHERE b /= DISPLAY_SWITCHES
+        THEN DISPLAY_SWITCHES := b
+        END;
+    changeDisplayTraindetectionelements =
+        ANY b
+        WHERE b /= DISPLAY_TRAINDETECTIONELEMENTS
+        THEN DISPLAY_TRAINDETECTIONELEMENTS := b
+        END;
+    changeDisplayTvdsections =
+        ANY b
+        WHERE b /= DISPLAY_TVDSECTIONS
+        THEN DISPLAY_TVDSECTIONS := b
+        END;
+    changeDisplayNames =
+        ANY b
+        WHERE b /= DISPLAY_NAMES
+        THEN DISPLAY_NAMES := b
+        END;
+    changeLanguage(language) =
+        PRE language : STRING THEN LANGUAGE := language END
+END//MACHINE

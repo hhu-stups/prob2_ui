@@ -1,19 +1,14 @@
 MACHINE RailML_import
 INCLUDES RailML_validation_flat
-PROMOTES EBO_CheckSwitchSpeeds, ValidateTrackLengths, ValidateTrackBeginEnd//,
-  //subsequentBlocks
 DEFINITIONS
-	"CHOOSE.def";
   "LibraryIO.def";
   "LibraryMeta.def";
   "LibraryStrings.def";
   "SORT.def";
-  "RailML_CustomGraphs.def";
-  CUSTOM_GRAPH == D4R_customGraph;
   SET_PREF_ALLOW_OPERATION_CALLS_IN_EXPRESSIONS == TRUE;
 
   PRINT_REPORT == FALSE;
-  PRINT_FILE == "";
+  PRINT_FILE == "d:/Users/jangr/OneDrive - hhu.de/[Master] 4. Semester/Masterarbeit/Gitlab/b-railml/Code/validation_report.txt";
 
   runErrorRule(Rule) ==
     IF no_error = TRUE THEN
@@ -26,10 +21,12 @@ DEFINITIONS
             IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "--- ERROR ---~nFile import aborted, the specified file does not contain valid railML.~n------~n~w [ERROR ~w] Validation failed with the following errors: ~w", {1 |-> TO_STRING(Rule), 2 |-> TO_STRING(Var2[{1}])}) ELSE skip END;
             ADD_ERROR("RailML: ", "File import aborted, the specified file does not contain valid railML.");
             VAR s, i IN
-              s := SORT(Var2[{1}]) || i := 1;
+              s := SORT(Var2[{1}]);
+              i := 1;
               WHILE i < card(s) DO
-                ADD_ERROR("RailML", s(i)) ||
-                ADD_STATE_ERROR("RailML", s(i)) || i := i+1
+                ADD_ERROR("RailML", s(i));
+                ADD_STATE_ERROR("RailML", s(i));
+                i := i+1
                 INVARIANT btrue
                 VARIANT card(s)+1 - i
               END
@@ -45,84 +42,25 @@ DEFINITIONS
           THEN IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "[SUCCESS ~w] Validation succeeded without any warning", {1 |-> TO_STRING(Rule)}) ELSE skip END
           ELSE
             IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "[WARNING ~w] Validation succeeded with the following warnings: ~w", {1 |-> TO_STRING(Rule), 2 |-> TO_STRING(Var2[{2}])}) ELSE skip END;
-            VAR s, i IN
-              s := SORT(Var2[{1}]) || i := 1;
+            warnings := warnings \/ Var2[{1}]
+            /*VAR s, i IN
+              s := SORT(Var2[{1}]);
+              i := 1;
               WHILE i < card(s) DO
-                ADD_WARNING("RailML: ", s(i)) || i := i+1
+                ADD_WARNING("RailML: ", s(i));
+                i := i+1
                 INVARIANT btrue
                 VARIANT card(s)+1 - i
               END
-            END
+            END*/
         END
       END
     ELSE skip END;
   runComputation(Computation) == IF no_error = TRUE THEN Computation ELSE skip END
-VARIABLES
-	no_error, SCALING_FACTOR, DISPLAY_BUFFERSTOPS, DISPLAY_BORDERS, DISPLAY_CROSSINGS, DISPLAY_DERAILERS, DISPLAY_OPERATIONALPOINTS, DISPLAY_SIGNALS, DISPLAY_SWITCHES, DISPLAY_TRAINDETECTIONELEMENTS, DISPLAY_NAMES
-INVARIANT
-	no_error : BOOL
-	& SCALING_FACTOR : REAL
-	& {DISPLAY_BUFFERSTOPS, DISPLAY_BORDERS, DISPLAY_CROSSINGS, DISPLAY_DERAILERS, DISPLAY_OPERATIONALPOINTS, DISPLAY_SIGNALS, DISPLAY_SWITCHES, DISPLAY_TRAINDETECTIONELEMENTS, DISPLAY_NAMES} <: BOOL
-INITIALISATION
-	no_error := TRUE ||
-	SCALING_FACTOR := 0.004 ||
-	DISPLAY_BUFFERSTOPS := TRUE ||
-	DISPLAY_BORDERS := TRUE ||
-	DISPLAY_CROSSINGS := TRUE ||
-	DISPLAY_DERAILERS := TRUE ||
-	DISPLAY_OPERATIONALPOINTS := TRUE ||
-	DISPLAY_SIGNALS := TRUE ||
-	DISPLAY_SWITCHES := TRUE ||
-	DISPLAY_TRAINDETECTIONELEMENTS := TRUE ||
-	DISPLAY_NAMES := TRUE
+VARIABLES no_error, warnings
+INVARIANT no_error : BOOL & warnings : FIN(STRING)
+INITIALISATION no_error := TRUE; warnings := {}
 OPERATIONS
-  changeScalingFactor(newFactor) =
-  	PRE newFactor : REAL THEN SCALING_FACTOR := newFactor END;
-  changeDisplayBorders =
-    ANY b
-    WHERE b /= DISPLAY_BORDERS
-    THEN DISPLAY_BORDERS := b
-    END;
-  changeDisplayBufferstops =
-    ANY b
-    WHERE b /= DISPLAY_BUFFERSTOPS
-    THEN DISPLAY_BUFFERSTOPS := b
-    END;
-  changeDisplayCrossings =
-  	ANY b
-    WHERE b /= DISPLAY_CROSSINGS
-    THEN DISPLAY_CROSSINGS := b
-    END;
-  changeDisplayDerailers =
-    	ANY b
-      WHERE b /= DISPLAY_DERAILERS
-      THEN DISPLAY_DERAILERS := b
-      END;
-  changeDisplayOperationalpoints =
-    	ANY b
-      WHERE b /= DISPLAY_OPERATIONALPOINTS
-      THEN DISPLAY_OPERATIONALPOINTS := b
-      END;
-  changeDisplaySignals =
-    	ANY b
-      WHERE b /= DISPLAY_SIGNALS
-      THEN DISPLAY_SIGNALS := b
-      END;
-  changeDisplaySwitches =
-    	ANY b
-      WHERE b /= DISPLAY_SWITCHES
-      THEN DISPLAY_SWITCHES := b
-      END;
-  changeDisplayTraindetectionelements =
-    	ANY b
-      WHERE b /= DISPLAY_TRAINDETECTIONELEMENTS
-      THEN DISPLAY_TRAINDETECTIONELEMENTS := b
-      END;
-  changeDisplayNames =
-  	ANY b
-  	WHERE b /= DISPLAY_NAMES
-  	THEN DISPLAY_NAMES := b
-  	END;
   importRailML = 
     BEGIN
       // RailML_readFile
@@ -240,7 +178,8 @@ OPERATIONS
       runComputation(set_TRACK);
 
       runErrorRule(validate_border);
-      runErrorRule(validate_bufferStop);      
+      runErrorRule(validate_bufferStop);
+      runErrorRule(validate_track);
       // END RailML3_IS
 
       // BEGIN RailML3_VIS
@@ -280,7 +219,6 @@ OPERATIONS
       runErrorRule(is_valid_derailersIL);
       runComputation(set_derailerIL);
       runErrorRule(is_valid_derailerIL);
-      runComputation(set_IL_DERAILER_IDS);      
 
       runComputation(set_movableCrossings);
       runErrorRule(is_valid_movableCrossings);
@@ -302,8 +240,11 @@ OPERATIONS
       //runErrorRule(validate_switchIL);
 
       runComputation(set_IL_MOVABLE_CROSSING);
+      runErrorRule(validate_movableCrossing);
+      runWarningRule(warnings_movableCrossing);
       runComputation(set_IL_DERAILER);
-      runComputation(set_IL_SWITCH);
+      runErrorRule(validate_derailerIL);
+      runComputation(set_IL_SWITCH);      
 
       runComputation(set_routeReleaseGroupsAhead);
       runErrorRule(is_valid_routeReleaseGroupsAhead);
@@ -326,9 +267,7 @@ OPERATIONS
       runComputation(set_overlaps);
       runErrorRule(is_valid_overlaps);
       runComputation(set_overlap);
-      runErrorRule(is_valid_overlap);
-      runWarningRule(warnings_overlap);
-      runComputation(set_IL_OVERLAP);
+      runErrorRule(is_valid_overlap);      
 
       runComputation(set_routeRelations);
       runErrorRule(is_valid_routeRelations);
@@ -337,8 +276,8 @@ OPERATIONS
       runComputation(set_IL_ROUTE_RELATION);
 
       runComputation(set_ROUTE);
-      runErrorRule(validate_route_errors);
-      runWarningRule(warnings_route);
+      runErrorRule(validate_route);
+      runWarningRule(warnings_route);      
 
       runComputation(set_conflictingRoutes);
       runErrorRule(is_valid_conflictingRoutes);
@@ -348,7 +287,12 @@ OPERATIONS
 
       runComputation(set_TVD_SECTIONS);
       runComputation(set_ROUTES_TVD_SECTIONS);
-      runErrorRule(validate_tvdSection_errors);
+      runErrorRule(validate_tvdSection);
+      runWarningRule(warnings_tvdSection);
+
+      runComputation(set_IL_OVERLAP);
+      runErrorRule(validate_overlap);
+      runWarningRule(warnings_overlap);
 
       runComputation(set_specificInfrastructureManagers);
       runErrorRule(is_valid_specificInfrastructureManagers);
@@ -362,7 +306,18 @@ OPERATIONS
       runComputation(set_signalBox);
       runErrorRule(is_valid_signalBox);
       runComputation(set_IL_SIGNAL_BOX_IDS);
-      runComputation(set_IL_SIGNAL_BOX)
+      runComputation(set_IL_SIGNAL_BOX);
       // END RailML3_IL
+
+      IF warnings /= {} THEN ADD_WARNING("RailML: ", warnings) ELSE skip END
+      /*WHILE warnings /= {} DO
+        VAR s IN
+          s :: warnings;
+          ADD_WARNING("RailML: ", s);
+          warnings := warnings - {s}
+        END
+        INVARIANT btrue
+        VARIANT card(warnings)
+      END*/
     END
 END//MACHINE

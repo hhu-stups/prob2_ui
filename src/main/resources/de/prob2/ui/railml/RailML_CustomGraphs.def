@@ -6,8 +6,9 @@ DEFINITIONS
     //SCALING_FACTOR == 0.004;
 
     //DISPLAY_NAMES == TRUE;
-    LANGUAGE == "en"; // "en"
+    //LANGUAGE == "en"; // "en"
 
+    BALISES == IF DISPLAY_BALISES = TRUE THEN allIdsOfType("balise") ELSE {} END;
 	BORDERS == IF DISPLAY_BORDERS = TRUE THEN RailML3_IS_OPENEND_IDS ELSE {} END;
     BUFFERSTOPS == IF DISPLAY_BUFFERSTOPS = TRUE THEN allIdsOfType("bufferStop") ELSE {} END;
     CROSSINGS == IF DISPLAY_CROSSINGS = TRUE THEN allIdsOfType("crossing") ELSE {} END;
@@ -16,6 +17,7 @@ DEFINITIONS
     SIGNALS == IF DISPLAY_SIGNALS = TRUE THEN allIdsOfType("signalIS") ELSE {} END;
     SWITCHES == IF DISPLAY_SWITCHES = TRUE THEN allIdsOfType("switchIS") ELSE {} END;
     TRAINDETECTIONELEMENTS == IF DISPLAY_TRAINDETECTIONELEMENTS = TRUE THEN allIdsOfType("trainDetectionElement") ELSE {} END;
+    TVDSECTIONS == IF DISPLAY_TVDSECTIONS = TRUE THEN allIdsOfType("tvdSection") ELSE {} END;
 
     D4R_customGraph == rec(
         layout: "neato",
@@ -27,7 +29,7 @@ DEFINITIONS
         
         // Bufferstops, Crossings, Openends, TDEs, Signals, Switches:
         nodes1:
-            UNION(i_e, e_sep).(i_e : BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
+            UNION(i_e, e_sep).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
                 & e_sep : RailML_spotElementProjection & i_e = MU(e_sep'refersToElement) |
                     {rec(shape: "point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
                         pos: TO_STRING(STRING_TO_REAL(MU(MU(e_sep'coordinate)'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(MU(e_sep'coordinate)'y))/INCH_FACTOR)^"!",
@@ -36,7 +38,7 @@ DEFINITIONS
                         fontsize: IF i_e : DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
                 )
             \/
-            UNION(i_e).(i_e : BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ TRAINDETECTIONELEMENTS
+            UNION(i_e).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ TRAINDETECTIONELEMENTS
                 & !e_sep.(e_sep : RailML_spotElementProjection => i_e /= MU(e_sep'refersToElement)) |
                     {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
                     pos: "",
@@ -51,7 +53,7 @@ DEFINITIONS
             ),
         // Labels for tvd sections:
         nodes3:
-            UNION(i_e, e_sep).(i_e : RailML3_IL_TVD_SECTION_IDS
+            UNION(i_e, e_sep).(i_e : TVDSECTIONS
                 & e_sep : RailML_spotElementProjection & i_e = MU(e_sep'refersToElement) |
                     {rec(shape: "point", nodes: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, `id`: i_e, pos: TO_STRING(STRING_TO_REAL(MU(MU(e_sep'coordinate)'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(MU(e_sep'coordinate)'y))/INCH_FACTOR)^"!", width:"0")}
             ),
@@ -145,7 +147,7 @@ DEFINITIONS
         
         // Bufferstops, Crossings, Openends, TDEs, Signals, Switches:
         nodes1:
-            UNION(i_e, e_ne, e_sloc, iC1, iC2, e_sep1, e_sep2, x1, y1, x2, y2).(i_e : BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
+            UNION(i_e, e_ne, e_sloc, iC1, iC2, e_sep1, e_sep2, x1, y1, x2, y2).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
                 & e_ne : RailML3_netElement & e_sloc : dom(RailML3_IS_SPOT_LOCATIONS(i_e)) & MU(e_ne'Id) = prj1(e_sloc)
                 & {iC1,iC2} <: union(ran(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES(MU(e_ne'Id))))~
                 & prj1(iC1) <= prj2(e_sloc) & IF prj2(e_sloc) = 1.0 THEN prj2(e_sloc) <= prj1(iC2) ELSE prj2(e_sloc) < prj1(iC2) END
