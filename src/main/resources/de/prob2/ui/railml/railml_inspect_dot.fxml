@@ -32,6 +32,7 @@
 				<center>
 					<SplitPane dividerPositions="0.20">
 						<VBox>
+							<CheckBox text="%railml.inspectDot.chooseElements.balises" fx:id="balises"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.borders" fx:id="borders"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.bufferstops" fx:id="bufferstops"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.crossings" fx:id="crossings"/>
@@ -39,15 +40,25 @@
 							<CheckBox text="%railml.inspectDot.chooseElements.operationalPoints" fx:id="operationalpoints"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.signals" fx:id="signals"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.switches" fx:id="switches"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.tdes" fx:id="traindetectionelements"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.traindetectionelements" fx:id="traindetectionelements"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.tvdsections" fx:id="tvdsections"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.names" fx:id="names"/>
 							<HBox spacing="10">
 								<Label text="%railml.inspectDot.chooseElements.language"/>
 								<ChoiceBox fx:id="languageChoiceBox"/>
 							</HBox>
-							<HBox spacing="10">
+							<HBox alignment="TOP_RIGHT" styleClass="border">
 								<Label text="%railml.inspectDot.chooseElements.scaling"/>
-								<Spinner fx:id="scalingSpinner"/>
+								<Button fx:id="incScalingButton" onAction="#increaseScalingFactor">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
+								<Button fx:id="decScalingButton" onAction="#decreaseScalingFactor">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+								</Button>
 							</HBox>
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
 								<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />

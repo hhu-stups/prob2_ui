@@ -36,8 +36,8 @@ OPERATIONS
     decreaseScalingFactor = SCALING_FACTOR := SCALING_FACTOR - 0.001;
     changeDisplayBalises =
         ANY b
-        WHERE b /= DISPLAY_BORDERS
-        THEN DISPLAY_BORDERS := b
+        WHERE b /= DISPLAY_BALISES
+        THEN DISPLAY_BALISES := b
         END;
     changeDisplayBorders =
         ANY b

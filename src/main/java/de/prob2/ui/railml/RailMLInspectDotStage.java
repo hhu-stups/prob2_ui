@@ -86,6 +86,8 @@ public class RailMLInspectDotStage extends Stage {
 	@FXML
 	private MenuItem zoomOutMenuButton;
 	@FXML
+	private CheckBox balises;
+	@FXML
 	private CheckBox borders;
 	@FXML
 	private CheckBox bufferstops;
@@ -102,11 +104,13 @@ public class RailMLInspectDotStage extends Stage {
 	@FXML
 	private CheckBox traindetectionelements;
 	@FXML
+	private CheckBox tvdsections;
+	@FXML
 	private CheckBox names;
 	@FXML
 	private ChoiceBox<Language> languageChoiceBox;
-	@FXML
-	private Spinner<Double> scalingSpinner;
+	/*@FXML
+	private Spinner<Double> scalingSpinner;*/
 	private enum Language {EN, NO}
 
 	private final StageManager stageManager;
@@ -164,6 +168,9 @@ public class RailMLInspectDotStage extends Stage {
 
 		initializeCheckboxes();
 
+		balises.selectedProperty().addListener((observable,from,to) -> {
+			railMLFile.setState(railMLFile.getState().perform("changeDisplayBalises"));
+		});
 		borders.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayBorders"));
 		});
@@ -188,23 +195,27 @@ public class RailMLInspectDotStage extends Stage {
 		traindetectionelements.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayTraindetectionelements"));
 		});
+		tvdsections.selectedProperty().addListener((observable,from,to) -> {
+			railMLFile.setState(railMLFile.getState().perform("changeDisplayTvdsections"));
+		});
 		names.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayNames"));
 		});
 
 		// TODO: Language
 		languageChoiceBox.getItems().addAll(RailMLInspectDotStage.Language.values());
-		SpinnerValueFactory<Double> valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0001, 10.0, 0.0004, 0.0001);
+		/*SpinnerValueFactory<Double> valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0001, 10.0, 0.0004, 0.0001);
 		scalingSpinner.setValueFactory(valueFactory);
 		scalingSpinner.valueProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeScalingFactor", "newFactor = " + scalingSpinner.getValue()));
-		});
+		});*/
 
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
 	}
 
 	protected void initializeCheckboxes() {
 		// must match INITIALISATION of B model
+		balises.setSelected(true);
 		borders.setSelected(true);
 		bufferstops.setSelected(true);
 		crossings.setSelected(true);
@@ -213,6 +224,7 @@ public class RailMLInspectDotStage extends Stage {
 		signals.setSelected(true);
 		switches.setSelected(true);
 		traindetectionelements.setSelected(true);
+		tvdsections.setSelected(true);
 		names.setSelected(true);
 	}
 
@@ -357,6 +369,18 @@ public class RailMLInspectDotStage extends Stage {
 
 	private void zoomByFactor(double factor) {
 		dotView.setZoom(dotView.getZoom() * factor);
+	}
+
+	@FXML
+	private void increaseScalingFactor() {
+		railMLFile.setState(railMLFile.getState().perform("increaseScalingFactor"));
+		adjustScroll();
+	}
+
+	@FXML
+	private void decreaseScalingFactor() {
+		railMLFile.setState(railMLFile.getState().perform("decreaseScalingFactor"));
+		adjustScroll();
 	}
 
 	private void adjustScroll() {
