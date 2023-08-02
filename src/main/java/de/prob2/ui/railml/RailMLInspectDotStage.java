@@ -36,6 +36,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -405,6 +406,14 @@ public class RailMLInspectDotStage extends Stage {
 		}
 		saveConverted(DotOutputFormat.SVG, tempSvgFile);
 		// convertSvgVisB
+		final Path finalSvg = railMLFile.getPath().resolve(railMLFile.getName() + ".svg").toAbsolutePath();
+		File finalSvgFile = new File(finalSvg.toString());
+		finalSvgFile.delete(); // TODO: Confirm
+		try {
+			Files.copy(tempSvgFile, finalSvg);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 		this.close();
 	}
 
