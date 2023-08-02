@@ -150,10 +150,7 @@ public class SimulationConditionChoice extends GridPane {
 	private ChoiceBox<SimulationEndingItem> endingChoice;
 
 	@FXML
-	private Label lbCheckProperty;
-
-	@FXML
-	private CheckBox cbCheckProperty;
+	private ChoiceBox<SimulationType> simulationChoice;
 
 	private final I18n i18n;
 
@@ -171,14 +168,14 @@ public class SimulationConditionChoice extends GridPane {
 	@FXML
 	private void initialize() {
 		tfMaxStepsBeforeProperty.visibleProperty().bind(cbMaxStepsBeforeProperty.selectedProperty());
-		lbCheckProperty.visibleProperty().bind(Bindings.createBooleanBinding(() -> simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO, simulationMode.modeProperty()));
-		cbCheckProperty.visibleProperty().bind(Bindings.createBooleanBinding(() -> simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO, simulationMode.modeProperty()));
+		simulationChoice.getSelectionModel().select(0);
 
 		startingChoice.visibleProperty().bind(cbStartingChoice.selectedProperty());
 		cbStartingChoice.selectedProperty().addListener((observable, from, to) -> {
 			startingChoice.getSelectionModel().clearSelection();
 			startingChoice.getSelectionModel().select(startingChoice.getSelectionModel().getSelectedItem());
 		});
+
 		startingChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.getChildren().removeAll(lbStartAfter, tfStartAfter, lbStartingPredicate, tfStartingPredicate, lbStartingTime, tfStartingTime);
 			if(to != null) {
@@ -366,12 +363,13 @@ public class SimulationConditionChoice extends GridPane {
 		return information;
 	}
 
-	public BooleanProperty checkPropertyProperty() {
-		return cbCheckProperty.selectedProperty();
+	public ChoiceBox<SimulationType> simulationChoice() {
+		return simulationChoice;
 	}
 
 	public boolean checkProperty() {
-		return cbCheckProperty.isSelected();
+		SimulationType type = simulationChoice.getSelectionModel().getSelectedItem();
+		return type != null && type != SimulationType.MONTE_CARLO_SIMULATION;
 	}
 
 	public void setChoosingStage(SimulationChoosingStage choosingStage) {

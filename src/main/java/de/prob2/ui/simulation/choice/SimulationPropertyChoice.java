@@ -75,9 +75,6 @@ public class SimulationPropertyChoice extends GridPane {
 	@FXML
 	private ChoiceBox<SimulationPropertyChoice.SimulationPropertyItem> checkingChoice;
 
-	@FXML
-	private ChoiceBox<SimulationType> simulationChoice;
-
 	private SimulationChoosingStage choosingStage;
 
 	private final I18n i18n;
@@ -138,10 +135,6 @@ public class SimulationPropertyChoice extends GridPane {
 			information.put("TIME", Integer.parseInt(tfMonteCarloTime.getText()));
 		}
 		return information;
-	}
-
-	public ChoiceBox<SimulationType> simulationChoice() {
-		return simulationChoice;
 	}
 
 	public void setChoosingStage(SimulationChoosingStage choosingStage) {

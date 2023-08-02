@@ -37,7 +37,7 @@
 
 	<Text text="%simulation.choice.header.property" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-	<Label text="%simulation.choice.check" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+	<Label text="%simulation.choice.property" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 	<ChoiceBox fx:id="checkingChoice" GridPane.rowIndex="2" GridPane.columnIndex="2">
 		<items>
 			<FXCollections fx:factory="observableArrayList">
@@ -51,15 +51,6 @@
 	</ChoiceBox>
 	<Spacer/>
 
-	<Label text="%simulation.choice.test" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
-	<ChoiceBox fx:id="simulationChoice" GridPane.rowIndex="4" GridPane.columnIndex="2">
-		<items>
-			<FXCollections fx:factory="observableArrayList">
-				<SimulationType fx:constant="HYPOTHESIS_TEST"/>
-				<SimulationType fx:constant="ESTIMATION"/>
-			</FXCollections>
-		</items>
-	</ChoiceBox>
 
 
 </fx:root>

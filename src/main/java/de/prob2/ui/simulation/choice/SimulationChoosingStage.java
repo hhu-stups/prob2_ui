@@ -76,9 +76,8 @@ public class SimulationChoosingStage extends Stage {
 	@FXML
 	private void initialize() {
 		setCheckListeners();
-		simulationConditionChoice.checkPropertyProperty().addListener((observable, from, to) -> updateGUI());
-		simulationPropertyChoice.simulationChoice().getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateGUI());
-		simulationPropertyChoice.simulationChoice().setConverter(i18n.translateConverter());
+		simulationConditionChoice.simulationChoice().getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateGUI());
+		simulationConditionChoice.simulationChoice().setConverter(i18n.translateConverter());
 		simulationPropertyChoice.setChoosingStage(this);
 		simulationConditionChoice.setChoosingStage(this);
 	}
@@ -112,7 +111,7 @@ public class SimulationChoosingStage extends Stage {
 			// TODO
 			return false;
 		}
-		SimulationType type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+		SimulationType type = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
 		switch (type) {
 			case ESTIMATION:
 				return simulationEstimationChoice.checkSelection();
@@ -137,7 +136,7 @@ public class SimulationChoosingStage extends Stage {
 		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationConditionChoice.checkProperty()) {
 			type = SimulationType.MONTE_CARLO_SIMULATION;
 		} else {
-			type = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+			type = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
 		}
 		SimulationItem simulationItem = new SimulationItem(id, type, this.extractInformation());
 		simulationItem.setSimulationModel(simulation);
@@ -150,7 +149,7 @@ public class SimulationChoosingStage extends Stage {
 		information.putAll(simulationMonteCarloChoice.extractInformation());
 
 		if(simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationConditionChoice.checkProperty()) {
-			SimulationType simulationType = simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem();
+			SimulationType simulationType = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
 			information.putAll(simulationPropertyChoice.extractInformation());
 			information.putAll(simulationConditionChoice.extractInformation());
 			switch (simulationType) {
@@ -170,7 +169,7 @@ public class SimulationChoosingStage extends Stage {
 		inputBox.getChildren().removeAll(simulationMonteCarloChoice, simulationConditionChoice, simulationPropertyChoice, simulationHypothesisChoice, simulationEstimationChoice);
 		SimulationMode.Mode mode = simulationMode.getMode();
 
-		SimulationType type = simulationConditionChoice.checkProperty() ? simulationPropertyChoice.simulationChoice().getSelectionModel().getSelectedItem() : SimulationType.MONTE_CARLO_SIMULATION;
+		SimulationType type = simulationConditionChoice.checkProperty() ? simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem() : SimulationType.MONTE_CARLO_SIMULATION;
 		if(type != null) {
 			if(type == SimulationType.ESTIMATION) {
 				inputBox.getChildren().add(0, simulationEstimationChoice);

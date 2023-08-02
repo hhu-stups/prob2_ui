@@ -19,6 +19,7 @@
 
 <?import de.prob2.ui.sharedviews.Spacer?>
 
+<?import de.prob2.ui.simulation.choice.SimulationType?>
 <fx:root type="SimulationConditionChoice" styleClass="border" stylesheets="@/prob.css" hgap="5.0" vgap="5.0" alignment="TOP_LEFT" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 
@@ -71,8 +72,16 @@
 		</items>
 	</ChoiceBox>
 
-	<Label fx:id="lbCheckProperty" text="%simulation.choice.checkProperty" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
-	<CheckBox fx:id="cbCheckProperty" GridPane.rowIndex="7" GridPane.columnIndex="2"/>
+	<Label text="%simulation.choice.check" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+	<ChoiceBox fx:id="simulationChoice" GridPane.rowIndex="7" GridPane.columnIndex="2">
+		<items>
+			<FXCollections fx:factory="observableArrayList">
+				<SimulationType fx:constant="MONTE_CARLO_SIMULATION"/>
+				<SimulationType fx:constant="HYPOTHESIS_TEST"/>
+				<SimulationType fx:constant="ESTIMATION"/>
+			</FXCollections>
+		</items>
+	</ChoiceBox>
 
 	<Spacer/>
 </fx:root>
