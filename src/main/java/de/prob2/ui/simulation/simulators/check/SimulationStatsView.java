@@ -26,6 +26,8 @@ public final class SimulationStatsView extends Stage {
 	@FXML
 	private Label percentage;
 	@FXML
+	private Label estimatedValue;
+	@FXML
 	private Label wallTime;
 	@FXML
 	private Label averageTraceLength;
@@ -48,6 +50,7 @@ public final class SimulationStatsView extends Stage {
 				numberSimulations.setText(null);
 				numberSuccess.setText(null);
 				percentage.setText(null);
+				estimatedValue.setText(null);
 				wallTime.setText(null);
 				averageTraceLength.setText(null);
 				statisticsPane.getChildren().clear();
@@ -56,6 +59,7 @@ public final class SimulationStatsView extends Stage {
 				numberSuccess.setText(String.valueOf(to.getNumberSuccess()));
 				BigDecimal percentageDecimal = BigDecimal.valueOf(100 * to.getPercentage()).setScale(2, RoundingMode.HALF_UP);
 				percentage.setText(String.format("%s%%", percentageDecimal));
+				estimatedValue.setText(String.format("%s", to.getEstimatedValue()));
 				wallTime.setText(String.format("%s s", to.getWallTime()));
 				averageTraceLength.setText(String.format("%s", to.getAverageTraceLength()));
 				buildExtendedStatistics(to.getExtendedStats());

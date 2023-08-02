@@ -57,14 +57,18 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 
 	private final EstimationType estimationType;
 
+	private final SimulationCheckingType checkingType;
+
 	private final double desiredValue;
 
 	private final double epsilon;
 
-	public SimulationEstimator(final Injector injector, final I18n i18n, final EstimationType estimationType, final double desiredValue, final double epsilon) {
+	public SimulationEstimator(final Injector injector, final I18n i18n, final EstimationType estimationType,
+							   final SimulationCheckingType checkingType, final double desiredValue, final double epsilon) {
 		this.injector = injector;
 		this.i18n = i18n;
 		this.estimationType = estimationType;
+		this.checkingType = checkingType;
 		this.desiredValue = desiredValue;
 		this.epsilon = epsilon;
 	}
@@ -75,10 +79,16 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 
 	private void checkMinimum() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
-		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
+		double sum;
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+			sum = simulationPropertyChecker.getEstimatedValues().stream()
+					.reduce(0.0, Double::sum);
+		} else {
+			sum = simulationPropertyChecker.getNumberSuccess();
+		}
 		int n = resultingTraces.size();
-		double ratio = (double) numberSuccess / n;
-		if(ratio >= desiredValue - epsilon) {
+		double estimatedValue = sum / n;
+		if(estimatedValue >= desiredValue - epsilon) {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
@@ -87,10 +97,16 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 
 	private void checkMaximum() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
-		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
+		double sum;
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+			sum = simulationPropertyChecker.getEstimatedValues().stream()
+					.reduce(0.0, Double::sum);
+		} else {
+			sum = simulationPropertyChecker.getNumberSuccess();
+		}
 		int n = resultingTraces.size();
-		double ratio = (double) numberSuccess / n;
-		if(ratio <= desiredValue + epsilon) {
+		double estimatedValue = sum / n;
+		if(estimatedValue <= desiredValue + epsilon) {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
@@ -99,10 +115,16 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 
 	private void checkMean() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
-		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
+		double sum;
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+			sum = simulationPropertyChecker.getEstimatedValues().stream()
+					.reduce(0.0, Double::sum);
+		} else {
+			sum = simulationPropertyChecker.getNumberSuccess();
+		}
 		int n = resultingTraces.size();
-		double ratio = (double) numberSuccess / n;
-		if(ratio >= desiredValue - epsilon && ratio <= desiredValue + epsilon) {
+		double estimatedValue = sum / n;
+		if(estimatedValue >= desiredValue - epsilon && estimatedValue <= desiredValue + epsilon) {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
@@ -171,12 +193,15 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
 		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
+
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
+		double estimatedValue = new BigDecimal(simulationPropertyChecker.getEstimatedValues().stream()
+				.reduce(0.0, Double::sum) / n).setScale(2, RoundingMode.HALF_UP).doubleValue();
 		double averageTraceLength = simulationPropertyChecker.getOperationExecutions().values().stream()
 				.map(l -> l.stream().reduce(0, Integer::sum))
 				.reduce(0, Integer::sum) / (double) n;
-		this.setStats(new SimulationStats(n, numberSuccess, ratio, wallTime, averageTraceLength, this.calculateExtendedStats()));
+		this.setStats(new SimulationStats(n, numberSuccess, ratio, estimatedValue, wallTime, averageTraceLength, this.calculateExtendedStats()));
 	}
 
 	@Override

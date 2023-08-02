@@ -10,7 +10,9 @@ import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
+import org.checkerframework.checker.units.qual.A;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,12 +26,15 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	private int numberSuccess;
 
+	private final List<Double> estimatedValues;
+
 	public SimulationPropertyChecker(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
 									 SimulationCheckingType type, Map<String, Object> additionalInformation) {
 		this.simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
 		this.numberSuccess = 0;
+		this.estimatedValues = new ArrayList<>();
 	}
 
 	public Checked checkTrace(Trace trace, int time) {
@@ -44,10 +49,26 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 				return checkPredicateEventually(trace);
 			case TIMING:
 				return checkTiming(time);
+			case AVERAGE:
+			case SUM:
+				estimateValue(trace);
+				return Checked.SUCCESS;
 			default:
 				break;
 		}
 		return Checked.SUCCESS;
+	}
+
+	public double estimateValue(Trace trace) {
+		switch (type) {
+			case AVERAGE:
+				return estimateAverage(trace);
+			case SUM:
+				return estimateSum(trace);
+			default:
+				break;
+		}
+		return 0.0;
 	}
 
 	public Checked checkAllInvariants(Trace trace) {
@@ -140,6 +161,46 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		return Checked.FAIL;
 	}
 
+	public double estimateAverage(Trace trace) {
+		double value = 0.0;
+		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		int steps = 0;
+		for(int i = 0; i < trace.getTransitionList().size(); i++) {
+			Transition transition = trace.getTransitionList().get(i);
+			State destination = transition.getDestination();
+			if(destination.isInitialised()) {
+				String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), expression, mode);
+				if (i >= simulationCheckingSimulator.getStartAtStep()) {
+					value = value + Double.parseDouble(evalResult);
+					steps++;
+				}
+			}
+		}
+		double res = steps == 0 ? 0.0 : value / steps;
+		estimatedValues.add(res);
+		return res;
+	}
+
+	public double estimateSum(Trace trace) {
+		double value = 0.0;
+		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		for(int i = 0; i < trace.getTransitionList().size(); i++) {
+			Transition transition = trace.getTransitionList().get(i);
+			State destination = transition.getDestination();
+			if(destination.isInitialised()) {
+				String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), expression, mode);
+				if (i >= simulationCheckingSimulator.getStartAtStep()) {
+					value = value + Double.parseDouble(evalResult);
+				}
+			}
+		}
+
+		estimatedValues.add(value);
+		return value;
+	}
+
 	@Override
 	public Map<String, List<Integer>> getOperationExecutions() {
 		return simulationCheckingSimulator.getOperationExecutions();
@@ -163,6 +224,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 	@Override
 	public SimulationStats getStats() {
 		return simulationCheckingSimulator.getStats();
+	}
+
+	public List<Double> getEstimatedValues() {
+		return estimatedValues;
 	}
 
 	@Override

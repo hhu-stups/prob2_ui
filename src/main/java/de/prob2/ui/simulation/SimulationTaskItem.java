@@ -146,6 +146,12 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 			this.itemBox.getChildren().add(lbTime);
 		}
 
+		if(information.containsKey("EXPRESSION")) {
+			Label lbExpression = new Label(i18n.translate("simulation.task.estimateExpression", information.get("EXPRESSION")));
+			lbExpression.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbExpression);
+		}
+
 		if(item.getType() == SimulationType.HYPOTHESIS_TEST) {
 			if(information.containsKey("HYPOTHESIS_CHECKING_TYPE")) {
 				Label lbHypothesisTest = new Label(i18n.translate("simulation.task.hypothesistest", i18n.translate(SimulationHypothesisChecker.HypothesisCheckingType.valueOf(information.get("HYPOTHESIS_CHECKING_TYPE").toString()).getShortKey())));
@@ -175,13 +181,23 @@ public class SimulationTaskItem extends TableCell<SimulationItem, String> {
 			}
 
 			if (information.containsKey("DESIRED_VALUE")) {
-				Label lbDesiredValue = new Label(i18n.translate("simulation.task.desiredValue", BigDecimal.valueOf((double) information.get("DESIRED_VALUE") * 100.0).setScale(3, RoundingMode.HALF_UP).doubleValue()));
+				Label lbDesiredValue;
+				if(information.containsKey("EXPRESSION")) {
+					lbDesiredValue = new Label(i18n.translate("simulation.task.desiredValue", BigDecimal.valueOf((double) information.get("DESIRED_VALUE")).setScale(3, RoundingMode.HALF_UP).doubleValue()));
+				} else {
+					lbDesiredValue = new Label(i18n.translate("simulation.task.desiredProbability", BigDecimal.valueOf((double) information.get("DESIRED_VALUE") * 100.0).setScale(3, RoundingMode.HALF_UP).doubleValue()));
+				}
 				lbDesiredValue.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbDesiredValue);
 			}
 
 			if (information.containsKey("EPSILON")) {
-				Label lbEpsilon = new Label(i18n.translate("simulation.task.epsilon", BigDecimal.valueOf((double) information.get("EPSILON") * 100.0).setScale(3, RoundingMode.HALF_UP).doubleValue()));
+				Label lbEpsilon;
+				if(information.containsKey("EXPRESSION")) {
+					lbEpsilon = new Label(i18n.translate("simulation.task.epsilon", BigDecimal.valueOf((double) information.get("EPSILON")).setScale(3, RoundingMode.HALF_UP).doubleValue()));
+				} else {
+					lbEpsilon = new Label(i18n.translate("simulation.task.epsilonProbability", BigDecimal.valueOf((double) information.get("EPSILON") * 100.0).setScale(3, RoundingMode.HALF_UP).doubleValue()));
+				}
 				lbEpsilon.getStyleClass().add("information");
 				this.itemBox.getChildren().add(lbEpsilon);
 			}

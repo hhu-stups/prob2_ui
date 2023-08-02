@@ -339,7 +339,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		double averageTraceLength = operationExecutions.values().stream()
 				.map(l -> l.stream().reduce(0, Integer::sum))
 				.reduce(0, Integer::sum)/(double) numberExecutions;
-		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, wallTime, averageTraceLength, calculateExtendedStats());
+		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, 0.0, wallTime, averageTraceLength, calculateExtendedStats());
 	}
 
 	public SimulationExtendedStats calculateExtendedStats() {

@@ -62,6 +62,11 @@ public class SimulationItem implements IValidationTask {
 			this.information.put("PREDICATE", predicate);
 		}
 
+		@JsonProperty("EXPRESSION")
+		private void setExpression(final String expression) {
+			this.information.put("EXPRESSION", expression);
+		}
+
 		@JsonProperty("STEPS_PER_EXECUTION")
 		private void setStepsPerExecution(final int stepsPerExecution) {
 			this.information.put("STEPS_PER_EXECUTION", stepsPerExecution);

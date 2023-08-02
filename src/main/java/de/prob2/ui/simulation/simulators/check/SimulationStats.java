@@ -8,17 +8,19 @@ public class SimulationStats {
 
 	private final double percentage;
 
+	private final double estimatedValue;
+
 	private final double wallTime;
 
 	private final double averageTraceLength;
 
 	private final SimulationExtendedStats extendedStats;
 
-
-	public SimulationStats(int numberSimulations, int numberSuccess, double percentage,
+	public SimulationStats(int numberSimulations, int numberSuccess, double percentage, double estimatedValue,
 			double wallTime, double averageTraceLength, SimulationExtendedStats extendedStats) {
 		this.numberSimulations = numberSimulations;
 		this.numberSuccess = numberSuccess;
+		this.estimatedValue = estimatedValue;
 		this.percentage = percentage;
 		this.wallTime = wallTime;
 		this.averageTraceLength = averageTraceLength;
@@ -35,6 +37,10 @@ public class SimulationStats {
 
 	public double getPercentage() {
 		return percentage;
+	}
+
+	public double getEstimatedValue() {
+		return estimatedValue;
 	}
 
 	public double getWallTime() {

@@ -188,7 +188,11 @@ public class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, injector.getInstance(I18n.class), estimationType, desiredValue, epsilon);
+		if(item.containsField("EXPRESSION")) {
+			additionalInformation.put("EXPRESSION", item.getField("EXPRESSION"));
+		}
+
+		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, injector.getInstance(I18n.class), estimationType, checkingType, desiredValue, epsilon);
 		initializeEstimator(simulationEstimator, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, simulationEstimator);
 	}

@@ -168,4 +168,8 @@ public class SimulationPropertyChoice extends GridPane {
 		}
 		checkingChoice.getItems().removeAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.SUM));
 	}
+
+	public ChoiceBox<SimulationPropertyItem> getCheckingChoice() {
+		return checkingChoice;
+	}
 }

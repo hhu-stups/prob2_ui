@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.choice;
 
+import com.google.inject.Injector;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -52,12 +53,15 @@ public class SimulationEstimationChoice extends GridPane {
 	@FXML
 	private TextField tfEpsilon;
 
+	private final Injector injector;
+
 	private final I18n i18n;
 
 	@Inject
-	private SimulationEstimationChoice(final StageManager stageManager, final I18n i18n) {
+	private SimulationEstimationChoice(final Injector injector, final StageManager stageManager, final I18n i18n) {
 		super();
 		stageManager.loadFXML(this, "simulation_estimation_choice.fxml");
+		this.injector = injector;
 		this.i18n = i18n;
 	}
 
@@ -80,19 +84,25 @@ public class SimulationEstimationChoice extends GridPane {
 	}
 
 	public boolean checkSelection() {
+		SimulationPropertyChoice simulationPropertyChoice = injector.getInstance(SimulationPropertyChoice.class);
+		SimulationCheckingType checkingType = simulationPropertyChoice.getCheckingChoice().getSelectionModel().getSelectedItem().getCheckingType();
+		boolean estimateProbability = checkingType != SimulationCheckingType.AVERAGE && checkingType != SimulationCheckingType.SUM;
+
 		try {
 			double desiredValue = Double.parseDouble(tfDesiredValue.getText());
 			double epsilon = Double.parseDouble(tfEpsilon.getText());
-			switch (estimationChoice.getSelectionModel().getSelectedItem().getEstimationType()) {
-				case MINIMUM:
-				case MAXIMUM:
-				case MEAN:
-					if(desiredValue <= 0.0 || desiredValue >= 1.0 || epsilon <= 0.0) {
-						return false;
-					}
-					return epsilon <= Math.min(desiredValue, 1 - desiredValue);
-				default:
-					break;
+			if(estimateProbability) {
+				switch (estimationChoice.getSelectionModel().getSelectedItem().getEstimationType()) {
+					case MINIMUM:
+					case MAXIMUM:
+					case MEAN:
+						if (desiredValue <= 0.0 || desiredValue >= 1.0 || epsilon <= 0.0) {
+							return false;
+						}
+						return epsilon <= Math.min(desiredValue, 1 - desiredValue);
+					default:
+						break;
+				}
 			}
 		} catch (NumberFormatException e) {
 			return false;
