@@ -139,7 +139,7 @@ public class RailMLStage extends Stage {
 		visualisationStrategyChoiceBox.visibleProperty().bind(visualisationCheckbox.selectedProperty());
 
 		generateFileListView.setItems(generateFileList);
-		generatedFiles.visibleProperty().bind(Bindings.createBooleanBinding(() -> !generateFileList.isEmpty()));
+		generatedFiles.visibleProperty().bind(Bindings.isEmpty(generateFileList).not());
 		generatedFiles.managedProperty().bind(generatedFiles.visibleProperty());
 		generateFileListView.setFixedCellSize(24);
 		generateFileListView.prefHeightProperty().bind(Bindings.size(generateFileList).multiply(generateFileListView.getFixedCellSize()).add(2));
