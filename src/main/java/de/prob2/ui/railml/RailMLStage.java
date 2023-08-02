@@ -210,6 +210,10 @@ public class RailMLStage extends Stage {
 			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		};*/
 		if(path != null) {
+			generateFileList.clear();
+			animationMachineCheckbox.setSelected(false);
+			validationMachineCheckbox.setSelected(false);
+			visualisationCheckbox.setSelected(false);
 			this.railMLpath = path;
 			this.generationPath = railMLpath.getParent().toAbsolutePath();
 			animationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_animation.mch");
