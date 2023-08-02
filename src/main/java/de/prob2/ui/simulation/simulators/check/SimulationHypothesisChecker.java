@@ -148,7 +148,7 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	}
 
 	public void initialize(final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationPropertyChecker(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		this.simulationPropertyChecker = new SimulationPropertyChecker(this, injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	@Override

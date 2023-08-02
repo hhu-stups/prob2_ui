@@ -74,7 +74,7 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	}
 
 	public void initialize(final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationPropertyChecker(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		this.simulationPropertyChecker = new SimulationPropertyChecker(this, injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	private void checkMinimum() {
@@ -95,6 +95,10 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		}
 	}
 
+	private boolean checkMinimum(double estimatedValue, double desiredValue, double epsilon) {
+		return estimatedValue >= desiredValue - epsilon;
+	}
+
 	private void checkMaximum() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
 		double sum;
@@ -106,11 +110,15 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		}
 		int n = resultingTraces.size();
 		double estimatedValue = sum / n;
-		if(estimatedValue <= desiredValue + epsilon) {
+		if(checkMaximum(estimatedValue, desiredValue, epsilon)) {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
 		}
+	}
+
+	private boolean checkMaximum(double estimatedValue, double desiredValue, double epsilon) {
+		return estimatedValue <= desiredValue + epsilon;
 	}
 
 	private void checkMean() {
@@ -124,11 +132,15 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		}
 		int n = resultingTraces.size();
 		double estimatedValue = sum / n;
-		if(estimatedValue >= desiredValue - epsilon && estimatedValue <= desiredValue + epsilon) {
+		if(checkMean(estimatedValue, desiredValue, epsilon)) {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.SUCCESS);
 		} else {
 			this.setResult(SimulationCheckingSimulator.MonteCarloCheckResult.FAIL);
 		}
+	}
+
+	private boolean checkMean(double estimatedValue, double desiredValue, double epsilon) {
+		return estimatedValue >= desiredValue - epsilon && estimatedValue <= desiredValue + epsilon;
 	}
 
 	@Override
@@ -146,6 +158,20 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 			default:
 				break;
 		}
+	}
+
+	public boolean check(double estimatedValue, double desiredValue, double epsilon) {
+		switch (estimationType) {
+			case MINIMUM:
+				return checkMinimum(estimatedValue, desiredValue, epsilon);
+			case MAXIMUM:
+				return checkMaximum(estimatedValue, desiredValue, epsilon);
+			case MEAN:
+				return checkMean(estimatedValue, desiredValue, epsilon);
+			default:
+				break;
+		}
+		return false;
 	}
 
 	@Override

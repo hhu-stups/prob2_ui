@@ -18,6 +18,8 @@ import java.util.Map;
 
 public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
+	private final ISimulationPropertyChecker hypothesisCheckerOrEstimator;
+
 	private final SimulationCheckingSimulator simulationCheckingSimulator;
 
 	private final CurrentTrace currentTrace;
@@ -28,8 +30,9 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	private final List<Double> estimatedValues;
 
-	public SimulationPropertyChecker(Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
+	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
 									 SimulationCheckingType type, Map<String, Object> additionalInformation) {
+		this.hypothesisCheckerOrEstimator = hypothesisCheckerOrEstimator;
 		this.simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
@@ -180,7 +183,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 		double res = steps == 0 ? 0.0 : value / steps;
 
-		boolean success = res >= desiredValue - epsilon && res <= desiredValue + epsilon;
+		boolean success = ((SimulationEstimator) hypothesisCheckerOrEstimator).check(res, desiredValue, epsilon);
 		if(success) {
 			numberSuccess++;
 		}
@@ -207,7 +210,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			}
 		}
 
-		boolean success = value >= desiredValue - epsilon && value <= desiredValue + epsilon;
+		boolean success = ((SimulationEstimator) hypothesisCheckerOrEstimator).check(value, desiredValue, epsilon);
 		if(success) {
 			numberSuccess++;
 		}
