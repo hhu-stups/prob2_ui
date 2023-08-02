@@ -34,6 +34,9 @@
 		<Label fx:id="lbMonteCarloTime" text="%simulation.choice.time" />
 		<TextField fx:id="tfMonteCarloTime" VBox.vgrow="NEVER"/>
 
+		<Label fx:id="lbExpression" text="%simulation.choice.expression" />
+		<TextField fx:id="tfExpression" VBox.vgrow="NEVER"/>
+
 	</fx:define>
 
 	<Text text="%simulation.choice.header.property" style="fx-font-weight: bold; -fx-font-size: 1.5em" GridPane.rowIndex="1" GridPane.columnIndex="1"/>

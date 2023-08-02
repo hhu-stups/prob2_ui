@@ -60,6 +60,9 @@ public class SimulationPropertyChoice extends GridPane {
 
 	private final List<SimulationCheckingType> PREDICATE_TYPES = Arrays.asList(SimulationCheckingType.PREDICATE_INVARIANT, SimulationCheckingType.PREDICATE_FINAL, SimulationCheckingType.PREDICATE_EVENTUALLY);
 
+	private final List<SimulationCheckingType> EXPRESSION_TYPES = Arrays.asList(SimulationCheckingType.AVERAGE, SimulationCheckingType.SUM);
+
+
 	@FXML
 	private Label lbMonteCarloTime;
 
@@ -71,6 +74,12 @@ public class SimulationPropertyChoice extends GridPane {
 
 	@FXML
 	private TextField tfPredicate;
+
+	@FXML
+	private Label lbExpression;
+
+	@FXML
+	private TextField tfExpression;
 
 	@FXML
 	private ChoiceBox<SimulationPropertyChoice.SimulationPropertyItem> checkingChoice;
@@ -93,6 +102,8 @@ public class SimulationPropertyChoice extends GridPane {
 			this.getChildren().remove(tfMonteCarloTime);
 			this.getChildren().remove(lbPredicate);
 			this.getChildren().remove(tfPredicate);
+			this.getChildren().remove(lbExpression);
+			this.getChildren().remove(tfExpression);
 			if(to != null) {
 				if(to.getCheckingType() == SimulationCheckingType.TIMING) {
 					this.add(lbMonteCarloTime, 1, 3);
@@ -101,6 +112,10 @@ public class SimulationPropertyChoice extends GridPane {
 				if(PREDICATE_TYPES.contains(to.getCheckingType())) {
 					this.add(lbPredicate, 1, 3);
 					this.add(tfPredicate, 2, 3);
+				}
+				if(EXPRESSION_TYPES.contains(to.getCheckingType())) {
+					this.add(lbExpression, 1, 3);
+					this.add(tfExpression, 2, 3);
 				}
 			}
 			choosingStage.sizeToScene();
@@ -129,6 +144,10 @@ public class SimulationPropertyChoice extends GridPane {
 		information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
 		if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
 			information.put("PREDICATE", tfPredicate.getText());
+		}
+
+		if(EXPRESSION_TYPES.contains(checkingChoiceItem.getCheckingType())) {
+			information.put("EXPRESSION", tfExpression.getText());
 		}
 
 		if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
