@@ -153,6 +153,14 @@ public class SimulationItemHandler {
 		double probability = (double) item.getField("PROBABILITY");
 		double significance = (double) item.getField("SIGNIFICANCE");
 
+		if(item.containsField("PROBABILITY")) {
+			additionalInformation.put("PROBABILITY", probability);
+		}
+
+		if(item.containsField("SIGNIFICANCE")) {
+			additionalInformation.put("SIGNIFICANCE", significance);
+		}
+
 		if(item.containsField("PREDICATE")) {
 			additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
 		}
@@ -179,6 +187,14 @@ public class SimulationItemHandler {
 		SimulationEstimator.EstimationType estimationType = (SimulationEstimator.EstimationType) item.getField("ESTIMATION_TYPE");
 		double desiredValue = (double) item.getField("DESIRED_VALUE");
 		double epsilon = (double) item.getField("EPSILON");
+
+		if(item.containsField("DESIRED_VALUE")) {
+			additionalInformation.put("DESIRED_VALUE", desiredValue);
+		}
+
+		if(item.containsField("EPSILON")) {
+			additionalInformation.put("EPSILON", epsilon);
+		}
 
 		if(item.containsField("PREDICATE")) {
 			additionalInformation.put("PREDICATE", item.getField("PREDICATE"));

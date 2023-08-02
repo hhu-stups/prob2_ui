@@ -92,7 +92,6 @@ public class SimulationItem implements IValidationTask {
 			this.information.put("STARTING_PREDICATE", startingPredicate);
 		}
 
-
 		@JsonProperty("STARTING_PREDICATE_ACTIVATED")
 		private void setStartingPredicateActivated(final String startingPredicateActivated) {
 			this.information.put("STARTING_PREDICATE_ACTIVATED", startingPredicateActivated);

@@ -51,15 +51,14 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 				return checkTiming(time);
 			case AVERAGE:
 			case SUM:
-				estimateValue(trace);
-				return Checked.SUCCESS;
+				return estimateValue(trace);
 			default:
 				break;
 		}
 		return Checked.SUCCESS;
 	}
 
-	public double estimateValue(Trace trace) {
+	public Checked estimateValue(Trace trace) {
 		switch (type) {
 			case AVERAGE:
 				return estimateAverage(trace);
@@ -68,7 +67,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			default:
 				break;
 		}
-		return 0.0;
+		return Checked.SUCCESS;
 	}
 
 	public Checked checkAllInvariants(Trace trace) {
@@ -161,9 +160,11 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		return Checked.FAIL;
 	}
 
-	public double estimateAverage(Trace trace) {
+	public Checked estimateAverage(Trace trace) {
 		double value = 0.0;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
+		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
+		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		int steps = 0;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
@@ -178,13 +179,22 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			}
 		}
 		double res = steps == 0 ? 0.0 : value / steps;
+
+		boolean success = res >= desiredValue - epsilon && res <= desiredValue + epsilon;
+		if(success) {
+			numberSuccess++;
+		}
+
 		estimatedValues.add(res);
-		return res;
+		return success ? Checked.SUCCESS : Checked.FAIL;
 	}
 
-	public double estimateSum(Trace trace) {
+	public Checked estimateSum(Trace trace) {
 		double value = 0.0;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
+		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
+		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
+
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
@@ -197,8 +207,13 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			}
 		}
 
+		boolean success = value >= desiredValue - epsilon && value <= desiredValue + epsilon;
+		if(success) {
+			numberSuccess++;
+		}
+
 		estimatedValues.add(value);
-		return value;
+		return success ? Checked.SUCCESS : Checked.FAIL;
 	}
 
 	@Override

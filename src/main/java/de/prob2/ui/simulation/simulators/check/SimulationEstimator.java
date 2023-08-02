@@ -146,7 +146,6 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 			default:
 				break;
 		}
-
 	}
 
 	@Override
