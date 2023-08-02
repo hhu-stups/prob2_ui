@@ -7,7 +7,9 @@ public enum SimulationCheckingType {
 	PREDICATE_INVARIANT("simulation.type.property.invariant"),
 	PREDICATE_FINAL("simulation.type.property.endPredicate"),
 	PREDICATE_EVENTUALLY("simulation.type.property.eventually"),
-	TIMING("simulation.type.property.timing");
+	TIMING("simulation.type.property.timing"),
+	AVERAGE("simulation.type.property.average"),
+	SUM("simulation.type.property.sum");
 
 	private final String key;
 

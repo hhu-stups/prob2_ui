@@ -176,6 +176,7 @@ public class SimulationChoosingStage extends Stage {
 			} else if(type == SimulationType.HYPOTHESIS_TEST) {
 				inputBox.getChildren().add(0, simulationHypothesisChoice);
 			}
+			simulationPropertyChoice.updateCheck(type);
 		}
 
 		if(simulationConditionChoice.checkProperty() || mode == SimulationMode.Mode.BLACK_BOX) {

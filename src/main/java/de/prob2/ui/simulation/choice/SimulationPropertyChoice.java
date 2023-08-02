@@ -140,4 +140,13 @@ public class SimulationPropertyChoice extends GridPane {
 	public void setChoosingStage(SimulationChoosingStage choosingStage) {
 		this.choosingStage = choosingStage;
 	}
+
+	public void updateCheck(SimulationType simulationType) {
+		checkingChoice.getSelectionModel().clearSelection();
+		if(simulationType == SimulationType.ESTIMATION) {
+			checkingChoice.getItems().addAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.SUM));
+			return;
+		}
+		checkingChoice.getItems().removeAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.SUM));
+	}
 }
