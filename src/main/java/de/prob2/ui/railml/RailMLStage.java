@@ -30,6 +30,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -218,6 +219,7 @@ public class RailMLStage extends Stage {
 			fileLocationField.setText(railMLpath.toAbsolutePath().toString());
 			locationField.setText(generationPath.toString());
 			railMLFile.setPath(generationPath);
+			railMLFile.setName(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()));
 		}
 	}
 
@@ -247,40 +249,45 @@ public class RailMLStage extends Stage {
 		//btStartImport.disableProperty().unbind();
 		//btStartImport.setDisable(true);
 
-		VisualisationStrategy visualisationStrategy = visualisationStrategyChoiceBox.getValue();
-		String visualisationDefinition;
-		if (visualisationStrategy == VisualisationStrategy.D4R) {
-			visualisationDefinition = RailMLCustomGraph.D4R;
-		} else if (visualisationStrategy == VisualisationStrategy.RAIL_OSCOPE) {
-			visualisationDefinition = RailMLCustomGraph.RAIL_OSCOPE;
-		} else {
-			visualisationDefinition = RailMLCustomGraph.DOT;
-		}
 		this.updater.execute(() -> {
 			try {
-				generateMachines(visualisationDefinition);
+				generateMachines();
 				final Path projectLocation = generationPath;
 				final Path relative = projectLocation.relativize(generationPath);
 				final String shortName = animationFileName.getValue();
-				//final Path railML_import_machine = new File(Objects.requireNonNull(getClass().getResource("RailML_animation_init_flat.mch")).getPath()).toPath();//"D:\\Users\\jangr\\Desktop\\prob2_ui\\src\\main\\resources\\de\\prob2\\ui\\railml\\RailML_animation_init_flat.mch");
 				final Machine animationMachine = new Machine(animationFileName.getValue(), "Animation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(animationFileName.getValue()));
+				final Machine validationMachine = new Machine(validationFileName.getValue(), "Validation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(validationFileName.getValue()));
 
 				if (!Thread.currentThread().isInterrupted()) {
 					Platform.runLater(() -> {
 						if (currentProject.getLocation() == null) {
 							boolean replacingProject = currentProject.confirmReplacingProject();
 							if (replacingProject) {
-								currentProject.switchTo(new Project(shortName, "", Collections.singletonList(animationMachine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
-								if (animationMachineCheckbox.isSelected()) {
+								currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
+								/*if (animationMachineCheckbox.isSelected()) {
 									currentProject.startAnimation(animationMachine);
-								}
-							}
-						} else {
-							if (animationMachineCheckbox.isSelected()) {
-								currentProject.addMachine(animationMachine);
-								currentProject.startAnimation(animationMachine);
+								}*/
 							}
 						}
+						if (animationMachineCheckbox.isSelected()) {
+							currentProject.addMachine(animationMachine);
+							Path defFile;
+							try {
+								defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
+								File currentDefs = new File(generationPath.resolve("RailML_animation.def").toString());
+								if (!currentDefs.exists() || (currentDefs.exists() && !Arrays.equals(Files.readAllBytes(currentDefs.toPath()), Files.readAllBytes(defFile)))) {
+									Files.copy(defFile, currentDefs.toPath());
+								}
+							} catch (IOException | URISyntaxException e) {
+								throw new RuntimeException(e);
+							}
+							final Machine animationDefinitions = new Machine("RailML_animation.def", "", Paths.get(generationPath.toString()).resolve("RailML_animation.def"));
+							currentProject.addMachine(animationDefinitions);
+						}
+						if (validationMachineCheckbox.isSelected()) {
+							currentProject.addMachine(validationMachine);
+						}
+
 						this.close();
 						if (visualisationCheckbox.isSelected()) {
 							RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
@@ -302,36 +309,51 @@ public class RailMLStage extends Stage {
 		});
 	}
 
-	public void generateMachines(String visualisationDefinition) throws Exception {
+	public void generateMachines() throws Exception {
 
-		Path path = Paths.get(getClass().getResource("RailML_import.mch").toURI());
-		//Path pathDef = Paths.get(getClass().getResource("RailML_CustomGraphs.def").toURI());
-		/*Machine printMachine = new Machine("short","",path.toAbsolutePath());
-		MachineLoader loader = injector.getInstance(MachineLoader.class);
-		final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
-		loader.loadAsync(printMachine, allPrefs);*/
+		VisualisationStrategy visualisationStrategy = visualisationStrategyChoiceBox.getValue();
+		Path graphMachine;
+		if (visualisationStrategy == VisualisationStrategy.D4R) {
+			graphMachine = Paths.get(getClass().getResource("RailML3_D4R_CustomGraph.mch").toURI());
+		} else if (visualisationStrategy == VisualisationStrategy.RAIL_OSCOPE) {
+			graphMachine = Paths.get(getClass().getResource("RailML3_NOR_CustomGraph.mch").toURI());
+		} else {
+			graphMachine = Paths.get(getClass().getResource("RailML3_DOT_CustomGraph.mch").toURI());
+		}
+
 		Api api = injector.getInstance(Api.class);
-		StateSpace stateSpace = //loader.getActiveStateSpace();
-			api.b_load(path.toAbsolutePath().toString());
-
+		StateSpace stateSpace = api.b_load(graphMachine.toAbsolutePath().toString());
+		ClassicalB no_error = new ClassicalB("no_error = TRUE");
+		stateSpace.subscribe(this, no_error);
 
 		currentState = stateSpace.getRoot()
-			//.perform("$setup_constants", "file = \"" + railMLFile + "\" & outputFile = \"" + animationMachine.getAbsolutePath().replace(File.separator, "/") + "\"")
-			.perform("$setup_constants", "file = \"" + railMLpath + "\"")// +
-				/*"  & outputFile = \"d:/Users/jangr/OneDrive - hhu.de/[Master] 4. Semester/Masterarbeit/Gitlab/b-railml/Code/RailML_animation_generated.mch\"\n" +
-				"  & visBFile = \"fig/visb_BRB_generated.json\"\n" +
-				"  & machineName = \"RailML_animation_generated\"")*/// " & customGraph = " + visualisationDefinition)
-			.perform("$initialise_machine")
-			.perform("importRailML");
-		System.out.println(stateSpace.printState(currentState));
-		railMLFile.setState(currentState);
-		//stateSpace.getModel().
+			.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
+				"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
+				"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
+				"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
+				"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
+				"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
+			.perform("$initialise_machine");
+			//.perform("importRailML");
 
 		// state.getStateErrors();
+		boolean inv_ok = currentState.isInvariantOk();
+		boolean import_success = currentState.getValues().get(no_error).toString().equals("TRUE");
 
-		if (animationMachineCheckbox.isSelected() && currentState.isInvariantOk()) {
-			writeAnimationMachine();
+		if (animationMachineCheckbox.isSelected() && inv_ok && import_success) {
+			File animationMachine = new File(Paths.get(generationPath.toString()).resolve(animationFileName.getValue()).toString());
+			animationMachine.delete(); // TODO: Confirm
+			animationMachine.createNewFile();
+			currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
+			//writeAnimationMachine();
 		}
+		if (validationMachineCheckbox.isSelected() && inv_ok && import_success) {
+			File validationMachine = new File(Paths.get(generationPath.toString()).resolve(validationFileName.getValue()).toString());
+			validationMachine.delete(); // TODO: Confirm
+			validationMachine.createNewFile();
+			currentState.perform("triggerPrintValidation").perform("printValidationMachine");
+		}
+		railMLFile.setState(currentState);
 
 		/*
 		final Path tempDotFile;

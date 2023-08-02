@@ -12,11 +12,13 @@ public class RailMLFile {
 
 	private Path path;
 	private State state;
+	private String name;
 
 	@Inject
 	public RailMLFile() {
 		this.path = null;
 		this.state = null;
+		this.name = null;
 	}
 
 	public void setPath(Path path) {
@@ -30,5 +32,11 @@ public class RailMLFile {
 	}
 	public State getState() {
 		return state;
+	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
 	}
 }
