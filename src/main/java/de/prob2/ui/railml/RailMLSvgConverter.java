@@ -68,7 +68,6 @@ public class RailMLSvgConverter {
 				}
 			}
 			// merged_paths = {ne40=1250.53,-162.47 1243.76,-162.47 1138.69,-162.47 1132.13,-162.47, ne22=1172.94,
-			System.out.println(merged_paths);
 
 			Element defs = (Element) doc.getElementsByTagName("defs").item(0);
 			if (defs == null) {
@@ -130,8 +129,6 @@ public class RailMLSvgConverter {
 					}
 				}
 
-				graph_group.insertBefore(merged_group, graph_group.getChildNodes().item(4)); // after title/polygon of graph, before all other inner groups
-
 				NodeList groups = graph_group.getElementsByTagName("g");
 				for (int i = 0; i < groups.getLength(); i++) {
 					Element group = (Element) groups.item(i);
@@ -140,6 +137,8 @@ public class RailMLSvgConverter {
 						group.getParentNode().removeChild(group);
 					}
 				}
+
+				graph_group.insertBefore(merged_group, graph_group.getChildNodes().item(4)); // after title/polygon of graph, before all other inner groups
 			}
 
 				// <path d="M2603.45,-177.94C2608.52,-180.48 2768.29,-260.36 2773.29,-262.86" fill="none" id="ne_94_path" stroke="green" />
