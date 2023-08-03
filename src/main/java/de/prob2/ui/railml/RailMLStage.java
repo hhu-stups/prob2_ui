@@ -226,7 +226,6 @@ public class RailMLStage extends Stage {
 			try {
 				generateMachines();
 				final Path projectLocation = generationPath;
-				final Path relative = projectLocation.relativize(generationPath);
 				final String shortName = animationFileName.getValue();
 				final Machine animationMachine = new Machine(animationFileName.getValue(), "Animation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(animationFileName.getValue()));
 				final Machine validationMachine = new Machine(validationFileName.getValue(), "Validation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(validationFileName.getValue()));
@@ -282,7 +281,7 @@ public class RailMLStage extends Stage {
 				if (!currentSimB.exists() || (currentSimB.exists() && !Arrays.equals(Files.readAllBytes(currentSimB.toPath()), Files.readAllBytes(simB)))) {
 					Files.copy(simB, currentSimB.toPath());
 				}
-				Path resolvedPath = currentProject.getLocation().relativize(currentSimB.toPath());
+				Path resolvedPath = currentProject.getLocation().relativize(generationPath);
 				currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 
 			} catch (IOException | URISyntaxException e) {
