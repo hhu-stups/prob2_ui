@@ -495,7 +495,7 @@ public class RailMLInspectDotStage extends Stage {
 	private void cancel() {
 		boolean abortImport = confirmAbortImport();
 		if (abortImport) {
-			updater.shutdownNow();
+			updater.cancel(true);
 			this.interrupt();
 			this.close();
 		}
