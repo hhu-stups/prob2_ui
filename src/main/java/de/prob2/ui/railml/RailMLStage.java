@@ -287,8 +287,6 @@ public class RailMLStage extends Stage {
 			}
 		}
 		if (animationMachineCheckbox.isSelected()) {
-			currentProject.addMachine(animationMachine);
-			currentProject.startAnimation(animationMachine);
 			Path defFile, simB;
 			try {
 				defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
@@ -310,7 +308,8 @@ public class RailMLStage extends Stage {
 			} catch (IOException | URISyntaxException e) {
 				throw new RuntimeException(e);
 			}
-
+			currentProject.addMachine(animationMachine);
+			currentProject.startAnimation(animationMachine);
 		}
 		if (validationMachineCheckbox.isSelected()) {
 			currentProject.addMachine(validationMachine);
