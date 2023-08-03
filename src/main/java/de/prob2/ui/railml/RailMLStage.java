@@ -63,7 +63,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	private CheckBox validationMachineCheckbox;
 
-	private enum VisualisationStrategy {D4R, RAIL_OSCOPE, DOT};
+	protected enum VisualisationStrategy {D4R, RAIL_OSCOPE, DOT};
 	@FXML
 	private ChoiceBox<VisualisationStrategy> visualisationStrategyChoiceBox;
 
@@ -316,6 +316,7 @@ public class RailMLStage extends Stage {
 	public void generateMachines() throws Exception {
 
 		VisualisationStrategy visualisationStrategy = visualisationStrategyChoiceBox.getValue();
+		railMLFile.setVisualisationStrategy(visualisationStrategy);
 		Path graphMachine;
 		if (visualisationStrategy == VisualisationStrategy.D4R) {
 			graphMachine = Paths.get(getClass().getResource("RailML3_D4R_CustomGraph.mch").toURI());
@@ -338,7 +339,6 @@ public class RailMLStage extends Stage {
 				"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
 				"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
 			.perform("$initialise_machine");
-			//.perform("importRailML");
 
 		// state.getStateErrors();
 		boolean inv_ok = currentState.isInvariantOk();
@@ -382,10 +382,6 @@ public class RailMLStage extends Stage {
 
 		customGraph.visualizeAsSvgToFile(tempSvgFileDot, Collections.emptyList());
 		RailMLSvgConverter.convertSvgForVisB(tempSvgFileDot.toString(), "VIS");
-
-		Path dotVisBmch = Paths.get(Objects.requireNonNull(getClass().getResource("Dot_SVG_for_VisB.mch")).toURI());*/
-		/*api.b_load(dotVisBmch.toAbsolutePath().toString()).getRoot()
-			.perform("$setup_constants", "file = \"" + tempSvgFileDot.toAbsolutePath() + "\" & outputFile = \"" + tempSvgFileVisB.toAbsolutePath() + "\"");*/
 
 		//Path svgPath = Paths.get(generationPath.toString()).resolve(svgFileName.getValue());
 		//setVisBPath();

@@ -430,7 +430,11 @@ public class RailMLInspectDotStage extends Stage {
 		}
 		saveConverted(DotOutputFormat.SVG, tempSvgFile);
 		// convertSvgVisB
-		RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "VIS");
+		if (railMLFile.getVisualisationStrategy() == RailMLStage.VisualisationStrategy.D4R) {
+			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "VIS");
+		} else {
+			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "DOT");
+		}
 		final Path finalSvg = railMLFile.getPath().resolve(railMLFile.getName() + ".svg").toAbsolutePath();
 		File finalSvgFile = new File(finalSvg.toString());
 		finalSvgFile.delete(); // TODO: Confirm

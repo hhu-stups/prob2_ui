@@ -13,12 +13,14 @@ public class RailMLFile {
 	private Path path;
 	private State state;
 	private String name;
+	private RailMLStage.VisualisationStrategy visualisationStrategy;
 
 	@Inject
 	public RailMLFile() {
 		this.path = null;
 		this.state = null;
 		this.name = null;
+		this.visualisationStrategy = null;
 	}
 
 	public void setPath(Path path) {
@@ -38,5 +40,11 @@ public class RailMLFile {
 	}
 	public void setName(String name) {
 		this.name = name;
+	}
+	public RailMLStage.VisualisationStrategy getVisualisationStrategy() {
+		return visualisationStrategy;
+	}
+	public void setVisualisationStrategy(RailMLStage.VisualisationStrategy visualisationStrategy) {
+		this.visualisationStrategy = visualisationStrategy;
 	}
 }
