@@ -339,63 +339,6 @@ public class RailMLStage extends Stage {
 			currentState.perform("triggerPrintValidation").perform("printValidationMachine");
 		}
 		railMLFile.setState(currentState);
-
-		/*
-		final Path tempDotFile;
-		try {
-			tempDotFile = Files.createTempFile("railml-", ".dot");
-		} catch (IOException e) {
-			throw new ProBError("Failed to create temporary dot file", e);
-		}
-
-		DotVisualizationCommand customGraph = getByName("custom_graph", currentState);
-		byte[] dotInput = customGraph.visualizeAsDotToBytes(Collections.emptyList());
-		Files.write(tempDotFile, dotInput);
-		tempDotFile.toFile().deleteOnExit();
-
-		final Path tempSvgFileDot, tempSvgFileVisB;
-		try {
-			tempSvgFileDot = Files.createTempFile("railml-", ".svg");
-			tempSvgFileVisB = Files.createTempFile("railml-", ".svg");
-		} catch (IOException e) {
-			throw new ProBError("Failed to create temporary svg files", e);
-		}
-
-		customGraph.visualizeAsSvgToFile(tempSvgFileDot, Collections.emptyList());
-		RailMLSvgConverter.convertSvgForVisB(tempSvgFileDot.toString(), "VIS");
-
-		//Path svgPath = Paths.get(generationPath.toString()).resolve(svgFileName.getValue());
-		//setVisBPath();
-		/*try {
-
-			Files.write(new DotCall("custom_graph")
-				.layoutEngine(stateSpace.getCurrentPreference("DOT_ENGINE"))
-				.outputFormat(DotOutputFormat.SVG)
-				.input(dotInput)
-				.call(), tempDotFile.toFile());
-		} catch (IOException | InterruptedException e) {
-
-			//LOGGER.error("Failed to save file converted from dot", e);
-		}*/
-	}
-
-	private void writeAnimationMachine() throws IOException {
-
-		File animationMachine = new File(Paths.get(generationPath.toString()).resolve(animationFileName.getValue()).toString());
-		animationMachine.createNewFile();
-		OutputStreamWriter writer = new OutputStreamWriter(Files.newOutputStream(animationMachine.toPath()), StandardCharsets.UTF_8);
-		Map<IEvalElement, AbstractEvalResult> variableConstants = currentState.getVariableValues(FormulaExpand.EXPAND);
-		writer.write("/*@generated */\nMACHINE " + MoreFiles.getNameWithoutExtension(animationMachine.toPath()) + "\n");
-		writer.write("CONSTANTS\n");
-		for (IEvalElement e : variableConstants.keySet()) {
-			if (e.getPrettyPrint().startsWith("RailML"))
-				writer.write("\t" + e.getPrettyPrint() + ",\n");
-		}
-		writer.write("PROPERTIES\n");
-		for (IEvalElement e : variableConstants.keySet()) {
-			if (e.getPrettyPrint().startsWith("RailML"))
-				writer.write("\t& " + e.getPrettyPrint() + " = " + variableConstants.get(e).toString() + "\n");
-		}
 	}
 
 	@FXML
