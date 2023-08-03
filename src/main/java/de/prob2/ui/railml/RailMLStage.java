@@ -16,6 +16,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.model.SimulationModel;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.*;
@@ -249,37 +250,10 @@ public class RailMLStage extends Stage {
 
 				if (!Thread.currentThread().isInterrupted()) {
 					Platform.runLater(() -> {
-						if (currentProject.getLocation() == null) {
-							boolean replacingProject = currentProject.confirmReplacingProject();
-							if (replacingProject) {
-								currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
-								/*if (animationMachineCheckbox.isSelected()) {
-									currentProject.startAnimation(animationMachine);
-								}*/
-							}
-						}
-						if (animationMachineCheckbox.isSelected()) {
-							currentProject.addMachine(animationMachine);
-							Path defFile;
-							try {
-								defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
-								File currentDefs = new File(generationPath.resolve("RailML_animation.def").toString());
-								if (!currentDefs.exists() || (currentDefs.exists() && !Arrays.equals(Files.readAllBytes(currentDefs.toPath()), Files.readAllBytes(defFile)))) {
-									Files.copy(defFile, currentDefs.toPath());
-								}
-							} catch (IOException | URISyntaxException e) {
-								throw new RuntimeException(e);
-							}
-							final Machine animationDefinitions = new Machine("RailML_animation.def", "", Paths.get(generationPath.toString()).resolve("RailML_animation.def"));
-							currentProject.addMachine(animationDefinitions);
-						}
-						if (validationMachineCheckbox.isSelected()) {
-							currentProject.addMachine(validationMachine);
-						}
-
 						this.close();
+						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (visualisationCheckbox.isSelected()) {
-							RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
+							railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 							railMLInspectDotStage.initializeCheckboxes();
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
@@ -290,6 +264,46 @@ public class RailMLStage extends Stage {
 								throw new RuntimeException(e);
 							}
 						}
+						railMLInspectDotStage.setOnHidden(event -> {
+							if (currentProject.getLocation() == null) {
+								boolean replacingProject = currentProject.confirmReplacingProject();
+								if (replacingProject) {
+									currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
+								/*if (animationMachineCheckbox.isSelected()) {
+									currentProject.startAnimation(animationMachine);
+								}*/
+								}
+							}
+							if (animationMachineCheckbox.isSelected()) {
+								currentProject.addMachine(animationMachine);
+								currentProject.startAnimation(animationMachine);
+								Path defFile, simB;
+								try {
+									defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
+									File currentDefs = new File(generationPath.resolve("RailML_animation.def").toString());
+									if (!currentDefs.exists() || (currentDefs.exists() && !Arrays.equals(Files.readAllBytes(currentDefs.toPath()), Files.readAllBytes(defFile)))) {
+										Files.copy(defFile, currentDefs.toPath());
+									}
+									final Machine animationDefinitions = new Machine("RailML_animation.def", "", Paths.get(generationPath.toString()).resolve("RailML_animation.def"));
+									currentProject.addMachine(animationDefinitions);
+
+									simB = Paths.get(getClass().getResource("railml_simb.json").toURI());
+									File currentSimB = new File(generationPath.resolve("railml_simb.json").toString());
+									if (!currentSimB.exists() || (currentSimB.exists() && !Arrays.equals(Files.readAllBytes(currentSimB.toPath()), Files.readAllBytes(simB)))) {
+										Files.copy(simB, currentSimB.toPath());
+									}
+									Path resolvedPath = currentProject.getLocation().relativize(currentSimB.toPath());
+									currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+
+								} catch (IOException | URISyntaxException e) {
+									throw new RuntimeException(e);
+								}
+
+							}
+							if (validationMachineCheckbox.isSelected()) {
+								currentProject.addMachine(validationMachine);
+							}
+						});
 					});
 				}
 			} catch (Exception e) {

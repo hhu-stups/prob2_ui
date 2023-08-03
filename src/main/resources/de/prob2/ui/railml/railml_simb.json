@@ -1,0 +1,165 @@
+{
+    "activations": [
+        {
+            "id": "$setup_constants",
+            "execute": "$setup_constants"
+        },
+        {
+            "id": "$initialise_machine",
+            "execute": "$initialise_machine",
+            "activating" : ["RS_trainArrive", "RS_trainChangeState"]
+        },
+        {
+            "id": "TrainArrive",
+            "chooseActivation": {
+                "RS_trainArrivalRequest": "0.1",
+                "skip": "0.9"
+            }
+        },
+        {
+            "id": "RS_trainChangeState_Choose",
+            "chooseActivation": {
+                "RS_trainChangeState": "0.1",
+                "skip": "0.9"
+            }
+        },
+        {
+            "id": "RS_trainChangeState",
+            "execute": "RS_trainChangeState",
+            "after": 1000,
+            "activating" : ["TrainArrive", "TrainMove_Init", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_noteChangeSignalState"],
+            "activationKind ": "single"
+        },
+        {
+            "id": "RS_trainArrivalRequest",
+            "execute": "RS_trainArrivalRequest",
+            "chooseActivation": {
+                "IL_trainAcceptArrival": "0.9",
+                "IL_trainDeclineArrival": "0.1"
+            }
+        },
+        {
+            "id": "IL_trainAcceptArrival",
+            "execute": "IL_trainAcceptArrival",
+            "activating" : ["TrainArrive", "RS_trainChangeState_Choose", "TrainMove_Init", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_noteChangeSignalState"]
+        },
+        {
+            "id": "IL_trainDeclineArrival",
+            "execute": "IL_trainDeclineArrival",
+            "activating" : ["TrainArrive", "RS_trainChangeState_Choose", "TrainMove_Init", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_noteChangeSignalState"]
+        },
+        {
+            "id": "TrainMove_Init",
+            "execute": "RS_trainMoveFront",
+            "priority": 0,
+            "after": 1000,
+            "activating" : "RS_trainMoveBack"
+        },
+        {
+            "id": "RS_trainMoveBack",
+            "execute": "RS_trainMoveBack",
+            "after": 1000,
+            "activating" : ["TrainArrive", "RS_trainChangeState_Choose", "TrainMove_Init", "RS_trainMoveBack", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear", "IL_completeRouteRelease", "IL_noteChangeSignalState"]
+        },
+        {
+            "id": "IS_startChangeSwitch",
+            "chooseActivation": {
+                "IS_startChangeSwitch_Exec": "IF {SwitchId, train | train : RS_arrivedTrains & RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId))} /= {} THEN 1.0 ELSE 0.0 END",
+                "skip": "1.0 - IF {SwitchId, train | train : RS_arrivedTrains & RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId))} /= {} THEN 1.0 ELSE 0.0 END"
+            }
+        },
+        {
+            "id": "IS_startChangeSwitch_Exec",
+            "execute": "IS_startChangeSwitch",
+            "after": 2000,
+            "fixedVariables":{
+                "SwitchId": "CHOOSE(dom({SwitchId, train | train : RS_arrivedTrains & RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId))}))"
+            },
+            "activating" : "IS_endChangeSwitch",
+            "activationKind " : "single"
+        },
+        {
+            "id": "IS_endChangeSwitch",
+            "execute": "IS_endChangeSwitch",
+            "after": "RailML3_IL_SWITCH_TYPICAL_THROW_TIMES(SwitchId)",
+            "activating" : ["TrainArrive", "RS_trainChangeState_Choose", "TrainMove_Init", "IS_startChangeSwitch", "IL_startRouteReservation"]
+        },
+        {
+            "id": "IL_startRouteReservation",
+            "execute": "IL_startRouteReservation",
+            "after": 1000,
+            "activating" : ["IL_startActivateSignalplan", "IL_endRouteReservation"]
+        },
+        {
+            "id": "IL_startActivateSignalplan",
+            "execute": "IL_startActivateSignalplan",
+            "after": 1000,
+            "activating" : ["IL_noteChangeSignalState"]
+        },
+        {
+            "id": "IL_noteChangeSignalState",
+            "chooseActivation": {
+                "IL_noteChangeSignalState_Exec": "IF {SignalId, train | train : RS_arrivedTrains & SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (dom(IL_signal_locked_by_signalplan) - dom(IL_noted_signal_states)) } /= {} THEN 1.0 ELSE 0.0 END",
+                "skip": "1.0 - IF {SignalId, train | train : RS_arrivedTrains & SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (dom(IL_signal_locked_by_signalplan) - dom(IL_noted_signal_states)) } /= {} THEN 1.0 ELSE 0.0 END"
+            }
+        },
+        {
+            "id": "IL_noteChangeSignalState_Exec",
+            "execute": "IL_noteChangeSignalState",
+            "after": 1000,
+            "additionalGuards": "{SignalId, train | train : RS_arrivedTrains & SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (dom(IL_signal_locked_by_signalplan) - dom(IL_noted_signal_states)) } /= {}",
+            "fixedVariables":{
+                "SignalId": "CHOOSE(dom({SignalId, train | train : RS_arrivedTrains & SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (dom(IL_signal_locked_by_signalplan) - dom(IL_noted_signal_states)) }))"
+            },
+            "activating" : ["IL_endRouteReservation", "TrainArrive", "RS_trainChangeState_Choose", "TrainMove_Init", "RS_trainMoveBack", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear", "IL_completeRouteRelease"]
+        },
+        {
+            "id": "IL_endRouteReservation",
+            "execute": "IL_endRouteReservation",
+            "after": 1000,
+            "activating" : ["IL_endActivateSignalplan", "TrainArrive", "RS_trainChangeState_Choose", "TrainMove_Init", "RS_trainMoveBack", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear", "IL_completeRouteRelease"]
+        },
+        {
+            "id": "IL_endActivateSignalplan",
+            "execute": "IL_endActivateSignalplan",
+            "after": 1000,
+            "activating" : ["TrainArrive", "TrainMove_Init", "RS_trainChangeState_Choose", "RS_trainMoveBack", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear", "IL_completeRouteRelease"]
+        },
+        {
+            "id": "IL_partialRouteReleaseAhead",
+            "execute": "IL_partialRouteReleaseAhead",
+            "after": 1000,
+            "activating" : ["IL_completeRouteRelease", "TrainArrive", "RS_trainChangeState_Choose", "TrainMove_Init", "RS_trainMoveBack", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear"]
+        },
+        {
+            "id": "IL_partialRouteReleaseRear",
+            "execute": "IL_partialRouteReleaseRear",
+            "after": 1000,
+            "activating" : ["IL_completeRouteRelease", "TrainArrive", "RS_trainChangeState_Choose", "TrainMove_Init", "RS_trainMoveBack", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear"]
+        },
+        {
+            "id": "IL_completeRouteRelease",
+            "execute": "IL_completeRouteRelease",
+            "after": 1000,
+            "activating" : ["TrainArrive", "TrainMove_Init", "RS_trainChangeState_Choose", "RS_trainMoveBack", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear", "IL_completeRouteRelease", "IL_noteChangeSignalState"]
+        },
+        {
+            "id": "skip",
+            "execute": "skip",
+            "after": 1000,
+            "activating": ["TrainArrive","RS_trainChangeState_Choose"]
+        }
+    ],
+    "listeners" : [
+        {
+            "id": "IS_changeSwitch",
+            "event": "IS_startChangeSwitch",
+            "activating": ["IS_endChangeSwitch"]
+        },
+        {
+            "id": "RS_moveTrain",
+            "event": "RS_trainMoveFront",
+            "activating": ["RS_trainMoveBack"]
+        }
+    ]
+}
