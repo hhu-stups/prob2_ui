@@ -1,7 +1,8 @@
 package de.prob2.ui.simulation.external;
 
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,11 +10,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
-import java.util.stream.Collectors;
 
 public class ExternalSimulatorExecutor {
 
@@ -33,11 +32,14 @@ public class ExternalSimulatorExecutor {
 
 	private boolean started;
 
-	public ExternalSimulatorExecutor(Path pythonFile) {
+	private boolean hasShield;
+
+	public ExternalSimulatorExecutor(Path pythonFile, ClassicalBModel model) {
 		this.pythonFile = pythonFile;
 		this.pb = new ProcessBuilder("python3", pythonFile.toString()).directory(pythonFile.getParent().toFile());
 		this.done = false;
 		this.started = false;
+		this.hasShield = model.getDefinitions().getDefinitionNames().contains("SHIELD_INTERVENTION");
 	}
 
 	public void reset() {
@@ -64,17 +66,19 @@ public class ExternalSimulatorExecutor {
 			String predicate = "";
 			boolean done = false;
 			try {
-				List<String> operations = trace.getCurrentState()
-						.getTransitions().stream()
-						.map(Transition::getName)
-						.collect(Collectors.toList());
-				String message = String.join(",", operations);
-				writer.write(message);
+				State state = trace.getCurrentState();
+
+				writer.write("step");
 				writer.newLine();
 				writer.flush();
-				String line;
-				int j = 0;
+				String line = reader.readLine();
 
+				String intervention = hasShield && state.isInitialised() ? state.eval(String.format("SHIELD_INTERVENTION(%s)", line)).toString() : line;
+				writer.write(intervention);
+				writer.newLine();
+				writer.flush();
+
+				int j = 0;
 
 				while (j <= 3) {
 					line = reader.readLine();

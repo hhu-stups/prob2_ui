@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.simulators;
 
 import de.prob.animator.command.GetPreferenceCommand;
+import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -137,7 +138,7 @@ public abstract class Simulator {
 				currentTrace.removeListener(traceListener);
 			} else if(config instanceof SimulationExternalConfiguration) {
 				if(this.externalSimulatorExecutor == null || !this.externalSimulatorExecutor.getPythonFile().equals(((SimulationExternalConfiguration) config).getExternalPath())) {
-					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(((SimulationExternalConfiguration) config).getExternalPath());
+					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(((SimulationExternalConfiguration) config).getExternalPath(), (ClassicalBModel) currentTrace.getModel());
 				} else if(this.externalSimulatorExecutor != null) {
 					this.externalSimulatorExecutor.reset();
 				}
