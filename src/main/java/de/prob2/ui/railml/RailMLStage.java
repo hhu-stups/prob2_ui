@@ -86,15 +86,12 @@ public class RailMLStage extends Stage {
 	private final SimpleStringProperty simBFileName = new SimpleStringProperty("railml_simb.json");
 
 	private State currentState;
-	private boolean importSuccess = true;
 
 	private final StageManager stageManager;
 
 	private final CurrentProject currentProject;
 
 	private final Injector injector;
-
-	private final MachineLoader machineLoader;
 
 	private final I18n i18n;
 
@@ -104,14 +101,12 @@ public class RailMLStage extends Stage {
 
 	@Inject
 	public RailMLStage(final StageManager stageManager, final CurrentProject currentProject,
-	                      final Injector injector, final MachineLoader machineLoader, final I18n i18n,
-	                      final FileChooserManager fileChooserManager, final StopActions stopActions,
-	                      final RailMLFile railMLFile) {
+	                      final Injector injector, final I18n i18n, final FileChooserManager fileChooserManager,
+	                      final StopActions stopActions, final RailMLFile railMLFile) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.injector = injector;
-		this.machineLoader = machineLoader;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.updater = new BackgroundUpdater("railml import executor");
@@ -174,14 +169,7 @@ public class RailMLStage extends Stage {
 		//currentOp.textProperty().bind(currentOperation);
 		Path railML = railMLFile.getPath();
 		if(railML != null) {
-			this.railMLpath = railML;
-			this.generationPath = railMLpath.getParent().toAbsolutePath();
-			animationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_animation.mch");
-			validationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_validation.rmch");
-			svgFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + ".svg");
-			fileLocationField.setText(railMLpath.toAbsolutePath().toString());
-			locationField.setText(generationPath.toString());
-			railMLFile.setPath(generationPath);
+			setFileNames(railML);
 		}
 
 		//progressInfo.visibleProperty().bind(new SimpleBooleanProperty(updater.runningProperty());
@@ -195,25 +183,25 @@ public class RailMLStage extends Stage {
 		fileChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getRailMLFilter());
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
-		/*if(path != null) {
-			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
-		};*/
 		if(path != null) {
 			generateFileList.clear();
 			animationMachineCheckbox.setSelected(false);
 			validationMachineCheckbox.setSelected(false);
 			visualisationCheckbox.setSelected(false);
-			this.railMLpath = path;
-			this.generationPath = railMLpath.getParent().toAbsolutePath();
-			animationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_animation.mch");
-			validationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_validation.rmch");
-			svgFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + ".svg");
-			fileLocationField.setText(railMLpath.toAbsolutePath().toString());
-			locationField.setText(generationPath.toString());
-			railMLFile.setPath(generationPath);
+			setFileNames(path);
 			railMLFile.setName(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()));
 		}
+	}
+
+	private void setFileNames(Path railML) {
+		this.railMLpath = railML;
+		this.generationPath = railMLpath.getParent().toAbsolutePath();
+		animationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_animation.mch");
+		validationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_validation.rmch");
+		svgFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + ".svg");
+		fileLocationField.setText(railMLpath.toAbsolutePath().toString());
+		locationField.setText(generationPath.toString());
+		railMLFile.setPath(generationPath);
 	}
 
 	@FXML
@@ -221,10 +209,6 @@ public class RailMLStage extends Stage {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
-		/*if(path != null) {
-			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
-		};*/
 		if(path != null) {
 			this.generationPath = path.toAbsolutePath();
 			locationField.setText(generationPath.toString());
@@ -281,9 +265,6 @@ public class RailMLStage extends Stage {
 			boolean replacingProject = currentProject.confirmReplacingProject();
 			if (replacingProject) {
 				currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
-			/*if (animationMachineCheckbox.isSelected()) {
-				currentProject.startAnimation(animationMachine);
-			}*/
 			}
 		}
 		if (animationMachineCheckbox.isSelected()) {
