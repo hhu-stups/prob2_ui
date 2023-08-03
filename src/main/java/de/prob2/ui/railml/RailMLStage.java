@@ -179,7 +179,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	public void selectRailMLFile() {
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
+		fileChooser.setTitle(i18n.translate("railml.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getRailMLFilter());
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
 		if(path != null) {
@@ -188,7 +188,6 @@ public class RailMLStage extends Stage {
 			validationMachineCheckbox.setSelected(false);
 			visualisationCheckbox.setSelected(false);
 			setFileNames(path);
-			railMLFile.setName(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()));
 		}
 	}
 
@@ -201,6 +200,7 @@ public class RailMLStage extends Stage {
 		fileLocationField.setText(railMLpath.toAbsolutePath().toString());
 		locationField.setText(generationPath.toString());
 		railMLFile.setPath(generationPath);
+		railMLFile.setName(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()));
 	}
 
 	@FXML
