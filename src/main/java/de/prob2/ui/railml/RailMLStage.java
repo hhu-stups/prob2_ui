@@ -79,9 +79,9 @@ public class RailMLStage extends Stage {
 	private Path railMLpath, generationPath;
 
 	private final SimpleStringProperty animationFileName = new SimpleStringProperty("");
+	private final SimpleStringProperty animationDefsFileName = new SimpleStringProperty("RailML_animation.def");
 	private final SimpleStringProperty validationFileName = new SimpleStringProperty("");
 	private final SimpleStringProperty svgFileName = new SimpleStringProperty("");
-	private final SimpleStringProperty visBFileName = new SimpleStringProperty("");
 	private final SimpleStringProperty simBFileName = new SimpleStringProperty("railml_simb.json");
 
 	private State currentState;
@@ -145,9 +145,9 @@ public class RailMLStage extends Stage {
 		generateFileListView.prefHeightProperty().bind(Bindings.size(generateFileList).multiply(generateFileListView.getFixedCellSize()).add(2));
 		animationMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
-				generateFileList.addAll(animationFileName.getValue(), simBFileName.getValue());
+				generateFileList.addAll(animationFileName.getValue(), animationDefsFileName.getValue(), simBFileName.getValue());
 			} else {
-				generateFileList.removeAll(animationFileName.getValue(), simBFileName.getValue());
+				generateFileList.removeAll(animationFileName.getValue(), animationDefsFileName.getValue(), simBFileName.getValue());
 			}
 		});
 		validationMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -166,16 +166,6 @@ public class RailMLStage extends Stage {
 				generateFileList.remove(svgFileName.getValue());
 			}
 		});
-		animationMachineCheckbox.selectedProperty()
-			.and(visualisationCheckbox.selectedProperty())
-			.and(visualisationStrategyChoiceBox.valueProperty().isNotNull())
-			.addListener((observable, oldValue, newValue) -> {
-				if (newValue) {
-					generateFileList.add(visBFileName.getValue());
-				} else {
-					generateFileList.remove(visBFileName.getValue());
-				}
-			});
 
 		progressInfo.setManaged(false);
 		progressInfo.setVisible(false);
@@ -188,7 +178,6 @@ public class RailMLStage extends Stage {
 			animationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_animation.mch");
 			validationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_validation.rmch");
 			svgFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + ".svg");
-			visBFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_visb.json");
 			fileLocationField.setText(railMLpath.toAbsolutePath().toString());
 			locationField.setText(generationPath.toString());
 			railMLFile.setPath(generationPath);
@@ -219,7 +208,6 @@ public class RailMLStage extends Stage {
 			animationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_animation.mch");
 			validationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_validation.rmch");
 			svgFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + ".svg");
-			visBFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_visb.json");
 			fileLocationField.setText(railMLpath.toAbsolutePath().toString());
 			locationField.setText(generationPath.toString());
 			railMLFile.setPath(generationPath);
@@ -231,9 +219,6 @@ public class RailMLStage extends Stage {
 	public void selectRailMLDirectory() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
-		/*directoryChooser.getExtensionFilters().addAll(
-			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json")
-		);*/
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
 		/*if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
@@ -349,7 +334,6 @@ public class RailMLStage extends Stage {
 			animationMachine.delete(); // TODO: Confirm
 			animationMachine.createNewFile();
 			currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
-			//writeAnimationMachine();
 		}
 		if (validationMachineCheckbox.isSelected() && inv_ok && import_success) {
 			File validationMachine = new File(Paths.get(generationPath.toString()).resolve(validationFileName.getValue()).toString());
