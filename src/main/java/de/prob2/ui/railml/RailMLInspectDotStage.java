@@ -111,7 +111,7 @@ public class RailMLInspectDotStage extends Stage {
 	private ChoiceBox<Language> languageChoiceBox;
 	/*@FXML
 	private Spinner<Double> scalingSpinner;*/
-	private enum Language {EN, NO}
+	private enum Language {EN, NO, DE}
 
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
@@ -202,8 +202,10 @@ public class RailMLInspectDotStage extends Stage {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayNames"));
 		});
 
-		// TODO: Language
 		languageChoiceBox.getItems().addAll(RailMLInspectDotStage.Language.values());
+		languageChoiceBox.valueProperty().addListener((observable,from,to) -> {
+			railMLFile.setState(railMLFile.getState().perform("changeLanguage", "language = \"" + languageChoiceBox.getValue().toString().toLowerCase() + "\""));
+		});
 		/*SpinnerValueFactory<Double> valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0001, 10.0, 0.0004, 0.0001);
 		scalingSpinner.setValueFactory(valueFactory);
 		scalingSpinner.valueProperty().addListener((observable,from,to) -> {
@@ -226,6 +228,7 @@ public class RailMLInspectDotStage extends Stage {
 		traindetectionelements.setSelected(true);
 		tvdsections.setSelected(true);
 		names.setSelected(true);
+		languageChoiceBox.setValue(Language.EN);
 	}
 
 	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
