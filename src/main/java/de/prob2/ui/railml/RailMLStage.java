@@ -158,8 +158,8 @@ public class RailMLStage extends Stage {
 				generateFileList.remove(validationFileName.getValue());
 			}
 		});
+		visualisationStrategyChoiceBox.setValue(VisualisationStrategy.DOT);
 		visualisationCheckbox.selectedProperty()
-			.and(visualisationStrategyChoiceBox.valueProperty().isNotNull())
 			.addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
 				generateFileList.add(svgFileName.getValue());
