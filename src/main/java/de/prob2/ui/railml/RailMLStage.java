@@ -266,9 +266,8 @@ public class RailMLStage extends Stage {
 			}
 		}
 		if (animationMachineCheckbox.isSelected()) {
-			Path defFile, simB;
 			try {
-				defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
+				Path defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
 				File currentDefs = new File(generationPath.resolve("RailML_animation.def").toString());
 				if (!currentDefs.exists() || (currentDefs.exists() && !Arrays.equals(Files.readAllBytes(currentDefs.toPath()), Files.readAllBytes(defFile)))) {
 					Files.copy(defFile, currentDefs.toPath());
@@ -276,19 +275,18 @@ public class RailMLStage extends Stage {
 				final Machine animationDefinitions = new Machine("RailML_animation.def", "", Paths.get(generationPath.toString()).resolve("RailML_animation.def"));
 				currentProject.addMachine(animationDefinitions);
 
-				simB = Paths.get(getClass().getResource("railml_simb.json").toURI());
+				Path simBResource = Paths.get(getClass().getResource("railml_simb.json").toURI());
 				File currentSimB = new File(generationPath.resolve("railml_simb.json").toString());
-				if (!currentSimB.exists() || (currentSimB.exists() && !Arrays.equals(Files.readAllBytes(currentSimB.toPath()), Files.readAllBytes(simB)))) {
-					Files.copy(simB, currentSimB.toPath());
+				if (!currentSimB.exists() || (currentSimB.exists() && !Arrays.equals(Files.readAllBytes(currentSimB.toPath()), Files.readAllBytes(simBResource)))) {
+					Files.copy(simBResource, currentSimB.toPath());
 				}
-				Path resolvedPath = currentProject.getLocation().relativize(generationPath);
-				currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
-
+				Path simB = currentProject.getLocation().relativize(generationPath);
+				currentProject.addMachine(animationMachine);
+				currentProject.startAnimation(animationMachine);
+				currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(simB, Collections.emptyList()));
 			} catch (IOException | URISyntaxException e) {
 				throw new RuntimeException(e);
 			}
-			currentProject.addMachine(animationMachine);
-			currentProject.startAnimation(animationMachine);
 		}
 		if (validationMachineCheckbox.isSelected()) {
 			currentProject.addMachine(validationMachine);
