@@ -4,9 +4,9 @@ DEFINITIONS
         {i_e • i_e : RailML3_IS_SWITCH_IDS |
             rec(`id`: i_e^"_ellipse",
                 stroke: IF i_e : dom(IS_switchsInMovement) THEN "darkorange" ELSIF i_e : dom(IL_switch_locked_routes) or IS_switch_keyLocked(i_e) = TRUE THEN "red" ELSE "black" END,
-                fill: IF #i_r.(i_r : dom(IL_routes_in_res) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) /<: IS_switch_states(i_e))
+                fill: IF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) /<: IS_switch_states(i_e))
                         THEN "red"
-                    ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) <: IS_switch_states(i_e))
+                    ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) <: IS_switch_states(i_e))
                         THEN "green"
                     ELSE "black" END
             )
@@ -189,17 +189,21 @@ DEFINITIONS
     VISB_SVG_EVENTS12 == {x•x:allIdsOfType("switchIS") | rec(`id`: x, event: "IS_endChangeSwitch", predicate: ("SwitchId=","\""^x^"\"") )};
     VISB_SVG_EVENTS13 == {x•x:allIdsOfType("switchIS") | rec(`id`: x, event: "IS_startChangeCoupledSwitches", predicate: "SwitchId1=\"x\" or SwitchId2=\"x\"" )};
     VISB_SVG_HOVERS1 == {x•x:allIdsOfType("switchIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    VISB_SVG_OBJECTS1 == {x•x:allIdsOfType("switchIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
     VISB_SVG_EVENTS21 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x, event: "IS_startChangeDerailer", predicate: ("DerailerId=","\""^x^"\"") )};
     VISB_SVG_EVENTS22 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x, event: "IS_endChangeDerailer", predicate: ("DerailerId=","\""^x^"\"") )};
     VISB_SVG_HOVERS2 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    VISB_SVG_OBJECTS2 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
     VISB_SVG_EVENTS31 == {x•x:allIdsOfType("crossing") | rec(`id`: x, event: "IS_startChangeCrossing", predicate: ("CrossingId=","\""^x^"\"") )};
     VISB_SVG_EVENTS32 == {x•x:allIdsOfType("crossing") | rec(`id`: x, event: "IS_endChangeCrossing", predicate: ("CrossingId=","\""^x^"\"") )};
     VISB_SVG_HOVERS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    VISB_SVG_OBJECTS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
     VISB_SVG_EVENTS41 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
     VISB_SVG_HOVERS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    VISB_SVG_OBJECTS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
     //VISB_SVG_EVENTS51 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainArrive" )}; // pred : position fits OE
     //VISB_SVG_EVENTS52 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainLeave" )};
