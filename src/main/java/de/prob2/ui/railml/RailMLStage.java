@@ -270,6 +270,7 @@ public class RailMLStage extends Stage {
 				Path defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
 				File currentDefs = new File(generationPath.resolve("RailML_animation.def").toString());
 				if (!currentDefs.exists() || (currentDefs.exists() && !Arrays.equals(Files.readAllBytes(currentDefs.toPath()), Files.readAllBytes(defFile)))) {
+					// TODO: file has changed: request replace
 					Files.copy(defFile, currentDefs.toPath());
 				}
 				final Machine animationDefinitions = new Machine("RailML_animation.def", "", Paths.get(generationPath.toString()).resolve("RailML_animation.def"));
@@ -280,7 +281,7 @@ public class RailMLStage extends Stage {
 				if (!currentSimB.exists() || (currentSimB.exists() && !Arrays.equals(Files.readAllBytes(currentSimB.toPath()), Files.readAllBytes(simBResource)))) {
 					Files.copy(simBResource, currentSimB.toPath());
 				}
-				Path simB = currentProject.getLocation().relativize(generationPath);
+				Path simB = currentProject.getLocation().relativize(simBResource.toAbsolutePath());
 				currentProject.addMachine(animationMachine);
 				currentProject.startAnimation(animationMachine);
 				currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(simB, Collections.emptyList()));
