@@ -54,12 +54,12 @@ test:jdk-17-linux:
     - apt-get install --assume-yes build-essential fakeroot
     - apt-get install --assume-yes bash
   script:
-    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.7 check jpackage
+    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.8 check jpackage
 
 test:jdk-17-macos-x86_64:
   extends: .test-common
   script:
-    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.7 check jpackage
+    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.8 check jpackage
   tags:
     - macos
     - x86_64
@@ -67,7 +67,7 @@ test:jdk-17-macos-x86_64:
 test:jdk-17-macos-arm64:
   extends: .test-common
   script:
-    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.7 check jpackage
+    - ./gradlew ${GRADLE_OPTIONS} -PjavafxVersion=17.0.8 check jpackage
   tags:
     - macos
     - arm64
@@ -75,7 +75,7 @@ test:jdk-17-macos-arm64:
 test:jdk-17-windows64:
   extends: .test-common
   script:
-    - call gradlew %GRADLE_OPTIONS% -PjavafxVersion=17.0.7 check jpackage
+    - call gradlew %GRADLE_OPTIONS% -PjavafxVersion=17.0.8 check jpackage
   tags:
     - windows
 

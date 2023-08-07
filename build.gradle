@@ -143,7 +143,7 @@ final osArch = System.getProperty("os.arch")
 
 if (!project.hasProperty("javafxVersion")) {
 	if (osArch == "aarch64") {
-		ext.javafxVersion = "17.0.7"
+		ext.javafxVersion = "17.0.8"
 	} else {
 		ext.javafxVersion = "11.0.2"
 	}
