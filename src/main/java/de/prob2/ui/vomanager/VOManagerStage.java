@@ -26,7 +26,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.TreeCheckedCell;
-import de.prob2.ui.vomanager.feedback.VOFeedbackManager;
+import de.prob2.ui.vomanager.feedback.VOFeedback;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
 import javafx.beans.InvalidationListener;
@@ -120,8 +120,6 @@ public class VOManagerStage extends Stage {
 
 	private final VOErrorHandler voErrorHandler;
 
-	private final VOFeedbackManager feedbackManager;
-
 	private final I18n i18n;
 
 	private final ObjectProperty<Mode> modeProperty;
@@ -132,14 +130,12 @@ public class VOManagerStage extends Stage {
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-						  final VOChecker voChecker, final VOErrorHandler voErrorHandler,
-						  final VOFeedbackManager feedbackManager, final I18n i18n) {
+			final VOChecker voChecker, final VOErrorHandler voErrorHandler, final I18n i18n) {
 		super();
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voChecker = voChecker;
 		this.voErrorHandler = voErrorHandler;
-		this.feedbackManager = feedbackManager;
 		this.i18n = i18n;
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.relatedMachineNames = FXCollections.observableSet();
@@ -431,7 +427,7 @@ public class VOManagerStage extends Stage {
 	}
 
 	public void showFeedback() {
-		Map<String, VOValidationFeedback> currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getRequirements(), currentProject.getCurrentMachine());
+		Map<String, VOValidationFeedback> currentFeedback = VOFeedback.computeValidationFeedback(currentProject.getRequirements(), currentProject.getCurrentMachine());
 		taFeedback.clear();
 
 		if(currentFeedback.isEmpty()) {

@@ -10,18 +10,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.google.inject.Singleton;
-
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.IValidationTask;
 import de.prob2.ui.vomanager.Requirement;
 import de.prob2.ui.vomanager.ValidationObligation;
 
-@Singleton
-public class VOFeedbackManager {
+public final class VOFeedback {
+	private VOFeedback() {
+		throw new AssertionError("Utility class");
+	}
 
-	public Map<Requirement, Set<Requirement>> computeFullDependencies(final Map<Requirement, ValidationObligation> vosByRequirement) {
+	public static Map<Requirement, Set<Requirement>> computeFullDependencies(final Map<Requirement, ValidationObligation> vosByRequirement) {
 		Map<Requirement, Set<Requirement>> result = new HashMap<>();
 		vosByRequirement.forEach((req1, vo1) ->
 			vosByRequirement.forEach((req2, vo2) -> {
@@ -42,7 +42,7 @@ public class VOFeedbackManager {
 		return result;
 	}
 
-	public Map<String, VOValidationFeedback> computeValidationFeedback(final List<Requirement> requirements, final Machine machine) {
+	public static Map<String, VOValidationFeedback> computeValidationFeedback(final List<Requirement> requirements, final Machine machine) {
 		final Map<Requirement, ValidationObligation> vosByRequirement = new HashMap<>();
 		for (final Requirement requirement : requirements) {
 			requirement.getValidationObligation(machine).ifPresent(vo ->
@@ -73,7 +73,7 @@ public class VOFeedbackManager {
 		return result;
 	}
 
-	private Set<Requirement> computeDependentVOs(Requirement currentRequirement, Map<Requirement, ValidationObligation> vosByRequirement, Set<String> dependentVTs, Map<Requirement, Set<Requirement>> fullDependencies) {
+	private static Set<Requirement> computeDependentVOs(Requirement currentRequirement, Map<Requirement, ValidationObligation> vosByRequirement, Set<String> dependentVTs, Map<Requirement, Set<Requirement>> fullDependencies) {
 		Set<Requirement> result = new LinkedHashSet<>();
 		for(String dependentVT : dependentVTs) {
 			vosByRequirement.forEach((requirement, vo) -> {
@@ -91,7 +91,7 @@ public class VOFeedbackManager {
 		return result;
 	}
 
-	private Set<VOEvolutionFeedback> computeEvolutionFeedback(Map<String, VOValidationFeedback> prevFeedback, Map<String, VOValidationFeedback> currentFeedback) {
+	private static Set<VOEvolutionFeedback> computeEvolutionFeedback(Map<String, VOValidationFeedback> prevFeedback, Map<String, VOValidationFeedback> currentFeedback) {
 		Set<VOEvolutionFeedback> result = new LinkedHashSet<>();
 		Set<String> conVOs = new LinkedHashSet<>();
 		Set<String> conVTs = new LinkedHashSet<>();
