@@ -128,8 +128,6 @@ public class VOManagerStage extends Stage {
 
 	private final ObservableSet<String> relatedMachineNames;
 
-	private Map<String, VOValidationFeedback> currentFeedback;
-
 	private final MapProperty<String, IValidationTask> currentMachineVTs;
 
 	@Inject
@@ -433,7 +431,7 @@ public class VOManagerStage extends Stage {
 	}
 
 	public void showFeedback() {
-		currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getRequirements(), currentProject.getCurrentMachine());
+		Map<String, VOValidationFeedback> currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getRequirements(), currentProject.getCurrentMachine());
 		taFeedback.clear();
 		if(currentFeedback == null) {
 			return;
