@@ -444,15 +444,15 @@ public class VOManagerStage extends Stage {
 				taFeedback.appendText(i18n.translate("vomanager.feedback.successful"));
 			}
 		} else {
-			for (VOValidationFeedback validationFeedback : currentFeedback.values()) {
-				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", validationFeedback.getRequirement()));
+			currentFeedback.forEach((requirement, validationFeedback) -> {
+				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", requirement));
 				taFeedback.appendText("\n");
 				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVTs", validationFeedback.getDependentVTs().toString()));
 				taFeedback.appendText("\n");
 				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentRequirements", validationFeedback.getDependentRequirements().toString()));
 				taFeedback.appendText("\n");
 				taFeedback.appendText("\n");
-			}
+			});
 		}
 	}
 

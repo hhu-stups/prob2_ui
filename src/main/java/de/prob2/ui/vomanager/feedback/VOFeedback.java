@@ -67,7 +67,7 @@ public final class VOFeedback {
 					.map(Requirement::getName)
 					.collect(Collectors.toCollection(LinkedHashSet::new));
 				
-				result.put(requirement.getName(), new VOValidationFeedback(requirement.getName(), dependentVTs, dependentRequirements));
+				result.put(requirement.getName(), new VOValidationFeedback(dependentVTs, dependentRequirements));
 			}
 		});
 		return result;
