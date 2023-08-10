@@ -147,12 +147,14 @@ public class SimulationChoosingStage extends Stage {
 		Map<String, Object> information = new HashMap<>();
 
 		information.putAll(simulationMonteCarloChoice.extractInformation());
+		information.putAll(simulationConditionChoice.extractInformation());
 
 		if(simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationConditionChoice.checkProperty()) {
 			SimulationType simulationType = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
 			information.putAll(simulationPropertyChoice.extractInformation());
-			information.putAll(simulationConditionChoice.extractInformation());
 			switch (simulationType) {
+				case MONTE_CARLO_SIMULATION:
+					break;
 				case ESTIMATION:
 					information.putAll(simulationEstimationChoice.extractInformation());
 					break;
