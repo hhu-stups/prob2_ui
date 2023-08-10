@@ -433,9 +433,7 @@ public class VOManagerStage extends Stage {
 	public void showFeedback() {
 		Map<String, VOValidationFeedback> currentFeedback = feedbackManager.computeValidationFeedback(currentProject.getRequirements(), currentProject.getCurrentMachine());
 		taFeedback.clear();
-		if(currentFeedback == null) {
-			return;
-		}
+
 		if(currentFeedback.isEmpty()) {
 			boolean checked = true;
 			for (Requirement requirement : currentProject.getRequirements()) {
