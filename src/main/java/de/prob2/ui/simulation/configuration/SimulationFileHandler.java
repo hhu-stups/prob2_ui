@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class SimulationFileHandler {
 
 		List<Path> timedTraces = Files.walk(inputFile).filter(p -> !Files.isDirectory(p))
 				.filter(p -> MoreFiles.getFileExtension(p).equals(SimulationFileHandler.TRACE_FILE_EXTENSION))
+				.sorted(Path::compareTo)
 				.collect(Collectors.toList());
 		return new SimulationBlackBoxModelConfiguration(timedTraces);
 	}
@@ -110,7 +112,7 @@ public class SimulationFileHandler {
 		Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
 		boolean onlyWhenExecuted = activationAsObject.get("activatingOnlyWhenExecuted") == null || activationAsObject.get("activatingOnlyWhenExecuted").getAsBoolean();
 		Map<String, String> updating = buildUpdating(activationAsObject.get("updating"));
-		String withPredicate = activationAsObject.get("withPredicate") == null ? null : activationAsObject.get("withPredicate").getAsString();
+		String withPredicate = activationAsObject.get("withPredicate") == null || activationAsObject.get("withPredicate").isJsonNull() ? null : activationAsObject.get("withPredicate").getAsString();
 		return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, onlyWhenExecuted, updating, withPredicate);
 	}
 
