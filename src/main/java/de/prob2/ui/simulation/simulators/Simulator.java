@@ -137,10 +137,17 @@ public abstract class Simulator {
 				activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
 				currentTrace.removeListener(traceListener);
 			} else if(config instanceof SimulationExternalConfiguration) {
-				if(this.externalSimulatorExecutor == null || !this.externalSimulatorExecutor.getPythonFile().equals(((SimulationExternalConfiguration) config).getExternalPath())) {
-					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(((SimulationExternalConfiguration) config).getExternalPath(), (ClassicalBModel) currentTrace.getModel());
-				} else if(this.externalSimulatorExecutor != null) {
-					this.externalSimulatorExecutor.reset();
+				if(this.externalSimulatorExecutor == null) {
+					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this, ((SimulationExternalConfiguration) config).getExternalPath(), (ClassicalBModel) currentTrace.getModel());
+					this.externalSimulatorExecutor.start();
+				} else {
+					if(!this.externalSimulatorExecutor.getPythonFile().equals(((SimulationExternalConfiguration) config).getExternalPath())) {
+						this.externalSimulatorExecutor.close();
+						this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this, ((SimulationExternalConfiguration) config).getExternalPath(), (ClassicalBModel) currentTrace.getModel());
+						this.externalSimulatorExecutor.start();
+					} else {
+						this.externalSimulatorExecutor.reset();
+					}
 				}
 				currentTrace.removeListener(traceListener);
 			}
@@ -278,9 +285,6 @@ public abstract class Simulator {
 				timestamps.add(time.get());
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 				if(config instanceof SimulationExternalConfiguration) {
-					if(!externalSimulatorExecutor.isStarted()) {
-						externalSimulatorExecutor.start();
-					}
 					if(!externalSimulatorExecutor.isDone()) {
 						FutureTask<ExternalSimulationStep> stepFuture = externalSimulatorExecutor.execute(newTrace);
 
@@ -289,6 +293,10 @@ public abstract class Simulator {
 							step = stepFuture.get();
 						} catch (Exception e) {
 							e.printStackTrace();
+						}
+
+						if(step == null) {
+							return trace;
 						}
 
 						ActivationOperationConfiguration newActivation = createDynamicActivation(step.getOp(), step.getOp(), step.getDelta(), 0,

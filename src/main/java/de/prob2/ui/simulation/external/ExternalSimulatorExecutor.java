@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.external;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.simulation.simulators.Simulator;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,6 +16,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 public class ExternalSimulatorExecutor {
+
+	private final Simulator simulator;
 
 	private final ProcessBuilder pb;
 
@@ -30,25 +33,21 @@ public class ExternalSimulatorExecutor {
 
 	private boolean done;
 
-	private boolean started;
-
 	private boolean hasShield;
 
-	public ExternalSimulatorExecutor(Path pythonFile, ClassicalBModel model) {
+	public ExternalSimulatorExecutor(Simulator simulator, Path pythonFile, ClassicalBModel model) {
+		this.simulator = simulator;
 		this.pythonFile = pythonFile;
 		this.pb = new ProcessBuilder("python3", pythonFile.toString()).directory(pythonFile.getParent().toFile());
 		this.done = false;
-		this.started = false;
 		this.hasShield = model.getDefinitions().getDefinitionNames().contains("SHIELD_INTERVENTION");
 	}
 
 	public void reset() {
 		this.done = false;
-		this.started = false;
 	}
 
 	public void start() {
-		started = true;
 		pb.redirectErrorStream(true);
 		try {
 			this.process = pb.start();
@@ -68,12 +67,20 @@ public class ExternalSimulatorExecutor {
 			try {
 				State state = trace.getCurrentState();
 
-				writer.write("step");
+				boolean finished = simulator.endingConditionReached(trace);
+
+				writer.write(String.valueOf(finished ? 1 : 0));
 				writer.newLine();
 				writer.flush();
+
+				if(finished) {
+					return null;
+				}
+
 				String line = reader.readLine();
 
 				String intervention = hasShield && state.isInitialised() ? state.eval(String.format("SHIELD_INTERVENTION(%s)", line)).toString() : line;
+
 				writer.write(intervention);
 				writer.newLine();
 				writer.flush();
@@ -104,10 +111,14 @@ public class ExternalSimulatorExecutor {
 		return task;
 	}
 
-	public void close() throws IOException {
-		reader.close();
-		writer.close();
-		process.getOutputStream().close();
+	public void close() {
+		try {
+			reader.close();
+			writer.close();
+			process.getOutputStream().close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void setDone(boolean done) {
@@ -116,10 +127,6 @@ public class ExternalSimulatorExecutor {
 
 	public boolean isDone() {
 		return done;
-	}
-
-	public boolean isStarted() {
-		return started;
 	}
 
 	public Path getPythonFile() {
