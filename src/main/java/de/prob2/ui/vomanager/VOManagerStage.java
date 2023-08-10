@@ -427,31 +427,30 @@ public class VOManagerStage extends Stage {
 	}
 
 	public void showFeedback() {
-		Map<String, VOValidationFeedback> currentFeedback = VOFeedback.computeValidationFeedback(currentProject.getRequirements(), currentProject.getCurrentMachine());
+		Machine currentMachine = currentProject.getCurrentMachine();
+		Map<String, VOValidationFeedback> currentFeedback = VOFeedback.computeValidationFeedback(currentProject.getRequirements(), currentMachine);
 		taFeedback.clear();
 
 		if(currentFeedback.isEmpty()) {
 			boolean checked = true;
 			for (Requirement requirement : currentProject.getRequirements()) {
-				final Optional<ValidationObligation> vo = requirement.getValidationObligation(currentProject.getCurrentMachine());
+				final Optional<ValidationObligation> vo = requirement.getValidationObligation(currentMachine);
 				if (vo.isPresent() && vo.get().getChecked() == Checked.NOT_CHECKED) {
-					taFeedback.appendText(i18n.translate("vomanager.feedback.notChecked"));
+					taFeedback.appendText(i18n.translate("vomanager.feedback.notChecked", currentMachine.getName()));
 					checked = false;
 					break;
 				}
 			}
 			if(checked) {
-				taFeedback.appendText(i18n.translate("vomanager.feedback.successful"));
+				taFeedback.appendText(i18n.translate("vomanager.feedback.successful", currentMachine.getName()));
 			}
 		} else {
 			currentFeedback.forEach((requirement, validationFeedback) -> {
-				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", requirement));
+				taFeedback.appendText(i18n.translate("vomanager.feedback.failingVO", requirement, currentMachine.getName()));
 				taFeedback.appendText("\n");
 				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentVTs", validationFeedback.getDependentVTs().toString()));
 				taFeedback.appendText("\n");
 				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentRequirements", validationFeedback.getDependentRequirements().toString()));
-				taFeedback.appendText("\n");
-				taFeedback.appendText("\n");
 			});
 		}
 	}
