@@ -1,11 +1,13 @@
 package de.prob2.ui.simulation.simulators;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.check.tracereplay.PersistentTrace;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.OperationInfo;
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
@@ -22,26 +24,27 @@ import java.util.Map;
 public class SimulationCreator {
 
 	public static SimulationModelConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
-		PersistentTrace persistentTrace = new PersistentTrace(trace);
-		List<PersistentTransition> transitions = persistentTrace.getTransitionList();
+		List<Transition> transitions = trace.getTransitionList();
 
 		List<ActivationConfiguration> activationConfigurations = new ArrayList<>();
 		int currentTimestamp = 0;
 
 		for(int i = 0; i < transitions.size(); i++) {
-			PersistentTransition transition = transitions.get(i);
+			Transition transition = transitions.get(i);
 
-			String op = transition.getOperationName();
+			String op = transition.getName();
 			OperationInfo opInfo = trace.getStateSpace().getLoadedMachine().getMachineOperationInfo(op);
 			int j = i + 1;
 
 
-			String nextTransitionName = i >= transitions.size() - 1 ? null : transitions.get(j).getOperationName();
+			String nextTransitionName = i >= transitions.size() - 1 ? null : transitions.get(j).getName();
 			String nextOp = nextTransitionName == null ? null : Transition.isArtificialTransitionName(nextTransitionName) ? nextTransitionName : nextTransitionName + "_" + j;
 			String id = Transition.isArtificialTransitionName(op) ? op : op + "_" + i;
 
 			int time = timestamps.get(i) - currentTimestamp;
-			Map<String, String> fixedVariables = createFixedVariables(SimulationHelperFunctions.mergeValues(transition.getParameters(), transition.getDestinationStateVariables()), opInfo);
+			State destination = transition.getDestination();
+			Map<String, String> fixedVariables = !"$setup_constants".equals(transition.getName()) ? createFixedVariables(computeFixedVariablesFromDestinationValues(destination.getVariableValues(FormulaExpand.EXPAND)), opInfo) :
+					createFixedVariables(computeFixedVariablesFromDestinationValues(destination.getConstantValues(FormulaExpand.EXPAND)), opInfo);
 			fixedVariables = fixedVariables == null || fixedVariables.isEmpty() ? null : fixedVariables;
 
 			List<String> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
