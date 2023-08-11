@@ -3,7 +3,7 @@ package de.prob2.ui.verifications.symbolicchecking;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.statespace.LoadedMachine;

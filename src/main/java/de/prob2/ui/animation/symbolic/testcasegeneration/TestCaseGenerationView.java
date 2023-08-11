@@ -3,8 +3,7 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 import java.util.List;
 import java.util.Optional;
 
-import javax.inject.Inject;
-
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 

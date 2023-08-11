@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.codecompletion.CodeCompletionItem;

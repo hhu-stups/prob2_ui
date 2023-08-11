@@ -3,7 +3,7 @@ package de.prob2.ui.animation.symbolic;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.I18n;

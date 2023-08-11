@@ -2,9 +2,8 @@ package de.prob2.ui.animation.symbolic;
 
 import java.util.Optional;
 
-import javax.inject.Inject;
-import javax.inject.Provider;
-
+import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;

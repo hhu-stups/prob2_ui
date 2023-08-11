@@ -1,6 +1,6 @@
 package de.prob2.ui.sharedviews;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.internal.FXMLInjected;

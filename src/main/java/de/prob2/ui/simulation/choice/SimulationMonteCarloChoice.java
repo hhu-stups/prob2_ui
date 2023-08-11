@@ -1,18 +1,20 @@
 package de.prob2.ui.simulation.choice;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
+
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.SimulationMode;
+
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 
 @FXMLInjected
 @Singleton

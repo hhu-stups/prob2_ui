@@ -1,22 +1,22 @@
 package de.prob2.ui.simulation.choice;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import com.google.inject.Inject;
 import com.google.inject.Injector;
+
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
+
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
 import javafx.util.StringConverter;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.Map;
 
 @FXMLInjected
 public class SimulationEstimationChoice extends GridPane {

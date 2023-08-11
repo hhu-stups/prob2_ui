@@ -10,8 +10,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.inject.Inject;
-
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractModel;

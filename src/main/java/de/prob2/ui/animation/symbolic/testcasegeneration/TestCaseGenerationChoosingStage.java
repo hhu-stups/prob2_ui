@@ -1,6 +1,6 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import javax.inject.Inject;
+import com.google.inject.Inject;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;

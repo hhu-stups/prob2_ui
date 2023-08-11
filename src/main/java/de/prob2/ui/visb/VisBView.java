@@ -11,12 +11,12 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-import javax.inject.Inject;
-import javax.inject.Singleton;
 
 import com.google.common.io.CharStreams;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ExportVisBHtmlForStates;

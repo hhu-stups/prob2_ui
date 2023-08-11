@@ -1,7 +1,6 @@
 package de.prob2.ui.project.verifications;
 
-import javax.inject.Inject;
-
+import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.FXMLInjected;
