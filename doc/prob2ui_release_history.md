@@ -4,7 +4,22 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.2.1 (not released yet)
 
-* (no changes yet)
+* Updated the ProB core to version 1.12.2 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
+* Added binaries for macOS on arm64 (Apple Silicon) in addition to x86\_64 (Intel)
+* SimB simulation can be controlled by an external simulator, e. g. a reinforcement learning agent
+* Added estimation of average and cumulative sum to SimB
+* Added average trace length to SimB statistics
+* Added CSV export of SimB statistics
+* Added column for number of steps to trace replay table
+* Added syntax highlighting for a few more code text fields
+* Editor now asks for confirmation before discarding unsaved changes when reloading the machine
+* Allowed resetting a manually changed VisB visualization path back to the `VISB_JSON_FILE` default
+* Fixed editor syntax highlighting sometimes not working on Windows
+* Improved error messages when a machine file could not be read
+* Improved handling of invalid values for ProB preferences
+* Improved feedback for internal errors in VisB
+
+**Note:** This is the last release to support Java 8 and 11. The next release will require Java 17 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
 
 ## Version 1.2.0 (22nd of June 2023)
 
@@ -37,8 +52,6 @@ Downloads of the current release and snapshot development builds can be found on
 * Fixed various keyboard problems with some OSes and keyboard layouts (Shift on Windows, undo/redo with non-US layouts, zoom shortcuts, consoles)
 * Fixed some toolbar icons becoming invisible for small window/view sizes
 * Fixed errors with the config file when switching between different versions of ProB 2 UI
-
-**Note:** This is the last release to support Java 8 and 11. The next release will require Java 17 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
 
 ### Downloads for version 1.2.0
 
