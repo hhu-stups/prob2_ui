@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SimulationEstimator implements ISimulationPropertyChecker {
 
@@ -221,12 +222,8 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
-		double estimatedValue = new BigDecimal(simulationPropertyChecker.getEstimatedValues().stream()
-				.reduce(0.0, Double::sum) / n).setScale(2, RoundingMode.HALF_UP).doubleValue();
-		double averageTraceLength = simulationPropertyChecker.getOperationExecutions().values().stream()
-				.map(l -> l.stream().reduce(0, Integer::sum))
-				.reduce(0, Integer::sum) / (double) n;
-		this.setStats(new SimulationStats(n, numberSuccess, ratio, estimatedValue, wallTime, averageTraceLength, this.calculateExtendedStats()));
+		List<Integer> traceLengths = resultingTraces.stream().map(Trace::size).collect(Collectors.toList());
+		this.setStats(new SimulationStats(n, numberSuccess, ratio, simulationPropertyChecker.getEstimatedValues(), wallTime, traceLengths, this.calculateExtendedStats()));
 	}
 
 	@Override

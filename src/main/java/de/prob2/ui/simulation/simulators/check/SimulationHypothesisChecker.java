@@ -11,8 +11,10 @@ import org.apache.commons.math3.special.Erf;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 
@@ -225,10 +227,8 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 		int numberSuccess = simulationPropertyChecker.getNumberSuccess();
 		int n = resultingTraces.size();
 		double ratio = (double) numberSuccess / n;
-		double averageTraceLength = simulationPropertyChecker.getOperationExecutions().values().stream()
-				.map(l -> l.stream().reduce(0, Integer::sum))
-				.reduce(0, Integer::sum) / (double) n;
-		this.setStats(new SimulationStats(n, numberSuccess, ratio, 0.0, wallTime, averageTraceLength, this.calculateExtendedStats()));
+		List<Integer> traceLengths = resultingTraces.stream().map(Trace::size).collect(Collectors.toList());
+		this.setStats(new SimulationStats(n, numberSuccess, ratio, new ArrayList<>(), wallTime, traceLengths, this.calculateExtendedStats()));
 	}
 
 	@Override

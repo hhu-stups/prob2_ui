@@ -45,13 +45,19 @@ public class SimulationTracesView extends Stage {
 
 		private final Checked checked;
 
+		private final int traceLength;
+
+		private final double estimatedValue;
+
 		private final int index;
 
-		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, Checked checked, int index) {
+		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, Checked checked, int traceLength, double estimatedValue, int index) {
 			this.parent = parent;
 			this.trace = trace;
 			this.timestamps = timestamps;
 			this.checked = checked;
+			this.traceLength = traceLength;
+			this.estimatedValue = estimatedValue;
 			this.index = index;
 		}
 
@@ -75,6 +81,14 @@ public class SimulationTracesView extends Stage {
 			return checked;
 		}
 
+		public int getTraceLength() {
+			return traceLength;
+		}
+
+		public double getEstimatedValue() {
+			return estimatedValue;
+		}
+
 		@Override
 		public String getTranslationKey() {
 			return "simulation.traces.view.name";
@@ -92,6 +106,10 @@ public class SimulationTracesView extends Stage {
 	private TableColumn<SimulationTraceItem, Checked> statusColumn;
 	@FXML
 	private TableColumn<SimulationTraceItem, String> traceColumn;
+	@FXML
+	private TableColumn<SimulationTraceItem, Float> estimatedValueColumn;
+	@FXML
+	private TableColumn<SimulationTraceItem, Integer> traceLengthColumn;
 	@FXML
 	private SplitPane splitPane;
 
@@ -116,10 +134,13 @@ public class SimulationTracesView extends Stage {
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
-	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps, List<Checked> status) {
+	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps, List<Checked> status, List<Double> estimatedValues) {
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
+		if(!estimatedValues.isEmpty()) {
+			estimatedValueColumn.setVisible(true);
+		}
 		for (int i = 0; i < traces.size(); i++) {
-			items.add(new SimulationTraceItem(item, traces.get(i), timestamps.get(i), status.get(i), i+1));
+			items.add(new SimulationTraceItem(item, traces.get(i), timestamps.get(i), status.get(i), traces.get(i).size(), estimatedValues.isEmpty() ? 0 : estimatedValues.get(i), i+1));
 		}
 		traceTableView.setItems(items);
 	}
@@ -128,6 +149,8 @@ public class SimulationTracesView extends Stage {
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		traceColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue()));
+		traceLengthColumn.setCellValueFactory(new PropertyValueFactory<>("traceLength"));
+		estimatedValueColumn.setCellValueFactory(new PropertyValueFactory<>("estimatedValue"));
 	}
 
 	private void initTableRows() {

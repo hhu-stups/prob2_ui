@@ -24,6 +24,8 @@
 						<columns>
 							<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
 							<TableColumn fx:id="traceColumn" text="%simulation.generatedTraces.columns.trace"/>
+							<TableColumn fx:id="traceLengthColumn" text="%simulation.generatedTraces.columns.traceLength" minWidth="${fontSize.fontSize * 8}" maxWidth="${fontSize.fontSize * 8}"/>
+							<TableColumn fx:id="estimatedValueColumn" text="%simulation.generatedTraces.columns.estimatedValue" minWidth="${fontSize.fontSize * 8}" maxWidth="${fontSize.fontSize * 8}" visible="false"/>
 						</columns>
 						<placeholder>
 							<Label text="%animation.tracereplay.view.placeholder"/>

@@ -338,10 +338,8 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	@Override
 	public void calculateStatistics(long time) {
 		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
-		double averageTraceLength = operationExecutions.values().stream()
-				.map(l -> l.stream().reduce(0, Integer::sum))
-				.reduce(0, Integer::sum)/(double) numberExecutions;
-		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, 0.0, wallTime, averageTraceLength, calculateExtendedStats());
+		List<Integer> traceLengths = resultingTraces.stream().map(trace -> trace.getTransitionList().size()).collect(Collectors.toList());
+		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, new ArrayList<>(), wallTime, traceLengths, calculateExtendedStats());
 	}
 
 	public SimulationExtendedStats calculateExtendedStats() {
