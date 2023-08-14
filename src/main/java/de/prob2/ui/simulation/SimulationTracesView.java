@@ -1,5 +1,9 @@
 package de.prob2.ui.simulation;
 
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -7,10 +11,14 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.Translatable;
+import de.prob2.ui.internal.csv.CSVWriter;
+import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.table.SimulationItem;
 
@@ -29,6 +37,7 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 @FXMLInjected
@@ -81,6 +90,7 @@ public class SimulationTracesView extends Stage {
 			return checked;
 		}
 
+		// Used via PropertyValueFactory
 		public int getTraceLength() {
 			return traceLength;
 		}
@@ -113,13 +123,17 @@ public class SimulationTracesView extends Stage {
 	@FXML
 	private SplitPane splitPane;
 
+	private final StageManager stageManager;
+	private final FileChooserManager fileChooserManager;
 	private final CurrentTrace currentTrace;
 	private final I18n i18n;
 	private final SimulationScenarioHandler simulationScenarioHandler;
 
 
 	@Inject
-	public SimulationTracesView(final StageManager stageManager, final CurrentTrace currentTrace, final I18n i18n, final SimulationScenarioHandler simulationScenarioHandler) {
+	public SimulationTracesView(final StageManager stageManager, final FileChooserManager fileChooserManager, final CurrentTrace currentTrace, final I18n i18n, final SimulationScenarioHandler simulationScenarioHandler) {
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
 		this.currentTrace = currentTrace;
 		this.i18n = i18n;
 		this.simulationScenarioHandler = simulationScenarioHandler;
@@ -190,5 +204,24 @@ public class SimulationTracesView extends Stage {
 
 	public void refresh() {
 		this.traceTableView.refresh();
+	}
+
+	@FXML
+	private void exportCSV() throws IOException {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("simulation.generatedTraces.stage.title"));
+		fileChooser.setInitialFileName("SimulationStatistics.csv");
+		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
+		if (path != null) {
+			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
+				csvWriter.header("Status", "Trace", "Trace Length", "Estimated Value");
+
+				int i = 1;
+				for (SimulationTraceItem traceItem : traceTableView.getItems()) {
+					csvWriter.record(traceItem.getChecked(), String.format("Trace %s", i), traceItem.getTraceLength(), traceItem.getEstimatedValue());
+				}
+			}
+		}
 	}
 }
