@@ -8,8 +8,8 @@ import javax.annotation.Nullable;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
-import de.codecentric.centerdevice.MenuToolkit;
-import de.codecentric.centerdevice.util.StageUtils;
+import de.jangassen.MenuToolkit;
+import de.jangassen.util.StageUtils;
 import de.prob2.ui.MainController;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;

@@ -3,14 +3,13 @@ import java.nio.file.Files
 import org.gradle.plugins.ide.eclipse.model.AccessRule
 
 plugins {
+	id "java"
+	id "application"
+	id "eclipse"
 	id "com.github.johnrengelman.shadow" version "8.1.1"
 	id "com.google.osdetector" version "1.7.3"
-	// The OpenJFX plugin does not work before Java 11, so we apply it conditionally in an if block further below.
-	id "org.openjfx.javafxplugin" version "0.0.14" apply false
+	id "org.openjfx.javafxplugin" version "0.0.14"
 }
-
-apply plugin: 'application'
-apply plugin: 'eclipse'
 
 project.group = "de.hhu.stups"
 project.version = "1.2.2-SNAPSHOT"
@@ -54,16 +53,17 @@ repositories {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_1_8
-	targetCompatibility = JavaVersion.VERSION_1_8
+	sourceCompatibility = JavaVersion.VERSION_17
+	targetCompatibility = JavaVersion.VERSION_17
 }
 
 // Module export/open declarations for Java 9+
 def exports = []
 def opens = []
 
+// TODO: investigate which of these are still required
 // Required by centerdevice-nsmenufx (as of version 2.1.6; see https://github.com/codecentric/NSMenuFX/issues/29)
-exports += [
+/*exports += [
 	"javafx.controls/com.sun.javafx.scene.control",
 	"javafx.graphics/com.sun.glass.ui",
 	"javafx.graphics/com.sun.javafx.menu",
@@ -76,27 +76,25 @@ exports += [
 opens += [
 	"javafx.graphics/com.sun.glass.ui.mac",
 	"javafx.graphics/com.sun.javafx.tk.quantum",
-]
+]*/
 
 // Required by controlsfx, because we are still using the Java 8-compatible version.
 // This has been fixed as of ControlsFX 11.0.0 (see https://github.com/controlsfx/controlsfx/issues/1100), but that release is only compatible with Java 11.
-exports += [
+/*exports += [
 	"javafx.graphics/com.sun.javafx.css",
-]
+]*/
 
-exports += [
+/*exports += [
 	"javafx.base/com.sun.javafx.event",
-]
+]*/
 
 application {
 	// Our actual application class is de.prob2.ui.ProB2.
 	// See the Javadoc of de.prob2.ui.Main for an explanation of why this extra class is necessary.
 	mainClass = "de.prob2.ui.Main"
 
-	if (JavaVersion.current().java9Compatible) {
-		applicationDefaultJvmArgs += exports.collect {"--add-exports=${it}=ALL-UNNAMED".toString()}
-		applicationDefaultJvmArgs += opens.collect {"--add-opens=${it}=ALL-UNNAMED".toString()}
-	}
+	applicationDefaultJvmArgs += exports.collect { "--add-exports=${it}=ALL-UNNAMED".toString() }
+	applicationDefaultJvmArgs += opens.collect { "--add-opens=${it}=ALL-UNNAMED".toString() }
 }
 
 tasks.withType(JavaCompile) {
@@ -113,18 +111,18 @@ configurations.all {
 }
 
 dependencies {
-	implementation group: "ch.qos.logback", name: "logback-classic", version: "1.3.11"
+	implementation group: "ch.qos.logback", name: "logback-classic", version: "1.4.11"
 	implementation group: "com.fatboyindustrial.gson-javatime-serialisers", name: "gson-javatime-serialisers", version: "1.1.2"
 	implementation group: "com.google.code.gson", name: "gson", version: "2.10.1"
 	implementation group: "com.google.guava", name: "guava", version: "32.1.2-jre"
 	implementation group: "com.googlecode.java-diff-utils", name: "diffutils", version: "1.3.0"
 	implementation group: "commons-cli", name: "commons-cli", version: "1.5.0"
-	implementation group: "de.codecentric.centerdevice", name: "centerdevice-nsmenufx", version: "2.1.7"
+	implementation group: "de.jangassen", name: "nsmenufx", version: "3.1.0"
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel", version: "4.12.2"
 	implementation group: "de.hhu.stups", name: "voparser", version: "0.2.1"
 	implementation group: "net.harawata", name: "appdirs", version: "1.2.1"
-	implementation group: "org.controlsfx", name: "controlsfx", version: "8.40.18"
-	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.10.8"
+	implementation group: "org.controlsfx", name: "controlsfx", version: "11.1.2"
+	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.0"
 	implementation group: "org.pf4j", name: "pf4j", version: "3.9.0"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
@@ -132,6 +130,8 @@ dependencies {
 	testImplementation platform('org.junit:junit-bom:5.10.0')
 	testImplementation 'org.junit.jupiter:junit-jupiter'
 	testImplementation 'org.assertj:assertj-core:3.24.2'
+
+	// these dependencies are kept outdated because of the automatic doc tests
 	testImplementation group: 'org.testfx', name: 'testfx-core', version: '4.0.16-alpha'
 	testImplementation group: 'org.testfx', name: 'testfx-junit', version: '4.0.15-alpha'
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.11.0'
@@ -140,14 +140,7 @@ dependencies {
 }
 
 final osArch = System.getProperty("os.arch")
-
-if (!project.hasProperty("javafxVersion")) {
-	if (osArch == "aarch64") {
-		ext.javafxVersion = "17.0.8"
-	} else {
-		ext.javafxVersion = "11.0.2"
-	}
-}
+final javafxVersion = "20.0.2"
 
 // Split off everything starting at the first non-digit (e. g. "11.0.2" -> "11", "17" -> "17", "18-ea+12" -> "18").
 // Used when creating a multi-release jar below (multiPlatformShadowJar) -
@@ -164,14 +157,12 @@ final javafxModules = [
 	"javafx.web",
 ]
 
-if (JavaVersion.current().java11Compatible) {
-	apply plugin: "org.openjfx.javafxplugin"
-	javafx {
-		version = javafxVersion
-		modules = javafxModules
-	}
+javafx {
+	version = javafxVersion
+	modules = javafxModules
 }
 
+// for multi-platform jar
 ["win", "mac", "linux"].each {platform ->
 	javafxModules.each {module ->
 		dependencies.javafxAllPlatforms(group: "org.openjfx", name: module.replace("javafx.", "javafx-"), version: javafxVersion, classifier: platform)

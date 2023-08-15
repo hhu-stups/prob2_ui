@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.codecentric.centerdevice.MenuToolkit;
+import de.jangassen.MenuToolkit;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;

@@ -17,7 +17,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 
-import de.codecentric.centerdevice.MenuToolkit;
+import de.jangassen.MenuToolkit;
 import de.prob.cli.ProBInstanceProvider;
 import de.prob2.ui.config.BasicConfig;
 import de.prob2.ui.config.ConfigData;

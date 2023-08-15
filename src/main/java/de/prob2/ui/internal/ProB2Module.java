@@ -10,7 +10,7 @@ import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
-import de.codecentric.centerdevice.MenuToolkit;
+import de.jangassen.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.config.RuntimeOptions;
