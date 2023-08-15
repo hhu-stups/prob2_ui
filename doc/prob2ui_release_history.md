@@ -7,6 +7,7 @@ Downloads of the current release and snapshot development builds can be found on
 * Updated the ProB core to version 1.12.2 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
 * Added binaries for macOS on arm64 (Apple Silicon) in addition to x86\_64 (Intel)
 * SimB simulation can be controlled by an external simulator, e. g. a reinforcement learning agent
+* Decisions made by reinforcement learning agent can be corrected by a safety shield via a `SHIELD_INTERVENTION`definition
 * Added estimation of average and cumulative sum to SimB
 * Added average trace length to SimB statistics
 * Added CSV export of SimB statistics with trace length and estimated value
