@@ -2,7 +2,7 @@
 
 Downloads of the current release and snapshot development builds can be found on [our main download page](https://prob.hhu.de/w/index.php?title=Download#ProB2-UI).
 
-## Version 1.2.1 (not released yet)
+## Version 1.2.1 (2023-08-15)
 
 * Updated the ProB core to version 1.12.2 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
 * Added binaries for macOS on arm64 (Apple Silicon) in addition to x86\_64 (Intel)
