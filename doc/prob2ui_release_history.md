@@ -26,6 +26,14 @@ Downloads of the current release and snapshot development builds can be found on
 
 **Note:** This is the last release to support Java 8 and 11. The next release will require Java 17 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
 
+### Downloads for version 1.2.1
+
+* [Standalone jar file (all platforms)](https://stups.hhu-hosting.de/downloads/prob2/1.2.1/prob2-ui-1.2.1-multi.jar)
+* [Windows installer (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.1/ProB%202%20UI-1.2.1.exe)
+* [macOS arm64 (Apple Silicon) application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.1/ProB%202%20UI-aarch64-1.2.1.dmg)
+* [macOS x86_64 (Intel) application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.1/ProB%202%20UI-x86_64-1.2.1.dmg)
+* [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.1/prob2-ui_1.2.1-1_amd64.deb)
+
 ## Version 1.2.0 (2023-06-22)
 
 * Updated the ProB core to version 1.12.1 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
