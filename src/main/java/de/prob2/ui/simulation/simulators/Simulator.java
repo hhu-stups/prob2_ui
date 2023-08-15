@@ -252,6 +252,9 @@ public abstract class Simulator {
 		Trace newTrace = trace;
 		for(ActivationOperationConfiguration opConfig : activationConfigurationsSorted) {
 			if (endingConditionReached(newTrace)) {
+				if(config instanceof SimulationExternalConfiguration) {
+					externalSimulatorExecutor.sendFinish();
+				}
 				break;
 			}
 			newTrace = executeActivatedOperation(opConfig, newTrace);

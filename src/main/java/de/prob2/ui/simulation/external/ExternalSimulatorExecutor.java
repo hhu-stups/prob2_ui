@@ -65,17 +65,13 @@ public class ExternalSimulatorExecutor {
 			String predicate = "";
 			boolean done = false;
 			try {
-				State state = trace.getCurrentState();
 
-				boolean finished = simulator.endingConditionReached(trace);
-
-				writer.write(String.valueOf(finished ? 1 : 0));
+				writer.write(String.valueOf(0));
 				writer.newLine();
 				writer.flush();
 
-				if(finished) {
-					return null;
-				}
+
+				State state = trace.getCurrentState();
 
 				String line = reader.readLine();
 
@@ -127,6 +123,16 @@ public class ExternalSimulatorExecutor {
 
 	public boolean isDone() {
 		return done;
+	}
+
+	public void sendFinish() {
+		try {
+			writer.write(String.valueOf(1));
+			writer.newLine();
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Path getPythonFile() {
