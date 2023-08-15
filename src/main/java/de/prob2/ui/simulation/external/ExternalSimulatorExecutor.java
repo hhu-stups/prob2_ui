@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.external;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.simulators.Simulator;
 
 import java.io.BufferedReader;
@@ -65,11 +66,12 @@ public class ExternalSimulatorExecutor {
 			String predicate = "";
 			boolean done = false;
 			try {
-
-				writer.write(String.valueOf(0));
-				writer.newLine();
-				writer.flush();
-
+				if(simulator.endingConditionReached(trace)) {
+					sendFinish();
+					return null;
+				} else {
+					sendContinue();
+				}
 
 				State state = trace.getCurrentState();
 
@@ -126,8 +128,22 @@ public class ExternalSimulatorExecutor {
 	}
 
 	public void sendFinish() {
+		if(done) {
+			return;
+		}
+		setDone(true);
 		try {
 			writer.write(String.valueOf(1));
+			writer.newLine();
+			writer.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void sendContinue() {
+		try {
+			writer.write(String.valueOf(0));
 			writer.newLine();
 			writer.flush();
 		} catch (IOException e) {

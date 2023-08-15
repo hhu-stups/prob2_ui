@@ -252,7 +252,7 @@ public abstract class Simulator {
 		Trace newTrace = trace;
 		for(ActivationOperationConfiguration opConfig : activationConfigurationsSorted) {
 			if (endingConditionReached(newTrace)) {
-				if(config instanceof SimulationExternalConfiguration) {
+				if(externalSimulatorExecutor != null) {
 					externalSimulatorExecutor.sendFinish();
 				}
 				break;
@@ -288,6 +288,7 @@ public abstract class Simulator {
 				timestamps.add(time.get());
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 				if(config instanceof SimulationExternalConfiguration) {
+
 					if(!externalSimulatorExecutor.isDone()) {
 						FutureTask<ExternalSimulationStep> stepFuture = externalSimulatorExecutor.execute(newTrace);
 
@@ -298,7 +299,7 @@ public abstract class Simulator {
 							e.printStackTrace();
 						}
 
-						if(step == null) {
+						if (step == null) {
 							return trace;
 						}
 
