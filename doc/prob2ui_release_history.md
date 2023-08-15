@@ -9,7 +9,7 @@ Downloads of the current release and snapshot development builds can be found on
 * SimB simulation can be controlled by an external simulator, e. g. a reinforcement learning agent
 * Added estimation of average and cumulative sum to SimB
 * Added average trace length to SimB statistics
-* Added CSV export of SimB statistics
+* Added CSV export of SimB statistics with trace length and estimated value
 * Added column for number of steps to trace replay table
 * Added syntax highlighting for a few more code text fields
 * Editor now asks for confirmation before discarding unsaved changes when reloading the machine
