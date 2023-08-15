@@ -79,13 +79,22 @@ test:jdk-17-windows64:
   tags:
     - windows
 
-distributions:
+deploy:snapshot:
   stage: deploy
-  only: 
-    - master@stups/prob/prob2_ui
+  only:
     - develop@stups/prob/prob2_ui
   image: alpine:3
   before_script:
     - apk update
     - apk add lftp openssh-client
   script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/snapshot/; mput -e build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe build/libs/*-multi.jar"
+
+deploy:release:
+  stage: deploy
+  only:
+    - master@stups/prob/prob2_ui
+  image: alpine:3
+  before_script:
+    - apk update
+    - apk add lftp openssh-client
+  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/; mkdir release-next; cd release-next; mput build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe build/libs/*-multi.jar"
