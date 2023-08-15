@@ -22,7 +22,7 @@ Downloads of the current release and snapshot development builds can be found on
 
 **Note:** This is the last release to support Java 8 and 11. The next release will require Java 17 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
 
-## Version 1.2.0 (22nd of June 2023)
+## Version 1.2.0 (2023-06-22)
 
 * Updated the ProB core to version 1.12.1 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
 * Added [SimB](https://prob.hhu.de/w/index.php?title=SimB), a simulator built on top of ProB, supporting interactive simulation and validation of probabilistic and timing properties
@@ -61,7 +61,7 @@ Downloads of the current release and snapshot development builds can be found on
 * [macOS application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/ProB%202%20UI-1.2.0.dmg)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/prob2-ui_1.2.0-1_amd64.deb)
 
-## Version 1.1.0 (26th of January 2021)
+## Version 1.1.0 (2021-01-26)
 
 * now contains [VisB](https://prob.hhu.de/w/index.php?title=VisB) directly in the application, VisB has been extended considerably now supporting hovers, more attributes, better debugging and error feedback, ...
 * supports model checking with time and state limit
@@ -88,7 +88,7 @@ Downloads of the current release and snapshot development builds can be found on
 * [macOS application (with bundled JRE, notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.1.0/ProB2-UI-1.1.0-notarized.zip)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.1.0/prob2-ui_1.1.0-1_amd64.deb)
 
-## Version 1.0.0 (18th of July 2019)
+## Version 1.0.0 (2019-07-18)
 
 * First stable release.
 
