@@ -98,6 +98,8 @@ public class RailMLInspectDotStage extends Stage {
 	@FXML
 	private CheckBox operationalpoints;
 	@FXML
+	private CheckBox levelcrossings;
+	@FXML
 	private CheckBox signals;
 	@FXML
 	private CheckBox switches;
@@ -186,6 +188,9 @@ public class RailMLInspectDotStage extends Stage {
 		operationalpoints.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayOperationalpoints"));
 		});
+		levelcrossings.selectedProperty().addListener((observable,from,to) -> {
+			railMLFile.setState(railMLFile.getState().perform("changeDisplayLevelcrossings"));
+		});
 		signals.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplaySignals"));
 		});
@@ -223,6 +228,7 @@ public class RailMLInspectDotStage extends Stage {
 		crossings.setSelected(true);
 		derailers.setSelected(true);
 		operationalpoints.setSelected(true);
+		levelcrossings.setSelected(true);
 		signals.setSelected(true);
 		switches.setSelected(true);
 		traindetectionelements.setSelected(true);

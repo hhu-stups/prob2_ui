@@ -38,6 +38,7 @@
 							<CheckBox text="%railml.inspectDot.chooseElements.crossings" fx:id="crossings"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.derailers" fx:id="derailers"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.operationalPoints" fx:id="operationalpoints"/>
+							<CheckBox text="%railml.inspectDot.chooseElements.levelcrossings" fx:id="levelcrossings"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.signals" fx:id="signals"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.switches" fx:id="switches"/>
 							<CheckBox text="%railml.inspectDot.chooseElements.traindetectionelements" fx:id="traindetectionelements"/>
