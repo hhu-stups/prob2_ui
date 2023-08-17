@@ -104,7 +104,7 @@ public class RailMLSvgConverter {
 				Element path_free = createPath(doc, id_prefix + "_free", gradient_id_free, d_merged_path, "1.33");
 				Element path_tvd = createPathWithBlink(doc, id_prefix + "_tvd", gradient_id_tvd, d_merged_path, "1.5");
 				Element path_res = createPathWithBlink(doc, id_prefix + "_res", gradient_id_res, d_merged_path, "1.67");
-				Element path_ovl = createPath(doc, id_prefix + "_ovl", gradient_id_ovl, d_merged_path, "1.85");
+				Element path_ovl = createPathWithBlink(doc, id_prefix + "_ovl", gradient_id_ovl, d_merged_path, "1.85");
 				Element path_occ = createPath(doc, id_prefix + "_occ", gradient_id_occ, d_merged_path, "2.0");
 
 				merged_group.appendChild(path_free);
