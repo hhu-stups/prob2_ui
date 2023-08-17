@@ -2,17 +2,14 @@ DEFINITIONS
     SET_PREF_DOT_NODE_FONT_SIZE == 5;
     SET_PREF_DOT_EDGE_FONT_SIZE == 5;
 
-    INCH_FACTOR == 2.54;
-    //SCALING_FACTOR == 0.004;
-
-    //DISPLAY_NAMES == TRUE;
-    //LANGUAGE == "en"; // "en"
+    INCH_FACTOR == 2.54;    
 
     BALISES == IF DISPLAY_BALISES = TRUE THEN allIdsOfType("balise") ELSE {} END;
-	BORDERS == IF DISPLAY_BORDERS = TRUE THEN RailML3_IS_OPENEND_IDS ELSE {} END;
+    BORDERS == IF DISPLAY_BORDERS = TRUE THEN RailML3_IS_OPENEND_IDS ELSE {} END;
     BUFFERSTOPS == IF DISPLAY_BUFFERSTOPS = TRUE THEN allIdsOfType("bufferStop") ELSE {} END;
     CROSSINGS == IF DISPLAY_CROSSINGS = TRUE THEN allIdsOfType("crossing") ELSE {} END;
     DERAILERS == IF DISPLAY_DERAILERS = TRUE THEN allIdsOfType("derailerIS") ELSE {} END;
+    LEVELCROSSINGS == IF DISPLAY_LEVELCROSSINGS = TRUE THEN allIdsOfType("levelCrossingIS") ELSE {} END;
     OPERATIONALPOINTS == IF DISPLAY_OPERATIONALPOINTS = TRUE THEN allIdsOfType("operationalPoint") ELSE {} END;
     SIGNALS == IF DISPLAY_SIGNALS = TRUE THEN allIdsOfType("signalIS") ELSE {} END;
     SWITCHES == IF DISPLAY_SWITCHES = TRUE THEN allIdsOfType("switchIS") ELSE {} END;
@@ -29,22 +26,22 @@ DEFINITIONS
         
         // Bufferstops, Crossings, Openends, TDEs, Signals, Switches:
         nodes1:
-            UNION(i_e, e_sep).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
+            UNION(i_e, e_sep).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ LEVELCROSSINGS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
                 & e_sep : RailML_spotElementProjection & i_e = MU(e_sep'refersToElement) |
                     {rec(shape: "point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
                         pos: TO_STRING(STRING_TO_REAL(MU(MU(e_sep'coordinate)'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(MU(e_sep'coordinate)'y))/INCH_FACTOR)^"!",
-                        height: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
-                        width: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
-                        fontsize: IF i_e : DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
+                        height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
+                        width: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
+                        fontsize: IF i_e : CROSSINGS \/ DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
                 )
             \/
-            UNION(i_e).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ TRAINDETECTIONELEMENTS
+            UNION(i_e).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ LEVELCROSSINGS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
                 & !e_sep.(e_sep : RailML_spotElementProjection => i_e /= MU(e_sep'refersToElement)) |
                     {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
                     pos: "",
-                    height: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
-                    width: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
-                    fontsize: IF i_e : DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
+                    height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
+                    width: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
+                    fontsize: IF i_e : CROSSINGS \/ DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
                 ),
         // Virtual nodes for netElements (only available with exact position):
         nodes2:
@@ -147,7 +144,7 @@ DEFINITIONS
         
         // Bufferstops, Crossings, Openends, TDEs, Signals, Switches:
         nodes1:
-            UNION(i_e, e_ne, e_sloc, iC1, iC2, e_sep1, e_sep2, x1, y1, x2, y2).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
+            UNION(i_e, e_ne, e_sloc, iC1, iC2, e_sep1, e_sep2, x1, y1, x2, y2).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ LEVELCROSSINGS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
                 & e_ne : RailML3_netElement & e_sloc : dom(RailML3_IS_SPOT_LOCATIONS(i_e)) & MU(e_ne'Id) = prj1(e_sloc)
                 & {iC1,iC2} <: union(ran(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES(MU(e_ne'Id))))~
                 & prj1(iC1) <= prj2(e_sloc) & IF prj2(e_sloc) = 1.0 THEN prj2(e_sloc) <= prj1(iC2) ELSE prj2(e_sloc) < prj1(iC2) END

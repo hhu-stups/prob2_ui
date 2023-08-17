@@ -1,34 +1,25 @@
 DEFINITIONS
     // Definitions for VisB:
-    VISB_SVG_UPDATES11 ==
-        {i_e • i_e : RailML3_IS_SWITCH_IDS |
+    VISB_SVG_UPDATES10 ==
+        {i_e • i_e : allIdsOfType("crossing") |
             rec(`id`: i_e^"_ellipse",
-                stroke: IF i_e : dom(IS_switchsInMovement) THEN "darkorange" ELSIF i_e : dom(IL_switch_locked_routes) or IS_switch_keyLocked(i_e) = TRUE THEN "red" ELSE "black" END,
-                fill: IF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) /<: IS_switch_states(i_e))
+                stroke: IF i_e : dom(IS_crossingsInMovement) THEN "darkorange"
+                    ELSIF i_e : dom(IL_crossing_locked_routes) or IS_crossing_keyLocked(i_e) = TRUE THEN "red"
+                    ELSE "black" END,
+                fill: IF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)) & (RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)(i_e) /= IS_crossing_states(i_e) or i_e : dom(IS_crossingsInMovement)))
                         THEN "red"
-                    ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) <: IS_switch_states(i_e))
+                    ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)) & RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)(i_e) = IS_crossing_states(i_e))
                         THEN "green"
                     ELSE "black" END
             )
         };
+    VISB_SVG_UPDATES11 ==
+        {i_e • i_e : allIdsOfType("crossing") |
+            rec(`id`: i_e^"_title",
+                text: FORMAT_TO_STRING("~w\nState: ~w", [i_e, TO_STRING(IS_crossing_states(i_e))])
+            )
+        };
     VISB_SVG_UPDATES12 ==
-        {i_e • i_e : allIdsOfType("signalIS") |
-            rec(`id`: i_e^"_ellipse",
-                stroke: IF #i_r.(i_r : dom(IL_routes_in_res) & (i_e = prj1(RailML3_IL_ROUTE_ENTRY(i_r)) or i_e = prj1(RailML3_IL_ROUTE_EXIT(i_r)))) or i_e : dom(IL_signal_locked_by_signalplan) THEN "darkorange"
-                    ELSIF i_e : IL_signal_locked THEN "red" ELSE "black" END,
-                fill: IF aspect_closed : IL_signal_states(i_e) THEN "red"
-                    ELSIF aspect_caution : IL_signal_states(i_e) THEN "yellow"
-                    ELSE "green" END
-            )
-        };
-    VISB_SVG_UPDATES13 ==
-        {i_e • i_e : union(allIdsOfType[{"border","bufferStop","trainDetectionElement"}]) |
-            rec(`id`: i_e^"_ellipse",
-                visibility: IF #i_sig.( i_sig : allIdsOfType("signalIS") & RailML3_IS_SPOT_LOCATIONS(i_e) /\ RailML3_IS_SPOT_LOCATIONS(i_sig) /= {} ) THEN "hidden"
-                    ELSE "visible" END
-            )
-        };
-    VISB_SVG_UPDATES14 ==
         {i_e • i_e : allIdsOfType("derailerIS") |
             rec(`id`: i_e^"_ellipse",
                 stroke: IF i_e : dom(IS_derailersInMovement) THEN "darkorange"
@@ -37,50 +28,76 @@ DEFINITIONS
                 fill: IF prj2(IS_derailer_states(i_e)) = position_derailingPosition THEN "yellow"
                     ELSE "black" END
             )
-        };// fill later for derailers in routes: ,  IF #i_r.(i_r : dom(IL_routes_in_res) & ((i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) /<: IS_switch_states(i_e)) or #i_sw_il.(i_sw_il : dom(IS_switch_states(i_e)) & !branch.(branch : RailML3_IL_SWITCH_BRANCHES(i_e)(i_sw_il, IS_switch_states(i_e)(i_sw_il)) \/ RailML3_IL_SWITCH_BRANCHES(i_e)(i_sw_il, IS_switch_states(i_e)(i_sw_il))~ => branch /: RailML3_IL_ROUTE_NXT(i_r))) )) THEN "red" ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) <: IS_switch_states(i_e) & !i_sw_il.(i_sw_il : dom(IS_switch_states(i_e)) => #branch.(branch : RailML3_IL_SWITCH_BRANCHES(i_e)(i_sw_il, IS_switch_states(i_e)(i_sw_il)) \/ RailML3_IL_SWITCH_BRANCHES(i_e)(i_sw_il, IS_switch_states(i_e)(i_sw_il))~ & branch : RailML3_IL_ROUTE_NXT(i_r))) ) THEN "green" ELSE "black" END)});
-    VISB_SVG_UPDATES15 ==
-        {i_e • i_e : allIdsOfType("crossing") |
+        };
+    VISB_SVG_UPDATES13 ==
+        {i_e • i_e : allIdsOfType("derailerIS") |
+            rec(`id`: i_e^"_title",
+                text: FORMAT_TO_STRING("~w\nState: ~w", [i_e, TO_STRING(IS_derailer_states(i_e))])
+            )
+        };
+    VISB_SVG_UPDATES14 ==
+        {i_e • i_e : RailML3_IS_SWITCH_IDS |
             rec(`id`: i_e^"_ellipse",
-                stroke: IF i_e : dom(IS_crossingsInMovement) THEN "darkorange"
-                    ELSIF i_e : dom(IL_crossing_locked_routes) or IS_crossing_keyLocked(i_e) = TRUE THEN "red"
+                stroke: IF i_e : dom(IS_switchsInMovement) THEN "darkorange" ELSIF i_e : dom(IL_switch_locked_routes) or IS_switch_keyLocked(i_e) = TRUE THEN "red" ELSE "black" END,
+                fill: IF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & (RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) /<: IS_switch_states(i_e) or i_e : dom(IS_switchsInMovement)))
+                        THEN "red"
+                    ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) <: IS_switch_states(i_e))
+                        THEN "green"
                     ELSE "black" END
             )
-        };// fill later for crossings in routes: ,  IF #i_r.(i_r : dom(IL_routes_in_res) & ((i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) /<: IS_switch_states(i_e)) or #i_sw_il.(i_sw_il : dom(IS_switch_states(i_e)) & !branch.(branch : RailML3_IL_SWITCH_BRANCHES(i_e)(i_sw_il, IS_switch_states(i_e)(i_sw_il)) \/ RailML3_IL_SWITCH_BRANCHES(i_e)(i_sw_il, IS_switch_states(i_e)(i_sw_il))~ => branch /: RailML3_IL_ROUTE_NXT(i_r))) )) THEN "red" ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) <: IS_switch_states(i_e) & !i_sw_il.(i_sw_il : dom(IS_switch_states(i_e)) => #branch.(branch : RailML3_IL_SWITCH_BRANCHES(i_e)(i_sw_il, IS_switch_states(i_e)(i_sw_il)) \/ RailML3_IL_SWITCH_BRANCHES(i_e)(i_sw_il, IS_switch_states(i_e)(i_sw_il))~ & branch : RailML3_IL_ROUTE_NXT(i_r))) ) THEN "green" ELSE "black" END)});
+        };
+    VISB_SVG_UPDATES15 ==
+        {i_e • i_e : RailML3_IS_SWITCH_IDS |
+            rec(`id`: i_e^"_title",
+                text: FORMAT_TO_STRING("~w (~w)\nState: ~w", [i_e, STRING_SPLIT(TO_STRING(RailML3_IS_SWITCH_TYPE(i_e)), "_")(2), TO_STRING(IS_switch_states(i_e))])
+            )
+        };
+    VISB_SVG_UPDATES16 ==
+        {i_e • i_e : allIdsOfType("signalIS") |
+            rec(`id`: i_e^"_ellipse",
+                stroke: IF #i_r.(i_r : dom(IL_routes_in_res) & (i_e = prj1(RailML3_IL_ROUTE_ENTRY(i_r)) or i_e = prj1(RailML3_IL_ROUTE_EXIT(i_r)))) or i_e : IL_signal_locked THEN "darkorange"
+                    ELSE "black" END,
+                fill: IF aspect_closed : IL_signal_states(i_e) THEN "red"
+                    ELSIF aspect_caution : IL_signal_states(i_e) THEN "yellow"
+                    ELSE "green" END
+            )
+        };
+    VISB_SVG_UPDATES17 ==
+        {i_e • i_e : allIdsOfType("signalIS") |
+            rec(`id`: i_e^"_title",
+                text: FORMAT_TO_STRING("~w\nAspect: ~w", [i_e, TO_STRING(IL_signal_states(i_e))])
+            )
+        };
+    VISB_SVG_UPDATES18 ==
+        {i_e • i_e : union(allIdsOfType[{"balise","border","bufferStop","levelCrossingIS","trainDetectionElement"}]) |
+            rec(`id`: i_e^"_ellipse",
+                visibility: IF #i_sig.( i_sig : allIdsOfType("signalIS") & RailML3_IS_SPOT_LOCATIONS(i_e) /\ RailML3_IS_SPOT_LOCATIONS(i_sig) /= {} ) THEN "hidden" ELSE "visible" END
+            )
+        };
+    
     
     // free:
-    VISB_SVG_UPDATES21 == 
-        {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
-            rec(`id`: i_e^"_lg_free_1",
+    VISB_SVG_UPDATES20 == 
+        UNION(i_e).(i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
+            {rec(`id`: i_e^"_lg_free_1",
                 offset: IF #np.(np : ignoreDirection((union(ran(RailML3_IS_CROSSING_BRANCHES)) \/ union(ran(RailML3_IS_SWITCH_BRANCHES))) /\ IS_next) & prj1(prj2(np)) = i_e & prj2(prj2(np)) = 0.0) THEN "20%"
                     ELSE "0%" END
-            )
-        };
-    VISB_SVG_UPDATES22 ==
-        {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
-            rec(`id`: i_e^"_lg_free_2",
+            ), rec(`id`: i_e^"_lg_free_2",
                 offset: IF #np.(np : ignoreDirection((union(ran(RailML3_IS_CROSSING_BRANCHES)) \/ union(ran(RailML3_IS_SWITCH_BRANCHES))) /\ IS_next) & prj1(prj2(np)) = i_e & prj2(prj2(np)) = 0.0) THEN "20%"
                     ELSE "0%" END
-            )
-        };
-    VISB_SVG_UPDATES23 ==
-        {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
-            rec(`id`: i_e^"_lg_free_3",
+            ), rec(`id`: i_e^"_lg_free_3",
                 offset: IF #np.(np : ignoreDirection((union(ran(RailML3_IS_CROSSING_BRANCHES)) \/ union(ran(RailML3_IS_SWITCH_BRANCHES))) /\ IS_next) & prj1(prj2(np)) = i_e & prj2(prj2(np)) = 1.0) THEN "80%"
                     ELSE "100%" END
-            )
-        };
-    VISB_SVG_UPDATES24 ==
-        {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
-            rec(`id`: i_e^"_lg_free_4",
+            ), rec(`id`: i_e^"_lg_free_4",
                 offset: IF #np.(np : ignoreDirection((union(ran(RailML3_IS_CROSSING_BRANCHES)) \/ union(ran(RailML3_IS_SWITCH_BRANCHES))) /\ IS_next) & prj1(prj2(np)) = i_e & prj2(prj2(np)) = 1.0) THEN "80%"
                     ELSE "100%" END
-            )
-        };
+            )}
+        );
     
     // TVD sections:
-    VISB_SVG_UPDATES31 ==
+    VISB_SVG_UPDATES30 ==
         UNION(i_e, route_tvd, occ_tvd).(i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL
-            & route_tvd = { a | #(b, i_t, i_r).( i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & b : dom(dom(RailML3_IL_TVD_SECTIONS(i_t))) & prj1(b) = i_e & a = prj2(b) ) }
+            & route_tvd = { a | #(b, i_t, i_r).( i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & b : dom(dom(RailML3_IL_TVD_SECTIONS(i_t))) & prj1(b) = i_e & a = prj2(b) ) }
             & occ_tvd = { a | #(b, i_t).( i_t : dom(IL_occupiedTvdSections) & b : dom(dom(RailML3_IL_TVD_SECTIONS(i_t))) & prj1(b) = i_e & a = prj2(b) ) } |
                 {rec(`id`: i_e^"_lg_tvd_1",
                     offset: IF occ_tvd /= {} THEN TO_STRING(min(occ_tvd)*100.0)^"%" ELSIF route_tvd /= {} THEN TO_STRING(min(route_tvd)*100.0)^"%" ELSE "0%" END
@@ -92,18 +109,25 @@ DEFINITIONS
                     offset: IF occ_tvd /= {} THEN TO_STRING(max(occ_tvd)*100.0)^"%" ELSIF route_tvd /= {} THEN TO_STRING(max(route_tvd)*100.0)^"%" ELSE "100%" END
                 )}
         );
-    VISB_SVG_UPDATES32 ==
+    VISB_SVG_UPDATES31 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`: i_e^"_tvd_blink",
-                values: IF #(i_r, i_t).(i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t))))) THEN "1;0.2;1"
+                values: IF #(i_r, i_t).(i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))) & i_t /: dom(IL_occupiedTvdSections)) THEN "1;0.2;1"
                     ELSE "1" END
             )
         };
-    VISB_SVG_UPDATES33 ==
+    VISB_SVG_UPDATES32 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`: i_e^"_tvd",
-                visibility: IF #i_t.(i_t : dom(IL_occupiedTvdSections) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t))))) or (#(i_r, i_t).(i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))))) THEN "visible"
+                visibility: IF #i_t.(i_t : dom(IL_occupiedTvdSections) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t))))) or (#(i_r, i_t).(i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))))) THEN "visible"
                     ELSE "hidden" END
+            )
+        };
+    VISB_SVG_UPDATES33 ==
+        {i_e • i_e : allIdsOfType("tvdSection") |
+            rec(`id`: i_e^"_title",
+                text: IF i_e : dom(IL_occupiedTvdSections) THEN FORMAT_TO_STRING("~w ~w", [i_e, TO_STRING(IL_occupiedTvdSections[{i_e}])])
+                    ELSE i_e END
             )
         };
     
@@ -122,14 +146,14 @@ DEFINITIONS
     VISB_SVG_UPDATES42 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`:i_e^"_res_blink",
-                values: IF #i_r.(i_r : RailML3_IL_ROUTE_IDS & i_e : dom(dom(dom(RailML3_IL_ROUTE_NXT(i_r)) \/ ran(RailML3_IL_ROUTE_NXT(i_r)))) & i_r : dom(IL_routes_in_res)) THEN "1;0.2;1"
+                values: IF #i_r.(i_r : allIdsOfType("route") & i_e : dom(dom(dom(RailML3_IL_ROUTE_NXT(i_r)) \/ ran(RailML3_IL_ROUTE_NXT(i_r)))) & i_r : dom(IL_routes_in_res)) THEN "1;0.2;1"
                     ELSE "1" END
             )
         };
     VISB_SVG_UPDATES43 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`:i_e^"_res",
-                visibility: IF #(i_r, NXT).(i_r : RailML3_IL_ROUTE_IDS & NXT = RailML3_IL_ROUTE_NXT(i_r) - union(union(RailML3_IL_ROUTE_RELEASE_GROUP_AHEAD_NXT[union(IL_released_partialRoutes[{i_r}])] \/ RailML3_IL_ROUTE_RELEASE_GROUP_REAR_NXT[union(IL_released_partialRoutes[{i_r}])])[{i_r}])
+                visibility: IF #(i_r, NXT).(i_r : allIdsOfType("route") & NXT = RailML3_IL_ROUTE_NXT(i_r) - union(union(RailML3_IL_ROUTE_RELEASE_GROUP_AHEAD_NXT[union(IL_released_partialRoutes[{i_r}])] \/ RailML3_IL_ROUTE_RELEASE_GROUP_REAR_NXT[union(IL_released_partialRoutes[{i_r}])])[{i_r}])
                         & i_e : dom(dom(dom(NXT) \/ ran(NXT))) & (i_r : dom(IL_routes_in_res) or i_r : dom(IL_res_routes))) THEN "visible"
                     ELSE "hidden" END
             )
@@ -146,8 +170,15 @@ DEFINITIONS
                     rec(`id`:i_e^"_lg_ovl_4", offset: IF coord /= {} THEN TO_STRING(max(coord)*100.0)^"%" ELSE "100%" END)
                 }
         );
-    //VISB_SVG_UPDATES65 == UNION(i_e).( i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |{rec(`id`:i_e^"_res_blink",  values: IF #i_r.(i_r : RailML3_IL_ROUTE_IDS & i_e : dom(dom(RailML3_IL_ROUTE_NXT(i_r))) \/ dom(ran(RailML3_IL_ROUTE_NXT(i_r))) & i_r : dom(IL_routes_in_res)) THEN "1;0.2;1" ELSE "1" END)});
-    VISB_SVG_UPDATES52 == UNION(i_e).( i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |{rec(`id`:i_e^"_ovl", visibility: IF #(i_o, NXT).(i_o : dom(IL_res_overlaps) & NXT = RailML3_IL_OVERLAP_NXT(i_o) & i_e : dom(dom(dom(NXT) \/ ran(NXT))) ) THEN "visible" ELSE "hidden" END)});
+    VISB_SVG_UPDATES52 ==
+        {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
+            rec(`id`:i_e^"_ovl_blink",
+                values: IF #i_r.(i_r : allIdsOfType("route") & i_r : dom(IL_routes_in_res) & i_e : union(RailML3_IL_ROUTE_OVERLAPS[{i_r}])) THEN "1;0.2;1"
+                    ELSE "1" END
+            )
+        };
+    //VISB_SVG_UPDATES65 == UNION(i_e).( i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |{rec(`id`:i_e^"_res_blink",  values: IF #i_r.(i_r : allIdsOfType("route") & i_e : dom(dom(RailML3_IL_ROUTE_NXT(i_r))) \/ dom(ran(RailML3_IL_ROUTE_NXT(i_r))) & i_r : dom(IL_routes_in_res)) THEN "1;0.2;1" ELSE "1" END)});
+    VISB_SVG_UPDATES53 == UNION(i_e).( i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |{rec(`id`:i_e^"_ovl", visibility: IF #(i_o, NXT).(i_o : dom(IL_res_overlaps) & NXT = RailML3_IL_OVERLAP_NXT(i_o) & i_e : dom(dom(dom(NXT) \/ ran(NXT))) ) THEN "visible" ELSE "hidden" END)});
     
     // occupation:
     VISB_SVG_UPDATES61 ==
@@ -202,12 +233,14 @@ DEFINITIONS
     VISB_SVG_OBJECTS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
     VISB_SVG_EVENTS41 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
+    VISB_SVG_EVENTS42 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_changeSignalState", predicate: ("SignalId=","\""^x^"\"") )};    
     VISB_SVG_HOVERS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
     //VISB_SVG_EVENTS51 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainArrive" )}; // pred : position fits OE
     //VISB_SVG_EVENTS52 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainLeave" )};
     //VISB_SVG_HOVERS5 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    // start RouteRes?
 
     ignoreDirection(Relation) == dom({ r, cr | cr : Relation & r = prj1(prj1(cr)) |-> prj1(prj2(cr)) });
     inverseDirectedRelation(Relation) == dom({ ir, r | r : Relation & ir = prj1(prj2(r)) |-> oppositeDirection(prj2(prj2(r))) |-> (prj1(prj1(r)) |-> oppositeDirection(prj2(prj1(r)))) });
@@ -218,7 +251,7 @@ DEFINITIONS
     elementOfId(Set, eId) == MU( { e | e : Set & eId = MU(e'Id)} );
 
     //GOAL == EBO_CheckSwitchSpeeds = "SUCCESS" & ValidateTrackLengths = "SUCCESS";
-    SET_PREF_ALLOW_OPERATION_CALLS_IN_EXPRESSIONS == TRUE;
+    //SET_PREF_ALLOW_OPERATION_CALLS_IN_EXPRESSIONS == TRUE;
     "CHOOSE.def";
     "LibraryIO.def";
     "LibraryMath.def";

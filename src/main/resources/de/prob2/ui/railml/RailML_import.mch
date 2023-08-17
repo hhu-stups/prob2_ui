@@ -23,7 +23,7 @@ DEFINITIONS
             VAR s, i IN
               s := SORT(Var2[{1}]);
               i := 1;
-              WHILE i < card(s) DO
+              WHILE i-1 < card(s) DO
                 ADD_ERROR("RailML", s(i));
                 ADD_STATE_ERROR("RailML", s(i));
                 i := i+1
@@ -128,7 +128,7 @@ OPERATIONS
       runComputation(set_derailersIS);
       runErrorRule(is_valid_derailersIS);
       runComputation(set_derailerIS);
-      runErrorRule(is_valid_derailerIS);
+      runErrorRule(is_valid_derailerIS);      
 
       runComputation(set_operationalPoints);
       runErrorRule(is_valid_operationalPoints);
@@ -171,10 +171,12 @@ OPERATIONS
       runComputation(set_linearCoordinate);
       runErrorRule(is_valid_linearCoordinate);
       //runComputation(set_LINEAR_COORDINATE);
-
-      runComputation(set_SIGNAL);      
+          
       runComputation(set_NET_RELATION_SUBSEQUENT_BLOCKS);
+      runComputation(set_SIGNAL);
       runErrorRule(validate_linearLocation);
+
+      runComputation(set_DERAILER);
       runComputation(set_TRACK);
 
       runErrorRule(validate_border);
@@ -213,7 +215,9 @@ OPERATIONS
       runErrorRule(is_valid_tvdSections);
       runComputation(set_tvdSection);
       runErrorRule(is_valid_tvdSection);
-      runComputation(set_TVD_SECTION_IDS);
+      runComputation(set_TVD_SECTIONS);
+      runErrorRule(validate_tvdSection);
+      runWarningRule(warnings_tvdSection);   
 
       runComputation(set_derailersIL);
       runErrorRule(is_valid_derailersIL);
@@ -223,90 +227,93 @@ OPERATIONS
       runComputation(set_movableCrossings);
       runErrorRule(is_valid_movableCrossings);
       runComputation(set_movableCrossing);
-      runErrorRule(is_valid_movableCrossing);
-      runComputation(set_IL_MOVABLE_CROSSING_IDS);      
+      runErrorRule(is_valid_movableCrossing);  
 
       runComputation(set_signalsIL);
       runErrorRule(is_valid_signalsIL);
       runComputation(set_signalIL);
       runErrorRule(is_valid_signalIL);
-      runComputation(set_IL_SIGNAL_IDS);
+      runComputation(set_IL_SIGNAL);
 
       runComputation(set_switchesIL);
       runErrorRule(is_valid_switchesIL);
       runComputation(set_switchIL);
-      runErrorRule(is_valid_switchIL);
-      runComputation(set_IL_SWITCH_IDS);
-      //runErrorRule(validate_switchIL);
+      runErrorRule(is_valid_switchIL);      
 
       runComputation(set_IL_MOVABLE_CROSSING);
       runErrorRule(validate_movableCrossing);
       runWarningRule(warnings_movableCrossing);
+
       runComputation(set_IL_DERAILER);
       runErrorRule(validate_derailerIL);
-      runComputation(set_IL_SWITCH);      
+      runWarningRule(warnings_derailerIL);
+
+      runComputation(set_IL_SWITCH);
+      runErrorRule(validate_switchIL);
+      runWarningRule(warnings_switchIL);
 
       runComputation(set_routeReleaseGroupsAhead);
       runErrorRule(is_valid_routeReleaseGroupsAhead);
       runComputation(set_routeReleaseGroupAhead);
       runErrorRule(is_valid_routeReleaseGroupAhead);
-      runComputation(set_IL_ROUTE_RELEASE_GROUP_AHEAD);
 
       runComputation(set_routeReleaseGroupsRear);
       runErrorRule(is_valid_routeReleaseGroupsRear);
       runComputation(set_routeReleaseGroupRear);
       runErrorRule(is_valid_routeReleaseGroupRear);
-      runComputation(set_IL_ROUTE_RELEASE_GROUP_REAR);
 
       runComputation(set_routes);
       runErrorRule(is_valid_routes);
       runComputation(set_route);
       runErrorRule(is_valid_route);
-      runComputation(set_ROUTE_IDS);
 
       runComputation(set_overlaps);
       runErrorRule(is_valid_overlaps);
       runComputation(set_overlap);
-      runErrorRule(is_valid_overlap);      
+      runErrorRule(is_valid_overlap);
 
       runComputation(set_routeRelations);
       runErrorRule(is_valid_routeRelations);
       runComputation(set_routeRelation);
       runErrorRule(is_valid_routeRelation);
       runComputation(set_IL_ROUTE_RELATION);
+      runErrorRule(validate_routeRelation);
+      runWarningRule(warnings_routeRelation);
 
       runComputation(set_ROUTE);
       runErrorRule(validate_route);
-      runWarningRule(warnings_route);      
-
-      runComputation(set_conflictingRoutes);
-      runErrorRule(is_valid_conflictingRoutes);
-      runComputation(set_conflictingRoute);
-      runErrorRule(is_valid_conflictingRoute);
-      runComputation(set_CONFLICTING_ROUTE);      
-
-      runComputation(set_TVD_SECTIONS);
-      runComputation(set_ROUTES_TVD_SECTIONS);
-      runErrorRule(validate_tvdSection);
-      runWarningRule(warnings_tvdSection);
+      runWarningRule(warnings_route);
 
       runComputation(set_IL_OVERLAP);
       runErrorRule(validate_overlap);
       runWarningRule(warnings_overlap);
 
+      runComputation(set_conflictingRoutes);
+      runErrorRule(is_valid_conflictingRoutes);
+      runComputation(set_conflictingRoute);
+      runErrorRule(is_valid_conflictingRoute);
+      runComputation(set_CONFLICTING_ROUTE);         
+
+      runComputation(set_IL_ROUTE_RELEASE_GROUP_AHEAD);
+      runErrorRule(validate_routeReleaseGroupAhead);
+      runWarningRule(warnings_routeReleaseGroupAhead);
+
+      runComputation(set_IL_ROUTE_RELEASE_GROUP_REAR);
+      runErrorRule(validate_routeReleaseGroupRear);
+      runWarningRule(warnings_routeReleaseGroupRear);
+
       runComputation(set_specificInfrastructureManagers);
       runErrorRule(is_valid_specificInfrastructureManagers);
       runComputation(set_specificInfrastructureManager);
       runErrorRule(is_valid_specificInfrastructureManager);
-      runComputation(set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_IDS);
       runComputation(set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER);
 
       runComputation(set_signalBoxes);
       runErrorRule(is_valid_signalBoxes);
       runComputation(set_signalBox);
       runErrorRule(is_valid_signalBox);
-      runComputation(set_IL_SIGNAL_BOX_IDS);
       runComputation(set_IL_SIGNAL_BOX);
+      runWarningRule(warnings_signalBox);
       // END RailML3_IL
 
       IF warnings /= {} THEN ADD_WARNING("RailML: ", warnings) ELSE skip END
