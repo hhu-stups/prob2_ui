@@ -277,14 +277,15 @@ public class RailMLStage extends Stage {
 				currentProject.addMachine(animationDefinitions);
 
 				Path simBResource = Paths.get(getClass().getResource("railml_simb.json").toURI());
-				File currentSimB = new File(generationPath.resolve("railml_simb.json").toString());
+				Path simBPath = generationPath.resolve("railml_simb.json");
+				File currentSimB = new File(simBPath.toString());
 				if (!currentSimB.exists() || (currentSimB.exists() && !Arrays.equals(Files.readAllBytes(currentSimB.toPath()), Files.readAllBytes(simBResource)))) {
 					Files.copy(simBResource, currentSimB.toPath());
 				}
-				Path simB = currentProject.getLocation().relativize(simBResource.toAbsolutePath());
 				currentProject.addMachine(animationMachine);
 				currentProject.startAnimation(animationMachine);
-				currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(simB, Collections.emptyList()));
+				currentProject.getCurrentMachine().simulationsProperty()
+					.add(new SimulationModel(currentProject.getLocation().relativize(simBPath.toAbsolutePath()), Collections.emptyList()));
 			} catch (IOException | URISyntaxException e) {
 				throw new RuntimeException(e);
 			}
