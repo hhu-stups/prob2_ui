@@ -49,6 +49,10 @@ public final class VersionInfo {
 		return this.buildInfo.getProperty("version");
 	}
 	
+	public String getUIBranch() {
+		return this.buildInfo.getProperty("branch");
+	}
+
 	public String getUICommit() {
 		return this.buildInfo.getProperty("commit");
 	}

@@ -231,6 +231,15 @@ task createHelp {
 }
 processResources.dependsOn(createHelp)
 
+def readCurrentGitBranch() {
+	def proc = ["git", "rev-parse", "--abbrev-ref", "HEAD"].execute(null, project.projectDir)
+	def exitCode = proc.waitFor()
+	if (exitCode != 0) {
+		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
+	}
+	return proc.in.readLines()[0]
+}
+
 def readCurrentGitCommit() {
 	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
 	def exitCode = proc.waitFor()
@@ -242,7 +251,7 @@ def readCurrentGitCommit() {
 
 processResources {
 	filesMatching("de/prob2/ui/build.properties") {
-		expand(version: project.version, commit: readCurrentGitCommit())
+		expand(version: project.version, branch: readCurrentGitBranch(), commit: readCurrentGitCommit())
 	}
 }
 

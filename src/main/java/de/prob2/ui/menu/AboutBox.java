@@ -47,6 +47,7 @@ public final class AboutBox extends Stage {
 		
 		versionInfoBuilder.add(i18n.translate("menu.aboutBox.uiInfo",
 			this.versionInfo.getUIVersion(),
+			this.versionInfo.getUIBranch(),
 			this.versionInfo.getUICommit()
 		));
 		
