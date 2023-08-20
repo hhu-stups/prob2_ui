@@ -174,6 +174,10 @@ public class RailMLStage extends Stage {
 		//progressInfo.visibleProperty().bind(new SimpleBooleanProperty(updater.runningProperty());
 		//progressInfo.managedProperty().bind(progressInfo.visibleProperty());
 		//currentOp.textProperty().bind(currentOperation);
+
+		setOnCloseRequest(e -> {
+			this.cancel();
+		});
 	}
 
 	@FXML
@@ -312,6 +316,8 @@ public class RailMLStage extends Stage {
 		StateSpace stateSpace = api.b_load(graphMachine.toAbsolutePath().toString());
 		ClassicalB no_error = new ClassicalB("no_error = TRUE");
 		stateSpace.subscribe(this, no_error);
+
+		// TODO: Adapt invalid machine names
 
 		currentState = stateSpace.getRoot()
 			.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
