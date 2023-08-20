@@ -30,39 +30,65 @@
 					</MenuBar>
 				</top>
 				<center>
-					<SplitPane dividerPositions="0.20">
+					<SplitPane dividerPositions="0.17">
 						<VBox>
-							<CheckBox text="%railml.inspectDot.chooseElements.balises" fx:id="balises"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.borders" fx:id="borders"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.bufferstops" fx:id="bufferstops"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.crossings" fx:id="crossings"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.derailers" fx:id="derailers"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.operationalPoints" fx:id="operationalpoints"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.levelcrossings" fx:id="levelcrossings"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.signals" fx:id="signals"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.switches" fx:id="switches"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.traindetectionelements" fx:id="traindetectionelements"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.tvdsections" fx:id="tvdsections"/>
-							<CheckBox text="%railml.inspectDot.chooseElements.names" fx:id="names"/>
-							<HBox spacing="10">
-								<Label text="%railml.inspectDot.chooseElements.language"/>
-								<ChoiceBox fx:id="languageChoiceBox"/>
-							</HBox>
-							<HBox alignment="TOP_RIGHT" styleClass="border">
-								<Label text="%railml.inspectDot.chooseElements.scaling"/>
-								<Button fx:id="incScalingButton" onAction="#increaseScalingFactor">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
-									</graphic>
-								</Button>
-								<Button fx:id="decScalingButton" onAction="#decreaseScalingFactor">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
-									</graphic>
-								</Button>
-							</HBox>
+							<Label text="%railml.inspectDot.chooseElements.title" styleClass="details-title">
+								<padding>
+									<Insets left="10"/>
+								</padding>
+							</Label>
+							<VBox styleClass="border">
+								<CheckBox text="%railml.inspectDot.chooseElements.balises" fx:id="balises"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.borders" fx:id="borders"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.bufferstops" fx:id="bufferstops"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.crossings" fx:id="crossings"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.derailers" fx:id="derailers"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.levelcrossings" fx:id="levelcrossings"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.operationalPoints" fx:id="operationalpoints"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.signals" fx:id="signals"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.switches" fx:id="switches"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.traindetectionelements" fx:id="traindetectionelements"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.tvdsections" fx:id="tvdsections"/>
+								<CheckBox text="%railml.inspectDot.chooseElements.names" fx:id="names"/>
+								<HBox alignment="CENTER_LEFT" spacing="10">
+									<Label text="%railml.inspectDot.chooseElements.language"/>
+									<ChoiceBox fx:id="languageChoiceBox"/>
+								</HBox>
+								<padding>
+									<Insets left="10" top="10" bottom="10"/>
+								</padding>
+							</VBox>
+							<Label text="%railml.inspectDot.configureDot.title" style="-fx-font-size: 16px;">
+								<padding>
+									<Insets left="10" top="30"/>
+								</padding>
+							</Label>
+							<VBox styleClass="border">
+								<HBox alignment="CENTER_LEFT" spacing="10">
+									<Label text="%railml.inspectDot.configureDot.dotengine"/>
+									<ChoiceBox fx:id="dotEngineChoiceBox"/>
+								</HBox>
+								<HBox alignment="CENTER_LEFT" spacing="10">
+									<Label text="%railml.inspectDot.configureDot.scaling"/>
+									<Button fx:id="incScalingButton" onAction="#increaseScalingFactor">
+										<graphic>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+										</graphic>
+									</Button>
+									<Button fx:id="decScalingButton" onAction="#decreaseScalingFactor">
+										<graphic>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+										</graphic>
+									</Button>
+								</HBox>
+								<CheckBox text="%railml.inspectDot.configureDot.curvedsplines" fx:id="curvedsplines"/>
+								<padding>
+									<Insets left="10" top="10" bottom="10"/>
+								</padding>
+							</VBox>
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
-								<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />
+								<Button fx:id="refreshDotView" styleClass="button-blue" text="%railml.inspectDot.button.refresh" onAction="#refreshDotView" />
+								<!--<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />-->
 								<Button fx:id="saveButton" onAction="#save" HBox.hgrow="NEVER">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
@@ -76,11 +102,13 @@
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
 									</graphic>
 								</Button>
+								<padding>
+									<Insets top="30"/>
+								</padding>
 								<!--<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />-->
 							</HBox>
-							<Button fx:id="refreshDotView" styleClass="button-blue" text="%railml.inspectDot.button.refresh" onAction="#refreshDotView" />
 							<padding>
-								<Insets left="10" top="10"/>
+								<Insets top="10"/>
 							</padding>
 						</VBox>
 						<VBox>

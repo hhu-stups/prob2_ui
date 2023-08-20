@@ -31,7 +31,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,9 +110,14 @@ public class RailMLInspectDotStage extends Stage {
 	private CheckBox names;
 	@FXML
 	private ChoiceBox<Language> languageChoiceBox;
+	@FXML
+	private ChoiceBox<DotEngine> dotEngineChoiceBox;
 	/*@FXML
 	private Spinner<Double> scalingSpinner;*/
 	private enum Language {EN, NO, DE}
+	private enum DotEngine {DOT, NEATO, FDP}
+	@FXML
+	private CheckBox curvedsplines;
 
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
@@ -185,11 +189,11 @@ public class RailMLInspectDotStage extends Stage {
 		derailers.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayDerailers"));
 		});
-		operationalpoints.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayOperationalpoints"));
-		});
 		levelcrossings.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayLevelcrossings"));
+		});
+		operationalpoints.selectedProperty().addListener((observable,from,to) -> {
+			railMLFile.setState(railMLFile.getState().perform("changeDisplayOperationalpoints"));
 		});
 		signals.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplaySignals"));
@@ -211,6 +215,17 @@ public class RailMLInspectDotStage extends Stage {
 		languageChoiceBox.valueProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeLanguage", "language = \"" + languageChoiceBox.getValue().toString().toLowerCase() + "\""));
 		});
+
+		dotEngineChoiceBox.getItems().addAll(RailMLInspectDotStage.DotEngine.values());
+		dotEngineChoiceBox.valueProperty().addListener((observable,from,to) -> {
+			railMLFile.setState(railMLFile.getState().perform("changeDotengine", "engine = \"" + dotEngineChoiceBox.getValue().toString().toLowerCase() + "\""));
+		});
+		// TODO: Maybe use ProB preference for dot engine later
+
+		curvedsplines.selectedProperty().addListener((observable,from,to) -> {
+			railMLFile.setState(railMLFile.getState().perform("changeUseCurvedSplines"));
+		});
+
 		/*SpinnerValueFactory<Double> valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0001, 10.0, 0.0004, 0.0001);
 		scalingSpinner.setValueFactory(valueFactory);
 		scalingSpinner.valueProperty().addListener((observable,from,to) -> {
@@ -227,14 +242,16 @@ public class RailMLInspectDotStage extends Stage {
 		bufferstops.setSelected(true);
 		crossings.setSelected(true);
 		derailers.setSelected(true);
-		operationalpoints.setSelected(true);
 		levelcrossings.setSelected(true);
+		operationalpoints.setSelected(true);
 		signals.setSelected(true);
 		switches.setSelected(true);
 		traindetectionelements.setSelected(true);
 		tvdsections.setSelected(true);
 		names.setSelected(true);
 		languageChoiceBox.setValue(Language.EN);
+		dotEngineChoiceBox.setValue(DotEngine.DOT);
+		curvedsplines.setSelected(true);
 	}
 
 	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
