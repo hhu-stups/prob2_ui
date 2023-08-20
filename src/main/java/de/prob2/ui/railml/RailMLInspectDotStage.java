@@ -6,16 +6,15 @@ import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
-import de.prob.statespace.State;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.*;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
-import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
@@ -117,7 +116,15 @@ public class RailMLInspectDotStage extends Stage {
 	private enum Language {EN, NO, DE}
 	private enum DotEngine {DOT, NEATO, FDP}
 	@FXML
+	private HBox dotEngineBox;
+	@FXML
+	private HBox scalingBox;
+	@FXML
 	private CheckBox curvedsplines;
+	@FXML
+	private Button saveButton;
+	@FXML
+	protected Button cancelButton;
 
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
@@ -125,6 +132,7 @@ public class RailMLInspectDotStage extends Stage {
 	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 	private final I18n i18n;
 	private final RailMLFile railMLFile;
+	private final RailMLStage.VisualisationStrategy currentStrategy;
 
 	private String dot;
 	private String dotEngine;
@@ -151,6 +159,7 @@ public class RailMLInspectDotStage extends Stage {
 		this.preferencesStageProvider = preferencesStageProvider;
 		this.i18n = i18n;
 		this.railMLFile = railMLFile;
+		this.currentStrategy = railMLFile.getVisualisationStrategy();
 
 		this.dot = null;
 		this.dotEngine = null;
@@ -160,7 +169,8 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		//stageManager.setMacMenuBar(stageManager.getCurrent(), this.menuBar);
+		stageManager.setMacMenuBar(stageManager.getCurrent(), this.menuBar);
+		saveButton.disableProperty().bind(currentDotContent.isNull());
 		//helpButton.setHelpContent("mainmenu.visualisations.graphVisualisation", null);
 		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
 			Set<Node> scrollBars = dotView.lookupAll(".scroll-bar");
@@ -172,7 +182,7 @@ public class RailMLInspectDotStage extends Stage {
 		zoomInMenuButton.setAccelerator(new MultiKeyCombination(zoomInChar, zoomInCode, zoomInKeypad));
 		zoomOutMenuButton.setAccelerator(new MultiKeyCombination(zoomOutChar, zoomOutCode, zoomOutKeypad));
 
-		initializeCheckboxes();
+		initializeOptions();
 
 		balises.selectedProperty().addListener((observable,from,to) -> {
 			railMLFile.setState(railMLFile.getState().perform("changeDisplayBalises"));
@@ -232,10 +242,33 @@ public class RailMLInspectDotStage extends Stage {
 			railMLFile.setState(railMLFile.getState().perform("changeScalingFactor", "newFactor = " + scalingSpinner.getValue()));
 		});*/
 
+		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
 	}
 
-	protected void initializeCheckboxes() {
+	protected void initializeOptionsForStrategy(RailMLStage.VisualisationStrategy strategy) {
+		boolean isDotCustomGraph = strategy == RailMLStage.VisualisationStrategy.DOT;
+
+		balises.setVisible(!isDotCustomGraph); balises.setManaged(!isDotCustomGraph);
+		borders.setDisable(isDotCustomGraph);
+		bufferstops.setDisable(isDotCustomGraph);
+		crossings.setDisable(isDotCustomGraph);
+		derailers.setVisible(!isDotCustomGraph); derailers.setManaged(!isDotCustomGraph);
+		levelcrossings.setVisible(!isDotCustomGraph); levelcrossings.setManaged(!isDotCustomGraph);
+		operationalpoints.setVisible(!isDotCustomGraph); operationalpoints.setManaged(!isDotCustomGraph);
+		signals.setVisible(!isDotCustomGraph); signals.setManaged(!isDotCustomGraph);
+		switches.setDisable(isDotCustomGraph);
+		traindetectionelements.setVisible(!isDotCustomGraph); traindetectionelements.setManaged(!isDotCustomGraph);
+		tvdsections.setVisible(!isDotCustomGraph); tvdsections.setManaged(!isDotCustomGraph);
+
+		dotEngineBox.setVisible(isDotCustomGraph); dotEngineBox.setManaged(isDotCustomGraph);
+		scalingBox.setVisible(!isDotCustomGraph); scalingBox.setManaged(!isDotCustomGraph);
+		curvedsplines.setVisible(isDotCustomGraph); curvedsplines.setManaged(isDotCustomGraph);
+
+		initializeOptions();
+	}
+
+	private void initializeOptions() {
 		// must match INITIALISATION of B model
 		balises.setSelected(true);
 		borders.setSelected(true);

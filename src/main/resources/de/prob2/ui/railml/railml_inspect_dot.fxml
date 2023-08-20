@@ -64,11 +64,11 @@
 								</padding>
 							</Label>
 							<VBox styleClass="border">
-								<HBox alignment="CENTER_LEFT" spacing="10">
+								<HBox alignment="CENTER_LEFT" spacing="10" fx:id="dotEngineBox">
 									<Label text="%railml.inspectDot.configureDot.dotengine"/>
 									<ChoiceBox fx:id="dotEngineChoiceBox"/>
 								</HBox>
-								<HBox alignment="CENTER_LEFT" spacing="10">
+								<HBox alignment="CENTER_LEFT" spacing="10" fx:id="scalingBox">
 									<Label text="%railml.inspectDot.configureDot.scaling"/>
 									<Button fx:id="incScalingButton" onAction="#increaseScalingFactor">
 										<graphic>
