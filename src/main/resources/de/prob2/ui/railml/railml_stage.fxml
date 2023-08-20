@@ -85,11 +85,16 @@
 							<ListView style="-fx-border-width: 0" fx:id="generateFileListView"/>
 						</VBox>
 					</AnchorPane>
-
-					<HBox alignment="CENTER_RIGHT" fx:id="progressInfo" prefHeight="30.0" spacing="7.0">
-						<ProgressBar fx:id="progressBar" prefHeight="30.0" HBox.hgrow="ALWAYS"/>
-						<!--<Label fx:id="currentOp" styleClass="bold" />-->
+					<HBox alignment="CENTER">
+						<ProgressBar fx:id="progressBar" minHeight="10.0" prefWidth="570.0"/>
+						<HBox.margin>
+							<Insets top="15" />
+						</HBox.margin>
 					</HBox>
+					<!--<HBox alignment="CENTER_RIGHT" fx:id="progressInfo" spacing="7.0">
+						<ProgressBar fx:id="progressBar" prefHeight="5.0"/>
+						<Label fx:id="currentOp" styleClass="bold" />
+					</HBox>-->
 					<ButtonBar styleClass="dialog">
 						<buttons>
 							<Button text="%common.buttons.cancel" cancelButton="true"

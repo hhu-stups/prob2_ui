@@ -9,7 +9,6 @@
 <?import javafx.scene.web.WebView?>
 <?import javafx.geometry.Insets?>
 <?import de.prob2.ui.layout.BindableGlyph?>
-<?import javafx.scene.control.SpinnerValueFactory?>
 <fx:root type="RailMLInspectDotStage" title="%railml.inspectDot.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 <fx:define>
 	<FontSize fx:id="fontSize" />

@@ -160,8 +160,8 @@ public class RailMLStage extends Stage {
 			}
 		});
 
-		progressInfo.setManaged(false);
-		progressInfo.setVisible(false);
+		//progressBar.setManaged(false);
+		//progressBar.setVisible(false);
 		//progressBar.progressProperty().bind(progress);
 		//currentOp.textProperty().bind(currentOperation);
 		Path railML = railMLFile.getPath();
@@ -169,8 +169,8 @@ public class RailMLStage extends Stage {
 			setFileNames(railML);
 		}
 
-		progressInfo.visibleProperty().bind(updater.runningProperty());
-		progressInfo.managedProperty().bind(progressInfo.visibleProperty());
+		progressBar.visibleProperty().bind(updater.runningProperty());
+		progressBar.managedProperty().bind(progressBar.visibleProperty());
 		//currentOp.textProperty().bind(currentOperation);
 
 		setOnCloseRequest(e -> {

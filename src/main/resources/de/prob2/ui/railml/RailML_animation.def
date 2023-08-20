@@ -174,7 +174,7 @@ DEFINITIONS
     VISB_SVG_UPDATES52 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`:i_e^"_ovl_blink",
-                values: IF #i_r.(i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_OVERLAPS) & i_e : RailML3_IL_ROUTE_OVERLAPS(i_r)) THEN "1;0.2;1"
+                values: IF #(i_r, i_o).(i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_OVERLAPS) & i_o : RailML3_IL_ROUTE_OVERLAPS(i_r) & i_e : dom(dom(dom(RailML3_IL_OVERLAP_NXT(i_o)) \/ ran(RailML3_IL_OVERLAP_NXT(i_o))))) THEN "1;0.2;1"
                     ELSE "1" END
             )
         };
