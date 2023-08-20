@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.*;
-import de.prob.exception.ProBError;
 import de.prob.scripting.Api;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -31,7 +30,6 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -171,8 +169,8 @@ public class RailMLStage extends Stage {
 			setFileNames(railML);
 		}
 
-		//progressInfo.visibleProperty().bind(new SimpleBooleanProperty(updater.runningProperty());
-		//progressInfo.managedProperty().bind(progressInfo.visibleProperty());
+		progressInfo.visibleProperty().bind(updater.runningProperty());
+		progressInfo.managedProperty().bind(progressInfo.visibleProperty());
 		//currentOp.textProperty().bind(currentOperation);
 
 		setOnCloseRequest(e -> {
@@ -239,7 +237,7 @@ public class RailMLStage extends Stage {
 						this.close();
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (visualisationCheckbox.isSelected()) {
-							railMLInspectDotStage.initializeCheckboxes();
+							railMLInspectDotStage.initializeOptionsForStrategy(railMLFile.getVisualisationStrategy());
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
 							DotVisualizationCommand customGraph = getByName("custom_graph", currentState);
