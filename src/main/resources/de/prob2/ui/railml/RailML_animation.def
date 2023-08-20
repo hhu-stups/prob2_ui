@@ -35,6 +35,7 @@ DEFINITIONS
                 text: FORMAT_TO_STRING("~w\nState: ~w", [i_e, TO_STRING(IS_derailer_states(i_e))])
             )
         };
+    // TODO: Not fitting switches of overlaps red
     VISB_SVG_UPDATES14 ==
         {i_e • i_e : RailML3_IS_SWITCH_IDS |
             rec(`id`: i_e^"_ellipse",
@@ -53,7 +54,7 @@ DEFINITIONS
             )
         };
     VISB_SVG_UPDATES16 ==
-        {i_e • i_e : allIdsOfType("signalIS") |
+        {i_e • i_e : RailML3_IL_SIGNAL_CONTROLLED |
             rec(`id`: i_e^"_ellipse",
                 stroke: IF #i_r.(i_r : dom(IL_routes_in_res) & (i_e = prj1(RailML3_IL_ROUTE_ENTRY(i_r)) or i_e = prj1(RailML3_IL_ROUTE_EXIT(i_r)))) or i_e : IL_signal_locked THEN "darkorange"
                     ELSE "black" END,
@@ -63,7 +64,7 @@ DEFINITIONS
             )
         };
     VISB_SVG_UPDATES17 ==
-        {i_e • i_e : allIdsOfType("signalIS") |
+        {i_e • i_e : RailML3_IL_SIGNAL_CONTROLLED |
             rec(`id`: i_e^"_title",
                 text: FORMAT_TO_STRING("~w\nAspect: ~w", [i_e, TO_STRING(IL_signal_states(i_e))])
             )
@@ -71,7 +72,7 @@ DEFINITIONS
     VISB_SVG_UPDATES18 ==
         {i_e • i_e : union(allIdsOfType[{"balise","border","bufferStop","levelCrossingIS","trainDetectionElement"}]) |
             rec(`id`: i_e^"_ellipse",
-                visibility: IF #i_sig.( i_sig : allIdsOfType("signalIS") & RailML3_IS_SPOT_LOCATIONS(i_e) /\ RailML3_IS_SPOT_LOCATIONS(i_sig) /= {} ) THEN "hidden" ELSE "visible" END
+                visibility: IF #i_sig.( i_sig : RailML3_IL_SIGNAL_CONTROLLED & RailML3_IS_SPOT_LOCATIONS(i_e) /\ RailML3_IS_SPOT_LOCATIONS(i_sig) /= {} ) THEN "hidden" ELSE "visible" END
             )
         };
     
@@ -173,7 +174,7 @@ DEFINITIONS
     VISB_SVG_UPDATES52 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`:i_e^"_ovl_blink",
-                values: IF #i_r.(i_r : allIdsOfType("route") & i_r : dom(IL_routes_in_res) & i_e : union(RailML3_IL_ROUTE_OVERLAPS[{i_r}])) THEN "1;0.2;1"
+                values: IF #i_r.(i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_OVERLAPS) & i_e : RailML3_IL_ROUTE_OVERLAPS(i_r)) THEN "1;0.2;1"
                     ELSE "1" END
             )
         };
@@ -232,14 +233,14 @@ DEFINITIONS
     VISB_SVG_HOVERS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
-    VISB_SVG_EVENTS41 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
-    VISB_SVG_EVENTS42 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_changeSignalState", predicate: ("SignalId=","\""^x^"\"") )};    
-    VISB_SVG_HOVERS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
-    VISB_SVG_OBJECTS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
+    VISB_SVG_EVENTS41 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
+    VISB_SVG_EVENTS42 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_changeSignalState", predicate: ("SignalId=","\""^x^"\"") )};    
+    VISB_SVG_HOVERS4 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    VISB_SVG_OBJECTS4 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
-    //VISB_SVG_EVENTS51 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainArrive" )}; // pred : position fits OE
-    //VISB_SVG_EVENTS52 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainLeave" )};
-    //VISB_SVG_HOVERS5 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    VISB_SVG_EVENTS51 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainArrive" )}; // pred : position fits OE
+    VISB_SVG_EVENTS52 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainLeave" )};
+    VISB_SVG_HOVERS5 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     // start RouteRes?
 
     ignoreDirection(Relation) == dom({ r, cr | cr : Relation & r = prj1(prj1(cr)) |-> prj1(prj2(cr)) });

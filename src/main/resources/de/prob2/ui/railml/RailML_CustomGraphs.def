@@ -12,7 +12,7 @@ DEFINITIONS
     LEVELCROSSINGS == IF DISPLAY_LEVELCROSSINGS = TRUE THEN allIdsOfType("levelCrossingIS") ELSE {} END;
     OPERATIONALPOINTS == IF DISPLAY_OPERATIONALPOINTS = TRUE THEN allIdsOfType("operationalPoint") ELSE {} END;
     SIGNALS == IF DISPLAY_SIGNALS = TRUE THEN allIdsOfType("signalIS") ELSE {} END;
-    SWITCHES == IF DISPLAY_SWITCHES = TRUE THEN allIdsOfType("switchIS") ELSE {} END;
+    SWITCHES == IF DISPLAY_SWITCHES = TRUE THEN RailML3_IS_SWITCH_IDS ELSE {} END;
     TRAINDETECTIONELEMENTS == IF DISPLAY_TRAINDETECTIONELEMENTS = TRUE THEN allIdsOfType("trainDetectionElement") ELSE {} END;
     TVDSECTIONS == IF DISPLAY_TVDSECTIONS = TRUE THEN allIdsOfType("tvdSection") ELSE {} END;
 
@@ -30,18 +30,18 @@ DEFINITIONS
                 & e_sep : RailML_spotElementProjection & i_e = MU(e_sep'refersToElement) |
                     {rec(shape: "point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
                         pos: TO_STRING(STRING_TO_REAL(MU(MU(e_sep'coordinate)'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(MU(e_sep'coordinate)'y))/INCH_FACTOR)^"!",
-                        height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
-                        width: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
-                        fontsize: IF i_e : CROSSINGS \/ DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
+                        height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
+                        width: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
+                        fontsize: IF i_e : CROSSINGS \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED \/ SWITCHES THEN "5" ELSE "4" END)}
                 )
             \/
             UNION(i_e).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ LEVELCROSSINGS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
                 & !e_sep.(e_sep : RailML_spotElementProjection => i_e /= MU(e_sep'refersToElement)) |
                     {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
                     pos: "",
-                    height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
-                    width: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END,
-                    fontsize: IF i_e : CROSSINGS \/ DERAILERS \/ SIGNALS \/ SWITCHES THEN "5" ELSE "4" END)}
+                    height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
+                    width: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
+                    fontsize: IF i_e : CROSSINGS \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED \/ SWITCHES THEN "5" ELSE "4" END)}
                 ),
         // Virtual nodes for netElements (only available with exact position):
         nodes2:
@@ -68,11 +68,13 @@ DEFINITIONS
         );
 
     DOT_customGraph == rec(
-        layout: "neato",
-        mode: "sgd",
+        layout: DOT_ENGINE,
+        `size`: "16,9!",
+        rankdir: "LR",
+        mode: "sgd", // if DOT_ENGINE = neato
         overlap: "false",
         directed: FALSE,
-        splines: "line",
+        splines: USE_CURVED_SPLINES,
         ratio: "compress",
         
         // Bufferstops, Crossings, Openends, TDEs, Signals, Switches:
@@ -96,41 +98,79 @@ DEFINITIONS
         // track begin and end are functional infrastructure
         edges1:
             UNION(i_ne, i_trc, f, t, f_, t_, minlen).(i_ne : allIdsOfType("netElement") & {f, t} <: RailML3_IS_TRACKS(i_trc) & f /= t & i_ne = prj2(f) & i_ne = prj1(t)
-                & IF prj1(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN f_ = prj1(f)
-                ELSE f_ = STRING_CONC(SORT({prj1(f),prj2(f)})) END
-                & IF prj2(t) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN t_ = prj2(t)
-                ELSE t_ = STRING_CONC(SORT({prj1(t),prj2(t)})) END
+                & IF TRUE : RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION(i_trc)[{i_ne}] THEN
+                    IF prj1(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN f_ = prj1(f)
+                    ELSE f_ = STRING_CONC(SORT({prj1(f),prj2(f)})) END
+                    & IF prj2(t) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN t_ = prj2(t)
+                    ELSE t_ = STRING_CONC(SORT({prj1(t),prj2(t)})) END
+                ELSE
+                    IF prj1(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN t_ = prj1(f)
+                    ELSE t_ = STRING_CONC(SORT({prj1(f),prj2(f)})) END
+                    & IF prj2(t) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN f_ = prj2(t)
+                    ELSE f_ = STRING_CONC(SORT({prj1(t),prj2(t)})) END
+                END
                 & IF elementOfId(RailML3_netElement, i_ne)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, i_ne)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
-                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: f_, to: t_, fontsize: "5") } //, minlen: minlen) }
+                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: f_, to: t_) } //, minlen: minlen) }
             ),
         // track end is an netElement
         edges2:
-            UNION(i_ne, i_trc, f, minlen).(i_ne : allIdsOfType("netElement") & f : RailML3_IS_TRACKS(i_trc) & i_ne = prj2(f) & i_trc : allIdsOfType("track") & i_ne = RailML3_IS_TRACK_END(i_trc) & IF prj1(f) : allIdsOfType("netElement") THEN prj1(f) /= RailML3_IS_TRACK_BEGIN(i_trc) ELSE btrue END
+            UNION(i_ne, i_trc, f, f_, t_, minlen).(i_ne : allIdsOfType("netElement") & f : RailML3_IS_TRACKS(i_trc) & i_ne = prj2(f) & i_trc : allIdsOfType("track") & i_ne = RailML3_IS_TRACK_END(i_trc)
+                & IF prj1(f) : allIdsOfType("netElement") THEN prj1(f) /= RailML3_IS_TRACK_BEGIN(i_trc) ELSE btrue END
+                & IF TRUE : RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION(i_trc)[{i_ne}] THEN
+                    IF prj1(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN f_ = prj1(f) ELSE f_ = STRING_CONC(SORT({i_ne, prj1(f)})) END
+                    & t_ = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))}))
+                ELSE
+                    IF prj1(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN t_ = prj1(f) ELSE t_ = STRING_CONC(SORT({i_ne, prj1(f)})) END
+                    & f_ = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))}))
+                END
                 & IF elementOfId(RailML3_netElement, i_ne)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, i_ne)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
-                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: IF prj1(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN prj1(f) ELSE STRING_CONC(SORT({i_ne, prj1(f)})) END, to: STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))})), fontsize: "5" )  } //, minlen: minlen) }
+                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: f_, to: t_) } //, minlen: minlen) }
             ),
         // track begin is an netElement
         edges3:
-            UNION(i_ne, i_trc, f, minlen).(i_ne : allIdsOfType("netElement") & f : RailML3_IS_TRACKS(i_trc) & i_ne = prj1(f) & i_trc : allIdsOfType("track") & i_ne = RailML3_IS_TRACK_BEGIN(i_trc) & IF prj2(f) : allIdsOfType("netElement") THEN prj2(f) /= RailML3_IS_TRACK_END(i_trc) ELSE btrue END
+            UNION(i_ne, i_trc, f, f_, t_, minlen).(i_ne : allIdsOfType("netElement") & f : RailML3_IS_TRACKS(i_trc) & i_ne = prj1(f) & i_trc : allIdsOfType("track") & i_ne = RailML3_IS_TRACK_BEGIN(i_trc)
+                & IF prj2(f) : allIdsOfType("netElement") THEN prj2(f) /= RailML3_IS_TRACK_END(i_trc) ELSE btrue END
+                & IF TRUE : RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION(i_trc)[{i_ne}] THEN
+                    f_ = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))}))
+                    & IF prj2(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN t_ = prj2(f) ELSE t_ = STRING_CONC(SORT({i_ne, prj2(f)})) END
+                ELSE
+                    t_ = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))})) 
+                    & IF prj2(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN f_ = prj2(f) ELSE f_ = STRING_CONC(SORT({i_ne, prj2(f)})) END
+                END
                 & IF elementOfId(RailML3_netElement, i_ne)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, i_ne)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
-                {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: IF prj2(f) : BUFFERSTOPS \/ SWITCHES \/ CROSSINGS \/ BORDERS THEN prj2(f) ELSE STRING_CONC(SORT({i_ne, prj2(f)})) END, to: STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))})), fontsize: "5" )  } //, minlen: minlen) }
+                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: f_, to: t_) } //, minlen: minlen) }
             ),
         // track begin and end are netElements and it is the same netElement
         edges4:
-            UNION(i_ne, i_ne2, i_trc, minlen).({i_ne, i_ne2} <: allIdsOfType("netElement") & i_trc : allIdsOfType("track") & card(RailML3_IS_TRACKS(i_trc)) = 0
-                & i_ne = RailML3_IS_TRACK_BEGIN(i_trc) & i_ne2 = RailML3_IS_TRACK_END(i_trc)
+            UNION(i_ne, i_ne2, i_trc, f_, t_, minlen).({i_ne, i_ne2} <: allIdsOfType("netElement") & i_trc : allIdsOfType("track") & card(RailML3_IS_TRACKS(i_trc)) = 0
+                & i_ne = RailML3_IS_TRACK_BEGIN(i_trc) & i_ne2 = RailML3_IS_TRACK_END(i_trc) & i_ne = i_ne2
+                & IF TRUE : RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION(i_trc)[{i_ne}] THEN
+                    f_ = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))}))
+                    & t_ = STRING_CONC(SORT({i_ne2,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))}))
+                ELSE 
+                    t_ = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))}))
+                    & f_ = STRING_CONC(SORT({i_ne2,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))}))
+                END
                 & IF elementOfId(RailML3_netElement, i_ne)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, i_ne)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
-                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))})), to: STRING_CONC(SORT({i_ne2,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))})), fontsize: "5" )  } //, minlen: minlen) }
+                    {rec(label: IF DISPLAY_NAMES = TRUE & i_ne |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_ne^" ("^RailML3_CO_NAMES(i_ne,LANGUAGE)^")" ELSE i_ne END, `id`: i_ne, style:"filled", colour:"green", penwidth:"1.5", from: f_, to: t_) } //, minlen: minlen) }
             ),
         // track begin and end are netElements and there are two netElement (i.e. only one relation)
         edges5:
             UNION(i_ne, i_ne2, i_trc, edge, label, minlen).({i_ne, i_ne2} <: allIdsOfType("netElement") & i_trc : allIdsOfType("track") & card(RailML3_IS_TRACKS(i_trc)) = 1
                 & i_ne = RailML3_IS_TRACK_BEGIN(i_trc) & i_ne2 = RailML3_IS_TRACK_END(i_trc)
-                & ((label = i_ne & edge = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))})) |-> STRING_CONC(SORT({i_ne,i_ne2})) )
-                    or
-                    ( label = i_ne2 & edge = STRING_CONC(SORT({i_ne,i_ne2})) |-> STRING_CONC(SORT({i_ne2,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))})) ) )
+                & (IF TRUE : RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION(i_trc)[{i_ne}] THEN
+                    label = i_ne & edge = STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))})) |-> STRING_CONC(SORT({i_ne,i_ne2}))
+                ELSE
+                    label = i_ne & edge = STRING_CONC(SORT({i_ne,i_ne2})) |-> STRING_CONC(SORT({i_ne,prj1(prj1(RailML3_IS_NET_RELATION(inverseDirectedPair(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)))))}))
+                END
+                or
+                IF TRUE : RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION(i_trc)[{i_ne2}] THEN
+                    label = i_ne2 & edge = STRING_CONC(SORT({i_ne,i_ne2})) |-> STRING_CONC(SORT({i_ne2,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))}))
+                ELSE
+                    label = i_ne2 & edge = STRING_CONC(SORT({i_ne2,prj1(prj1(RailML3_IS_NET_RELATION(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))))})) |-> STRING_CONC(SORT({i_ne,i_ne2}))
+                END)
                 & IF elementOfId(RailML3_netElement, label)'length /= -1.0 THEN minlen = elementOfId(RailML3_netElement, label)'length*SCALING_FACTOR ELSE minlen = 1.0 END |
-                    {rec(label: IF DISPLAY_NAMES = TRUE & label |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN label^" ("^RailML3_CO_NAMES(label,LANGUAGE)^")" ELSE label END, `id`: label, style:"filled", colour:"green", penwidth:"1.5", edge: edge, fontsize: "5")  } //, minlen: minlen) }
+                    {rec(label: IF DISPLAY_NAMES = TRUE & label |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN label^" ("^RailML3_CO_NAMES(label,LANGUAGE)^")" ELSE label END, `id`: label, style:"filled", colour:"green", penwidth:"1.5", edge: edge)  } //, minlen: minlen) }
             )
         );
 
@@ -154,7 +194,7 @@ DEFINITIONS
                 & x1 = STRING_TO_REAL(MU(MU(e_sep1'coordinate)'x))/INCH_FACTOR & y1 = STRING_TO_REAL(MU(MU(e_sep1'coordinate)'y))/INCH_FACTOR
                 & x2 = STRING_TO_REAL(MU(MU(e_sep2'coordinate)'x))/INCH_FACTOR & y2 = STRING_TO_REAL(MU(MU(e_sep2'coordinate)'y))/INCH_FACTOR
                 |
-                    {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, pos: TO_STRING(x1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (x2-x1) )^","^TO_STRING(y1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (y2-y1) )^"!", height: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END, width: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ SIGNALS THEN "0.05" ELSE "0.025" END, fontsize: IF i_e : SWITCHES \/ DERAILERS \/ SIGNALS THEN "5" ELSE "4" END)}
+                    {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, pos: TO_STRING(x1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (x2-x1) )^","^TO_STRING(y1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (y2-y1) )^"!", height: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END, width: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END, fontsize: IF i_e : SWITCHES \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "5" ELSE "4" END)}
                 ),
         // Virtual nodes for netElements (only available with exact position):
         nodes2:
