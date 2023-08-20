@@ -76,6 +76,7 @@ public class RailMLStage extends Stage {
 
 	private Path railMLpath, generationPath;
 
+	private final SimpleStringProperty dataFileName = new SimpleStringProperty("");
 	private final SimpleStringProperty animationFileName = new SimpleStringProperty("");
 	private final SimpleStringProperty animationDefsFileName = new SimpleStringProperty("RailML_animation.def");
 	private final SimpleStringProperty validationFileName = new SimpleStringProperty("");
@@ -150,6 +151,13 @@ public class RailMLStage extends Stage {
 				generateFileList.remove(validationFileName.getValue());
 			}
 		});
+		animationMachineCheckbox.selectedProperty().or(validationMachineCheckbox.selectedProperty()).addListener((observable, oldValue, newValue) -> {
+			if (newValue) {
+				generateFileList.add(dataFileName.getValue());
+			} else {
+				generateFileList.remove(dataFileName.getValue());
+			}
+		});
 		visualisationStrategyChoiceBox.setValue(VisualisationStrategy.DOT);
 		visualisationCheckbox.selectedProperty()
 			.addListener((observable, oldValue, newValue) -> {
@@ -196,6 +204,7 @@ public class RailMLStage extends Stage {
 	private void setFileNames(Path railML) {
 		this.railMLpath = railML;
 		this.generationPath = railMLpath.getParent().toAbsolutePath();
+		dataFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_data.mch");
 		animationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_animation.mch");
 		validationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_validation.rmch");
 		svgFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + ".svg");
@@ -229,6 +238,7 @@ public class RailMLStage extends Stage {
 				generateMachines();
 				final Path projectLocation = generationPath;
 				final String shortName = animationFileName.getValue();
+				final Machine dataMachine = new Machine(dataFileName.getValue(), "Data machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(dataFileName.getValue()));
 				final Machine animationMachine = new Machine(animationFileName.getValue(), "Animation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(animationFileName.getValue()));
 				final Machine validationMachine = new Machine(validationFileName.getValue(), "Validation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(validationFileName.getValue()));
 
@@ -247,10 +257,10 @@ public class RailMLStage extends Stage {
 								throw new RuntimeException(e);
 							}
 							railMLInspectDotStage.setOnHidden(event -> {
-								createProject(shortName, projectLocation, animationMachine, validationMachine);
+								createProject(shortName, projectLocation, dataMachine, animationMachine, validationMachine);
 							});
 						} else {
-							createProject(shortName, projectLocation, animationMachine, validationMachine);
+							createProject(shortName, projectLocation, dataMachine, animationMachine, validationMachine);
 						}
 					});
 				}
@@ -260,13 +270,14 @@ public class RailMLStage extends Stage {
 		});
 	}
 
-	private void createProject(String shortName, Path projectLocation, Machine animationMachine, Machine validationMachine) {
+	private void createProject(String shortName, Path projectLocation, Machine dataMachine, Machine animationMachine, Machine validationMachine) {
 		if (currentProject.getLocation() == null) {
 			boolean replacingProject = currentProject.confirmReplacingProject();
 			if (replacingProject) {
 				currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 			}
 		}
+		currentProject.addMachine(dataMachine);
 		if (animationMachineCheckbox.isSelected()) {
 			try {
 				Path defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
@@ -317,9 +328,11 @@ public class RailMLStage extends Stage {
 
 		currentState = stateSpace.getRoot()
 			.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
+				"  & outputBaseFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
 				"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
 				"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
 				"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
+				"  & baseMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
 				"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
 				"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
 			.perform("$initialise_machine");
@@ -328,6 +341,12 @@ public class RailMLStage extends Stage {
 		boolean inv_ok = currentState.isInvariantOk();
 		boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
 
+		if ((animationMachineCheckbox.isSelected() || validationMachineCheckbox.isSelected()) && inv_ok && import_success) {
+			File dataMachine = new File(Paths.get(generationPath.toString()).resolve(dataFileName.getValue()).toString());
+			dataMachine.delete(); // TODO: Confirm
+			dataMachine.createNewFile();
+			currentState.perform("triggerPrintBaseMachine").perform("printBaseMachine");
+		}
 		if (animationMachineCheckbox.isSelected() && inv_ok && import_success) {
 			File animationMachine = new File(Paths.get(generationPath.toString()).resolve(animationFileName.getValue()).toString());
 			animationMachine.delete(); // TODO: Confirm

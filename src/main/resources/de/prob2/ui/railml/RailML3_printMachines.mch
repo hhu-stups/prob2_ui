@@ -6,95 +6,83 @@ DEFINITIONS
     "LibraryStrings.def";
     "SORT.def"
 CONSTANTS
-    outputBaseFile, outputAnimationFile, outputValidationFile, svgFile, animationMachineName, validationMachineName
+    outputBaseFile, outputAnimationFile, outputValidationFile, svgFile, baseMachineName, animationMachineName, validationMachineName
 PROPERTIES
-    {file, outputBaseFile, outputAnimationFile, outputValidationFile, svgFile, animationMachineName, validationMachineName} <: STRING
+    {file, outputBaseFile, outputAnimationFile, outputValidationFile, svgFile, baseMachineName, animationMachineName, validationMachineName} <: STRING
 VARIABLES
-    printAnimation, printValidation
+    printBase, printAnimation, printValidation
 INVARIANT
-    printAnimation : BOOL & printValidation : BOOL
+    {printBase, printAnimation, printValidation} <: BOOL
 INITIALISATION
-    importRailML; printAnimation := FALSE; printValidation := FALSE
+    importRailML; printBase := FALSE; printAnimation := FALSE; printValidation := FALSE
 OPERATIONS
-    triggerPrintAnimation =
-        PRE printAnimation = FALSE THEN
+    triggerPrintBaseMachine =
+        PRE printBase = FALSE THEN
             IF "FALSE" /: ran(FORMULA_VALUES("inv")) & no_error = TRUE THEN
-                printAnimation := TRUE                
+                printBase := TRUE                
             ELSIF "FALSE" : ran(FORMULA_VALUES("inv")) THEN
                 ADD_ERROR("RailML: ", "Import failed because of an invariant violation - check details in state view")            
             ELSE ADD_ERROR("RailML: ", "Import failed") END
         END;
-    triggerPrintValidation =
-        PRE printValidation = FALSE THEN
-            IF "FALSE" /: ran(FORMULA_VALUES("inv")) & no_error = TRUE THEN
-                printValidation := TRUE                
-            ELSIF "FALSE" : ran(FORMULA_VALUES("inv")) THEN
-                ADD_ERROR("RailML: ", "Import failed because of an invariant violation - check details in state view")            
-            ELSE ADD_ERROR("RailML: ", "Import failed") END
+    triggerPrintAnimation = PRE printAnimation = FALSE THEN printAnimation := TRUE END;
+    triggerPrintValidation = PRE printValidation = FALSE THEN printValidation := TRUE END;
+
+
+
+    printBaseMachine =
+        PRE printBase = TRUE THEN
+            FPRINTF(outputBaseFile, "~w~n", ['''/*@generated */''']);
+            FPRINTF(outputBaseFile, "~w~w~n", ["MACHINE ", baseMachineName]);
+
+            FPRINTF(outputBaseFile, "~w~n", ["ABSTRACT_CONSTANTS\n    allIdsOfType"]);
+            FPRINTF(outputBaseFile, "~w~n", ["CONCRETE_CONSTANTS\n    all_ids,"]);
+            VAR variable_names, filtered_variable_names IN
+                variable_names := FORMULA_INFOS("variables");
+                filtered_variable_names := SQUASH({ i, name | i : dom(variable_names) & name = variable_names(i) & SUB_STRING(name, 1, 6) = "RailML" });
+                FPRINTF(outputBaseFile, "    ~w~n", [STRING_JOIN(filtered_variable_names, ",\n    ")])
+            END;
+
+            FPRINTF(outputBaseFile, "~w~n", ["PROPERTIES\n    allIdsOfType = %type.( type : STRING | all_ids~[{type} * ran(ran(all_ids))] )"]);
+            FPRINTF(outputBaseFile, "    & all_ids = ~w~n", [all_ids]);
+            FPRINTF(outputBaseFile, "    & ~w~n", [STRING_JOIN(STRING_SPLIT(VARS_AS_TYPED_STRING("RailML"), " &"), "\n    &")]); // prevent very long lines
+
+            FPRINTF(outputBaseFile, "~w~n", ["SETS"]);
+            VAR set_names, set_values, filtered_sets IN
+                set_names := FORMULA_INFOS("sets");
+                set_values := FORMULA_VALUES("sets");
+                filtered_sets := SQUASH({ i, name | i : dom(set_names) & name = set_names(i)^" = "^set_values(i) & SUB_STRING(set_names(i), 1, 6) = "RailML" });
+                FPRINTF(outputBaseFile, "    ~w~n", [STRING_JOIN(filtered_sets, ";\n    ")])
+            END;
+
+            FPRINTF(outputBaseFile, "~w", ["END"])
         END;
+
+
 
     printAnimationMachine =
-    PRE printAnimation = TRUE THEN
-    FPRINTF(outputAnimationFile, "~w~n", ['''/*@generated */''']);
-    FPRINTF(outputAnimationFile, "~w~w~n", ["MACHINE ", animationMachineName]);
+        PRE printAnimation = TRUE THEN
+            FPRINTF(outputAnimationFile, "~w~n", ['''/*@generated */''']);
+            FPRINTF(outputAnimationFile, "MACHINE ~w~n", [animationMachineName]);
+            FPRINTF(outputAnimationFile, "EXTENDS ~w~n", [baseMachineName]);
+            
+            FPRINTF(outputAnimationFile, "~w~n", ["CONSTANTS\n    RS_trainFront_init, RS_trainBack_init, RS_train_states_init"]);
 
-    FPRINTF(outputAnimationFile, "~w~n", ['''ABSTRACT_CONSTANTS
-    allIdsOfType''']);
-    FPRINTF(outputAnimationFile, "~w~n", ['''CONCRETE_CONSTANTS
-    all_ids, RS_trainFront_init, RS_trainBack_init, RS_train_states_init,''']);
-    VAR variable_names, filtered_variable_names IN
-        variable_names := FORMULA_INFOS("variables");
-        filtered_variable_names := SQUASH({ i, name | i : dom(variable_names) & name = variable_names(i) & SUB_STRING(name, 1, 11) : {"RailML3_IS_", "RailML3_IL_", "RailML3_VIS", "RailML3_CO_"} });
-        FPRINTF(outputAnimationFile, "    ~w~n", [STRING_JOIN(filtered_variable_names, ",\n    ")])
-    END;
-
-    FPRINTF(outputAnimationFile, "~w~n", ['''PROPERTIES
-    allIdsOfType = %type.( type : STRING | all_ids~[{type} * ran(ran(all_ids))] )
-    & RS_trainFront_init : RS_trains +-> (STRING * REAL * RailML3_IS_DIRECTION)
+            FPRINTF(outputAnimationFile, "~w~n", ['''PROPERTIES
+    RS_trainFront_init : RS_trains +-> (STRING * REAL * RailML3_IS_DIRECTION)
     & RS_trainBack_init : RS_trains +-> (STRING * REAL * RailML3_IS_DIRECTION)
     & RS_train_states_init : RS_trains +-> RS_TRAIN_STATES
     & RS_trainFront_init = {}
     & RS_trainBack_init = {}
     & RS_train_states_init = {}''']); // TODO: set individually
-    FPRINTF(outputAnimationFile, "    & all_ids = ~w~n", [all_ids]);
-    FPRINTF(outputAnimationFile, "    & ~w~n", [STRING_JOIN(STRING_SPLIT(VARS_AS_TYPED_STRING("RailML3_IS"), " &"), "\n    &")]); // prevent very long lines
-    FPRINTF(outputAnimationFile, "    & ~w~n", [STRING_JOIN(STRING_SPLIT(VARS_AS_TYPED_STRING("RailML3_IL"), " &"), "\n    &")]);
-    FPRINTF(outputAnimationFile, "    & ~w~n", [STRING_JOIN(STRING_SPLIT(VARS_AS_TYPED_STRING("RailML3_VIS"), " &"), "\n    &")]);
-    FPRINTF(outputAnimationFile, "    & ~w~n", [STRING_JOIN(STRING_SPLIT(VARS_AS_TYPED_STRING("RailML3_CO"), " &"), "\n    &")]);
-    // BEGIN ROUTES
-    // r : dom(...) is necessary since ROUTE_IDS is initialised before "...".
-    /*& !(r).(r : allIdsOfType("route") & r : dom(RailML3_IL_ROUTE_NXT) => RailML3_IL_ROUTE_NXT(r) /= {})
 
-    // From prob_examples/public_examples/EventBPrologPackages/Abrial_Train_Ch17/Train_1_beebook_v2.mch :    
-    & {r,b|(r,b) : RailML3_IL_ROUTES_FST}~ <: RailML3_IL_ROUTE_RTBL
-    & {r,b|(r,b) : RailML3_IL_ROUTES_LST}~ <: RailML3_IL_ROUTE_RTBL
-    & !(r).(r : allIdsOfType("route") & r : dom(RailML3_IL_ROUTES_FST) & r : dom(RailML3_IL_ROUTES_LST) => RailML3_IL_ROUTES_FST(r) /= RailML3_IL_ROUTES_LST(r))
-    /*& !(r).(r : allIdsOfType("route") & r : dom(RailML3_IL_ROUTE_NXT) & r : dom(RailML3_IL_ROUTES_FST) & r : dom(RailML3_IL_ROUTES_LST)
-        => !(S).(S <: ran(RailML3_IL_ROUTE_NXT(r)) & S <: RailML3_IL_ROUTE_NXT(r)[S] => S = {} or (RailML3_IL_ROUTES_FST(r) = RailML3_IL_ROUTES_LST(r) & S = {RailML3_IL_ROUTES_FST(r)}) ))*/
-    // double switch causes errors for all following:
-    /*& !(r).(r : allIdsOfType("route") & r : dom(RailML3_IL_ROUTE_NXT) & r : dom(RailML3_IL_ROUTES_FST) & r : dom(RailML3_IL_ROUTES_LST) & RailML3_IL_ROUTE_RTBL /= {} => RailML3_IL_ROUTE_NXT(r) : (RailML3_IL_ROUTE_RTBL~)[{r}] \ {RailML3_IL_ROUTES_LST(r)} >->> (RailML3_IL_ROUTE_RTBL~)[{r}] \ {RailML3_IL_ROUTES_FST(r)})
-    & !(r,s).((r : allIdsOfType("route") & s : allIdsOfType("route")) & r /= s & {r,s} <: dom(RailML3_IL_ROUTES_FST) & {r,s} <: dom(RailML3_IL_ROUTES_LST) & RailML3_IL_ROUTE_RTBL /= {}
-        & {RailML3_IL_ROUTES_FST(s) |-> RailML3_IL_ROUTES_LST(r), RailML3_IL_ROUTES_FST(r) |-> RailML3_IL_ROUTES_LST(r)} <: RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1
-        => RailML3_IL_ROUTES_FST(r) /: (RailML3_IL_ROUTE_RTBL~)[{s}] \ {RailML3_IL_ROUTES_FST(s),RailML3_IL_ROUTES_LST(s)})
-    & !(r,s).((r : allIdsOfType("route") & s : allIdsOfType("route")) & r /= s & {r,s} <: dom(RailML3_IL_ROUTES_FST) & {r,s} <: dom(RailML3_IL_ROUTES_LST) & RailML3_IL_ROUTE_RTBL /= {}
-        & {RailML3_IL_ROUTES_FST(s) |-> RailML3_IL_ROUTES_LST(r), RailML3_IL_ROUTES_FST(r) |-> RailML3_IL_ROUTES_LST(r)} <: RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1
-        => RailML3_IL_ROUTES_LST(r) /: (RailML3_IL_ROUTE_RTBL~)[{s}] \ {RailML3_IL_ROUTES_FST(s),RailML3_IL_ROUTES_LST(s)})*/
-    // END ROUTES'''});
-
-    FPRINTF(outputAnimationFile, "~w~n", ['''DEFINITIONS
+            FPRINTF(outputAnimationFile, "~w~n", ['''DEFINITIONS
     SET_PREF_optimize_enum_set_elems == TRUE;
     "RailML_animation.def";''']);
-    FPRINTF(outputAnimationFile, "    VISB_SVG_FILE == \"~w\"~n", [svgFile]);
+            FPRINTF(outputAnimationFile, "    VISB_SVG_FILE == \"~w\"~n", [svgFile]);
 
-    FPRINTF(outputAnimationFile, "~w~n", ["SETS"]);
-    VAR set_names, set_values, filtered_sets IN
-        set_names := FORMULA_INFOS("sets");
-        set_values := FORMULA_VALUES("sets");
-        filtered_sets := SQUASH({ i, name | i : dom(set_names) & name = set_names(i)^" = "^set_values(i) & SUB_STRING(set_names(i), 1, 6) = "RailML" });
-        FPRINTF(outputAnimationFile, "    ~w;~n", [STRING_JOIN(filtered_sets, ";\n    ")])
-    END;
-    FPRINTF(outputAnimationFile, "~w~n", ['''    RS_trains;
-    RS_TRAIN_STATES = {train_moving, train_standing}
+            FPRINTF(outputAnimationFile, "~w~n", ["SETS\n    RS_trains;"]);
+            FPRINTF(outputAnimationFile, "~w~n", ["    RS_TRAIN_STATES = {train_moving, train_standing}"]);
+            FPRINTF(outputAnimationFile, "~w~n", ['''
 VARIABLES
     IS_next,
     IS_crossing_states, IS_crossingsInMovement, IS_crossing_keyLocked,
@@ -979,39 +967,13 @@ END'''])
     END;
 
     printValidationMachine =
-    PRE printValidation = TRUE THEN
-    FPRINTF(outputValidationFile, "~w~n", ['''/*@generated */''']);
-    FPRINTF(outputValidationFile, "~w~w~n", ["RULES_MACHINE ", validationMachineName]);
+        PRE printValidation = TRUE THEN
+            FPRINTF(outputValidationFile, "~w~n", ['''/*@generated */''']);
+            FPRINTF(outputValidationFile, "RULES_MACHINE ~w~n", [validationMachineName]);
+            FPRINTF(outputValidationFile, "REFERENCES ~w~n", [baseMachineName]);
 
-    FPRINTF(outputValidationFile, "~w~n", ['''DEFINITIONS
-    SET_PREF_optimize_enum_set_elems == TRUE
-ABSTRACT_CONSTANTS
-    allIdsOfType''']);
-    FPRINTF(outputValidationFile, "~w~n", ['''CONCRETE_CONSTANTS
-    all_ids,''']);
-    VAR variable_names, filtered_variable_names IN
-        variable_names := FORMULA_INFOS("variables");
-        filtered_variable_names := SQUASH({ i, name | i : dom(variable_names) & name = variable_names(i) & SUB_STRING(name, 1, 6) = "RailML" });
-        FPRINTF(outputValidationFile, "    ~w~n", [STRING_JOIN(filtered_variable_names, ",\n    ")])
-    END;
-
-    FPRINTF(outputValidationFile, "~w~n", ['''PROPERTIES
-    allIdsOfType = %type.( type : STRING | all_ids~[{type} * ran(ran(all_ids))] )''']);
-    FPRINTF(outputValidationFile, "    & all_ids = ~w~n", [all_ids]);
-    FPRINTF(outputValidationFile, "    & ~w~n", [STRING_JOIN(STRING_SPLIT(VARS_AS_TYPED_STRING("RailML"), " &"), "\n    &")]); // prevent very long lines
-
-    //FPRINTF(outputFile, "~w~n", ['''DEFINITIONS
-    //"RailML_animation.def";''']);
-    //FPRINTF(outputFile, "    VISB_SVG_FILE == \"~w\"~n", [svgFile]);
-
-    FPRINTF(outputValidationFile, "~w~n", ["SETS"]);
-    VAR set_names, set_values, filtered_sets IN
-        set_names := FORMULA_INFOS("sets");
-        set_values := FORMULA_VALUES("sets");
-        filtered_sets := SQUASH({ i, name | i : dom(set_names) & name = set_names(i)^" = "^set_values(i) & SUB_STRING(set_names(i), 1, 6) = "RailML" });
-        FPRINTF(outputValidationFile, "    ~w~n", [STRING_JOIN(filtered_sets, ";\n    ")])
-    END;
-    FPRINTF(outputValidationFile, "~w~n", ['''DEFINITIONS
+            FPRINTF(outputValidationFile, "~w~n", ['''DEFINITIONS
+    SET_PREF_optimize_enum_set_elems == TRUE;
     "CHOOSE.def";
     "LibraryMath.def";
     "LibraryMeta.def";
