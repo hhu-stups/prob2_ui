@@ -100,7 +100,10 @@ ABSTRACT_VARIABLES
   RailML3_IL_ROUTE_RTBL,
   RailML3_IL_ROUTE_SWITCH_POSITIONS,
   RailML3_IL_ROUTE_TVD_SECTIONS,
+  RailML3_IL_SIGNAL_CONTROLLED,
+  RailML3_IL_SIGNAL_CONTROL_SECTIONS,
   RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS,
+  RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION,
   RailML3_IL_SIGNAL_NOT_CONTROLLED_BY_SIGNALPLAN,
   RailML3_IL_SIGNAL_REFERS_TO,
   RailML3_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_GENERIC_ASPECT_OF_ID,
@@ -122,6 +125,7 @@ ABSTRACT_VARIABLES
   RailML3_IS_CROSSING_BRANCHES,
   RailML3_IS_DERAILER_NOT_PASSABLE,
   RailML3_IS_LINEAR_LOCATIONS,
+  RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION,
   RailML3_IS_LINEAR_LOCATION_REFERS_TO,
   RailML3_IS_LINEAR_LOCATION_SEQUENCE,
   RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM,
@@ -136,8 +140,6 @@ ABSTRACT_VARIABLES
   RailML3_IS_NET_RESOURCES_MICRO_LEVEL,
   RailML3_IS_NO_NET_RELATION,
   RailML3_IS_OPENEND_IDS,
-  RailML3_IS_SIGNAL_CONTROL_SECTIONS,
-  RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION,
   RailML3_IS_SIGNAL_IS_SWITCHABLE,
   RailML3_IS_SIGNAL_IS_TRAIN_MOVEMENT_SIGNAL,
   RailML3_IS_SIGNAL_POSITIONS,
@@ -714,7 +716,7 @@ PROPERTIES
   & file : STRING
   & data : POW(INTEGER * struct(attributes:POW(STRING * STRING),element:STRING,meta:POW(STRING * STRING),pId:INTEGER,recId:INTEGER))
   & all_ids : POW(STRING * (STRING * INTEGER))
-  //& file = "../RailML examples/Own Examples created by D4R/KI-LOK_shunting.railml"
+  //& file = "../RailML examples/Jernbanedirektoratet Norge (V3.2)/BRB.xml"
   & data = READ_XML(file,"auto")
   & elementsOfType = 
     %(type) . (
@@ -810,7 +812,10 @@ INVARIANT
   & RailML3_IL_ROUTE_RTBL : POW(STRING * REAL * RailML3_IS_DIRECTION * STRING)
   & RailML3_IL_ROUTE_SWITCH_POSITIONS : POW(STRING * POW(STRING * POW(STRING * RailML3_IL_SWITCH_POSITIONS)))
   & RailML3_IL_ROUTE_TVD_SECTIONS : POW(STRING * POW(STRING))
+  & RailML3_IL_SIGNAL_CONTROLLED : POW(STRING)
+  & RailML3_IL_SIGNAL_CONTROL_SECTIONS : POW(STRING * POW(STRING * POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION))))
   & RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS : POW(STRING * POW(STRING * POW(STRING)))
+  & RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION : POW(STRING * POW(STRING))
   & RailML3_IL_SIGNAL_NOT_CONTROLLED_BY_SIGNALPLAN : POW(STRING)
   & RailML3_IL_SIGNAL_REFERS_TO : POW(STRING * STRING)
   & RailML3_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_GENERIC_ASPECT_OF_ID : POW(STRING * RailML3_IL_SIGNAL_GENERIC_ASPECTS)
@@ -832,6 +837,7 @@ INVARIANT
   & RailML3_IS_CROSSING_BRANCHES : POW(STRING * POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)))
   & RailML3_IS_DERAILER_NOT_PASSABLE : POW(STRING * POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)))
   & RailML3_IS_LINEAR_LOCATIONS : POW(STRING * POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)))
+  & RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION : POW(STRING * POW(STRING * BOOL))
   & RailML3_IS_LINEAR_LOCATION_REFERS_TO : POW(STRING * STRING)
   & RailML3_IS_LINEAR_LOCATION_SEQUENCE : POW(STRING * POW(INTEGER * INTEGER))
   & RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM : POW(STRING * POW(STRING * POW(INTEGER * (REAL * STRING))))
@@ -846,8 +852,6 @@ INVARIANT
   & RailML3_IS_NET_RESOURCES_MICRO_LEVEL : POW(STRING)
   & RailML3_IS_NO_NET_RELATION : POW(STRING * POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)))
   & RailML3_IS_OPENEND_IDS : POW(STRING)
-  & RailML3_IS_SIGNAL_CONTROL_SECTIONS : POW(STRING * POW(STRING * POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION))))
-  & RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION : POW(STRING * POW(STRING))
   & RailML3_IS_SIGNAL_IS_SWITCHABLE : POW(STRING * BOOL)
   & RailML3_IS_SIGNAL_IS_TRAIN_MOVEMENT_SIGNAL : POW(STRING * BOOL)
   & RailML3_IS_SIGNAL_POSITIONS : POW(STRING * (STRING * REAL * RailML3_IS_DIRECTION))
@@ -1215,16 +1219,6 @@ INVARIANT
      =>
      RailML3_IS_SIGNAL_IS_TRAIN_MOVEMENT_SIGNAL : allIdsOfType("signalIS") --> BOOL
     )
-  & (
-     set_SIGNAL = "EXECUTED"
-     =>
-     RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION : allIdsOfType("signalIS") --> FIN(union(allIdsOfType[{"bufferStop","signalIS"}]) \/ RailML3_IS_OPENEND_IDS)
-    )
-  & (
-     set_SIGNAL = "EXECUTED"
-     =>
-     RailML3_IS_SIGNAL_CONTROL_SECTIONS : allIdsOfType("signalIS") --> (union(allIdsOfType[{"bufferStop","signalIS"}]) \/ RailML3_IS_OPENEND_IDS +-> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION <-> allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION))
-    )
   & set_SIGNAL : {"COMPUTATION_DISABLED","EXECUTED","NOT_EXECUTED"}
   & (
      set_switchesIS = "EXECUTED"
@@ -1314,6 +1308,11 @@ INVARIANT
      set_LINEAR_LOCATION = "EXECUTED"
      =>
      RailML3_IS_LINEAR_LOCATION_SEQUENCE : allIdsOfType("linearLocation") +-> seq1(NATURAL)
+    )
+  & (
+     set_LINEAR_LOCATION = "EXECUTED"
+     =>
+     RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION : ran(RailML3_IS_LINEAR_LOCATION_REFERS_TO) --> (allIdsOfType("netElement") +-> BOOL)
     )
   & set_LINEAR_LOCATION : {"COMPUTATION_DISABLED","EXECUTED","NOT_EXECUTED"}
   & validate_linearLocation : {"DISABLED","FAIL","NOT_CHECKED","SUCCESS"}
@@ -1872,7 +1871,22 @@ INVARIANT
   & (
      set_IL_SIGNAL = "EXECUTED"
      =>
-     RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS : allIdsOfType("signalIS") --> (union(allIdsOfType[{"bufferStop","signalIS"}]) \/ RailML3_IS_OPENEND_IDS +-> FIN(allIdsOfType("tvdSection")))
+     RailML3_IL_SIGNAL_CONTROLLED : FIN(allIdsOfType("signalIS"))
+    )
+  & (
+     set_IL_SIGNAL = "EXECUTED"
+     =>
+     RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION : RailML3_IL_SIGNAL_CONTROLLED --> FIN(allIdsOfType("bufferStop") \/ RailML3_IL_SIGNAL_CONTROLLED \/ RailML3_IS_OPENEND_IDS)
+    )
+  & (
+     set_IL_SIGNAL = "EXECUTED"
+     =>
+     RailML3_IL_SIGNAL_CONTROL_SECTIONS : RailML3_IL_SIGNAL_CONTROLLED --> (allIdsOfType("bufferStop") \/ RailML3_IL_SIGNAL_CONTROLLED \/ RailML3_IS_OPENEND_IDS +-> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION <-> allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION))
+    )
+  & (
+     set_IL_SIGNAL = "EXECUTED"
+     =>
+     RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS : RailML3_IL_SIGNAL_CONTROLLED --> (allIdsOfType("bufferStop") \/ RailML3_IL_SIGNAL_CONTROLLED \/ RailML3_IS_OPENEND_IDS +-> FIN(allIdsOfType("tvdSection")))
     )
   & set_IL_SIGNAL : {"COMPUTATION_DISABLED","EXECUTED","NOT_EXECUTED"}
   & (
@@ -2101,7 +2115,7 @@ INVARIANT
   & set_NET_ELEMENT_COORDINATES : {"COMPUTATION_DISABLED","EXECUTED","NOT_EXECUTED"}
 INITIALISATION
     BEGIN
-      EBO_CheckSwitchSpeeds,EBO_CheckSwitchSpeeds_Counterexamples,RailML_name,set_name,is_valid_name,is_valid_name_Counterexamples,RailML3_CO_NAMES,set_CO_NAME,RailML3_infrastructure,set_infrastructure,is_valid_infrastructure,is_valid_infrastructure_Counterexamples,RailML3_topology,set_topology,is_valid_topology,is_valid_topology_Counterexamples,RailML3_netElements,set_netElements,is_valid_netElements,is_valid_netElements_Counterexamples,RailML3_netElement,set_netElement,is_valid_netElement,is_valid_netElement_Counterexamples,RailML3_IS_NET_ELEMENT_LENGTHS,RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES,RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM,set_NET_ELEMENT,warnings_netElement,warnings_netElement_Counterexamples,RailML3_netRelations,set_netRelations,is_valid_netRelations,is_valid_netRelations_Counterexamples,RailML3_netRelation,set_netRelation,is_valid_netRelation,is_valid_netRelation_Counterexamples,RailML3_IS_NET_RELATION,RailML3_IS_NO_NET_RELATION,RailML3_IS_NET_RELATION_BY_ID,set_NET_RELATION,warnings_netRelation,warnings_netRelation_Counterexamples,RailML3_networks,set_networks,is_valid_networks,is_valid_networks_Counterexamples,RailML3_network,set_network,is_valid_network,is_valid_network_Counterexamples,RailML3_level,set_level,is_valid_level,is_valid_level_Counterexamples,RailML3_IS_NET_RESOURCES_MICRO_LEVEL,RailML3_IS_NET_RESOURCES_MESO_LEVEL,RailML3_IS_NET_RESOURCES_MACRO_LEVEL,set_NETWORK,validate_level,validate_level_Counterexamples,warnings_level,warnings_level_Counterexamples,RailML3_functionalInfrastructure,set_functionalInfrastructure,is_valid_functionalInfrastructure,is_valid_functionalInfrastructure_Counterexamples,RailML3_borders,set_borders,is_valid_borders,is_valid_borders_Counterexamples,RailML3_border,set_border,is_valid_border,is_valid_border_Counterexamples,RailML3_IS_OPENEND_IDS,set_BORDER,validate_border,validate_border_Counterexamples,RailML3_bufferStops,set_bufferStops,is_valid_bufferStops,is_valid_bufferStops_Counterexamples,RailML3_bufferStop,set_bufferStop,is_valid_bufferStop,is_valid_bufferStop_Counterexamples,validate_bufferStop,validate_bufferStop_Counterexamples,RailML3_crossings,set_crossings,is_valid_crossings,is_valid_crossings_Counterexamples,RailML3_crossing,set_crossing,is_valid_crossing,is_valid_crossing_Counterexamples,RailML3_IS_CROSSING_BRANCHES,set_CROSSING,RailML3_derailersIS,set_derailersIS,is_valid_derailersIS,is_valid_derailersIS_Counterexamples,RailML3_derailerIS,set_derailerIS,is_valid_derailerIS,is_valid_derailerIS_Counterexamples,RailML3_IS_DERAILER_NOT_PASSABLE,set_DERAILER,RailML3_operationalPoints,set_operationalPoints,is_valid_operationalPoints,is_valid_operationalPoints_Counterexamples,RailML3_operationalPoint,set_operationalPoint,is_valid_operationalPoint,is_valid_operationalPoint_Counterexamples,RailML3_signalsIS,set_signalsIS,is_valid_signalsIS,is_valid_signalsIS_Counterexamples,RailML3_signalIS,set_signalIS,is_valid_signalIS,is_valid_signalIS_Counterexamples,RailML3_IS_SIGNAL_POSITIONS,RailML3_IS_SIGNAL_IS_SWITCHABLE,RailML3_IS_SIGNAL_IS_TRAIN_MOVEMENT_SIGNAL,RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION,RailML3_IS_SIGNAL_CONTROL_SECTIONS,set_SIGNAL,RailML3_switchesIS,set_switchesIS,is_valid_switchesIS,is_valid_switchesIS_Counterexamples,RailML3_switchIS,set_switchIS,is_valid_switchIS,is_valid_switchIS_Counterexamples,RailML3_IS_SWITCH_IDS,RailML3_IS_SWITCH_TYPE,RailML3_IS_SWITCH_BRANCHES,set_SWITCH,validate_switchIS,validate_switchIS_Counterexamples,RailML3_tracks,set_tracks,is_valid_tracks,is_valid_tracks_Counterexamples,RailML3_track,set_track,is_valid_track,is_valid_track_Counterexamples,RailML3_trainDetectionElements,set_trainDetectionElements,is_valid_trainDetectionElements,is_valid_trainDetectionElements_Counterexamples,RailML3_trainDetectionElement,set_trainDetectionElement,is_valid_trainDetectionElement,is_valid_trainDetectionElement_Counterexamples,RailML3_linearLocation,set_linearLocation,is_valid_linearLocation,is_valid_linearLocation_Counterexamples,RailML3_IS_LINEAR_LOCATION_REFERS_TO,RailML3_IS_LINEAR_LOCATIONS,RailML3_IS_LINEAR_LOCATION_SEQUENCE,set_LINEAR_LOCATION,validate_linearLocation,validate_linearLocation_Counterexamples,warnings_linearLocation,warnings_linearLocation_Counterexamples,RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS,RailML3_IS_TRACKS,RailML3_IS_TRACK_BEGIN_NET_ELEMENT,RailML3_IS_TRACK_BEGIN,RailML3_IS_TRACK_END_NET_ELEMENT,RailML3_IS_TRACK_END,set_TRACK,validate_track,validate_track_Counterexamples,RailML3_spotLocation,set_spotLocation,is_valid_spotLocation,is_valid_spotLocation_Counterexamples,RailML3_IS_SPOT_LOCATION_REFERS_TO,RailML3_IS_SPOT_LOCATIONS,set_SPOT_LOCATION,validate_spotLocation,validate_spotLocation_Counterexamples,warnings_spotLocation,warnings_spotLocation_Counterexamples,RailML3_linearCoordinate,set_linearCoordinate,is_valid_linearCoordinate,is_valid_linearCoordinate_Counterexamples,RailML3_IS_ALL_INTRINSIC_COORDINATES,RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS,RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1,set_NET_RELATION_SUBSEQUENT_BLOCKS,RailML3_interlocking,set_interlocking,is_valid_interlocking,is_valid_interlocking_Counterexamples,RailML3_assetsForInterlockings,set_assetsForInterlockings,is_valid_assetsForInterlockings,is_valid_assetsForInterlockings_Counterexamples,RailML_assetsForInterlocking,set_assetsForInterlocking,is_valid_assetsForInterlocking,is_valid_assetsForInterlocking_Counterexamples,RailML3_conflictingRoutes,set_conflictingRoutes,is_valid_conflictingRoutes,is_valid_conflictingRoutes_Counterexamples,RailML3_conflictingRoute,set_conflictingRoute,is_valid_conflictingRoute,is_valid_conflictingRoute_Counterexamples,RailML3_IL_CONFLICTING_ROUTES,set_CONFLICTING_ROUTE,RailML3_derailersIL,set_derailersIL,is_valid_derailersIL,is_valid_derailersIL_Counterexamples,RailML3_derailerIL,set_derailerIL,is_valid_derailerIL,is_valid_derailerIL_Counterexamples,RailML3_IL_DERAILER_REFERS_TO,RailML3_IL_DERAILER_HAS_TVD_SECTION,RailML3_IL_DERAILER_IS_KEY_LOCKED,RailML3_IL_DERAILER_PREFERRED_POSITION,RailML3_IL_DERAILER_RETURNS_TO_PREFERRED_POSITION,RailML3_IL_DERAILER_RELATED_MOVABLE_ELEMENT,RailML3_IL_DERAILER_MAX_THROW_TIMES,RailML3_IL_DERAILER_TYPICAL_THROW_TIMES,set_IL_DERAILER,validate_derailerIL,validate_derailerIL_Counterexamples,warnings_derailerIL,warnings_derailerIL_Counterexamples,RailML3_movableCrossings,set_movableCrossings,is_valid_movableCrossings,is_valid_movableCrossings_Counterexamples,RailML3_movableCrossing,set_movableCrossing,is_valid_movableCrossing,is_valid_movableCrossing_Counterexamples,RailML3_IL_MOVABLE_CROSSING_REFERS_TO,RailML3_IL_MOVABLE_CROSSING_BRANCHES,RailML3_IL_MOVABLE_CROSSING_HAS_TVD_SECTION,RailML3_IL_MOVABLE_CROSSING_IS_KEY_LOCKED,RailML3_IL_MOVABLE_CROSSING_PREFERRED_POSITION,RailML3_IL_MOVABLE_CROSSING_RETURNS_TO_PREFERRED_POSITION,RailML3_IL_MOVABLE_CROSSING_RELATED_MOVABLE_ELEMENT,RailML3_IL_MOVABLE_CROSSING_MAX_THROW_TIMES,RailML3_IL_MOVABLE_CROSSING_TYPICAL_THROW_TIMES,set_IL_MOVABLE_CROSSING,validate_movableCrossing,validate_movableCrossing_Counterexamples,warnings_movableCrossing,warnings_movableCrossing_Counterexamples,RailML3_overlaps,set_overlaps,is_valid_overlaps,is_valid_overlaps_Counterexamples,RailML3_overlap,set_overlap,is_valid_overlap,is_valid_overlap_Counterexamples,RailML3_IL_OVERLAP_LENGTH,RailML3_IL_OVERLAP_VALIDITY_TIME,RailML3_IL_OVERLAP_NXT,RailML3_IL_OVERLAP_TVD_SECTIONS,RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS,RailML3_IL_OVERLAP_CROSSING_POSITIONS,RailML3_IL_OVERLAP_DERAILERS,RailML3_IL_OVERLAP_SWITCH_POSITIONS,RailML3_IL_OVERLAP_RELEASE_TIMERS,RailML3_IL_OVERLAP_RELEASE_TRIGGER_SECTION,set_IL_OVERLAP,validate_overlap,validate_overlap_Counterexamples,warnings_overlap,warnings_overlap_Counterexamples,RailML3_routeReleaseGroupsAhead,set_routeReleaseGroupsAhead,is_valid_routeReleaseGroupsAhead,is_valid_routeReleaseGroupsAhead_Counterexamples,RailML3_routeReleaseGroupAhead,set_routeReleaseGroupAhead,is_valid_routeReleaseGroupAhead,is_valid_routeReleaseGroupAhead_Counterexamples,RailML3_IL_ROUTE_RELEASE_GROUPS_AHEAD_TVD_SECTIONS,RailML3_IL_ROUTE_RELEASE_GROUP_AHEAD_NXT,RailML3_IL_ROUTE_RELEASE_GROUPS_AHEAD_TYPICAL_DELAYS,set_IL_ROUTE_RELEASE_GROUP_AHEAD,validate_routeReleaseGroupAhead,validate_routeReleaseGroupAhead_Counterexamples,warnings_routeReleaseGroupAhead,warnings_routeReleaseGroupAhead_Counterexamples,RailML3_routeReleaseGroupsRear,set_routeReleaseGroupsRear,is_valid_routeReleaseGroupsRear,is_valid_routeReleaseGroupsRear_Counterexamples,RailML3_routeReleaseGroupRear,set_routeReleaseGroupRear,is_valid_routeReleaseGroupRear,is_valid_routeReleaseGroupRear_Counterexamples,RailML3_IL_ROUTE_RELEASE_GROUPS_REAR_TVD_SECTIONS,RailML3_IL_ROUTE_RELEASE_GROUP_REAR_NXT,RailML3_IL_ROUTE_RELEASE_GROUPS_REAR_TYPICAL_DELAYS,set_IL_ROUTE_RELEASE_GROUP_REAR,validate_routeReleaseGroupRear,validate_routeReleaseGroupRear_Counterexamples,warnings_routeReleaseGroupRear,warnings_routeReleaseGroupRear_Counterexamples,RailML3_routeRelations,set_routeRelations,is_valid_routeRelations,is_valid_routeRelations_Counterexamples,RailML3_routeRelation,set_routeRelation,is_valid_routeRelation,is_valid_routeRelation_Counterexamples,RailML3_IL_ROUTE_RELATION_MUST_DERAILER_POSITIONS,RailML3_IL_ROUTE_RELATION_MUST_SECTION_STATES,RailML3_IL_ROUTE_RELATION_MUST_SWITCH_POSITIONS,set_IL_ROUTE_RELATION,validate_routeRelation,validate_routeRelation_Counterexamples,warnings_routeRelation,warnings_routeRelation_Counterexamples,RailML3_routes,set_routes,is_valid_routes,is_valid_routes_Counterexamples,RailML3_route,set_route,is_valid_route,is_valid_route_Counterexamples,RailML3_IL_ROUTE_FORCED_SWITCH_POSITIONS,RailML3_IL_ROUTE_ENTRY,RailML3_IL_ROUTE_EXIT,RailML3_IL_ROUTE_NXT,RailML3_IL_ROUTE_RTBL,RailML3_IL_ROUTE_CROSSING_POSITIONS,RailML3_IL_ROUTE_DERAILERS,RailML3_IL_ROUTE_SWITCH_POSITIONS,RailML3_IL_ROUTE_RELEASE_GROUPS,RailML3_IL_ROUTE_OVERLAPS,RailML3_IL_ROUTE_ADDITIONAL_RELATIONS,RailML3_IL_ROUTE_LOCKS_AUTOMATICALLY,RailML3_IL_ROUTE_TVD_SECTIONS,RailML3_IL_ACTIVATION_SECTION_TVD_SECTIONS,RailML3_IL_ROUTE_ACTIVATION_SECTIONS,set_ROUTE,validate_route,validate_route_Counterexamples,warnings_route,warnings_route_Counterexamples,RailML3_signalsIL,set_signalsIL,is_valid_signalsIL,is_valid_signalsIL_Counterexamples,RailML3_signalIL,set_signalIL,is_valid_signalIL,is_valid_signalIL_Counterexamples,RailML3_IL_SIGNAL_REFERS_TO,RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS,set_IL_SIGNAL,RailML3_switchesIL,set_switchesIL,is_valid_switchesIL,is_valid_switchesIL_Counterexamples,RailML3_switchIL,set_switchIL,is_valid_switchIL,is_valid_switchIL_Counterexamples,RailML3_IL_SWITCH_REFERS_TO,RailML3_IL_SWITCH_BRANCHES,RailML3_IL_SWITCH_POSITION_RESTRICTIONS,RailML3_IL_SWITCH_IS_KEY_LOCKED,RailML3_IL_SWITCH_PREFERRED_POSITION,RailML3_IL_SWITCH_RETURNS_TO_PREFERRED_POSITION,RailML3_IL_SWITCH_HAS_TVD_SECTION,RailML3_IL_SWITCH_HAS_FOOLING_TRAIN_DETECTORS,RailML3_IL_SWITCH_RELATED_MOVABLE_ELEMENT,RailML3_IL_SWITCH_MAX_THROW_TIMES,RailML3_IL_SWITCH_TYPICAL_THROW_TIMES,set_IL_SWITCH,validate_switchIL,validate_switchIL_Counterexamples,warnings_switchIL,warnings_switchIL_Counterexamples,RailML3_tvdSections,set_tvdSections,is_valid_tvdSections,is_valid_tvdSections_Counterexamples,RailML3_tvdSection,set_tvdSection,is_valid_tvdSection,is_valid_tvdSection_Counterexamples,RailML3_IL_TVD_SECTIONS,RailML3_IL_TVD_SECTION_BERTHING_TRACKS,RailML3_IL_TVD_SECTION_DEMARCATING_ELEMENTS,set_TVD_SECTIONS,validate_tvdSection,validate_tvdSection_Counterexamples,warnings_tvdSection,warnings_tvdSection_Counterexamples,RailML3_signalBoxes,set_signalBoxes,is_valid_signalBoxes,is_valid_signalBoxes_Counterexamples,RailML3_signalBox,set_signalBox,is_valid_signalBox,is_valid_signalBox_Counterexamples,RailML3_IL_ASPECT_RELATION_APPLIES_TO_ROUTES,RailML3_IL_ASPECT_RELATION_SIGNAL_ASPECTS,RailML3_IL_ASPECT_RELATION_SIGNAL_ASPECTS_INFERRED_FROM_ROUTE,RailML3_IL_SIGNAL_NOT_CONTROLLED_BY_SIGNALPLAN,set_IL_SIGNAL_BOX,warnings_signalBox,warnings_signalBox_Counterexamples,RailML3_specificInfrastructureManagers,set_specificInfrastructureManagers,is_valid_specificInfrastructureManagers,is_valid_specificInfrastructureManagers_Counterexamples,RailML3_specificInfrastructureManager,set_specificInfrastructureManager,is_valid_specificInfrastructureManager,is_valid_specificInfrastructureManager_Counterexamples,RailML3_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_GENERIC_ASPECT_OF_ID,set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER,is_supported_railml,is_supported_railml_Counterexamples,unique_ids,unique_ids_Counterexamples,version,read_file,RailML_visualizations,set_visualizations,is_valid_visualizations,is_valid_visualizations_Counterexamples,RailML_infrastructureVisualizations,set_infrastructureVisualizations,is_valid_infrastructureVisualizations,is_valid_infrastructureVisualizations_Counterexamples,RailML_infrastructureVisualization,set_infrastructureVisualization,is_valid_infrastructureVisualization,is_valid_infrastructureVisualization_Counterexamples,RailML_spotElementProjection,set_spotElementProjection,is_valid_spotElementProjection,is_valid_spotElementProjection_Counterexamples,RailML_linearElementProjection,set_linearElementProjection,is_valid_linearElementProjection,is_valid_linearElementProjection_Counterexamples,RailML3_VIS_NET_ELEMENT_COORDINATES,set_NET_ELEMENT_COORDINATES := "NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED"
+      EBO_CheckSwitchSpeeds,EBO_CheckSwitchSpeeds_Counterexamples,RailML_name,set_name,is_valid_name,is_valid_name_Counterexamples,RailML3_CO_NAMES,set_CO_NAME,RailML3_infrastructure,set_infrastructure,is_valid_infrastructure,is_valid_infrastructure_Counterexamples,RailML3_topology,set_topology,is_valid_topology,is_valid_topology_Counterexamples,RailML3_netElements,set_netElements,is_valid_netElements,is_valid_netElements_Counterexamples,RailML3_netElement,set_netElement,is_valid_netElement,is_valid_netElement_Counterexamples,RailML3_IS_NET_ELEMENT_LENGTHS,RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES,RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM,set_NET_ELEMENT,warnings_netElement,warnings_netElement_Counterexamples,RailML3_netRelations,set_netRelations,is_valid_netRelations,is_valid_netRelations_Counterexamples,RailML3_netRelation,set_netRelation,is_valid_netRelation,is_valid_netRelation_Counterexamples,RailML3_IS_NET_RELATION,RailML3_IS_NO_NET_RELATION,RailML3_IS_NET_RELATION_BY_ID,set_NET_RELATION,warnings_netRelation,warnings_netRelation_Counterexamples,RailML3_networks,set_networks,is_valid_networks,is_valid_networks_Counterexamples,RailML3_network,set_network,is_valid_network,is_valid_network_Counterexamples,RailML3_level,set_level,is_valid_level,is_valid_level_Counterexamples,RailML3_IS_NET_RESOURCES_MICRO_LEVEL,RailML3_IS_NET_RESOURCES_MESO_LEVEL,RailML3_IS_NET_RESOURCES_MACRO_LEVEL,set_NETWORK,validate_level,validate_level_Counterexamples,warnings_level,warnings_level_Counterexamples,RailML3_functionalInfrastructure,set_functionalInfrastructure,is_valid_functionalInfrastructure,is_valid_functionalInfrastructure_Counterexamples,RailML3_borders,set_borders,is_valid_borders,is_valid_borders_Counterexamples,RailML3_border,set_border,is_valid_border,is_valid_border_Counterexamples,RailML3_IS_OPENEND_IDS,set_BORDER,validate_border,validate_border_Counterexamples,RailML3_bufferStops,set_bufferStops,is_valid_bufferStops,is_valid_bufferStops_Counterexamples,RailML3_bufferStop,set_bufferStop,is_valid_bufferStop,is_valid_bufferStop_Counterexamples,validate_bufferStop,validate_bufferStop_Counterexamples,RailML3_crossings,set_crossings,is_valid_crossings,is_valid_crossings_Counterexamples,RailML3_crossing,set_crossing,is_valid_crossing,is_valid_crossing_Counterexamples,RailML3_IS_CROSSING_BRANCHES,set_CROSSING,RailML3_derailersIS,set_derailersIS,is_valid_derailersIS,is_valid_derailersIS_Counterexamples,RailML3_derailerIS,set_derailerIS,is_valid_derailerIS,is_valid_derailerIS_Counterexamples,RailML3_IS_DERAILER_NOT_PASSABLE,set_DERAILER,RailML3_operationalPoints,set_operationalPoints,is_valid_operationalPoints,is_valid_operationalPoints_Counterexamples,RailML3_operationalPoint,set_operationalPoint,is_valid_operationalPoint,is_valid_operationalPoint_Counterexamples,RailML3_signalsIS,set_signalsIS,is_valid_signalsIS,is_valid_signalsIS_Counterexamples,RailML3_signalIS,set_signalIS,is_valid_signalIS,is_valid_signalIS_Counterexamples,RailML3_IS_SIGNAL_POSITIONS,RailML3_IS_SIGNAL_IS_SWITCHABLE,RailML3_IS_SIGNAL_IS_TRAIN_MOVEMENT_SIGNAL,set_SIGNAL,RailML3_switchesIS,set_switchesIS,is_valid_switchesIS,is_valid_switchesIS_Counterexamples,RailML3_switchIS,set_switchIS,is_valid_switchIS,is_valid_switchIS_Counterexamples,RailML3_IS_SWITCH_IDS,RailML3_IS_SWITCH_TYPE,RailML3_IS_SWITCH_BRANCHES,set_SWITCH,validate_switchIS,validate_switchIS_Counterexamples,RailML3_tracks,set_tracks,is_valid_tracks,is_valid_tracks_Counterexamples,RailML3_track,set_track,is_valid_track,is_valid_track_Counterexamples,RailML3_trainDetectionElements,set_trainDetectionElements,is_valid_trainDetectionElements,is_valid_trainDetectionElements_Counterexamples,RailML3_trainDetectionElement,set_trainDetectionElement,is_valid_trainDetectionElement,is_valid_trainDetectionElement_Counterexamples,RailML3_linearLocation,set_linearLocation,is_valid_linearLocation,is_valid_linearLocation_Counterexamples,RailML3_IS_LINEAR_LOCATION_REFERS_TO,RailML3_IS_LINEAR_LOCATIONS,RailML3_IS_LINEAR_LOCATION_SEQUENCE,RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION,set_LINEAR_LOCATION,validate_linearLocation,validate_linearLocation_Counterexamples,warnings_linearLocation,warnings_linearLocation_Counterexamples,RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS,RailML3_IS_TRACKS,RailML3_IS_TRACK_BEGIN_NET_ELEMENT,RailML3_IS_TRACK_BEGIN,RailML3_IS_TRACK_END_NET_ELEMENT,RailML3_IS_TRACK_END,set_TRACK,validate_track,validate_track_Counterexamples,RailML3_spotLocation,set_spotLocation,is_valid_spotLocation,is_valid_spotLocation_Counterexamples,RailML3_IS_SPOT_LOCATION_REFERS_TO,RailML3_IS_SPOT_LOCATIONS,set_SPOT_LOCATION,validate_spotLocation,validate_spotLocation_Counterexamples,warnings_spotLocation,warnings_spotLocation_Counterexamples,RailML3_linearCoordinate,set_linearCoordinate,is_valid_linearCoordinate,is_valid_linearCoordinate_Counterexamples,RailML3_IS_ALL_INTRINSIC_COORDINATES,RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS,RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1,set_NET_RELATION_SUBSEQUENT_BLOCKS,RailML3_interlocking,set_interlocking,is_valid_interlocking,is_valid_interlocking_Counterexamples,RailML3_assetsForInterlockings,set_assetsForInterlockings,is_valid_assetsForInterlockings,is_valid_assetsForInterlockings_Counterexamples,RailML_assetsForInterlocking,set_assetsForInterlocking,is_valid_assetsForInterlocking,is_valid_assetsForInterlocking_Counterexamples,RailML3_conflictingRoutes,set_conflictingRoutes,is_valid_conflictingRoutes,is_valid_conflictingRoutes_Counterexamples,RailML3_conflictingRoute,set_conflictingRoute,is_valid_conflictingRoute,is_valid_conflictingRoute_Counterexamples,RailML3_IL_CONFLICTING_ROUTES,set_CONFLICTING_ROUTE,RailML3_derailersIL,set_derailersIL,is_valid_derailersIL,is_valid_derailersIL_Counterexamples,RailML3_derailerIL,set_derailerIL,is_valid_derailerIL,is_valid_derailerIL_Counterexamples,RailML3_IL_DERAILER_REFERS_TO,RailML3_IL_DERAILER_HAS_TVD_SECTION,RailML3_IL_DERAILER_IS_KEY_LOCKED,RailML3_IL_DERAILER_PREFERRED_POSITION,RailML3_IL_DERAILER_RETURNS_TO_PREFERRED_POSITION,RailML3_IL_DERAILER_RELATED_MOVABLE_ELEMENT,RailML3_IL_DERAILER_MAX_THROW_TIMES,RailML3_IL_DERAILER_TYPICAL_THROW_TIMES,set_IL_DERAILER,validate_derailerIL,validate_derailerIL_Counterexamples,warnings_derailerIL,warnings_derailerIL_Counterexamples,RailML3_movableCrossings,set_movableCrossings,is_valid_movableCrossings,is_valid_movableCrossings_Counterexamples,RailML3_movableCrossing,set_movableCrossing,is_valid_movableCrossing,is_valid_movableCrossing_Counterexamples,RailML3_IL_MOVABLE_CROSSING_REFERS_TO,RailML3_IL_MOVABLE_CROSSING_BRANCHES,RailML3_IL_MOVABLE_CROSSING_HAS_TVD_SECTION,RailML3_IL_MOVABLE_CROSSING_IS_KEY_LOCKED,RailML3_IL_MOVABLE_CROSSING_PREFERRED_POSITION,RailML3_IL_MOVABLE_CROSSING_RETURNS_TO_PREFERRED_POSITION,RailML3_IL_MOVABLE_CROSSING_RELATED_MOVABLE_ELEMENT,RailML3_IL_MOVABLE_CROSSING_MAX_THROW_TIMES,RailML3_IL_MOVABLE_CROSSING_TYPICAL_THROW_TIMES,set_IL_MOVABLE_CROSSING,validate_movableCrossing,validate_movableCrossing_Counterexamples,warnings_movableCrossing,warnings_movableCrossing_Counterexamples,RailML3_overlaps,set_overlaps,is_valid_overlaps,is_valid_overlaps_Counterexamples,RailML3_overlap,set_overlap,is_valid_overlap,is_valid_overlap_Counterexamples,RailML3_IL_OVERLAP_LENGTH,RailML3_IL_OVERLAP_VALIDITY_TIME,RailML3_IL_OVERLAP_NXT,RailML3_IL_OVERLAP_TVD_SECTIONS,RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS,RailML3_IL_OVERLAP_CROSSING_POSITIONS,RailML3_IL_OVERLAP_DERAILERS,RailML3_IL_OVERLAP_SWITCH_POSITIONS,RailML3_IL_OVERLAP_RELEASE_TIMERS,RailML3_IL_OVERLAP_RELEASE_TRIGGER_SECTION,set_IL_OVERLAP,validate_overlap,validate_overlap_Counterexamples,warnings_overlap,warnings_overlap_Counterexamples,RailML3_routeReleaseGroupsAhead,set_routeReleaseGroupsAhead,is_valid_routeReleaseGroupsAhead,is_valid_routeReleaseGroupsAhead_Counterexamples,RailML3_routeReleaseGroupAhead,set_routeReleaseGroupAhead,is_valid_routeReleaseGroupAhead,is_valid_routeReleaseGroupAhead_Counterexamples,RailML3_IL_ROUTE_RELEASE_GROUPS_AHEAD_TVD_SECTIONS,RailML3_IL_ROUTE_RELEASE_GROUP_AHEAD_NXT,RailML3_IL_ROUTE_RELEASE_GROUPS_AHEAD_TYPICAL_DELAYS,set_IL_ROUTE_RELEASE_GROUP_AHEAD,validate_routeReleaseGroupAhead,validate_routeReleaseGroupAhead_Counterexamples,warnings_routeReleaseGroupAhead,warnings_routeReleaseGroupAhead_Counterexamples,RailML3_routeReleaseGroupsRear,set_routeReleaseGroupsRear,is_valid_routeReleaseGroupsRear,is_valid_routeReleaseGroupsRear_Counterexamples,RailML3_routeReleaseGroupRear,set_routeReleaseGroupRear,is_valid_routeReleaseGroupRear,is_valid_routeReleaseGroupRear_Counterexamples,RailML3_IL_ROUTE_RELEASE_GROUPS_REAR_TVD_SECTIONS,RailML3_IL_ROUTE_RELEASE_GROUP_REAR_NXT,RailML3_IL_ROUTE_RELEASE_GROUPS_REAR_TYPICAL_DELAYS,set_IL_ROUTE_RELEASE_GROUP_REAR,validate_routeReleaseGroupRear,validate_routeReleaseGroupRear_Counterexamples,warnings_routeReleaseGroupRear,warnings_routeReleaseGroupRear_Counterexamples,RailML3_routeRelations,set_routeRelations,is_valid_routeRelations,is_valid_routeRelations_Counterexamples,RailML3_routeRelation,set_routeRelation,is_valid_routeRelation,is_valid_routeRelation_Counterexamples,RailML3_IL_ROUTE_RELATION_MUST_DERAILER_POSITIONS,RailML3_IL_ROUTE_RELATION_MUST_SECTION_STATES,RailML3_IL_ROUTE_RELATION_MUST_SWITCH_POSITIONS,set_IL_ROUTE_RELATION,validate_routeRelation,validate_routeRelation_Counterexamples,warnings_routeRelation,warnings_routeRelation_Counterexamples,RailML3_routes,set_routes,is_valid_routes,is_valid_routes_Counterexamples,RailML3_route,set_route,is_valid_route,is_valid_route_Counterexamples,RailML3_IL_ROUTE_FORCED_SWITCH_POSITIONS,RailML3_IL_ROUTE_ENTRY,RailML3_IL_ROUTE_EXIT,RailML3_IL_ROUTE_NXT,RailML3_IL_ROUTE_RTBL,RailML3_IL_ROUTE_CROSSING_POSITIONS,RailML3_IL_ROUTE_DERAILERS,RailML3_IL_ROUTE_SWITCH_POSITIONS,RailML3_IL_ROUTE_RELEASE_GROUPS,RailML3_IL_ROUTE_OVERLAPS,RailML3_IL_ROUTE_ADDITIONAL_RELATIONS,RailML3_IL_ROUTE_LOCKS_AUTOMATICALLY,RailML3_IL_ROUTE_TVD_SECTIONS,RailML3_IL_ACTIVATION_SECTION_TVD_SECTIONS,RailML3_IL_ROUTE_ACTIVATION_SECTIONS,set_ROUTE,validate_route,validate_route_Counterexamples,warnings_route,warnings_route_Counterexamples,RailML3_signalsIL,set_signalsIL,is_valid_signalsIL,is_valid_signalsIL_Counterexamples,RailML3_signalIL,set_signalIL,is_valid_signalIL,is_valid_signalIL_Counterexamples,RailML3_IL_SIGNAL_REFERS_TO,RailML3_IL_SIGNAL_CONTROLLED,RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION,RailML3_IL_SIGNAL_CONTROL_SECTIONS,RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS,set_IL_SIGNAL,RailML3_switchesIL,set_switchesIL,is_valid_switchesIL,is_valid_switchesIL_Counterexamples,RailML3_switchIL,set_switchIL,is_valid_switchIL,is_valid_switchIL_Counterexamples,RailML3_IL_SWITCH_REFERS_TO,RailML3_IL_SWITCH_BRANCHES,RailML3_IL_SWITCH_POSITION_RESTRICTIONS,RailML3_IL_SWITCH_IS_KEY_LOCKED,RailML3_IL_SWITCH_PREFERRED_POSITION,RailML3_IL_SWITCH_RETURNS_TO_PREFERRED_POSITION,RailML3_IL_SWITCH_HAS_TVD_SECTION,RailML3_IL_SWITCH_HAS_FOOLING_TRAIN_DETECTORS,RailML3_IL_SWITCH_RELATED_MOVABLE_ELEMENT,RailML3_IL_SWITCH_MAX_THROW_TIMES,RailML3_IL_SWITCH_TYPICAL_THROW_TIMES,set_IL_SWITCH,validate_switchIL,validate_switchIL_Counterexamples,warnings_switchIL,warnings_switchIL_Counterexamples,RailML3_tvdSections,set_tvdSections,is_valid_tvdSections,is_valid_tvdSections_Counterexamples,RailML3_tvdSection,set_tvdSection,is_valid_tvdSection,is_valid_tvdSection_Counterexamples,RailML3_IL_TVD_SECTIONS,RailML3_IL_TVD_SECTION_BERTHING_TRACKS,RailML3_IL_TVD_SECTION_DEMARCATING_ELEMENTS,set_TVD_SECTIONS,validate_tvdSection,validate_tvdSection_Counterexamples,warnings_tvdSection,warnings_tvdSection_Counterexamples,RailML3_signalBoxes,set_signalBoxes,is_valid_signalBoxes,is_valid_signalBoxes_Counterexamples,RailML3_signalBox,set_signalBox,is_valid_signalBox,is_valid_signalBox_Counterexamples,RailML3_IL_ASPECT_RELATION_APPLIES_TO_ROUTES,RailML3_IL_ASPECT_RELATION_SIGNAL_ASPECTS,RailML3_IL_ASPECT_RELATION_SIGNAL_ASPECTS_INFERRED_FROM_ROUTE,RailML3_IL_SIGNAL_NOT_CONTROLLED_BY_SIGNALPLAN,set_IL_SIGNAL_BOX,warnings_signalBox,warnings_signalBox_Counterexamples,RailML3_specificInfrastructureManagers,set_specificInfrastructureManagers,is_valid_specificInfrastructureManagers,is_valid_specificInfrastructureManagers_Counterexamples,RailML3_specificInfrastructureManager,set_specificInfrastructureManager,is_valid_specificInfrastructureManager,is_valid_specificInfrastructureManager_Counterexamples,RailML3_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_GENERIC_ASPECT_OF_ID,set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER,is_supported_railml,is_supported_railml_Counterexamples,unique_ids,unique_ids_Counterexamples,version,read_file,RailML_visualizations,set_visualizations,is_valid_visualizations,is_valid_visualizations_Counterexamples,RailML_infrastructureVisualizations,set_infrastructureVisualizations,is_valid_infrastructureVisualizations,is_valid_infrastructureVisualizations_Counterexamples,RailML_infrastructureVisualization,set_infrastructureVisualization,is_valid_infrastructureVisualization,is_valid_infrastructureVisualization_Counterexamples,RailML_spotElementProjection,set_spotElementProjection,is_valid_spotElementProjection,is_valid_spotElementProjection_Counterexamples,RailML_linearElementProjection,set_linearElementProjection,is_valid_linearElementProjection,is_valid_linearElementProjection_Counterexamples,RailML3_VIS_NET_ELEMENT_COORDINATES,set_NET_ELEMENT_COORDINATES := "NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},{},{},{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},{},{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},"NOT_CHECKED",{},{},"NOT_EXECUTED",{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED","NOT_CHECKED",{},{},"NOT_EXECUTED"
     END
 OPERATIONS
   set_visualizations = 
@@ -2161,10 +2175,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_infrastructureVisualizations = 
     SELECT 
         is_valid_infrastructureVisualizations = "NOT_CHECKED"
-      & set_visualizations = "EXECUTED"
       & set_infrastructureVisualizations = "EXECUTED"
-      & read_file = "EXECUTED"
+      & set_visualizations = "EXECUTED"
       & set_infrastructure = "EXECUTED"
+      & read_file = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -2423,8 +2437,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_linearElementProjection = 
     SELECT 
         is_valid_linearElementProjection = "NOT_CHECKED"
-      & set_infrastructureVisualization = "EXECUTED"
       & set_linearElementProjection = "EXECUTED"
+      & set_infrastructureVisualization = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -2566,8 +2580,8 @@ OPERATIONS
   set_NET_ELEMENT_COORDINATES = 
     SELECT 
         set_NET_ELEMENT_COORDINATES = "NOT_EXECUTED"
-      & is_valid_linearElementProjection = "SUCCESS"
       & set_linearElementProjection = "EXECUTED"
+      & is_valid_linearElementProjection = "SUCCESS"
     THEN 
       RailML3_VIS_NET_ELEMENT_COORDINATES,set_NET_ELEMENT_COORDINATES := FORCE({i_ne,s|s : POW(STRING * STRING) & (i_ne : allIdsOfType("netElement") & #e_lep.(e_lep : RailML_linearElementProjection & MU_WD(e_lep'refersToElement) = i_ne & s = {vn1,vn2|vn1 : STRING & vn2 : STRING & #(e_coord1,e_coord2).(e_coord1 : e_lep'coordinates & e_coord2 : e_lep'coordinates & e_coord1 /= e_coord2 & vn1 = (MU_WD(e_lep'refersToElement) ^ "_") ^ TO_STRING(e_coord1'recId) & vn2 = (MU_WD(e_lep'refersToElement) ^ "_") ^ TO_STRING(e_coord2'recId) & e_coord1'recId + 1 = e_coord2'recId)}))}),"EXECUTED"
     END;
@@ -2699,9 +2713,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_assetsForInterlockings = 
     SELECT 
         is_valid_assetsForInterlockings = "NOT_CHECKED"
-      & read_file = "EXECUTED"
       & set_interlocking = "EXECUTED"
       & set_assetsForInterlockings = "EXECUTED"
+      & read_file = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -2748,10 +2762,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_assetsForInterlocking = 
     SELECT 
         is_valid_assetsForInterlocking = "NOT_CHECKED"
-      & set_assetsForInterlocking = "EXECUTED"
-      & read_file = "EXECUTED"
       & set_interlocking = "EXECUTED"
+      & set_assetsForInterlocking = "EXECUTED"
       & set_assetsForInterlockings = "EXECUTED"
+      & read_file = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -2836,8 +2850,8 @@ OPERATIONS
   set_conflictingRoute = 
     SELECT 
         set_conflictingRoute = "NOT_EXECUTED"
-      & validate_route = "SUCCESS"
       & is_valid_conflictingRoutes = "SUCCESS"
+      & validate_route = "SUCCESS"
     THEN 
       RailML3_conflictingRoute,set_conflictingRoute := FORCE({e|e : struct(Id:POW(STRING),conflictsWithRoutes:POW(STRING),pId:INTEGER,recId:INTEGER,refersToRoute:POW(STRING),xmlLineNumber:INTEGER) & #e_crt.(e_crt : ran(data) & e_crt'element = "conflictingRoute" & e = rec(Id:e_crt'attributes[{"id"}],conflictsWithRoutes:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("conflictsWithRoute" |-> e_crt'recId) & "ref" |-> i_A : e_A'attributes)},pId:e_crt'pId,recId:e_crt'recId,refersToRoute:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("refersToRoute" |-> e_crt'recId) & "ref" |-> i_A : e_A'attributes)},xmlLineNumber:STRING_TO_INT(e_crt'meta("xmlLineNumber"))))}),"EXECUTED"
     END;
@@ -2962,8 +2976,8 @@ OPERATIONS
   set_CONFLICTING_ROUTE = 
     SELECT 
         set_CONFLICTING_ROUTE = "NOT_EXECUTED"
-      & is_valid_conflictingRoute = "SUCCESS"
       & set_conflictingRoute = "EXECUTED"
+      & is_valid_conflictingRoute = "SUCCESS"
     THEN 
       RailML3_IL_CONFLICTING_ROUTES,set_CONFLICTING_ROUTE := FORCE({i_rt,i_crt|i_rt : STRING & i_crt : POW(STRING) & #e_crt.(e_crt : RailML3_conflictingRoute & MU_WD(e_crt'refersToRoute) = i_rt & i_crt = e_crt'conflictsWithRoutes)}),"EXECUTED"
     END;
@@ -2979,8 +2993,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_derailersIL = 
     SELECT 
         is_valid_derailersIL = "NOT_CHECKED"
-      & set_assetsForInterlocking = "EXECUTED"
       & set_derailersIL = "EXECUTED"
+      & set_assetsForInterlocking = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -3028,8 +3042,8 @@ OPERATIONS
     SELECT 
         is_valid_derailerIL = "NOT_CHECKED"
       & set_trainDetectionElement = "EXECUTED"
-      & set_derailersIL = "EXECUTED"
       & set_derailerIL = "EXECUTED"
+      & set_derailersIL = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -3236,16 +3250,16 @@ OPERATIONS
   set_IL_DERAILER = 
     SELECT 
         set_IL_DERAILER = "NOT_EXECUTED"
-      & set_switchIL = "EXECUTED"
       & set_CROSSING = "EXECUTED"
-      & is_valid_derailerIL = "SUCCESS"
-      & set_SWITCH = "EXECUTED"
-      & is_valid_switchIL = "SUCCESS"
+      & set_switchIL = "EXECUTED"
       & set_derailerIL = "EXECUTED"
       & is_valid_movableCrossing = "SUCCESS"
-      & set_SPOT_LOCATION = "EXECUTED"
+      & is_valid_derailerIL = "SUCCESS"
       & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
       & set_movableCrossing = "EXECUTED"
+      & set_SWITCH = "EXECUTED"
+      & is_valid_switchIL = "SUCCESS"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
       RailML3_IL_DERAILER_REFERS_TO,RailML3_IL_DERAILER_HAS_TVD_SECTION,RailML3_IL_DERAILER_IS_KEY_LOCKED,RailML3_IL_DERAILER_PREFERRED_POSITION,RailML3_IL_DERAILER_RETURNS_TO_PREFERRED_POSITION,RailML3_IL_DERAILER_RELATED_MOVABLE_ELEMENT,RailML3_IL_DERAILER_MAX_THROW_TIMES,RailML3_IL_DERAILER_TYPICAL_THROW_TIMES,set_IL_DERAILER := FORCE({i_der_il,i_der|i_der_il : STRING & i_der : STRING & #e_der_il.(e_der_il : RailML3_derailerIL & MU_WD(e_der_il'Id) = i_der_il & i_der : e_der_il'refersTo)}),FORCE(%fnc_x.(fnc_x : STRING & #rme.(rme : STRING & #e_der.(e_der : RailML3_derailerIL & fnc_x : e_der'refersTo & rme : e_der'hasTvdSection))|{i_der,rme|i_der : STRING & rme : STRING & #e_der.(e_der : RailML3_derailerIL & i_der : e_der'refersTo & rme : e_der'hasTvdSection)}[{fnc_x}])),FORCE(%i_der.(i_der : allIdsOfType("derailerIS")|(IF #e_der.(e_der : RailML3_derailerIL & i_der = MU_WD(e_der'refersTo) & e_der'isKeyLocked = TRUE) THEN TRUE ELSE FALSE END))),FORCE({i_der,pref|pref : RailML3_IL_DERAILER_POSITIONS & (i_der : allIdsOfType("derailerIL") & #e_der.(e_der : RailML3_derailerIL & i_der = MU_WD(e_der'Id) & pref : e_der'preferredPosition))}),FORCE(%i_der.(i_der : allIdsOfType("derailerIL")|(IF #e_der.(e_der : RailML3_derailerIL & i_der = MU_WD(e_der'Id) & e_der'returnsToPreferredPosition = TRUE) THEN TRUE ELSE FALSE END))),FORCE({i_der,rme|i_der : STRING & rme : STRING & #(e_der,rme_il).(e_der : RailML3_derailerIL & i_der : e_der'refersTo & rme_il : e_der'relatedMovableElement & ((rme_il : allIdsOfType("movableCrossing") => rme : MU({e|e : RailML3_movableCrossing & rme_il = MU(e'Id)})'refersTo) & (not(rme_il : allIdsOfType("movableCrossing")) => (rme_il : allIdsOfType("derailerIL") => rme : MU({e|e : RailML3_derailerIL & rme_il = MU(e'Id)})'refersTo) & (not(rme_il : allIdsOfType("derailerIL")) => rme_il : allIdsOfType("switchIL") & rme : MU({e|e : RailML3_switchIL & rme_il = MU(e'Id)})'refersTo))))}),FORCE(%i_der.(i_der : allIdsOfType("derailerIS") & card(RailML3_derailerIL) /= 0|min({time|time : INTEGER & #e_der.(e_der : RailML3_derailerIL & i_der : e_der'refersTo & time = e_der'maxThrowTime)}))),FORCE(%i_der.(i_der : allIdsOfType("derailerIS") & card(RailML3_derailerIL) /= 0|max({time|time : INTEGER & #e_der.(e_der : RailML3_derailerIL & i_der : e_der'refersTo & time = e_der'typicalThrowTime)}))),"EXECUTED"
     END;
@@ -3253,8 +3267,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_derailerIL = 
     SELECT 
         validate_derailerIL = "NOT_CHECKED"
-      & set_derailerIL = "EXECUTED"
       & set_IL_DERAILER = "EXECUTED"
+      & set_derailerIL = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -3279,10 +3293,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_derailerIL = 
     SELECT 
         warnings_derailerIL = "NOT_CHECKED"
-      & set_derailerIS = "EXECUTED"
-      & set_TVD_SECTIONS = "EXECUTED"
-      & set_DERAILER = "EXECUTED"
       & set_IL_DERAILER = "EXECUTED"
+      & set_derailerIS = "EXECUTED"
+      & set_DERAILER = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -3341,8 +3355,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_movableCrossings = 
     SELECT 
         is_valid_movableCrossings = "NOT_CHECKED"
-      & set_movableCrossings = "EXECUTED"
       & set_assetsForInterlocking = "EXECUTED"
+      & set_movableCrossings = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -3381,10 +3395,10 @@ OPERATIONS
     SELECT 
         set_movableCrossing = "NOT_EXECUTED"
       & set_CROSSING = "EXECUTED"
-      & set_TRACK = "EXECUTED"
       & set_SWITCH = "EXECUTED"
       & set_NET_ELEMENT = "EXECUTED"
       & is_valid_movableCrossings = "SUCCESS"
+      & set_TRACK = "EXECUTED"
     THEN 
       RailML3_movableCrossing,set_movableCrossing := FORCE({e|e : struct(Id:POW(STRING),branchDownLeft:POW(STRING),branchDownRight:POW(STRING),branchUpLeft:POW(STRING),branchUpRight:POW(STRING),hasFoulingTrainDetectors:POW(STRING),hasGaugeClearanceMarkers:POW(STRING),hasTvdSection:POW(STRING),isKeyLocked:BOOL,maxThrowTime:INTEGER,pId:INTEGER,preferredPosition:POW(RailML3_IL_CROSSING_POSITIONS),recId:INTEGER,refersTo:POW(STRING),relatedMovableElement:POW(STRING),returnsToPreferredPosition:BOOL,typicalThrowTime:INTEGER,xmlLineNumber:INTEGER) & #e_cr.(e_cr : elementsOfType("movableCrossing") & e = rec(Id:e_cr'attributes[{"id"}],branchDownLeft:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("branchDownLeft" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},branchDownRight:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("branchDownRight" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},branchUpLeft:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("branchUpLeft" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},branchUpRight:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("branchUpRight" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},hasFoulingTrainDetectors:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasFoulingTrainDetector" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},hasGaugeClearanceMarkers:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasGaugeClearanceMarker" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},hasTvdSection:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasTvdSection" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},isKeyLocked:(IF "isKeyLocked" : dom(e_cr'attributes) & e_cr'attributes("isKeyLocked") = "true" THEN TRUE ELSE FALSE END),maxThrowTime:(IF "maxThrowTime" : dom(e_cr'attributes) THEN (IF GET_IS_REGEX_MATCH(e_cr'attributes("maxThrowTime"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_cr'attributes("maxThrowTime"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_cr'attributes("maxThrowTime"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_cr'attributes("maxThrowTime"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_cr'attributes("maxThrowTime"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_cr'attributes("maxThrowTime"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_cr'attributes("maxThrowTime"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),pId:e_cr'pId,preferredPosition:(IF "preferredPosition" : dom(e_cr'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_CROSSING_POSITIONS,"position_" ^ e_cr'attributes("preferredPosition"))} ELSE {} END),recId:e_cr'recId,refersTo:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("refersTo" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},relatedMovableElement:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("relatedMovableElement" |-> e_cr'recId) & "ref" |-> i_A : e_A'attributes)},returnsToPreferredPosition:(IF "returnsToPreferredPosition" : dom(e_cr'attributes) & e_cr'attributes("returnsToPreferredPosition") = "true" THEN TRUE ELSE FALSE END),typicalThrowTime:(IF "typicalThrowTime" : dom(e_cr'attributes) THEN (IF GET_IS_REGEX_MATCH(e_cr'attributes("typicalThrowTime"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_cr'attributes("typicalThrowTime"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_cr'attributes("typicalThrowTime"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_cr'attributes("typicalThrowTime"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_cr'attributes("typicalThrowTime"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_cr'attributes("typicalThrowTime"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_cr'attributes("typicalThrowTime"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),xmlLineNumber:STRING_TO_INT(e_cr'meta("xmlLineNumber"))))}),"EXECUTED"
     END;
@@ -3392,9 +3406,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_movableCrossing = 
     SELECT 
         is_valid_movableCrossing = "NOT_CHECKED"
-      & set_movableCrossings = "EXECUTED"
       & set_trainDetectionElement = "EXECUTED"
       & set_movableCrossing = "EXECUTED"
+      & set_movableCrossings = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -3692,17 +3706,17 @@ OPERATIONS
   set_IL_MOVABLE_CROSSING = 
     SELECT 
         set_IL_MOVABLE_CROSSING = "NOT_EXECUTED"
-      & set_switchIL = "EXECUTED"
-      & set_NET_RELATION = "EXECUTED"
       & set_CROSSING = "EXECUTED"
-      & set_TRACK = "EXECUTED"
+      & set_switchIL = "EXECUTED"
+      & set_derailerIL = "EXECUTED"
+      & set_NET_RELATION = "EXECUTED"
+      & is_valid_movableCrossing = "SUCCESS"
       & is_valid_derailerIL = "SUCCESS"
+      & set_movableCrossing = "EXECUTED"
       & set_SWITCH = "EXECUTED"
       & set_NET_ELEMENT = "EXECUTED"
       & is_valid_switchIL = "SUCCESS"
-      & set_derailerIL = "EXECUTED"
-      & is_valid_movableCrossing = "SUCCESS"
-      & set_movableCrossing = "EXECUTED"
+      & set_TRACK = "EXECUTED"
     THEN 
         RailML3_IL_MOVABLE_CROSSING_REFERS_TO := FORCE({i_cr_il,i_cr|i_cr_il : STRING & i_cr : STRING & #e_cr_il.(e_cr_il : RailML3_movableCrossing & MU_WD(e_cr_il'Id) = i_cr_il & i_cr : e_cr_il'refersTo)})
       ;
@@ -3712,8 +3726,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_movableCrossing = 
     SELECT 
         validate_movableCrossing = "NOT_CHECKED"
-      & set_IL_MOVABLE_CROSSING = "EXECUTED"
       & set_CROSSING = "EXECUTED"
+      & set_IL_MOVABLE_CROSSING = "EXECUTED"
       & set_movableCrossing = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
@@ -3752,10 +3766,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_movableCrossing = 
     SELECT 
         warnings_movableCrossing = "NOT_CHECKED"
-      & set_IL_MOVABLE_CROSSING = "EXECUTED"
       & set_CROSSING = "EXECUTED"
       & set_crossing = "EXECUTED"
       & set_TVD_SECTIONS = "EXECUTED"
+      & set_IL_MOVABLE_CROSSING = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -3814,8 +3828,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_overlaps = 
     SELECT 
         is_valid_overlaps = "NOT_CHECKED"
-      & set_overlaps = "EXECUTED"
       & set_assetsForInterlocking = "EXECUTED"
+      & set_overlaps = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4069,19 +4083,19 @@ OPERATIONS
   set_IL_OVERLAP = 
     SELECT 
         set_IL_OVERLAP = "NOT_EXECUTED"
-      & set_IL_MOVABLE_CROSSING = "EXECUTED"
-      & is_valid_overlap = "SUCCESS"
+      & set_ROUTE = "EXECUTED"
+      & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
       & set_overlap = "EXECUTED"
       & set_SWITCH = "EXECUTED"
-      & set_TVD_SECTIONS = "EXECUTED"
-      & set_SPOT_LOCATION = "EXECUTED"
-      & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
+      & set_IL_SWITCH = "EXECUTED"
       & set_switchIL = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
       & validate_route = "SUCCESS"
       & set_DERAILER = "EXECUTED"
-      & set_IL_SWITCH = "EXECUTED"
+      & set_IL_MOVABLE_CROSSING = "EXECUTED"
+      & is_valid_overlap = "SUCCESS"
       & set_signalIL = "EXECUTED"
-      & set_ROUTE = "EXECUTED"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
         RailML3_IL_OVERLAP_LENGTH,RailML3_IL_OVERLAP_VALIDITY_TIME,RailML3_IL_OVERLAP_NXT := FORCE({i_o,l|i_o : STRING & l : REAL & #e_o.(e_o : RailML3_overlap & i_o = MU_WD(e_o'Id) & l : e_o'length)}),FORCE({i_o,val_time|i_o : STRING & val_time : INTEGER & #e_o.(e_o : RailML3_overlap & i_o = MU_WD(e_o'Id) & val_time = e_o'overlapValidityTime)}),FORCE(%fnc_x.(fnc_x : STRING & #nxt.(nxt : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #(e_o,ne_entry,ref_exit,ne_exit,restriction_set).(ne_entry : STRING * REAL * RailML3_IS_DIRECTION & restriction_set : POW(STRING * REAL * RailML3_IS_DIRECTION) & (e_o : RailML3_overlap & fnc_x = MU_WD(e_o'Id) & (#i_r.(i_r : e_o'activeForApproachRoutes & ne_entry = prj2(RailML3_IL_ROUTE_EXIT(i_r))) or #rta.(rta : e_o'relatedToTrackAsset & ne_entry : (IF rta : allIdsOfType("trainDetectionElement") THEN dom(RailML3_IS_SPOT_LOCATIONS(rta)) * {direction_normal,direction_reverse} ELSE RailML3_IS_SPOT_LOCATIONS(MU(MU({e|e : RailML3_signalIL & rta = MU(e'Id)})'refersTo)) END))) & ref_exit : e_o'isLimitedBy & ne_exit : (IF ref_exit : allIdsOfType("trainDetectionElement") THEN RailML3_IS_SPOT_LOCATIONS(ref_exit) ELSE RailML3_IS_SPOT_LOCATIONS(MU(MU({e|e : RailML3_switchIL & ref_exit = MU(e'Id)})'refersTo)) END) & restriction_set = (RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1[{ne_entry}] /\ (RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1~)[{ne_exit}]) \/ {ne_entry,ne_exit} & nxt : (restriction_set <| RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS) |> restriction_set)))|{i_o,nxt|i_o : STRING & nxt : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #(e_o,ne_entry,ref_exit,ne_exit,restriction_set).(ne_entry : STRING * REAL * RailML3_IS_DIRECTION & restriction_set : POW(STRING * REAL * RailML3_IS_DIRECTION) & (e_o : RailML3_overlap & i_o = MU_WD(e_o'Id) & (#i_r.(i_r : e_o'activeForApproachRoutes & ne_entry = prj2(RailML3_IL_ROUTE_EXIT(i_r))) or #rta.(rta : e_o'relatedToTrackAsset & ne_entry : (IF rta : allIdsOfType("trainDetectionElement") THEN dom(RailML3_IS_SPOT_LOCATIONS(rta)) * {direction_normal,direction_reverse} ELSE RailML3_IS_SPOT_LOCATIONS(MU(MU({e|e : RailML3_signalIL & rta = MU(e'Id)})'refersTo)) END))) & ref_exit : e_o'isLimitedBy & ne_exit : (IF ref_exit : allIdsOfType("trainDetectionElement") THEN RailML3_IS_SPOT_LOCATIONS(ref_exit) ELSE RailML3_IS_SPOT_LOCATIONS(MU(MU({e|e : RailML3_switchIL & ref_exit = MU(e'Id)})'refersTo)) END) & restriction_set = (RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1[{ne_entry}] /\ (RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1~)[{ne_exit}]) \/ {ne_entry,ne_exit} & nxt : (restriction_set <| RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS) |> restriction_set))}[{fnc_x}]))
       ;
@@ -4093,8 +4107,8 @@ OPERATIONS
         validate_overlap = "NOT_CHECKED"
       & set_IL_OVERLAP = "EXECUTED"
       & set_overlap = "EXECUTED"
-      & set_NET_ELEMENT = "EXECUTED"
       & set_SWITCH = "EXECUTED"
+      & set_NET_ELEMENT = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4145,10 +4159,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_overlap = 
     SELECT 
         warnings_overlap = "NOT_CHECKED"
-      & set_IL_OVERLAP = "EXECUTED"
-      & set_overlap = "EXECUTED"
-      & set_TVD_SECTIONS = "EXECUTED"
       & set_route = "EXECUTED"
+      & set_IL_OVERLAP = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
+      & set_overlap = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4280,8 +4294,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_routeReleaseGroupAhead = 
     SELECT 
         is_valid_routeReleaseGroupAhead = "NOT_CHECKED"
-      & set_routeReleaseGroupsAhead = "EXECUTED"
       & set_routeReleaseGroupAhead = "EXECUTED"
+      & set_routeReleaseGroupsAhead = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4345,12 +4359,12 @@ OPERATIONS
   set_IL_ROUTE_RELEASE_GROUP_AHEAD = 
     SELECT 
         set_IL_ROUTE_RELEASE_GROUP_AHEAD = "NOT_EXECUTED"
-      & is_valid_routeReleaseGroupAhead = "SUCCESS"
-      & validate_route = "SUCCESS"
-      & set_TVD_SECTIONS = "EXECUTED"
-      & set_routeReleaseGroupAhead = "EXECUTED"
-      & validate_tvdSection = "SUCCESS"
       & set_ROUTE = "EXECUTED"
+      & set_routeReleaseGroupAhead = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
+      & validate_route = "SUCCESS"
+      & validate_tvdSection = "SUCCESS"
+      & is_valid_routeReleaseGroupAhead = "SUCCESS"
     THEN 
         RailML3_IL_ROUTE_RELEASE_GROUPS_AHEAD_TVD_SECTIONS := FORCE({i_rga,i_tvd|i_rga : STRING & i_tvd : POW(STRING) & #e_rga.(e_rga : RailML3_routeReleaseGroupAhead & i_rga = MU_WD(e_rga'Id) & i_tvd = e_rga'hasTvdSections)})
       ;
@@ -4360,9 +4374,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_routeReleaseGroupAhead = 
     SELECT 
         validate_routeReleaseGroupAhead = "NOT_CHECKED"
-      & set_IL_ROUTE_RELEASE_GROUP_AHEAD = "EXECUTED"
-      & set_routeReleaseGroupAhead = "EXECUTED"
       & set_ROUTE = "EXECUTED"
+      & set_routeReleaseGroupAhead = "EXECUTED"
+      & set_IL_ROUTE_RELEASE_GROUP_AHEAD = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4387,10 +4401,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_routeReleaseGroupAhead = 
     SELECT 
         warnings_routeReleaseGroupAhead = "NOT_CHECKED"
+      & set_ROUTE = "EXECUTED"
+      & set_routeReleaseGroupAhead = "EXECUTED"
       & set_TVD_SECTIONS = "EXECUTED"
       & set_IL_ROUTE_RELEASE_GROUP_AHEAD = "EXECUTED"
-      & set_routeReleaseGroupAhead = "EXECUTED"
-      & set_ROUTE = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4483,8 +4497,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_routeReleaseGroupRear = 
     SELECT 
         is_valid_routeReleaseGroupRear = "NOT_CHECKED"
-      & set_routeReleaseGroupRear = "EXECUTED"
       & set_routeReleaseGroupsRear = "EXECUTED"
+      & set_routeReleaseGroupRear = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4548,12 +4562,12 @@ OPERATIONS
   set_IL_ROUTE_RELEASE_GROUP_REAR = 
     SELECT 
         set_IL_ROUTE_RELEASE_GROUP_REAR = "NOT_EXECUTED"
-      & set_routeReleaseGroupRear = "EXECUTED"
-      & validate_route = "SUCCESS"
       & is_valid_routeReleaseGroupRear = "SUCCESS"
-      & set_TVD_SECTIONS = "EXECUTED"
-      & validate_tvdSection = "SUCCESS"
       & set_ROUTE = "EXECUTED"
+      & set_routeReleaseGroupRear = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
+      & validate_route = "SUCCESS"
+      & validate_tvdSection = "SUCCESS"
     THEN 
         RailML3_IL_ROUTE_RELEASE_GROUPS_REAR_TVD_SECTIONS := FORCE({i_rgr,i_tvd|i_rgr : STRING & i_tvd : POW(STRING) & #e_rgr.(e_rgr : RailML3_routeReleaseGroupRear & i_rgr = MU_WD(e_rgr'Id) & i_tvd = e_rgr'hasTvdSections)})
       ;
@@ -4563,9 +4577,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_routeReleaseGroupRear = 
     SELECT 
         validate_routeReleaseGroupRear = "NOT_CHECKED"
+      & set_ROUTE = "EXECUTED"
       & set_IL_ROUTE_RELEASE_GROUP_REAR = "EXECUTED"
       & set_routeReleaseGroupRear = "EXECUTED"
-      & set_ROUTE = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4590,10 +4604,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_routeReleaseGroupRear = 
     SELECT 
         warnings_routeReleaseGroupRear = "NOT_CHECKED"
+      & set_ROUTE = "EXECUTED"
       & set_IL_ROUTE_RELEASE_GROUP_REAR = "EXECUTED"
       & set_routeReleaseGroupRear = "EXECUTED"
       & set_TVD_SECTIONS = "EXECUTED"
-      & set_ROUTE = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4686,8 +4700,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_routeRelation = 
     SELECT 
         is_valid_routeRelation = "NOT_CHECKED"
-      & set_routeRelation = "EXECUTED"
       & set_routeRelations = "EXECUTED"
+      & set_routeRelation = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -4895,10 +4909,10 @@ OPERATIONS
     SELECT 
         set_IL_ROUTE_RELATION = "NOT_EXECUTED"
       & set_switchIL = "EXECUTED"
-      & is_valid_routeRelation = "SUCCESS"
-      & set_SWITCH = "EXECUTED"
       & set_derailerIL = "EXECUTED"
+      & set_SWITCH = "EXECUTED"
       & set_routeRelation = "EXECUTED"
+      & is_valid_routeRelation = "SUCCESS"
     THEN 
       RailML3_IL_ROUTE_RELATION_MUST_DERAILER_POSITIONS,RailML3_IL_ROUTE_RELATION_MUST_SECTION_STATES,RailML3_IL_ROUTE_RELATION_MUST_SWITCH_POSITIONS,set_IL_ROUTE_RELATION := FORCE({i_rr,prov|prov : POW(RailML3_IL_REQUIRE_PROVING_TYPES * BOOL * POW(STRING * (STRING * RailML3_IL_DERAILER_POSITIONS))) & (i_rr : allIdsOfType("routeRelation") & prov = {provtype_bool,pos|provtype_bool : RailML3_IL_REQUIRE_PROVING_TYPES * BOOL & pos : POW(STRING * (STRING * RailML3_IL_DERAILER_POSITIONS)) & #(e_rr,e_rsp,e_rsp_pos).(e_rr : RailML3_routeRelation & i_rr = MU(e_rr'Id) & e_rsp : e_rr'requiredDerailerPosition & e_rsp'mustOrShould = require_must & e_rsp_pos : e_rsp'relatedDerailerAndPosition & provtype_bool = e_rsp'proving |-> e_rsp'isNegated & pos = {i_der,position|position : STRING * RailML3_IL_DERAILER_POSITIONS & (i_der : allIdsOfType("derailerIS") & (# /* LET */ (e_der).( e_der=MU({e|e : RailML3_derailerIL & MU_WD(e_rsp_pos'refersToDerailer) = MU(e'Id)}) & (i_der = MU_WD(e_der'refersTo) & prj1(position) = MU_WD(e_der'Id)))) & (e_rsp_pos'isNegated = FALSE => prj2(position) = MU_WD(e_rsp_pos'inPosition)) & (not(e_rsp_pos'isNegated = FALSE) => prj2(position) = (IF MU_WD(e_rsp_pos'inPosition) = position_derailingPosition THEN position_passablePosition ELSE position_derailingPosition END)))})} & prov /= {})}),FORCE({i_rr,prov|prov : POW(RailML3_IL_REQUIRE_PROVING_TYPES * BOOL * (STRING * RailML3_IL_TVD_SECTION_STATES)) & (i_rr : allIdsOfType("routeRelation") & prov = {provtype_bool,st|provtype_bool : RailML3_IL_REQUIRE_PROVING_TYPES * BOOL & st : STRING * RailML3_IL_TVD_SECTION_STATES & #(e_rr,e_rsp,e_rsp_pos,state).(state : RailML3_IL_TVD_SECTION_STATES & (e_rr : RailML3_routeRelation & i_rr = MU_WD(e_rr'Id) & e_rsp : e_rr'requiredSectionState & e_rsp'mustOrShould = require_must & e_rsp_pos : e_rsp'relatedSectionAndVacancy & provtype_bool = e_rsp'proving |-> e_rsp'isNegated & st = MU(e_rsp_pos'refersToSection) |-> state & ((e_rsp_pos'isNegated = FALSE => state = MU_WD(e_rsp_pos'inState)) & (not(e_rsp_pos'isNegated = FALSE) => state = (IF MU_WD(e_rsp_pos'inState) = tvd_occupied THEN tvd_vacant ELSE (IF MU_WD(e_rsp_pos'inState) = tvd_vacant THEN tvd_occupied ELSE tvd_unknown END) END)))))} & prov /= {})}),FORCE({i_rr,prov|prov : POW(RailML3_IL_REQUIRE_PROVING_TYPES * BOOL * POW(STRING * POW(STRING * RailML3_IL_SWITCH_POSITIONS))) & (i_rr : allIdsOfType("routeRelation") & prov = {provtype_bool,pos|provtype_bool : RailML3_IL_REQUIRE_PROVING_TYPES * BOOL & pos : POW(STRING * POW(STRING * RailML3_IL_SWITCH_POSITIONS)) & #(e_rr,e_rsp,e_rsp_pos).(e_rr : RailML3_routeRelation & i_rr = MU_WD(e_rr'Id) & e_rsp : e_rr'requiredSwitchPosition & e_rsp'mustOrShould = require_must & e_rsp_pos : e_rsp'relatedSwitchAndPosition & provtype_bool = e_rsp'proving |-> e_rsp'isNegated & pos = {i_sw,positions|positions : POW(STRING * RailML3_IL_SWITCH_POSITIONS) & (i_sw : RailML3_IS_SWITCH_IDS & (# /* LET */ (e_sw).( e_sw=MU({e|e : RailML3_switchIL & MU_WD(e_rsp_pos'refersToSwitch) = MU(e'Id)}) & (i_sw = MU_WD(e_sw'refersTo) & positions = {i_sw_il,sw_pos|i_sw_il : STRING & sw_pos : RailML3_IL_SWITCH_POSITIONS & (i_sw_il = MU_WD(e_sw'Id) & ((e_rsp_pos'isNegated = FALSE => sw_pos = MU_WD(e_rsp_pos'inPosition)) & (not(e_rsp_pos'isNegated = FALSE) => sw_pos = (IF MU_WD(e_rsp_pos'inPosition) = position_left THEN position_right ELSE position_left END))))}))))})} & prov /= {})}),"EXECUTED"
     END;
@@ -4906,8 +4920,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_routeRelation = 
     SELECT 
         validate_routeRelation = "NOT_CHECKED"
-      & set_SWITCH = "EXECUTED"
       & set_IL_ROUTE_RELATION = "EXECUTED"
+      & set_SWITCH = "EXECUTED"
       & set_routeRelation = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
@@ -5123,8 +5137,8 @@ OPERATIONS
   set_route = 
     SELECT 
         set_route = "NOT_EXECUTED"
-      & read_file = "EXECUTED"
       & is_valid_routes = "SUCCESS"
+      & read_file = "EXECUTED"
     THEN 
       RailML3_route,set_route := FORCE({e|e : struct(Id:POW(STRING),additionalRelations:POW(STRING * POW(RailML3_IL_ROUTE_RELATION_TYPES)),approachReleaseDelay:INTEGER,facingSwitchInPositions:POW(struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER)),hasReleaseGroups:POW(STRING),hasTvdSections:POW(STRING),locksAutomatically:BOOL,pId:INTEGER,priorityRank:POW(INTEGER),proceedAspectDelay:INTEGER,processingDelay:INTEGER,recId:INTEGER,residualRouteReleaseDelay:INTEGER,routeActivationSections:POW(struct(Id:POW(STRING),activationSections:POW(STRING),automaticReleaseDelay:INTEGER,delayForLock:INTEGER,xmlLineNumber:INTEGER)),routeEntry:POW(struct(Id:POW(STRING),nonReplacement:POW(STRING),refersTo:POW(STRING),xmlLineNumber:INTEGER)),routeExit:POW(struct(Id:POW(STRING),hasOverlaps:POW(STRING),refersTo:POW(STRING),xmlLineNumber:INTEGER)),signalClosureDelay:INTEGER,switchPositionsInDepartureTrack:POW(struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER)),trailingSwitchInPositions:POW(struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER)),xmlLineNumber:INTEGER) & #e_r.(e_r : elementsOfType("route") & e = rec(Id:e_r'attributes[{"id"}],additionalRelations:{i_A|i_A : STRING * POW(RailML3_IL_ROUTE_RELATION_TYPES) & #e_A.(e_A : childsOfElementType("additionalRelation" |-> e_r'recId) & #ref.(ref : STRING & ("ref" |-> ref : e_A'attributes & i_A = ref |-> (IF version = {v3_2} & "usage" : dom(e_A'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_ROUTE_RELATION_TYPES,"relation_" ^ e_A'attributes("usage"))} ELSE {} END))))},approachReleaseDelay:(IF "approachReleaseDelay" : dom(e_r'attributes) THEN (IF GET_IS_REGEX_MATCH(e_r'attributes("approachReleaseDelay"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("approachReleaseDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("approachReleaseDelay"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("approachReleaseDelay"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("approachReleaseDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("approachReleaseDelay"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("approachReleaseDelay"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),facingSwitchInPositions:{a|a : struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("facingSwitchInPosition" |-> e_r'recId) & #c2.(c2 : childsOfElementType("refersToSwitch" |-> c'recId) & a = rec(inPosition:(IF "inPosition" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_SWITCH_POSITIONS,"position_" ^ c'attributes("inPosition"))} ELSE {} END),isNegated:(IF "isNegated" : dom(c'attributes) & c'attributes("isNegated") = "true" THEN TRUE ELSE FALSE END),refersToSwitch:c2'attributes[{"ref"}],xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber")))))},hasReleaseGroups:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasReleaseGroup" |-> e_r'recId) & "ref" |-> i_A : e_A'attributes)},hasTvdSections:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasTvdSection" |-> e_r'recId) & "ref" |-> i_A : e_A'attributes)},locksAutomatically:(IF "locksAutomatically" : dom(e_r'attributes) & e_r'attributes("locksAutomatically") = "true" THEN TRUE ELSE FALSE END),pId:e_r'pId,priorityRank:(IF "priorityRank" : dom(e_r'attributes) THEN {STRING_TO_INT(e_r'attributes("priorityRank"))} ELSE {} END),proceedAspectDelay:(IF "proceedAspectDelay" : dom(e_r'attributes) THEN (IF GET_IS_REGEX_MATCH(e_r'attributes("proceedAspectDelay"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("proceedAspectDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("proceedAspectDelay"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("proceedAspectDelay"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("proceedAspectDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("proceedAspectDelay"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("proceedAspectDelay"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),processingDelay:(IF "processingDelay" : dom(e_r'attributes) THEN (IF GET_IS_REGEX_MATCH(e_r'attributes("processingDelay"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("processingDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("processingDelay"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("processingDelay"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("processingDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("processingDelay"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("processingDelay"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),recId:e_r'recId,residualRouteReleaseDelay:(IF "residualRouteReleaseDelay" : dom(e_r'attributes) THEN (IF GET_IS_REGEX_MATCH(e_r'attributes("residualRouteReleaseDelay"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("residualRouteReleaseDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("residualRouteReleaseDelay"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("residualRouteReleaseDelay"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("residualRouteReleaseDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("residualRouteReleaseDelay"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("residualRouteReleaseDelay"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),routeActivationSections:{a|a : struct(Id:POW(STRING),activationSections:POW(STRING),automaticReleaseDelay:INTEGER,delayForLock:INTEGER,xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("routeActivationSection" |-> e_r'recId) & a = rec(Id:c'attributes[{"id"}],activationSections:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("activationSection" |-> c'recId) & "ref" |-> i_A : e_A'attributes)},automaticReleaseDelay:(IF "automaticReleaseDelay" : dom(c'attributes) THEN (IF GET_IS_REGEX_MATCH(c'attributes("automaticReleaseDelay"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(c'attributes("automaticReleaseDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(c'attributes("automaticReleaseDelay"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(c'attributes("automaticReleaseDelay"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(c'attributes("automaticReleaseDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(c'attributes("automaticReleaseDelay"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(c'attributes("automaticReleaseDelay"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),delayForLock:(IF "delayForLock" : dom(c'attributes) THEN (IF GET_IS_REGEX_MATCH(c'attributes("delayForLock"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(c'attributes("delayForLock"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(c'attributes("delayForLock"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(c'attributes("delayForLock"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(c'attributes("delayForLock"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(c'attributes("delayForLock"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(c'attributes("delayForLock"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber"))))},routeEntry:{a|a : struct(Id:POW(STRING),nonReplacement:POW(STRING),refersTo:POW(STRING),xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("routeEntry" |-> e_r'recId) & #c2.(c2 : childsOfElementType("refersTo" |-> c'recId) & a = rec(Id:c'attributes[{"id"}],nonReplacement:c'attributes[{"nonReplacement"}],refersTo:c2'attributes[{"ref"}],xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber")))))},routeExit:{a|a : struct(Id:POW(STRING),hasOverlaps:POW(STRING),refersTo:POW(STRING),xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("routeExit" |-> e_r'recId) & a = rec(Id:c'attributes[{"id"}],hasOverlaps:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasOverlap" |-> c'recId) & i_A = e_A'attributes("ref"))},refersTo:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("refersTo" |-> c'recId) & i_A = e_A'attributes("ref"))},xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber"))))},signalClosureDelay:(IF "signalClosureDelay" : dom(e_r'attributes) THEN (IF GET_IS_REGEX_MATCH(e_r'attributes("signalClosureDelay"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("signalClosureDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("signalClosureDelay"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("signalClosureDelay"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("signalClosureDelay"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_r'attributes("signalClosureDelay"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_r'attributes("signalClosureDelay"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),switchPositionsInDepartureTrack:{a|a : struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("switchPositionInDepartureTrack" |-> e_r'recId) & #c2.(c2 : childsOfElementType("refersToSwitch" |-> c'recId) & a = rec(inPosition:(IF "inPosition" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_SWITCH_POSITIONS,"position_" ^ c'attributes("inPosition"))} ELSE {} END),isNegated:(IF "isNegated" : dom(c'attributes) & c'attributes("isNegated") = "true" THEN TRUE ELSE FALSE END),refersToSwitch:c2'attributes[{"ref"}],xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber")))))},trailingSwitchInPositions:{a|a : struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("trailingSwitchInPosition" |-> e_r'recId) & #c2.(c2 : childsOfElementType("refersToSwitch" |-> c'recId) & a = rec(inPosition:(IF "inPosition" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_SWITCH_POSITIONS,"position_" ^ c'attributes("inPosition"))} ELSE {} END),isNegated:(IF "isNegated" : dom(c'attributes) & c'attributes("isNegated") = "true" THEN TRUE ELSE FALSE END),refersToSwitch:c2'attributes[{"ref"}],xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber")))))},xmlLineNumber:STRING_TO_INT(e_r'meta("xmlLineNumber"))))}),"EXECUTED"
     END;
@@ -5132,10 +5146,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_route = 
     SELECT 
         is_valid_route = "NOT_CHECKED"
-      & read_file = "EXECUTED"
       & set_BORDER = "EXECUTED"
       & set_route = "EXECUTED"
       & set_routes = "EXECUTED"
+      & read_file = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -5472,20 +5486,20 @@ OPERATIONS
   set_ROUTE = 
     SELECT 
         set_ROUTE = "NOT_EXECUTED"
-      & set_IL_MOVABLE_CROSSING = "EXECUTED"
-      & set_NET_ELEMENT = "EXECUTED"
-      & set_SWITCH = "EXECUTED"
-      & set_TVD_SECTIONS = "EXECUTED"
-      & set_SPOT_LOCATION = "EXECUTED"
-      & set_IL_DERAILER = "EXECUTED"
-      & set_route = "EXECUTED"
-      & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
       & set_NET_RELATION = "EXECUTED"
-      & set_SIGNAL = "EXECUTED"
+      & set_route = "EXECUTED"
       & set_IL_SIGNAL = "EXECUTED"
-      & set_BORDER = "EXECUTED"
-      & set_DERAILER = "EXECUTED"
+      & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
+      & set_SWITCH = "EXECUTED"
+      & set_NET_ELEMENT = "EXECUTED"
       & set_IL_SWITCH = "EXECUTED"
+      & set_IL_DERAILER = "EXECUTED"
+      & set_BORDER = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
+      & set_DERAILER = "EXECUTED"
+      & set_IL_MOVABLE_CROSSING = "EXECUTED"
+      & set_SIGNAL = "EXECUTED"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
         RailML3_IL_ROUTE_FORCED_SWITCH_POSITIONS,RailML3_IL_ROUTE_ENTRY,RailML3_IL_ROUTE_EXIT := FORCE({i_r,sig_pos|sig_pos : POW(STRING * POW(STRING * RailML3_IL_SWITCH_POSITIONS)) & (i_r : allIdsOfType("route") & sig_pos = {i_sw,positions|positions : POW(STRING * RailML3_IL_SWITCH_POSITIONS) & (i_sw : RailML3_IS_SWITCH_IDS & (#e_r.(e_r : RailML3_route & i_r = MU(e_r'Id) & positions = {i_sw_il,sw_pos|i_sw_il : STRING & sw_pos : RailML3_IL_SWITCH_POSITIONS & #e_ftsw.(e_ftsw : e_r'facingSwitchInPositions \/ e_r'trailingSwitchInPositions \/ e_r'switchPositionsInDepartureTrack & i_sw = RailML3_IL_SWITCH_REFERS_TO(MU_WD(e_ftsw'refersToSwitch)) & i_sw_il = MU(e_ftsw'refersToSwitch) & ((e_ftsw'isNegated = FALSE => sw_pos = MU_WD(e_ftsw'inPosition)) & (not(e_ftsw'isNegated = FALSE) => sw_pos = (IF MU_WD(e_ftsw'inPosition) = position_left THEN position_right ELSE position_left END))))}) & positions /= {}))} & sig_pos /= {})}),FORCE({i_r,entry|i_r : STRING & entry : STRING * (STRING * REAL * RailML3_IS_DIRECTION) & #(e_r,ref_entry,ne_entry).(ref_entry : STRING & (e_r : RailML3_route & i_r = MU_WD(e_r'Id) & ref_entry = MU_WD(MU_WD(e_r'routeEntry)'refersTo) & ne_entry : (IF ref_entry : allIdsOfType("bufferStop") \/ RailML3_IS_OPENEND_IDS THEN dom(RailML3_IS_SPOT_LOCATIONS(ref_entry)) * {direction_normal,direction_reverse} /\ dom(RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS) ELSE RailML3_IS_SPOT_LOCATIONS(RailML3_IL_SIGNAL_REFERS_TO(ref_entry)) END) & entry = ref_entry |-> ne_entry))}),FORCE({i_r,exit|i_r : STRING & exit : STRING * (STRING * REAL * RailML3_IS_DIRECTION) & #(e_r,ref_exit,ne_exit).(ref_exit : STRING & (e_r : RailML3_route & i_r = MU_WD(e_r'Id) & ref_exit = MU_WD(MU_WD(e_r'routeExit)'refersTo) & ne_exit : (IF ref_exit : allIdsOfType("bufferStop") \/ RailML3_IS_OPENEND_IDS THEN dom(RailML3_IS_SPOT_LOCATIONS(ref_exit)) * {direction_normal,direction_reverse} /\ ran(RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS) ELSE RailML3_IS_SPOT_LOCATIONS(RailML3_IL_SIGNAL_REFERS_TO(ref_exit)) END) & exit = ref_exit |-> ne_exit))})
       ;
@@ -5499,9 +5513,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_route = 
     SELECT 
         validate_route = "NOT_CHECKED"
-      & set_IL_ROUTE_RELATION = "EXECUTED"
-      & set_route = "EXECUTED"
       & set_ROUTE = "EXECUTED"
+      & set_route = "EXECUTED"
+      & set_IL_ROUTE_RELATION = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -5616,9 +5630,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_route = 
     SELECT 
         warnings_route = "NOT_CHECKED"
-      & set_TVD_SECTIONS = "EXECUTED"
-      & set_route = "EXECUTED"
       & set_ROUTE = "EXECUTED"
+      & set_route = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
       & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
@@ -5691,8 +5705,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_signalsIL = 
     SELECT 
         is_valid_signalsIL = "NOT_CHECKED"
-      & set_signalsIL = "EXECUTED"
       & set_assetsForInterlocking = "EXECUTED"
+      & set_signalsIL = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -5731,8 +5745,8 @@ OPERATIONS
     SELECT 
         set_signalIL = "NOT_EXECUTED"
       & is_valid_signalsIL = "SUCCESS"
-      & set_SIGNAL = "EXECUTED"
       & read_file = "EXECUTED"
+      & set_SIGNAL = "EXECUTED"
     THEN 
       RailML3_signalIL,set_signalIL := FORCE({e|e : struct(Id:POW(STRING),approachSpeed:POW(REAL),function:POW(RailML3_IL_SIGNAL_FUNCTION_TYPES),isNotWired:BOOL,malfunctionSpeed:POW(REAL),pId:INTEGER,passingSpeed:POW(REAL),recId:INTEGER,refersTo:POW(STRING),releaseSpeed:POW(REAL),xmlLineNumber:INTEGER) & #e_sig.(e_sig : elementsOfType("signalIL") & e = rec(Id:e_sig'attributes[{"id"}],approachSpeed:(IF "approachSpeed" : dom(e_sig'attributes) THEN {STRING_TO_REAL(e_sig'attributes("approachSpeed"))} ELSE {} END),function:(IF "function" : dom(e_sig'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_SIGNAL_FUNCTION_TYPES,"function_" ^ e_sig'attributes("function"))} ELSE {} END),isNotWired:(IF version = {v3_2} & "isNotWired" : dom(e_sig'attributes) & e_sig'attributes("isNotWired") = "true" THEN TRUE ELSE (IF version = {v3_1} & "isVirtual" : dom(e_sig'attributes) & e_sig'attributes("isVirtual") = "true" THEN TRUE ELSE FALSE END) END),malfunctionSpeed:(IF "malfunctionSpeed" : dom(e_sig'attributes) THEN {STRING_TO_REAL(e_sig'attributes("malfunctionSpeed"))} ELSE {} END),pId:e_sig'pId,passingSpeed:(IF "passingSpeed" : dom(e_sig'attributes) THEN {STRING_TO_REAL(e_sig'attributes("passingSpeed"))} ELSE {} END),recId:e_sig'recId,refersTo:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("refersTo" |-> e_sig'recId) & "ref" |-> i_A : e_A'attributes)},releaseSpeed:(IF "releaseSpeed" : dom(e_sig'attributes) THEN {STRING_TO_REAL(e_sig'attributes("releaseSpeed"))} ELSE {} END),xmlLineNumber:STRING_TO_INT(e_sig'meta("xmlLineNumber"))))}),"EXECUTED"
     END;
@@ -5740,8 +5754,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_signalIL = 
     SELECT 
         is_valid_signalIL = "NOT_CHECKED"
-      & set_signalsIL = "EXECUTED"
       & set_signalIL = "EXECUTED"
+      & set_signalsIL = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -5832,13 +5846,21 @@ OPERATIONS
     SELECT 
         set_IL_SIGNAL = "NOT_EXECUTED"
       & is_valid_signalIL = "SUCCESS"
-      & set_SIGNAL = "EXECUTED"
-      & set_TVD_SECTIONS = "EXECUTED"
       & set_BORDER = "EXECUTED"
-      & set_SPOT_LOCATION = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
+      & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
       & set_signalIL = "EXECUTED"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
-      RailML3_IL_SIGNAL_REFERS_TO,RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS,set_IL_SIGNAL := FORCE({i_sig_il,i_sig|i_sig_il : STRING & i_sig : STRING & #e_sig_il.(e_sig_il : RailML3_signalIL & i_sig_il = MU_WD(e_sig_il'Id) & i_sig : e_sig_il'refersTo)}),FORCE(%i_sig.(i_sig : allIdsOfType("signalIS")|%fnc_x.(fnc_x : dom({sig_exit,i_tvd|i_tvd : allIdsOfType("tvdSection") & sig_exit : RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & RailML3_IL_TVD_SECTIONS(i_tvd) <: RailML3_IS_SIGNAL_CONTROL_SECTIONS(i_sig)(sig_exit)} \/ {sig_exit,i_tvd|i_tvd : allIdsOfType("tvdSection") & sig_exit : RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & (RailML3_IS_SPOT_LOCATIONS(sig_exit) /\ (dom(RailML3_IL_TVD_SECTIONS(i_tvd)) \/ ran(RailML3_IL_TVD_SECTIONS(i_tvd)))) /= {}})|({sig_exit,i_tvd|i_tvd : allIdsOfType("tvdSection") & sig_exit : RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & RailML3_IL_TVD_SECTIONS(i_tvd) <: RailML3_IS_SIGNAL_CONTROL_SECTIONS(i_sig)(sig_exit)} \/ {sig_exit,i_tvd|i_tvd : allIdsOfType("tvdSection") & sig_exit : RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & (RailML3_IS_SPOT_LOCATIONS(sig_exit) /\ (dom(RailML3_IL_TVD_SECTIONS(i_tvd)) \/ ran(RailML3_IL_TVD_SECTIONS(i_tvd)))) /= {}})[{fnc_x}]))),"EXECUTED"
+        RailML3_IL_SIGNAL_REFERS_TO := FORCE({i_sig_il,i_sig|i_sig_il : STRING & i_sig : STRING & #e_sig_il.(e_sig_il : RailML3_signalIL & i_sig_il = MU_WD(e_sig_il'Id) & i_sig : e_sig_il'refersTo)})
+      ;
+        RailML3_IL_SIGNAL_CONTROLLED := FORCE({i_sig|i_sig : allIdsOfType("signalIS") & #i_sig_il.(i_sig_il : STRING & i_sig = RailML3_IL_SIGNAL_REFERS_TO(i_sig_il))})
+      ;
+        RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION := FORCE(%i_sig.(i_sig : RailML3_IL_SIGNAL_CONTROLLED|{eocs|eocs : allIdsOfType("bufferStop") \/ RailML3_IL_SIGNAL_CONTROLLED \/ RailML3_IS_OPENEND_IDS & #sloc_eocs.(sloc_eocs : RailML3_IS_SPOT_LOCATIONS(eocs) & #sloc_sig.(sloc_sig : RailML3_IS_SPOT_LOCATIONS(i_sig) & sloc_sig |-> sloc_eocs : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1 & not(#(inter_sig,sloc_inter_sig).(inter_sig : RailML3_IL_SIGNAL_CONTROLLED & sloc_inter_sig : RailML3_IS_SPOT_LOCATIONS(inter_sig) & (sloc_sig |-> sloc_inter_sig : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1 & sloc_inter_sig |-> sloc_eocs : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1)))))}))
+      ;
+        RailML3_IL_SIGNAL_CONTROL_SECTIONS := FORCE(%i_sig.(i_sig : RailML3_IL_SIGNAL_CONTROLLED|{sig_exit,nxt|nxt : POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)) & (#(restriction_set,sloc_entry,sloc_exit).(restriction_set : POW(STRING * REAL * RailML3_IS_DIRECTION) & (sloc_entry : RailML3_IS_SPOT_LOCATIONS(i_sig) & sloc_exit : RailML3_IS_SPOT_LOCATIONS(sig_exit) & restriction_set = (RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1[{sloc_entry}] /\ (RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1~)[{sloc_exit}]) \/ {sloc_entry,sloc_exit} & nxt = (restriction_set <| RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS) |> restriction_set)) & sig_exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & nxt /= {})}))
+      ;
+        RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS,set_IL_SIGNAL := FORCE(%i_sig.(i_sig : RailML3_IL_SIGNAL_CONTROLLED|%fnc_x.(fnc_x : dom({sig_exit,i_tvd|i_tvd : allIdsOfType("tvdSection") & sig_exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & RailML3_IL_TVD_SECTIONS(i_tvd) <: RailML3_IL_SIGNAL_CONTROL_SECTIONS(i_sig)(sig_exit)} \/ {sig_exit,i_tvd|i_tvd : allIdsOfType("tvdSection") & sig_exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & (RailML3_IS_SPOT_LOCATIONS(sig_exit) /\ (dom(RailML3_IL_TVD_SECTIONS(i_tvd)) \/ ran(RailML3_IL_TVD_SECTIONS(i_tvd)))) /= {} & !sig_entry_sloc.(sig_entry_sloc : RailML3_IS_SPOT_LOCATIONS(i_sig) => sig_entry_sloc /: (dom(RailML3_IL_TVD_SECTIONS(i_tvd)) \/ ran(RailML3_IL_TVD_SECTIONS(i_tvd))))})|({sig_exit,i_tvd|i_tvd : allIdsOfType("tvdSection") & sig_exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & RailML3_IL_TVD_SECTIONS(i_tvd) <: RailML3_IL_SIGNAL_CONTROL_SECTIONS(i_sig)(sig_exit)} \/ {sig_exit,i_tvd|i_tvd : allIdsOfType("tvdSection") & sig_exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & (RailML3_IS_SPOT_LOCATIONS(sig_exit) /\ (dom(RailML3_IL_TVD_SECTIONS(i_tvd)) \/ ran(RailML3_IL_TVD_SECTIONS(i_tvd)))) /= {} & !sig_entry_sloc.(sig_entry_sloc : RailML3_IS_SPOT_LOCATIONS(i_sig) => sig_entry_sloc /: (dom(RailML3_IL_TVD_SECTIONS(i_tvd)) \/ ran(RailML3_IL_TVD_SECTIONS(i_tvd))))})[{fnc_x}]))),"EXECUTED"
     END;
   
   set_switchesIL = 
@@ -5891,10 +5913,10 @@ OPERATIONS
   set_switchIL = 
     SELECT 
         set_switchIL = "NOT_EXECUTED"
-      & is_valid_switchesIL = "SUCCESS"
-      & set_TRACK = "EXECUTED"
       & set_SWITCH = "EXECUTED"
       & set_NET_ELEMENT = "EXECUTED"
+      & set_TRACK = "EXECUTED"
+      & is_valid_switchesIL = "SUCCESS"
     THEN 
       RailML3_switchIL,set_switchIL := FORCE({e|e : struct(Id:POW(STRING),branchLeft:POW(STRING),branchRight:POW(STRING),branchTip:POW(STRING),hasFoulingTrainDetectors:POW(STRING),hasGaugeClearanceMarkers:POW(STRING),hasPositionRestriction:POW(struct(relatedDerailerInPosition:POW(struct(inPosition:POW(RailML3_IL_DERAILER_POSITIONS),isNegated:BOOL,refersToDerailer:POW(STRING),xmlLineNumber:INTEGER)),relatedSwitchInPosition:POW(struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER)),restrictedPosition:POW(RailML3_IL_SWITCH_POSITIONS),xmlLineNumber:INTEGER)),hasTvdSection:POW(STRING),isKeyLocked:BOOL,maxThrowTime:INTEGER,pId:INTEGER,preferredPosition:POW(RailML3_IL_SWITCH_POSITIONS),recId:INTEGER,refersTo:POW(STRING),relatedMovableElement:POW(STRING),returnsToPreferredPosition:BOOL,typicalThrowTime:INTEGER,xmlLineNumber:INTEGER) & #e_sw.(e_sw : elementsOfType("switchIL") & e = rec(Id:e_sw'attributes[{"id"}],branchLeft:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("branchLeft" |-> e_sw'recId) & "ref" |-> i_A : e_A'attributes)},branchRight:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("branchRight" |-> e_sw'recId) & "ref" |-> i_A : e_A'attributes)},branchTip:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("branchTip" |-> e_sw'recId) & "ref" |-> i_A : e_A'attributes)},hasFoulingTrainDetectors:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasFoulingTrainDetector" |-> e_sw'recId) & "ref" |-> i_A : e_A'attributes)},hasGaugeClearanceMarkers:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasGaugeClearanceMarker" |-> e_sw'recId) & "ref" |-> i_A : e_A'attributes)},hasPositionRestriction:{i_A|i_A : struct(relatedDerailerInPosition:POW(struct(inPosition:POW(RailML3_IL_DERAILER_POSITIONS),isNegated:BOOL,refersToDerailer:POW(STRING),xmlLineNumber:INTEGER)),relatedSwitchInPosition:POW(struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER)),restrictedPosition:POW(RailML3_IL_SWITCH_POSITIONS),xmlLineNumber:INTEGER) & #e_A.(e_A : childsOfElementType("hasPositionRestriction" |-> e_sw'recId) & i_A = rec(relatedDerailerInPosition:{a|a : struct(inPosition:POW(RailML3_IL_DERAILER_POSITIONS),isNegated:BOOL,refersToDerailer:POW(STRING),xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("relatedDerailerInPosition" |-> e_A'recId) & #c2.(c2 : childsOfElementType("refersToDerailer" |-> c'recId) & a = rec(inPosition:(IF "inPosition" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_DERAILER_POSITIONS,"position_" ^ c'attributes("inPosition"))} ELSE {} END),isNegated:(IF "isNegated" : dom(c'attributes) & c'attributes("isNegated") = "true" THEN TRUE ELSE FALSE END),refersToDerailer:c2'attributes[{"ref"}],xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber")))))},relatedSwitchInPosition:{a|a : struct(inPosition:POW(RailML3_IL_SWITCH_POSITIONS),isNegated:BOOL,refersToSwitch:POW(STRING),xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("relatedSwitchInPosition" |-> e_A'recId) & #c2.(c2 : childsOfElementType("refersToSwitch" |-> c'recId) & a = rec(inPosition:(IF "inPosition" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_SWITCH_POSITIONS,"position_" ^ c'attributes("inPosition"))} ELSE {} END),isNegated:(IF "isNegated" : dom(c'attributes) & c'attributes("isNegated") = "true" THEN TRUE ELSE FALSE END),refersToSwitch:c2'attributes[{"ref"}],xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber")))))},restrictedPosition:(IF "restrictedPosition" : dom(e_A'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_SWITCH_POSITIONS,"position_" ^ e_A'attributes("restrictedPosition"))} ELSE {} END),xmlLineNumber:STRING_TO_INT(e_A'meta("xmlLineNumber"))))},hasTvdSection:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("hasTvdSection" |-> e_sw'recId) & "ref" |-> i_A : e_A'attributes)},isKeyLocked:(IF "isKeyLocked" : dom(e_sw'attributes) & e_sw'attributes("isKeyLocked") = "true" THEN TRUE ELSE FALSE END),maxThrowTime:(IF "maxThrowTime" : dom(e_sw'attributes) THEN (IF GET_IS_REGEX_MATCH(e_sw'attributes("maxThrowTime"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_sw'attributes("maxThrowTime"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_sw'attributes("maxThrowTime"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_sw'attributes("maxThrowTime"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_sw'attributes("maxThrowTime"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_sw'attributes("maxThrowTime"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_sw'attributes("maxThrowTime"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),pId:e_sw'pId,preferredPosition:(IF "preferredPosition" : dom(e_sw'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_SWITCH_POSITIONS,"position_" ^ e_sw'attributes("preferredPosition"))} ELSE {} END),recId:e_sw'recId,refersTo:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("refersTo" |-> e_sw'recId) & "ref" |-> i_A : e_A'attributes)},relatedMovableElement:{i_A|i_A : STRING & #e_A.(e_A : childsOfElementType("relatedMovableElement" |-> e_sw'recId) & "ref" |-> i_A : e_A'attributes)},returnsToPreferredPosition:(IF "returnsToPreferredPosition" : dom(e_sw'attributes) & e_sw'attributes("returnsToPreferredPosition") = "true" THEN TRUE ELSE FALSE END),typicalThrowTime:(IF "typicalThrowTime" : dom(e_sw'attributes) THEN (IF GET_IS_REGEX_MATCH(e_sw'attributes("typicalThrowTime"),"PT\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_sw'attributes("typicalThrowTime"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_sw'attributes("typicalThrowTime"),"PT\d+M\d+S") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_sw'attributes("typicalThrowTime"),"\d+M"),"M")(1)) * 60000 + STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_sw'attributes("typicalThrowTime"),"\d+S"),"S")(1)) * 1000 ELSE (IF GET_IS_REGEX_MATCH(e_sw'attributes("typicalThrowTime"),"PT\d+M") = TRUE THEN STRING_TO_INT(STRING_SPLIT(REGEX_SEARCH_STR(e_sw'attributes("typicalThrowTime"),"\d+M"),"M")(1)) * 60000 ELSE 0 END) END) END) ELSE 0 END),xmlLineNumber:STRING_TO_INT(e_sw'meta("xmlLineNumber"))))}),"EXECUTED"
     END;
@@ -5902,9 +5924,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_switchIL = 
     SELECT 
         is_valid_switchIL = "NOT_CHECKED"
+      & set_trainDetectionElement = "EXECUTED"
       & set_switchIL = "EXECUTED"
       & set_switchesIL = "EXECUTED"
-      & set_trainDetectionElement = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -6294,15 +6316,15 @@ OPERATIONS
     SELECT 
         set_IL_SWITCH = "NOT_EXECUTED"
       & set_switchIL = "EXECUTED"
+      & set_derailerIL = "EXECUTED"
       & set_NET_RELATION = "EXECUTED"
-      & set_TRACK = "EXECUTED"
+      & is_valid_movableCrossing = "SUCCESS"
       & is_valid_derailerIL = "SUCCESS"
+      & set_movableCrossing = "EXECUTED"
       & set_SWITCH = "EXECUTED"
       & set_NET_ELEMENT = "EXECUTED"
       & is_valid_switchIL = "SUCCESS"
-      & set_derailerIL = "EXECUTED"
-      & is_valid_movableCrossing = "SUCCESS"
-      & set_movableCrossing = "EXECUTED"
+      & set_TRACK = "EXECUTED"
     THEN 
         RailML3_IL_SWITCH_REFERS_TO := FORCE({i_sw_il,i_sw|i_sw_il : STRING & i_sw : STRING & #e_sw_il.(e_sw_il : RailML3_switchIL & MU_WD(e_sw_il'Id) = i_sw_il & i_sw : e_sw_il'refersTo)})
       ;
@@ -6313,8 +6335,8 @@ OPERATIONS
     SELECT 
         validate_switchIL = "NOT_CHECKED"
       & set_switchIL = "EXECUTED"
-      & set_SWITCH = "EXECUTED"
       & set_IL_DERAILER = "EXECUTED"
+      & set_SWITCH = "EXECUTED"
       & set_IL_SWITCH = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
@@ -6379,9 +6401,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_switchIL = 
     SELECT 
         warnings_switchIL = "NOT_CHECKED"
-      & set_switchIS = "EXECUTED"
-      & set_SWITCH = "EXECUTED"
       & set_TVD_SECTIONS = "EXECUTED"
+      & set_SWITCH = "EXECUTED"
+      & set_switchIS = "EXECUTED"
       & set_IL_SWITCH = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
@@ -6441,8 +6463,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_tvdSections = 
     SELECT 
         is_valid_tvdSections = "NOT_CHECKED"
-      & set_assetsForInterlocking = "EXECUTED"
       & set_tvdSections = "EXECUTED"
+      & set_assetsForInterlocking = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -6489,8 +6511,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_tvdSection = 
     SELECT 
         is_valid_tvdSection = "NOT_CHECKED"
-      & set_tvdSection = "EXECUTED"
       & set_tvdSections = "EXECUTED"
+      & set_tvdSection = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -6580,12 +6602,12 @@ OPERATIONS
   set_TVD_SECTIONS = 
     SELECT 
         set_TVD_SECTIONS = "NOT_EXECUTED"
+      & set_BORDER = "EXECUTED"
       & set_NET_RELATION = "EXECUTED"
+      & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
       & set_tvdSection = "EXECUTED"
       & set_NET_ELEMENT = "EXECUTED"
-      & set_BORDER = "EXECUTED"
       & set_SPOT_LOCATION = "EXECUTED"
-      & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
     THEN 
       RailML3_IL_TVD_SECTIONS,RailML3_IL_TVD_SECTION_BERTHING_TRACKS,RailML3_IL_TVD_SECTION_DEMARCATING_ELEMENTS,set_TVD_SECTIONS := FORCE(%i_tvd.(i_tvd : allIdsOfType("tvdSection")|union({r|r : POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)) & #(e_tvd,i1,i2,ne_entry,ne_exit,openends).(openends : POW(STRING) & (e_tvd : RailML3_tvdSection & i_tvd = MU_WD(e_tvd'Id) & openends = (IF card(e_tvd'hasDemarcatingTraindetectors) = 1 & card(e_tvd'hasDemarcatingBufferstops) = 0 THEN {oe|oe : RailML3_IS_OPENEND_IDS & #sloc_oe.(sloc_oe : RailML3_IS_SPOT_LOCATIONS(oe) & #sloc_tde_correct.(sloc_tde_correct : RailML3_IS_SPOT_LOCATIONS(MU_WD(e_tvd'hasDemarcatingTraindetectors)) & sloc_tde_correct |-> sloc_oe : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1 & not(#(tde,sloc_tde).(tde : allIdsOfType("trainDetectionElement") & sloc_tde : RailML3_IS_SPOT_LOCATIONS(tde) & (sloc_tde_correct |-> sloc_tde : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1 & sloc_tde |-> sloc_oe : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1)))))} ELSE {} END) & i1 : e_tvd'hasDemarcatingTraindetectors \/ e_tvd'hasDemarcatingBufferstops \/ openends & i2 : e_tvd'hasDemarcatingTraindetectors \/ e_tvd'hasDemarcatingBufferstops \/ openends & i1 /= i2 & ne_entry : {ne,dir|ne : STRING * REAL & dir : RailML3_IS_DIRECTION & #sloc.(sloc : RailML3_IS_SPOT_LOCATIONS(i1) & ne = prj1(sloc) & ((prj2(prj1(sloc)) : {0.0,1.0} => dir : {direction_normal,direction_reverse}) & (not(prj2(prj1(sloc)) : {0.0,1.0}) => dir = prj2(sloc))))} & ne_exit : {ne,dir|ne : STRING * REAL & dir : RailML3_IS_DIRECTION & #sloc.(sloc : RailML3_IS_SPOT_LOCATIONS(i2) & ne = prj1(sloc) & ((prj2(prj1(sloc)) : {0.0,1.0} => dir : {direction_normal,direction_reverse}) & (not(prj2(prj1(sloc)) : {0.0,1.0}) => dir = prj2(sloc))))} & r = ((RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1~)[{ne_exit}] <| RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS) |> RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1[{ne_entry}]))}))),FORCE(%i_tvd.(i_tvd : allIdsOfType("tvdSection")|MU({e|e : RailML3_tvdSection & i_tvd = MU(e'Id)})'isBerthingTrack)),FORCE(%i_tvd.(i_tvd : allIdsOfType("tvdSection")|MU({e|e : RailML3_tvdSection & i_tvd = MU(e'Id)})'hasDemarcatingBufferstops \/ MU({e|e : RailML3_tvdSection & i_tvd = MU(e'Id)})'hasDemarcatingTraindetectors)),"EXECUTED"
     END;
@@ -6593,8 +6615,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_tvdSection = 
     SELECT 
         validate_tvdSection = "NOT_CHECKED"
-      & set_tvdSection = "EXECUTED"
       & set_TVD_SECTIONS = "EXECUTED"
+      & set_tvdSection = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -6632,12 +6654,12 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_tvdSection = 
     SELECT 
         warnings_tvdSection = "NOT_CHECKED"
-      & set_NETWORK = "EXECUTED"
-      & set_tvdSection = "EXECUTED"
-      & set_TVD_SECTIONS = "EXECUTED"
-      & set_BORDER = "EXECUTED"
-      & set_SPOT_LOCATION = "EXECUTED"
       & set_netElement = "EXECUTED"
+      & set_NETWORK = "EXECUTED"
+      & set_BORDER = "EXECUTED"
+      & set_TVD_SECTIONS = "EXECUTED"
+      & set_tvdSection = "EXECUTED"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -6730,8 +6752,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_signalBox = 
     SELECT 
         is_valid_signalBox = "NOT_CHECKED"
-      & set_specificInfrastructureManager = "EXECUTED"
       & set_signalBoxes = "EXECUTED"
+      & set_specificInfrastructureManager = "EXECUTED"
       & set_signalBox = "EXECUTED"
       & set_specificInfrastructureManagers = "EXECUTED"
     THEN 
@@ -6966,13 +6988,13 @@ OPERATIONS
   set_IL_SIGNAL_BOX = 
     SELECT 
         set_IL_SIGNAL_BOX = "NOT_EXECUTED"
-      & validate_route = "SUCCESS"
+      & is_valid_specificInfrastructureManager = "SUCCESS"
+      & set_ROUTE = "EXECUTED"
+      & set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER = "EXECUTED"
       & set_IL_SIGNAL = "EXECUTED"
+      & validate_route = "SUCCESS"
       & set_signalBox = "EXECUTED"
       & set_SPOT_LOCATION = "EXECUTED"
-      & is_valid_specificInfrastructureManager = "SUCCESS"
-      & set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER = "EXECUTED"
-      & set_ROUTE = "EXECUTED"
     THEN 
         RailML3_IL_ASPECT_RELATION_APPLIES_TO_ROUTES,RailML3_IL_ASPECT_RELATION_SIGNAL_ASPECTS := FORCE({i_asp,i_r|i_asp : STRING & i_r : POW(STRING) & #(e_sb,e_isp,e_asp).(e_sb : RailML3_signalBox & e_isp : e_sb'implementsSignalplans & e_asp : e_isp'aspectRelations & i_asp = MU_WD(e_asp'Id) & i_r = e_asp'appliesToRoutes)}),FORCE({i_asp_rel,asp_rel|i_asp_rel : STRING & asp_rel : struct(distant:POW(STRING * POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS)),master:POW(STRING * POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS)),slave:POW(STRING * POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS))) & #(e_sb,e_isp,e_asp_rel).(e_sb : RailML3_signalBox & e_isp : e_sb'implementsSignalplans & e_asp_rel : e_isp'aspectRelations & i_asp_rel = MU_WD(e_asp_rel'Id) & asp_rel = rec(distant:{i_sig,asp|i_sig : STRING & asp : POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS) & #e_asp.(e_asp : e_asp_rel'distantAspects & i_sig = MU_WD(e_asp'refersToSignal) & asp = RailML3_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_GENERIC_ASPECT_OF_ID[e_asp'showsAspects])},master:{i_sig,asp|i_sig : STRING & asp : POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS) & #e_asp.(e_asp : e_asp_rel'masterAspect & i_sig = MU_WD(e_asp'refersToSignal) & asp = RailML3_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_GENERIC_ASPECT_OF_ID[e_asp'showsAspects])},slave:{i_sig,asp|i_sig : STRING & asp : POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS) & #e_asp.(e_asp : e_asp_rel'slaveAspect & i_sig = MU_WD(e_asp'refersToSignal) & asp = RailML3_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_GENERIC_ASPECT_OF_ID[e_asp'showsAspects])}))})
       ;
@@ -6984,9 +7006,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_signalBox = 
     SELECT 
         warnings_signalBox = "NOT_CHECKED"
-      & set_signalBox = "EXECUTED"
-      & set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER = "EXECUTED"
       & set_IL_SIGNAL_BOX = "EXECUTED"
+      & set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER = "EXECUTED"
+      & set_signalBox = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -7024,8 +7046,8 @@ OPERATIONS
   set_specificInfrastructureManagers = 
     SELECT 
         set_specificInfrastructureManagers = "NOT_EXECUTED"
-      & read_file = "EXECUTED"
       & is_valid_interlocking = "SUCCESS"
+      & read_file = "EXECUTED"
     THEN 
       RailML3_specificInfrastructureManagers,set_specificInfrastructureManagers := FORCE(IF version = {v3_2} THEN {e|e : struct(pId:INTEGER,recId:INTEGER,type:RailML3_IL_GENERIC_TYPES,xmlLineNumber:INTEGER) & #e_g.(e_g : elementsOfType("specificInfrastructureManagers") & e = rec(pId:e_g'pId,recId:e_g'recId,type:TYPED_STRING_TO_ENUM(RailML3_IL_GENERIC_TYPES,"specificInfrastructureManagers"),xmlLineNumber:STRING_TO_INT(e_g'meta("xmlLineNumber"))))} ELSE {e|e : struct(pId:INTEGER,recId:INTEGER,type:RailML3_IL_GENERIC_TYPES,xmlLineNumber:INTEGER) & #e_g.(e_g : elementsOfType("specificIMs") & e = rec(pId:e_g'pId,recId:e_g'recId,type:TYPED_STRING_TO_ENUM(RailML3_IL_GENERIC_TYPES,"specificIMs"),xmlLineNumber:STRING_TO_INT(e_g'meta("xmlLineNumber"))))} END),"EXECUTED"
     END;
@@ -7033,8 +7055,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_specificInfrastructureManagers = 
     SELECT 
         is_valid_specificInfrastructureManagers = "NOT_CHECKED"
-      & set_specificInfrastructureManagers = "EXECUTED"
       & set_interlocking = "EXECUTED"
+      & set_specificInfrastructureManagers = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -7072,8 +7094,8 @@ OPERATIONS
   set_specificInfrastructureManager = 
     SELECT 
         set_specificInfrastructureManager = "NOT_EXECUTED"
-      & read_file = "EXECUTED"
       & is_valid_specificInfrastructureManagers = "SUCCESS"
+      & read_file = "EXECUTED"
     THEN 
       RailML3_specificInfrastructureManager,set_specificInfrastructureManager := FORCE({e|e : struct(Id:POW(STRING),pId:INTEGER,recId:INTEGER,usesTypes:POW(struct(hasAspects:POW(struct(Id:POW(STRING),genericAspect:POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS),xmlLineNumber:INTEGER)),xmlLineNumber:INTEGER)),xmlLineNumber:INTEGER) & #e_sim.(e_sim : (IF version = {v3_2} THEN elementsOfType("specificInfrastructureManager") ELSE elementsOfType("specificIM") END) & e = rec(Id:e_sim'attributes[{"id"}],pId:e_sim'pId,recId:e_sim'recId,usesTypes:{a|a : struct(hasAspects:POW(struct(Id:POW(STRING),genericAspect:POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS),xmlLineNumber:INTEGER)),xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("usesTypes" |-> e_sim'recId) & a = rec(hasAspects:{i_A|i_A : struct(Id:POW(STRING),genericAspect:POW(RailML3_IL_SIGNAL_GENERIC_ASPECTS),xmlLineNumber:INTEGER) & #e_A.(e_A : childsOfElementType("hasAspect" |-> c'recId) & i_A = rec(Id:e_A'attributes[{"id"}],genericAspect:(IF "genericAspect" : dom(e_A'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IL_SIGNAL_GENERIC_ASPECTS,"aspect_" ^ e_A'attributes("genericAspect"))} ELSE {} END),xmlLineNumber:STRING_TO_INT(e_A'meta("xmlLineNumber"))))},xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber"))))},xmlLineNumber:STRING_TO_INT(e_sim'meta("xmlLineNumber"))))}),"EXECUTED"
     END;
@@ -7186,8 +7208,8 @@ OPERATIONS
   set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER = 
     SELECT 
         set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER = "NOT_EXECUTED"
-      & set_specificInfrastructureManager = "EXECUTED"
       & is_valid_specificInfrastructureManager = "SUCCESS"
+      & set_specificInfrastructureManager = "EXECUTED"
     THEN 
       RailML3_IL_SPECIFIC_INFRASTRUCTURE_MANAGER_GENERIC_ASPECT_OF_ID,set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER := FORCE({i_asp,asp|i_asp : STRING & asp : RailML3_IL_SIGNAL_GENERIC_ASPECTS & #(e_sim,e_ut,e_asp).(e_sim : RailML3_specificInfrastructureManager & e_ut : e_sim'usesTypes & e_asp : e_ut'hasAspects & i_asp = MU_WD(e_asp'Id) & asp = MU_WD(e_asp'genericAspect))}),"EXECUTED"
     END;
@@ -7356,8 +7378,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_netElement = 
     SELECT 
         is_valid_netElement = "NOT_CHECKED"
-      & set_netElements = "EXECUTED"
       & set_netElement = "EXECUTED"
+      & set_netElements = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -7473,8 +7495,8 @@ OPERATIONS
   set_NET_ELEMENT = 
     SELECT 
         set_NET_ELEMENT = "NOT_EXECUTED"
-      & is_valid_netElement = "SUCCESS"
       & set_netElement = "EXECUTED"
+      & is_valid_netElement = "SUCCESS"
     THEN 
         RailML3_IS_NET_ELEMENT_LENGTHS,RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES := FORCE({i,l|i : STRING & l : REAL & #e.(e : RailML3_netElement & i = MU_WD(e'Id) & l = e'length)}),FORCE(%fnc_x.(fnc_x : allIdsOfType("netElement") & #iCs.(iCs : STRING * POW(STRING * REAL) & #(e_aps,e_ne).(e_ne : RailML3_netElement & MU_WD(e_ne'Id) = fnc_x & e_aps : e_ne'associatedPositioningSystem & iCs = MU_WD(e_aps'Id) |-> {i_iC,iC|i_iC : STRING & iC : REAL & #e_iC.(e_iC : e_aps'intrinsicCoordinate & i_iC = MU_WD(e_iC'Id) & iC = MU_WD(e_iC'intrinsicCoord))}))|{i_ne,iCs|iCs : STRING * POW(STRING * REAL) & (i_ne : allIdsOfType("netElement") & #(e_aps,e_ne).(e_ne : RailML3_netElement & MU_WD(e_ne'Id) = i_ne & e_aps : e_ne'associatedPositioningSystem & iCs = MU_WD(e_aps'Id) |-> {i_iC,iC|i_iC : STRING & iC : REAL & #e_iC.(e_iC : e_aps'intrinsicCoordinate & i_iC = MU_WD(e_iC'Id) & iC = MU_WD(e_iC'intrinsicCoord))}))}[{fnc_x}]))
       ;
@@ -7484,8 +7506,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_netElement = 
     SELECT 
         warnings_netElement = "NOT_CHECKED"
-      & set_NET_ELEMENT = "EXECUTED"
       & set_netElement = "EXECUTED"
+      & set_NET_ELEMENT = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -7566,8 +7588,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_netRelation = 
     SELECT 
         is_valid_netRelation = "NOT_CHECKED"
-      & set_netRelations = "EXECUTED"
       & set_netRelation = "EXECUTED"
+      & set_netRelations = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -7722,9 +7744,9 @@ OPERATIONS
   set_NET_RELATION = 
     SELECT 
         set_NET_RELATION = "NOT_EXECUTED"
+      & set_netRelation = "EXECUTED"
       & is_valid_netRelation = "SUCCESS"
       & set_NET_ELEMENT = "EXECUTED"
-      & set_netRelation = "EXECUTED"
     THEN 
         RailML3_IS_NET_RELATION,RailML3_IS_NO_NET_RELATION := FORCE({r|r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #e_nr.(e_nr : RailML3_netRelation & r = MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> direction_normal |-> (MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> direction_normal) & e_nr'positionOnA = 1.0 & e_nr'positionOnB = 0.0 & (e_nr'navigability = navigability_AB or e_nr'navigability = navigability_Both))} \/ {r|r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #e_nr.(e_nr : RailML3_netRelation & r = MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> direction_normal |-> (MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> direction_normal) & e_nr'positionOnA = 0.0 & e_nr'positionOnB = 1.0 & (e_nr'navigability = navigability_BA or e_nr'navigability = navigability_Both))} \/ {r|r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #e_nr.(e_nr : RailML3_netRelation & r = MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> direction_reverse |-> (MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> direction_reverse) & e_nr'positionOnA = 0.0 & e_nr'positionOnB = 1.0 & (e_nr'navigability = navigability_AB or e_nr'navigability = navigability_Both))} \/ {r|r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #e_nr.(e_nr : RailML3_netRelation & r = MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> direction_reverse |-> (MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> direction_reverse) & e_nr'positionOnA = 1.0 & e_nr'positionOnB = 0.0 & (e_nr'navigability = navigability_BA or e_nr'navigability = navigability_Both))} \/ {r|r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #e_nr.(e_nr : RailML3_netRelation & r = MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> direction_reverse |-> (MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> direction_normal) & e_nr'positionOnA = 0.0 & e_nr'positionOnB = 0.0 & (e_nr'navigability = navigability_AB or e_nr'navigability = navigability_Both))} \/ {r|r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #e_nr.(e_nr : RailML3_netRelation & r = MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> direction_reverse |-> (MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> direction_normal) & e_nr'positionOnA = 0.0 & e_nr'positionOnB = 0.0 & (e_nr'navigability = navigability_BA or e_nr'navigability = navigability_Both))} \/ {r|r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #e_nr.(e_nr : RailML3_netRelation & r = MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> direction_normal |-> (MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> direction_reverse) & e_nr'positionOnA = 1.0 & e_nr'positionOnB = 1.0 & (e_nr'navigability = navigability_AB or e_nr'navigability = navigability_Both))} \/ {r|r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #e_nr.(e_nr : RailML3_netRelation & r = MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> direction_normal |-> (MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> direction_reverse) & e_nr'positionOnA = 1.0 & e_nr'positionOnB = 1.0 & (e_nr'navigability = navigability_BA or e_nr'navigability = navigability_Both))}),FORCE(%fnc_x.(fnc_x : STRING & #r.(r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #(e_nr,dirA,dirB).(dirA : RailML3_IS_DIRECTION & dirB : RailML3_IS_DIRECTION & (e_nr : RailML3_netRelation & fnc_x = MU_WD(e_nr'Id) & ((e_nr'positionOnA = 1.0 => dirA = direction_normal) & (not(e_nr'positionOnA = 1.0) => dirA = direction_reverse)) & ((e_nr'positionOnB = 1.0 => dirB = direction_reverse) & (not(e_nr'positionOnB = 1.0) => dirB = direction_normal)) & (r = MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> dirA |-> (MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> dirB) or r = MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> (IF dirB = direction_normal THEN direction_reverse ELSE direction_normal END) |-> (MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> (IF dirA = direction_normal THEN direction_reverse ELSE direction_normal END))) & e_nr'navigability = navigability_None)))|{i_nr,r|i_nr : STRING & r : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #(e_nr,dirA,dirB).(dirA : RailML3_IS_DIRECTION & dirB : RailML3_IS_DIRECTION & (e_nr : RailML3_netRelation & i_nr = MU_WD(e_nr'Id) & ((e_nr'positionOnA = 1.0 => dirA = direction_normal) & (not(e_nr'positionOnA = 1.0) => dirA = direction_reverse)) & ((e_nr'positionOnB = 1.0 => dirB = direction_reverse) & (not(e_nr'positionOnB = 1.0) => dirB = direction_normal)) & (r = MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> dirA |-> (MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> dirB) or r = MU_WD(e_nr'elementB) |-> e_nr'positionOnB |-> (IF dirB = direction_normal THEN direction_reverse ELSE direction_normal END) |-> (MU_WD(e_nr'elementA) |-> e_nr'positionOnA |-> (IF dirA = direction_normal THEN direction_reverse ELSE direction_normal END))) & e_nr'navigability = navigability_None))}[{fnc_x}]))
       ;
@@ -7892,8 +7914,8 @@ OPERATIONS
   set_level = 
     SELECT 
         set_level = "NOT_EXECUTED"
-      & set_NET_RELATION = "EXECUTED"
       & is_valid_network = "SUCCESS"
+      & set_NET_RELATION = "EXECUTED"
       & set_NET_ELEMENT = "EXECUTED"
     THEN 
       RailML3_level,set_level := FORCE({e|e : struct(Id:POW(STRING),descriptionLevel:RailML3_IS_LEVEL_DESCRIPTIONLEVEL,networkResources:POW(STRING),pId:INTEGER,recId:INTEGER,xmlLineNumber:INTEGER) & #e_lv.(e_lv : elementsOfType("level") & e = rec(Id:e_lv'attributes[{"id"}],descriptionLevel:(IF "descriptionLevel" : dom(e_lv'attributes) THEN TYPED_STRING_TO_ENUM(RailML3_IS_LEVEL_DESCRIPTIONLEVEL,"descriptionLevel_" ^ e_lv'attributes("descriptionLevel")) ELSE descriptionLevel_Micro END),networkResources:{a|a : STRING & #c.(c : childsOfElementType("networkResource" |-> e_lv'recId) & "ref" |-> a : c'attributes)},pId:e_lv'pId,recId:e_lv'recId,xmlLineNumber:STRING_TO_INT(e_lv'meta("xmlLineNumber"))))}),"EXECUTED"
@@ -7902,8 +7924,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_level = 
     SELECT 
         is_valid_level = "NOT_CHECKED"
-      & set_network = "EXECUTED"
       & set_level = "EXECUTED"
+      & set_network = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -7980,10 +8002,10 @@ OPERATIONS
   set_NETWORK = 
     SELECT 
         set_NETWORK = "NOT_EXECUTED"
-      & set_NET_RELATION = "EXECUTED"
-      & is_valid_network = "SUCCESS"
       & set_level = "EXECUTED"
+      & is_valid_network = "SUCCESS"
       & is_valid_level = "SUCCESS"
+      & set_NET_RELATION = "EXECUTED"
       & set_NET_ELEMENT = "EXECUTED"
     THEN 
       RailML3_IS_NET_RESOURCES_MICRO_LEVEL,RailML3_IS_NET_RESOURCES_MESO_LEVEL,RailML3_IS_NET_RESOURCES_MACRO_LEVEL,set_NETWORK := FORCE({i_e|i_e : STRING & #e_lv.(e_lv : RailML3_level & e_lv'descriptionLevel = descriptionLevel_Micro & i_e : e_lv'networkResources)}),FORCE({i_e|i_e : STRING & #e_lv.(e_lv : RailML3_level & e_lv'descriptionLevel = descriptionLevel_Meso & i_e : e_lv'networkResources)}),FORCE({i_e|i_e : STRING & #e_lv.(e_lv : RailML3_level & e_lv'descriptionLevel = descriptionLevel_Macro & i_e : e_lv'networkResources)}),"EXECUTED"
@@ -7992,9 +8014,9 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_level = 
     SELECT 
         validate_level = "NOT_CHECKED"
+      & set_netRelation = "EXECUTED"
       & set_NETWORK = "EXECUTED"
       & set_NET_RELATION = "EXECUTED"
-      & set_netRelation = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8145,8 +8167,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_borders = 
     SELECT 
         is_valid_borders = "NOT_CHECKED"
-      & set_functionalInfrastructure = "EXECUTED"
       & set_borders = "EXECUTED"
+      & set_functionalInfrastructure = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8257,8 +8279,8 @@ OPERATIONS
   set_BORDER = 
     SELECT 
         set_BORDER = "NOT_EXECUTED"
-      & is_valid_border = "SUCCESS"
       & set_border = "EXECUTED"
+      & is_valid_border = "SUCCESS"
     THEN 
       RailML3_IS_OPENEND_IDS,set_BORDER := FORCE({i_br|#e_br.(e_br : RailML3_border & i_br = MU_WD(e_br'Id) & e_br'isOpenEnd = TRUE) & i_br : allIdsOfType("border")}),"EXECUTED"
     END;
@@ -8267,10 +8289,10 @@ OPERATIONS
     SELECT 
         validate_border = "NOT_CHECKED"
       & set_border = "EXECUTED"
-      & set_bufferStop = "EXECUTED"
       & set_BORDER = "EXECUTED"
-      & set_SPOT_LOCATION = "EXECUTED"
       & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
+      & set_bufferStop = "EXECUTED"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8363,8 +8385,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_bufferStop = 
     SELECT 
         is_valid_bufferStop = "NOT_CHECKED"
-      & set_bufferStop = "EXECUTED"
       & set_bufferStops = "EXECUTED"
+      & set_bufferStop = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8415,10 +8437,10 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_bufferStop = 
     SELECT 
         validate_bufferStop = "NOT_CHECKED"
-      & set_bufferStop = "EXECUTED"
-      & is_valid_bufferStop = "SUCCESS"
-      & set_SPOT_LOCATION = "EXECUTED"
       & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
+      & is_valid_bufferStop = "SUCCESS"
+      & set_bufferStop = "EXECUTED"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8451,8 +8473,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_crossings = 
     SELECT 
         is_valid_crossings = "NOT_CHECKED"
-      & set_crossings = "EXECUTED"
       & set_functionalInfrastructure = "EXECUTED"
+      & set_crossings = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8499,8 +8521,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_crossing = 
     SELECT 
         is_valid_crossing = "NOT_CHECKED"
-      & set_crossings = "EXECUTED"
       & set_crossing = "EXECUTED"
+      & set_crossings = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8590,8 +8612,8 @@ OPERATIONS
   set_CROSSING = 
     SELECT 
         set_CROSSING = "NOT_EXECUTED"
-      & set_NET_RELATION = "EXECUTED"
       & set_crossing = "EXECUTED"
+      & set_NET_RELATION = "EXECUTED"
       & is_valid_crossing = "SUCCESS"
     THEN 
       RailML3_IS_CROSSING_BRANCHES,set_CROSSING := FORCE(%fnc_x.(#branch.(branch : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & #(e_scr,nr).(e_scr : RailML3_crossing & fnc_x = MU_WD(e_scr'Id) & nr : e_scr'straightBranch & branch : RailML3_IS_NET_RELATION_BY_ID(MU_WD(nr'netRelationRef)))) & fnc_x : allIdsOfType("crossing")|{i_scr,branch|branch : STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION) & (#(e_scr,nr).(e_scr : RailML3_crossing & i_scr = MU_WD(e_scr'Id) & nr : e_scr'straightBranch & branch : RailML3_IS_NET_RELATION_BY_ID(MU_WD(nr'netRelationRef))) & i_scr : allIdsOfType("crossing"))}[{fnc_x}])),"EXECUTED"
@@ -8708,8 +8730,8 @@ OPERATIONS
     SELECT 
         set_DERAILER = "NOT_EXECUTED"
       & is_valid_derailerIS = "SUCCESS"
-      & set_SPOT_LOCATION = "EXECUTED"
       & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
       RailML3_IS_DERAILER_NOT_PASSABLE,set_DERAILER := FORCE(%fnc_x.(fnc_x : allIdsOfType("derailerIS") & #np.(np : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS & (prj1(np) : dom(RailML3_IS_SPOT_LOCATIONS(fnc_x)) * {direction_normal,direction_reverse} or prj2(np) : dom(RailML3_IS_SPOT_LOCATIONS(fnc_x)) * {direction_normal,direction_reverse}))|{i_der,np|i_der : allIdsOfType("derailerIS") & np : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS & (prj1(np) : dom(RailML3_IS_SPOT_LOCATIONS(i_der)) * {direction_normal,direction_reverse} or prj2(np) : dom(RailML3_IS_SPOT_LOCATIONS(i_der)) * {direction_normal,direction_reverse})}[{fnc_x}])),"EXECUTED"
     END;
@@ -8725,8 +8747,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_operationalPoints = 
     SELECT 
         is_valid_operationalPoints = "NOT_CHECKED"
-      & set_functionalInfrastructure = "EXECUTED"
       & set_operationalPoints = "EXECUTED"
+      & set_functionalInfrastructure = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8772,8 +8794,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_operationalPoint = 
     SELECT 
         is_valid_operationalPoint = "NOT_CHECKED"
-      & set_operationalPoint = "EXECUTED"
       & set_operationalPoints = "EXECUTED"
+      & set_operationalPoint = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8832,8 +8854,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_signalsIS = 
     SELECT 
         is_valid_signalsIS = "NOT_CHECKED"
-      & set_functionalInfrastructure = "EXECUTED"
       & set_signalsIS = "EXECUTED"
+      & set_functionalInfrastructure = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -8945,14 +8967,11 @@ OPERATIONS
     SELECT 
         set_SIGNAL = "NOT_EXECUTED"
       & is_valid_signalIS = "SUCCESS"
-      & set_signalIS = "EXECUTED"
-      & set_BORDER = "EXECUTED"
-      & set_SPOT_LOCATION = "EXECUTED"
       & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
+      & set_signalIS = "EXECUTED"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
-        RailML3_IS_SIGNAL_POSITIONS,RailML3_IS_SIGNAL_IS_SWITCHABLE,RailML3_IS_SIGNAL_IS_TRAIN_MOVEMENT_SIGNAL,RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION := FORCE({i_sig,pos|i_sig : allIdsOfType("signalIS") & pos : RailML3_IS_SPOT_LOCATIONS(i_sig)}),FORCE({i_sig,switchable|i_sig : STRING & switchable : BOOL & #e_sig.(e_sig : RailML3_signalIS & i_sig = MU_WD(e_sig'Id) & switchable = e_sig'isSwitchable)}),FORCE({i_sig,switchable|i_sig : STRING & switchable : BOOL & #e_sig.(e_sig : RailML3_signalIS & i_sig = MU_WD(e_sig'Id) & switchable = e_sig'isTrainMovementSignal)}),FORCE(%i_sig.(i_sig : allIdsOfType("signalIS")|{eocs|eocs : union(allIdsOfType[{"bufferStop","signalIS"}]) \/ RailML3_IS_OPENEND_IDS & #sloc_eocs.(sloc_eocs : RailML3_IS_SPOT_LOCATIONS(eocs) & #sloc_sig.(sloc_sig : RailML3_IS_SPOT_LOCATIONS(i_sig) & sloc_sig |-> sloc_eocs : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1 & not(#(inter_sig,sloc_inter_sig).(inter_sig : allIdsOfType("signalIS") & sloc_inter_sig : RailML3_IS_SPOT_LOCATIONS(inter_sig) & (sloc_sig |-> sloc_inter_sig : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1 & sloc_inter_sig |-> sloc_eocs : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1)))))}))
-      ;
-        RailML3_IS_SIGNAL_CONTROL_SECTIONS,set_SIGNAL := FORCE(%i_sig.(i_sig : allIdsOfType("signalIS")|{sig_exit,nxt|nxt : POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)) & (#(restriction_set,sloc_entry,sloc_exit).(restriction_set : POW(STRING * REAL * RailML3_IS_DIRECTION) & (sloc_entry : RailML3_IS_SPOT_LOCATIONS(i_sig) & sloc_exit : RailML3_IS_SPOT_LOCATIONS(sig_exit) & restriction_set = (RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1[{sloc_entry}] /\ (RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1~)[{sloc_exit}]) \/ {sloc_entry,sloc_exit} & nxt = (restriction_set <| RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS) |> restriction_set)) & sig_exit : RailML3_IS_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & nxt /= {})})),"EXECUTED"
+      RailML3_IS_SIGNAL_POSITIONS,RailML3_IS_SIGNAL_IS_SWITCHABLE,RailML3_IS_SIGNAL_IS_TRAIN_MOVEMENT_SIGNAL,set_SIGNAL := FORCE({i_sig,pos|i_sig : allIdsOfType("signalIS") & pos : RailML3_IS_SPOT_LOCATIONS(i_sig)}),FORCE({i_sig,switchable|i_sig : STRING & switchable : BOOL & #e_sig.(e_sig : RailML3_signalIS & i_sig = MU_WD(e_sig'Id) & switchable = e_sig'isSwitchable)}),FORCE({i_sig,switchable|i_sig : STRING & switchable : BOOL & #e_sig.(e_sig : RailML3_signalIS & i_sig = MU_WD(e_sig'Id) & switchable = e_sig'isTrainMovementSignal)}),"EXECUTED"
     END;
   
   set_switchesIS = 
@@ -9005,8 +9024,8 @@ OPERATIONS
   set_switchIS = 
     SELECT 
         set_switchIS = "NOT_EXECUTED"
-      & set_NET_RELATION = "EXECUTED"
       & is_valid_switchesIS = "SUCCESS"
+      & set_NET_RELATION = "EXECUTED"
     THEN 
       RailML3_switchIS,set_switchIS := FORCE({e|e : struct(Id:POW(STRING),branchCourse:POW(RailML3_IS_SWITCH_COURSES),continueCourse:POW(RailML3_IS_SWITCH_COURSES),leftBranch:POW(struct(branchingSpeed:POW(REAL),joiningSpeed:POW(REAL),length:POW(REAL),netRelationRef:POW(STRING),pId:INTEGER,radius:POW(REAL),recId:INTEGER,xmlLineNumber:INTEGER)),pId:INTEGER,recId:INTEGER,rightBranch:POW(struct(branchingSpeed:POW(REAL),joiningSpeed:POW(REAL),length:POW(REAL),netRelationRef:POW(STRING),pId:INTEGER,radius:POW(REAL),recId:INTEGER,xmlLineNumber:INTEGER)),straightBranch:POW(struct(branchingSpeed:POW(REAL),joiningSpeed:POW(REAL),length:POW(REAL),netRelationRef:POW(STRING),pId:INTEGER,radius:POW(REAL),recId:INTEGER,xmlLineNumber:INTEGER)),turningBranch:POW(struct(branchingSpeed:POW(REAL),joiningSpeed:POW(REAL),length:POW(REAL),netRelationRef:POW(STRING),pId:INTEGER,radius:POW(REAL),recId:INTEGER,xmlLineNumber:INTEGER)),type:POW(RailML3_IS_SWITCH_TYPES),xmlLineNumber:INTEGER) & #e_sw.(e_sw : elementsOfType("switchIS") & e = rec(Id:e_sw'attributes[{"id"}],branchCourse:(IF "branchCourse" : dom(e_sw'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SWITCH_COURSES,"course_" ^ e_sw'attributes("branchCourse"))} ELSE {} END),continueCourse:(IF "continueCourse" : dom(e_sw'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SWITCH_COURSES,"course_" ^ e_sw'attributes("continueCourse"))} ELSE {} END),leftBranch:{a|a : struct(branchingSpeed:POW(REAL),joiningSpeed:POW(REAL),length:POW(REAL),netRelationRef:POW(STRING),pId:INTEGER,radius:POW(REAL),recId:INTEGER,xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("leftBranch" |-> e_sw'recId) & a = rec(branchingSpeed:(IF "branchingSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END),joiningSpeed:(IF "joiningSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END),length:(IF "length" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END),netRelationRef:c'attributes[{"netRelationRef"}],pId:c'pId,radius:(IF "radius" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END),recId:c'recId,xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber"))))},pId:e_sw'pId,recId:e_sw'recId,rightBranch:{a|a : struct(branchingSpeed:POW(REAL),joiningSpeed:POW(REAL),length:POW(REAL),netRelationRef:POW(STRING),pId:INTEGER,radius:POW(REAL),recId:INTEGER,xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("rightBranch" |-> e_sw'recId) & a = rec(branchingSpeed:(IF "branchingSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END),joiningSpeed:(IF "joiningSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END),length:(IF "length" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END),netRelationRef:c'attributes[{"netRelationRef"}],pId:c'pId,radius:(IF "radius" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END),recId:c'recId,xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber"))))},straightBranch:{a|a : struct(branchingSpeed:POW(REAL),joiningSpeed:POW(REAL),length:POW(REAL),netRelationRef:POW(STRING),pId:INTEGER,radius:POW(REAL),recId:INTEGER,xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("straightBranch" |-> e_sw'recId) & a = rec(branchingSpeed:(IF "branchingSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END),joiningSpeed:(IF "joiningSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END),length:(IF "length" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END),netRelationRef:c'attributes[{"netRelationRef"}],pId:c'pId,radius:(IF "radius" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END),recId:c'recId,xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber"))))},turningBranch:{a|a : struct(branchingSpeed:POW(REAL),joiningSpeed:POW(REAL),length:POW(REAL),netRelationRef:POW(STRING),pId:INTEGER,radius:POW(REAL),recId:INTEGER,xmlLineNumber:INTEGER) & #c.(c : childsOfElementType("turningBranch" |-> e_sw'recId) & a = rec(branchingSpeed:(IF "branchingSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END),joiningSpeed:(IF "joiningSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END),length:(IF "length" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END),netRelationRef:c'attributes[{"netRelationRef"}],pId:c'pId,radius:(IF "radius" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END),recId:c'recId,xmlLineNumber:STRING_TO_INT(c'meta("xmlLineNumber"))))},type:(IF "type" : dom(e_sw'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SWITCH_TYPES,"switch_" ^ e_sw'attributes("type"))} ELSE {} END),xmlLineNumber:STRING_TO_INT(e_sw'meta("xmlLineNumber"))))}),"EXECUTED"
     END;
@@ -9014,8 +9033,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_switchIS = 
     SELECT 
         is_valid_switchIS = "NOT_CHECKED"
-      & set_switchIS = "EXECUTED"
       & set_switchesIS = "EXECUTED"
+      & set_switchIS = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -9300,10 +9319,10 @@ OPERATIONS
   set_SWITCH = 
     SELECT 
         set_SWITCH = "NOT_EXECUTED"
-      & set_NET_RELATION = "EXECUTED"
       & set_CROSSING = "EXECUTED"
-      & set_switchIS = "EXECUTED"
       & is_valid_switchIS = "SUCCESS"
+      & set_NET_RELATION = "EXECUTED"
+      & set_switchIS = "EXECUTED"
     THEN 
         RailML3_IS_SWITCH_IDS := FORCE({i_sw|i_sw : STRING & #e_sw.(e_sw : RailML3_switchIS & i_sw = MU_WD(e_sw'Id) & switch_switchCrossingPart /: e_sw'type)})
       ;
@@ -9314,8 +9333,8 @@ OPERATIONS
     SELECT 
         validate_switchIS = "NOT_CHECKED"
       & set_NET_RELATION = "EXECUTED"
-      & set_switchIS = "EXECUTED"
       & set_SWITCH = "EXECUTED"
+      & set_switchIS = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -9361,8 +9380,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- is_valid_tracks = 
     SELECT 
         is_valid_tracks = "NOT_CHECKED"
-      & set_functionalInfrastructure = "EXECUTED"
       & set_tracks = "EXECUTED"
+      & set_functionalInfrastructure = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -9400,8 +9419,8 @@ OPERATIONS
   set_track = 
     SELECT 
         set_track = "NOT_EXECUTED"
-      & set_SWITCH = "EXECUTED"
       & set_BORDER = "EXECUTED"
+      & set_SWITCH = "EXECUTED"
       & is_valid_tracks = "SUCCESS"
     THEN 
       RailML3_track,set_track := FORCE({e|e : struct(Id:POW(STRING),lengths:POW(REAL),pId:INTEGER,recId:INTEGER,trackBegin:POW(STRING),trackEnd:POW(STRING),type:POW(RailML3_IS_TRACK_TYPES),xmlLineNumber:INTEGER) & #e_trc.(e_trc : elementsOfType("track") & e = rec(Id:e_trc'attributes[{"id"}],lengths:{a|a : REAL & #c.(c : childsOfElementType("length" |-> e_trc'recId) & a = STRING_TO_REAL(c'attributes("value")))},pId:e_trc'pId,recId:e_trc'recId,trackBegin:{a|a : STRING & #c.(c : childsOfElementType("trackBegin" |-> e_trc'recId) & "ref" |-> a : c'attributes)},trackEnd:{a|a : STRING & #c.(c : childsOfElementType("trackEnd" |-> e_trc'recId) & "ref" |-> a : c'attributes)},type:(IF "type" : dom(e_trc'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_TRACK_TYPES,"track_" ^ e_trc'attributes("type"))} ELSE {} END),xmlLineNumber:STRING_TO_INT(e_trc'meta("xmlLineNumber"))))}),"EXECUTED"
@@ -9797,19 +9816,19 @@ OPERATIONS
   set_LINEAR_LOCATION = 
     SELECT 
         set_LINEAR_LOCATION = "NOT_EXECUTED"
+      & is_valid_linearLocation = "SUCCESS"
+      & set_linearLocation = "EXECUTED"
       & set_NETWORK = "EXECUTED"
       & set_NET_RELATION = "EXECUTED"
-      & set_linearLocation = "EXECUTED"
-      & is_valid_linearLocation = "SUCCESS"
     THEN 
-      RailML3_IS_LINEAR_LOCATION_REFERS_TO,RailML3_IS_LINEAR_LOCATIONS,RailML3_IS_LINEAR_LOCATION_SEQUENCE,set_LINEAR_LOCATION := FORCE({i_lloc,i_ref|i_lloc : STRING & i_ref : STRING & #e_lloc.(e_lloc : RailML3_linearLocation & i_lloc = MU_WD(e_lloc'Id) & i_ref = e_lloc'refersTo)}),FORCE({i_ref,lloc|i_ref : STRING & lloc : POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)) & #e_lloc.(e_lloc : RailML3_linearLocation & i_ref = e_lloc'refersTo & lloc = {l1,l2|l1 : STRING * REAL * RailML3_IS_DIRECTION & l2 : STRING * REAL * RailML3_IS_DIRECTION & (#e_ane.(e_ane : e_lloc'associatedNetElements & MU_WD(e_ane'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL & prj1(l1) = MU_WD(e_ane'netElementRef) |-> e_ane'intrinsicCoordBegin & prj1(l2) = MU_WD(e_ane'netElementRef) |-> e_ane'intrinsicCoordEnd & prj2(l1) = (IF e_ane'intrinsicCoordBegin < e_ane'intrinsicCoordEnd THEN direction_normal ELSE direction_reverse END)) & prj2(l1) = prj2(l2))} \/ {l1,l2|l1 : STRING * REAL * RailML3_IS_DIRECTION & l2 : STRING * REAL * RailML3_IS_DIRECTION & (#(e_ane1,e_ane2).(e_ane1 : e_lloc'associatedNetElements & e_ane2 : e_lloc'associatedNetElements & e_ane1 /= e_ane2 & MU_WD(e_ane1'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL & MU_WD(e_ane2'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL & prj1(l1) = MU_WD(e_ane1'netElementRef) |-> e_ane1'intrinsicCoordEnd & prj1(l2) = MU_WD(e_ane2'netElementRef) |-> e_ane2'intrinsicCoordBegin) & l1 |-> l2 : RailML3_IS_NET_RELATION)})}),FORCE({i_lloc,ne_seq|i_lloc : STRING & ne_seq : POW(INTEGER * INTEGER) & (#e_lloc.(e_lloc : RailML3_linearLocation & i_lloc = MU_WD(e_lloc'Id) & ne_seq = SORT({i|i : INTEGER & #e_ane.(e_ane : e_lloc'associatedNetElements & i : e_ane'sequence)})) & ne_seq /= {})}),"EXECUTED"
+      RailML3_IS_LINEAR_LOCATION_REFERS_TO,RailML3_IS_LINEAR_LOCATIONS,RailML3_IS_LINEAR_LOCATION_SEQUENCE,RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION,set_LINEAR_LOCATION := FORCE({i_lloc,i_ref|i_lloc : STRING & i_ref : STRING & #e_lloc.(e_lloc : RailML3_linearLocation & i_lloc = MU_WD(e_lloc'Id) & i_ref = e_lloc'refersTo)}),FORCE({i_ref,lloc|i_ref : STRING & lloc : POW(STRING * REAL * RailML3_IS_DIRECTION * (STRING * REAL * RailML3_IS_DIRECTION)) & #e_lloc.(e_lloc : RailML3_linearLocation & i_ref = e_lloc'refersTo & lloc = {l1,l2|l1 : STRING * REAL * RailML3_IS_DIRECTION & l2 : STRING * REAL * RailML3_IS_DIRECTION & (#e_ane.(e_ane : e_lloc'associatedNetElements & MU_WD(e_ane'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL & prj1(l1) = MU_WD(e_ane'netElementRef) |-> e_ane'intrinsicCoordBegin & prj1(l2) = MU_WD(e_ane'netElementRef) |-> e_ane'intrinsicCoordEnd & prj2(l1) = (IF e_ane'intrinsicCoordBegin < e_ane'intrinsicCoordEnd THEN direction_normal ELSE direction_reverse END)) & prj2(l1) = prj2(l2))} \/ {l1,l2|l1 : STRING * REAL * RailML3_IS_DIRECTION & l2 : STRING * REAL * RailML3_IS_DIRECTION & (#(e_ane1,e_ane2).(e_ane1 : e_lloc'associatedNetElements & e_ane2 : e_lloc'associatedNetElements & e_ane1 /= e_ane2 & MU_WD(e_ane1'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL & MU_WD(e_ane2'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL & prj1(l1) = MU_WD(e_ane1'netElementRef) |-> e_ane1'intrinsicCoordEnd & prj1(l2) = MU_WD(e_ane2'netElementRef) |-> e_ane2'intrinsicCoordBegin) & l1 |-> l2 : RailML3_IS_NET_RELATION)})}),FORCE({i_lloc,ne_seq|i_lloc : STRING & ne_seq : POW(INTEGER * INTEGER) & (#e_lloc.(e_lloc : RailML3_linearLocation & i_lloc = MU_WD(e_lloc'Id) & ne_seq = SORT({i|i : INTEGER & #e_ane.(e_ane : e_lloc'associatedNetElements & i : e_ane'sequence)})) & ne_seq /= {})}),FORCE(%fnc_x.(fnc_x : STRING & #ne_ko.(ne_ko : STRING * BOOL & #(e_lloc,e_ane).(e_lloc : RailML3_linearLocation & fnc_x = e_lloc'refersTo & e_ane : e_lloc'associatedNetElements & ne_ko = MU_WD(e_ane'netElementRef) |-> e_ane'keepsOrientation))|{i_ref,ne_ko|i_ref : STRING & ne_ko : STRING * BOOL & #(e_lloc,e_ane).(e_lloc : RailML3_linearLocation & i_ref = e_lloc'refersTo & e_ane : e_lloc'associatedNetElements & ne_ko = MU_WD(e_ane'netElementRef) |-> e_ane'keepsOrientation)}[{fnc_x}])),"EXECUTED"
     END;
   
   `$RESULT`,`$COUNTEREXAMPLES` <-- validate_linearLocation = 
     SELECT 
         validate_linearLocation = "NOT_CHECKED"
-      & set_NET_RELATION = "EXECUTED"
       & set_linearLocation = "EXECUTED"
+      & set_NET_RELATION = "EXECUTED"
       & set_LINEAR_LOCATION = "EXECUTED"
       & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
     THEN 
@@ -9850,8 +9869,8 @@ OPERATIONS
     SELECT 
         warnings_linearLocation = "NOT_CHECKED"
       & set_linearLocation = "EXECUTED"
-      & set_NET_ELEMENT = "EXECUTED"
       & set_LINEAR_LOCATION = "EXECUTED"
+      & set_NET_ELEMENT = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -9904,11 +9923,11 @@ OPERATIONS
         set_TRACK = "NOT_EXECUTED"
       & validate_linearLocation = "SUCCESS"
       & set_CROSSING = "EXECUTED"
-      & set_SWITCH = "EXECUTED"
       & set_BORDER = "EXECUTED"
       & set_LINEAR_LOCATION = "EXECUTED"
-      & set_SPOT_LOCATION = "EXECUTED"
+      & set_SWITCH = "EXECUTED"
       & is_valid_track = "SUCCESS"
+      & set_SPOT_LOCATION = "EXECUTED"
     THEN 
         RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS := FORCE(allIdsOfType("track") <| RailML3_IS_LINEAR_LOCATIONS)
       ;
@@ -9924,8 +9943,8 @@ OPERATIONS
         validate_track = "NOT_CHECKED"
       & set_linearLocation = "EXECUTED"
       & set_track = "EXECUTED"
-      & set_TRACK = "EXECUTED"
       & set_NET_RELATION_SUBSEQUENT_BLOCKS = "EXECUTED"
+      & set_TRACK = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -10100,8 +10119,8 @@ OPERATIONS
   set_SPOT_LOCATION = 
     SELECT 
         set_SPOT_LOCATION = "NOT_EXECUTED"
-      & set_spotLocation = "EXECUTED"
       & is_valid_spotLocation = "SUCCESS"
+      & set_spotLocation = "EXECUTED"
     THEN 
       RailML3_IS_SPOT_LOCATION_REFERS_TO,RailML3_IS_SPOT_LOCATIONS,set_SPOT_LOCATION := FORCE({i_sloc,i_ref|i_sloc : STRING & i_ref : STRING & #e_sloc.(e_sloc : RailML3_spotLocation & i_sloc = MU_WD(e_sloc'Id) & i_ref = e_sloc'refersTo)}),FORCE(%fnc_x.(fnc_x : dom({i_ref_ne_dir|i_ref_ne_dir : STRING * (STRING * REAL * RailML3_IS_DIRECTION) & #e_sloc.(e_sloc : RailML3_spotLocation & prj1(i_ref_ne_dir) = e_sloc'refersTo & prj1(prj2(i_ref_ne_dir)) = MU_WD(e_sloc'netElementRef) |-> e_sloc'intrinsicCoord & (e_sloc'applicationDirection = direction_both => prj2(prj2(i_ref_ne_dir)) = direction_normal or prj2(prj2(i_ref_ne_dir)) = direction_reverse) & (not(e_sloc'applicationDirection = direction_both) => prj2(prj2(i_ref_ne_dir)) = e_sloc'applicationDirection))})|{i_ref_ne_dir|i_ref_ne_dir : STRING * (STRING * REAL * RailML3_IS_DIRECTION) & #e_sloc.(e_sloc : RailML3_spotLocation & prj1(i_ref_ne_dir) = e_sloc'refersTo & prj1(prj2(i_ref_ne_dir)) = MU_WD(e_sloc'netElementRef) |-> e_sloc'intrinsicCoord & (e_sloc'applicationDirection = direction_both => prj2(prj2(i_ref_ne_dir)) = direction_normal or prj2(prj2(i_ref_ne_dir)) = direction_reverse) & (not(e_sloc'applicationDirection = direction_both) => prj2(prj2(i_ref_ne_dir)) = e_sloc'applicationDirection))}[{fnc_x}])),"EXECUTED"
     END;
@@ -10148,8 +10167,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- warnings_spotLocation = 
     SELECT 
         warnings_spotLocation = "NOT_CHECKED"
-      & validate_spotLocation = "SUCCESS"
       & set_spotLocation = "EXECUTED"
+      & validate_spotLocation = "SUCCESS"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -10187,8 +10206,8 @@ OPERATIONS
   set_linearCoordinate = 
     SELECT 
         set_linearCoordinate = "NOT_EXECUTED"
-      & set_NET_ELEMENT = "EXECUTED"
       & set_LINEAR_LOCATION = "EXECUTED"
+      & set_NET_ELEMENT = "EXECUTED"
       & set_SPOT_LOCATION = "EXECUTED"
     THEN 
       RailML3_linearCoordinate,set_linearCoordinate := FORCE({e|e : struct(measure:POW(REAL),pId:INTEGER,positioningSystemRef:POW(STRING),recId:INTEGER,refersTo:STRING,xmlLineNumber:INTEGER) & #e_lc.(e_lc : elementsOfType("linearCoordinate") & e = rec(measure:(IF "measure" : dom(e_lc'attributes) & GET_STRING_IS_NUMBER(e_lc'attributes("measure")) = TRUE THEN {STRING_TO_REAL(e_lc'attributes("measure"))} ELSE {} END),pId:e_lc'pId,positioningSystemRef:e_lc'attributes[{"positioningSystemRef"}],recId:e_lc'recId,refersTo:data(e_lc'pId)'attributes("id"),xmlLineNumber:STRING_TO_INT(e_lc'meta("xmlLineNumber"))))}),"EXECUTED"
@@ -10335,8 +10354,8 @@ OPERATIONS
   set_CO_NAME = 
     SELECT 
         set_CO_NAME = "NOT_EXECUTED"
-      & set_name = "EXECUTED"
       & is_valid_name = "SUCCESS"
+      & set_name = "EXECUTED"
     THEN 
       RailML3_CO_NAMES,set_CO_NAME := FORCE({i,n|i : STRING * STRING & n : STRING & #e_n.(e_n : RailML_name & i = e_n'refersTo |-> MU_WD(e_n'language) & n = MU_WD(e_n'name))}),"EXECUTED"
     END;
@@ -10344,8 +10363,8 @@ OPERATIONS
   `$RESULT`,`$COUNTEREXAMPLES` <-- EBO_CheckSwitchSpeeds = 
     SELECT 
         EBO_CheckSwitchSpeeds = "NOT_CHECKED"
-      & set_switchIS = "EXECUTED"
       & is_valid_switchIS = "SUCCESS"
+      & set_switchIS = "EXECUTED"
     THEN 
         VAR `$ResultTuple`,`$ResultSrings`
         IN
@@ -10384,7 +10403,7 @@ DEFINITIONS
   EXPRESSION RAND(rnd_low,rnd_up);
   EXPRESSION GET_IS_ENABLED_TRANSITION(operation_name);
   EXPRESSION REAL_TO_DEC_STRING(realnr,precision);
-  EXPRESSION VARS_AS_TYPED_STRING(prob_state_id);
+  EXPRESSION VARS_AS_TYPED_STRING(`prefix`);
   SUBSTITUTION SEE(see_file);
   PREDICATE ENABLED_TRANSITION(operation_name);
   EXPRESSION GET_STRING_IS_ALPHANUMERIC(sss);
@@ -10401,6 +10420,7 @@ DEFINITIONS
   EXPRESSION STRING_REV(xxx);
   EXPRESSION errorParent(TypeAsString,ParentTypeAsString,lineNr);
   EXPRESSION REGEX_ISEARCH_ALL(re_str,re_pat);
+  EXPRESSION STORE(stored_value);
   EXPRESSION RACOS(x);
   EXPRESSION RACOT(x);
   EXPRESSION FACTORIAL(x);
@@ -10502,6 +10522,7 @@ DEFINITIONS
   EXPRESSION NON_DET_OUTPUT_STATE;
   EXPRESSION PROJECT_INFO(info_field_name);
   EXPRESSION random_numset(prob_numerator,prob_denominator,low,up);
+  EXPRESSION RECALL_VALUE(key);
   EXPRESSION LOGx(m,b,x);
   PREDICATE ENABLED(operation_name);
   SUBSTITUTION PRINT(x);
@@ -10543,6 +10564,7 @@ DEFINITIONS
   EXPRESSION RADD(x,y);
   EXPRESSION READ_XML(file,encoding);
   PREDICATE printf(format_string,value);
+  PREDICATE STORE_VALUE(key,stored_value);
   EXPRESSION PROJECT_STATISTICS(info_field_name);
   EXPRESSION RADIANS(x);
   PREDICATE REGEX_MATCH(re_str,re_pat);

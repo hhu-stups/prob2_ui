@@ -233,14 +233,20 @@ DEFINITIONS
     VISB_SVG_HOVERS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
-    VISB_SVG_EVENTS41 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
+    VISB_SVG_EVENTS41 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
+    VISB_SVG_EVENTS42 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_changeSignalState", predicate: ("SignalId=","\""^x^"\"") )};    
+    VISB_SVG_HOVERS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    VISB_SVG_OBJECTS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
+
+    // Following for generated machines:
+    /*VISB_SVG_EVENTS41 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
     VISB_SVG_EVENTS42 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_changeSignalState", predicate: ("SignalId=","\""^x^"\"") )};    
     VISB_SVG_HOVERS4 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
-    VISB_SVG_OBJECTS4 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
+    VISB_SVG_OBJECTS4 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};*/
 
-    VISB_SVG_EVENTS51 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainArrive" )}; // pred : position fits OE
-    VISB_SVG_EVENTS52 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainLeave" )};
-    VISB_SVG_HOVERS5 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
+    //VISB_SVG_EVENTS51 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainArrive" )}; // pred : position fits OE
+    //VISB_SVG_EVENTS52 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainLeave" )};
+    //VISB_SVG_HOVERS5 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     // start RouteRes?
 
     ignoreDirection(Relation) == dom({ r, cr | cr : Relation & r = prj1(prj1(cr)) |-> prj1(prj2(cr)) });
