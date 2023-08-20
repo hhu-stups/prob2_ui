@@ -312,8 +312,6 @@ public class RailMLStage extends Stage {
 
 		Api api = injector.getInstance(Api.class);
 		StateSpace stateSpace = api.b_load(graphMachine.toAbsolutePath().toString());
-		ClassicalB no_error = new ClassicalB("no_error = TRUE");
-		stateSpace.subscribe(this, no_error);
 
 		// TODO: Adapt invalid machine names
 
@@ -328,7 +326,7 @@ public class RailMLStage extends Stage {
 
 		// state.getStateErrors();
 		boolean inv_ok = currentState.isInvariantOk();
-		boolean import_success = currentState.getValues().get(no_error).toString().equals("TRUE");
+		boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
 
 		if (animationMachineCheckbox.isSelected() && inv_ok && import_success) {
 			File animationMachine = new File(Paths.get(generationPath.toString()).resolve(animationFileName.getValue()).toString());
