@@ -16,7 +16,6 @@ public final class CheckedIcon extends BindableGlyph {
 		final String styleClass;
 		final FontAwesome.Glyph icon;
 		switch (checked) {
-			case UNKNOWN:
 			case NOT_CHECKED:
 				styleClass = "not-checked";
 				icon = FontAwesome.Glyph.QUESTION_CIRCLE;

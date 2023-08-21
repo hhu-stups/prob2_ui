@@ -1,7 +1,7 @@
 package de.prob2.ui.verifications;
 
 public enum Checked {
-	NOT_CHECKED, SUCCESS, FAIL, TIMEOUT, INTERRUPTED, PARSE_ERROR, LIMIT_REACHED, UNKNOWN;
+	NOT_CHECKED, SUCCESS, FAIL, TIMEOUT, INTERRUPTED, PARSE_ERROR, LIMIT_REACHED;
 	
 	public Checked and(final Checked other) {
 		if (this == PARSE_ERROR || this == FAIL) {
