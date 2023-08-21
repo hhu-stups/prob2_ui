@@ -5,10 +5,13 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.*;
+import de.prob.exception.ProBError;
+import de.prob.ltl.parser.WarningListener;
 import de.prob.scripting.Api;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.*;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -92,6 +95,7 @@ public class RailMLStage extends Stage {
 	private final Injector injector;
 
 	private final I18n i18n;
+	private final ErrorDisplayFilter errorDisplayFilter;
 
 	private final FileChooserManager fileChooserManager;
 	private final BackgroundUpdater updater;
@@ -99,13 +103,15 @@ public class RailMLStage extends Stage {
 
 	@Inject
 	public RailMLStage(final StageManager stageManager, final CurrentProject currentProject,
-	                      final Injector injector, final I18n i18n, final FileChooserManager fileChooserManager,
-	                      final StopActions stopActions, final RailMLFile railMLFile) {
+	                   final Injector injector, final I18n i18n, final ErrorDisplayFilter errorDisplayFilter,
+	                   final FileChooserManager fileChooserManager,
+	                   final StopActions stopActions, final RailMLFile railMLFile) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.i18n = i18n;
+		this.errorDisplayFilter = errorDisplayFilter;
 		this.fileChooserManager = fileChooserManager;
 		this.updater = new BackgroundUpdater("railml import executor");
 		stopActions.add(this.updater::shutdownNow);
@@ -264,6 +270,16 @@ public class RailMLStage extends Stage {
 						}
 					});
 				}
+			} catch (ProBError e) {
+				Platform.runLater(() -> {
+					boolean isRailMLError = e.getErrors().stream().allMatch(error -> error.getMessage().startsWith("RailML"));
+					if (isRailMLError) {
+						stageManager.makeExceptionAlert(e, "railml.stage.import.error.header", "railml.stage.import.error.content").showAndWait();
+					} else {
+						stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait();
+					}
+					this.toFront();
+				});
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}
@@ -323,6 +339,16 @@ public class RailMLStage extends Stage {
 
 		Api api = injector.getInstance(Api.class);
 		StateSpace stateSpace = api.b_load(graphMachine.toAbsolutePath().toString());
+		stateSpace.addWarningListener(warnings -> {
+				final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
+				if (!filteredWarnings.isEmpty()) {
+					Platform.runLater(() -> {
+						final WarningAlert alert = injector.getInstance(WarningAlert.class);
+						alert.getWarnings().setAll(filteredWarnings);
+						alert.show();
+					});
+				}
+			});
 
 		// TODO: Adapt invalid machine names
 
