@@ -61,32 +61,9 @@ java {
 def exports = []
 def opens = []
 
-// TODO: investigate which of these are still required
-// Required by centerdevice-nsmenufx (as of version 2.1.6; see https://github.com/codecentric/NSMenuFX/issues/29)
-/*exports += [
-	"javafx.controls/com.sun.javafx.scene.control",
-	"javafx.graphics/com.sun.glass.ui",
-	"javafx.graphics/com.sun.javafx.menu",
-	"javafx.graphics/com.sun.javafx.tk",
-	"javafx.base/com.sun.javafx.collections",
-	// Uncomment when getting WebView console messages with com.sun.javafx.webkit.WebConsoleListener
-	// (see the corresponding commented out code in de.prob2.ui.visb.VisBView).
-	//"javafx.web/com.sun.javafx.webkit",
-]
-opens += [
-	"javafx.graphics/com.sun.glass.ui.mac",
-	"javafx.graphics/com.sun.javafx.tk.quantum",
-]*/
-
-// Required by controlsfx, because we are still using the Java 8-compatible version.
-// This has been fixed as of ControlsFX 11.0.0 (see https://github.com/controlsfx/controlsfx/issues/1100), but that release is only compatible with Java 11.
-/*exports += [
-	"javafx.graphics/com.sun.javafx.css",
-]*/
-
-/*exports += [
-	"javafx.base/com.sun.javafx.event",
-]*/
+// Uncomment when getting WebView console messages with com.sun.javafx.webkit.WebConsoleListener
+// (see the corresponding commented out code in de.prob2.ui.visb.VisBView).
+//exports += ["javafx.web/com.sun.javafx.webkit"]
 
 application {
 	// Our actual application class is de.prob2.ui.ProB2.
