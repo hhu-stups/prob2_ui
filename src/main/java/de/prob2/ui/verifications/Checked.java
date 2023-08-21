@@ -1,14 +1,14 @@
 package de.prob2.ui.verifications;
 
 public enum Checked {
-	NOT_CHECKED, SUCCESS, FAIL, TIMEOUT, INTERRUPTED, PARSE_ERROR, LIMIT_REACHED;
+	NOT_CHECKED, SUCCESS, FAIL, TIMEOUT, INTERRUPTED, PARSE_ERROR;
 	
 	public Checked and(final Checked other) {
 		if (this == PARSE_ERROR || this == FAIL) {
 			return this;
 		} else if (other == PARSE_ERROR || other == FAIL) {
 			return other;
-		} else if (this == TIMEOUT || this == INTERRUPTED || this == LIMIT_REACHED) {
+		} else if (this == TIMEOUT || this == INTERRUPTED) {
 			return this;
 		} else if (this == SUCCESS) {
 			return other;
@@ -30,9 +30,9 @@ public enum Checked {
 			return other;
 		} else if (other == FAIL) {
 			return this;
-		} else if (this == TIMEOUT || this == INTERRUPTED || this == LIMIT_REACHED) {
+		} else if (this == TIMEOUT || this == INTERRUPTED) {
 			return other;
-		} else if (other == TIMEOUT || other == INTERRUPTED || other == LIMIT_REACHED) {
+		} else if (other == TIMEOUT || other == INTERRUPTED) {
 			return this;
 		} else {
 			return other;

@@ -36,7 +36,6 @@ public final class CheckedIcon extends BindableGlyph {
 				icon = FontAwesome.Glyph.PAUSE;
 				break;
 			
-			case LIMIT_REACHED:
 			case TIMEOUT:
 				styleClass = "timeout";
 				icon = FontAwesome.Glyph.CLOCK_ALT;

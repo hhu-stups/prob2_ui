@@ -150,7 +150,7 @@ public final class SymbolicCheckingFormulaHandler {
 				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.interrupted"));
 				break;
 			case LIMIT_REACHED:
-				item.setResultItem(new CheckingResultItem(Checked.LIMIT_REACHED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached"));
+				item.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached"));
 				break;
 			default:
 				break;

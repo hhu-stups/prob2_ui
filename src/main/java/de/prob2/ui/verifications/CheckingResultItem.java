@@ -30,7 +30,6 @@ public class CheckingResultItem {
 			case TIMEOUT: return "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout";
 			case INTERRUPTED: return "common.result.interrupted.header";
 			case PARSE_ERROR: return "common.result.couldNotParseFormula.header";
-			case LIMIT_REACHED: return "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached";
 			default: throw new IllegalArgumentException("Unhandled checked status: " + this.getChecked());
 		}
 	}
