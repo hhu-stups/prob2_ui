@@ -17,8 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public abstract class RevealInExplorer {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(OpenFile.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(RevealInExplorer.class);
 
 	protected final StageManager stageManager;
 	private final ExecutorService executorService;
