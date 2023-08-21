@@ -1,17 +1,14 @@
 package de.prob2.ui.verifications;
 
-import de.prob2.ui.layout.BindableGlyph;
 import javafx.scene.control.TreeTableCell;
-import org.controlsfx.glyphfont.FontAwesome;
 
 public final class TreeCheckedCell<T> extends TreeTableCell<T, Checked> {
 	public TreeCheckedCell() {
 		super();
 		
 		this.setText(null);
-		final BindableGlyph iconView = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		final CheckedIcon iconView = new CheckedIcon();
 		iconView.setVisible(false);
-		iconView.getStyleClass().addAll("checked-icon", "not-checked");
 		this.setGraphic(iconView);
 	}
 	
@@ -19,51 +16,12 @@ public final class TreeCheckedCell<T> extends TreeTableCell<T, Checked> {
 	protected void updateItem(final Checked item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		final BindableGlyph graphic = (BindableGlyph)this.getGraphic();
-		graphic.getStyleClass().removeAll("not-checked", "success", "fail", "interrupted", "parse-error");
+		final CheckedIcon graphic = (CheckedIcon)this.getGraphic();
 		if (empty || item == null) {
 			graphic.setVisible(false);
 		} else {
 			graphic.setVisible(true);
-			final String styleClass;
-			final FontAwesome.Glyph icon;
-			switch (item) {
-				case NOT_CHECKED:
-					styleClass = "not-checked";
-					icon = FontAwesome.Glyph.QUESTION_CIRCLE;
-					break;
-				
-				case SUCCESS:
-					styleClass = "success";
-					icon = FontAwesome.Glyph.CHECK;
-					break;
-				
-				case FAIL:
-					styleClass = "fail";
-					icon = FontAwesome.Glyph.REMOVE;
-					break;
-				
-				case INTERRUPTED:
-					styleClass = "interrupted";
-					icon = FontAwesome.Glyph.PAUSE;
-					break;
-				
-				case LIMIT_REACHED:
-				case TIMEOUT:
-					styleClass = "timeout";
-					icon = FontAwesome.Glyph.CLOCK_ALT;
-					break;
-				
-				case PARSE_ERROR:
-					styleClass = "parse-error";
-					icon = FontAwesome.Glyph.EXCLAMATION_TRIANGLE;
-					break;
-				
-				default:
-					throw new IllegalArgumentException("Unknown checking status: " + item);
-			}
-			graphic.getStyleClass().add(styleClass);
-			graphic.setIcon(icon);
+			graphic.setChecked(item);
 		}
 	}
 }
