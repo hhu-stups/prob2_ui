@@ -77,8 +77,14 @@ public abstract class RevealInExplorer {
 		}
 
 		@Override
-		protected void revealInExplorerImpl(File file, File parent) throws Exception {
-			Desktop.getDesktop().open(parent);
+		protected void revealInExplorerImpl(File file, File parent) throws IOException {
+			Desktop desktop = Desktop.getDesktop();
+			try {
+				// As of Java 17, this is only supported on macOS.
+				desktop.browseFileDirectory(file);
+			} catch (UnsupportedOperationException ignored) {
+				desktop.open(parent);
+			}
 		}
 	}
 
@@ -103,18 +109,6 @@ public abstract class RevealInExplorer {
 		@Override
 		protected void revealInExplorerImpl(File file, File parent) throws Exception {
 			Runtime.getRuntime().exec(new String[]{"xdg-open", parent.toString()}).waitFor();
-		}
-	}
-
-	public static final class OpenR extends RevealInExplorer {
-
-		public OpenR(StageManager stageManager, StopActions stopActions) {
-			super(stageManager, stopActions);
-		}
-
-		@Override
-		protected void revealInExplorerImpl(File file, File parent) throws Exception {
-			Runtime.getRuntime().exec(new String[]{"open", "-R", file.toString()}).waitFor();
 		}
 	}
 }

@@ -69,8 +69,6 @@ public class ProB2Module extends AbstractModule {
 	private static RevealInExplorer provideRevealInExplorer(StageManager stageManager, StopActions stopActions) {
 		if (IS_WINDOWS) {
 			return new RevealInExplorer.ExplorerSelect(stageManager, stopActions);
-		} else if (IS_MAC) {
-			return new RevealInExplorer.OpenR(stageManager, stopActions);
 		} else {
 			return new RevealInExplorer.DesktopOpen(stageManager, stopActions);
 		}
