@@ -50,11 +50,7 @@ public final class OrValidationExpression implements IValidationExpression {
 			return Checked.SUCCESS;
 		}
 		
-		if (leftRes == Checked.FAIL && rightRes == Checked.FAIL) {
-			return Checked.FAIL;
-		} else {
-			return Checked.UNKNOWN;
-		}
+		return leftRes.or(rightRes);
 	}
 
 	@Override
