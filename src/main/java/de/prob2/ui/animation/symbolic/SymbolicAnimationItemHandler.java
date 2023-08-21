@@ -35,7 +35,7 @@ public final class SymbolicAnimationItemHandler {
 				item.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound"));
 				break;
 			case TIMEOUT:
-				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.timeout"));
+				item.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "animation.symbolic.resultHandler.sequence.result.timeout"));
 				break;
 			case INTERRUPTED:
 				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted"));
