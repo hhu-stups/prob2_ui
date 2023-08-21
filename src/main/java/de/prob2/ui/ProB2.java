@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import ch.qos.logback.classic.ClassicConstants;
 
@@ -76,26 +74,6 @@ public class ProB2 extends Application {
 	private Injector injector;
 	private I18n i18n;
 	private StopActions stopActions;
-
-	private boolean isJavaVersionOk(final String javaVersion) {
-		final Matcher javaVersionMatcher = Pattern.compile("(?:1\\.)?(\\d+).*_(\\d+).*").matcher(javaVersion);
-		if (javaVersionMatcher.matches()) {
-			final int majorVersion;
-			final int updateNumber;
-			try {
-				majorVersion = Integer.parseInt(javaVersionMatcher.group(1));
-				updateNumber = Integer.parseInt(javaVersionMatcher.group(2));
-			} catch (NumberFormatException e) {
-				logger.warn("Failed to parse Java version; skipping version check", e);
-				return true;
-			}
-
-			return majorVersion > 8 || (majorVersion == 8 && updateNumber >= 60);
-		} else {
-			logger.info("Java version ({}) does not match pre-Java 9 format (this is not an error); skipping version check", javaVersion);
-			return true;
-		}
-	}
 
 	private static IllegalStateException die(final String message, final int exitCode) {
 		if (message != null) {
@@ -257,19 +235,6 @@ public class ProB2 extends Application {
 				}
 			});
 		});
-
-		final String javaVersion = System.getProperty("java.version");
-		if (!isJavaVersionOk(javaVersion)) {
-			Platform.runLater(() -> {
-				stageManager.makeAlert(
-						Alert.AlertType.ERROR,
-						"internal.javaVersionTooOld.header",
-						"internal.javaVersionTooOld.content",
-						javaVersion
-				).showAndWait();
-				throw die("Java version too old: " + javaVersion, 1);
-			});
-		}
 
 		final Thread sharedAnimatorPreloader = new Thread(() -> injector.getInstance(MachineLoader.class).startSharedAnimator(), "Shared Animator Preloader");
 		this.stopActions.add(sharedAnimatorPreloader::interrupt);

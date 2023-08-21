@@ -9,10 +9,6 @@ import javafx.scene.layout.Region;
 /**
  * <p>Slightly modified version of {@link TabPane} that calculates a proper minimum size based on its contents.</p>
  */
-// Region.snapSize(double) is deprecated since Java 9,
-// but its suggested replacement methods (snapSizeX and snapSizeY) only exist since Java 9.
-// Because we still target Java 8, we have no choice other than using the deprecated method.
-@SuppressWarnings("deprecation")
 public final class BetterTabPane extends TabPane {
 	public BetterTabPane() {
 		this((Tab[])null);
@@ -41,7 +37,7 @@ public final class BetterTabPane extends TabPane {
 		
 		double highestMinWidth = 0.0;
 		for (final Tab tab : this.getTabs()) {
-			highestMinWidth = Math.max(highestMinWidth, this.snapSize(tab.getContent().minWidth(-1)));
+			highestMinWidth = Math.max(highestMinWidth, this.snapSizeX(tab.getContent().minWidth(-1)));
 		}
 		
 		final boolean isHorizontal = this.isHorizontal();
@@ -50,11 +46,11 @@ public final class BetterTabPane extends TabPane {
 		if (tabHeaderArea == null) {
 			tabHeaderAreaSize = 0.0;
 		} else {
-			tabHeaderAreaSize = snapSize(isHorizontal ? tabHeaderArea.prefWidth(-1) : tabHeaderArea.prefHeight(-1));
+			tabHeaderAreaSize = snapSizeX(isHorizontal ? tabHeaderArea.prefWidth(-1) : tabHeaderArea.prefHeight(-1));
 		}
 		
 		double prefWidth = isHorizontal ? Math.max(highestMinWidth, tabHeaderAreaSize) : highestMinWidth + tabHeaderAreaSize;
-		return snapSize(prefWidth) + snappedRightInset() + snappedLeftInset();
+		return snapSizeX(prefWidth) + snappedRightInset() + snappedLeftInset();
 	}
 	
 	@Override
@@ -66,7 +62,7 @@ public final class BetterTabPane extends TabPane {
 		
 		double highestMinHeight = 0.0;
 		for (final Tab tab : this.getTabs()) {
-			highestMinHeight = Math.max(highestMinHeight, this.snapSize(tab.getContent().minHeight(-1)));
+			highestMinHeight = Math.max(highestMinHeight, this.snapSizeY(tab.getContent().minHeight(-1)));
 		}
 		
 		final boolean isHorizontal = this.isHorizontal();
@@ -75,10 +71,10 @@ public final class BetterTabPane extends TabPane {
 		if (tabHeaderArea == null) {
 			tabHeaderAreaSize = 0.0;
 		} else {
-			tabHeaderAreaSize = snapSize(isHorizontal ? tabHeaderArea.prefHeight(-1) : tabHeaderArea.prefWidth(-1));
+			tabHeaderAreaSize = snapSizeY(isHorizontal ? tabHeaderArea.prefHeight(-1) : tabHeaderArea.prefWidth(-1));
 		}
 		
-		double prefWidth = isHorizontal ? highestMinHeight + snapSize(tabHeaderAreaSize) : Math.max(highestMinHeight, tabHeaderAreaSize);
-		return snapSize(prefWidth) + snappedTopInset() + snappedBottomInset();
+		double prefWidth = isHorizontal ? highestMinHeight + snapSizeY(tabHeaderAreaSize) : Math.max(highestMinHeight, tabHeaderAreaSize);
+		return snapSizeY(prefWidth) + snappedTopInset() + snappedBottomInset();
 	}
 }
