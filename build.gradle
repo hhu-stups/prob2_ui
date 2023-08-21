@@ -297,7 +297,7 @@ task jpackage(type: Exec) {
 	final jpackageIconsDir = new File(jpackageFilesDir, "icons")
 	final jpackageLaunchersDir = new File(jpackageFilesDir, "launchers")
 	final shadowJarFile = shadowJar.archiveFile.get().asFile
-	final destinationDir = project.distsDirectory.get().asFile
+	final destinationDir = base.distsDirectory.get().asFile
 	executable = "jpackage"
 	args = [
 		"--verbose",
