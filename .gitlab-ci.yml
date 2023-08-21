@@ -36,7 +36,7 @@ test:jdk-17-linux:
     - apt-get install --assume-yes build-essential fakeroot
     - apt-get install --assume-yes bash
   script:
-    - ./gradlew ${GRADLE_OPTIONS} check jpackage
+    - ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar jpackage
 
 test:jdk-17-macos-x86_64:
   extends: .test-common
