@@ -1,18 +1,16 @@
 package de.prob2.ui.menu;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StopActions;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,12 +19,9 @@ public abstract class OpenFile {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OpenFile.class);
 
 	protected final StageManager stageManager;
-	private final ExecutorService executorService;
 
-	protected OpenFile(StageManager stageManager, StopActions stopActions) {
+	protected OpenFile(StageManager stageManager) {
 		this.stageManager = stageManager;
-		this.executorService = Executors.newSingleThreadExecutor();
-		stopActions.add(this.executorService::shutdownNow);
 	}
 
 	public final void open(Path file) {
@@ -46,7 +41,7 @@ public abstract class OpenFile {
 				return;
 			}
 
-			executorService.submit(() -> {
+			Thread thread = new Thread(() -> {
 				try {
 					openImpl(fileAsFile);
 				} catch (Exception e) {
@@ -59,7 +54,9 @@ public abstract class OpenFile {
 						alert.show();
 					});
 				}
-			});
+			}, "OpenFile background runner");
+			thread.setDaemon(true);
+			thread.start();
 		}
 	}
 
@@ -67,8 +64,8 @@ public abstract class OpenFile {
 
 	public static final class DesktopOpen extends OpenFile {
 
-		public DesktopOpen(StageManager stageManager, StopActions stopActions) {
-			super(stageManager, stopActions);
+		public DesktopOpen(StageManager stageManager) {
+			super(stageManager);
 		}
 
 		@Override
@@ -79,8 +76,8 @@ public abstract class OpenFile {
 
 	public static final class ExplorerRoot extends OpenFile {
 
-		public ExplorerRoot(StageManager stageManager, StopActions stopActions) {
-			super(stageManager, stopActions);
+		public ExplorerRoot(StageManager stageManager) {
+			super(stageManager);
 		}
 
 		@Override
@@ -91,8 +88,8 @@ public abstract class OpenFile {
 
 	public static final class XdgOpen extends OpenFile {
 
-		public XdgOpen(StageManager stageManager, StopActions stopActions) {
-			super(stageManager, stopActions);
+		public XdgOpen(StageManager stageManager) {
+			super(stageManager);
 		}
 
 		@Override
@@ -103,8 +100,8 @@ public abstract class OpenFile {
 
 	public static final class Open extends OpenFile {
 
-		public Open(StageManager stageManager, StopActions stopActions) {
-			super(stageManager, stopActions);
+		public Open(StageManager stageManager) {
+			super(stageManager);
 		}
 
 		@Override

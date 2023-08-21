@@ -1,18 +1,16 @@
 package de.prob2.ui.menu;
 
-import java.awt.*;
+import java.awt.Desktop;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StopActions;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +18,9 @@ public abstract class RevealInExplorer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RevealInExplorer.class);
 
 	protected final StageManager stageManager;
-	private final ExecutorService executorService;
 
-	protected RevealInExplorer(StageManager stageManager, StopActions stopActions) {
+	protected RevealInExplorer(StageManager stageManager) {
 		this.stageManager = stageManager;
-		this.executorService = Executors.newSingleThreadExecutor();
-		stopActions.add(this.executorService::shutdownNow);
 	}
 
 	public final void revealInExplorer(Path file) {
@@ -49,7 +44,7 @@ public abstract class RevealInExplorer {
 					return;
 				}
 
-				executorService.submit(() -> {
+				Thread thread = new Thread(() -> {
 					try {
 						revealInExplorerImpl(fileAsFile, parentAsFile);
 					} catch (Exception e) {
@@ -62,7 +57,9 @@ public abstract class RevealInExplorer {
 							alert.show();
 						});
 					}
-				});
+				}, "RevealInExplorer background runner");
+				thread.setDaemon(true);
+				thread.start();
 			}
 		}
 	}
@@ -71,8 +68,8 @@ public abstract class RevealInExplorer {
 
 	public static final class DesktopOpen extends RevealInExplorer {
 
-		public DesktopOpen(StageManager stageManager, StopActions stopActions) {
-			super(stageManager, stopActions);
+		public DesktopOpen(StageManager stageManager) {
+			super(stageManager);
 		}
 
 		@Override
@@ -89,8 +86,8 @@ public abstract class RevealInExplorer {
 
 	public static final class ExplorerSelect extends RevealInExplorer {
 
-		public ExplorerSelect(StageManager stageManager, StopActions stopActions) {
-			super(stageManager, stopActions);
+		public ExplorerSelect(StageManager stageManager) {
+			super(stageManager);
 		}
 
 		@Override
@@ -101,8 +98,8 @@ public abstract class RevealInExplorer {
 
 	public static final class XdgOpen extends RevealInExplorer {
 
-		public XdgOpen(StageManager stageManager, StopActions stopActions) {
-			super(stageManager, stopActions);
+		public XdgOpen(StageManager stageManager) {
+			super(stageManager);
 		}
 
 		@Override

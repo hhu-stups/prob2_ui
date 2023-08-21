@@ -66,18 +66,18 @@ public class ProB2Module extends AbstractModule {
 
 	@Provides
 	@Singleton
-	private static RevealInExplorer provideRevealInExplorer(StageManager stageManager, StopActions stopActions) {
+	private static RevealInExplorer provideRevealInExplorer(StageManager stageManager) {
 		if (IS_WINDOWS) {
-			return new RevealInExplorer.ExplorerSelect(stageManager, stopActions);
+			return new RevealInExplorer.ExplorerSelect(stageManager);
 		} else {
-			return new RevealInExplorer.DesktopOpen(stageManager, stopActions);
+			return new RevealInExplorer.DesktopOpen(stageManager);
 		}
 	}
 
 	@Provides
 	@Singleton
-	private static OpenFile provideOpenFile(StageManager stageManager, StopActions stopActions) {
-		return new OpenFile.DesktopOpen(stageManager, stopActions);
+	private static OpenFile provideOpenFile(StageManager stageManager) {
+		return new OpenFile.DesktopOpen(stageManager);
 	}
 
 	@Provides
