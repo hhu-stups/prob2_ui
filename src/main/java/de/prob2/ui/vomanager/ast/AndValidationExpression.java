@@ -36,6 +36,8 @@ public final class AndValidationExpression implements IValidationExpression {
 	
 	@Override
 	public Checked getChecked() {
+		// Short-circuiting: skip calculating right-hand result
+		// if the left-hand result is enough to determine the overall result.
 		final Checked leftRes = this.getLeft().getChecked();
 		if (leftRes == Checked.PARSE_ERROR) {
 			return Checked.PARSE_ERROR;
@@ -44,12 +46,6 @@ public final class AndValidationExpression implements IValidationExpression {
 		}
 		
 		final Checked rightRes = this.getRight().getChecked();
-		if (rightRes == Checked.PARSE_ERROR) {
-			return Checked.PARSE_ERROR;
-		} else if (rightRes == Checked.FAIL) {
-			return Checked.FAIL;
-		}
-		
 		return leftRes.and(rightRes);
 	}
 
