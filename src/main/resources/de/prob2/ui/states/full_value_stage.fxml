@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -42,6 +41,7 @@
 							<Insets topRightBottomLeft="10.0"/>
 						</padding>
 						<CheckBox fx:id="prettifyCheckBox" text="%states.fullValueStage.prettify" alignment="CENTER_LEFT" HBox.hgrow="NEVER"/>
+						<CheckBox fx:id="showFullValueCheckBox" text="%states.fullValueStage.showFullValue" alignment="CENTER_LEFT" HBox.hgrow="NEVER"/>
 						<Spacer/>
 						<Button fx:id="saveAsButton" text="%common.buttons.saveAs" alignment="CENTER_RIGHT" HBox.hgrow="NEVER" onAction="#saveAs" />
 					</HBox>

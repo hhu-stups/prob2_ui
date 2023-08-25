@@ -1,40 +1,30 @@
 package de.prob2.ui.states;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import com.google.inject.Inject;
-
 import de.prob.animator.domainobjects.BVisual2Value;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-
+import de.prob2.ui.project.MachineLoader;
+import difflib.DiffUtils;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import difflib.DiffUtils;
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class FullValueStage extends Stage {
 	private static final Pattern PRETTIFY_DELIMITERS = Pattern.compile("[\\{\\}\\,]");
@@ -52,6 +42,7 @@ public class FullValueStage extends Stage {
 	@FXML private TextArea previousValueTextarea;
 	@FXML private StyleClassedTextArea diffTextarea;
 	@FXML private CheckBox prettifyCheckBox;
+	@FXML private CheckBox showFullValueCheckBox;
 	@FXML private Button saveAsButton;
 	
 	private final StageManager stageManager;
@@ -59,15 +50,16 @@ public class FullValueStage extends Stage {
 	private final I18n i18n;
 	
 	private final ObjectProperty<StateItem> value;
+	private final StateSpace sp;
 	
 	@Inject
-	public FullValueStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final I18n i18n) {
+	public FullValueStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final I18n i18n, final MachineLoader machineLoader) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
 		
 		this.value = new SimpleObjectProperty<>(this, "value", null);
-		
+		this.sp = machineLoader.getActiveStateSpace();
 		stageManager.loadFXML(this, "full_value_stage.fxml");
 	}
 	
@@ -75,6 +67,8 @@ public class FullValueStage extends Stage {
 	private void initialize() {
 		this.valueProperty().addListener((o, from, to) -> this.updateValue(to));
 		this.prettifyCheckBox.selectedProperty().addListener(o -> this.updateValue(this.getValue()));
+		this.showFullValueCheckBox.selectedProperty().addListener(o -> this.updateValue(this.getValue()));
+		this.showFullValueCheckBox.setTooltip(new Tooltip(i18n.translate("states.fullValueStage.fullValueTooltip")));
 		this.tabPane.getSelectionModel().select(this.currentValueTab);
 	}
 	
@@ -206,11 +200,21 @@ public class FullValueStage extends Stage {
 		
 		this.formulaTextarea.setText(newValue.getLabel());
 		this.descriptionTextarea.setText(newValue.getDescription());
-		final String cv = prettifyIfEnabled(valueToString(newValue.getCurrentValue()));
-		final String pv = prettifyIfEnabled(valueToString(newValue.getPreviousValue()));
+		String oldMaxDisplayPref = sp.getCurrentPreference("MAX_DISPLAY_SET");
+		Map<String, String> pref = new HashMap<>();
+		if(showFullValueCheckBox.isSelected()) {
+			pref.put("MAX_DISPLAY_SET", "-1");
+			sp.changePreferences(pref);
+		}
+		final String cv = prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getCurrentState())));
+		final String pv = prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getPreviousState())));
 		this.currentValueTextarea.setText(cv);
 		this.previousValueTextarea.setText(pv);
 		this.updateDiff(cv, pv);
+		if(showFullValueCheckBox.isSelected()) {
+			pref.put("MAX_DISPLAY_SET", oldMaxDisplayPref);
+			sp.changePreferences(pref);
+		}
 	}
 	
 	@FXML
