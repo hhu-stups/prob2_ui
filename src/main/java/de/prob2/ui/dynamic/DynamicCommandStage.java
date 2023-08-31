@@ -252,7 +252,61 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			final T item = lvChoice.getSelectionModel().getSelectedItem();
 			return item == null || item.getRelevantPreferences().isEmpty();
 		}, lvChoice.getSelectionModel().selectedItemProperty()));
+
+		this.tvFormula.setRowFactory(param -> {
+			final TableRow<DynamicCommandFormulaItem> row = new TableRow<>();
+
+			row.setOnMouseClicked(e -> {
+				if(e.getClickCount() == 2){
+					evaluateFormula(row.getItem().getFormula());
+				}
+			});
+
+			MenuItem editFormula = new MenuItem(i18n.translate("dynamic.editFormula"));
+			editFormula.setOnAction(event -> editFormula(row));
+
+			MenuItem evaluateItem = new MenuItem(i18n.translate("dynamic.evaluateFormula"));
+			evaluateItem.setOnAction(event -> evaluateFormula(row.getItem().getFormula()));
+
+			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
+			dischargeItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setChecked(Checked.SUCCESS);
+			});
+
+			MenuItem failItem = new MenuItem(i18n.translate("dynamic.formulaView.fail"));
+			failItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setChecked(Checked.FAIL);
+			});
+
+			MenuItem unknownItem = new MenuItem(i18n.translate("dynamic.formulaView.unknown"));
+			unknownItem.setOnAction(event -> {
+				DynamicCommandFormulaItem item = row.getItem();
+				if(item == null) {
+					return;
+				}
+				item.setChecked(Checked.NOT_CHECKED);
+			});
+
+			Menu statusMenu = new Menu(i18n.translate("dynamic.setStatus"), null, dischargeItem, failItem, unknownItem);
+
+			row.contextMenuProperty().bind(
+				Bindings.when(row.emptyProperty())
+					.then((ContextMenu) null)
+					.otherwise(new ContextMenu(evaluateItem, editFormula, statusMenu)));
+			return row;
+		});
 	}
+
+	protected abstract void editFormula(TableRow<DynamicCommandFormulaItem> row);
+
 
 	private void evaluateFormulaFromTable() {
 		DynamicCommandFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();

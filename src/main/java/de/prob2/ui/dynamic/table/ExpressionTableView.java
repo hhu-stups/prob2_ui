@@ -165,61 +165,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			}
 			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});
-
-		this.tvFormula.setRowFactory(param -> {
-			final TableRow<DynamicCommandFormulaItem> row = new TableRow<>();
-			MenuItem editItem = new MenuItem(i18n.translate("verifications.po.poView.contextMenu.editId"));
-			editItem.setOnAction(event -> {
-				DynamicCommandFormulaItem item = row.getItem();
-				final TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
-				stageManager.register(dialog);
-				dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
-				dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
-				dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
-				final Optional<String> res = dialog.showAndWait();
-				res.ifPresent(idText -> {
-					final String id = idText.trim().isEmpty() ? null : idText;
-					Machine machine = currentProject.getCurrentMachine();
-					item.setId(id);
-					// This is necessary to force updating ids for VO Manager
-					machine.getDotVisualizationItems().get(lastItem.getCommand()).set(machine.getDotVisualizationItems().get(lastItem.getCommand()).indexOf(item), item);
-				});
-				tvFormula.refresh();
-			});
-
-			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
-			dischargeItem.setOnAction(event -> {
-				DynamicCommandFormulaItem item = row.getItem();
-				if(item == null) {
-					return;
-				}
-				item.setChecked(Checked.SUCCESS);
-			});
-
-			MenuItem failItem = new MenuItem(i18n.translate("dynamic.formulaView.fail"));
-			failItem.setOnAction(event -> {
-				DynamicCommandFormulaItem item = row.getItem();
-				if(item == null) {
-					return;
-				}
-				item.setChecked(Checked.FAIL);
-			});
-
-			MenuItem unknownItem = new MenuItem(i18n.translate("dynamic.formulaView.unknown"));
-			unknownItem.setOnAction(event -> {
-				DynamicCommandFormulaItem item = row.getItem();
-				if(item == null) {
-					return;
-				}
-				item.setChecked(Checked.NOT_CHECKED);
-			});
-
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(editItem, dischargeItem, failItem, unknownItem)));
-			return row;
-		});
 	}
 
 	@Override
