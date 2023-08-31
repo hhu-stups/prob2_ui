@@ -90,7 +90,6 @@
 										<Tooltip text="%dynamic.button.removeFormula" />
 									</tooltip>
 								</Button>
-								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 
 							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0">
@@ -119,6 +118,7 @@
 						</VBox>
 						<VBox>
 							<HBox alignment="TOP_RIGHT" styleClass="border">
+								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 								<Button fx:id="zoomInButton" onAction="#zoomIn">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
