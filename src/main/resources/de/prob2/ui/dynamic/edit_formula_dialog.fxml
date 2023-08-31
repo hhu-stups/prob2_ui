@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
+<fx:root type="Dialog" title=""
+		 xmlns:fx="http://javafx.com/fxml/1" resizable="true">
+	<dialogPane>
+		<DialogPane stylesheets="@/prob.css">
+			<content>
+				<AnchorPane>
+					<VBox spacing="5" AnchorPane.topAnchor="14"
+						AnchorPane.bottomAnchor="0" AnchorPane.leftAnchor="-10"
+						AnchorPane.rightAnchor="-10">
+						<Label fx:id="formulaTitleLabel" text="%dynamic.button.addFormula" styleClass="title">
+							<VBox.margin>
+								<Insets left="10" right="10" />
+							</VBox.margin>
+						</Label>
+						<AnchorPane styleClass="border">
+							<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
+								AnchorPane.topAnchor="20" AnchorPane.bottomAnchor="20"
+								alignment="center_right">
+								<HBox spacing="20" alignment="center_left">
+									<Label text="%verifications.common.columns.id" />
+									<TextField fx:id="idField" HBox.hgrow="always"/>
+								</HBox>
+								<Label fx:id="errorExplanationLabel" textFill="#B77300">
+									<VBox.margin>
+										<Insets top="5" />
+									</VBox.margin>
+								</Label>
+								<VBox spacing="20" alignment="center_left">
+									<Label text="%verifications.temporal.formula.temporalFormulaStage.formula" />
+									<ExtendedCodeArea fx:id="formulaTextArea" styleClass="text-area-with-border"/>
+									<VBox.margin>
+										<Insets top="20" />
+									</VBox.margin>
+								</VBox>
+							</VBox>
+						</AnchorPane>
+					</VBox>
+				</AnchorPane>
+			</content>
+			<ButtonType buttonData="CANCEL_CLOSE" text="%common.buttons.cancel" />
+			<ButtonType fx:id="okButtonType" buttonData="OK_DONE"
+				text="%common.buttons.ok" />
+		</DialogPane>
+	</dialogPane>
+</fx:root>

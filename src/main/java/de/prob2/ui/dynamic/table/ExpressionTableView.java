@@ -1,19 +1,9 @@
 package de.prob2.ui.dynamic.table;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
 import de.prob.animator.command.GetShortestTraceCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
@@ -24,6 +14,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
+import de.prob2.ui.dynamic.EditFormulaDialog;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -31,12 +22,8 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -44,18 +31,19 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
@@ -337,14 +325,22 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 
 	@Override
-	protected void addFormula() {
-		if(lastItem == null) {
-			return;
-		}
-		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
+	protected void editFormula(TableRow<DynamicCommandFormulaItem> row){
+		final EditFormulaDialog dialog = injector.getInstance(EditFormulaDialog.class);
+		dialog.initOwner(this);
+		Optional<DynamicCommandFormulaItem> item = row == null ? dialog.addAndShow(currentProject, lastItem.getCommand()) : dialog.editAndShow(currentProject, row, lastItem.getCommand());
 		Machine machine = currentProject.getCurrentMachine();
-		machine.addTableVisualizationItem(lastItem.getCommand(), formulaItem);
-		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
+		if(item != null && item.isPresent()) {
+			if (row == null){
+				machine.addTableVisualizationItem(lastItem.getCommand(), item.get());
+				this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
+			} else {
+				ListProperty<DynamicCommandFormulaItem> tableVisualisationItem = machine.getTableVisualizationItems().get(lastItem.getCommand());
+				tableVisualisationItem.set(tableVisualisationItem.indexOf(item.get()), item.get());
+				machine.setChanged(true);
+			}
+			tvFormula.refresh();
+		}
 	}
 
 	@Override

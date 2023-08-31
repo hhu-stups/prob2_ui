@@ -1,57 +1,41 @@
 package de.prob2.ui.dynamic;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.inject.Provider;
-
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.CommandInterruptedException;
-import de.prob.animator.domainobjects.*;
+import de.prob.animator.domainobjects.DynamicCommandItem;
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.ExtendedCodeArea;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.po.ProofObligationItem;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import javafx.util.StringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.List;
+
 public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends Stage {
+
 	private static final class DynamicCommandItemCell<T extends DynamicCommandItem> extends ListCell<T> {
 		private DynamicCommandItemCell() {
 			super();
@@ -136,9 +120,13 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected final I18n i18n;
 	
 	protected final BackgroundUpdater updater;
-	
+
+
+
 	protected DynamicCommandStage(final Provider<DynamicPreferencesStage> preferencesStageProvider,
-								  final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final I18n i18n, final StopActions stopActions, final String threadName) {
+								  final StageManager stageManager, final CurrentTrace currentTrace,
+								  final CurrentProject currentProject, final I18n i18n, final StopActions stopActions,
+								  final String threadName) {
 		this.preferencesStageProvider = preferencesStageProvider;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
@@ -237,11 +225,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
-		formulaColumn.setCellFactory(TextFieldTableCell.forTableColumn());
-		formulaColumn.setOnEditCommit(e -> {
-			e.getRowValue().setFormula(e.getNewValue());
-			currentProject.getCurrentMachine().setChanged(true);
-		});
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("formula"));
 
 		tvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> evaluateFormulaFromTable());
@@ -475,15 +458,13 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 
 	@FXML
 	private void handleAddFormula() {
-		addFormula();
+		editFormula(null);
 	}
 
 	@FXML
 	private void handleRemoveFormula() {
 		removeFormula();
 	}
-
-	protected abstract void addFormula();
 
 	protected abstract void removeFormula();
 }

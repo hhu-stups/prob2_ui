@@ -1,18 +1,9 @@
 package de.prob2.ui.dynamic.dotty;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
-
 import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
@@ -23,6 +14,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
+import de.prob2.ui.dynamic.EditFormulaDialog;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.MultiKeyCombination;
@@ -30,12 +22,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -43,14 +31,7 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollBar;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -58,13 +39,22 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @Singleton
 public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
+	private final Injector injector;
 
 	@FXML
 	private WebView dotView;
@@ -115,12 +105,11 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	@Inject
 	public DotView(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
-	               final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions) {
+				   final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions, final Injector injector) {
 		super(preferencesStageProvider, stageManager, currentTrace, currentProject, i18n, stopActions, "Graph Visualizer");
-
+		this.injector = injector;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-
 		this.dot = null;
 		this.dotEngine = null;
 		this.currentDotContent = new SimpleObjectProperty<>(this, "currentDotContent", null);
@@ -338,15 +327,24 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	@Override
-	protected void addFormula() {
-		if(lastItem == null) {
-			return;
-		}
-		DynamicCommandFormulaItem formulaItem = new DynamicCommandFormulaItem(null, lastItem.getCommand(), "");
+	protected void editFormula(TableRow<DynamicCommandFormulaItem> row){
+		final EditFormulaDialog dialog = injector.getInstance(EditFormulaDialog.class);
+		dialog.initOwner(this);
+		Optional<DynamicCommandFormulaItem> item = row == null ? dialog.addAndShow(currentProject, lastItem.getCommand()) : dialog.editAndShow(currentProject, row, lastItem.getCommand());
 		Machine machine = currentProject.getCurrentMachine();
-		machine.addDotVisualizationItem(lastItem.getCommand(), formulaItem);
-		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
+		if(item != null && item.isPresent()) {
+			if (row == null){
+				machine.addDotVisualizationItem(lastItem.getCommand(), item.get());
+				this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
+			} else {
+				ListProperty<DynamicCommandFormulaItem> dotVisualisationItem = machine.getDotVisualizationItems().get(lastItem.getCommand());
+				dotVisualisationItem.set(dotVisualisationItem.indexOf(item.get()), item.get());
+				machine.setChanged(true);
+			}
+			tvFormula.refresh();
+		}
 	}
+
 
 	@Override
 	protected void removeFormula() {
