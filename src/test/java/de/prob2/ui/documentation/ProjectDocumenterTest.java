@@ -36,12 +36,12 @@ import javafx.collections.FXCollections;
 import javafx.stage.Stage;
 
 import org.awaitility.Awaitility;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.DisabledOnOs;
-import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
@@ -93,6 +93,7 @@ class ProjectDocumenterTest extends ApplicationTest {
 	}
 
 	@BeforeEach
+	@AfterEach
 	public void cleanOutput() throws IOException {
 		try {
 			MoreFiles.deleteRecursively(outputPath, RecursiveDeleteOption.ALLOW_INSECURE);
