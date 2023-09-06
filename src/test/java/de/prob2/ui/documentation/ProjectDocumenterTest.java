@@ -11,6 +11,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import com.google.common.io.CharStreams;
@@ -33,9 +34,7 @@ import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 
 import javafx.collections.FXCollections;
-import javafx.stage.Stage;
 
-import org.awaitility.Awaitility;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,17 +42,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.condition.OS;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.testfx.framework.junit.ApplicationTest;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@RunWith(MockitoJUnitRunner.class)
-class ProjectDocumenterTest extends ApplicationTest {
+class ProjectDocumenterTest {
 
 	List<Machine> machines = new ArrayList<>();
 	Machine trafficLight = Mockito.mock(Machine.class);
@@ -94,10 +90,10 @@ class ProjectDocumenterTest extends ApplicationTest {
 
 	@BeforeEach
 	@AfterEach
-	public void cleanOutput() throws IOException {
+	public void cleanOutput() {
 		try {
 			MoreFiles.deleteRecursively(outputPath, RecursiveDeleteOption.ALLOW_INSECURE);
-		} catch (NoSuchFileException ignored) {}
+		} catch (IOException ignored) {}
 	}
 	@Test
 	void testBlankDocument() throws IOException {
@@ -171,11 +167,12 @@ class ProjectDocumenterTest extends ApplicationTest {
 	necessary terminal packages*/
 	@DisabledOnOs({OS.WINDOWS, OS.MAC})
 	@Test
-	void testPDFCreated() throws IOException {
+	void testPDFCreated() throws Exception {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,false,machines,outputPath,outputFilename,injector);
-		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
-		//PDF creation not instant set max delay 30s
-		Awaitility.await().atMost(30, TimeUnit.SECONDS).until(() -> Files.exists(getOutputFile(".pdf")));
+		Process p = runDocumentationWithMockedSaveTraceHtml(velocityDocumenter).orElseThrow();
+		// PDF creation not instant set max delay 30s
+		p.waitFor(30, TimeUnit.SECONDS);
+		assertEquals(0, p.exitValue());
 		assertTrue(Files.exists(getOutputFile(".pdf")));
 	}
 
@@ -187,19 +184,13 @@ class ProjectDocumenterTest extends ApplicationTest {
 	}
 
 	/* html trace creation uses many of JavaFX Classes that cannot be easily mocked. So function call Returns dummy html file from test resources*/
-	private static void runDocumentationWithMockedSaveTraceHtml(ProjectDocumenter velocityDocumenter1) throws IOException {
+	private static Optional<Process> runDocumentationWithMockedSaveTraceHtml(ProjectDocumenter velocityDocumenter1) throws IOException {
 		ProjectDocumenter documenterSpy = Mockito.spy(velocityDocumenter1);
 		Mockito.doReturn("src/test/resources/documentation/output/html_files/TrafficLight/TrafficLight_Cars/dummy.html").when(documenterSpy).saveTraceHtml(ArgumentMatchers.any(), ArgumentMatchers.any());
-		documenterSpy.documentVelocity();
+		return documenterSpy.documentVelocity();
 	}
 
 	private Path getOutputFile(String extension) {
 		return outputPath.resolve(outputFilename + extension);
 	}
-
-	@Override
-	public void start(Stage stage){
-		stage.show();
-	}
-
 }

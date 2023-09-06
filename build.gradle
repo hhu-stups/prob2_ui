@@ -103,16 +103,11 @@ dependencies {
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.3'
-	testImplementation platform('org.junit:junit-bom:5.10.0')
-	testImplementation 'org.junit.jupiter:junit-jupiter'
-	testImplementation 'org.assertj:assertj-core:3.24.2'
 
-	// these dependencies are kept outdated because of the automatic doc tests
-	testImplementation group: 'org.testfx', name: 'testfx-core', version: '4.0.16-alpha'
-	testImplementation group: 'org.testfx', name: 'testfx-junit', version: '4.0.15-alpha'
-	testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.11.0'
-	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '4.11.0'
-	testImplementation 'org.awaitility:awaitility:4.2.0'
+	testImplementation platform('org.junit:junit-bom:5.10.0')
+	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
+	testImplementation group: 'org.assertj', name : 'assertj-core', version: '3.24.2'
+	testImplementation group: 'org.mockito', name: 'mockito-inline', version: '5.2.0'
 }
 
 final osArch = System.getProperty("os.arch")

@@ -11,6 +11,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Properties;
 
 import com.google.inject.Inject;
@@ -66,10 +67,12 @@ public class ProjectDocumenter {
 		tracesHtmlPaths = new HashMap<>();
 	}
 
-	private static void createPdf(String filename, Path directory) throws IOException {
+	private static Process createPdf(String filename, Path directory) throws IOException {
 		final ProcessBuilder builder = new ProcessBuilder("pdflatex", "--shell-escape", "-interaction=nonstopmode", filename + ".tex");
 		builder.directory(directory.toFile());
-		builder.start();
+		builder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+		builder.redirectError(ProcessBuilder.Redirect.INHERIT);
+		return builder.start();
 	}
 
 	private static void copyFile(Path path, InputStream resource) throws IOException {
@@ -86,7 +89,7 @@ public class ProjectDocumenter {
 		copyFile(latexResourcesDir.resolve("autodoc.cls"), ProjectDocumenter.class.getResourceAsStream("autodoc.cls"));
 	}
 
-	public void documentVelocity() throws IOException {
+	public Optional<Process> documentVelocity() throws IOException {
 		buildLatexResources(directory);
 		initVelocityEngine();
 		VelocityContext context = getVelocityContext();
@@ -95,7 +98,9 @@ public class ProjectDocumenter {
 			Velocity.mergeTemplate(templateName, String.valueOf(StandardCharsets.UTF_8),context,writer);
 		}
 		if (makePdf) {
-			createPdf(filename, directory);
+			return Optional.of(createPdf(filename, directory));
+		} else{
+			return Optional.empty();
 		}
 	}
 
