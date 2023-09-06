@@ -171,7 +171,7 @@ class ProjectDocumenterTest {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject,i18n,false,false,false,true,false,machines,outputPath,outputFilename,injector);
 		Process p = runDocumentationWithMockedSaveTraceHtml(velocityDocumenter).orElseThrow();
 		// PDF creation not instant set max delay 30s
-		p.waitFor(30, TimeUnit.SECONDS);
+		assertTrue(p.waitFor(30, TimeUnit.SECONDS));
 		assertEquals(0, p.exitValue());
 		assertTrue(Files.exists(getOutputFile(".pdf")));
 	}
