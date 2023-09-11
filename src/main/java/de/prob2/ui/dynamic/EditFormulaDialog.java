@@ -42,7 +42,7 @@ public class EditFormulaDialog extends Dialog<DynamicCommandFormulaItem> {
 			this.idField.appendText(row.getItem().getId());
 			this.idField.setEditable(false);
 		} else {
-			chechIDs(currentProject);
+			checkIDs(currentProject);
 		}
 		this.formulaTextArea.appendText(row.getItem().getFormula());
 		this.formulaTitleLabel.setText(i18n.translate("dynamic.editFormula"));
@@ -66,7 +66,7 @@ public class EditFormulaDialog extends Dialog<DynamicCommandFormulaItem> {
 	}
 
 	public Optional<DynamicCommandFormulaItem> addAndShow(CurrentProject currentProject, String lastItemCommand) {
-		chechIDs(currentProject);
+		checkIDs(currentProject);
 		this.setResultConverter(type -> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
@@ -82,7 +82,7 @@ public class EditFormulaDialog extends Dialog<DynamicCommandFormulaItem> {
 		return super.showAndWait();
 	}
 
-	private void chechIDs(CurrentProject currentProject){
+	private void checkIDs(CurrentProject currentProject){
 		List<String> idList = currentProject.getCurrentMachine().getValidationTasks().values().stream().map(e->e.getId()).collect(Collectors.toList());
 
 		idField.textProperty().addListener((observable, from, to) -> {
