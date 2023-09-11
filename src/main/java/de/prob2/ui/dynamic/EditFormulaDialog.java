@@ -1,11 +1,13 @@
 package de.prob2.ui.dynamic;
 
 import com.google.inject.Inject;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
@@ -37,7 +39,7 @@ public class EditFormulaDialog extends Dialog<DynamicCommandFormulaItem> {
 		stageManager.loadFXML(this, "edit_formula_dialog.fxml");
 	}
 
-	public Optional<DynamicCommandFormulaItem> editAndShow(CurrentProject currentProject, TableRow<DynamicCommandFormulaItem> row, String lastItemCommand) {
+	public Optional<DynamicCommandFormulaItem> editAndShow(CurrentProject currentProject, TableRow<DynamicCommandFormulaItem> row, ObservableList<ErrorItem> errors) {
 		if(row.getItem().getId()!=null){
 			this.idField.appendText(row.getItem().getId());
 			this.idField.setEditable(false);
@@ -45,6 +47,7 @@ public class EditFormulaDialog extends Dialog<DynamicCommandFormulaItem> {
 			checkIDs(currentProject);
 		}
 		this.formulaTextArea.appendText(row.getItem().getFormula());
+		formulaTextArea.getErrors().setAll(errors);
 		this.formulaTitleLabel.setText(i18n.translate("dynamic.editFormula"));
 
 		this.setResultConverter(type -> {

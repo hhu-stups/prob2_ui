@@ -4,12 +4,12 @@ import com.google.inject.Provider;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.DynamicCommandItem;
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -20,12 +20,12 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -69,16 +69,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected TableColumn<DynamicCommandFormulaItem, String> idColumn;
 	@FXML
 	protected TableColumn<DynamicCommandFormulaItem, String> formulaColumn;
-
-	@FXML
-	protected Button evaluateFormulaButton;
-
-	@FXML
-	protected ExtendedCodeArea taFormula;
-
-	@FXML
-	protected VBox enterFormulaBox;
-
 	@FXML
 	protected TextArea taErrors;
 
@@ -120,6 +110,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected final I18n i18n;
 	
 	protected final BackgroundUpdater updater;
+
+	protected final ObservableList<ErrorItem> errors = FXCollections.observableArrayList();
+
 
 
 
@@ -164,7 +157,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				lbDescription.setText(to.getDescription());
 			}
 			boolean needFormula = to.getArity() > 0;
-			enterFormulaBox.setVisible(needFormula);
 			tvFormula.setVisible(needFormula);
 			addButton.setVisible(needFormula);
 			removeButton.setVisible(needFormula);
@@ -172,7 +164,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			// If the command selection changed and the new command requires a formula,
 			// clear the visualization and wait for the user to input one.
 			if (to.isAvailable() && (!needFormula || to.equals(lastItem))) {
-				visualize(to, taFormula.getText());
+				visualize(to, "");
 			} else {
 				this.interrupt();
 			}
@@ -208,18 +200,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		});
 		
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
-
-		taFormula.getStyleClass().add("visualization-formula");
-		taFormula.setOnKeyPressed(e -> {
-			if (e.getCode().equals(KeyCode.ENTER)) {
-				if (!e.isShiftDown()) {
-					evaluateFormulaButton();
-					e.consume();
-				} else {
-					taFormula.insertText(taFormula.getCaretPosition(), "\n");
-				}
-			}
-		});
 
 		tvFormula.setEditable(true);
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -299,11 +279,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		evaluateFormula(item.getFormula());
 	}
 
-	@FXML
-	private void evaluateFormulaButton() {
-		evaluateFormula(taFormula.getText());
-	}
-
 	private void evaluateFormula(String formula) {
 		T item = lvChoice.getSelectionModel().getSelectedItem();
 		if (item == null) {
@@ -376,7 +351,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.errorsView.setVisible(false);
 		this.clearContent();
 		this.updatePlaceholderLabel();
-		taFormula.getErrors().clear();
+		this.errors.clear();
 	}
 	
 	protected abstract void clearContent();
@@ -428,7 +403,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			taErrors.setText(e.getMessage());
 			errorsView.setVisible(true);
 			placeholderLabel.setVisible(false);
-			taFormula.getErrors().setAll(e.getErrors());
+			errors.setAll(e.getErrors());
 		});
 	}
 	
@@ -446,7 +421,6 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			if (choice.getArity() == 0) {
 				throw new IllegalArgumentException("Visualization command does not take an argument: " + command);
 			}
-			taFormula.replaceText(formula);
 			visualize(choice, formula);
 		}
 	}

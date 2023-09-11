@@ -173,7 +173,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			taErrors.clear();
 			errorsView.setVisible(false);
 			tableView.setVisible(true);
-			taFormula.getErrors().clear();
+			errors.clear();
 		});
 	}
 
@@ -328,7 +328,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	protected void editFormula(TableRow<DynamicCommandFormulaItem> row){
 		final EditFormulaDialog dialog = injector.getInstance(EditFormulaDialog.class);
 		dialog.initOwner(this);
-		Optional<DynamicCommandFormulaItem> item = row == null ? dialog.addAndShow(currentProject, lastItem.getCommand()) : dialog.editAndShow(currentProject, row, lastItem.getCommand());
+		Optional<DynamicCommandFormulaItem> item = row == null ? dialog.addAndShow(currentProject, lastItem.getCommand()) : dialog.editAndShow(currentProject, row, errors);
 		Machine machine = currentProject.getCurrentMachine();
 		if(item != null && item.isPresent()) {
 			if (row == null){
