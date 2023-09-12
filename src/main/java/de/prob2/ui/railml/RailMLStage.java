@@ -6,7 +6,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
-import de.prob.ltl.parser.WarningListener;
 import de.prob.scripting.Api;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -32,10 +31,10 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.net.URL;
+import java.nio.file.*;
 import java.util.*;
 
 import static de.prob.animator.domainobjects.DotVisualizationCommand.getByName;
@@ -329,17 +328,42 @@ public class RailMLStage extends Stage {
 
 		VisualisationStrategy visualisationStrategy = visualisationStrategyChoiceBox.getValue();
 		railMLFile.setVisualisationStrategy(visualisationStrategy);
-		Path graphMachine;
+		String graphMachineName;
 		if (visualisationStrategy == VisualisationStrategy.D4R) {
-			graphMachine = Paths.get(getClass().getResource("RailML3_D4R_CustomGraph.mch").toURI());
+			graphMachineName = "RailML3_D4R_CustomGraph.mch";
 		} else if (visualisationStrategy == VisualisationStrategy.RAIL_OSCOPE) {
-			graphMachine = Paths.get(getClass().getResource("RailML3_NOR_CustomGraph.mch").toURI());
+			graphMachineName = "RailML3_NOR_CustomGraph.mch";
 		} else {
-			graphMachine = Paths.get(getClass().getResource("RailML3_DOT_CustomGraph.mch").toURI());
+			graphMachineName = "RailML3_DOT_CustomGraph.mch";
 		}
+		URI graphMachine = getClass().getResource(graphMachineName).toURI();
 
 		Api api = injector.getInstance(Api.class);
-		StateSpace stateSpace = api.b_load(graphMachine.toAbsolutePath().toString());
+		StateSpace stateSpace;
+		if ("jar".equals(graphMachine.getScheme())) {
+			Path tempGraphMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve(graphMachineName);
+			Path tempGraphDefs = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_CustomGraphs.def");
+			Path tempPrintMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_printMachines.mch");
+			Path tempImportMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML_import.mch");
+			Path tempValidationMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML_validation_flat.mch");
+
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(graphMachineName)), tempGraphMachine, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_CustomGraphs.def")), tempGraphDefs, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_printMachines.mch")), tempPrintMachine, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML_import.mch")), tempImportMachine, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML_validation_flat.mch")), tempValidationMachine, StandardCopyOption.REPLACE_EXISTING);
+
+			stateSpace = api.b_load(tempGraphMachine.toString());
+
+			Files.delete(tempGraphMachine);
+			Files.delete(tempGraphDefs);
+			Files.delete(tempPrintMachine);
+			Files.delete(tempImportMachine);
+			Files.delete(tempValidationMachine);
+		} else {
+			stateSpace = api.b_load(Paths.get(graphMachine.getPath()).toString());
+		}
+
 		stateSpace.addWarningListener(warnings -> {
 				final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
 				if (!filteredWarnings.isEmpty()) {
@@ -351,15 +375,13 @@ public class RailMLStage extends Stage {
 				}
 			});
 
-		// TODO: Adapt invalid machine names
-
 		currentState = stateSpace.getRoot()
-			.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
-				"  & outputBaseFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
+			.perform("$setup_constants","file = \"" + railMLpath + "\"" +
+				"  & outputDataFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
 				"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
 				"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
 				"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
-				"  & baseMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
+				"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
 				"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
 				"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
 			.perform("$initialise_machine");
@@ -372,7 +394,7 @@ public class RailMLStage extends Stage {
 			File dataMachine = new File(Paths.get(generationPath.toString()).resolve(dataFileName.getValue()).toString());
 			dataMachine.delete(); // TODO: Confirm
 			dataMachine.createNewFile();
-			currentState.perform("triggerPrintBaseMachine").perform("printBaseMachine");
+			currentState.perform("triggerPrintData").perform("printDataMachine");
 		}
 		if (animationMachineCheckbox.isSelected() && inv_ok && import_success) {
 			File animationMachine = new File(Paths.get(generationPath.toString()).resolve(animationFileName.getValue()).toString());
