@@ -228,6 +228,7 @@ public class RailMLStage extends Stage {
 		if(path != null) {
 			this.generationPath = path.toAbsolutePath();
 			locationField.setText(generationPath.toString());
+			railMLFile.setPath(generationPath);
 		}
 	}
 
