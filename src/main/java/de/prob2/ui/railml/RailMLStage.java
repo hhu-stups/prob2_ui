@@ -296,32 +296,42 @@ public class RailMLStage extends Stage {
 		currentProject.addMachine(dataMachine);
 		if (animationMachineCheckbox.isSelected()) {
 			try {
-				Path defFile = Paths.get(getClass().getResource("RailML3_VisB.def").toURI());
-				File currentDefs = new File(generationPath.resolve("RailML3_VisB.def").toString());
-				if (!currentDefs.exists() || (currentDefs.exists() && !Arrays.equals(Files.readAllBytes(currentDefs.toPath()), Files.readAllBytes(defFile)))) {
-					// TODO: file has changed: request replace
-					Files.copy(defFile, currentDefs.toPath());
-				}
+				replaceOldFile("RailML3_VisB.def");
+				replaceOldFile("RailML3_CustomGraphs.def");
+				replaceOldFile("RailML3_SimB.json");
+				Path simbPath = generationPath.resolve("RailML3_SimB.json");
+
 				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", Paths.get(generationPath.toString()).resolve("RailML3_VisB.def"));
 				currentProject.addMachine(animationDefinitions);
-
-				Path simBResource = Paths.get(getClass().getResource("RailML3_SimB.json").toURI());
-				Path simBPath = generationPath.resolve("RailML3_SimB.json");
-				File currentSimB = new File(simBPath.toString());
-				if (!currentSimB.exists() || (currentSimB.exists() && !Arrays.equals(Files.readAllBytes(currentSimB.toPath()), Files.readAllBytes(simBResource)))) {
-					Files.copy(simBResource, currentSimB.toPath());
-				}
 				currentProject.addMachine(animationMachine);
 				currentProject.startAnimation(animationMachine);
 				currentProject.getCurrentMachine().simulationsProperty()
-					.add(new SimulationModel(currentProject.getLocation().relativize(simBPath.toAbsolutePath()), Collections.emptyList()));
-			} catch (IOException | URISyntaxException e) {
+					.add(new SimulationModel(currentProject.getLocation().relativize(simbPath), Collections.emptyList()));
+			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
 		}
 		if (validationMachineCheckbox.isSelected()) {
 			currentProject.addMachine(validationMachine);
+			if (!animationMachineCheckbox.isSelected()) {
+				currentProject.startAnimation(validationMachine);
+			}
 		}
+	}
+
+	private void replaceOldFile(String fileName) throws IOException {
+		Path currentFile = generationPath.resolve(fileName);
+		if (Files.exists(currentFile)) {
+			int fileNumber = 1;
+			Path newOldFile;
+			do {
+				String numberedFileName = MoreFiles.getNameWithoutExtension(currentFile) + "_" + fileNumber + ".def";
+				newOldFile = Paths.get(numberedFileName);
+				fileNumber++;
+			} while (Files.exists(newOldFile));
+			Files.copy(currentFile, newOldFile);
+		}
+		Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(fileName)), currentFile, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	public void generateMachines() throws Exception {
