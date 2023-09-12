@@ -30,18 +30,18 @@ DEFINITIONS
                 & e_sep : RailML_spotElementProjection & i_e = MU(e_sep'refersToElement) |
                     {rec(shape: "point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
                         pos: TO_STRING(STRING_TO_REAL(MU(MU(e_sep'coordinate)'x))/INCH_FACTOR)^","^TO_STRING(-STRING_TO_REAL(MU(MU(e_sep'coordinate)'y))/INCH_FACTOR)^"!",
-                        height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
-                        width: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
-                        fontsize: IF i_e : CROSSINGS \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED \/ SWITCHES THEN "5" ELSE "4" END)}
+                        height: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
+                        width: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
+                        fontsize: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED \/ SWITCHES THEN "5" ELSE "4" END)}
                 )
             \/
             UNION(i_e).(i_e : BALISES \/ BUFFERSTOPS \/ CROSSINGS \/ DERAILERS \/ BORDERS \/ LEVELCROSSINGS \/ SIGNALS \/ SWITCHES \/ TRAINDETECTIONELEMENTS
                 & !e_sep.(e_sep : RailML_spotElementProjection => i_e /= MU(e_sep'refersToElement)) |
                     {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END,
                     pos: "",
-                    height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
-                    width: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
-                    fontsize: IF i_e : CROSSINGS \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED \/ SWITCHES THEN "5" ELSE "4" END)}
+                    height: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
+                    width: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END,
+                    fontsize: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED \/ SWITCHES THEN "5" ELSE "4" END)}
                 ),
         // Virtual nodes for netElements (only available with exact position):
         nodes2:
@@ -81,7 +81,7 @@ DEFINITIONS
         nodes1:
             UNION(i_e).(i_e : BUFFERSTOPS \/ CROSSINGS \/ BORDERS \/ SWITCHES//\/ DERAILERS \/ SIGNALS \/ TRAINDETECTIONELEMENTS
                 | //& i_e /: dom(RailML3_IS_LINEAR_COORDINATES) |
-                {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, height: IF i_e : CROSSINGS \/ SWITCHES THEN "0.075" ELSE "0.025" END, fontsize: IF i_e : CROSSINGS \/ SWITCHES THEN "5" ELSE "4" END)}
+                {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, height: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES THEN "0.075" ELSE "0.025" END, fontsize: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES THEN "5" ELSE "4" END)}
             ),
         // netElements that are endpoints of tracks
         nodes2:
@@ -194,7 +194,7 @@ DEFINITIONS
                 & x1 = STRING_TO_REAL(MU(MU(e_sep1'coordinate)'x))/INCH_FACTOR & y1 = STRING_TO_REAL(MU(MU(e_sep1'coordinate)'y))/INCH_FACTOR
                 & x2 = STRING_TO_REAL(MU(MU(e_sep2'coordinate)'x))/INCH_FACTOR & y2 = STRING_TO_REAL(MU(MU(e_sep2'coordinate)'y))/INCH_FACTOR
                 |
-                    {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, pos: TO_STRING(x1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (x2-x1) )^","^TO_STRING(y1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (y2-y1) )^"!", height: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END, width: IF i_e : SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END, fontsize: IF i_e : SWITCHES \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "5" ELSE "4" END)}
+                    {rec(shape:"point", nodes: i_e, `id`: i_e, xlabel: IF DISPLAY_NAMES = TRUE & i_e |-> LANGUAGE : dom(RailML3_CO_NAMES) THEN i_e^" ("^RailML3_CO_NAMES(i_e,LANGUAGE)^")" ELSE i_e END, pos: TO_STRING(x1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (x2-x1) )^","^TO_STRING(y1 + ((prj2(e_sloc) - prj1(iC1)) / (prj1(iC2) - prj1(iC1))) * (y2-y1) )^"!", height: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END, width: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES THEN "0.075" ELSIF i_e : DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "0.05" ELSE "0.025" END, fontsize: IF i_e : RailML3_IS_MOVABLE_CROSSING_IDS \/ SWITCHES \/ DERAILERS \/ RailML3_IL_SIGNAL_CONTROLLED THEN "5" ELSE "4" END)}
                 ),
         // Virtual nodes for netElements (only available with exact position):
         nodes2:

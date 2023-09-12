@@ -5,7 +5,7 @@ DEFINITIONS
     "LibraryIO.def";
 	"LibraryStrings.def";
     "SORT.def";
-    "RailML_CustomGraphs.def";
+    "RailML3_CustomGraphs.def";
     CUSTOM_GRAPH == DOT_customGraph;
 
     inverseDirectedPair(Pair) == prj1(Pair) |-> oppositeDirection(prj2(Pair));

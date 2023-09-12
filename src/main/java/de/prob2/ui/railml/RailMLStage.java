@@ -81,10 +81,10 @@ public class RailMLStage extends Stage {
 
 	private final SimpleStringProperty dataFileName = new SimpleStringProperty("");
 	private final SimpleStringProperty animationFileName = new SimpleStringProperty("");
-	private final SimpleStringProperty animationDefsFileName = new SimpleStringProperty("RailML_animation.def");
+	private final SimpleStringProperty animationDefsFileName = new SimpleStringProperty("RailML3_VisB.def");
 	private final SimpleStringProperty validationFileName = new SimpleStringProperty("");
 	private final SimpleStringProperty svgFileName = new SimpleStringProperty("");
-	private final SimpleStringProperty simBFileName = new SimpleStringProperty("railml_simb.json");
+	private final SimpleStringProperty simBFileName = new SimpleStringProperty("RailML3_SimB.json");
 
 	private State currentState;
 
@@ -296,17 +296,17 @@ public class RailMLStage extends Stage {
 		currentProject.addMachine(dataMachine);
 		if (animationMachineCheckbox.isSelected()) {
 			try {
-				Path defFile = Paths.get(getClass().getResource("RailML_animation.def").toURI());
-				File currentDefs = new File(generationPath.resolve("RailML_animation.def").toString());
+				Path defFile = Paths.get(getClass().getResource("RailML3_VisB.def").toURI());
+				File currentDefs = new File(generationPath.resolve("RailML3_VisB.def").toString());
 				if (!currentDefs.exists() || (currentDefs.exists() && !Arrays.equals(Files.readAllBytes(currentDefs.toPath()), Files.readAllBytes(defFile)))) {
 					// TODO: file has changed: request replace
 					Files.copy(defFile, currentDefs.toPath());
 				}
-				final Machine animationDefinitions = new Machine("RailML_animation.def", "", Paths.get(generationPath.toString()).resolve("RailML_animation.def"));
+				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", Paths.get(generationPath.toString()).resolve("RailML3_VisB.def"));
 				currentProject.addMachine(animationDefinitions);
 
-				Path simBResource = Paths.get(getClass().getResource("railml_simb.json").toURI());
-				Path simBPath = generationPath.resolve("railml_simb.json");
+				Path simBResource = Paths.get(getClass().getResource("RailML3_SimB.json").toURI());
+				Path simBPath = generationPath.resolve("RailML3_SimB.json");
 				File currentSimB = new File(simBPath.toString());
 				if (!currentSimB.exists() || (currentSimB.exists() && !Arrays.equals(Files.readAllBytes(currentSimB.toPath()), Files.readAllBytes(simBResource)))) {
 					Files.copy(simBResource, currentSimB.toPath());

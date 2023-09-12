@@ -1,5 +1,5 @@
-MACHINE RailML_import
-INCLUDES RailML_validation_flat
+MACHINE RailML3_import
+INCLUDES RailML3_validation_flat
 DEFINITIONS
   "LibraryIO.def";
   "LibraryMeta.def";
@@ -69,9 +69,17 @@ OPERATIONS
       runComputation(read_file);
 
       // BEGIN RailML3_CO
+      runComputation(set_common);
+      runErrorRule(is_valid_common);
+
       runComputation(set_name);
       runErrorRule(is_valid_name);
       runComputation(set_CO_NAME);
+
+      runComputation(set_speedProfiles);
+      runErrorRule(is_valid_speedProfiles);
+      runComputation(set_speedProfile);
+      runErrorRule(is_valid_speedProfile);
       // END RailML3_CO
       
       // BEGIN RailML3_IS
@@ -108,6 +116,16 @@ OPERATIONS
       runComputation(set_functionalInfrastructure);
       runErrorRule(is_valid_functionalInfrastructure);
 
+      runComputation(set_balises);
+      runErrorRule(is_valid_balises);
+      runComputation(set_balise);
+      runErrorRule(is_valid_balise);
+
+      runComputation(set_baliseGroups);
+      runErrorRule(is_valid_baliseGroups);
+      runComputation(set_baliseGroup);
+      runErrorRule(is_valid_baliseGroup);
+
       runComputation(set_borders);
       runErrorRule(is_valid_borders);
       runComputation(set_border);
@@ -138,7 +156,12 @@ OPERATIONS
       runComputation(set_signalsIS);
       runErrorRule(is_valid_signalsIS);
       runComputation(set_signalIS);
-      runErrorRule(is_valid_signalIS);      
+      runErrorRule(is_valid_signalIS);    
+
+      runComputation(set_speeds);
+      runErrorRule(is_valid_speeds);
+      runComputation(set_speedSection);
+      runErrorRule(is_valid_speedSection);  
 
       runComputation(set_switchesIS);
       runErrorRule(is_valid_switchesIS);
@@ -170,9 +193,9 @@ OPERATIONS
 
       runComputation(set_linearCoordinate);
       runErrorRule(is_valid_linearCoordinate);
-      //runComputation(set_LINEAR_COORDINATE);
           
       runComputation(set_NET_RELATION_SUBSEQUENT_BLOCKS);
+      runErrorRule(validate_NET_RELATION_SUBSEQUENT_BLOCKS);
       runComputation(set_SIGNAL);
       runErrorRule(validate_linearLocation);
 
@@ -182,6 +205,25 @@ OPERATIONS
       runErrorRule(validate_border);
       runErrorRule(validate_bufferStop);
       runErrorRule(validate_track);
+      runWarningRule(warnings_track);
+
+      runComputation(set_geometry);
+      runErrorRule(is_valid_geometry);
+
+      runComputation(set_geometryPoints);
+      runErrorRule(is_valid_geometryPoints);
+      runComputation(set_geometryPoint);
+      runErrorRule(is_valid_geometryPoint);
+
+      runComputation(set_gradientCurves);
+      runErrorRule(is_valid_gradientCurves);
+      runComputation(set_gradientCurve);
+      runErrorRule(is_valid_gradientCurve);
+
+      runComputation(set_horizontalCurves);
+      runErrorRule(is_valid_horizontalCurves);
+      runComputation(set_horizontalCurve);
+      runErrorRule(is_valid_horizontalCurve);
       // END RailML3_IS
 
       // BEGIN RailML3_VIS
@@ -234,6 +276,7 @@ OPERATIONS
       runComputation(set_signalIL);
       runErrorRule(is_valid_signalIL);
       runComputation(set_IL_SIGNAL);
+      runErrorRule(validate_signalIL);
 
       runComputation(set_switchesIL);
       runErrorRule(is_valid_switchesIL);

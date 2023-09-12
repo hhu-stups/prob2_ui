@@ -1,25 +1,26 @@
 MACHINE RailML3_printMachines
-INCLUDES RailML_import
+INCLUDES RailML3_import
 DEFINITIONS
     "LibraryIO.def";
     "LibraryMeta.def";
     "LibraryStrings.def";
-    "SORT.def"
+    "SORT.def";
+    SET_PREF_MAX_DISPLAY_SET == -1
 CONSTANTS
-    outputBaseFile, outputAnimationFile, outputValidationFile, svgFile, baseMachineName, animationMachineName, validationMachineName
+    outputDataFile, outputAnimationFile, outputValidationFile, svgFile, dataMachineName, animationMachineName, validationMachineName
 PROPERTIES
-    {file, outputBaseFile, outputAnimationFile, outputValidationFile, svgFile, baseMachineName, animationMachineName, validationMachineName} <: STRING
+    {file, outputDataFile, outputAnimationFile, outputValidationFile, svgFile, dataMachineName, animationMachineName, validationMachineName} <: STRING
 VARIABLES
-    printBase, printAnimation, printValidation
+    printData, printAnimation, printValidation
 INVARIANT
-    {printBase, printAnimation, printValidation} <: BOOL
+    {printData, printAnimation, printValidation} <: BOOL
 INITIALISATION
-    importRailML; printBase := FALSE; printAnimation := FALSE; printValidation := FALSE
+    importRailML; printData := FALSE; printAnimation := FALSE; printValidation := FALSE
 OPERATIONS
-    triggerPrintBaseMachine =
-        PRE printBase = FALSE THEN
+    triggerPrintData =
+        PRE printData = FALSE THEN
             IF "FALSE" /: ran(FORMULA_VALUES("inv")) & no_error = TRUE THEN
-                printBase := TRUE                
+                printData := TRUE                
             ELSIF "FALSE" : ran(FORMULA_VALUES("inv")) THEN
                 ADD_ERROR("RailML: ", "Import failed because of an invariant violation - check details in state view")            
             ELSE ADD_ERROR("RailML: ", "Import failed") END
@@ -29,32 +30,32 @@ OPERATIONS
 
 
 
-    printBaseMachine =
-        PRE printBase = TRUE THEN
-            FPRINTF(outputBaseFile, "~w~n", ['''/*@generated */''']);
-            FPRINTF(outputBaseFile, "~w~w~n", ["MACHINE ", baseMachineName]);
+    printDataMachine =
+        PRE printData = TRUE THEN
+            FPRINTF(outputDataFile, "~w~n", ['''/*@generated */''']);
+            FPRINTF(outputDataFile, "~w~w~n", ["MACHINE ", dataMachineName]);
 
-            FPRINTF(outputBaseFile, "~w~n", ["ABSTRACT_CONSTANTS\n    allIdsOfType"]);
-            FPRINTF(outputBaseFile, "~w~n", ["CONCRETE_CONSTANTS\n    all_ids,"]);
+            FPRINTF(outputDataFile, "~w~n", ["ABSTRACT_CONSTANTS\n    allIdsOfType"]);
+            FPRINTF(outputDataFile, "~w~n", ["CONCRETE_CONSTANTS\n    all_ids,"]);
             VAR variable_names, filtered_variable_names IN
                 variable_names := FORMULA_INFOS("variables");
                 filtered_variable_names := SQUASH({ i, name | i : dom(variable_names) & name = variable_names(i) & SUB_STRING(name, 1, 6) = "RailML" });
-                FPRINTF(outputBaseFile, "    ~w~n", [STRING_JOIN(filtered_variable_names, ",\n    ")])
+                FPRINTF(outputDataFile, "    ~w~n", [STRING_JOIN(filtered_variable_names, ",\n    ")])
             END;
 
-            FPRINTF(outputBaseFile, "~w~n", ["PROPERTIES\n    allIdsOfType = %type.( type : STRING | all_ids~[{type} * ran(ran(all_ids))] )"]);
-            FPRINTF(outputBaseFile, "    & all_ids = ~w~n", [all_ids]);
-            FPRINTF(outputBaseFile, "    & ~w~n", [STRING_JOIN(STRING_SPLIT(VARS_AS_TYPED_STRING("RailML"), " &"), "\n    &")]); // prevent very long lines
+            FPRINTF(outputDataFile, "~w~n", ["PROPERTIES\n    allIdsOfType = %type.( type : STRING | all_ids~[{type} * ran(ran(all_ids))] )"]);
+            FPRINTF(outputDataFile, "    & all_ids = ~w~n", [all_ids]);
+            FPRINTF(outputDataFile, "    & ~w~n", [STRING_JOIN(STRING_SPLIT(VARS_AS_TYPED_STRING("RailML"), " &"), "\n    &")]); // prevent very long lines
 
-            FPRINTF(outputBaseFile, "~w~n", ["SETS"]);
+            FPRINTF(outputDataFile, "~w~n", ["SETS"]);
             VAR set_names, set_values, filtered_sets IN
                 set_names := FORMULA_INFOS("sets");
                 set_values := FORMULA_VALUES("sets");
                 filtered_sets := SQUASH({ i, name | i : dom(set_names) & name = set_names(i)^" = "^set_values(i) & SUB_STRING(set_names(i), 1, 6) = "RailML" });
-                FPRINTF(outputBaseFile, "    ~w~n", [STRING_JOIN(filtered_sets, ";\n    ")])
+                FPRINTF(outputDataFile, "    ~w~n", [STRING_JOIN(filtered_sets, ";\n    ")])
             END;
 
-            FPRINTF(outputBaseFile, "~w", ["END"])
+            FPRINTF(outputDataFile, "~w", ["END"])
         END;
 
 
@@ -63,7 +64,7 @@ OPERATIONS
         PRE printAnimation = TRUE THEN
             FPRINTF(outputAnimationFile, "~w~n", ['''/*@generated */''']);
             FPRINTF(outputAnimationFile, "MACHINE ~w~n", [animationMachineName]);
-            FPRINTF(outputAnimationFile, "EXTENDS ~w~n", [baseMachineName]);
+            FPRINTF(outputAnimationFile, "EXTENDS ~w~n", [dataMachineName]);
             
             FPRINTF(outputAnimationFile, "~w~n", ["CONSTANTS\n    RS_trainFront_init, RS_trainBack_init, RS_train_states_init"]);
 
@@ -76,14 +77,29 @@ OPERATIONS
     & RS_train_states_init = {}''']); // TODO: set individually
 
             FPRINTF(outputAnimationFile, "~w~n", ['''DEFINITIONS
+    ignoreDirection(Relation) == dom({ r, cr | cr : Relation & r = prj1(prj1(cr)) |-> prj1(prj2(cr)) });
+    inverseDirectedRelation(Relation) == dom({ ir, r | r : Relation & ir = prj1(prj2(r)) |-> oppositeDirection(prj2(prj2(r))) |-> (prj1(prj1(r)) |-> oppositeDirection(prj2(prj1(r)))) });
+    inverseDirectedPair(Pair) == prj1(Pair) |-> oppositeDirection(prj2(Pair));
+    inverseSwitchPosition(pos) == IF pos = position_left THEN position_right ELSE position_left END;
+    oppositeDirection(dir) == IF dir = direction_normal THEN direction_reverse ELSE direction_normal END;
+
+    elementOfId(Set, eId) == MU( { e | e : Set & eId = MU(e'Id)} );
+
+    "CHOOSE.def";
+    "LibraryMath.def";
+    "LibraryMeta.def";
+    "LibraryReals.def";
+    "LibraryStrings.def";
+    "SORT.def";
+    SET_PREF_MEMOIZE_FUNCTIONS == TRUE;
     SET_PREF_optimize_enum_set_elems == TRUE;
-    "RailML_animation.def";''']);
+    
+    "RailML3_VisB.def";''']);
             FPRINTF(outputAnimationFile, "    VISB_SVG_FILE == \"~w\"~n", [svgFile]);
 
             FPRINTF(outputAnimationFile, "~w~n", ["SETS\n    RS_trains;"]);
             FPRINTF(outputAnimationFile, "~w~n", ["    RS_TRAIN_STATES = {train_moving, train_standing}"]);
-            FPRINTF(outputAnimationFile, "~w~n", ['''
-VARIABLES
+            FPRINTF(outputAnimationFile, "~w~n", ['''VARIABLES
     IS_next,
     IS_crossing_states, IS_crossingsInMovement, IS_crossing_keyLocked,
     IS_derailer_states, IS_derailersInMovement, IS_derailer_keyLocked,
@@ -970,14 +986,38 @@ END'''])
         PRE printValidation = TRUE THEN
             FPRINTF(outputValidationFile, "~w~n", ['''/*@generated */''']);
             FPRINTF(outputValidationFile, "RULES_MACHINE ~w~n", [validationMachineName]);
-            FPRINTF(outputValidationFile, "REFERENCES ~w~n", [baseMachineName]);
+            FPRINTF(outputValidationFile, "REFERENCES ~w~n", [dataMachineName]);
 
             FPRINTF(outputValidationFile, "~w~n", ['''DEFINITIONS
-    SET_PREF_optimize_enum_set_elems == TRUE;
+    ignoreDirection(Relation) == dom({ r, cr | cr : Relation & r = prj1(prj1(cr)) |-> prj1(prj2(cr)) });
+    inverseDirectedRelation(Relation) == dom({ ir, r | r : Relation & ir = prj1(prj2(r)) |-> oppositeDirection(prj2(prj2(r))) |-> (prj1(prj1(r)) |-> oppositeDirection(prj2(prj1(r)))) });
+    inverseDirectedPair(Pair) == prj1(Pair) |-> oppositeDirection(prj2(Pair));
+    inverseSwitchPosition(pos) == IF pos = position_left THEN position_right ELSE position_left END;
+    oppositeDirection(dir) == IF dir = direction_normal THEN direction_reverse ELSE direction_normal END;
+    lengthBetweenPositionsOnRelation(Pos1, Pos2, Relation) ==
+        SIGMA(bl, begin).( begin : dom(Relation) & begin /: ran(Relation) & bl = prj1(prj1(begin)) & RailML3_IS_NET_ELEMENT_LENGTHS(bl) /= -1.0 | RailML3_IS_NET_ELEMENT_LENGTHS(bl) )
+        + SIGMA(bl, begin, end).( begin : dom(Relation) & begin /: ran(Relation) & end /: dom(Relation) & end : ran(Relation) & bl : dom(dom(ran(Relation))) - dom(dom({begin,end})) & RailML3_IS_NET_ELEMENT_LENGTHS(bl) /= -1.0 | RailML3_IS_NET_ELEMENT_LENGTHS(bl) )
+        + SIGMA(bl, end).( end /: dom(Relation) & end : ran(Relation) & bl = prj1(prj1(end)) & RailML3_IS_NET_ELEMENT_LENGTHS(bl) /= -1.0 | RailML3_IS_NET_ELEMENT_LENGTHS(bl) );    
+    lengthBetween(a,b) ==
+        min(
+            dom({ l, nxt | #r.(r = ( RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1[{a}] /\ RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1~[{b}] ) \/ {a, b}
+                & nxt = r <| RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS |> r
+                //& nxt : dom(RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS) >+> ran(RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS)
+                //& a |-> b : closure1(nxt)
+                & l = SIGMA(c).( c : nxt & prj1(prj1(prj1(c))) = prj1(prj1(prj2(c))) & prj1(prj1(prj1(c))) : dom(RailML3_IS_NET_ELEMENT_LENGTHS) & RailML3_IS_NET_ELEMENT_LENGTHS(prj1(prj1(prj1(c)))) /= -1.0 | RABS(prj2(prj1(prj1(c))) - prj2(prj1(prj2(c)))) * RailML3_IS_NET_ELEMENT_LENGTHS(prj1(prj1(prj1(c)))) )
+            )})
+        );
+
+    elementOfId(Set, eId) == MU( { e | e : Set & eId = MU(e'Id)} );
+
     "CHOOSE.def";
     "LibraryMath.def";
     "LibraryMeta.def";
     "LibraryReals.def";
+    "LibraryStrings.def";
+    "SORT.def";
+    SET_PREF_MEMOIZE_FUNCTIONS == TRUE;
+    SET_PREF_optimize_enum_set_elems == TRUE;
 
     EBO_maximum_speed_per_curve_radius(radius, superelevation) ==
         RSQRT(RABS(radius)/11.8 * (superelevation + 130.0)); // http://www.gesetze-im-internet.de/ebo/__40.html, "Ueberhoehungsfehlbetrag" here chosen as 130 mm
@@ -1031,6 +1071,19 @@ OPERATIONS
                 THEN STRING_FORMAT(" [joining speed of right branch is ~w, but expected <= ~w] ", MU(MU(e_sw'rightBranch)'joiningSpeed), EBO_maximum_speed_per_curve_radius(MU(MU(e_sw'rightBranch)'radius),0.0))
                 ELSE ""
             END
+        END
+    END;
+    RULE MinDistanceOfTDEs // requires all netElements to have an attribute length
+    BODY
+        RULE_FORALL i_tde1, i_tde2, sloc1, sloc2, dist
+            WHERE {i_tde1, i_tde2} <: allIdsOfType("trainDetectionElement") & i_tde1 /= i_tde2
+                & sloc1 : RailML3_IS_SPOT_LOCATIONS(i_tde1) & sloc2 : RailML3_IS_SPOT_LOCATIONS(i_tde2) & sloc1 |-> sloc2 : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1
+                & !i_ne.(i_ne : dom(RailML3_IS_NET_ELEMENT_LENGTHS) /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL => RailML3_IS_NET_ELEMENT_LENGTHS(i_ne) /= -1.0)
+                & not(#(i_tde3, sloc3).(i_tde3 : allIdsOfType("trainDetectionElement") & sloc3 : RailML3_IS_SPOT_LOCATIONS(i_tde3) & sloc1 |-> sloc3 : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1 & sloc3 |-> sloc2 : RailML3_IS_NET_RELATION_SUBSEQUENT_BLOCKS_closure1))
+                & dist = lengthBetween(sloc1, sloc2)
+            EXPECT dist > 21.0
+        COUNTEREXAMPLE
+            STRING_FORMAT("Distance between trainDetectionElements ~w and ~w is ~w (<= 21.0)", i_tde1, i_tde2, dist)
         END
     END
 END'''])

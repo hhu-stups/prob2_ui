@@ -7,8 +7,12 @@ DEFINITIONS
                     ELSIF i_e : dom(IL_crossing_locked_routes) or IS_crossing_keyLocked(i_e) = TRUE THEN "red"
                     ELSE "black" END,
                 fill: IF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)) & (RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)(i_e) /= IS_crossing_states(i_e) or i_e : dom(IS_crossingsInMovement)))
+                        or #i_o.(i_o : dom(IL_res_overlaps) & i_o : dom(RailML3_IL_OVERLAP_CROSSING_POSITIONS) & i_e : dom(RailML3_IL_OVERLAP_CROSSING_POSITIONS(i_o)) & (RailML3_IL_OVERLAP_CROSSING_POSITIONS(i_o)(i_e) /= IS_crossing_states(i_e) or i_e : dom(IS_crossingsInMovement)))
                         THEN "red"
-                    ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)) & RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)(i_e) = IS_crossing_states(i_e))
+                    ELSIF !i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)) => RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)(i_e) = IS_crossing_states(i_e))
+                        & !(i_o, i_r).(i_o : dom(IL_res_overlaps) /\ dom(RailML3_IL_OVERLAP_CROSSING_POSITIONS) & i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_OVERLAPS) & i_o : RailML3_IL_ROUTE_OVERLAPS(i_r) & i_e : dom(RailML3_IL_OVERLAP_CROSSING_POSITIONS(i_o)) => RailML3_IL_OVERLAP_CROSSING_POSITIONS(i_o)(i_e) = IS_crossing_states(i_e))
+                        & ( #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_CROSSING_POSITIONS(i_r)))
+                        or #(i_o, i_r).(i_o : dom(IL_res_overlaps) /\ dom(RailML3_IL_OVERLAP_CROSSING_POSITIONS) & i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_OVERLAPS) & i_o : RailML3_IL_ROUTE_OVERLAPS(i_r) & i_e : dom(RailML3_IL_OVERLAP_CROSSING_POSITIONS(i_o))) )
                         THEN "green"
                     ELSE "black" END
             )
@@ -35,14 +39,17 @@ DEFINITIONS
                 text: FORMAT_TO_STRING("~w\nState: ~w", [i_e, TO_STRING(IS_derailer_states(i_e))])
             )
         };
-    // TODO: Not fitting switches of overlaps red
     VISB_SVG_UPDATES14 ==
         {i_e • i_e : RailML3_IS_SWITCH_IDS |
             rec(`id`: i_e^"_ellipse",
-                stroke: IF i_e : dom(IS_switchsInMovement) THEN "darkorange" ELSIF i_e : dom(IL_switch_locked_routes) or IS_switch_keyLocked(i_e) = TRUE THEN "red" ELSE "black" END,
-                fill: IF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & (RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) /<: IS_switch_states(i_e) or i_e : dom(IS_switchsInMovement)))
+                stroke: IF i_e : dom(IS_switchesInMovement) THEN "darkorange" ELSIF i_e : dom(IL_switch_locked_routes) or IS_switch_keyLocked(i_e) = TRUE THEN "red" ELSE "black" END,
+                fill: IF #i_r.(i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & (RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) /<: IS_switch_states(i_e) or i_e : dom(IS_switchesInMovement)))
+                        or #i_o.(i_o : dom(IL_res_overlaps) /\ dom(RailML3_IL_OVERLAP_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_OVERLAP_SWITCH_POSITIONS(i_o)) & (RailML3_IL_OVERLAP_SWITCH_POSITIONS(i_o)(i_e) /<: IS_switch_states(i_e) or i_e : dom(IS_switchesInMovement)))
                         THEN "red"
-                    ELSIF #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) & RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) <: IS_switch_states(i_e))
+                    ELSIF !i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)) => RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)(i_e) <: IS_switch_states(i_e))
+                        & !(i_o, i_r).(i_o : dom(IL_res_overlaps) /\ dom(RailML3_IL_OVERLAP_SWITCH_POSITIONS) & i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_OVERLAPS) & i_o : RailML3_IL_ROUTE_OVERLAPS(i_r) & i_e : dom(RailML3_IL_OVERLAP_SWITCH_POSITIONS(i_o)) => RailML3_IL_OVERLAP_SWITCH_POSITIONS(i_o)(i_e) <: IS_switch_states(i_e))
+                        & ( #i_r.(i_r : dom(IL_routes_in_res) & i_r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & i_e : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(i_r)))
+                        or #(i_o, i_r).(i_o : dom(IL_res_overlaps) /\ dom(RailML3_IL_OVERLAP_SWITCH_POSITIONS) & i_r : dom(IL_routes_in_res) /\ dom(RailML3_IL_ROUTE_OVERLAPS) & i_o : RailML3_IL_ROUTE_OVERLAPS(i_r) & i_e : dom(RailML3_IL_OVERLAP_SWITCH_POSITIONS(i_o))) )
                         THEN "green"
                     ELSE "black" END
             )
@@ -113,15 +120,25 @@ DEFINITIONS
     VISB_SVG_UPDATES31 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`: i_e^"_tvd_blink",
-                values: IF #(i_r, i_t).(i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))) & i_t /: dom(IL_occupiedTvdSections)) THEN "1;0.2;1"
-                    ELSE "1" END
+                values: IF #(i_r, i_t).(i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))) & i_t /: dom(IL_occupiedTvdSections))
+                    or #(i_o, i_t).(i_o : dom(IL_res_overlaps) /\ dom(RailML3_IL_OVERLAP_TVD_SECTIONS)
+                        & i_t : RailML3_IL_OVERLAP_TVD_SECTIONS(i_o)
+                        & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t))))
+                        & i_t /: dom(IL_occupiedTvdSections))
+                    THEN "1;0.2;1" ELSE "1" END
             )
         };
     VISB_SVG_UPDATES32 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`: i_e^"_tvd",
-                visibility: IF #i_t.(i_t : dom(IL_occupiedTvdSections) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t))))) or (#(i_r, i_t).(i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))))) THEN "visible"
-                    ELSE "hidden" END
+                visibility: IF #i_t.(i_t : dom(IL_occupiedTvdSections) & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))))
+                    or #(i_r, i_t).(i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS)
+                        & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) - ( union(RailML3_IL_ROUTE_RELEASE_GROUPS_AHEAD_TVD_SECTIONS[union(IL_released_partialRoutes[{i_r}])]) \/ union(RailML3_IL_ROUTE_RELEASE_GROUPS_REAR_TVD_SECTIONS[union(IL_released_partialRoutes[{i_r}])]) )
+                        & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))))
+                    or #(i_o, i_t).(i_o : dom(IL_res_overlaps) /\ dom(RailML3_IL_OVERLAP_TVD_SECTIONS)
+                        & i_t : RailML3_IL_OVERLAP_TVD_SECTIONS(i_o)
+                        & i_e : dom(dom(dom(RailML3_IL_TVD_SECTIONS(i_t)))))                   
+                    THEN "visible" ELSE "hidden" END
             )
         };
     VISB_SVG_UPDATES33 ==
@@ -210,6 +227,13 @@ DEFINITIONS
                     ELSE "hidden" END
             )
         };
+    VISB_SVG_UPDATES63 ==
+        {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
+            rec(`id`:i_e^"_title",
+                text: IF i_e : dom(dom(ran(RS_trainFront) \/ ran(RS_trainBack))) or #t.(t : RS_arrivedTrains & i_e : dom(RS_trainOccupiedBlocks(t)) ) THEN i_e^" "^TO_STRING({ t | t : RS_arrivedTrains & i_e : dom(RS_trainOccupiedBlocks(t)) })
+                    ELSE i_e END
+            )
+        };
 
     VISB_SVG_EVENTS11 == {x•x:allIdsOfType("switchIS") | rec(`id`: x, event: "IS_startChangeSwitch", predicate: ('''(#(i_sw_il1, i_sw_il2).(RailML3_IS_SWITCH_TYPE(SwitchId) = switch_doubleSwitchCrossing
         & [i_sw_il1, i_sw_il2] = SORT(dom(IS_switch_states(\"'''^x^'''\"))) & ( ( CurrState(i_sw_il1) = position_left & CurrState(i_sw_il2) = position_left & DestState(i_sw_il1) = position_left & DestState(i_sw_il2) = position_right )
@@ -228,6 +252,7 @@ DEFINITIONS
     VISB_SVG_HOVERS2 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS2 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
+    // RailML3_IS_MOVABLE_CROSSING_IDS in generated version:
     VISB_SVG_EVENTS31 == {x•x:allIdsOfType("crossing") | rec(`id`: x, event: "IS_startChangeCrossing", predicate: ("CrossingId=","\""^x^"\"") )};
     VISB_SVG_EVENTS32 == {x•x:allIdsOfType("crossing") | rec(`id`: x, event: "IS_endChangeCrossing", predicate: ("CrossingId=","\""^x^"\"") )};
     VISB_SVG_HOVERS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
@@ -238,7 +263,7 @@ DEFINITIONS
     VISB_SVG_HOVERS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
-    // Following for generated machines:
+    // Following for generated machines: (RailML3_IL_SIGNAL_CONTROLLED/RailML3_IS_OPENEND_IDS are variables in not generated machines and thus cannot be used here)
     /*VISB_SVG_EVENTS41 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
     VISB_SVG_EVENTS42 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_changeSignalState", predicate: ("SignalId=","\""^x^"\"") )};    
     VISB_SVG_HOVERS4 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
@@ -248,20 +273,3 @@ DEFINITIONS
     //VISB_SVG_EVENTS52 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x, event: "RS_trainLeave" )};
     //VISB_SVG_HOVERS5 == {x•x:RailML3_IS_OPENEND_IDS | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     // start RouteRes?
-
-    ignoreDirection(Relation) == dom({ r, cr | cr : Relation & r = prj1(prj1(cr)) |-> prj1(prj2(cr)) });
-    inverseDirectedRelation(Relation) == dom({ ir, r | r : Relation & ir = prj1(prj2(r)) |-> oppositeDirection(prj2(prj2(r))) |-> (prj1(prj1(r)) |-> oppositeDirection(prj2(prj1(r)))) });
-    inverseDirectedPair(Pair) == prj1(Pair) |-> oppositeDirection(prj2(Pair));
-    inverseSwitchPosition(pos) == IF pos = position_left THEN position_right ELSE position_left END;
-    oppositeDirection(dir) == IF dir = direction_normal THEN direction_reverse ELSE direction_normal END;
-
-    elementOfId(Set, eId) == MU( { e | e : Set & eId = MU(e'Id)} );
-
-    //GOAL == EBO_CheckSwitchSpeeds = "SUCCESS" & ValidateTrackLengths = "SUCCESS";
-    //SET_PREF_ALLOW_OPERATION_CALLS_IN_EXPRESSIONS == TRUE;
-    "CHOOSE.def";
-    "LibraryIO.def";
-    "LibraryMath.def";
-    "LibraryReals.def";
-	"LibraryStrings.def";
-    "SORT.def";

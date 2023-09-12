@@ -4,7 +4,7 @@ DEFINITIONS
     "CHOOSE.def";
     "LibraryIO.def";
 	"LibraryStrings.def";
-    "RailML_CustomGraphs.def";
+    "RailML3_CustomGraphs.def";
     CUSTOM_GRAPH == NOR_customGraph
 VARIABLES
 	SCALING_FACTOR,
