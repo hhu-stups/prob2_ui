@@ -354,14 +354,14 @@ public class RailMLStage extends Stage {
 			Path tempGraphMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve(graphMachineName);
 			Path tempGraphDefs = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_CustomGraphs.def");
 			Path tempPrintMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_printMachines.mch");
-			Path tempImportMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML_import.mch");
-			Path tempValidationMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML_validation_flat.mch");
+			Path tempImportMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_import.mch");
+			Path tempValidationMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_validation_flat.mch");
 
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(graphMachineName)), tempGraphMachine, StandardCopyOption.REPLACE_EXISTING);
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_CustomGraphs.def")), tempGraphDefs, StandardCopyOption.REPLACE_EXISTING);
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_printMachines.mch")), tempPrintMachine, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML_import.mch")), tempImportMachine, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML_validation_flat.mch")), tempValidationMachine, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_import.mch")), tempImportMachine, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_validation_flat.mch")), tempValidationMachine, StandardCopyOption.REPLACE_EXISTING);
 
 			stateSpace = api.b_load(tempGraphMachine.toString());
 
@@ -371,7 +371,7 @@ public class RailMLStage extends Stage {
 			Files.delete(tempImportMachine);
 			Files.delete(tempValidationMachine);
 		} else {
-			stateSpace = api.b_load(Paths.get(graphMachine.getPath()).toString());
+			stateSpace = api.b_load(Paths.get(graphMachine).toString());
 		}
 
 		stateSpace.addWarningListener(warnings -> {
