@@ -1,9 +1,15 @@
 package de.prob2.ui.states;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import de.prob.animator.domainobjects.BVisual2Value;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.animator.domainobjects.ExpandedFormula;
+import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.dotty.DotView;
+import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
@@ -29,7 +35,9 @@ import java.util.regex.Pattern;
 public class FullValueStage extends Stage {
 	private static final Pattern PRETTIFY_DELIMITERS = Pattern.compile("[\\{\\}\\,]");
 	private static final Logger LOGGER = LoggerFactory.getLogger(FullValueStage.class);
-	
+	private final StatesView statesView;
+	private final Injector injector;
+
 	@FXML private TabPane tabPane;
 	@FXML private Tab formulaTab;
 	@FXML private Tab descriptionTab;
@@ -53,13 +61,14 @@ public class FullValueStage extends Stage {
 	private final StateSpace sp;
 	
 	@Inject
-	public FullValueStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final I18n i18n, final MachineLoader machineLoader) {
+	public FullValueStage(final StageManager stageManager, final Injector injector, final FileChooserManager fileChooserManager, final I18n i18n, final MachineLoader machineLoader, StatesView statesView) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
-		
+		this.statesView = statesView;
 		this.value = new SimpleObjectProperty<>(this, "value", null);
 		this.sp = machineLoader.getActiveStateSpace();
+		this.injector = injector;
 		stageManager.loadFXML(this, "full_value_stage.fxml");
 	}
 	
@@ -70,6 +79,45 @@ public class FullValueStage extends Stage {
 		this.showFullValueCheckBox.selectedProperty().addListener(o -> this.updateValue(this.getValue()));
 		this.showFullValueCheckBox.setTooltip(new Tooltip(i18n.translate("states.fullValueStage.fullValueTooltip")));
 		this.tabPane.getSelectionModel().select(this.currentValueTab);
+
+		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
+			i18n.translate("states.statesView.contextMenu.items.visualizeExpressionGraph"));
+		visualizeExpressionAsGraphItem.setOnAction(event -> {
+			try {
+				String visualizedFormula = statesView.getFormulaForVisualization(value.getValue());
+				DotView formulaStage = injector.getInstance(DotView.class);
+				formulaStage.show();
+				formulaStage.toFront();
+				formulaStage.visualizeFormula(visualizedFormula);
+			} catch (EvaluationException | ProBError e) {
+				LOGGER.error("Could not visualize formula", e);
+				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
+			}
+		});
+
+		final MenuItem visualizeExpressionAsTableItem = new MenuItem(
+			i18n.translate("states.statesView.contextMenu.items.visualizeExpressionTable"));
+		visualizeExpressionAsTableItem.setOnAction(event -> {
+			try {
+				String visualizedFormula = statesView.getFormulaForVisualization(value.getValue());
+				if(ExpandedFormula.FormulaType.PREDICATE == value.getValue().getFormula().expandStructureNonrecursive().getType()) {
+					visualizedFormula = String.format(Locale.ROOT, "bool(%s)", visualizedFormula);
+				}
+				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+				expressionTableView.show();
+				expressionTableView.toFront();
+				expressionTableView.visualizeExpression(visualizedFormula);
+			} catch (EvaluationException | ProBError e) {
+				LOGGER.error("Could not visualize formula", e);
+				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
+			}
+		});
+
+		currentValueTextarea.contextMenuProperty().setValue(new ContextMenu(visualizeExpressionAsGraphItem, visualizeExpressionAsTableItem));
 	}
 	
 	private static String prettify(final String s) {

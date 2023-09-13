@@ -246,7 +246,7 @@ public final class StatesView extends StackPane {
 		}
 	}
 
-	private String getFormulaForVisualization(StateItem item) {
+	String getFormulaForVisualization(StateItem item) {
 		final List<BVisual2Formula> topLevel = BVisual2Formula.getTopLevel(currentTrace.getStateSpace());
 		final List<List<ExpandedFormula>> topLevelOperations = topLevel.stream()
 				.filter(formula -> TOP_LEVEL_OPERATIONS_ID.equals(formula.expandStructure().getFormula().getId()))
