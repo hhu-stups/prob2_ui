@@ -207,7 +207,7 @@ public class FullValueStage extends Stage {
 			sp.changePreferences(pref);
 		}
 		final String cv = prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getCurrentState())));
-		final String pv = prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getPreviousState())));
+		final String pv = newValue.getPreviousState() == null ? "" : prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getPreviousState())));
 		this.currentValueTextarea.setText(cv);
 		this.previousValueTextarea.setText(pv);
 		this.updateDiff(cv, pv);
