@@ -7,14 +7,14 @@
         {
             "id": "$initialise_machine",
             "execute": "$initialise_machine",
-            "activating" : "Any_Action"
+            "activating" : ["Any_Action"]
         },
         {
             "id": "Any_Action",
             "chooseActivation": {
-                "RS_Action": 0.34,
-                "IS_Action": 0.33,
-                "IL_Action": 0.33
+                "RS_Action": 0.5,
+                "IS_Action": 0.25,
+                "IL_Action": 0.25
             }
         },
             {
@@ -34,6 +34,7 @@
                 },
                     {
                         "id": "RS_trainArrivalRequest_Exec",
+                        "after": 1000,
                         "execute": "RS_trainArrivalRequest",
                         "activating": ["skip", "RS_trainArrivalRequest_Choose"]
                     },
@@ -59,18 +60,20 @@
                                     "fixedVariables":{
                                         "Train": "CHOOSE(dom(RS_requestingArrivalTrains))"
                                     },
-                                    "activating": ["IL_startActivateSignalplan", "IL_endRouteReservation"],
+                                    "activating": ["skip", "IL_startActivateSignalplan", "IL_endRouteReservation"],
                                     "comment": "IL_trainAcceptArrival_Exec activated after end of route reservation"
                                 },
                                     {
                                         "id": "IL_trainAcceptArrival_Exec",
                                         "after": 1000,
-                                        "execute": "IL_trainAcceptArrival"
+                                        "execute": "IL_trainAcceptArrival",
+                                        "activating": "skip"
                                     },
                             {
                                 "id": "IL_trainDeclineArrival",
                                 "after": 1000,
-                                "execute": "IL_trainDeclineArrival"
+                                "execute": "IL_trainDeclineArrival",
+                                "activating": "skip"
                             },
                 {
                     "id": "RS_trainMoveFront",
@@ -82,37 +85,46 @@
                     {
                         "id": "RS_trainMoveFront_Exec",
                         "execute": "RS_trainMoveFront",
+                        "after": 1000,
                         "activating" : ["skip", "RS_trainMoveBack"]
                     },
                         {
                             "id": "RS_trainMoveBack",
-                            "after": 2000,
+                            "after": 1000,
                             "execute": "RS_trainMoveBack",
-                            "activating" : "RS_trainLeave"
+                            "activating" : ["skip", "RS_trainLeave", "IL_ReleaseAction"]
                         },
                             {
                                 "id": "RS_trainLeave",
                                 "after": 1000,
-                                "execute": "RS_trainLeave"
+                                "execute": "RS_trainLeave",
+                                "activating": "skip"
                             },
                 {
                     "id": "RS_trainChangeState",
                     "chooseActivation":{
-                        "RS_trainChangeState_Exec": "IF ENABLED(\"RS_trainChangeState\") = TRUE THEN 1.0 ELSE 0.0 END",
-                        "skip": "1.0 - IF ENABLED(\"RS_trainChangeState\") = TRUE THEN 1.0 ELSE 0.0 END"
+                        "RS_trainChangeState_Exec": "IF dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {} THEN 1.0 ELSE 0.0 END",
+                        "skip": "1.0 - IF dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {} THEN 1.0 ELSE 0.0 END"
                     },
-                    "comment": "TODO: Train on berthingTrack"
+                    "comment": "dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {}",
+                    "comment2": "IF { Train | Train : RS_arrivedTrains & prj1(prj1(RS_trainBack(Train))) = prj1(prj1(RS_trainFront(Train))) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE } /= {} THEN 1.0 ELSE 0.0 END"
                 },
                     {
                         "id": "RS_trainChangeState_Exec",
                         "after": 1000,
                         "execute": "RS_trainChangeState",
-                        "activating" : ["skip", "RS_trainChangeDirection"]
+                        "additionalGuards": "dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {}",
+                        "fixedVariables": {
+                            "Train": "CHOOSE(dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }))"
+                        },
+                        "activating": ["skip", "RS_trainChangeDirection"],
+                        "activationKind": "single"
                     },
                         {
                             "id": "RS_trainChangeDirection",
                             "after": 1000,
-                            "execute": "RS_trainChangeDirection"
+                            "execute": "RS_trainChangeDirection",
+                            "activating": "skip"
                         },
 
             {
@@ -145,7 +157,7 @@
                             "id": "IS_endChangeCrossing",
                             "execute": "IS_endChangeCrossing",
                             "after": "RailML3_IL_MOVABLE_CROSSING_TYPICAL_THROW_TIMES(CrossingId)",
-                            "activating": ["IL_noteChangeSignalState", "IL_endRouteReservation"]
+                            "activating": ["skip", "IL_noteChangeSignalState", "IL_endRouteReservation"]
                         },
                 {
                     "id": "IS_startChangeDerailer",
@@ -191,8 +203,16 @@
                             "id": "IS_endChangeSwitch",
                             "execute": "IS_endChangeSwitch",
                             "after": "RailML3_IL_SWITCH_TYPICAL_THROW_TIMES(SwitchId)",
-                            "activating" : ["IS_endChangeSwitch", "IL_noteChangeSignalState", "IL_endRouteReservation"]
+                            "activating": ["skip", "IS_endChangeSwitch_RelatedMovableElement_Choose", "IL_noteChangeSignalState", "IL_endRouteReservation"]
                         },
+                            {
+                                "id": "IS_endChangeSwitch_RelatedMovableElement",
+                                "execute": "IS_endChangeSwitch",
+                                "additionalGuards": "SwitchId : dom(RailML3_IL_SWITCH_RELATED_MOVABLE_ELEMENT)",
+                                "after": "RailML3_IL_SWITCH_TYPICAL_THROW_TIMES(RailML3_IL_SWITCH_RELATED_MOVABLE_ELEMENT(SwitchId))",
+                                "fixedVariables": {"SwitchId": "RailML3_IL_SWITCH_RELATED_MOVABLE_ELEMENT(SwitchId)"},
+                                "activating": ["skip", "IL_noteChangeSignalState", "IL_endRouteReservation"]
+                            },
 
             {
                 "id": "IL_Action",
@@ -213,7 +233,7 @@
                         "id": "IL_startRouteReservation",
                         "execute": "IL_startRouteReservation",
                         "after": 1000,
-                        "activating" : ["IS_Action", "IL_startActivateSignalplan_Choose", "IL_endRouteReservation"]
+                        "activating" : ["skip", "IS_Action", "IL_startActivateSignalplan_Choose", "IL_endRouteReservation"]
                     },
                 {
                     "id": "IL_startActivateSignalplan_Choose",
@@ -236,18 +256,19 @@
                             "fixedVariables":{
                                 "SignalId": "CHOOSE(dom({SignalId, sp | sp : IL_signalplan_in_activation & SignalId : RailML3_IL_SIGNAL_REFERS_TO[dom(sp'master \\/ sp'slave \\/ sp'distant)] - dom(IL_noted_signal_states) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_noteChangeSignalState(\\\"~w\\\")\", [SignalId])) = TRUE }))"
                             },
-                            "activating" : ["IL_startRouteReservation", "IS_Action", "IL_noteChangeSignalState", "IL_endRouteReservation", "IL_endActivateSignalplan"]
+                            "activating" : ["skip", "IL_startRouteReservation", "IS_Action", "IL_noteChangeSignalState", "IL_endRouteReservation", "IL_endActivateSignalplan"]
                         },
                     {
                         "id": "IL_endRouteReservation",
                         "execute": "IL_endRouteReservation",
                         "after": 1000,
-                        "activating" : ["IL_endActivateSignalplan", "IL_trainAcceptArrival_Exec"]
+                        "activating" : ["skip", "IL_endActivateSignalplan", "IL_trainAcceptArrival_Exec"]
                     },
                     {
                         "id": "IL_endActivateSignalplan",
                         "execute": "IL_endActivateSignalplan",
-                        "after": 1000
+                        "after": 1000,
+                        "activating": "skip"
                     },
                 {
                     "id": "IL_changeSignalState",
@@ -264,32 +285,58 @@
                         "fixedVariables":{
                             "SignalId": "CHOOSE(dom({SignalId, train | train : RS_arrivedTrains & SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (IL_signal_locked - dom(IL_noted_signal_states)) }))"
                         },
-                        "activating": ["skip"],
-                        "activationKind " : "single"
+                        "activating": ["skip"]
                     },
         {
-            "id": "IL_partialRouteReleaseAhead",
-            "execute": "IL_partialRouteReleaseAhead",
-            "after": 1000,
-            "activating" : ["IL_completeRouteRelease", "TrainArrive", "TrainMove_Init", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear"]
+            "id": "IL_ReleaseAction",
+            "chooseActivation": {
+                "IL_partialRouteReleaseAhead": 0.1,
+                "IL_partialRouteReleaseRear": 0.3,
+                "IL_completeRouteReleaseAhead": 0.1,
+                "IL_completeRouteReleaseRear": 0.3,
+                "IL_startOverlapRelease": 0.2
+            }
         },
-        {
-            "id": "IL_partialRouteReleaseRear",
-            "execute": "IL_partialRouteReleaseRear",
-            "after": 1000,
-            "activating" : ["IL_completeRouteRelease", "TrainArrive", "TrainMove_Init", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear"]
-        },
-        {
-            "id": "IL_completeRouteReleaseRear",
-            "execute": "IL_completeRouteReleaseRear",
-            "after": 1000,
-            "activating" : ["TrainArrive", "TrainMove_Init", "IS_startChangeSwitch", "IL_startRouteReservation", "IL_partialRouteReleaseAhead", "IL_partialRouteReleaseRear", "IL_completeRouteRelease", "IL_noteChangeSignalState"]
-        },
+            {
+                "id": "IL_partialRouteReleaseAhead",
+                "execute": "IL_partialRouteReleaseAhead",
+                "after": 1000,
+                "activating" : ["skip", "IL_partialRouteReleaseAhead", "IL_completeRouteReleaseAhead"]
+            },
+            {
+                "id": "IL_partialRouteReleaseRear",
+                "execute": "IL_partialRouteReleaseRear",
+                "after": 1000,
+                "activating" : ["skip", "IL_partialRouteReleaseRear", "IL_completeRouteReleaseRear"]
+            },
+            {
+                "id": "IL_completeRouteReleaseAhead",
+                "execute": "IL_completeRouteReleaseAhead",
+                "after": 1000,
+                "activating" : ["skip"]
+            },
+            {
+                "id": "IL_completeRouteReleaseRear",
+                "execute": "IL_completeRouteReleaseRear",
+                "after": 1000,
+                "activating" : ["skip"]
+            },
+            {
+                "id": "IL_startOverlapRelease",
+                "execute": "IL_startOverlapRelease",
+                "after": 1000,
+                "activating" : ["skip", "IL_endOverlapRelease"]
+            },
+            {
+                "id": "IL_endOverlapRelease",
+                "execute": "IL_endOverlapRelease",
+                "after": "RailML3_IL_OVERLAP_RELEASE_TIMERS(OverlapId)",
+                "activating" : ["skip"]
+            },
         {
             "id": "skip",
             "execute": "skip",
-            "after": 1000,
-            "activating": "Any_Action"
+            "activating": ["Any_Action"]
         }
     ],
     "listeners" : [
