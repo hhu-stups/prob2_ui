@@ -326,7 +326,7 @@ public class RailMLStage extends Stage {
 			Path newOldFile;
 			do {
 				String numberedFileName = MoreFiles.getNameWithoutExtension(currentFile) + "_" + fileNumber + ".def";
-				newOldFile = Paths.get(numberedFileName);
+				newOldFile = generationPath.resolve(numberedFileName);
 				fileNumber++;
 			} while (Files.exists(newOldFile));
 			Files.copy(currentFile, newOldFile);
