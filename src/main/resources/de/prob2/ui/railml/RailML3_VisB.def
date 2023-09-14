@@ -104,17 +104,20 @@ DEFINITIONS
     
     // TVD sections:
     VISB_SVG_UPDATES30 ==
-        UNION(i_e, route_tvd, occ_tvd).(i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL
-            & route_tvd = { a | #(b, i_t, i_r).( i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & b : dom(dom(RailML3_IL_TVD_SECTIONS(i_t))) & prj1(b) = i_e & a = prj2(b) ) }
+        UNION(i_e, route_ovl_tvd, occ_tvd).(i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL
+            & route_ovl_tvd =
+                { a | #(b, i_t, i_r).( i_r : dom(IL_routes_in_res \/ IL_res_routes) /\ dom(RailML3_IL_ROUTE_TVD_SECTIONS) & i_t : RailML3_IL_ROUTE_TVD_SECTIONS(i_r) & b : dom(dom(RailML3_IL_TVD_SECTIONS(i_t))) & prj1(b) = i_e & a = prj2(b) ) }
+                \/
+                { a | #(b, i_t, i_o).( i_o : dom(IL_res_overlaps) /\ dom(RailML3_IL_OVERLAP_TVD_SECTIONS) & i_t : RailML3_IL_OVERLAP_TVD_SECTIONS(i_o) & b : dom(dom(RailML3_IL_TVD_SECTIONS(i_t))) & prj1(b) = i_e & a = prj2(b) ) }
             & occ_tvd = { a | #(b, i_t).( i_t : dom(IL_occupiedTvdSections) & b : dom(dom(RailML3_IL_TVD_SECTIONS(i_t))) & prj1(b) = i_e & a = prj2(b) ) } |
                 {rec(`id`: i_e^"_lg_tvd_1",
-                    offset: IF occ_tvd /= {} THEN TO_STRING(min(occ_tvd)*100.0)^"%" ELSIF route_tvd /= {} THEN TO_STRING(min(route_tvd)*100.0)^"%" ELSE "0%" END
+                    offset: IF occ_tvd /= {} THEN TO_STRING(min(occ_tvd)*100.0)^"%" ELSIF route_ovl_tvd /= {} THEN TO_STRING(min(route_ovl_tvd)*100.0)^"%" ELSE "0%" END
                 ), rec(`id`: i_e^"_lg_tvd_2",
-                    offset: IF occ_tvd /= {} THEN TO_STRING(min(occ_tvd)*100.0)^"%" ELSIF route_tvd /= {} THEN TO_STRING(min(route_tvd)*100.0)^"%" ELSE "0%" END
+                    offset: IF occ_tvd /= {} THEN TO_STRING(min(occ_tvd)*100.0)^"%" ELSIF route_ovl_tvd /= {} THEN TO_STRING(min(route_ovl_tvd)*100.0)^"%" ELSE "0%" END
                 ), rec(`id`: i_e^"_lg_tvd_3",
-                    offset: IF occ_tvd /= {} THEN TO_STRING(max(occ_tvd)*100.0)^"%" ELSIF route_tvd /= {} THEN TO_STRING(max(route_tvd)*100.0)^"%" ELSE "100%" END
+                    offset: IF occ_tvd /= {} THEN TO_STRING(max(occ_tvd)*100.0)^"%" ELSIF route_ovl_tvd /= {} THEN TO_STRING(max(route_ovl_tvd)*100.0)^"%" ELSE "100%" END
                 ), rec(`id`: i_e^"_lg_tvd_4",
-                    offset: IF occ_tvd /= {} THEN TO_STRING(max(occ_tvd)*100.0)^"%" ELSIF route_tvd /= {} THEN TO_STRING(max(route_tvd)*100.0)^"%" ELSE "100%" END
+                    offset: IF occ_tvd /= {} THEN TO_STRING(max(occ_tvd)*100.0)^"%" ELSIF route_ovl_tvd /= {} THEN TO_STRING(max(route_ovl_tvd)*100.0)^"%" ELSE "100%" END
                 )}
         );
     VISB_SVG_UPDATES31 ==

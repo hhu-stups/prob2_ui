@@ -28,8 +28,8 @@
                 {
                     "id": "RS_trainArrivalRequest",
                     "chooseActivation": {
-                        "RS_trainArrivalRequest_Exec": "IF ENABLED(\"RS_trainArrivalRequest\") = TRUE THEN 1.0 ELSE 0.0 END",
-                        "skip": "1.0 - IF ENABLED(\"RS_trainArrivalRequest\") = TRUE THEN 1.0 ELSE 0.0 END"
+                        "RS_trainArrivalRequest_Exec": "IF GET_IS_ENABLED(\"RS_trainArrivalRequest\") = TRUE THEN 1.0 ELSE 0.0 END",
+                        "skip": "1.0 - IF GET_IS_ENABLED(\"RS_trainArrivalRequest\") = TRUE THEN 1.0 ELSE 0.0 END"
                     }
                 },
                     {
@@ -48,8 +48,8 @@
                             {
                                 "id": "IL_trainAcceptArrival_Choose",
                                 "chooseActivation": {
-                                    "IL_trainAcceptArrival": "IF RS_requestingArrivalTrains /= {} & #route.(route : allIdsOfType(\"route\") & ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_startRouteReservation(\\\"~w\\\",\\\"~w\\\")\", [route, TO_STRING(CHOOSE(dom(RS_requestingArrivalTrains)))])) = TRUE) THEN 1.0 ELSE 0.0 END",
-                                    "IL_trainAcceptArrival_Exec": "1.0 - IF RS_requestingArrivalTrains /= {} & #route.(route : allIdsOfType(\"route\") & ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_startRouteReservation(\\\"~w\\\",\\\"~w\\\")\", [route, TO_STRING(CHOOSE(dom(RS_requestingArrivalTrains)))])) = TRUE) THEN 1.0 ELSE 0.0 END"
+                                    "IL_trainAcceptArrival": "IF RS_requestingArrivalTrains /= {} & #route.(route : allIdsOfType(\"route\") & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_startRouteReservation(\\\"~w\\\",\\\"~w\\\")\", [route, TO_STRING(CHOOSE(dom(RS_requestingArrivalTrains)))])) = TRUE) THEN 1.0 ELSE 0.0 END",
+                                    "IL_trainAcceptArrival_Exec": "1.0 - IF RS_requestingArrivalTrains /= {} & #route.(route : allIdsOfType(\"route\") & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_startRouteReservation(\\\"~w\\\",\\\"~w\\\")\", [route, TO_STRING(CHOOSE(dom(RS_requestingArrivalTrains)))])) = TRUE) THEN 1.0 ELSE 0.0 END"
                                 }
                             },
                                 {
@@ -78,8 +78,8 @@
                 {
                     "id": "RS_trainMoveFront",
                     "chooseActivation":{
-                        "RS_trainMoveFront_Exec": "IF ENABLED(\"RS_trainMoveFront\") = TRUE THEN 1.0 ELSE 0.0 END",
-                        "skip": "1.0 - IF ENABLED(\"RS_trainMoveFront\") = TRUE THEN 1.0 ELSE 0.0 END"
+                        "RS_trainMoveFront_Exec": "IF GET_IS_ENABLED(\"RS_trainMoveFront\") = TRUE THEN 1.0 ELSE 0.0 END",
+                        "skip": "1.0 - IF GET_IS_ENABLED(\"RS_trainMoveFront\") = TRUE THEN 1.0 ELSE 0.0 END"
                     }
                 },
                     {
@@ -103,19 +103,19 @@
                 {
                     "id": "RS_trainChangeState",
                     "chooseActivation":{
-                        "RS_trainChangeState_Exec": "IF dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {} THEN 1.0 ELSE 0.0 END",
-                        "skip": "1.0 - IF dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {} THEN 1.0 ELSE 0.0 END"
+                        "RS_trainChangeState_Exec": "IF dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {} THEN 1.0 ELSE 0.0 END",
+                        "skip": "1.0 - IF dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {} THEN 1.0 ELSE 0.0 END"
                     },
-                    "comment": "dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {}",
-                    "comment2": "IF { Train | Train : RS_arrivedTrains & prj1(prj1(RS_trainBack(Train))) = prj1(prj1(RS_trainFront(Train))) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE } /= {} THEN 1.0 ELSE 0.0 END"
+                    "comment": "dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {}",
+                    "comment2": "IF { Train | Train : RS_arrivedTrains & prj1(prj1(RS_trainBack(Train))) = prj1(prj1(RS_trainFront(Train))) & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE } /= {} THEN 1.0 ELSE 0.0 END"
                 },
                     {
                         "id": "RS_trainChangeState_Exec",
                         "after": 1000,
                         "execute": "RS_trainChangeState",
-                        "additionalGuards": "dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {}",
+                        "additionalGuards": "dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }) /= {}",
                         "fixedVariables": {
-                            "Train": "CHOOSE(dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }))"
+                            "Train": "CHOOSE(dom({ Train, tvd | Train : RS_arrivedTrains & tvd : RailML3_IL_TVD_SECTIONS & {RS_trainBack(Train), RS_trainFront(Train)} <: dom(prj2(tvd)) \\/ ran(prj2(tvd)) & (RailML3_IL_TVD_SECTION_BERTHING_TRACKS(prj1(tvd)) = TRUE or RS_train_states(Train) = train_standing) & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"RS_trainChangeState(~w)\", [Train])) = TRUE }))"
                         },
                         "activating": ["skip", "RS_trainChangeDirection"],
                         "activationKind": "single"
@@ -179,23 +179,23 @@
                             "id": "IS_endChangeDerailer",
                             "execute": "IS_endChangeDerailer",
                             "after": "RailML3_IL_DERAILER_TYPICAL_THROW_TIMES(DerailerId)",
-                            "activating": ["IL_noteChangeSignalState", "IL_endRouteReservation"]
+                            "activating": ["skip", "IL_noteChangeSignalState", "IL_endRouteReservation"]
                         },
                     
                 {
                     "id": "IS_startChangeSwitch",
                     "chooseActivation": {
-                        "IS_startChangeSwitch_Exec": "IF {SwitchId, train | train : RS_arrivedTrains & RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId)) or #route.(route : dom(IL_routes_in_res) /\\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & SwitchId : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(route)) & IS_switch_states(SwitchId) /= RailML3_IL_ROUTE_SWITCH_POSITIONS(route)(SwitchId) ) } /= {} THEN 1.0 ELSE 0.0 END",
-                        "skip": "1.0 - IF {SwitchId, train | train : RS_arrivedTrains & RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId)) or #route.(route : dom(IL_routes_in_res) /\\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & SwitchId : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(route)) & IS_switch_states(SwitchId) /= RailML3_IL_ROUTE_SWITCH_POSITIONS(route)(SwitchId) ) } /= {} THEN 1.0 ELSE 0.0 END"
+                        "IS_startChangeSwitch_Exec": "IF {SwitchId, train | train : RS_arrivedTrains & #(CurrState,DestState).(CurrState = IS_switch_states(SwitchId) & DestState : dom(RailML3_IL_SWITCH_BRANCHES(SwitchId)) & CurrState /= DestState & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"IS_startChangeSwitch(\\\"~w\\\",~w,~w)\",[SwitchId, TO_STRING(CurrState), TO_STRING(DestState)])) = TRUE) & ( RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId)) or #route.(route : dom(IL_routes_in_res) /\\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & SwitchId : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(route)) & IS_switch_states(SwitchId) /= RailML3_IL_ROUTE_SWITCH_POSITIONS(route)(SwitchId) ) or #SignalId.(SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (IL_signal_locked - dom(IL_noted_signal_states)) & union(ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(SignalId))) /\\ RailML3_IS_SWITCH_BRANCHES(SwitchId) /= {}) ) } /= {} THEN 1.0 ELSE 0.0 END",
+                        "skip": "1.0 - IF {SwitchId, train | train : RS_arrivedTrains & #(CurrState,DestState).(CurrState = IS_switch_states(SwitchId) & DestState : dom(RailML3_IL_SWITCH_BRANCHES(SwitchId)) & CurrState /= DestState & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"IS_startChangeSwitch(\\\"~w\\\",~w,~w)\",[SwitchId, TO_STRING(CurrState), TO_STRING(DestState)])) = TRUE) & ( RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId)) or #route.(route : dom(IL_routes_in_res) /\\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & SwitchId : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(route)) & IS_switch_states(SwitchId) /= RailML3_IL_ROUTE_SWITCH_POSITIONS(route)(SwitchId) ) or #SignalId.(SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (IL_signal_locked - dom(IL_noted_signal_states)) & union(ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(SignalId))) /\\ RailML3_IS_SWITCH_BRANCHES(SwitchId) /= {}) ) } /= {} THEN 1.0 ELSE 0.0 END"
                     }
                 },
                     {
                         "id": "IS_startChangeSwitch_Exec",
                         "execute": "IS_startChangeSwitch",
                         "after": 1000,
-                        "additionalGuards": "{SwitchId, train | train : RS_arrivedTrains & RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId)) or #route.(route : dom(IL_routes_in_res) /\\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & SwitchId : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(route)) & IS_switch_states(SwitchId) /= RailML3_IL_ROUTE_SWITCH_POSITIONS(route)(SwitchId) ) } /= {}",
+                        "additionalGuards": "{SwitchId, train | train : RS_arrivedTrains & #(CurrState,DestState).(CurrState = IS_switch_states(SwitchId) & DestState : dom(RailML3_IL_SWITCH_BRANCHES(SwitchId)) & CurrState /= DestState & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"IS_startChangeSwitch(\\\"~w\\\",~w,~w)\",[SwitchId, TO_STRING(CurrState), TO_STRING(DestState)])) = TRUE) & ( RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId)) or #route.(route : dom(IL_routes_in_res) /\\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & SwitchId : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(route)) & IS_switch_states(SwitchId) /= RailML3_IL_ROUTE_SWITCH_POSITIONS(route)(SwitchId) ) or #SignalId.(SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (IL_signal_locked - dom(IL_noted_signal_states)) & union(ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(SignalId))) /\\ RailML3_IS_SWITCH_BRANCHES(SwitchId) /= {}) ) } /= {}",
                         "fixedVariables":{
-                            "SwitchId": "CHOOSE(dom({SwitchId, train | train : RS_arrivedTrains & RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId)) or #route.(route : dom(IL_routes_in_res) /\\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & SwitchId : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(route)) & IS_switch_states(SwitchId) /= RailML3_IL_ROUTE_SWITCH_POSITIONS(route)(SwitchId) ) }))"
+                            "SwitchId": "CHOOSE(dom({SwitchId, train | train : RS_arrivedTrains & #(CurrState,DestState).(CurrState = IS_switch_states(SwitchId) & DestState : dom(RailML3_IL_SWITCH_BRANCHES(SwitchId)) & CurrState /= DestState & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"IS_startChangeSwitch(\\\"~w\\\",~w,~w)\",[SwitchId, TO_STRING(CurrState), TO_STRING(DestState)])) = TRUE) & ( RS_trainFront(train) : dom(RailML3_IS_SWITCH_BRANCHES(SwitchId)) or #route.(route : dom(IL_routes_in_res) /\\ dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & SwitchId : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(route)) & IS_switch_states(SwitchId) /= RailML3_IL_ROUTE_SWITCH_POSITIONS(route)(SwitchId) ) or #SignalId.(SignalId : { i_sig | i_sig : allIdsOfType(\"signalIS\") & RS_trainFront(train) : RailML3_IS_SPOT_LOCATIONS(i_sig) } \\/ (IL_signal_locked - dom(IL_noted_signal_states)) & union(ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(SignalId))) /\\ RailML3_IS_SWITCH_BRANCHES(SwitchId) /= {}) ) }))"
                         },
                         "activating" : ["skip", "IS_endChangeSwitch"]
                     },
@@ -225,8 +225,8 @@
                 {
                     "id": "IL_startRouteReservation_Choose",
                     "chooseActivation":{
-                        "IL_startRouteReservation": "IF ENABLED(\"IL_startRouteReservation\") = TRUE THEN 1.0 ELSE 0.0 END",
-                        "skip": "1.0 - IF ENABLED(\"IL_startRouteReservation\") = TRUE THEN 1.0 ELSE 0.0 END"
+                        "IL_startRouteReservation": "IF GET_IS_ENABLED(\"IL_startRouteReservation\") = TRUE THEN 1.0 ELSE 0.0 END",
+                        "skip": "1.0 - IF GET_IS_ENABLED(\"IL_startRouteReservation\") = TRUE THEN 1.0 ELSE 0.0 END"
                     }
                 },
                     {
@@ -238,8 +238,8 @@
                 {
                     "id": "IL_startActivateSignalplan_Choose",
                     "chooseActivation":{
-                        "IL_startActivateSignalplan": "IF ENABLED(\"IL_startActivateSignalplan\") = TRUE THEN 1.0 ELSE 0.0 END",
-                        "skip": "1.0 - IF ENABLED(\"IL_startActivateSignalplan\") = TRUE THEN 1.0 ELSE 0.0 END"
+                        "IL_startActivateSignalplan": "IF GET_IS_ENABLED(\"IL_startActivateSignalplan\") = TRUE THEN 1.0 ELSE 0.0 END",
+                        "skip": "1.0 - IF GET_IS_ENABLED(\"IL_startActivateSignalplan\") = TRUE THEN 1.0 ELSE 0.0 END"
                     }
                 },
                     {
@@ -252,9 +252,9 @@
                             "id": "IL_noteChangeSignalState",
                             "execute": "IL_noteChangeSignalState",
                             "after": 1000,
-                            "additionalGuards": "{SignalId, sp | sp : IL_signalplan_in_activation & SignalId : RailML3_IL_SIGNAL_REFERS_TO[dom(sp'master \\/ sp'slave \\/ sp'distant)] - dom(IL_noted_signal_states) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_noteChangeSignalState(\\\"~w\\\")\", [SignalId])) = TRUE } /= {}",
+                            "additionalGuards": "{SignalId, sp | sp : IL_signalplan_in_activation & SignalId : RailML3_IL_SIGNAL_REFERS_TO[dom(sp'master \\/ sp'slave \\/ sp'distant)] - dom(IL_noted_signal_states) & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_noteChangeSignalState(\\\"~w\\\")\", [SignalId])) = TRUE } /= {}",
                             "fixedVariables":{
-                                "SignalId": "CHOOSE(dom({SignalId, sp | sp : IL_signalplan_in_activation & SignalId : RailML3_IL_SIGNAL_REFERS_TO[dom(sp'master \\/ sp'slave \\/ sp'distant)] - dom(IL_noted_signal_states) & ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_noteChangeSignalState(\\\"~w\\\")\", [SignalId])) = TRUE }))"
+                                "SignalId": "CHOOSE(dom({SignalId, sp | sp : IL_signalplan_in_activation & SignalId : RailML3_IL_SIGNAL_REFERS_TO[dom(sp'master \\/ sp'slave \\/ sp'distant)] - dom(IL_noted_signal_states) & GET_IS_ENABLED_TRANSITION(FORMAT_TO_STRING(\"IL_noteChangeSignalState(\\\"~w\\\")\", [SignalId])) = TRUE }))"
                             },
                             "activating" : ["skip", "IL_startRouteReservation", "IS_Action", "IL_noteChangeSignalState", "IL_endRouteReservation", "IL_endActivateSignalplan"]
                         },

@@ -297,7 +297,7 @@ public class RailMLStage extends Stage {
 		if (animationMachineCheckbox.isSelected()) {
 			try {
 				replaceOldFile("RailML3_VisB.def");
-				replaceOldFile("RailML3_CustomGraphs.def");
+				//replaceOldFile("RailML3_CustomGraphs.def");
 				replaceOldFile("RailML3_SimB.json");
 				Path simbPath = generationPath.resolve("RailML3_SimB.json");
 
