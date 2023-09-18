@@ -149,9 +149,9 @@ public class BEditorView extends BorderPane {
 				.then("")
 				.otherwise(i18n.translate("beditor.unsavedWarning"))
 		);
-		setHint();
+		Platform.runLater(this::setHint);
 
-		machineChoice.setConverter(new StringConverter<Path>() {
+		machineChoice.setConverter(new StringConverter<>() {
 			@Override
 			public String toString(final Path object) {
 				return object == null ? "" : object.getFileName().toString();
