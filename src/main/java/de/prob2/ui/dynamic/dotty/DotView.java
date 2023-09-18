@@ -318,8 +318,12 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		placeholderLabel.setVisible(true);
 	}
 
-	public void visualizeFormula(final String formula) {
+	public void visualizeFormulaAsTree(final String formula) {
 		this.selectCommand(DotVisualizationCommand.FORMULA_TREE_NAME, formula);
+	}
+
+	public void visualizeFormulaAsGraph(final String formula) {
+		this.selectCommand(DotVisualizationCommand.EXPRESSION_AS_GRAPH_NAME, formula);
 	}
 
 	public void visualizeProjection(final String formula) {

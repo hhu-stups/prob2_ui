@@ -321,7 +321,11 @@ public final class StatesView extends StackPane {
 				DotView formulaStage = injector.getInstance(DotView.class);
 				formulaStage.show();
 				formulaStage.toFront();
-				formulaStage.visualizeFormula(visualizedFormula);
+				if (row.getItem().getType().equals(ExpandedFormula.FormulaType.EXPRESSION)) {
+					formulaStage.visualizeFormulaAsGraph(visualizedFormula);
+				} else {
+					formulaStage.visualizeFormulaAsTree(visualizedFormula);
+				}
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");

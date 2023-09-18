@@ -88,14 +88,37 @@ public class FullValueStage extends Stage {
 				DotView formulaStage = injector.getInstance(DotView.class);
 				formulaStage.show();
 				formulaStage.toFront();
-				formulaStage.visualizeFormula(visualizedFormula);
-			} catch (EvaluationException | ProBError e) {
+				if (value.getValue().getType().equals(ExpandedFormula.FormulaType.EXPRESSION)) {
+					formulaStage.visualizeFormulaAsGraph(visualizedFormula);
+				} else {
+					formulaStage.visualizeFormulaAsTree(visualizedFormula);
+				}
+            } catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
 				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 			}
 		});
+
+//		final MenuItem visualizeExpressionAsTreeItem = new MenuItem(
+//			i18n.translate("states.statesView.contextMenu.items.visualizeExpressionTree"));
+//		visualizeExpressionAsTreeItem.setOnAction(event -> {
+//			try {
+//				String visualizedFormula = statesView.getFormulaForVisualization(value.getValue());
+//				DotView formulaStage = injector.getInstance(DotView.class);
+//				formulaStage.show();
+//				formulaStage.toFront();
+//				System.err.println(this.value.getValue().getType());
+//					formulaStage.visualizeFormulaAsTree(visualizedFormula);
+//
+//			} catch (EvaluationException | ProBError e) {
+//				LOGGER.error("Could not visualize formula", e);
+//				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
+//				alert.initOwner(this.getScene().getWindow());
+//				alert.showAndWait();
+//			}
+//		});
 
 		final MenuItem visualizeExpressionAsTableItem = new MenuItem(
 			i18n.translate("states.statesView.contextMenu.items.visualizeExpressionTable"));
