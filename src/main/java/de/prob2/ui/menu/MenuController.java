@@ -16,6 +16,9 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -50,6 +53,16 @@ public final class MenuController extends MenuBar {
 			// Remove Preferences menu item from FileMenu
 			MenuItem preferencesItem = fileMenu.getPreferencesItem();
 			fileMenu.getItems().remove(preferencesItem);
+
+			// With the new NSMenuFX 3.x, shortcut handling in the application menu is buggy.
+			// For some reason, the comma key is only recognized as a KeyCodeCombination, but not as a KeyCharacterCombination.
+			// Additionally, only META_DOWN and not SHORTCUT_DOWN is recognized as the Command key, see:
+			// https://github.com/codecentric/NSMenuFX/issues/42
+			// https://github.com/0x4a616e/NSMenuFX/issues/24
+			// https://github.com/0x4a616e/NSMenuFX/pull/25
+			// So the key combination needs to have *exactly* this format so that it gets recognized.
+			// These bugs are still present as of de.jangassen:nsmenufx:3.1.0 from 2021.
+			preferencesItem.setAccelerator(new KeyCodeCombination(KeyCode.COMMA, KeyCombination.META_DOWN));
 
 			// Create Mac-style application menu
 			MenuItem quit = menuToolkit.createQuitMenuItem(i18n.translate("common.prob2"));
