@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -496,9 +497,8 @@ public class RailMLInspectDotStage extends Stage {
 		}
 		final Path finalSvg = railMLFile.getPath().resolve(railMLFile.getName() + ".svg").toAbsolutePath();
 		File finalSvgFile = new File(finalSvg.toString());
-		finalSvgFile.delete(); // TODO: Confirm
 		try {
-			Files.copy(tempSvgFile, finalSvg);
+			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING); // TODO: Confirm
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
