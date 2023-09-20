@@ -35,8 +35,7 @@ public class RailMLSvgConverter {
 
 				// add IDs
 				for (int j = 0; j < childElements.getLength(); j++) {
-					if (childElements.item(j) instanceof Element) {
-						Element childElement = (Element) childElements.item(j);
+					if (childElements.item(j) instanceof Element childElement) {
 						childElement.setAttribute("id",
 							gElement.getAttribute("id") + "_" + childElement.getNodeName());
 						if (childElement.getNodeName().equals("title")) {
