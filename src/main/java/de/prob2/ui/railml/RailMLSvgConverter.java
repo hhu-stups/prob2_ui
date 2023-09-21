@@ -115,7 +115,7 @@ public class RailMLSvgConverter {
 				merged_group.appendChild(path_ovl);
 				merged_group.appendChild(path_occ);
 
-				//merged_group.setAttribute("class", "edge");
+				merged_group.setAttribute("class", "edge");
 				merged_group.setAttribute("id", id_prefix);
 				merged_group.appendChild(title_merged_group);
 
