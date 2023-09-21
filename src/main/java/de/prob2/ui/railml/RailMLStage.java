@@ -352,11 +352,12 @@ public class RailMLStage extends Stage {
 		Api api = injector.getInstance(Api.class);
 		StateSpace stateSpace;
 		if ("jar".equals(graphMachine.getScheme())) {
-			Path tempGraphMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve(graphMachineName);
-			Path tempGraphDefs = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_CustomGraphs.def");
-			Path tempPrintMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_printMachines.mch");
-			Path tempImportMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_import.mch");
-			Path tempValidationMachine = Paths.get(System.getProperty("java.io.tmpdir")).resolve("RailML3_validation_flat.mch");
+			Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
+			Path tempGraphMachine = tempDir.resolve(graphMachineName);
+			Path tempGraphDefs = tempDir.resolve("RailML3_CustomGraphs.def");
+			Path tempPrintMachine = tempDir.resolve("RailML3_printMachines.mch");
+			Path tempImportMachine = tempDir.resolve("RailML3_import.mch");
+			Path tempValidationMachine = tempDir.resolve("RailML3_validation_flat.mch");
 
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(graphMachineName)), tempGraphMachine, StandardCopyOption.REPLACE_EXISTING);
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_CustomGraphs.def")), tempGraphDefs, StandardCopyOption.REPLACE_EXISTING);
@@ -397,26 +398,19 @@ public class RailMLStage extends Stage {
 				"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
 			.perform("$initialise_machine");
 
-		// state.getStateErrors();
 		boolean inv_ok = currentState.isInvariantOk();
 		boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
 
 		if ((animationMachineCheckbox.isSelected() || validationMachineCheckbox.isSelected()) && inv_ok && import_success) {
-			File dataMachine = new File(Paths.get(generationPath.toString()).resolve(dataFileName.getValue()).toString());
-			dataMachine.delete(); // TODO: Confirm
-			dataMachine.createNewFile();
+			replaceOldFile(dataFileName.getValue());
 			currentState.perform("triggerPrintData").perform("printDataMachine");
 		}
 		if (animationMachineCheckbox.isSelected() && inv_ok && import_success) {
-			File animationMachine = new File(Paths.get(generationPath.toString()).resolve(animationFileName.getValue()).toString());
-			animationMachine.delete(); // TODO: Confirm
-			animationMachine.createNewFile();
+			replaceOldFile(animationFileName.getValue());
 			currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
 		}
 		if (validationMachineCheckbox.isSelected() && inv_ok && import_success) {
-			File validationMachine = new File(Paths.get(generationPath.toString()).resolve(validationFileName.getValue()).toString());
-			validationMachine.delete(); // TODO: Confirm
-			validationMachine.createNewFile();
+			replaceOldFile(validationFileName.getValue());
 			currentState.perform("triggerPrintValidation").perform("printValidationMachine");
 		}
 		railMLFile.setState(currentState);
