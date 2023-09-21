@@ -237,14 +237,13 @@ public class RailMLInspectDotStage extends Stage {
 			railMLFile.setState(railMLFile.getState().perform("changeUseCurvedSplines"));
 		});
 
-		/*SpinnerValueFactory<Double> valueFactory = new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0001, 10.0, 0.0004, 0.0001);
-		scalingSpinner.setValueFactory(valueFactory);
-		scalingSpinner.valueProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeScalingFactor", "newFactor = " + scalingSpinner.getValue()));
-		});*/
-
 		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
+
+		this.setOnCloseRequest(e -> {
+			e.consume();
+			this.cancel();
+		});
 	}
 
 	protected void initializeOptionsForStrategy(RailMLStage.VisualisationStrategy strategy) {
@@ -469,22 +468,11 @@ public class RailMLInspectDotStage extends Stage {
 	}
 
 	@FXML
-	private void editPreferences() {
-		/*final DynamicPreferencesStage preferences = this.preferencesStageProvider.get();
-		preferences.initOwner(this);
-		preferences.initModality(Modality.WINDOW_MODAL);
-		//preferences.setToRefresh(this);
-		DotVisualizationCommand currentItem = DotVisualizationCommand.getByName("custom_graph", railMLFile.getState());
-		preferences.setIncludedPreferenceNames(currentItem.getRelevantPreferences(), railMLFile.getState().getStateSpace());
-		preferences.setTitle(i18n.translate("dynamic.preferences.stage.title", currentItem.getName()));
-		preferences.show();*/
-	}
-
-	@FXML
 	private void acceptVisualisation() {
 		final Path tempSvgFile;
 		try {
 			tempSvgFile = Files.createTempFile("railml-", ".svg");
+			tempSvgFile.toFile().deleteOnExit();
 		} catch (IOException e) {
 			throw new ProBError("Failed to create temporary svg file", e);
 		}
@@ -496,9 +484,8 @@ public class RailMLInspectDotStage extends Stage {
 			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "DOT");
 		}
 		final Path finalSvg = railMLFile.getPath().resolve(railMLFile.getName() + ".svg").toAbsolutePath();
-		File finalSvgFile = new File(finalSvg.toString());
 		try {
-			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING); // TODO: Confirm
+			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING); // TODO: replaceOldFile()
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
