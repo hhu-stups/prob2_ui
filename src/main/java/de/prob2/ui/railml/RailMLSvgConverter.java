@@ -88,12 +88,15 @@ public class RailMLSvgConverter {
 				String[] path_begin = path_d[0].split(",");
 				String[] path_end = path_d[path_d.length - 1].split(",");
 
-				createAndAddGradient(doc, defs, gradient_id_occ, path_begin[0], path_begin[1], path_end[0], path_end[1], "transparent", "red");
-				createAndAddGradient(doc, defs, gradient_id_ovl, path_begin[0], path_begin[1], path_end[0], path_end[1], "transparent","mediumvioletred");
-				createAndAddGradient(doc, defs, gradient_id_res, path_begin[0], path_begin[1], path_end[0], path_end[1], "transparent","darkorange");
-				createAndAddGradient(doc, defs, gradient_id_tvd, path_begin[0], path_begin[1], path_end[0], path_end[1], "transparent","blue");
-				createAndAddGradient(doc, defs, gradient_id_free, path_begin[0], path_begin[1], path_end[0], path_end[1], "black", "yellowgreen");
-
+				if (path_begin.length > 1 && path_end.length > 1) {
+					createAndAddGradient(doc, defs, gradient_id_occ, path_begin[0], path_begin[1], path_end[0], path_end[1], "transparent", "red");
+					createAndAddGradient(doc, defs, gradient_id_ovl, path_begin[0], path_begin[1], path_end[0], path_end[1], "transparent", "mediumvioletred");
+					createAndAddGradient(doc, defs, gradient_id_res, path_begin[0], path_begin[1], path_end[0], path_end[1], "transparent", "darkorange");
+					createAndAddGradient(doc, defs, gradient_id_tvd, path_begin[0], path_begin[1], path_end[0], path_end[1], "transparent", "blue");
+					createAndAddGradient(doc, defs, gradient_id_free, path_begin[0], path_begin[1], path_end[0], path_end[1], "black", "yellowgreen");
+				} else {
+					throw new RuntimeException("Path " + id_prefix + " too short");
+				}
 				Element merged_group = doc.createElement("g");
 
 				Element title_merged_group = doc.createElement("title");
@@ -112,7 +115,7 @@ public class RailMLSvgConverter {
 				merged_group.appendChild(path_ovl);
 				merged_group.appendChild(path_occ);
 
-				merged_group.setAttribute("class", "edge");
+				//merged_group.setAttribute("class", "edge");
 				merged_group.setAttribute("id", id_prefix);
 				merged_group.appendChild(title_merged_group);
 
