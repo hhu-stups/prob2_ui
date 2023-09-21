@@ -4,7 +4,7 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.2.2 (not released yet)
 
-* (no changes yet)
+* Added search to editor
 
 ## Version 1.2.1 (2023-08-15)
 

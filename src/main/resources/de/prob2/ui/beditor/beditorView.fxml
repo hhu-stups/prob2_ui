@@ -36,6 +36,14 @@
 				</tooltip>
 			</Button>
 			<fx:include source="../sharedviews/reload_button.fxml"/>
+			<Button fx:id="searchButton" onAction="#handleSearch">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize + 4}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%menu.file.items.search"/>
+				</tooltip>
+			</Button>
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 			<Label fx:id="warningLabel" styleClass="warning" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
 			<CheckBox fx:id="cbUnicode" text="%common.checkbox.unicode" visible="false" alignment="CENTER_RIGHT" HBox.hgrow="NEVER"/>

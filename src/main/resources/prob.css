@@ -584,7 +584,7 @@
 	-rtfx-underline-color: red;
 }
 
-.editor .errorTable{
+.editor .errorTable {
 	-rtfx-background-color: yellow;
 }
 
@@ -1240,4 +1240,25 @@
 
 .unrelated .tree-table-cell {
 	-fx-text-fill: -prob-grey-75;
+}
+
+/* ==================== SEARCH ======================== */
+
+.editor .searchResult {
+	-rtfx-background-color: grey;
+}
+
+.search-error {
+	-fx-text-fill: red;
+	-fx-font-weight: bold;
+}
+
+.search-no-results {
+	-fx-text-fill: -prob-orange;
+	-fx-font-weight: bold;
+}
+
+.search-has-results {
+	-fx-text-fill: -prob-grey-75;
+	-fx-font-weight: bold;
 }

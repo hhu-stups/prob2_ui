@@ -70,6 +70,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	protected final Popup errorPopup;
 	protected final Label errorPopupLabel;
 	protected final SimpleObjectProperty<ErrorItem.Location> errorHighlight;
+	protected final SimpleObjectProperty<ErrorItem.Location> searchResult;
 	private final ExecutorService executor;
 	private final ObservableValue<Optional<Point2D>> caretPos;
 	private final ObservableValue<Optional<String>> textBeforeCaret;
@@ -87,14 +88,15 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		this.errorPopup.getContent().add(this.errorPopupLabel);
 
 		this.errorHighlight = new SimpleObjectProperty<>(null, "errorHighlight", null);
+		this.searchResult = new SimpleObjectProperty<>(null, "searchResult", null);
 
 		this.caretPos = Bindings.createObjectBinding(
-			() -> this.caretBoundsProperty().getValue()
-				      .map(bounds -> new Point2D(
-					      (bounds.getMinX() + bounds.getMaxX()) / 2.0,
-					      bounds.getMaxY()
-				      )),
-			this.caretBoundsProperty()
+				() -> this.caretBoundsProperty().getValue()
+						      .map(bounds -> new Point2D(
+								      (bounds.getMinX() + bounds.getMaxX()) / 2.0,
+								      bounds.getMaxY()
+						      )),
+				this.caretBoundsProperty()
 		);
 		this.textBeforeCaret = Bindings.createObjectBinding(() -> {
 			int caret = this.getCaretPosition();
@@ -124,19 +126,19 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		}
 
 		this.multiPlainChanges()
-			.successionEnds(Duration.ofMillis(50))
-			.retainLatestUntilLater(this.executor)
-			.supplyTask(this::computeHighlightingAsync)
-			.awaitLatest(this.multiPlainChanges())
-			.filterMap(t -> {
-				if (t.isSuccess()) {
-					return Optional.of(t.get());
-				} else {
-					LOGGER.warn("Highlighting failed", t.getFailure());
-					return Optional.empty();
-				}
-			})
-			.subscribe(this::applyHighlighting);
+				.successionEnds(Duration.ofMillis(50))
+				.retainLatestUntilLater(this.executor)
+				.supplyTask(this::computeHighlightingAsync)
+				.awaitLatest(this.multiPlainChanges())
+				.filterMap(t -> {
+					if (t.isSuccess()) {
+						return Optional.of(t.get());
+					} else {
+						LOGGER.warn("Highlighting failed", t.getFailure());
+						return Optional.empty();
+					}
+				})
+				.subscribe(this::applyHighlighting);
 		this.errors.addListener((ListChangeListener<ErrorItem>) change -> {
 			if (this.errors.isEmpty()) {
 				this.setErrorHighlight(null);
@@ -145,27 +147,28 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			this.reloadHighlighting();
 		});
 		this.errorHighlight.addListener((observable, oldValue, newValue) -> this.reloadHighlighting());
+		this.searchResult.addListener((observable, oldValue, newValue) -> this.reloadHighlighting());
 
 		this.setMouseOverTextDelay(Duration.ofMillis(500));
 		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
 			// Inefficient, but works - there should never be so many errors that the iteration has a noticeable performance impact.
 			final String errorsText = this.getErrors().stream()
-				                          .filter(error ->
-					                                  error.getLocations().stream()
-						                                  .anyMatch(
-							                                  location -> e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
-								                                              && e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location)
-						                                  )
-				                          )
-				                          .map(ErrorItem::getMessage)
-				                          .collect(Collectors.joining("\n"));
+					                          .filter(error ->
+							                                  error.getLocations().stream()
+									                                  .anyMatch(
+											                                  location -> e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
+													                                              && e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location)
+									                                  )
+					                          )
+					                          .map(ErrorItem::getMessage)
+					                          .collect(Collectors.joining("\n"));
 			if (!errorsText.isEmpty()) {
 				this.errorPopupLabel.setText(errorsText);
 				// Try to position the popup under the text being hovered over,
 				// so that the line in question is not covered by the popup.
 				final double popupY = this.getCharacterBoundsOnScreen(e.getCharacterIndex(), e.getCharacterIndex() + 1)
-					                      .map(Bounds::getMaxY)
-					                      .orElse(e.getScreenPosition().getY());
+						                      .map(Bounds::getMaxY)
+						                      .orElse(e.getScreenPosition().getY());
 				this.errorPopup.show(this, e.getScreenPosition().getX(), popupY);
 			}
 		});
@@ -249,17 +252,18 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		Objects.requireNonNull(location, "location");
 		if (location.getStartLine() > location.getEndLine()) {
 			throw new IllegalArgumentException("line");
-		} else if (location.getStartColumn() > location.getEndColumn()) {
+		} else if (location.getStartLine() == location.getEndLine()
+				           && location.getStartColumn() > location.getEndColumn()) {
 			throw new IllegalArgumentException("column");
 		}
 
 		int displayedStartColumn;
 		if (
-			location.getStartLine() == location.getEndLine()
-				&& location.getStartColumn() == location.getEndColumn()
-				&& location.getStartLine() >= 1
-				&& location.getStartLine() <= this.getParagraphs().size()
-				&& location.getStartColumn() >= this.getParagraphLength(location.getStartLine() - 1)
+				location.getStartLine() == location.getEndLine()
+						&& location.getStartColumn() == location.getEndColumn()
+						&& location.getStartLine() >= 1
+						&& location.getStartLine() <= this.getParagraphs().size()
+						&& location.getStartColumn() >= this.getParagraphLength(location.getStartLine() - 1)
 		) {
 			// the styling cannot be displayed on substrings with length 0
 			// thus - when we detect a location with length 0 - we extend it to length 1 to the right
@@ -270,19 +274,19 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		}
 
 		return this.getClampedAbsolutePosition(
-			location.getStartLine() - 1,
-			displayedStartColumn
+				location.getStartLine() - 1,
+				displayedStartColumn
 		);
 	}
 
 	private int errorLocationAbsoluteEnd(final ErrorItem.Location location) {
 		int displayedEndColumn;
 		if (
-			location.getStartLine() == location.getEndLine()
-				&& location.getStartColumn() == location.getEndColumn()
-				&& location.getEndLine() >= 1
-				&& location.getEndLine() <= this.getParagraphs().size()
-				&& location.getEndColumn() < this.getParagraphLength(location.getStartLine() - 1)
+				location.getStartLine() == location.getEndLine()
+						&& location.getStartColumn() == location.getEndColumn()
+						&& location.getEndLine() >= 1
+						&& location.getEndLine() <= this.getParagraphs().size()
+						&& location.getEndColumn() < this.getParagraphLength(location.getStartLine() - 1)
 		) {
 			// the styling cannot be displayed on substrings with length 0
 			// thus - when we detect a location with length 0 - we extend it to length 1 to the right
@@ -293,16 +297,16 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		}
 
 		return this.getClampedAbsolutePosition(
-			location.getEndLine() - 1,
-			displayedEndColumn
+				location.getEndLine() - 1,
+				displayedEndColumn
 		);
 	}
 
 	public void jumpToErrorSource(ErrorItem.Location errorLocation) {
 		this.setErrorHighlight(errorLocation);
 		this.moveTo(this.getClampedAbsolutePosition(
-			errorLocation.getStartLine() - 1,
-			errorLocation.getStartColumn()
+				errorLocation.getStartLine() - 1,
+				errorLocation.getStartColumn()
 		));
 		this.requestFollowCaret();
 	}
@@ -314,11 +318,11 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 				int endIndex = this.errorLocationAbsoluteEnd(location);
 				if (endIndex > startIndex) {
 					highlighting = highlighting.overlay(
-						new StyleSpansBuilder<Collection<String>>()
-							.add(Collections.emptySet(), startIndex)
-							.add(Arrays.asList("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
-							.create(),
-						ExtendedCodeArea::combineCollections
+							new StyleSpansBuilder<Collection<String>>()
+									.add(Collections.emptySet(), startIndex)
+									.add(Arrays.asList("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
+									.create(),
+							ExtendedCodeArea::combineCollections
 					);
 				}
 			}
@@ -329,11 +333,38 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			int endIndex = this.errorLocationAbsoluteEnd(errorHighlight.get());
 			if (endIndex > startIndex) {
 				highlighting = highlighting.overlay(
-					new StyleSpansBuilder<Collection<String>>()
-						.add(Collections.emptySet(), startIndex)
-						.add(Collections.singletonList("errorTable"), endIndex - startIndex)
-						.create(),
-					ExtendedCodeArea::combineCollections
+						new StyleSpansBuilder<Collection<String>>()
+								.add(Collections.emptySet(), startIndex)
+								.add(Collections.singletonList("errorTable"), endIndex - startIndex)
+								.create(),
+						ExtendedCodeArea::combineCollections
+				);
+			}
+		}
+
+		return highlighting;
+	}
+
+	public void jumpToSearchResult(ErrorItem.Location searchResultLocation) {
+		this.moveTo(this.getClampedAbsolutePosition(
+				searchResultLocation.getEndLine() - 1,
+				searchResultLocation.getEndColumn()
+		));
+		this.requestFollowCaret();
+		this.setSearchResult(searchResultLocation);
+	}
+
+	protected StyleSpans<Collection<String>> addSearchHighlighting(StyleSpans<Collection<String>> highlighting) {
+		if (searchResult.get() != null) {
+			int startIndex = this.errorLocationAbsoluteStart(searchResult.get());
+			int endIndex = this.errorLocationAbsoluteEnd(searchResult.get());
+			if (endIndex > startIndex) {
+				highlighting = highlighting.overlay(
+						new StyleSpansBuilder<Collection<String>>()
+								.add(Collections.emptySet(), startIndex)
+								.add(Collections.singletonList("searchResult"), endIndex - startIndex)
+								.create(),
+						ExtendedCodeArea::combineCollections
 				);
 			}
 		}
@@ -361,6 +392,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	protected StyleSpans<Collection<String>> computeHighlighting(String text) {
 		StyleSpans<Collection<String>> highlighting = StyleSpans.singleton(Collections.emptySet(), text.length());
 		highlighting = addErrorHighlighting(highlighting);
+		highlighting = addSearchHighlighting(highlighting);
 		return highlighting;
 	}
 
@@ -374,6 +406,10 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 
 	public void setErrorHighlight(ErrorItem.Location errorLocation) {
 		this.errorHighlight.set(errorLocation);
+	}
+
+	public void setSearchResult(ErrorItem.Location searchResultLocation) {
+		this.searchResult.set(searchResultLocation);
 	}
 
 	public void reloadHighlighting() {

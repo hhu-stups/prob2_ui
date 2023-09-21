@@ -61,9 +61,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
 
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,6 +83,9 @@ public class BEditorView extends BorderPane {
 
 	@FXML
 	private Button openExternalButton;
+
+	@FXML
+	private Button searchButton;
 
 	@FXML
 	private Label warningLabel;
@@ -144,6 +152,7 @@ public class BEditorView extends BorderPane {
 		});
 		saveButton.disableProperty().bind(saved);
 		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
+		searchButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(
 			Bindings.when(saved)
 				.then("")
@@ -226,6 +235,12 @@ public class BEditorView extends BorderPane {
 		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
 
 		helpButton.setHelpContent("mainView.editor", null);
+
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.CONTROL_DOWN), e -> handleSearch()));
+	}
+
+	BEditor getEditor() {
+		return this.beditor;
 	}
 
 	private void updateSaved() {
@@ -389,6 +404,8 @@ public class BEditorView extends BorderPane {
 		changingText = true;
 		this.setPath(path);
 		beditor.replaceText(text);
+		beditor.moveTo(0);
+		beditor.requestFollowCaret();
 		lastSavedText.set(beditor.getText());
 		beditor.reloadHighlighting();
 		beditor.setEditable(true);
@@ -450,6 +467,11 @@ public class BEditorView extends BorderPane {
 		injector.getInstance(ExternalEditor.class).open(this.getPath());
 	}
 
+	@FXML
+	public void handleSearch() {
+		injector.getInstance(SearchStage.class).open(this);
+	}
+
 	private static boolean fileNameMatchesCurrentPath(String filename, Path currentPath) {
 		Objects.requireNonNull(currentPath, "currentPath");
 
@@ -480,14 +502,28 @@ public class BEditorView extends BorderPane {
 		beditor.requestFocus();
 	}
 
-	public void jumpToSource(Path machinePath, int paragraphIndex, int columnIndex) {
-		this.focusAndShowMachine(machinePath);
+	public void jumpToPosition(int paragraphIndex, int columnIndex) {
 		beditor.moveTo(paragraphIndex, columnIndex);
 		beditor.requestFollowCaret();
+	}
+
+	public void jumpToPosition(int position) {
+		beditor.moveTo(position);
+		beditor.requestFollowCaret();
+	}
+
+	public void jumpToSource(Path machinePath, int paragraphIndex, int columnIndex) {
+		this.focusAndShowMachine(machinePath);
+		this.jumpToPosition(paragraphIndex, columnIndex);
 	}
 
 	public void jumpToErrorSource(ErrorItem.Location errorLocation) {
 		this.focusAndShowMachine(Paths.get(errorLocation.getFilename()));
 		beditor.jumpToErrorSource(errorLocation);
+	}
+
+	public void jumpToSearchResult(ErrorItem.Location searchResultLocation) {
+		this.focusAndShowMachine(Paths.get(searchResultLocation.getFilename()));
+		beditor.jumpToSearchResult(searchResultLocation);
 	}
 }
