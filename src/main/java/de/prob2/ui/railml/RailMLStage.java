@@ -293,15 +293,16 @@ public class RailMLStage extends Stage {
 				currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 			}
 		}
-		currentProject.addMachine(dataMachine);
+		if (animationMachineCheckbox.isSelected() || validationMachineCheckbox.isSelected()) {
+			currentProject.addMachine(dataMachine);
+		}
 		if (animationMachineCheckbox.isSelected()) {
 			try {
 				replaceOldFile("RailML3_VisB.def");
-				//replaceOldFile("RailML3_CustomGraphs.def");
 				replaceOldFile("RailML3_SimB.json");
 				Path simbPath = generationPath.resolve("RailML3_SimB.json");
 
-				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", Paths.get(generationPath.toString()).resolve("RailML3_VisB.def"));
+				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.resolve("RailML3_VisB.def"));
 				currentProject.addMachine(animationDefinitions);
 				currentProject.addMachine(animationMachine);
 				currentProject.startAnimation(animationMachine);
