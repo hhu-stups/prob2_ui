@@ -7,8 +7,7 @@ plugins {
 
 	id "com.github.johnrengelman.shadow" version "8.1.1"
 	id "com.google.osdetector" version "1.7.3"
-	// cannot update to 0.1.0 as this breaks multiPlatformShadowJar
-	id "org.openjfx.javafxplugin" version "0.0.14"
+	id "org.openjfx.javafxplugin" version "0.1.0"
 }
 
 project.group = "de.hhu.stups"
@@ -77,7 +76,32 @@ tasks.withType(JavaCompile) {
 }
 
 configurations {
-	javafxAllPlatforms
+	// These configurations are used by the multi-platform jar build.
+	// Each OS needs its own configuration - otherwise Gradle complains about conflicts between different OS versions of the same dependency.
+
+	javafxWin {
+		attributes {
+			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.WINDOWS))
+			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
+		}
+	}
+
+	javafxMac {
+		attributes {
+			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.MACOS))
+			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
+		}
+	}
+
+	javafxLinux {
+		attributes {
+			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.LINUX))
+			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
+		}
+	}
 }
 
 configurations.all {
@@ -131,13 +155,7 @@ final javafxModules = [
 javafx {
 	version = javafxVersion
 	modules = javafxModules
-}
-
-// for multi-platform jar
-["win", "mac", "linux"].each {platform ->
-	javafxModules.each {module ->
-		dependencies.javafxAllPlatforms(group: "org.openjfx", name: module.replace("javafx.", "javafx-"), version: javafxVersion, classifier: platform)
-	}
+	configurations += ["javafxWin", "javafxMac", "javafxLinux"]
 }
 
 final generatedResourcesDir = new File(project.buildDir, "generated-src/main/resources")
@@ -262,7 +280,9 @@ task multiPlatformShadowJar(type: ShadowJar) {
 	// because they usually have JavaFX preinstalled,
 	// and there are no easily usable standalone versions of OpenJFX < 11 that we could use anyway.
 	into("META-INF/versions/${javafxMajorVersion}") {
-		from(project.configurations.javafxAllPlatforms.collect {zipTree(it)})
+		from(project.configurations.javafxWin.collect {zipTree(it)})
+		from(project.configurations.javafxMac.collect {zipTree(it)})
+		from(project.configurations.javafxLinux.collect {zipTree(it)})
 	}
 }
 
