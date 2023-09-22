@@ -351,6 +351,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 			dotVisualisationItem.set(dotVisualisationItem.indexOf(item), item);
 			machine.setChanged(true);
 			tvFormula.refresh();
+			evaluateFormula(item.getFormula());
 		}
 	}
 
@@ -366,6 +367,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 			machine.addDotVisualizationItem(lastItem.getCommand(), item);
 			this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 			tvFormula.refresh();
+			evaluateFormula(item.getFormula());
 		}
 	}
 

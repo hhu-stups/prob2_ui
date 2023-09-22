@@ -347,6 +347,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			tableVisualisationItem.set(tableVisualisationItem.indexOf(item), item);
 			machine.setChanged(true);
 			tvFormula.refresh();
+			evaluateFormula(item.getFormula());
 		}
 	}
 
@@ -362,6 +363,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			machine.addTableVisualizationItem(lastItem.getCommand(), item);
 			this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 			tvFormula.refresh();
+			evaluateFormula(item.getFormula());
 		}
 	}
 
