@@ -251,7 +251,7 @@ public class RailMLStage extends Stage {
 			try {
 				generateMachines();
 				final Path projectLocation = generationPath;
-				final String shortName = animationFileName.getValue();
+				final String shortName = MoreFiles.getNameWithoutExtension(railMLpath);
 				final Machine dataMachine = new Machine(dataFileName.getValue(), "Data machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(dataFileName.getValue()));
 				final Machine animationMachine = new Machine(animationFileName.getValue(), "Animation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(animationFileName.getValue()));
 				final Machine validationMachine = new Machine(validationFileName.getValue(), "Validation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(validationFileName.getValue()));
@@ -268,9 +268,9 @@ public class RailMLStage extends Stage {
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);
 							}
-							railMLInspectDotStage.setOnHidden(event -> {
-								createProject(shortName, projectLocation, dataMachine, animationMachine, validationMachine);
-							});
+							if (generateAnimation || generateValidation) {
+								railMLInspectDotStage.setOnHidden(event -> createProject(shortName, projectLocation, dataMachine, animationMachine, validationMachine));
+							}
 						} else {
 							createProject(shortName, projectLocation, dataMachine, animationMachine, validationMachine);
 						}

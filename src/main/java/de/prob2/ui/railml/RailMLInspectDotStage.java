@@ -219,7 +219,7 @@ public class RailMLInspectDotStage extends Stage {
 		});
 
 		dotView.visibleProperty().bind(this.updater.runningProperty().not());
-		placeholderLabel.disableProperty().bind(this.updater.runningProperty().not());
+		placeholderLabel.visibleProperty().bind(this.updater.runningProperty());
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
 		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
 
@@ -422,7 +422,6 @@ public class RailMLInspectDotStage extends Stage {
 		Platform.runLater(() -> {
 			if (!thread.isInterrupted()) {
 				dotView.getEngine().loadContent("<center>" + svgContent + "</center>");
-				dotView.setVisible(true);
 			}
 		});
 	}
