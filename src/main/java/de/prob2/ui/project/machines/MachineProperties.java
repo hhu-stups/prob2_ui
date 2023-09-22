@@ -2,6 +2,7 @@ package de.prob2.ui.project.machines;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
@@ -32,7 +33,22 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineCheckingStatus;
-
+@JsonPropertyOrder({
+	"validationTasks",
+	"temporalFormulas",
+	"ltlPatterns",
+	"symbolicCheckingFormulas",
+	"symbolicAnimationFormulas",
+	"testCases",
+	"traces",
+	"modelcheckingItems",
+	"proofObligationItems",
+	"simulations",
+	"visBVisualisation",
+	"historyChartItems",
+	"dotVisualizationItems",
+	"tableVisualizationItems"
+	})
 public class MachineProperties {
 	@JsonIgnore
 	private final ObjectProperty<MachineCheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus());

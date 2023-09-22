@@ -66,20 +66,7 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 	"description",
 	"location",
 	"lastUsedPreferenceName",
-	"validationTasks",
-	"temporalFormulas",
-	"ltlPatterns",
-	"symbolicCheckingFormulas",
-	"symbolicAnimationFormulas",
-	"testCases",
-	"traces",
-	"modelcheckingItems",
-	"proofObligationItems",
-	"simulations",
-	"visBVisualisation",
-	"historyChartItems",
-	"dotVisualizationItems",
-	"tableVisualizationItems"
+	"machineProperties"
 })
 public class Machine {
 	private final StringProperty name;

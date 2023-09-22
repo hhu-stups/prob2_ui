@@ -25,6 +25,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.machines.MachineProperties;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
@@ -72,11 +73,13 @@ class ProjectDocumenterTest extends ApplicationTest {
 	void setup(){
 		Mockito.when(trafficLight.getName()).thenReturn("TrafficLight");
 		Mockito.when(trafficLight.getLocation()).thenReturn(Paths.get("src/test/resources/machines/TrafficLight/TrafficLight.mch"));
-		Mockito.when(trafficLight.getTraces()).thenReturn(FXCollections.observableArrayList(trace));
-		Mockito.when(trafficLight.getModelcheckingItems()).thenReturn(Collections.singletonList(modelCheckingItem));
-		Mockito.when(trafficLight.getTemporalFormulas()).thenReturn(Collections.singletonList(ltlFormulaItem));
-		Mockito.when(trafficLight.getLTLPatterns()).thenReturn(Collections.singletonList(ltlPatternItem));
-		Mockito.when(trafficLight.getSymbolicCheckingFormulas()).thenReturn(Collections.singletonList(symbolicCheckingFormulaItem));
+		MachineProperties machineProperties = Mockito.mock(MachineProperties.class);
+		Mockito.when(trafficLight.getMachineProperties()).thenReturn(machineProperties);
+		Mockito.when(machineProperties.getTraces()).thenReturn(FXCollections.observableArrayList(trace));
+		Mockito.when(machineProperties.getModelcheckingItems()).thenReturn(Collections.singletonList(modelCheckingItem));
+		Mockito.when(machineProperties.getTemporalFormulas()).thenReturn(Collections.singletonList(ltlFormulaItem));
+		Mockito.when(machineProperties.getLTLPatterns()).thenReturn(Collections.singletonList(ltlPatternItem));
+		Mockito.when(machineProperties.getSymbolicCheckingFormulas()).thenReturn(Collections.singletonList(symbolicCheckingFormulaItem));
 
 		Mockito.when(trace.getName()).thenReturn("TrafficLight_Cars");
 		TraceJsonFile jsonFile = Mockito.mock(TraceJsonFile.class);
