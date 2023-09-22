@@ -272,18 +272,10 @@ task multiPlatformShadowJar(type: ShadowJar) {
 	from(sourceSets.main.output)
 	configurations = [
 		project.configurations.runtimeClasspath,
+		project.configurations.javafxWin,
+		project.configurations.javafxMac,
+		project.configurations.javafxLinux,
 	]
-
-	// Java 11 and newer normally don't have JavaFX preinstalled,
-	// so include OpenJFX 11 for these Java versions so they can run the jar.
-	// We don't bundle OpenJFX for older Java versions,
-	// because they usually have JavaFX preinstalled,
-	// and there are no easily usable standalone versions of OpenJFX < 11 that we could use anyway.
-	into("META-INF/versions/${javafxMajorVersion}") {
-		from(project.configurations.javafxWin.collect {zipTree(it)})
-		from(project.configurations.javafxMac.collect {zipTree(it)})
-		from(project.configurations.javafxLinux.collect {zipTree(it)})
-	}
 }
 
 if (project.hasProperty("probHome")) {
