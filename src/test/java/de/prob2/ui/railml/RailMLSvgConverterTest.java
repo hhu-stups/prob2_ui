@@ -26,7 +26,7 @@ public class RailMLSvgConverterTest {
 		pathConverted.toFile().deleteOnExit();
 
 		Files.copy(pathInput, pathConverted, StandardCopyOption.REPLACE_EXISTING);
-		convertSvgForVisB(pathConverted.toString(), "DOT");
+		convertSvgForVisB(pathConverted.toString(), RailMLImportMeta.VisualisationStrategy.DOT);
 
 		assertThat(Files.readString(pathCorrect))
 			.and(Files.readString(pathConverted))
@@ -49,9 +49,15 @@ public class RailMLSvgConverterTest {
 				</g>
 			</svg>""";
 
-		Path pathConverted = Files.createTempFile("railml-",".svg");
-		pathConverted.toFile().deleteOnExit();
-		Files.writeString(pathConverted, inputSvg);
+		Path pathConverted1 = Files.createTempFile("railml-",".svg");
+		pathConverted1.toFile().deleteOnExit();
+		Files.writeString(pathConverted1, inputSvg);
+		Path pathConverted2 = Files.createTempFile("railml-",".svg");
+		pathConverted2.toFile().deleteOnExit();
+		Files.writeString(pathConverted2, inputSvg);
+		Path pathConverted3 = Files.createTempFile("railml-",".svg");
+		pathConverted3.toFile().deleteOnExit();
+		Files.writeString(pathConverted3, inputSvg);
 		//***** *****/
 
 		//***** Expected SVG *****/
@@ -68,9 +74,21 @@ public class RailMLSvgConverterTest {
 			</svg>""";
 		//***** *****/
 
-		convertSvgForVisB(pathConverted.toString(), "DOT");
+		convertSvgForVisB(pathConverted1.toString(), RailMLImportMeta.VisualisationStrategy.D4R);
+		convertSvgForVisB(pathConverted2.toString(), RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE);
+		convertSvgForVisB(pathConverted2.toString(), RailMLImportMeta.VisualisationStrategy.DOT);
 
-		assertThat(Files.readString(pathConverted))
+		assertThat(Files.readString(pathConverted1))
+			.and(expectedSvg)
+			.ignoreComments()
+			.ignoreWhitespace()
+			.areSimilar();
+		assertThat(Files.readString(pathConverted2))
+			.and(expectedSvg)
+			.ignoreComments()
+			.ignoreWhitespace()
+			.areSimilar();
+		assertThat(Files.readString(pathConverted3))
 			.and(expectedSvg)
 			.ignoreComments()
 			.ignoreWhitespace()
@@ -94,7 +112,7 @@ public class RailMLSvgConverterTest {
 		Files.writeString(pathConverted, inputSvg);
 		//***** *****/
 
-		Assertions.assertThatThrownBy(() -> convertSvgForVisB(pathConverted.toString(), "DOT"))
+		Assertions.assertThatThrownBy(() -> convertSvgForVisB(pathConverted.toString(), RailMLImportMeta.VisualisationStrategy.DOT))
 			.hasMessage("Attribute 'd' of path short_path could not be processed");
 	}
 

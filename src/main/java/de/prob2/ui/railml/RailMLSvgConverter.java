@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class RailMLSvgConverter {
 
-	protected static void convertSvgForVisB(final String svg_file, final String svg_type) throws Exception {
+	protected static void convertSvgForVisB(final String svg_file, final RailMLImportMeta.VisualisationStrategy svg_type) throws Exception {
 
 		Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(new File(svg_file));
 		doc.getDocumentElement().normalize();
@@ -51,10 +51,10 @@ public class RailMLSvgConverter {
 
 			String gElementId = ((Element) path.getParentNode()).getAttribute("id");
 			String netElement_id;
-			if ("VIS".equals(svg_type)) {
+			if (svg_type == RailMLImportMeta.VisualisationStrategy.D4R) {
 				int lastUnderscore = gElementId.lastIndexOf("_");
 				netElement_id = gElementId.substring(0, lastUnderscore);
-			} else { //("DOT".equals(svg_type))
+			} else { //RAIL_OSCOPE or DOT
 				netElement_id = gElementId;
 			}
 
@@ -135,7 +135,8 @@ public class RailMLSvgConverter {
 			for (int i = 0; i < groups.getLength(); i++) {
 				Element group = (Element) groups.item(i);
 				String groupId = group.getAttribute("id");
-				if ((svg_type.equals("VIS") && groupId.startsWith(id_prefix + "_") || svg_type.equals("DOT") && groupId.equals(id_prefix))) {
+				if ((svg_type == RailMLImportMeta.VisualisationStrategy.D4R && groupId.startsWith(id_prefix + "_")
+					|| (svg_type == RailMLImportMeta.VisualisationStrategy.DOT || svg_type == RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE) && groupId.equals(id_prefix))) {
 					group.getParentNode().removeChild(group);
 				}
 			}

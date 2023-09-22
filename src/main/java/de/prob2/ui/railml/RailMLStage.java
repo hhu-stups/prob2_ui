@@ -60,10 +60,9 @@ public class RailMLStage extends Stage {
 	private CheckBox validationMachineCheckbox;
 	private boolean generateAnimation, generateValidation, generateSVG;
 
-	protected enum VisualisationStrategy {D4R, RAIL_OSCOPE, DOT};
 	@FXML
-	private ChoiceBox<VisualisationStrategy> visualisationStrategyChoiceBox;
-	private VisualisationStrategy visualisationStrategy;
+	private ChoiceBox<RailMLImportMeta.VisualisationStrategy> visualisationStrategyChoiceBox;
+	private RailMLImportMeta.VisualisationStrategy visualisationStrategy;
 
 	@FXML
 	private HBox progressInfo;
@@ -132,7 +131,7 @@ public class RailMLStage extends Stage {
 		locationField.setText("");
 		visualisationStrategyField.visibleProperty()
 			.bind(visualisationCheckbox.selectedProperty());
-		visualisationStrategyChoiceBox.getItems().addAll(VisualisationStrategy.values());
+		visualisationStrategyChoiceBox.getItems().addAll(RailMLImportMeta.VisualisationStrategy.values());
 		visualisationStrategyChoiceBox.visibleProperty().bind(visualisationCheckbox.selectedProperty());
 
 		generateFileListView.setItems(generateFileList);
@@ -161,7 +160,7 @@ public class RailMLStage extends Stage {
 				generateFileList.remove(dataFileName.getValue());
 			}
 		});
-		visualisationStrategyChoiceBox.setValue(VisualisationStrategy.DOT);
+		visualisationStrategyChoiceBox.setValue(RailMLImportMeta.VisualisationStrategy.DOT);
 		visualisationCheckbox.selectedProperty()
 			.addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
@@ -296,9 +295,9 @@ public class RailMLStage extends Stage {
 	public void generateMachines() throws Exception {
 
 		String graphMachineName;
-		if (visualisationStrategy == VisualisationStrategy.D4R) {
+		if (visualisationStrategy == RailMLImportMeta.VisualisationStrategy.D4R) {
 			graphMachineName = "RailML3_D4R_CustomGraph.mch";
-		} else if (visualisationStrategy == VisualisationStrategy.RAIL_OSCOPE) {
+		} else if (visualisationStrategy == RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE) {
 			graphMachineName = "RailML3_NOR_CustomGraph.mch";
 		} else {
 			graphMachineName = "RailML3_DOT_CustomGraph.mch";

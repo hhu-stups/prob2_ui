@@ -9,10 +9,11 @@ import java.nio.file.Path;
 @Singleton
 public class RailMLImportMeta {
 
+	protected enum VisualisationStrategy {D4R, RAIL_OSCOPE, DOT};
 	private Path path;
 	private State state;
 	private String name;
-	private RailMLStage.VisualisationStrategy visualisationStrategy;
+	private VisualisationStrategy visualisationStrategy;
 
 	@Inject
 	public RailMLImportMeta() {
@@ -25,25 +26,25 @@ public class RailMLImportMeta {
 	public void setPath(Path path) {
 		this.path = path;
 	}
-	public Path getPath() {
+	protected Path getPath() {
 		return path;
 	}
-	public void setState(State state) {
+	protected void setState(State state) {
 		this.state = state;
 	}
-	public State getState() {
+	protected State getState() {
 		return state;
 	}
-	public String getName() {
+	protected String getName() {
 		return name;
 	}
-	public void setName(String name) {
+	protected void setName(String name) {
 		this.name = name;
 	}
-	public RailMLStage.VisualisationStrategy getVisualisationStrategy() {
+	protected VisualisationStrategy getVisualisationStrategy() {
 		return visualisationStrategy;
 	}
-	public void setVisualisationStrategy(RailMLStage.VisualisationStrategy visualisationStrategy) {
+	protected void setVisualisationStrategy(VisualisationStrategy visualisationStrategy) {
 		this.visualisationStrategy = visualisationStrategy;
 	}
 }

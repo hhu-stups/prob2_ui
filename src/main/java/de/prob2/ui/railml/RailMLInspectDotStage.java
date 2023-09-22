@@ -229,8 +229,8 @@ public class RailMLInspectDotStage extends Stage {
 		});
 	}
 
-	protected void initializeOptionsForStrategy(RailMLStage.VisualisationStrategy strategy) {
-		boolean isDotCustomGraph = strategy == RailMLStage.VisualisationStrategy.DOT;
+	protected void initializeOptionsForStrategy(RailMLImportMeta.VisualisationStrategy strategy) {
+		boolean isDotCustomGraph = strategy == RailMLImportMeta.VisualisationStrategy.DOT;
 
 		balises.setVisible(!isDotCustomGraph); balises.setManaged(!isDotCustomGraph);
 		borders.setDisable(isDotCustomGraph);
@@ -336,11 +336,7 @@ public class RailMLInspectDotStage extends Stage {
 		saveConverted(DotOutputFormat.SVG, tempSvgFile);
 
 		try {
-			if (railMLImportMeta.getVisualisationStrategy() == RailMLStage.VisualisationStrategy.D4R) {
-				RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "VIS");
-			} else {
-				RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "DOT");
-			}
+			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), railMLImportMeta.getVisualisationStrategy());
 		} catch (Exception e) {
 			throw new ProBError("Failed to convert railML SVG file", e);
 		}
