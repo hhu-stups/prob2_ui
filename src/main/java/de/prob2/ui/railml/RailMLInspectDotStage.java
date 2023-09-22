@@ -1,20 +1,17 @@
 package de.prob2.ui.railml;
 
 import com.google.inject.Inject;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.prob.animator.domainobjects.*;
+import de.prob.animator.domainobjects.DotCall;
+import de.prob.animator.domainobjects.DotOutputFormat;
+import de.prob.animator.domainobjects.DotVisualizationCommand;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.dynamic.DynamicPreferencesStage;
-import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.*;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
@@ -34,7 +31,6 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -44,6 +40,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
+import static de.prob.animator.domainobjects.DotVisualizationCommand.getByName;
 
 @FXMLInjected
 @Singleton
@@ -58,30 +56,20 @@ public class RailMLInspectDotStage extends Stage {
 	private TextArea taErrors;
 	@FXML
 	private Parent errorsView;
-
 	@FXML
 	private MenuBar menuBar;
-
 	@FXML
 	private Button zoomOutButton;
-
 	@FXML
 	private Button zoomInButton;
 	@FXML
 	private Button refreshDotView;
-
 	@FXML
 	private HBox zoomBox;
-
-	@FXML
-	private HelpButton helpButton;
-
 	@FXML
 	private MenuItem zoomResetMenuButton;
-
 	@FXML
 	private MenuItem zoomInMenuButton;
-
 	@FXML
 	private MenuItem zoomOutMenuButton;
 	@FXML
@@ -112,8 +100,6 @@ public class RailMLInspectDotStage extends Stage {
 	private ChoiceBox<Language> languageChoiceBox;
 	@FXML
 	private ChoiceBox<DotEngine> dotEngineChoiceBox;
-	/*@FXML
-	private Spinner<Double> scalingSpinner;*/
 	private enum Language {EN, NO, DE}
 	private enum DotEngine {DOT, NEATO, FDP}
 	@FXML
@@ -130,10 +116,8 @@ public class RailMLInspectDotStage extends Stage {
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final BackgroundUpdater updater;
-	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 	private final I18n i18n;
-	private final RailMLFile railMLFile;
-	private final RailMLStage.VisualisationStrategy currentStrategy;
+	private final RailMLImportMeta railMLImportMeta;
 
 	private String dot;
 	private String dotEngine;
@@ -150,17 +134,14 @@ public class RailMLInspectDotStage extends Stage {
 	private final KeyCombination zoomOutKeypad = new KeyCodeCombination(KeyCode.SUBTRACT, KeyCombination.SHORTCUT_DOWN);
 
 	@Inject
-	public RailMLInspectDotStage(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
-	                             final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions,
-	                             final RailMLFile railMLFile) {
+	public RailMLInspectDotStage(final StageManager stageManager, final I18n i18n, final FileChooserManager fileChooserManager,
+	                             final StopActions stopActions, final RailMLImportMeta railMLImportMeta) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.updater = new BackgroundUpdater("railml dot view updater");
 		stopActions.add(this.updater::shutdownNow);
-		this.preferencesStageProvider = preferencesStageProvider;
 		this.i18n = i18n;
-		this.railMLFile = railMLFile;
-		this.currentStrategy = railMLFile.getVisualisationStrategy();
+		this.railMLImportMeta = railMLImportMeta;
 
 		this.dot = null;
 		this.dotEngine = null;
@@ -186,59 +167,61 @@ public class RailMLInspectDotStage extends Stage {
 		initializeOptions();
 
 		balises.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayBalises"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBalises"));
 		});
 		borders.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayBorders"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBorders"));
 		});
 		bufferstops.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayBufferstops"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBufferstops"));
 		});
 		crossings.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayCrossings"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayCrossings"));
 		});
 		derailers.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayDerailers"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayDerailers"));
 		});
 		levelcrossings.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayLevelcrossings"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayLevelcrossings"));
 		});
 		operationalpoints.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayOperationalpoints"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayOperationalpoints"));
 		});
 		signals.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplaySignals"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplaySignals"));
 		});
 		switches.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplaySwitches"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplaySwitches"));
 		});
 		traindetectionelements.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayTraindetectionelements"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayTraindetectionelements"));
 		});
 		tvdsections.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayTvdsections"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayTvdsections"));
 		});
 		names.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDisplayNames"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayNames"));
 		});
 
 		languageChoiceBox.getItems().addAll(RailMLInspectDotStage.Language.values());
 		languageChoiceBox.valueProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeLanguage", "language = \"" + languageChoiceBox.getValue().toString().toLowerCase() + "\""));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeLanguage", "language = \"" + languageChoiceBox.getValue().toString().toLowerCase() + "\""));
 		});
 
 		dotEngineChoiceBox.getItems().addAll(RailMLInspectDotStage.DotEngine.values());
 		dotEngineChoiceBox.valueProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeDotengine", "engine = \"" + dotEngineChoiceBox.getValue().toString().toLowerCase() + "\""));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDotengine", "engine = \"" + dotEngineChoiceBox.getValue().toString().toLowerCase() + "\""));
 		});
 		// TODO: Maybe use ProB preference for dot engine later
 
 		curvedsplines.selectedProperty().addListener((observable,from,to) -> {
-			railMLFile.setState(railMLFile.getState().perform("changeUseCurvedSplines"));
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeUseCurvedSplines"));
 		});
 
-		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
+		dotView.visibleProperty().bind(this.updater.runningProperty().not());
+		placeholderLabel.disableProperty().bind(this.updater.runningProperty().not());
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
+		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
 
 		this.setOnCloseRequest(e -> {
 			e.consume();
@@ -269,7 +252,7 @@ public class RailMLInspectDotStage extends Stage {
 	}
 
 	private void initializeOptions() {
-		// must match INITIALISATION of B model
+		// values must match INITIALISATION of B model
 		balises.setSelected(true);
 		borders.setSelected(true);
 		bufferstops.setSelected(true);
@@ -287,13 +270,14 @@ public class RailMLInspectDotStage extends Stage {
 		curvedsplines.setSelected(true);
 	}
 
-	protected void visualizeInternal(final DotVisualizationCommand item, final List<IEvalElement> formulas) throws InterruptedException {
-		// Store dot and dotEngine as local variables in addition to the fields
-		// to avoid a race condition where clearContent sets them to null
-		// while this method is still running in the background thread.
-		final String dotLocal = item.getState().getStateSpace().getCurrentPreference("DOT");
-		final String dotEngineLocal = item.getPreferredDotLayoutEngine()
-				.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
+	/**
+	 * Same method as in DotView.java, but only for "custom_graph".
+	 */
+	protected void visualizeCustomGraph(final List<IEvalElement> formulas) throws InterruptedException {
+		DotVisualizationCommand customGraphItem = getByName("custom_graph", railMLImportMeta.getState());
+		final String dotLocal = customGraphItem.getState().getStateSpace().getCurrentPreference("DOT");
+		final String dotEngineLocal = customGraphItem.getPreferredDotLayoutEngine()
+				.orElseGet(() -> customGraphItem.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
 		this.dot = dotLocal;
 		this.dotEngine = dotEngineLocal;
 
@@ -301,18 +285,18 @@ public class RailMLInspectDotStage extends Stage {
 		if (dotLocal == null || dotLocal.isEmpty()) {
 			Platform.runLater(() -> {
 				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.emptyDotPath.header", "dotty.error.emptyDotPath.message").show();
-				//this.close();
+				this.close();
 			});
 			return;
 		} else if (dotEngineLocal == null || dotEngineLocal.isEmpty()) {
 			Platform.runLater(() -> {
 				this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.emptyDotEngine.header", "dotty.error.emptyDotEngine.message").show();
-				//this.close();
+				this.close();
 			});
 			return;
 		}
 
-		byte[] dotInput = item.visualizeAsDotToBytes(formulas);
+		byte[] dotInput = customGraphItem.visualizeAsDotToBytes(formulas);
 		this.currentDotContent.set(dotInput);
 		if (!Thread.currentThread().isInterrupted()) {
 			final String outputFormat = DotOutputFormat.SVG;
@@ -334,6 +318,104 @@ public class RailMLInspectDotStage extends Stage {
 			loadGraph(new String(svgData, StandardCharsets.UTF_8));
 		}
 	}
+
+	/**
+	 * Saves the current visualisation to a temporary SVG file, applies RailMLSvgConverter.convertSvgForVisB
+	 * for the current strategy and copies the content of the converted temporary SVG to the final SVG file.
+	 * This finishes the task of this stage.
+	 */
+	@FXML
+	private void acceptVisualisation() {
+		final Path tempSvgFile;
+		try {
+			tempSvgFile = Files.createTempFile("railml-", ".svg");
+			tempSvgFile.toFile().deleteOnExit();
+		} catch (IOException e) {
+			throw new ProBError("Failed to create temporary svg file", e);
+		}
+		saveConverted(DotOutputFormat.SVG, tempSvgFile);
+
+		if (railMLImportMeta.getVisualisationStrategy() == RailMLStage.VisualisationStrategy.D4R) {
+			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "VIS");
+		} else {
+			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "DOT");
+		}
+
+		final Path finalSvg = railMLImportMeta.getPath().resolve(railMLImportMeta.getName() + ".svg").toAbsolutePath();
+
+		try {
+			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING); // TODO: replaceOldFile()
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+		this.close();
+	}
+
+	/**
+	 * After changing elements to be visualised or Dot options, the visualisation can be reloaded using this method.
+	 */
+	@FXML
+	private void refreshDotView () {
+		this.updater.execute(() -> {
+			try {
+				visualizeCustomGraph(Collections.emptyList());
+			} catch (InterruptedException e) {
+				LOGGER.info("RailML Visualization interrupted", e);
+				Thread.currentThread().interrupt();
+			} catch (ProBError e) {
+				handleProBError(e);
+			} catch (Exception e) {
+				if (e.getCause() instanceof ProBError) {
+					handleProBError((ProBError) e.getCause());
+				} else if (e.getCause() instanceof BCompoundException) {
+					handleProBError(new ProBError((BCompoundException) e.getCause()));
+				} else {
+					LOGGER.error("RailML Visualization failed", e);
+					Platform.runLater(() -> {
+						taErrors.setText(e.getMessage());
+						errorsView.setVisible(true);
+						placeholderLabel.setVisible(false);
+					});
+				}
+			}
+		});
+	}
+
+	private void handleProBError(ProBError e)  {
+		LOGGER.error("Visualization failed with ProBError", e);
+		Platform.runLater(() -> {
+			taErrors.setText(e.getMessage());
+			errorsView.setVisible(true);
+			placeholderLabel.setVisible(false);
+		});
+	}
+
+	@FXML
+	private void interrupt() {
+		railMLImportMeta.getState().getStateSpace().sendInterrupt();
+	}
+
+	@FXML
+	private void cancel() {
+		boolean abortImport = confirmAbortImport();
+		if (abortImport) {
+			updater.cancel(true);
+			this.interrupt();
+			this.close();
+		}
+	}
+
+	public boolean confirmAbortImport() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+				"railml.inspectDot.alerts.confirmAbortImport.header",
+				"railml.inspectDot.alerts.confirmAbortImport.content");
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
+	}
+
+	/* -------------------------------
+		Helper methods for saving taken from DotView.java:
+	 */
 
 	private void loadGraph(final String svgContent) {
 		Thread thread = Thread.currentThread();
@@ -390,14 +472,18 @@ public class RailMLInspectDotStage extends Stage {
 	private void saveConverted(String format, final Path path) {
 		try {
 			Files.write(path, new DotCall(this.dot)
-					.layoutEngine(this.dotEngine)
-					.outputFormat(format)
-					.input(this.currentDotContent.get())
-					.call());
+				.layoutEngine(this.dotEngine)
+				.outputFormat(format)
+				.input(this.currentDotContent.get())
+				.call());
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}
 	}
+
+	/* -------------------------------
+		Helper methods for zoom, scroll, and placeholder taken from DotView.java:
+	 */
 
 	private void updatePlaceholderLabel() {
 		final String text;
@@ -432,13 +518,13 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	private void increaseScalingFactor() {
-		railMLFile.setState(railMLFile.getState().perform("increaseScalingFactor"));
+		railMLImportMeta.setState(railMLImportMeta.getState().perform("increaseScalingFactor"));
 		adjustScroll();
 	}
 
 	@FXML
 	private void decreaseScalingFactor() {
-		railMLFile.setState(railMLFile.getState().perform("decreaseScalingFactor"));
+		railMLImportMeta.setState(railMLImportMeta.getState().perform("decreaseScalingFactor"));
 		adjustScroll();
 	}
 
@@ -457,98 +543,5 @@ public class RailMLInspectDotStage extends Stage {
 			}
 		}
 		dotView.getEngine().executeScript("window.scrollBy(" + x + "," + y + ")");
-	}
-
-	private void clearContent() {
-		this.dot = null;
-		this.dotEngine = null;
-		this.currentDotContent.set(null);
-		dotView.getEngine().loadContent("");
-		dotView.setVisible(false);
-	}
-
-	@FXML
-	private void acceptVisualisation() {
-		final Path tempSvgFile;
-		try {
-			tempSvgFile = Files.createTempFile("railml-", ".svg");
-			tempSvgFile.toFile().deleteOnExit();
-		} catch (IOException e) {
-			throw new ProBError("Failed to create temporary svg file", e);
-		}
-		saveConverted(DotOutputFormat.SVG, tempSvgFile);
-		// convertSvgVisB
-		if (railMLFile.getVisualisationStrategy() == RailMLStage.VisualisationStrategy.D4R) {
-			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "VIS");
-		} else {
-			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "DOT");
-		}
-		final Path finalSvg = railMLFile.getPath().resolve(railMLFile.getName() + ".svg").toAbsolutePath();
-		try {
-			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING); // TODO: replaceOldFile()
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
-		this.close();
-	}
-
-	@FXML
-	private void refreshDotView () {
-		this.updater.execute(() -> {
-			DotVisualizationCommand currentItem = DotVisualizationCommand.getByName("custom_graph", railMLFile.getState());
-			try {
-				visualizeInternal(currentItem, Collections.emptyList());
-			} catch (InterruptedException e) {
-				LOGGER.info("RailML Visualization interrupted", e);
-				Thread.currentThread().interrupt();
-			} catch (ProBError e) {
-				handleProBError(e);
-			} catch (Exception e) {
-				if (e.getCause() instanceof ProBError) {
-					handleProBError((ProBError) e.getCause());
-				} else if (e.getCause() instanceof BCompoundException) {
-					handleProBError(new ProBError((BCompoundException) e.getCause()));
-				} else {
-					LOGGER.error("Visualization failed", e);
-					Platform.runLater(() -> {
-						taErrors.setText(e.getMessage());
-						errorsView.setVisible(true);
-						placeholderLabel.setVisible(false);
-					});
-				}
-			}
-		});
-	}
-
-	private void handleProBError(ProBError e)  {
-		LOGGER.error("Visualization failed with ProBError", e);
-		Platform.runLater(() -> {
-			taErrors.setText(e.getMessage());
-			errorsView.setVisible(true);
-			placeholderLabel.setVisible(false);
-		});
-	}
-
-	@FXML
-	private void interrupt() {
-		railMLFile.getState().getStateSpace().sendInterrupt();
-	}
-
-	@FXML
-	private void cancel() {
-		boolean abortImport = confirmAbortImport();
-		if (abortImport) {
-			updater.cancel(true);
-			this.interrupt();
-			this.close();
-		}
-	}
-
-	public boolean confirmAbortImport() {
-		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-				"railml.inspectDot.alerts.confirmAbortImport.header",
-				"railml.inspectDot.alerts.confirmAbortImport.content");
-		Optional<ButtonType> result = alert.showAndWait();
-		return result.isPresent() && ButtonType.OK.equals(result.get());
 	}
 }

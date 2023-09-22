@@ -32,12 +32,8 @@ import javafx.stage.Stage;
 
 import java.io.*;
 import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
 import java.nio.file.*;
 import java.util.*;
-
-import static de.prob.animator.domainobjects.DotVisualizationCommand.getByName;
 
 @FXMLInjected
 @Singleton
@@ -85,6 +81,7 @@ public class RailMLStage extends Stage {
 	private final SimpleStringProperty svgFileName = new SimpleStringProperty("");
 	private final SimpleStringProperty simBFileName = new SimpleStringProperty("RailML3_SimB.json");
 
+	private StateSpace stateSpace;
 	private State currentState;
 
 	private final StageManager stageManager;
@@ -98,13 +95,13 @@ public class RailMLStage extends Stage {
 
 	private final FileChooserManager fileChooserManager;
 	private final BackgroundUpdater updater;
-	private final RailMLFile railMLFile;
+	private final RailMLImportMeta railMLImportMeta;
 
 	@Inject
 	public RailMLStage(final StageManager stageManager, final CurrentProject currentProject,
 	                   final Injector injector, final I18n i18n, final ErrorDisplayFilter errorDisplayFilter,
 	                   final FileChooserManager fileChooserManager,
-	                   final StopActions stopActions, final RailMLFile railMLFile) {
+	                   final StopActions stopActions, final RailMLImportMeta railMLImportMeta) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -113,8 +110,8 @@ public class RailMLStage extends Stage {
 		this.errorDisplayFilter = errorDisplayFilter;
 		this.fileChooserManager = fileChooserManager;
 		this.updater = new BackgroundUpdater("railml import executor");
-		stopActions.add(this.updater::shutdownNow);
-		this.railMLFile = railMLFile;
+		stopActions.add(this::cancel);
+		this.railMLImportMeta = railMLImportMeta;
 		stageManager.loadFXML(this, "railml_stage.fxml", this.getClass().getName());
 	}
 
@@ -177,18 +174,16 @@ public class RailMLStage extends Stage {
 		//progressBar.setVisible(false);
 		//progressBar.progressProperty().bind(progress);
 		//currentOp.textProperty().bind(currentOperation);
-		Path railML = railMLFile.getPath();
+		Path railML = railMLImportMeta.getPath();
 		if(railML != null) {
-			setFileNames(railML);
+			setFileNames(railML, MoreFiles.getNameWithoutExtension(railML));
 		}
 
 		progressBar.visibleProperty().bind(updater.runningProperty());
 		progressBar.managedProperty().bind(progressBar.visibleProperty());
 		//currentOp.textProperty().bind(currentOperation);
 
-		setOnCloseRequest(e -> {
-			this.cancel();
-		});
+		setOnCloseRequest(e -> this.cancel());
 	}
 
 	@FXML
@@ -197,26 +192,33 @@ public class RailMLStage extends Stage {
 		fileChooser.setTitle(i18n.translate("railml.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getRailMLFilter());
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
+
 		if(path != null) {
-			generateFileList.clear();
-			animationMachineCheckbox.setSelected(false);
-			validationMachineCheckbox.setSelected(false);
-			visualisationCheckbox.setSelected(false);
-			setFileNames(path);
+			String fileName = MoreFiles.getNameWithoutExtension(path);
+			//if (fileName.contains("-") || (Character.isAlphabetic(fileName.charAt(0)) && !Character.isUpperCase(fileName.charAt(0)))) {
+			//	stageManager.makeAlert(Alert.AlertType.ERROR, "railml.stage.filename.error.header", "railml.stage.filename.error.content").showAndWait();
+			//	this.requestFocus();
+			//} else {
+				generateFileList.clear();
+				animationMachineCheckbox.setSelected(false);
+				validationMachineCheckbox.setSelected(false);
+				visualisationCheckbox.setSelected(false);
+				setFileNames(path, fileName);
+			//}
 		}
 	}
 
-	private void setFileNames(Path railML) {
-		this.railMLpath = railML;
+	private void setFileNames(Path railML, String fileName) {
+		this.railMLpath = railML.toAbsolutePath();
 		this.generationPath = railMLpath.getParent().toAbsolutePath();
-		dataFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_data.mch");
-		animationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_animation.mch");
-		validationFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + "_validation.rmch");
-		svgFileName.setValue(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()) + ".svg");
+		dataFileName.setValue(fileName + "_data.mch");
+		animationFileName.setValue(fileName + "_animation.mch");
+		validationFileName.setValue(fileName + "_validation.rmch");
+		svgFileName.setValue(fileName + ".svg");
 		fileLocationField.setText(railMLpath.toAbsolutePath().toString());
 		locationField.setText(generationPath.toString());
-		railMLFile.setPath(generationPath);
-		railMLFile.setName(MoreFiles.getNameWithoutExtension(railMLpath.getFileName()));
+		railMLImportMeta.setPath(generationPath);
+		railMLImportMeta.setName(fileName);
 	}
 
 	@FXML
@@ -227,7 +229,7 @@ public class RailMLStage extends Stage {
 		if(path != null) {
 			this.generationPath = path.toAbsolutePath();
 			locationField.setText(generationPath.toString());
-			railMLFile.setPath(generationPath);
+			railMLImportMeta.setPath(generationPath);
 		}
 	}
 
@@ -253,12 +255,11 @@ public class RailMLStage extends Stage {
 						this.close();
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (visualisationCheckbox.isSelected()) {
-							railMLInspectDotStage.initializeOptionsForStrategy(railMLFile.getVisualisationStrategy());
+							railMLInspectDotStage.initializeOptionsForStrategy(railMLImportMeta.getVisualisationStrategy());
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
-							DotVisualizationCommand customGraph = getByName("custom_graph", currentState);
 							try {
-								railMLInspectDotStage.visualizeInternal(customGraph, Collections.emptyList());
+								railMLInspectDotStage.visualizeCustomGraph(Collections.emptyList());
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);
 							}
@@ -298,8 +299,8 @@ public class RailMLStage extends Stage {
 		}
 		if (animationMachineCheckbox.isSelected()) {
 			try {
-				replaceOldFile("RailML3_VisB.def");
-				replaceOldFile("RailML3_SimB.json");
+				replaceOldResourceFile("RailML3_VisB.def");
+				replaceOldResourceFile("RailML3_SimB.json");
 				Path simbPath = generationPath.resolve("RailML3_SimB.json");
 
 				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.resolve("RailML3_VisB.def"));
@@ -320,7 +321,7 @@ public class RailMLStage extends Stage {
 		}
 	}
 
-	private void replaceOldFile(String fileName) throws IOException {
+	private void replaceOldResourceFile(String fileName) throws IOException {
 		Path currentFile = generationPath.resolve(fileName);
 		if (Files.exists(currentFile)) {
 			int fileNumber = 1;
@@ -335,10 +336,25 @@ public class RailMLStage extends Stage {
 		Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(fileName)), currentFile, StandardCopyOption.REPLACE_EXISTING);
 	}
 
+	private void replaceOldFile(String fileName) throws IOException {
+		Path currentFile = generationPath.resolve(fileName);
+		if (Files.exists(currentFile)) {
+			int fileNumber = 1;
+			Path newOldFile;
+			do {
+				String numberedFileName = MoreFiles.getNameWithoutExtension(currentFile) + "_" + fileNumber + ".def";
+				newOldFile = generationPath.resolve(numberedFileName);
+				fileNumber++;
+			} while (Files.exists(newOldFile));
+			Files.copy(currentFile, newOldFile);
+		}
+		Files.delete(currentFile);
+	}
+
 	public void generateMachines() throws Exception {
 
 		VisualisationStrategy visualisationStrategy = visualisationStrategyChoiceBox.getValue();
-		railMLFile.setVisualisationStrategy(visualisationStrategy);
+		railMLImportMeta.setVisualisationStrategy(visualisationStrategy);
 		String graphMachineName;
 		if (visualisationStrategy == VisualisationStrategy.D4R) {
 			graphMachineName = "RailML3_D4R_CustomGraph.mch";
@@ -350,7 +366,7 @@ public class RailMLStage extends Stage {
 		URI graphMachine = getClass().getResource(graphMachineName).toURI();
 
 		Api api = injector.getInstance(Api.class);
-		StateSpace stateSpace;
+		//StateSpace stateSpace;
 		if ("jar".equals(graphMachine.getScheme())) {
 			Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
 			Path tempGraphMachine = tempDir.resolve(graphMachineName);
@@ -376,6 +392,7 @@ public class RailMLStage extends Stage {
 			stateSpace = api.b_load(Paths.get(graphMachine).toString());
 		}
 
+
 		stateSpace.addWarningListener(warnings -> {
 				final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
 				if (!filteredWarnings.isEmpty()) {
@@ -387,38 +404,50 @@ public class RailMLStage extends Stage {
 				}
 			});
 
-		currentState = stateSpace.getRoot()
-			.perform("$setup_constants","file = \"" + railMLpath + "\"" +
-				"  & outputDataFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
-				"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
-				"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
-				"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
-				"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
-				"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
-				"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
-			.perform("$initialise_machine");
+		String linkSvg = "TRUE";
 
-		boolean inv_ok = currentState.isInvariantOk();
-		boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
+		if (!Thread.currentThread().isInterrupted()) {
+			currentState = stateSpace.getRoot()
+				.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
+					"  & outputDataFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
+					"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
+					"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
+					"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
+					"  & LINK_SVG = " + linkSvg + "\n" +
+					"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
+					"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
+					"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
+				.perform("$initialise_machine");
 
-		if ((animationMachineCheckbox.isSelected() || validationMachineCheckbox.isSelected()) && inv_ok && import_success) {
-			replaceOldFile(dataFileName.getValue());
-			currentState.perform("triggerPrintData").perform("printDataMachine");
+			boolean inv_ok = currentState.isInvariantOk();
+			boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
+
+			if ((animationMachineCheckbox.isSelected() || validationMachineCheckbox.isSelected()) && inv_ok && import_success) {
+				Path dataFilePath = Paths.get(dataFileName.getValue());
+				if (!Files.exists(dataFilePath)) Files.createFile(dataFilePath);
+				replaceOldFile(dataFileName.getValue());
+				currentState.perform("triggerPrintData").perform("printDataMachine");
+			}
+			if (animationMachineCheckbox.isSelected() && inv_ok && import_success) {
+				Path animFilePath = Paths.get(animationFileName.getValue());
+				if (!Files.exists(animFilePath)) Files.createFile(animFilePath);
+				replaceOldFile(animationFileName.getValue());
+				currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
+			}
+			if (validationMachineCheckbox.isSelected() && inv_ok && import_success) {
+				Path validFilePath = Paths.get(validationFileName.getValue());
+				if (!Files.exists(validFilePath)) Files.createFile(validFilePath);
+				replaceOldFile(validationFileName.getValue());
+				currentState.perform("triggerPrintValidation").perform("printValidationMachine");
+			}
+			railMLImportMeta.setState(currentState);
 		}
-		if (animationMachineCheckbox.isSelected() && inv_ok && import_success) {
-			replaceOldFile(animationFileName.getValue());
-			currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
-		}
-		if (validationMachineCheckbox.isSelected() && inv_ok && import_success) {
-			replaceOldFile(validationFileName.getValue());
-			currentState.perform("triggerPrintValidation").perform("printValidationMachine");
-		}
-		railMLFile.setState(currentState);
 	}
 
 	@FXML
 	public void cancel() {
 		updater.cancel(true);
+		if (stateSpace != null) stateSpace.kill();
 		this.close();
 	}
 }

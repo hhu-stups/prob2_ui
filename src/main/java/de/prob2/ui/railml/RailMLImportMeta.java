@@ -3,12 +3,11 @@ package de.prob2.ui.railml;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.statespace.State;
-import javafx.beans.property.SimpleStringProperty;
 
 import java.nio.file.Path;
 
 @Singleton
-public class RailMLFile {
+public class RailMLImportMeta {
 
 	private Path path;
 	private State state;
@@ -16,7 +15,7 @@ public class RailMLFile {
 	private RailMLStage.VisualisationStrategy visualisationStrategy;
 
 	@Inject
-	public RailMLFile() {
+	public RailMLImportMeta() {
 		this.path = null;
 		this.state = null;
 		this.name = null;
