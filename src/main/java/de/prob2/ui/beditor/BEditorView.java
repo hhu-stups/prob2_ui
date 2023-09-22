@@ -236,7 +236,7 @@ public class BEditorView extends BorderPane {
 
 		helpButton.setHelpContent("mainView.editor", null);
 
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.CONTROL_DOWN), e -> handleSearch()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.SHORTCUT_DOWN), e -> handleSearch()));
 	}
 
 	BEditor getEditor() {
