@@ -294,6 +294,8 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 
 	protected abstract void editFormula(TableRow<DynamicCommandFormulaItem> row);
 
+	protected abstract void addFormula();
+
 
 	private void evaluateFormulaFromTable() {
 		DynamicCommandFormulaItem item = tvFormula.getSelectionModel().getSelectedItem();
@@ -463,7 +465,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 
 	@FXML
 	private void handleAddFormula() {
-		editFormula(null);
+		addFormula();
 	}
 
 	@FXML

@@ -338,23 +338,29 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	protected void editFormula(TableRow<DynamicCommandFormulaItem> row){
 		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
 		stage.initOwner(this);
-		if (row == null) {
-			stage.createNewItem(lastItem.getCommand());
-		} else {
-			stage.editItem(row.getItem(),errors);
-		}
+		stage.editItem(row.getItem(),errors);
 		stage.showAndWait();
 		DynamicCommandFormulaItem item = stage.getItem();
 		Machine machine = currentProject.getCurrentMachine();
 		if(item != null ) {
-			if (row == null){
-				machine.addTableVisualizationItem(lastItem.getCommand(), item);
-				this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
-			} else {
-				ListProperty<DynamicCommandFormulaItem> tableVisualisationItem = machine.getTableVisualizationItems().get(lastItem.getCommand());
-				tableVisualisationItem.set(tableVisualisationItem.indexOf(item), item);
-				machine.setChanged(true);
-			}
+			ListProperty<DynamicCommandFormulaItem> tableVisualisationItem = machine.getTableVisualizationItems().get(lastItem.getCommand());
+			tableVisualisationItem.set(tableVisualisationItem.indexOf(item), item);
+			machine.setChanged(true);
+			tvFormula.refresh();
+		}
+	}
+
+	@Override
+	protected void addFormula(){
+		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
+		stage.initOwner(this);
+		stage.createNewItem(lastItem.getCommand());
+		stage.showAndWait();
+		DynamicCommandFormulaItem item = stage.getItem();
+		Machine machine = currentProject.getCurrentMachine();
+		if(item != null ) {
+			machine.addTableVisualizationItem(lastItem.getCommand(), item);
+			this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 			tvFormula.refresh();
 		}
 	}

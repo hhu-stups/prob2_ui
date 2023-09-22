@@ -14,7 +14,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
-import de.prob2.ui.dynamic.EditFormulaDialog;
+import de.prob2.ui.dynamic.EditFormulaStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.MultiKeyCombination;
@@ -340,19 +340,31 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	@Override
 	protected void editFormula(TableRow<DynamicCommandFormulaItem> row){
-		final EditFormulaDialog dialog = injector.getInstance(EditFormulaDialog.class);
-		dialog.initOwner(this);
-		Optional<DynamicCommandFormulaItem> item = row == null ? dialog.addAndShow(currentProject, lastItem.getCommand()) : dialog.editAndShow(currentProject, row, errors);
+		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
+		stage.initOwner(this);
+		stage.editItem(row.getItem(),errors);
+		stage.showAndWait();
+		DynamicCommandFormulaItem item = stage.getItem();
+        Machine machine = currentProject.getCurrentMachine();
+		if(item != null ) {
+			ListProperty<DynamicCommandFormulaItem> dotVisualisationItem = machine.getDotVisualizationItems().get(lastItem.getCommand());
+			dotVisualisationItem.set(dotVisualisationItem.indexOf(item), item);
+			machine.setChanged(true);
+			tvFormula.refresh();
+		}
+	}
+
+	@Override
+	protected void addFormula(){
+		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
+		stage.initOwner(this);
+		stage.createNewItem(lastItem.getCommand());
+		stage.showAndWait();
+		DynamicCommandFormulaItem item = stage.getItem();
 		Machine machine = currentProject.getCurrentMachine();
-		if(item != null && item.isPresent()) {
-			if (row == null){
-				machine.addDotVisualizationItem(lastItem.getCommand(), item.get());
-				this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
-			} else {
-				ListProperty<DynamicCommandFormulaItem> dotVisualisationItem = machine.getDotVisualizationItems().get(lastItem.getCommand());
-				dotVisualisationItem.set(dotVisualisationItem.indexOf(item.get()), item.get());
-				machine.setChanged(true);
-			}
+		if(item != null ) {
+			machine.addDotVisualizationItem(lastItem.getCommand(), item);
+			this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 			tvFormula.refresh();
 		}
 	}
