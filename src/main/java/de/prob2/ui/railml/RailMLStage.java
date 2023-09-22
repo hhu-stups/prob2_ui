@@ -293,6 +293,103 @@ public class RailMLStage extends Stage {
 		});
 	}
 
+	public void generateMachines() throws Exception {
+
+		String graphMachineName;
+		if (visualisationStrategy == VisualisationStrategy.D4R) {
+			graphMachineName = "RailML3_D4R_CustomGraph.mch";
+		} else if (visualisationStrategy == VisualisationStrategy.RAIL_OSCOPE) {
+			graphMachineName = "RailML3_NOR_CustomGraph.mch";
+		} else {
+			graphMachineName = "RailML3_DOT_CustomGraph.mch";
+		}
+		URI graphMachine = getClass().getResource(graphMachineName).toURI();
+
+		Api api = injector.getInstance(Api.class);
+
+		if ("jar".equals(graphMachine.getScheme())) {
+			Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
+			Path tempGraphMachine = tempDir.resolve(graphMachineName);
+			Path tempGraphDefs = tempDir.resolve("RailML3_CustomGraphs.def");
+			Path tempPrintMachine = tempDir.resolve("RailML3_printMachines.mch");
+			Path tempImportMachine = tempDir.resolve("RailML3_import.mch");
+			Path tempValidationMachine = tempDir.resolve("RailML3_validation_flat.mch");
+
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(graphMachineName)), tempGraphMachine, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_CustomGraphs.def")), tempGraphDefs, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_printMachines.mch")), tempPrintMachine, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_import.mch")), tempImportMachine, StandardCopyOption.REPLACE_EXISTING);
+			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_validation_flat.mch")), tempValidationMachine, StandardCopyOption.REPLACE_EXISTING);
+
+			stateSpace = api.b_load(tempGraphMachine.toString());
+
+			Files.delete(tempGraphMachine);
+			Files.delete(tempGraphDefs);
+			Files.delete(tempPrintMachine);
+			Files.delete(tempImportMachine);
+			Files.delete(tempValidationMachine);
+		} else {
+			stateSpace = api.b_load(Paths.get(graphMachine).toString());
+		}
+
+		stateSpace.addWarningListener(warnings -> {
+			final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
+			if (!filteredWarnings.isEmpty()) {
+				Platform.runLater(() -> {
+					final WarningAlert alert = injector.getInstance(WarningAlert.class);
+					alert.getWarnings().setAll(filteredWarnings);
+					alert.show();
+				});
+			}
+		});
+
+		String linkSvg;
+		if (generateSVG) {
+			linkSvg = "TRUE";
+		} else {
+			linkSvg = "FALSE";
+		}
+
+		if (!Thread.currentThread().isInterrupted()) {
+			State currentState = stateSpace.getRoot()
+				.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
+					"  & outputDataFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
+					"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
+					"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
+					"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
+					"  & LINK_SVG = " + linkSvg + "\n" +
+					"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
+					"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
+					"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
+				.perform("$initialise_machine");
+
+			boolean inv_ok = currentState.isInvariantOk();
+			boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
+
+			if (inv_ok && import_success) {
+				if (generateAnimation || generateValidation) {
+					Path dataFilePath = Paths.get(dataFileName.getValue());
+					if (!Files.exists(dataFilePath)) Files.createFile(dataFilePath);
+					replaceOldFile(dataFileName.getValue());
+					currentState.perform("triggerPrintData").perform("printDataMachine");
+				}
+				if (generateAnimation) {
+					Path animFilePath = Paths.get(animationFileName.getValue());
+					if (!Files.exists(animFilePath)) Files.createFile(animFilePath);
+					replaceOldFile(animationFileName.getValue());
+					currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
+				}
+				if (generateValidation) {
+					Path validFilePath = Paths.get(validationFileName.getValue());
+					if (!Files.exists(validFilePath)) Files.createFile(validFilePath);
+					replaceOldFile(validationFileName.getValue());
+					currentState.perform("triggerPrintValidation").perform("printValidationMachine");
+				}
+			}
+			railMLImportMeta.setState(currentState);
+		}
+	}
+
 	private void createProject(String shortName, Path projectLocation, Machine dataMachine, Machine animationMachine, Machine validationMachine) {
 		if (currentProject.getLocation() == null) {
 			boolean replacingProject = currentProject.confirmReplacingProject();
@@ -349,103 +446,6 @@ public class RailMLStage extends Stage {
 				fileNumber++;
 			} while (Files.exists(newOldFile));
 			Files.copy(currentFile, newOldFile);
-		}
-	}
-
-	public void generateMachines() throws Exception {
-
-		String graphMachineName;
-		if (visualisationStrategy == VisualisationStrategy.D4R) {
-			graphMachineName = "RailML3_D4R_CustomGraph.mch";
-		} else if (visualisationStrategy == VisualisationStrategy.RAIL_OSCOPE) {
-			graphMachineName = "RailML3_NOR_CustomGraph.mch";
-		} else {
-			graphMachineName = "RailML3_DOT_CustomGraph.mch";
-		}
-		URI graphMachine = getClass().getResource(graphMachineName).toURI();
-
-		Api api = injector.getInstance(Api.class);
-
-		if ("jar".equals(graphMachine.getScheme())) {
-			Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
-			Path tempGraphMachine = tempDir.resolve(graphMachineName);
-			Path tempGraphDefs = tempDir.resolve("RailML3_CustomGraphs.def");
-			Path tempPrintMachine = tempDir.resolve("RailML3_printMachines.mch");
-			Path tempImportMachine = tempDir.resolve("RailML3_import.mch");
-			Path tempValidationMachine = tempDir.resolve("RailML3_validation_flat.mch");
-
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(graphMachineName)), tempGraphMachine, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_CustomGraphs.def")), tempGraphDefs, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_printMachines.mch")), tempPrintMachine, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_import.mch")), tempImportMachine, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_validation_flat.mch")), tempValidationMachine, StandardCopyOption.REPLACE_EXISTING);
-
-			stateSpace = api.b_load(tempGraphMachine.toString());
-
-			Files.delete(tempGraphMachine);
-			Files.delete(tempGraphDefs);
-			Files.delete(tempPrintMachine);
-			Files.delete(tempImportMachine);
-			Files.delete(tempValidationMachine);
-		} else {
-			stateSpace = api.b_load(Paths.get(graphMachine).toString());
-		}
-
-		stateSpace.addWarningListener(warnings -> {
-				final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
-				if (!filteredWarnings.isEmpty()) {
-					Platform.runLater(() -> {
-						final WarningAlert alert = injector.getInstance(WarningAlert.class);
-						alert.getWarnings().setAll(filteredWarnings);
-						alert.show();
-					});
-				}
-			});
-
-		String linkSvg;
-		if (generateSVG) {
-			linkSvg = "TRUE";
-		} else {
-			linkSvg = "FALSE";
-		}
-
-		if (!Thread.currentThread().isInterrupted()) {
-			State currentState = stateSpace.getRoot()
-				.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
-					"  & outputDataFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
-					"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
-					"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
-					"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
-					"  & LINK_SVG = " + linkSvg + "\n" +
-					"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
-					"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
-					"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
-				.perform("$initialise_machine");
-
-			boolean inv_ok = currentState.isInvariantOk();
-			boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
-
-			if (inv_ok && import_success) {
-				if (generateAnimation || generateValidation) {
-					Path dataFilePath = Paths.get(dataFileName.getValue());
-					if (!Files.exists(dataFilePath)) Files.createFile(dataFilePath);
-					replaceOldFile(dataFileName.getValue());
-					currentState.perform("triggerPrintData").perform("printDataMachine");
-				}
-				if (generateAnimation) {
-					Path animFilePath = Paths.get(animationFileName.getValue());
-					if (!Files.exists(animFilePath)) Files.createFile(animFilePath);
-					replaceOldFile(animationFileName.getValue());
-					currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
-				}
-				if (generateValidation) {
-					Path validFilePath = Paths.get(validationFileName.getValue());
-					if (!Files.exists(validFilePath)) Files.createFile(validFilePath);
-					replaceOldFile(validationFileName.getValue());
-					currentState.perform("triggerPrintValidation").perform("printValidationMachine");
-				}
-			}
-			railMLImportMeta.setState(currentState);
 		}
 	}
 
