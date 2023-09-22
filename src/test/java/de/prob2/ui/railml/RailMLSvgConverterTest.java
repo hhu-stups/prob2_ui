@@ -1,5 +1,6 @@
 package de.prob2.ui.railml;
 
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -16,7 +17,7 @@ public class RailMLSvgConverterTest {
 	private static final Path svgPath = Paths.get("src/test/resources/svgs");
 
 	@Test
-	void testSimpleExample() throws IOException {
+	void testSimpleExample() throws Exception {
 
 		final Path pathInput = svgPath.resolve("simple_example_dot.svg");
 		final Path pathCorrect = svgPath.resolve("simple_example_correct_converted.svg");
@@ -35,7 +36,7 @@ public class RailMLSvgConverterTest {
 	}
 
 	@Test
-	void testCreationOfIDs() throws IOException {
+	void testCreationOfIDs() throws Exception {
 		//***** Input SVG *****/
 		String inputSvg = """
 			<svg>
@@ -77,7 +78,28 @@ public class RailMLSvgConverterTest {
 	}
 
 	@Test
-	void testPathConversionForDotMode() throws IOException {
+	void testFaultyPath() throws IOException {
+		//***** Input SVG *****/
+		String inputSvg = """
+			<svg>
+				<g>
+					<g id="short_path">
+						<path d="M 250, L 5,10" />
+					</g>
+				</g>
+			</svg>""";
+
+		Path pathConverted = Files.createTempFile("railml-",".svg");
+		pathConverted.toFile().deleteOnExit();
+		Files.writeString(pathConverted, inputSvg);
+		//***** *****/
+
+		Assertions.assertThatThrownBy(() -> convertSvgForVisB(pathConverted.toString(), "DOT"))
+			.hasMessage("Attribute 'd' of path short_path could not be processed");
+	}
+
+	@Test
+	void testPathConversionForDotMode() throws Exception {
 		//***** Input SVG *****/
 		String inputSvg = """
 			<svg>
@@ -130,17 +152,17 @@ public class RailMLSvgConverterTest {
 				</defs>
 				<g>
 					<g class="edge" id="path_01">
-						<path d="M 250,10 L 30,50 L 50,50 L  L  L 70,50 L  L  L 100,50" fill="none" id="path_01_free" stroke="url(#path_01_lg_free)" stroke-width="1.33"/>
-						<path d="M 250,10 L 30,50 L 50,50 L  L  L 70,50 L  L  L 100,50" fill="none" id="path_01_tvd" stroke="url(#path_01_lg_tvd)" stroke-width="1.5">
+						<path d="M 250,10 L 30,50 L 50,50 L 70,50 L 100,50" fill="none" id="path_01_free" stroke="url(#path_01_lg_free)" stroke-width="1.33"/>
+						<path d="M 250,10 L 30,50 L 50,50 L 70,50 L 100,50" fill="none" id="path_01_tvd" stroke="url(#path_01_lg_tvd)" stroke-width="1.5">
 							<animate attributeName="opacity" dur="1s" id="path_01_tvd_blink" repeatCount="indefinite" values="1" />
 						</path>
-						<path d="M 250,10 L 30,50 L 50,50 L  L  L 70,50 L  L  L 100,50" fill="none" id="path_01_res" stroke="url(#path_01_lg_res)" stroke-width="1.67">
+						<path d="M 250,10 L 30,50 L 50,50 L 70,50 L 100,50" fill="none" id="path_01_res" stroke="url(#path_01_lg_res)" stroke-width="1.67">
 							<animate attributeName="opacity" dur="1s" id="path_01_res_blink" repeatCount="indefinite" values="1" />
 						</path>
-						<path d="M 250,10 L 30,50 L 50,50 L  L  L 70,50 L  L  L 100,50" fill="none" id="path_01_ovl" stroke="url(#path_01_lg_ovl)" stroke-width="1.85">
+						<path d="M 250,10 L 30,50 L 50,50 L 70,50 L 100,50" fill="none" id="path_01_ovl" stroke="url(#path_01_lg_ovl)" stroke-width="1.85">
 							<animate attributeName="opacity" dur="1s" id="path_01_ovl_blink" repeatCount="indefinite" values="1" />
 						</path>
-						<path d="M 250,10 L 30,50 L 50,50 L  L  L 70,50 L  L  L 100,50" fill="none" id="path_01_occ" stroke="url(#path_01_lg_occ)" stroke-width="2.0"/>
+						<path d="M 250,10 L 30,50 L 50,50 L 70,50 L 100,50" fill="none" id="path_01_occ" stroke="url(#path_01_lg_occ)" stroke-width="2.0"/>
 			            <title id="path_01_title">path_01</title>
 			        </g>
 				</g>

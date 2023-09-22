@@ -331,14 +331,18 @@ public class RailMLInspectDotStage extends Stage {
 			tempSvgFile = Files.createTempFile("railml-", ".svg");
 			tempSvgFile.toFile().deleteOnExit();
 		} catch (IOException e) {
-			throw new ProBError("Failed to create temporary svg file", e);
+			throw new ProBError("Failed to create temporary SVG file", e);
 		}
 		saveConverted(DotOutputFormat.SVG, tempSvgFile);
 
-		if (railMLImportMeta.getVisualisationStrategy() == RailMLStage.VisualisationStrategy.D4R) {
-			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "VIS");
-		} else {
-			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "DOT");
+		try {
+			if (railMLImportMeta.getVisualisationStrategy() == RailMLStage.VisualisationStrategy.D4R) {
+				RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "VIS");
+			} else {
+				RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), "DOT");
+			}
+		} catch (Exception e) {
+			throw new ProBError("Failed to convert railML SVG file", e);
 		}
 
 		final Path finalSvg = railMLImportMeta.getPath().resolve(railMLImportMeta.getName() + ".svg").toAbsolutePath();
