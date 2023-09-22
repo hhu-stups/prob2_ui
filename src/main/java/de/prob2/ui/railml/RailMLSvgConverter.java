@@ -48,12 +48,15 @@ public class RailMLSvgConverter {
 		NodeList pathList = root.getElementsByTagName("path");
 		for (int k = 0; k < pathList.getLength(); k++) { // order must be correct - should be ensured by the order of the recIds in RailML3_VIS_NET_ELEMENT_COORDINATES
 			Element path = (Element) pathList.item(k);
+			Element parentG = (Element) path.getParentNode();
+			String gElementId = parentG.getAttribute("id");
 
-			String gElementId = ((Element) path.getParentNode()).getAttribute("id");
 			String netElement_id;
 			if (svg_type == RailMLImportMeta.VisualisationStrategy.D4R) {
 				int lastUnderscore = gElementId.lastIndexOf("_");
 				netElement_id = gElementId.substring(0, lastUnderscore);
+				graph_group.removeChild(parentG);
+				k = k-1; // pathList has one element less after removal
 			} else { //RAIL_OSCOPE or DOT
 				netElement_id = gElementId;
 			}
