@@ -58,10 +58,12 @@ public class RailMLStage extends Stage {
 	private CheckBox animationMachineCheckbox;
 	@FXML
 	private CheckBox validationMachineCheckbox;
+	private boolean generateAnimation, generateValidation, generateSVG;
 
 	protected enum VisualisationStrategy {D4R, RAIL_OSCOPE, DOT};
 	@FXML
 	private ChoiceBox<VisualisationStrategy> visualisationStrategyChoiceBox;
+	private VisualisationStrategy visualisationStrategy;
 
 	@FXML
 	private HBox progressInfo;
@@ -82,7 +84,6 @@ public class RailMLStage extends Stage {
 	private final SimpleStringProperty simBFileName = new SimpleStringProperty("RailML3_SimB.json");
 
 	private StateSpace stateSpace;
-	private State currentState;
 
 	private final StageManager stageManager;
 
@@ -209,8 +210,8 @@ public class RailMLStage extends Stage {
 	}
 
 	private void setFileNames(Path railML, String fileName) {
-		this.railMLpath = railML.toAbsolutePath();
-		this.generationPath = railMLpath.getParent().toAbsolutePath();
+		railMLpath = railML.toAbsolutePath();
+		generationPath = railMLpath.getParent().toAbsolutePath();
 		dataFileName.setValue(fileName + "_data.mch");
 		animationFileName.setValue(fileName + "_animation.mch");
 		validationFileName.setValue(fileName + "_validation.rmch");
@@ -227,7 +228,7 @@ public class RailMLStage extends Stage {
 		directoryChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
 		if(path != null) {
-			this.generationPath = path.toAbsolutePath();
+			generationPath = path.toAbsolutePath();
 			locationField.setText(generationPath.toString());
 			railMLImportMeta.setPath(generationPath);
 		}
@@ -240,8 +241,13 @@ public class RailMLStage extends Stage {
 		//progressInfo.setManaged(true);
 		//btStartImport.disableProperty().unbind();
 		//btStartImport.setDisable(true);
+		generateAnimation = animationMachineCheckbox.isSelected();
+		generateValidation = validationMachineCheckbox.isSelected();
+		generateSVG = visualisationCheckbox.isSelected();
+		visualisationStrategy = visualisationStrategyChoiceBox.getValue();
+		railMLImportMeta.setVisualisationStrategy(visualisationStrategy);
 
-		this.updater.execute(() -> {
+		updater.execute(() -> {
 			try {
 				generateMachines();
 				final Path projectLocation = generationPath;
@@ -252,10 +258,9 @@ public class RailMLStage extends Stage {
 
 				if (!Thread.currentThread().isInterrupted()) {
 					Platform.runLater(() -> {
-						this.close();
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
-						if (visualisationCheckbox.isSelected()) {
-							railMLInspectDotStage.initializeOptionsForStrategy(railMLImportMeta.getVisualisationStrategy());
+						if (generateSVG) {
+							railMLInspectDotStage.initializeOptionsForStrategy(visualisationStrategy);
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
 							try {
@@ -269,6 +274,7 @@ public class RailMLStage extends Stage {
 						} else {
 							createProject(shortName, projectLocation, dataMachine, animationMachine, validationMachine);
 						}
+						this.close();
 					});
 				}
 			} catch (ProBError e) {
@@ -294,10 +300,10 @@ public class RailMLStage extends Stage {
 				currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 			}
 		}
-		if (animationMachineCheckbox.isSelected() || validationMachineCheckbox.isSelected()) {
+		if (generateAnimation || generateValidation) {
 			currentProject.addMachine(dataMachine);
 		}
-		if (animationMachineCheckbox.isSelected()) {
+		if (generateAnimation) {
 			try {
 				replaceOldResourceFile("RailML3_VisB.def");
 				replaceOldResourceFile("RailML3_SimB.json");
@@ -313,9 +319,9 @@ public class RailMLStage extends Stage {
 				throw new RuntimeException(e);
 			}
 		}
-		if (validationMachineCheckbox.isSelected()) {
+		if (generateValidation) {
 			currentProject.addMachine(validationMachine);
-			if (!animationMachineCheckbox.isSelected()) {
+			if (!generateAnimation) {
 				currentProject.startAnimation(validationMachine);
 			}
 		}
@@ -323,21 +329,17 @@ public class RailMLStage extends Stage {
 
 	private void replaceOldResourceFile(String fileName) throws IOException {
 		Path currentFile = generationPath.resolve(fileName);
-		if (Files.exists(currentFile)) {
-			int fileNumber = 1;
-			Path newOldFile;
-			do {
-				String numberedFileName = MoreFiles.getNameWithoutExtension(currentFile) + "_" + fileNumber + ".def";
-				newOldFile = generationPath.resolve(numberedFileName);
-				fileNumber++;
-			} while (Files.exists(newOldFile));
-			Files.copy(currentFile, newOldFile);
-		}
+		saveOldFile(currentFile);
 		Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(fileName)), currentFile, StandardCopyOption.REPLACE_EXISTING);
 	}
 
 	private void replaceOldFile(String fileName) throws IOException {
 		Path currentFile = generationPath.resolve(fileName);
+		saveOldFile(currentFile);
+		Files.delete(currentFile);
+	}
+
+	private void saveOldFile(Path currentFile) throws IOException {
 		if (Files.exists(currentFile)) {
 			int fileNumber = 1;
 			Path newOldFile;
@@ -348,13 +350,10 @@ public class RailMLStage extends Stage {
 			} while (Files.exists(newOldFile));
 			Files.copy(currentFile, newOldFile);
 		}
-		Files.delete(currentFile);
 	}
 
 	public void generateMachines() throws Exception {
 
-		VisualisationStrategy visualisationStrategy = visualisationStrategyChoiceBox.getValue();
-		railMLImportMeta.setVisualisationStrategy(visualisationStrategy);
 		String graphMachineName;
 		if (visualisationStrategy == VisualisationStrategy.D4R) {
 			graphMachineName = "RailML3_D4R_CustomGraph.mch";
@@ -366,7 +365,7 @@ public class RailMLStage extends Stage {
 		URI graphMachine = getClass().getResource(graphMachineName).toURI();
 
 		Api api = injector.getInstance(Api.class);
-		//StateSpace stateSpace;
+
 		if ("jar".equals(graphMachine.getScheme())) {
 			Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
 			Path tempGraphMachine = tempDir.resolve(graphMachineName);
@@ -392,7 +391,6 @@ public class RailMLStage extends Stage {
 			stateSpace = api.b_load(Paths.get(graphMachine).toString());
 		}
 
-
 		stateSpace.addWarningListener(warnings -> {
 				final List<ErrorItem> filteredWarnings = this.errorDisplayFilter.filterErrors(warnings);
 				if (!filteredWarnings.isEmpty()) {
@@ -407,7 +405,7 @@ public class RailMLStage extends Stage {
 		String linkSvg = "TRUE";
 
 		if (!Thread.currentThread().isInterrupted()) {
-			currentState = stateSpace.getRoot()
+			State currentState = stateSpace.getRoot()
 				.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
 					"  & outputDataFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
 					"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
@@ -422,19 +420,19 @@ public class RailMLStage extends Stage {
 			boolean inv_ok = currentState.isInvariantOk();
 			boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
 
-			if ((animationMachineCheckbox.isSelected() || validationMachineCheckbox.isSelected()) && inv_ok && import_success) {
+			if ((generateAnimation || generateValidation) && inv_ok && import_success) {
 				Path dataFilePath = Paths.get(dataFileName.getValue());
 				if (!Files.exists(dataFilePath)) Files.createFile(dataFilePath);
 				replaceOldFile(dataFileName.getValue());
 				currentState.perform("triggerPrintData").perform("printDataMachine");
 			}
-			if (animationMachineCheckbox.isSelected() && inv_ok && import_success) {
+			if (generateAnimation && inv_ok && import_success) {
 				Path animFilePath = Paths.get(animationFileName.getValue());
 				if (!Files.exists(animFilePath)) Files.createFile(animFilePath);
 				replaceOldFile(animationFileName.getValue());
 				currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
 			}
-			if (validationMachineCheckbox.isSelected() && inv_ok && import_success) {
+			if (generateValidation && inv_ok && import_success) {
 				Path validFilePath = Paths.get(validationFileName.getValue());
 				if (!Files.exists(validFilePath)) Files.createFile(validFilePath);
 				replaceOldFile(validationFileName.getValue());

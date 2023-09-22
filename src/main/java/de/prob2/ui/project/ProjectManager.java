@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import de.prob2.ui.railml.RailMLFile;
+import de.prob2.ui.railml.RailMLImportMeta;
 import de.prob2.ui.railml.RailMLInspectDotStage;
 import de.prob2.ui.railml.RailMLStage;
 import de.prob2.ui.simulation.SimulatorStage;
@@ -377,8 +377,8 @@ public class ProjectManager {
 				e.getStackTrace().toString()).show();
 			System.out.println("XML is valid against XSD.");
 		}*/
-		RailMLFile railMLFile = injector.getInstance(RailMLFile.class);
-		railMLFile.setPath(selected);
+		RailMLImportMeta railMLImportMeta = injector.getInstance(RailMLImportMeta.class);
+		railMLImportMeta.setPath(selected);
 		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
 		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 		if (railMLInspectDotStage.isShowing()) {
