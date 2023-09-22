@@ -222,6 +222,9 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				} else {
 					taFormula.insertText(taFormula.getCaretPosition(), "\n");
 				}
+			} else if (e.getCode().equals(KeyCode.INSERT)){
+				addFormulaButton();
+				e.consume();
 			}
 		});
 
@@ -306,10 +309,13 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	}
 
 	@FXML
+	protected abstract void addFormulaButton();
+
+	@FXML
 	private void evaluateFormulaButton() {
 		evaluateFormula(taFormula.getText());
 	}
-	private void evaluateFormula(String formula) {
+	protected void evaluateFormula(String formula) {
 		T item = lvChoice.getSelectionModel().getSelectedItem();
 		if (item == null) {
 			return;

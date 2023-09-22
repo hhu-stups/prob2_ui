@@ -43,7 +43,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @Singleton
 public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
@@ -286,11 +285,12 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 
 
-	@FXML
-	private void addFormulaButton(){
+	@Override
+	protected void addFormulaButton(){
 		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
 		currentProject.getCurrentMachine().addTableVisualizationItem(lastItem.getCommand(), item);
 		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
+		evaluateFormula(item.getFormula());
 	}
 
 

@@ -48,7 +48,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @Singleton
@@ -288,11 +287,12 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		adjustScroll();
 	}
 
-	@FXML
-	private void addFormulaButton(){
+	@Override
+	protected void addFormulaButton(){
 		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
 		currentProject.getCurrentMachine().addDotVisualizationItem(lastItem.getCommand(), item);
 		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
+		evaluateFormula(item.getFormula());
 	}
 
 	private void zoomByFactor(double factor) {
