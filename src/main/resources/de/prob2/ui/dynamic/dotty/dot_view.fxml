@@ -92,7 +92,7 @@
 								</Button>
 							</HBox>
 
-							<TableView fx:id="tvFormula" visible="false" minHeight="200.0" maxHeight="200.0">
+							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0">
 								<columnResizePolicy>
 									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 								</columnResizePolicy>
@@ -102,6 +102,21 @@
 									<TableColumn fx:id="formulaColumn" minWidth="80.0" text="%common.columns.formula" />
 								</columns>
 							</TableView>
+							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
+								<VBox spacing="10.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
+									<padding><Insets top="5" right="5" bottom="5" left="5"/></padding>
+									<Label text="%dynamic.enterFormula" VBox.vgrow="NEVER"/>
+									<VirtualizedScrollPane fx:id="virtualizedScrollPane">
+										<content>
+											<ExtendedCodeArea fx:id="taFormula" VBox.vgrow="ALWAYS"/>
+										</content>
+									</VirtualizedScrollPane>
+									<HBox alignment="CENTER" VBox.vgrow="NEVER" spacing="10.0">
+									<Button fx:id="addFormulaButton" styleClass="button-blue" text="%dynamic.button.addFormula" onAction="#addFormulaButton"/>
+									<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%dynamic.evaluateFormula" onAction="#evaluateFormulaButton"/>
+									</HBox>
+								</VBox>
+							</VBox>
 						</VBox>
 						<VBox>
 							<HBox alignment="TOP_RIGHT" styleClass="border">

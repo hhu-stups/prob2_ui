@@ -10,6 +10,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -26,6 +27,8 @@ import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
@@ -114,6 +117,14 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 	protected final ObservableList<ErrorItem> errors = FXCollections.observableArrayList();
 
 
+	@FXML
+	protected Button evaluateFormulaButton;
+
+	@FXML
+	protected ExtendedCodeArea taFormula;
+
+	@FXML
+	protected VBox enterFormulaBox;
 
 
 	protected DynamicCommandStage(final Provider<DynamicPreferencesStage> preferencesStageProvider,
@@ -157,6 +168,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 				lbDescription.setText(to.getDescription());
 			}
 			boolean needFormula = to.getArity() > 0;
+			enterFormulaBox.setVisible(needFormula);
 			tvFormula.setVisible(needFormula);
 			addButton.setVisible(needFormula);
 			removeButton.setVisible(needFormula);
@@ -200,6 +212,18 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		});
 		
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
+
+		taFormula.getStyleClass().add("visualization-formula");
+		taFormula.setOnKeyPressed(e -> {
+			if (e.getCode().equals(KeyCode.ENTER)) {
+				if (!e.isShiftDown()) {
+					evaluateFormulaButton();
+					e.consume();
+				} else {
+					taFormula.insertText(taFormula.getCaretPosition(), "\n");
+				}
+			}
+		});
 
 		tvFormula.setEditable(true);
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
@@ -279,6 +303,10 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		evaluateFormula(item.getFormula());
 	}
 
+	@FXML
+	private void evaluateFormulaButton() {
+		evaluateFormula(taFormula.getText());
+	}
 	private void evaluateFormula(String formula) {
 		T item = lvChoice.getSelectionModel().getSelectedItem();
 		if (item == null) {
@@ -351,6 +379,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 		this.errorsView.setVisible(false);
 		this.clearContent();
 		this.updatePlaceholderLabel();
+		taFormula.getErrors().clear();
 		this.errors.clear();
 	}
 	
@@ -404,6 +433,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			errorsView.setVisible(true);
 			placeholderLabel.setVisible(false);
 			errors.setAll(e.getErrors());
+			taFormula.getErrors().setAll(e.getErrors());
 		});
 	}
 	
@@ -421,6 +451,7 @@ public abstract class DynamicCommandStage<T extends DynamicCommandItem> extends 
 			if (choice.getArity() == 0) {
 				throw new IllegalArgumentException("Visualization command does not take an argument: " + command);
 			}
+			taFormula.replaceText(formula);
 			visualize(choice, formula);
 		}
 	}

@@ -211,6 +211,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				errorsView.setVisible(false);
 				dotView.setVisible(true);
 				errors.clear();
+				taFormula.getErrors().clear();
 			}
 		});
 	}
@@ -285,6 +286,13 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private void zoomOut() {
 		zoomByFactor(0.85);
 		adjustScroll();
+	}
+
+	@FXML
+	private void addFormulaButton(){
+		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
+		currentProject.getCurrentMachine().addDotVisualizationItem(lastItem.getCommand(), item);
+		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 	}
 
 	private void zoomByFactor(double factor) {

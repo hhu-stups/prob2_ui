@@ -14,7 +14,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
 import de.prob2.ui.dynamic.DynamicCommandStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
-import de.prob2.ui.dynamic.EditFormulaDialog;
+import de.prob2.ui.dynamic.EditFormulaStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -174,6 +174,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			errorsView.setVisible(false);
 			tableView.setVisible(true);
 			errors.clear();
+			taFormula.getErrors().clear();
 		});
 	}
 
@@ -284,6 +285,15 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		return data;
 	}
 
+
+	@FXML
+	private void addFormulaButton(){
+		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
+		currentProject.getCurrentMachine().addTableVisualizationItem(lastItem.getCommand(), item);
+		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
+	}
+
+
 	@FXML
 	private void save() {
 		if (currentTable == null || currentTable.get() == null) {
@@ -326,17 +336,23 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 
 	@Override
 	protected void editFormula(TableRow<DynamicCommandFormulaItem> row){
-		final EditFormulaDialog dialog = injector.getInstance(EditFormulaDialog.class);
-		dialog.initOwner(this);
-		Optional<DynamicCommandFormulaItem> item = row == null ? dialog.addAndShow(currentProject, lastItem.getCommand()) : dialog.editAndShow(currentProject, row, errors);
+		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
+		stage.initOwner(this);
+		if (row == null) {
+			stage.createNewItem(lastItem.getCommand());
+		} else {
+			stage.editItem(row.getItem(),errors);
+		}
+		stage.showAndWait();
+		DynamicCommandFormulaItem item = stage.getItem();
 		Machine machine = currentProject.getCurrentMachine();
-		if(item != null && item.isPresent()) {
+		if(item != null ) {
 			if (row == null){
-				machine.addTableVisualizationItem(lastItem.getCommand(), item.get());
+				machine.addTableVisualizationItem(lastItem.getCommand(), item);
 				this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 			} else {
 				ListProperty<DynamicCommandFormulaItem> tableVisualisationItem = machine.getTableVisualizationItems().get(lastItem.getCommand());
-				tableVisualisationItem.set(tableVisualisationItem.indexOf(item.get()), item.get());
+				tableVisualisationItem.set(tableVisualisationItem.indexOf(item), item);
 				machine.setChanged(true);
 			}
 			tvFormula.refresh();
