@@ -402,7 +402,12 @@ public class RailMLStage extends Stage {
 				}
 			});
 
-		String linkSvg = "TRUE";
+		String linkSvg;
+		if (generateSVG) {
+			linkSvg = "TRUE";
+		} else {
+			linkSvg = "FALSE";
+		}
 
 		if (!Thread.currentThread().isInterrupted()) {
 			State currentState = stateSpace.getRoot()
@@ -420,23 +425,25 @@ public class RailMLStage extends Stage {
 			boolean inv_ok = currentState.isInvariantOk();
 			boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
 
-			if ((generateAnimation || generateValidation) && inv_ok && import_success) {
-				Path dataFilePath = Paths.get(dataFileName.getValue());
-				if (!Files.exists(dataFilePath)) Files.createFile(dataFilePath);
-				replaceOldFile(dataFileName.getValue());
-				currentState.perform("triggerPrintData").perform("printDataMachine");
-			}
-			if (generateAnimation && inv_ok && import_success) {
-				Path animFilePath = Paths.get(animationFileName.getValue());
-				if (!Files.exists(animFilePath)) Files.createFile(animFilePath);
-				replaceOldFile(animationFileName.getValue());
-				currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
-			}
-			if (generateValidation && inv_ok && import_success) {
-				Path validFilePath = Paths.get(validationFileName.getValue());
-				if (!Files.exists(validFilePath)) Files.createFile(validFilePath);
-				replaceOldFile(validationFileName.getValue());
-				currentState.perform("triggerPrintValidation").perform("printValidationMachine");
+			if (inv_ok && import_success) {
+				if (generateAnimation || generateValidation) {
+					Path dataFilePath = Paths.get(dataFileName.getValue());
+					if (!Files.exists(dataFilePath)) Files.createFile(dataFilePath);
+					replaceOldFile(dataFileName.getValue());
+					currentState.perform("triggerPrintData").perform("printDataMachine");
+				}
+				if (generateAnimation) {
+					Path animFilePath = Paths.get(animationFileName.getValue());
+					if (!Files.exists(animFilePath)) Files.createFile(animFilePath);
+					replaceOldFile(animationFileName.getValue());
+					currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
+				}
+				if (generateValidation) {
+					Path validFilePath = Paths.get(validationFileName.getValue());
+					if (!Files.exists(validFilePath)) Files.createFile(validFilePath);
+					replaceOldFile(validationFileName.getValue());
+					currentState.perform("triggerPrintValidation").perform("printValidationMachine");
+				}
 			}
 			railMLImportMeta.setState(currentState);
 		}
