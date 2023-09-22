@@ -37,7 +37,7 @@
 							</ListView>
 
 							<HBox alignment="CENTER" VBox.vgrow="NEVER">
-								<Label fx:id="lbDescription" prefHeight="200.0" wrapText="true" VBox.vgrow="ALWAYS"/>
+								<Label fx:id="lbDescription" prefHeight="80.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 							</HBox>
 							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
 								<Button fx:id="editPreferencesButton" styleClass="button-blue" text="%dynamic.editPreferences" onAction="#editPreferences" />
@@ -76,7 +76,7 @@
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 							</HBox>
 
-							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0">
+							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0" fixedCellSize="${fontSize.fontSize *1.5}">
 								<columnResizePolicy>
 									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 								</columnResizePolicy>

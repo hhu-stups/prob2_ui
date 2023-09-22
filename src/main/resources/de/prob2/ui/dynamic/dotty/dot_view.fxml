@@ -92,7 +92,7 @@
 								</Button>
 							</HBox>
 
-							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0">
+							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0" fixedCellSize="${fontSize.fontSize *1.5}">
 								<columnResizePolicy>
 									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 								</columnResizePolicy>
