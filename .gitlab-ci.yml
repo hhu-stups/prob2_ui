@@ -57,7 +57,7 @@ test:jdk-17-macos-arm64:
 test:jdk-17-windows64:
   extends: .test-common
   script:
-    - call gradlew %GRADLE_OPTIONS% check jpackage
+    - .\gradlew.bat %GRADLE_OPTIONS% check jpackage
   tags:
     - windows
 
