@@ -35,6 +35,9 @@ import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
 
+import static de.prob2.ui.railml.RailMLHelper.replaceOldFile;
+import static de.prob2.ui.railml.RailMLHelper.replaceOldResourceFile;
+
 @FXMLInjected
 @Singleton
 public class RailMLStage extends Stage {
@@ -342,11 +345,17 @@ public class RailMLStage extends Stage {
 			}
 		});
 
-		String linkSvg;
+		String linkSvg, fullImport;
 		if (generateSVG) {
 			linkSvg = "TRUE";
+			if (!generateAnimation && !generateValidation) {
+				fullImport = "FALSE";
+			} else {
+				fullImport = "TRUE";
+			}
 		} else {
 			linkSvg = "FALSE";
+			fullImport = "TRUE";
 		}
 
 		if (!Thread.currentThread().isInterrupted()) {
@@ -357,6 +366,7 @@ public class RailMLStage extends Stage {
 					"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
 					"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
 					"  & LINK_SVG = " + linkSvg + "\n" +
+					"  & FULL_IMPORT = " + fullImport + "\n" +
 					"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
 					"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
 					"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
@@ -367,21 +377,21 @@ public class RailMLStage extends Stage {
 
 			if (inv_ok && import_success) {
 				if (generateAnimation || generateValidation) {
-					Path dataFilePath = Paths.get(dataFileName.getValue());
+					Path dataFilePath = generationPath.resolve(dataFileName.getValue());
 					if (!Files.exists(dataFilePath)) Files.createFile(dataFilePath);
-					replaceOldFile(dataFileName.getValue());
+					replaceOldFile(dataFilePath);
 					currentState.perform("triggerPrintData").perform("printDataMachine");
 				}
 				if (generateAnimation) {
-					Path animFilePath = Paths.get(animationFileName.getValue());
+					Path animFilePath = generationPath.resolve(animationFileName.getValue());
 					if (!Files.exists(animFilePath)) Files.createFile(animFilePath);
-					replaceOldFile(animationFileName.getValue());
+					replaceOldFile(animFilePath);
 					currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
 				}
 				if (generateValidation) {
-					Path validFilePath = Paths.get(validationFileName.getValue());
+					Path validFilePath = generationPath.resolve(validationFileName.getValue());
 					if (!Files.exists(validFilePath)) Files.createFile(validFilePath);
-					replaceOldFile(validationFileName.getValue());
+					replaceOldFile(validFilePath);
 					currentState.perform("triggerPrintValidation").perform("printValidationMachine");
 				}
 			}
@@ -401,8 +411,8 @@ public class RailMLStage extends Stage {
 		}
 		if (generateAnimation) {
 			try {
-				replaceOldResourceFile("RailML3_VisB.def");
-				replaceOldResourceFile("RailML3_SimB.json");
+				replaceOldResourceFile(generationPath.resolve("RailML3_VisB.def"));
+				replaceOldResourceFile(generationPath.resolve("RailML3_SimB.json"));
 				Path simbPath = generationPath.resolve("RailML3_SimB.json");
 
 				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.resolve("RailML3_VisB.def"));
@@ -420,31 +430,6 @@ public class RailMLStage extends Stage {
 			if (!generateAnimation) {
 				currentProject.startAnimation(validationMachine);
 			}
-		}
-	}
-
-	private void replaceOldResourceFile(String fileName) throws IOException {
-		Path currentFile = generationPath.resolve(fileName);
-		saveOldFile(currentFile);
-		Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(fileName)), currentFile, StandardCopyOption.REPLACE_EXISTING);
-	}
-
-	private void replaceOldFile(String fileName) throws IOException {
-		Path currentFile = generationPath.resolve(fileName);
-		saveOldFile(currentFile);
-		Files.delete(currentFile);
-	}
-
-	private void saveOldFile(Path currentFile) throws IOException {
-		if (Files.exists(currentFile)) {
-			int fileNumber = 1;
-			Path newOldFile;
-			do {
-				String numberedFileName = MoreFiles.getNameWithoutExtension(currentFile) + "_" + fileNumber + ".def";
-				newOldFile = generationPath.resolve(numberedFileName);
-				fileNumber++;
-			} while (Files.exists(newOldFile));
-			Files.copy(currentFile, newOldFile);
 		}
 	}
 

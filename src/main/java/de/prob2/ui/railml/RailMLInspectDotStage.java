@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static de.prob.animator.domainobjects.DotVisualizationCommand.getByName;
+import static de.prob2.ui.railml.RailMLHelper.replaceOldFile;
 
 @FXMLInjected
 @Singleton
@@ -62,6 +63,10 @@ public class RailMLInspectDotStage extends Stage {
 	private Button zoomOutButton;
 	@FXML
 	private Button zoomInButton;
+	@FXML
+	private Button incScalingButton;
+	@FXML
+	private Button decScalingButton;
 	@FXML
 	private Button refreshDotView;
 	@FXML
@@ -166,56 +171,63 @@ public class RailMLInspectDotStage extends Stage {
 
 		initializeOptions();
 
-		balises.selectedProperty().addListener((observable,from,to) -> {
+		balises.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBalises"));
 		});
-		borders.selectedProperty().addListener((observable,from,to) -> {
+		borders.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBorders"));
 		});
-		bufferstops.selectedProperty().addListener((observable,from,to) -> {
+		bufferstops.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBufferstops"));
 		});
-		crossings.selectedProperty().addListener((observable,from,to) -> {
+		crossings.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayCrossings"));
 		});
-		derailers.selectedProperty().addListener((observable,from,to) -> {
+		derailers.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayDerailers"));
 		});
-		levelcrossings.selectedProperty().addListener((observable,from,to) -> {
+		levelcrossings.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayLevelcrossings"));
 		});
-		operationalpoints.selectedProperty().addListener((observable,from,to) -> {
+		operationalpoints.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayOperationalpoints"));
 		});
-		signals.selectedProperty().addListener((observable,from,to) -> {
+		signals.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplaySignals"));
 		});
-		switches.selectedProperty().addListener((observable,from,to) -> {
+		switches.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplaySwitches"));
 		});
-		traindetectionelements.selectedProperty().addListener((observable,from,to) -> {
+		traindetectionelements.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayTraindetectionelements"));
 		});
-		tvdsections.selectedProperty().addListener((observable,from,to) -> {
+		tvdsections.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayTvdsections"));
 		});
-		names.selectedProperty().addListener((observable,from,to) -> {
+		names.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayNames"));
 		});
 
 		languageChoiceBox.getItems().addAll(RailMLInspectDotStage.Language.values());
-		languageChoiceBox.valueProperty().addListener((observable,from,to) -> {
+		languageChoiceBox.valueProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeLanguage", "language = \"" + languageChoiceBox.getValue().toString().toLowerCase() + "\""));
 		});
 
 		dotEngineChoiceBox.getItems().addAll(RailMLInspectDotStage.DotEngine.values());
-		dotEngineChoiceBox.valueProperty().addListener((observable,from,to) -> {
+		dotEngineChoiceBox.valueProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDotengine", "engine = \"" + dotEngineChoiceBox.getValue().toString().toLowerCase() + "\""));
 		});
 		// TODO: Maybe use ProB preference for dot engine later
 
-		curvedsplines.selectedProperty().addListener((observable,from,to) -> {
+		curvedsplines.selectedProperty().addListener((observable, from, to) -> {
 			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeUseCurvedSplines"));
+		});
+
+		incScalingButton.pressedProperty().addListener((observable, from, to) -> {
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("increaseScalingFactor"));
+		});
+		decScalingButton.pressedProperty().addListener((observable, from, to) -> {
+			railMLImportMeta.setState(railMLImportMeta.getState().perform("decreaseScalingFactor"));
 		});
 
 		dotView.visibleProperty().bind(this.updater.runningProperty().not());
@@ -342,9 +354,9 @@ public class RailMLInspectDotStage extends Stage {
 		}
 
 		final Path finalSvg = railMLImportMeta.getPath().resolve(railMLImportMeta.getName() + ".svg").toAbsolutePath();
-
 		try {
-			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING); // TODO: replaceOldFile()
+			replaceOldFile(finalSvg);
+			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
@@ -374,7 +386,6 @@ public class RailMLInspectDotStage extends Stage {
 					Platform.runLater(() -> {
 						taErrors.setText(e.getMessage());
 						errorsView.setVisible(true);
-						placeholderLabel.setVisible(false);
 					});
 				}
 			}
@@ -386,7 +397,6 @@ public class RailMLInspectDotStage extends Stage {
 		Platform.runLater(() -> {
 			taErrors.setText(e.getMessage());
 			errorsView.setVisible(true);
-			placeholderLabel.setVisible(false);
 		});
 	}
 
@@ -513,18 +523,6 @@ public class RailMLInspectDotStage extends Stage {
 
 	private void zoomByFactor(double factor) {
 		dotView.setZoom(dotView.getZoom() * factor);
-	}
-
-	@FXML
-	private void increaseScalingFactor() {
-		railMLImportMeta.setState(railMLImportMeta.getState().perform("increaseScalingFactor"));
-		adjustScroll();
-	}
-
-	@FXML
-	private void decreaseScalingFactor() {
-		railMLImportMeta.setState(railMLImportMeta.getState().perform("decreaseScalingFactor"));
-		adjustScroll();
 	}
 
 	private void adjustScroll() {

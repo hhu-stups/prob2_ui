@@ -69,12 +69,12 @@
 								</HBox>
 								<HBox alignment="CENTER_LEFT" spacing="10" fx:id="scalingBox">
 									<Label text="%railml.inspectDot.configureDot.scaling"/>
-									<Button fx:id="incScalingButton" onAction="#increaseScalingFactor">
+									<Button fx:id="incScalingButton">
 										<graphic>
 											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 										</graphic>
 									</Button>
-									<Button fx:id="decScalingButton" onAction="#decreaseScalingFactor">
+									<Button fx:id="decScalingButton">
 										<graphic>
 											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
 										</graphic>

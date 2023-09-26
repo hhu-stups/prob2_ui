@@ -20,17 +20,11 @@ DEFINITIONS
             no_error := FALSE;
             IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "--- ERROR ---~nFile import aborted, the specified file does not contain valid railML.~n------~n~w [ERROR ~w] Validation failed with the following errors: ~w", {1 |-> TO_STRING(Rule), 2 |-> TO_STRING(Var2[{1}])}) ELSE skip END;
             ADD_ERROR("RailML: ", "File import aborted, the specified file does not contain valid railML.");
-            VAR s, i IN
-              s := SORT(Var2[{1}]);
-              i := 1;
-              WHILE i-1 < card(s) DO
-                ADD_ERROR("RailML", s(i));
-                ADD_STATE_ERROR("RailML", s(i));
-                i := i+1
-                INVARIANT btrue
-                VARIANT card(s)+1 - i
-              END
-            END            
+            VAR errors IN
+              errors := makeRailMLMessages(Var2[{1}]);
+              ADD_ERRORS(errors);
+              ADD_STATE_ERRORS(errors)
+            END
         END
       END
     ELSE skip END;
@@ -42,26 +36,19 @@ DEFINITIONS
           THEN IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "[SUCCESS ~w] Validation succeeded without any warning", {1 |-> TO_STRING(Rule)}) ELSE skip END
           ELSE
             IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "[WARNING ~w] Validation succeeded with the following warnings: ~w", {1 |-> TO_STRING(Rule), 2 |-> TO_STRING(Var2[{2}])}) ELSE skip END;
-            warnings := warnings \/ Var2[{1}]
-            /*VAR s, i IN
-              s := SORT(Var2[{1}]);
-              i := 1;
-              WHILE i < card(s) DO
-                ADD_WARNING("RailML: ", s(i));
-                i := i+1
-                INVARIANT btrue
-                VARIANT card(s)+1 - i
-              END
-            END*/
+            defaultWarnings := defaultWarnings \/ Var2[{1}];
+            semanticWarnings := semanticWarnings \/ Var2[{2}]
         END
       END
     ELSE skip END;
-  runComputation(Computation) == IF no_error = TRUE THEN Computation ELSE skip END
-VARIABLES no_error, warnings
-INVARIANT no_error : BOOL & warnings : FIN(STRING)
-INITIALISATION no_error := TRUE; warnings := {}
+  runComputation(Computation) == IF no_error = TRUE THEN Computation ELSE skip END;
+
+  makeRailMLMessages(SetOfStringMessages) == dom({ msg, orig_msg | orig_msg : SetOfStringMessages & msg = STRING_APPEND("RailML: ", orig_msg) })
+VARIABLES no_error, defaultWarnings, semanticWarnings
+INVARIANT no_error : BOOL & {defaultWarnings, semanticWarnings} <: FIN(STRING)
+INITIALISATION no_error := TRUE; defaultWarnings := {}; semanticWarnings := {}
 OPERATIONS
-  importRailML = 
+  importRailML(full_import) = 
     BEGIN
       // RailML_readFile
       runErrorRule(is_supported_railml);
@@ -194,8 +181,8 @@ OPERATIONS
       runComputation(set_linearCoordinate);
       runErrorRule(is_valid_linearCoordinate);
           
-      runComputation(set_NET_RELATION_SUBSEQUENT_BLOCKS);
-      runErrorRule(validate_NET_RELATION_SUBSEQUENT_BLOCKS);
+      runComputation(set_NET_RELATION_SUBSEQUENT_LOCATIONS);
+      runErrorRule(validate_NET_RELATION_SUBSEQUENT_LOCATIONS);
       runComputation(set_SIGNAL);
       runErrorRule(validate_linearLocation);
 
@@ -278,96 +265,98 @@ OPERATIONS
       runComputation(set_IL_SIGNAL);
       runErrorRule(validate_signalIL);
 
-      runComputation(set_switchesIL);
-      runErrorRule(is_valid_switchesIL);
-      runComputation(set_switchIL);
-      runErrorRule(is_valid_switchIL);      
+      IF full_import = FALSE THEN skip
+      ELSE
+        runComputation(set_switchesIL);
+        runErrorRule(is_valid_switchesIL);
+        runComputation(set_switchIL);
+        runErrorRule(is_valid_switchIL);      
 
-      runComputation(set_IL_MOVABLE_CROSSING);
-      runErrorRule(validate_movableCrossing);
-      runWarningRule(warnings_movableCrossing);
+        runComputation(set_IL_MOVABLE_CROSSING);
+        runErrorRule(validate_movableCrossing);
+        runWarningRule(warnings_movableCrossing);
 
-      runComputation(set_IL_DERAILER);
-      runErrorRule(validate_derailerIL);
-      runWarningRule(warnings_derailerIL);
+        runComputation(set_IL_DERAILER);
+        runErrorRule(validate_derailerIL);
+        runWarningRule(warnings_derailerIL);
 
-      runComputation(set_IL_SWITCH);
-      runErrorRule(validate_switchIL);
-      runWarningRule(warnings_switchIL);
+        runComputation(set_IL_SWITCH);
+        runErrorRule(validate_switchIL);
+        runWarningRule(warnings_switchIL);
 
-      runComputation(set_routeReleaseGroupsAhead);
-      runErrorRule(is_valid_routeReleaseGroupsAhead);
-      runComputation(set_routeReleaseGroupAhead);
-      runErrorRule(is_valid_routeReleaseGroupAhead);
+        runComputation(set_routeReleaseGroupsAhead);
+        runErrorRule(is_valid_routeReleaseGroupsAhead);
+        runComputation(set_routeReleaseGroupAhead);
+        runErrorRule(is_valid_routeReleaseGroupAhead);
 
-      runComputation(set_routeReleaseGroupsRear);
-      runErrorRule(is_valid_routeReleaseGroupsRear);
-      runComputation(set_routeReleaseGroupRear);
-      runErrorRule(is_valid_routeReleaseGroupRear);
+        runComputation(set_routeReleaseGroupsRear);
+        runErrorRule(is_valid_routeReleaseGroupsRear);
+        runComputation(set_routeReleaseGroupRear);
+        runErrorRule(is_valid_routeReleaseGroupRear);
 
-      runComputation(set_routes);
-      runErrorRule(is_valid_routes);
-      runComputation(set_route);
-      runErrorRule(is_valid_route);
+        runComputation(set_routes);
+        runErrorRule(is_valid_routes);
+        runComputation(set_route);
+        runErrorRule(is_valid_route);
 
-      runComputation(set_overlaps);
-      runErrorRule(is_valid_overlaps);
-      runComputation(set_overlap);
-      runErrorRule(is_valid_overlap);
+        runComputation(set_overlaps);
+        runErrorRule(is_valid_overlaps);
+        runComputation(set_overlap);
+        runErrorRule(is_valid_overlap);
 
-      runComputation(set_routeRelations);
-      runErrorRule(is_valid_routeRelations);
-      runComputation(set_routeRelation);
-      runErrorRule(is_valid_routeRelation);
-      runComputation(set_IL_ROUTE_RELATION);
-      runErrorRule(validate_routeRelation);
-      runWarningRule(warnings_routeRelation);
+        runComputation(set_routeRelations);
+        runErrorRule(is_valid_routeRelations);
+        runComputation(set_routeRelation);
+        runErrorRule(is_valid_routeRelation);
+        runComputation(set_IL_ROUTE_RELATION);
+        runErrorRule(validate_routeRelation);
+        runWarningRule(warnings_routeRelation);
 
-      runComputation(set_ROUTE);
-      runErrorRule(validate_route);
-      runWarningRule(warnings_route);
+        runComputation(set_ROUTE);
+        runErrorRule(validate_route);
+        runWarningRule(warnings_route);
 
-      runComputation(set_IL_OVERLAP);
-      runErrorRule(validate_overlap);
-      runWarningRule(warnings_overlap);
+        runComputation(set_IL_OVERLAP);
+        runErrorRule(validate_overlap);
+        runWarningRule(warnings_overlap);
 
-      runComputation(set_conflictingRoutes);
-      runErrorRule(is_valid_conflictingRoutes);
-      runComputation(set_conflictingRoute);
-      runErrorRule(is_valid_conflictingRoute);
-      runComputation(set_CONFLICTING_ROUTE);         
+        runComputation(set_conflictingRoutes);
+        runErrorRule(is_valid_conflictingRoutes);
+        runComputation(set_conflictingRoute);
+        runErrorRule(is_valid_conflictingRoute);
+        runComputation(set_CONFLICTING_ROUTE);         
 
-      runComputation(set_IL_ROUTE_RELEASE_GROUP_AHEAD);
-      runErrorRule(validate_routeReleaseGroupAhead);
-      runWarningRule(warnings_routeReleaseGroupAhead);
+        runComputation(set_IL_ROUTE_RELEASE_GROUP_AHEAD);
+        runErrorRule(validate_routeReleaseGroupAhead);
+        runWarningRule(warnings_routeReleaseGroupAhead);
 
-      runComputation(set_IL_ROUTE_RELEASE_GROUP_REAR);
-      runErrorRule(validate_routeReleaseGroupRear);
-      runWarningRule(warnings_routeReleaseGroupRear);
+        runComputation(set_IL_ROUTE_RELEASE_GROUP_REAR);
+        runErrorRule(validate_routeReleaseGroupRear);
+        runWarningRule(warnings_routeReleaseGroupRear);
 
-      runComputation(set_specificInfrastructureManagers);
-      runErrorRule(is_valid_specificInfrastructureManagers);
-      runComputation(set_specificInfrastructureManager);
-      runErrorRule(is_valid_specificInfrastructureManager);
-      runComputation(set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER);
+        runComputation(set_specificInfrastructureManagers);
+        runErrorRule(is_valid_specificInfrastructureManagers);
+        runComputation(set_specificInfrastructureManager);
+        runErrorRule(is_valid_specificInfrastructureManager);
+        runComputation(set_IL_SPECIFIC_INFRASTRUCTURE_MANAGER);
 
-      runComputation(set_signalBoxes);
-      runErrorRule(is_valid_signalBoxes);
-      runComputation(set_signalBox);
-      runErrorRule(is_valid_signalBox);
-      runComputation(set_IL_SIGNAL_BOX);
-      runWarningRule(warnings_signalBox);
+        runComputation(set_signalBoxes);
+        runErrorRule(is_valid_signalBoxes);
+        runComputation(set_signalBox);
+        runErrorRule(is_valid_signalBox);
+        runComputation(set_IL_SIGNAL_BOX);
+        runWarningRule(warnings_signalBox)
+      END;
       // END RailML3_IL
 
-      IF warnings /= {} THEN ADD_WARNING("RailML: ", warnings) ELSE skip END
-      /*WHILE warnings /= {} DO
-        VAR s IN
-          s :: warnings;
-          ADD_WARNING("RailML: ", s);
-          warnings := warnings - {s}
-        END
-        INVARIANT btrue
-        VARIANT card(warnings)
-      END*/
+      IF semanticWarnings /= {} THEN
+        ADD_WARNINGS(makeRailMLMessages(semanticWarnings));
+        ADD_WARNINGS(makeRailMLMessages({"SEMANTIC WARNINGS:"}))
+      ELSE skip END;
+      IF defaultWarnings /= {} THEN
+        ADD_WARNINGS(makeRailMLMessages(defaultWarnings));
+        ADD_WARNINGS(makeRailMLMessages({"DEFAULT VALUES:"}));
+        ADD_WARNINGS(makeRailMLMessages({"----------------------------------------------------------------"}))
+      ELSE skip END
     END
 END//MACHINE
