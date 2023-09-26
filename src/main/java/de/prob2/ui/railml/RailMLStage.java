@@ -377,21 +377,15 @@ public class RailMLStage extends Stage {
 
 			if (inv_ok && import_success) {
 				if (generateAnimation || generateValidation) {
-					Path dataFilePath = generationPath.resolve(dataFileName.getValue());
-					if (!Files.exists(dataFilePath)) Files.createFile(dataFilePath);
-					replaceOldFile(dataFilePath);
+					replaceOldFile(generationPath.resolve(dataFileName.getValue()));
 					currentState.perform("triggerPrintData").perform("printDataMachine");
 				}
 				if (generateAnimation) {
-					Path animFilePath = generationPath.resolve(animationFileName.getValue());
-					if (!Files.exists(animFilePath)) Files.createFile(animFilePath);
-					replaceOldFile(animFilePath);
+					replaceOldFile(generationPath.resolve(animationFileName.getValue()));
 					currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
 				}
 				if (generateValidation) {
-					Path validFilePath = generationPath.resolve(validationFileName.getValue());
-					if (!Files.exists(validFilePath)) Files.createFile(validFilePath);
-					replaceOldFile(validFilePath);
+					replaceOldFile(generationPath.resolve(validationFileName.getValue()));
 					currentState.perform("triggerPrintValidation").perform("printValidationMachine");
 				}
 			}
@@ -411,8 +405,8 @@ public class RailMLStage extends Stage {
 		}
 		if (generateAnimation) {
 			try {
-				replaceOldResourceFile(generationPath.resolve("RailML3_VisB.def"));
-				replaceOldResourceFile(generationPath.resolve("RailML3_SimB.json"));
+				replaceOldResourceFile(generationPath, "RailML3_VisB.def");
+				replaceOldResourceFile(generationPath, "RailML3_SimB.json");
 				Path simbPath = generationPath.resolve("RailML3_SimB.json");
 
 				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.resolve("RailML3_VisB.def"));
