@@ -142,7 +142,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			State state = trace.getCurrentState();
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), predicate, mode);
-			if("TRUE".equals(evalResult)) {
+			if(evalResult.startsWith("TRUE")) {
 				return true;
 			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
 				throw new SimulationError("Ending predicate is not of type boolean");
@@ -170,7 +170,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			State state = trace.getCurrentState();
 			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), predicate, mode);
-			if ("TRUE".equals(evalResult)) {
+			if (evalResult.startsWith("TRUE")) {
 				setStartingInformation();
 			} else if (!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
 				throw new SimulationError("Starting predicate is not of type boolean");
@@ -192,7 +192,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			String currentEvalResult = simulationEventHandler.getCache().readValueWithCaching(currentState, this.getVariables(), predicate, currentMode);
 
 
-			if ("TRUE".equals(currentEvalResult)) {
+			if (currentEvalResult.startsWith("TRUE")) {
 				if("FALSE".equals(previousEvalResult)) {
 					setStartingInformation();
 				}
