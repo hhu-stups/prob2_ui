@@ -3,15 +3,21 @@
 <?import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCInputView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.BorderPane?>
 <fx:root type="MCDCInputView" stylesheets="@/prob.css" spacing="5.0" xmlns:fx="http://javafx.com/fxml/1">
-	<HBox spacing="10.0">
-		<Label text="%animation.testcase.mcdc.level" labelFor="$levelSpinner" VBox.vgrow="NEVER"/>
-		<Spinner fx:id="levelSpinner" editable="true" VBox.vgrow="NEVER"/>
-	</HBox>
-	<HBox spacing="10.0">
-		<Label text="%animation.testcase.depth" labelFor="$depthSpinner" VBox.vgrow="NEVER"/>
-		<Spinner fx:id="depthSpinner" editable="true" VBox.vgrow="NEVER"/>
-	</HBox>
+	<BorderPane>
+		<left>
+			<VBox spacing="10.0">
+				<Label text="%animation.testcase.mcdc.formuladepth" labelFor="$levelSpinner" VBox.vgrow="NEVER"/>
+				<Label text="%animation.testcase.depth" labelFor="$depthSpinner" VBox.vgrow="NEVER"/>
+			</VBox>
+		</left>
+		<right>
+			<VBox spacing="10.0">
+				<Spinner fx:id="depthSpinner" editable="true" VBox.vgrow="NEVER"/>
+				<Spinner fx:id="levelSpinner" editable="true" VBox.vgrow="NEVER"/>
+			</VBox>
+		</right>
+	</BorderPane>
 </fx:root>
