@@ -39,7 +39,7 @@ public class MCDCInputView extends VBox {
 		depthSpinner.getEditor().textProperty().addListener((observable, from, to) -> {
 			if(to.isEmpty()) {
 				depthSpinner.getEditor().setText("1");
-			} else if(!to.matches("[1-9]+")){
+			} else if(!to.matches("[1-9]\\d*")){
 				depthSpinner.getEditor().setText(from);
 			}
 		});
