@@ -1,29 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+<?import de.prob2.ui.sharedviews.BetterTabPane?>
+<?import javafx.scene.control.Tab?>
 <fx:root type="Stage" title="%animation.testcase.traceInformation.title" minHeight="400.0" minWidth="600.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css" height="400.0" width="600.0">
-			<VBox spacing="10.0">
-				<Label text="%animation.testcase.traceInformation.generatedtraces" VBox.vgrow="NEVER"/>
+			<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+			<Tab text="%animation.testcase.traceInformation.generatedtraces">
 				<TableView fx:id="tvTraces">
 					<columnResizePolicy>
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 					</columnResizePolicy>
 					<columns>
 						<TableColumn fx:id="depth" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.depth" />
-						<TableColumn fx:id="operations" editable="false" prefWidth="200.0" text="%animation.testcase.traceInformation.column.trace" />
-						<TableColumn fx:id="coveredOperation" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.coveredOperation" />
-						<TableColumn fx:id="guard" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.guard" />
-						<TableColumn fx:id="enabled" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.enabled" />
+						<TableColumn fx:id="coveredOperation" editable="false" prefWidth="100.0" text="%animation.testcase.traceInformation.column.coveredOperation" />
+						<TableColumn fx:id="operations" editable="false" prefWidth="100.0" text="%animation.testcase.traceInformation.column.trace" />
+						<TableColumn fx:id="guard" editable="false" prefWidth="150.0" text="%animation.testcase.traceInformation.column.guard" />
 					</columns>
 				</TableView>
-				<Label text="%animation.testcase.traceInformation.uncoveredOperations" VBox.vgrow="NEVER"/>
+			</Tab>
+				<Tab text="%animation.testcase.traceInformation.uncoveredOperations">
 				<TableView fx:id="tvUncovered">
 					<columnResizePolicy>
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
@@ -33,7 +33,8 @@
 						<TableColumn fx:id="uncoveredGuard" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.guard" />
 					</columns>
 				</TableView>
-			</VBox>
+			</Tab>
+			</BetterTabPane>
 		</Scene>
 	</scene>
 </fx:root>

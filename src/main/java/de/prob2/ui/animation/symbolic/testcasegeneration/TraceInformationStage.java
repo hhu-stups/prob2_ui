@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
-import de.prob2.ui.internal.I18n;
 import java.util.Arrays;
 
 import com.google.inject.Inject;
@@ -106,9 +105,6 @@ public final class TraceInformationStage extends Stage {
 	private TableColumn<TestTrace, String> guard;
 	
 	@FXML
-	private TableColumn<TestTrace, String> enabled;
-	
-	@FXML
 	private TableView<Target> tvUncovered;
 	
 	@FXML
@@ -143,9 +139,6 @@ public final class TraceInformationStage extends Stage {
 		guard.setCellFactory(WrappedTextTableCell::new);
 		guard.setCellValueFactory(features -> Bindings.createStringBinding(() ->
 			features.getValue().getTarget().getGuardString()
-		));
-		enabled.setCellValueFactory(features -> Bindings.createStringBinding(() ->
-			String.valueOf(features.getValue().getTarget().getFeasible())
 		));
 		
 		tvUncovered.setRowFactory(item -> new UncoveredOperationRow());
