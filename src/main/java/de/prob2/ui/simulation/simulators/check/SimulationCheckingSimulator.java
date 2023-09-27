@@ -100,6 +100,8 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	private int startAtTime;
 
+	private int timing;
+
 	private final Map<String, Object> additionalInformation;
 
 	private SimulationStats stats;
@@ -121,6 +123,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		this.currentNumberStepsBeforeChecking = Integer.MAX_VALUE;
 		this.startAtStep = Integer.MAX_VALUE;
 		this.startAtTime = Integer.MAX_VALUE;
+		this.timing = Integer.MAX_VALUE;
 		this.additionalInformation = additionalInformation;
 		this.stats = null;
 		this.result = MonteCarloCheckResult.NOT_FINISHED;
@@ -213,6 +216,14 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		startingConditionReached = true;
 		startAtStep = stepCounter;
 		startAtTime = time.get();
+
+		if(additionalInformation.containsKey("TIME")) {
+			String time = String.valueOf(this.getAdditionalInformation().get("TIME"));
+			State state = currentTrace.getCurrentState();
+			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), time, mode);
+			timing = Integer.parseInt(evalResult);
+		}
 	}
 
 	@Override
@@ -407,5 +418,9 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	public int getStartAtTime() {
 		return startAtTime;
+	}
+
+	public int getTiming() {
+		return timing;
 	}
 }

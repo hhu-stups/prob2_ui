@@ -123,10 +123,10 @@ public class SimulationPropertyChoice extends GridPane {
 			choosingStage.sizeToScene();
 		});
 
-		checkingChoice.setConverter(new StringConverter<SimulationPropertyChoice.SimulationPropertyItem>() {
+		checkingChoice.setConverter(new StringConverter<>() {
 			@Override
 			public String toString(SimulationPropertyChoice.SimulationPropertyItem object) {
-				if(object == null) {
+				if (object == null) {
 					return "";
 				}
 				return object.getName(i18n);
@@ -153,7 +153,7 @@ public class SimulationPropertyChoice extends GridPane {
 		}
 
 		if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
-			information.put("TIME", Integer.parseInt(tfMonteCarloTime.getText()));
+			information.put("TIME", tfMonteCarloTime.getText());
 		}
 		return information;
 	}

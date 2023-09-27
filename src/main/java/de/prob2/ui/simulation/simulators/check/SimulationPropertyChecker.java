@@ -155,7 +155,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 	}
 
 	public Checked checkTiming(int time) {
-		int maximumTime = (int) this.getAdditionalInformation().get("TIME");
+		int maximumTime = simulationCheckingSimulator.getTiming();
 		if(time - simulationCheckingSimulator.getStartAtTime() <= maximumTime) {
 			numberSuccess++;
 			return Checked.SUCCESS;
