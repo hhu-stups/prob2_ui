@@ -13,9 +13,9 @@ public class MagicLayoutSettings implements HasMetadata {
 	public static final String FILE_TYPE = "Magic Layout settings";
 	public static final int CURRENT_FORMAT_VERSION = 1;
 
-	private String machineName;
-	private List<MagicNodegroup> nodegroups;
-	private List<MagicEdgegroup> edgegroups;
+	private final String machineName;
+	private final List<MagicNodegroup> nodegroups;
+	private final List<MagicEdgegroup> edgegroups;
 	private final JsonMetadata metadata;
 
 	@JsonCreator

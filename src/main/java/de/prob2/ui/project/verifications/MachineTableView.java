@@ -51,30 +51,25 @@ public class MachineTableView extends TableView<Machine> {
 				final String styleClass;
 				final FontAwesome.Glyph icon;
 				final Machine.CheckingStatus status = item.getStatus();
-				switch (status) {
-					case UNKNOWN:
+				icon = switch (status) {
+					case UNKNOWN -> {
 						styleClass = "unknown";
-						icon = FontAwesome.Glyph.QUESTION_CIRCLE;
-						break;
-
-					case SUCCESSFUL:
+						yield FontAwesome.Glyph.QUESTION_CIRCLE;
+					}
+					case SUCCESSFUL -> {
 						styleClass = "successful";
-						icon = FontAwesome.Glyph.CHECK;
-						break;
-
-					case FAILED:
+						yield FontAwesome.Glyph.CHECK;
+					}
+					case FAILED -> {
 						styleClass = "failed";
-						icon = FontAwesome.Glyph.REMOVE;
-						break;
-
-					case NONE:
+						yield FontAwesome.Glyph.REMOVE;
+					}
+					case NONE -> {
 						styleClass = "none";
-						icon = FontAwesome.Glyph.BAN;
-						break;
-
-					default:
-						throw new IllegalArgumentException("Unknown checking status: " + item);
-				}
+						yield FontAwesome.Glyph.BAN;
+					}
+					default -> throw new IllegalArgumentException("Unknown checking status: " + item);
+				};
 				graphic.getStyleClass().add(styleClass);
 				graphic.setIcon(icon);
 				this.setText(status == Machine.CheckingStatus.NONE ? "" : i18n.format("({0,number,integer}/{1,number,integer})", item.getNumberSuccess(), item.getNumberTotal()));

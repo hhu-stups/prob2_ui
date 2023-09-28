@@ -65,13 +65,13 @@ public class VisualisationController {
 
 	private HashMap<String, List<FormulaListener>> formulaListenerMap;
 	private HashMap<String, EventListener> eventListenerMap;
-	private SimpleObjectProperty<Visualisation> visualisation = new SimpleObjectProperty<>(null);
-	private SimpleBooleanProperty detached = new SimpleBooleanProperty(false);
+	private final SimpleObjectProperty<Visualisation> visualisation = new SimpleObjectProperty<>(null);
+	private final SimpleBooleanProperty detached = new SimpleBooleanProperty(false);
 	private Stage visualizationStage;
 	private Tab visualisationTab;
 	private AnchorPane placeHolderContent;
 	private Label placeHolderLabel;
-	private VisualisationModel visualisationModel;
+	private final VisualisationModel visualisationModel;
 	private VisualisationLoader visualisationLoader;
 	
 

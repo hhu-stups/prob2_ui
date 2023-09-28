@@ -221,7 +221,7 @@ public class TraceTestView extends Stage {
 
 	private final Injector injector;
 
-	private SimpleObjectProperty<ReplayTrace> replayTrace;
+	private final SimpleObjectProperty<ReplayTrace> replayTrace;
 
 	private final List<List<Postcondition>> postconditions = new ArrayList<>();
 

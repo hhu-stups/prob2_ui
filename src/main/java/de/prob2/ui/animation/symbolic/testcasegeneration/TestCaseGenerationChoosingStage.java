@@ -100,16 +100,10 @@ public class TestCaseGenerationChoosingStage extends Stage {
 
 	private TestCaseGenerationItem extractItem() {
 		final TestCaseGenerationType type = this.getTestCaseGenerationType();
-		switch (type) {
-			case MCDC:
-				return new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
-
-			case COVERED_OPERATIONS:
-				return new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
-
-			default:
-				throw new AssertionError("Unhandled test case generation type: " + type);
-		}
+		return switch (type) {
+			case MCDC -> new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
+			case COVERED_OPERATIONS -> new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
+		};
 	}
 
 	public void changeType(final TestCaseGenerationType type) {

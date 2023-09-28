@@ -451,7 +451,7 @@ public class SimulatorStage extends Stage {
 		Path path = configurationPath.get();
 		if(path != null) {
 			ISimulationModelConfiguration config = realTimeSimulator.getConfig();
-			Path configPath = null;
+			Path configPath;
 			if(config instanceof SimulationModelConfiguration || config instanceof SimulationExternalConfiguration) {
 				configPath = configurationPath.get();
 				injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);

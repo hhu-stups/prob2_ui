@@ -146,7 +146,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	
 	protected T addItem(final T newItem) {
 		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		if (!existingItem.isPresent()) {
+		if (existingItem.isEmpty()) {
 			items.add(newItem);
 			return newItem;
 		} else {
@@ -156,7 +156,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	
 	protected T replaceItem(final T oldItem, final T newItem) {
 		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
-		if (!existingItem.isPresent()) {
+		if (existingItem.isEmpty()) {
 			items.set(items.indexOf(oldItem), newItem);
 			return newItem;
 		} else {

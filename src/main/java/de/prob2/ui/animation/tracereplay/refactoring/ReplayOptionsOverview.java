@@ -16,7 +16,7 @@ public class ReplayOptionsOverview extends Dialog<ReplayOptions> {
 
 	private final Map<String, OperationInfo> operations;
 	private final Map<String, ReplayOptionsChoice> choices;
-	private ReplayOptionsChoice global = null;
+	private ReplayOptionsChoice global;
 	private final StageManager stageManager;
 
 	@FXML

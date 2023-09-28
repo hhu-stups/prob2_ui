@@ -7,12 +7,12 @@ import javafx.scene.layout.StackPane;
 
 abstract class AbstractVertex extends StackPane {
 
-	DoubleProperty centerX = new SimpleDoubleProperty();
-	DoubleProperty centerY = new SimpleDoubleProperty();
-	DoubleProperty leftX = new SimpleDoubleProperty();
-	DoubleProperty rightX = new SimpleDoubleProperty();
-	DoubleProperty topY = new SimpleDoubleProperty();
-	DoubleProperty bottomY = new SimpleDoubleProperty();
+	final DoubleProperty centerX = new SimpleDoubleProperty();
+	final DoubleProperty centerY = new SimpleDoubleProperty();
+	final DoubleProperty leftX = new SimpleDoubleProperty();
+	final DoubleProperty rightX = new SimpleDoubleProperty();
+	final DoubleProperty topY = new SimpleDoubleProperty();
+	final DoubleProperty bottomY = new SimpleDoubleProperty();
 
 	AbstractVertex() {
 		this.layoutXProperty().addListener((observable, from, to) -> updateProperties());

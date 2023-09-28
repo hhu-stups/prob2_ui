@@ -67,7 +67,7 @@ public class SimulationItemHandler {
 	public Optional<SimulationItem> addItem(final SimulationModel simulationModel, final SimulationItem item) {
 		final List<SimulationItem> items = this.getItems(simulationModel);
 		final Optional<SimulationItem> existingItem = items.stream().filter(item::equals).findAny();
-		if(!existingItem.isPresent()) {
+		if(existingItem.isEmpty()) {
 			items.add(item);
 		}
 		return existingItem;

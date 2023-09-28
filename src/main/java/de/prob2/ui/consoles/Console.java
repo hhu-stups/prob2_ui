@@ -357,7 +357,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public void moveCaretToInputEndIfRequired() {
-		if (!this.getPositionInInput().isPresent()) {
+		if (this.getPositionInInput().isEmpty()) {
 			this.moveToInputEnd();
 		}
 	}

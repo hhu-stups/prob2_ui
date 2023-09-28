@@ -76,9 +76,9 @@ public final class LTLPatternParser {
 		String name = ((Pattern_defContext) tree).ID().getText();
 		signature.append(name);
 		signature.append("(");
-		signature.append(String.join(", ", ((Pattern_defContext) tree).pattern_def_param().stream()
+		signature.append(((Pattern_defContext) tree).pattern_def_param().stream()
 			.map(LTLPatternParser::extractParameterFromContext)
-			.collect(Collectors.toList())));
+			.collect(Collectors.joining(", ")));
 		signature.append(")");
 		return signature.toString();
 	}

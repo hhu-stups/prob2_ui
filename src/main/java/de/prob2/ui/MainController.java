@@ -83,7 +83,7 @@ public class MainController extends BorderPane {
 	private void initialize() {
 		Platform.runLater(() -> {
 			this.detacher = injector.getInstance(DetachViewStageController.class);
-			this.getAccordions().stream().forEach(e -> e.getPanes().stream().forEach(this::addContextMenu));
+			this.getAccordions().forEach(e -> e.getPanes().forEach(this::addContextMenu));
 		});
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
 		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
@@ -185,7 +185,6 @@ public class MainController extends BorderPane {
 				url = this.getClass().getResource(perspective);
 				if (url == null) {
 					LOGGER.error("Attempted to load nonexistant preset perspective {}", perspective);
-					url = null;
 				}
 				break;
 

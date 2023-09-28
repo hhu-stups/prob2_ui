@@ -55,7 +55,7 @@ public final class ExternalEditor {
 
 	public void open(Path path) {
 		final Optional<Path> editorPath = this.getExternalEditorPath();
-		if (!editorPath.isPresent()) {
+		if (editorPath.isEmpty()) {
 			this.stageManager.makeAlert(Alert.AlertType.ERROR, "externalEditor.alerts.noEditorSet.header", "externalEditor.alerts.noEditorSet.content").show();
 			return;
 		}

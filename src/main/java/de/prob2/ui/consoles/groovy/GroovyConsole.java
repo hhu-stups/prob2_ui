@@ -40,7 +40,7 @@ public class GroovyConsole extends Console {
 					@Override
 					public void doReplacement(GroovyCCItem replacement) {
 						OptionalInt optInputPosition = GroovyConsole.this.getPositionInInput();
-						if (!optInputPosition.isPresent()) {
+						if (optInputPosition.isEmpty()) {
 							// the cursor is not in the input, we dont have an anchor position for completion
 							return;
 						}

@@ -2,6 +2,7 @@ package de.prob2.ui.prob2fx;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -221,7 +222,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void changeMachineOrder(List<Machine> machines) {
 		if (machines.size() != this.getMachines().size()) {
 			throw new IllegalArgumentException("size mismatch, expected same number of machines");
-		} else if (!this.getMachines().containsAll(machines)) {
+		} else if (!new HashSet<>(this.getMachines()).containsAll(machines)) {
 			throw new IllegalArgumentException("machine mismatch");
 		}
 

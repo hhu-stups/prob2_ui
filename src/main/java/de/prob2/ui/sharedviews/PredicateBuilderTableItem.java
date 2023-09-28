@@ -24,11 +24,11 @@ public class PredicateBuilderTableItem {
 		}
 	}
 
-	private String name;
+	private final String name;
 
 	private String value;
 
-	private VariableType type;
+	private final VariableType type;
 
 	public PredicateBuilderTableItem(String name, String value, VariableType type) {
 		this.name = name;

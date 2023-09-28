@@ -55,7 +55,7 @@ public class HelpSystem extends StackPane {
 	@FXML private Button external;
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
-	WebEngine webEngine;
+	final WebEngine webEngine;
 	private boolean updateTreeSelection;
 	private final ResourceBundle helpPageTitles;
 	private final ResourceBundle helpPageResourcePaths;

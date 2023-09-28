@@ -4,9 +4,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class ReplayedTraceRow {

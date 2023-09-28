@@ -27,10 +27,10 @@ public final class VOFeedback {
 			vosByRequirement.forEach((req2, vo2) -> {
 				if (vo1.getTasks().stream()
 						.map(IValidationTask::getId)
-						.collect(Collectors.toList())
+						.collect(Collectors.toSet())
 						.containsAll(vo2.getTasks().stream()
 								.map(IValidationTask::getId)
-								.collect(Collectors.toList()))) {
+								.collect(Collectors.toSet()))) {
 					if(result.containsKey(req1)) {
 						result.get(req1).add(req2);
 					} else {
@@ -82,7 +82,7 @@ public final class VOFeedback {
 				}
 				if(vo.getTasks().stream()
 						.map(IValidationTask::getId)
-						.collect(Collectors.toList())
+						.collect(Collectors.toSet())
 						.contains(dependentVT) && !fullDependencies.get(requirement).contains(currentRequirement)) {
 					result.add(requirement);
 				}

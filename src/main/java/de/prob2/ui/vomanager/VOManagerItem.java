@@ -33,7 +33,7 @@ abstract class VOManagerItem {
 	}
 	
 	static final class TopLevelMachine extends VOManagerItem {
-		private Collection<Requirement> projectRequirements;
+		private final Collection<Requirement> projectRequirements;
 		
 		TopLevelMachine(final Collection<Requirement> projectRequirements, final Machine machine) {
 			super(null, machine, null);

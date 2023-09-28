@@ -8,7 +8,7 @@ import de.prob2.ui.verifications.CheckingResultItem;
 
 public class TemporalCheckingResultItem extends CheckingResultItem {
 
-	private List<ErrorItem> errorMarkers;
+	private final List<ErrorItem> errorMarkers;
 	
 	public TemporalCheckingResultItem(Checked checked, List<ErrorItem> errorMarkers, String messageBundleKey,
 									  Object... messageParams) {

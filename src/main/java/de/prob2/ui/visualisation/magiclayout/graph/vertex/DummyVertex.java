@@ -5,7 +5,7 @@ import javafx.scene.shape.Circle;
 
 public class DummyVertex extends Vertex {
 
-	Circle circle = new Circle(5);
+	final Circle circle = new Circle(5);
 
 	public DummyVertex() {
 		this.getChildren().setAll(circle);

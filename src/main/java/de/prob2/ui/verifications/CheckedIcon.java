@@ -14,41 +14,33 @@ public final class CheckedIcon extends BindableGlyph {
 	public void setChecked(final Checked checked) {
 		this.getStyleClass().removeAll("not-checked", "success", "fail", "interrupted", "timeout", "parse-error");
 		final String styleClass;
-		final FontAwesome.Glyph icon;
-		switch (checked) {
-			case NOT_CHECKED:
+		final FontAwesome.Glyph icon = switch (checked) {
+			case NOT_CHECKED -> {
 				styleClass = "not-checked";
-				icon = FontAwesome.Glyph.QUESTION_CIRCLE;
-				break;
-			
-			case SUCCESS:
+				yield FontAwesome.Glyph.QUESTION_CIRCLE;
+			}
+			case SUCCESS -> {
 				styleClass = "success";
-				icon = FontAwesome.Glyph.CHECK;
-				break;
-			
-			case FAIL:
+				yield FontAwesome.Glyph.CHECK;
+			}
+			case FAIL -> {
 				styleClass = "fail";
-				icon = FontAwesome.Glyph.REMOVE;
-				break;
-			
-			case INTERRUPTED:
+				yield FontAwesome.Glyph.REMOVE;
+			}
+			case INTERRUPTED -> {
 				styleClass = "interrupted";
-				icon = FontAwesome.Glyph.PAUSE;
-				break;
-			
-			case TIMEOUT:
+				yield FontAwesome.Glyph.PAUSE;
+			}
+			case TIMEOUT -> {
 				styleClass = "timeout";
-				icon = FontAwesome.Glyph.CLOCK_ALT;
-				break;
-			
-			case PARSE_ERROR:
+				yield FontAwesome.Glyph.CLOCK_ALT;
+			}
+			case PARSE_ERROR -> {
 				styleClass = "parse-error";
-				icon = FontAwesome.Glyph.EXCLAMATION_TRIANGLE;
-				break;
-			
-			default:
-				throw new IllegalArgumentException("Unknown checking status: " + checked);
-		}
+				yield FontAwesome.Glyph.EXCLAMATION_TRIANGLE;
+			}
+			default -> throw new IllegalArgumentException("Unknown checking status: " + checked);
+		};
 		this.getStyleClass().add(styleClass);
 		this.setIcon(icon);
 	}

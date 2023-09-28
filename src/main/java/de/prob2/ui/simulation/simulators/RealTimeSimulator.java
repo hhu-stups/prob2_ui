@@ -79,9 +79,4 @@ public class RealTimeSimulator extends Simulator {
 	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
 		throw new UnsupportedOperationException();
 	}
-
-	@Override
-	public SimulationEventHandler getSimulationEventHandler() {
-		return super.getSimulationEventHandler();
-	}
 }

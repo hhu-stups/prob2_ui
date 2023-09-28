@@ -21,8 +21,8 @@ public final class WarningAlert extends Alert {
 	@FXML private ErrorTableView warningTable;
 	
 	private final StageManager stageManager;
-	private ObservableList<ErrorItem> warnings;
-	private I18n i18n;
+	private final ObservableList<ErrorItem> warnings;
+	private final I18n i18n;
 	private String messageKeyForBundle;
 	
 	@Inject

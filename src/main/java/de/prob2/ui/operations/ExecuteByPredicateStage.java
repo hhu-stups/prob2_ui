@@ -282,10 +282,7 @@ public final class ExecuteByPredicateStage extends Stage {
 	}
 
 	private String buildVisualizationPredicate() {
-		StringBuilder predicate = new StringBuilder();
-		predicate.append(buildFreeVariables());
-		predicate.append(buildInnerPredicate());
-		return predicate.toString();
+		return buildFreeVariables() + buildInnerPredicate();
 	}
 
 }

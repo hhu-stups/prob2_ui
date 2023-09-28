@@ -34,7 +34,7 @@ public class StateVisualisationController {
 
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
-	private BooleanProperty visualisationPossible = new SimpleBooleanProperty(false);
+	private final BooleanProperty visualisationPossible = new SimpleBooleanProperty(false);
 	private final Map<Integer, Image> machineImages;
 
 	@Inject

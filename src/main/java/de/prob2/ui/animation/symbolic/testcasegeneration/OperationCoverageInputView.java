@@ -29,9 +29,9 @@ public class OperationCoverageInputView extends VBox {
 	
 	public static class OperationTableItem {
 
-		private String operation;
+		private final String operation;
 
-		private BooleanProperty selected;
+		private final BooleanProperty selected;
 
 		public OperationTableItem(String operation, boolean selected) {
 			this.operation = operation;

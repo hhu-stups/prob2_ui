@@ -2,7 +2,6 @@ package de.prob2.ui.vomanager;
 
 import java.util.Collections;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -43,7 +42,7 @@ public class RequirementRefineDialog extends Stage {
 		targetMenu.getItems().addAll(currentProject.getMachines().stream()
 				.map(Machine::getName)
 				.filter(entry -> !entry.equals(currentProject.getCurrentMachine().getName()))
-				.collect(Collectors.toList()));
+				.toList());
 		targetMenu.getSelectionModel().selectFirst();
 	}
 

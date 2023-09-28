@@ -29,7 +29,7 @@ import java.util.Set;
 
 public class MagicGraphFX implements MagicGraphI {
 
-	private StageManager stageManager;
+	private final StageManager stageManager;
 
 	private Graph graph;
 	private State state;
@@ -86,14 +86,10 @@ public class MagicGraphFX implements MagicGraphI {
 	}
 
 	private Layout getGraphLayout(MagicLayout layout) {
-		switch (layout) {
-		case LAYERED:
-			return new LayeredLayout();
-		case RANDOM:
-			return new RandomLayout();
-		default:
-			return new LayeredLayout();
-		}
+		return switch (layout) {
+			case LAYERED -> new LayeredLayout();
+			case RANDOM -> new RandomLayout();
+		};
 	}
 
 	@Override
@@ -243,7 +239,7 @@ public class MagicGraphFX implements MagicGraphI {
 			model.addEdge(new Edge(new Vertex(tuple.getFirst().toString()), new Vertex(tuple.getSecond().toString()),
 				caption));
 		} else if(bValue instanceof BSet<?>) {
-			((BSet<?>) bValue).stream().forEach(element -> combineModel(model, getModel(caption, (BValue) element)));
+			((BSet<?>) bValue).stream().forEach(element -> combineModel(model, getModel(caption, element)));
 		} else {
 			if (caption.equals(bValue.toString())) {
 				model.addVertex(new Vertex(caption));
@@ -339,17 +335,11 @@ public class MagicGraphFX implements MagicGraphI {
 	 *         {@link MagicShape}
 	 */
 	private Vertex.Type toVertexType(MagicShape shape) {
-		switch (shape) {
-		case CIRCLE:
-			return Vertex.Type.CIRCLE;
-		case ELLIPSE:
-			return Vertex.Type.ELLIPSE;
-		case RECTANGLE:
-			return Vertex.Type.RECTANGLE;
-		case TRIANGLE:
-			return Vertex.Type.TRIANGLE;
-		default:
-			return Vertex.Type.RECTANGLE;
-		}
+		return switch (shape) {
+			case CIRCLE -> Vertex.Type.CIRCLE;
+			case ELLIPSE -> Vertex.Type.ELLIPSE;
+			case RECTANGLE -> Vertex.Type.RECTANGLE;
+			case TRIANGLE -> Vertex.Type.TRIANGLE;
+		};
 	}
 }

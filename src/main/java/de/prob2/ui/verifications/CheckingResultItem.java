@@ -8,9 +8,9 @@ import javafx.scene.layout.Region;
 
 public class CheckingResultItem {
 	
-	private Checked checked;
-	private String messageBundleKey;
-	private Object[] messageParams;
+	private final Checked checked;
+	private final String messageBundleKey;
+	private final Object[] messageParams;
 	
 	public CheckingResultItem(Checked checked, String messageBundleKey, Object... messageParams) {
 		this.checked = checked;
@@ -23,15 +23,14 @@ public class CheckingResultItem {
 	}
 	
 	public String getHeaderBundleKey() {
-		switch (this.getChecked()) {
-			case NOT_CHECKED: return "verifications.result.notChecked.header";
-			case SUCCESS: return "verifications.result.succeeded.header";
-			case FAIL: return "verifications.result.failed.header";
-			case TIMEOUT: return "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout";
-			case INTERRUPTED: return "common.result.interrupted.header";
-			case PARSE_ERROR: return "common.result.couldNotParseFormula.header";
-			default: throw new IllegalArgumentException("Unhandled checked status: " + this.getChecked());
-		}
+		return switch (this.getChecked()) {
+			case NOT_CHECKED -> "verifications.result.notChecked.header";
+			case SUCCESS -> "verifications.result.succeeded.header";
+			case FAIL -> "verifications.result.failed.header";
+			case TIMEOUT -> "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout";
+			case INTERRUPTED -> "common.result.interrupted.header";
+			case PARSE_ERROR -> "common.result.couldNotParseFormula.header";
+		};
 	}
 	
 	public String getMessageBundleKey() {

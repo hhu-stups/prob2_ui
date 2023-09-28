@@ -178,7 +178,7 @@ public class ProjectManager {
 					"project.projectManager.alerts.fileAlreadyExistsWarning.header",
 					"project.projectManager.alerts.fileAlreadyExistsWarning.content", location)
 					.showAndWait();
-			if (!result.isPresent() || result.get() == ButtonType.CANCEL) {
+			if (result.isEmpty() || result.get() == ButtonType.CANCEL) {
 				return;
 			} else if (result.get().equals(renameBT)) {
 				FileChooser fileChooser = new FileChooser();

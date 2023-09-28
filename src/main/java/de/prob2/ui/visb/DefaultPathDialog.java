@@ -24,10 +24,10 @@ public final class DefaultPathDialog extends Dialog<DefaultPathDialog.Action> {
 	private final SimpleObjectProperty<Path> loadedPath;
 	private final SimpleObjectProperty<Path> defaultPath;
 
-	private ButtonType loadButtonType;
-	private ButtonType loadDefinitionsButtonType;
-	private ButtonType setButtonType;
-	private ButtonType unsetButtonType;
+	private final ButtonType loadButtonType;
+	private final ButtonType loadDefinitionsButtonType;
+	private final ButtonType setButtonType;
+	private final ButtonType unsetButtonType;
 
 	@Inject
 	public DefaultPathDialog(final StageManager stageManager, final I18n i18n) {

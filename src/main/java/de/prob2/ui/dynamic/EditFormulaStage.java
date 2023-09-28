@@ -15,7 +15,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
-import java.util.List;
+
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class EditFormulaStage extends Stage {
@@ -83,7 +84,9 @@ public class EditFormulaStage extends Stage {
 	}
 
 	private void checkId() {
-		List<String> idList = currentProject.getCurrentMachine().getValidationTasks().values().stream().map(IValidationTask::getId).collect(Collectors.toList());
+		Set<String> idList = currentProject.getCurrentMachine().getValidationTasks().values().stream()
+			                     .map(IValidationTask::getId)
+			                     .collect(Collectors.toSet());
 		idField.textProperty().addListener((observable, from, to) -> {
 			if (idList.contains(to)) {
 				okButton.setDisable(true);

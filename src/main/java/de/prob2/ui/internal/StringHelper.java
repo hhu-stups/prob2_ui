@@ -16,26 +16,14 @@ public final class StringHelper {
 			if (' ' <= c && c <= '~') {
 				b.append(c);
 			} else {
-				String esc;
-				switch (c) {
-					case '\t':
-						esc = "\\t";
-						break;
-					case '\b':
-						esc = "\\b";
-						break;
-					case '\n':
-						esc = "\\n";
-						break;
-					case '\r':
-						esc = "\\r";
-						break;
-					case '\f':
-						esc = "\\f";
-						break;
-					default:
-						esc = "\\u{" + Integer.toHexString(c) + "}";
-				}
+				String esc = switch (c) {
+					case '\t' -> "\\t";
+					case '\b' -> "\\b";
+					case '\n' -> "\\n";
+					case '\r' -> "\\r";
+					case '\f' -> "\\f";
+					default -> "\\u{" + Integer.toHexString(c) + "}";
+				};
 
 				b.append(esc);
 			}

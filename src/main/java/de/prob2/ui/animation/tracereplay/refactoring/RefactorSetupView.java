@@ -3,7 +3,6 @@ package de.prob2.ui.animation.tracereplay.refactoring;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -201,7 +200,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 
 		ChangeListener<Path> validTarget = (observable, oldValue, newValue) -> {
 			if(whatToDo.get() == RefactorSetup.WhatToDo.OPTION_REPLAY){
-				if(!currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toList()).contains(alpha.getName())){
+				if(!currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toSet()).contains(alpha.getName())){
 					label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult.Warning"));
 					//label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult"));
 					label.setTextFill(Color.color(1, 0, 0));
@@ -211,7 +210,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 				}
 			}else{
 				if(whatToDo.get() == RefactorSetup.WhatToDo.REFINEMENT_REPLAY){
-					if(!beta.getName().isEmpty() && !currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toList()).contains(beta.getName())){
+					if(!beta.getName().isEmpty() && !currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toSet()).contains(beta.getName())){
 						label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult.Warning"));
 						label.setTextFill(Color.color(1, 0, 0));
 					}

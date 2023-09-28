@@ -63,22 +63,12 @@ public class Vertex extends AbstractVertex {
 		double txtWidth = txt.getLayoutBounds().getWidth();
 		double txtHeight = txt.getLayoutBounds().getHeight();
 
-		switch (type) {
-		case RECTANGLE:
-			shape = new Rectangle(txtWidth + 20, txtHeight + 10);
-			break;
-		case CIRCLE:
-			shape = new Circle((txtWidth + 20) / 2);
-			break;
-		case ELLIPSE:
-			shape = new Ellipse((txtWidth + 20) / 2, (txtHeight + 20) / 2);
-			break;
-		case TRIANGLE:
-			shape = new Polygon(0, txtHeight + 20, (txtWidth + 30) * 2, txtHeight + 20, txtWidth + 30, 0);
-			break;
-		default:
-			shape = new Circle((txtWidth + 20) / 2);
-		}
+		this.shape = switch (type) {
+			case RECTANGLE -> new Rectangle(txtWidth + 20, txtHeight + 10);
+			case CIRCLE -> new Circle((txtWidth + 20) / 2);
+			case ELLIPSE -> new Ellipse((txtWidth + 20) / 2, (txtHeight + 20) / 2);
+			case TRIANGLE -> new Polygon(0, txtHeight + 20, (txtWidth + 30) * 2, txtHeight + 20, txtWidth + 30, 0);
+		};
 
 		setStyle(this.style);
 

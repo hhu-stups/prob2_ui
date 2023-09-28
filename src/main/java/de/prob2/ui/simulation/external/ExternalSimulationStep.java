@@ -5,13 +5,13 @@ import java.util.StringJoiner;
 
 public class ExternalSimulationStep {
 
-	private String op;
+	private final String op;
 
-	private String predicate;
+	private final String predicate;
 
-	private String delta;
+	private final String delta;
 
-	private boolean done;
+	private final boolean done;
 
 	public ExternalSimulationStep(String op, String predicate, String delta, boolean done) {
 		this.op = op;

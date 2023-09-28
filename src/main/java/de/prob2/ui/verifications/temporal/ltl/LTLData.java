@@ -15,9 +15,9 @@ public class LTLData implements HasMetadata {
 	public static final String FILE_TYPE = "LTL";
 	public static final int CURRENT_FORMAT_VERSION = 1;
 
-	private List<TemporalFormulaItem> formulas;
+	private final List<TemporalFormulaItem> formulas;
 
-	private List<LTLPatternItem> patterns;
+	private final List<LTLPatternItem> patterns;
 
 	private final JsonMetadata metadata;
 

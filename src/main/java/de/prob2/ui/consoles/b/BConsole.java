@@ -50,7 +50,7 @@ public final class BConsole extends Console {
 					@Override
 					public void doReplacement(BCCItem replacement) {
 						OptionalInt optInputPosition = BConsole.this.getPositionInInput();
-						if (!optInputPosition.isPresent()) {
+						if (optInputPosition.isEmpty()) {
 							// the cursor is not in the input, we dont have an anchor position for completion
 							return;
 						}

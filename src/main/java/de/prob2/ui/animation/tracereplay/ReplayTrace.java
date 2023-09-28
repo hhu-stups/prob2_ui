@@ -47,7 +47,7 @@ public class ReplayTrace implements IExecutableItem, IValidationTask {
 	private Path absoluteLocation;
 	@JsonIgnore
 	private TraceManager traceManager;
-	private BooleanProperty selected;
+	private final BooleanProperty selected;
 
 	public ReplayTrace(String id, Path location, Path absoluteLocation, TraceManager traceManager) {
 		this.id = id;

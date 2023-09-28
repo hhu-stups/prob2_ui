@@ -1,6 +1,5 @@
 package de.prob2.ui.preferences;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 

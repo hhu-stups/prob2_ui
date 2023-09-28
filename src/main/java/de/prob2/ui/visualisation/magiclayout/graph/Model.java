@@ -7,13 +7,13 @@ import java.util.Set;
 import de.prob2.ui.visualisation.magiclayout.graph.vertex.Vertex;
 
 public class Model {
-	private Set<Vertex> vertices = new HashSet<>();
-	private Set<Edge> edges = new HashSet<>();
+	private final Set<Vertex> vertices = new HashSet<>();
+	private final Set<Edge> edges = new HashSet<>();
 
-	private Set<Vertex> addedVertices = new HashSet<>();
-	private Set<Vertex> removedVertices = new HashSet<>();
-	private Set<Edge> addedEdges = new HashSet<>();
-	private Set<Edge> removedEdges = new HashSet<>();
+	private final Set<Vertex> addedVertices = new HashSet<>();
+	private final Set<Vertex> removedVertices = new HashSet<>();
+	private final Set<Edge> addedEdges = new HashSet<>();
+	private final Set<Edge> removedEdges = new HashSet<>();
 
 	public void addVertex(Vertex vertex) {
 		if (vertices.contains(vertex)) {

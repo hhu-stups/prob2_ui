@@ -3,7 +3,6 @@ package de.prob2.ui.consoles.b.codecompletion;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.prob.animator.command.CompleteIdentifierCommand;
 import de.prob.statespace.StateSpace;
@@ -74,7 +73,7 @@ public final class BCodeCompletion {
 			this.suggestions.addAll(
 				cmd.getCompletions().stream()
 					.map(item -> new BCCItem(this.text, item))
-					.collect(Collectors.toList())
+					.toList()
 			);
 		}
 	}

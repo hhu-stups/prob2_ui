@@ -297,7 +297,7 @@ public class RequirementsEditingBox extends VBox {
 	private boolean nameExists(){
 		return currentProject.getRequirements().stream()
 				.map(Requirement::getName)
-				.collect(Collectors.toList())
+				.collect(Collectors.toSet())
 				.contains(tfName.getText());
 	}
 

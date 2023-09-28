@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 
@@ -117,7 +116,7 @@ public final class PredicateBuilderView extends VBox {
 				break;
 			}
 			final String rhs = assignment[1];
-			items.stream().filter(item -> item.getName().equals(lhs)).collect(Collectors.toList()).get(0).setValue(rhs);
+			items.stream().filter(item -> item.getName().equals(lhs)).toList().get(0).setValue(rhs);
 		}
 		table.refresh();
 		// Store all remaining parts of the conjunction in the predicate field.

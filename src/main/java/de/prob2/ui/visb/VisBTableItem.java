@@ -8,7 +8,7 @@ public class VisBTableItem {
 
 	private final VisBItem visBItem;
 
-	private BooleanProperty selected;
+	private final BooleanProperty selected;
 
 	public VisBTableItem(final VisBItem visBItem) {
 		this.visBItem = visBItem;

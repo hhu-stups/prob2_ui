@@ -33,7 +33,7 @@ public class ExternalSimulatorExecutor {
 
 	private boolean done;
 
-	private boolean hasShield;
+	private final boolean hasShield;
 
 	public ExternalSimulatorExecutor(Simulator simulator, Path pythonFile, ClassicalBModel model) {
 		this.simulator = simulator;

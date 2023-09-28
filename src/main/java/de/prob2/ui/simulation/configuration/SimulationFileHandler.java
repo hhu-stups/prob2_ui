@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -206,14 +205,14 @@ public class SimulationFileHandler {
 					activations.add(jsonElement.getAsJsonArray().get(j).getAsString());
 				}
 			} else {
-				activations.addAll(Collections.singletonList(jsonElement.getAsString()));
+				activations.add(jsonElement.getAsString());
 			}
 		}
 		return activations;
 	}
 
 	private static ActivationOperationConfiguration.ActivationKind buildActivationKind(JsonElement jsonElement) {
-		ActivationOperationConfiguration.ActivationKind activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
+		ActivationOperationConfiguration.ActivationKind activationKind;
 		if(jsonElement == null || jsonElement.isJsonNull() || "multi".equals(jsonElement.getAsString())) {
 			activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
 		} else if("single:max".equals(jsonElement.getAsString())) {
@@ -222,6 +221,8 @@ public class SimulationFileHandler {
 			activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE_MIN;
 		} else if("single".equals(jsonElement.getAsString())) {
 			activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE;
+		} else {
+			activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
 		}
 		return activationKind;
 	}

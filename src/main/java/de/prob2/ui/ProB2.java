@@ -383,7 +383,7 @@ public class ProB2 extends Application {
 					"common.alerts.unsavedProjectChanges.header", "common.alerts.unsavedProjectChanges.content",
 					currentProject.getName());
 			Optional<ButtonType> result = alert.showAndWait();
-			if (!result.isPresent() || result.get().equals(ButtonType.CANCEL)) {
+			if (result.isEmpty() || result.get().equals(ButtonType.CANCEL)) {
 				event.consume();
 			} else if (result.get().equals(save)) {
 				injector.getInstance(ProjectManager.class).saveCurrentProject();

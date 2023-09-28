@@ -268,7 +268,7 @@ public final class OperationsView extends VBox {
 			if (to != null) {
 				final Set<Transition> operations = to.getNextTransitions();
 				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) ||
-						operations.stream().map(Transition::getName).collect(Collectors.toList()).contains(Transition.PARTIAL_SETUP_CONSTANTS_NAME)) {
+						operations.stream().map(Transition::getName).collect(Collectors.toSet()).contains(Transition.PARTIAL_SETUP_CONSTANTS_NAME)) {
 					showUnsatCoreButton = true;
 				}
 			}
@@ -496,23 +496,11 @@ public final class OperationsView extends VBox {
 	}
 
 	private void doSort(final LoadedMachine loadedMachine) {
-		final Comparator<OperationItem> comparator;
-		switch (this.getSortMode()) {
-		case MODEL_ORDER:
-			comparator = this.modelOrderComparator(new ArrayList<>(loadedMachine.getOperationNames()));
-			break;
-
-		case A_TO_Z:
-			comparator = this::compareAlphanumeric;
-			break;
-
-		case Z_TO_A:
-			comparator = ((Comparator<OperationItem>) this::compareAlphanumeric).reversed();
-			break;
-
-		default:
-			throw new IllegalStateException("Unhandled sort mode: " + this.getSortMode());
-		}
+		final Comparator<OperationItem> comparator = switch (this.getSortMode()) {
+			case MODEL_ORDER -> this.modelOrderComparator(new ArrayList<>(loadedMachine.getOperationNames()));
+			case A_TO_Z -> this::compareAlphanumeric;
+			case Z_TO_A -> ((Comparator<OperationItem>) this::compareAlphanumeric).reversed();
+		};
 
 		events.sort(comparator);
 	}

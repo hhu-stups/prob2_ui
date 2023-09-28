@@ -37,7 +37,7 @@ public class VisualisationModel {
 	private Trace oldTrace;
 	private Trace newTrace;
 	private Map<String, Object> valueCache;
-	private Map<String, IEvalElement> parsedFormulas;
+	private final Map<String, IEvalElement> parsedFormulas;
 	private boolean randomExecution;
 	private AbstractModel model;
 
@@ -87,7 +87,7 @@ public class VisualisationModel {
 		for (int i = 0; i < formulas.size(); i++) {
 			String formula = formulas.get(i);
 			AbstractEvalResult newAbstractValue = newAbstractValues.get(i);
-			EvalResult newValue = null;
+			EvalResult newValue;
 			if (newAbstractValue instanceof EvalResult) {
 				newValue = (EvalResult) newAbstractValue;
 				//cache value so we don't have to eval it again
@@ -103,7 +103,7 @@ public class VisualisationModel {
 				continue;
 			}
 			AbstractEvalResult oldAbstractValue = oldAbstractValues.get(i);
-			EvalResult oldValue = null;
+			EvalResult oldValue;
 			if (oldAbstractValue instanceof EvalResult) {
 				oldValue = (EvalResult) oldAbstractValue;
 			} else {

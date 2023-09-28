@@ -84,16 +84,10 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	}
 	
 	protected String extractFormula() {
-		switch (cbChoice.getValue()) {
-			case SEQUENCE:
-				return tfFormula.getText();
-			
-			case FIND_VALID_STATE:
-				return predicateBuilderView.getPredicate();
-			
-			default:
-				throw new AssertionError("Unhandled symbolic animation type: " + cbChoice.getValue());
-		}
+		return switch (cbChoice.getValue()) {
+			case SEQUENCE -> tfFormula.getText();
+			case FIND_VALID_STATE -> predicateBuilderView.getPredicate();
+		};
 	}
 	
 	public void setData(SymbolicAnimationItem item) {

@@ -50,18 +50,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProjectDocumenterTest {
 
-	List<Machine> machines = new ArrayList<>();
-	Machine trafficLight = Mockito.mock(Machine.class);
-	ReplayTrace trace = Mockito.mock(ReplayTrace.class);
-	I18n i18n = Mockito.mock(I18n.class);
-	Injector injector = Mockito.mock(Injector.class);
-	CurrentProject currentProject = Mockito.mock(CurrentProject.class);
+	final List<Machine> machines = new ArrayList<>();
+	final Machine trafficLight = Mockito.mock(Machine.class);
+	final ReplayTrace trace = Mockito.mock(ReplayTrace.class);
+	final I18n i18n = Mockito.mock(I18n.class);
+	final Injector injector = Mockito.mock(Injector.class);
+	final CurrentProject currentProject = Mockito.mock(CurrentProject.class);
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
-	ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
-	TemporalFormulaItem ltlFormulaItem = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, "", "", "", true);
-	SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("", "", SymbolicCheckingType.SYMBOLIC_MODEL_CHECK);
-	LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
+	final ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
+	final TemporalFormulaItem ltlFormulaItem = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, "", "", "", true);
+	final SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("", "", SymbolicCheckingType.SYMBOLIC_MODEL_CHECK);
+	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
 
 	@BeforeAll
 	void setup() {

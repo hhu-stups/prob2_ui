@@ -1,7 +1,6 @@
 package de.prob2.ui.visb;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -241,7 +239,7 @@ public class VisBController {
 	private void executeBeforeInitialisation() {
 		Set<Transition> nextTransitions = currentTrace.get().getNextTransitions();
 		if(currentTrace.get().getNextTransitions().size() == 1) {
-			String transitionName = nextTransitions.stream().map(Transition::getName).collect(Collectors.toList()).get(0);
+			String transitionName = nextTransitions.stream().map(Transition::getName).toList().get(0);
 			Trace trace = currentTrace.get().execute(transitionName, new ArrayList<>());
 			currentTrace.set(trace);
 			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
@@ -279,11 +277,12 @@ public class VisBController {
 				throw new IOException("Given json path is not a regular file: " + jsonPath);
 			}
 		}
-		
-		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPath.equals(NO_PATH) ? "" : jsonPath.toString());
+
+		String jsonPathString = jsonPath.equals(NO_PATH) ? "" : jsonPath.toString();
+		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPathString);
 		
 		currentTrace.getStateSpace().execute(loadCmd);
-		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPath.equals(NO_PATH) ? "" : jsonPath.toString());
+		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPathString);
 		
 		currentTrace.getStateSpace().execute(svgCmd);
 		String svgPathString = svgCmd.getSvgPath();

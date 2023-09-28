@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Singleton
 public class UIInteractionHandler {
@@ -195,7 +194,7 @@ public class UIInteractionHandler {
 				hasInitialization = true;
 				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) activationConfiguration;
 				activations = new ArrayList<>(initializationConfiguration.getActivating());
-				activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
+				activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).toList());
 				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), activations, true, null, null));
 			} else if(Transition.SETUP_CONSTANTS_NAME.equals(activationConfiguration.getId())) {
 				hasSetupConstants = true;
@@ -216,7 +215,7 @@ public class UIInteractionHandler {
 		}
 
 		if(!hasInitialization) {
-			activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).collect(Collectors.toList()));
+			activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).toList());
 			OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.INITIALISE_MACHINE_NAME);
 			// Somehow the constructor with 1 argument always sets using destination state to false
 			State destination = initializationTransition.getDestination();

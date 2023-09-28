@@ -6,7 +6,7 @@ import javafx.scene.layout.Pane;
 
 public class Graph extends Pane {
 
-	private Model model;
+	private final Model model;
 	private Layout layout;
 
 	public Graph(Model model) {

@@ -37,7 +37,7 @@ public abstract class Simulator {
 
 	protected Map<String, String> variables;
 
-	protected IntegerProperty time;
+	protected final IntegerProperty time;
 
 	protected int delay;
 
@@ -55,7 +55,7 @@ public abstract class Simulator {
 
 	protected final SimulationEventHandler simulationEventHandler;
 
-	protected ChangeListener<? super Trace> traceListener;
+	protected final ChangeListener<? super Trace> traceListener;
 
 	protected List<Integer> timestamps;
 

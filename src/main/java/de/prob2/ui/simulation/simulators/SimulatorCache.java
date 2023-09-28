@@ -29,16 +29,14 @@ public class SimulatorCache {
 				}
 			}
 
-			switch (mode) {
-				case CLASSICAL_B:
-					// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
-					return new ClassicalB(expr, FormulaExpand.EXPAND);
-				case EVENT_B:
-					// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
-					return new EventB(expr, FormulaExpand.EXPAND);
-				default:
-					throw new RuntimeException("Evaluation mode is not supported");
-			}
+			return switch (mode) {
+				case CLASSICAL_B ->
+						// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
+						new ClassicalB(expr, FormulaExpand.EXPAND);
+				case EVENT_B ->
+						// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
+						new EventB(expr, FormulaExpand.EXPAND);
+			};
 		});
 
 		return bState.eval(formula).toString();

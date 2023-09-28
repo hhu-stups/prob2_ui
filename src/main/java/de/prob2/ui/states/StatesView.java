@@ -251,8 +251,7 @@ public final class StatesView extends StackPane {
 		final List<List<ExpandedFormula>> topLevelOperations = topLevel.stream()
 				.filter(formula -> TOP_LEVEL_OPERATIONS_ID.equals(formula.expandStructure().getFormula().getId()))
 				.map(formula -> formula.expandStructure().getChildren())
-				.collect(Collectors.toList());
-
+				.toList();
 
 		String formulaID = item.getFormula().getId();
 		if(TOP_LEVEL_PREDICATES.contains(formulaID)) {
@@ -457,10 +456,10 @@ public final class StatesView extends StackPane {
 
 	private ChangeListener<Boolean> getTrackVisibleListener(final TreeItem<StateItem> treeItem) {
 		return (o, from, to) -> {
-			final List<BVisual2Formula> subformulas = treeItem.getChildren().stream()
+			final Set<BVisual2Formula> subformulas = treeItem.getChildren().stream()
 				.map(TreeItem::getValue)
 				.map(StateItem::getFormula)
-				.collect(Collectors.toList());
+				.collect(Collectors.toSet());
 
 			if (to) {
 				visibleFormulas.addAll(subformulas);

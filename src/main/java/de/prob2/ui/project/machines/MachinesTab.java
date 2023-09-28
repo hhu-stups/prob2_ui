@@ -65,7 +65,7 @@ public class MachinesTab extends Tab {
 		@FXML private Menu startAnimationWithPreferencesMenu;
 		@FXML private MenuItem showInternalItem;
 
-		private ObjectProperty<Machine> machineProperty;
+		private final ObjectProperty<Machine> machineProperty;
 
 		private MachinesItem() {
 			this.machineProperty = new SimpleObjectProperty<>(this, "machine", null);

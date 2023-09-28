@@ -1,8 +1,8 @@
 package de.prob2.ui.simulation.configuration;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.Map;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class ActivationChoiceConfiguration extends ActivationConfiguration {
 
@@ -20,16 +20,6 @@ public class ActivationChoiceConfiguration extends ActivationConfiguration {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("ActivationChoiceActivation(");
-		sb.append("id");
-		sb.append("=");
-		sb.append(id);
-		sb.append(", ");
-		sb.append("activations");
-		sb.append("=");
-		sb.append(activations);
-		sb.append(")");
-		return sb.toString();
+		return "ActivationChoiceActivation(id=" + id + ", activations=" + activations + ")";
 	}
 }

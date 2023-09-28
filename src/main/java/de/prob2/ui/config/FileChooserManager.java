@@ -126,7 +126,7 @@ public class FileChooserManager {
 			if (children.anyMatch(p -> p.getFileName().toString().startsWith(prefix))) {
 				// Directory already contains test case trace - ask if the user really wants to save here.
 				final Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "", contentBundleKey, path).showAndWait();
-				if (!selected.isPresent() || selected.get() != ButtonType.YES) {
+				if (selected.isEmpty() || selected.get() != ButtonType.YES) {
 					return true;
 				}
 			}

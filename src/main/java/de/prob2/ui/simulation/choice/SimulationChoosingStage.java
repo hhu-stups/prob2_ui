@@ -131,7 +131,7 @@ public class SimulationChoosingStage extends Stage {
 
 	private SimulationItem extractItem() {
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
-		SimulationType type = null;
+		SimulationType type;
 		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationConditionChoice.checkProperty()) {
 			type = SimulationType.MONTE_CARLO_SIMULATION;
 		} else {

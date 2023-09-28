@@ -17,7 +17,7 @@ public class LTLParseListener extends BaseErrorListener {
 
 	private final Logger LOGGER = LoggerFactory.getLogger(LTLParseListener.class);
 
-	private List<ErrorItem> errorMarkers = new LinkedList<>();
+	private final List<ErrorItem> errorMarkers = new LinkedList<>();
 
 	private static ErrorItem.Location locationFromTokenPos(final int line, final int charPositionInLine, final int length) {
 		return new ErrorItem.Location("", line, charPositionInLine, line, charPositionInLine + length);

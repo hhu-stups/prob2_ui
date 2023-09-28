@@ -43,7 +43,7 @@ public class ProjectDocumenter {
 	private final List<Machine> machines;
 	private final CurrentProject project;
 	private final Injector injector;
-	private HashMap<String,String> tracesHtmlPaths;
+	private final HashMap<String,String> tracesHtmlPaths;
 
 	@Inject
 	public ProjectDocumenter(CurrentProject project,
@@ -107,12 +107,10 @@ public class ProjectDocumenter {
 	// future translations can be added here
 	private String getLanguageTemplate() {
 		String language = injector.getInstance(Locale.class).getLanguage();
-		switch (language){
-			case "de":
-				return "de/prob2/ui/documentation/velocity_template_german.tex.vm";
-			default:
-				return "de/prob2/ui/documentation/velocity_template_english.tex.vm";
-		}
+		return switch (language) {
+			case "de" -> "de/prob2/ui/documentation/velocity_template_german.tex.vm";
+			default -> "de/prob2/ui/documentation/velocity_template_english.tex.vm";
+		};
 	}
 
 	private static void initVelocityEngine() {

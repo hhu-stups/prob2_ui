@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public class VisBConnector {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBConnector.class);
-	private Injector injector;
+	private final Injector injector;
 
 	@Inject
 	public VisBConnector(Injector injector){

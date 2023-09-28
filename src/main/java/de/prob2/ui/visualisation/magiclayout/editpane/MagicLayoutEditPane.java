@@ -356,7 +356,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 
 	private void initLineTypeComboBox() {
 		// show different line types in ComboBox
-		lineTypeComboBox.setCellFactory((ListView<MagicLineType> lv) -> new LineListCell<MagicLineType>() {
+		lineTypeComboBox.setCellFactory((ListView<MagicLineType> lv) -> new LineListCell<>() {
 			@Override
 			protected void defineLineStyle(Line line, MagicLineType style) {
 				line.getStrokeDashArray().addAll(style.getDashArrayList());
@@ -364,7 +364,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 			}
 		});
 
-		lineTypeComboBox.setButtonCell(new LineListCell<MagicLineType>() {
+		lineTypeComboBox.setButtonCell(new LineListCell<>() {
 			@Override
 			protected void defineLineStyle(Line line, MagicLineType style) {
 				line.getStrokeDashArray().addAll(style.getDashArrayList());
@@ -377,7 +377,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 
 	private void initLineWidthComboBox() {
 		// show different line thicknesses in ComboBox (not just double values)
-		lineWidthComboBox.setCellFactory((ListView<MagicLineWidth> lv) -> new LineListCell<MagicLineWidth>() {
+		lineWidthComboBox.setCellFactory((ListView<MagicLineWidth> lv) -> new LineListCell<>() {
 			@Override
 			protected void defineLineStyle(Line line, MagicLineWidth width) {
 				line.setStrokeWidth(width.getWidth());
@@ -385,7 +385,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 			}
 		});
 
-		lineWidthComboBox.setButtonCell(new LineListCell<MagicLineWidth>() {
+		lineWidthComboBox.setButtonCell(new LineListCell<>() {
 			@Override
 			protected void defineLineStyle(Line line, MagicLineWidth width) {
 				line.setStrokeWidth(width.getWidth());

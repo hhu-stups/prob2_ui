@@ -109,19 +109,12 @@ public class ModelcheckingStage extends Stage {
 	}
 
 	public static String getSearchStrategyNameKey(final ModelCheckingSearchStrategy searchStrategy) {
-		switch (searchStrategy) {
-			case MIXED_BF_DF:
-				return "verifications.modelchecking.modelcheckingStage.strategy.mixedBfDf";
-			
-			case BREADTH_FIRST:
-				return "verifications.modelchecking.modelcheckingStage.strategy.breadthFirst";
-			
-			case DEPTH_FIRST:
-				return "verifications.modelchecking.modelcheckingStage.strategy.depthFirst";
-			
-			default:
-				return null;
-		}
+		return switch (searchStrategy) {
+			case MIXED_BF_DF -> "verifications.modelchecking.modelcheckingStage.strategy.mixedBfDf";
+			case BREADTH_FIRST -> "verifications.modelchecking.modelcheckingStage.strategy.breadthFirst";
+			case DEPTH_FIRST -> "verifications.modelchecking.modelcheckingStage.strategy.depthFirst";
+			default -> null;
+		};
 	}
 
 	@FXML

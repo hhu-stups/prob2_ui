@@ -41,16 +41,16 @@ public class Edge extends Group {
 		}
 	}
 
-	private Vertex source;
-	private Vertex target;
+	private final Vertex source;
+	private final Vertex target;
 
-	private Line line = new Line();
-	private Label txt;
-	private Polygon arrowhead;
+	private final Line line = new Line();
+	private final Label txt;
+	private final Polygon arrowhead;
 
-	private ObjectProperty<Style> style = new SimpleObjectProperty<>();
-	private DoubleProperty distanceX = new SimpleDoubleProperty();
-	private DoubleProperty distanceY = new SimpleDoubleProperty();
+	private final ObjectProperty<Style> style = new SimpleObjectProperty<>();
+	private final DoubleProperty distanceX = new SimpleDoubleProperty();
+	private final DoubleProperty distanceY = new SimpleDoubleProperty();
 
 	public Edge(Vertex source, Vertex target, String caption) {
 		this.source = source;
