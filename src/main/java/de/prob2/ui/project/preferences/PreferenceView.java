@@ -31,7 +31,7 @@ public class PreferenceView extends AnchorPane {
 		
 		StringBuilder builder = new StringBuilder();
 		for(String pref : preference.getPreferences().keySet()) {
-			builder.append(pref + " = " + preference.getPreferences().get(pref) + "\n\n");
+			builder.append(pref).append(" = ").append(preference.getPreferences().get(pref)).append("\n\n");
 		}
 		String prefs = builder.toString();
 		prefText.setText(prefs);

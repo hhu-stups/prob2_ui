@@ -29,7 +29,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.ProjectManager;
 
-import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -147,7 +146,7 @@ public final class PreferencesStage extends Stage {
 		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProject.setDefaultLocation(Paths.get(to)));
 
 		localeOverrideBox.valueProperty().bindBidirectional(uiState.localeOverrideProperty());
-		localeOverrideBox.setConverter(new StringConverter<Locale>() {
+		localeOverrideBox.setConverter(new StringConverter<>() {
 			@Override
 			public String toString(Locale object) {
 				return object == null ? "System Default" : object.getDisplayName(object);

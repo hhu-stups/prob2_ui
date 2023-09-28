@@ -19,7 +19,6 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.value.ChangeListener;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -115,8 +114,7 @@ public abstract class Simulator {
 		this.noActivationQueued = false;
 
 		if(config != null) {
-			if(config instanceof SimulationModelConfiguration) {
-				SimulationModelConfiguration modelConfig = (SimulationModelConfiguration) config;
+			if(config instanceof SimulationModelConfiguration modelConfig) {
 				// sort after priority
 				this.variables = modelConfig.getVariables() != null ? new HashMap<>(modelConfig.getVariables()) : new HashMap<>();
 				this.activationConfigurationsSorted = modelConfig.getActivationConfigurations().stream()
@@ -172,8 +170,7 @@ public abstract class Simulator {
 	}
 
 	protected void setPreferences(Trace trace) {
-		if(config instanceof SimulationModelConfiguration) {
-			SimulationModelConfiguration modelConfig = (SimulationModelConfiguration) config;
+		if(config instanceof SimulationModelConfiguration modelConfig) {
 			SimulationModelConfigurationChecker simulationConfigurationChecker = new SimulationModelConfigurationChecker(trace.getStateSpace(), modelConfig);
 			simulationConfigurationChecker.check();
 			if(!simulationConfigurationChecker.getErrors().isEmpty()) {

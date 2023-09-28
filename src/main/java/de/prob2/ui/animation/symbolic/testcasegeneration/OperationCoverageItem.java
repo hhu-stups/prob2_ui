@@ -44,10 +44,9 @@ public final class OperationCoverageItem extends TestCaseGenerationItem {
 	
 	@Override
 	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof OperationCoverageItem)) {
+		if (!(obj instanceof OperationCoverageItem other)) {
 			return false;
 		}
-		final OperationCoverageItem other = (OperationCoverageItem)obj;
 		return super.settingsEqual(other) && this.getOperations().equals(other.getOperations());
 	}
 }

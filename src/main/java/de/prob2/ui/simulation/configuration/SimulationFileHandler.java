@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +51,14 @@ public class SimulationFileHandler {
 			}
 		}
 
-		List<Path> timedTraces = Files.walk(inputFile).filter(p -> !Files.isDirectory(p))
-				.filter(p -> MoreFiles.getFileExtension(p).equals(SimulationFileHandler.TRACE_FILE_EXTENSION))
-				.sorted(Path::compareTo)
-				.collect(Collectors.toList());
+		List<Path> timedTraces;
+		try (var s = Files.walk(inputFile)) {
+			timedTraces = s
+				              .filter(Files::isRegularFile)
+				              .filter(p -> MoreFiles.getFileExtension(p).equals(SimulationFileHandler.TRACE_FILE_EXTENSION))
+				              .sorted()
+				              .collect(Collectors.toList());
+		}
 		return new SimulationBlackBoxModelConfiguration(timedTraces);
 	}
 

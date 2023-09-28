@@ -226,10 +226,9 @@ public class SimulationItem implements IValidationTask {
 
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof SimulationItem)) {
+		if(!(obj instanceof SimulationItem otherItem)) {
 			return false;
 		}
-		SimulationItem otherItem = (SimulationItem) obj;
 		return Objects.equals(this.id, otherItem.id) && this.type == otherItem.type && this.information.equals(otherItem.information);
 	}
 

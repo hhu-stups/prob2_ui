@@ -150,9 +150,7 @@ public class FullValueStage extends Stage {
 		Matcher matcher = PRETTIFY_DELIMITERS.matcher(s);
 		
 		while (matcher.find()) {
-			for (int i = 0; i < indentLevel; i++) {
-				out.append("\t");
-			}
+			out.append("\t".repeat(Math.max(0, indentLevel)));
 			out.append(s, lastMatchPos, matcher.start());
 			lastMatchPos = matcher.end();
 			

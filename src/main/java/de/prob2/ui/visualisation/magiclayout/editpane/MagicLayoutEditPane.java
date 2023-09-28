@@ -44,7 +44,7 @@ import javafx.util.StringConverter;
 
 public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox {
 
-	private abstract class LineListCell<S> extends ListCell<S> {
+	private static abstract class LineListCell<S> extends ListCell<S> {
 		private LineListCell() {
 			setContentDisplay(ContentDisplay.GRAPHIC_ONLY);
 		}
@@ -176,7 +176,7 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 	private void initListView() {
 		listView.setEditable(true);
 		listView.setCellFactory(lv -> {
-			TextFieldListCell<T> cell = new TextFieldListCell<T>() {
+			TextFieldListCell<T> cell = new TextFieldListCell<>() {
 
 				@Override
 				public void commitEdit(T component) {
@@ -184,13 +184,13 @@ public abstract class MagicLayoutEditPane<T extends MagicComponent> extends VBox
 						return;
 					}
 					if (!listView.getItems().contains(component)
-							|| listView.getItems().indexOf(component) == this.getIndex()) {
+							    || listView.getItems().indexOf(component) == this.getIndex()) {
 						super.commitEdit(component);
 					}
 				}
 			};
 
-			cell.setConverter(new StringConverter<T>() {
+			cell.setConverter(new StringConverter<>() {
 
 				@Override
 				public String toString(T component) {

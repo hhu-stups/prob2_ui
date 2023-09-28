@@ -3,7 +3,6 @@ package de.prob2.ui.simulation.external;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.simulators.Simulator;
 
 import java.io.BufferedReader;

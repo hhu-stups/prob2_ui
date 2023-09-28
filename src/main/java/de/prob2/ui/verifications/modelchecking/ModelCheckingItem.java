@@ -242,10 +242,9 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 
 	@Override
 	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof ModelCheckingItem)) {
+		if (!(obj instanceof ModelCheckingItem other)) {
 			return false;
 		}
-		final ModelCheckingItem other = (ModelCheckingItem)obj;
 		return Objects.equals(this.getId(), other.getId())
 			&& Objects.equals(this.getSearchStrategy(), other.getSearchStrategy())
 			&& Objects.equals(this.getNodesLimit(), other.getNodesLimit())

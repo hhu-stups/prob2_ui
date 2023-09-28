@@ -120,10 +120,9 @@ public abstract class MagicComponent {
 		if (other == this) {
 			return true;
 		}
-		if (!(other instanceof MagicComponent)) {
+		if (!(other instanceof MagicComponent otherComponent)) {
 			return false;
 		}
-		MagicComponent otherComponent = (MagicComponent) other;
 		return otherComponent.name.get().equals(this.name.get());
 	}
 	

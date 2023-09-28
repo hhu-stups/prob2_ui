@@ -12,7 +12,7 @@ import de.prob.voparser.node.Start;
 import de.prob2.ui.verifications.Checked;
 
 public interface IValidationExpression {
-	public static IValidationExpression fromAst(final PVo ast) {
+	static IValidationExpression fromAst(final PVo ast) {
 		if (ast instanceof AIdentifierVo) {
 			return ValidationTaskExpression.fromAst((AIdentifierVo)ast);
 		} else if (ast instanceof AAndVo) {
@@ -26,19 +26,19 @@ public interface IValidationExpression {
 		}
 	}
 	
-	public static IValidationExpression parse(final VOParser parser, final String expression) {
+	static IValidationExpression parse(final VOParser parser, final String expression) {
 		final Start ast = parser.parseFormula(expression);
 		parser.typeCheck(ast);
 		return fromAst(ast.getPVo());
 	}
 	
-	public abstract Stream<? extends IValidationExpression> getChildren();
+	Stream<? extends IValidationExpression> getChildren();
 	
-	public default Stream<ValidationTaskExpression> getAllTasks() {
+	default Stream<ValidationTaskExpression> getAllTasks() {
 		return this.getChildren().flatMap(IValidationExpression::getAllTasks);
 	}
 	
-	public abstract Checked getChecked();
+	Checked getChecked();
 
 	String toString();
 }

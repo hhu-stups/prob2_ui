@@ -87,10 +87,9 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	@Override
 	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof TestCaseGenerationItem)) {
+		if (!(obj instanceof TestCaseGenerationItem other)) {
 			return false;
 		}
-		final TestCaseGenerationItem other = (TestCaseGenerationItem)obj;
 		return this.getType().equals(other.getType())
 			&& this.getMaxDepth() == other.getMaxDepth();
 	}

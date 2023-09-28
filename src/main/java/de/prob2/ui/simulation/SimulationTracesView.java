@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation;
 
-import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -11,14 +10,12 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.Translatable;
 import de.prob2.ui.internal.csv.CSVWriter;
-import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.table.SimulationItem;
 

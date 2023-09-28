@@ -101,7 +101,7 @@ public class ProjectTab extends Tab {
 		projectNameTextField.setOnKeyPressed(keyEvent -> {
 			if (keyEvent.getCode().equals(KeyCode.ENTER)) {
 				String name = projectNameTextField.getText();
-				if(name.replace(" ", "").length() == 0) {
+				if (name.isBlank()) {
 					final Alert alert = stageManager.makeAlert(AlertType.WARNING, 
 							"project.projectTab.alerts.emptyNameWarning.header",
 							"project.projectTab.alerts.emptyNameWarning.content");

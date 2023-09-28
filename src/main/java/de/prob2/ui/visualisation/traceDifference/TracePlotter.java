@@ -82,20 +82,17 @@ public class TracePlotter {
 
 	}
 
-	public double stringSize(List<TraceConnector.Pair<PersistentTransition, PersistentTransition>> trace, Measure measure){
+	double stringSize(List<TraceConnector.Pair<PersistentTransition, PersistentTransition>> trace, Measure measure){
 		Optional<Double> first = Stream.concat(trace.stream().map(entry -> entry.getFirst().getOperationName()),
 						trace.stream().map(entry -> entry.getFirst().getDestinationStateVariables().entrySet()).flatMap(entry -> entry.stream().map(Object::toString)))
 				.map(measure::measure)
 				.max(Comparator.naturalOrder());
-
 		Optional<Double> second = Stream.concat(trace.stream().map(entry -> entry.getSecond().getOperationName()),
 						trace.stream().map(entry -> entry.getSecond().getDestinationStateVariables().entrySet()).flatMap(entry -> entry.stream().map(Object::toString)))
 				.map(measure::measure)
 				.max(Comparator.naturalOrder());
 
-
-
-		return Math.max(first.get(), second.get());
+		return Math.max(first.orElseThrow(), second.orElseThrow());
 	}
 
 

@@ -60,8 +60,8 @@ public class Vertex extends AbstractVertex {
 	public void setType(Type type) {
 		this.type = type;
 
-		Double txtWidth = txt.getLayoutBounds().getWidth();
-		Double txtHeight = txt.getLayoutBounds().getHeight();
+		double txtWidth = txt.getLayoutBounds().getWidth();
+		double txtHeight = txt.getLayoutBounds().getHeight();
 
 		switch (type) {
 		case RECTANGLE:

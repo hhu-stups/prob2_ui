@@ -25,7 +25,7 @@ public final class VOFeedback {
 		Map<Requirement, Set<Requirement>> result = new HashMap<>();
 		vosByRequirement.forEach((req1, vo1) ->
 			vosByRequirement.forEach((req2, vo2) -> {
-				if(vo1.getTasks().stream()
+				if (vo1.getTasks().stream()
 						.map(IValidationTask::getId)
 						.collect(Collectors.toList())
 						.containsAll(vo2.getTasks().stream()

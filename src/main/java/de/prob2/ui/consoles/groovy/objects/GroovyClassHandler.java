@@ -39,9 +39,8 @@ public final class GroovyClassHandler {
 
 
 	public static void handleArrays(Object object, ObservableList<CollectionDataItem> collectionData) {
-		if (object instanceof Object[]) {
+		if (object instanceof Object[] objects) {
 			// Check Array of Objects
-			Object[] objects = (Object[]) object;
 			for (int i = 0; i < objects.length; i++) {
 				String value = "";
 				if (objects[i] != null) {

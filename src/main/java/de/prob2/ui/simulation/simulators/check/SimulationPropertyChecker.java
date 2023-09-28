@@ -10,7 +10,6 @@ import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.Checked;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.ArrayList;
 import java.util.List;

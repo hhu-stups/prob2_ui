@@ -72,9 +72,9 @@ public class Edge extends Group {
 
 			// move text to center of line
 			double textLayoutX = (distanceX.get() / 2
-					+ (line.getStartX() < line.getEndX() ? line.getStartX() : line.getEndX()) - txt.getWidth() / 2);
+					+ (Math.min(line.getStartX(), line.getEndX())) - txt.getWidth() / 2);
 			double textLayoutY = (distanceY.get() / 2
-					+ (line.getStartY() < line.getEndY() ? line.getStartY() : line.getEndY()) - txt.getHeight() / 2);
+					+ (Math.min(line.getStartY(), line.getEndY())) - txt.getHeight() / 2);
 			txt.relocate(textLayoutX, textLayoutY);
 
 			// set arrowPoints depending on line end
@@ -82,9 +82,9 @@ public class Edge extends Group {
 					line.getEndX() + Math.sqrt(3) * 5, line.getEndY() + 5);
 
 			// rotate text and arrowhead to point to target node
-			Double xDiff = line.getEndX() - line.getStartX();
-			Double yDiff = line.getEndY() - line.getStartY();
-			Double rotationDegrees = Math.acos(yDiff / Math.sqrt(xDiff * xDiff + yDiff * yDiff)) * 360 / (2 * Math.PI);
+			double xDiff = line.getEndX() - line.getStartX();
+			double yDiff = line.getEndY() - line.getStartY();
+			double rotationDegrees = Math.acos(yDiff / Math.sqrt(xDiff * xDiff + yDiff * yDiff)) * 360 / (2 * Math.PI);
 			if (xDiff < 0) {
 				txt.setRotate(rotationDegrees + 90);
 				rotationDegrees = rotationDegrees - 150;
@@ -144,8 +144,8 @@ public class Edge extends Group {
 	}
 
 	private void calculatePositioning() {
-		Double approxDistanceX = Math.abs(source.getCenterX() - target.getCenterX());
-		Double approxDistanceY = Math.abs(source.getCenterY() - target.getCenterY());
+		double approxDistanceX = Math.abs(source.getCenterX() - target.getCenterX());
+		double approxDistanceY = Math.abs(source.getCenterY() - target.getCenterY());
 
 		if (approxDistanceX > approxDistanceY) { // are the vertices rather one below the other or next to each other?
 			if (source.getCenterX() > target.getCenterX()) { // which vertex is closer to the origin of the coordinate system?

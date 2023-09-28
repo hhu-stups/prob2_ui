@@ -218,7 +218,7 @@ public final class StatesView extends StackPane {
 		if (hasDescription) {
 			sb.append(item.getDescription());
 		}
-		if (sb.length() > 0) {
+		if (!sb.isEmpty()) {
 			sb.append('\n');
 		}
 
@@ -230,7 +230,7 @@ public final class StatesView extends StackPane {
 				sb.append(i18n.translate("states.statesView.tooltip.elementChildren", childrenCount));
 			}
 		}
-		if (sb.length() > 0) {
+		if (!sb.isEmpty()) {
 			sb.append('\n');
 		}
 
@@ -239,7 +239,7 @@ public final class StatesView extends StackPane {
 			sb.append(i18n.translate("states.statesView.tooltip.proofInfo", proofInfo.getProvenCount(), proofInfo.getUnprovenCount(), proofInfo.getUnchangedCount()));
 		}
 
-		if (sb.length() > 0) {
+		if (!sb.isEmpty()) {
 			return new Tooltip(sb.toString());
 		} else {
 			return null;
@@ -513,7 +513,7 @@ public final class StatesView extends StackPane {
 		// The tree items for the children of treeItem's children are generated once treeItem is expanded.
 		// This needs to be an anonymous class instead of a lambda,
 		// so that the listener can remove itself after it runs once.
-		final ChangeListener<Boolean> generateGrandchildrenListener = new ChangeListener<Boolean>() {
+		final ChangeListener<Boolean> generateGrandchildrenListener = new ChangeListener<>() {
 			@Override
 			public void changed(final ObservableValue<? extends Boolean> o, final Boolean from, final Boolean to) {
 				if (to) {

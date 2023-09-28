@@ -125,12 +125,7 @@ public class LayeredLayout implements Layout {
 		addDummyVertices(vertexLayerMap, acyclicEdges);
 
 		NavigableMap<Integer, List<Vertex>> layerLists = new TreeMap<>();
-		vertexLayerMap.forEach((vertex, layerNr) -> {
-			if (layerLists.get(layerNr) == null) {
-				layerLists.put(layerNr, new ArrayList<>());
-			}
-			layerLists.get(layerNr).add(vertex);
-		});
+		vertexLayerMap.forEach((vertex, layerNr) -> layerLists.computeIfAbsent(layerNr, k -> new ArrayList<>()).add(vertex));
 		return layerLists;
 	}
 
@@ -199,7 +194,7 @@ public class LayeredLayout implements Layout {
 		int deadlockCounter = 0;
 
 		//TODO: Are cyclic dependencies allowed? That was the problem that cause StackOverflowError (see PROB2UI-339)
-		while(verticesStackQueue.size() > 0 && verticesStackQueue.size() > deadlockCounter) {
+		while (!verticesStackQueue.isEmpty() && verticesStackQueue.size() > deadlockCounter) {
 			Vertex currentVertex = verticesStackQueue.pollLast();
 			if(!vertexLayerMap.containsKey(currentVertex)) {
 				Set<Vertex> successors = getSuccessors(currentVertex, edges);
@@ -291,9 +286,7 @@ public class LayeredLayout implements Layout {
 			baryMap.put(bary, vertex);
 		});
 
-		List<Vertex> permutedLayer = new ArrayList<>();
-		permutedLayer.addAll(baryMap.values());
-
+		List<Vertex> permutedLayer = new ArrayList<>(baryMap.values());
 		layers.put(permuteLayerNr, permutedLayer);
 	}
 

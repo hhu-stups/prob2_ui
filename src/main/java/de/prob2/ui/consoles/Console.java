@@ -343,7 +343,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public void moveCaretToPosInInput(int pos) {
-		assert this.getParagraphs().size() >= 1;
+		assert !this.getParagraphs().isEmpty();
 		this.moveTo(this.getParagraphs().size() - 1, this.inputStart.get() + pos);
 		this.requestFollowCaret();
 	}
@@ -430,7 +430,7 @@ public abstract class Console extends StyleClassedTextArea {
 		historyAndSearchHandler.enter(command);
 
 		if (command != null && !command.isEmpty()) {
-			if (commandBuffer.length() > 0) {
+			if (!commandBuffer.isEmpty()) {
 				commandBuffer.append('\n');
 			}
 

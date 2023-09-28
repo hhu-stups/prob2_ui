@@ -378,7 +378,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 
 	private Task<StyleSpans<Collection<String>>> computeHighlightingAsync() {
 		final String text = this.getText();
-		final Task<StyleSpans<Collection<String>>> task = new Task<StyleSpans<Collection<String>>>() {
+		final Task<StyleSpans<Collection<String>>> task = new Task<>() {
 
 			@Override
 			protected StyleSpans<Collection<String>> call() {

@@ -18,7 +18,6 @@ import de.prob.check.CTLNotYetFinished;
 import de.prob.check.CTLOk;
 import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
-import de.prob.check.LTLCounterExample;
 import de.prob.exception.ProBError;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
@@ -26,8 +25,8 @@ import de.prob.parserbase.ProBParserBase;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
-import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
+import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

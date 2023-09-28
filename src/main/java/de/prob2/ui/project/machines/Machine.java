@@ -769,10 +769,9 @@ public class Machine {
 		if (other == this) {
 			return true;
 		}
-		if (!(other instanceof Machine)) {
+		if (!(other instanceof Machine otherMachine)) {
 			return false;
 		}
-		Machine otherMachine = (Machine) other;
 		return this.getLocation().equals(otherMachine.getLocation());
 	}
 

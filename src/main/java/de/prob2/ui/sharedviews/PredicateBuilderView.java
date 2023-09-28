@@ -28,7 +28,7 @@ import javafx.scene.layout.VBox;
 
 @FXMLInjected
 public final class PredicateBuilderView extends VBox {
-	private final class ValueCell extends TableCell<PredicateBuilderTableItem, String> {
+	private static final class ValueCell extends TableCell<PredicateBuilderTableItem, String> {
 		private ValueCell() {
 			super();
 		}
@@ -74,7 +74,7 @@ public final class PredicateBuilderView extends VBox {
 		this.table.placeholderProperty().bind(this.placeholderProperty());
 		this.nameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getName()));
 		this.valueColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue()));
-		this.valueColumn.setCellFactory(param -> this.new ValueCell());
+		this.valueColumn.setCellFactory(param -> new ValueCell());
 		this.typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
 	}
 	

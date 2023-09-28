@@ -1,6 +1,7 @@
 package de.prob2.ui.internal;
 
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
@@ -48,6 +49,7 @@ final class ProB2UIJacksonModule extends Module {
 	
 	// Extend the standard NioPathSerializer to inherit the implementation of serializeWithType.
 	private static final class CustomNioPathSerializer extends NioPathSerializer {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private CustomNioPathSerializer() {
@@ -61,6 +63,7 @@ final class ProB2UIJacksonModule extends Module {
 	}
 	
 	private static final class CustomNioPathDeserializer extends StdScalarDeserializer<Path> {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private CustomNioPathDeserializer() {
@@ -83,6 +86,7 @@ final class ProB2UIJacksonModule extends Module {
 	// because we only use 2D BoundingBoxes.
 	
 	private static final class BoundingBoxSerializer extends StdSerializer<BoundingBox> {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private BoundingBoxSerializer() {
@@ -101,6 +105,7 @@ final class ProB2UIJacksonModule extends Module {
 	}
 	
 	private static final class BoundingBoxDeserializer extends StdDeserializer<BoundingBox> {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private BoundingBoxDeserializer() {
@@ -140,6 +145,7 @@ final class ProB2UIJacksonModule extends Module {
 	// This format is compatible with the FX Gson library that we previously used.
 	
 	private static final class ColorSerializer extends StdSerializer<Color> {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private ColorSerializer() {
@@ -157,6 +163,7 @@ final class ProB2UIJacksonModule extends Module {
 	}
 	
 	private static final class ColorDeserializer extends StdDeserializer<Color> {
+		@Serial
 		private static final long serialVersionUID = 1L;
 		
 		private ColorDeserializer() {

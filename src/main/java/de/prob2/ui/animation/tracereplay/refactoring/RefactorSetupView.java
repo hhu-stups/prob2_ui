@@ -72,7 +72,7 @@ import javafx.stage.Stage;
 
 public class RefactorSetupView extends Dialog<RefactorSetup> {
 
-	private static final List<String> CLASSICAL_EXTENSIONS = Collections.unmodifiableList(Arrays.asList(EventBFactory.RODIN_MACHINE_EXTENSION, EventBPackageFactory.EXTENSION, ClassicalBFactory.CLASSICAL_B_MACHINE_EXTENSION, ClassicalBFactory.CLASSICAL_B_REFINEMENT_EXTENSION));
+	private static final List<String> CLASSICAL_EXTENSIONS = List.of(EventBFactory.RODIN_MACHINE_EXTENSION, EventBPackageFactory.EXTENSION, ClassicalBFactory.CLASSICAL_B_MACHINE_EXTENSION, ClassicalBFactory.CLASSICAL_B_REFINEMENT_EXTENSION);
 
 	@FXML
 	ComboBox<RefactorSetup.WhatToDo> options;
@@ -177,7 +177,6 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 		this.setResultConverter(param -> {
 					if (param.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 						return new RefactorSetup(RefactorSetup.WhatToDo.NOTHING, alpha.get(), beta.get(), trace.get(), checkBox.isSelected(), maxDepth.getValue(), maxBreadth.getValue());
-
 					} else {
 						return new RefactorSetup(whatToDo.get(), alpha.get(), beta.get(), trace.get(), checkBox.isSelected(), maxDepth.getValue(), maxBreadth.getValue());
 					}
@@ -212,7 +211,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 				}
 			}else{
 				if(whatToDo.get() == RefactorSetup.WhatToDo.REFINEMENT_REPLAY){
-					if(!beta.getName().equals("") && !currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toList()).contains(beta.getName())){
+					if(!beta.getName().isEmpty() && !currentProject.getMachines().stream().map(Machine::getName).collect(Collectors.toList()).contains(beta.getName())){
 						label.setText(i18n.translate("traceModification.traceRefactorSetup.checkBox.setResult.Warning"));
 						label.setTextFill(Color.color(1, 0, 0));
 					}
@@ -357,7 +356,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 	}
 
 	public void showAndPerformAction() {
-		RefactorSetup result = this.showAndWait().get();
+		RefactorSetup result = this.showAndWait().orElseThrow();
 		if (result.whatToDo == RefactorSetup.WhatToDo.NOTHING) {
 			return;
 		}
@@ -394,7 +393,7 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 			case OPTION_REPLAY:
 				ReplayOptionsOverview traceOptionChoice = new ReplayOptionsOverview(fileObject.getVariableNames(), fileObject.getMachineOperationInfos(), stageManager);
 				Optional<ReplayOptions> optionResult = traceOptionChoice.showAndWait();
-				ReplayOptions replayOptions = optionResult.get();
+				ReplayOptions replayOptions = optionResult.orElseThrow();
 				try {
 					// TODO Use shared animator instead of starting a new one
 					ModelFactory<?> factory = injector.getInstance(FactoryProvider.factoryClassFromExtension(MoreFiles.getFileExtension(result.fileAlpha)));

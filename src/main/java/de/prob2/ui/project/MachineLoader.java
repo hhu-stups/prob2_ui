@@ -265,8 +265,7 @@ public class MachineLoader {
 		}).whenComplete((r, e) -> {
 			if (e != null) {
 				LOGGER.error("Exception while loading machine {}", machine.getName());
-				if (e instanceof EventBFileNotFoundException) {
-					EventBFileNotFoundException exc = (EventBFileNotFoundException) e;
+				if (e instanceof EventBFileNotFoundException exc) {
 					if(!exc.refreshProject()) {
 						// the source file (e.g. .bum) does not exist
 						showAlert(exc, machine);

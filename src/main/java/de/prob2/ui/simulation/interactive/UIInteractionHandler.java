@@ -17,7 +17,7 @@ import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationCreator;
-import de.prob2.ui.simulation.simulators.SimulationEventHandler;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -67,10 +67,9 @@ public class UIInteractionHandler {
 	}
 
 	public void loadUIListenersIntoSimulator(RealTimeSimulator realTimeSimulator) {
-		if(!(realTimeSimulator.getConfig() instanceof SimulationModelConfiguration)) {
+		if(!(realTimeSimulator.getConfig() instanceof SimulationModelConfiguration config)) {
 			return;
 		}
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		List<UIListenerConfiguration> uiListeners = config.getUiListenerConfigurations();
 		for(UIListenerConfiguration uiListener : uiListeners) {
 			String event = uiListener.getEvent();

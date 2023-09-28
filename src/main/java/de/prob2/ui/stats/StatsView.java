@@ -151,7 +151,7 @@ public class StatsView extends ScrollPane {
 	}
 
 	public void updateWhileModelChecking(final ModelCheckingItem item) {
-		item.currentStepProperty().addListener(new ChangeListener<ModelCheckingStep>() {
+		item.currentStepProperty().addListener(new ChangeListener<>() {
 			@Override
 			public void changed(final ObservableValue<? extends ModelCheckingStep> o, final ModelCheckingStep from, final ModelCheckingStep to) {
 				if (to == null) {

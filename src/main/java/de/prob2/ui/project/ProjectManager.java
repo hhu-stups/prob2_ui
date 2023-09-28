@@ -37,7 +37,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.Preference;
 
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
@@ -380,15 +379,16 @@ public class ProjectManager {
 			"project.projectManager.alerts.unknownJSONType.header",
 			"project.projectManager.alerts.unknownJSONType.content");
 		alert.initOwner(null);
+
 		Optional<ButtonType> result = alert.showAndWait();
-		if (result.get().equals(visBButton)){
-			return JsonType.VISB;
-		} else if (result.get().equals(simBButton)) {
-			return JsonType.SIMB;
-		} else {
-			return JsonType.NONE;
+		if (result.isPresent()) {
+			if (result.get().equals(visBButton)){
+				return JsonType.VISB;
+			} else if (result.get().equals(simBButton)) {
+				return JsonType.SIMB;
+			}
 		}
+
+		return JsonType.NONE;
 	}
-
-
 }

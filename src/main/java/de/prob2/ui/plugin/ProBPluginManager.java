@@ -288,8 +288,7 @@ public class ProBPluginManager {
 			throw new PluginRuntimeException("Could not load the plugin '{}'.", pluginFileName);
 		} else {
 			PluginWrapper pluginWrapper = pluginManager.getPlugin(loadedPluginId);
-			if (pluginWrapper.getPlugin() instanceof InvalidPlugin) {
-				InvalidPlugin invPlug = (InvalidPlugin) pluginWrapper.getPlugin();
+			if (pluginWrapper.getPlugin() instanceof InvalidPlugin invPlug) {
 				Alert alert;
 				if (invPlug.getException() != null) {
 					alert = stageManager.makeExceptionAlert(invPlug.getException(), invPlug.getMessageBundleKey(), invPlug.getPluginClassName());

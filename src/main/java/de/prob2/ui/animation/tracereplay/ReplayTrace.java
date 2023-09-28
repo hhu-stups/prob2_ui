@@ -238,10 +238,9 @@ public class ReplayTrace implements IExecutableItem, IValidationTask {
 	
 	@Override
 	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof ReplayTrace)) {
+		if (!(obj instanceof ReplayTrace other)) {
 			return false;
 		}
-		final ReplayTrace other = (ReplayTrace)obj;
 		return Objects.equals(this.getId(), other.getId())
 			&& this.getLocation().equals(other.getLocation());
 	}

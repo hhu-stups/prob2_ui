@@ -570,8 +570,7 @@ public class SimulatorStage extends Stage {
 
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
 		if(config != null) {
-			if(config instanceof SimulationModelConfiguration) {
-				SimulationModelConfiguration modelConfig = (SimulationModelConfiguration) config;
+			if(config instanceof SimulationModelConfiguration modelConfig) {
 				for (ActivationConfiguration activationConfig : modelConfig.getActivationConfigurations()) {
 					if (activationConfig instanceof ActivationOperationConfiguration) {
 						observableList.add(createOperationDebugItem(activationConfig));

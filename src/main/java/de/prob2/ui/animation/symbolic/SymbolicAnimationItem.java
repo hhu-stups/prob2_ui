@@ -48,10 +48,9 @@ public class SymbolicAnimationItem extends AbstractCheckableItem {
 
 	@Override
 	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof SymbolicAnimationItem)) {
+		if (!(obj instanceof SymbolicAnimationItem other)) {
 			return false;
 		}
-		final SymbolicAnimationItem other = (SymbolicAnimationItem)obj;
 		return this.getType().equals(other.getType())
 			&& this.getCode().equals(other.getCode());
 	}

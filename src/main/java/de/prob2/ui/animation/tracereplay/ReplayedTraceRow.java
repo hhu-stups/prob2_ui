@@ -26,7 +26,7 @@ public class ReplayedTraceRow {
 		this.precision = new SimpleStringProperty(precision);
 		this.errorMessage = new SimpleStringProperty(errorMessage);
 		this.style = new SimpleStringProperty(style);
-		this.styleClasses = Collections.unmodifiableList(new ArrayList<>(styleClasses));
+		this.styleClasses = List.copyOf(styleClasses);
 	}
 
 	public ReadOnlyProperty<Number> stepProperty() {

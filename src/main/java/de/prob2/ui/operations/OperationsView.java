@@ -499,7 +499,7 @@ public final class OperationsView extends VBox {
 		final Comparator<OperationItem> comparator;
 		switch (this.getSortMode()) {
 		case MODEL_ORDER:
-			comparator = this.modelOrderComparator(new ArrayList<String>(loadedMachine.getOperationNames()));
+			comparator = this.modelOrderComparator(new ArrayList<>(loadedMachine.getOperationNames()));
 			break;
 
 		case A_TO_Z:

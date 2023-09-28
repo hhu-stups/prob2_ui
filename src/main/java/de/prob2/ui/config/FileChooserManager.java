@@ -63,13 +63,14 @@ public class FileChooserManager {
 		map.put(ZFactory.class, "common.fileChooser.fileTypes.z");
 		map.put(ZFuzzFactory.class, "common.fileChooser.fileTypes.zFuzz");
 		map.put(AlloyFactory.class, "common.fileChooser.fileTypes.alloy");
-		FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(new HashMap<>(map));
+		FACTORY_TO_TYPE_KEY_MAP = Map.copyOf(map);
+
 		// Remove unsupported file types for creating new machines
 		map.remove(EventBFactory.class);
 		map.remove(EventBPackageFactory.class);
 		//map.remove(ZFactory.class);
 		map.remove(ZFuzzFactory.class);
-		NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP = Collections.unmodifiableMap(map);
+		NEW_MACHINE_FACTORY_TO_TYPE_KEY_MAP = Map.copyOf(map);
 	}
 
 	private final I18n i18n;

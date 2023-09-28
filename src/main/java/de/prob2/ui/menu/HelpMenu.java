@@ -88,7 +88,7 @@ public class HelpMenu extends Menu {
 		syntaxStage.setTitle(title);
 		try (
 			InputStream is = Objects.requireNonNull(this.getClass().getResourceAsStream(filename));
-			InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+			InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)
 		) {
 			syntaxStage.setText(CharStreams.toString(isr));
 		} catch (IOException | UncheckedIOException e) {

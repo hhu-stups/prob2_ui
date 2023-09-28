@@ -53,9 +53,8 @@ public final class SymbolicCheckingFormulaHandler {
 		item.setResultItem(res);
 		
 		final List<Trace> counterExamples;
-		if (result instanceof CBCInvariantViolationFound) {
+		if (result instanceof CBCInvariantViolationFound violation) {
 			counterExamples = new ArrayList<>();
-			final CBCInvariantViolationFound violation = (CBCInvariantViolationFound)result;
 			final int size = violation.getCounterexamples().size();
 			for (int i = 0; i < size; i++) {
 				counterExamples.add(violation.getTrace(i, stateSpace));

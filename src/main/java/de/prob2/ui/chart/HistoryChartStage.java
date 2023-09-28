@@ -210,9 +210,7 @@ public final class HistoryChartStage extends Stage {
 		});
 		this.separateChartsCheckBox.setSelected(true);
 
-		this.rectangularLineChartCheckBox.selectedProperty().addListener((observable, from, to) -> {
-			updateCharts();
-		});
+		this.rectangularLineChartCheckBox.selectedProperty().addListener((observable, from, to) -> updateCharts());
 		this.rectangularLineChartCheckBox.setSelected(true);
 
 		this.singleChart.prefWidthProperty().bind(this.chartsScrollPane.widthProperty().subtract(5));

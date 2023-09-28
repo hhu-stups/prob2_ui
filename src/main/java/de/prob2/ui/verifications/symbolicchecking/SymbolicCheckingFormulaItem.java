@@ -81,10 +81,9 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem implement
 	
 	@Override
 	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof SymbolicCheckingFormulaItem)) {
+		if (!(obj instanceof SymbolicCheckingFormulaItem other)) {
 			return false;
 		}
-		final SymbolicCheckingFormulaItem other = (SymbolicCheckingFormulaItem)obj;
 		return Objects.equals(this.getId(), other.getId())
 			&& this.getType().equals(other.getType())
 			&& this.getCode().equals(other.getCode());

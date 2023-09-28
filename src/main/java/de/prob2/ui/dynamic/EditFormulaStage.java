@@ -6,6 +6,8 @@ import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.vomanager.IValidationTask;
+
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -81,7 +83,7 @@ public class EditFormulaStage extends Stage {
 	}
 
 	private void checkId() {
-		List<String> idList = currentProject.getCurrentMachine().getValidationTasks().values().stream().map(e -> e.getId()).collect(Collectors.toList());
+		List<String> idList = currentProject.getCurrentMachine().getValidationTasks().values().stream().map(IValidationTask::getId).collect(Collectors.toList());
 		idField.textProperty().addListener((observable, from, to) -> {
 			if (idList.contains(to)) {
 				okButton.setDisable(true);
