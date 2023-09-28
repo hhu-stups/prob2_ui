@@ -223,10 +223,10 @@ public class SimulationConditionChoice extends GridPane {
 			choosingStage.sizeToScene();
 		});
 
-		startingChoice.setConverter(new StringConverter<SimulationStartingItem>() {
+		startingChoice.setConverter(new StringConverter<>() {
 			@Override
 			public String toString(SimulationStartingItem object) {
-				if(object == null) {
+				if (object == null) {
 					return "";
 				}
 				return object.getStartingType().getName(i18n);
@@ -239,10 +239,10 @@ public class SimulationConditionChoice extends GridPane {
 		});
 
 
-		endingChoice.setConverter(new StringConverter<SimulationEndingItem>() {
+		endingChoice.setConverter(new StringConverter<>() {
 			@Override
 			public String toString(SimulationEndingItem object) {
-				if(object == null) {
+				if (object == null) {
 					return "";
 				}
 				return object.getEndingType().getName(i18n);

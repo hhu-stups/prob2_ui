@@ -190,7 +190,7 @@ public class VisualisationModel {
 	 */
 	public void executeRandomEvents(int number, long time, boolean stopOnInvariantViolation,
 									EventHandler<WorkerStateEvent> afterExecution) {
-		Task<Void> task = new Task<Void>() {
+		Task<Void> task = new Task<>() {
 			@Override
 			protected Void call() throws Exception {
 				randomExecution = true;

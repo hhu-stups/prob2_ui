@@ -87,9 +87,7 @@ public final class DetachViewStageController extends Stage {
 		});
 
 		for (CheckBox checkBox : checkBoxMap.values()) {
-			checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> {
-						apply.setDisable(false);
-			});
+			checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> apply.setDisable(false));
 		}
 		this.setOnShowing(e -> {
 			attachAll.setDisable(wrapperStages.isEmpty());

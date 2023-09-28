@@ -379,15 +379,16 @@ public class ProjectManager {
 			"project.projectManager.alerts.unknownJSONType.header",
 			"project.projectManager.alerts.unknownJSONType.content");
 		alert.initOwner(null);
+
 		Optional<ButtonType> result = alert.showAndWait();
-		if (result.get().equals(visBButton)){
-			return JsonType.VISB;
-		} else if (result.get().equals(simBButton)) {
-			return JsonType.SIMB;
-		} else {
-			return JsonType.NONE;
+		if (result.isPresent()) {
+			if (result.get().equals(visBButton)){
+				return JsonType.VISB;
+			} else if (result.get().equals(simBButton)) {
+				return JsonType.SIMB;
+			}
 		}
+
+		return JsonType.NONE;
 	}
-
-
 }

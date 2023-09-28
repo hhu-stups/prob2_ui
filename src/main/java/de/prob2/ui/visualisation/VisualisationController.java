@@ -74,12 +74,10 @@ public final class VisualisationController {
 		previousStateVBox.managedProperty().bind(previousStateVisualisationController.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
 
-		this.updater.runningProperty().addListener((o, from, to) -> {
-			Platform.runLater(() -> {
-				this.currentStateVisualisation.setDisable(to);
-				this.previousStateVisualisation.setDisable(to);
-			});
-		});
+		this.updater.runningProperty().addListener((o, from, to) -> Platform.runLater(() -> {
+			this.currentStateVisualisation.setDisable(to);
+			this.previousStateVisualisation.setDisable(to);
+		}));
 
 		currentTrace.addListener((o, from, to) -> {
 			if (to == null) {

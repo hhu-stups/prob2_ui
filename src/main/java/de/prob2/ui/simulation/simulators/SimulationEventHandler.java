@@ -155,8 +155,7 @@ public class SimulationEventHandler {
 			if (!transitions.isEmpty()) {
 				return transitions.get(0);
 			}
-		} else if (probabilisticVariables instanceof String){
-			String probabilisticVariablesAsString = (String) probabilisticVariables;
+		} else if (probabilisticVariables instanceof String probabilisticVariablesAsString){
 			if("first".equals(probabilisticVariablesAsString)) {
 				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, 1);
 				if (!transitions.isEmpty()) {

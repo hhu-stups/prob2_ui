@@ -190,9 +190,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 				svgData = dotCall.call();
 			} catch (ProBError e) {
 				LOGGER.error("could not visualize graph with dot (command={}, layoutEngine={}, outputFormat={})", dotLocal, dotEngineLocal, outputFormat, e);
-				Platform.runLater(() -> {
-					this.stageManager.makeExceptionAlert(e, "dotty.error.dotVisualization.message").show();
-				});
+				Platform.runLater(() -> this.stageManager.makeExceptionAlert(e, "dotty.error.dotVisualization.message").show());
 				return;
 			}
 
@@ -304,8 +302,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		double x = 0.0;
 		double y = 0.0;
 		for (final Node node : nodes) {
-			if (node instanceof ScrollBar) {
-				ScrollBar sb = (ScrollBar) node;
+			if (node instanceof ScrollBar sb) {
 				if (sb.getOrientation() == Orientation.VERTICAL) {
 					x = sb.getPrefHeight() / 2;
 				} else {

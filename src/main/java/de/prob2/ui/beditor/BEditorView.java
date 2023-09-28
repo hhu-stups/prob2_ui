@@ -439,7 +439,7 @@ public class BEditorView extends BorderPane {
 		resetWatching();
 		assert this.getPath() != null;
 		try {
-			Files.write(this.getPath(), beditor.getText().getBytes(EDITOR_CHARSET), StandardOpenOption.TRUNCATE_EXISTING);
+			Files.writeString(this.getPath(), beditor.getText(), EDITOR_CHARSET, StandardOpenOption.TRUNCATE_EXISTING);
 		} catch (IOException e) {
 			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
 			alert.initOwner(this.getScene().getWindow());

@@ -45,20 +45,20 @@ public final class BConsole extends Console {
 
 		this.codeCompletion = new CodeCompletion<>(
 			stageManager,
-			new AbstractParentWithEditableText<BCCItem>() {
+				new AbstractParentWithEditableText<>() {
 
-				@Override
-				public void doReplacement(BCCItem replacement) {
-					OptionalInt optInputPosition = BConsole.this.getPositionInInput();
-					if (!optInputPosition.isPresent()) {
-						// the cursor is not in the input, we dont have an anchor position for completion
-						return;
+					@Override
+					public void doReplacement(BCCItem replacement) {
+						OptionalInt optInputPosition = BConsole.this.getPositionInInput();
+						if (!optInputPosition.isPresent()) {
+							// the cursor is not in the input, we dont have an anchor position for completion
+							return;
+						}
+
+						int inputPosition = optInputPosition.getAsInt();
+						BConsole.this.replace(inputPosition - replacement.getOriginalText().length(), inputPosition, replacement.getReplacement());
 					}
-
-					int inputPosition = optInputPosition.getAsInt();
-					BConsole.this.replace(inputPosition - replacement.getOriginalText().length(), inputPosition, replacement.getReplacement());
-				}
-			},
+				},
 			bInterpreter::getSuggestions
 		);
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));

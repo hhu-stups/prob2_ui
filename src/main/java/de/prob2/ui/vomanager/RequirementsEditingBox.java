@@ -120,7 +120,7 @@ public class RequirementsEditingBox extends VBox {
 		voStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		voStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
 
-		voMachineColumn.setCellFactory(col -> new TableCell<ValidationObligation, String>() {
+		voMachineColumn.setCellFactory(col -> new TableCell<>() {
 			@Override
 			protected void updateItem(final String item, final boolean empty) {
 				super.updateItem(item, empty);

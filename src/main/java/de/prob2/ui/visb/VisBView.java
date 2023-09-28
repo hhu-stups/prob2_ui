@@ -400,21 +400,21 @@ public class VisBView extends BorderPane {
 			// https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
 			webView.getEngine().getLoadWorker().stateProperty().addListener(
 				//Use new constructor instead of lambda expression to access change listener with keyword this
-				new ChangeListener<Worker.State>() {
-					@Override
-					public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
-						switch (newValue) {
-							case SUCCEEDED:
-							case FAILED:
-							case CANCELLED:
-								webView.getEngine().getLoadWorker().stateProperty().removeListener(this);
+					new ChangeListener<>() {
+						@Override
+						public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
+							switch (newValue) {
+								case SUCCEEDED:
+								case FAILED:
+								case CANCELLED:
+									webView.getEngine().getLoadWorker().stateProperty().removeListener(this);
+							}
+							if (newValue != Worker.State.SUCCEEDED) {
+								return;
+							}
+							runnable.run();
 						}
-						if (newValue != Worker.State.SUCCEEDED) {
-							return;
-						}
-						runnable.run();
 					}
-				}
 			);
 		} else {
 			runnable.run();

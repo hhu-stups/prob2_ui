@@ -1,10 +1,13 @@
 package de.prob2.ui.visualisation.fx.loader.clazz;
 
+import java.io.Serial;
+
 import javax.tools.Diagnostic;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
 
 public class InMemoryCompilerException extends Exception {
+	@Serial
 	private static final long serialVersionUID = 1L;
 
 	private static String buildMessage(String className, DiagnosticCollector<JavaFileObject> diagnostics) {

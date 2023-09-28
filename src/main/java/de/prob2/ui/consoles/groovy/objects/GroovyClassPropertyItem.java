@@ -195,10 +195,9 @@ public class GroovyClassPropertyItem extends GroovyAbstractItem {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof GroovyClassPropertyItem)) {
+		if (!(obj instanceof GroovyClassPropertyItem other)) {
 			return false;
 		}
-		GroovyClassPropertyItem other = (GroovyClassPropertyItem) obj;
 		return other.name.get().equals(name.get()) &&
 				       other.isMethod == this.isMethod &&
 				       other.params.get().equals(params.get()) &&

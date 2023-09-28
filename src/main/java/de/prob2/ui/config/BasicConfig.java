@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Locale;
+import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
@@ -43,11 +44,8 @@ public final class BasicConfig {
 	private BasicConfigData load() {
 		try {
 			final BasicConfigData data = this.objectMapper.readValue(this.configFilePath.toFile(), BasicConfigData.class);
-			if (data == null) {
-				// Config file is empty, use defaults instead.
-				return new BasicConfigData();
-			}
-			return data;
+			// Config file is empty, use defaults instead.
+			return Objects.requireNonNullElseGet(data, BasicConfigData::new);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			LOGGER.info("Config file not found while loading basic config, loading default settings", exc);
 			return new BasicConfigData();

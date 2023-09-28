@@ -320,7 +320,7 @@ public final class I18n {
 	 * @return string converter
 	 */
 	public <T extends Translatable> StringConverter<T> translateConverter(String nullTranslationKey) {
-		return new StringConverter<T>() {
+		return new StringConverter<>() {
 
 			@Override
 			public String toString(T object) {
@@ -351,7 +351,7 @@ public final class I18n {
 	 */
 	public <T> StringConverter<T> translateConverter(TranslatableAdapter<? super T> adapter, String nullTranslationKey) {
 		Objects.requireNonNull(adapter, "adapter");
-		return new StringConverter<T>() {
+		return new StringConverter<>() {
 
 			@Override
 			public String toString(T object) {
@@ -402,7 +402,7 @@ public final class I18n {
 	 * @return string converter
 	 */
 	public <T extends Formattable> StringConverter<T> formatConverter(String nullTranslationKey) {
-		return new StringConverter<T>() {
+		return new StringConverter<>() {
 
 			@Override
 			public String toString(T object) {
@@ -433,7 +433,7 @@ public final class I18n {
 	 */
 	public <T> StringConverter<T> formatConverter(FormattableAdapter<? super T> adapter, String nullTranslationKey) {
 		Objects.requireNonNull(adapter, "adapter");
-		return new StringConverter<T>() {
+		return new StringConverter<>() {
 
 			@Override
 			public String toString(T object) {

@@ -19,7 +19,7 @@ public class CompletableFutureTask<T> extends CompletableFuture<T> implements Ru
 	private final FutureTask<T> task;
 
 	CompletableFutureTask(final Callable<T> callable) {
-		this.task = new FutureTask<T>(callable) {
+		this.task = new FutureTask<>(callable) {
 			@Override
 			protected void done() {
 				if (this.isCancelled()) {

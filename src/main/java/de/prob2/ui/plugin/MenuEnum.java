@@ -46,8 +46,7 @@ public enum MenuEnum {
 
 	private Menu searchMenuInSubMenus(@Nonnull final Menu menuToSearchIn){
 		for (MenuItem item : menuToSearchIn.getItems()) {
-			if (item instanceof Menu) {
-				Menu subMenu = (Menu) item;
+			if (item instanceof Menu subMenu) {
 				if (this.id.equals(subMenu.getId())) {
 					return subMenu;
 				}

@@ -67,10 +67,9 @@ public class UIInteractionHandler {
 	}
 
 	public void loadUIListenersIntoSimulator(RealTimeSimulator realTimeSimulator) {
-		if(!(realTimeSimulator.getConfig() instanceof SimulationModelConfiguration)) {
+		if(!(realTimeSimulator.getConfig() instanceof SimulationModelConfiguration config)) {
 			return;
 		}
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		List<UIListenerConfiguration> uiListeners = config.getUiListenerConfigurations();
 		for(UIListenerConfiguration uiListener : uiListeners) {
 			String event = uiListener.getEvent();

@@ -147,10 +147,9 @@ public class Project implements HasMetadata {
 		if (other == this) {
 			return true;
 		}
-		if (!(other instanceof Project)) {
+		if (!(other instanceof Project otherProject)) {
 			return false;
 		}
-		Project otherProject = (Project) other;
 
 		return otherProject.name.equals(this.name) &&
 				otherProject.description.equals(this.description) &&

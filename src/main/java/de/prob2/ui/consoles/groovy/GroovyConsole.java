@@ -35,20 +35,20 @@ public class GroovyConsole extends Console {
 		this.groovyInterpreter = groovyInterpreter;
 		this.codeCompletion = new CodeCompletion<>(
 			stageManager,
-			new AbstractParentWithEditableText<GroovyCCItem>() {
+				new AbstractParentWithEditableText<>() {
 
-				@Override
-				public void doReplacement(GroovyCCItem replacement) {
-					OptionalInt optInputPosition = GroovyConsole.this.getPositionInInput();
-					if (!optInputPosition.isPresent()) {
-						// the cursor is not in the input, we dont have an anchor position for completion
-						return;
+					@Override
+					public void doReplacement(GroovyCCItem replacement) {
+						OptionalInt optInputPosition = GroovyConsole.this.getPositionInInput();
+						if (!optInputPosition.isPresent()) {
+							// the cursor is not in the input, we dont have an anchor position for completion
+							return;
+						}
+
+						int inputPosition = optInputPosition.getAsInt();
+						GroovyConsole.this.replace(inputPosition - replacement.getOriginalText().length(), inputPosition, replacement.getReplacement());
 					}
-
-					int inputPosition = optInputPosition.getAsInt();
-					GroovyConsole.this.replace(inputPosition - replacement.getOriginalText().length(), inputPosition, replacement.getReplacement());
-				}
-			},
+				},
 			this.groovyInterpreter::getSuggestions
 		);
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));

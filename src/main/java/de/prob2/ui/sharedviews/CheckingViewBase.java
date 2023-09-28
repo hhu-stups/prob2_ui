@@ -135,8 +135,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		shouldExecuteColumn.setGraphic(selectAll);
 		configurationColumn.setCellValueFactory(features -> {
 			String configuration = configurationForItem(features.getValue());
-			if (features.getValue() instanceof IValidationTask) {
-				final IValidationTask task = (IValidationTask)features.getValue();
+			if (features.getValue() instanceof IValidationTask task) {
 				if (task.getId() != null) {
 					configuration = "[" + task.getId() + "] " + configuration;
 				}

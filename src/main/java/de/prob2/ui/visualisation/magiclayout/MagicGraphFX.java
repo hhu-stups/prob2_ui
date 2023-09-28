@@ -239,8 +239,7 @@ public class MagicGraphFX implements MagicGraphI {
 	 */
 	private Model getModel(String caption, BValue bValue) {
 		Model model = new Model();
-		if (bValue instanceof BTuple) {
-			BTuple<?, ?> tuple = (BTuple<?, ?>) bValue;
+		if (bValue instanceof BTuple<?, ?> tuple) {
 			model.addEdge(new Edge(new Vertex(tuple.getFirst().toString()), new Vertex(tuple.getSecond().toString()),
 				caption));
 		} else if(bValue instanceof BSet<?>) {

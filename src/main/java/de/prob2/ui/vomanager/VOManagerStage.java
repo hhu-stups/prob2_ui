@@ -156,11 +156,11 @@ public class VOManagerStage extends Stage {
 		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
 		requirementStatusColumn.setCellValueFactory(features -> features.getValue().getValue().checkedProperty());
 
-		tvRequirements.setRowFactory(table -> new TreeTableRow<VOManagerItem>() {
+		tvRequirements.setRowFactory(table -> new TreeTableRow<>() {
 			@Override
 			protected void updateItem(final VOManagerItem item, final boolean empty) {
 				super.updateItem(item, empty);
-				
+
 				this.getStyleClass().remove("unrelated");
 				if (empty) {
 					this.setContextMenu(null);
@@ -171,24 +171,24 @@ public class VOManagerStage extends Stage {
 							checkItem(item);
 						}
 					};
-					
+
 					if (item.getVo() != null) {
 						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.check"));
 						checkItem.setOnAction(e -> checkItem(item));
-						
+
 						final MenuItem removeItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.remove"));
 						removeItem.setOnAction(e -> removeItem(item));
-						
+
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
 						this.setOnMouseClicked(doubleClickHandler);
 					} else if (item.getRequirement() != null) {
 						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.check", item.getRequirement().getValidationObligations().size()));
 						checkItem.setOnAction(e -> checkItem(item));
 						checkItem.setDisable(item.getRequirement().getValidationObligations().isEmpty());
-						
+
 						final MenuItem removeItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.remove"));
 						removeItem.setOnAction(e -> removeItem(item));
-						
+
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
 						this.setOnMouseClicked(doubleClickHandler);
 					} else {
@@ -196,7 +196,7 @@ public class VOManagerStage extends Stage {
 						this.setContextMenu(null);
 						this.setOnMouseClicked(null);
 					}
-					
+
 					// Gray out items belonging to machines that are not in the current machine's refinement chain.
 					if (item.getMachineName() != null && !relatedMachineNames.isEmpty() && !relatedMachineNames.contains(item.getMachineName())) {
 						this.getStyleClass().add("unrelated");

@@ -41,10 +41,9 @@ public final class MCDCItem extends TestCaseGenerationItem {
 	
 	@Override
 	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof MCDCItem)) {
+		if (!(obj instanceof MCDCItem other)) {
 			return false;
 		}
-		final MCDCItem other = (MCDCItem)obj;
 		return super.settingsEqual(other) && this.getLevel() == other.getLevel();
 	}
 }

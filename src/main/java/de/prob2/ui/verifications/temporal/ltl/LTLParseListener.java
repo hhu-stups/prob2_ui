@@ -27,8 +27,7 @@ public class LTLParseListener extends BaseErrorListener {
 	public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
 							String msg, RecognitionException e) {
 		int length = 1;
-		if (offendingSymbol instanceof Token) {
-			Token token = (Token) offendingSymbol;
+		if (offendingSymbol instanceof Token token) {
 			length = token.getStopIndex() - token.getStartIndex() + 1;
 		}
 		errorMarkers.add(new ErrorItem(msg, ErrorItem.Type.ERROR, Collections.singletonList(locationFromTokenPos(line, charPositionInLine, length))));

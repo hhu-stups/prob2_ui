@@ -304,7 +304,7 @@ public class VisBController {
 			if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
 				throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
 			}
-			svgContent = new String(Files.readAllBytes(svgPath), StandardCharsets.UTF_8);
+			svgContent = Files.readString(svgPath);
 		}
 		
 		ReadVisBItemsCommand readVisBItemsCommand = new ReadVisBItemsCommand();

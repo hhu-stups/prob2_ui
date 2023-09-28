@@ -17,7 +17,7 @@ import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 
 final class GroovyCodeCompletionHandler {
 
-	private static final Map<String, String> GLOBAL_CLASSES = new HashMap<String, String>() {
+	private static final Map<String, String> GLOBAL_CLASSES = new HashMap<>() {
 		{
 			this.put("BigDecimal", "java.math.BigDecimal");
 			this.put("BigInteger", "java.math.BigInteger");

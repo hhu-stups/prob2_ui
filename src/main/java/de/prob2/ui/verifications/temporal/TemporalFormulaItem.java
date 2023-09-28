@@ -115,10 +115,9 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 	
 	@Override
 	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof TemporalFormulaItem)) {
+		if (!(obj instanceof TemporalFormulaItem other)) {
 			return false;
 		}
-		final TemporalFormulaItem other = (TemporalFormulaItem)obj;
 		return this.type == other.type
 			&& Objects.equals(this.getId(), other.getId())
 			&& this.getCode().equals(other.getCode())

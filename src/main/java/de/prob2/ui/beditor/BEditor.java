@@ -43,19 +43,19 @@ public class BEditor extends ExtendedCodeArea {
 
 		this.codeCompletion = new CodeCompletion<>(
 			stageManager,
-			new AbstractParentWithEditableText<BCCItem>() {
+				new AbstractParentWithEditableText<>() {
 
-				@Override
-				public void doReplacement(BCCItem replacement) {
-					if (!BEditor.this.isEditable()) {
-						// the text field is not editable, assume no file loaded
-						return;
+					@Override
+					public void doReplacement(BCCItem replacement) {
+						if (!BEditor.this.isEditable()) {
+							// the text field is not editable, assume no file loaded
+							return;
+						}
+
+						int caret = BEditor.this.getCaretPosition();
+						BEditor.this.replace(caret - replacement.getOriginalText().length(), caret, replacement.getReplacement(), Collections.emptyList());
 					}
-
-					int caret = BEditor.this.getCaretPosition();
-					BEditor.this.replace(caret - replacement.getOriginalText().length(), caret, replacement.getReplacement(), Collections.emptyList());
-				}
-			},
+				},
 			text -> BCodeCompletion.doCompletion(currentTrace.getStateSpace(), text)
 		);
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));

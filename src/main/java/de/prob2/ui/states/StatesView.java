@@ -513,7 +513,7 @@ public final class StatesView extends StackPane {
 		// The tree items for the children of treeItem's children are generated once treeItem is expanded.
 		// This needs to be an anonymous class instead of a lambda,
 		// so that the listener can remove itself after it runs once.
-		final ChangeListener<Boolean> generateGrandchildrenListener = new ChangeListener<Boolean>() {
+		final ChangeListener<Boolean> generateGrandchildrenListener = new ChangeListener<>() {
 			@Override
 			public void changed(final ObservableValue<? extends Boolean> o, final Boolean from, final Boolean to) {
 				if (to) {

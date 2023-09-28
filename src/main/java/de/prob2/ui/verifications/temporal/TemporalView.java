@@ -133,16 +133,16 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		this.currentProject = currentProject;
 		this.fileChooserManager = fileChooserManager;
 		this.jacksonManager = jacksonManager;
-		jacksonManager.initContext(new JacksonManager.Context<LTLData>(objectMapper, LTLData.class, LTLData.FILE_TYPE, LTLData.CURRENT_FORMAT_VERSION) {
+		jacksonManager.initContext(new JacksonManager.Context<>(objectMapper, LTLData.class, LTLData.FILE_TYPE, LTLData.CURRENT_FORMAT_VERSION) {
 			@Override
 			public boolean shouldAcceptOldMetadata() {
 				return true;
 			}
-			
+
 			@Override
 			public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 				if (oldVersion <= 0) {
-					for (final String fieldName : new String[] {"formulas", "patterns"}) {
+					for (final String fieldName : new String[] { "formulas", "patterns" }) {
 						if (!oldObject.has(fieldName)) {
 							throw new JsonConversionException("Not a valid LTL file - missing required field " + fieldName);
 						}

@@ -125,12 +125,7 @@ public class LayeredLayout implements Layout {
 		addDummyVertices(vertexLayerMap, acyclicEdges);
 
 		NavigableMap<Integer, List<Vertex>> layerLists = new TreeMap<>();
-		vertexLayerMap.forEach((vertex, layerNr) -> {
-			if (layerLists.get(layerNr) == null) {
-				layerLists.put(layerNr, new ArrayList<>());
-			}
-			layerLists.get(layerNr).add(vertex);
-		});
+		vertexLayerMap.forEach((vertex, layerNr) -> layerLists.computeIfAbsent(layerNr, k -> new ArrayList<>()).add(vertex));
 		return layerLists;
 	}
 
@@ -291,9 +286,7 @@ public class LayeredLayout implements Layout {
 			baryMap.put(bary, vertex);
 		});
 
-		List<Vertex> permutedLayer = new ArrayList<>();
-		permutedLayer.addAll(baryMap.values());
-
+		List<Vertex> permutedLayer = new ArrayList<>(baryMap.values());
 		layers.put(permuteLayerNr, permutedLayer);
 	}
 

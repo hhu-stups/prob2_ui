@@ -41,7 +41,7 @@ public class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
 	}
 
 	private static <T> TableCell<ReplayedTraceRow, T> cellFactory(TableColumn<ReplayedTraceRow, T> column) {
-		return new TableCell<ReplayedTraceRow, T>() {
+		return new TableCell<>() {
 			{
 				getStyleClass().add("trace-diff-cell");
 			}

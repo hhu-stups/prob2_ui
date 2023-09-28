@@ -33,8 +33,7 @@ final class ValueCell extends TreeTableCell<StateItem, BVisual2Value> {
 	private void checkResult(final BVisual2Value result) {
 		if (result == null) {
 			this.setText(null);
-		} else if (result instanceof BVisual2Value.PredicateValue) {
-			final BVisual2Value.PredicateValue predValue = (BVisual2Value.PredicateValue)result;
+		} else if (result instanceof BVisual2Value.PredicateValue predValue) {
 			this.setText(String.valueOf(predValue.getValue()));
 			switch (predValue) {
 				case FALSE:

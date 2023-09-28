@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  */
 public final class BackgroundUpdater implements Executor {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BackgroundUpdater.class);
-	private static final FutureCallback<Object> THROW_EXCEPTIONS_CALLBACK = new FutureCallback<Object>() {
+	private static final FutureCallback<Object> THROW_EXCEPTIONS_CALLBACK = new FutureCallback<>() {
 		@Override
 		public void onSuccess(final Object result) {
 		}

@@ -61,7 +61,7 @@ public class PreferencesTab extends Tab {
 	}
 
 	private ListCell<Preference> initListCell() {
-		ListCell<Preference> cell = new ListCell<Preference>() {
+		ListCell<Preference> cell = new ListCell<>() {
 			@Override
 			public void updateItem(Preference preference, boolean empty) {
 				super.updateItem(preference, empty);
@@ -107,8 +107,7 @@ public class PreferencesTab extends Tab {
 			if (event.getButton().equals(MouseButton.PRIMARY) && event.getClickCount() == 2) {
 				showPreferenceView(cell.getItem());
 			}
-			if (splitPane.getItems().get(0) instanceof PreferenceView) {
-				PreferenceView prefView = (PreferenceView) splitPane.getItems().get(0);
+			if (splitPane.getItems().get(0) instanceof PreferenceView prefView) {
 				preferencesListView.getSelectionModel().select(prefView.getPreference());
 			} else {
 				preferencesListView.getSelectionModel().clearSelection();
@@ -118,8 +117,7 @@ public class PreferencesTab extends Tab {
 		// displayed in Preference View. Otherwise this preference would be
 		// unselected as long as a mouse button is pressed
 		cell.setOnMousePressed(event -> {
-			if (splitPane.getItems().get(0) instanceof PreferenceView) {
-				PreferenceView prefView = (PreferenceView) splitPane.getItems().get(0);
+			if (splitPane.getItems().get(0) instanceof PreferenceView prefView) {
 				preferencesListView.getSelectionModel().select(prefView.getPreference());
 			} else {
 				preferencesListView.getSelectionModel().clearSelection();

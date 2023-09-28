@@ -67,10 +67,10 @@ public class SimulationEstimationChoice extends GridPane {
 
 	@FXML
 	private void initialize() {
-		estimationChoice.setConverter(new StringConverter<SimulationEstimationChoice.SimulationEstimationChoiceItem>() {
+		estimationChoice.setConverter(new StringConverter<>() {
 			@Override
 			public String toString(SimulationEstimationChoice.SimulationEstimationChoiceItem object) {
-				if(object == null) {
+				if (object == null) {
 					return "";
 				}
 				return object.getName(i18n);
