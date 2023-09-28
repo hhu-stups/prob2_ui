@@ -13,6 +13,7 @@ import java.util.concurrent.CancellationException;
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
 
+import de.prob.analysis.testcasegeneration.Target;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
@@ -226,7 +227,10 @@ public final class TraceFileHandler {
 			for (int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + (i+1) + ".prob2trace");
 				save(traces.get(i), traceFilePath, item.createdByForMetadata(i));
-				this.addTraceFile(machine, traceFilePath);
+				Target target = item.getResult().getTestTraces().get(i).getTarget();
+				String description = "Test Case Generation Trace \nOperation: " + target.getOperation() + "\nGuard: " + target.getGuardString();
+				ReplayTrace trace = this.addTraceFile(machine, traceFilePath);
+				trace.saveModified(trace.load().changeDescription(description));
 			}
 
 		} catch (IOException e) {
