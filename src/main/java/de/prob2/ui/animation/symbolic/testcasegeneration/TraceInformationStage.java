@@ -7,11 +7,13 @@ import com.google.inject.Inject;
 import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.WrappedTextTableCell;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
 import javafx.scene.control.ContextMenu;
@@ -42,7 +44,7 @@ public final class TraceInformationStage extends Stage {
 					this.setCursor(Cursor.DEFAULT);
 				}
 			});
-			MenuItem executeTrace = new MenuItem("Show Trace");
+			MenuItem executeTrace = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
 			executeTrace.setOnAction(e -> {
 				TestTrace item = this.getItem();
 				if (item.getTrace() != null) {
@@ -117,10 +119,13 @@ public final class TraceInformationStage extends Stage {
 
 	private final CurrentTrace currentTrace;
 
+	private final I18n i18n;;
+
 	@Inject
-	private TraceInformationStage(final StageManager stageManager, final CurrentTrace currentTrace) {
+	private TraceInformationStage(final StageManager stageManager, final CurrentTrace currentTrace, final I18n i18n) {
 		stageManager.loadFXML(this, "test_case_generation_trace_information.fxml");
 		this.currentTrace = currentTrace;
+		this.i18n = i18n;
 	}
 
 	public void setResult(final TestCaseGeneratorResult result) {
