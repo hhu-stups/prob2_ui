@@ -12,17 +12,15 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.WrappedTextTableCell;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 public final class TraceInformationStage extends Stage {
@@ -117,6 +115,12 @@ public final class TraceInformationStage extends Stage {
 	@FXML
 	private TableColumn<Target, String> uncoveredGuard;
 
+	@FXML
+	private Text generatedTracesSummary;
+
+	@FXML
+	private Text uncoveredOpsSummary;
+
 	private final CurrentTrace currentTrace;
 
 	private final I18n i18n;;
@@ -142,7 +146,7 @@ public final class TraceInformationStage extends Stage {
 		operations.setCellValueFactory(features -> Bindings.createStringBinding(() ->
 			String.join(",\n", features.getValue().getTransitionNames())
 		));
-		coveredOperation.setCellValueFactory(features -> Bindings.createStringBinding(() -> 
+		coveredOperation.setCellValueFactory(features -> Bindings.createStringBinding(() ->
 			features.getValue().getTarget().getOperation()
 		));
 		guard.setCellFactory(WrappedTextTableCell::new);
@@ -154,6 +158,10 @@ public final class TraceInformationStage extends Stage {
 		uncoveredOperation.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		uncoveredGuard.setCellFactory(WrappedTextTableCell::new);
 		uncoveredGuard.setCellValueFactory(new PropertyValueFactory<>("guardString"));
+		Platform.runLater(() -> {
+			generatedTracesSummary.setText(String.valueOf(tvTraces.getItems().size()));
+			uncoveredOpsSummary.setText(String.valueOf(tvUncovered.getItems().size()));
+		});
 	}
 
 }

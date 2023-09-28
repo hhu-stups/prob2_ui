@@ -2,14 +2,21 @@
 
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
-<?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import javafx.scene.control.Tab?>
-<fx:root type="Stage" title="%animation.testcase.traceInformation.title" minHeight="400.0" minWidth="600.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<fx:root type="Stage" title="%animation.testcase.traceInformation.title" minHeight="400.0" minWidth="600.0" height="400.0" width="600.0" xmlns="http://javafx.com/javafx/8.0.91" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
-		<Scene stylesheets="@/prob.css" height="400.0" width="600.0">
-			<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE">
+		<Scene>
+		<BorderPane stylesheets="@/prob.css">
+			<center>
+			<BetterTabPane fx:id="tabPane" tabClosingPolicy="UNAVAILABLE" >
 			<Tab text="%animation.testcase.traceInformation.generatedtraces">
 				<TableView fx:id="tvTraces">
 					<columnResizePolicy>
@@ -36,6 +43,20 @@
 				</TableView>
 			</Tab>
 			</BetterTabPane>
+			</center>
+		<bottom>
+			<VBox>
+			<HBox spacing="10.0">
+				<Label text="%animation.testcase.traceInformation.generatedtraces" labelFor="$generatedTracesSummary" VBox.vgrow="NEVER"/>
+				<Text fx:id="generatedTracesSummary" VBox.vgrow="NEVER"/>
+			</HBox>
+			<HBox spacing="10.0">
+				<Label text="%animation.testcase.traceInformation.uncoveredOperations" labelFor="$uncoveredOpsSummary" VBox.vgrow="NEVER"/>
+				<Text fx:id="uncoveredOpsSummary" VBox.vgrow="NEVER"/>
+			</HBox>
+			</VBox>
+		</bottom>
+		</BorderPane>
 		</Scene>
 	</scene>
 </fx:root>
