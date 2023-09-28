@@ -14,16 +14,16 @@ class CSVWriterTest {
 		StringWriter w = new StringWriter();
 		try (CSVWriter csvWriter = new CSVWriter(w)) {
 			csvWriter
-					.header("Foo", "Bar")
-					.record("A", "B")
-					.record("C", "D");
+				.header("Foo", "Bar")
+				.record("A", "B")
+				.record("C", "D");
 		}
 
-		assertThat(w.toString()).isEqualTo(
-				"Foo,Bar\r\n" +
-						"A,B\r\n" +
-						"C,D\r\n"
-		);
+		assertThat(w.toString()).isEqualTo("""
+			Foo,Bar\r
+			A,B\r
+			C,D\r
+			""");
 	}
 
 	@Test
@@ -31,11 +31,12 @@ class CSVWriterTest {
 		StringWriter w = new StringWriter();
 		try (CSVWriter csvWriter = new CSVWriter(w)) {
 			csvWriter
-					.record("A,B", "C");
+				.record("A,B", "C");
 		}
 
-		assertThat(w.toString()).isEqualTo(
-				"\"A,B\",C\r\n"
+		assertThat(w.toString()).isEqualTo("""
+			"A,B",C\r
+			"""
 		);
 	}
 
@@ -43,12 +44,11 @@ class CSVWriterTest {
 	void testQuoteEscape() throws IOException {
 		StringWriter w = new StringWriter();
 		try (CSVWriter csvWriter = new CSVWriter(w)) {
-			csvWriter
-					.record("\"A\"", "B");
+			csvWriter.record("\"A\"", "B");
 		}
 
-		assertThat(w.toString()).isEqualTo(
-				"\"\"\"A\"\"\",B\r\n"
-		);
+		assertThat(w.toString()).isEqualTo("""
+			"A",B\r
+			""");
 	}
 }
