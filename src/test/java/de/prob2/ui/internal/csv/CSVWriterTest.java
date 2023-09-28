@@ -48,7 +48,7 @@ class CSVWriterTest {
 		}
 
 		assertThat(w.toString()).isEqualTo("""
-			"A",B\r
+			\"""A\""",B\r
 			""");
 	}
 }
