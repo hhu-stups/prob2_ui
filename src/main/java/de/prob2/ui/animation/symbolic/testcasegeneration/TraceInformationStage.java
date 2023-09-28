@@ -90,7 +90,10 @@ public final class TraceInformationStage extends Stage {
 	}
 
 	@FXML
-	private TableColumn<TestTrace, String> number;
+	private TableColumn<TestTrace, String> numberGeneratedTraces;
+
+	@FXML
+	private TableColumn<TestTrace, String> numberUncoveredOps;
 	@FXML
 	private TableView<TestTrace> tvTraces;
 
@@ -139,8 +142,10 @@ public final class TraceInformationStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		number.setCellValueFactory(p -> new ReadOnlyObjectWrapper(tvTraces.getItems().indexOf(p.getValue()) + 1));
-		number.setSortable(false);
+		numberGeneratedTraces.setCellValueFactory(p -> new ReadOnlyObjectWrapper(tvTraces.getItems().indexOf(p.getValue()) + 1));
+		numberGeneratedTraces.setSortable(false);
+		numberUncoveredOps.setCellValueFactory(p -> new ReadOnlyObjectWrapper(tvUncovered.getItems().indexOf(p.getValue()) + 1));
+		numberUncoveredOps.setSortable(false);
 		tvTraces.setRowFactory(item -> new TraceInformationRow());
 		depth.setCellValueFactory(new PropertyValueFactory<>("depth"));
 		operations.setCellValueFactory(features -> Bindings.createStringBinding(() ->

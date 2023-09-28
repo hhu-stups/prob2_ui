@@ -23,7 +23,7 @@
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 					</columnResizePolicy>
 					<columns>
-						<TableColumn fx:id="number" editable="false" prefWidth="20.0" text="#" />
+						<TableColumn fx:id="numberGeneratedTraces" editable="false" prefWidth="20.0" text="#" />
 						<TableColumn fx:id="depth" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.depth" />
 						<TableColumn fx:id="coveredOperation" editable="false" prefWidth="100.0" text="%animation.testcase.traceInformation.column.coveredOperation" />
 						<TableColumn fx:id="operations" editable="false" prefWidth="100.0" text="%animation.testcase.traceInformation.column.trace" />
@@ -37,8 +37,9 @@
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 					</columnResizePolicy>
 					<columns>
-						<TableColumn fx:id="uncoveredOperation" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.operation" />
-						<TableColumn fx:id="uncoveredGuard" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.guard" />
+						<TableColumn fx:id="numberUncoveredOps" editable="false" prefWidth="20.0" text="#" />
+						<TableColumn fx:id="uncoveredOperation" editable="false" prefWidth="150.0" text="%animation.testcase.traceInformation.column.operation" />
+						<TableColumn fx:id="uncoveredGuard" editable="false" prefWidth="150.0" text="%animation.testcase.traceInformation.column.guard" />
 					</columns>
 				</TableView>
 			</Tab>
