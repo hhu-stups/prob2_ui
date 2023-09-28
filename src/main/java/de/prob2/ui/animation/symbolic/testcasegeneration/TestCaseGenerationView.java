@@ -7,6 +7,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.statespace.Trace;
@@ -33,6 +34,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.input.MouseButton;
 
 @FXMLInjected
 @Singleton
@@ -43,11 +45,15 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
-			showDetails.setOnAction(e -> {
-				TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
-				stage.setResult(this.getItem().getResult());
-				stage.show();
-				stage.toFront();
+			showDetails.setOnAction(e -> showDetails(this.getItem().getResult()));
+			this.setOnMouseClicked(e -> {
+				if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY) {
+					if (this.getItem().getResult() != null && !this.getItem().getResult().getTestTraces().isEmpty()) {
+						showDetails(this.getItem().getResult());
+					} else {
+						executeItem(this.getItem());
+					}
+				}
 			});
 			contextMenu.getItems().add(showDetails);
 
@@ -82,6 +88,13 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
 			});
+
+		}
+		private void showDetails(TestCaseGeneratorResult result) {
+			TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
+			stage.setResult(this.getItem().getResult());
+			stage.show();
+			stage.toFront();
 		}
 
 		private void showExamples(TestCaseGenerationItem item, Menu exampleItem) {
