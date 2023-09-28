@@ -16,6 +16,7 @@
 						<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 					</columnResizePolicy>
 					<columns>
+						<TableColumn fx:id="number" editable="false" prefWidth="20.0" text="#" />
 						<TableColumn fx:id="depth" editable="false" prefWidth="20.0" text="%animation.testcase.traceInformation.column.depth" />
 						<TableColumn fx:id="coveredOperation" editable="false" prefWidth="100.0" text="%animation.testcase.traceInformation.column.coveredOperation" />
 						<TableColumn fx:id="operations" editable="false" prefWidth="100.0" text="%animation.testcase.traceInformation.column.trace" />
