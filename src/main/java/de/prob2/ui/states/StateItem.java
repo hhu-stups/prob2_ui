@@ -10,8 +10,8 @@ import de.prob.statespace.State;
 // This class needs to be public (even though it's only used inside this package) so that Bindings.select can access its getters.
 public final class StateItem {
 	public interface FormulaEvaluator {
-		public abstract ExpandedFormula expand(final BVisual2Formula formula);
-		public abstract BVisual2Value evaluate(final BVisual2Formula formula, final State state);
+		ExpandedFormula expand(final BVisual2Formula formula);
+		BVisual2Value evaluate(final BVisual2Formula formula, final State state);
 	}
 
 	private final boolean expanded;

@@ -30,8 +30,8 @@ import javafx.beans.property.SimpleObjectProperty;
 })
 public class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask {
 
-	public static enum TemporalType {
-		LTL, CTL;
+	public enum TemporalType {
+		LTL, CTL
 	}
 
 	private final TemporalType type;

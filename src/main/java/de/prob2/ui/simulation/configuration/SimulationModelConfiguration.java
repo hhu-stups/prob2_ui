@@ -18,7 +18,7 @@ import de.prob.json.JsonMetadataBuilder;
 })
 public class SimulationModelConfiguration implements HasMetadata, ISimulationModelConfiguration {
 
-	public static enum SimulationFileType {
+	public enum SimulationFileType {
 		SIMULATION("Simulation"),
 		TIMED_TRACE("Timed_Trace"),
 		INTERACTION_REPLAY("Interaction_Replay");

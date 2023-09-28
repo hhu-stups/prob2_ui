@@ -83,7 +83,6 @@ public final class Config {
 		}
 
 		this.load();
-		;
 		stopActions.add(this::save);
 	}
 

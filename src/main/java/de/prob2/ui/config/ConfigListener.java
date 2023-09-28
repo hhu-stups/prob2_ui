@@ -8,7 +8,7 @@ public interface ConfigListener {
 	 * 
 	 * @param configData the loaded config data object from which the settings should be loaded
 	 */
-	public abstract void loadConfig(final ConfigData configData);
+	void loadConfig(final ConfigData configData);
 	
 	/**
 	 * Save the current state of the UI into the given config data object.
@@ -17,5 +17,5 @@ public interface ConfigListener {
 	 * 
 	 * @param configData the new config data object into which the settings should be saved
 	 */
-	public abstract void saveConfig(final ConfigData configData);
+	void saveConfig(final ConfigData configData);
 }

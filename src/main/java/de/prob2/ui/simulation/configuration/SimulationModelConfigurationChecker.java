@@ -65,7 +65,7 @@ public class SimulationModelConfigurationChecker {
 			//}
 		} else if(probability instanceof String) {
 			if(!"uniform".equals(probability) && !"first".equals(probability)) {
-				errors.add(new ConfigurationCheckingError(String.format("Value %s for probability in activation configuration is not allowed", probability.toString())));
+				errors.add(new ConfigurationCheckingError(String.format("Value %s for probability in activation configuration is not allowed", probability)));
 			}
 		} else { // probability is a map
 			Map<String, Map<String, String>> probabilityAsMap = (Map<String, Map<String, String>>) probability;

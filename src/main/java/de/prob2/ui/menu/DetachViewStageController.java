@@ -92,11 +92,7 @@ public final class DetachViewStageController extends Stage {
 			});
 		}
 		this.setOnShowing(e -> {
-			if (wrapperStages.isEmpty()) {
-				attachAll.setDisable(true);
-			} else {
-				attachAll.setDisable(false);
-			}
+			attachAll.setDisable(wrapperStages.isEmpty());
 			apply.setDisable(true);
 		});
 	}

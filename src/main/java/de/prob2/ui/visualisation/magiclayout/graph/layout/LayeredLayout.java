@@ -199,7 +199,7 @@ public class LayeredLayout implements Layout {
 		int deadlockCounter = 0;
 
 		//TODO: Are cyclic dependencies allowed? That was the problem that cause StackOverflowError (see PROB2UI-339)
-		while(verticesStackQueue.size() > 0 && verticesStackQueue.size() > deadlockCounter) {
+		while (!verticesStackQueue.isEmpty() && verticesStackQueue.size() > deadlockCounter) {
 			Vertex currentVertex = verticesStackQueue.pollLast();
 			if(!vertexLayerMap.containsKey(currentVertex)) {
 				Set<Vertex> successors = getSuccessors(currentVertex, edges);

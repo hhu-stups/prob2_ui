@@ -2,9 +2,7 @@ package de.prob2.ui.simulation.configuration;
 
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonValue;

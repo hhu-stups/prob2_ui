@@ -7,7 +7,7 @@ import com.google.common.base.MoreObjects;
 import de.prob.animator.domainobjects.ProBPreference;
 
 interface PrefTreeItem {
-	public static class Category implements PrefTreeItem {
+	final class Category implements PrefTreeItem {
 		private final String name;
 		
 		Category(final String name) {
@@ -59,7 +59,7 @@ interface PrefTreeItem {
 		}
 	}
 	
-	public static class Preference implements PrefTreeItem {
+	final class Preference implements PrefTreeItem {
 		private final ProBPreference preferenceInfo;
 		private final String value;
 		
@@ -119,24 +119,24 @@ interface PrefTreeItem {
 		}
 	}
 	
-	public abstract String getName();
+	String getName();
 	
-	public abstract String getValue();
+	String getValue();
 	
-	public abstract String getDefaultValue();
+	String getDefaultValue();
 	
-	public default boolean isChanged() {
+	default boolean isChanged() {
 		return !Objects.equals(this.getValue(), this.getDefaultValue());
 	}
 	
-	public abstract String getDescription();
+	String getDescription();
 	
 	@Override
-	public abstract boolean equals(final Object obj);
+	boolean equals(final Object obj);
 	
 	@Override
-	public abstract int hashCode();
+	int hashCode();
 	
 	@Override
-	public abstract String toString();
+	String toString();
 }

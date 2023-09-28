@@ -17,7 +17,7 @@ import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationCreator;
-import de.prob2.ui.simulation.simulators.SimulationEventHandler;
+
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 

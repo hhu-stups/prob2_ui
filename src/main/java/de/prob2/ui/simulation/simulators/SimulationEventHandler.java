@@ -147,24 +147,24 @@ public class SimulationEventHandler {
 		String predicate = buildPredicateForTransition(currentState, activation);
 		if(probabilisticVariables == null) {
 			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, 1);
-			if(transitions.size() > 0) {
+			if (!transitions.isEmpty()) {
 				return transitions.get(0);
 			}
 		} else if(probabilisticVariables instanceof HashMap) {
 			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
-			if(transitions.size() >= 1) {
+			if (!transitions.isEmpty()) {
 				return transitions.get(0);
 			}
 		} else if (probabilisticVariables instanceof String){
 			String probabilisticVariablesAsString = (String) probabilisticVariables;
 			if("first".equals(probabilisticVariablesAsString)) {
 				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, 1);
-				if(transitions.size() > 0) {
+				if (!transitions.isEmpty()) {
 					return transitions.get(0);
 				}
 			} else if("uniform".equals(probabilisticVariablesAsString)) {
 				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
-				if(transitions.size() > 0) {
+				if (!transitions.isEmpty()) {
 					return transitions.get(random.nextInt(transitions.size()));
 				}
 			} else {

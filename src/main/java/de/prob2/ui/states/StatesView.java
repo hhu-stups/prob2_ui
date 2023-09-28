@@ -218,7 +218,7 @@ public final class StatesView extends StackPane {
 		if (hasDescription) {
 			sb.append(item.getDescription());
 		}
-		if (sb.length() > 0) {
+		if (!sb.isEmpty()) {
 			sb.append('\n');
 		}
 
@@ -230,7 +230,7 @@ public final class StatesView extends StackPane {
 				sb.append(i18n.translate("states.statesView.tooltip.elementChildren", childrenCount));
 			}
 		}
-		if (sb.length() > 0) {
+		if (!sb.isEmpty()) {
 			sb.append('\n');
 		}
 
@@ -239,7 +239,7 @@ public final class StatesView extends StackPane {
 			sb.append(i18n.translate("states.statesView.tooltip.proofInfo", proofInfo.getProvenCount(), proofInfo.getUnprovenCount(), proofInfo.getUnchangedCount()));
 		}
 
-		if (sb.length() > 0) {
+		if (!sb.isEmpty()) {
 			return new Tooltip(sb.toString());
 		} else {
 			return null;

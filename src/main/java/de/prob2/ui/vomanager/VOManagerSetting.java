@@ -6,7 +6,7 @@ public enum VOManagerSetting {
 
 	private final String name;
 
-	private VOManagerSetting(String name) {
+	VOManagerSetting(String name) {
 		this.name = name;
 	}
 
