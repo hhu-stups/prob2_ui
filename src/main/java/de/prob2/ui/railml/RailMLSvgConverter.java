@@ -3,14 +3,13 @@ package de.prob2.ui.railml;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.*;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +54,6 @@ public class RailMLSvgConverter {
 			if (svg_type == RailMLImportMeta.VisualisationStrategy.D4R) {
 				int lastUnderscore = gElementId.lastIndexOf("_");
 				netElement_id = gElementId.substring(0, lastUnderscore);
-				graph_group.removeChild(parentG);
-				k = k-1; // pathList has one element less after removal
 			} else { //RAIL_OSCOPE or DOT
 				netElement_id = gElementId;
 			}
@@ -140,7 +137,8 @@ public class RailMLSvgConverter {
 				String groupId = group.getAttribute("id");
 				if ((svg_type == RailMLImportMeta.VisualisationStrategy.D4R && groupId.startsWith(id_prefix + "_")
 					|| (svg_type == RailMLImportMeta.VisualisationStrategy.DOT || svg_type == RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE) && groupId.equals(id_prefix))) {
-					group.getParentNode().removeChild(group);
+					graph_group.removeChild(group);
+					i = i-1;
 				}
 			}
 

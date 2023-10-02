@@ -213,9 +213,11 @@ public class RailMLSvgConverterTest {
 				<g>
 					<g id="path_01_001">
 						<path d="M250,10C30,50 50,50 Q 70,50 L 100,50Z" />
+						<text attr="250">path_01</text>
 					</g>
 					<g id="path_01_002">
 						<path d="M250,10C30,50 50,50 Q 70,50 L 100,50Z" />
+						<text attr="500">path_01</text>
 					</g>
 				</g>
 			</svg>""";
@@ -274,6 +276,8 @@ public class RailMLSvgConverterTest {
 						</path>
 						<path d="M 250,10 L 30,50 L 50,50 L 70,50 L 100,50 L 250,10 L 30,50 L 50,50 L 70,50 L 100,50" fill="none" id="path_01_occ" stroke="url(#path_01_lg_occ)" stroke-width="2.0"/>
 			            <title id="path_01_title">path_01</title>
+			            <text attr="250" id="path_01_001_text">path_01</text>
+			            <text attr="500" id="path_01_002_text">path_01</text>
 			        </g>
 				</g>
 			</svg>""";
