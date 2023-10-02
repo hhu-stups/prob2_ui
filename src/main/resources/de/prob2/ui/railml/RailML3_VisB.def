@@ -1,7 +1,7 @@
 DEFINITIONS
     // Definitions for VisB:
     VISB_SVG_UPDATES10 ==
-        {i_e • i_e : allIdsOfType("crossing") |
+        {i_e • i_e : RailML3_IS_MOVABLE_CROSSING_IDS |
             rec(`id`: i_e^"_ellipse",
                 stroke: IF i_e : dom(IS_crossingsInMovement) THEN "darkorange"
                     ELSIF i_e : dom(IL_crossing_locked_routes) or IS_crossing_keyLocked(i_e) = TRUE THEN "red"
@@ -18,7 +18,7 @@ DEFINITIONS
             )
         };
     VISB_SVG_UPDATES11 ==
-        {i_e • i_e : allIdsOfType("crossing") |
+        {i_e • i_e : RailML3_IS_MOVABLE_CROSSING_IDS |
             rec(`id`: i_e^"_title",
                 text: FORMAT_TO_STRING("~w\nState: ~w", [i_e, TO_STRING(IS_crossing_states(i_e))])
             )
