@@ -254,9 +254,9 @@ public class RailMLStage extends Stage {
 				generateMachines();
 				final Path projectLocation = generationPath;
 				final String shortName = MoreFiles.getNameWithoutExtension(railMLpath);
-				final Machine dataMachine = new Machine(dataFileName.getValue(), "Data machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(dataFileName.getValue()));
-				final Machine animationMachine = new Machine(animationFileName.getValue(), "Animation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(animationFileName.getValue()));
-				final Machine validationMachine = new Machine(validationFileName.getValue(), "Validation machine generated from " + railMLpath.getFileName(), Paths.get(generationPath.toString()).resolve(validationFileName.getValue()));
+				final Machine dataMachine = new Machine(dataFileName.getValue(), "Data machine generated from " + railMLpath.getFileName(), generationPath.relativize(generationPath.resolve(dataFileName.getValue())));
+				final Machine animationMachine = new Machine(animationFileName.getValue(), "Animation machine generated from " + railMLpath.getFileName(), generationPath.relativize(generationPath.resolve(animationFileName.getValue())));
+				final Machine validationMachine = new Machine(validationFileName.getValue(), "Validation machine generated from " + railMLpath.getFileName(), generationPath.relativize(generationPath.resolve(validationFileName.getValue())));
 
 				if (!Thread.currentThread().isInterrupted()) {
 					Platform.runLater(() -> {
@@ -409,7 +409,7 @@ public class RailMLStage extends Stage {
 				replaceOldResourceFile(generationPath, "RailML3_SimB.json");
 				Path simbPath = generationPath.resolve("RailML3_SimB.json");
 
-				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.resolve("RailML3_VisB.def"));
+				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.relativize(generationPath.resolve("RailML3_VisB.def")));
 				currentProject.addMachine(animationDefinitions);
 				currentProject.addMachine(animationMachine);
 				currentProject.startAnimation(animationMachine);
