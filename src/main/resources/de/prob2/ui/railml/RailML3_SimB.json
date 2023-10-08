@@ -88,16 +88,17 @@
                     {
                         "id": "RS_trainMoveFront_Exec",
                         "execute": "RS_trainMoveFront",
-                        "after": 1000,
+                        "after": 5000,
                         "probabilisticVariables": "uniform",
                         "activating" : ["skip", "RS_trainMoveBack"]
                     },
                         {
                             "id": "RS_trainMoveBack",                            
                             "execute": "RS_trainMoveBack",
-                            "after": 1000,
+                            "after": 5000,
                             "probabilisticVariables": "uniform",
-                            "activating" : ["skip", "RS_trainMoveBack", "RS_trainLeave", "IL_ReleaseAction"]
+                            "activating" : ["skip", "RS_trainMoveBack", "RS_trainLeave", "IL_ReleaseAction"],
+                            "comment": "for after with speedSections (currently leads to bug): IF prj1(prj1(currFront)) = prj1(prj1(newFront)) & prj1(prj1(currFront)) : dom(RailML3_IS_NET_ELEMENT_LENGTHS) & currFront |-> newFront : dom(ran(RailML3_IS_SPEED_SECTIONS)) THEN ceiling((min(ran(RailML3_IS_SPEED_SECTIONS)[{currFront |-> newFront}]) / 3.6) * 1000.0 / RailML3_IS_NET_ELEMENT_LENGTHS(prj1(prj1(currFront)))) ELSE 5000 END"
                         },
                             {
                                 "id": "RS_trainLeave",
@@ -119,7 +120,8 @@
                         "priority": 1,
                         "execute": "RS_trainChangeDirection",
                         "probabilisticVariables": "uniform",
-                        "activating": ["skip", "RS_trainMoveFront"]
+                        "activating": ["skip", "RS_trainMoveFront"],
+                        "activationKind": "single"
                     },
 
             {

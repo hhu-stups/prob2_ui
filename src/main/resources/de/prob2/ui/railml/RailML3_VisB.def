@@ -226,14 +226,14 @@ DEFINITIONS
     VISB_SVG_UPDATES62 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`:i_e^"_occ",
-                visibility: IF i_e : dom(dom(ran(RS_trainFront) \/ ran(RS_trainBack))) or #t.(t : RS_arrivedTrains & i_e : dom(RS_trainOccupiedBlocks(t)) ) THEN "visible"
+                visibility: IF #t.(t : RS_arrivedTrains & i_e : dom(RS_trainOccupiedLocations(t)) \/ dom(dom(RS_trainFront[{t}] \/ RS_trainBack[{t}]))) THEN "visible"
                     ELSE "hidden" END
             )
         };
     VISB_SVG_UPDATES63 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
             rec(`id`:i_e^"_title",
-                text: IF i_e : dom(dom(ran(RS_trainFront) \/ ran(RS_trainBack))) or #t.(t : RS_arrivedTrains & i_e : dom(RS_trainOccupiedBlocks(t)) ) THEN i_e^" "^TO_STRING({ t | t : RS_arrivedTrains & i_e : dom(RS_trainOccupiedBlocks(t)) })
+                text: IF #t.(t : RS_arrivedTrains & i_e : dom(RS_trainOccupiedLocations(t)) \/ dom(dom(RS_trainFront[{t}] \/ RS_trainBack[{t}]))) THEN i_e^" "^TO_STRING({ t | t : RS_arrivedTrains & i_e : dom(RS_trainOccupiedLocations(t)) })
                     ELSE i_e END
             )
         };

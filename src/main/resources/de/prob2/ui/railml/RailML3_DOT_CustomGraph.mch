@@ -5,6 +5,7 @@ DEFINITIONS
     "LibraryIO.def";
 	"LibraryStrings.def";
     "SORT.def";
+    SET_PREF_MEMOIZE_FUNCTIONS == TRUE;
     "RailML3_CustomGraphs.def";
     CUSTOM_GRAPH == DOT_customGraph;
 

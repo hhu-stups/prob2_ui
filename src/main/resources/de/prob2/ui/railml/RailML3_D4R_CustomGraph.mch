@@ -4,6 +4,7 @@ DEFINITIONS
     "CHOOSE.def";
     "LibraryIO.def";
 	"LibraryStrings.def";
+    SET_PREF_MEMOIZE_FUNCTIONS == TRUE;
     "RailML3_CustomGraphs.def";
     CUSTOM_GRAPH == D4R_customGraph
 VARIABLES

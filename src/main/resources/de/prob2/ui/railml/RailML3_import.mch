@@ -187,6 +187,7 @@ OPERATIONS
       runErrorRule(validate_linearLocation);
 
       runComputation(set_DERAILER);
+      runComputation(set_SPEED_SECTION);
       runComputation(set_TRACK);
 
       runErrorRule(validate_border);
@@ -348,15 +349,12 @@ OPERATIONS
         runWarningRule(warnings_signalBox)
       END;
       // END RailML3_IL
-
-      IF semanticWarnings /= {} THEN
-        ADD_WARNINGS(makeRailMLMessages(semanticWarnings));
-        ADD_WARNINGS(makeRailMLMessages({"SEMANTIC WARNINGS:"}))
-      ELSE skip END;
+      
       IF defaultWarnings /= {} THEN
-        ADD_WARNINGS(makeRailMLMessages(defaultWarnings));
-        ADD_WARNINGS(makeRailMLMessages({"DEFAULT VALUES:"}));
-        ADD_WARNINGS(makeRailMLMessages({"----------------------------------------------------------------"}))
+        ADD_WARNINGS(makeRailMLMessages(defaultWarnings \/ {"DEFAULT VALUES:"} \/ {"----------------------------------------------------------------"}))
+      ELSE skip END;
+      IF semanticWarnings /= {} THEN
+        ADD_WARNINGS(makeRailMLMessages(semanticWarnings \/ {"SEMANTIC WARNINGS:"}))
       ELSE skip END
     END
 END//MACHINE
