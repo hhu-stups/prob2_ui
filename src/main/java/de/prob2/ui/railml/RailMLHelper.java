@@ -23,7 +23,7 @@ public class RailMLHelper {
 
 			if (!Arrays.equals(currFile,resFile)) {
 				saveOldFile(currentFile);
-				Files.copy(resourceFile, currentFile, StandardCopyOption.REPLACE_EXISTING);
+				Files.write(currentFile, resFile, StandardOpenOption.TRUNCATE_EXISTING);
 			}
 		} else {
 			Files.copy(resourceFile, currentFile, StandardCopyOption.REPLACE_EXISTING);
