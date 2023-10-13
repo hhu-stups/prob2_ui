@@ -17,7 +17,11 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.scene.text.Text;
@@ -36,7 +40,7 @@ public final class TraceInformationStage extends Stage {
 				}
 			});
 			this.itemProperty().addListener((observable, from, to) -> {
-				if(to != null && to.getTrace() != null) {
+				if (to != null && to.getTrace() != null) {
 					this.setCursor(Cursor.HAND);
 				} else {
 					this.setCursor(Cursor.DEFAULT);
@@ -105,16 +109,16 @@ public final class TraceInformationStage extends Stage {
 
 	@FXML
 	private TableColumn<TestTrace, String> coveredOperation;
-	
+
 	@FXML
 	private TableColumn<TestTrace, String> guard;
-	
+
 	@FXML
 	private TableView<Target> tvUncovered;
-	
+
 	@FXML
 	private TableColumn<Target, String> uncoveredOperation;
-	
+
 	@FXML
 	private TableColumn<Target, String> uncoveredGuard;
 
@@ -126,7 +130,8 @@ public final class TraceInformationStage extends Stage {
 
 	private final CurrentTrace currentTrace;
 
-	private final I18n i18n;;
+	private final I18n i18n;
+	;
 
 	@Inject
 	private TraceInformationStage(final StageManager stageManager, final CurrentTrace currentTrace, final I18n i18n) {
@@ -142,23 +147,46 @@ public final class TraceInformationStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		numberGeneratedTraces.setCellValueFactory(p -> new ReadOnlyObjectWrapper(tvTraces.getItems().indexOf(p.getValue()) + 1));
+		numberGeneratedTraces.setCellValueFactory(p -> {
+			TestTrace trace = p.getValue();
+			if (trace != null) {
+				int index = tvTraces.getItems().indexOf(trace);
+				if (index >= 0) {
+					return new ReadOnlyObjectWrapper<>(Integer.toString(index + 1));
+				}
+			}
+
+			return new ReadOnlyObjectWrapper<>(i18n.translate("common.notAvailable"));
+		});
 		numberGeneratedTraces.setSortable(false);
-		numberUncoveredOps.setCellValueFactory(p -> new ReadOnlyObjectWrapper(tvUncovered.getItems().indexOf(p.getValue()) + 1));
+		numberUncoveredOps.setCellValueFactory(p -> {
+			TestTrace trace = p.getValue();
+			if (trace != null) {
+				Target target = trace.getTarget();
+				if (target != null) {
+					int index = tvUncovered.getItems().indexOf(target);
+					if (index >= 0) {
+						return new ReadOnlyObjectWrapper<>(Integer.toString(index + 1));
+					}
+				}
+			}
+
+			return new ReadOnlyObjectWrapper<>(i18n.translate("common.notAvailable"));
+		});
 		numberUncoveredOps.setSortable(false);
 		tvTraces.setRowFactory(item -> new TraceInformationRow());
 		depth.setCellValueFactory(new PropertyValueFactory<>("depth"));
-		operations.setCellValueFactory(features -> Bindings.createStringBinding(() ->
-			String.join(",\n", features.getValue().getTransitionNames())
-		));
-		coveredOperation.setCellValueFactory(features -> Bindings.createStringBinding(() ->
-			features.getValue().getTarget().getOperation()
-		));
+		operations.setCellValueFactory(features ->
+			                               Bindings.createStringBinding(() -> String.join(",\n", features.getValue().getTransitionNames()))
+		);
+		coveredOperation.setCellValueFactory(features ->
+			                                     Bindings.createStringBinding(() -> features.getValue().getTarget().getOperation())
+		);
 		guard.setCellFactory(WrappedTextTableCell::new);
-		guard.setCellValueFactory(features -> Bindings.createStringBinding(() ->
-			features.getValue().getTarget().getGuardString()
-		));
-		
+		guard.setCellValueFactory(features ->
+			                          Bindings.createStringBinding(() -> features.getValue().getTarget().getGuardString())
+		);
+
 		tvUncovered.setRowFactory(item -> new UncoveredOperationRow());
 		uncoveredOperation.setCellValueFactory(new PropertyValueFactory<>("operation"));
 		uncoveredGuard.setCellFactory(WrappedTextTableCell::new);
