@@ -55,7 +55,10 @@ java {
 }
 
 // Module export/open declarations for Java 9+
-def exports = []
+def exports = [
+	// So the documentation generator Velocity templates can call JavaFX collection methods
+	"javafx.base/com.sun.javafx.collections",
+]
 def opens = []
 
 // Uncomment when getting WebView console messages with com.sun.javafx.webkit.WebConsoleListener
