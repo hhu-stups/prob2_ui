@@ -50,22 +50,13 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 	"tableVisualizationItems"
 	})
 public class MachineProperties {
-	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> traceReplayStatus = new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus());
-	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> temporalStatus = new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus());
-	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> symbolicCheckingStatus = new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus());
-	@JsonIgnore
-	private final ObjectProperty<MachineCheckingStatus> modelcheckingStatus = new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus());
-
-	private final ListProperty<TemporalFormulaItem> temporalFormulas;
+	private final CheckingProperty<TemporalFormulaItem> temporal;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
-	private final ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulas;
+	private final CheckingProperty<SymbolicCheckingFormulaItem> symbolic;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
-	private final ListProperty<ReplayTrace> traces;
-	private final ListProperty<ModelCheckingItem> modelcheckingItems;
+	private final CheckingProperty<ReplayTrace> trace;
+	private final CheckingProperty<ModelCheckingItem> modelchecking;
 	@JsonIgnore // Saved as proofObligationItems instead
 	private final ListProperty<ProofObligationItem> allProofObligationItems;
 	// Contains only proof obligations that have an ID.
@@ -88,14 +79,15 @@ public class MachineProperties {
 
 
 	public MachineProperties() {
-		this.temporalFormulas = new SimpleListProperty<>(this, "temporalFormulas", FXCollections.observableArrayList());
+		this.temporal = new CheckingProperty<>(new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "temporalFormulas", FXCollections.observableArrayList()));
+		this.symbolic = new CheckingProperty<>(new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList()));
+		this.modelchecking = new CheckingProperty<>(new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList()));
+		this.trace = new CheckingProperty<>(new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList()));
+
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
-		this.symbolicCheckingFormulas = new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList());
 		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
 
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
-		this.traces = new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList());
-		this.modelcheckingItems = new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList());
 		this.allProofObligationItems = new SimpleListProperty<>(this, "allProofObligationItems", FXCollections.observableArrayList());
 		this.proofObligationItems = new SimpleListProperty<>(this, "proofObligationItems", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
@@ -139,18 +131,18 @@ public class MachineProperties {
 		}
 	}
 	public ObjectProperty<MachineCheckingStatus> traceReplayStatusProperty() {
-		return traceReplayStatus;
+		return trace.statusProperty();
 	}
 
 	public MachineCheckingStatus getTraceReplayStatus() {
-		return traceReplayStatus.get();
+		return traceReplayStatusProperty().get();
 	}
 	public void setTraceReplayStatus(final MachineCheckingStatus status) {
 		this.traceReplayStatusProperty().set(status);
 	}
 
 	public ObjectProperty<MachineCheckingStatus> temporalStatusProperty() {
-		return this.temporalStatus;
+		return this.temporal.statusProperty();
 	}
 
 	public MachineCheckingStatus getTemporalStatus() {
@@ -161,7 +153,7 @@ public class MachineProperties {
 		this.temporalStatusProperty().set(status);
 	}
 	public ObjectProperty<MachineCheckingStatus> symbolicCheckingStatusProperty() {
-		return this.symbolicCheckingStatus;
+		return this.symbolic.statusProperty();
 	}
 
 	public MachineCheckingStatus getSymbolicCheckingStatus() {
@@ -173,7 +165,7 @@ public class MachineProperties {
 	}
 
 	public ObjectProperty<MachineCheckingStatus> modelcheckingStatusProperty() {
-		return this.modelcheckingStatus;
+		return this.modelchecking.statusProperty();
 	}
 
 	public MachineCheckingStatus getModelcheckingStatus() {
@@ -194,7 +186,7 @@ public class MachineProperties {
 	}
 
 	public ListProperty<TemporalFormulaItem> temporalFormulasProperty() {
-		return temporalFormulas;
+		return this.temporal.itemProperty();
 	}
 
 	@JsonProperty("temporalFormulas")
@@ -222,11 +214,11 @@ public class MachineProperties {
 	}
 
 	public ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulasProperty() {
-		return symbolicCheckingFormulas;
+		return this.symbolic.itemProperty();
 	}
 
 	public List<SymbolicCheckingFormulaItem> getSymbolicCheckingFormulas() {
-		return symbolicCheckingFormulas.get();
+		return this.symbolicCheckingFormulasProperty().get();
 	}
 
 	@JsonProperty
@@ -261,11 +253,11 @@ public class MachineProperties {
 	}
 
 	public ListProperty<ModelCheckingItem> modelcheckingItemsProperty() {
-		return modelcheckingItems;
+		return this.modelchecking.itemProperty();
 	}
 
 	public List<ModelCheckingItem> getModelcheckingItems() {
-		return modelcheckingItems.get();
+		return this.modelcheckingItemsProperty().get();
 	}
 
 	@JsonProperty
@@ -337,16 +329,16 @@ public class MachineProperties {
 	}
 
 	public ListProperty<ReplayTrace> tracesProperty() {
-		return this.traces;
+		return this.trace.itemProperty();
 	}
 
 	public ObservableList<ReplayTrace> getTraces() {
-		return this.traces.get();
+		return this.tracesProperty().get();
 	}
 
 	@JsonProperty
 	private void setTraces(final List<ReplayTrace> traces) {
-		this.traces.setAll(traces);
+		this.tracesProperty().setAll(traces);
 	}
 	public ListProperty<SimulationModel> simulationsProperty() {
 		return simulations;
@@ -573,15 +565,15 @@ public class MachineProperties {
 	}
 
 	public void resetStatus() {
-		temporalFormulas.forEach(TemporalFormulaItem::reset);
+		temporalFormulasProperty().forEach(TemporalFormulaItem::reset);
 		ltlPatterns.forEach(LTLPatternItem::reset);
 		patternManager = new PatternManager();
-		symbolicCheckingFormulas.forEach(SymbolicCheckingFormulaItem::reset);
+		symbolicCheckingFormulasProperty().forEach(SymbolicCheckingFormulaItem::reset);
 		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
 		simulations.forEach(SimulationModel::reset);
 		testCases.forEach(TestCaseGenerationItem::reset);
-		traces.forEach(ReplayTrace::reset);
-		modelcheckingItems.forEach(ModelCheckingItem::reset);
+		tracesProperty().forEach(ReplayTrace::reset);
+		modelcheckingItemsProperty().forEach(ModelCheckingItem::reset);
 	}
 
 }
