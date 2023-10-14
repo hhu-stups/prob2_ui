@@ -54,6 +54,10 @@ public final class ExternalEditor {
 	}
 
 	public void open(Path path) {
+		if (path == null) {
+			return;
+		}
+
 		final Optional<Path> editorPath = this.getExternalEditorPath();
 		if (editorPath.isEmpty()) {
 			this.stageManager.makeAlert(Alert.AlertType.ERROR, "externalEditor.alerts.noEditorSet.header", "externalEditor.alerts.noEditorSet.content").show();
@@ -62,7 +66,7 @@ public final class ExternalEditor {
 		final ProcessBuilder processBuilder = new ProcessBuilder(getCommandLine(editorPath.get().toAbsolutePath(), path.toString()));
 		try {
 			processBuilder.start();
-		} catch (IOException e) {
+		} catch (Exception e) {
 			LOGGER.error("Failed to start external editor", e);
 			stageManager.makeExceptionAlert(e, "externalEditor.alerts.couldNotStartEditor.content").showAndWait();
 		}

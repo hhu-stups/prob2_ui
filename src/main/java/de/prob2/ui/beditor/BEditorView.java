@@ -1,10 +1,8 @@
 package de.prob2.ui.beditor;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.UncheckedIOException;
+import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
-import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
@@ -18,7 +16,6 @@ import java.nio.file.WatchService;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -116,6 +113,7 @@ public class BEditorView extends BorderPane {
 	private Thread watchThread;
 	private WatchKey key;
 	private boolean changingText;
+	private boolean saving;
 
 	@Inject
 	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
@@ -246,16 +244,8 @@ public class BEditorView extends BorderPane {
 	private void updateSaved() {
 		boolean newSaved = getPath() == null;
 		if (!newSaved) {
-			String lastSaved = this.lastSavedText.get();
-			if (lastSaved == null) {
-				lastSaved = "";
-			}
-
-			String editor = this.beditor.getText();
-			if (editor == null) {
-				editor = "";
-			}
-
+			String lastSaved = Objects.requireNonNullElse(this.lastSavedText.get(), "");
+			String editor = Objects.requireNonNullElse(this.beditor.getText(), "");
 			newSaved = lastSaved.equals(editor);
 		}
 
@@ -321,12 +311,13 @@ public class BEditorView extends BorderPane {
 		if (stateSpace == null) {
 			return;
 		}
+
 		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
-		cmd.setTranslationMode(cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
+		cmd.setTranslationMode(this.cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
 		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
 		stateSpace.execute(cmd);
 		this.setEditorText(cmd.getPrettyPrint(), machinePath);
-		beditor.setEditable(false);
+		this.beditor.setEditable(false);
 	}
 
 	private void updateIncludedMachines() {
@@ -401,33 +392,53 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void setEditorText(String text, Path path) {
+		if (this.saving) {
+			return;
+		}
+
 		changingText = true;
-		this.setPath(path);
-		beditor.replaceText(text);
-		beditor.moveTo(0);
-		beditor.requestFollowCaret();
-		lastSavedText.set(beditor.getText());
-		beditor.reloadHighlighting();
-		beditor.setEditable(true);
-		changingText = false;
+		try {
+			if (
+				this.getPath() != null && this.getPath().equals(path)
+					&& this.lastSavedText.get() != null && this.lastSavedText.get().equals(text)
+			) {
+				// fact 1: we are loading the same file path that we have open right now
+				// fact 2: the file contents equal the last saved text
+				// conclusion: either nothing changed or the user changed the editor text
+				// => do not discard the changes of the user!
+				this.updateSaved();
+				return;
+			}
+
+			System.out.println("##### setEditorText: " + path);
+			this.setPath(path);
+			beditor.replaceText(text);
+			beditor.moveTo(0);
+			beditor.requestFollowCaret();
+			lastSavedText.set(beditor.getText());
+			beditor.reloadHighlighting();
+			beditor.setEditable(true);
+		} finally {
+			changingText = false;
+		}
 	}
 
 	private void setText(Path path) {
-		if (path.toFile().exists()) {
+		if (Files.isRegularFile(path)) {
 			String text;
-			try (BufferedReader r = Files.newBufferedReader(path, EDITOR_CHARSET)) {
-				text = CharStreams.toString(r);
-			} catch (IOException | UncheckedIOException e) {
+			try {
+				text = Files.readString(path, EDITOR_CHARSET);
+			} catch (IOException e) {
 				LOGGER.error("Could not read file: {}", path, e);
-				if (e.getCause() instanceof MalformedInputException) {
-					final Alert alert = stageManager.makeExceptionAlert(e, "beditor.encodingError.header", "beditor.encodingError.content", path);
-					alert.initOwner(this.getScene().getWindow());
-					alert.show();
+				final Alert alert;
+				if (e instanceof CharacterCodingException) {
+					alert = stageManager.makeExceptionAlert(e, "beditor.encodingError.header", "beditor.encodingError.content", path);
 				} else {
-					final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", path);
-					alert.initOwner(this.getScene().getWindow());
-					alert.show();
+					alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", path);
 				}
+
+				alert.initOwner(this.getScene().getWindow());
+				alert.show();
 				return;
 			}
 			this.setEditorText(text, path);
@@ -436,21 +447,30 @@ public class BEditorView extends BorderPane {
 
 	@FXML
 	public void handleSave() {
-		resetWatching();
-		assert this.getPath() != null;
-		try {
-			Files.writeString(this.getPath(), beditor.getText(), EDITOR_CHARSET, StandardOpenOption.TRUNCATE_EXISTING);
-		} catch (IOException e) {
-			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
-			alert.initOwner(this.getScene().getWindow());
-			alert.showAndWait();
-			LOGGER.error("Could not save file: {}", path, e);
+		if (this.saving) {
 			return;
 		}
-		lastSavedText.set(beditor.getText());
-		registerFile(this.getPath());
 
-		currentProject.reloadCurrentMachine();
+		this.saving = true;
+		try {
+			resetWatching();
+			assert this.getPath() != null;
+			try {
+				Files.writeString(this.getPath(), beditor.getText(), EDITOR_CHARSET, StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (IOException e) {
+				final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
+				LOGGER.error("Could not save file: {}", path, e);
+				return;
+			}
+			lastSavedText.set(beditor.getText());
+			registerFile(this.getPath());
+
+			currentProject.reloadCurrentMachine();
+		} finally {
+			this.saving = false;
+		}
 	}
 
 	private void resetWatching() {
@@ -474,7 +494,6 @@ public class BEditorView extends BorderPane {
 
 	private static boolean fileNameMatchesCurrentPath(String filename, Path currentPath) {
 		Objects.requireNonNull(currentPath, "currentPath");
-
 		if (filename == null || filename.isEmpty()) {
 			return false;
 		}
