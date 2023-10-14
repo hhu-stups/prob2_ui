@@ -410,7 +410,6 @@ public class BEditorView extends BorderPane {
 				return;
 			}
 
-			System.out.println("##### setEditorText: " + path);
 			this.setPath(path);
 			beditor.replaceText(text);
 			beditor.moveTo(0);
