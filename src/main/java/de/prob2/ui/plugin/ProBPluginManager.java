@@ -474,9 +474,13 @@ public class ProBPluginManager {
 		protected void validatePluginDescriptor(PluginDescriptor descriptor) {
 			//TODO: show what is wrong in an alert
 			super.validatePluginDescriptor(descriptor);
-			if (descriptor.getRequires() == null || descriptor.getRequires().isEmpty() || descriptor.getRequires().equals("*")) {
+			/* TODO:
+			    The following check seems not to be necessary, as the DefaultVersionManager allows NullOrEmpty and "*" for checkVersionConstraint to leave "requires" unspecified.
+			    In addition, there seem to be problems with x.x.x-SNAPSHOT version number matching, which prevents compatible plugins from loading.
+			*/
+			/*if (descriptor.getRequires() == null || descriptor.getRequires().isEmpty() || descriptor.getRequires().equals("*")) {
 				throw new PluginRuntimeException("Plugin-Requires has to be specified!");
-			}
+			}*/
 			if (!descriptor.getDependencies().isEmpty()) {
 				StringBuilder builder = new StringBuilder("Plugin-Dependencies are not supported but the plugin has the following dependencies:");
 				for (PluginDependency dependency : descriptor.getDependencies()) {
