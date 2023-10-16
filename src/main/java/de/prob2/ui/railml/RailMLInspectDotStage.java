@@ -171,64 +171,47 @@ public class RailMLInspectDotStage extends Stage {
 
 		initializeOptions();
 
-		balises.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBalises"));
-		});
-		borders.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBorders"));
-		});
-		bufferstops.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayBufferstops"));
-		});
-		crossings.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayCrossings"));
-		});
-		derailers.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayDerailers"));
-		});
-		levelcrossings.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayLevelcrossings"));
-		});
-		operationalpoints.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayOperationalpoints"));
-		});
-		signals.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplaySignals"));
-		});
-		switches.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplaySwitches"));
-		});
-		traindetectionelements.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayTraindetectionelements"));
-		});
-		tvdsections.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayTvdsections"));
-		});
-		names.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDisplayNames"));
-		});
+		balises.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayBalises"));
+		borders.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayBorders"));
+		bufferstops.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayBufferstops"));
+		crossings.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayCrossings"));
+		derailers.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayDerailers"));
+		levelcrossings.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayLevelcrossings"));
+		operationalpoints.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayOperationalpoints"));
+		signals.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplaySignals"));
+		switches.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplaySwitches"));
+		traindetectionelements.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayTraindetectionelements"));
+		tvdsections.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayTvdsections"));
+		names.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayNames"));
 
 		languageChoiceBox.getItems().addAll(RailMLInspectDotStage.Language.values());
-		languageChoiceBox.valueProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeLanguage", "language = \"" + languageChoiceBox.getValue().toString().toLowerCase() + "\""));
-		});
+		languageChoiceBox.valueProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeLanguage", "language = \"" + languageChoiceBox.getValue().toString().toLowerCase() + "\""));
 
 		dotEngineChoiceBox.getItems().addAll(RailMLInspectDotStage.DotEngine.values());
-		dotEngineChoiceBox.valueProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeDotengine", "engine = \"" + dotEngineChoiceBox.getValue().toString().toLowerCase() + "\""));
-		});
+		dotEngineChoiceBox.valueProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeDotengine", "engine = \"" + dotEngineChoiceBox.getValue().toString().toLowerCase() + "\""));
 		// TODO: Maybe use ProB preference for dot engine later
 
-		curvedsplines.selectedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("changeUseCurvedSplines"));
-		});
+		curvedsplines.selectedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("changeUseCurvedSplines"));
 
-		incScalingButton.pressedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("increaseScalingFactor"));
-		});
-		decScalingButton.pressedProperty().addListener((observable, from, to) -> {
-			railMLImportMeta.setState(railMLImportMeta.getState().perform("decreaseScalingFactor"));
-		});
+		incScalingButton.pressedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("increaseScalingFactor"));
+		decScalingButton.pressedProperty()
+			.addListener((o,f,t) -> railMLImportMeta.perform("decreaseScalingFactor"));
 
 		dotView.visibleProperty().bind(this.updater.runningProperty().not());
 		placeholderLabel.visibleProperty().bind(this.updater.runningProperty());

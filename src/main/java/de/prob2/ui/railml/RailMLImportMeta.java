@@ -35,6 +35,12 @@ public class RailMLImportMeta {
 	protected State getState() {
 		return state;
 	}
+	protected void perform(String operation) {
+		state = state.perform(operation);
+	}
+	protected void perform(String operation, String predicates) {
+		state = state.perform(operation, predicates);
+	}
 	protected String getName() {
 		return name;
 	}
