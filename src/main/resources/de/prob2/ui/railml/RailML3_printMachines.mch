@@ -142,7 +142,7 @@ INVARIANT
     & !(sw, branch).(sw : RailML3_IS_SWITCH_IDS & sw /: dom(IS_switchesInMovement) & branch : RailML3_IS_SWITCH_BRANCHES(sw) & branch /: (RailML3_IL_SWITCH_BRANCHES(sw)(IS_switch_states(sw)) \/ inverseDirectedRelation(RailML3_IL_SWITCH_BRANCHES(sw)(IS_switch_states(sw)))) => branch /: IS_next) /*@desc "other switch positions are not part of IS_next" */
     & IS_switch_keyLocked : RailML3_IS_SWITCH_IDS --> BOOL
 
-    & RS_requestingArrivalTrains : RS_trains - RS_arrivedTrains +-> ((allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION) * allIdsOfType("tvdSection"))
+    & RS_requestingArrivalTrains : (RS_trains - RS_arrivedTrains) +-> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
     & RS_arrivedTrains <: RS_trains
     & RS_arrivedTrains /\ dom(RS_requestingArrivalTrains) = {} /*@desc "arrived and requesting arrival trains are disjoint" */
     & RS_trainOccupiedLocations : (RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)) --> FIN(allIdsOfType("netElement") * REAL)
@@ -175,6 +175,7 @@ INVARIANT
     & !res_bl.(res_bl : IL_res_blocks /\ ran(ran(RailML3_IL_ROUTE_ENTRY \/ RailML3_IL_ROUTE_EXIT)) => card(IL_res_route_blocks[{res_bl}]) : 0..2 ) /*@desc "route entries/exits can be reserved by at most two routes" */
     & !res_bl.(res_bl : IL_res_blocks - ran(ran(RailML3_IL_ROUTE_ENTRY \/ RailML3_IL_ROUTE_EXIT)) => card(IL_res_route_blocks[{res_bl}]) : 0..1 ) /*@desc "other blocks can be reserved by at most one route" */
     & IL_res_route_blocks <: RailML3_IL_ROUTE_BLOCKS
+    & !(r,res_bl).(r : dom(IL_routes_in_res) & res_bl : IL_res_route_blocks~[{r}] - {prj2(RailML3_IL_ROUTE_ENTRY(r)), prj2(RailML3_IL_ROUTE_EXIT(r))} => prj1(res_bl) /: union(ran(RS_trainOccupiedLocations)) ) /*@desc "no blocks of a route in reservation are occupied" */
     & !(r).(r : allIdsOfType("route") => RailML3_IL_ROUTE_NXT(r)[(IL_res_route_blocks~)[{r}]] <: (IL_res_route_blocks~)[{r}])
     & !(r,rg).(r : dom(IL_res_routes) & rg : IL_released_partialRoutes(r) => ((dom(RailML3_IL_ROUTE_RELEASE_GROUP_AHEAD_NXT(rg)(r) \/ RailML3_IL_ROUTE_RELEASE_GROUP_REAR_NXT(rg)(r)) \/ ran(RailML3_IL_ROUTE_RELEASE_GROUP_AHEAD_NXT(rg)(r) \/ RailML3_IL_ROUTE_RELEASE_GROUP_REAR_NXT(rg)(r))) <| RailML3_IL_ROUTE_BLOCKS) |> {r} = IL_res_route_blocks |> {r}) /*@desc "all route blocks of a reserved route (except those released by partial route releases) are part of the reserved route blocks" */
     & !(r).(r : dom(IL_res_routes) => (IL_res_route_blocks~)[{r}] <| RailML3_IL_ROUTE_NXT(r) = (IL_res_route_blocks~)[{r}] <| IS_next |> (IL_res_route_blocks~)[{r}])
@@ -249,6 +250,7 @@ INVARIANT
     & !(r,der).(r : dom(IL_res_routes) & r : dom(RailML3_IL_ROUTE_DERAILERS) & der : IL_derailer_locked_routes~[{r}] => prj2(IS_derailer_states(der)) = position_passablePosition & der /: dom(IS_derailersInMovement)) /*@desc "derailers are in passable position for all reserved routes" */
     & !(r,sw).(r : dom(IL_res_routes) & r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & sw : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(r)) /\ IL_switch_locked_routes~[{r}] => RailML3_IL_ROUTE_SWITCH_POSITIONS(r)(sw) <: IS_switch_states(sw) & sw /: dom(IS_switchesInMovement)) /*@desc "forced positions of switches are fulfilled for all routes" */
 INITIALISATION
+    importRailML(TRUE);
     IS_crossing_states :=
         { i_cr, cr | #i_cr_il.(i_cr_il : allIdsOfType("movableCrossing") & RailML3_IL_MOVABLE_CROSSING_REFERS_TO(i_cr_il) = i_cr & cr = i_cr_il |-> IF i_cr_il : dom(RailML3_IL_MOVABLE_CROSSING_PREFERRED_POSITION) THEN RailML3_IL_MOVABLE_CROSSING_PREFERRED_POSITION(i_cr_il) ELSE `position_upleft-rightdown` END) } ||
     IS_derailer_states :=
@@ -310,14 +312,19 @@ OPERATIONS
             & DerailerId /: dom(IS_derailersInMovement) /*@desc "the derailer is not in movement" */
             & !sloc.(sloc : dom(RailML3_IS_SPOT_LOCATIONS(DerailerId)) => sloc /: union(ran(RS_trainOccupiedLocations))) /*@desc "the location of the derailer is not occupied by a train" */
             & !tvd.(tvd : union(RailML3_IL_DERAILER_HAS_TVD_SECTION[{DerailerId}]) => tvd /: dom(IL_occupiedTvdSections)) /*@desc "the TVD sections of the derailer are not occupied by a train" */
-            & signals = dom({ signal, NXT | #exit.(exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(signal) & NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal)(exit) & NXT <: IS_next & NXT /\ RailML3_IS_DERAILER_NOT_PASSABLE(DerailerId) /= {}) }) /*@desc "set containing all signals controlling the sections of the derailer" */
-            & !(signal).(signal : signals => dom(dom({ nxt, NXT | #exit.(exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(signal) & NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal)(exit) & NXT <: IS_next & nxt : ran(NXT |>> closure1(NXT)[ran(RailML3_IS_DERAILER_NOT_PASSABLE(DerailerId))]) ) })) /\ union(ran(RS_trainOccupiedLocations)) = {}) /*@desc "if part of signal section: the derailer is only controllable if the section is free for the path of the current position" */
+            & signals = { signal, path | #section.(
+                section : ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal))
+                & section /\ RailML3_IS_DERAILER_NOT_PASSABLE(DerailerId) /= {}
+                & path = railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1[ran(RailML3_IS_DERAILER_NOT_PASSABLE(DerailerId))] <<| section
+                & !b.(b : path => b : IS_next)
+            )} /*@desc "set containing all signals controlling the sections of the derailer" */
+            & !path.(path : ran(signals) => dom(dom(path) \/ ran(path)) /\ union(ran(RS_trainOccupiedLocations)) = {} ) /*@desc "if part of signal section: the derailer is only controllable if the section is free for the path of the current position" */
         THEN
             IS_derailersInMovement := IS_derailersInMovement \/ {DerailerId |-> DestState} ||
             IF prj2(DestState) = position_derailingPosition THEN
                 IS_next := IS_next - RailML3_IS_DERAILER_NOT_PASSABLE(DerailerId) ||
-                IL_signal_states := IL_signal_states <+ (signals * {{aspect_closed}}) ||
-                IL_noted_signal_states := signals <<| IL_noted_signal_states
+                IL_signal_states := IL_signal_states <+ (dom(signals) * {{aspect_closed}}) ||
+                IL_noted_signal_states := dom(signals) <<| IL_noted_signal_states
             ELSE skip END
         END;
     IS_endChangeDerailer(DerailerId) =
@@ -354,13 +361,18 @@ OPERATIONS
             & !(train, branch).(train : RS_arrivedTrains & branch : RailML3_IS_CROSSING_BRANCHES(CrossingId)
                 => prj1(prj1(branch)) /: RS_trainOccupiedLocations(train) or prj1(prj2(branch)) /: RS_trainOccupiedLocations(train)  ) /*@desc "the crossing is not occupied by a train" */
             & !tvd.(tvd : union(RailML3_IL_MOVABLE_CROSSING_HAS_TVD_SECTION[{CrossingId}]) => tvd /: dom(IL_occupiedTvdSections)) /*@desc "the TVD sections of the crossing are not occupied by a train" */
-            & signals = dom({ signal, NXT | #exit.(exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(signal) & NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal)(exit) & NXT <: IS_next & NXT /\ RailML3_IS_CROSSING_BRANCHES(CrossingId) /= {}) }) /*@desc "set containing all signals controlling the sections of the crossing" */
-            & !(signal).(signal : signals => dom(dom({ nxt, NXT | #exit.(exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(signal) & NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal)(exit) & NXT <: IS_next & nxt : ran(NXT |>> closure1(NXT)[ran(RailML3_IS_CROSSING_BRANCHES(CrossingId))]) ) })) /\ union(ran(RS_trainOccupiedLocations)) = {}) /*@desc "if part of signal section: the crossing is only controllable if the section is free for the path of the current position" */
+            & signals = { signal, path | #section.(
+                section : ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal))
+                & section /\ RailML3_IS_CROSSING_BRANCHES(CrossingId) /= {}
+                & path = railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1[ran(RailML3_IS_CROSSING_BRANCHES(CrossingId))] <<| section
+                & !b.(b : path => b : IS_next)
+            )} /*@desc "set containing all signals controlling the sections of the crossing" */
+            & !path.(path : ran(signals) => dom(dom(path) \/ ran(path)) /\ union(ran(RS_trainOccupiedLocations)) = {} ) /*@desc "if part of signal section: the crossing is only controllable if the section is free for the path of the current position" */
         THEN
             IS_crossingsInMovement := IS_crossingsInMovement \/ {CrossingId |-> DestState} ||
             IS_next := IS_next - (RailML3_IL_MOVABLE_CROSSING_BRANCHES(CrossingId)(CurrState) \/ inverseDirectedRelation(RailML3_IL_MOVABLE_CROSSING_BRANCHES(CrossingId)(CurrState))) ||
-            IL_signal_states := IL_signal_states <+ (signals * {{aspect_closed}}) ||
-            IL_noted_signal_states := signals <<| IL_noted_signal_states
+            IL_signal_states := IL_signal_states <+ (dom(signals) * {{aspect_closed}}) ||
+            IL_noted_signal_states := dom(signals) <<| IL_noted_signal_states
         END;
     IS_endChangeCrossing(CrossingId) =
         ANY
@@ -405,13 +417,18 @@ OPERATIONS
             & !(train, branch).(train : RS_arrivedTrains & branch : RailML3_IS_SWITCH_BRANCHES(SwitchId)
                 => prj1(prj1(branch)) /: RS_trainOccupiedLocations(train) or prj1(prj2(branch)) /: RS_trainOccupiedLocations(train) ) /*@desc "the switch is not occupied by a train" */
             & !tvd.(tvd : union(RailML3_IL_SWITCH_HAS_TVD_SECTION[{SwitchId}]) => tvd /: dom(IL_occupiedTvdSections)) /*@desc "the TVD sections of the switch are not occupied by a train" */
-            & signals = dom({ signal, NXT | #exit.(exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(signal) & NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal)(exit) & NXT <: IS_next & NXT /\ RailML3_IS_SWITCH_BRANCHES(SwitchId) /= {}) }) /*@desc "set containing all signals controlling the sections of the switch" */
-            & !(signal).(signal : signals => dom(dom({ nxt, NXT | #exit.(exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(signal) & NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal)(exit) & NXT <: IS_next & nxt : ran(NXT |>> closure1(NXT)[ran(RailML3_IS_SWITCH_BRANCHES(SwitchId))]) ) })) /\ union(ran(RS_trainOccupiedLocations)) = {}) /*@desc "if part of signal section: the switch is only controllable if the section is free for the path of the current position" */
+            & signals = { signal, path | #section.(
+                section : ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal))
+                & section /\ RailML3_IS_SWITCH_BRANCHES(SwitchId) /= {}
+                & path = railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1[ran(RailML3_IS_SWITCH_BRANCHES(SwitchId))] <<| section
+                & !b.(b : path => b : IS_next)
+            )} /*@desc "set containing all signals controlling the sections of the switch" */
+            & !path.(path : ran(signals) => dom(dom(path) \/ ran(path)) /\ union(ran(RS_trainOccupiedLocations)) = {} ) /*@desc "if part of a signal section: the switch can only be controlled if the section up to the switch is free for the path of the current position" */
         THEN
             IS_switchesInMovement := IS_switchesInMovement \/ {SwitchId |-> DestState} ||
             IS_next := IS_next - (RailML3_IL_SWITCH_BRANCHES(SwitchId)(CurrState) \/ inverseDirectedRelation(RailML3_IL_SWITCH_BRANCHES(SwitchId)(CurrState))) ||
-            IL_signal_states := IL_signal_states <+ (signals * {{aspect_closed}}) ||
-            IL_noted_signal_states := signals <<| IL_noted_signal_states
+            IL_signal_states := IL_signal_states <+ (dom(signals) * {{aspect_closed}}) ||
+            IL_noted_signal_states := dom(signals) <<| IL_noted_signal_states
         END;
     IS_endChangeSwitch(SwitchId) =
         ANY
@@ -481,24 +498,30 @@ OPERATIONS
                 => prj1(prj1(branch)) /: RS_trainOccupiedLocations(train) or prj1(prj2(branch)) /: RS_trainOccupiedLocations(train) ) /*@desc "the second switch is not occupied by a train" */
             & !tvd.(tvd : union(RailML3_IL_SWITCH_HAS_TVD_SECTION[{SwitchId2}]) => tvd /: dom(IL_occupiedTvdSections)) /*@desc "the TVD sections of the second switch are not occupied by a train" */
         // Signals:
-            & signals = dom({ signal, NXT | #exit.(exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(signal) & NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal)(exit) & NXT <: IS_next & NXT /\ union(RailML3_IS_SWITCH_BRANCHES[{SwitchId1, SwitchId2}]) /= {}) }) /*@desc "set containing all signals controlling the sections of the switches" */
-            & !(signal).(signal : signals => dom(dom({ nxt, NXT | #exit.(exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(signal) & NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal)(exit) & NXT <: IS_next & nxt : ran(NXT |>> closure1(NXT)[ran(union(RailML3_IS_SWITCH_BRANCHES[{SwitchId1,SwitchId2}]))]) ) })) /\ union(ran(RS_trainOccupiedLocations)) = {}) /*@desc "if part of signal section: the switches are only controllable if the section is free for the path of the current positions" */
+            & signals = { signal, path | #section.(
+                section : ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(signal))
+                & section /\ union(RailML3_IS_SWITCH_BRANCHES[{SwitchId1,SwitchId2}]) /= {}
+                & path = railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1[ran(union(RailML3_IS_SWITCH_BRANCHES[{SwitchId1,SwitchId2}]))] <<| section
+                & !b.(b : path => b : IS_next)
+            )} /*@desc "set containing all signals controlling the sections of the switches" */
+            & !path.(path : ran(signals) => dom(dom(path) \/ ran(path)) /\ union(ran(RS_trainOccupiedLocations)) = {} ) /*@desc "if part of signal section: the switches are only controllable if the section is free for the path of the current positions" */
         THEN
             IS_switchesInMovement := IS_switchesInMovement \/ {SwitchId1 |-> DestState1} ||
             IS_next := IS_next - (RailML3_IL_SWITCH_BRANCHES(SwitchId1)(CurrState1) \/ inverseDirectedRelation(RailML3_IL_SWITCH_BRANCHES(SwitchId1)(CurrState1)));
             IS_switchesInMovement := IS_switchesInMovement \/ {SwitchId2 |-> DestState2} ||
             IS_next := IS_next - (RailML3_IL_SWITCH_BRANCHES(SwitchId2)(CurrState2) \/ inverseDirectedRelation(RailML3_IL_SWITCH_BRANCHES(SwitchId2)(CurrState2))) ||
-            IL_signal_states := IL_signal_states <+ (signals * {{aspect_closed}}) ||
-            IL_noted_signal_states := signals <<| IL_noted_signal_states
+            IL_signal_states := IL_signal_states <+ (dom(signals) * {{aspect_closed}}) ||
+            IL_noted_signal_states := dom(signals) <<| IL_noted_signal_states
         END;
 
     IL_startRouteReservation(Route, Train) =
-        ANY
-            signals
-        WHERE
+        SELECT
             Route : allIdsOfType("route") - dom(IL_routes_in_res \/ IL_res_routes)  /*@desc "the route is currently not reserved or in reservation" */
-            & Train : (dom(RS_requestingArrivalTrains) \/ RS_arrivedTrains) /*@desc "the requesting train is currently in the interlocking area" */
-            & (RS_trainFront(Train) |-> prj2(RailML3_IL_ROUTE_ENTRY(Route)) : railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1 or RS_trainFront(Train) = prj2(RailML3_IL_ROUTE_ENTRY(Route))) /*@desc "the train is in front of the route entry" */
+            & ( ( Train : RS_arrivedTrains
+                    & (RS_trainFront(Train) |-> prj2(RailML3_IL_ROUTE_ENTRY(Route)) : railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1 or RS_trainFront(Train) = prj2(RailML3_IL_ROUTE_ENTRY(Route))) /*@desc "the train is in front of the route entry" */
+                )
+                or (Train : dom(RS_requestingArrivalTrains) & RS_requestingArrivalTrains(Train) = prj2(RailML3_IL_ROUTE_ENTRY(Route)))
+            ) /*@desc "the requesting train is currently in the interlocking area or an arriving train reserves a rout starting at an open end" */            
             & (IF Route : dom(RailML3_IL_ROUTE_ACTIVATION_SECTIONS) THEN
                 #actTvd.(actTvd : RailML3_IL_ROUTE_ACTIVATION_SECTIONS(Route) & Train : IL_occupiedTvdSections[{actTvd}] & RS_trainFront(Train) : (dom(RailML3_IL_TVD_SECTIONS(actTvd)) \/ ran(RailML3_IL_TVD_SECTIONS(actTvd))))
             ELSE
@@ -516,14 +539,17 @@ OPERATIONS
                 & dom(IL_res_route_blocks~[{r}]) /\ dom(RailML3_IL_ROUTE_BLOCKS~[{Route}] - {prj2(RailML3_IL_ROUTE_ENTRY(Route)),prj2(RailML3_IL_ROUTE_EXIT(Route))}) = {} ) /*@desc "no route block is reserved by another route (dom(.) to ensure both directions are taken into account)" */
             & !o.(o : dom(IL_res_overlaps) & IL_res_overlaps(o) /= Train => RailML3_IL_OVERLAP_NXT(o) /\ RailML3_IL_ROUTE_NXT(Route) = {} ) /*@desc "no reserved overlap intersects the route" */
             & !(o,o2).(o : union(RailML3_IL_ROUTE_OVERLAPS[{Route}]) & o2 : dom(IL_res_overlaps) & o /= o2 => o /: dom(IL_res_overlaps) & RailML3_IL_OVERLAP_NXT(o) /\ RailML3_IL_OVERLAP_NXT(o2) = {} & !r.(r : dom(IL_routes_in_res \/ IL_res_routes) & r /= Route => RailML3_IL_OVERLAP_NXT(o) /\ RailML3_IL_ROUTE_NXT(r) = {})) /*@desc "the overlaps to be reserved do not intersect with other reserved overlaps" */
-            & signals = { i_sig | i_sig : RailML3_IL_SIGNAL_CONTROLLED & RailML3_IL_ROUTE_NXT(Route) /\ union(ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(i_sig))) /= {} }
         THEN
             IL_routes_in_res := IL_routes_in_res \/ {Route |-> Train} ||
             IL_res_route_blocks := IL_res_route_blocks \/ (RailML3_IL_ROUTE_BLOCKS |> {Route}) ||
             IL_res_blocks := IL_res_blocks \/ (RailML3_IL_ROUTE_BLOCKS~)[{Route}] ||
             IL_res_overlaps := IL_res_overlaps \/ (union(RailML3_IL_ROUTE_OVERLAPS[{Route}]) * {Train}) ||
-            IL_signal_states := IL_signal_states <+ (signals * {{aspect_closed}}) ||
-            IL_noted_signal_states := signals <<| IL_noted_signal_states
+            LET signals BE
+                signals = { i_sig | i_sig : RailML3_IL_SIGNAL_CONTROLLED & RailML3_IS_SPOT_LOCATIONS(i_sig) /\ RailML3_IL_ROUTE_BLOCKS~[{Route}] /= {} }
+            IN
+                IL_signal_states := IL_signal_states <+ (signals * {{aspect_closed}}) ||
+                IL_noted_signal_states := signals <<| IL_noted_signal_states
+            END
         END;
     IL_endRouteReservation(Route, Train) =
         ANY
@@ -795,6 +821,7 @@ OPERATIONS
                 )
             ) /*@desc "if the signalplan in activation corresponds to a route, the route reservation must be completed" */
             & dom({ s1, s2 | s2 : signalplan_relation & s1 = RailML3_IL_SIGNAL_REFERS_TO(prj1(s2)) |-> prj2(s2) }) <: IL_noted_signal_states /*@desc "the noted signal states of all associated signals must match the requested aspects of the signalplan" */
+            & !(s,sp_act).(s : dom(Signalplan'master) & sp_act : IL_signalplan_in_activation & sp_act /= Signalplan => s /: dom(sp_act'slave))  /*@desc "all signalplans for the master signal are activated" */
         THEN
             IL_signalplan_in_activation := IL_signalplan_in_activation - {Signalplan} ||
             IL_signal_locked := IL_signal_locked - dom({ s1, s2 | s2 : dom(signalplan_relation) & s1 = RailML3_IL_SIGNAL_REFERS_TO(s2) & aspect_closed : signalplan_relation(s2)
@@ -878,39 +905,42 @@ OPERATIONS
             IL_signal_states(SignalId) := destAspect
         END;
 
-    RS_trainArrivalRequest(Position, Train) =
+    RS_trainArrivalRequest(OpenendId, Train, Position) =
         ANY
-            tvdSection, signals
+            tvds
         WHERE
-            Position : dom(union(RailML3_IS_SPOT_LOCATIONS[RailML3_IS_OPENEND_IDS])) * {direction_normal, direction_reverse}
+            OpenendId : RailML3_IS_OPENEND_IDS
+            & Position : dom(union(RailML3_IS_SPOT_LOCATIONS[{OpenendId}])) * {direction_normal, direction_reverse}
             & Position : dom(IS_next)
-            & tvdSection : allIdsOfType("tvdSection")
-            & tvdSection /: dom(IL_occupiedTvdSections)
-            & Position : dom(RailML3_IL_TVD_SECTIONS(tvdSection))
-            & Position /: dom(union(RailML3_IL_TVD_SECTIONS[dom(IL_occupiedTvdSections)])) /*@desc "TVD sections of open end are vacant" */
-            & IS_next(Position) /: dom(union(RailML3_IL_TVD_SECTIONS[dom(IL_occupiedTvdSections)])) /*@desc "TVD sections of the next location after the open end are vacant" */
+            & tvds <: allIdsOfType("tvdSection")
+            & tvds /= {} /*@desc "open end must be part of at least one TVD section" */
+            & !tvd.(tvd : tvds => Position : dom(RailML3_IL_TVD_SECTIONS(tvd)) or prj1(IS_next(Position)) : dom(dom(RailML3_IL_TVD_SECTIONS(tvd))))
+            & tvds /\ dom(IL_occupiedTvdSections) = {} /*@desc "TVD sections of open end are vacant" */
             & Train : RS_trains - (RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)) /*@desc "the train has not yet arrived" */
-            & signals = dom({ i_sig, exit | i_sig : RailML3_IL_SIGNAL_CONTROLLED & exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & RailML3_IL_SIGNAL_CONTROL_SECTIONS(i_sig)(exit) <: IS_next & tvdSection : RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS(i_sig)(exit) })
         THEN
-            IL_occupiedTvdSections := IL_occupiedTvdSections \/ {tvdSection |-> Train} ||
-            RS_requestingArrivalTrains := RS_requestingArrivalTrains \/ {Train |-> (Position, tvdSection)} ||
-            RS_trainOccupiedLocations := RS_trainOccupiedLocations \/ {Train |-> {prj1(Position), prj1(IS_next(Position))}} ||
-            RS_trainFront := RS_trainFront \/ {Train |-> IS_next(Position)} ||
-            RS_trainBack := RS_trainBack \/ {Train |-> Position} ||
-            IL_signal_states := IL_signal_states <+ (signals * {{aspect_closed}}) ||
-            IL_noted_signal_states := signals <<| IL_noted_signal_states
+            IL_occupiedTvdSections := IL_occupiedTvdSections \/ (tvds * {Train}) ||
+            RS_requestingArrivalTrains := RS_requestingArrivalTrains \/ {Train |-> Position} ||
+            LET signals BE
+                signals = { i_sig | i_sig : RailML3_IL_SIGNAL_CONTROLLED & OpenendId : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(i_sig) & RailML3_IL_SIGNAL_CONTROL_SECTIONS(i_sig)(OpenendId) <: IS_next }
+            IN
+                IL_signal_states := IL_signal_states <+ (signals * {{aspect_closed}}) ||
+                IL_noted_signal_states := signals <<| IL_noted_signal_states
+            END
         END;
     IL_trainAcceptArrival(Train) =
         ANY
-            position, tvdSection, route
+            position, route
         WHERE
-            Train |-> (position, tvdSection) : RS_requestingArrivalTrains
+            Train |-> position : RS_requestingArrivalTrains
             & route : allIdsOfType("route")
             & ( prj1(RailML3_IL_ROUTE_ENTRY(route)) : RailML3_IS_OPENEND_IDS & prj2(RailML3_IL_ROUTE_ENTRY(route)) = position =>
                 route : dom(IL_res_routes) & IL_res_routes(route) = Train
             ) /*@desc "if the open end is a route entry, a route must be reserved by the arriving train" */
         THEN            
             RS_requestingArrivalTrains := {Train} <<| RS_requestingArrivalTrains ||
+            RS_trainOccupiedLocations := RS_trainOccupiedLocations \/ {Train |-> {prj1(position), prj1(IS_next(position))}} ||
+            RS_trainFront := RS_trainFront \/ {Train |-> IS_next(position)} ||
+            RS_trainBack := RS_trainBack \/ {Train |-> position} ||
             RS_arrivedTrains := RS_arrivedTrains \/ {Train}
         END;
     IL_trainDeclineArrival(Train) =
