@@ -25,6 +25,7 @@ import de.prob.scripting.ExtractedModel;
 import de.prob.scripting.ModelFactory;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.ErrorDisplayFilter;
 import de.prob2.ui.internal.StageManager;
@@ -275,7 +276,7 @@ public class MachineLoader {
 								"project.machineLoader.alerts.eventBFileNotFound.content", exc.getLocalizedMessage(), machine.getName())
 							.showAndWait());
 					}
-				} else if (e instanceof FileNotFoundException) {
+				} else if (TraceFileHandler.isFileNotFound(e)) {
 					LOGGER.error("Machine file of \"{}\" not found", machine.getName(), e);
 					showAlert(e, machine);
 				} else {

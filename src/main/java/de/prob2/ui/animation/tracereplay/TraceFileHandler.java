@@ -64,7 +64,7 @@ public final class TraceFileHandler {
 		this.i18n = i18n;
 	}
 
-	private static boolean isFileNotFound(Throwable e) {
+	public static boolean isFileNotFound(Throwable e) {
 		if (e instanceof FileNotFoundException || e instanceof NoSuchFileException) {
 			return true;
 		}
@@ -129,10 +129,10 @@ public final class TraceFileHandler {
 			messageContent.add(path);
 		}
 		return stageManager.makeAlert(
-				Alert.AlertType.ERROR,
-				headerBundleKey,
-				contentBundleKey,
-				messageContent.toArray()
+			Alert.AlertType.ERROR,
+			headerBundleKey,
+			contentBundleKey,
+			messageContent.toArray()
 		);
 	}
 
@@ -225,7 +225,7 @@ public final class TraceFileHandler {
 			int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 			//Starts counting with 1 in the file name
 			for (int i = 0; i < numberGeneratedTraces; i++) {
-				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + (i+1) + ".prob2trace");
+				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + (i + 1) + ".prob2trace");
 				save(traces.get(i), traceFilePath, item.createdByForMetadata(i));
 				Target target = item.getResult().getTestTraces().get(i).getTarget();
 				String description = "Test Case Generation Trace \nOperation: " + target.getOperation() + "\nGuard: " + target.getGuardString();
@@ -239,18 +239,18 @@ public final class TraceFileHandler {
 		}
 		if (traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION,
-					"animation.testcase.notAllTestCasesGenerated.header",
-					"animation.testcase.notAllTestCasesGenerated.content",
-					NUMBER_MAXIMUM_GENERATED_TRACES).showAndWait();
+				"animation.testcase.notAllTestCasesGenerated.header",
+				"animation.testcase.notAllTestCasesGenerated.content",
+				NUMBER_MAXIMUM_GENERATED_TRACES).showAndWait();
 		}
 	}
 
 	public void save(Trace trace, Path location, String createdBy) throws IOException {
 		JsonMetadata jsonMetadata = TraceJsonFile.metadataBuilder()
-			.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-			.withModelName(currentProject.getCurrentMachine().getName())
-			.withCreator(createdBy)
-			.build();
+			                            .withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
+			                            .withModelName(currentProject.getCurrentMachine().getName())
+			                            .withCreator(createdBy)
+			                            .build();
 		traceManager.save(location, new TraceJsonFile(trace, jsonMetadata));
 	}
 

@@ -71,7 +71,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.currentTrace = currentTrace;
 
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
-				Paths.get(System.getProperty("user.home")));
+			Paths.get(System.getProperty("user.home")));
 		this.exists = new SimpleBooleanProperty(this, "exists", false);
 		this.exists.bind(Bindings.isNotNull(this));
 		this.name = new SimpleStringProperty(this, "name", "");
@@ -101,14 +101,14 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				if (from != null && !to.getLocation().equals(from.getLocation())) {
 					this.updateCurrentMachine(null, null);
 				}
-				for(Machine machine : to.getMachines()) {
+				for (Machine machine : to.getMachines()) {
 					machine.changedProperty().addListener((o1, from1, to1) -> {
 						if (to1) {
 							this.setSaved(false);
 						}
 					});
 				}
-				for(Preference pref : to.getPreferences()) {
+				for (Preference pref : to.getPreferences()) {
 					pref.changedProperty().addListener((o1, from1, to1) -> {
 						if (to1) {
 							this.setSaved(false);
@@ -182,8 +182,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public CompletableFuture<?> reloadMachine(Machine machine) {
 		if (machine == null) {
 			throw new IllegalStateException("Cannot reload without machine");
-		}
-		if (!this.confirmMachineReplace()) {
+		} else if (!this.confirmMachineReplace()) {
 			return CompletableFuture.completedFuture(null);
 		}
 		return this.startAnimation(machine);
@@ -192,11 +191,9 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public CompletableFuture<?> reloadMachine(Machine machine, Preference preference) {
 		if (machine == null) {
 			throw new IllegalStateException("Cannot reload without machine");
-		}
-		if (preference == null) {
+		} else if (preference == null) {
 			throw new IllegalStateException("Cannot reload without preference");
-		}
-		if (!this.confirmMachineReplace()) {
+		} else if (!this.confirmMachineReplace()) {
 			return CompletableFuture.completedFuture(null);
 		}
 		return this.startAnimation(machine, preference);
@@ -211,7 +208,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public void removeMachine(Machine machine) {
 		List<Machine> machinesList = this.getMachines();
 		machinesList.remove(machine);
-		if(machine.equals(currentMachine.get())) {
+		if (machine.equals(currentMachine.get())) {
 			this.saved.set(false);
 			this.currentTrace.set(null);
 			this.updateCurrentMachine(null, null);
@@ -408,8 +405,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	public boolean confirmReplacingProject() {
 		if (this.get() != null && !this.isSaved()) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-					"prob2fx.currentProject.alerts.confirmReplacingProject.header",
-					"prob2fx.currentProject.alerts.confirmReplacingProject.content");
+				"prob2fx.currentProject.alerts.confirmReplacingProject.header",
+				"prob2fx.currentProject.alerts.confirmReplacingProject.content");
 			Optional<ButtonType> result = alert.showAndWait();
 			return result.isPresent() && ButtonType.OK.equals(result.get());
 		} else {
@@ -419,7 +416,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 	public boolean confirmMachineReplace() {
 		if (this.getCurrentMachine() == null || this.injector.getInstance(BEditorView.class).savedProperty().get()) {
-			// we can always replace the empty machine
+			// we can replace the current machine when it is empty or saved
 			return true;
 		}
 
