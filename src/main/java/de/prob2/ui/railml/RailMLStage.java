@@ -252,7 +252,6 @@ public class RailMLStage extends Stage {
 		updater.execute(() -> {
 			try {
 				generateMachines();
-				final Path projectLocation = generationPath;
 				final String shortName = MoreFiles.getNameWithoutExtension(railMLpath);
 				final Machine dataMachine = new Machine(dataFileName.getValue(), "Data machine generated from " + railMLpath.getFileName(), generationPath.relativize(generationPath.resolve(dataFileName.getValue())));
 				final Machine animationMachine = new Machine(animationFileName.getValue(), "Animation machine generated from " + railMLpath.getFileName(), generationPath.relativize(generationPath.resolve(animationFileName.getValue())));
@@ -271,10 +270,10 @@ public class RailMLStage extends Stage {
 								throw new RuntimeException(e);
 							}
 							if (generateAnimation || generateValidation) {
-								railMLInspectDotStage.setOnHidden(event -> createProject(shortName, projectLocation, dataMachine, animationMachine, validationMachine));
+								railMLInspectDotStage.setOnHidden(event -> createProject(shortName, generationPath, dataMachine, animationMachine, validationMachine));
 							}
 						} else {
-							createProject(shortName, projectLocation, dataMachine, animationMachine, validationMachine);
+							createProject(shortName, generationPath, dataMachine, animationMachine, validationMachine);
 						}
 						this.close();
 					});
@@ -394,11 +393,9 @@ public class RailMLStage extends Stage {
 	}
 
 	private void createProject(String shortName, Path projectLocation, Machine dataMachine, Machine animationMachine, Machine validationMachine) {
-		if (currentProject.getLocation() == null) {
-			boolean replacingProject = currentProject.confirmReplacingProject();
-			if (replacingProject) {
-				currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
-			}
+		boolean replacingProject = currentProject.confirmReplacingProject();
+		if (replacingProject) {
+			currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 		}
 		if (generateAnimation || generateValidation) {
 			currentProject.addMachine(dataMachine);
@@ -407,9 +404,9 @@ public class RailMLStage extends Stage {
 			try {
 				replaceOldResourceFile(generationPath, "RailML3_VisB.def");
 				replaceOldResourceFile(generationPath, "RailML3_SimB.json");
+				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.relativize(generationPath.resolve("RailML3_VisB.def")));
 				Path simbPath = generationPath.resolve("RailML3_SimB.json");
 
-				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.relativize(generationPath.resolve("RailML3_VisB.def")));
 				currentProject.addMachine(animationDefinitions);
 				currentProject.addMachine(animationMachine);
 				currentProject.startAnimation(animationMachine);
