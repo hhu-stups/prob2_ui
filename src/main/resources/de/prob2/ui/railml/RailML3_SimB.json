@@ -264,7 +264,7 @@
                         "execute": "IL_endActivateSignalplan",
                         "after": 1000,
                         "probabilisticVariables": "uniform",
-                        "activating" : ["skip"]
+                        "activating" : ["skip", "endActivateSignalplan"]
                     },
                 {
                     "id": "IL_changeSignalState",
@@ -377,6 +377,16 @@
     ],
     "listeners" : [
         {
+            "id": "IS_changeCrossing",
+            "event": "IS_startChangeCrossing",
+            "activating": ["IS_endChangeCrossing"]
+        },
+        {
+            "id": "IS_changeDerailer",
+            "event": "IS_startChangeDerailer",
+            "activating": ["IS_endChangeDerailer"]
+        },
+        {
             "id": "IS_changeSwitch",
             "event": "IS_startChangeSwitch",
             "activating": ["IS_endChangeSwitch"]
@@ -385,6 +395,11 @@
             "id": "RS_moveTrain",
             "event": "RS_trainMoveFront",
             "activating": ["RS_trainMoveBack"]
+        },
+        {
+            "id": "IL_overlapRelease",
+            "event": "IL_startOverlapRelease",
+            "activating": ["IL_endOverlapRelease"]
         }
     ]
 }

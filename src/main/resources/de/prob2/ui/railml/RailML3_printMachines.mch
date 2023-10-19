@@ -913,6 +913,8 @@ OPERATIONS
             & tvds /= {} /*@desc "open end must be part of at least one TVD section" */
             & !tvd.(tvd : tvds => Position : dom(RailML3_IL_TVD_SECTIONS(tvd)) or prj1(IS_next(Position)) : dom(dom(RailML3_IL_TVD_SECTIONS(tvd))))
             & tvds /\ dom(IL_occupiedTvdSections) = {} /*@desc "TVD sections of open end are vacant" */
+            & !r.(r : dom(IL_routes_in_res \/ IL_res_routes) => union(RailML3_IL_ROUTE_TVD_SECTIONS[{r}]) /\ tvds = {}) /*@desc "TVD sections of open end are not part of reserved route" */
+            & !o.(o : dom(IL_res_overlaps) => union(RailML3_IL_OVERLAP_TVD_SECTIONS[{o}]) /\ tvds = {}) /*@desc "TVD sections of open end are not part of reserved overlap" */
             & Train : RS_trains - (RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)) /*@desc "the train has not yet arrived" */
         THEN
             IL_occupiedTvdSections := IL_occupiedTvdSections \/ (tvds * {Train}) ||
@@ -957,7 +959,7 @@ OPERATIONS
             position : dom(union(RailML3_IS_SPOT_LOCATIONS[RailML3_IS_OPENEND_IDS])) * {direction_normal, direction_reverse}
             & tvdSection : allIdsOfType("tvdSection")
             & tvdSection : IL_occupiedTvdSections~[{Train}]
-            & position : dom(RailML3_IL_TVD_SECTIONS(tvdSection))
+            & position : ran(RailML3_IL_TVD_SECTIONS(tvdSection))
             & Train : RS_arrivedTrains
             & RS_trainFront(Train) = position /*@desc "front of train is location of an open end" */
             & RS_trainBack(Train) |-> position : RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS /*@desc "front and back of train are directly connected in topology" */
