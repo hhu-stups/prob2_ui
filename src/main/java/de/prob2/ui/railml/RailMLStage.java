@@ -396,30 +396,30 @@ public class RailMLStage extends Stage {
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if (replacingProject) {
 			currentProject.switchTo(new Project(shortName, "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
-		}
-		if (generateAnimation || generateValidation) {
-			currentProject.addMachine(dataMachine);
-		}
-		if (generateAnimation) {
-			try {
-				replaceOldResourceFile(generationPath, "RailML3_VisB.def");
-				replaceOldResourceFile(generationPath, "RailML3_SimB.json");
-				final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.relativize(generationPath.resolve("RailML3_VisB.def")));
-				Path simbPath = generationPath.resolve("RailML3_SimB.json");
-
-				currentProject.addMachine(animationDefinitions);
-				currentProject.addMachine(animationMachine);
-				currentProject.startAnimation(animationMachine);
-				currentProject.getCurrentMachine().simulationsProperty()
-					.add(new SimulationModel(currentProject.getLocation().relativize(simbPath), Collections.emptyList()));
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			if (generateAnimation || generateValidation) {
+				currentProject.addMachine(dataMachine);
 			}
-		}
-		if (generateValidation) {
-			currentProject.addMachine(validationMachine);
-			if (!generateAnimation) {
-				currentProject.startAnimation(validationMachine);
+			if (generateAnimation) {
+				try {
+					replaceOldResourceFile(generationPath, "RailML3_VisB.def");
+					replaceOldResourceFile(generationPath, "RailML3_SimB.json");
+					final Machine animationDefinitions = new Machine("RailML3_VisB.def", "", generationPath.relativize(generationPath.resolve("RailML3_VisB.def")));
+					Path simbPath = generationPath.resolve("RailML3_SimB.json");
+
+					currentProject.addMachine(animationDefinitions);
+					currentProject.addMachine(animationMachine);
+					currentProject.startAnimation(animationMachine);
+					currentProject.getCurrentMachine().simulationsProperty()
+						.add(new SimulationModel(currentProject.getLocation().relativize(simbPath), Collections.emptyList()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}
+			if (generateValidation) {
+				currentProject.addMachine(validationMachine);
+				if (!generateAnimation) {
+					currentProject.startAnimation(validationMachine);
+				}
 			}
 		}
 	}
