@@ -36,71 +36,71 @@ public final class RegexSyntaxHighlighting {
 
 		//Event-B Regex
 		var syntaxClassesForEventB = List.of(
-			new Token("editor_keyword", compile("(CONTEXT|EXTENDS|SETS|CONSTANTS|CONCRETE_CONSTANTS|AXIOMS|THEOREMS|MACHINE|REFINES|SEES|VARIABLES|ABSTRACT_VARIABLES|INVARIANT|VARIANT|EVENTS|EVENT|BEGIN|ANY|WHERE|WHEN|WITH|THEN|INITIALISATION|END)", U)),
-			new Token("editor_ctrlkeyword", compile("((POW|POW1|card|union|inter|min|max|finite|partition|dom|ran)|[ |\t|\n|\r]*(UNION|INTER|id|prj1|prj2|skip)[ |\t|\n|\r])", U)),
-			new Token("editor_logical", compile("([ |\t|\n|\r]*(false|true|or|not)[ |\t|\n|\r]|⊤|⊥|&|∧|∨|=>|⇒|<=>|⇔|!|#|¬|∃|∀)", U)),
-			new Token("editor_assignments", compile("(:\\||::|:∈|:=)", U)),
-			new Token("editor_arithmetic", compile("(\\/\\\\|\\\\\\/|∩|∪|\\{\\}|∅|\\\\|\\+->>|⤀|\\+->|⇸|\\+|-->>|↠|-->|→|-|>=|<=|≤|≥|/<<:|<<:|/<:|<:|⊄|⊂|⊈|⊆|/:|:|∉|∈|>\\+>|⤔|>->>|⤖|>->|↣|><|⊗|>|<\\+|⇷|<<->>|<<->|<->>|<->|↔|<<\\||⩤|<\\||◁|<|;|[ |\t|\n|\r]*circ[ |\t\n\r]|◦|\\|>>|⩥|\\|>|▷|\\|\\||%|≠|/=|=)", U)),
-			new Token("editor_comment", compile("(//[^\n\r]*)|(/\\*([^*]|\\*+[^*/])*\\*+/)", U)),
+			new Token("editor_keyword", compile("CONTEXT|EXTENDS|SETS|CONSTANTS|CONCRETE_CONSTANTS|AXIOMS|THEOREMS|MACHINE|REFINES|SEES|VARIABLES|ABSTRACT_VARIABLES|INVARIANT|VARIANT|EVENTS|EVENT|BEGIN|ANY|WHERE|WHEN|WITH|THEN|INITIALISATION|END", U)),
+			new Token("editor_ctrlkeyword", compile("(?:POW|POW1|card|union|inter|min|max|finite|partition|dom|ran)|[ \t\n\r]*(UNION|INTER|id|prj1|prj2|skip)[ \t\n\r]", U)),
+			new Token("editor_logical", compile("[ \t\n\r]*(false|true|or|not)[ \t\n\r]|⊤|⊥|&|∧|∨|=>|⇒|<=>|⇔|!|#|¬|∃|∀", U)),
+			new Token("editor_assignments", compile(":\\||::|:∈|:=", U)),
+			new Token("editor_arithmetic", compile("/\\\\|\\\\/|∩|∪|\\{}|∅|\\\\|\\+->>|⤀|\\+->|⇸|\\+|-->>|↠|-->|→|-|>=|<=|≤|≥|/<<:|<<:|/<:|<:|⊄|⊂|⊈|⊆|/:|:|∉|∈|>\\+>|⤔|>->>|⤖|>->|↣|><|⊗|>|<\\+|⇷|<<->>|<<->|<->>|<->|↔|<<\\||⩤|<\\||◁|<|;|[ \t\n\r]*circ[ \t\n\r]|◦|\\|>>|⩥|\\|>|▷|\\|\\||%|≠|/=|=", U)),
+			new Token("editor_comment", compile("//[^\n\r]*|/\\*.*?\\*/", U | Pattern.DOTALL)),
 			new Token("editor_identifier", compile("[_a-zA-Z][_a-zA-Z0-9]*", U)),
-			new Token("editor_ignored", compile("( |\t|\r|\n)+", U))
+			new Token("editor_ignored", compile("[ \t\r\n]+", U))
 		);
 
 		//XTL Regex
 		var syntaxClassesForXTL = List.of(
-			new Token("editor_keyword", compile("(start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(function_result|image|image_right_click_transition|image_click_transition))")),
-			new Token("editor_types", compile("(true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth|nth1|nth0|perm|perm2|permutation|same_length|add_error|print|write|sort)")),
-			new Token("editor_string", compile("((\"(.*)*\")|('(.*)*'))")),
+			new Token("editor_keyword", compile("start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(?:function_result|image|image_right_click_transition|image_click_transition)")),
+			new Token("editor_types", compile("true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth|nth1|nth0|perm|perm2|permutation|same_length|add_error|print|write|sort")),
+			new Token("editor_string", compile("\"[^\"]*\"|'[^']*'")),
 			new Token("editor_xtl_variable", compile("[A-Z][_a-zA-Z0-9]*")),
 			new Token("editor_xtl_functor", compile("[_a-z][_a-zA-Z0-9]*")),
 			new Token("editor_assignments", compile(":-|!|-->|;|\\.")),
-			new Token("editor_comment", compile("(%(.)*|/\\*([^*]|\\*+[^*/])*\\*+/)")),
-			new Token("editor_ignored", compile("( |\t|\r|\n)+"))
+			new Token("editor_comment", compile("%[^\n\r]*|/\\*.*?\\*/", Pattern.DOTALL)),
+			new Token("editor_ignored", compile("[ \t\r\n]+"))
 		);
 
 		//TLA Regex
 		var syntaxClassesForTLA = List.of(
-			new Token("editor_keyword", compile("(MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLES|VARIABLE|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL)")),
-			new Token("editor_ctrlkeyword", compile("(IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING)")),
-			new Token("editor_types", compile("(Next|Init|Spec|Inv)")),
-			new Token("editor_comment", compile("(\\\\\\*[^\n\r]*)|(\\(\\*([^*]|\\*+[^*)])*\\*+\\))")),
-			new Token("editor_arithmetic", compile("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|/|Int|Nat")),
-			new Token("editor_logical", compile("<=>|=>|<<|>>|!|#|/=|~|<>|->|->|~\\\\|\"|\\[\\]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\")),
+			new Token("editor_keyword", compile("MODULE|CONSTANTS|CONSTANT|ASSUME|ASSUMPTION|VARIABLES|VARIABLE|AXIOM|THEOREM|EXTENDS|INSTANCE|LOCAL")),
+			new Token("editor_ctrlkeyword", compile("IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING")),
+			new Token("editor_types", compile("Next|Init|Spec|Inv")),
+			new Token("editor_comment", compile("\\\\\\*[^\n\r]*|\\(\\*.*?\\*\\)", Pattern.DOTALL)),
+			new Token("editor_arithmetic", compile("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|Int|Nat")),
+			new Token("editor_logical", compile("<=>|=>|<<|>>|!|#|/=|~|<>|->|~\\\\|\"|\\[]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\")),
 			new Token("editor_identifier", compile("[_a-zA-Z][_a-zA-Z0-9]*")),
-			new Token("editor_ignored", compile("( |\t|\r|\n)+"))
+			new Token("editor_ignored", compile("[ \t\r\n]+"))
 		);
 
 		//CSP Regex
 		var syntaxClassesForCSP = List.of(
-			new Token("editor_keyword", compile("if|then|else|@@|let|within|\\{|\\}|<->|<-|\\[\\||\\|\\]|\\[|\\]|\\\\")),
-			new Token("editor_types", compile("!|\\?|->|\\[\\]|\\|~\\||\\|\\|\\||;|STOP|SKIP|CHAOS|/\\|\\[>|@")),
+			new Token("editor_keyword", compile("if|then|else|@@|let|within|\\{|\\}|<->|<-|\\[\\||\\|]|\\[|]|\\\\")),
+			new Token("editor_types", compile("!|\\?|->|\\[]|\\|~\\||\\|\\|\\||;|STOP|SKIP|CHAOS|/\\|\\[>|@")),
 			new Token("editor_arithmetic", compile("agent|MAIN|channel|datatype|subtype|nametype|machine|Events")),
 			new Token("editor_assignments", compile("assert|transparent|diamond|print|include")),
 			new Token("editor_logical", compile("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|\\!=|>|<|<=|>=|=<|&&|\\|\\||Int|Bool")),
 			new Token("editor_unsupported", compile("external|extensions|productions|Proc")),
 			new Token("editor_identifier", compile("[_a-zA-Z][_a-zA-Z0-9]*")),
-			new Token("editor_comment", compile("(\\{-([^-]|-+[^\\-\\}])*-+\\})|(--(.*))")),
-			new Token("editor_ignored", compile("( |\t|\r|\n)+"))
+			new Token("editor_comment", compile("--[^\n\r]*|\\{-.*?-\\}", Pattern.DOTALL)),
+			new Token("editor_ignored", compile("[ \t\r\n]+"))
 		);
 
 		//Alloy Regex
 		var syntaxClassesForAlloy = List.of(
 			new Token("editor_keyword", compile("module|sig|fact|extends|run|abstract|open|fun|pred|check|assert|plus|minus|mul|div|rem|sum")),
-			new Token("editor_types", compile("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|\\~|->|&|\\+|-|=|\\#")),
+			new Token("editor_types", compile("not|one|lone|set|no|all|some|disjoint|let|in|for|and|or|implies|iff|else|none|univ|iden|Int|int|=>|&&|<=>|\\|\\||!|\\.|\\^|\\*|<:|:>|\\+\\+|~|->|&|\\+|-|=|#")),
 			new Token("editor_identifier", compile("[_a-zA-Z][_a-zA-Z0-9]*")),
-			new Token("editor_comment", compile("(//[^\n\r]*|/\\*([^*]|\\*+[^*/])*\\*+/)"))
+			new Token("editor_comment", compile("//[^\n\r]*|/\\*.*?\\*/", Pattern.DOTALL))
 		);
 
 		//Z Regex
 		var syntaxClassesForZ = List.of(
-			new Token("editor_arithmetic", compile("(head|tail|last|front|squash|rev|min|max|first|second|succ|count|items|\\\\(\\{|\\}|notin|in|inbag|(big)?cup|(big)?cap|subset|subseteq|subbageq|disjoint|partition|plus|oplus|uplus|uminus|otimes|setminus|emptyset|leq|geq|neq|div|mod|dom|(n)?(d|r)res|langle|rangle|lbag|rbag|ran|id|inv|mapsto|succ|cat|dcat|prefix|suffix|inseq|filter|extract|bcount|\\#))")),
-			new Token("editor_types", compile("\\\\(power(_1)?|nat(_1)?|num|bag|cross|upto|rel|(p)?fun|(p)?inj|bij|seq(_1)?|iseq(_1)?|(b)?tree)")),
-			new Token("editor_logical", compile("\\\\(land|lor|implies|iff|lnot|forall|exists(_1)?|mu|lambda|true|false)")),
-			new Token("editor_keyword", compile("(\\\\(where|also|Delta))|(\\\\(begin|end)\\{(schema|zed|axdef)\\})")),
-			new Token("editor_assignments", compile("::=|=|\\\\(IF|THEN|ELSE|LET|defs)")),
-			new Token("editor_identifier", compile("(\\\\|[_a-zA-Z])[_a-zA-Z0-9]*")),
-			new Token("editor_comment", compile("%(.)*|/\\*([^*]|\\*+[^*/])*\\*+/|\\\\(noindent|documentclass|(begin|end)\\{(document)\\}|(sub)?section|(usepackage)\\{(fuzz|z-eves)\\}|\\\\)")),
-			new Token("editor_unsupported", compile("\\\\(infix|arithmos)"))
+			new Token("editor_arithmetic", compile("head|tail|last|front|squash|rev|min|max|first|second|succ|count|items|\\\\(\\{|\\}|notin|in|inbag|(big)?cup|(big)?cap|subset|subseteq|subbageq|disjoint|partition|plus|oplus|uplus|uminus|otimes|setminus|emptyset|leq|geq|neq|div|mod|dom|(n)?(d|r)res|langle|rangle|lbag|rbag|ran|id|inv|mapsto|succ|cat|dcat|prefix|suffix|inseq|filter|extract|bcount|\\#)")),
+			new Token("editor_types", compile("\\\\(?:power(?:_1)?|nat(?:_1)?|num|bag|cross|upto|rel|p?fun|p?inj|bij|seq(?:_1)?|iseq(?:_1)?|b?tree)")),
+			new Token("editor_logical", compile("\\\\(?:land|lor|implies|iff|lnot|forall|exists(?:_1)?|mu|lambda|true|false)")),
+			new Token("editor_keyword", compile("\\\\(?:where|also|Delta)|\\\\(?:begin|end)\\{(?:schema|zed|axdef)\\}")),
+			new Token("editor_assignments", compile("::=|=|\\\\(?:IF|THEN|ELSE|LET|defs)")),
+			new Token("editor_identifier", compile("(?:\\\\|[_a-zA-Z])[_a-zA-Z0-9]*")),
+			new Token("editor_comment", compile("%[^\n\r]*|/\\*.*?\\*/|\\\\(?:noindent|documentclass|(?:begin|end)\\{document\\}|(?:sub)?section|usepackage\\{(?:fuzz|z-eves)\\}|\\\\)", Pattern.DOTALL)),
+			new Token("editor_unsupported", compile("\\\\(?:infix|arithmos)"))
 		);
 
 		SYNTAX_CLASSES_OTHER_LANGUAGES = Map.ofEntries(
