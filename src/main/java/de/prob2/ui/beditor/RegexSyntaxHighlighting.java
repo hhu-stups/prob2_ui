@@ -207,16 +207,16 @@ public final class RegexSyntaxHighlighting {
 
 	private record Token(String syntaxClass, Pattern pattern) {
 		Token {
-			Objects.requireNonNull(syntaxClass);
-			Objects.requireNonNull(pattern);
+			Objects.requireNonNull(syntaxClass, "syntaxClass");
+			Objects.requireNonNull(pattern, "pattern");
 		}
 	}
 
 	private record Range(String syntaxClass, int start, int end) {
 		Range {
-			Objects.requireNonNull(syntaxClass);
-			if (start < 0 || start > end) {
-				throw new IllegalArgumentException();
+			Objects.requireNonNull(syntaxClass, "syntaxClass");
+			if (start < 0 || start >= end) {
+				throw new IllegalArgumentException("0 <= start < end");
 			}
 		}
 	}
