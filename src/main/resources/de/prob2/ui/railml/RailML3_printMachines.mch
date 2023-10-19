@@ -145,11 +145,11 @@ INVARIANT
     & RS_requestingArrivalTrains : (RS_trains - RS_arrivedTrains) +-> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
     & RS_arrivedTrains <: RS_trains
     & RS_arrivedTrains /\ dom(RS_requestingArrivalTrains) = {} /*@desc "arrived and requesting arrival trains are disjoint" */
-    & RS_trainOccupiedLocations : (RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)) --> FIN(allIdsOfType("netElement") * REAL)
-    & !(t1,t2).({t1,t2} <: (RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)) & t1 /= t2 => RS_trainOccupiedLocations(t1) /\ RS_trainOccupiedLocations(t2) = {}) /*@desc "no collision of trains" */
-    & RS_trainFront : (RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)) --> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
-    & RS_trainBack : (RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)) --> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
-    & !t.(t : (RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)) => RS_trainBack(t) |-> RS_trainFront(t) : closure1(IS_next)) /*@desc "train not broken in two parts (which also covers that not on a element in movement), back behind front, and back /= front" */
+    & RS_trainOccupiedLocations : RS_arrivedTrains --> FIN(allIdsOfType("netElement") * REAL)
+    & !(t1,t2).({t1,t2} <: RS_arrivedTrains & t1 /= t2 => RS_trainOccupiedLocations(t1) /\ RS_trainOccupiedLocations(t2) = {}) /*@desc "no collision of trains" */
+    & RS_trainFront : RS_arrivedTrains --> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
+    & RS_trainBack : RS_arrivedTrains --> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
+    & !t.(t : RS_arrivedTrains => RS_trainBack(t) |-> RS_trainFront(t) : closure1(IS_next)) /*@desc "train not broken in two parts (which also covers that not on a element in movement), back behind front, and back /= front" */
 
     & IL_occupiedTvdSections : allIdsOfType("tvdSection") +-> RS_arrivedTrains \/ dom(RS_requestingArrivalTrains)
     & !tvd.(tvd : dom(IL_occupiedTvdSections) & IL_occupiedTvdSections(tvd) : RS_arrivedTrains
@@ -250,7 +250,6 @@ INVARIANT
     & !(r,der).(r : dom(IL_res_routes) & r : dom(RailML3_IL_ROUTE_DERAILERS) & der : IL_derailer_locked_routes~[{r}] => prj2(IS_derailer_states(der)) = position_passablePosition & der /: dom(IS_derailersInMovement)) /*@desc "derailers are in passable position for all reserved routes" */
     & !(r,sw).(r : dom(IL_res_routes) & r : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS) & sw : dom(RailML3_IL_ROUTE_SWITCH_POSITIONS(r)) /\ IL_switch_locked_routes~[{r}] => RailML3_IL_ROUTE_SWITCH_POSITIONS(r)(sw) <: IS_switch_states(sw) & sw /: dom(IS_switchesInMovement)) /*@desc "forced positions of switches are fulfilled for all routes" */
 INITIALISATION
-    importRailML(TRUE);
     IS_crossing_states :=
         { i_cr, cr | #i_cr_il.(i_cr_il : allIdsOfType("movableCrossing") & RailML3_IL_MOVABLE_CROSSING_REFERS_TO(i_cr_il) = i_cr & cr = i_cr_il |-> IF i_cr_il : dom(RailML3_IL_MOVABLE_CROSSING_PREFERRED_POSITION) THEN RailML3_IL_MOVABLE_CROSSING_PREFERRED_POSITION(i_cr_il) ELSE `position_upleft-rightdown` END) } ||
     IS_derailer_states :=
@@ -565,12 +564,12 @@ OPERATIONS
             & !i_cr_il.(i_cr_il : dom(ran(r_crossings)) => i_cr_il /: dom(ran(IS_crossingsInMovement)) ) /*@desc "no movable crossings on the route are in movement" */
 
             & r_derailers = union(RailML3_IL_ROUTE_DERAILERS[{Route}]) \/ union(RailML3_IL_OVERLAP_DERAILERS[r_overlaps])
-                \/ dom({ der, rr | rr : r_relations & der : dom(union(RailML3_IL_ROUTE_RELATION_MUST_DERAILER_POSITIONS(rr)[{proving_continuously} * BOOL])) })
+                \/ dom({ der, rr | rr : r_relations /\ dom(RailML3_IL_ROUTE_RELATION_MUST_DERAILER_POSITIONS) & der : dom(union(RailML3_IL_ROUTE_RELATION_MUST_DERAILER_POSITIONS(rr)[{proving_continuously} * BOOL])) })
             & !i_der.( i_der : r_derailers => prj1(IS_derailer_states(i_der)) /: dom(ran(IS_derailersInMovement)) & prj2(IS_derailer_states(i_der)) = position_passablePosition )  /*@desc "no derailer on the route are in movement or in derailing position" */
 
             & r_switches = union(RailML3_IL_ROUTE_SWITCH_POSITIONS[{Route}]) \/ union(RailML3_IL_OVERLAP_SWITCH_POSITIONS[r_overlaps])
-                \/ dom({ sw, rr | rr : r_relations & sw : union(RailML3_IL_ROUTE_RELATION_MUST_SWITCH_POSITIONS(rr)[{proving_continuously} * BOOL]) })
-                \/ dom({ sw, o | o : r_overlaps & sw : union(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS(o)[{proving_continuously} * BOOL]) })
+                \/ dom({ sw, rr | rr : r_relations /\ dom(RailML3_IL_ROUTE_RELATION_MUST_SWITCH_POSITIONS) & sw : union(RailML3_IL_ROUTE_RELATION_MUST_SWITCH_POSITIONS(rr)[{proving_continuously} * BOOL]) })
+                \/ dom({ sw, o | o : r_overlaps /\ dom(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS) & sw : union(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS(o)[{proving_continuously} * BOOL]) })
             & !i_sw.( i_sw : dom(r_switches) => r_switches(i_sw) <: IS_switch_states(i_sw) ) /*@desc "the positions of switches are the expected" */
             & !i_sw_il.(i_sw_il : dom(union(ran(r_switches))) => i_sw_il /: dom(union(ran(IS_switchesInMovement))) ) /*@desc "no switches on the route are in movement" */
 
@@ -600,11 +599,9 @@ OPERATIONS
                     & RailML3_IL_ROUTE_RELATION_MUST_SECTION_STATES(rr)[{proving_continuously |-> TRUE}]~[{tvd_vacant, tvd_unknown}] <: dom(IL_occupiedTvdSections)
                 )
             ) /*@desc "Preconditions from routeRelations for derailers, switches, and sections are fulfilled (all proving types)" */ // TODO for later extension: detection states                
-            & !o.(o : r_overlaps =>
-                (o : dom(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS) =>
-                    union(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS(o)[RailML3_IL_REQUIRE_PROVING_TYPES * {FALSE}]) <: IS_switch_states
-                    & !rrr.(rrr : union(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS(o)[RailML3_IL_REQUIRE_PROVING_TYPES * {TRUE}]) => rrr /: IS_switch_states)
-                )
+            & !o.(o : r_overlaps /\ dom(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS) =>
+                union(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS(o)[RailML3_IL_REQUIRE_PROVING_TYPES * {FALSE}]) <: IS_switch_states
+                & !rrr.(rrr : union(RailML3_IL_OVERLAP_MUST_SWITCH_POSITIONS(o)[RailML3_IL_REQUIRE_PROVING_TYPES * {TRUE}]) => rrr /: IS_switch_states)
             ) /*@desc "for all associated overlaps the switch positions are the expected (all proving types)" */
         THEN
             IL_routes_in_res := IL_routes_in_res - {Route |-> Train} ||
