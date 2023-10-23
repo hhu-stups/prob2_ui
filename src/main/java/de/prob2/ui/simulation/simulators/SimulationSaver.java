@@ -90,7 +90,7 @@ public final class SimulationSaver {
 			int numberGeneratedTraces = traces.size();
 			for (int i = 1; i <= numberGeneratedTraces; i++) { //Starts counting with 1 in the file name
 				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + i + "." + SIMULATION_EXTENSION);
-				this.saveConfiguration(traces.get(i - 1), timestamps.get(i - 1), traceFilePath, createMetadata(item.createdByForMetadata()));
+				this.saveConfiguration(traces.get(i-1), timestamps.get(i-1), traceFilePath, createMetadata(item.createdByForMetadata()));
 			}
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();

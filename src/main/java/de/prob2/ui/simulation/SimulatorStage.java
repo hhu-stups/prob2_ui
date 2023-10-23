@@ -57,7 +57,10 @@ import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ListBinding;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -337,6 +340,10 @@ public class SimulatorStage extends Stage {
 		);
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
+		saveAutomaticSimulationItem.disableProperty().bind(Bindings.createBooleanBinding(() -> {
+			ISimulationModelConfiguration config = realTimeSimulator.getConfig();
+			return config == null || config instanceof SimulationExternalConfiguration;
+		}, configurationPath, cbSimulation.itemsProperty(), cbSimulation.getSelectionModel().selectedItemProperty()));
 		helpButton.setHelpContent("mainmenu.advanced.simB", null);
 		saveTraceItem.setOnAction(e -> {
 			try {
@@ -378,6 +385,8 @@ public class SimulatorStage extends Stage {
 			noSimulations.unbind();
 			loadSimulationsFromMachine(to);
 		};
+
+		currentProject.addListener((observable, from, to) -> machineChangeListener.changed(null, null, null));
 
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
@@ -643,10 +652,11 @@ public class SimulatorStage extends Stage {
 	}
 
 	public void loadSimulationsFromMachine(Machine machine) {
+		cbSimulation.itemsProperty().unbind();
 		if(machine == null) {
+			cbSimulation.setItems(FXCollections.observableArrayList());
 			return;
 		}
-		cbSimulation.itemsProperty().unbind();
 		cbSimulation.itemsProperty().bind(machine.simulationsProperty());
 	}
 
