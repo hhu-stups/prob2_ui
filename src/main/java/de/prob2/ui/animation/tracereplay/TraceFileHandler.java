@@ -34,6 +34,7 @@ import de.prob2.ui.simulation.table.SimulationItem;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
@@ -178,23 +179,21 @@ public final class TraceFileHandler {
 	}
 
 	public void save(SimulationItem item, Machine machine) {
-		FileChooser fileChooser = new FileChooser();
+		DirectoryChooser fileChooser = new DirectoryChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.savePaths.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "Simulation." + TRACE_FILE_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
-		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+		Path path = this.fileChooserManager.showDirectoryChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path == null) {
 			return;
 		}
 
 		try {
-			if (fileChooserManager.checkIfPathAlreadyContainsFiles(path.getParent(), path.getFileName().toString().split("\\.")[0], "animation.testcase.save.directoryAlreadyContainsTestCases")) {
+			if (fileChooserManager.checkIfPathAlreadyContainsFiles(path, "Trace_", "animation.testcase.save.directoryAlreadyContainsTestCases")) {
 				return;
 			}
 
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
 			for (Trace trace : item.getTraces()) {
-				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + numberGeneratedTraces + ".prob2trace");
+				final Path traceFilePath = path.resolve("Trace_" + numberGeneratedTraces + ".prob2trace");
 				save(trace, traceFilePath, item.createdByForMetadata());
 				this.addTraceFile(machine, traceFilePath);
 				numberGeneratedTraces++;
