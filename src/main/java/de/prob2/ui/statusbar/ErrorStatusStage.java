@@ -76,7 +76,13 @@ public final class ErrorStatusStage extends Stage {
 			if (to == null) {
 				this.descriptionTextArea.setText(null);
 			} else {
-				this.descriptionTextArea.setText(to.getLongDescription());
+				String desc = to.getLongDescription();
+				// TODO Once the error span is returned in a structured format, display it in our usual format and highlight in editor
+				// TODO Allow visualizing predicate included in span (once that is returned from Prolog)
+				if (to.getSpanDescription() != null) {
+					desc += "\n" + to.getSpanDescription();
+				}
+				this.descriptionTextArea.setText(desc);
 			}
 		});
 		
