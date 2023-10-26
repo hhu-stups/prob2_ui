@@ -8,64 +8,53 @@ import de.prob.prolog.term.PrologTerm;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextField;
-import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
-
+import javafx.util.converter.IntegerStringConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferenceValueCell.class);
-	
+
 	private final ReadOnlyObjectProperty<PreferencesChangeState> state;
-	
+
 	PreferenceValueCell(final ReadOnlyObjectProperty<PreferencesChangeState> state) {
 		super();
-		
+
 		this.state = state;
 	}
-	
+
 	private void setPreferenceValue(final String name, final String newValue) {
 		this.state.get().changePreference(name, newValue);
 	}
-	
+
 	private void changeToSpinner(final PrefTreeItem.Preference pti, final int min, final int max) {
-		final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, min));
+		final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, 0));
 		spinner.setEditable(true);
-		spinner.getEditor().textProperty().addListener((o, from, to) -> {
-			int value;
-			try {
-				value = Integer.parseInt(spinner.getEditor().textProperty().get());
-				if (value < min) {
-					value = min;
-				}
-				if (value > max) {
-					value = max;
-				}
-				setPreferenceValue(pti.getPreferenceInfo().name, String.valueOf(value));
-			} catch (NumberFormatException e) {
-				LOGGER.trace("User-entered number is currently invalid", e);
-				spinner.getEditor().textProperty().setValue(from);
+		spinner.getEditor().setTextFormatter(new TextFormatter<>(new IntegerStringConverter()));
+		spinner.getEditor().setText(pti.getValue());
+
+		spinner.valueProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue != null && min <= newValue && newValue <= max) {
+				this.setPreferenceValue(
+					pti.getName(),
+					spinner.getValueFactory().getConverter().toString(newValue)
+				);
 			}
 		});
-		spinner.getEditor().setText(pti.getValue());
+
 		this.setText(null);
 		this.setGraphic(spinner);
 	}
-	
+
 	private void changeToTextField(final PrefTreeItem.Preference item) {
 		final TextField textField = new TextField(item.getValue());
 		textField.textProperty().addListener((o, from, to) -> this.setPreferenceValue(item.getPreferenceInfo().name, to));
 		this.setText(null);
 		this.setGraphic(textField);
 	}
-	
+
 	private void changeToCheckBox(final PrefTreeItem.Preference pti) {
 		final CheckBox checkBox = new CheckBox();
 		checkBox.setSelected("true".equals(pti.getValue()));
@@ -73,7 +62,7 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 		this.setText(null);
 		this.setGraphic(checkBox);
 	}
-	
+
 	private void changeToColorPicker(final PrefTreeItem.Preference pti) {
 		Color color;
 		try {
@@ -89,20 +78,20 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 		colorPicker.setOnAction(event -> {
 			final Color selected = colorPicker.getValue();
 			this.setPreferenceValue(pti.getPreferenceInfo().name, String.format(Locale.ROOT,
-					"#%02x%02x%02x",
-				(int)(selected.getRed()*255),
-				(int)(selected.getGreen()*255),
-				(int)(selected.getBlue()*255)
+				"#%02x%02x%02x",
+				(int) (selected.getRed() * 255),
+				(int) (selected.getGreen() * 255),
+				(int) (selected.getBlue() * 255)
 			));
 		});
 		this.setText(null);
 		this.setGraphic(colorPicker);
 	}
-	
+
 	private void changeToComboBox(final PrefTreeItem.Preference pti) {
 		final List<String> validValues;
 		if (pti.getPreferenceInfo().type instanceof ListPrologTerm) {
-			validValues = PrologTerm.atomsToStrings((ListPrologTerm)pti.getPreferenceInfo().type);
+			validValues = PrologTerm.atomsToStrings((ListPrologTerm) pti.getPreferenceInfo().type);
 		} else {
 			final String typeName = pti.getPreferenceInfo().type.atomToString();
 			validValues = PrefConstants.VALID_TYPE_VALUES.get(typeName);
@@ -114,12 +103,11 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 		this.setText(null);
 		this.setGraphic(comboBox);
 	}
-	
+
 	@Override
 	public void updateItem(final PrefTreeItem item, final boolean empty) {
 		super.updateItem(item, empty);
-		
-		if (empty || item instanceof PrefTreeItem.Category) {
+		if (empty || item == null || item instanceof PrefTreeItem.Category) {
 			// Empty rows and categories have no value.
 			this.setText(null);
 			this.setGraphic(null);

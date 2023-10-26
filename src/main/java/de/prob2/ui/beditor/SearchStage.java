@@ -149,7 +149,7 @@ public class SearchStage extends Stage {
 		try {
 			searchPattern = Pattern.compile(searchText, flags);
 		} catch (PatternSyntaxException e) {
-			LOGGER.warn("unable to parse search string", e);
+			LOGGER.trace("unable to parse search string regex", e);
 			this.setResultText(STYLE_ERROR, "beditor.searchStage.resultLabel.error");
 			return;
 		}
