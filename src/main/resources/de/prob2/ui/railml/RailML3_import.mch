@@ -7,24 +7,19 @@ DEFINITIONS
   "SORT.def";
   SET_PREF_ALLOW_OPERATION_CALLS_IN_EXPRESSIONS == TRUE;
 
-  PRINT_REPORT == FALSE;
-  PRINT_FILE == "d:/Users/jangr/OneDrive - hhu.de/[Master] 4. Semester/Masterarbeit/Gitlab/b-railml/Code/validation_report.txt";
-
   runErrorRule(Rule) ==
     IF no_error = TRUE THEN
       VAR Var1, Var2 IN
         Var1, Var2 <-- Rule;
-        IF Var1 = "SUCCESS"
-          THEN IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "[SUCCESS ~w] Validation succeeded without any error", {1 |-> TO_STRING(Rule)}) ELSE skip END
-          ELSE
-            no_error := FALSE;
-            IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "--- ERROR ---~nFile import aborted, the specified file does not contain valid railML.~n------~n~w [ERROR ~w] Validation failed with the following errors: ~w", {1 |-> TO_STRING(Rule), 2 |-> TO_STRING(Var2[{1}])}) ELSE skip END;
-            ADD_ERROR("RailML: ", "File import aborted, the specified file does not contain valid railML.");
-            VAR errors IN
-              errors := makeRailMLMessages(Var2[{1}]);
-              ADD_ERRORS(errors);
-              ADD_STATE_ERRORS(errors)
-            END
+        IF Var1 = "SUCCESS" THEN skip
+        ELSE
+          no_error := FALSE;
+          ADD_ERROR("RailML: ", "File import aborted, the specified file does not contain valid railML.");
+          VAR errors IN
+            errors := makeRailMLMessages(Var2[{1}]);
+            ADD_ERRORS(errors);
+            ADD_STATE_ERRORS(errors)
+          END
         END
       END
     ELSE skip END;
@@ -32,12 +27,10 @@ DEFINITIONS
     IF no_error = TRUE THEN
       VAR Var1, Var2 IN
         Var1, Var2 <-- Rule;
-        IF Var1 = "SUCCESS"
-          THEN IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "[SUCCESS ~w] Validation succeeded without any warning", {1 |-> TO_STRING(Rule)}) ELSE skip END
-          ELSE
-            IF PRINT_REPORT = TRUE THEN FPRINTF(PRINT_FILE, "[WARNING ~w] Validation succeeded with the following warnings: ~w", {1 |-> TO_STRING(Rule), 2 |-> TO_STRING(Var2[{2}])}) ELSE skip END;
-            defaultWarnings := defaultWarnings \/ Var2[{1}];
-            semanticWarnings := semanticWarnings \/ Var2[{2}]
+        IF Var1 = "SUCCESS" THEN skip
+        ELSE
+          defaultWarnings := defaultWarnings \/ Var2[{1}];
+          semanticWarnings := semanticWarnings \/ Var2[{2}]
         END
       END
     ELSE skip END;

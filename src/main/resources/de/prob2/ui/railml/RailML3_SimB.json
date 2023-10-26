@@ -264,7 +264,7 @@
                         "execute": "IL_endActivateSignalplan",
                         "after": 1000,
                         "probabilisticVariables": "uniform",
-                        "activating" : ["skip", "endActivateSignalplan"]
+                        "activating" : ["skip", "IL_endActivateSignalplan"]
                     },
                 {
                     "id": "IL_changeSignalState",
