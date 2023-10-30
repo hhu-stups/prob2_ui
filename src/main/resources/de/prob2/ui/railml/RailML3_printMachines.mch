@@ -739,7 +739,7 @@ OPERATIONS
         END;
     IL_completeRouteReleaseRear(Route) =
         ANY
-            train, NXT, NXT_partOfTwoRoutes, r_signals
+            train, NXT, NXT_partOfTwoRoutes
         WHERE
             Route |-> train : IL_res_routes /*@desc "the route is currently reserved" */
             & ( prj2(RailML3_IL_ROUTE_EXIT(Route)) |-> RS_trainBack(train) : railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1 or train /: RS_arrivedTrains ) /*@desc "the train has completely passed the route or left the interlocking area" */
@@ -747,7 +747,6 @@ OPERATIONS
             & !i_tvd.(i_tvd : union(RailML3_IL_ROUTE_TVD_SECTIONS[{Route}]) => i_tvd /: dom(IL_occupiedTvdSections)) /*@desc "all TVD sections of the route are vacant" */
             & NXT = RailML3_IL_ROUTE_NXT(Route)
             & NXT_partOfTwoRoutes = dom({ por, r | r : dom(IL_routes_in_res \/ IL_res_routes) & por : dom(NXT) \/ ran(NXT) & r /= Route & por |-> r : IL_res_route_blocks })
-            & r_signals = dom({ i_sig, pos | i_sig : RailML3_IL_SIGNAL_CONTROLLED & pos : RailML3_IS_SPOT_LOCATIONS(i_sig) & pos : dom(NXT) \/ ran(NXT) & i_sig /: RailML3_IL_SIGNAL_REFERS_TO[{prj1(RailML3_IL_ROUTE_EXIT(Route))}] })
         THEN
             IL_released_partialRoutes := {Route} <<| IL_released_partialRoutes ||
             IL_res_routes := IL_res_routes - {Route |-> train} ||
@@ -983,7 +982,23 @@ OPERATIONS
             RS_arrivedTrains := RS_arrivedTrains - {Train} ||
             RS_trainOccupiedLocations := {Train} <<| RS_trainOccupiedLocations ||
             RS_trainFront := {Train} <<| RS_trainFront ||
-            RS_trainBack := {Train} <<| RS_trainBack
+            RS_trainBack := {Train} <<| RS_trainBack ||
+            VAR lastRoutes, NXT, NXT_partOfTwoRoutes
+            IN
+                lastRoutes := { r | r |-> Train : IL_routes_in_res \/ IL_res_routes };
+                NXT := union(RailML3_IL_ROUTE_NXT[lastRoutes]);
+                NXT_partOfTwoRoutes := dom({ por, r | #train.(r |-> train : IL_routes_in_res \/ IL_res_routes & por : dom(NXT) \/ ran(NXT) & r /: lastRoutes & train /= Train & por |-> r : IL_res_route_blocks )});
+
+                IL_released_partialRoutes := lastRoutes <<| IL_released_partialRoutes ||
+                IL_res_routes := IL_res_routes - (lastRoutes * {Train}) ||
+                IL_res_route_blocks := IL_res_route_blocks |>> lastRoutes ||
+                IL_res_blocks := IL_res_blocks - ( (RailML3_IL_ROUTE_BLOCKS~)[lastRoutes] /\ ((dom(NXT) \/ ran(NXT)) - NXT_partOfTwoRoutes) ) ||
+                IL_crossing_locked_routes := IL_crossing_locked_routes |>> lastRoutes ||
+                IL_derailer_locked_routes := IL_derailer_locked_routes |>> lastRoutes ||
+                IL_switch_locked_routes := IL_switch_locked_routes |>> lastRoutes ||
+                IL_res_overlaps := union(RailML3_IL_ROUTE_OVERLAPS[lastRoutes]) <<| IL_res_overlaps ||
+                IL_overlaps_in_release := IL_overlaps_in_release - union(RailML3_IL_ROUTE_OVERLAPS[lastRoutes])
+            END
         END;
 
     RS_trainMoveFront(currFront, newFront, Train) =
