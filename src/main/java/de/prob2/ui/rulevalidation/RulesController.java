@@ -1,13 +1,10 @@
 package de.prob2.ui.rulevalidation;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import de.prob.model.brules.RulesChecker;
 import de.prob.model.brules.RulesModel;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.ui.RulesView;
 import groovy.lang.Singleton;
@@ -18,7 +15,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.TabPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.VBox;
@@ -54,28 +50,27 @@ public class RulesController {
 		this.stageManager = stageManager;
 
 		traceListener = (observable, oldTrace, newTrace) -> {
-			LOGGER.debug("Trace changed!");
-				if (rulesView != null) {
-					if (newTrace == null || !(newTrace.getModel() instanceof RulesModel)) {
-						LOGGER.debug("No rules model in new trace!");
-						rulesView.clear();
-						model.clear();
-						//plugin.restoreOperationsView(true);
-					} else if (oldTrace == null || !newTrace.getModel().equals(oldTrace.getModel())) {
-						// the model changed -> rebuild view
-						LOGGER.debug("New rules model in new trace!");
-						ruleModel = (RulesModel) newTrace.getModel();
-						rulesChecker = new RulesChecker(newTrace);
-						rulesChecker.init();
-						initialize(ruleModel);
-						model.update(rulesChecker.getCurrentTrace());
-						//plugin.removeOperationsView();
-					} else {
-						// model didn't change -> update view
-						LOGGER.debug("Update rules view to new trace!");
-						model.update(newTrace);
-					}
+			if (rulesView != null) {
+				if (newTrace == null || !(newTrace.getModel() instanceof RulesModel)) {
+					LOGGER.debug("No rules model in new trace!");
+					rulesView.clear();
+					model.clear();
+					//plugin.restoreOperationsView(true);
+				} else if (oldTrace == null || !newTrace.getModel().equals(oldTrace.getModel())) {
+					// the model changed -> rebuild view
+					LOGGER.debug("New rules model in new trace!");
+					ruleModel = (RulesModel) newTrace.getModel();
+					rulesChecker = new RulesChecker(newTrace);
+					rulesChecker.init();
+					initialize(ruleModel);
+					model.update(rulesChecker.getCurrentTrace());
+					//plugin.removeOperationsView();
+				} else {
+					// model didn't change -> update view
+					LOGGER.debug("Update rules view to new trace!");
+					model.update(newTrace);
 				}
+			}
 		};
 
 		currentTrace.addListener(traceListener);

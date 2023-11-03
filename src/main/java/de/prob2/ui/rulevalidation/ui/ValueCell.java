@@ -17,18 +17,16 @@ import java.util.Map;
  */
 public class ValueCell extends TreeTableCell<Object, Object>{
 
-	private final RulesDataModel model;
 	private boolean executable;
 
-	ValueCell(RulesDataModel model) {
+	ValueCell() {
 		setAlignment(Pos.CENTER_LEFT);
-		this.model = model;
 	}
 
 	@Override
 	protected void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
-		TreeItem<Object> treeItem = getTreeTableRow().getTreeItem();
+		TreeItem<Object> treeItem = getTableRow().getTreeItem();
 		if (treeItem instanceof OperationItem) {
 			executable = ((OperationItem) treeItem).isExecutable();
 		}
@@ -46,11 +44,11 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	}
 
 	private void configureForComputationResult(String op, ComputationStatus result) {
-		getTreeTableRow().getTreeItem();
+		getTableRow().getTreeItem();
 		setText(result.toString());
 		switch (result) {
 			case EXECUTED:
-				setStyle("-fx-background-color:palegreen");
+				getStyleClass().add("true");
 				break;
 			case DISABLED:
 				setStyle("-fx-background-color:lightgray");
@@ -73,10 +71,10 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		setText(result.getRuleState().name());
 		switch (result.getRuleState()) {
 			case FAIL:
-				setStyle("-fx-background-color:pink");
+				getStyleClass().add("false");
 				break;
 			case SUCCESS:
-				setStyle("-fx-background-color:palegreen");
+				getStyleClass().add("true");
 				break;
 			case NOT_CHECKED:
 				if (!executable) {

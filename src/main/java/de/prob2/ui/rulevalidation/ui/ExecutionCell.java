@@ -33,14 +33,7 @@ public class ExecutionCell extends TreeTableCell<Object, Object> {
 	@SuppressWarnings("unchecked")
 	protected void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
-		TreeTableRow<Object> row = getTreeTableRow();
-		row.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			if (getGraphic() != null) {
-				Label label = (Label) getGraphic();
-				label.setTextFill(newValue ? Color.WHITE : Color.valueOf("#037875"));
-			}
-		});
-		TreeItem<Object> treeItem = row.getTreeItem();
+		TreeItem<Object> treeItem = getTableRow().getTreeItem();
 		if (treeItem instanceof OperationItem) {
 			executable = ((OperationItem) treeItem).isExecutable();
 		}

@@ -2,25 +2,19 @@ package de.prob2.ui.rulevalidation.ui;
 
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.model.brules.RuleResult;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.text.Font;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,7 +95,7 @@ public class RulesView extends AnchorPane{
 		tvNameColumn.setCellFactory(column -> new NameCell());
 		tvNameColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
 
-		tvValueColumn.setCellFactory(column -> new ValueCell(dataModel));
+		tvValueColumn.setCellFactory(column -> new ValueCell());
 		tvValueColumn.setCellValueFactory(param -> {
 			Object item = param.getValue().getValue();
 			if (item instanceof RuleOperation) {
