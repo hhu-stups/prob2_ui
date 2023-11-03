@@ -3,6 +3,7 @@ package de.prob2.ui.rulevalidation.ui;
 import de.prob.model.brules.ComputationStatus;
 import de.prob.model.brules.RuleResult;
 import de.prob.model.brules.RuleStatus;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.rulevalidation.RulesController;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
@@ -23,9 +24,11 @@ public class ExecutionCell extends TreeTableCell<Object, Object> {
 
 	private final RulesController controller;
 	private boolean executable;
+	private final I18n i18n;
 
-	ExecutionCell(RulesController controller) {
+	ExecutionCell(RulesController controller, I18n i18n) {
 		this.controller = controller;
+		this.i18n = i18n;
 		setAlignment(Pos.CENTER_LEFT);
 	}
 
@@ -66,7 +69,7 @@ public class ExecutionCell extends TreeTableCell<Object, Object> {
 	}
 
 	private Label createLabel(String operation) {
-		Label label = new Label("Execute");
+		Label label = new Label(i18n.translate("common.buttons.execute"));
 		label.setUnderline(true);
 		label.setTextFill(Color.valueOf("#037875"));
 		label.setOnMouseClicked(event -> {

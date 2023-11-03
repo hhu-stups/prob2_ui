@@ -8,6 +8,7 @@ import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.model.brules.RuleResult;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
@@ -80,11 +81,13 @@ public class RulesView extends AnchorPane{
 
 	private final RulesDataModel dataModel;
 	private final RulesController controller;
+	private final I18n i18n;
 
 	@Inject
-	public RulesView(final StageManager stageManager, final RulesController controller) {
+	public RulesView(final StageManager stageManager, final RulesController controller, final I18n i18n) {
 		this.controller = controller;
 		this.dataModel = controller.getModel();
+		this.i18n = i18n;
 		stageManager.loadFXML(this, "rulesView.fxml");
 		this.controller.setView(this);
 	}
@@ -114,7 +117,7 @@ public class RulesView extends AnchorPane{
 			return null;
 		} );
 
-		tvExecuteColumn.setCellFactory(column -> new ExecutionCell(controller));
+		tvExecuteColumn.setCellFactory(column -> new ExecutionCell(controller, i18n));
 		tvExecuteColumn.setCellValueFactory(param -> {
 			Object item = param.getValue().getValue();
 			if (item instanceof RuleOperation) {
