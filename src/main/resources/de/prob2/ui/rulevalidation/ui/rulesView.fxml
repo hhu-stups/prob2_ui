@@ -22,7 +22,7 @@
                     </graphic>
                 </Button>
                 <TextField fx:id="filterTextField" onAction="#handleFilterButton"
-                           promptText="Filter" HBox.hgrow="ALWAYS" prefHeight="${filterButton.width}" />
+                           promptText="%rulevalidation.view.filter" HBox.hgrow="ALWAYS" prefHeight="${filterButton.width}" />
             </HBox>
         </AnchorPane>
         <TreeTableView fx:id="treeTableView" VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -31,8 +31,8 @@
                 <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
             </columnResizePolicy>
             <columns>
-                <TreeTableColumn fx:id="tvNameColumn" id="name" editable="false" minWidth="80.0" sortable="false" text="Name" />
-                <TreeTableColumn fx:id="tvValueColumn" id="value" editable="false" minWidth="80.0"  sortable="false" text="Value" />
+                <TreeTableColumn fx:id="tvNameColumn" id="name" editable="false" minWidth="80.0" sortable="false" text="%states.statesView.columns.name" />
+                <TreeTableColumn fx:id="tvValueColumn" id="value" editable="false" minWidth="80.0"  sortable="false" text="%states.statesView.columns.value" />
                 <TreeTableColumn fx:id="tvExecuteColumn" id="execute" editable="false" minWidth="80.0"  sortable="false"/>
             </columns>
             <placeholder>
@@ -42,7 +42,7 @@
         </TreeTableView>
         <HBox VBox.vgrow="never" alignment="CENTER_LEFT">
             <Separator HBox.hgrow="NEVER" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
-            <Label HBox.hgrow="NEVER" text="Summary" style="-fx-text-fill:gray;">
+            <Label HBox.hgrow="NEVER" text="%rulevalidation.view.summary" style="-fx-text-fill:rgb(128,128,128);">
                 <padding>
                     <Insets left="5" right="5"/>
                 </padding>
@@ -52,42 +52,47 @@
         <HBox VBox.vgrow="never" alignment="CENTER_LEFT" spacing="5">
             <HBox HBox.hgrow="ALWAYS" spacing="10" alignment="CENTER_LEFT">
                 <HBox alignment="CENTER_LEFT" >
-                    <Label text="Rules: "/>
+                    <Label text="%rulevalidation.view.summary.rules"/>
+					<Label text=" "/>
                     <Label fx:id="rulesLabel" text="-"/>
                     <padding>
                         <Insets left="5" right="5"/>
                     </padding>
                 </HBox>
                 <HBox alignment="CENTER_LEFT" >
-                    <Label text="Not checked: "/>
+                    <Label text="%rulevalidation.view.summary.notChecked"/>
+					<Label text=" "/>
                     <Label fx:id="notCheckedLabel" text="-"/>
                     <padding>
                         <Insets left="5" right="5"/>
                     </padding>
                 </HBox>
-                <HBox alignment="CENTER_LEFT"  style="-fx-background-color:palegreen">
-                    <Label text="Success: "/>
+                <HBox alignment="CENTER_LEFT"  style="-fx-background-color: rgba(76, 175, 80, 0.15)">
+                    <Label text="%rulevalidation.view.summary.success"/>
+					<Label text=" "/>
                     <Label fx:id="successLabel" text="-"/>
                     <padding>
                         <Insets left="5" right="5"/>
                     </padding>
                 </HBox>
-                <HBox alignment="CENTER_LEFT" style="-fx-background-color:pink">
-                    <Label text="Fail: "/>
+                <HBox alignment="CENTER_LEFT" style="-fx-background-color: rgba(204, 47, 39, 0.15)">
+                    <Label text="%rulevalidation.view.summary.fail"/>
+					<Label text=" "/>
                     <Label fx:id="failLabel" text="-"/>
                     <padding>
                         <Insets left="5" right="5"/>
                     </padding>
                 </HBox>
                 <HBox alignment="CENTER_LEFT" style="-fx-background-color:lightgray">
-                    <Label text="Disabled: "/>
+                    <Label text="%rulevalidation.view.summary.disabled"/>
+					<Label text=" "/>
                     <Label fx:id="disabledLabel" text="-"/>
                     <padding>
                         <Insets left="5" right="5"/>
                     </padding>
                 </HBox>
             </HBox>
-            <Button fx:id="executeAllButton" text="Execute all Rules" onAction="#executeAll" styleClass="button-blue"/>
+            <Button fx:id="executeAllButton" text="%rulevalidation.view.executeAll" onAction="#executeAll" styleClass="button-blue"/>
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
