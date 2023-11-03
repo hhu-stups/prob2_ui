@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<fx:root type="AnchorPane" minWidth="240" minHeight="70" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+        <AnchorPane>
+            <HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
+                  AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
+                  AnchorPane.bottomAnchor="10.0" alignment="CENTER">
+                <Button fx:id="filterButton"
+                              onAction="#handleFilterButton" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
+                    <graphic>
+                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH"/>
+                    </graphic>
+                </Button>
+                <TextField fx:id="filterTextField" onAction="#handleFilterButton"
+                           promptText="Filter" HBox.hgrow="ALWAYS" prefHeight="${filterButton.width}" />
+            </HBox>
+        </AnchorPane>
+        <TreeTableView fx:id="treeTableView" VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxWidth="Infinity" showRoot="false">
+            <columnResizePolicy>
+                <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+            </columnResizePolicy>
+            <columns>
+                <TreeTableColumn fx:id="tvNameColumn" id="name" editable="false" minWidth="80.0" sortable="false" text="Name" />
+                <TreeTableColumn fx:id="tvValueColumn" id="value" editable="false" minWidth="80.0"  sortable="false" text="Value" />
+                <TreeTableColumn fx:id="tvExecuteColumn" id="execute" editable="false" minWidth="80.0"  sortable="false"/>
+            </columns>
+            <placeholder>
+                <Label text="No Rules Machine loaded"/>
+            </placeholder>
+            <TreeItem fx:id="tvRootItem" expanded="true"/>
+        </TreeTableView>
+        <HBox VBox.vgrow="never" alignment="CENTER_LEFT">
+            <Separator HBox.hgrow="NEVER" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
+            <Label HBox.hgrow="NEVER" text="Summary" style="-fx-text-fill:gray;">
+                <padding>
+                    <Insets left="5" right="5"/>
+                </padding>
+            </Label>
+            <Separator HBox.hgrow="ALWAYS" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
+        </HBox>
+        <HBox VBox.vgrow="never" alignment="CENTER_LEFT" spacing="5">
+            <HBox HBox.hgrow="ALWAYS" spacing="10" alignment="CENTER_LEFT">
+                <HBox alignment="CENTER_LEFT" >
+                    <Label text="Rules: "/>
+                    <Label fx:id="rulesLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" >
+                    <Label text="Not checked: "/>
+                    <Label fx:id="notCheckedLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+                <HBox alignment="CENTER_LEFT"  style="-fx-background-color:palegreen">
+                    <Label text="Success: "/>
+                    <Label fx:id="successLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" style="-fx-background-color:pink">
+                    <Label text="Fail: "/>
+                    <Label fx:id="failLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" style="-fx-background-color:lightgray">
+                    <Label text="Disabled: "/>
+                    <Label fx:id="disabledLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+            </HBox>
+            <Button fx:id="executeAllButton" text="Execute all Rules" onAction="#executeAll" styleClass="button-blue"/>
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+        </HBox>
+    </VBox>
+</fx:root>
