@@ -163,6 +163,7 @@ public class RulesView extends AnchorPane{
 			tvComputationsItem.getChildren().addAll(computationsToShow);
 			tvRootItem.getChildren().add(tvComputationsItem);
 		}
+		treeTableView.refresh();
 	}
 
 	private List<TreeItem<Object>> filterItems(String filterText, List<TreeItem<Object>> allItems) {
