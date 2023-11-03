@@ -3,7 +3,6 @@ package de.prob2.ui.rulevalidation.ui;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.brules.ComputationStatus;
 import de.prob.model.brules.RuleResult;
-import de.prob2.ui.rulevalidation.RulesDataModel;
 import javafx.geometry.Pos;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
@@ -37,13 +36,13 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		else if (item instanceof RuleResult.CounterExample)
 			setText(((RuleResult.CounterExample)item).getMessage());
 		else if (item instanceof Map.Entry)
-			configureForComputationResult((String)((Map.Entry)item).getKey(), (ComputationStatus)((Map.Entry)item).getValue());
+			configureForComputationResult((ComputationStatus)((Map.Entry)item).getValue());
 		else if (item instanceof IdentifierNotInitialised)
 			configureForNotInitialised((IdentifierNotInitialised)item);
 		setGraphic(null);
 	}
 
-	private void configureForComputationResult(String op, ComputationStatus result) {
+	private void configureForComputationResult(ComputationStatus result) {
 		getTableRow().getTreeItem();
 		setText(result.toString());
 		switch (result) {

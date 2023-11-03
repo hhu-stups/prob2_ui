@@ -124,10 +124,10 @@ public class RulesView extends AnchorPane{
 			}
 			return null;
 		});
-
-		//filterButton.setFont(new Font(fontsize.getFontSize()));
 		
 		executeAllButton.setDisable(true);
+		// workaround for correct colouring of value cells after changing view:
+		treeTableView.setOnMouseClicked(e -> treeTableView.refresh());
 	}
 
 	@FXML
@@ -140,8 +140,8 @@ public class RulesView extends AnchorPane{
 		tvComputationsItem.getChildren().clear();
 
 		String filterText = filterTextField.getText();
-		List<TreeItem<Object>> rulesToShow = null;
-		List<TreeItem<Object>> computationsToShow = null;
+		List<TreeItem<Object>> rulesToShow;
+		List<TreeItem<Object>> computationsToShow;
 		if (filterText != null && !filterText.isEmpty()) {
 			//filter
 			filterText = filterText.toLowerCase();
@@ -215,12 +215,13 @@ public class RulesView extends AnchorPane{
 		ruleItems = new ArrayList<>(tvRulesItem.getChildren());
 		computationItems = new ArrayList<>(tvComputationsItem.getChildren());
 
-		rulesLabel.setText(dataModel.getRuleMap().size() + "");
+		rulesLabel.setText(String.valueOf(dataModel.getRuleMap().size()));
 		disabledLabel.textProperty().bind(dataModel.disabledRulesProperty());
 		failLabel.textProperty().bind(dataModel.failedRulesProperty());
 		notCheckedLabel.textProperty().bind(dataModel.notCheckedRulesProperty());
 		successLabel.textProperty().bind(dataModel.successRulesProperty());
 
 		executeAllButton.setDisable(false);
+		treeTableView.refresh();
 	}
 }
