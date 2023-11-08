@@ -6,6 +6,7 @@ import java.util.Collections;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.model.brules.RulesModelFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.codecompletion.CodeCompletion;
@@ -83,6 +84,10 @@ public class BEditor extends ExtendedCodeArea {
 		Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
 		if (modelFactoryClass == ClassicalBFactory.class) {
 			return styleSpans.overlay(BLexerSyntaxHighlighting.computeBHighlighting(text), ExtendedCodeArea::combineCollections);
+		} else if (modelFactoryClass == RulesModelFactory.class) {
+			// B-Rules DSL keywords are not recognized by the lexer and are added by an additional regex highlighting
+			return styleSpans.overlay(BLexerSyntaxHighlighting.computeBHighlighting(text), ExtendedCodeArea::combineCollections)
+				.overlay(RegexSyntaxHighlighting.computeHighlighting(RulesModelFactory.class, text), ExtendedCodeArea::combineCollections);
 		} else if (RegexSyntaxHighlighting.canHighlight(modelFactoryClass)) {
 			return styleSpans.overlay(RegexSyntaxHighlighting.computeHighlighting(modelFactoryClass, text), ExtendedCodeArea::combineCollections);
 		} else {
