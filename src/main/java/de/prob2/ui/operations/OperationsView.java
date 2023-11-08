@@ -584,9 +584,9 @@ public final class OperationsView extends VBox {
 	@FXML
 	private void computeUnsatCore() {
 		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-		expressionTableView.selectCommand(TableVisualizationCommand.UNSAT_CORE_PROPERTIES_NAME);
 		expressionTableView.show();
 		expressionTableView.toFront();
+		expressionTableView.selectCommand(TableVisualizationCommand.UNSAT_CORE_PROPERTIES_NAME);
 	}
 
 	@FXML
