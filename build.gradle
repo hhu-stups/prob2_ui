@@ -162,7 +162,7 @@ javafx {
 	configurations += ["javafxWin", "javafxMac", "javafxLinux"]
 }
 
-final generatedResourcesDir = new File(project.buildDir, "generated-src/main/resources")
+final generatedResourcesDir = layout.buildDirectory.dir("generated-src/main/resources").get().asFile
 
 sourceSets {
 	main {
