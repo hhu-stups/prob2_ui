@@ -23,6 +23,7 @@
                 </Button>
                 <TextField fx:id="filterTextField" onAction="#handleFilterButton"
                            promptText="%rulevalidation.view.filter" HBox.hgrow="ALWAYS" prefHeight="${filterButton.width}" />
+				<Button fx:id="executeAllButton" text="%rulevalidation.view.executeAll" onAction="#executeAll" styleClass="button-blue"/>
             </HBox>
         </AnchorPane>
         <TreeTableView fx:id="treeTableView" VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
@@ -92,7 +93,11 @@
                     </padding>
                 </HBox>
             </HBox>
-            <Button fx:id="executeAllButton" text="%rulevalidation.view.executeAll" onAction="#executeAll" styleClass="button-blue"/>
+			<Button fx:id="validationReportButton" text="%rulevalidation.view.save" onAction="#saveValidationReport" styleClass="button-blue">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+				</graphic>
+			</Button>
             <padding>
                 <Insets topRightBottomLeft="10"/>
             </padding>
