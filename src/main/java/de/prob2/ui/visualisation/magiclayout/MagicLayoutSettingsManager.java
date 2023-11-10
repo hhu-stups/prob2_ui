@@ -2,6 +2,7 @@ package de.prob2.ui.visualisation.magiclayout;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -76,7 +77,7 @@ public class MagicLayoutSettingsManager {
 		if (path != null) {
 			try {
 				this.jsonManager.writeToFile(path, layoutSettings);
-			} catch (FileNotFoundException exc) {
+			} catch (FileNotFoundException | NoSuchFileException exc) {
 				LOGGER.warn("Failed to create layout settings file", exc);
 				stageManager.makeExceptionAlert(exc,
 						"visualisation.magicLayout.settingsManager.alert.failedToCreateLayoutSettingsFile.content")
