@@ -76,8 +76,8 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		result = null;
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		String code = taCode.getText();
-		if(cbType.getValue().getType() == TemporalFormulaItem.TemporalType.LTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, id, code, taDescription.getText(), cbExpectedResult.getValue());
+		if (cbType.getValue().getType() == TemporalFormulaItem.TemporalType.LTL) {
+			final TemporalFormulaItem item = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, id, code, taDescription.getText(), -1, cbExpectedResult.getValue());
 			try {
 				LTLFormulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 			} catch (ProBError e) {
@@ -85,8 +85,8 @@ public class TemporalFormulaStage extends TemporalItemStage {
 				return;
 			}
 			result = item;
-		} else if(cbType.getValue().getType() == TemporalFormulaItem.TemporalType.CTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.CTL, id, code, taDescription.getText(), cbExpectedResult.getValue());
+		} else if (cbType.getValue().getType() == TemporalFormulaItem.TemporalType.CTL) {
+			final TemporalFormulaItem item = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.CTL, id, code, taDescription.getText(), -1, cbExpectedResult.getValue());
 			try {
 				CTLFormulaChecker.parseFormula(item.getCode(), currentTrace.getModel());
 			} catch (ProBError e) {

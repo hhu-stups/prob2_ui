@@ -116,11 +116,11 @@ public final class LTLFormulaChecker {
 		}
 		item.setResultItem(new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.message", errorMessage));
 	}
-	
+
 	public static void checkFormula(TemporalFormulaItem item, Machine machine, StateSpace stateSpace) {
 		try {
 			final LTL formula = parseFormula(item.getCode(), machine, stateSpace.getModel());
-			final LTLChecker checker = new LTLChecker(stateSpace, formula);
+			final LTLChecker checker = new LTLChecker(stateSpace, formula, null, item.getStateLimit());
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {
 				handleFormulaParseErrors(item, ((LTLError)result).getErrors());
