@@ -40,11 +40,13 @@ public class FullValueStage extends Stage {
 
 	@FXML private TabPane tabPane;
 	@FXML private Tab formulaTab;
+	@FXML private Tab labelTab;
 	@FXML private Tab descriptionTab;
 	@FXML private Tab currentValueTab;
 	@FXML private Tab previousValueTab;
 	@FXML private Tab diffTab;
 	@FXML private TextArea formulaTextarea;
+	@FXML private TextArea labelTextarea;
 	@FXML private TextArea descriptionTextarea;
 	@FXML private TextArea currentValueTextarea;
 	@FXML private TextArea previousValueTextarea;
@@ -254,19 +256,27 @@ public class FullValueStage extends Stage {
 		if (newValue == null) {
 			this.setTitle(null);
 			this.formulaTextarea.clear();
+			this.labelTextarea.setDisable(true);
+			this.labelTextarea.clear();
 			this.descriptionTextarea.clear();
 			this.currentValueTextarea.clear();
 			this.previousValueTextarea.clear();
 			this.diffTextarea.clear();
 			return;
 		}
-		
+
+		String label;
 		if (newValue.getRodinLabels() != null && !newValue.getRodinLabels().isEmpty()) {
-			this.setTitle("@" + String.join(";", newValue.getRodinLabels()));
+			label = "@" + String.join(";", newValue.getRodinLabels());
+			this.setTitle(label);
+			this.labelTextarea.setText(label);
+			this.labelTab.setDisable(false);
 		} else {
 			this.setTitle(newValue.getLabel());
+			this.labelTab.setDisable(true);
+			this.labelTextarea.clear();
 		}
-		
+
 		this.formulaTextarea.setText(newValue.getLabel());
 		this.descriptionTextarea.setText(newValue.getDescription());
 		String oldMaxDisplayPref = sp.getCurrentPreference("MAX_DISPLAY_SET");

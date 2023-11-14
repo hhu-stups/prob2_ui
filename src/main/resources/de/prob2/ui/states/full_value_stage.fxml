@@ -21,6 +21,9 @@
 						<Tab fx:id="formulaTab" text="%states.fullValueStage.tabs.formula">
 							<TextArea fx:id="formulaTextarea" editable="false" wrapText="true"/>
 						</Tab>
+						<Tab fx:id="labelTab" text="%states.fullValueStage.tabs.label" disable="true">
+							<TextArea fx:id="labelTextarea" editable="false" wrapText="true"/>
+						</Tab>
 						<Tab fx:id="descriptionTab" text="%states.fullValueStage.tabs.description">
 							<TextArea fx:id="descriptionTextarea" editable="false" wrapText="true"/>
 						</Tab>
