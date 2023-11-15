@@ -1,6 +1,5 @@
 package de.prob2.ui.rulevalidation.ui;
 
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
@@ -152,8 +151,6 @@ public class RulesView extends AnchorPane{
 		executeAllButton.setDisable(true);
 		currentTrace.addListener((o, oldTrace, newTrace) ->
 			validationReportButton.setDisable(newTrace == null || newTrace.getCurrentState() == null || !newTrace.getCurrentState().isInitialised()));
-		// workaround for correct colouring of value cells after changing view:
-		treeTableView.setOnMouseClicked(e -> treeTableView.refresh());
 	}
 
 	@FXML

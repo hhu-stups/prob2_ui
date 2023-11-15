@@ -29,6 +29,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		if (treeItem instanceof OperationItem) {
 			executable = ((OperationItem) treeItem).isExecutable();
 		}
+		getStyleClass().removeAll("true","false");
 		if (item == null || empty || item instanceof String)
 			configureEmptyCell();
 		else if (item instanceof RuleResult)
