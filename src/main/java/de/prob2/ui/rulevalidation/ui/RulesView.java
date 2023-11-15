@@ -232,8 +232,9 @@ public class RulesView extends AnchorPane{
 					switch (resultSummary.status.get(ruleStr)) {
 						case FAIL:
 							writer.write(" FAILED");
-							if (resultSummary.counterexamples.containsKey(ruleStr)) {
-								for (RuleResult.CounterExample counterExample : resultSummary.counterexamples.get(ruleStr)) {
+							if (resultSummary.ruleresults.containsKey(ruleStr)) {
+								List<RuleResult.CounterExample> counterExamples = resultSummary.ruleresults.get(ruleStr).getCounterExamples();
+								for (RuleResult.CounterExample counterExample : counterExamples) {
 									writer.write("\n    - " + counterExample.getErrorType() + ", " + counterExample.getMessage());
 								}
 							}
