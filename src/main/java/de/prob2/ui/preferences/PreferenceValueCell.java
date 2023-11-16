@@ -5,12 +5,20 @@ import java.util.Locale;
 
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
+import de.prob2.ui.codecompletion.ImprovedIntegerSpinnerValueFactory;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.TextField;
+import javafx.scene.control.TextFormatter;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.paint.Color;
 import javafx.util.converter.IntegerStringConverter;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +38,10 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	}
 
 	private void changeToSpinner(final PrefTreeItem.Preference pti, final int min, final int max) {
-		final Spinner<Integer> spinner = new Spinner<>(new SpinnerValueFactory.IntegerSpinnerValueFactory(min, max, 0));
+		final Spinner<Integer> spinner = new Spinner<>();
 		spinner.setEditable(true);
 		spinner.getEditor().setTextFormatter(new TextFormatter<>(new IntegerStringConverter()));
+		spinner.setValueFactory(new ImprovedIntegerSpinnerValueFactory(min, max, 0));
 		spinner.getEditor().setText(pti.getValue());
 
 		spinner.valueProperty().addListener((observable, oldValue, newValue) -> {

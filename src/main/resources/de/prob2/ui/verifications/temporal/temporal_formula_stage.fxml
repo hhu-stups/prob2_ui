@@ -17,6 +17,9 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.collections.FXCollections?>
 <?import java.lang.Boolean?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.Spinner?>
 
 <!-- Do not remove the following imports as they are detected as unused accidentally -->
 <?import de.prob2.ui.verifications.temporal.TemporalItemStage.TemporalFormulaChoiceItem?>
@@ -62,6 +65,18 @@
 									</FXCollections>
 								</items>
 							</ChoiceBox>
+						</HBox>
+						<HBox alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="chooseStateLimit" text="%verifications.temporal.formula.temporalFormulaStage.stateLimit">
+								<tooltip>
+									<Tooltip text="%verifications.temporal.formula.temporalFormulaStage.tooltips.chooseStateLimit" />
+								</tooltip>
+							</CheckBox>
+							<Spinner fx:id="stateLimit" editable="true">
+								<tooltip>
+									<Tooltip text="%verifications.temporal.formula.temporalFormulaStage.tooltips.stateLimit" />
+								</tooltip>
+							</Spinner>
 						</HBox>
 						<HBox alignment="CENTER_LEFT" spacing="5.0">
 							<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>

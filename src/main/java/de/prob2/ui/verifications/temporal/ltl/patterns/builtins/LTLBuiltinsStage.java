@@ -43,8 +43,7 @@ public final class LTLBuiltinsStage extends Stage {
 		description.setCellFactory(WrappedTextTableCell::new);
 		description.setCellValueFactory(new PropertyValueFactory<>("description"));
 		tvPatterns.setItems(FXCollections.observableList(patternManager.getBuiltins().stream()
-			.map(pattern -> new LTLBuiltinsItem(String.join("\n", pattern.getSignatures()), pattern.getDescription()))
-			.collect(Collectors.toList())));
+			                                                 .map(pattern -> new LTLBuiltinsItem(String.join("\n", pattern.getSignatures()), pattern.getDescription()))
+			                                                 .collect(Collectors.toList())));
 	}
-
 }

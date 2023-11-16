@@ -1,20 +1,20 @@
 package de.prob2.ui.verifications.temporal;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
+
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
-import org.fxmisc.richtext.CodeArea;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 public abstract class TemporalItemStage extends Stage {
 
@@ -48,56 +48,50 @@ public abstract class TemporalItemStage extends Stage {
 			return Objects.hash(type);
 		}
 	}
-	
+
 	@FXML
-	protected CodeArea taCode;
-	
+	protected TemporalFormulaEditor taCode;
+
 	@FXML
 	protected TextArea taDescription;
-	
+
 	@FXML
 	protected TextArea taErrors;
 
 	@FXML
 	protected HelpButton helpButton;
-	
+
 	protected final CurrentProject currentProject;
 
 	protected final FontSize fontSize;
-	
+
 	protected final LTLBuiltinsStage builtinsStage;
-	
+
 	public TemporalItemStage(final CurrentProject currentProject, final FontSize fontSize, final LTLBuiltinsStage builtinsStage) {
 		super();
 		this.currentProject = currentProject;
 		this.fontSize = fontSize;
 		this.builtinsStage = builtinsStage;
 	}
-	
+
 	@FXML
 	public void initialize() {
-		helpButton.setHelpContent("verification", "LTL");
-		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
+		this.helpButton.setHelpContent("verification", "LTL");
+		((BindableGlyph) this.helpButton.getGraphic()).bindableFontSizeProperty().bind(this.fontSize.fontSizeProperty().multiply(1.2));
+
+		// clear errors when the user types, as all location information will be outdated by then
+		this.taCode.textProperty().addListener(observable -> this.taCode.getErrors().clear());
 	}
-	
+
 	@FXML
 	protected void showBuiltins() {
-		builtinsStage.show();
+		this.builtinsStage.show();
 	}
-	
+
 	public void showErrors(final List<ErrorItem> errors) {
-		taErrors.setText(errors.stream()
-			.map(ErrorItem::getMessage)
-			.collect(Collectors.joining("\n")));
-		markText(errors);
-	}
-	
-	private void markText(final List<ErrorItem> errorMarkers) {
-		if (!errorMarkers.isEmpty() && !errorMarkers.get(0).getLocations().isEmpty()) {
-			// TODO Implement proper error highlighting like in BEditor
-			final ErrorItem.Location location = errorMarkers.get(0).getLocations().get(0);
-			final int line = location.getStartLine() - 1;
-			taCode.selectRange(line, location.getStartColumn(), line, location.getEndColumn());
-		}
+		this.taErrors.setText(errors.stream()
+			                      .map(ErrorItem::getMessage)
+			                      .collect(Collectors.joining("\n")));
+		this.taCode.getErrors().setAll(errors);
 	}
 }
