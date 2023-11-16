@@ -262,7 +262,6 @@ public class RulesView extends AnchorPane{
 							writer.write(" unknown");
 					}
 				}
-				writer.close();
 			}
 		}
 	}
