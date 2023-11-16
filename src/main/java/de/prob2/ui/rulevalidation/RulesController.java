@@ -1,28 +1,22 @@
 package de.prob2.ui.rulevalidation;
 
 import com.google.inject.Inject;
+import de.be4.classicalb.core.parser.rules.AbstractOperation;
+import de.be4.classicalb.core.parser.rules.FunctionOperation;
 import de.prob.model.brules.RulesChecker;
 import de.prob.model.brules.RulesModel;
 import de.prob.statespace.Trace;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.ui.RulesView;
 import groovy.lang.Singleton;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
-import javafx.geometry.Insets;
-import javafx.geometry.Pos;
-import javafx.scene.Scene;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
+import javafx.scene.control.ProgressBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 /**
  * @author Christoph Heinzen
@@ -35,19 +29,18 @@ public class RulesController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RulesController.class);
 
 	private final CurrentTrace currentTrace;
-	private final StageManager stageManager;
 	private RulesModel ruleModel;
 	private RulesChecker rulesChecker;
 
 	private final ChangeListener<Trace> traceListener;
 	private RulesView rulesView;
 	private final RulesDataModel model;
+	private int nrExecutedOperations = 0;
 
 	@Inject
-	RulesController(final StageManager stageManager, final CurrentTrace currentTrace) {
+	RulesController(final CurrentTrace currentTrace) {
 		this.currentTrace = currentTrace;
 		this.model = new RulesDataModel();
-		this.stageManager = stageManager;
 
 		traceListener = (observable, oldTrace, newTrace) -> {
 			if (rulesView != null) {
@@ -79,6 +72,7 @@ public class RulesController {
 	private void initialize(RulesModel newModel) {
 		model.initialize(newModel);
 		rulesView.build();
+		this.nrExecutedOperations = 0;
 	}
 
 	void stop() {
@@ -95,63 +89,68 @@ public class RulesController {
 	}
 
 	public void executeOperation(final String operationName) {
-		execute(new Task<Void>() {
+		execute(new Task<>() {
 			@Override
-			protected Void call() throws Exception {
+			protected Void call() {
+				rulesView.progressBox.setVisible(true);
+				Platform.runLater(() -> {
+					ProgressBar progressBar = rulesView.progressBar;
+					progressBar.setProgress(-1);
+					rulesView.progressOperation.setText(operationName);
+					rulesView.progressLabel.setText("");
+				});
 				rulesChecker = new RulesChecker(currentTrace.get());
 				rulesChecker.executeOperationAndDependencies(operationName);
+				rulesView.progressBox.setVisible(false);
 				return null;
 			}
 		}, operationName);
 	}
 
 	public void executeAllOperations() {
-		execute(new Task<Void>() {
+		execute(new Task<>() {
 			@Override
-			protected Void call() throws Exception {
-				rulesChecker = new RulesChecker(currentTrace.get());
-				rulesChecker.executeAllOperations();
-				return null;
+			protected Void call() {
+			rulesChecker = new RulesChecker(currentTrace.get());
+			rulesChecker.init();
+			int totalNrOfOperations = ruleModel.getRulesProject().getOperationsMap().values().
+				stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
+			// determine all operations that can be executed in this state
+			Set<AbstractOperation> executableOperations = rulesChecker.getExecutableOperations();
+			while (!executableOperations.isEmpty()) {
+				for (AbstractOperation op : executableOperations) {
+					rulesChecker.executeOperation(op);
+					nrExecutedOperations++;
+					Platform.runLater(() -> {
+						ProgressBar progressBar = rulesView.progressBar;
+						progressBar.setProgress((double) nrExecutedOperations / totalNrOfOperations);
+						rulesView.progressOperation.setText(op.getName());
+						rulesView.progressLabel.setText(" (" + nrExecutedOperations + "/" + totalNrOfOperations + ")");
+					});
+				}
+				executableOperations = rulesChecker.getExecutableOperations();
+			}
+			rulesView.progressBox.setVisible(false);
+			return null;
 			}
 		}, null);
-
 	}
 
 	private void execute(Task<Void> task, String operation) {
-		final Stage progressAlert = createProgressAlert(operation);
-		progressAlert.setOnCloseRequest(event -> {
-			if (task.isRunning()) {
-				event.consume();
-			}
-		});
-		progressAlert.show();
 		task.setOnSucceeded(event -> {
-			LOGGER.debug("Task succeeded!");
+			LOGGER.debug("Task for execution of rule " + operation + " succeeded!");
+			int before = currentTrace.get().size();
+			// don't count setup_constants and initialization
+			if (operation != null && nrExecutedOperations == 0) before += 2;
 			currentTrace.set(rulesChecker.getCurrentTrace());
-			progressAlert.close();
+			if (operation != null) nrExecutedOperations += currentTrace.get().size() - before;
 		});
 		task.setOnFailed(event -> {
-			LOGGER.debug("Task failed or cancelled!");
+			LOGGER.debug("Task for execution of rule " + operation + " failed or cancelled!");
 			currentTrace.set(currentTrace.get());
-			progressAlert.close();
 		});
 		task.setOnCancelled(task.getOnFailed());
 		new Thread(task).start();
 
-	}
-
-	private Stage createProgressAlert(String rule) {
-		String text = rule == null ? "Executing Rules..." : "Executing Rule " + rule;
-		VBox content = new VBox(20, new ProgressIndicator(), new Label(text));
-		content.setAlignment(Pos.CENTER);
-		content.setPadding(new Insets(20,40,20,40));
-		content.setBackground(new Background(new BackgroundFill(Color.WHITE, null, null)));
-		Stage stage = new Stage();
-		stage.setScene(new Scene(content));
-		stage.setTitle("Execute");
-		stage.initModality(Modality.APPLICATION_MODAL);
-		stage.initOwner(stageManager.getCurrent());
-		stageManager.register(stage, null);
-		return stage;
 	}
 }

@@ -18,6 +18,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,16 @@ public class RulesView extends AnchorPane{
 
 	@FXML
 	private Label rulesLabel;
+
+	@FXML
+	public VBox progressBox;
+
+	@FXML
+	public Label progressLabel;
+	@FXML
+	public Label progressOperation;
+	@FXML
+	public ProgressBar progressBar;
 
 	@FXML
 	private Label notCheckedLabel;
@@ -199,6 +210,8 @@ public class RulesView extends AnchorPane{
 
 	@FXML
 	public void executeAll(){
+		executeAllButton.setDisable(true);
+		progressBox.setVisible(true);
 		controller.executeAllOperations();
 	}
 

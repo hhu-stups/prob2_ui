@@ -26,21 +26,36 @@
 				<Button fx:id="executeAllButton" text="%rulevalidation.view.executeAll" onAction="#executeAll" styleClass="button-blue"/>
             </HBox>
         </AnchorPane>
-        <TreeTableView fx:id="treeTableView" VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-                       AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" maxWidth="Infinity" showRoot="false">
-            <columnResizePolicy>
-                <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-            </columnResizePolicy>
-            <columns>
-                <TreeTableColumn fx:id="tvNameColumn" id="name" editable="false" minWidth="80.0" sortable="false" text="%states.statesView.columns.name" />
-                <TreeTableColumn fx:id="tvValueColumn" id="value" editable="false" minWidth="80.0"  sortable="false" text="%states.statesView.columns.value" />
-                <TreeTableColumn fx:id="tvExecuteColumn" id="execute" editable="false" minWidth="80.0"  sortable="false"/>
-            </columns>
-            <placeholder>
-                <Label text="No Rules Machine loaded"/>
-            </placeholder>
-            <TreeItem fx:id="tvRootItem" expanded="true"/>
-        </TreeTableView>
+		<StackPane VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+				   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<TreeTableView fx:id="treeTableView" maxWidth="Infinity" showRoot="false">
+				<columnResizePolicy>
+					<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+				</columnResizePolicy>
+				<columns>
+					<TreeTableColumn fx:id="tvNameColumn" id="name" editable="false" minWidth="80.0" sortable="false" text="%states.statesView.columns.name" />
+					<TreeTableColumn fx:id="tvValueColumn" id="value" editable="false" minWidth="80.0"  sortable="false" text="%states.statesView.columns.value" />
+					<TreeTableColumn fx:id="tvExecuteColumn" id="execute" editable="false" minWidth="80.0"  sortable="false"/>
+				</columns>
+				<placeholder>
+					<Label text="No Rules Machine loaded"/>
+				</placeholder>
+				<TreeItem fx:id="tvRootItem" expanded="true"/>
+			</TreeTableView>
+			<VBox fx:id="progressBox" style="-fx-background-color: rgba(255, 255, 255, 0.75);" alignment="CENTER" visible="false">
+				<HBox alignment="CENTER">
+					<Label text="%rulevalidation.view.executeAll.executing" styleClass="bold"/>
+					<Label text="  "/>
+					<Label fx:id="progressLabel"/>
+				</HBox>
+				<ProgressBar fx:id="progressBar" progress="0" prefWidth="300">
+					<padding>
+						<Insets top="10" bottom="10"/>
+					</padding>
+				</ProgressBar>
+				<Label fx:id="progressOperation"/>
+			</VBox>
+		</StackPane>
         <HBox VBox.vgrow="never" alignment="CENTER_LEFT">
             <Separator HBox.hgrow="NEVER" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
             <Label HBox.hgrow="NEVER" text="%rulevalidation.view.summary" style="-fx-text-fill:rgb(128,128,128);">
