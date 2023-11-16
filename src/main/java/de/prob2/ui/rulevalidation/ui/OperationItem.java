@@ -43,13 +43,13 @@ class OperationItem extends TreeItem<Object> {
 						executable = false;
 						break;
 				}
-			} else if (newValue instanceof Map.Entry && operation instanceof ComputationOperation) {
-				createComputationChildren((Map.Entry)newValue, (ComputationOperation) operation);
+			} else if (newValue instanceof Map.Entry<?, ?> && operation instanceof ComputationOperation) {
+				createComputationChildren((Map.Entry<?, ?>)newValue, (ComputationOperation) operation);
 			}
 		});
 	}
 
-	private void createComputationChildren(Map.Entry result, ComputationOperation op) {
+	private void createComputationChildren(Map.Entry<?, ?> result, ComputationOperation op) {
 		ComputationStatus state = (ComputationStatus) result.getValue();
 		if (state == ComputationStatus.NOT_EXECUTED) {
 			List<String> failedDependencies = model.getFailedDependenciesOfComputation(op.getName());
