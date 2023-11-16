@@ -29,10 +29,8 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		if (treeItem instanceof OperationItem) {
 			executable = ((OperationItem) treeItem).isExecutable();
 		}
-		getStyleClass().removeAll("true","false");
-		if (item == null || empty || item instanceof String)
-			configureEmptyCell();
-		else if (item instanceof RuleResult)
+		configureEmptyCell();
+		if (item instanceof RuleResult)
 			configureForRuleResult((RuleResult)item);
 		else if (item instanceof RuleResult.CounterExample)
 			setText(((RuleResult.CounterExample)item).getMessage());
@@ -65,6 +63,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	private void configureEmptyCell() {
 		setText(null);
 		setStyle(null);
+		getStyleClass().removeAll("true","false");
 	}
 
 	private void configureForRuleResult(RuleResult result) {
