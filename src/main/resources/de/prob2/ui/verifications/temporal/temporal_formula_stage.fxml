@@ -55,17 +55,6 @@
 								<TemporalFormulaEditor fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 							</content>
 						</VirtualizedScrollPane>
-						<HBox fx:id="expectedResultBox" alignment="CENTER_LEFT" spacing="5.0">
-							<Label text="%verifications.temporal.formula.temporalFormulaStage.expectedResult" HBox.hgrow="NEVER"/>
-							<ChoiceBox fx:id="cbExpectedResult" HBox.hgrow="NEVER">
-								<items>
-									<FXCollections fx:factory="observableArrayList">
-										<Boolean fx:constant="TRUE"/>
-										<Boolean fx:constant="FALSE"/>
-									</FXCollections>
-								</items>
-							</ChoiceBox>
-						</HBox>
 						<HBox alignment="CENTER_LEFT" spacing="5.0">
 							<CheckBox fx:id="chooseStateLimit" text="%verifications.temporal.formula.temporalFormulaStage.stateLimit">
 								<tooltip>
@@ -77,6 +66,17 @@
 									<Tooltip text="%verifications.temporal.formula.temporalFormulaStage.tooltips.stateLimit" />
 								</tooltip>
 							</Spinner>
+						</HBox>
+						<HBox fx:id="expectedResultBox" alignment="CENTER_LEFT" spacing="5.0">
+							<Label text="%verifications.temporal.formula.temporalFormulaStage.expectedResult" HBox.hgrow="NEVER"/>
+							<ChoiceBox fx:id="cbExpectedResult" HBox.hgrow="NEVER">
+								<items>
+									<FXCollections fx:factory="observableArrayList">
+										<Boolean fx:constant="TRUE"/>
+										<Boolean fx:constant="FALSE"/>
+									</FXCollections>
+								</items>
+							</ChoiceBox>
 						</HBox>
 						<HBox alignment="CENTER_LEFT" spacing="5.0">
 							<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>
