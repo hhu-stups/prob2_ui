@@ -1,17 +1,19 @@
 package de.prob2.ui.rulevalidation.ui;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.model.brules.RuleResult;
-import de.prob.model.brules.RuleResults;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.rulevalidation.RuleValidationReport;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
 import javafx.beans.property.ReadOnlyObjectWrapper;
@@ -23,17 +25,11 @@ import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import static de.prob.model.brules.RuleStatus.*;
-
 
 /**
  * Description of class
@@ -108,15 +104,17 @@ public class RulesView extends AnchorPane{
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final CurrentTrace currentTrace;
+	private final Injector injector;
 
 	@Inject
 	public RulesView(final StageManager stageManager, final RulesController controller, final I18n i18n, final FileChooserManager fileChooserManager,
-	                 final CurrentTrace currentTrace) {
+	                 final CurrentTrace currentTrace, final Injector injector) {
 		this.controller = controller;
 		this.dataModel = controller.getModel();
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTrace = currentTrace;
+		this.injector = injector;
 		this.stageManager = stageManager;
 		this.stageManager.loadFXML(this, "rulesView.fxml");
 		this.controller.setView(this);
@@ -219,50 +217,13 @@ public class RulesView extends AnchorPane{
 	public void saveValidationReport() throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("rulevalidation.view.save.title"));
-		fileChooser.setInitialFileName("ValidationReport.txt");
-		fileChooser.getExtensionFilters().add(fileChooserManager.getPlainTextFilter());
-		// TODO: Kind not correct
-		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.HISTORY_CHART, stageManager.getCurrent());
+		fileChooser.setInitialFileName("ValidationReport.html");
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html"));
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
-			try (BufferedWriter writer = Files.newBufferedWriter(path)) {
-				RuleResults ruleResults = new RuleResults(new HashSet<>(dataModel.getRuleMap().values()), currentTrace.getCurrentState(), -1);
-				RuleResults.ResultSummary resultSummary = ruleResults.getSummary();
-
-				writer.write("VALIDATION REPORT (" + currentTrace.getModel().getModelFile().getName() + ")\n-----------------------------");
-				writer.write("\nTotal number of rules: " + resultSummary.numberOfRules);
-				writer.write("\nNumber of checked rules: " + (resultSummary.numberOfRules - resultSummary.numberOfRulesNotChecked));
-				writer.write("\nNumber of successful rules: " + resultSummary.numberOfRulesSucceeded);
-				writer.write("\nNumber of failed rules: " + resultSummary.numberOfRulesFailed);
-				writer.write("\nNumber of disabled rules: " + resultSummary.numberOfRulesDisabled);
-				writer.write("\n-----------------------------");
-
-				for (String ruleStr : resultSummary.status.keySet()) {
-					writer.write("\n" + ruleStr + ":");
-
-					switch (resultSummary.status.get(ruleStr)) {
-						case FAIL:
-							writer.write(" FAILED");
-							if (resultSummary.ruleresults.containsKey(ruleStr)) {
-								List<RuleResult.CounterExample> counterExamples = resultSummary.ruleresults.get(ruleStr).getCounterExamples();
-								for (RuleResult.CounterExample counterExample : counterExamples) {
-									writer.write("\n    - " + counterExample.getErrorType() + ", " + counterExample.getMessage());
-								}
-							}
-							break;
-						case SUCCESS:
-							writer.write(" successful");
-							break;
-						case NOT_CHECKED:
-							writer.write(" not checked");
-							break;
-						case DISABLED:
-							writer.write(" disabled");
-							break;
-						default:
-							writer.write(" unknown");
-					}
-				}
-			}
+			RuleValidationReport ruleValidationReport = new RuleValidationReport(currentTrace, i18n,
+				injector.getInstance(VersionInfo.class), dataModel);
+			ruleValidationReport.reportVelocity(path);
 		}
 	}
 

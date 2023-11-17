@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	    <meta charset="UTF-8">
+	    <title>$i18n.translate("rulevalidation.report.title")</title>
+	    <style>
+	        body {
+	            font-family: 'Arial', sans-serif;
+	            background-color: #f4f4f4;
+	            padding: 40px;
+	        }
+	        .rule-list {
+	            background-color: #fff;
+	            border: 1px solid #ddd;
+	            border-radius: 8px;
+	            margin-bottom: 20px;
+	            overflow: hidden;
+	        }
+	        .rule-header {
+	            padding: 10px;
+	            border-bottom: 1px solid #ddd;
+	            display: flex;
+	            align-items: center;
+	        }
+			.rule-header.pointer {
+	            cursor: pointer;
+	        }
+	        .rule-content {
+	            padding: 10px;
+	            display: none;
+	        }
+	        .red { background-color: rgba(204, 47, 39, 0.3); }
+	        .orange { background-color: rgba(255, 154, 0, 0.3); }
+	        .green { background-color: rgba(76, 175, 80, 0.3); }
+	        .grey { background-color: rgba(117, 117, 117, 0.3); }
+			.icon { margin-right: 10px; }
+		</style>
+	</head>
+	<body>
+		<h2>$i18n.translate("rulevalidation.report.title")</h2>
+		<hr>
+		$i18n.translate("rulevalidation.report.checkedMachine") <b>$machineName</b>
+		<div style="line-height:25px;">
+	 		<br>$i18n.translate("rulevalidation.report.totalNrOfRules") <b>$numberOfRules</b>
+		    <br>$i18n.translate("rulevalidation.report.nrCheckedRules") <b>$rulesChecked</b>
+		    <br>$i18n.translate("rulevalidation.report.nrSuccessfulRules") <b>$rulesSucceeded</b>
+	        <br>$i18n.translate("rulevalidation.report.nrFailedRules") <b>$rulesFailed</b>
+			<br>$i18n.translate("rulevalidation.report.nrDisabledRules") <b>$rulesDisabled</b>
+		</div>
+		<br>
+		<div class="rule-list">
+			#foreach($ruleResult in $ruleResults.values())
+				#set($ruleName = $ruleResult.getRuleName())
+				#set($ruleStatus = $ruleResult.getRuleState())
+				#if($ruleStatus == $status_SUCCESS)
+			<div class="rule-header green">
+				#elseif($ruleStatus == $status_FAIL)
+			<div class="rule-header pointer red" onclick="openDetails('$ruleName')">
+				<span class="icon">&#9888;</span>
+				#elseif($ruleStatus == $status_NOT_CHECKED && !$ruleResult.getFailedDependencies().isEmpty())
+			<div class="rule-header pointer orange" onclick="openDetails('$ruleName')">
+				<span class="icon">&#9888;</span>
+				#elseif($ruleStatus == $status_NOT_CHECKED && !$ruleResult.getNotCheckedDependencies().isEmpty())
+			<div class="rule-header pointer grey" onclick="openDetails('$ruleName')">
+				<span class="icon">&#128712;</span>
+				#elseif($ruleStatus == $status_DISABLED)
+			<div class="rule-header grey">
+				#else
+			<div class="rule-header">
+				#end
+				$ruleName #if($ruleResult.getRuleId()) &ensp;[$ruleResult.getRuleId()] #end &emsp;<b>$ruleStatus</b>
+			</div>
+
+			#if($ruleResult.getNumberOfViolations() > 0 || !$ruleResult.getFailedDependencies().isEmpty() || !$ruleResult.getNotCheckedDependencies().isEmpty())
+			<div class="rule-content" id="$ruleName">
+				#if($ruleResult.getNumberOfViolations() > 0)
+				<b>$ruleResult.getNumberOfViolations()</b> Violations found:
+					<ul class="content-list">
+					#foreach($counterExample in $ruleResult.getCounterExamples())
+						<li>($counterExample.getErrorType()) $counterExample.getMessage()</li>
+					#end
+					</ul>
+				#end
+				#if(!$ruleResult.getFailedDependencies().isEmpty())
+					Rule could not be checked due to failed dependencies:
+					<ul class="content-list">
+						#foreach($failed in $ruleResult.getFailedDependencies())
+							<li>$failed</li>
+						#end
+					</ul>
+				#end
+				#if(!$ruleResult.getNotCheckedDependencies().isEmpty())
+					Rule could not be checked due to unchecked dependencies:
+					<ul class="content-list">
+						#foreach($notChecked in $ruleResult.getNotCheckedDependencies())
+							<li>$notChecked</li>
+						#end
+					</ul>
+				#end
+			</div>
+			#end
+			#end
+		</div>
+		$i18n.translate("rulevalidation.report.probVersion") $probCliVersion
+		<br>$localDateTime
+		<script>
+			function openDetails(contentId) {
+				const content = document.getElementById(contentId);
+				content.style.display = (content.style.display === 'block') ? 'none' : 'block';
+			}
+		</script>
+	</body>
+</html>
