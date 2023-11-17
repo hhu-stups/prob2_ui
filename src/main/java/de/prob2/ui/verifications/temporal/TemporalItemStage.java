@@ -80,7 +80,10 @@ public abstract class TemporalItemStage extends Stage {
 		((BindableGlyph) this.helpButton.getGraphic()).bindableFontSizeProperty().bind(this.fontSize.fontSizeProperty().multiply(1.2));
 
 		// clear errors when the user types, as all location information will be outdated by then
-		this.taCode.textProperty().addListener(observable -> this.taCode.getErrors().clear());
+		this.taCode.textProperty().addListener((observable, oldValue, newValue) -> {
+			this.taErrors.clear();
+			this.taCode.getErrors().clear();
+		});
 	}
 
 	@FXML
