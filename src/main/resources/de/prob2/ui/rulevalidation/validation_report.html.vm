@@ -23,8 +23,8 @@
 	            align-items: center;
 	        }
 			.rule-header.pointer {
-	            cursor: pointer;
-	        }
+				cursor: pointer;
+			}
 	        .rule-content {
 	            padding: 10px;
 	            display: none;
@@ -41,10 +41,10 @@
 		<hr>
 		$i18n.translate("rulevalidation.report.checkedMachine") <b>$machineName</b>
 		<div style="line-height:25px;">
-	 		<br>$i18n.translate("rulevalidation.report.totalNrOfRules") <b>$numberOfRules</b>
-		    <br>$i18n.translate("rulevalidation.report.nrCheckedRules") <b>$rulesChecked</b>
-		    <br>$i18n.translate("rulevalidation.report.nrSuccessfulRules") <b>$rulesSucceeded</b>
-	        <br>$i18n.translate("rulevalidation.report.nrFailedRules") <b>$rulesFailed</b>
+			<br>$i18n.translate("rulevalidation.report.totalNrOfRules") <b>$numberOfRules</b>
+			<br>$i18n.translate("rulevalidation.report.nrCheckedRules") <b>$rulesChecked</b>
+			<br>$i18n.translate("rulevalidation.report.nrSuccessfulRules") <b>$rulesSucceeded</b>
+			<br>$i18n.translate("rulevalidation.report.nrFailedRules") <b>$rulesFailed</b>
 			<br>$i18n.translate("rulevalidation.report.nrDisabledRules") <b>$rulesDisabled</b>
 		</div>
 		<br>
@@ -74,7 +74,7 @@
 			#if($ruleResult.getNumberOfViolations() > 0 || !$ruleResult.getFailedDependencies().isEmpty() || !$ruleResult.getNotCheckedDependencies().isEmpty())
 			<div class="rule-content" id="$ruleName">
 				#if($ruleResult.getNumberOfViolations() > 0)
-				<b>$ruleResult.getNumberOfViolations()</b> Violations found:
+				<b>$ruleResult.getNumberOfViolations()</b> $i18n.translate("rulevalidation.report.violations")
 					<ul class="content-list">
 					#foreach($counterExample in $ruleResult.getCounterExamples())
 						<li>($counterExample.getErrorType()) $counterExample.getMessage()</li>
@@ -82,7 +82,7 @@
 					</ul>
 				#end
 				#if(!$ruleResult.getFailedDependencies().isEmpty())
-					Rule could not be checked due to failed dependencies:
+					$i18n.translate("rulevalidation.report.failedDependencies")
 					<ul class="content-list">
 						#foreach($failed in $ruleResult.getFailedDependencies())
 							<li>$failed</li>
@@ -90,7 +90,7 @@
 					</ul>
 				#end
 				#if(!$ruleResult.getNotCheckedDependencies().isEmpty())
-					Rule could not be checked due to unchecked dependencies:
+					$i18n.translate("rulevalidation.report.notCheckedDependencies")
 					<ul class="content-list">
 						#foreach($notChecked in $ruleResult.getNotCheckedDependencies())
 							<li>$notChecked</li>
