@@ -8,6 +8,7 @@ import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
+import de.prob.statespace.State;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.*;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
@@ -385,7 +386,9 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	private void interrupt() {
-		railMLImportMeta.getState().getStateSpace().sendInterrupt();
+		State state = railMLImportMeta.getState();
+		if (state != null && state.getStateSpace() != null)
+			state.getStateSpace().sendInterrupt();
 	}
 
 	@FXML
