@@ -48,7 +48,7 @@ public class RulesView extends AnchorPane{
 	private Button filterButton;
 
 	@FXML
-	private Button executeAllButton;
+	public Button executeAllButton;
 	@FXML
 	private Button validationReportButton;
 
@@ -158,6 +158,7 @@ public class RulesView extends AnchorPane{
 
 		filterTextField.setOnKeyTyped(e -> this.handleFilterButton());
 		executeAllButton.setDisable(true);
+		progressBox.setVisible(false);
 		currentTrace.addListener((o, oldTrace, newTrace) ->
 			validationReportButton.setDisable(newTrace == null || newTrace.getCurrentState() == null || !newTrace.getCurrentState().isInitialised()));
 	}

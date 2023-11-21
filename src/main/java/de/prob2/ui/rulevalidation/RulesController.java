@@ -6,12 +6,14 @@ import de.be4.classicalb.core.parser.rules.FunctionOperation;
 import de.prob.model.brules.RulesChecker;
 import de.prob.model.brules.RulesModel;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.ui.RulesView;
 import groovy.lang.Singleton;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
+import javafx.scene.control.Alert;
 import javafx.scene.control.ProgressBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,6 +30,7 @@ public class RulesController {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(RulesController.class);
 
+	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private RulesModel ruleModel;
 	private RulesChecker rulesChecker;
@@ -38,7 +41,8 @@ public class RulesController {
 	private int nrExecutedOperations = 0;
 
 	@Inject
-	RulesController(final CurrentTrace currentTrace) {
+	RulesController(final StageManager stageManager, final CurrentTrace currentTrace) {
+		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.model = new RulesDataModel();
 
@@ -130,7 +134,6 @@ public class RulesController {
 				}
 				executableOperations = rulesChecker.getExecutableOperations();
 			}
-			rulesView.progressBox.setVisible(false);
 			return null;
 			}
 		}, null);
@@ -144,12 +147,29 @@ public class RulesController {
 			if (operation != null && nrExecutedOperations == 0) before += 2;
 			currentTrace.set(rulesChecker.getCurrentTrace());
 			if (operation != null) nrExecutedOperations += currentTrace.get().size() - before;
+			rulesView.progressBox.setVisible(false);
 		});
 		task.setOnFailed(event -> {
-			LOGGER.debug("Task for execution of rule " + operation + " failed or cancelled!");
+			if (operation != null) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.singleRule", operation).showAndWait();
+				LOGGER.debug("Task for execution of rule " + operation + " failed or cancelled!");
+			} else {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.allRules").showAndWait();
+				LOGGER.debug("Task for execution of all rules failed or cancelled!");
+			}
 			currentTrace.set(currentTrace.get());
+			rulesView.executeAllButton.setDisable(false);
+			rulesView.progressBox.setVisible(false);
 		});
-		task.setOnCancelled(task.getOnFailed());
+		task.setOnCancelled(event -> {
+			if (operation != null) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.singleRule", operation).showAndWait();
+			} else {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.allRules").showAndWait();
+			}
+			rulesView.executeAllButton.setDisable(false);
+			rulesView.progressBox.setVisible(false);
+		});
 		new Thread(task).start();
 
 	}
