@@ -1,4 +1,4 @@
-package de.prob2.ui.codecompletion;
+package de.prob2.ui.internal;
 
 import javafx.beans.NamedArg;
 import javafx.scene.control.SpinnerValueFactory;

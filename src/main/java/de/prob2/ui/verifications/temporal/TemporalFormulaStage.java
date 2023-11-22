@@ -3,7 +3,7 @@ package de.prob2.ui.verifications.temporal;
 import com.google.inject.Inject;
 
 import de.prob.exception.ProBError;
-import de.prob2.ui.codecompletion.ImprovedIntegerSpinnerValueFactory;
+import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;

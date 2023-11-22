@@ -5,7 +5,7 @@ import java.util.Locale;
 
 import de.prob.prolog.term.ListPrologTerm;
 import de.prob.prolog.term.PrologTerm;
-import de.prob2.ui.codecompletion.ImprovedIntegerSpinnerValueFactory;
+import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.collections.FXCollections;
