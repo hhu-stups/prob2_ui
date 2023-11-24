@@ -68,18 +68,13 @@ public final class BCodeCompletion {
 		if (this.stateSpace != null) {
 			CompleteIdentifierCommand cmd = new CompleteIdentifierCommand(this.text);
 			cmd.setIgnoreCase(ignoreCase);
-			cmd.setKeywords(includeKeywords ? CompleteIdentifierCommand.KeywordContext.ALL : CompleteIdentifierCommand.KeywordContext.EXPR);
+			cmd.setLatexToUnicode(true);
+			cmd.setAsciiToUnicode(true); // TODO: include special chars like !, # or 1 for ascii to unicode conversion
+			cmd.addKeywordContext(includeKeywords ? CompleteIdentifierCommand.KeywordContext.ALL : CompleteIdentifierCommand.KeywordContext.EXPR);
+			cmd.addKeywordContext(CompleteIdentifierCommand.KeywordContext.LATEX);
 			this.stateSpace.execute(cmd);
 			this.suggestions.addAll(cmd.getCompletions().stream().map(item -> new BCCItem(this.text, item)).toList());
-
-			if (this.text.startsWith("\\")) {
-				CompleteIdentifierCommand cmd2 = new CompleteIdentifierCommand(this.text.substring(1));
-				cmd2.setIgnoreCase(ignoreCase);
-				cmd2.setKeywords(CompleteIdentifierCommand.KeywordContext.LATEX);
-				this.stateSpace.execute(cmd2);
-				// TODO: get unicode replacement from Prolog
-				this.suggestions.addAll(cmd2.getCompletions().stream().map(item -> new BCCItem(this.text, "\\" + item)).toList());
-			}
+			// TODO: convert latex commands into unicode directly
 		}
 	}
 

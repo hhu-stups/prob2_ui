@@ -55,6 +55,7 @@ public class BEditor extends ExtendedCodeArea {
 
 						int caret = BEditor.this.getCaretPosition();
 						BEditor.this.replace(caret - replacement.getOriginalText().length(), caret, replacement.getReplacement(), Collections.emptyList());
+						BEditor.this.reloadHighlighting();
 					}
 				},
 			text -> BCodeCompletion.doCompletion(currentTrace.getStateSpace(), text)
