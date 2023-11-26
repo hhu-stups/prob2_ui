@@ -384,8 +384,9 @@ public class RailMLStage extends Stage {
 					currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
 				}
 				if (generateValidation) {
-					replaceOldFile(generationPath.resolve(validationFileName.getValue()));
-					currentState.perform("triggerPrintValidation").perform("printValidationMachine");
+					Path path = generationPath.resolve(validationFileName.getValue());
+					replaceOldFile(path);
+					RailMLMachinePrinter.printValidationMachine(path, MoreFiles.getNameWithoutExtension(path), dataFileName.getValue());
 				}
 			}
 			railMLImportMeta.setState(currentState);
