@@ -12,13 +12,27 @@ import java.util.Properties;
 
 public class RailMLMachinePrinter {
 
+	public static void printAnimationMachine(Path path, String animationMachineName, String dataMachineName,
+											 boolean generateSvg, String svgFile) throws IOException {
+		initVelocityEngine();
+		VelocityContext context = new VelocityContext();
+		context.put("animationMachineName", animationMachineName);
+		context.put("dataMachineName", dataMachineName);
+		context.put("generateSvg", generateSvg);
+		context.put("svgFile", svgFile);
+		try (final Writer writer = Files.newBufferedWriter(path)) {
+			Velocity.mergeTemplate("de/prob2/ui/railml/animation_template.mch.vm",
+				String.valueOf(StandardCharsets.UTF_8),context,writer);
+		}
+	}
+
 	public static void printValidationMachine(Path path, String validationMachineName, String dataMachineName) throws IOException {
 		initVelocityEngine();
 		VelocityContext context = new VelocityContext();
 		context.put("validationMachineName", validationMachineName);
 		context.put("dataMachineName", dataMachineName);
 		try (final Writer writer = Files.newBufferedWriter(path)) {
-			Velocity.mergeTemplate("de/prob2/ui/railml/validation_template.mch.vm",
+			Velocity.mergeTemplate("de/prob2/ui/railml/validation_template.rmch.vm",
 				String.valueOf(StandardCharsets.UTF_8),context,writer);
 		}
 	}

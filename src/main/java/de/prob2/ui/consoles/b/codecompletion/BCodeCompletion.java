@@ -68,7 +68,7 @@ public final class BCodeCompletion {
 		if (this.stateSpace != null) {
 			CompleteIdentifierCommand cmd = new CompleteIdentifierCommand(this.text);
 			cmd.setIgnoreCase(ignoreCase);
-			cmd.setIncludeKeywords(includeKeywords);
+			//cmd.setIncludeKeywords(includeKeywords);
 			this.stateSpace.execute(cmd);
 			this.suggestions.addAll(
 				cmd.getCompletions().stream()

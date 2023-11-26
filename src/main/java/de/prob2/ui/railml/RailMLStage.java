@@ -375,18 +375,22 @@ public class RailMLStage extends Stage {
 			boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
 
 			if (inv_ok && import_success) {
+				Path dataPath = generationPath.resolve(dataFileName.getValue());
 				if (generateAnimation || generateValidation) {
-					replaceOldFile(generationPath.resolve(dataFileName.getValue()));
+					replaceOldFile(dataPath);
 					currentState.perform("triggerPrintData").perform("printDataMachine");
 				}
 				if (generateAnimation) {
-					replaceOldFile(generationPath.resolve(animationFileName.getValue()));
-					currentState.perform("triggerPrintAnimation").perform("printAnimationMachine");
+					Path path = generationPath.resolve(animationFileName.getValue());
+					replaceOldFile(path);
+					RailMLMachinePrinter.printAnimationMachine(path, MoreFiles.getNameWithoutExtension(path),
+						MoreFiles.getNameWithoutExtension(dataPath), generateSVG, svgFileName.getValue());
 				}
 				if (generateValidation) {
 					Path path = generationPath.resolve(validationFileName.getValue());
 					replaceOldFile(path);
-					RailMLMachinePrinter.printValidationMachine(path, MoreFiles.getNameWithoutExtension(path), dataFileName.getValue());
+					RailMLMachinePrinter.printValidationMachine(path, MoreFiles.getNameWithoutExtension(path),
+						MoreFiles.getNameWithoutExtension(dataPath));
 				}
 			}
 			railMLImportMeta.setState(currentState);
