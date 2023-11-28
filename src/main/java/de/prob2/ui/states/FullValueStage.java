@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -31,6 +30,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.MachineLoader;
 
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -52,7 +52,6 @@ import org.slf4j.LoggerFactory;
 
 public class FullValueStage extends Stage {
 
-	private static final Pattern PRETTIFY_DELIMITERS_PATTERN = Pattern.compile("[{},]");
 	private static final Pattern PLAIN_LABEL_PATTERN = Pattern.compile("[\\w\\s]+");
 	private static final Logger LOGGER = LoggerFactory.getLogger(FullValueStage.class);
 
@@ -183,46 +182,52 @@ public class FullValueStage extends Stage {
 	}
 
 	private static String prettify(final String s) {
-		final StringBuilder out = new StringBuilder();
+		int len = s.length();
+		StringBuilder out = new StringBuilder(len);
+
+		// TODO: ignore quoted or escaped brackets/commas
 		int indentLevel = 0;
-		int lastMatchPos = 0;
-		Matcher matcher = PRETTIFY_DELIMITERS_PATTERN.matcher(s);
 
-		while (matcher.find()) {
-			out.append("\t".repeat(Math.max(0, indentLevel)));
-			out.append(s, lastMatchPos, matcher.start());
-			lastMatchPos = matcher.end();
+		char c;
+		for (int i = 0; i < len; i++) {
+			c = s.charAt(i);
 
-			switch (matcher.group()) {
-				case "{":
-					out.append("{\n");
+			switch (c) {
+				case '{':
+				case '[':
 					indentLevel++;
+					out.append(c);
+					out.append('\n').append("\t".repeat(indentLevel));
 					break;
-
-				case "}":
-					indentLevel--;
-					if (s.charAt(matcher.start() - 1) != '{') {
-						out.append("\n");
+				case '}':
+				case ']':
+					if (indentLevel > 0) {
+						indentLevel--;
 					}
-					out.append("}\n");
+					out.append('\n').append("\t".repeat(indentLevel));
+					out.append(c);
 					break;
-
-				case ",":
-					out.append(",\n");
+				case ',':
+					out.append(c);
+					out.append('\n').append("\t".repeat(indentLevel));
 					break;
-
 				default:
-					throw new IllegalStateException("Unhandled delimiter: " + matcher.group());
+					out.append(c);
 			}
 		}
-
-		out.append(s, lastMatchPos, s.length());
 
 		return out.toString();
 	}
 
 	private String prettifyIfEnabled(final String s) {
 		return this.prettifyCheckBox.isSelected() ? prettify(s) : s;
+	}
+
+	public void bindCheckboxes(BooleanProperty prettifyProperty, BooleanProperty showFullValueProperty) {
+		this.prettifyCheckBox.setSelected(prettifyProperty.get());
+		prettifyProperty.bind(this.prettifyCheckBox.selectedProperty());
+		this.showFullValueCheckBox.setSelected(showFullValueProperty.get());
+		showFullValueProperty.bind(this.showFullValueCheckBox.selectedProperty());
 	}
 
 	public ObjectProperty<StateItem> valueProperty() {
