@@ -262,11 +262,15 @@ public class RailMLStage extends Stage {
 					Platform.runLater(() -> {
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (generateSVG) {
+							List<IEvalElement> customGraphFormula = Collections.singletonList(stateSpace.getModel()
+								.parseFormula(visualisationStrategy.getCustomGraphDefinition(), FormulaExpand.EXPAND));
+							railMLImportMeta.setCustomGraphFormula(customGraphFormula);
+
 							railMLInspectDotStage.initializeOptionsForStrategy(visualisationStrategy);
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
 							try {
-								railMLInspectDotStage.visualizeCustomGraph(Collections.emptyList());
+								railMLInspectDotStage.visualizeCustomGraph(customGraphFormula);
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);
 							}

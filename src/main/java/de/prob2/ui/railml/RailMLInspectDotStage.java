@@ -270,7 +270,7 @@ public class RailMLInspectDotStage extends Stage {
 	 * Same method as in DotView.java, but only for "custom_graph".
 	 */
 	protected void visualizeCustomGraph(final List<IEvalElement> formulas) throws InterruptedException {
-		DotVisualizationCommand customGraphItem = getByName("custom_graph", railMLImportMeta.getState());
+		DotVisualizationCommand customGraphItem = getByName("expr_as_graph", railMLImportMeta.getState());
 		final String dotLocal = customGraphItem.getState().getStateSpace().getCurrentPreference("DOT");
 		final String dotEngineLocal = customGraphItem.getPreferredDotLayoutEngine()
 				.orElseGet(() -> customGraphItem.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
@@ -354,7 +354,7 @@ public class RailMLInspectDotStage extends Stage {
 	private void refreshDotView () {
 		this.updater.execute(() -> {
 			try {
-				visualizeCustomGraph(Collections.emptyList());
+				visualizeCustomGraph(railMLImportMeta.getCustomGraphFormula());
 			} catch (InterruptedException e) {
 				LOGGER.info("RailML Visualization interrupted", e);
 				Thread.currentThread().interrupt();
