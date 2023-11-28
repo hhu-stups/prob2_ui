@@ -12,6 +12,23 @@ import java.util.Properties;
 
 public class RailMLMachinePrinter {
 
+	public static void printDataMachine(Path path, String dataMachineName, String VARS_AS_TYPED_STRING_railML_identifiers,
+																			String VARS_AS_TYPED_STRING_railML_contents, String all_ids, String data,
+																			String SETS_railML) throws IOException {
+		initVelocityEngine();
+		VelocityContext context = new VelocityContext();
+		context.put("dataMachineName", dataMachineName);
+		context.put("VARS_AS_TYPED_STRING_railML_identifiers", VARS_AS_TYPED_STRING_railML_identifiers);
+		context.put("VARS_AS_TYPED_STRING_railML_contents", VARS_AS_TYPED_STRING_railML_contents);
+		context.put("all_ids", all_ids);
+		context.put("data", data);
+		context.put("SETS_railML", SETS_railML);
+		try (final Writer writer = Files.newBufferedWriter(path)) {
+			Velocity.mergeTemplate("de/prob2/ui/railml/data_template.mch.vm",
+				String.valueOf(StandardCharsets.UTF_8),context,writer);
+		}
+	}
+
 	public static void printAnimationMachine(Path path, String animationMachineName, String dataMachineName,
 											 boolean generateSvg, String svgFile) throws IOException {
 		initVelocityEngine();

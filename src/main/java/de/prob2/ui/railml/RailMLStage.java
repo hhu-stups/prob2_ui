@@ -34,6 +34,7 @@ import java.io.*;
 import java.net.URI;
 import java.nio.file.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.prob2.ui.railml.RailMLHelper.replaceOldFile;
 import static de.prob2.ui.railml.RailMLHelper.replaceOldResourceFile;
@@ -377,8 +378,27 @@ public class RailMLStage extends Stage {
 			if (inv_ok && import_success) {
 				Path dataPath = generationPath.resolve(dataFileName.getValue());
 				if (generateAnimation || generateValidation) {
+					String VARS_AS_TYPED_STRING_railML_identifiers = stateSpace.getLoadedMachine().getVariableNames().
+						stream().filter(v -> v.startsWith("RailML3_")).collect(Collectors.joining(",\n    "));
+					String VARS_AS_TYPED_STRING_railML_contents = currentState.eval("VARS_AS_TYPED_STRING(\"RailML3_\")", FormulaExpand.EXPAND)
+						.toString().replace(" &", "\n    &").translateEscapes();
+					VARS_AS_TYPED_STRING_railML_contents = VARS_AS_TYPED_STRING_railML_contents.substring(1, VARS_AS_TYPED_STRING_railML_contents.length() - 1);
+					String all_ids = currentState.eval("all_ids", FormulaExpand.EXPAND).toString();
+					String data = ""; // currentState.eval("data", FormulaExpand.EXPAND).toString();
+					List<String> sets = stateSpace.getLoadedMachine().getSetNames().
+						stream().filter(v -> v.startsWith("RailML3_")).toList();
+					StringBuilder sb = new StringBuilder();
+					for (int i = 0; i < sets.size(); i++) {
+						sb.append(sets.get(i)).append(" = ").append(currentState.eval(sets.get(i)));
+						if (i < sets.size() - 1) {
+							sb.append(";\n    ");
+						}
+					}
+					String SETS_railML = sb.toString();
+
 					replaceOldFile(dataPath);
-					currentState.perform("triggerPrintData").perform("printDataMachine");
+					RailMLMachinePrinter.printDataMachine(dataPath, MoreFiles.getNameWithoutExtension(dataPath), VARS_AS_TYPED_STRING_railML_identifiers,
+						VARS_AS_TYPED_STRING_railML_contents, all_ids, data, SETS_railML);
 				}
 				if (generateAnimation) {
 					Path path = generationPath.resolve(animationFileName.getValue());
