@@ -1,4 +1,4 @@
-MACHINE RailML3_D4R_CustomGraph
+MACHINE RailML3_CustomGraph
 EXTENDS RailML3_printMachines
 DEFINITIONS
     "CHOOSE.def";
@@ -6,7 +6,15 @@ DEFINITIONS
 	"LibraryStrings.def";
     SET_PREF_MEMOIZE_FUNCTIONS == TRUE;
     "RailML3_CustomGraphs.def";
-    CUSTOM_GRAPH == D4R_customGraph
+
+    inverseDirectedPair(Pair) == prj1(Pair) |-> oppositeDirection(prj2(Pair));
+    oppositeDirection(dir) == IF dir = direction_normal THEN direction_reverse ELSE direction_normal END;
+    elementOfId(Set, eId) == MU( { e | e : Set & eId = MU(e'Id)} )
+CONSTANTS
+	scalingFactorInit, scalingFactorStep
+PROPERTIES
+    {scalingFactorInit, scalingFactorStep} <: REAL
+    & scalingFactorInit > 0.0
 VARIABLES
 	SCALING_FACTOR,
     DISPLAY_BALISES, DISPLAY_BUFFERSTOPS, DISPLAY_BORDERS, DISPLAY_CROSSINGS, DISPLAY_DERAILERS, DISPLAY_OPERATIONALPOINTS, DISPLAY_LEVELCROSSINGS, DISPLAY_SIGNALS, DISPLAY_SWITCHES, DISPLAY_TRAINDETECTIONELEMENTS, DISPLAY_TVDSECTIONS, DISPLAY_NAMES,
@@ -17,7 +25,7 @@ INVARIANT
     & {LANGUAGE, DOT_ENGINE} <: STRING
     & USE_CURVED_SPLINES : BOOL
 INITIALISATION
-	SCALING_FACTOR := 0.004 ||
+	SCALING_FACTOR := scalingFactorInit || // D4R: 0.004, NOR: 0.1
     DISPLAY_BALISES := TRUE ||
 	DISPLAY_BUFFERSTOPS := TRUE ||
 	DISPLAY_BORDERS := TRUE ||
@@ -33,9 +41,9 @@ INITIALISATION
     LANGUAGE := "en" ||
     DOT_ENGINE := "dot" ||
     USE_CURVED_SPLINES := TRUE
-OPERATIONS 
-    increaseScalingFactor = SCALING_FACTOR := SCALING_FACTOR + 0.001;
-    decreaseScalingFactor = SCALING_FACTOR := SCALING_FACTOR - 0.001;
+OPERATIONS
+    increaseScalingFactor = SCALING_FACTOR := SCALING_FACTOR + scalingFactorStep; // D4R: 0.001, NOR: 0.1
+    decreaseScalingFactor = SCALING_FACTOR := SCALING_FACTOR - scalingFactorStep; // D4R: 0.001, NOR: 0.1
     changeDisplayBalises =
         ANY b
         WHERE b /= DISPLAY_BALISES

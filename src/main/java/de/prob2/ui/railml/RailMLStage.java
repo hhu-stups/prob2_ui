@@ -301,16 +301,8 @@ public class RailMLStage extends Stage {
 
 	public void generateMachines() throws Exception {
 
-		String graphMachineName;
-		if (visualisationStrategy == RailMLImportMeta.VisualisationStrategy.D4R) {
-			graphMachineName = "RailML3_D4R_CustomGraph.mch";
-		} else if (visualisationStrategy == RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE) {
-			graphMachineName = "RailML3_NOR_CustomGraph.mch";
-		} else {
-			graphMachineName = "RailML3_DOT_CustomGraph.mch";
-		}
-		URI graphMachine = getClass().getResource(graphMachineName).toURI();
-
+		String graphMachineName = "RailML3_CustomGraph.mch";
+		URI graphMachine = Objects.requireNonNull(getClass().getResource(graphMachineName)).toURI();
 		Api api = injector.getInstance(Api.class);
 
 		if ("jar".equals(graphMachine.getScheme())) {
@@ -361,6 +353,11 @@ public class RailMLStage extends Stage {
 			linkSvg = "FALSE";
 			fullImport = "TRUE";
 		}
+		double scalingFactorInit = 0.004, scalingFactorStep = 0.001;
+		if (visualisationStrategy == RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE) {
+			scalingFactorInit = 0.1;
+			scalingFactorStep = 0.1;
+		}
 
 		if (!Thread.currentThread().isInterrupted()) {
 			State currentState = stateSpace.getRoot()
@@ -373,7 +370,9 @@ public class RailMLStage extends Stage {
 					"  & FULL_IMPORT = " + fullImport + "\n" +
 					"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
 					"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
-					"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"")
+					"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"" +
+				  "  & scalingFactorInit = " + scalingFactorInit +
+					"  & scalingFactorStep = " + scalingFactorStep)
 				.perform("$initialise_machine");
 
 			boolean inv_ok = currentState.isInvariantOk();

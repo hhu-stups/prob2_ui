@@ -210,12 +210,16 @@ INVARIANT
     & IL_signal_states : RailML3_IL_SIGNAL_CONTROLLED --> FIN(RailML3_IL_SIGNAL_GENERIC_ASPECTS)
     & !sig.(sig : dom(IL_signal_states) & aspect_closed : IL_signal_states(sig) => card(IL_signal_states(sig)) = 1) /*@desc "If aspect_closed is active, no other aspect can be shown" */
     & !sig.(sig : dom(IL_signal_states) & aspect_closed /: IL_signal_states(sig) =>
-        #exit.(
-            exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(sig)
-            & RailML3_IL_SIGNAL_CONTROL_SECTIONS(sig)(exit) <: IS_next
-            & dom(dom({ nxt, NXT | NXT = RailML3_IL_SIGNAL_CONTROL_SECTIONS(sig)(exit) & NXT <: IS_next & nxt : ran(NXT) })) /\ union(ran(RS_trainOccupiedLocations)) = {}
-            & RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS(sig)(exit) /\ dom(IL_occupiedTvdSections) = {}
-        )
+        LET cs1 BE cs1 = closure1(IS_next) IN
+            #(exit, sloc_entry, sloc_exit).(
+                exit : RailML3_IL_SIGNAL_END_OF_CONTROL_SECTION(sig)
+                & sloc_entry : RailML3_IS_SPOT_LOCATIONS(sig)
+                & sloc_exit : RailML3_IS_SPOT_LOCATIONS(exit)
+                & sloc_entry |-> sloc_exit : cs1
+                & dom(ran(RailML3_IL_SIGNAL_CONTROL_SECTIONS(sig)(exit))) /\ union(ran(RS_trainOccupiedLocations)) = {}
+                & RailML3_IL_SIGNAL_CONTROL_TVD_SECTIONS(sig)(exit) /\ dom(IL_occupiedTvdSections) = {}
+            )
+        END
     ) /*@desc "movable elements after not closed signal are passable; (current) block after not closed signal is not occupied; tvdSections after not closed signal are not occupied" */
     & IL_noted_signal_states : RailML3_IL_SIGNAL_CONTROLLED +-> FIN(RailML3_IL_SIGNAL_GENERIC_ASPECTS)
     & !sig.(sig : dom(IL_noted_signal_states) & aspect_closed : IL_noted_signal_states(sig) => card(IL_noted_signal_states(sig)) = 1) /*@desc "If aspect_closed is noted, no other aspect can be shown" */
