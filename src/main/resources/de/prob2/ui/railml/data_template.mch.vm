@@ -1,0 +1,25 @@
+/*@generated */
+MACHINE $dataMachineName
+ABSTRACT_CONSTANTS
+	allIdsOfType
+CONCRETE_CONSTANTS
+	all_ids, railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1#if(!$VARS_AS_TYPED_STRING_railML_identifiers.equals("")),
+	$VARS_AS_TYPED_STRING_railML_identifiers#end#if(!$data.equals("")),
+	data
+#end
+PROPERTIES
+	allIdsOfType = %type.( type : STRING | all_ids~[{type} * ran(ran(all_ids))] )
+	& railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1 = closure1(RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS)
+    & all_ids = $all_ids
+    & $VARS_AS_TYPED_STRING_railML_contents
+
+	// Use the following line if not imported data is needed for own validation rules.
+	// (example: e : ran(data) & e'element = "netElement" & e'attributes("id") = "test_id" & e'attributes("length") = "500.0" & ... ))
+#if(!$data.equals("")),
+	& data = $data
+#end
+#if(!$SETS_railML.equals(""))
+SETS
+	$SETS_railML
+#end
+END
