@@ -224,10 +224,8 @@ public class FullValueStage extends Stage {
 	}
 
 	public void bindCheckboxes(BooleanProperty prettifyProperty, BooleanProperty showFullValueProperty) {
-		this.prettifyCheckBox.setSelected(prettifyProperty.get());
-		prettifyProperty.bind(this.prettifyCheckBox.selectedProperty());
-		this.showFullValueCheckBox.setSelected(showFullValueProperty.get());
-		showFullValueProperty.bind(this.showFullValueCheckBox.selectedProperty());
+		this.prettifyCheckBox.selectedProperty().bindBidirectional(prettifyProperty);
+		this.showFullValueCheckBox.selectedProperty().bindBidirectional(showFullValueProperty);
 	}
 
 	public ObjectProperty<StateItem> valueProperty() {
