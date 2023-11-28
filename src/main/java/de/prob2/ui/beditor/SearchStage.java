@@ -183,6 +183,11 @@ public class SearchStage extends Stage {
 
 	@FXML
 	private void handleClose() {
+		this.close();
+	}
+
+	@Override
+	public void close() {
 		if (this.bEditorView != null) {
 			this.bEditorView.getEditor().setSearchResult(null);
 		}
@@ -190,7 +195,8 @@ public class SearchStage extends Stage {
 		this.lblResults.setText("");
 		this.gotoStartButton.disableProperty().unbind();
 		this.bEditorView = null;
-		this.close();
+
+		super.close();
 	}
 
 	private ErrorItem.Location buildSearchResultLocation(int start, int end) {
