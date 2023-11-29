@@ -1,0 +1,69 @@
+DEFINITIONS
+    //-----------------------------------------------------------------------------
+    // RailML 3: VISUALIZATIONS
+    // descriptions taken from https://wiki3.railml.org/wiki/Visualizations:visualizations
+    //-----------------------------------------------------------------------------
+
+    RailML3_VIS_generic_Type ==
+        struct(
+            recId : NATURAL1,
+            pId : NATURAL,
+            xmlLineNumber : NATURAL1,
+            type : RailML3_VIS_GENERIC_TYPES
+        );
+
+    // 	container element for infrastructure visualizations
+    RailML3_VIS_infrastructureVisualization_Type == 
+        struct(
+            recId : NATURAL1,
+            pId : NATURAL1,
+            xmlLineNumber : NATURAL1,
+
+            // attributes:
+            Id : FIN(union(allIdsOfType[{"infrastructureVisualization", "visualization"}])), // obligatory
+            positioningSystemRef : FIN(dom(all_ids)) // optional
+        );
+
+    // element projection as spot location (1 coordinate)
+    RailML3_VIS_spotElementProjection_Type == 
+        struct(
+            recId : NATURAL1,
+            pId : NATURAL1,
+            xmlLineNumber : NATURAL1,
+
+            // attributes:
+            Id : FIN(allIdsOfType("spotElementProjection")), // obligatory
+            refersToElement : FIN(dom(all_ids)), // obligatory
+
+            // children:
+            coordinate : FIN(RailML3_VIS_coordinate_Type) // (1..1)
+            // uses Symbol (0..1)
+        );
+
+    // element projection as linear location (min 2 coordinates)
+    RailML3_VIS_linearElementProjection_Type == 
+        struct(
+            recId : NATURAL1,
+            pId : NATURAL1,
+            xmlLineNumber : NATURAL1,
+
+            // attributes:
+            Id : FIN(allIdsOfType("linearElementProjection")), // obligatory
+            refersToElement : FIN(dom(all_ids)), // obligatory
+
+            // children:
+            coordinates : FIN(RailML3_VIS_coordinate_Type) // (2..*)
+            // uses Symbol (0..1)
+        );
+
+    RailML3_VIS_coordinate_Type == 
+        struct(
+            recId : NATURAL1,
+            pId : NATURAL1,
+            xmlLineNumber : NATURAL1,
+
+            // attributes:
+            x : FIN(STRING), // obligatory
+            y : FIN(STRING), // optional
+            z : FIN(STRING) // optional
+        );

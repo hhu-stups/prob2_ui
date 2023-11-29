@@ -5,7 +5,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.*;
+import de.be4.classicalb.core.parser.rules.AbstractOperation;
+import de.be4.classicalb.core.parser.rules.FunctionOperation;
 import de.prob.exception.ProBError;
+import de.prob.model.brules.RulesChecker;
+import de.prob.model.brules.RulesModel;
 import de.prob.scripting.Api;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -19,21 +23,28 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.model.SimulationModel;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.net.URI;
-import java.nio.file.*;
-import java.util.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static de.prob2.ui.railml.RailMLHelper.replaceOldFile;
@@ -63,19 +74,19 @@ public class RailMLStage extends Stage {
 	@FXML
 	private CheckBox validationMachineCheckbox;
 	private boolean generateAnimation, generateValidation, generateSVG;
+	@FXML
+	public VBox progressBox;
+	@FXML
+	public Label progressLabel;
+	@FXML
+	public Label progressOperation;
+	@FXML
+	public ProgressBar progressBar;
+
 
 	@FXML
 	private ChoiceBox<RailMLImportMeta.VisualisationStrategy> visualisationStrategyChoiceBox;
 	private RailMLImportMeta.VisualisationStrategy visualisationStrategy;
-
-	@FXML
-	private HBox progressInfo;
-	@FXML
-	private ProgressBar progressBar;
-	private final SimpleDoubleProperty progress = new SimpleDoubleProperty(0.0);
-	@FXML
-	private Label currentOp;
-	private final SimpleStringProperty currentOperation = new SimpleStringProperty("");
 
 	private Path railMLpath, generationPath;
 
@@ -178,6 +189,9 @@ public class RailMLStage extends Stage {
 		//progressBar.setVisible(false);
 		//progressBar.progressProperty().bind(progress);
 		//currentOp.textProperty().bind(currentOperation);
+		progressBox.visibleProperty().bind(updater.runningProperty());
+		progressBox.managedProperty().bind(progressBox.visibleProperty());
+
 		Path railML = railMLImportMeta.getPath();
 		if(railML != null) {
 			setFileNames(railML, MoreFiles.getNameWithoutExtension(railML));
@@ -301,7 +315,7 @@ public class RailMLStage extends Stage {
 
 	public void generateMachines() throws Exception {
 
-		String graphMachineName = "RailML3_CustomGraph.mch";
+		String graphMachineName = "rmch/RailML3_validation.rmch";
 		URI graphMachine = Objects.requireNonNull(getClass().getResource(graphMachineName)).toURI();
 		Api api = injector.getInstance(Api.class);
 
@@ -327,7 +341,7 @@ public class RailMLStage extends Stage {
 			Files.delete(tempImportMachine);
 			Files.delete(tempValidationMachine);
 		} else {
-			stateSpace = api.b_load(Paths.get(graphMachine).toString());
+			stateSpace = api.brules_load(Paths.get(graphMachine).toString());
 		}
 
 		stateSpace.addWarningListener(warnings -> {
@@ -361,7 +375,7 @@ public class RailMLStage extends Stage {
 
 		if (!Thread.currentThread().isInterrupted()) {
 			State currentState = stateSpace.getRoot()
-				.perform("$setup_constants", "file = \"" + railMLpath + "\"" +
+				.perform("$setup_constants", "file = \"" + railMLpath + "\"" /*+
 					"  & outputDataFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
 					"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
 					"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
@@ -371,9 +385,33 @@ public class RailMLStage extends Stage {
 					"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
 					"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
 					"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"" +
-				  "  & scalingFactorInit = " + scalingFactorInit +
-					"  & scalingFactorStep = " + scalingFactorStep)
+					"  & scalingFactorInit = " + scalingFactorInit +
+					"  & scalingFactorStep = " + scalingFactorStep*/)
 				.perform("$initialise_machine");
+
+			RulesChecker rulesChecker = new RulesChecker(stateSpace.getTrace(currentState.getId()));
+			rulesChecker.init();
+			RulesModel rulesModel = (RulesModel) stateSpace.getModel();
+			int totalNrOfOperations = rulesModel.getRulesProject().getOperationsMap().values().
+				stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
+			int nrExecutedOperations = 0;
+			// determine all operations that can be executed in this state
+			Set<AbstractOperation> executableOperations = rulesChecker.getExecutableOperations();
+			while (!executableOperations.isEmpty()) {
+				for (AbstractOperation op : executableOperations) {
+					rulesChecker.executeOperation(op);
+					nrExecutedOperations++;
+					int finalNrExecutedOperations = nrExecutedOperations;
+					Platform.runLater(() -> {
+						ProgressBar progressBar = this.progressBar;
+						progressBar.setProgress((double) finalNrExecutedOperations / totalNrOfOperations);
+						this.progressOperation.setText(op.getName());
+						this.progressLabel.setText(" (" + finalNrExecutedOperations + "/" + totalNrOfOperations + ")");
+					});
+				}
+				executableOperations = rulesChecker.getExecutableOperations();
+			}
+			currentState = rulesChecker.getCurrentTrace().getCurrentState();
 
 			boolean inv_ok = currentState.isInvariantOk();
 			boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");

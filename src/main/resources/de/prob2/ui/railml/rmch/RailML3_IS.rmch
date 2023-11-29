@@ -1,0 +1,2805 @@
+/*
+RailML3 Infrastructure Rules
+------------------------------
+Reads RailML3 infrastructure from XML "data" in "RailML_readFile.rmch" and creates a new set per element type by a computation.
+The type of the set is specific for each element type. Types are specified in "RailML3_IS_Types.def".
+Childs with finite cardinality (e.g. (0..1), (1..1) or (0..2)) or properties which can be listed easily (e.g. string refs in a set (0..*))
+are included in their parent; others stored as types separatly.
+Necessary rules that must hold for valid RailML data are checked on this sets. They only check the pure railML schematic rules;
+specific constraints for B are validated in RailML_validation.mch.
+Sets for animation are created after successful validation of the data.
+
+The general procedure for each element type is:
+    - Computation "set_xyz":
+        Search data for all elements of type "xyz" -> Compute RailML_xyz of B-type RailML3_IS_xyz_Type to guarantee correct types of attributes
+    - Rule is_valid_xyz:
+        Validation of the correct cardinality of the elements themselves and of the attributes
+        Validate whether the element xyz has the correct parent element; if successful, xyz is fully validated    
+    - Computation(s) set_IS_XYZ(_IDS):
+        Convert selected data into a structure that is used for animation.
+    - Rule validate_xyz
+        Semantic validation rules are implemented here.
+    - Rule warnings_xyz
+        When a default value was set for a not available attribute and the default value is not part of the railML schema a warning should be prompted.
+        Additional semantical rules can also be written as a warning if they are not crucial for the functioning of the model.
+*/
+RULES_MACHINE RailML3_IS
+REFERENCES RailML3_readFile
+SETS
+    RailML3_IS_GENERIC_TYPES = {
+        topology, netElements, netRelations, netTravelPaths, networks,
+        functionalInfrastructure, balises, baliseGroups, borders, bufferStops, crossings, derailersIS, operationalPoints, signalsIS, speeds, switchesIS, tracks, trainDetectionElements,
+        geometry, geometryPoints, horizontalCurves, gradientCurves
+    };
+
+    // Attribute Types:
+    RailML3_IS_DIRECTION = {direction_both, direction_reverse, direction_normal};
+    RailML3_IS_MILEAGE_DIRECTIONS = {mileageDirection_nominal, mileageDirection_reverse};
+    RailML3_IS_NET_RELATION_NAVIGABILITY = {navigability_AB, navigability_BA, navigability_Both, navigability_None};
+    RailML3_IS_LEVEL_DESCRIPTIONLEVEL = {descriptionLevel_Micro, descriptionLevel_Meso, descriptionLevel_Macro};
+    RailML3_IS_BALISE_TYPES = {balise_controlled, balise_fixed, balise_transparent};
+    RailML3_IS_BALISE_GROUP_TYPES = {baliseGroup_fixed, baliseGroup_infill, baliseGroup_signal};
+    RailML3_IS_BALISE_GROUP_APPLICATION_TYPES = {applicationType_ETCS, applicationType_GNT, applicationType_NTC, `applicationType_TBL1+`, applicationType_ZBS};
+    RailML3_IS_BALISE_GROUP_COVERAGES = {coverage_both, coverage_none, coverage_physical, coverage_virtual};
+    RailML3_IS_BALISE_GROUP_CONNECTION_TYPES = {connection_physical, connection_logical};
+    RailML3_IS_BALISE_GROUP_FUNCTIONAL_TYPES = {functionalType_announcementLevelTransition, functionalType_announcementTemporarySpeedRestriction, functionalType_border,
+        functionalType_handover, functionalType_infill, funtionalType_networkRegistration, funtionalType_normal, funtionalType_odometryPurposeOnly, 
+        funtionalType_revocationTemporarySpeedSection, funtionalType_sessionEstablishment, funtionalType_sessionTermination, funtionalType_signal,
+        funtionalType_stopIfInShunting, funtionalType_trackAheadFree, funtionalType_stopIfInStaffResponsible};
+    RailML3_IS_BALISE_GROUP_LINK_REACTIONS = {linkReaction_applyServiceBrake, linkReaction_noReaction, linkReaction_trainTrip};
+    RailML3_IS_BORDER_TYPES = {border_area, border_country, border_infrastructureManager, border_state, border_station, border_tariff, `border_other:model`};
+    RailML3_IS_BUFFERSTOP_TYPES = {bufferStop_brakingBufferStop, bufferStop_fixedBufferStop, bufferStop_headRamp, bufferStop_sleeperCross};    
+    RailML3_IS_DERAILER_TYPES = {derailer_doubleDerailer, derailer_singleDerailer};
+    RailML3_IS_DERAIL_SIDES = {derailSide_left, derailSide_right};
+    RailML3_IS_EUROBALISE_DUPLICATE_TYPES = {duplicate_no, duplicate_ofNextBalise, duplicate_ofPreviousBalise};
+    RailML3_IS_HORIZONTAL_CURVE_TYPES = {horizontalCurve_arc, horizontalCurve_clothoide, horizontalCurve_cosinusioide, horizontalCurve_cubicParabola,
+        horizontalCurve_curveBloss, horizontalCurve_curveWiener, horizontalCurve_doucine, horizontalCurve_sinusoide, horizontalCurve_straight};
+    RailML3_IS_GRADIENT_CURVE_TYPES = {gradientCurve_arc, gradientCurve_mixed, gradientCurve_straight};
+    RailML3_IS_SIGNAL_POSITION_AT_TRACK_TYPES = {positionAtTrack_above, positionAtTrack_left, positionAtTrack_right};
+    RailML3_IS_SIGNAL_TYPES = {signal_board, signal_light, signal_pole, signal_semaphore, signal_virtual};
+    RailML3_IS_SPEED_SECTION_REFERS_TO_TRAIN_TYPES = {refersToTrain_endOfTrain, refersToTrain_headOfTrain, refersToTrain_midOfTrain};
+    RailML3_IS_SWITCH_COURSES = {course_left, course_right};
+    RailML3_IS_SWITCH_TYPES = {switch_doubleSwitchCrossing, switch_switchCrossingPart, switch_insideCurvedSwitch, switch_ordinarySwitch, switch_outsideCurvedSwitch, switch_singleSwitchCrossing};
+    RailML3_IS_TRACK_TYPES = {track_mainTrack, track_secondaryTrack, track_sidingTrack, track_connectingTrack};
+    RailML3_IS_TRAIN_DETECTION_ELEMENT_TYPES = {trainDetectionElement_axleCounter, trainDetectionElement_axleCountingCircuit, trainDetectionElement_clearancePoint,
+        trainDetectionElement_insulatedRailJoint, trainDetectionElement_trackCircuit, trainDetectionElement_virtualClearancePoint};
+    RailML3_IS_TRAIN_DETECTION_ELEMENT_DETECTED_OBJECTS = {detectedObject_axle, detectedObject_endOfTrain, detectedObject_train, detectedObject_wheel}
+DEFINITIONS
+    "CHOOSE.def";
+    "LibraryMeta.def";
+    "LibraryReals.def";
+    "LibraryStrings.def";
+    "SORT.def";
+    "RailML3_IS_Types.def";
+
+    ignoreDirection(Relation) == dom({ r, cr | cr : Relation & r = prj1(prj1(cr)) |-> prj1(prj2(cr)) });
+    inverseDirectedRelation(Relation) == dom({ ir, r | r : Relation & ir = prj1(prj2(r)) |-> oppositeDirection(prj2(prj2(r))) |-> (prj1(prj1(r)) |-> oppositeDirection(prj2(prj1(r)))) });
+    oppositeDirection(dir) == IF dir = direction_normal THEN direction_reverse ELSE direction_normal END;
+
+    genericISType(TypeAsString) == 
+        dom({e, e_g | e_g : elementsOfType(TypeAsString)
+                    & e = rec(
+                            recId: e_g'recId,
+                            pId: e_g'pId,
+                            xmlLineNumber: STRING_TO_INT(e_g'meta("xmlLineNumber")),
+                            type: TYPED_STRING_TO_ENUM(RailML3_IS_GENERIC_TYPES, TypeAsString)
+                        ) });
+
+    errorCard(TypeAsString, Set, MinNr, MaxNr, ActualNr) == 
+        STRING_FORMAT("[Lines ~w]: expected min. ~w and max. ~w elements of type '"^TypeAsString^"', but were ~w", dom({ nr, e | e : Set & nr = e'xmlLineNumber }), MinNr, MaxNr, ActualNr);
+    errorCardOnlyLowerBound(TypeAsString, Set, MinNr, ActualNr) == 
+        STRING_FORMAT("[Lines ~w]: expected min. ~w elements of type '"^TypeAsString^"', but were ~w", dom({ nr, e | e : Set & nr = e'xmlLineNumber }), MinNr, ActualNr);
+    errorAttribute(AttrNameAsString, TypeAsString, lineNr) ==
+        STRING_FORMAT("[Line ~w]: expected obligatory attribute '"^AttrNameAsString^"' for element '"^TypeAsString^"' is missing", lineNr);
+    errorParent(TypeAsString, ParentTypeAsString, lineNr) == 
+        STRING_FORMAT("[Line ~w]: expected parent of type '"^ParentTypeAsString^"' for type '"^TypeAsString^"'", lineNr);
+    errorParentMultipleTypes(TypeAsString, SetOfParentTypesAsString, lineNr) == 
+        STRING_FORMAT("[Line ~w]: expected parent of types '~w' for type '"^TypeAsString^"'", lineNr, SetOfParentTypesAsString);
+    errorValue(TypeAsString, ExpectedValueAsString, ValueAsString, lineNr) == 
+        STRING_FORMAT("[Line ~w]: expected one of the values "^ExpectedValueAsString^" for attribute '"^TypeAsString^"', but was '"^ValueAsString^"'", lineNr);
+    errorReference(Attribute, ActualValue, ExpectedType, lineNr) == 
+        STRING_FORMAT("[Line ~w]: Attribute '"^Attribute^"' must be an ID referencing to '"^ExpectedType^"', but was '"^ActualValue^"'", lineNr);
+    warningDefaultValue(AttrNameAsString, DefaultValueAsString, lineNr) ==
+        STRING_FORMAT("[Line ~w]: attribute '"^AttrNameAsString^"' not specified - set to default value '"^DefaultValueAsString^"'", lineNr);
+OPERATIONS
+    COMPUTATION set_infrastructure
+    DEPENDS_ON_COMPUTATION read_file
+    BODY
+        DEFINE RailML3_infrastructure
+            TYPE FIN(RailML3_infrastructure_Type)
+            VALUE dom({e, e_is | e_is : elementsOfType("infrastructure")
+                & e = rec(recId:e_is'recId, pId:e_is'pId, xmlLineNumber:STRING_TO_INT(e_is'meta("xmlLineNumber")), Id:e_is'attributes[{"id"}]) })
+        END
+    END;
+    RULE is_valid_infrastructure
+    DEPENDS_ON_COMPUTATION set_infrastructure
+    BODY
+        RULE_FAIL c
+            WHEN c = card(RailML3_infrastructure) & c /= 1
+        COUNTEREXAMPLE 
+            errorCard("infrastructure", RailML3_infrastructure, 1, 1, c)
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_infrastructure & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "infrastructure", e'xmlLineNumber)
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_infrastructure & e'pId /= 1
+        COUNTEREXAMPLE 
+            errorParent("infrastructure", "railML", e'xmlLineNumber)
+        END
+    END;
+
+    // BEGIN TOPOLOGY
+    COMPUTATION set_topology
+    DEPENDS_ON_RULE is_valid_infrastructure
+    BODY
+        DEFINE RailML3_topology
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("topology")
+        END
+    END;
+    RULE is_valid_topology
+    DEPENDS_ON_COMPUTATION set_topology
+    BODY
+        RULE_FAIL c
+            WHEN c = card(RailML3_topology) & c /= 1
+        COUNTEREXAMPLE 
+            errorCard("topology", RailML3_topology, 1, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_topology & card(RailML3_infrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_infrastructure)'recId
+        COUNTEREXAMPLE 
+            errorParent("topology", "infrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    // BEGIN NET_ELEMENTS
+    COMPUTATION set_netElements
+    DEPENDS_ON_RULE is_valid_topology
+    BODY
+        DEFINE RailML3_netElements
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("netElements")
+        END
+    END;
+    RULE is_valid_netElements
+    DEPENDS_ON_COMPUTATION set_netElements
+    BODY
+        RULE_FAIL c
+            WHEN c = card(RailML3_netElements) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("netElements", RailML3_netElements, 1, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_netElements & card(RailML3_topology) = 1
+            EXPECT e'pId = MU_WD(RailML3_topology)'recId
+        COUNTEREXAMPLE 
+            errorParent("netElements", "topology", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_netElement
+    DEPENDS_ON_RULE is_valid_netElements
+    BODY
+        DEFINE RailML3_netElement
+            TYPE FIN(RailML3_IS_netElement_Type)
+            VALUE dom({ne, e_ne | e_ne : elementsOfType("netElement") 
+                & ne = rec(
+                        recId: e_ne'recId,
+                        pId: e_ne'pId,
+                        xmlLineNumber: STRING_TO_INT(e_ne'meta("xmlLineNumber")),
+                        Id: e_ne'attributes[{"id"}],
+                        length: IF "length" : dom(e_ne'attributes) & STRING_IS_NUMBER(e_ne'attributes("length")) THEN STRING_TO_REAL(e_ne'attributes("length")) ELSE -1.0 END,
+                        associatedPositioningSystem:
+                            dom({ aps, e_aps | e_aps : childsOfElementType("associatedPositioningSystem", e_ne'recId)
+                                & aps = rec(
+                                    xmlLineNumber : STRING_TO_INT(e_aps'meta("xmlLineNumber")),
+                                    Id : e_aps'attributes[{"id"}],
+                                    intrinsicCoordinate :
+                                        dom({ ic, e_ic | e_ic : childsOfElementType("intrinsicCoordinate", e_aps'recId)
+                                            & ic = rec(
+                                                xmlLineNumber : STRING_TO_INT(e_ic'meta("xmlLineNumber")),
+                                                Id : e_ic'attributes[{"id"}],
+                                                intrinsicCoord : IF "intrinsicCoord" : dom(e_ic'attributes) & STRING_IS_NUMBER(e_ic'attributes("intrinsicCoord")) THEN {STRING_TO_REAL(e_ic'attributes("intrinsicCoord"))} ELSE {} END
+                                        ) })
+                                )
+                            })
+                    ) })
+        END
+    END;
+    RULE is_valid_netElement
+    DEPENDS_ON_COMPUTATION set_netElement
+    BODY
+        RULE_FAIL c
+        WHEN c = card(RailML3_netElement) & c = 0
+        COUNTEREXAMPLE
+            errorCardOnlyLowerBound("netElement", RailML3_netElements, 1, c)
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_netElement & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "netElement", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_ne, c
+            WHEN e_ne : RailML3_netElement & c = card(e_ne'associatedPositioningSystem) & c = 0
+        COUNTEREXAMPLE
+            errorCardOnlyLowerBound("associatedPositioningSystem", {e_ne}, 1, c)
+        END;
+        RULE_FAIL e_ne, e_aps
+            WHEN e_ne : RailML3_netElement & e_aps : e_ne'associatedPositioningSystem & (card(e_aps'Id) /= 1 or card(e_aps'Id) = 1 & MU_WD(e_aps'Id) = "")
+        COUNTEREXAMPLE
+            errorAttribute("id", "associatedPositioningSystem", e_aps'xmlLineNumber)
+        END;
+        RULE_FAIL e_ne, e_aps, c
+            WHEN e_ne : RailML3_netElement & e_aps : e_ne'associatedPositioningSystem & c = card(e_aps'intrinsicCoordinate) & c = 0
+        COUNTEREXAMPLE
+            errorCardOnlyLowerBound("intrinsicCoordinate", {e_aps}, 1, c)
+        END;
+        RULE_FAIL e_ne, e_aps, e_ic
+            WHEN e_ne : RailML3_netElement & e_aps : e_ne'associatedPositioningSystem & e_ic : e_aps'intrinsicCoordinate & (card(e_aps'Id) /= 1 or card(e_aps'Id) = 1 & MU_WD(e_aps'Id) = "")
+        COUNTEREXAMPLE
+            errorAttribute("id", "intrinsicCoordinate", e_ic'xmlLineNumber)
+        END;
+        RULE_FAIL e_ne, e_aps, e_ic
+            WHEN e_ne : RailML3_netElement & e_aps : e_ne'associatedPositioningSystem & e_ic : e_aps'intrinsicCoordinate & card(e_ic'intrinsicCoord) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("intrinsicCoord", "intrinsicCoordinate", e_ic'xmlLineNumber)
+        END;
+        // valid parent:
+        RULE_FORALL e
+            WHERE e : RailML3_netElement & card(RailML3_netElements) = 1
+            EXPECT e'pId = MU_WD(RailML3_netElements)'recId
+        COUNTEREXAMPLE
+            errorParent("netElement", "netElements", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_NET_ELEMENT
+    DEPENDS_ON_RULE is_valid_netElement
+    BODY
+        DEFINE RailML3_IS_NET_ELEMENT_LENGTHS
+            TYPE allIdsOfType("netElement") --> REAL
+            VALUE { i,l | #e.(e : RailML3_netElement & i = MU_WD(e'Id) & l = e'length) }
+        END;
+        DEFINE RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES
+            TYPE allIdsOfType("netElement") +-> (allIdsOfType("associatedPositioningSystem") +-> (allIdsOfType("intrinsicCoordinate") <-> REAL))
+            VALUE
+                fnc({ i_ne, iCs | #(e_ne, e_aps).(i_ne : allIdsOfType("netElement") & e_ne : RailML3_netElement & MU_WD(e_ne'Id) = i_ne & e_aps : e_ne'associatedPositioningSystem
+                    & iCs = MU_WD(e_aps'Id) |-> { i_iC, iC | #e_iC.(e_iC : e_aps'intrinsicCoordinate & i_iC = MU_WD(e_iC'Id) & iC = MU_WD(e_iC'intrinsicCoord) )}
+                )})
+        END;
+        DEFINE RailML3_IS_NET_ELEMENT_ASSOCIATED_POSITIONING_SYSTEM
+            TYPE allIdsOfType("netElement") +-> (allIdsOfType("associatedPositioningSystem") +-> seq(REAL * allIdsOfType("intrinsicCoordinate")) )
+            VALUE fnc({ i_ne, aps | #i_aps.(i_ne : allIdsOfType("netElement") & i_aps : dom(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES(i_ne)) & aps = i_aps |-> SORT(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES(i_ne)(i_aps)~))})
+        END
+    END;
+
+    RULE warnings_netElement
+    DEPENDS_ON_COMPUTATION set_NET_ELEMENT
+    ERROR_TYPES 2
+    BODY
+        RULE_FAIL WHEN bfalse COUNTEREXAMPLE "" END; // to implement error type 1
+        RULE_FAIL e_ne, i_ne, i_aps, duplic_ic
+            WHEN e_ne : RailML3_netElement & i_ne = MU_WD(e_ne'Id) & i_ne : dom(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES) & i_aps : dom(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES(i_ne)) & #(i_ic1,i_ic2).({i_ic1 |-> duplic_ic, i_ic2 |-> duplic_ic} <: union(RailML3_IS_NET_ELEMENT_INTRINSIC_COORDINATES(i_ne)[{i_aps}]) & i_ic1 /= i_ic2)
+        ERROR_TYPE 2
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^i_ne^"']: intrinsicCoordinate ~w specified multiple times for associatedPositioningSystem '"^i_aps^"'", e_ne'xmlLineNumber, duplic_ic)
+        END
+    END;
+    // END NET_ELEMENTS
+
+    // BEGIN NET_RELATIONS
+    COMPUTATION set_netRelations
+    DEPENDS_ON_RULE is_valid_topology
+    BODY
+        DEFINE RailML3_netRelations
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("netRelations")
+        END
+    END;
+    RULE is_valid_netRelations
+    DEPENDS_ON_COMPUTATION set_netRelations
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_netRelations) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("netRelations", RailML3_netRelations, 1, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_netRelations & card(RailML3_topology) = 1
+            EXPECT e'pId = MU_WD(RailML3_topology)'recId
+        COUNTEREXAMPLE 
+            errorParent("netRelations", "topology", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_netRelation
+    DEPENDS_ON_RULE is_valid_netRelations
+    DEPENDS_ON_COMPUTATION set_NET_ELEMENT
+    BODY
+        DEFINE RailML3_netRelation
+            TYPE FIN(RailML3_IS_netRelation_Type)
+            VALUE dom({e, e_nr | e_nr : elementsOfType("netRelation")
+                & e = rec(
+                        recId: e_nr'recId,
+                        pId: e_nr'pId,                        
+                        xmlLineNumber: STRING_TO_INT(e_nr'meta("xmlLineNumber")),
+                        Id: e_nr'attributes[{"id"}],
+                        navigability: 
+                            IF "navigability" : dom(e_nr'attributes)
+                                THEN TYPED_STRING_TO_ENUM(RailML3_IS_NET_RELATION_NAVIGABILITY, "navigability_"^e_nr'attributes("navigability"))
+                                ELSE navigability_Both
+                            END,
+                        positionOnA: IF "positionOnA" : dom(e_nr'attributes) & STRING_IS_INT(e_nr'attributes("positionOnA")) THEN STRING_TO_REAL(e_nr'attributes("positionOnA")) ELSE 1.0 END,
+                        positionOnB: IF "positionOnB" : dom(e_nr'attributes) & STRING_IS_INT(e_nr'attributes("positionOnB")) THEN STRING_TO_REAL(e_nr'attributes("positionOnB")) ELSE 0.0 END,
+                        elementA: dom({ i_A, e_A | e_A : childsOfElementType("elementA", e_nr'recId) & i_A : e_A'attributes[{"ref"}] }),
+                        elementB: dom({ i_B, e_B | e_B : childsOfElementType("elementB", e_nr'recId) & i_B : e_B'attributes[{"ref"}] })
+                    ) })
+        END
+    END;
+    RULE is_valid_netRelation
+    DEPENDS_ON_COMPUTATION set_netRelation
+    BODY
+        RULE_FAIL c
+        WHEN c = card(RailML3_netRelation) & c = 0
+        COUNTEREXAMPLE
+            errorCardOnlyLowerBound("netRelation", RailML3_netRelations, 1, c)
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_netRelation & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "netRelation", e'xmlLineNumber)
+        END;
+        RULE_FAIL e, posA
+            WHEN e : RailML3_netRelation & posA = e'positionOnA & posA /: {0.0,1.0}
+        COUNTEREXAMPLE
+            errorValue("positionOnA", "[0,1]", TO_STRING(ceiling(posA)), e'xmlLineNumber)
+        END;
+        RULE_FAIL e, posB
+            WHEN e : RailML3_netRelation & posB = e'positionOnB & posB /: {0.0,1.0}
+        COUNTEREXAMPLE
+            errorValue("positionOnB", "[0,1]", TO_STRING(ceiling(posB)), e'xmlLineNumber)
+        END;
+        RULE_FAIL e_nr, c
+            WHEN e_nr : RailML3_netRelation & c = card(e_nr'elementA) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("elementA", {e_nr}, 1, 1, c)
+        END;
+        RULE_FAIL e_nr, e_data
+            WHEN e_nr : RailML3_netRelation & e_data : childsOfElementType("elementA", e_nr'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "elementA", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_nr, e_A
+            WHEN e_nr : RailML3_netRelation & card(e_nr'elementA) = 1 & e_A = MU_WD(e_nr'elementA) & e_A /: allIdsOfType("netElement")
+        COUNTEREXAMPLE
+            errorReference("ref@elementA", e_A, "netElement", e_nr'xmlLineNumber)
+        END;
+        RULE_FAIL e_nr, c
+            WHEN e_nr : RailML3_netRelation & c = card(e_nr'elementB) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("elementB", {e_nr}, 1, 1, c)
+        END;
+        RULE_FAIL e_nr, e_B
+            WHEN e_nr : RailML3_netRelation & card(e_nr'elementB) = 1 & e_B = MU_WD(e_nr'elementB) & e_B /: allIdsOfType("netElement")
+        COUNTEREXAMPLE
+            errorReference("ref@elementB", e_B, "netElement", e_nr'xmlLineNumber)
+        END;
+        RULE_FAIL e_nr, e_data
+            WHEN e_nr : RailML3_netRelation & e_data : childsOfElementType("elementB", e_nr'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "elementB", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_netRelation & card(RailML3_netRelations) = 1
+            EXPECT e'pId = MU_WD(RailML3_netRelations)'recId
+        COUNTEREXAMPLE
+            errorParent("netRelation", "netRelations", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_NET_RELATION
+    DEPENDS_ON_RULE is_valid_netRelation
+    DEPENDS_ON_COMPUTATION set_NET_ELEMENT
+    BODY
+        DEFINE RailML3_IS_NET_RELATION
+            TYPE (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION) <-> (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION)
+            VALUE
+                // direction_normal:
+                dom({ r, e_nr | e_nr : RailML3_netRelation & r = (MU_WD(e_nr'elementA), e_nr'positionOnA, direction_normal) |-> (MU_WD(e_nr'elementB), e_nr'positionOnB, direction_normal) & e_nr'positionOnA = 1.0 & e_nr'positionOnB = 0.0 & (e_nr'navigability = navigability_AB or e_nr'navigability = navigability_Both) })
+                \/
+                dom({ r, e_nr | e_nr : RailML3_netRelation & r = (MU_WD(e_nr'elementB), e_nr'positionOnB, direction_normal) |-> (MU_WD(e_nr'elementA), e_nr'positionOnA, direction_normal) & e_nr'positionOnA = 0.0 & e_nr'positionOnB = 1.0 & (e_nr'navigability = navigability_BA or e_nr'navigability = navigability_Both) })
+                \/
+                // direction_reverse:
+                dom({ r, e_nr | e_nr : RailML3_netRelation & r = (MU_WD(e_nr'elementA), e_nr'positionOnA, direction_reverse) |-> (MU_WD(e_nr'elementB), e_nr'positionOnB, direction_reverse) & e_nr'positionOnA = 0.0 & e_nr'positionOnB = 1.0 & (e_nr'navigability = navigability_AB or e_nr'navigability = navigability_Both) })
+                \/
+                dom({ r, e_nr | e_nr : RailML3_netRelation & r = (MU_WD(e_nr'elementB), e_nr'positionOnB, direction_reverse) |-> (MU_WD(e_nr'elementA), e_nr'positionOnA, direction_reverse) & e_nr'positionOnA = 1.0 & e_nr'positionOnB = 0.0 & (e_nr'navigability = navigability_BA or e_nr'navigability = navigability_Both) })
+                \/
+                // direction change from reverse to normal:
+                dom({ r, e_nr | e_nr : RailML3_netRelation & r = (MU_WD(e_nr'elementA), e_nr'positionOnA, direction_reverse) |-> (MU_WD(e_nr'elementB), e_nr'positionOnB, direction_normal) & e_nr'positionOnA = 0.0 & e_nr'positionOnB = 0.0 & (e_nr'navigability = navigability_AB or e_nr'navigability = navigability_Both) })
+                \/
+                dom({ r, e_nr | e_nr : RailML3_netRelation & r = (MU_WD(e_nr'elementB), e_nr'positionOnB, direction_reverse) |-> (MU_WD(e_nr'elementA), e_nr'positionOnA, direction_normal) & e_nr'positionOnA = 0.0 & e_nr'positionOnB = 0.0 & (e_nr'navigability = navigability_BA or e_nr'navigability = navigability_Both) })
+                \/
+                // direction change from normal to reverse:
+                dom({ r, e_nr | e_nr : RailML3_netRelation & r = (MU_WD(e_nr'elementA), e_nr'positionOnA, direction_normal) |-> (MU_WD(e_nr'elementB), e_nr'positionOnB, direction_reverse) & e_nr'positionOnA = 1.0 & e_nr'positionOnB = 1.0 & (e_nr'navigability = navigability_AB or e_nr'navigability = navigability_Both) })
+                \/
+                dom({ r, e_nr | e_nr : RailML3_netRelation & r = (MU_WD(e_nr'elementB), e_nr'positionOnB, direction_normal) |-> (MU_WD(e_nr'elementA), e_nr'positionOnA, direction_reverse) & e_nr'positionOnA = 1.0 & e_nr'positionOnB = 1.0 & (e_nr'navigability = navigability_BA or e_nr'navigability = navigability_Both) })            
+        END;
+        DEFINE RailML3_IS_NO_NET_RELATION
+            TYPE allIdsOfType("netRelation") +-> FIN((allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION) * (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION))
+            VALUE fnc({ i_nr, r | #(e_nr, dirA, dirB).(e_nr : RailML3_netRelation
+                & i_nr = MU_WD(e_nr'Id)
+                & IF e_nr'positionOnA = 1.0 THEN dirA = direction_normal ELSE dirA = direction_reverse END
+                & IF e_nr'positionOnB = 1.0 THEN dirB = direction_reverse ELSE dirB = direction_normal END
+                & ( r = (MU_WD(e_nr'elementA), e_nr'positionOnA, dirA) |-> (MU_WD(e_nr'elementB), e_nr'positionOnB, dirB)
+                    or r = (MU_WD(e_nr'elementB), e_nr'positionOnB, oppositeDirection(dirB)) |-> (MU_WD(e_nr'elementA), e_nr'positionOnA, oppositeDirection(dirA)) )
+                & e_nr'navigability = navigability_None ) })
+        END;
+        DEFINE RailML3_IS_NET_RELATION_BY_ID
+            TYPE allIdsOfType("netRelation") - dom(RailML3_IS_NO_NET_RELATION) --> FIN((allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION) * (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION))
+            VALUE fnc({ i_nr, r | #e_nr.(e_nr : RailML3_netRelation
+                & i_nr = MU_WD(e_nr'Id)
+                & (( prj1(prj1(r)) = (MU_WD(e_nr'elementA), e_nr'positionOnA) & prj1(prj2(r)) = (MU_WD(e_nr'elementB), e_nr'positionOnB) )
+                    or ( prj1(prj1(r)) = (MU_WD(e_nr'elementB), e_nr'positionOnB) & prj1(prj2(r)) = (MU_WD(e_nr'elementA), e_nr'positionOnA) ) )
+                & e_nr'navigability /= navigability_None & r : RailML3_IS_NET_RELATION ) })
+        END
+    END;
+
+    RULE warnings_netRelation
+    DEPENDS_ON_COMPUTATION set_NET_RELATION
+    ERROR_TYPES 2
+    BODY
+        RULE_FAIL e
+            WHEN e : elementsOfType("netRelation") & "navigability" /: dom(e'attributes)
+        COUNTEREXAMPLE
+            warningDefaultValue("navigability", "both", STRING_TO_INT(e'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e
+            WHEN e : elementsOfType("netRelation") & "positionOnA" /: dom(e'attributes)
+        COUNTEREXAMPLE
+            warningDefaultValue("positionOnA", "1", STRING_TO_INT(e'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e
+            WHEN e : elementsOfType("netRelation") & "positionOnB" /: dom(e'attributes)
+        COUNTEREXAMPLE
+            warningDefaultValue("positionOnB", "0", STRING_TO_INT(e'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL WHEN bfalse ERROR_TYPE 2 COUNTEREXAMPLE "" END // to implement error type 2
+    END;
+    // END NET_RELATIONS
+
+    // BEGIN NETWORKS
+    COMPUTATION set_networks
+    DEPENDS_ON_RULE is_valid_topology
+    BODY
+        DEFINE RailML3_networks
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("networks")
+        END
+    END;
+    RULE is_valid_networks
+    DEPENDS_ON_COMPUTATION set_networks
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_networks) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("networks", RailML3_networks, 1, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_networks & card(RailML3_topology) = 1
+            EXPECT e'pId = MU_WD(RailML3_topology)'recId
+        COUNTEREXAMPLE 
+            errorParent("networks", "topology", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_network
+    DEPENDS_ON_RULE is_valid_networks
+    BODY
+        DEFINE RailML3_network
+            TYPE FIN(RailML3_IS_network_Type)
+            VALUE dom({e,e_nw | e_nw : elementsOfType("network")
+                & e = rec(
+                        recId: e_nw'recId, 
+                        pId: e_nw'pId,                        
+                        xmlLineNumber: STRING_TO_INT(e_nw'meta("xmlLineNumber")),
+                        Id: e_nw'attributes[{"id"}]
+                        //networkResources: { a | #c.(c : ran(childsOfElementType("networkResource", e_nw'recId)) & c'pId = e_nw'recId & a = c'attributes("id"))}
+                    ) })
+        END
+    END;
+    RULE is_valid_network
+    DEPENDS_ON_COMPUTATION set_network
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_network) & IF card(RailML3_networks) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no networks
+        COUNTEREXAMPLE
+            IF card(RailML3_networks) = 1 
+                THEN errorCardOnlyLowerBound("network", RailML3_networks, 1, c)
+                ELSE errorCard("network", RailML3_network, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_network & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "network", e'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_network & card(RailML3_networks) = 1
+            EXPECT e'pId = MU_WD(RailML3_networks)'recId
+        COUNTEREXAMPLE
+            errorParent("network", "networks", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_level
+    DEPENDS_ON_RULE is_valid_network
+    DEPENDS_ON_COMPUTATION set_NET_ELEMENT, set_NET_RELATION
+    BODY
+        DEFINE RailML3_level
+            TYPE FIN(RailML3_IS_level_Type)
+            VALUE dom({e, e_lv | e_lv : elementsOfType("level")
+                & e = rec(
+                    recId: e_lv'recId, 
+                    pId: e_lv'pId,
+                    Id: e_lv'attributes[{"id"}],
+                    xmlLineNumber: STRING_TO_INT(e_lv'meta("xmlLineNumber")),
+                    descriptionLevel:
+                        IF "descriptionLevel" : dom(e_lv'attributes)
+                            THEN TYPED_STRING_TO_ENUM(RailML3_IS_LEVEL_DESCRIPTIONLEVEL, "descriptionLevel_"^e_lv'attributes("descriptionLevel"))
+                            ELSE descriptionLevel_Micro
+                        END,
+                    networkResources: dom({ a, c | c : childsOfElementType("networkResource", e_lv'recId) & a : c'attributes[{"ref"}]})
+                ) })
+        END
+    END;
+    RULE is_valid_level
+    DEPENDS_ON_COMPUTATION set_level
+    BODY
+        RULE_FAIL c
+        WHEN c = card(RailML3_level) & c = 0
+        COUNTEREXAMPLE
+            errorCardOnlyLowerBound("level", RailML3_network, 1, c)
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_level & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "level", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_lv, e_data
+            WHEN e_lv : RailML3_level & e_data : childsOfElementType("networkResource", e_lv'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "networkResource", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_lv, e_res
+            WHEN e_lv : RailML3_level & card(e_lv'networkResources) = 1 & e_res = MU_WD(e_lv'networkResources) & e_res /: union(allIdsOfType[{"netElement","netRelation"}])
+        COUNTEREXAMPLE
+            errorReference("level@networkResource", e_res, "netElement", e_lv'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_level & card(RailML3_network) = 1
+            EXPECT e'pId = MU_WD(RailML3_network)'recId
+        COUNTEREXAMPLE
+            errorParent("level", "network", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_NETWORK
+    DEPENDS_ON_RULE is_valid_network, is_valid_level
+    DEPENDS_ON_COMPUTATION set_NET_ELEMENT, set_NET_RELATION
+    BODY
+        DEFINE RailML3_IS_NET_RESOURCES_MICRO_LEVEL
+            TYPE FIN(allIdsOfType("netElement") \/ allIdsOfType("netRelation"))
+            VALUE { i_e | #e_lv.(e_lv : RailML3_level & e_lv'descriptionLevel = descriptionLevel_Micro & i_e : e_lv'networkResources) }
+        END;
+        DEFINE RailML3_IS_NET_RESOURCES_MESO_LEVEL
+            TYPE FIN(allIdsOfType("netElement") \/ allIdsOfType("netRelation"))
+            VALUE { i_e | #e_lv.(e_lv : RailML3_level & e_lv'descriptionLevel = descriptionLevel_Meso & i_e : e_lv'networkResources) }
+        END;
+        DEFINE RailML3_IS_NET_RESOURCES_MACRO_LEVEL
+            TYPE FIN(allIdsOfType("netElement") \/ allIdsOfType("netRelation"))
+            VALUE { i_e | #e_lv.(e_lv : RailML3_level & e_lv'descriptionLevel = descriptionLevel_Macro & i_e : e_lv'networkResources) }
+        END
+    END;
+
+    RULE validate_level
+    DEPENDS_ON_COMPUTATION set_NETWORK
+    BODY
+        RULE_FAIL e
+            WHEN e : RailML3_IS_NET_RESOURCES_MICRO_LEVEL /\ RailML3_IS_NET_RESOURCES_MESO_LEVEL
+                or e : RailML3_IS_NET_RESOURCES_MESO_LEVEL /\ RailML3_IS_NET_RESOURCES_MACRO_LEVEL
+                or e : RailML3_IS_NET_RESOURCES_MICRO_LEVEL /\ RailML3_IS_NET_RESOURCES_MACRO_LEVEL
+        COUNTEREXAMPLE
+            "[id '"^e^"']: topology element defined for multiple level types"
+        END;
+        RULE_FAIL e_nr,nr, ne1, ne2
+            WHEN
+                e_nr : RailML3_netRelation
+                & nr = MU_WD(e_nr'Id) & nr : (RailML3_IS_NET_RESOURCES_MICRO_LEVEL - dom(RailML3_IS_NO_NET_RELATION)) /\ allIdsOfType("netRelation")
+                & ne1 : dom(dom(dom(RailML3_IS_NET_RELATION_BY_ID(nr)))) & ne2 : dom(dom(ran(RailML3_IS_NET_RELATION_BY_ID(nr))))
+                & {ne1,ne2} /<: RailML3_IS_NET_RESOURCES_MICRO_LEVEL
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^nr^"']: netElements of a relation on micro level must both be on micro level, check '"^ne1^"' and '"^ne2^"'", e_nr'xmlLineNumber)
+        END;
+        RULE_FAIL e_nr,nr, ne1, ne2
+            WHEN
+                e_nr : RailML3_netRelation
+                & nr = MU_WD(e_nr'Id) & nr : (RailML3_IS_NET_RESOURCES_MESO_LEVEL - dom(RailML3_IS_NO_NET_RELATION)) /\ allIdsOfType("netRelation")
+                & ne1 : dom(dom(dom(RailML3_IS_NET_RELATION_BY_ID(nr)))) & ne2 : dom(dom(ran(RailML3_IS_NET_RELATION_BY_ID(nr))))
+                & {ne1,ne2} /<: RailML3_IS_NET_RESOURCES_MESO_LEVEL
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^nr^"']: netElements of a relation on meso level must both be on meso level, check '"^ne1^"' and '"^ne2^"'", e_nr'xmlLineNumber)
+        END;
+        RULE_FAIL e_nr,nr, ne1, ne2
+            WHEN
+                e_nr : RailML3_netRelation
+                & nr = MU_WD(e_nr'Id) & nr : (RailML3_IS_NET_RESOURCES_MACRO_LEVEL - dom(RailML3_IS_NO_NET_RELATION)) /\ allIdsOfType("netRelation")
+                & ne1 : dom(dom(dom(RailML3_IS_NET_RELATION_BY_ID(nr)))) & ne2 : dom(dom(ran(RailML3_IS_NET_RELATION_BY_ID(nr))))
+                & {ne1,ne2} /<: RailML3_IS_NET_RESOURCES_MACRO_LEVEL
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^nr^"']: netElements of a relation on macro level must both be on macro level, check '"^ne1^"' and '"^ne2^"'", e_nr'xmlLineNumber)
+        END
+    END;
+    RULE warnings_level
+    DEPENDS_ON_RULE validate_level
+    ERROR_TYPES 2
+    BODY
+        RULE_FAIL e
+            WHEN e : elementsOfType("level") & "descriptionLevel" /: dom(e'attributes)
+        COUNTEREXAMPLE
+            warningDefaultValue("descriptionLevel", "Micro", STRING_TO_INT(e'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL WHEN RailML3_IS_NET_RESOURCES_MICRO_LEVEL = {}
+        ERROR_TYPE 2
+        COUNTEREXAMPLE
+            "micro level contains no topology elements: animation not possible"
+        END
+    END;
+    // END NETWORKS
+    // END TOPOLOGY
+    //--------------
+    // BEGIN FUNCTIONAL_INFRASTRUCTURE
+    COMPUTATION set_functionalInfrastructure
+    DEPENDS_ON_RULE is_valid_infrastructure
+    BODY
+        DEFINE RailML3_functionalInfrastructure
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("functionalInfrastructure")
+        END
+    END;
+    RULE is_valid_functionalInfrastructure
+    DEPENDS_ON_COMPUTATION set_functionalInfrastructure
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_functionalInfrastructure) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("functionalInfrastructure", RailML3_functionalInfrastructure, 0, card(RailML3_infrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_functionalInfrastructure & card(RailML3_infrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_infrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("functionalInfrastructure", "infrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    // BEGIN BALISES
+    COMPUTATION set_balises
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_balises
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("balises")
+        END
+    END;
+    RULE is_valid_balises
+    DEPENDS_ON_COMPUTATION set_balises
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_balises) & c /: 0..1
+        COUNTEREXAMPLE
+            errorCard("balises", RailML3_balises, 0, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_balises & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("balises", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_balise
+    DEPENDS_ON_RULE is_valid_balises
+    BODY
+        DEFINE RailML3_balise
+            TYPE FIN(RailML3_IS_balise_Type)
+            VALUE dom({e, e_ba | e_ba : elementsOfType("balise")
+                & e = rec(
+                        recId: e_ba'recId,
+                        pId: e_ba'pId,                        
+                        xmlLineNumber: STRING_TO_INT(e_ba'meta("xmlLineNumber")),
+                        Id: e_ba'attributes[{"id"}],
+                        type: IF "type" : dom(e_ba'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BALISE_TYPES, "balise_"^e_ba'attributes("type"))} ELSE {} END,
+                        belongsToBaliseGroup: IF version = {v3_2} THEN e_ba'attributes[{"belongsToBaliseGroup"}] ELSE {} END,
+                        belongsToParent: IF version = {v3_1} THEN e_ba'attributes[{"belongsToParent"}] ELSE {} END,
+                        distanceToPredecessorBaliseWithinGroup: IF "distanceToPredecessorBaliseWithinGroup" : dom(e_ba'attributes) & STRING_IS_NUMBER(e_ba'attributes("distanceToPredecessorBaliseWithinGroup")) THEN {STRING_TO_REAL(e_ba'attributes("distanceToPredecessorBaliseWithinGroup"))} ELSE {} END, // km/h
+                        isBaliseGroup: IF version = {v3_1} & "isBaliseGroup" : dom(e_ba'attributes) & e_ba'attributes("isBaliseGroup") = "true" THEN TRUE ELSE FALSE END,
+                        baliseGroupType: IF version = {v3_1} & "baliseGroupType" : dom(e_ba'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BALISE_GROUP_TYPES, "baliseGroup_"^e_ba'attributes("baliseGroupType"))} ELSE {} END,
+                        isEurobalise: IF version = {v3_2} THEN dom({ a, c | c : childsOfElementType("isEurobalise", e_ba'recId)
+                            & a = rec(
+                                    positionInGroup : IF "positionInGroup" : dom(c'attributes) & STRING_IS_INT(c'attributes("positionInGroup")) THEN {STRING_TO_INT(c'attributes("positionInGroup"))} ELSE {} END,
+                                    duplicate: IF "duplicate" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_EUROBALISE_DUPLICATE_TYPES, "duplicate_"^c'attributes("duplicate"))} ELSE {} END,
+                                    mVersion : IF "mVersion" : dom(c'attributes) & STRING_IS_INT(c'attributes("mVersion")) THEN {STRING_TO_INT(c'attributes("mVersion"))} ELSE {} END
+                                )}) 
+                            ELSE {} END
+                    ) })
+        END
+    END;
+    RULE is_valid_balise
+    DEPENDS_ON_COMPUTATION set_balise
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_balise) & IF card(RailML3_balises) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no balises
+        COUNTEREXAMPLE
+            IF card(RailML3_balises) = 1 
+                THEN errorCardOnlyLowerBound("balise", RailML3_balises, 1, c)
+                ELSE errorCard("balise", RailML3_balise, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_balise & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "balise", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_ba, c
+            WHEN e_ba : RailML3_balise & c = card(e_ba'isEurobalise) & c > 1
+        COUNTEREXAMPLE
+            errorCard("isEurobalise", {e_ba}, 0, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_balise & card(RailML3_balises) = 1
+            EXPECT e'pId = MU_WD(RailML3_balises)'recId
+        COUNTEREXAMPLE
+            errorParent("balise", "balises", e'xmlLineNumber)
+        END
+    END;
+    // END BALISES
+
+    // BEGIN BALISE_GROUPS
+    COMPUTATION set_baliseGroups
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_baliseGroups
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("baliseGroups")
+        END
+    END;
+    RULE is_valid_baliseGroups
+    DEPENDS_ON_COMPUTATION set_baliseGroups
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_baliseGroups) & c /: 0..1
+        COUNTEREXAMPLE
+            errorCard("baliseGroups", RailML3_baliseGroups, 0, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_baliseGroups & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("baliseGroups", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_baliseGroup
+    DEPENDS_ON_RULE is_valid_baliseGroups
+    BODY
+        DEFINE RailML3_baliseGroup
+            TYPE FIN(RailML3_IS_baliseGroup_Type)
+            VALUE IF version = {v3_2} THEN dom({e, e_bg | e_bg : elementsOfType("baliseGroup")
+                & e = rec(
+                        recId: e_bg'recId,
+                        pId: e_bg'pId,                        
+                        xmlLineNumber: STRING_TO_INT(e_bg'meta("xmlLineNumber")),
+                        Id: e_bg'attributes[{"id"}],
+                        mileageDirection: IF "mileageDirection" : dom(e_bg'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_MILEAGE_DIRECTIONS, "mileageDirection_"^e_bg'attributes("mileageDirection"))} ELSE {} END,
+                        coverage: IF "coverage" : dom(e_bg'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BALISE_GROUP_COVERAGES, "coverage_"^e_bg'attributes("coverage"))} ELSE {} END,
+                        numberOfBalisesInGroup: IF "numberOfBalisesInGroup" : dom(e_bg'attributes) & STRING_IS_INT(e_bg'attributes("numberOfBalisesInGroup")) THEN {STRING_TO_INT(e_bg'attributes("numberOfBalisesInGroup"))} ELSE {} END,
+                        applicationTypes: dom({ a, c | c : childsOfElementType("applicationType", e_bg'recId)
+                            & a : IF "value" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BALISE_GROUP_APPLICATION_TYPES, "applicationType_"^c'attributes("value"))} ELSE {} END}),
+                        connectedWithInfrastructureElement: dom({ a, c | c : childsOfElementType("connectedWithInfrastructureElement", e_bg'recId)
+                            & a = rec(
+                                    ref: c'attributes[{"ref"}],
+                                    type: IF "type" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BALISE_GROUP_CONNECTION_TYPES, "connection_"^c'attributes("type"))} ELSE {} END
+                                )}),
+                        functionalType: dom({ a, c | c : childsOfElementType("functionalType", e_bg'recId)
+                            & a = rec(
+                                    value: IF "value" : dom(e_bg'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BALISE_GROUP_FUNCTIONAL_TYPES, "functionalType_"^e_bg'attributes("value"))} ELSE {} END,
+                                    mileageDirection: IF "mileageDirection" : dom(e_bg'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_MILEAGE_DIRECTIONS, "mileageDirection_"^e_bg'attributes("mileageDirection"))} ELSE {} END
+                                )}),
+                        isEurobaliseGroup: dom({ a, c | c : childsOfElementType("isEurobaliseGroup", e_bg'recId)
+                            & a = rec(
+                                    countryID: IF "countryID" : dom(c'attributes) & STRING_IS_INT(c'attributes("countryID")) THEN {STRING_TO_INT(c'attributes("countryID"))} ELSE {} END,
+                                    groupID: IF "groupID" : dom(c'attributes) & STRING_IS_INT(c'attributes("groupID")) THEN {STRING_TO_INT(c'attributes("groupID"))} ELSE {} END,
+                                    usesPackage44: IF "usesPackage44" : dom(c'attributes) & STRING_IS_INT(c'attributes("usesPackage44")) THEN {STRING_TO_INT(c'attributes("usesPackage44"))} ELSE {} END,
+                                    virtualCoverageID: IF "virtualCoverageID" : dom(c'attributes) & STRING_IS_INT(c'attributes("virtualCoverageID")) THEN {STRING_TO_INT(c'attributes("virtualCoverageID"))} ELSE {} END,
+                                    isLinked: IF "isLinked" : dom(e_bg'attributes) & e_bg'attributes("isLinked") = "true" THEN TRUE ELSE FALSE END,
+                                    linkReactionNominal: IF "linkReactionNominal" : dom(e_bg'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BALISE_GROUP_LINK_REACTIONS, "linkReaction_"^e_bg'attributes("linkReactionNominal"))} ELSE {} END,
+                                    linkReactionReverse: IF "linkReactionReverse" : dom(e_bg'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BALISE_GROUP_LINK_REACTIONS, "linkReaction_"^e_bg'attributes("linkReactionReverse"))} ELSE {} END,
+                                    locationAccuracy: IF "locationAccuracy" : dom(c'attributes) & STRING_IS_NUMBER(c'attributes("locationAccuracy")) THEN {STRING_TO_REAL(c'attributes("locationAccuracy"))} ELSE {} END,
+                                    mVersion: IF "mVersion" : dom(c'attributes) & STRING_IS_INT(c'attributes("mVersion")) THEN {STRING_TO_INT(c'attributes("mVersion"))} ELSE {} END
+                                )})
+                    ) })
+                ELSE {} END
+        END
+    END;
+    RULE is_valid_baliseGroup
+    DEPENDS_ON_COMPUTATION set_baliseGroup
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_baliseGroup) & IF card(RailML3_baliseGroups) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no baliseGroups
+        COUNTEREXAMPLE
+            IF card(RailML3_baliseGroups) = 1 
+                THEN errorCardOnlyLowerBound("baliseGroup", RailML3_baliseGroups, 1, c)
+                ELSE errorCard("baliseGroup", RailML3_baliseGroup, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_baliseGroup & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "balise", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_bg, c
+            WHEN e_bg : RailML3_baliseGroup & c = card(e_bg'applicationTypes) & c > 1
+        COUNTEREXAMPLE
+            errorCardOnlyLowerBound("applicationType", {e_bg}, 1, c)
+        END;
+        RULE_FAIL e_bg, e_cie
+            WHEN e_bg : RailML3_baliseGroup & e_cie : e_bg'connectedWithInfrastructureElement & (card(e_cie'ref) /= 1 or (card(e_cie'ref) = 1 & MU_WD(e_cie'ref) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("ref", "connectedWithInfrastructureElement", e_bg'xmlLineNumber)
+        END;
+        RULE_FAIL e_bg, e_cie, ref
+            WHEN e_bg : RailML3_baliseGroup & e_cie : e_bg'connectedWithInfrastructureElement & ref : e_cie'ref & ref /: union(allIdsOfType[{"border","bufferStop","crossing","switchIS"}])
+        COUNTEREXAMPLE
+            errorReference("ref@connectedWithInfrastructureElement", ref, "signalIS', 'etcsLevelTransition', 'radioBlockCenterBorder', 'switchIS', 'bufferStop", e_bg'xmlLineNumber)
+        END;
+        RULE_FAIL e_bg, e_cie
+            WHEN e_bg : RailML3_baliseGroup & e_cie : e_bg'connectedWithInfrastructureElement & card(e_cie'type) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("type", "connectedWithInfrastructureElement", e_bg'xmlLineNumber)
+        END;
+        RULE_FAIL e_bg, c
+            WHEN e_bg : RailML3_baliseGroup & c = card(e_bg'isEurobaliseGroup) & c > 1
+        COUNTEREXAMPLE
+            errorCardOnlyLowerBound("isEurobaliseGroup", {e_bg}, 1, c)
+        END;
+        RULE_FAIL e_bg, e_ieg
+            WHEN e_bg : RailML3_baliseGroup & e_ieg : e_bg'isEurobaliseGroup & card(e_ieg'countryID) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("countryID", "connectedWithInfrastructureElement", e_bg'xmlLineNumber)
+        END;
+        RULE_FAIL e_bg, e_ieg
+            WHEN e_bg : RailML3_baliseGroup & e_ieg : e_bg'isEurobaliseGroup & card(e_ieg'groupID) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("groupID", "connectedWithInfrastructureElement", e_bg'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_baliseGroup & card(RailML3_baliseGroups) = 1
+            EXPECT e'pId = MU_WD(RailML3_baliseGroups)'recId
+        COUNTEREXAMPLE
+            errorParent("baliseGroup", "baliseGroups", e'xmlLineNumber)
+        END
+    END;
+    // END BALISE_GROUPS
+
+    // BEGIN BORDERS
+    COMPUTATION set_borders
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_borders
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("borders")
+        END
+    END;
+    RULE is_valid_borders
+    DEPENDS_ON_COMPUTATION set_borders
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_borders) & c /: 0..1
+        COUNTEREXAMPLE
+            errorCard("borders", RailML3_borders, 0, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_borders & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("borders", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_border
+    DEPENDS_ON_RULE is_valid_borders
+    BODY
+        DEFINE RailML3_border
+            TYPE FIN(RailML3_IS_border_Type)
+            VALUE dom({e, e_br | e_br : elementsOfType("border")
+                & e = rec(
+                        recId: e_br'recId,
+                        pId: e_br'pId,                        
+                        xmlLineNumber: STRING_TO_INT(e_br'meta("xmlLineNumber")),
+                        Id: e_br'attributes[{"id"}],
+                        type: IF "type" : dom(e_br'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BORDER_TYPES, "border_"^e_br'attributes("type"))} ELSE {} END,
+                        isOpenEnd: IF "isOpenEnd" : dom(e_br'attributes) & e_br'attributes("isOpenEnd") = "true" THEN TRUE ELSE FALSE END,
+                        externalRef: e_br'attributes[{"externalRef"}]
+                    ) })
+        END
+    END;
+    RULE is_valid_border
+    DEPENDS_ON_COMPUTATION set_border
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_border) & IF card(RailML3_borders) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no borders
+        COUNTEREXAMPLE
+            IF card(RailML3_borders) = 1 
+                THEN errorCardOnlyLowerBound("border", RailML3_borders, 1, c)
+                ELSE errorCard("border", RailML3_border, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_border & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "border", e'xmlLineNumber)
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_border & card(e'type) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("type", "border", e'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_border & card(RailML3_borders) = 1
+            EXPECT e'pId = MU_WD(RailML3_borders)'recId
+        COUNTEREXAMPLE
+            errorParent("border", "borders", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_BORDER
+    DEPENDS_ON_RULE is_valid_border
+    BODY
+        DEFINE RailML3_IS_OPENEND_IDS
+            TYPE FIN(allIdsOfType("border"))
+            VALUE dom({ i_br, e_br | e_br : RailML3_border & i_br = MU_WD(e_br'Id) & i_br : allIdsOfType("border") & e_br'isOpenEnd = TRUE })
+        END
+    END;
+
+    RULE validate_border
+    DEPENDS_ON_COMPUTATION set_BORDER, set_NET_RELATION_SUBSEQUENT_LOCATIONS, set_SPOT_LOCATION
+    DEPENDS_ON_RULE validate_spotLocation
+    BODY
+        RULE_FAIL e_b, i_b
+        WHEN e_b : RailML3_border & i_b = MU_WD(e_b'Id) & i_b : RailML3_IS_OPENEND_IDS
+            & not(#sloc.(sloc : RailML3_IS_SPOT_LOCATIONS(i_b) & {prj1(sloc) |-> direction_normal, prj1(sloc) |-> direction_reverse} <: dom(RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS) \/ ran(RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS)))
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '~w']: Border has attribute openEnd=true, but its spotLocation is not at an end of a track", e_b'xmlLineNumber, i_b)
+        END;
+        RULE_FAIL e_b, i_b, e_bus, i_bus
+        WHEN e_b : RailML3_border & i_b = MU_WD(e_b'Id) & i_b : RailML3_IS_OPENEND_IDS & e_bus : RailML3_bufferStop & i_bus = MU_WD(e_bus'Id)
+            & RailML3_IS_SPOT_LOCATIONS(i_b) /\ RailML3_IS_SPOT_LOCATIONS(i_bus) /= {}
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Lines {~w,~w}, ids {'~w','~w'}]: Border with attribute openEnd=true has the same spotLocation as a bufferstop", e_b'xmlLineNumber, e_bus'xmlLineNumber, i_b, i_bus)
+        END
+    END;
+    // END BORDERS
+
+    // BEGIN BUFFER_STOPS
+    COMPUTATION set_bufferStops
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_bufferStops
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("bufferStops")
+        END
+    END;
+    RULE is_valid_bufferStops
+    DEPENDS_ON_COMPUTATION set_bufferStops
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_bufferStops) & c /: 0..card(RailML3_functionalInfrastructure) // (0..1), 0 if no functionalInfrastructure
+        COUNTEREXAMPLE
+            errorCard("bufferStops", RailML3_bufferStops, 0, card(RailML3_functionalInfrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_bufferStops & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("bufferStops", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_bufferStop
+    DEPENDS_ON_RULE is_valid_bufferStops
+    BODY
+        DEFINE RailML3_bufferStop
+            TYPE FIN(RailML3_IS_bufferStop_Type)
+            VALUE dom({e, e_bs | e_bs : ran(data) & e_bs'element  = "bufferStop"
+                & e = rec(
+                        recId: e_bs'recId,
+                        pId: e_bs'pId,
+                        Id: e_bs'attributes[{"id"}],
+                        xmlLineNumber: STRING_TO_INT(e_bs'meta("xmlLineNumber")),
+                        type: IF "type" : dom(e_bs'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_BUFFERSTOP_TYPES, "bufferStop_"^e_bs'attributes("type"))} ELSE {} END
+                    ) })
+        END
+    END;
+    RULE is_valid_bufferStop
+    DEPENDS_ON_COMPUTATION set_bufferStop
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_bufferStop) & IF card(RailML3_bufferStops) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no bufferStops
+        COUNTEREXAMPLE
+            IF card(RailML3_bufferStops) = 1 
+                THEN errorCardOnlyLowerBound("bufferStop", RailML3_bufferStops, 1, c)
+                ELSE errorCard("bufferStop", RailML3_bufferStop, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_bufferStop & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "bufferStop", e'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_bufferStop & card(RailML3_bufferStops) = 1
+            EXPECT e'pId = MU_WD(RailML3_bufferStops)'recId
+        COUNTEREXAMPLE
+            errorParent("bufferStop", "bufferStops", e'xmlLineNumber)
+        END
+    END;
+
+    RULE validate_bufferStop
+    DEPENDS_ON_RULE is_valid_bufferStop
+    DEPENDS_ON_COMPUTATION set_NET_RELATION_SUBSEQUENT_LOCATIONS, set_SPOT_LOCATION
+    BODY
+        RULE_FAIL e_b, i_b
+        WHEN e_b : RailML3_bufferStop & i_b = MU_WD(e_b'Id) & i_b : allIdsOfType("bufferStop")
+            & not(#sloc.(sloc : RailML3_IS_SPOT_LOCATIONS(i_b) & {prj1(sloc) |-> direction_normal, prj1(sloc) |-> direction_reverse} <: dom(RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS) \/ ran(RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS)))
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^i_b^"']: the spotLocation of the bufferStop is not at an end of a track", e_b'xmlLineNumber)
+        END
+    END;
+    // END BUFFER_STOPS
+
+    // BEGIN CROSSINGS
+    COMPUTATION set_crossings
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_crossings
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("crossings")
+        END
+    END;
+    RULE is_valid_crossings
+    DEPENDS_ON_COMPUTATION set_crossings
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_crossings) & c /: 0..1
+        COUNTEREXAMPLE
+            errorCard("crossings", RailML3_crossings, 0, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_crossings & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("crossings", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_crossing
+    DEPENDS_ON_RULE is_valid_crossings
+    BODY
+        DEFINE RailML3_crossing
+            TYPE FIN(RailML3_IS_crossing_Type)
+            VALUE dom({e, e_scr | e_scr : elementsOfType("crossing")
+                & e = rec(
+                        recId: e_scr'recId,
+                        pId: e_scr'pId,                        
+                        xmlLineNumber: STRING_TO_INT(e_scr'meta("xmlLineNumber")),
+                        Id: e_scr'attributes[{"id"}],
+                        straightBranch: 
+                            IF version = {v3_2} THEN
+                                dom({ a, c | c : childsOfElementType("straightBranch", e_scr'recId)
+                                    & a = rec(
+                                            recId: c'recId,
+                                            pId: c'pId,
+                                            xmlLineNumber: STRING_TO_INT(c'meta("xmlLineNumber")),
+                                            netRelationRef: c'attributes[{"netRelationRef"}],
+                                            branchingSpeed: IF "branchingSpeed" : dom(c'attributes) & STRING_IS_NUMBER(c'attributes("branchingSpeed")) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END, // km/h
+                                            joiningSpeed: IF "joiningSpeed" : dom(c'attributes) & STRING_IS_NUMBER(c'attributes("joiningSpeed")) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END, // km/h
+                                            radius: IF "radius" : dom(c'attributes) & STRING_IS_NUMBER(c'attributes("radius")) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END, // m
+                                            length: IF "length" : dom(c'attributes) & STRING_IS_NUMBER(c'attributes("length")) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END
+                                        )})
+                            ELSE
+                                dom({ a, c | c : childsOfElementType("external", e_scr'recId)
+                                    & a = rec(
+                                            recId: c'recId,
+                                            pId: c'pId,
+                                            xmlLineNumber: STRING_TO_INT(c'meta("xmlLineNumber")),
+                                            netRelationRef: c'attributes[{"ref"}],
+                                            branchingSpeed: {},
+                                            joiningSpeed: {},
+                                            radius: {},
+                                            length: {}
+                                        )})
+                            END
+                    ) })
+        END
+    END;
+    RULE is_valid_crossing
+    DEPENDS_ON_COMPUTATION set_crossing
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_crossing) & IF card(RailML3_crossings) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no crossings
+        COUNTEREXAMPLE
+            IF card(RailML3_crossings) = 1 
+                THEN errorCardOnlyLowerBound("crossing", RailML3_crossings, 1, c)
+                ELSE errorCard("crossing", RailML3_crossing, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_crossing & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "crossing", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_scr, c
+            WHEN e_scr : RailML3_crossing & c = card(e_scr'straightBranch) & c /= 2 // by schema 0..2, but a crossing w/o 2 branches is not usable in B
+        COUNTEREXAMPLE
+            errorCard("straightBranch' (only railML 3.2) or 'external", {e_scr}, 2, 2, c)
+        END;
+        RULE_FAIL e_scr, e_b
+            WHEN e_scr : RailML3_crossing & e_b : e_scr'straightBranch & card(e_b'netRelationRef) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("netRelationRef", "straightBranch", e_b'xmlLineNumber)
+        END;
+        RULE_FAIL e_scr, e_b
+            WHEN e_scr : RailML3_crossing & e_b : e_scr'straightBranch & card(e_b'netRelationRef) = 1 & MU_WD(e_b'netRelationRef) /: allIdsOfType("netRelation")
+        COUNTEREXAMPLE
+            errorReference("netRelationRef", MU_WD(e_b'netRelationRef), "netRelation", e_b'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_crossing & card(RailML3_crossings) = 1
+            EXPECT e'pId = MU_WD(RailML3_crossings)'recId
+        COUNTEREXAMPLE
+            errorParent("crossing", "crossings", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_CROSSING
+    DEPENDS_ON_RULE is_valid_crossing
+    BODY
+        DEFINE RailML3_IS_CROSSING_BRANCHES
+            TYPE allIdsOfType("crossing") --> ((allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION) <-> (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION))
+            VALUE
+                fnc({ i_scr, branch | #(e_scr, nr).(e_scr : RailML3_crossing & i_scr : allIdsOfType("crossing") & i_scr = MU_WD(e_scr'Id)
+                    & nr : e_scr'straightBranch
+                    & branch : RailML3_IS_NET_RELATION_BY_ID(MU_WD(nr'netRelationRef)))
+                })
+        END
+    END;
+    // END CROSSINGS
+
+    // BEGIN DERAILERS
+    COMPUTATION set_derailersIS
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_derailersIS
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("derailersIS")
+        END
+    END;
+    RULE is_valid_derailersIS
+    DEPENDS_ON_COMPUTATION set_derailersIS
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_derailersIS) & c /: 0..card(RailML3_functionalInfrastructure) // (0..1), 0 if no functionalInfrastructure
+        COUNTEREXAMPLE
+            errorCard("derailersIS", RailML3_derailersIS, 0, card(RailML3_functionalInfrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_derailersIS & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("derailersIS", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_derailerIS
+    DEPENDS_ON_RULE is_valid_derailersIS
+    BODY
+        DEFINE RailML3_derailerIS
+            TYPE FIN(RailML3_IS_derailerIS_Type)
+            VALUE dom({e, e_der | e_der : elementsOfType("derailerIS")
+                & e = rec(
+                        recId: e_der'recId,
+                        pId: e_der'pId,
+                        xmlLineNumber: STRING_TO_INT(e_der'meta("xmlLineNumber")),
+                        Id: e_der'attributes[{"id"}],
+                        derailSide: IF "derailSide" : dom(e_der'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_DERAIL_SIDES, "derailSide_"^e_der'attributes("derailSide"))} ELSE {} END,
+                        type: IF "type" : dom(e_der'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_DERAILER_TYPES, "derailer_"^e_der'attributes("type"))} ELSE {} END
+                    ) })
+        END
+    END;
+    RULE is_valid_derailerIS
+    DEPENDS_ON_COMPUTATION set_derailerIS
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_derailerIS) & IF card(RailML3_derailersIS) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no derailersIS
+        COUNTEREXAMPLE
+            IF card(RailML3_derailersIS) = 1 
+                THEN errorCardOnlyLowerBound("derailerIS", RailML3_derailersIS, 1, c)
+                ELSE errorCard("derailerIS", RailML3_derailerIS, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_derailerIS & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "derailerIS", e'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_derailerIS & card(RailML3_derailersIS) = 1
+            EXPECT e'pId = MU_WD(RailML3_derailersIS)'recId
+        COUNTEREXAMPLE
+            errorParent("derailerIS", "derailersIS", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_DERAILER
+    DEPENDS_ON_RULE is_valid_derailerIS
+    DEPENDS_ON_COMPUTATION set_NET_RELATION_SUBSEQUENT_LOCATIONS, set_SPOT_LOCATION
+    BODY
+        DEFINE RailML3_IS_DERAILER_NOT_PASSABLE
+            TYPE allIdsOfType("derailerIS") --> ((allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION) <-> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION))
+            VALUE fnc({ i_der, np | i_der : allIdsOfType("derailerIS")
+                & np : RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS
+                & ( prj1(np) : (dom(RailML3_IS_SPOT_LOCATIONS(i_der)) * {direction_normal, direction_reverse}) or prj2(np) : (dom(RailML3_IS_SPOT_LOCATIONS(i_der)) * {direction_normal, direction_reverse}) ) })
+        END
+    END;
+    // END DERAILERS
+
+    // BEGIN OPERATIONAL POINTS
+    COMPUTATION set_operationalPoints
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_operationalPoints
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("operationalPoints")
+        END
+    END;
+    RULE is_valid_operationalPoints
+    DEPENDS_ON_COMPUTATION set_operationalPoints
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_operationalPoints) & c /: 0..card(RailML3_functionalInfrastructure) // (0..1), 0 if no functionalInfrastructure
+        COUNTEREXAMPLE
+            errorCard("operationalPoints", RailML3_operationalPoints, 0, card(RailML3_functionalInfrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_operationalPoints & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("operationalPoints", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_operationalPoint
+    DEPENDS_ON_RULE is_valid_operationalPoints
+    BODY
+        DEFINE RailML3_operationalPoint
+            TYPE FIN(RailML3_IS_operationalPoint_Type)
+            VALUE dom({e, e_op | e_op : ran(data) & e_op'element  = "operationalPoint"
+                & e = rec(
+                        recId: e_op'recId,
+                        pId: e_op'pId,
+                        xmlLineNumber: STRING_TO_INT(e_op'meta("xmlLineNumber")),
+                        Id: e_op'attributes[{"id"}]                        
+                    ) })
+        END
+    END;
+    RULE is_valid_operationalPoint
+    DEPENDS_ON_COMPUTATION set_operationalPoint
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_operationalPoint) & IF card(RailML3_operationalPoints) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no operationalPoints
+        COUNTEREXAMPLE
+            IF card(RailML3_operationalPoints) = 1 
+                THEN errorCardOnlyLowerBound("operationalPoint", RailML3_operationalPoints, 1, c)
+                ELSE errorCard("operationalPoint", RailML3_operationalPoint, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_operationalPoint & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "operationalPoint", e'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_operationalPoint & card(RailML3_operationalPoints) = 1
+            EXPECT e'pId = MU_WD(RailML3_operationalPoints)'recId
+        COUNTEREXAMPLE
+            errorParent("operationalPoint", "operationalPoints", e'xmlLineNumber)
+        END
+    END;
+    // END OPERATIONAL POINTS
+
+    // BEGIN SIGNALS_IS
+    COMPUTATION set_signalsIS
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_signalsIS
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("signalsIS")
+        END
+    END;
+    RULE is_valid_signalsIS
+    DEPENDS_ON_COMPUTATION set_signalsIS
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_signalsIS) & c /: 0..card(RailML3_functionalInfrastructure) // (0..1), 0 if no functionalInfrastructure
+        COUNTEREXAMPLE
+            errorCard("signalsIS", RailML3_signalsIS, 0, card(RailML3_functionalInfrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_signalsIS & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("signalsIS", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_signalIS
+    DEPENDS_ON_RULE is_valid_signalsIS
+    BODY
+        DEFINE RailML3_signalIS
+            TYPE FIN(RailML3_IS_signalIS_Type)
+            VALUE dom({e, e_sig | e_sig : elementsOfType("signalIS")
+                & e = rec(
+                        recId: e_sig'recId,
+                        pId: e_sig'pId,
+                        xmlLineNumber: STRING_TO_INT(e_sig'meta("xmlLineNumber")),
+                        Id: e_sig'attributes[{"id"}],
+                        isSwitchable: IF "isSwitchable" : dom(e_sig'attributes) & e_sig'attributes("isSwitchable") = "true" THEN TRUE ELSE FALSE END,
+                        isAnnouncementSignal: IF card( childsOfElementType("isAnnouncementSignal", e_sig'recId) ) = 1 THEN TRUE ELSE FALSE END,
+                        isDangerSignal: IF card( childsOfElementType("isDangerSignal", e_sig'recId) ) = 1 THEN TRUE ELSE FALSE END,
+                        isEtcsSignal: IF card( childsOfElementType("isEtcsSignal", e_sig'recId) ) = 1 THEN TRUE ELSE FALSE END,
+                        isInformationSignal: IF card( childsOfElementType("isInformationSignal", e_sig'recId) ) = 1 THEN TRUE ELSE FALSE END,
+                        isVehicleEquipmentSignal: IF card( childsOfElementType("isVehicleEquipmentSignal", e_sig'recId) ) = 1 THEN TRUE ELSE FALSE END,
+                        isTrainMovementSignal: IF card( childsOfElementType("isTrainMovementSignal", e_sig'recId) ) = 1 THEN TRUE ELSE FALSE END,
+                        signalConstruction: dom({ a, c | c : childsOfElementType("signalConstruction", e_sig'recId)
+                            & a = rec(
+                                    xmlLineNumber: STRING_TO_INT(c'meta("xmlLineNumber")),
+                                    height : IF "height" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("height"))} ELSE {} END,
+                                    positionAtTrack : IF "positionAtTrack" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SIGNAL_POSITION_AT_TRACK_TYPES, "positionAtTrack_"^c'attributes("positionAtTrack"))} ELSE {} END,
+                                    type : IF "type" : dom(c'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SIGNAL_TYPES, "signal_"^c'attributes("type"))} ELSE {} END
+                                )})
+                        ) })
+        END
+    END;
+    RULE is_valid_signalIS
+    DEPENDS_ON_COMPUTATION set_signalIS
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_signalIS) & IF card(RailML3_signalsIS) = 1 THEN c = 0 ELSE c /= 0 END // (1..*), 0 if no signalsIS
+        COUNTEREXAMPLE
+            IF card(RailML3_signalsIS) = 1 
+                THEN errorCardOnlyLowerBound("signalIS", RailML3_signalsIS, 1, c)
+                ELSE errorCard("signalIS", RailML3_signalIS, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_signalIS & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "signalIS", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_sig, c
+            WHEN e_sig : RailML3_signalIS & c = card(e_sig'signalConstruction) & c > 1
+        COUNTEREXAMPLE
+            errorCard("signalConstruction", {e_sig}, 0, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_signalIS & card(RailML3_signalsIS) = 1
+            EXPECT e'pId = MU_WD(RailML3_signalsIS)'recId
+        COUNTEREXAMPLE
+            errorParent("signalIS", "signalsIS", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_SIGNAL
+    DEPENDS_ON_RULE is_valid_signalIS
+    DEPENDS_ON_COMPUTATION set_SPOT_LOCATION, set_NET_RELATION_SUBSEQUENT_LOCATIONS
+    BODY
+        DEFINE RailML3_IS_SIGNAL_POSITIONS
+            TYPE allIdsOfType("signalIS") --> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
+            VALUE { i_sig, pos | i_sig : allIdsOfType("signalIS") & pos : RailML3_IS_SPOT_LOCATIONS(i_sig) }
+        END;
+        DEFINE RailML3_IS_SIGNAL_IS_SWITCHABLE
+            TYPE allIdsOfType("signalIS") --> BOOL
+            VALUE { i_sig, switchable | #e_sig.(e_sig : RailML3_signalIS & i_sig = MU_WD(e_sig'Id) & switchable = e_sig'isSwitchable ) }
+        END;
+        DEFINE RailML3_IS_SIGNAL_IS_TRAIN_MOVEMENT_SIGNAL
+            TYPE allIdsOfType("signalIS") --> BOOL
+            VALUE { i_sig, switchable | #e_sig.(e_sig : RailML3_signalIS & i_sig = MU_WD(e_sig'Id) & switchable = e_sig'isTrainMovementSignal ) }
+        END
+    END;    
+    // END SIGNALS_IS
+
+    // BEGIN SPEED_SECTIONS
+    COMPUTATION set_speeds
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_speeds
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("speeds")
+        END
+    END;
+    RULE is_valid_speeds
+    DEPENDS_ON_COMPUTATION set_speeds
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_speeds) & c /: 0..card(RailML3_functionalInfrastructure) // (0..1), 0 if no functionalInfrastructure
+        COUNTEREXAMPLE
+            errorCard("speeds", RailML3_speeds, 0, card(RailML3_functionalInfrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_speeds & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("speeds", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_speedSection
+    DEPENDS_ON_RULE is_valid_speeds
+    BODY
+        DEFINE RailML3_speedSection
+            TYPE FIN(RailML3_IS_speedSection_Type)
+            VALUE dom({e, e_ss | e_ss : elementsOfType("speedSection")
+                & e = rec(
+                        recId: e_ss'recId,
+                        pId: e_ss'pId,                        
+                        xmlLineNumber: STRING_TO_INT(e_ss'meta("xmlLineNumber")),
+                        Id: e_ss'attributes[{"id"}],
+                        maxSpeed: IF "maxSpeed" : dom(e_ss'attributes) & STRING_IS_NUMBER(e_ss'attributes("maxSpeed")) THEN {STRING_TO_REAL(e_ss'attributes("maxSpeed"))} ELSE {} END,
+                        isTemporary: IF "isTemporary" : dom(e_ss'attributes) & e_ss'attributes("isTemporary") = "true" THEN TRUE ELSE FALSE END,
+                        isSignalized: IF "isSignalized" : dom(e_ss'attributes) & e_ss'attributes("isSignalized") = "false" THEN FALSE ELSE TRUE END,
+                        refersToTrain: IF "refersToTrain" : dom(e_ss'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SPEED_SECTION_REFERS_TO_TRAIN_TYPES, "refersToTrain_"^e_ss'attributes("refersToTrain"))} ELSE {} END,
+                        validForSpeedProfiles: dom({ a, c | c : childsOfElementType("validForSpeedProfile", e_ss'recId) & a : c'attributes[{"ref"}]})
+                )})
+        END
+    END;
+    RULE is_valid_speedSection
+    DEPENDS_ON_COMPUTATION set_speedSection
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_speedSection) & IF card(RailML3_speeds) = 1 THEN c = 0 ELSE c /= 0 END // (1..*), 0 if no speedSections
+        COUNTEREXAMPLE
+            IF card(RailML3_speeds) = 1 
+                THEN errorCardOnlyLowerBound("speedSection", RailML3_speeds, 1, c)
+                ELSE errorCard("speedSection", RailML3_speedSection, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_speedSection & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "speedSection", e'xmlLineNumber)
+        END;
+        RULE_FAIL e, ms
+            WHEN e : RailML3_speedSection & ms : e'maxSpeed & ms <= 0.0
+        COUNTEREXAMPLE
+            errorValue("maxSpeed", "> 0.0", TO_STRING(ms), e'xmlLineNumber)
+        END;
+        RULE_FAIL e_ss, e_data
+            WHEN e_ss : RailML3_speedSection & e_data : childsOfElementType("validForSpeedProfile", e_ss'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "validForSpeedProfile", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_ss, e_vfsp
+            WHEN e_ss : RailML3_speedSection & e_vfsp : e_ss'validForSpeedProfiles & e_vfsp /: allIdsOfType("speedProfile")
+        COUNTEREXAMPLE
+            errorReference("ref@validForSpeedProfile", e_vfsp, "speedSection", e_ss'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_speedSection & card(RailML3_speeds) = 1
+            EXPECT e'pId = MU_WD(RailML3_speeds)'recId
+        COUNTEREXAMPLE
+            errorParent("speedSections", "speeds", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_SPEED_SECTION
+    DEPENDS_ON_RULE is_valid_speedSection
+    DEPENDS_ON_COMPUTATION set_LINEAR_LOCATION
+    BODY
+        DEFINE RailML3_IS_SPEED_SECTIONS
+            TYPE allIdsOfType("speedSection") <-> ( (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION) * (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION) * REAL )
+            VALUE { i_ss, pos_speed | #e_ss.(e_ss : RailML3_speedSection & i_ss = MU_WD(e_ss'Id)
+                & prj1(pos_speed) : union(RailML3_IS_LINEAR_LOCATIONS[{i_ss}])
+                & prj2(pos_speed) : e_ss'maxSpeed )
+            }
+        END;
+        DEFINE RailML3_IS_VALID_FOR_SPEED_PROFILES
+            TYPE allIdsOfType("speedSection") +-> FIN(allIdsOfType("speedProfile"))
+            VALUE dom({ i_ss, e_ss | e_ss : RailML3_speedSection & i_ss = MU_WD(e_ss'Id) |-> e_ss'validForSpeedProfiles })
+        END
+    END;
+    // END SPEED_SECTIONS
+
+    // BEGIN SWITCHES
+    COMPUTATION set_switchesIS
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_switchesIS
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("switchesIS")
+        END
+    END;
+    RULE is_valid_switchesIS
+    DEPENDS_ON_COMPUTATION set_switchesIS
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_switchesIS) & c /: 0..card(RailML3_functionalInfrastructure) // (0..1), 0 if no functionalInfrastructure
+        COUNTEREXAMPLE
+            errorCard("switchesIS", RailML3_switchesIS, 0, card(RailML3_functionalInfrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_switchesIS & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("switchesIS", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_switchIS
+    DEPENDS_ON_RULE is_valid_switchesIS
+    DEPENDS_ON_COMPUTATION set_NET_RELATION 
+    BODY
+        DEFINE RailML3_switchIS
+            TYPE FIN(RailML3_IS_switchIS_Type)
+            VALUE dom({e, e_sw | e_sw : elementsOfType("switchIS")
+                & e = rec(
+                        recId: e_sw'recId,
+                        pId: e_sw'pId,                        
+                        xmlLineNumber: STRING_TO_INT(e_sw'meta("xmlLineNumber")),
+                        Id: e_sw'attributes[{"id"}],
+                        type: IF "type" : dom(e_sw'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SWITCH_TYPES, "switch_"^e_sw'attributes("type"))} ELSE {} END,
+                        continueCourse: IF "continueCourse" : dom(e_sw'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SWITCH_COURSES, "course_"^e_sw'attributes("continueCourse"))} ELSE {} END,
+                        branchCourse: IF "branchCourse" : dom(e_sw'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_SWITCH_COURSES, "course_"^e_sw'attributes("branchCourse"))} ELSE {} END,
+                        leftBranch: dom({ a, c | c : childsOfElementType("leftBranch", e_sw'recId)
+                            & a = rec(
+                                    recId : c'recId,
+                                    pId : c'pId,
+                                    xmlLineNumber: STRING_TO_INT(c'meta("xmlLineNumber")),
+                                    netRelationRef : c'attributes[{"netRelationRef"}],
+                                    branchingSpeed : IF "branchingSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END, // km/h
+                                    joiningSpeed : IF "joiningSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END, // km/h
+                                    radius : IF "radius" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END, // m
+                                    length : IF "length" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END // m
+                                )}),
+                        rightBranch: dom({ a, c | c : childsOfElementType("rightBranch", e_sw'recId)
+                            & a = rec(
+                                    recId : c'recId,
+                                    pId : c'pId,
+                                    xmlLineNumber: STRING_TO_INT(c'meta("xmlLineNumber")),
+                                    netRelationRef : c'attributes[{"netRelationRef"}],
+                                    branchingSpeed : IF "branchingSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END, // km/h
+                                    joiningSpeed : IF "joiningSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END, // km/h
+                                    radius : IF "radius" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END, // m
+                                    length : IF "length" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END // m
+                                )}),
+                        straightBranch: dom({ a, c | c : childsOfElementType("straightBranch", e_sw'recId)
+                            & a = rec(
+                                    recId : c'recId,
+                                    pId : c'pId,
+                                    xmlLineNumber: STRING_TO_INT(c'meta("xmlLineNumber")),
+                                    netRelationRef : c'attributes[{"netRelationRef"}],
+                                    branchingSpeed : IF "branchingSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END, // km/h
+                                    joiningSpeed : IF "joiningSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END, // km/h
+                                    radius : IF "radius" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END, // m
+                                    length : IF "length" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END // m
+                                )}),
+                        turningBranch: dom({ a, c | c : childsOfElementType("turningBranch", e_sw'recId)
+                            & a = rec(
+                                    recId : c'recId,
+                                    pId : c'pId,
+                                    xmlLineNumber: STRING_TO_INT(c'meta("xmlLineNumber")),
+                                    netRelationRef : c'attributes[{"netRelationRef"}],
+                                    branchingSpeed : IF "branchingSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("branchingSpeed"))} ELSE {} END, // km/h
+                                    joiningSpeed : IF "joiningSpeed" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("joiningSpeed"))} ELSE {} END, // km/h
+                                    radius : IF "radius" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("radius"))} ELSE {} END, // m
+                                    length : IF "length" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("length"))} ELSE {} END // m
+                                )})
+                        ) })
+        END
+    END;
+    RULE is_valid_switchIS
+    DEPENDS_ON_COMPUTATION set_switchIS
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_switchIS) & IF card(RailML3_switchesIS) = 1 THEN c = 0 ELSE c /= 0 END // (1..*), 0 if no switchesIS
+        COUNTEREXAMPLE
+            IF card(RailML3_switchesIS) = 1 
+                THEN errorCardOnlyLowerBound("switchIS", RailML3_switchesIS, 1, c)
+                ELSE errorCard("switchIS", RailML3_switchIS, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_switchIS & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "switchIS", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & card(e_sw'type) = 1 & (MU_WD(e_sw'type) = switch_ordinarySwitch or MU_WD(e_sw'type) = switch_insideCurvedSwitch or MU_WD(e_sw'type) = switch_outsideCurvedSwitch) & c = card(e_sw'leftBranch) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("leftBranch", {e_sw}, 1, 1, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & card(e_sw'type) = 1 & (MU_WD(e_sw'type) = switch_ordinarySwitch or MU_WD(e_sw'type) = switch_insideCurvedSwitch or MU_WD(e_sw'type) = switch_outsideCurvedSwitch) & c = card(e_sw'rightBranch) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("rightBranch", {e_sw}, 1, 1, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & card(e_sw'type) = 1 & MU_WD(e_sw'type) = switch_singleSwitchCrossing & c = card(e_sw'straightBranch) & c /= 2
+        COUNTEREXAMPLE
+            errorCard("straightBranch", {e_sw}, 2, 2, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & card(e_sw'type) = 1 & MU_WD(e_sw'type) = switch_singleSwitchCrossing & c = card(e_sw'turningBranch) & c /= 1
+        COUNTEREXAMPLE
+            errorCard("turningBranch", {e_sw}, 1, 1, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & card(e_sw'type) = 1 & MU_WD(e_sw'type) = switch_doubleSwitchCrossing & c = card(e_sw'straightBranch) & c /= 2
+        COUNTEREXAMPLE
+            errorCard("straightBranch", {e_sw}, 2, 2, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & card(e_sw'type) = 1 & MU_WD(e_sw'type) = switch_doubleSwitchCrossing & c = card(e_sw'turningBranch) & c /= 2
+        COUNTEREXAMPLE
+            errorCard("turningBranch", {e_sw}, 2, 2, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & e_sw'type = {} & c = card(e_sw'leftBranch) & c > 1
+        COUNTEREXAMPLE
+            errorCard("leftBranch", {e_sw}, 0, 1, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & e_sw'type = {} & c = card(e_sw'rightBranch) & c > 1
+        COUNTEREXAMPLE
+            errorCard("rightBranch", {e_sw}, 0, 1, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & e_sw'type = {} & c = card(e_sw'straightBranch) & c > 2
+        COUNTEREXAMPLE
+            errorCard("straightBranch", {e_sw}, 0, 2, c)
+        END;
+        RULE_FAIL e_sw, c
+            WHEN e_sw : RailML3_switchIS & e_sw'type = {} & c = card(e_sw'turningBranch) & c > 2
+        COUNTEREXAMPLE
+            errorCard("turningBranch", {e_sw}, 0, 2, c)
+        END;
+        RULE_FAIL e_sw, e_b
+            WHEN e_sw : RailML3_switchIS & e_b : e_sw'leftBranch & card(e_b'netRelationRef) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("netRelationRef", "leftBranch", e_b'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, e_b
+            WHEN e_sw : RailML3_switchIS & e_b : e_sw'leftBranch & card(e_b'netRelationRef) = 1 & MU_WD(e_b'netRelationRef) /: allIdsOfType("netRelation")
+        COUNTEREXAMPLE
+            errorReference("netRelationRef", MU_WD(e_b'netRelationRef), "netRelation", e_b'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, e_b
+            WHEN e_sw : RailML3_switchIS & e_b : e_sw'rightBranch & card(e_b'netRelationRef) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("netRelationRef", "rightBranch", e_b'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, e_b
+            WHEN e_sw : RailML3_switchIS & e_b : e_sw'rightBranch & card(e_b'netRelationRef) = 1 & MU_WD(e_b'netRelationRef) /: allIdsOfType("netRelation")
+        COUNTEREXAMPLE
+            errorReference("netRelationRef", MU_WD(e_b'netRelationRef), "netRelation", e_b'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, e_b
+            WHEN e_sw : RailML3_switchIS & e_b : e_sw'straightBranch & card(e_b'netRelationRef) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("netRelationRef", "straightBranch", e_b'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, e_b
+            WHEN e_sw : RailML3_switchIS & e_b : e_sw'straightBranch & card(e_b'netRelationRef) = 1 & MU_WD(e_b'netRelationRef) /: allIdsOfType("netRelation")
+        COUNTEREXAMPLE
+            errorReference("netRelationRef", MU_WD(e_b'netRelationRef), "netRelation", e_b'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, e_b
+            WHEN e_sw : RailML3_switchIS & e_b : e_sw'turningBranch & card(e_b'netRelationRef) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("netRelationRef", "turningBranch", e_b'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, e_b
+            WHEN e_sw : RailML3_switchIS & e_b : e_sw'turningBranch & card(e_b'netRelationRef) = 1 & MU_WD(e_b'netRelationRef) /: allIdsOfType("netRelation")
+        COUNTEREXAMPLE
+            errorReference("netRelationRef", MU_WD(e_b'netRelationRef), "netRelation", e_b'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_switchIS & card(RailML3_switchesIS) = 1
+            EXPECT e'pId = MU_WD(RailML3_switchesIS)'recId
+        COUNTEREXAMPLE
+            errorParent("switchIS", "switchesIS", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_SWITCH
+    DEPENDS_ON_RULE is_valid_switchIS
+    DEPENDS_ON_COMPUTATION set_CROSSING, set_NET_RELATION
+    BODY
+        DEFINE RailML3_IS_SWITCH_IDS
+            TYPE FIN(allIdsOfType("switchIS"))
+            VALUE dom({ i_sw, e_sw | e_sw : RailML3_switchIS & i_sw = MU_WD(e_sw'Id) & switch_switchCrossingPart /: e_sw'type })
+        END;
+        DEFINE RailML3_IS_SWITCH_TYPE
+            TYPE RailML3_IS_SWITCH_IDS --> RailML3_IS_SWITCH_TYPES
+            VALUE { i_sw, type | #e_sw.(e_sw : RailML3_switchIS & type = IF card(e_sw'type) = 1 THEN MU_WD(e_sw'type) ELSE switch_ordinarySwitch END & i_sw : RailML3_IS_SWITCH_IDS & i_sw = MU_WD(e_sw'Id) ) }
+        END;
+        DEFINE RailML3_IS_SWITCH_BRANCHES
+            TYPE RailML3_IS_SWITCH_IDS --> ((allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION) <-> (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION))
+            VALUE 
+                fnc({ i_sw, branch | #(e_sw, nr).(e_sw : RailML3_switchIS & i_sw : RailML3_IS_SWITCH_IDS & i_sw = MU_WD(e_sw'Id)
+                    & nr : e_sw'leftBranch \/ e_sw'rightBranch \/ e_sw'turningBranch \/ e_sw'straightBranch
+                    & branch : RailML3_IS_NET_RELATION_BY_ID(MU_WD(nr'netRelationRef)))
+                })
+        END
+    END;
+
+    RULE validate_switchIS
+    DEPENDS_ON_COMPUTATION set_SWITCH
+    BODY
+        RULE_FAIL e_sw, e_rb, e_lb, nr_r, nr_l
+            WHEN e_sw : RailML3_switchIS & MU_WD(e_sw'Id) : RailML3_IS_SWITCH_IDS & e_rb : e_sw'rightBranch & e_lb : e_sw'leftBranch & nr_r : e_rb'netRelationRef & nr_l : e_lb'netRelationRef
+                & dom(dom(RailML3_IS_NET_RELATION_BY_ID(nr_r)) \/ ran(RailML3_IS_NET_RELATION_BY_ID(nr_r))) /\ dom(dom(RailML3_IS_NET_RELATION_BY_ID(nr_l)) \/ ran(RailML3_IS_NET_RELATION_BY_ID(nr_l))) = {}
+            COUNTEREXAMPLE
+                STRING_FORMAT("[Line ~w, id '"^MU_WD(e_sw'Id)^"']: Left and right branches are not connected and therefore do not indicate a branch tip", e_sw'xmlLineNumber)
+        END;
+        RULE_FAIL e_sw, e_tb, e_sb, nr_t, nr_s
+            WHEN e_sw : RailML3_switchIS & MU_WD(e_sw'Id) : RailML3_IS_SWITCH_IDS & e_tb : e_sw'turningBranch & e_sb : e_sw'straightBranch & nr_t : e_tb'netRelationRef & nr_s : e_sb'netRelationRef
+                & dom(dom(RailML3_IS_NET_RELATION_BY_ID(nr_t)) \/ ran(RailML3_IS_NET_RELATION_BY_ID(nr_t))) /\ dom(dom(RailML3_IS_NET_RELATION_BY_ID(nr_s)) \/ ran(RailML3_IS_NET_RELATION_BY_ID(nr_s))) = {}
+            COUNTEREXAMPLE
+                STRING_FORMAT("[Line ~w, id '"^MU_WD(e_sw'Id)^"']: Turning branch end is not connected to straight branch end", e_sw'xmlLineNumber)
+        END
+    END;
+    // END SWITCHES
+
+    // BEGIN TRACKS
+    COMPUTATION set_tracks
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_tracks
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("tracks")
+        END
+    END;
+    RULE is_valid_tracks
+    DEPENDS_ON_COMPUTATION set_tracks
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_tracks) & c /: 0..card(RailML3_functionalInfrastructure) // (0..1), 0 if no functionalInfrastructure
+        COUNTEREXAMPLE
+            errorCard("tracks", RailML3_tracks, 0, card(RailML3_functionalInfrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_tracks & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("tracks", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_track
+    DEPENDS_ON_RULE is_valid_tracks
+    DEPENDS_ON_COMPUTATION set_BORDER, set_SWITCH
+    BODY
+        DEFINE RailML3_track
+            TYPE FIN(RailML3_IS_track_Type)
+            VALUE dom({e, e_trc | e_trc : elementsOfType("track")
+                & e = rec(
+                        recId: e_trc'recId,
+                        pId: e_trc'pId,
+                        xmlLineNumber: STRING_TO_INT(e_trc'meta("xmlLineNumber")),
+                        Id: e_trc'attributes[{"id"}],
+                        type: IF "type" : dom(e_trc'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_TRACK_TYPES, "track_"^e_trc'attributes("type"))} ELSE {} END,
+                        trackBegin: dom({ a, c | c : childsOfElementType("trackBegin", e_trc'recId) & a : c'attributes[{"ref"}]}),
+                        trackEnd: dom({ a, c | c : childsOfElementType("trackEnd", e_trc'recId) & a : c'attributes[{"ref"}]}),
+                        lengths: dom({ a, c | c : childsOfElementType("length", e_trc'recId) & a = STRING_TO_REAL(c'attributes("value"))})
+                )})
+        END
+    END;
+    RULE is_valid_track
+    DEPENDS_ON_COMPUTATION set_track 
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_track) & IF card(RailML3_tracks) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no tracks
+        COUNTEREXAMPLE
+            IF card(RailML3_tracks) = 1 
+                THEN errorCardOnlyLowerBound("track", RailML3_tracks, 1, c)
+                ELSE errorCard("track", RailML3_track, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_track & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "track", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_trc, c
+            WHEN e_trc : RailML3_track & c = card(e_trc'trackBegin) & c > 1
+        COUNTEREXAMPLE
+            errorCard("trackBegin", {e_trc}, 0, 1, c)
+        END;
+        RULE_FAIL e_trc, e_data
+            WHEN e_trc : RailML3_track & e_data : childsOfElementType("trackBegin", e_trc'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "trackBegin", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_trc, e_tb
+            WHEN e_trc : RailML3_track & e_tb : e_trc'trackBegin & e_tb /: union(allIdsOfType[{"border","bufferStop","crossing","switchIS"}])
+        COUNTEREXAMPLE
+            errorReference("ref@trackBegin", e_tb, "border','bufferStop','crossing','switchIS", e_trc'xmlLineNumber)
+        END;
+        RULE_FAIL e_trc, c
+            WHEN e_trc : RailML3_track & c = card(e_trc'trackEnd) & c > 1
+        COUNTEREXAMPLE
+            errorCard("trackEnd", {e_trc}, 0, 1, c)
+        END;
+        RULE_FAIL e_trc, e_data
+            WHEN e_trc : RailML3_track & e_data : childsOfElementType("trackEnd", e_trc'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "trackEnd", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_trc, e_te
+            WHEN e_trc : RailML3_track & e_te : e_trc'trackEnd & e_te /: union(allIdsOfType[{"border","bufferStop","crossing","switchIS"}])
+        COUNTEREXAMPLE
+            errorReference("ref@trackEnd", e_te, "border','bufferStop','crossing','switchIS", e_trc'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_track & card(RailML3_tracks) = 1
+            EXPECT e'pId = MU_WD(RailML3_tracks)'recId
+        COUNTEREXAMPLE
+            errorParent("track", "tracks", e'xmlLineNumber)
+        END
+    END;
+    
+    COMPUTATION set_TRACK
+    DEPENDS_ON_RULE validate_linearLocation, is_valid_track
+    DEPENDS_ON_COMPUTATION set_BORDER, set_SWITCH, set_LINEAR_LOCATION, set_SPOT_LOCATION
+    BODY        
+        DEFINE RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS
+            TYPE allIdsOfType("track") --> ((allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION) >+> (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION))
+            VALUE allIdsOfType("track") <| RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS
+        END;
+        DEFINE RailML3_IS_TRACKS
+            TYPE allIdsOfType("track") --> ((union(allIdsOfType[{"netElement","bufferStop","crossing","switchIS"}]) \/ RailML3_IS_OPENEND_IDS) >+> (union(allIdsOfType[{"netElement","bufferStop","crossing","switchIS"}]) \/ RailML3_IS_OPENEND_IDS))
+            VALUE
+                %i_trc.(i_trc : dom(RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS) |
+                    { func | #(trc_a, trc_b, func_a, func_b, slocs).((trc_a, trc_b) : ignoreDirection(RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS(i_trc) - union(ran(RailML3_IS_SWITCH_BRANCHES))) & slocs = { i,s | i : dom((RailML3_IS_OPENEND_IDS \/ allIdsOfType("bufferStop")) <| RailML3_IS_SPOT_LOCATIONS) & s = dom(((RailML3_IS_OPENEND_IDS \/ allIdsOfType("bufferStop")) <| RailML3_IS_SPOT_LOCATIONS)(i)) }
+                        & IF {trc_a, trc_b} <: union(ran(slocs)) THEN
+                            (( func_a : dom(slocs) & trc_a : slocs(func_a) & func_b = prj1(trc_a)) or ( func_a = prj1(trc_a) & func_b : dom(slocs) & trc_b : slocs(func_b) ) )
+                        ELSE
+                            IF trc_a : union(ran(slocs)) THEN
+                                (( func_a : dom(slocs) & trc_a : slocs(func_a)& func_b = prj1(trc_a)) or ( func_a |-> func_b = prj1(trc_a) |-> prj1(trc_b) ) )
+                            ELSE
+                                IF trc_b : union(ran(slocs)) THEN
+                                    (( func_a = prj1(trc_a) & func_b : dom(slocs) & trc_b : slocs(func_b) ) or ( func_a |-> func_b = prj1(trc_a) |-> prj1(trc_b) ) )
+                                ELSE
+                                    func_a |-> func_b = prj1(trc_a) |-> prj1(trc_b)
+                                END
+                            END
+                        END
+                        & func = func_a |-> func_b & func_a /= func_b
+                        )
+                    }
+                    <+
+                    { func | #(trc_a, trc_b, func_a, func_b, BRANCHES).(BRANCHES = RailML3_IS_SWITCH_BRANCHES \/ RailML3_IS_CROSSING_BRANCHES
+                        & (trc_a, trc_b) : RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS(i_trc) & ( trc_a : ran(union(ran(BRANCHES))) or trc_b : dom(union(ran(BRANCHES))) )
+                        & trc_a |-> trc_b /: union(ran(BRANCHES))
+                        & IF trc_a : ran(union(ran(BRANCHES))) & trc_b : dom(union(ran(BRANCHES))) THEN
+                            ( ( func_a : dom(BRANCHES) & trc_a : ran(BRANCHES(func_a)) & func_b = prj1(prj1(trc_a)) )
+                            or
+                            ( func_a = prj1(prj1(trc_b)) & func_b : dom(BRANCHES) & trc_b : dom(BRANCHES(func_b)) ) )
+                        ELSE
+                            (trc_a : ran(union(ran(BRANCHES))) & ( ( func_a : dom(BRANCHES) & trc_a : ran(BRANCHES(func_a)) & func_b = prj1(prj1(trc_a)) ) ) )
+                            or
+                            (trc_b : dom(union(ran(BRANCHES))) & ( ( func_a = prj1(prj1(trc_b)) & func_b : dom(BRANCHES) & trc_b : dom(BRANCHES(func_b)) ) ) )
+                        END
+                        & func = func_a |-> func_b & func_a /= func_b
+                        )
+                    }
+                )
+        END;
+        DEFINE RailML3_IS_TRACK_BEGIN_NET_ELEMENT
+            TYPE allIdsOfType("track") --> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
+            VALUE {i_trc, ne | i_trc : allIdsOfType("track") & ne : dom(RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS(i_trc)) & ne /: ran(RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS(i_trc)) }
+        END;
+        DEFINE RailML3_IS_TRACK_BEGIN
+            TYPE allIdsOfType("track") --> (union(allIdsOfType[{"netElement","bufferStop","crossing","switchIS"}]) \/ RailML3_IS_OPENEND_IDS)
+            VALUE {i_trc, ne | i_trc : allIdsOfType("track") & IF RailML3_IS_TRACKS(i_trc) = {} THEN ne = prj1(prj1(RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc))) ELSE ne : ran(RailML3_IS_TRACKS(i_trc)~) & ne /: dom(RailML3_IS_TRACKS(i_trc)~) END }
+        END;
+        DEFINE RailML3_IS_TRACK_END_NET_ELEMENT
+            TYPE allIdsOfType("track") --> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
+            VALUE {i_trc, ne | i_trc : allIdsOfType("track") & ne : ran(RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS(i_trc)) & ne /: dom(RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS(i_trc)) }
+        END;
+        DEFINE RailML3_IS_TRACK_END
+            TYPE allIdsOfType("track") --> (union(allIdsOfType[{"netElement","bufferStop","crossing","switchIS"}]) \/ RailML3_IS_OPENEND_IDS)
+            VALUE {i_trc, ne | i_trc : allIdsOfType("track") & IF RailML3_IS_TRACKS(i_trc) = {} THEN ne = prj1(prj1(RailML3_IS_TRACK_END_NET_ELEMENT(i_trc))) ELSE ne : ran(RailML3_IS_TRACKS(i_trc)) & ne /: dom(RailML3_IS_TRACKS(i_trc)) END }
+        END
+    END;
+
+    RULE validate_track
+    DEPENDS_ON_COMPUTATION set_TRACK, set_NET_RELATION_SUBSEQUENT_LOCATIONS
+    BODY
+        RULE_FORALL e_trc, trackBegin
+        WHERE e_trc : RailML3_track & trackBegin = e_trc'trackBegin
+        EXPECT IF card(trackBegin) = 1 THEN RailML3_IS_TRACK_BEGIN(MU_WD(e_trc'Id)) = MU_WD(trackBegin) ELSE btrue END
+        COUNTEREXAMPLE
+    	    STRING_FORMAT("[Line ~w, id '"^MU_WD(e_trc'Id)^"']: Begin of track is declared as '~w', but was inferred as '~w' from topology", e_trc'xmlLineNumber, MU_WD(trackBegin), RailML3_IS_TRACK_BEGIN(MU_WD(e_trc'Id)))
+        END;
+        RULE_FORALL e_trc, i_trc, trackBegin
+        WHERE e_trc : RailML3_track & i_trc = MU_WD(e_trc'Id) & trackBegin = RailML3_IS_TRACK_BEGIN(i_trc) & trackBegin : allIdsOfType("netElement")
+        EXPECT card(RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS[{RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc)}]) = 1
+        COUNTEREXAMPLE
+    	    STRING_FORMAT("[Line ~w, id '"^i_trc^"']: Begin of track is inferred as netElement '~w', but it is ambiguous (probably it should be a switch or crossing)", e_trc'xmlLineNumber, trackBegin)
+        END;
+        RULE_FORALL e_trc, trackEnd
+        WHERE e_trc : RailML3_track & trackEnd = e_trc'trackEnd
+        EXPECT IF card(trackEnd) = 1 THEN RailML3_IS_TRACK_END(MU_WD(e_trc'Id)) = MU_WD(trackEnd) ELSE btrue END
+        COUNTEREXAMPLE
+    	    STRING_FORMAT("[Line ~w, id '"^MU_WD(e_trc'Id)^"']: End of track is declared as '~w', but was inferred as '~w' from topology", e_trc'xmlLineNumber, MU_WD(trackEnd), RailML3_IS_TRACK_END(MU_WD(e_trc'Id)))
+        END;
+        RULE_FORALL e_trc, i_trc, trackEnd
+        WHERE e_trc : RailML3_track & i_trc = MU_WD(e_trc'Id) & trackEnd = RailML3_IS_TRACK_END(i_trc) & trackEnd : allIdsOfType("netElement")
+        EXPECT card(RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS[{RailML3_IS_TRACK_END_NET_ELEMENT(i_trc)}]) = 1
+        COUNTEREXAMPLE
+    	    STRING_FORMAT("[Line ~w, id '"^i_trc^"']: End of track is inferred as netElement '~w', but it is ambiguous (probably it should be a switch or crossing)", e_trc'xmlLineNumber, trackEnd)
+        END;
+        RULE_FAIL e_trc, i_trc, trackBegin, trackEnd
+            WHEN e_trc : RailML3_track & i_trc = MU_WD(e_trc'Id) & trackBegin = RailML3_IS_TRACK_BEGIN_NET_ELEMENT(i_trc) & trackEnd = RailML3_IS_TRACK_END_NET_ELEMENT(i_trc)
+                & trackBegin |-> trackEnd /: closure1(RailML3_IS_TRACK_ASSOCIATED_NET_ELEMENTS(i_trc))
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^i_trc^"']: Track is not fully connected in topology (no path between trackBegin '~w' and trackEnd '~w' could be found)", e_trc'xmlLineNumber, RailML3_IS_TRACK_BEGIN(i_trc), RailML3_IS_TRACK_END(i_trc))
+        END
+    END;
+    RULE warnings_track
+    DEPENDS_ON_COMPUTATION set_TRACK, set_NET_RELATION_SUBSEQUENT_LOCATIONS
+    ERROR_TYPES 2
+    BODY
+        RULE_FAIL WHEN bfalse COUNTEREXAMPLE "" END; // to implement error type 1
+        RULE_FORALL e_trc, e_lloc, length, expected_length
+        WHERE
+            e_trc : RailML3_track & e_lloc : RailML3_linearLocation & e_lloc'pId = e_trc'recId & !e_ane.(e_ane : e_lloc'associatedNetElements => card(e_ane'posBegin) = 1 & card(e_ane'posEnd) = 1)
+            & length : e_trc'lengths & expected_length = SIGMA(e_ane, pB, pE).(e_ane : e_lloc'associatedNetElements & pB : e_ane'posBegin & pE : e_ane'posEnd | RABS(pE - pB))
+        EXPECT length = expected_length
+        ERROR_TYPE 2
+        COUNTEREXAMPLE
+    	    STRING_FORMAT("[Line ~w, id '"^MU_WD(e_trc'Id)^"']: Track has total length of ~w, but sum of the lengths of its netElements is ~w", e_trc'xmlLineNumber, length, expected_length)
+        END
+    END;
+    // END TRACKS
+
+    // BEGIN TRAIN_DETECTION_ELEMENTS
+    COMPUTATION set_trainDetectionElements
+    DEPENDS_ON_RULE is_valid_functionalInfrastructure
+    BODY
+        DEFINE RailML3_trainDetectionElements
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("trainDetectionElements")
+        END
+    END;
+    RULE is_valid_trainDetectionElements
+    DEPENDS_ON_COMPUTATION set_trainDetectionElements
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_trainDetectionElements) & c /: 0..card(RailML3_functionalInfrastructure) // (0..1), 0 if no functionalInfrastructure
+        COUNTEREXAMPLE
+            errorCard("trainDetectionElements", RailML3_trainDetectionElements, 0, card(RailML3_functionalInfrastructure), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_trainDetectionElements & card(RailML3_functionalInfrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_functionalInfrastructure)'recId
+        COUNTEREXAMPLE
+            errorParent("trainDetectionElements", "functionalInfrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_trainDetectionElement
+    DEPENDS_ON_RULE is_valid_trainDetectionElements
+    BODY
+        DEFINE RailML3_trainDetectionElement
+            TYPE FIN(RailML3_IS_trainDetectionElement_Type)
+            VALUE dom({e, e_tde | e_tde : ran(data) & e_tde'element  = "trainDetectionElement"
+                & e = rec(
+                        recId: e_tde'recId,
+                        pId: e_tde'pId,
+                        xmlLineNumber: STRING_TO_INT(e_tde'meta("xmlLineNumber")),
+                        Id: e_tde'attributes[{"id"}],
+                        type: IF "type" : dom(e_tde'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_TRAIN_DETECTION_ELEMENT_TYPES, "trainDetectionElement_"^e_tde'attributes("type"))} ELSE {} END,
+                        detectedObject: IF "detectedObject" : dom(e_tde'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_TRAIN_DETECTION_ELEMENT_DETECTED_OBJECTS, "detectedObject_"^e_tde'attributes("detectedObject"))} ELSE {} END,
+                        limitsTrainDetectionElement: dom({ a, c | c : childsOfElementType("limitsTrainDetectionElement", e_tde'recId) & a : c'attributes[{"ref"}]})
+                )})
+        END
+    END;
+    RULE is_valid_trainDetectionElement
+    DEPENDS_ON_COMPUTATION set_trainDetectionElement
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_trainDetectionElement) & IF card(RailML3_trainDetectionElements) = 1 THEN c = 0 ELSE c /= 0 END // (1..*), 0 if no trainDetectionElements
+        COUNTEREXAMPLE
+            IF card(RailML3_trainDetectionElements) = 1 
+                THEN errorCardOnlyLowerBound("trainDetectionElement", RailML3_trainDetectionElements, 1, c)
+                ELSE errorCard("trainDetectionElement", RailML3_trainDetectionElement, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_trainDetectionElement & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "trainDetectionElement", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_tde, c
+            WHEN e_tde : RailML3_trainDetectionElement & c = card(e_tde'limitsTrainDetectionElement) & c > 2
+        COUNTEREXAMPLE
+            errorCard("limitsTrainDetectionElement", {e_tde}, 0, 2, c)
+        END;
+        RULE_FAIL e_tde, e_data
+            WHEN e_tde : RailML3_trainDetectionElement & e_data : childsOfElementType("limitsTrainDetectionElement", e_tde'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "limitsTrainDetectionElement", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_tde, e_t
+            WHEN e_tde : RailML3_trainDetectionElement & e_t : e_tde'limitsTrainDetectionElement & e_t /: allIdsOfType("trainDetectionElement")
+        COUNTEREXAMPLE
+            errorReference("ref@limitsTrainDetectionElement", e_t, "trainDetectionElement", e_tde'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_trainDetectionElement & card(RailML3_trainDetectionElements) = 1
+            EXPECT e'pId = MU_WD(RailML3_trainDetectionElements)'recId
+        COUNTEREXAMPLE
+            errorParent("trainDetectionElement", "trainDetectionElements", e'xmlLineNumber)
+        END
+    END;
+    // END TRAIN_DETECTION_ELEMENTS
+
+    // BEGIN GENERAL CHILDREN
+    // BEGIN LINEAR_LOCATION 
+    COMPUTATION set_linearLocation
+    DEPENDS_ON_COMPUTATION set_NET_ELEMENT
+    BODY
+        DEFINE RailML3_linearLocation
+            TYPE FIN(RailML3_IS_linearLocation_Type)
+            VALUE dom({e, e_lloc | e_lloc : elementsOfType("linearLocation")
+                & e = rec(
+                        recId: e_lloc'recId,
+                        pId: e_lloc'pId,
+                        xmlLineNumber: STRING_TO_INT(e_lloc'meta("xmlLineNumber")),
+                        Id: e_lloc'attributes[{"id"}],
+                        applicationDirection: IF "applicationDirection" : dom(e_lloc'attributes) THEN TYPED_STRING_TO_ENUM(RailML3_IS_DIRECTION, "direction_"^e_lloc'attributes("applicationDirection")) ELSE direction_both END,
+                        associatedNetElements: // included here; only possible other parent areaLocation is not used
+                            dom({ a, c | c : childsOfElementType("associatedNetElement", e_lloc'recId)
+                                & #(i_ne, posBegin, posEnd, keepsOrientation).(
+                                    i_ne = c'attributes[{"netElementRef"}]
+                                    & posBegin = IF "posBegin" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("posBegin"))} ELSE {} END
+                                    & posEnd = IF "posEnd" : dom(c'attributes) THEN {STRING_TO_REAL(c'attributes("posEnd"))} ELSE {} END
+                                    & keepsOrientation = IF "keepsOrientation" : dom(c'attributes) & c'attributes("keepsOrientation") = "true" THEN TRUE ELSE FALSE END
+                                    & a = rec(
+                                        recId: c'recId, 
+                                        pId: c'pId,
+                                        xmlLineNumber: STRING_TO_INT(c'meta("xmlLineNumber")),
+                                        netElementRef: i_ne,
+                                        sequence: IF "sequence" : dom(c'attributes) THEN {STRING_TO_INT(c'attributes("sequence"))} ELSE {} END,
+                                        keepsOrientation: keepsOrientation,
+                                        intrinsicCoordBegin:
+                                            // extension: for different linear positioning systems
+                                            IF "intrinsicCoordBegin" : dom(c'attributes) THEN
+                                                STRING_TO_REAL(c'attributes("intrinsicCoordBegin"))
+                                            ELSIF posBegin /= {} & card(i_ne) = 1 & RailML3_IS_NET_ELEMENT_LENGTHS(MU_WD(i_ne)) > 0.0 THEN
+                                                max( {0.0, min({1.0, MU_WD(posBegin)/RailML3_IS_NET_ELEMENT_LENGTHS(MU_WD(i_ne)) } ) } )
+                                            ELSIF keepsOrientation = FALSE THEN 1.0
+                                            ELSE 0.0 END,
+                                        intrinsicCoordEnd:
+                                            // extension: for different linear positioning systems
+                                            IF "intrinsicCoordEnd" : dom(c'attributes) THEN
+                                                STRING_TO_REAL(c'attributes("intrinsicCoordEnd"))
+                                            ELSIF posEnd /= {} & card(i_ne) = 1 & RailML3_IS_NET_ELEMENT_LENGTHS(MU_WD(i_ne)) > 0.0 THEN
+                                                max( {0.0, min({1.0, MU_WD(posEnd)/RailML3_IS_NET_ELEMENT_LENGTHS(MU_WD(i_ne)) } ) } )
+                                            ELSIF keepsOrientation = FALSE THEN 0.0
+                                            ELSE 1.0 END,
+                                        posBegin: posBegin,
+                                        posEnd: posEnd
+                                )
+                            ) }),
+                        refersTo: data(e_lloc'pId)'attributes("id")
+                ) })
+        END
+    END;
+    RULE is_valid_linearLocation
+    DEPENDS_ON_COMPUTATION set_linearLocation
+    BODY
+        RULE_FAIL e
+            WHEN e : RailML3_linearLocation & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "linearLocation", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_lloc, c
+            WHEN e_lloc : RailML3_linearLocation & c = card(e_lloc'associatedNetElements) & c = 0
+        COUNTEREXAMPLE
+            errorCardOnlyLowerBound("associatedNetElement", {e_lloc}, 1, c)
+        END;
+        RULE_FORALL e, valid_parents
+            WHERE e : RailML3_linearLocation
+                & valid_parents = {"balise", "baliseGroup", "border", "bufferStop", "crossing", "derailerIS", "detector", "electrificationSection", 
+                    "etcsArea", "etcsLevelTransition", "genericArea", "geometryPoint", "gradientCurve", "horizontalCurve", "keyLockIS", "levelCrossingIS", 
+                    "line", "loadingGauge", "mileageChange", "operationalPoint", "overCrossing", "platform", "platformEdge", "radioBlockCentreBorder", 
+                    "restrictionArea", "serviceSection", "signalIS", "speedSection", "stoppingPlace", "switchIS", "track", "trackBed", "trackGauge", 
+                    "trainDetectionElement", "trainProtectionElement", "trainRadio", "tunnelGateIS", "underCrossing", "weightLimit"}
+            EXPECT data(e'pId)'element : valid_parents
+        COUNTEREXAMPLE
+            errorParentMultipleTypes("linearLocation", TO_STRING(valid_parents), e'xmlLineNumber)
+        END;
+        // valid associated net elements
+        RULE_FAIL e_lloc, e_ane
+            WHEN e_lloc : RailML3_linearLocation & e_ane : e_lloc'associatedNetElements & card(e_ane'netElementRef) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("netElementRef", "associatedNetElement", e_ane'xmlLineNumber)
+        END;
+        RULE_FAIL e_lloc, e_ane, i_ne
+            WHEN e_lloc : RailML3_linearLocation & e_ane : e_lloc'associatedNetElements & i_ne : e_ane'netElementRef & i_ne /: allIdsOfType("netElement")
+        COUNTEREXAMPLE
+            errorReference("associatedNetElement@netElementRef", i_ne, "netElement", e_lloc'xmlLineNumber)
+        END;
+        RULE_FAIL e_lloc, e_ane, iC
+            WHEN e_lloc : RailML3_linearLocation & e_ane : e_lloc'associatedNetElements & iC = e_ane'intrinsicCoordBegin & (iC < 0.0 or iC > 1.0)
+        COUNTEREXAMPLE
+            errorValue("intrinsicCoordBegin", "[0.0,1.0]", TO_STRING(iC), e_ane'xmlLineNumber)
+        END;
+        RULE_FAIL e_lloc, e_ane, iC
+            WHEN e_lloc : RailML3_linearLocation & e_ane : e_lloc'associatedNetElements & iC = e_ane'intrinsicCoordEnd & (iC < 0.0 or iC > 1.0)
+        COUNTEREXAMPLE
+            errorValue("intrinsicCoordEnd", "[0.0,1.0]", TO_STRING(iC), e_ane'xmlLineNumber)
+        END
+    END;   
+
+    COMPUTATION set_LINEAR_LOCATION
+    DEPENDS_ON_RULE is_valid_linearLocation
+    DEPENDS_ON_COMPUTATION set_NET_RELATION
+    BODY
+        DEFINE RailML3_IS_LINEAR_LOCATION_REFERS_TO
+            TYPE allIdsOfType("linearLocation") --> dom(all_ids)
+            VALUE { i_lloc, i_ref | #e_lloc.(e_lloc : RailML3_linearLocation & i_lloc = MU_WD(e_lloc'Id) & i_ref = e_lloc'refersTo) }
+        END;
+        DEFINE RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS
+            TYPE ran(RailML3_IS_LINEAR_LOCATION_REFERS_TO) +-> ((allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION) <-> (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION))
+            VALUE
+                { i_ref, lloc | #e_lloc.(e_lloc : RailML3_linearLocation & i_ref = e_lloc'refersTo
+                    & lloc = { l1,l2 | #(e_ane).(e_ane : e_lloc'associatedNetElements & MU_WD(e_ane'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL & prj1(l1) = (MU_WD(e_ane'netElementRef) |-> e_ane'intrinsicCoordBegin) & prj1(l2) = (MU_WD(e_ane'netElementRef) |-> e_ane'intrinsicCoordEnd) & prj2(l1) = prj2(l2)
+                            & prj2(l1) = IF e_ane'intrinsicCoordBegin < e_ane'intrinsicCoordEnd THEN direction_normal ELSE direction_reverse END ) }
+                        \/
+                        { l1,l2 | #(e_ane1, e_ane2).({e_ane1, e_ane2} <: e_lloc'associatedNetElements & e_ane1 /= e_ane2 & MU_WD(e_ane1'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL & MU_WD(e_ane2'netElementRef) : RailML3_IS_NET_RESOURCES_MICRO_LEVEL
+                            & prj1(l1) = (MU_WD(e_ane1'netElementRef) |-> e_ane1'intrinsicCoordEnd) & prj1(l2) = (MU_WD(e_ane2'netElementRef) |-> e_ane2'intrinsicCoordBegin) & l1 |-> l2 : RailML3_IS_NET_RELATION) }
+                )}
+        END;
+        DEFINE RailML3_IS_LINEAR_LOCATIONS
+            TYPE ran(RailML3_IS_LINEAR_LOCATION_REFERS_TO) +-> ((allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION) <-> (allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION))
+            VALUE 
+                %i_ref.(i_ref : dom(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS) |
+                    dom({ lloc, e_lloc | e_lloc : RailML3_linearLocation & i_ref = e_lloc'refersTo
+                        & lloc : IF e_lloc'applicationDirection = direction_both THEN RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(i_ref) \/ inverseDirectedRelation(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(i_ref))
+                            ELSIF e_lloc'applicationDirection = direction_reverse THEN inverseDirectedRelation(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(i_ref))
+                            ELSE RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(i_ref) END
+                    })
+                )
+        END;
+        DEFINE RailML3_IS_LINEAR_LOCATION_SEQUENCE
+            TYPE allIdsOfType("linearLocation") +-> seq1(NATURAL)
+            VALUE { i_lloc, ne_seq | #e_lloc.(e_lloc : RailML3_linearLocation & i_lloc = MU_WD(e_lloc'Id) & ne_seq = SORT(dom({ i, e_ane | e_ane : e_lloc'associatedNetElements & i : e_ane'sequence }))) & ne_seq /= {} }
+        END;
+        DEFINE RailML3_IS_LINEAR_LOCATION_KEEPS_ORIENTATION
+            TYPE ran(RailML3_IS_LINEAR_LOCATION_REFERS_TO) --> (allIdsOfType("netElement") +-> BOOL)
+            VALUE fnc({ i_ref, ne_ko | #(e_lloc, e_ane).(e_lloc : RailML3_linearLocation & i_ref = e_lloc'refersTo & e_ane : e_lloc'associatedNetElements & ne_ko = MU_WD(e_ane'netElementRef) |-> e_ane'keepsOrientation) })
+        END
+    END;
+
+    RULE validate_linearLocation
+    DEPENDS_ON_COMPUTATION set_LINEAR_LOCATION, set_NET_RELATION_SUBSEQUENT_LOCATIONS
+    BODY
+        // from the fact that any point can reach any other, one can deduce that they are all correctly on the same level
+        // connectivity of llocs is checked only for such elements that must be connected (e.g. tracks). Other linear defined elements can have for multiple parallel tracks, for ex. tunnels
+        RULE_FAIL e_lloc, i_lloc, begin, end, i_ne_b, i_ne_e
+            WHEN e_lloc : RailML3_linearLocation & i_lloc = MU_WD(e_lloc'Id)
+                & RailML3_IS_LINEAR_LOCATION_REFERS_TO(i_lloc) : dom(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS) /\ union(allIdsOfType[{"lines","platformEdge","track"}])
+                & begin = { b | b : dom(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(RailML3_IS_LINEAR_LOCATION_REFERS_TO(i_lloc))) & b /: ran(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(RailML3_IS_LINEAR_LOCATION_REFERS_TO(i_lloc))) }
+                & end = { e | e /: dom(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(RailML3_IS_LINEAR_LOCATION_REFERS_TO(i_lloc))) & e : ran(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(RailML3_IS_LINEAR_LOCATION_REFERS_TO(i_lloc))) } 
+                & i_ne_b : begin & i_ne_e : end & prj1(prj1(i_ne_b)) /= prj1(prj1(i_ne_e))
+                & prj1(i_ne_b) |-> prj1(i_ne_e) /: closure1(ignoreDirection(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(RailML3_IS_LINEAR_LOCATION_REFERS_TO(i_lloc)) \/ union(ran(RailML3_IS_NO_NET_RELATION))))
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^i_lloc^"']: LinearLocation is not fully connected in topology (netElements with ids '"^prj1(prj1(i_ne_b))^"' and '"^prj1(prj1(i_ne_e))^"' are not connected)", e_lloc'xmlLineNumber)
+        END;
+        RULE_FORALL e_lloc, i_lloc, e_ane1, e_ane2, seq_1, seq_2
+            WHERE e_lloc : RailML3_linearLocation & i_lloc = MU_WD(e_lloc'Id) & i_lloc : dom(RailML3_IS_LINEAR_LOCATION_SEQUENCE)
+                & {e_ane1, e_ane2} <: e_lloc'associatedNetElements & e_ane1 /= e_ane2
+                & seq_1 : e_ane1'sequence & seq_2 : e_ane2'sequence
+                & RailML3_IS_LINEAR_LOCATION_SEQUENCE(i_lloc)~(seq_1) = pred(RailML3_IS_LINEAR_LOCATION_SEQUENCE(i_lloc)~(seq_2))
+            EXPECT seq_1 = pred(seq_2) & #r.(r : RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(RailML3_IS_LINEAR_LOCATION_REFERS_TO(i_lloc)) & prj1(prj1(prj1(r))) = MU_WD(e_ane1'netElementRef) & prj1(prj1(prj2(r))) = MU_WD(e_ane2'netElementRef) )
+        COUNTEREXAMPLE
+            IF seq_1 /= pred(seq_2) THEN
+                STRING_FORMAT("[Line ~w, id '"^i_lloc^"']: Sequence has gaps - netElement '"^MU_WD(e_ane1'netElementRef)^"' with sequence number ~w has no successor, but a higher number ~w exists", e_lloc'xmlLineNumber, seq_1, seq_2)                
+            ELSE "" END
+            ^
+            IF not( #r.(r : RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS(RailML3_IS_LINEAR_LOCATION_REFERS_TO(i_lloc)) & prj1(prj1(prj1(r))) = MU_WD(e_ane1'netElementRef) & prj1(prj1(prj2(r))) = MU_WD(e_ane2'netElementRef) ) ) THEN
+                STRING_FORMAT("[Line ~w, id '"^i_lloc^"']: Sequence does not match the topology - netElement '"^MU_WD(e_ane1'netElementRef)^"' should be the successor of netElement '"^MU_WD(e_ane2'netElementRef)^"' given sequence numbers ~w and ~w, but they are not", e_lloc'xmlLineNumber, seq_1, seq_2)
+            ELSE "" END
+        END
+    END;
+    RULE warnings_linearLocation
+    DEPENDS_ON_COMPUTATION set_LINEAR_LOCATION
+    ERROR_TYPES 2
+    BODY
+        RULE_FAIL e_lloc, e_ane, e_ane_orig
+            WHEN e_lloc : RailML3_linearLocation & e_ane : childsOfElementType("associatedNetElement", e_lloc'recId) & e_ane_orig : e_lloc'associatedNetElements
+                & e_ane_orig'recId = e_ane'recId & "intrinsicCoordBegin" /: dom(e_ane'attributes)
+        COUNTEREXAMPLE
+            warningDefaultValue("intrinsicCoordBegin", TO_STRING(e_ane_orig'intrinsicCoordBegin), STRING_TO_INT(e_ane'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_lloc, e_ane, e_ane_orig
+            WHEN e_lloc : RailML3_linearLocation & e_ane : childsOfElementType("associatedNetElement", e_lloc'recId) & e_ane_orig : e_lloc'associatedNetElements
+                & e_ane_orig'recId = e_ane'recId & "intrinsicCoordEnd" /: dom(e_ane'attributes)
+        COUNTEREXAMPLE
+            warningDefaultValue("intrinsicCoordEnd", TO_STRING(e_ane_orig'intrinsicCoordEnd), STRING_TO_INT(e_ane'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_lloc, e_ane, e_ane_orig, i_ne
+            WHEN e_lloc : RailML3_linearLocation & e_ane : childsOfElementType("associatedNetElement", e_lloc'recId) & e_ane_orig : e_lloc'associatedNetElements
+                & e_ane_orig'recId = e_ane'recId & ("intrinsicCoordBegin" /: dom(e_ane'attributes) or "intrinsicCoordEnd" /: dom(e_ane'attributes)) & i_ne = MU_WD(e_ane_orig'netElementRef) & RailML3_IS_NET_ELEMENT_LENGTHS(i_ne) = -1.0
+                & i_ne : RailML3_IS_NET_RESOURCES_MICRO_LEVEL
+        ERROR_TYPE 2
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^i_ne^"']: Referenced netElement has no length - derived intrinsic coordinates can be imprecise!", e_ane_orig'xmlLineNumber)
+        END
+    END;
+    // END LINEAR_LOCATION
+
+    // BEGIN SPOT_LOCATION
+    COMPUTATION set_spotLocation
+    DEPENDS_ON_COMPUTATION set_NET_ELEMENT
+    BODY
+        DEFINE RailML3_spotLocation
+            TYPE FIN(RailML3_IS_spotLocation_Type)
+            VALUE dom({e, e_sloc | e_sloc : elementsOfType("spotLocation")
+                & #(i_ne, pos).(
+                    i_ne = e_sloc'attributes[{"netElementRef"}]
+                    & pos = IF "pos" : dom(e_sloc'attributes) & STRING_IS_NUMBER(e_sloc'attributes("pos")) THEN {STRING_TO_REAL(e_sloc'attributes("pos"))} ELSE {} END
+                    & e = rec(
+                            recId: e_sloc'recId,
+                            pId: e_sloc'pId,                            
+                            xmlLineNumber: STRING_TO_INT(e_sloc'meta("xmlLineNumber")),
+                            Id: e_sloc'attributes[{"id"}],
+                            netElementRef: i_ne,
+                            intrinsicCoord:
+                                // extension: for different linear positioning systems
+                                IF "intrinsicCoord" : dom(e_sloc'attributes) THEN
+                                    STRING_TO_REAL(e_sloc'attributes("intrinsicCoord"))
+                                ELSIF pos /= {} & card(i_ne) = 1 & RailML3_IS_NET_ELEMENT_LENGTHS(MU(i_ne)) > 0.0 THEN
+                                    max( {0.0, min({1.0, MU_WD(pos)/RailML3_IS_NET_ELEMENT_LENGTHS(MU_WD(i_ne)) } ) } )
+                                ELSE 0.0 END,
+                            applicationDirection: IF "applicationDirection" : dom(e_sloc'attributes) THEN TYPED_STRING_TO_ENUM(RailML3_IS_DIRECTION, "direction_"^e_sloc'attributes("applicationDirection")) ELSE direction_both END,
+                            pos: pos,
+                            refersTo: data(e_sloc'pId)'attributes("id")
+                ))})
+        END
+    END;
+    RULE is_valid_spotLocation
+    DEPENDS_ON_COMPUTATION set_spotLocation
+    BODY
+        RULE_FAIL e
+            WHEN e : RailML3_spotLocation & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "spotLocation", e'xmlLineNumber)
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_spotLocation & card(e'netElementRef) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("netElementRef", "spotLocation", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_sloc, i_ne
+            WHEN e_sloc : RailML3_spotLocation & i_ne : e_sloc'netElementRef & i_ne /: allIdsOfType("netElement")
+        COUNTEREXAMPLE
+            errorReference("associatedNetElement@netElementRef", i_ne, "netElement", e_sloc'xmlLineNumber)
+        END;
+        RULE_FAIL e_sloc, iC
+            WHEN e_sloc : RailML3_spotLocation & iC = e_sloc'intrinsicCoord & (iC < 0.0 or iC > 1.0)
+        COUNTEREXAMPLE
+            errorValue("intrinsicCoord", "[0.0,1.0]", TO_STRING(iC), e_sloc'xmlLineNumber)
+        END;
+        RULE_FORALL e, valid_parents
+            WHERE e : RailML3_spotLocation 
+                & valid_parents = {"balise", "baliseGroup", "border", "bufferStop", "crossing", "derailerIS", "detector", "electrificationSection", 
+                    "etcsArea", "etcsLevelTransition", "genericArea", "geometryPoint", "gradientCurve", "horizontalCurve", "keyLockIS", "levelCrossingIS", 
+                    "line", "loadingGauge", "mileageChange", "operationalPoint", "overCrossing", "platform", "platformEdge", "radioBlockCentreBorder", 
+                    "restrictionArea", "serviceSection", "signalIS", "speedSection", "stoppingPlace", "switchIS", "track", "trackBed", "trackGauge", 
+                    "trainDetectionElement", "trainProtectionElement", "trainRadio", "tunnelGateIS", "underCrossing", "weightLimit"}
+            EXPECT data(e'pId)'element : valid_parents
+        COUNTEREXAMPLE
+            errorParentMultipleTypes("spotLocation", TO_STRING(valid_parents), e'xmlLineNumber)
+        END
+    END;    
+
+    COMPUTATION set_SPOT_LOCATION
+    DEPENDS_ON_RULE is_valid_spotLocation
+    BODY
+        DEFINE RailML3_IS_SPOT_LOCATION_REFERS_TO
+            TYPE allIdsOfType("spotLocation") --> dom(all_ids)
+            VALUE { i_sloc, i_ref | #e_sloc.(e_sloc : RailML3_spotLocation & i_sloc = MU_WD(e_sloc'Id) & i_ref = e_sloc'refersTo) }
+        END;
+        DEFINE RailML3_IS_SPOT_LOCATIONS
+            TYPE dom(all_ids) +-> FIN(allIdsOfType("netElement")*REAL*RailML3_IS_DIRECTION)
+            VALUE
+                fnc(dom({ i_ref_ne_dir, e_sloc | e_sloc : RailML3_spotLocation & prj1(i_ref_ne_dir) = e_sloc'refersTo & prj1(prj2(i_ref_ne_dir)) = MU_WD(e_sloc'netElementRef) |-> e_sloc'intrinsicCoord
+                    & IF e_sloc'applicationDirection = direction_both THEN prj2(prj2(i_ref_ne_dir)) = direction_normal or prj2(prj2(i_ref_ne_dir)) = direction_reverse ELSE prj2(prj2(i_ref_ne_dir)) = e_sloc'applicationDirection END }))
+        END
+    END;
+
+    RULE validate_spotLocation
+    DEPENDS_ON_COMPUTATION set_SPOT_LOCATION
+    BODY
+        // Single point elements such as signals or switches have exactly 1 sloc; others such as overCrossing can have two points (tunnel, bridge) (currently ignores multiple linear positioning systems)
+        RULE_FAIL i_e, c
+            WHEN i_e : union(allIdsOfType[{"balise","baliseGroup","border","bufferStop","crossing","derailerIS","levelCrossingIS","trainDetectionElement","trainProtectionElement","signalIS","switchIS"}])
+                & IF i_e : dom(RailML3_IS_SPOT_LOCATIONS) THEN c = card(dom(RailML3_IS_SPOT_LOCATIONS(i_e))) & c /= 1 ELSE c = 0 & i_e /: dom(RailML3_IS_SPOT_LOCATIONS) END
+        COUNTEREXAMPLE
+            STRING_FORMAT("[Line ~w, id '"^i_e^"']: Expected exactly one spotLocation for type '"^prj1(all_ids(i_e))^"', but found ~w", STRING_TO_INT(data(prj2(all_ids(i_e)))'meta("xmlLineNumber")), c)
+        END;
+        RULE_FAIL i1, i2
+            WHEN {i1, i2} <: union(allIdsOfType[{"crossing","derailerIS"}]) \/ RailML3_IS_SWITCH_IDS & i1 /= i2 & RailML3_IS_SPOT_LOCATIONS(i1) /\ RailML3_IS_SPOT_LOCATIONS(i2) /= {}
+        COUNTEREXAMPLE
+            STRING_FORMAT("[ids '~w','~w']: Only one crossing, derailer or switch can be located at the same spotLocation", i1, i2)
+        END
+    END;
+    RULE warnings_spotLocation
+    DEPENDS_ON_RULE validate_spotLocation
+    ERROR_TYPES 2
+    BODY
+        RULE_FAIL e_sloc
+            WHEN e_sloc : elementsOfType("spotLocation") & "applicationDirection" /: dom(e_sloc'attributes)
+        COUNTEREXAMPLE
+            warningDefaultValue("applicationDirection", "both", STRING_TO_INT(e_sloc'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_sloc, e_sloc_orig
+            WHEN e_sloc_orig : RailML3_spotLocation & e_sloc : elementsOfType("spotLocation") & "intrinsicCoord" /: dom(e_sloc'attributes)
+                & e_sloc_orig'recId = e_sloc'recId & "intrinsicCoordEnd" /: dom(e_sloc'attributes)
+        COUNTEREXAMPLE
+            warningDefaultValue("intrinsicCoord", TO_STRING(e_sloc_orig'intrinsicCoord), STRING_TO_INT(e_sloc'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL WHEN bfalse ERROR_TYPE 2 COUNTEREXAMPLE "" END // to implement error type 2
+    END;    
+    // END SPOT_LOCATION    
+
+    // BEGIN LINEAR_COORDINATE
+    COMPUTATION set_linearCoordinate
+    DEPENDS_ON_COMPUTATION set_NET_ELEMENT, set_SPOT_LOCATION, set_LINEAR_LOCATION
+    BODY
+        DEFINE RailML3_linearCoordinate
+            TYPE FIN(RailML3_IS_linearCoordinate_Type)
+            VALUE
+                dom({ e, e_lc | e_lc : elementsOfType("linearCoordinate")
+                    & e = rec(
+                            recId: e_lc'recId,
+                            pId: e_lc'pId,
+                            xmlLineNumber: STRING_TO_INT(e_lc'meta("xmlLineNumber")),
+                            positioningSystemRef: e_lc'attributes[{"positioningSystemRef"}],
+                            measure: IF "measure" : dom(e_lc'attributes) & STRING_IS_NUMBER(e_lc'attributes("measure")) THEN {STRING_TO_REAL(e_lc'attributes("measure"))} ELSE {} END,
+                            refersTo: data(e_lc'pId)'attributes("id")
+                    )})
+        END
+    END;
+    RULE is_valid_linearCoordinate
+    DEPENDS_ON_COMPUTATION set_linearCoordinate
+    BODY
+        RULE_FAIL e
+            WHEN e : RailML3_linearCoordinate & card(e'positioningSystemRef) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("positioningSystemRef", "linearCoordinate", e'xmlLineNumber)
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_linearCoordinate & card(e'measure) /= 1
+        COUNTEREXAMPLE
+            errorAttribute("measure", "linearCoordinate", e'xmlLineNumber)
+        END;
+        RULE_FAIL e1, e2, ref
+            WHEN {e1, e2} <: RailML3_linearCoordinate & e1 /= e2 & ref = e1'refersTo & ref = e2'refersTo & ref : allIdsOfType("spotLocation")
+        COUNTEREXAMPLE
+            errorCard("linearCoordinate", {e1,e2}, 0, 1, 2)
+        END;
+        RULE_FORALL e_lc, valid_parents
+            WHERE e_lc : RailML3_linearCoordinate & valid_parents = {"intrinsicCoordinate", "linearLocation", "spotLocation"}
+            EXPECT data(e_lc'pId)'element : valid_parents
+        COUNTEREXAMPLE
+            errorParentMultipleTypes("linearCoordinate", TO_STRING(valid_parents), e_lc'xmlLineNumber)
+        END
+    END;
+    // END LINEAR_COORDINATE
+    // END GENERAL CHILDREN
+
+    // FINAL COMPUTATION FOR RELATION
+    COMPUTATION set_NET_RELATION_SUBSEQUENT_LOCATIONS
+    DEPENDS_ON_COMPUTATION set_NET_RELATION, set_NETWORK, set_SPOT_LOCATION, set_LINEAR_LOCATION
+    BODY
+        DEFINE RailML3_IS_ALL_INTRINSIC_COORDINATES
+            TYPE FIN(allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION)
+            VALUE 
+                ( dom(union(ran(RailML3_IS_SPOT_LOCATIONS)))
+                    \/ (dom(dom(union(ran(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS)))) \/ dom(ran(union(ran(RailML3_IS_LINEAR_LOCATION_ASSOCIATED_NET_ELEMENTS)))))
+                    \/ (allIdsOfType("netElement") * {0.0,1.0})
+                ) * {direction_normal, direction_reverse}
+        END;
+        DEFINE RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS
+            TYPE ((allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION) <-> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION))
+            VALUE
+                union(RailML3_IS_NET_RELATION_BY_ID[RailML3_IS_NET_RESOURCES_MICRO_LEVEL])
+                <+ ({ iC_dir1, iC_dir2 | #(i_ne, all_locs).(
+                        i_ne : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL
+                        & all_locs = SORT({i_ne} * REAL <| RailML3_IS_ALL_INTRINSIC_COORDINATES |> {direction_normal})
+                        & all_locs~(iC_dir1) = pred(all_locs~(iC_dir2))
+                    ) }
+                    \/
+                    { iC_dir1, iC_dir2 | #(i_ne, all_locs).(
+                        i_ne : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL
+                        & all_locs = SORT({i_ne} * REAL <| RailML3_IS_ALL_INTRINSIC_COORDINATES |> {direction_reverse})
+                        & all_locs~(iC_dir1) = succ(all_locs~(iC_dir2))
+                    ) }
+                )
+        END;
+        DEFINE railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1
+            TYPE ((allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION) <-> (allIdsOfType("netElement") * REAL * RailML3_IS_DIRECTION))
+            VALUE closure1(RailML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS)
+        END
+    END;
+    
+    RULE validate_NET_RELATION_SUBSEQUENT_LOCATIONS
+    DEPENDS_ON_COMPUTATION set_NET_RELATION_SUBSEQUENT_LOCATIONS
+    BODY
+        RULE_FAIL block
+        WHEN block |-> block : railML3_IS_NET_RELATION_SUBSEQUENT_LOCATIONS_closure1
+        COUNTEREXAMPLE
+            STRING_FORMAT("netRelation contains a cycle ~w -> ~w", block, block)
+        END
+    END;
+    // END FUNCTIONAL_INFRASTRUCTURE
+    //--------------
+    // BEGIN GEOMETRY
+    COMPUTATION set_geometry
+    DEPENDS_ON_RULE is_valid_infrastructure
+    BODY
+        DEFINE RailML3_geometry
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("geometry")
+        END
+    END;
+    RULE is_valid_geometry
+    DEPENDS_ON_COMPUTATION set_geometry
+    BODY
+        RULE_FAIL c
+            WHEN c = card(RailML3_geometry) & c > 1
+        COUNTEREXAMPLE 
+            errorCard("geometry", RailML3_geometry, 0, 1, c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_geometry & card(RailML3_infrastructure) = 1
+            EXPECT e'pId = MU_WD(RailML3_infrastructure)'recId
+        COUNTEREXAMPLE 
+            errorParent("geometry", "infrastructure", e'xmlLineNumber)
+        END
+    END;
+
+    // BEGIN GEOMETRY_POINTS
+    COMPUTATION set_geometryPoints
+    DEPENDS_ON_RULE is_valid_geometry
+    BODY
+        DEFINE RailML3_geometryPoints
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("geometryPoints")
+        END
+    END;
+    RULE is_valid_geometryPoints
+    DEPENDS_ON_COMPUTATION set_geometryPoints
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_geometryPoints) & c /: 0..card(RailML3_geometry) // (0..1), 0 if no geometry
+        COUNTEREXAMPLE
+            errorCard("geometryPoints", RailML3_geometryPoints, 0, card(RailML3_geometry), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_geometryPoints & card(RailML3_geometry) = 1
+            EXPECT e'pId = MU_WD(RailML3_geometry)'recId
+        COUNTEREXAMPLE
+            errorParent("geometryPoints", "geometry", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_geometryPoint
+    DEPENDS_ON_RULE is_valid_geometryPoints
+    BODY
+        DEFINE RailML3_geometryPoint
+            TYPE FIN(RailML3_IS_geometryPoint_Type)
+            VALUE dom({e, e_gp | e_gp : elementsOfType("geometryPoint")
+                & e = rec(
+                        recId: e_gp'recId,
+                        pId: e_gp'pId,
+                        xmlLineNumber: STRING_TO_INT(e_gp'meta("xmlLineNumber")),
+                        Id: e_gp'attributes[{"id"}],
+                        radius: IF "radius" : dom(e_gp'attributes) & STRING_IS_NUMBER(e_gp'attributes("radius")) THEN {STRING_TO_REAL(e_gp'attributes("radius"))} ELSE {} END,
+                        gradient: IF "gradient" : dom(e_gp'attributes) & STRING_IS_NUMBER(e_gp'attributes("gradient")) THEN {STRING_TO_REAL(e_gp'attributes("gradient"))} ELSE {} END,
+                        azimuth: IF "azimuth" : dom(e_gp'attributes) & STRING_IS_NUMBER(e_gp'attributes("azimuth")) THEN {STRING_TO_REAL(e_gp'attributes("azimuth"))} ELSE {} END
+                )})
+        END
+    END;
+    RULE is_valid_geometryPoint
+    DEPENDS_ON_COMPUTATION set_geometryPoint
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_geometryPoint) & IF card(RailML3_geometryPoints) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no geometryPoints
+        COUNTEREXAMPLE
+            IF card(RailML3_geometryPoints) = 1 
+                THEN errorCardOnlyLowerBound("geometryPoint", RailML3_geometryPoints, 1, c)
+                ELSE errorCard("geometryPoint", RailML3_geometryPoint, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_geometryPoint & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "geometryPoint", e'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_geometryPoint & card(RailML3_geometryPoints) = 1
+            EXPECT e'pId = MU_WD(RailML3_geometryPoints)'recId
+        COUNTEREXAMPLE
+            errorParent("geometryPoint", "geometryPoints", e'xmlLineNumber)
+        END
+    END;
+    // END GEOMETRY_POINTS
+
+    // BEGIN GRADIENT_CURVES
+    COMPUTATION set_gradientCurves
+    DEPENDS_ON_RULE is_valid_geometry
+    BODY
+        DEFINE RailML3_gradientCurves
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("gradientCurves")
+        END
+    END;
+    RULE is_valid_gradientCurves
+    DEPENDS_ON_COMPUTATION set_gradientCurves
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_gradientCurves) & c /: 0..card(RailML3_geometry) // (0..1), 0 if no geometry
+        COUNTEREXAMPLE
+            errorCard("gradientCurves", RailML3_gradientCurves, 0, card(RailML3_geometry), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_gradientCurves & card(RailML3_geometry) = 1
+            EXPECT e'pId = MU_WD(RailML3_geometry)'recId
+        COUNTEREXAMPLE
+            errorParent("gradientCurves", "geometry", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_gradientCurve
+    DEPENDS_ON_RULE is_valid_gradientCurves
+    BODY
+        DEFINE RailML3_gradientCurve
+            TYPE FIN(RailML3_IS_gradientCurve_Type)
+            VALUE dom({e, e_gc | e_gc : elementsOfType("gradientCurve")
+                & e = rec(
+                        recId: e_gc'recId,
+                        pId: e_gc'pId,
+                        xmlLineNumber: STRING_TO_INT(e_gc'meta("xmlLineNumber")),
+                        Id: e_gc'attributes[{"id"}],
+                        curveType: IF "curveType" : dom(e_gc'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_GRADIENT_CURVE_TYPES, "gradientCurve_"^e_gc'attributes("curveType"))} ELSE {} END,
+                        gradient: IF "gradient" : dom(e_gc'attributes) & STRING_IS_NUMBER(e_gc'attributes("gradient")) THEN {STRING_TO_REAL(e_gc'attributes("gradient"))} ELSE {} END,
+                        deltaGradient: IF "deltaGradient" : dom(e_gc'attributes) & STRING_IS_NUMBER(e_gc'attributes("deltaGradient")) THEN {STRING_TO_REAL(e_gc'attributes("deltaGradient"))} ELSE {} END,
+                        radius: IF "radius" : dom(e_gc'attributes) & STRING_IS_NUMBER(e_gc'attributes("radius")) THEN {STRING_TO_REAL(e_gc'attributes("radius"))} ELSE {} END,
+                        length: IF "length" : dom(e_gc'attributes) & STRING_IS_NUMBER(e_gc'attributes("length")) THEN {STRING_TO_REAL(e_gc'attributes("length"))} ELSE {} END,
+                        beginsInGeometryPoint: dom({ a, c | c : childsOfElementType("beginsInGeometryPoint", e_gc'recId) & a : c'attributes[{"ref"}]}),
+                        endsInGeometryPoint: dom({ a, c | c : childsOfElementType("endsInGeometryPoint", e_gc'recId) & a : c'attributes[{"ref"}]})
+                )})
+        END
+    END;
+    RULE is_valid_gradientCurve
+    DEPENDS_ON_COMPUTATION set_gradientCurve
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_gradientCurve) & IF card(RailML3_gradientCurves) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no gradientCurves
+        COUNTEREXAMPLE
+            IF card(RailML3_gradientCurves) = 1 
+                THEN errorCardOnlyLowerBound("gradientCurve", RailML3_gradientCurves, 1, c)
+                ELSE errorCard("gradientCurve", RailML3_gradientCurve, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_gradientCurve & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "gradientCurve", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_gc, c
+            WHEN e_gc : RailML3_gradientCurve & c = card(e_gc'beginsInGeometryPoint) & c > 1
+        COUNTEREXAMPLE
+            errorCard("beginsInGeometryPoint", {e_gc}, 0, 1, c)
+        END;
+        RULE_FAIL e_gc, e_data
+            WHEN e_gc : RailML3_gradientCurve & e_data : childsOfElementType("beginsInGeometryPoint", e_gc'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "beginsInGeometryPoint", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_gc, e_bgc
+            WHEN e_gc : RailML3_gradientCurve & e_bgc : e_gc'beginsInGeometryPoint & e_bgc /: allIdsOfType("geometryPoint")
+        COUNTEREXAMPLE
+            errorReference("ref@beginsInGeometryPoint", e_bgc, "geometryPoint", e_gc'xmlLineNumber)
+        END;
+        RULE_FAIL e_gc, c
+            WHEN e_gc : RailML3_gradientCurve & c = card(e_gc'endsInGeometryPoint) & c > 1
+        COUNTEREXAMPLE
+            errorCard("endsInGeometryPoint", {e_gc}, 0, 1, c)
+        END;
+        RULE_FAIL e_gc, e_data
+            WHEN e_gc : RailML3_gradientCurve & e_data : childsOfElementType("endsInGeometryPoint", e_gc'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "endsInGeometryPoint", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_gc, e_egc
+            WHEN e_gc : RailML3_gradientCurve & e_egc : e_gc'endsInGeometryPoint & e_egc /: allIdsOfType("geometryPoint")
+        COUNTEREXAMPLE
+            errorReference("ref@endsInGeometryPoint", e_egc, "geometryPoint", e_gc'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_gradientCurve & card(RailML3_gradientCurves) = 1
+            EXPECT e'pId = MU_WD(RailML3_gradientCurves)'recId
+        COUNTEREXAMPLE
+            errorParent("gradientCurve", "gradientCurves", e'xmlLineNumber)
+        END
+    END;
+    // END GRADIENT_CURVES
+
+    // BEGIN HORIZONTAL_CURVES
+    COMPUTATION set_horizontalCurves
+    DEPENDS_ON_RULE is_valid_geometry
+    BODY
+        DEFINE RailML3_horizontalCurves
+            TYPE FIN(RailML3_IS_generic_Type)
+            VALUE genericISType("horizontalCurves")
+        END
+    END;
+    RULE is_valid_horizontalCurves
+    DEPENDS_ON_COMPUTATION set_horizontalCurves
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_horizontalCurves) & c /: 0..card(RailML3_geometry) // (0..1), 0 if no geometry
+        COUNTEREXAMPLE
+            errorCard("horizontalCurves", RailML3_horizontalCurves, 0, card(RailML3_geometry), c)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_horizontalCurves & card(RailML3_geometry) = 1
+            EXPECT e'pId = MU_WD(RailML3_geometry)'recId
+        COUNTEREXAMPLE
+            errorParent("horizontalCurves", "geometry", e'xmlLineNumber)
+        END
+    END;
+
+    COMPUTATION set_horizontalCurve
+    DEPENDS_ON_RULE is_valid_horizontalCurves
+    BODY
+        DEFINE RailML3_horizontalCurve
+            TYPE FIN(RailML3_IS_horizontalCurve_Type)
+            VALUE dom({e, e_hc | e_hc : elementsOfType("horizontalCurve")
+                & e = rec(
+                        recId: e_hc'recId,
+                        pId: e_hc'pId,
+                        xmlLineNumber: STRING_TO_INT(e_hc'meta("xmlLineNumber")),
+                        Id: e_hc'attributes[{"id"}],
+                        curveType: IF "curveType" : dom(e_hc'attributes) THEN {TYPED_STRING_TO_ENUM(RailML3_IS_HORIZONTAL_CURVE_TYPES, "horizontalCurve_"^e_hc'attributes("curveType"))} ELSE {} END,
+                        azimuth: IF "azimuth" : dom(e_hc'attributes) & STRING_IS_NUMBER(e_hc'attributes("azimuth")) THEN {STRING_TO_REAL(e_hc'attributes("azimuth"))} ELSE {} END,
+                        deltaAzimuth: IF "deltaAzimuth" : dom(e_hc'attributes) & STRING_IS_NUMBER(e_hc'attributes("deltaAzimuth")) THEN {STRING_TO_REAL(e_hc'attributes("deltaAzimuth"))} ELSE {} END,
+                        radius: IF "radius" : dom(e_hc'attributes) & STRING_IS_NUMBER(e_hc'attributes("radius")) THEN {STRING_TO_REAL(e_hc'attributes("radius"))} ELSE {} END,
+                        length: IF "length" : dom(e_hc'attributes) & STRING_IS_NUMBER(e_hc'attributes("length")) THEN {STRING_TO_REAL(e_hc'attributes("length"))} ELSE {} END,
+                        beginsInGeometryPoint: dom({ a, c | c : childsOfElementType("beginsInGeometryPoint", e_hc'recId) & a : c'attributes[{"ref"}]}),
+                        endsInGeometryPoint: dom({ a, c | c : childsOfElementType("endsInGeometryPoint", e_hc'recId) & a : c'attributes[{"ref"}]})
+                )})
+        END
+    END;
+    RULE is_valid_horizontalCurve
+    DEPENDS_ON_COMPUTATION set_horizontalCurve
+    BODY
+        RULE_FAIL c
+        WHEN
+            c = card(RailML3_horizontalCurve) & IF card(RailML3_horizontalCurves) = 1 THEN c < 1 ELSE c /= 0 END // (1..*), 0 if no horizontalCurves
+        COUNTEREXAMPLE
+            IF card(RailML3_horizontalCurves) = 1 
+                THEN errorCardOnlyLowerBound("horizontalCurve", RailML3_horizontalCurves, 1, c)
+                ELSE errorCard("horizontalCurve", RailML3_horizontalCurve, 0, 0, c)
+            END
+        END;
+        RULE_FAIL e
+            WHEN e : RailML3_horizontalCurve & (card(e'Id) /= 1 or (card(e'Id) = 1 & MU_WD(e'Id) = ""))
+        COUNTEREXAMPLE
+            errorAttribute("id", "horizontalCurve", e'xmlLineNumber)
+        END;
+        RULE_FAIL e_hc, c
+            WHEN e_hc : RailML3_horizontalCurve & c = card(e_hc'beginsInGeometryPoint) & c > 1
+        COUNTEREXAMPLE
+            errorCard("beginsInGeometryPoint", {e_hc}, 0, 1, c)
+        END;
+        RULE_FAIL e_hc, e_data
+            WHEN e_hc : RailML3_horizontalCurve & e_data : childsOfElementType("beginsInGeometryPoint", e_hc'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "beginsInGeometryPoint", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_hc, e_bgc
+            WHEN e_hc : RailML3_horizontalCurve & e_bgc : e_hc'beginsInGeometryPoint & e_bgc /: allIdsOfType("geometryPoint")
+        COUNTEREXAMPLE
+            errorReference("ref@beginsInGeometryPoint", e_bgc, "geometryPoint", e_hc'xmlLineNumber)
+        END;
+        RULE_FAIL e_hc, c
+            WHEN e_hc : RailML3_horizontalCurve & c = card(e_hc'endsInGeometryPoint) & c > 1
+        COUNTEREXAMPLE
+            errorCard("endsInGeometryPoint", {e_hc}, 0, 1, c)
+        END;
+        RULE_FAIL e_hc, e_data
+            WHEN e_hc : RailML3_horizontalCurve & e_data : childsOfElementType("endsInGeometryPoint", e_hc'recId) & ("ref" /: dom(e_data'attributes) or "ref" |-> "" : e_data'attributes)
+        COUNTEREXAMPLE
+            errorAttribute("ref", "endsInGeometryPoint", STRING_TO_INT(e_data'meta("xmlLineNumber")))
+        END;
+        RULE_FAIL e_hc, e_egc
+            WHEN e_hc : RailML3_horizontalCurve & e_egc : e_hc'endsInGeometryPoint & e_egc /: allIdsOfType("geometryPoint")
+        COUNTEREXAMPLE
+            errorReference("ref@endsInGeometryPoint", e_egc, "geometryPoint", e_hc'xmlLineNumber)
+        END;
+        RULE_FORALL e
+            WHERE e : RailML3_horizontalCurve & card(RailML3_horizontalCurves) = 1
+            EXPECT e'pId = MU_WD(RailML3_horizontalCurves)'recId
+        COUNTEREXAMPLE
+            errorParent("horizontalCurve", "horizontalCurves", e'xmlLineNumber)
+        END
+    END
+    // END HORIZONTAL_CURVES
+    // END GEOMETRY
+END
