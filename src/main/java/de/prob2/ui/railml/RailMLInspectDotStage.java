@@ -121,6 +121,7 @@ public class RailMLInspectDotStage extends Stage {
 	private final I18n i18n;
 	private final RailMLImportMeta railMLImportMeta;
 
+	private double scalingFactor;
 	private String dot;
 	private String dotEngine;
 	private final ObjectProperty<byte[]> currentDotContent;
@@ -145,6 +146,7 @@ public class RailMLInspectDotStage extends Stage {
 		this.i18n = i18n;
 		this.railMLImportMeta = railMLImportMeta;
 
+		this.scalingFactor = 0.1;
 		this.dot = null;
 		this.dotEngine = null;
 		this.currentDotContent = new SimpleObjectProperty<>(this, "currentDotContent", null);
@@ -171,9 +173,9 @@ public class RailMLInspectDotStage extends Stage {
 		// TODO: Maybe use ProB preference for dot engine later
 
 		incScalingButton.pressedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("increaseScalingFactor"));
+			.addListener((o,f,t) -> scalingFactor += railMLImportMeta.getVisualisationStrategy() == RailMLImportMeta.VisualisationStrategy.D4R ? 0.001 : 0.1);
 		decScalingButton.pressedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("decreaseScalingFactor"));
+			.addListener((o,f,t) -> scalingFactor -= railMLImportMeta.getVisualisationStrategy() == RailMLImportMeta.VisualisationStrategy.D4R ? 0.001 : 0.1);
 
 		dotView.visibleProperty().bind(this.updater.runningProperty().not());
 		placeholderLabel.visibleProperty().bind(this.updater.runningProperty());
@@ -207,6 +209,7 @@ public class RailMLInspectDotStage extends Stage {
 		curvedsplines.setVisible(isDotCustomGraph); curvedsplines.setManaged(isDotCustomGraph);
 
 		initializeOptions();
+		scalingFactor = railMLImportMeta.getVisualisationStrategy() == RailMLImportMeta.VisualisationStrategy.D4R ? 0.004 : 0.1;
 	}
 
 	private void initializeOptions() {
@@ -301,8 +304,7 @@ public class RailMLInspectDotStage extends Stage {
 		sb.append("(");
 		sb.append(displayArgs.stream().map(this::bBool).collect(Collectors.joining(",")));
 
-		String scalingFactorInit = railMLImportMeta.getVisualisationStrategy() == RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE ? "0.1" : "0.004";
-		sb.append(",").append(scalingFactorInit);
+		sb.append(",").append(scalingFactor);
 
 		String language = languageChoiceBox.getValue().toString().toLowerCase();
 		sb.append(",\"").append(language).append("\"");
