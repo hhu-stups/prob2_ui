@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static de.prob.animator.domainobjects.DotVisualizationCommand.EXPRESSION_AS_GRAPH_NAME;
 import static de.prob.animator.domainobjects.DotVisualizationCommand.getByName;
 import static de.prob2.ui.railml.RailMLHelper.replaceOldFile;
 
@@ -270,7 +271,7 @@ public class RailMLInspectDotStage extends Stage {
 	 * Same method as in DotView.java, but only for "custom_graph".
 	 */
 	protected void visualizeCustomGraph(final List<IEvalElement> formulas) throws InterruptedException {
-		DotVisualizationCommand customGraphItem = getByName("expr_as_graph", railMLImportMeta.getState());
+		DotVisualizationCommand customGraphItem = getByName(EXPRESSION_AS_GRAPH_NAME, railMLImportMeta.getState());
 		final String dotLocal = customGraphItem.getState().getStateSpace().getCurrentPreference("DOT");
 		final String dotEngineLocal = customGraphItem.getPreferredDotLayoutEngine()
 				.orElseGet(() -> customGraphItem.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
