@@ -315,7 +315,7 @@ public class RailMLStage extends Stage {
 
 	public void generateMachines() throws Exception {
 
-		String graphMachineName = "rmch/RailML3_validation.rmch";
+		String graphMachineName = "rmch/RailML3_import.rmch";
 		URI graphMachine = Objects.requireNonNull(getClass().getResource(graphMachineName)).toURI();
 		Api api = injector.getInstance(Api.class);
 

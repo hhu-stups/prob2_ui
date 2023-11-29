@@ -9,35 +9,7 @@ ABSTRACT_CONSTANTS
 CONCRETE_CONSTANTS
     file, data /*@desc the complete imported railML file by READ_XML */, all_ids
 PROPERTIES
-    //file =
-        //"../RailML examples/Invalid Files for Testing/empty.xml"
-        //"../RailML examples/Invalid Files for Testing/no_railml.xml"
-        //"../RailML examples/Invalid Files for Testing/unsupported_version.xml"
-        //"../RailML examples/Invalid Files for Testing/multiple_is.xml"
-        //"../RailML examples/Invalid Files for Testing/tp_wo_is.xml"
-        //"../RailML examples/Simple Examples by railML.org (IS, IL, V2.3-V3.1)/SimpleExample_v12.xml"
-        //"../RailML examples/Advanced Example by railML.org (IS, IL, V3.1)/AdvancedExample.railml"
-        //"../RailML examples/Own Examples created by D4R/Duesseldorf_Hbf.railml"
-        //"../RailML examples/Own Examples created by D4R/KI-LOK_shunting.railml"
-        //"../RailML examples/Own Examples created by D4R/Koeln_Hbf.railml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2)/FLB.xml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2)/BRB.xml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2) - NEW -/BB.xml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2) - NEW -/DB1.xml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2) - NEW -/DB2.xml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2) - NEW -/OSL.xml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2)/DB2.xml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2)/BB.xml"
-        //"../RailML examples/Jernbanedirektoratet Norge (V3.2) - NEW -/Norway.xml"
-        //"../RailML examples/Examples RailOscope/Advanced Example railML.org.xml"
-        //"../RailML examples/Examples RailOscope/SmallWorld.xml"
-        //"../RailML examples/Examples RailOscope/Simplest Example.xml"
-        //"../RailML examples/Examples RailOscope/Simplest Example RTC.xml"
-        //"../RailML examples/Examples RailOscope/Simple Example+RTC.xml"
-        //"../RailML examples/Examples RailOscope/Simple Example, imported from railML 2.4.xml"
-        //"../RailML examples/Examples RailOscope/OpenStreetMap & Layouter Example.xml"
-        //"../RailML examples/Examples RailOscope/Bergensbanen.xml"
-     data = READ_XML(file, "auto")
+    data = READ_XML(file, "auto")
     & elementsOfType = %type.(type : STRING | { e | e : ran(data) & e'element = type } )
     & childsOfElementType = %(type, pId).(type : STRING & pId : NATURAL | { e | e : elementsOfType(type) & e'pId = pId } )
     & all_ids = { i, t | #e.(e : ran(data) & "id" : dom(e'attributes) & i = e'attributes("id") & t = e'element |-> e'recId) }
