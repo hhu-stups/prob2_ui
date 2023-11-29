@@ -4,9 +4,10 @@ import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-import de.prob.animator.domainobjects.*;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.FunctionOperation;
+import de.prob.animator.domainobjects.ErrorItem;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RulesChecker;
 import de.prob.model.brules.RulesModel;
@@ -281,16 +282,11 @@ public class RailMLStage extends Stage {
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (generateSVG) {
 							clearProgressWithMessage("Create visualization");
-
-							List<IEvalElement> customGraphFormula = Collections.singletonList(stateSpace.getModel()
-								.parseFormula(visualisationStrategy.getCustomGraphDefinition() + "(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 0.004, \"en\", \"dot\", TRUE)", FormulaExpand.EXPAND));
-							railMLImportMeta.setCustomGraphFormula(customGraphFormula);
-
 							railMLInspectDotStage.initializeOptionsForStrategy(visualisationStrategy);
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
 							try {
-								railMLInspectDotStage.visualizeCustomGraph(customGraphFormula);
+								railMLInspectDotStage.visualizeCustomGraph();
 							} catch (InterruptedException e) {
 								throw new RuntimeException(e);
 							}

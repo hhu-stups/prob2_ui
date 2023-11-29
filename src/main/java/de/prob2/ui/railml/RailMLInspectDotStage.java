@@ -3,10 +3,7 @@ package de.prob2.ui.railml;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.prob.animator.domainobjects.DotCall;
-import de.prob.animator.domainobjects.DotOutputFormat;
-import de.prob.animator.domainobjects.DotVisualizationCommand;
-import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.config.FileChooserManager;
@@ -37,10 +34,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static de.prob.animator.domainobjects.DotVisualizationCommand.EXPRESSION_AS_GRAPH_NAME;
 import static de.prob.animator.domainobjects.DotVisualizationCommand.getByName;
@@ -158,7 +153,6 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		stageManager.setMacMenuBar(stageManager.getCurrent(), this.menuBar);
 		saveButton.disableProperty().bind(currentDotContent.isNull());
 		//helpButton.setHelpContent("mainmenu.visualisations.graphVisualisation", null);
 		dotView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
@@ -172,43 +166,9 @@ public class RailMLInspectDotStage extends Stage {
 		zoomOutMenuButton.setAccelerator(new MultiKeyCombination(zoomOutChar, zoomOutCode, zoomOutKeypad));
 
 		initializeOptions();
-
-		balises.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayBalises"));
-		borders.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayBorders"));
-		bufferstops.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayBufferstops"));
-		crossings.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayCrossings"));
-		derailers.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayDerailers"));
-		levelcrossings.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayLevelcrossings"));
-		operationalpoints.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayOperationalpoints"));
-		signals.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplaySignals"));
-		switches.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplaySwitches"));
-		traindetectionelements.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayTraindetectionelements"));
-		tvdsections.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayTvdsections"));
-		names.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDisplayNames"));
-
 		languageChoiceBox.getItems().addAll(RailMLInspectDotStage.Language.values());
-		languageChoiceBox.valueProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeLanguage", "language = \"" + languageChoiceBox.getValue().toString().toLowerCase() + "\""));
-
 		dotEngineChoiceBox.getItems().addAll(RailMLInspectDotStage.DotEngine.values());
-		dotEngineChoiceBox.valueProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeDotengine", "engine = \"" + dotEngineChoiceBox.getValue().toString().toLowerCase() + "\""));
 		// TODO: Maybe use ProB preference for dot engine later
-
-		curvedsplines.selectedProperty()
-			.addListener((o,f,t) -> railMLImportMeta.perform("changeUseCurvedSplines"));
 
 		incScalingButton.pressedProperty()
 			.addListener((o,f,t) -> railMLImportMeta.perform("increaseScalingFactor"));
@@ -220,6 +180,7 @@ public class RailMLInspectDotStage extends Stage {
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
 		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
 
+		this.setOnShown(e -> stageManager.setMacMenuBar(stageManager.getCurrent(), this.menuBar));
 		this.setOnCloseRequest(e -> {
 			e.consume();
 			this.cancel();
@@ -249,7 +210,6 @@ public class RailMLInspectDotStage extends Stage {
 	}
 
 	private void initializeOptions() {
-		// values must match INITIALISATION of B model
 		balises.setSelected(true);
 		borders.setSelected(true);
 		bufferstops.setSelected(true);
@@ -267,10 +227,16 @@ public class RailMLInspectDotStage extends Stage {
 		curvedsplines.setSelected(true);
 	}
 
+	protected void visualizeCustomGraph() throws InterruptedException {
+		List<IEvalElement> customGraphFormula = Collections.singletonList(railMLImportMeta.getState().getStateSpace().getModel()
+			.parseFormula(railMLImportMeta.getVisualisationStrategy().getCustomGraphDefinition() + this.getArgumentsForGraphDefinition(), FormulaExpand.EXPAND));
+		this.visualizeCustomGraph(customGraphFormula);
+	}
+
 	/**
 	 * Same method as in DotView.java, but only for "custom_graph".
 	 */
-	protected void visualizeCustomGraph(final List<IEvalElement> formulas) throws InterruptedException {
+	private void visualizeCustomGraph(final List<IEvalElement> formulas) throws InterruptedException {
 		DotVisualizationCommand customGraphItem = getByName(EXPRESSION_AS_GRAPH_NAME, railMLImportMeta.getState());
 		final String dotLocal = customGraphItem.getState().getStateSpace().getCurrentPreference("DOT");
 		final String dotEngineLocal = customGraphItem.getPreferredDotLayoutEngine()
@@ -316,6 +282,43 @@ public class RailMLInspectDotStage extends Stage {
 		}
 	}
 
+	private String getArgumentsForGraphDefinition() {
+		List<Boolean> displayArgs = new ArrayList<>();
+		displayArgs.add(balises.isSelected());
+		displayArgs.add(bufferstops.isSelected());
+		displayArgs.add(borders.isSelected());
+		displayArgs.add(crossings.isSelected());
+		displayArgs.add(derailers.isSelected());
+		displayArgs.add(operationalpoints.isSelected());
+		displayArgs.add(levelcrossings.isSelected());
+		displayArgs.add(signals.isSelected());
+		displayArgs.add(switches.isSelected());
+		displayArgs.add(traindetectionelements.isSelected());
+		displayArgs.add(tvdsections.isSelected());
+		displayArgs.add(names.isSelected());
+
+		StringBuilder sb = new StringBuilder();
+		sb.append("(");
+		sb.append(displayArgs.stream().map(this::bBool).collect(Collectors.joining(",")));
+
+		String scalingFactorInit = railMLImportMeta.getVisualisationStrategy() == RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE ? "0.1" : "0.004";
+		sb.append(",").append(scalingFactorInit);
+
+		String language = languageChoiceBox.getValue().toString().toLowerCase();
+		sb.append(",\"").append(language).append("\"");
+
+		String engine = dotEngineChoiceBox.getValue().toString().toLowerCase();
+		sb.append(",\"").append(engine).append("\"");
+
+		sb.append(",").append(bBool(curvedsplines.isSelected()));
+		sb.append(")");
+		return sb.toString();
+	}
+
+	private String bBool(boolean b) {
+		return b ? "TRUE" : "FALSE";
+	}
+
 	/**
 	 * Saves the current visualisation to a temporary SVG file, applies RailMLSvgConverter.convertSvgForVisB
 	 * for the current strategy and copies the content of the converted temporary SVG to the final SVG file.
@@ -355,7 +358,7 @@ public class RailMLInspectDotStage extends Stage {
 	private void refreshDotView () {
 		this.updater.execute(() -> {
 			try {
-				visualizeCustomGraph(railMLImportMeta.getCustomGraphFormula());
+				visualizeCustomGraph();
 			} catch (InterruptedException e) {
 				LOGGER.info("RailML Visualization interrupted", e);
 				Thread.currentThread().interrupt();
