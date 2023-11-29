@@ -277,7 +277,7 @@ public class RailMLStage extends Stage {
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (generateSVG) {
 							List<IEvalElement> customGraphFormula = Collections.singletonList(stateSpace.getModel()
-								.parseFormula(visualisationStrategy.getCustomGraphDefinition(), FormulaExpand.EXPAND));
+								.parseFormula(visualisationStrategy.getCustomGraphDefinition() + "(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 0.004, \"en\", \"dot\", TRUE)", FormulaExpand.EXPAND));
 							railMLImportMeta.setCustomGraphFormula(customGraphFormula);
 
 							railMLInspectDotStage.initializeOptionsForStrategy(visualisationStrategy);
