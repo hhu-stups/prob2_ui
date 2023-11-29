@@ -88,7 +88,7 @@
 					<HBox alignment="CENTER">
 						<VBox fx:id="progressBox" style="-fx-background-color: rgba(255, 255, 255, 0.75);" alignment="CENTER" visible="false">
 							<HBox alignment="CENTER">
-								<Label text="Executing" styleClass="bold"/>
+								<Label fx:id="progressDescription" styleClass="bold"/>
 								<Label text="  "/>
 								<Label fx:id="progressLabel"/>
 							</HBox>

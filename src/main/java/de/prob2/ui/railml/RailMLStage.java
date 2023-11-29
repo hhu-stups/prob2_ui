@@ -77,6 +77,8 @@ public class RailMLStage extends Stage {
 	@FXML
 	public VBox progressBox;
 	@FXML
+	public Label progressDescription;
+	@FXML
 	public Label progressLabel;
 	@FXML
 	public Label progressOperation;
@@ -264,6 +266,8 @@ public class RailMLStage extends Stage {
 		visualisationStrategy = visualisationStrategyChoiceBox.getValue();
 		railMLImportMeta.setVisualisationStrategy(visualisationStrategy);
 
+		clearProgressWithMessage("Initialize import");
+
 		updater.execute(() -> {
 			try {
 				generateMachines();
@@ -276,6 +280,8 @@ public class RailMLStage extends Stage {
 					Platform.runLater(() -> {
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (generateSVG) {
+							clearProgressWithMessage("Create visualization");
+
 							List<IEvalElement> customGraphFormula = Collections.singletonList(stateSpace.getModel()
 								.parseFormula(visualisationStrategy.getCustomGraphDefinition() + "(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, 0.004, \"en\", \"dot\", TRUE)", FormulaExpand.EXPAND));
 							railMLImportMeta.setCustomGraphFormula(customGraphFormula);
@@ -311,6 +317,13 @@ public class RailMLStage extends Stage {
 				throw new RuntimeException(e);
 			}
 		});
+	}
+
+	private void clearProgressWithMessage(String message) {
+		progressDescription.setText(message);
+		progressLabel.setText("");
+		progressBar.setProgress(-1);
+		progressOperation.setText("");
 	}
 
 	public void generateMachines() throws Exception {
@@ -389,6 +402,8 @@ public class RailMLStage extends Stage {
 					"  & scalingFactorStep = " + scalingFactorStep*/)
 				.perform("$initialise_machine");
 
+			Platform.runLater(() -> clearProgressWithMessage("Executing:"));
+
 			RulesChecker rulesChecker = new RulesChecker(stateSpace.getTrace(currentState.getId()));
 			rulesChecker.init();
 			RulesModel rulesModel = (RulesModel) stateSpace.getModel();
@@ -419,6 +434,8 @@ public class RailMLStage extends Stage {
 			if (inv_ok && import_success) {
 				Path dataPath = generationPath.resolve(dataFileName.getValue());
 				if (generateAnimation || generateValidation) {
+					clearProgressWithMessage("Generate Machines");
+
 					String VARS_AS_TYPED_STRING_railML_identifiers = stateSpace.getLoadedMachine().getVariableNames().
 						stream().filter(v -> v.startsWith("RailML3_")).collect(Collectors.joining(",\n    "));
 					String VARS_AS_TYPED_STRING_railML_contents = currentState.eval("VARS_AS_TYPED_STRING(\"RailML3_\")", FormulaExpand.EXPAND)
