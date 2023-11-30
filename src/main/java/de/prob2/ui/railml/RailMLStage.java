@@ -364,38 +364,9 @@ public class RailMLStage extends Stage {
 			}
 		});
 
-		String linkSvg, fullImport;
-		if (generateSVG) {
-			linkSvg = "TRUE";
-			if (!generateAnimation && !generateValidation) {
-				fullImport = "FALSE";
-			} else {
-				fullImport = "TRUE";
-			}
-		} else {
-			linkSvg = "FALSE";
-			fullImport = "TRUE";
-		}
-		double scalingFactorInit = 0.004, scalingFactorStep = 0.001;
-		if (visualisationStrategy == RailMLImportMeta.VisualisationStrategy.RAIL_OSCOPE) {
-			scalingFactorInit = 0.1;
-			scalingFactorStep = 0.1;
-		}
-
 		if (!Thread.currentThread().isInterrupted()) {
 			State currentState = stateSpace.getRoot()
-				.perform("$setup_constants", "file = \"" + railMLpath + "\"" /*+
-					"  & outputDataFile = \"" + generationPath.resolve(dataFileName.getValue()) + "\"\n" +
-					"  & outputAnimationFile = \"" + generationPath.resolve(animationFileName.getValue()) + "\"\n" +
-					"  & outputValidationFile = \"" + generationPath.resolve(validationFileName.getValue()) + "\"\n" +
-					"  & svgFile = \"" + svgFileName.getValue() + "\"\n" +
-					"  & LINK_SVG = " + linkSvg + "\n" +
-					"  & FULL_IMPORT = " + fullImport + "\n" +
-					"  & dataMachineName = \"" + dataFileName.getValue().split(".mch")[0] + "\"" +
-					"  & animationMachineName = \"" + animationFileName.getValue().split(".mch")[0] + "\"" +
-					"  & validationMachineName = \"" + validationFileName.getValue().split(".rmch")[0] + "\"" +
-					"  & scalingFactorInit = " + scalingFactorInit +
-					"  & scalingFactorStep = " + scalingFactorStep*/)
+				.perform("$setup_constants", "file = \"" + railMLpath + "\"")
 				.perform("$initialise_machine");
 
 			Platform.runLater(() -> clearProgressWithMessage("Executing:"));
@@ -412,13 +383,7 @@ public class RailMLStage extends Stage {
 				for (AbstractOperation op : executableOperations) {
 					rulesChecker.executeOperation(op);
 					nrExecutedOperations++;
-					int finalNrExecutedOperations = nrExecutedOperations;
-					Platform.runLater(() -> {
-						ProgressBar progressBar = this.progressBar;
-						progressBar.setProgress((double) finalNrExecutedOperations / totalNrOfOperations);
-						this.progressOperation.setText(op.getName());
-						this.progressLabel.setText(" (" + finalNrExecutedOperations + "/" + totalNrOfOperations + ")");
-					});
+					updateProgress(nrExecutedOperations, totalNrOfOperations, op.getName());
 				}
 				executableOperations = rulesChecker.getExecutableOperations();
 			}
@@ -509,13 +474,12 @@ public class RailMLStage extends Stage {
 		if (stateSpace != null) stateSpace.kill();
 		this.close();
 	}
-}
 
-/*private void updateProgress(final String op) {
+	private void updateProgress(final int nrExecutedOperations, final int totalNrOfOperations, final String opName) {
 		Platform.runLater(() -> {
-			progress.setValue(progress.getValue() + 1.0);
-			progressBar.setProgress(progress.getValue() / 3.0);
-			currentOperation.setValue(op);
+			ProgressBar progressBar = this.progressBar;
+			progressBar.setProgress((double) nrExecutedOperations / totalNrOfOperations);
+			this.progressOperation.setText(opName);
+			this.progressLabel.setText(" (" + nrExecutedOperations + "/" + totalNrOfOperations + ")");
 		});
 	}
- */
