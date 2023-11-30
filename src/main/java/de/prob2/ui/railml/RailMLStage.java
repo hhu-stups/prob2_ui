@@ -483,3 +483,4 @@ public class RailMLStage extends Stage {
 			this.progressLabel.setText(" (" + nrExecutedOperations + "/" + totalNrOfOperations + ")");
 		});
 	}
+}
