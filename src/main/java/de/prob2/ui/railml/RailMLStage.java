@@ -256,17 +256,11 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	public void startImport() {
-
-		//progressInfo.setVisible(true);
-		//progressInfo.setManaged(true);
-		//btStartImport.disableProperty().unbind();
-		//btStartImport.setDisable(true);
 		generateAnimation = animationMachineCheckbox.isSelected();
 		generateValidation = validationMachineCheckbox.isSelected();
 		generateSVG = visualisationCheckbox.isSelected();
 		visualisationStrategy = visualisationStrategyChoiceBox.getValue();
 		railMLImportMeta.setVisualisationStrategy(visualisationStrategy);
-
 		clearProgressWithMessage("Initialize import");
 
 		updater.execute(() -> {
@@ -281,7 +275,7 @@ public class RailMLStage extends Stage {
 					Platform.runLater(() -> {
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (generateSVG) {
-							clearProgressWithMessage("Create visualization");
+							this.close();
 							railMLInspectDotStage.initializeOptionsForStrategy(visualisationStrategy);
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
@@ -295,8 +289,8 @@ public class RailMLStage extends Stage {
 							}
 						} else {
 							createProject(shortName, generationPath, dataMachine, animationMachine, validationMachine);
+							this.close();
 						}
-						this.close();
 					});
 				}
 			} catch (ProBError e) {
@@ -381,9 +375,9 @@ public class RailMLStage extends Stage {
 			Set<AbstractOperation> executableOperations = rulesChecker.getExecutableOperations();
 			while (!executableOperations.isEmpty()) {
 				for (AbstractOperation op : executableOperations) {
-					rulesChecker.executeOperation(op);
 					nrExecutedOperations++;
 					updateProgress(nrExecutedOperations, totalNrOfOperations, op.getName());
+					rulesChecker.executeOperation(op);
 				}
 				executableOperations = rulesChecker.getExecutableOperations();
 			}
