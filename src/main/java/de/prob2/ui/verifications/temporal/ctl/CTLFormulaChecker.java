@@ -102,7 +102,7 @@ public final class CTLFormulaChecker {
 	public static void checkFormula(TemporalFormulaItem item, StateSpace stateSpace) {
 		try {
 			final CTL formula = parseFormula(item.getCode(), stateSpace.getModel());
-			final CTLChecker checker = new CTLChecker(stateSpace, formula);
+			final CTLChecker checker = new CTLChecker(stateSpace, formula, null, item.getStateLimit());
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof CTLError) {
 				handleFormulaParseErrors(item, ((CTLError) result).getErrors());

@@ -59,7 +59,7 @@ class ProjectDocumenterTest {
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
 	final ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
-	final TemporalFormulaItem ltlFormulaItem = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, "", "", "", true);
+	final TemporalFormulaItem ltlFormulaItem = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, "", "", "", -1, true);
 	final SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("", "", SymbolicCheckingType.SYMBOLIC_MODEL_CHECK);
 	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
 

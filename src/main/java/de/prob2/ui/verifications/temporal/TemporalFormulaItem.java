@@ -24,6 +24,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"type",
 	"id",
 	"description",
+	"stateLimit",
 	"code",
 	"expectedResult",
 	"selected",
@@ -38,6 +39,7 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 	private final String id;
 	private final String code;
 	private final String description;
+	private final int stateLimit;
 	private final boolean expectedResult;
 	
 	@JsonIgnore
@@ -49,6 +51,7 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 		@JsonProperty("id") final String id,
 		@JsonProperty("code") final String code,
 		@JsonProperty("description") final String description,
+		@JsonProperty("stateLimit") final int stateLimit,
 		@JsonProperty("expectedResult") final boolean expectedResult
 	) {
 		super();
@@ -57,6 +60,7 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 		this.id = id;
 		this.code = code;
 		this.description = description;
+		this.stateLimit = stateLimit;
 		this.expectedResult = expectedResult;
 	}
 	
@@ -81,6 +85,10 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 	
 	public String getDescription() {
 		return this.description;
+	}
+
+	public int getStateLimit() {
+		return this.stateLimit;
 	}
 
 	public boolean getExpectedResult() {
@@ -122,18 +130,19 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 			&& Objects.equals(this.getId(), other.getId())
 			&& this.getCode().equals(other.getCode())
 			&& this.getDescription().equals(other.getDescription())
+			&& this.stateLimit == other.stateLimit
 			&& this.expectedResult == other.expectedResult;
 	}
 
 	@Override
 	@JsonIgnore
 	public String toString() {
-		return String.format(Locale.ROOT, "%s(%s, %s,%s,%s)", type, this.getClass().getSimpleName(), this.getId(), this.getCode(), this.getExpectedResult());
+		return String.format(Locale.ROOT, "%s(%s,%s,%s,%s)", type, this.getClass().getSimpleName(), this.getId(), this.getCode(), this.getExpectedResult());
 	}
 	
 	@Override
 	public void execute(final ExecutionContext context) {
-		if(type == TemporalType.LTL) {
+		if (type == TemporalType.LTL) {
 			LTLFormulaChecker.checkFormula(this, context.getMachine(), context.getStateSpace());
 		} else {
 			CTLFormulaChecker.checkFormula(this, context.getStateSpace());

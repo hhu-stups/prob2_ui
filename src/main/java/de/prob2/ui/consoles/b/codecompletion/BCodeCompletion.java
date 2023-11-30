@@ -19,7 +19,7 @@ public final class BCodeCompletion {
 	}
 
 	private static boolean isIdentifierStart(char c) {
-		return Character.isJavaIdentifierStart(c) && !Character.isIdentifierIgnorable(c);
+		return c == '@' || c == '\\' || (Character.isJavaIdentifierStart(c) && !Character.isIdentifierIgnorable(c));
 	}
 
 	private static boolean isIdentifierPart(char c) {
@@ -58,7 +58,8 @@ public final class BCodeCompletion {
 		return doCompletion(stateSpace, text, true);
 	}
 
-	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text, boolean includeKeywords) {
+	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text,
+			boolean includeKeywords) {
 		BCodeCompletion cc = new BCodeCompletion(stateSpace, extractPrefix(text));
 		cc.find(true, includeKeywords);
 		return cc.getSuggestions();
@@ -68,13 +69,20 @@ public final class BCodeCompletion {
 		if (this.stateSpace != null) {
 			CompleteIdentifierCommand cmd = new CompleteIdentifierCommand(this.text);
 			cmd.setIgnoreCase(ignoreCase);
-			//cmd.setIncludeKeywords(includeKeywords);
+			cmd.setKeywords(includeKeywords ? CompleteIdentifierCommand.KeywordContext.ALL
+					: CompleteIdentifierCommand.KeywordContext.EXPR);
 			this.stateSpace.execute(cmd);
-			this.suggestions.addAll(
-				cmd.getCompletions().stream()
-					.map(item -> new BCCItem(this.text, item))
-					.toList()
-			);
+			this.suggestions.addAll(cmd.getCompletions().stream().map(item -> new BCCItem(this.text, item)).toList());
+
+			if (this.text.startsWith("\\")) {
+				CompleteIdentifierCommand cmd2 = new CompleteIdentifierCommand(this.text.substring(1));
+				cmd2.setIgnoreCase(ignoreCase);
+				cmd2.setKeywords(CompleteIdentifierCommand.KeywordContext.LATEX);
+				this.stateSpace.execute(cmd2);
+				// TODO: get unicode replacement from Prolog
+				this.suggestions.addAll(
+						cmd2.getCompletions().stream().map(item -> new BCCItem(this.text, "\\" + item)).toList());
+			}
 		}
 	}
 

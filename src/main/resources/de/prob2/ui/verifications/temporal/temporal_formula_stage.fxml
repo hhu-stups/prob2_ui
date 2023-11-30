@@ -17,6 +17,9 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.collections.FXCollections?>
 <?import java.lang.Boolean?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.Spinner?>
 
 <!-- Do not remove the following imports as they are detected as unused accidentally -->
 <?import de.prob2.ui.verifications.temporal.TemporalItemStage.TemporalFormulaChoiceItem?>
@@ -52,6 +55,18 @@
 								<TemporalFormulaEditor fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 							</content>
 						</VirtualizedScrollPane>
+						<HBox alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="chooseStateLimit" text="%verifications.temporal.formula.temporalFormulaStage.stateLimit">
+								<tooltip>
+									<Tooltip text="%verifications.temporal.formula.temporalFormulaStage.tooltips.chooseStateLimit" />
+								</tooltip>
+							</CheckBox>
+							<Spinner fx:id="stateLimit" editable="true">
+								<tooltip>
+									<Tooltip text="%verifications.temporal.formula.temporalFormulaStage.tooltips.stateLimit" />
+								</tooltip>
+							</Spinner>
+						</HBox>
 						<HBox fx:id="expectedResultBox" alignment="CENTER_LEFT" spacing="5.0">
 							<Label text="%verifications.temporal.formula.temporalFormulaStage.expectedResult" HBox.hgrow="NEVER"/>
 							<ChoiceBox fx:id="cbExpectedResult" HBox.hgrow="NEVER">

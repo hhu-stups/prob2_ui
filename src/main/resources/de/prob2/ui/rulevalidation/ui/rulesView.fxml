@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<fx:root type="AnchorPane" minWidth="240" minHeight="70" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+        <AnchorPane>
+            <HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
+                  AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
+                  AnchorPane.bottomAnchor="10.0" alignment="CENTER">
+                <Button fx:id="filterButton"
+                              onAction="#handleFilterButton" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
+                    <graphic>
+                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH"/>
+                    </graphic>
+                </Button>
+                <TextField fx:id="filterTextField" onAction="#handleFilterButton"
+                           promptText="%rulevalidation.view.filter" HBox.hgrow="ALWAYS" prefHeight="${filterButton.width}" />
+				<Button fx:id="executeAllButton" text="%rulevalidation.view.executeAll" onAction="#executeAll" styleClass="button-blue"/>
+            </HBox>
+        </AnchorPane>
+		<StackPane VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
+				   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			<TreeTableView fx:id="treeTableView" maxWidth="Infinity" showRoot="false">
+				<columnResizePolicy>
+					<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+				</columnResizePolicy>
+				<columns>
+					<TreeTableColumn fx:id="tvNameColumn" id="name" editable="false" minWidth="80.0" sortable="false" text="%states.statesView.columns.name" />
+					<TreeTableColumn fx:id="tvValueColumn" id="value" editable="false" minWidth="80.0"  sortable="false" text="%states.statesView.columns.value" />
+					<TreeTableColumn fx:id="tvExecuteColumn" id="execute" editable="false" minWidth="80.0"  sortable="false"/>
+				</columns>
+				<placeholder>
+					<Label text="No Rules Machine loaded"/>
+				</placeholder>
+				<TreeItem fx:id="tvRootItem" expanded="true"/>
+			</TreeTableView>
+			<VBox fx:id="progressBox" style="-fx-background-color: rgba(255, 255, 255, 0.75);" alignment="CENTER" visible="false">
+				<HBox alignment="CENTER">
+					<Label text="%rulevalidation.view.executeAll.executing" styleClass="bold"/>
+					<Label text="  "/>
+					<Label fx:id="progressLabel"/>
+				</HBox>
+				<ProgressBar fx:id="progressBar" progress="0" prefWidth="300">
+					<padding>
+						<Insets top="10" bottom="10"/>
+					</padding>
+				</ProgressBar>
+				<Label fx:id="progressOperation"/>
+			</VBox>
+		</StackPane>
+        <HBox VBox.vgrow="never" alignment="CENTER_LEFT">
+            <Separator HBox.hgrow="NEVER" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
+            <Label HBox.hgrow="NEVER" text="%rulevalidation.view.summary" style="-fx-text-fill:rgb(128,128,128);">
+                <padding>
+                    <Insets left="5" right="5"/>
+                </padding>
+            </Label>
+            <Separator HBox.hgrow="ALWAYS" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
+        </HBox>
+        <HBox VBox.vgrow="never" alignment="CENTER_LEFT" spacing="5">
+            <HBox HBox.hgrow="ALWAYS" spacing="10" alignment="CENTER_LEFT">
+                <HBox alignment="CENTER_LEFT" >
+                    <Label text="%rulevalidation.view.summary.rules"/>
+					<Label text=" "/>
+                    <Label fx:id="rulesLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" >
+                    <Label text="%rulevalidation.view.summary.notChecked"/>
+					<Label text=" "/>
+                    <Label fx:id="notCheckedLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+                <HBox alignment="CENTER_LEFT"  style="-fx-background-color: rgba(76, 175, 80, 0.15)">
+                    <Label text="%rulevalidation.view.summary.success"/>
+					<Label text=" "/>
+                    <Label fx:id="successLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" style="-fx-background-color: rgba(204, 47, 39, 0.15)">
+                    <Label text="%rulevalidation.view.summary.fail"/>
+					<Label text=" "/>
+                    <Label fx:id="failLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+                <HBox alignment="CENTER_LEFT" style="-fx-background-color:lightgray">
+                    <Label text="%rulevalidation.view.summary.disabled"/>
+					<Label text=" "/>
+                    <Label fx:id="disabledLabel" text="-"/>
+                    <padding>
+                        <Insets left="5" right="5"/>
+                    </padding>
+                </HBox>
+            </HBox>
+			<Button fx:id="validationReportButton" text="%rulevalidation.view.save" onAction="#saveValidationReport" styleClass="button-blue">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+				</graphic>
+			</Button>
+            <padding>
+                <Insets topRightBottomLeft="10"/>
+            </padding>
+        </HBox>
+    </VBox>
+</fx:root>

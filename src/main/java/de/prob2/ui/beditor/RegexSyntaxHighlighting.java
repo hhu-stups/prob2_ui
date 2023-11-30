@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import de.be4.classicalb.core.parser.util.Utils;
+import de.prob.model.brules.RulesModelFactory;
 import de.prob.scripting.AlloyFactory;
 import de.prob.scripting.CSPFactory;
 import de.prob.scripting.EventBFactory;
@@ -103,6 +104,13 @@ public final class RegexSyntaxHighlighting {
 			new Token("editor_unsupported", compile("\\\\(?:infix|arithmos)"))
 		);
 
+		//B-Rules DSL keywords Regex
+		var syntaxClassesForRulesDSL = List.of(
+			new Token("editor_keyword", compile("\\b(RULES_MACHINE|REFERENCES)\\b", U)),
+			new Token("editor_ctrlkeyword", compile("\\b(RULE|DEPENDS_ON_RULE|DEPENDS_ON_COMPUTATION|ACTIVATION|REPLACES|ERROR_TYPES|CLASSIFICATION|RULEID|TAGS|BODY|RULE_FORALL|EXPECT|RULE_FAIL|ERROR_TYPE|COUNTEREXAMPLE|COMPUTATION|DEFINE|TYPE|DUMMY_VALUE|VALUE|FUNCTION|PRECONDITION|POSTCONDITION|FOR|IN|DO)\\b", U)),
+			new Token("editor_special_identifier", compile("SUCCEEDED_RULE(?:_ERROR_TYPE)?|GET_RULE_COUNTEREXAMPLES|FAILED_RULE(?:_ERROR_TYPE|_ALL_ERROR_TYPES)?|NOT_CHECKED_RULE|DISABLED_RULE|STRING_FORMAT"))
+		);
+
 		SYNTAX_CLASSES_OTHER_LANGUAGES = Map.ofEntries(
 			entry(EventBFactory.class, syntaxClassesForEventB),
 			entry(EventBPackageFactory.class, syntaxClassesForEventB),
@@ -110,7 +118,8 @@ public final class RegexSyntaxHighlighting {
 			entry(TLAFactory.class, syntaxClassesForTLA),
 			entry(CSPFactory.class, syntaxClassesForCSP),
 			entry(AlloyFactory.class, syntaxClassesForAlloy),
-			entry(ZFactory.class, syntaxClassesForZ)
+			entry(ZFactory.class, syntaxClassesForZ),
+			entry(RulesModelFactory.class, syntaxClassesForRulesDSL)
 		);
 	}
 

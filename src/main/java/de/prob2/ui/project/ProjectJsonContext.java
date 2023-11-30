@@ -29,33 +29,33 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	ProjectJsonContext(final ObjectMapper objectMapper) {
 		super(objectMapper, Project.class, Project.FILE_TYPE, Project.CURRENT_FORMAT_VERSION);
 	}
-	
+
 	@Override
 	public boolean shouldAcceptOldMetadata() {
 		return true;
 	}
-	
+
 	private static ObjectNode checkObject(final JsonNode node) {
 		if (!(node instanceof ObjectNode)) {
 			throw new JsonConversionException("Expected an ObjectNode, not " + (node == null ? "(missing field)" : node.getClass().getSimpleName()));
 		}
 		return (ObjectNode)node;
 	}
-	
+
 	private static ArrayNode checkArray(final JsonNode node) {
 		if (!(node instanceof ArrayNode)) {
 			throw new JsonConversionException("Expected an ArrayNode, not " + (node == null ? "(missing field)" : node.getClass().getSimpleName()));
 		}
 		return (ArrayNode)node;
 	}
-	
+
 	private static String checkText(final JsonNode node) {
 		if (!(node instanceof TextNode)) {
 			throw new JsonConversionException("Expected a TextNode, not " + (node == null ? "(missing field)" : node.getClass().getSimpleName()));
 		}
 		return Objects.requireNonNull(node.textValue());
 	}
-	
+
 	private static void updateV0CheckableItem(final ObjectNode checkableItem) {
 		// Some old items might have "selected" missing or under the previous name "shouldExecute".
 		if (!checkableItem.has("selected")) {
@@ -67,7 +67,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 		checkableItem.remove("shouldExecute");
 	}
-	
+
 	private static void updateV0SymbolicCheckingItem(final ObjectNode symbolicCheckingItem) {
 		// The names of some symbolic checking types have changed in the past and need to be updated.
 		if (symbolicCheckingItem.get("type").isNull()) {
@@ -81,7 +81,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 		}
 	}
-	
+
 	private static void updateV0TestCaseItem(final ObjectNode testCaseItem) {
 		if (!testCaseItem.has("additionalInformation")) {
 			testCaseItem.set("additionalInformation", testCaseItem.objectNode());
@@ -128,7 +128,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			testCaseItem.put("maxDepth", Integer.parseInt(depthSplitOnColon[1]));
 		}
 	}
-	
+
 	private static void moveV0TestCaseSymbolicAnimationItems(final ArrayNode symbolicAnimationFormulas, final ArrayNode testCases) {
 		// Test case generation was previously part of symbolic animation,
 		// but has now been moved into its own checking category.
@@ -184,19 +184,19 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 		}
 	}
-	
+
 	private static void updateV0ModelcheckingItem(final ObjectNode modelcheckingItem) {
 		// This information is no longer stored in the project file
 		// and is instead derived from the options list.
 		modelcheckingItem.remove("strategy");
 		modelcheckingItem.remove("description");
-		
+
 		// Old modelcheckingItems might not have "shouldExecute" yet.
 		if (!modelcheckingItem.has("shouldExecute")) {
 			modelcheckingItem.put("shouldExecute", true);
 		}
 	}
-	
+
 	/**
 	 * <p>Convert a serialied File or Path object to a plain string value if necessary/possible.</p>
 	 * <p>
@@ -204,7 +204,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	 * In later versions this was changed so that they are serialized as plain strings instead.
 	 * This method tries to convert paths from the old format.
 	 * </p>
-	 * 
+	 *
 	 * @param path the path value to be converted
 	 * @return the path, converted if necessary
 	 */
@@ -220,13 +220,13 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			return path;
 		}
 	}
-	
+
 	private static void updateV0Machine(final ObjectNode machine) {
 		machine.set("location", convertV0Path(machine.get("location")));
 		// The machine type is no longer stored explicitly in the project file
 		// and is derived from the machine file extension instead.
 		machine.remove("type");
-		
+
 		// The last used preference was previously stored in "lastUsed" as a full Preference object.
 		// This has been replaced by "lastUsedPreferenceName",
 		// which stores just the name and not the full map of preference values.
@@ -240,7 +240,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			machine.put("lastUsedPreferenceName", lastUsedPreferenceName);
 		}
 		machine.remove("lastUsed");
-		
+
 		for (final String checkableItemFieldName : new String[] {"ltlFormulas", "ltlPatterns", "symbolicCheckingFormulas", "symbolicAnimationFormulas", "testCases"}) {
 			if (!machine.has(checkableItemFieldName)) {
 				machine.set(checkableItemFieldName, machine.arrayNode());
@@ -265,7 +265,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		for (int i = 0; i < traces.size(); i++) {
 			traces.set(i, convertV0Path(traces.get(i)));
 		}
-		
+
 		// Some very old projects might not have the "modelcheckingItems" list yet.
 		if (!machine.has("modelcheckingItems")) {
 			machine.set("modelcheckingItems", machine.arrayNode());
@@ -274,7 +274,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			updateV0ModelcheckingItem(checkObject(modelcheckingItemNode))
 		);
 	}
-	
+
 	private static void updateV1Machine(final ObjectNode machine) {
 		checkArray(machine.get("testCases")).forEach(testCaseItemNode -> {
 			final ObjectNode additionalInformation = checkObject(checkObject(testCaseItemNode).get("additionalInformation"));
@@ -287,7 +287,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			additionalInformation.remove("traceInformation");
 			additionalInformation.remove("uncoveredOperations");
 		});
-		
+
 		// The items of all of these lists have a field called checked,
 		// which was previously saved in the project file,
 		// but ignored when loading the project.
@@ -429,7 +429,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	private static void updateV17Machine(final ObjectNode machine) {
 		final ArrayNode symbolicCheckingFormulas = checkArray(machine.get("symbolicCheckingFormulas"));
 		final ArrayNode symbolicAnimationFormulas = checkArray(machine.get("symbolicAnimationFormulas"));
-		
+
 		// In the past, some symbolic item types were moved back and forth
 		// between symbolic checking and animation.
 		// If a formula with one of these types was created before the type was moved,
@@ -439,7 +439,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		// The error is only detected once the user tries to check/execute the formula.
 		// To fix this, search both lists for formulas of types that have been moved
 		// and move the formulas into the correct list.
-		
+
 		for (final Iterator<JsonNode> it = symbolicCheckingFormulas.iterator(); it.hasNext();) {
 			final ObjectNode formula = checkObject(it.next());
 			final String type = checkText(formula.get("type"));
@@ -448,7 +448,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				it.remove();
 			}
 		}
-		
+
 		for (final Iterator<JsonNode> it = symbolicAnimationFormulas.iterator(); it.hasNext();) {
 			final ObjectNode formula = checkObject(it.next());
 			final String type = checkText(formula.get("type"));
@@ -468,7 +468,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 		});
 	}
-	
+
 	private static void updateV19Machine(final ObjectNode machine) {
 		if(!machine.has("historyChartItems")) {
 			machine.set("historyChartItems", machine.arrayNode());
@@ -573,7 +573,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 		}
 	}
-	
+
 	private static void updateV26Machine(final ObjectNode machine) {
 		final ArrayNode traceObjects = machine.arrayNode();
 		for (final JsonNode traceLocationNode : checkArray(machine.get("traces"))) {
@@ -583,10 +583,10 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		}
 		machine.set("traces", traceObjects);
 	}
-	
+
 	private static void updateV27Machine(final ObjectNode machine) {
 		final ArrayNode validationTasksArray = checkArray(machine.get("validationTasks"));
-		
+
 		final Map<String, String> idByParams = new HashMap<>();
 		for (final JsonNode taskNode : validationTasksArray) {
 			final ObjectNode task = checkObject(taskNode);
@@ -594,7 +594,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			final String parameters = checkText(task.get("parameters"));
 			idByParams.put(parameters, id);
 		}
-		
+
 		final ArrayNode modelcheckingItems = checkArray(machine.get("modelcheckingItems"));
 		for (final JsonNode itemNode : modelcheckingItems) {
 			final ObjectNode item = checkObject(itemNode);
@@ -606,14 +606,14 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			item.put("id", idByParams.get(parameters.toString()));
 		}
-		
+
 		final ArrayNode ltlFormulas = checkArray(machine.get("ltlFormulas"));
 		for (final JsonNode formulaNode : ltlFormulas) {
 			final ObjectNode formula = checkObject(formulaNode);
 			final String code = checkText(formula.get("code"));
 			formula.put("id", idByParams.get(code));
 		}
-		
+
 		final ArrayNode symbolicCheckingFormulas = checkArray(machine.get("symbolicCheckingFormulas"));
 		for (final JsonNode formulaNode : symbolicCheckingFormulas) {
 			final ObjectNode formula = checkObject(formulaNode);
@@ -631,7 +631,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			formula.put("id", idByParams.get(parameters));
 		}
-		
+
 		final ArrayNode traces = checkArray(machine.get("traces"));
 		for (final JsonNode traceNode : traces) {
 			final ObjectNode trace = checkObject(traceNode);
@@ -640,7 +640,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			final String fileName = split[split.length - 1];
 			trace.put("id", idByParams.get(fileName));
 		}
-		
+
 		final ArrayNode simulations = checkArray(machine.get("simulations"));
 		for (final JsonNode simulationNode : simulations) {
 			final ObjectNode simulation = checkObject(simulationNode);
@@ -654,7 +654,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				simulationItem.put("id", idByParams.get(configuration.toString()));
 			}
 		}
-		
+
 		machine.remove("validationTasks");
 	}
 
@@ -691,7 +691,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			modelCheckingItem.set("options", prologOptions);
 		});
 	}
-	
+
 	private static void updateV29Machine(ObjectNode machine) {
 		checkArray(machine.get("modelcheckingItems")).forEach(modelCheckingItemNode -> {
 			ObjectNode modelCheckingItem = checkObject(modelCheckingItemNode);
@@ -726,7 +726,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			modelCheckingItem.put("searchStrategy", searchStrategy);
 		});
 	}
-	
+
 	private static void updateV30Project(final ObjectNode project) {
 		final ArrayNode requirements = checkArray(project.get("requirements"));
 		final Map<String, ArrayNode> vosByRequirement = new HashMap<>();
@@ -735,7 +735,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			final ArrayNode vosForRequirement = requirement.putArray("validationObligations");
 			vosByRequirement.put(checkText(requirement.get("name")), vosForRequirement);
 		});
-		
+
 		final ArrayNode machines = checkArray(project.get("machines"));
 		machines.forEach(machineNode -> {
 			final ObjectNode machine = checkObject(machineNode);
@@ -746,7 +746,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				final ObjectNode vo = checkObject(voNode);
 				String expression = checkText(vo.get("expression"));
 				final boolean needsParentheses = !VALIDATION_TASK_ID_PATTERN.matcher(expression).matches();
-				
+
 				final String requirementName = checkText(vo.get("requirement"));
 				if (expressionsByRequirement.containsKey(requirementName)) {
 					// If there were multiple validation obligations for the same machine and requirement,
@@ -760,7 +760,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				}
 				expressionsByRequirement.put(requirementName, expression);
 			});
-			
+
 			expressionsByRequirement.forEach((requirementName, expression) -> {
 				final ArrayNode vosForRequirement = vosByRequirement.get(requirementName);
 				final ObjectNode vo = vosForRequirement.objectNode();
@@ -832,7 +832,13 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				checkObject(temporalNode).put("type", "LTL")
 		);
 	}
-	
+
+	private static void updateV37Machine(final ObjectNode machine) {
+		checkArray(machine.get("temporalFormulas")).forEach(
+			temporalNode -> checkObject(temporalNode).put("stateLimit", -1)
+		);
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -849,7 +855,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				oldObject.set("preferences", oldObject.arrayNode());
 			}
 		}
-		
+
 		checkArray(oldObject.get("machines")).forEach(machineNode -> {
 			final ObjectNode machine = checkObject(machineNode);
 			if (oldVersion <= 0) {
@@ -943,7 +949,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				updateV29Machine(machine);
 			}
 		});
-		
+
 		if (oldVersion <= 30) {
 			updateV30Project(oldObject);
 		}
@@ -968,8 +974,11 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			if (oldVersion <= 36) {
 				updateV36Machine(machine);
 			}
+			if (oldVersion <= 37) {
+				updateV37Machine(machine);
+			}
 		});
-		
+
 		return oldObject;
 	}
 
