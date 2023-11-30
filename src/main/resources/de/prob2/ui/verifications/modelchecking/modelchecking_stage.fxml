@@ -37,6 +37,30 @@
 
 					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+							<Label text="%verifications.modelchecking.modelcheckingStage.optimizations" style="-fx-font-weight: bold;"/>
+						</HBox>
+					</VBox>
+					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="enablePOR" selected="true"
+									  text="%verifications.modelchecking.modelcheckingStage.options.enablePOR">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.enablePOR" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="enablePGE" selected="true"
+									  text="%verifications.modelchecking.modelcheckingStage.options.enablePGE">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.enablePGE" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+					</VBox>
+
+					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
 							<Label text="%verifications.modelchecking.modelcheckingStage.errors" style="-fx-font-weight: bold;"/>
 						</HBox>
 					</VBox>
@@ -74,11 +98,11 @@
 							</CheckBox>
 						</HBox>
 					</VBox>
-						<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-							<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-								<Label text="%verifications.modelchecking.modelcheckingStage.goals" style="-fx-font-weight: bold;"/>
-							</HBox>
-						</VBox>
+					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+							<Label text="%verifications.modelchecking.modelcheckingStage.goals" style="-fx-font-weight: bold;"/>
+						</HBox>
+					</VBox>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<CheckBox fx:id="stopAtFullCoverage" text="%verifications.modelchecking.modelcheckingStage.options.stopAtFullCoverage">

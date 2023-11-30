@@ -41,6 +41,8 @@ import de.prob2.ui.statusbar.StatusBar;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -106,6 +108,8 @@ public final class StatesView extends StackPane {
 	private boolean structureFullyExpanded;
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCache;
 	private final StateItem.FormulaEvaluator cachingEvaluator;
+	private final BooleanProperty fullValuePrettify;
+	private final BooleanProperty fullValueShowFullValue;
 
 	private boolean persistSorting;
 
@@ -137,6 +141,8 @@ public final class StatesView extends StackPane {
 				return evaluateFormulaWithCaching(formula, state);
 			}
 		};
+		this.fullValuePrettify = new SimpleBooleanProperty();
+		this.fullValueShowFullValue = new SimpleBooleanProperty();
 		this.persistSorting = true;
 		stageManager.loadFXML(this, "states_view.fxml");
 	}
@@ -724,7 +730,8 @@ public final class StatesView extends StackPane {
 	}
 
 	private void showDetails(final StateItem item) {
-		final FullValueStage stage = injector.getInstance(FullValueStage.class);
+		final FullValueStage stage = this.injector.getInstance(FullValueStage.class);
+		stage.bindCheckboxes(this.fullValuePrettify, this.fullValueShowFullValue);
 		stage.setValue(item);
 		stage.show();
 	}

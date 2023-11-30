@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.external;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.simulators.Simulator;
 
 import java.io.BufferedReader;
@@ -14,6 +15,7 @@ import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.stream.Collectors;
 
 public class ExternalSimulatorExecutor {
 
@@ -33,14 +35,11 @@ public class ExternalSimulatorExecutor {
 
 	private boolean done;
 
-	private final boolean hasShield;
-
 	public ExternalSimulatorExecutor(Simulator simulator, Path pythonFile, ClassicalBModel model) {
 		this.simulator = simulator;
 		this.pythonFile = pythonFile;
 		this.pb = new ProcessBuilder("python3", pythonFile.toString()).directory(pythonFile.getParent().toFile());
 		this.done = false;
-		this.hasShield = model.getDefinitions().getDefinitionNames().contains("SHIELD_INTERVENTION");
 	}
 
 	public void reset() {
@@ -74,18 +73,19 @@ public class ExternalSimulatorExecutor {
 
 				State state = trace.getCurrentState();
 
-				String line = reader.readLine();
+				String enabledOperations = state
+						.getTransitions().stream()
+						.map(Transition::getName)
+						.collect(Collectors.joining(","));
 
-				String intervention = hasShield && state.isInitialised() ? state.eval(String.format("SHIELD_INTERVENTION(%s)", line)).toString() : line;
-
-				writer.write(intervention);
+				writer.write(enabledOperations);
 				writer.newLine();
 				writer.flush();
 
 				int j = 0;
 
 				while (j <= 3) {
-					line = reader.readLine();
+					String line = reader.readLine();
 					if (j == 0) {
 						operation = line;
 					} else if (j == 1) {
