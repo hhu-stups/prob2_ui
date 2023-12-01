@@ -1,6 +1,8 @@
 package de.prob2.ui.rulevalidation;
 
 import com.google.inject.Singleton;
+import de.be4.classicalb.core.parser.rules.RuleOperation;
+import de.prob.model.brules.RuleResult;
 import de.prob.model.brules.RuleResults;
 import de.prob.model.brules.RuleStatus;
 import de.prob2.ui.internal.I18n;
@@ -15,8 +17,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Properties;
+import java.util.*;
 
 @Singleton
 public class RuleValidationReport {
@@ -45,15 +46,23 @@ public class RuleValidationReport {
 
 	private static void initVelocityEngine() {
 		Properties p = new Properties();
-		p.setProperty("resource.loader", "class");
-		p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		p.setProperty("resource.loaders", "class");
+		p.setProperty("resource.loader.class.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		Velocity.init(p);
 	}
 
 	private VelocityContext getVelocityContext() {
-		RuleResults ruleResults = new RuleResults(new HashSet<>(rulesDataModel.getRuleMap().values()),
+		RuleResults ruleResults = new RuleResults(new HashSet<RuleOperation>(rulesDataModel.getRuleMap().values()),
 			currentTrace.getCurrentState(), -1);
 		RuleResults.ResultSummary resultSummary = ruleResults.getSummary();
+
+		Map<String, List<RuleResult>> sortedClassificationRuleResults = ruleResults.getRuleResultsForClassifications();
+		for (List<RuleResult> ruleResult : sortedClassificationRuleResults.values()) {
+			ruleResult.sort(Comparator.comparing(RuleResult::getRuleName));
+		}
+
+		List<RuleResult> sortedRuleResults = ruleResults.getRuleResultsWithoutClassification();
+		sortedRuleResults.sort(Comparator.comparing(RuleResult::getRuleName));
 
 		VelocityContext context = new VelocityContext();
 		context.put("i18n", i18n);
@@ -63,7 +72,8 @@ public class RuleValidationReport {
 		context.put("rulesSucceeded", resultSummary.numberOfRulesSucceeded);
 		context.put("rulesFailed", resultSummary.numberOfRulesFailed);
 		context.put("rulesDisabled", resultSummary.numberOfRulesDisabled);
-		context.put("ruleResults", ruleResults.getRuleResultMap());
+		context.put("classificationMap", sortedClassificationRuleResults);
+		context.put("noClassification", sortedRuleResults);
 		context.put("status_SUCCESS", RuleStatus.SUCCESS);
 		context.put("status_FAIL", RuleStatus.FAIL);
 		context.put("status_NOT_CHECKED", RuleStatus.NOT_CHECKED);

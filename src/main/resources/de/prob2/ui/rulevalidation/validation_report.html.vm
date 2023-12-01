@@ -1,3 +1,56 @@
+#macro(ruleContent $ruleResults)
+	#foreach($ruleResult in $ruleResults)
+		#set($ruleName = $ruleResult.getRuleName())
+		#set($ruleStatus = $ruleResult.getRuleState())
+		#if($ruleStatus == $status_SUCCESS)
+		<div class="rule-header green">
+		#elseif($ruleStatus == $status_FAIL)
+		<div class="rule-header pointer red" onclick="openDetails('rule_$ruleName')">
+			<span class="icon">&#9888;</span>
+		#elseif($ruleStatus == $status_NOT_CHECKED && !$ruleResult.getFailedDependencies().isEmpty())
+		<div class="rule-header pointer orange" onclick="openDetails('rule_$ruleName')">
+			<span class="icon">&#9888;</span>
+		#elseif($ruleStatus == $status_NOT_CHECKED && !$ruleResult.getNotCheckedDependencies().isEmpty())
+		<div class="rule-header pointer grey" onclick="openDetails('rule_$ruleName')">
+			<span class="icon">&#128712;</span>
+		#elseif($ruleStatus == $status_DISABLED)
+		<div class="rule-header grey">
+		#else
+		<div class="rule-header">
+		#end
+		$ruleName #if($ruleResult.getRuleId()) &ensp;[$ruleResult.getRuleId()] #end &emsp;<b>$ruleStatus</b>
+	</div>
+
+		#if($ruleResult.getNumberOfViolations() > 0 || !$ruleResult.getFailedDependencies().isEmpty() || !$ruleResult.getNotCheckedDependencies().isEmpty())
+			<div class="rule-content" id="rule_$ruleName">
+				#if($ruleResult.getNumberOfViolations() > 0)
+					<b>$ruleResult.getNumberOfViolations()</b> $i18n.translate("rulevalidation.report.violations")
+					<ul>
+						#foreach($counterExample in $ruleResult.getCounterExamples())
+							<li>($counterExample.getErrorType()) $counterExample.getMessage()</li>
+						#end
+					</ul>
+				#end
+				#if(!$ruleResult.getFailedDependencies().isEmpty())
+					$i18n.translate("rulevalidation.report.failedDependencies")
+					<ul>
+						#foreach($failed in $ruleResult.getFailedDependencies())
+							<li>$failed</li>
+						#end
+					</ul>
+				#end
+				#if(!$ruleResult.getNotCheckedDependencies().isEmpty())
+					$i18n.translate("rulevalidation.report.notCheckedDependencies")
+					<ul>
+						#foreach($notChecked in $ruleResult.getNotCheckedDependencies())
+							<li>$notChecked</li>
+						#end
+					</ul>
+				#end
+			</div>
+		#end
+	#end
+#end
 <!DOCTYPE html>
 <html lang="en">
 	<head>
@@ -9,17 +62,36 @@
 	            background-color: #f4f4f4;
 	            padding: 40px;
 	        }
-	        .rule-list {
+			.classification-header {
+				padding: 10px;
+				border-bottom: 1px solid #ddd;
+				align-items: center;
+				background-color: rgba(117, 117, 117, 0.2);
+				cursor: pointer;
+			}
+	        .classification-list {
 	            background-color: #fff;
 	            border: 1px solid #ddd;
 	            border-radius: 8px;
 	            margin-bottom: 20px;
 	            overflow: hidden;
 	        }
+			.rule-list {
+				background-color: #fff;
+				border: 1px solid #ddd;
+				border-radius: 8px;
+				overflow: hidden;
+			}
+			.rule-list.classification {
+				display: none;
+			}
+			.rule-list.normal {
+				margin-bottom: 20px;
+				display: block;
+			}
 	        .rule-header {
 	            padding: 10px;
 	            border-bottom: 1px solid #ddd;
-	            display: flex;
 	            align-items: center;
 	        }
 			.rule-header.pointer {
@@ -48,59 +120,24 @@
 			<br>$i18n.translate("rulevalidation.report.nrDisabledRules") <b>$rulesDisabled</b>
 		</div>
 		<br>
-		<div class="rule-list">
-			#foreach($ruleResult in $ruleResults.values())
-				#set($ruleName = $ruleResult.getRuleName())
-				#set($ruleStatus = $ruleResult.getRuleState())
-				#if($ruleStatus == $status_SUCCESS)
-			<div class="rule-header green">
-				#elseif($ruleStatus == $status_FAIL)
-			<div class="rule-header pointer red" onclick="openDetails('$ruleName')">
-				<span class="icon">&#9888;</span>
-				#elseif($ruleStatus == $status_NOT_CHECKED && !$ruleResult.getFailedDependencies().isEmpty())
-			<div class="rule-header pointer orange" onclick="openDetails('$ruleName')">
-				<span class="icon">&#9888;</span>
-				#elseif($ruleStatus == $status_NOT_CHECKED && !$ruleResult.getNotCheckedDependencies().isEmpty())
-			<div class="rule-header pointer grey" onclick="openDetails('$ruleName')">
-				<span class="icon">&#128712;</span>
-				#elseif($ruleStatus == $status_DISABLED)
-			<div class="rule-header grey">
-				#else
-			<div class="rule-header">
-				#end
-				$ruleName #if($ruleResult.getRuleId()) &ensp;[$ruleResult.getRuleId()] #end &emsp;<b>$ruleStatus</b>
-			</div>
-
-			#if($ruleResult.getNumberOfViolations() > 0 || !$ruleResult.getFailedDependencies().isEmpty() || !$ruleResult.getNotCheckedDependencies().isEmpty())
-			<div class="rule-content" id="$ruleName">
-				#if($ruleResult.getNumberOfViolations() > 0)
-				<b>$ruleResult.getNumberOfViolations()</b> $i18n.translate("rulevalidation.report.violations")
-					<ul class="content-list">
-					#foreach($counterExample in $ruleResult.getCounterExamples())
-						<li>($counterExample.getErrorType()) $counterExample.getMessage()</li>
-					#end
-					</ul>
-				#end
-				#if(!$ruleResult.getFailedDependencies().isEmpty())
-					$i18n.translate("rulevalidation.report.failedDependencies")
-					<ul class="content-list">
-						#foreach($failed in $ruleResult.getFailedDependencies())
-							<li>$failed</li>
-						#end
-					</ul>
-				#end
-				#if(!$ruleResult.getNotCheckedDependencies().isEmpty())
-					$i18n.translate("rulevalidation.report.notCheckedDependencies")
-					<ul class="content-list">
-						#foreach($notChecked in $ruleResult.getNotCheckedDependencies())
-							<li>$notChecked</li>
-						#end
-					</ul>
+		#if(!$classificationMap.keySet().isEmpty)
+			<div class="classification-list">
+				#foreach($classification in $classificationMap.keySet())
+					#set($ruleResults = $classificationMap.get($classification))
+				<div class="classification-header" onclick="openDetails('classification_$classification')">
+					<b>$classification</b>  ($ruleResults.size())
+				</div>
+				<div class="rule-list classification" id="classification_$classification">
+					#ruleContent($ruleResults)
+				</div>
 				#end
 			</div>
-			#end
-			#end
-		</div>
+		#end
+		#if(!$noClassification.isEmpty())
+			<div class="rule-list normal">
+				#ruleContent($noClassification)
+			</div>
+		#end
 		$i18n.translate("rulevalidation.report.probVersion") $probCliVersion
 		<br>$localDateTime
 		<script>
