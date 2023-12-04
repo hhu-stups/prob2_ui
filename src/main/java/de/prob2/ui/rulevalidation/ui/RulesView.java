@@ -27,9 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Description of class
@@ -244,11 +242,29 @@ public class RulesView extends AnchorPane{
 		tvRootItem.getChildren().clear();
 		tvRulesItem = new TreeItem<>("RULES");
 		if (!dataModel.getRuleMap().isEmpty()) {
+			Map<String, List<TreeItem<Object>>> classificationItems = new HashMap<>();
+			List<TreeItem<Object>> noClassificationItem = new ArrayList<>();
 			for (Map.Entry<String, RuleOperation> entry : dataModel.getRuleMap().entrySet()) {
 				LOGGER.debug("Add item for rule {}   {}.", entry.getKey(), entry.getValue());
-				tvRulesItem.getChildren()
-						.add(new OperationItem(entry.getValue(), dataModel.getRuleValue(entry.getKey()), dataModel));
+				TreeItem<Object> operationItem = new OperationItem(entry.getValue(), dataModel.getRuleValue(entry.getKey()), dataModel);
+				String classification = entry.getValue().getClassification();
+				if (classification != null && classificationItems.containsKey(classification)) {
+					classificationItems.get(classification).add(operationItem);
+				} else if (classification != null) {
+					classificationItems.put(classification, new ArrayList<>());
+					classificationItems.get(classification).add(operationItem);
+				} else {
+					noClassificationItem.add(operationItem);
+				}
 			}
+			List<String> sortedClassifications = new ArrayList<>(classificationItems.keySet());
+			Collections.sort(sortedClassifications);
+			for (String cl : sortedClassifications) {
+				TreeItem<Object> classificationItem = new TreeItem<>(cl);
+				classificationItem.getChildren().addAll(classificationItems.get(cl));
+				tvRulesItem.getChildren().add(classificationItem);
+			}
+			tvRulesItem.getChildren().addAll(noClassificationItem);
 			tvRootItem.getChildren().add(tvRulesItem);
 
 		}
