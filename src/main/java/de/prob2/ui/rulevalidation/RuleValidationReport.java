@@ -18,6 +18,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Singleton
 public class RuleValidationReport {
@@ -73,6 +74,7 @@ public class RuleValidationReport {
 		context.put("rulesFailed", resultSummary.numberOfRulesFailed);
 		context.put("rulesDisabled", resultSummary.numberOfRulesDisabled);
 		context.put("classificationMap", sortedClassificationRuleResults);
+		context.put("Collectors", Collectors.class);
 		context.put("noClassification", sortedRuleResults);
 		context.put("status_SUCCESS", RuleStatus.SUCCESS);
 		context.put("status_FAIL", RuleStatus.FAIL);
