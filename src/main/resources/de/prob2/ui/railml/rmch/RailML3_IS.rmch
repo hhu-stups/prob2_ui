@@ -112,6 +112,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_infrastructure
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_infrastructure
     BODY
         RULE_FAIL c
@@ -141,6 +142,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_topology
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_topology
     BODY
         RULE_FAIL c
@@ -166,6 +168,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_netElements
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_netElements
     BODY
         RULE_FAIL c
@@ -211,6 +214,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_netElement
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_netElement
     BODY
         RULE_FAIL c
@@ -278,6 +282,7 @@ OPERATIONS
     END;
 
     RULE warnings_netElement
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_NET_ELEMENT
     ERROR_TYPES 2
     BODY
@@ -301,6 +306,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_netRelations
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_netRelations
     BODY
         RULE_FAIL c
@@ -319,7 +325,6 @@ OPERATIONS
 
     COMPUTATION set_netRelation
     DEPENDS_ON_RULE is_valid_netRelations
-    DEPENDS_ON_COMPUTATION set_NET_ELEMENT
     BODY
         DEFINE RailML3_netRelation
             TYPE FIN(RailML3_IS_netRelation_Type)
@@ -342,6 +347,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_netRelation
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_netRelation
     BODY
         RULE_FAIL c
@@ -450,6 +456,7 @@ OPERATIONS
     END;
 
     RULE warnings_netRelation
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_NET_RELATION
     ERROR_TYPES 2
     BODY
@@ -482,6 +489,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_networks
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_networks
     BODY
         RULE_FAIL c
@@ -514,6 +522,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_network
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_network
     BODY
         RULE_FAIL c
@@ -560,6 +569,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_level
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_level
     BODY
         RULE_FAIL c
@@ -609,6 +619,7 @@ OPERATIONS
     END;
 
     RULE validate_level
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_NETWORK
     BODY
         RULE_FAIL e
@@ -647,6 +658,7 @@ OPERATIONS
         END
     END;
     RULE warnings_level
+    CLASSIFICATION warning
     DEPENDS_ON_RULE validate_level
     ERROR_TYPES 2
     BODY
@@ -674,6 +686,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_functionalInfrastructure
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_functionalInfrastructure
     BODY
         RULE_FAIL c
@@ -700,6 +713,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_balises
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_balises
     BODY
         RULE_FAIL c
@@ -744,6 +758,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_balise
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_balise
     BODY
         RULE_FAIL c
@@ -784,6 +799,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_baliseGroups
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_baliseGroups
     BODY
         RULE_FAIL c
@@ -843,6 +859,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_baliseGroup
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_baliseGroup
     BODY
         RULE_FAIL c
@@ -913,6 +930,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_borders
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_borders
     BODY
         RULE_FAIL c
@@ -947,6 +965,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_border
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_border
     BODY
         RULE_FAIL c
@@ -986,6 +1005,7 @@ OPERATIONS
     END;
 
     RULE validate_border
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_BORDER, set_NET_RELATION_SUBSEQUENT_LOCATIONS, set_SPOT_LOCATION
     DEPENDS_ON_RULE validate_spotLocation
     BODY
@@ -1014,6 +1034,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_bufferStops
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_bufferStops
     BODY
         RULE_FAIL c
@@ -1046,6 +1067,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_bufferStop
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_bufferStop
     BODY
         RULE_FAIL c
@@ -1071,6 +1093,7 @@ OPERATIONS
     END;
 
     RULE validate_bufferStop
+    CLASSIFICATION semantic
     DEPENDS_ON_RULE is_valid_bufferStop
     DEPENDS_ON_COMPUTATION set_NET_RELATION_SUBSEQUENT_LOCATIONS, set_SPOT_LOCATION
     BODY
@@ -1093,6 +1116,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_crossings
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_crossings
     BODY
         RULE_FAIL c
@@ -1150,6 +1174,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_crossing
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_crossing
     BODY
         RULE_FAIL c
@@ -1213,6 +1238,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_derailersIS
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_derailersIS
     BODY
         RULE_FAIL c
@@ -1246,6 +1272,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_derailerIS
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_derailerIS
     BODY
         RULE_FAIL c
@@ -1293,6 +1320,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_operationalPoints
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_operationalPoints
     BODY
         RULE_FAIL c
@@ -1324,6 +1352,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_operationalPoint
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_operationalPoint
     BODY
         RULE_FAIL c
@@ -1359,6 +1388,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_signalsIS
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_signalsIS
     BODY
         RULE_FAIL c
@@ -1404,6 +1434,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_signalIS
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_signalIS
     BODY
         RULE_FAIL c
@@ -1462,6 +1493,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_speeds
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_speeds
     BODY
         RULE_FAIL c
@@ -1498,6 +1530,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_speedSection
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_speedSection
     BODY
         RULE_FAIL c
@@ -1565,6 +1598,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_switchesIS
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_switchesIS
     BODY
         RULE_FAIL c
@@ -1644,6 +1678,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_switchIS
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_switchIS
     BODY
         RULE_FAIL c
@@ -1781,6 +1816,7 @@ OPERATIONS
     END;
 
     RULE validate_switchIS
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_SWITCH
     BODY
         RULE_FAIL e_sw, e_rb, e_lb, nr_r, nr_l
@@ -1808,6 +1844,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_tracks
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_tracks
     BODY
         RULE_FAIL c
@@ -1844,6 +1881,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_track
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_track 
     BODY
         RULE_FAIL c
@@ -1964,6 +2002,7 @@ OPERATIONS
     END;
 
     RULE validate_track
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_TRACK, set_NET_RELATION_SUBSEQUENT_LOCATIONS
     BODY
         RULE_FORALL e_trc, trackBegin
@@ -1998,6 +2037,7 @@ OPERATIONS
         END
     END;
     RULE warnings_track
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_TRACK, set_NET_RELATION_SUBSEQUENT_LOCATIONS
     ERROR_TYPES 2
     BODY
@@ -2024,6 +2064,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_trainDetectionElements
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_trainDetectionElements
     BODY
         RULE_FAIL c
@@ -2058,6 +2099,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_trainDetectionElement
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_trainDetectionElement
     BODY
         RULE_FAIL c
@@ -2151,6 +2193,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_linearLocation
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_linearLocation
     BODY
         RULE_FAIL e
@@ -2238,6 +2281,7 @@ OPERATIONS
     END;
 
     RULE validate_linearLocation
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_LINEAR_LOCATION, set_NET_RELATION_SUBSEQUENT_LOCATIONS
     BODY
         // from the fact that any point can reach any other, one can deduce that they are all correctly on the same level
@@ -2269,6 +2313,7 @@ OPERATIONS
         END
     END;
     RULE warnings_linearLocation
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_LINEAR_LOCATION
     ERROR_TYPES 2
     BODY
@@ -2325,6 +2370,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_spotLocation
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_spotLocation
     BODY
         RULE_FAIL e
@@ -2376,6 +2422,7 @@ OPERATIONS
     END;
 
     RULE validate_spotLocation
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_SPOT_LOCATION
     BODY
         // Single point elements such as signals or switches have exactly 1 sloc; others such as overCrossing can have two points (tunnel, bridge) (currently ignores multiple linear positioning systems)
@@ -2392,6 +2439,7 @@ OPERATIONS
         END
     END;
     RULE warnings_spotLocation
+    CLASSIFICATION warning
     DEPENDS_ON_RULE validate_spotLocation
     ERROR_TYPES 2
     BODY
@@ -2429,6 +2477,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_linearCoordinate
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_linearCoordinate
     BODY
         RULE_FAIL e
@@ -2492,6 +2541,7 @@ OPERATIONS
     END;
     
     RULE validate_NET_RELATION_SUBSEQUENT_LOCATIONS
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_NET_RELATION_SUBSEQUENT_LOCATIONS
     BODY
         RULE_FAIL block
@@ -2512,6 +2562,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_geometry
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_geometry
     BODY
         RULE_FAIL c
@@ -2537,6 +2588,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_geometryPoints
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_geometryPoints
     BODY
         RULE_FAIL c
@@ -2571,6 +2623,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_geometryPoint
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_geometryPoint
     BODY
         RULE_FAIL c
@@ -2606,6 +2659,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_gradientCurves
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_gradientCurves
     BODY
         RULE_FAIL c
@@ -2644,6 +2698,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_gradientCurve
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_gradientCurve
     BODY
         RULE_FAIL c
@@ -2709,6 +2764,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_horizontalCurves
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_horizontalCurves
     BODY
         RULE_FAIL c
@@ -2747,6 +2803,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_horizontalCurve
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_horizontalCurve
     BODY
         RULE_FAIL c

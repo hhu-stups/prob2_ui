@@ -71,6 +71,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_common
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_common
     BODY
         RULE_FAIL c
@@ -107,6 +108,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_name
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_name
     BODY
         RULE_FAIL e
@@ -156,6 +158,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_speedProfiles
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_speedProfiles
     BODY
         RULE_FAIL c
@@ -214,6 +217,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_speedProfile
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_speedProfile
     BODY
         RULE_FAIL c

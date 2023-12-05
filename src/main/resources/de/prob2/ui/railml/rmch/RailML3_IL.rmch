@@ -116,6 +116,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_interlocking
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_interlocking
     BODY
         RULE_FAIL c
@@ -140,6 +141,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_assetsForInterlockings
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_assetsForInterlockings
     BODY
         RULE_FAIL c
@@ -165,6 +167,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_assetsForInterlocking
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_assetsForInterlocking
     BODY
         RULE_FAIL c
@@ -207,6 +210,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_conflictingRoutes
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_conflictingRoutes
     BODY
         RULE_FAIL c
@@ -243,6 +247,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_conflictingRoute
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_conflictingRoute
     BODY
         RULE_FAIL c
@@ -312,6 +317,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_derailersIL
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_derailersIL
     BODY
         RULE_FAIL c
@@ -356,6 +362,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_derailerIL
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_derailerIL
     BODY
         RULE_FAIL c
@@ -487,6 +494,7 @@ OPERATIONS
     END;
 
     RULE validate_derailerIL
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_IL_DERAILER
     BODY
         RULE_FAIL e_der, i_der
@@ -496,6 +504,7 @@ OPERATIONS
         END
     END;
     RULE warnings_derailerIL
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_IL_DERAILER
     ERROR_TYPES 2
     BODY
@@ -528,6 +537,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_movableCrossings
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_movableCrossings
     BODY
         RULE_FAIL c
@@ -577,6 +587,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_movableCrossing
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_movableCrossing
     BODY
         RULE_FAIL c
@@ -770,6 +781,7 @@ OPERATIONS
     END;
 
     RULE validate_movableCrossing
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_IL_MOVABLE_CROSSING
     BODY
         RULE_FAIL e_cr, i_cr
@@ -790,6 +802,7 @@ OPERATIONS
         END
     END;
     RULE warnings_movableCrossing
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_IL_MOVABLE_CROSSING
     ERROR_TYPES 2
     BODY
@@ -822,6 +835,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_overlaps
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_overlaps
     BODY
         RULE_FAIL c
@@ -895,6 +909,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_overlap
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_overlap
     BODY
         RULE_FAIL c
@@ -1097,6 +1112,7 @@ OPERATIONS
     END;
     
     RULE validate_overlap
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_IL_OVERLAP
     BODY
         RULE_FAIL e_o, i_o
@@ -1125,6 +1141,7 @@ OPERATIONS
         // as soon as additionalRelations are supported: check that they match the forced positions
     END;
     RULE warnings_overlap
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_IL_OVERLAP
     ERROR_TYPES 2
     BODY
@@ -1167,6 +1184,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_routeReleaseGroupsAhead
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_routeReleaseGroupsAhead
     BODY
         RULE_FAIL c
@@ -1204,6 +1222,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_routeReleaseGroupAhead
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_routeReleaseGroupAhead
     BODY
         RULE_FAIL c
@@ -1254,6 +1273,7 @@ OPERATIONS
     END;
 
     RULE validate_routeReleaseGroupAhead
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_IL_ROUTE_RELEASE_GROUP_AHEAD
     BODY
         RULE_FORALL e_rga, i_rga, i_r
@@ -1264,6 +1284,7 @@ OPERATIONS
         END
     END;    
     RULE warnings_routeReleaseGroupAhead
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_IL_ROUTE_RELEASE_GROUP_AHEAD
     ERROR_TYPES 2
     BODY
@@ -1292,6 +1313,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_routeReleaseGroupsRear
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_routeReleaseGroupsRear
     BODY
         RULE_FAIL c
@@ -1329,6 +1351,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_routeReleaseGroupRear
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_routeReleaseGroupRear
     BODY
         RULE_FAIL c
@@ -1379,6 +1402,7 @@ OPERATIONS
     END;
 
     RULE validate_routeReleaseGroupRear
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_IL_ROUTE_RELEASE_GROUP_REAR
     BODY
         RULE_FORALL e_rgr, i_rgr, i_r
@@ -1389,6 +1413,7 @@ OPERATIONS
         END
     END;    
     RULE warnings_routeReleaseGroupRear
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_IL_ROUTE_RELEASE_GROUP_REAR
     ERROR_TYPES 2
     BODY
@@ -1417,6 +1442,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_routeRelations
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_routeRelations
     BODY
         RULE_FAIL c
@@ -1523,6 +1549,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_routeRelation
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_routeRelation
     BODY
         RULE_FAIL c
@@ -1671,6 +1698,7 @@ OPERATIONS
     END;
 
     RULE validate_routeRelation
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_IL_ROUTE_RELATION
     BODY
         // related derailer positions:
@@ -1700,6 +1728,7 @@ OPERATIONS
         END
     END;
     RULE warnings_routeRelation
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_IL_ROUTE_RELATION
     ERROR_TYPES 2
     BODY
@@ -1761,6 +1790,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_routes
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_routes
     BODY
         RULE_FAIL c
@@ -1861,6 +1891,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_route
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_route
     BODY
         RULE_FAIL c
@@ -2141,6 +2172,7 @@ OPERATIONS
     END;
 
     RULE validate_route
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_ROUTE, set_IL_ROUTE_RELATION
     BODY
         RULE_FORALL e_r, i_r
@@ -2202,6 +2234,7 @@ OPERATIONS
         END        
     END;
     RULE warnings_route
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_ROUTE
     ERROR_TYPES 2
     BODY
@@ -2270,6 +2303,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_signalsIL
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_signalsIL
     BODY
         RULE_FAIL c
@@ -2315,6 +2349,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_signalIL
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_signalIL
     BODY
         RULE_FAIL c
@@ -2409,6 +2444,7 @@ OPERATIONS
     END;
 
     RULE validate_signalIL
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_IL_SIGNAL
     BODY
         RULE_FORALL e_sig, i_sig, i_sigs_exit
@@ -2430,6 +2466,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_switchesIL
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_switchesIL
     BODY
         RULE_FAIL c
@@ -2503,6 +2540,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_switchIL
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_switchIL
     BODY
         RULE_FAIL c
@@ -2789,6 +2827,7 @@ OPERATIONS
     END;
 
     RULE validate_switchIL
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_IL_SWITCH
     BODY
         RULE_FAIL e_sw, i_sw
@@ -2816,6 +2855,7 @@ OPERATIONS
         END
     END;
     RULE warnings_switchIL
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_IL_SWITCH
     ERROR_TYPES 2
     BODY
@@ -2860,6 +2900,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_tvdSections
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_tvdSections
     BODY
         RULE_FAIL c
@@ -2899,6 +2940,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_tvdSection
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_tvdSection
     BODY
         RULE_FAIL c
@@ -2990,6 +3032,7 @@ OPERATIONS
     END;
     
     RULE validate_tvdSection
+    CLASSIFICATION semantic
     DEPENDS_ON_COMPUTATION set_TVD_SECTIONS
     BODY
         RULE_FAIL e_tvd
@@ -3004,6 +3047,7 @@ OPERATIONS
         END
     END;
     RULE warnings_tvdSection
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_TVD_SECTIONS
     ERROR_TYPES 2
     BODY
@@ -3048,6 +3092,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_signalBoxes
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_signalBoxes
     BODY
         RULE_FAIL c
@@ -3120,6 +3165,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_signalBox
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_signalBox
     BODY
         RULE_FAIL c
@@ -3286,6 +3332,7 @@ OPERATIONS
     END;
 
     RULE warnings_signalBox
+    CLASSIFICATION warning
     DEPENDS_ON_COMPUTATION set_IL_SIGNAL_BOX
     ERROR_TYPES 2
     BODY
@@ -3322,6 +3369,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_specificInfrastructureManagers
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_specificInfrastructureManagers
     BODY
         RULE_FAIL c
@@ -3364,6 +3412,7 @@ OPERATIONS
         END
     END;
     RULE is_valid_specificInfrastructureManager
+    CLASSIFICATION syntax
     DEPENDS_ON_COMPUTATION set_specificInfrastructureManager
     BODY
         RULE_FAIL c

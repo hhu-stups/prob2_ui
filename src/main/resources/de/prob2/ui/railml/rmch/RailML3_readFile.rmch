@@ -16,6 +16,7 @@ PROPERTIES
     & allIdsOfType = %type.( type : STRING | all_ids~[{type} * ran(ran(all_ids))] )
 OPERATIONS
     RULE is_supported_railml
+    CLASSIFICATION syntax
     BODY
         RULE_FAIL e
         WHEN
@@ -32,6 +33,7 @@ OPERATIONS
     END;
 
     RULE unique_ids
+    CLASSIFICATION syntax
     DEPENDS_ON_RULE is_supported_railml
     BODY
         RULE_FAIL duplic_i
