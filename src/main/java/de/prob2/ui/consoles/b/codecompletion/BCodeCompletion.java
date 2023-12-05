@@ -66,9 +66,9 @@ public final class BCodeCompletion {
 		return doCompletion(stateSpace, text, true);
 	}
 
-	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text, boolean includeKeywords) {
+	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text, boolean inEditor) {
 		BCodeCompletion cc = new BCodeCompletion(stateSpace, extractPrefix(text));
-		cc.find(true, includeKeywords);
+		cc.find(true, inEditor);
 		return cc.getSuggestions();
 	}
 
