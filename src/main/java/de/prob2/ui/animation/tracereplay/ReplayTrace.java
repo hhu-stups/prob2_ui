@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.io.MoreFiles;
 
@@ -32,7 +33,9 @@ import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 public class ReplayTrace implements IExecutableItem, IValidationTask {
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
+	@JsonIgnore
 	private final ObjectProperty<Checked> status;
 	@JsonIgnore
 	private final DoubleProperty progress;
@@ -105,8 +108,11 @@ public class ReplayTrace implements IExecutableItem, IValidationTask {
 		return this.loadedTrace;
 	}
 
+	@Override
 	public void reset() {
 		this.setChecked(Checked.NOT_CHECKED);
+		this.setProgress(-1);
+		this.loadedTrace.set(null);
 		this.setReplayedTrace(null);
 		this.setAnimatedReplayedTrace(null);
 	}

@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.statespace.Trace;
@@ -138,6 +139,7 @@ public class SimulationItem implements IValidationTask {
 		}
 	}
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 
 	private final SimulationType type;

@@ -150,7 +150,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			items.add(newItem);
 			return newItem;
 		} else {
-			return existingItem.get();
+			T t = existingItem.get();
+			t.reset();
+			return t;
 		}
 	}
 	
@@ -160,7 +162,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			items.set(items.indexOf(oldItem), newItem);
 			return newItem;
 		} else {
-			return existingItem.get();
+			T t = existingItem.get();
+			t.reset();
+			return t;
 		}
 	}
 	

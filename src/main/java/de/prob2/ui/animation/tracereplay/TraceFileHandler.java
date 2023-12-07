@@ -181,7 +181,9 @@ public final class TraceFileHandler {
 			machine.getTraces().add(replayTrace);
 			return replayTrace;
 		} else {
-			return existingItem.get();
+			ReplayTrace t = existingItem.get();
+			t.reset();
+			return t;
 		}
 	}
 

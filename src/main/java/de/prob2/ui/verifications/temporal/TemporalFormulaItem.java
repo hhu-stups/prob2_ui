@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -36,6 +37,7 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 	}
 
 	private final TemporalType type;
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String code;
 	private final String description;

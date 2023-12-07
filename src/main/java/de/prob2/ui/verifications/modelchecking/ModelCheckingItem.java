@@ -215,9 +215,12 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	public BooleanProperty selectedProperty() {
 		return shouldExecute;
 	}
-	
+
+	@Override
 	public void reset() {
+		this.checked.set(Checked.NOT_CHECKED);
 		this.stepsProperty().clear();
+		this.currentStep.set(null);
 	}
 	
 	public ListProperty<ModelCheckingStep> stepsProperty() {

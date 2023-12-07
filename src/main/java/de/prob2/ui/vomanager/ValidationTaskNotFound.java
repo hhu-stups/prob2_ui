@@ -3,6 +3,7 @@ package de.prob2.ui.vomanager;
 import java.util.Locale;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
@@ -16,6 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public final class ValidationTaskNotFound implements IValidationTask {
 	private final ReadOnlyObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	
 	public ValidationTaskNotFound(final String id) {

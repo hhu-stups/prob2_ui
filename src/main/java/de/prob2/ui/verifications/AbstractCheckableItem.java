@@ -25,7 +25,8 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	private void initListeners() {
 		this.resultItemProperty().addListener((o, from, to) -> this.checked.set(to == null ? Checked.NOT_CHECKED : to.getChecked()));
 	}
-	
+
+	@Override
 	public void reset() {
 		this.setResultItem(null);
 	}
@@ -62,7 +63,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	public ReadOnlyObjectProperty<Checked> checkedProperty() {
 		return this.checked;
 	}
-	
+
 	@Override
 	public Checked getChecked() {
 		return this.checkedProperty().get();

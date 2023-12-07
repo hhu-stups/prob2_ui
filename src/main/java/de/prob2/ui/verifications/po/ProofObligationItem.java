@@ -3,6 +3,8 @@ package de.prob2.ui.verifications.po;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
@@ -13,6 +15,7 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class ProofObligationItem implements IValidationTask {
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String name;
 	private final String description;

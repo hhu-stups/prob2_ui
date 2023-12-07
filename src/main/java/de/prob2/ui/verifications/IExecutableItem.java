@@ -11,4 +11,5 @@ public interface IExecutableItem {
 	Checked getChecked();
 	boolean settingsEqual(IExecutableItem obj);
 	void execute(ExecutionContext context);
+	void reset();
 }

@@ -5,6 +5,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -29,6 +30,7 @@ import javafx.collections.ObservableList;
 	"selected",
 })
 public class SymbolicCheckingFormulaItem extends AbstractCheckableItem implements IValidationTask {
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final SymbolicCheckingType type;
 	private final String code;

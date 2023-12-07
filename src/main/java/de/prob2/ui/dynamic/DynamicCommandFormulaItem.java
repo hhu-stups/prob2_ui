@@ -5,6 +5,7 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.internal.I18n;
@@ -16,6 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public class DynamicCommandFormulaItem implements IValidationTask {
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String id;
 	private final String commandType;
 	private String formula;
