@@ -321,7 +321,6 @@ public class ProjectManager {
 		}
 	}
 
-	//TODO: make sure, that no duplicated traces are added
 	public void openTrace(Path selected) {
 		if (currentProject.getCurrentMachine() == null) {
 			stageManager.makeAlert(Alert.AlertType.WARNING, "common.alerts.noMachineLoaded.header",

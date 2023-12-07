@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -174,9 +175,14 @@ public final class TraceFileHandler {
 	}
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
-		final ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
-		machine.getTraces().add(replayTrace);
-		return replayTrace;
+		ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
+		Optional<ReplayTrace> existingItem = machine.getTraces().stream().filter(replayTrace::settingsEqual).findAny();
+		if (existingItem.isEmpty()) {
+			machine.getTraces().add(replayTrace);
+			return replayTrace;
+		} else {
+			return existingItem.get();
+		}
 	}
 
 	public void save(SimulationItem item, Machine machine) {
@@ -298,8 +304,14 @@ public final class TraceFileHandler {
 			return;
 		}
 
-		Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, "animation.tracereplay.dialog.deleteTraceFile.title", "animation.tracereplay.dialog.deleteTraceFile.content", path).showAndWait();
-		if (selected.isEmpty() || selected.get() != ButtonType.OK) {
+		Optional<ButtonType> selected = stageManager.makeAlert(
+			Alert.AlertType.CONFIRMATION,
+			Arrays.asList(ButtonType.YES, ButtonType.NO),
+			"animation.tracereplay.dialog.deleteTraceFile.title",
+			"animation.tracereplay.dialog.deleteTraceFile.content",
+			path
+		).showAndWait();
+		if (selected.isEmpty() || selected.get() != ButtonType.YES) {
 			return;
 		}
 
