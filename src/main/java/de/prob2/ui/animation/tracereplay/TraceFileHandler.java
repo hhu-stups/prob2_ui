@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 
 import com.fasterxml.jackson.core.JacksonException;
@@ -285,5 +286,28 @@ public final class TraceFileHandler {
 		}
 
 		return path;
+	}
+
+	public void deleteTraceFile(ReplayTrace trace) {
+		if (trace == null) {
+			return;
+		}
+
+		Path path = trace.getAbsoluteLocation();
+		if (path == null || !Files.isRegularFile(path)) {
+			return;
+		}
+
+		Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.CONFIRMATION, "animation.tracereplay.dialog.deleteTraceFile.title", "animation.tracereplay.dialog.deleteTraceFile.content", path).showAndWait();
+		if (selected.isEmpty() || selected.get() != ButtonType.OK) {
+			return;
+		}
+
+		try {
+			Files.delete(path);
+		} catch (IOException e) {
+			LOGGER.warn("could not delete trace file {}", path, e);
+			stageManager.makeExceptionAlert(e, "common.alerts.couldNotDeleteFile.content").show();
+		}
 	}
 }

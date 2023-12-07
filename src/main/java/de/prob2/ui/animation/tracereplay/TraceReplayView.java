@@ -287,4 +287,10 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			}
 		}
 	}
+
+	@Override
+	protected void removeItem(ReplayTrace item) {
+		super.removeItem(item);
+		traceFileHandler.deleteTraceFile(item);
+	}
 }
