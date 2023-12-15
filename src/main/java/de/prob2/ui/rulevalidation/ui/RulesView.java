@@ -94,6 +94,7 @@ public class RulesView extends AnchorPane{
 	private TreeItem<Object> tvComputationsItem;
 
 	private List<TreeItem<Object>> ruleItems;
+	private Map<String, List<TreeItem<Object>>> classificationItems;
 	private List<TreeItem<Object>> computationItems;
 
 	private final RulesDataModel dataModel;
@@ -168,6 +169,12 @@ public class RulesView extends AnchorPane{
 
 		tvRootItem.getChildren().clear();
 		tvRulesItem.getChildren().clear();
+		for (TreeItem<Object> item : ruleItems) {
+			item.getChildren().clear();
+			if (item.getValue() instanceof String) {
+				item.getChildren().addAll(classificationItems.get((String) item.getValue()));
+			}
+		}
 		tvComputationsItem.getChildren().clear();
 
 		String filterText = filterTextField.getText();
@@ -191,15 +198,29 @@ public class RulesView extends AnchorPane{
 			tvComputationsItem.getChildren().addAll(computationsToShow);
 			tvRootItem.getChildren().add(tvComputationsItem);
 		}
+		treeTableView.sort();
 		treeTableView.refresh();
 	}
 
 	private List<TreeItem<Object>> filterItems(String filterText, List<TreeItem<Object>> allItems) {
 		List<TreeItem<Object>> filtered = new ArrayList<>();
 		for (TreeItem<Object> item : allItems) {
-			String itemName = ((AbstractOperation) item.getValue()).getName().toLowerCase();
-			if (itemName.contains(filterText)) {
+			if (item.getValue() instanceof AbstractOperation) {
+				String itemName = ((AbstractOperation) item.getValue()).getName().toLowerCase();
+				if (itemName.contains(filterText)) {
+					filtered.add(item);
+				}
+			} else if (item.getValue() instanceof String && ((String) item.getValue()).toLowerCase().contains(filterText)) {
+				// item is classificationItem and classification identifier matches search
 				filtered.add(item);
+			} else if (item.getValue() instanceof String) {
+				// item is classificationItem
+				List<TreeItem<Object>> filteredRules = filterItems(filterText, item.getChildren());
+				item.getChildren().clear();
+				if (!filteredRules.isEmpty()) {
+					item.getChildren().addAll(filteredRules);
+					filtered.add(item);
+				}
 			}
 		}
 		return filtered;
@@ -241,8 +262,8 @@ public class RulesView extends AnchorPane{
 		LOGGER.debug("Build RulesView!");
 		tvRootItem.getChildren().clear();
 		tvRulesItem = new TreeItem<>("RULES");
+		classificationItems = new HashMap<>();
 		if (!dataModel.getRuleMap().isEmpty()) {
-			Map<String, List<TreeItem<Object>>> classificationItems = new HashMap<>();
 			List<TreeItem<Object>> noClassificationItem = new ArrayList<>();
 			for (Map.Entry<String, RuleOperation> entry : dataModel.getRuleMap().entrySet()) {
 				LOGGER.debug("Add item for rule {}   {}.", entry.getKey(), entry.getValue());
@@ -257,9 +278,7 @@ public class RulesView extends AnchorPane{
 					noClassificationItem.add(operationItem);
 				}
 			}
-			List<String> sortedClassifications = new ArrayList<>(classificationItems.keySet());
-			Collections.sort(sortedClassifications);
-			for (String cl : sortedClassifications) {
+			for (String cl : classificationItems.keySet()) {
 				TreeItem<Object> classificationItem = new TreeItem<>(cl);
 				classificationItem.getChildren().addAll(classificationItems.get(cl));
 				tvRulesItem.getChildren().add(classificationItem);
@@ -288,6 +307,7 @@ public class RulesView extends AnchorPane{
 		successLabel.textProperty().bind(dataModel.successRulesProperty());
 
 		executeAllButton.setDisable(false);
+		treeTableView.sort();
 		treeTableView.refresh();
 	}
 }
