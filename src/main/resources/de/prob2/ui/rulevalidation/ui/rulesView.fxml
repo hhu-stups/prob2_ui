@@ -38,7 +38,7 @@
 					<TreeTableColumn fx:id="tvExecuteColumn" id="execute" editable="false" minWidth="80.0"  sortable="false"/>
 				</columns>
 				<placeholder>
-					<Label text="No Rules Machine loaded"/>
+					<Label text="%rulevalidation.view.placeholder"/>
 				</placeholder>
 				<TreeItem fx:id="tvRootItem" expanded="true"/>
 			</TreeTableView>
