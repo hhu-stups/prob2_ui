@@ -136,12 +136,12 @@ public abstract class Simulator {
 				currentTrace.removeListener(traceListener);
 			} else if(config instanceof SimulationExternalConfiguration) {
 				if(this.externalSimulatorExecutor == null) {
-					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this, ((SimulationExternalConfiguration) config).getExternalPath(), (ClassicalBModel) currentTrace.getModel());
+					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this, ((SimulationExternalConfiguration) config).getExternalPath());
 					this.externalSimulatorExecutor.start();
 				} else {
 					if(!this.externalSimulatorExecutor.getPythonFile().equals(((SimulationExternalConfiguration) config).getExternalPath())) {
 						this.externalSimulatorExecutor.close();
-						this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this, ((SimulationExternalConfiguration) config).getExternalPath(), (ClassicalBModel) currentTrace.getModel());
+						this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this, ((SimulationExternalConfiguration) config).getExternalPath());
 						this.externalSimulatorExecutor.start();
 					} else {
 						this.externalSimulatorExecutor.reset();
