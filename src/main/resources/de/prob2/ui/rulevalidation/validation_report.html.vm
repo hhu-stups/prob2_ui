@@ -2,6 +2,7 @@
 	#foreach($ruleResult in $ruleResults)
 		#set($ruleName = $ruleResult.getRuleName())
 		#set($ruleStatus = $ruleResult.getRuleState())
+		#set($tags = $ruleResult.getTags())
 		#if($ruleStatus == $status_SUCCESS)
 		<div class="rule-header green">
 		#elseif($ruleStatus == $status_FAIL)
@@ -18,7 +19,12 @@
 		#else
 		<div class="rule-header">
 		#end
-		$ruleName #if($ruleResult.getRuleId()) &ensp;[$ruleResult.getRuleId()] #end &emsp;<b>$ruleStatus</b>
+		$ruleName #if($ruleResult.getRuleId()) &ensp;[$ruleResult.getRuleId()] #end
+		#if(!$tags.isEmpty()) &emsp; #end
+		#foreach($tag in $tags)
+			<div class="tag">$tag</div>
+		#end
+		&emsp;<b>$ruleStatus</b>
 	</div>
 
 		#if($ruleResult.getNumberOfViolations() > 0 || !$ruleResult.getFailedDependencies().isEmpty() || !$ruleResult.getNotCheckedDependencies().isEmpty())
@@ -102,6 +108,13 @@
 	            padding: 10px;
 	            display: none;
 	        }
+			.tag {
+				display: inline-block;
+				padding: 5px 10px;
+				background-color: #0099ff;
+				color: #fff;
+				border-radius: 20px;
+			}
 	        .red { background-color: rgba(204, 47, 39, 0.3); }
 	        .orange { background-color: rgba(255, 154, 0, 0.3); }
 	        .green { background-color: rgba(76, 175, 80, 0.3); }
