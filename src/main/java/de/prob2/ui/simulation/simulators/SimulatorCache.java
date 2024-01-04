@@ -20,29 +20,27 @@ public class SimulatorCache {
 	private final Map<String, Map<String, Map<String, List<Transition>>>> transitionCache = new HashMap<>();
 
 	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, SimulationHelperFunctions.EvaluationMode mode) {
-		IEvalElement formula = formulasCache.computeIfAbsent(expression, expr -> {
-			if(variables != null && !variables.isEmpty() && expr.contains("$")) {
-				for(Map.Entry<String, String> entry : variables.entrySet()) {
-					String key = entry.getKey();
-					String val = entry.getValue();
-					expr = expr.replaceAll(Pattern.quote("$") + key, val);
-				}
+		// Replace SimB variables (starting with $ first) before caching
+		if(variables != null && !variables.isEmpty() && expression.contains("$")) {
+			for(Map.Entry<String, String> entry : variables.entrySet()) {
+				String key = entry.getKey();
+				String val = entry.getValue();
+				expression = expression.replaceAll(Pattern.quote("$") + key, val);
 			}
-
-			return switch (mode) {
-				case CLASSICAL_B ->
-						// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
-						new ClassicalB(expr, FormulaExpand.EXPAND);
-				case EVENT_B ->
-						// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
-						new EventB(expr, FormulaExpand.EXPAND);
-			};
+		}
+		IEvalElement formula = formulasCache.computeIfAbsent(expression, expr -> switch (mode) {
+			case CLASSICAL_B ->
+					// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
+					new ClassicalB(expr, FormulaExpand.EXPAND);
+			case EVENT_B ->
+					// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
+					new EventB(expr, FormulaExpand.EXPAND);
 		});
 
 		return bState.eval(formula).toString();
 	}
 
-	public List<Transition> readTransitionsWithCaching(State bState, String opName, String predicate, int maxTransitions) {
+	public List<Transition> readTransitionsWithCaching(State bState, Map<String, String> variables, String opName, String predicate, int maxTransitions) {
 		if(transitionCache.keySet().size() > 5000) {
 			transitionCache.clear();
 		}
@@ -51,7 +49,7 @@ public class SimulatorCache {
 		// It seems that Java evaluates the value first, before adding it to the HashMap under the condition that the corresponding key is not present
 		// This would destroy the idea of caching, i.e., only evaluating when the key is absent.
 
-		String stateID = bState.getId();
+		String stateID = variables.isEmpty() ? bState.getId() : bState.getId() + variables;
 		if(!transitionCache.containsKey(stateID) || !transitionCache.get(stateID).containsKey(opName) ||
 				!transitionCache.get(stateID).get(opName).containsKey(predicate)) {
 			// loads transitions in cache if necessary

@@ -274,7 +274,7 @@ public abstract class Simulator {
 			}
 			activationForOperation.remove(activation);
 			State currentState = newTrace.getCurrentState();
-			Transition transition = simulationEventHandler.selectTransition(activation, currentState);
+			Transition transition = simulationEventHandler.selectTransition(activation, currentState, variables);
 			if (transition != null) {
 				newTrace = newTrace.add(transition);
 				stepCounter++;
@@ -312,6 +312,7 @@ public abstract class Simulator {
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 			} else if(!activationConfig.isActivatingOnlyWhenExecuted()) {
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
+				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 			}
 		}
 		return newTrace;
