@@ -296,7 +296,7 @@ public class FileChooserManager {
 		}
 		if(railml) {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + "railml");
-			fileChooser.getExtensionFilters().addAll(this.getExtensionFilter("common.fileChooser.fileTypes.railml", "railml"));
+			fileChooser.getExtensionFilters().addAll(this.getRailMLFilter());
 		}
 
 		// This extension filter is created manually instead of with getExtensionFilter,
