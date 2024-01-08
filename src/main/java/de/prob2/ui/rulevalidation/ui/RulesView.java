@@ -16,8 +16,11 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.RuleValidationReport;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
@@ -43,6 +46,8 @@ public class RulesView extends AnchorPane{
 	private static final Logger LOGGER = LoggerFactory.getLogger(RulesView.class);
 
 	@FXML
+	private ToggleButton tagListButton;
+	@FXML
 	private Button filterButton;
 
 	@FXML
@@ -55,6 +60,13 @@ public class RulesView extends AnchorPane{
 
 	@FXML
 	private Label rulesLabel;
+
+	@FXML
+	private VBox tagSelectionContainer;
+	@FXML
+	private ScrollPane tagSelectionScrollPane;
+	@FXML
+	private VBox tagSelectionBox;
 
 	@FXML
 	public VBox progressBox;
@@ -121,6 +133,10 @@ public class RulesView extends AnchorPane{
 
 	@FXML
 	public void initialize() {
+		tagListButton.visibleProperty().bind(Bindings.createBooleanBinding(() ->
+			!tagSelectionBox.getChildren().isEmpty(), tagSelectionBox.getChildren()));
+		tagListButton.managedProperty().bind(tagListButton.visibleProperty());
+		tagSelectionContainer.managedProperty().bind(tagSelectionContainer.visibleProperty());
 
 		tvNameColumn.setCellFactory(column -> new NameCell());
 		tvNameColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
@@ -163,6 +179,65 @@ public class RulesView extends AnchorPane{
 	}
 
 	@FXML
+	public void handleTagButton(){
+		tagSelectionContainer.setVisible(!tagSelectionContainer.isVisible());
+		// TODO: Behaviour below should be separated
+		ObservableList<Node> nodes = tagSelectionBox.getChildren();
+		List<String> tags = new ArrayList<>();
+		for (Node node : nodes) {
+			if (node instanceof CheckBox checkBox && checkBox.isSelected()) {
+				tags.add(checkBox.getText());
+			}
+		}
+
+		tvRootItem.getChildren().clear();
+		tvRulesItem.getChildren().clear();
+		for (TreeItem<Object> item : ruleItems) {
+			item.getChildren().clear();
+			if (item.getValue() instanceof String) {
+				item.getChildren().addAll(classificationItems.get((String) item.getValue()));
+			}
+		}
+		tvComputationsItem.getChildren().clear();
+
+		List<TreeItem<Object>> rulesToShow;
+		List<TreeItem<Object>> computationsToShow;
+		if (!tags.isEmpty()) {
+			//filter
+			rulesToShow = filterTags(tags, ruleItems);
+			computationsToShow = filterTags(tags, computationItems);
+		} else {
+			//don't filter, show all
+			rulesToShow = ruleItems;
+			computationsToShow = computationItems;
+		}
+		if (!rulesToShow.isEmpty()) {
+			tvRulesItem.getChildren().addAll(rulesToShow);
+			tvRootItem.getChildren().add(tvRulesItem);
+		}
+		if (!computationsToShow.isEmpty()) {
+			tvComputationsItem.getChildren().addAll(computationsToShow);
+			tvRootItem.getChildren().add(tvComputationsItem);
+		}
+		treeTableView.sort();
+		treeTableView.refresh();
+	}
+
+	private List<TreeItem<Object>> filterTags(List<String> tags, List<TreeItem<Object>> allItems) {
+		List<TreeItem<Object>> filtered = new ArrayList<>();
+		for (TreeItem<Object> item : allItems) {
+			filtered.addAll(filterTags(tags, item.getChildren()));
+			for (String tag : tags) {
+				if (item.getValue() instanceof AbstractOperation abstractOperation && abstractOperation.getTags().contains(tag)) {
+					filtered.add(item);
+					break;
+				}
+			}
+		}
+		return filtered;
+	}
+
+	@FXML
 	public void handleFilterButton(){
 
 		LOGGER.debug("Filter Operations");
@@ -183,8 +258,8 @@ public class RulesView extends AnchorPane{
 		if (filterText != null && !filterText.isEmpty()) {
 			//filter
 			filterText = filterText.toLowerCase();
-			rulesToShow = filterItems(filterText, ruleItems);
-			computationsToShow = filterItems(filterText, computationItems);
+			rulesToShow = filterOperationNames(filterText, ruleItems);
+			computationsToShow = filterOperationNames(filterText, computationItems);
 		} else {
 			//don't filter, show all
 			rulesToShow = ruleItems;
@@ -198,11 +273,10 @@ public class RulesView extends AnchorPane{
 			tvComputationsItem.getChildren().addAll(computationsToShow);
 			tvRootItem.getChildren().add(tvComputationsItem);
 		}
-		treeTableView.sort();
 		treeTableView.refresh();
 	}
 
-	private List<TreeItem<Object>> filterItems(String filterText, List<TreeItem<Object>> allItems) {
+	private List<TreeItem<Object>> filterOperationNames(String filterText, List<TreeItem<Object>> allItems) {
 		List<TreeItem<Object>> filtered = new ArrayList<>();
 		for (TreeItem<Object> item : allItems) {
 			if (item.getValue() instanceof AbstractOperation) {
@@ -215,7 +289,7 @@ public class RulesView extends AnchorPane{
 				filtered.add(item);
 			} else if (item.getValue() instanceof String) {
 				// item is classificationItem
-				List<TreeItem<Object>> filteredRules = filterItems(filterText, item.getChildren());
+				List<TreeItem<Object>> filteredRules = filterOperationNames(filterText, item.getChildren());
 				item.getChildren().clear();
 				if (!filteredRules.isEmpty()) {
 					item.getChildren().addAll(filteredRules);
@@ -260,6 +334,27 @@ public class RulesView extends AnchorPane{
 	public void build() {
 
 		LOGGER.debug("Build RulesView!");
+
+		tagSelectionBox.getChildren().clear();
+		Set<String> allTags = new HashSet<>();
+		for (RuleOperation op : dataModel.getRuleMap().values()) {
+			allTags.addAll(op.getTags());
+		}
+		for (ComputationOperation op : dataModel.getComputationMap().values()) {
+			allTags.addAll(op.getTags());
+		}
+		if (allTags.isEmpty()) {
+			tagSelectionContainer.setVisible(false);
+		} else {
+			List<CheckBox> tagCheckBoxes = new ArrayList<>();
+			for (String tag : allTags) {
+				CheckBox checkBox = new CheckBox(tag);
+				//checkBox.setSelected(true);
+				tagCheckBoxes.add(checkBox);
+			}
+			tagSelectionBox.getChildren().addAll(tagCheckBoxes);
+		}
+
 		tvRootItem.getChildren().clear();
 		tvRulesItem = new TreeItem<>("RULES");
 		classificationItems = new HashMap<>();

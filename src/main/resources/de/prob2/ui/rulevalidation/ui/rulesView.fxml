@@ -15,6 +15,11 @@
             <HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
                   AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
                   AnchorPane.bottomAnchor="10.0" alignment="CENTER">
+				<ToggleButton fx:id="tagListButton" onAction="#handleTagButton">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILTER" bindableFontSize="${fontSize.fontSize + 2}" />
+					</graphic>
+				</ToggleButton>
                 <Button fx:id="filterButton"
                               onAction="#handleFilterButton" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
                     <graphic>
@@ -54,6 +59,16 @@
 					</padding>
 				</ProgressBar>
 				<Label fx:id="progressOperation"/>
+			</VBox>
+			<VBox fx:id="tagSelectionContainer" visible="false">
+				<ScrollPane fx:id="tagSelectionScrollPane" maxWidth="150" maxHeight="200" style="-fx-background-color: red">
+					<Label text="Tags" style="-fx-font-weight: bold;"/>
+					<VBox fx:id="tagSelectionBox" style="-fx-background-color: transparent">
+						<padding>
+							<Insets top="10" bottom="10" left="10"/>
+						</padding>
+					</VBox>
+				</ScrollPane>
 			</VBox>
 		</StackPane>
         <HBox VBox.vgrow="never" alignment="CENTER_LEFT">
