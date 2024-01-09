@@ -60,16 +60,18 @@
 				</ProgressBar>
 				<Label fx:id="progressOperation"/>
 			</VBox>
-			<VBox fx:id="tagSelectionContainer" visible="false">
-				<ScrollPane fx:id="tagSelectionScrollPane" maxWidth="150" maxHeight="200" style="-fx-background-color: red">
-					<Label text="Tags" style="-fx-font-weight: bold;"/>
-					<VBox fx:id="tagSelectionBox" style="-fx-background-color: transparent">
+			<Pane fx:id="tagSelectionContainer" visible="false" pickOnBounds="false">
+				<ScrollPane fx:id="tagSelectionScrollPane" maxWidth="150" maxHeight="200">
+					<VBox>
+						<Label text="Tags" style="-fx-font-weight: bold;"/>
+						<Separator/>
+						<VBox fx:id="tagSelectionBox"/>
 						<padding>
-							<Insets top="10" bottom="10" left="10"/>
+							<Insets top="10" bottom="10" left="10" right="10"/>
 						</padding>
 					</VBox>
 				</ScrollPane>
-			</VBox>
+			</Pane>
 		</StackPane>
         <HBox VBox.vgrow="never" alignment="CENTER_LEFT">
             <Separator HBox.hgrow="NEVER" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>

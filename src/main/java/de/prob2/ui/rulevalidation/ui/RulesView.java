@@ -18,11 +18,12 @@ import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.collections.ObservableList;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
@@ -62,7 +63,7 @@ public class RulesView extends AnchorPane{
 	private Label rulesLabel;
 
 	@FXML
-	private VBox tagSelectionContainer;
+	private Pane tagSelectionContainer;
 	@FXML
 	private ScrollPane tagSelectionScrollPane;
 	@FXML
@@ -104,10 +105,10 @@ public class RulesView extends AnchorPane{
 	private TreeItem<Object> tvRootItem;
 	private TreeItem<Object> tvRulesItem;
 	private TreeItem<Object> tvComputationsItem;
-
 	private List<TreeItem<Object>> ruleItems;
 	private Map<String, List<TreeItem<Object>>> classificationItems;
 	private List<TreeItem<Object>> computationItems;
+	private Set<String> currentTags;
 
 	private final RulesDataModel dataModel;
 	private final StageManager stageManager;
@@ -137,6 +138,35 @@ public class RulesView extends AnchorPane{
 			!tagSelectionBox.getChildren().isEmpty(), tagSelectionBox.getChildren()));
 		tagListButton.managedProperty().bind(tagListButton.visibleProperty());
 		tagSelectionContainer.managedProperty().bind(tagSelectionContainer.visibleProperty());
+
+		tagSelectionBox.getChildren().addListener((ListChangeListener<Node>) change -> {
+			while (change.next()) {
+				if (change.wasAdded()) {
+					for (Node node : change.getAddedSubList()) {
+						if (node instanceof CheckBox checkBox) {
+							checkBox.selectedProperty().addListener((obs, o, n) -> {
+								if (n) {
+									currentTags.add(checkBox.getText());
+								} else {
+									currentTags.remove(checkBox.getText());
+								}
+								List<TreeItem<Object>> filteredRuleItems;
+								List<TreeItem<Object>> filteredComputationItems;
+								if (!currentTags.isEmpty()) {
+									filteredRuleItems = filterTags(currentTags, ruleItems);
+									filteredComputationItems = filterTags(currentTags, computationItems);
+								} else {
+									filteredRuleItems = ruleItems;
+									filteredComputationItems = computationItems;
+								}
+								showFilteredItems(filteredRuleItems, filteredComputationItems);
+							});
+						}
+					}
+				}
+			}
+		});
+		treeTableView.setOnMousePressed(e -> tagSelectionContainer.setVisible(false));
 
 		tvNameColumn.setCellFactory(column -> new NameCell());
 		tvNameColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
@@ -181,49 +211,9 @@ public class RulesView extends AnchorPane{
 	@FXML
 	public void handleTagButton(){
 		tagSelectionContainer.setVisible(!tagSelectionContainer.isVisible());
-		// TODO: Behaviour below should be separated
-		ObservableList<Node> nodes = tagSelectionBox.getChildren();
-		List<String> tags = new ArrayList<>();
-		for (Node node : nodes) {
-			if (node instanceof CheckBox checkBox && checkBox.isSelected()) {
-				tags.add(checkBox.getText());
-			}
-		}
-
-		tvRootItem.getChildren().clear();
-		tvRulesItem.getChildren().clear();
-		for (TreeItem<Object> item : ruleItems) {
-			item.getChildren().clear();
-			if (item.getValue() instanceof String) {
-				item.getChildren().addAll(classificationItems.get((String) item.getValue()));
-			}
-		}
-		tvComputationsItem.getChildren().clear();
-
-		List<TreeItem<Object>> rulesToShow;
-		List<TreeItem<Object>> computationsToShow;
-		if (!tags.isEmpty()) {
-			//filter
-			rulesToShow = filterTags(tags, ruleItems);
-			computationsToShow = filterTags(tags, computationItems);
-		} else {
-			//don't filter, show all
-			rulesToShow = ruleItems;
-			computationsToShow = computationItems;
-		}
-		if (!rulesToShow.isEmpty()) {
-			tvRulesItem.getChildren().addAll(rulesToShow);
-			tvRootItem.getChildren().add(tvRulesItem);
-		}
-		if (!computationsToShow.isEmpty()) {
-			tvComputationsItem.getChildren().addAll(computationsToShow);
-			tvRootItem.getChildren().add(tvComputationsItem);
-		}
-		treeTableView.sort();
-		treeTableView.refresh();
 	}
 
-	private List<TreeItem<Object>> filterTags(List<String> tags, List<TreeItem<Object>> allItems) {
+	private static List<TreeItem<Object>> filterTags(Set<String> tags, List<TreeItem<Object>> allItems) {
 		List<TreeItem<Object>> filtered = new ArrayList<>();
 		for (TreeItem<Object> item : allItems) {
 			filtered.addAll(filterTags(tags, item.getChildren()));
@@ -239,19 +229,7 @@ public class RulesView extends AnchorPane{
 
 	@FXML
 	public void handleFilterButton(){
-
 		LOGGER.debug("Filter Operations");
-
-		tvRootItem.getChildren().clear();
-		tvRulesItem.getChildren().clear();
-		for (TreeItem<Object> item : ruleItems) {
-			item.getChildren().clear();
-			if (item.getValue() instanceof String) {
-				item.getChildren().addAll(classificationItems.get((String) item.getValue()));
-			}
-		}
-		tvComputationsItem.getChildren().clear();
-
 		String filterText = filterTextField.getText();
 		List<TreeItem<Object>> rulesToShow;
 		List<TreeItem<Object>> computationsToShow;
@@ -265,6 +243,20 @@ public class RulesView extends AnchorPane{
 			rulesToShow = ruleItems;
 			computationsToShow = computationItems;
 		}
+		showFilteredItems(rulesToShow, computationsToShow);
+	}
+
+	private void showFilteredItems(List<TreeItem<Object>> rulesToShow, List<TreeItem<Object>> computationsToShow) {
+		tvRootItem.getChildren().clear();
+		tvRulesItem.getChildren().clear();
+		for (TreeItem<Object> item : ruleItems) {
+			item.getChildren().clear();
+			if (item.getValue() instanceof String) {
+				item.getChildren().addAll(classificationItems.get((String) item.getValue()));
+			}
+		}
+		tvComputationsItem.getChildren().clear();
+
 		if (!rulesToShow.isEmpty()) {
 			tvRulesItem.getChildren().addAll(rulesToShow);
 			tvRootItem.getChildren().add(tvRulesItem);
@@ -273,6 +265,7 @@ public class RulesView extends AnchorPane{
 			tvComputationsItem.getChildren().addAll(computationsToShow);
 			tvRootItem.getChildren().add(tvComputationsItem);
 		}
+		treeTableView.sort();
 		treeTableView.refresh();
 	}
 
@@ -343,13 +336,13 @@ public class RulesView extends AnchorPane{
 		for (ComputationOperation op : dataModel.getComputationMap().values()) {
 			allTags.addAll(op.getTags());
 		}
+		currentTags = new HashSet<>();
 		if (allTags.isEmpty()) {
 			tagSelectionContainer.setVisible(false);
 		} else {
 			List<CheckBox> tagCheckBoxes = new ArrayList<>();
 			for (String tag : allTags) {
 				CheckBox checkBox = new CheckBox(tag);
-				//checkBox.setSelected(true);
 				tagCheckBoxes.add(checkBox);
 			}
 			tagSelectionBox.getChildren().addAll(tagCheckBoxes);
