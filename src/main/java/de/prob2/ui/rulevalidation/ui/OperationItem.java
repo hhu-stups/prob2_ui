@@ -75,14 +75,7 @@ class OperationItem extends TreeItem<Object> {
 			}
 			// create children for disabled dependencies
 			List<String> disabledDependencies = model.getDisabledDependencies(operation);
-			if (!disabledDependencies.isEmpty()) {
-				TreeItem<Object> disabledItem = new TreeItem<>("DISABLED DEPENDENCIES");
-				for (String disabled : disabledDependencies) {
-					disabledItem.getChildren().add(new TreeItem<>(disabled));
-				}
-				this.getChildren().add(disabledItem);
-				executable = false;
-			}
+			addDisabledDependencies(disabledDependencies);
 		}
 	}
 
@@ -122,15 +115,19 @@ class OperationItem extends TreeItem<Object> {
 
 				// create child items for disabled dependencies
 				List<String> disabledDependencies = model.getDisabledDependencies(operation);
-				if (!disabledDependencies.isEmpty()) {
-					TreeItem<Object> disabledItem = new TreeItem<>("DISABLED DEPENDENCIES");
-					for (String disabled : disabledDependencies) {
-						disabledItem.getChildren().add(new TreeItem<>(disabled));
-					}
-					this.getChildren().add(disabledItem);
-					executable = false;
-				}
+				addDisabledDependencies(disabledDependencies);
 				break;
+		}
+	}
+
+	private void addDisabledDependencies(List<String> disabledDependencies) {
+		if (!disabledDependencies.isEmpty()) {
+			TreeItem<Object> disabledItem = new TreeItem<>("DISABLED DEPENDENCIES");
+			for (String disabled : disabledDependencies) {
+				disabledItem.getChildren().add(new TreeItem<>(disabled));
+			}
+			this.getChildren().add(disabledItem);
+			executable = false;
 		}
 	}
 

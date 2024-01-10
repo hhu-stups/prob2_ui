@@ -35,7 +35,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		else if (item instanceof RuleResult.CounterExample)
 			setText(((RuleResult.CounterExample)item).getMessage());
 		else if (item instanceof Map.Entry)
-			configureForComputationResult((ComputationStatus)((Map.Entry)item).getValue());
+			configureForComputationResult((ComputationStatus)((Map.Entry<?, ?>)item).getValue());
 		else if (item instanceof IdentifierNotInitialised)
 			configureForNotInitialised((IdentifierNotInitialised)item);
 		setGraphic(null);

@@ -53,7 +53,7 @@ public class RuleValidationReport {
 	}
 
 	private VelocityContext getVelocityContext() {
-		RuleResults ruleResults = new RuleResults(new HashSet<RuleOperation>(rulesDataModel.getRuleMap().values()),
+		RuleResults ruleResults = new RuleResults(new HashSet<>(rulesDataModel.getRuleMap().values()),
 			currentTrace.getCurrentState(), -1);
 		RuleResults.ResultSummary resultSummary = ruleResults.getSummary();
 
