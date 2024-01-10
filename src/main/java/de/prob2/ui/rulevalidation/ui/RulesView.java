@@ -272,12 +272,12 @@ public class RulesView extends AnchorPane{
 	private List<TreeItem<Object>> filterOperationNames(String filterText, List<TreeItem<Object>> allItems) {
 		List<TreeItem<Object>> filtered = new ArrayList<>();
 		for (TreeItem<Object> item : allItems) {
-			if (item.getValue() instanceof AbstractOperation) {
-				String itemName = ((AbstractOperation) item.getValue()).getName().toLowerCase();
+			if (item.getValue() instanceof AbstractOperation abstractOperation) {
+				String itemName = abstractOperation.getName().toLowerCase();
 				if (itemName.contains(filterText)) {
 					filtered.add(item);
 				}
-			} else if (item.getValue() instanceof String && ((String) item.getValue()).toLowerCase().contains(filterText)) {
+			} else if (item.getValue() instanceof String classification && classification.toLowerCase().contains(filterText)) {
 				// item is classificationItem and classification identifier matches search
 				filtered.add(item);
 			} else if (item.getValue() instanceof String) {
