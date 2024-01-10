@@ -47,6 +47,8 @@ public class RulesView extends AnchorPane{
 	private static final Logger LOGGER = LoggerFactory.getLogger(RulesView.class);
 
 	@FXML
+	private AnchorPane topBar;
+	@FXML
 	private ToggleButton tagListButton;
 	@FXML
 	private Button filterButton;
@@ -150,22 +152,14 @@ public class RulesView extends AnchorPane{
 								} else {
 									currentTags.remove(checkBox.getText());
 								}
-								List<TreeItem<Object>> filteredRuleItems;
-								List<TreeItem<Object>> filteredComputationItems;
-								if (!currentTags.isEmpty()) {
-									filteredRuleItems = filterTags(currentTags, ruleItems);
-									filteredComputationItems = filterTags(currentTags, computationItems);
-								} else {
-									filteredRuleItems = ruleItems;
-									filteredComputationItems = computationItems;
-								}
-								showFilteredItems(filteredRuleItems, filteredComputationItems);
+								filterTagsAndSearch();
 							});
 						}
 					}
 				}
 			}
 		});
+		topBar.setOnMousePressed(e -> tagSelectionContainer.setVisible(false));
 		treeTableView.setOnMousePressed(e -> tagSelectionContainer.setVisible(false));
 
 		tvNameColumn.setCellFactory(column -> new NameCell());
@@ -213,60 +207,60 @@ public class RulesView extends AnchorPane{
 		tagSelectionContainer.setVisible(!tagSelectionContainer.isVisible());
 	}
 
-	private static List<TreeItem<Object>> filterTags(Set<String> tags, List<TreeItem<Object>> allItems) {
-		List<TreeItem<Object>> filtered = new ArrayList<>();
-		for (TreeItem<Object> item : allItems) {
-			filtered.addAll(filterTags(tags, item.getChildren()));
-			for (String tag : tags) {
-				if (item.getValue() instanceof AbstractOperation abstractOperation && abstractOperation.getTags().contains(tag)) {
-					filtered.add(item);
-					break;
-				}
-			}
-		}
-		return filtered;
-	}
-
 	@FXML
 	public void handleFilterButton(){
-		LOGGER.debug("Filter Operations");
-		String filterText = filterTextField.getText();
-		List<TreeItem<Object>> rulesToShow;
-		List<TreeItem<Object>> computationsToShow;
-		if (filterText != null && !filterText.isEmpty()) {
-			//filter
-			filterText = filterText.toLowerCase();
-			rulesToShow = filterOperationNames(filterText, ruleItems);
-			computationsToShow = filterOperationNames(filterText, computationItems);
-		} else {
-			//don't filter, show all
-			rulesToShow = ruleItems;
-			computationsToShow = computationItems;
-		}
-		showFilteredItems(rulesToShow, computationsToShow);
+		filterTagsAndSearch();
 	}
 
-	private void showFilteredItems(List<TreeItem<Object>> rulesToShow, List<TreeItem<Object>> computationsToShow) {
+	private void filterTagsAndSearch() {
+		String filterText = filterTextField.getText();
+		LOGGER.debug("Filter Operations for tags " + currentTags + " and search '" + filterText + "'");
+		clearTable();
+		List<TreeItem<Object>> filteredRuleItems;
+		List<TreeItem<Object>> filteredComputationItems;
+		if (!currentTags.isEmpty()) {
+			filteredRuleItems = filterCurrentTags(ruleItems);
+			filteredComputationItems = filterCurrentTags(computationItems);
+		} else {
+			filteredRuleItems = new ArrayList<>(ruleItems);
+			filteredComputationItems = new ArrayList<>(computationItems);
+		}
+		if (filterText != null && !filterText.isEmpty()) {
+			filterText = filterText.toLowerCase();
+			filteredRuleItems.retainAll(filterOperationNames(filterText, ruleItems));
+			filteredComputationItems.retainAll(filterOperationNames(filterText, computationItems));
+		}
+		showFilteredItems(filteredRuleItems, filteredComputationItems);
+	}
+
+	private void clearTable() {
 		tvRootItem.getChildren().clear();
 		tvRulesItem.getChildren().clear();
 		for (TreeItem<Object> item : ruleItems) {
 			item.getChildren().clear();
-			if (item.getValue() instanceof String) {
-				item.getChildren().addAll(classificationItems.get((String) item.getValue()));
+			if (item.getValue() instanceof String classification) {
+				item.getChildren().addAll(classificationItems.get(classification));
 			}
 		}
 		tvComputationsItem.getChildren().clear();
+	}
 
-		if (!rulesToShow.isEmpty()) {
-			tvRulesItem.getChildren().addAll(rulesToShow);
-			tvRootItem.getChildren().add(tvRulesItem);
+	private List<TreeItem<Object>> filterCurrentTags(List<TreeItem<Object>> allItems) {
+		List<TreeItem<Object>> filtered = new ArrayList<>();
+		for (TreeItem<Object> item : allItems) {
+			if (item.getValue() instanceof AbstractOperation abstractOperation && currentTags.stream().anyMatch(abstractOperation.getTags()::contains)) {
+				filtered.add(item);
+			} else if (item.getValue() instanceof String) {
+				// item is classificationItem
+				List<TreeItem<Object>> filteredRules = filterCurrentTags(item.getChildren());
+				item.getChildren().clear();
+				if (!filteredRules.isEmpty()) {
+					item.getChildren().addAll(filteredRules);
+					filtered.add(item);
+				}
+			}
 		}
-		if (!computationsToShow.isEmpty()) {
-			tvComputationsItem.getChildren().addAll(computationsToShow);
-			tvRootItem.getChildren().add(tvComputationsItem);
-		}
-		treeTableView.sort();
-		treeTableView.refresh();
+		return filtered;
 	}
 
 	private List<TreeItem<Object>> filterOperationNames(String filterText, List<TreeItem<Object>> allItems) {
@@ -291,6 +285,19 @@ public class RulesView extends AnchorPane{
 			}
 		}
 		return filtered;
+	}
+
+	private void showFilteredItems(List<TreeItem<Object>> rulesToShow, List<TreeItem<Object>> computationsToShow) {
+		if (!rulesToShow.isEmpty()) {
+			tvRulesItem.getChildren().setAll(rulesToShow);
+			tvRootItem.getChildren().add(tvRulesItem);
+		}
+		if (!computationsToShow.isEmpty()) {
+			tvComputationsItem.getChildren().setAll(computationsToShow);
+			tvRootItem.getChildren().add(tvComputationsItem);
+		}
+		treeTableView.sort();
+		treeTableView.refresh();
 	}
 
 	@FXML

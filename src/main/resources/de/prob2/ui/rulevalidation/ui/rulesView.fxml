@@ -11,7 +11,7 @@
 	</fx:define>
     <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
           AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
-        <AnchorPane>
+        <AnchorPane fx:id="topBar">
             <HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
                   AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
                   AnchorPane.bottomAnchor="10.0" alignment="CENTER">
