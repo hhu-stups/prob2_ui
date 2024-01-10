@@ -7,7 +7,9 @@ import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.model.brules.RuleResult;
+import de.prob.model.brules.RulesModel;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -16,6 +18,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.RuleValidationReport;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
+import de.prob2.ui.rulevalidation.RulesDependencyGraphCreator;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
@@ -55,6 +58,8 @@ public class RulesView extends AnchorPane{
 
 	@FXML
 	public Button executeAllButton;
+	@FXML
+	public Button visualizeGraphButton;
 	@FXML
 	private Button validationReportButton;
 
@@ -310,6 +315,13 @@ public class RulesView extends AnchorPane{
 	}
 
 	@FXML
+	public void visualizeCompleteDependencyGraph() {
+		RulesModel rulesModel = (RulesModel) currentTrace.getModel();
+		RulesDependencyGraphCreator.visualizeCompleteGraph(injector.getInstance(DotView.class), currentTrace,
+			rulesModel.getRulesProject().getOperationsMap().values());
+	}
+
+	@FXML
 	public void saveValidationReport() throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("rulevalidation.view.save.title"));
@@ -336,6 +348,7 @@ public class RulesView extends AnchorPane{
 	public void build() {
 
 		LOGGER.debug("Build RulesView!");
+		filterTextField.clear();
 
 		tagSelectionBox.getChildren().clear();
 		Set<String> allTags = new HashSet<>();

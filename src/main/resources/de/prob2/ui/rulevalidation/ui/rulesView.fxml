@@ -61,7 +61,7 @@
 				<Label fx:id="progressOperation"/>
 			</VBox>
 			<Pane fx:id="tagSelectionContainer" visible="false" pickOnBounds="false">
-				<ScrollPane fx:id="tagSelectionScrollPane" maxWidth="150" maxHeight="200">
+				<ScrollPane fx:id="tagSelectionScrollPane" maxWidth="600" maxHeight="300">
 					<VBox>
 						<Label text="Tags" style="-fx-font-weight: bold;"/>
 						<Separator/>
@@ -125,6 +125,12 @@
                     </padding>
                 </HBox>
             </HBox>
+			<Button fx:id="visualizeGraphButton"
+					onAction="#visualizeCompleteDependencyGraph" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="&#xf1e0;" />
+				</graphic>
+			</Button>
 			<Button fx:id="validationReportButton" text="%rulevalidation.view.save" onAction="#saveValidationReport" styleClass="button-blue">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
