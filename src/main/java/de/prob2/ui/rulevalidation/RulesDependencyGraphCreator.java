@@ -11,13 +11,17 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import java.util.*;
 public class RulesDependencyGraphCreator {
 
-	public static void visualizeCompleteGraph(DotView formulaStage, CurrentTrace currentTrace, Collection<AbstractOperation> operations) {
+	public static void visualizeGraph(DotView formulaStage, CurrentTrace currentTrace, Collection<AbstractOperation> operations) {
+		Set<AbstractOperation> allOperations = new HashSet<>(operations);
+		for (AbstractOperation operation : operations) {
+			allOperations.addAll(operation.getTransitiveDependencies());
+		}
 		RulesChecker rulesChecker = new RulesChecker(currentTrace.get());
 		rulesChecker.init();
 		Map<AbstractOperation, OperationStatus> operationStates = rulesChecker.getOperationStates();
 		List<String> nodes = new ArrayList<>();
 		List<String> edges = new ArrayList<>();
-		for (AbstractOperation operation : operations) {
+		for (AbstractOperation operation : allOperations) {
 			//if (operation instanceof FunctionOperation) {
 			//	break;
 			//}
@@ -46,8 +50,7 @@ public class RulesDependencyGraphCreator {
 				shape = "rectangle";
 			}
 			nodes.add("rec(shape: \"" + shape + "\", style: \"filled\", fillcolor: \"" + statusColor + "\", nodes: \"" + operation.getName() + "\")");
-			Set<AbstractOperation> dependencies = operation.getRequiredDependencies();
-			for (AbstractOperation dependency : dependencies) {
+			for (AbstractOperation dependency : operation.getRequiredDependencies()) {
 				String edgeColor = "black";
 				if (notChecked && operationStates.get(dependency) instanceof RuleStatus ruleStatus) {
 					edgeColor = switch (ruleStatus) {

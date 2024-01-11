@@ -6,6 +6,8 @@ import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
+import de.prob.animator.domainobjects.EvaluationException;
+import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResult;
 import de.prob.model.brules.RulesModel;
 import de.prob2.ui.config.FileChooserManager;
@@ -317,7 +319,7 @@ public class RulesView extends AnchorPane{
 	@FXML
 	public void visualizeCompleteDependencyGraph() {
 		RulesModel rulesModel = (RulesModel) currentTrace.getModel();
-		RulesDependencyGraphCreator.visualizeCompleteGraph(injector.getInstance(DotView.class), currentTrace,
+		RulesDependencyGraphCreator.visualizeGraph(injector.getInstance(DotView.class), currentTrace,
 			rulesModel.getRulesProject().getOperationsMap().values());
 	}
 
@@ -370,6 +372,8 @@ public class RulesView extends AnchorPane{
 			tagSelectionBox.getChildren().addAll(tagCheckBoxes);
 		}
 
+		treeTableView.setRowFactory(view -> initTableRow());
+
 		tvRootItem.getChildren().clear();
 		tvRulesItem = new TreeItem<>("RULES");
 		classificationItems = new HashMap<>();
@@ -419,5 +423,31 @@ public class RulesView extends AnchorPane{
 		executeAllButton.setDisable(false);
 		treeTableView.sort();
 		treeTableView.refresh();
+	}
+
+	private TreeTableRow<Object> initTableRow() {
+		final TreeTableRow<Object> row = new TreeTableRow<>();
+
+		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
+			i18n.translate("states.statesView.contextMenu.items.visualizeExpressionGraph"));
+		visualizeExpressionAsGraphItem.setOnAction(event -> {
+			try {
+				if (row.getItem() instanceof AbstractOperation abstractOperation) {
+					RulesDependencyGraphCreator.visualizeGraph(injector.getInstance(DotView.class), currentTrace, Collections.singleton(abstractOperation));
+				}
+			} catch (EvaluationException | ProBError e) {
+				LOGGER.error("Could not visualize formula", e);
+				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
+			}
+		});
+
+		// TODO: Show only for operation items
+		row.contextMenuProperty().bind(Bindings.when(Bindings.createBooleanBinding(() -> true)) //row.getItem() instanceof AbstractOperation))
+				.then(new ContextMenu(visualizeExpressionAsGraphItem))
+				.otherwise((ContextMenu) null));
+
+		return row;
 	}
 }
