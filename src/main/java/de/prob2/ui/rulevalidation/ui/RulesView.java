@@ -169,6 +169,8 @@ public class RulesView extends AnchorPane{
 		topBar.setOnMousePressed(e -> tagSelectionContainer.setVisible(false));
 		treeTableView.setOnMousePressed(e -> tagSelectionContainer.setVisible(false));
 
+		treeTableView.setRowFactory(view -> initTableRow());
+
 		tvNameColumn.setCellFactory(column -> new NameCell());
 		tvNameColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
 
@@ -372,8 +374,6 @@ public class RulesView extends AnchorPane{
 			tagSelectionBox.getChildren().addAll(tagCheckBoxes);
 		}
 
-		treeTableView.setRowFactory(view -> initTableRow());
-
 		tvRootItem.getChildren().clear();
 		tvRulesItem = new TreeItem<>("RULES");
 		classificationItems = new HashMap<>();
@@ -443,11 +443,8 @@ public class RulesView extends AnchorPane{
 			}
 		});
 
-		// TODO: Show only for operation items
-		row.contextMenuProperty().bind(Bindings.when(Bindings.createBooleanBinding(() -> true)) //row.getItem() instanceof AbstractOperation))
-				.then(new ContextMenu(visualizeExpressionAsGraphItem))
-				.otherwise((ContextMenu) null));
-
+		row.itemProperty().addListener((obs, oldVal, newVal) ->
+			row.setContextMenu(newVal instanceof AbstractOperation ? new ContextMenu(visualizeExpressionAsGraphItem) : null));
 		return row;
 	}
 }
