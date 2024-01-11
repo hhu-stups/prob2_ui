@@ -130,6 +130,9 @@
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="&#xf1e0;" />
 				</graphic>
+				<tooltip>
+					<Tooltip text="%rulevalidation.view.dependencyGraph.complete"/>
+				</tooltip>
 			</Button>
 			<Button fx:id="validationReportButton" text="%rulevalidation.view.save" onAction="#saveValidationReport" styleClass="button-blue">
 				<graphic>

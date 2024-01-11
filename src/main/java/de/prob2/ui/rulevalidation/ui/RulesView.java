@@ -429,7 +429,7 @@ public class RulesView extends AnchorPane{
 		final TreeTableRow<Object> row = new TreeTableRow<>();
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
-			i18n.translate("states.statesView.contextMenu.items.visualizeExpressionGraph"));
+			i18n.translate("rulevalidation.view.contextMenu.dependencyGraph"));
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				if (row.getItem() instanceof AbstractOperation abstractOperation) {
@@ -437,7 +437,7 @@ public class RulesView extends AnchorPane{
 				}
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
-				final Alert alert = stageManager.makeExceptionAlert(e, "states.statesView.alerts.couldNotVisualizeFormula.content");
+				final Alert alert = stageManager.makeExceptionAlert(e, "rulevalidation.view.dependencyGraph.error");
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 			}
