@@ -1,6 +1,7 @@
 package de.prob2.ui.rulevalidation;
 
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
+import de.be4.classicalb.core.parser.rules.FunctionOperation;
 import de.prob.model.brules.ComputationStatus;
 import de.prob.model.brules.OperationStatus;
 import de.prob.model.brules.RuleStatus;
@@ -16,15 +17,13 @@ public class RulesDependencyGraphCreator {
 		for (AbstractOperation operation : operations) {
 			allOperations.addAll(operation.getTransitiveDependencies());
 		}
+		allOperations.removeIf(operation -> operation instanceof FunctionOperation);
 		RulesChecker rulesChecker = new RulesChecker(currentTrace.get());
 		rulesChecker.init();
 		Map<AbstractOperation, OperationStatus> operationStates = rulesChecker.getOperationStates();
 		List<String> nodes = new ArrayList<>();
 		List<String> edges = new ArrayList<>();
 		for (AbstractOperation operation : allOperations) {
-			//if (operation instanceof FunctionOperation) {
-			//	break;
-			//}
 			String shape = "ellipse";
 			String statusColor = "transparent";
 			boolean notChecked = false;
