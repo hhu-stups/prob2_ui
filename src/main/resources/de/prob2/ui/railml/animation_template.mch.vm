@@ -26,10 +26,10 @@ DEFINITIONS
     "SORT.def";
     SET_PREF_MEMOIZE_FUNCTIONS == TRUE;
     SET_PREF_optimize_enum_set_elems == TRUE;
-#if($generateSVG)
+#if($generateSvg)
 
 	"RailML3_VisB.def";
-	VISB_SVG_FILE == $svgFile
+	VISB_SVG_FILE == "$svgFile"
 #end
 SETS
 	RS_trains
