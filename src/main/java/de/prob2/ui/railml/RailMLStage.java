@@ -383,13 +383,10 @@ public class RailMLStage extends Stage {
 			}
 			currentState = rulesChecker.getCurrentTrace().getCurrentState();
 
-			boolean inv_ok = currentState.isInvariantOk();
-			boolean import_success = currentState.eval("no_error = TRUE").toString().equals("TRUE");
-
-			if (inv_ok && import_success) {
+			if (currentState.isInvariantOk()) {
 				Path dataPath = generationPath.resolve(dataFileName.getValue());
 				if (generateAnimation || generateValidation) {
-					clearProgressWithMessage("Generate Machines");
+					Platform.runLater(() -> clearProgressWithMessage("Generate Machines"));
 
 					String VARS_AS_TYPED_STRING_railML_identifiers = stateSpace.getLoadedMachine().getVariableNames().
 						stream().filter(v -> v.startsWith("RailML3_")).collect(Collectors.joining(",\n    "));
