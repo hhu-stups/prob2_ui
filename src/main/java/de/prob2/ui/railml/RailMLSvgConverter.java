@@ -103,11 +103,11 @@ public class RailMLSvgConverter {
 			title_merged_group.setAttribute("id", id_prefix + "_title");
 			title_merged_group.setTextContent(id_prefix);
 
-			Element path_free = createPath(doc, id_prefix + "_free", gradient_id_free, d_merged_path, "1.33");
-			Element path_tvd = createPathWithBlink(doc, id_prefix + "_tvd", gradient_id_tvd, d_merged_path, "1.5");
-			Element path_res = createPathWithBlink(doc, id_prefix + "_res", gradient_id_res, d_merged_path, "1.67");
-			Element path_ovl = createPathWithBlink(doc, id_prefix + "_ovl", gradient_id_ovl, d_merged_path, "1.85");
-			Element path_occ = createPath(doc, id_prefix + "_occ", gradient_id_occ, d_merged_path, "2.0");
+			Element path_free = createPath(doc, id_prefix + "_free", gradient_id_free, d_merged_path, "1.33", "yellowgreen");
+			Element path_tvd = createPathWithBlink(doc, id_prefix + "_tvd", gradient_id_tvd, d_merged_path, "1.5", "blue");
+			Element path_res = createPathWithBlink(doc, id_prefix + "_res", gradient_id_res, d_merged_path, "1.67", "darkorange");
+			Element path_ovl = createPathWithBlink(doc, id_prefix + "_ovl", gradient_id_ovl, d_merged_path, "1.85", "mediumvioletred");
+			Element path_occ = createPath(doc, id_prefix + "_occ", gradient_id_occ, d_merged_path, "2.0", "red");
 
 			merged_group.appendChild(path_free);
 			merged_group.appendChild(path_tvd);
@@ -144,11 +144,8 @@ public class RailMLSvgConverter {
 
 			graph_group.insertBefore(merged_group, graph_group.getChildNodes().item(4)); // after title/polygon of graph, before all other inner groups
 		}
-
-			// <path d="M2603.45,-177.94C2608.52,-180.48 2768.29,-260.36 2773.29,-262.86" fill="none" id="ne_94_path" stroke="green" />
-			// merge paths
-
-
+		// <path d="M2603.45,-177.94C2608.52,-180.48 2768.29,-260.36 2773.29,-262.86" fill="none" id="ne_94_path" stroke="green" />
+		// merge paths
 
 		doc.normalizeDocument();
 
@@ -158,18 +155,21 @@ public class RailMLSvgConverter {
 		transformer.transform(new javax.xml.transform.dom.DOMSource(doc), new javax.xml.transform.stream.StreamResult(fos));
 	}
 
-	private static Element createPath(Document doc, String id, String gradient_id, String d_merged_path, String stroke) {
+	private static Element createPath(Document doc, String id, String gradient_id, String d_merged_path,
+									  String strokeWidth, String stroke) {
 		Element path = doc.createElement("path");
 		path.setAttribute("id", id);
 		path.setAttribute("d", "M " + d_merged_path.replaceAll("\\s+", " L "));
-		path.setAttribute("stroke", "url(#" + gradient_id + ")");
+		path.setAttribute("stroke", stroke);
 		path.setAttribute("fill", "none");
-		path.setAttribute("stroke-width", stroke);
+		path.setAttribute("stroke-width", strokeWidth);
+		path.setAttribute("pathLength", "100");
 		return path;
 	}
 
-	private static Element createPathWithBlink(Document doc, String id, String gradient_id, String d_merged_path, String stroke) {
-		Element path_with_blink = createPath(doc, id, gradient_id, d_merged_path, stroke);
+	private static Element createPathWithBlink(Document doc, String id, String gradient_id, String d_merged_path,
+											   String strokeWidth, String stroke) {
+		Element path_with_blink = createPath(doc, id, gradient_id, d_merged_path, strokeWidth, stroke);
 		Element blink = doc.createElement("animate");
 		blink.setAttribute("id", id + "_blink");
 		blink.setAttribute("attributeName", "opacity");

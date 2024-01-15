@@ -202,26 +202,11 @@ DEFINITIONS
     VISB_SVG_UPDATES53 == UNION(i_e).( i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |{rec(`id`:i_e^"_ovl", visibility: IF #(i_o, NXT).(i_o : dom(IL_res_overlaps) & NXT = RailML3_IL_OVERLAP_NXT(i_o) & i_e : dom(dom(dom(NXT) \/ ran(NXT))) ) THEN "visible" ELSE "hidden" END)});
     
     // occupation:
-    VISB_SVG_UPDATES61 ==
-        UNION(i_e, t).( i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL & t : RS_arrivedTrains & (i_e = prj1(prj1(RS_trainFront(t))) or i_e = prj1(prj1(RS_trainBack(t)))) |
-            {
-                rec(`id`:i_e^"_lg_occ_1",
-                    offset: IF i_e = prj1(prj1(RS_trainFront(t))) & prj2(RS_trainFront(t)) = direction_reverse THEN TO_STRING(prj2(prj1(RS_trainFront(t)))*100.0)^"%"
-                        ELSIF i_e = prj1(prj1(RS_trainBack(t))) & prj2(RS_trainBack(t)) = direction_normal THEN TO_STRING(prj2(prj1(RS_trainBack(t)))*100.0)^"%"
-                        ELSE "0%" END),
-                rec(`id`:i_e^"_lg_occ_2",
-                    offset: IF i_e = prj1(prj1(RS_trainFront(t))) & prj2(RS_trainFront(t)) = direction_reverse THEN TO_STRING(prj2(prj1(RS_trainFront(t)))*100.0)^"%"
-                        ELSIF i_e = prj1(prj1(RS_trainBack(t))) & prj2(RS_trainBack(t)) = direction_normal THEN TO_STRING(prj2(prj1(RS_trainBack(t)))*100.0)^"%"
-                        ELSE "0%" END),
-                rec(`id`:i_e^"_lg_occ_3",
-                    offset: IF i_e = prj1(prj1(RS_trainFront(t))) & prj2(RS_trainFront(t)) = direction_normal THEN TO_STRING(prj2(prj1(RS_trainFront(t)))*100.0)^"%"
-                        ELSIF i_e = prj1(prj1(RS_trainBack(t))) & prj2(RS_trainBack(t)) = direction_reverse THEN TO_STRING(prj2(prj1(RS_trainBack(t)))*100.0)^"%"
-                        ELSE "100%" END),
-                rec(`id`:i_e^"_lg_occ_4",
-                    offset: IF i_e = prj1(prj1(RS_trainFront(t))) & prj2(RS_trainFront(t)) = direction_normal THEN TO_STRING(prj2(prj1(RS_trainFront(t)))*100.0)^"%"
-                        ELSIF i_e = prj1(prj1(RS_trainBack(t))) & prj2(RS_trainBack(t)) = direction_reverse THEN TO_STRING(prj2(prj1(RS_trainBack(t)))*100.0)^"%"
-                        ELSE "100%" END)
-            }
+    VISB_SVG_UPDATES61 == 
+        UNION(i_e).( i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
+            {rec(`id`: i_e^"_occ",
+                `stroke-dasharray`: svg_dasharray_for_intervals(SORT(dom({ i, t | t : RS_arrivedTrains & LET occ BE occ = RS_trainOccupiedLocations(t)[{i_e}] IN occ /= {} & i = min(occ)*100.0 |-> max(occ)*100.0 END })))
+            )}
         );
     VISB_SVG_UPDATES62 ==
         {i_e • i_e : allIdsOfType("netElement") /\ RailML3_IS_NET_RESOURCES_MICRO_LEVEL |
@@ -244,34 +229,34 @@ DEFINITIONS
             or ( CurrState(i_sw_il1) = position_right & CurrState(i_sw_il2) = position_left & DestState(i_sw_il1) = position_right & DestState(i_sw_il2) = position_right )
             or ( CurrState(i_sw_il1) = position_right & CurrState(i_sw_il2) = position_right & DestState(i_sw_il1) = position_left & DestState(i_sw_il2) = position_left ) ) )
         or (RailML3_IS_SWITCH_TYPE(SwitchId) /= switch_doubleSwitchCrossing))
-        & SwitchId = ''', "\""^x^"\"") )}; // includes switchCrossingsParts, but they should not have an ID in the SVG    
-    VISB_SVG_EVENTS12 == {x•x:allIdsOfType("switchIS") | rec(`id`: x, event: "IS_endChangeSwitch", predicate: ("SwitchId=","\""^x^"\"") )};
-    VISB_SVG_EVENTS13 == {x•x:allIdsOfType("switchIS") | rec(`id`: x, event: "IS_startChangeCoupledSwitches", predicate: "SwitchId1=\"x\" or SwitchId2=\"x\"" )};
+        & SwitchId = \"'''^x^"\"") )}; // includes switchCrossingsParts, but they should not have an ID in the SVG    
+    VISB_SVG_EVENTS12 == {x•x:allIdsOfType("switchIS") | rec(`id`: x, event: "IS_endChangeSwitch", predicate: "SwitchId=\""^x^"\"" )};
+    VISB_SVG_EVENTS13 == {x•x:allIdsOfType("switchIS") | rec(`id`: x, event: "IS_startChangeCoupledSwitches", predicate: "SwitchId1=\""^x^"\" or SwitchId2=\""^x^"\"" )};
     VISB_SVG_HOVERS1 == {x•x:allIdsOfType("switchIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS1 == {x•x:allIdsOfType("switchIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
-    VISB_SVG_EVENTS21 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x, event: "IS_startChangeDerailer", predicate: ("DerailerId=","\""^x^"\"") )};
-    VISB_SVG_EVENTS22 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x, event: "IS_endChangeDerailer", predicate: ("DerailerId=","\""^x^"\"") )};
+    VISB_SVG_EVENTS21 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x, event: "IS_startChangeDerailer", predicate: "DerailerId=\""^x^"\"" )};
+    VISB_SVG_EVENTS22 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x, event: "IS_endChangeDerailer", predicate: "DerailerId=\""^x^"\"" )};
     VISB_SVG_HOVERS2 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS2 == {x•x:allIdsOfType("derailerIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
     // RailML3_IS_MOVABLE_CROSSING_IDS in generated version: (variables cannot be used for EVENTS and HOVERS)
-    /*VISB_SVG_EVENTS31 == {x•x:allIdsOfType("crossing") | rec(`id`: x, event: "IS_startChangeCrossing", predicate: ("CrossingId=","\""^x^"\"") )};
-    VISB_SVG_EVENTS32 == {x•x:allIdsOfType("crossing") | rec(`id`: x, event: "IS_endChangeCrossing", predicate: ("CrossingId=","\""^x^"\"") )};
+    /*VISB_SVG_EVENTS31 == {x•x:allIdsOfType("crossing") | rec(`id`: x, event: "IS_startChangeCrossing", predicate: "CrossingId=\""^x^"\"" )};
+    VISB_SVG_EVENTS32 == {x•x:allIdsOfType("crossing") | rec(`id`: x, event: "IS_endChangeCrossing", predicate: "CrossingId=\""^x^"\"" )};
     VISB_SVG_HOVERS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS3 == {x•x:allIdsOfType("crossing") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};*/
-    VISB_SVG_EVENTS31 == {x•x:RailML3_IS_MOVABLE_CROSSING_IDS | rec(`id`: x, event: "IS_startChangeCrossing", predicate: ("CrossingId=","\""^x^"\"") )};
-    VISB_SVG_EVENTS32 == {x•x:RailML3_IS_MOVABLE_CROSSING_IDS | rec(`id`: x, event: "IS_endChangeCrossing", predicate: ("CrossingId=","\""^x^"\"") )};
+    VISB_SVG_EVENTS31 == {x•x:RailML3_IS_MOVABLE_CROSSING_IDS | rec(`id`: x, event: "IS_startChangeCrossing", predicate: "CrossingId=\""^x^"\"" )};
+    VISB_SVG_EVENTS32 == {x•x:RailML3_IS_MOVABLE_CROSSING_IDS | rec(`id`: x, event: "IS_endChangeCrossing", predicate: "CrossingId=\""^x^"\"" )};
     VISB_SVG_HOVERS3 == {x•x:RailML3_IS_MOVABLE_CROSSING_IDS | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS3 == {x•x:RailML3_IS_MOVABLE_CROSSING_IDS | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
     // RailML3_IL_SIGNAL_CONTROLLED in generated version:
-    /*VISB_SVG_EVENTS41 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
-    VISB_SVG_EVENTS42 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_changeSignalState", predicate: ("SignalId=","\""^x^"\"") )};    
+    /*VISB_SVG_EVENTS41 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: "SignalId=\""^x^"\"" )};
+    VISB_SVG_EVENTS42 == {x•x:allIdsOfType("signalIS") | rec(`id`: x, event: "IL_changeSignalState", predicate: "SignalId=\""^x^"\"" )};    
     VISB_SVG_HOVERS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS4 == {x•x:allIdsOfType("signalIS") | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};*/
-    VISB_SVG_EVENTS41 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: ("SignalId=","\""^x^"\"") )};
-    VISB_SVG_EVENTS42 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_changeSignalState", predicate: ("SignalId=","\""^x^"\"") )};    
+    VISB_SVG_EVENTS41 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_noteChangeSignalState", predicate: "SignalId=\""^x^"\"" )};
+    VISB_SVG_EVENTS42 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x, event: "IL_changeSignalState", predicate: "SignalId=\""^x^"\"" )};    
     VISB_SVG_HOVERS4 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x^"_ellipse", `stroke-width`: "1.5" )};
     VISB_SVG_OBJECTS4 == {x•x:RailML3_IL_SIGNAL_CONTROLLED | rec(`id`: x^"_ellipse", svg_class: "ellipse", `stroke-width`: "1.0" )};
 
