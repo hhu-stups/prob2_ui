@@ -4,9 +4,9 @@ import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.collections.ObservableList;
 
-public class CheckingProperty<T> {
-	private final ObjectProperty<MachineCheckingStatus> status;
+public final class CheckingProperty<T> {
 
+	private final ObjectProperty<MachineCheckingStatus> status;
 	private final ListProperty<T> item;
 
 	public CheckingProperty(ObjectProperty<MachineCheckingStatus> status, ListProperty<T> item) {
@@ -18,23 +18,23 @@ public class CheckingProperty<T> {
 		return status.get();
 	}
 
-	public ObjectProperty<MachineCheckingStatus> statusProperty() {
-		return status;
-	}
-
 	public void setStatus(MachineCheckingStatus status) {
 		this.status.set(status);
+	}
+
+	public ObjectProperty<MachineCheckingStatus> statusProperty() {
+		return status;
 	}
 
 	public ObservableList<T> getItem() {
 		return item.get();
 	}
 
-	public ListProperty<T> itemProperty() {
-		return item;
-	}
-
 	public void setItem(ObservableList<T> item) {
 		this.item.set(item);
+	}
+
+	public ListProperty<T> itemProperty() {
+		return item;
 	}
 }
