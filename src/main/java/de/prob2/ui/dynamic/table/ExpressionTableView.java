@@ -287,7 +287,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	@Override
 	protected void addFormulaButton(){
 		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
-		currentProject.getCurrentMachine().addTableVisualizationItem(lastItem.getCommand(), item);
+		currentProject.getCurrentMachine().getMachineProperties().addTableVisualizationItem(lastItem.getCommand(), item);
 		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 		evaluateFormula(item.getFormula());
 	}
@@ -341,7 +341,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		DynamicCommandFormulaItem item = stage.getItem();
 		Machine machine = currentProject.getCurrentMachine();
 		if(item != null ) {
-			ListProperty<DynamicCommandFormulaItem> tableVisualisationItem = machine.getTableVisualizationItems().get(lastItem.getCommand());
+			ListProperty<DynamicCommandFormulaItem> tableVisualisationItem = machine.getMachineProperties().getTableVisualizationItems().get(lastItem.getCommand());
 			tableVisualisationItem.set(tableVisualisationItem.indexOf(item), item);
 			machine.setChanged(true);
 			tvFormula.refresh();

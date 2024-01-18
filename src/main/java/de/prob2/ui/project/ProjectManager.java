@@ -360,7 +360,7 @@ public class ProjectManager {
 			case SIMB:
 				injector.getInstance(SimulatorStage.class).show();
 				injector.getInstance(SimulatorStage.class).toFront();
-				currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(currentProject.getLocation().relativize(selected), Collections.emptyList()));
+				currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(currentProject.getLocation().relativize(selected), Collections.emptyList()));
 				break;
 			case NONE:
 				break;

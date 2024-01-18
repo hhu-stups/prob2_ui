@@ -542,7 +542,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
 	}
 
