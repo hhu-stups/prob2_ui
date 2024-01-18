@@ -1,8 +1,17 @@
 package de.prob2.ui.project.machines;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
@@ -20,19 +29,26 @@ import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.vomanager.IValidationTask;
+
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.MapProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyListProperty;
+import javafx.beans.property.ReadOnlyMapProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
 
-import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
-
 import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineCheckingStatus;
+
 @JsonPropertyOrder({
 	"validationTasks",
 	"temporalFormulas",
@@ -48,8 +64,9 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 	"historyChartItems",
 	"dotVisualizationItems",
 	"tableVisualizationItems"
-	})
-public class MachineProperties {
+})
+public final class MachineProperties {
+
 	private final CheckingProperty<TemporalFormulaItem> temporal;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final CheckingProperty<SymbolicCheckingFormulaItem> symbolic;
@@ -76,7 +93,6 @@ public class MachineProperties {
 
 	@JsonIgnore
 	private PatternManager patternManager = new PatternManager();
-
 
 	public MachineProperties() {
 		this.temporal = new CheckingProperty<>(new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "temporalFormulas", FXCollections.observableArrayList()));
@@ -130,6 +146,7 @@ public class MachineProperties {
 			}
 		}
 	}
+
 	public ObjectProperty<MachineCheckingStatus> traceReplayStatusProperty() {
 		return trace.statusProperty();
 	}
@@ -137,6 +154,7 @@ public class MachineProperties {
 	public MachineCheckingStatus getTraceReplayStatus() {
 		return traceReplayStatusProperty().get();
 	}
+
 	public void setTraceReplayStatus(final MachineCheckingStatus status) {
 		this.traceReplayStatusProperty().set(status);
 	}
@@ -152,6 +170,7 @@ public class MachineProperties {
 	public void setTemporalStatus(final MachineCheckingStatus status) {
 		this.temporalStatusProperty().set(status);
 	}
+
 	public ObjectProperty<MachineCheckingStatus> symbolicCheckingStatusProperty() {
 		return this.symbolic.statusProperty();
 	}
@@ -290,25 +309,25 @@ public class MachineProperties {
 
 	public void updateAllProofObligationsFromModel(final AbstractModel model) {
 		// TODO: Does not yet work with .eventb files
-		if(!(model instanceof EventBModel) || ((EventBModel) model).getTopLevelMachine() == null) {
+		if (!(model instanceof EventBModel) || ((EventBModel) model).getTopLevelMachine() == null) {
 			return;
 		}
 
 		// Save the previous POs and allow lookup by name.
 		Map<String, SavedProofObligationItem> previousPOsByName = this.getProofObligationItems().stream()
-			.collect(Collectors.toMap(SavedProofObligationItem::getName, x -> x));
+			                                                          .collect(Collectors.toMap(SavedProofObligationItem::getName, x -> x));
 
 		// Read the current POs from the model.
 		List<ProofObligationItem> proofObligations = ((EventBModel) model).getTopLevelMachine()
-			.getProofs()
-			.stream()
-			.map(ProofObligationItem::new)
-			.collect(Collectors.toList());
+			                                             .getProofs()
+			                                             .stream()
+			                                             .map(ProofObligationItem::new)
+			                                             .collect(Collectors.toList());
 
 		// Copy any PO validation task IDs from the previous POs.
 		// This also removes all POs from previousPOsByName that have a corresponding current PO,
 		// leaving only the POs that no longer exist in the model.
-		for (ListIterator<ProofObligationItem> iterator = proofObligations.listIterator(); iterator.hasNext();) {
+		for (ListIterator<ProofObligationItem> iterator = proofObligations.listIterator(); iterator.hasNext(); ) {
 			final ProofObligationItem po = iterator.next();
 			final SavedProofObligationItem previousPO = previousPOsByName.remove(po.getName());
 			if (previousPO != null) {
@@ -340,6 +359,7 @@ public class MachineProperties {
 	private void setTraces(final List<ReplayTrace> traces) {
 		this.tracesProperty().setAll(traces);
 	}
+
 	public ListProperty<SimulationModel> simulationsProperty() {
 		return simulations;
 	}
@@ -353,8 +373,8 @@ public class MachineProperties {
 	public void setSimulations(List<SimulationModel> simulations) {
 		this.simulationsProperty().clear();
 		this.simulationsProperty().addAll(simulations);
-		for(SimulationModel simulationModel : simulations) {
-			for(SimulationItem simulationItem : simulationModel.getSimulationItems()) {
+		for (SimulationModel simulationModel : simulations) {
+			for (SimulationItem simulationItem : simulationModel.getSimulationItems()) {
 				simulationItem.setSimulationModel(simulationModel);
 			}
 		}
@@ -401,7 +421,7 @@ public class MachineProperties {
 
 	private ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> convertToObservable(Map<String, List<DynamicCommandFormulaItem>> VisualizationItems) {
 		ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> map = FXCollections.observableHashMap();
-		for(String key : VisualizationItems.keySet()) {
+		for (String key : VisualizationItems.keySet()) {
 			ObservableList<DynamicCommandFormulaItem> collections = FXCollections.observableArrayList();
 			collections.addAll(VisualizationItems.get(key));
 			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
@@ -414,7 +434,7 @@ public class MachineProperties {
 
 	public void addDotVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
 		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getDotVisualizationItems();
-		if(!map.containsKey(commandType)) {
+		if (!map.containsKey(commandType)) {
 			addDotVisualizationListProperty(commandType);
 		}
 		map.get(commandType).add(formula);
@@ -422,7 +442,7 @@ public class MachineProperties {
 
 	public void removeDotVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
 		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getDotVisualizationItems();
-		if(map.containsKey(commandType)) {
+		if (map.containsKey(commandType)) {
 			map.get(commandType).remove(formula);
 		}
 	}
@@ -433,7 +453,6 @@ public class MachineProperties {
 		listProperty.addListener((InvalidationListener) o -> this.changed.set(true));
 		this.addValidationTaskListener(listProperty);
 	}
-
 
 	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> tableVisualizationItemsProperty() {
 		return tableVisualizationItems;
@@ -450,7 +469,7 @@ public class MachineProperties {
 
 	public void addTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
 		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getTableVisualizationItems();
-		if(!map.containsKey(commandType)) {
+		if (!map.containsKey(commandType)) {
 			addTableVisualizationListProperty(commandType);
 		}
 		map.get(commandType).add(formula);
@@ -458,7 +477,7 @@ public class MachineProperties {
 
 	public void removeTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
 		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getTableVisualizationItems();
-		if(map.containsKey(commandType)) {
+		if (map.containsKey(commandType)) {
 			map.get(commandType).remove(formula);
 		}
 	}
@@ -481,6 +500,7 @@ public class MachineProperties {
 	public void setChanged(final boolean changed) {
 		this.changedProperty().set(changed);
 	}
+
 	public PatternManager getPatternManager() {
 		return patternManager;
 	}
@@ -488,7 +508,6 @@ public class MachineProperties {
 	public void clearPatternManager() {
 		patternManager.getPatterns().clear();
 	}
-
 
 	public void initListeners() {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
@@ -502,9 +521,9 @@ public class MachineProperties {
 		this.allProofObligationItemsProperty().addListener((o, from, to) -> {
 			// Update the saved POs whenever the real PO list changes.
 			final List<SavedProofObligationItem> updatedSavedPOs = to.stream()
-				.filter(po -> po.getId() != null)
-				.map(SavedProofObligationItem::new)
-				.collect(Collectors.toList());
+				                                                       .filter(po -> po.getId() != null)
+				                                                       .map(SavedProofObligationItem::new)
+				                                                       .collect(Collectors.toList());
 
 			// Avoid marking the machine as unsaved if the POs didn't actually change.
 			if (!this.getProofObligationItems().equals(updatedSavedPOs)) {
@@ -530,7 +549,7 @@ public class MachineProperties {
 		this.addValidationTaskListener(this.modelcheckingItemsProperty());
 		this.addValidationTaskListener(this.allProofObligationItemsProperty());
 
-		this.simulationsProperty().addListener((ListChangeListener<SimulationModel>)change -> {
+		this.simulationsProperty().addListener((ListChangeListener<SimulationModel>) change -> {
 			while (change.next()) {
 				for (final SimulationModel simulationModel : change.getRemoved()) {
 					this.removeValidationTaskListener(simulationModel.simulationItemsProperty());
@@ -544,7 +563,7 @@ public class MachineProperties {
 
 	public void addCheckingStatusListener(final ReadOnlyListProperty<? extends IExecutableItem> items, final ObjectProperty<MachineCheckingStatus> statusProperty) {
 		final InvalidationListener updateListener = o -> Platform.runLater(() -> statusProperty.set(combineMachineCheckingStatus(items)));
-		items.addListener((ListChangeListener<IExecutableItem>)change -> {
+		items.addListener((ListChangeListener<IExecutableItem>) change -> {
 			while (change.next()) {
 				change.getRemoved().forEach(item -> {
 					item.selectedProperty().removeListener(updateListener);
@@ -575,5 +594,4 @@ public class MachineProperties {
 		tracesProperty().forEach(ReplayTrace::reset);
 		modelcheckingItemsProperty().forEach(ModelCheckingItem::reset);
 	}
-
 }
