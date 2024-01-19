@@ -154,9 +154,9 @@ public class RailMLSvgConverter {
 		Element path_with_blink = createPath(doc, id, d_merged_path, strokeWidth, stroke);
 		Element blink = doc.createElement("animate");
 		blink.setAttribute("id", id + "_blink");
-		blink.setAttribute("attributeName", "opacity");
-		blink.setAttribute("values", "1");
-		blink.setAttribute("dur", "1s");
+		blink.setAttribute("attributeName", "stroke-dasharray");
+		blink.setAttribute("calcMode", "discrete");
+		blink.setAttribute("dur", "1.5s");
 		blink.setAttribute("repeatCount", "indefinite");
 		path_with_blink.appendChild(blink);
 		return path_with_blink;
