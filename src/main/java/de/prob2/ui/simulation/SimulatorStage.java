@@ -681,4 +681,11 @@ public class SimulatorStage extends Stage {
 		}
 		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
 	}
+
+	@FXML
+	private void generateDiagram(){
+		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+		System.out.println(config.getActivationConfigurations());
+		
+	}
 }

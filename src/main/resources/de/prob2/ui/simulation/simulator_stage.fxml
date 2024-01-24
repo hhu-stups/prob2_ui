@@ -84,6 +84,16 @@
 											text="%simulation.tooltips.addSimulation" />
 								</tooltip>
 							</Button>
+							<Button fx:id="btGenerateDiagram" disable="false"
+									contentDisplay="GRAPHIC_ONLY" onAction="#generateDiagram">
+								<graphic>
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
+								</graphic>
+								<tooltip>
+									<Tooltip
+											text="%simulation.tooltips.generateDiagram" />
+								</tooltip>
+							</Button>
 							<MenuButton fx:id="saveTraceButton">
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
