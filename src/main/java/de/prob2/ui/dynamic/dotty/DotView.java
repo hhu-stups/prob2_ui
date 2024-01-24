@@ -138,9 +138,9 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 			if(machine == null || to == null) {
 				return;
 			}
-			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getDotVisualizationItems();
+			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getMachineProperties().getDotVisualizationItems();
 			if(!items.containsKey(to.getCommand())) {
-				machine.addDotVisualizationListProperty(to.getCommand());
+				machine.getMachineProperties().addDotVisualizationListProperty(to.getCommand());
 			}
 			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});
@@ -288,7 +288,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	@Override
 	protected void addFormulaButton(){
 		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
-		currentProject.getCurrentMachine().addDotVisualizationItem(lastItem.getCommand(), item);
+		currentProject.getCurrentMachine().getMachineProperties().addDotVisualizationItem(lastItem.getCommand(), item);
 		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 		evaluateFormula(item.getFormula());
 	}
@@ -344,7 +344,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		DynamicCommandFormulaItem item = stage.getItem();
         Machine machine = currentProject.getCurrentMachine();
 		if(item != null ) {
-			ListProperty<DynamicCommandFormulaItem> dotVisualisationItem = machine.getDotVisualizationItems().get(lastItem.getCommand());
+			ListProperty<DynamicCommandFormulaItem> dotVisualisationItem = machine.getMachineProperties().getDotVisualizationItems().get(lastItem.getCommand());
 			dotVisualisationItem.set(dotVisualisationItem.indexOf(item), item);
 			machine.setChanged(true);
 			tvFormula.refresh();
@@ -361,13 +361,12 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		DynamicCommandFormulaItem item = stage.getItem();
 		Machine machine = currentProject.getCurrentMachine();
 		if(item != null ) {
-			machine.addDotVisualizationItem(lastItem.getCommand(), item);
+			machine.getMachineProperties().addDotVisualizationItem(lastItem.getCommand(), item);
 			this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
 			tvFormula.refresh();
 			evaluateFormula(item.getFormula());
 		}
 	}
-
 
 	@Override
 	protected void removeFormula() {
@@ -376,7 +375,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		}
 		DynamicCommandFormulaItem formulaItem = this.tvFormula.getItems().get(this.tvFormula.getSelectionModel().getSelectedIndex());
 		Machine machine = currentProject.getCurrentMachine();
-		machine.removeDotVisualizationItem(lastItem.getCommand(), formulaItem);
+		machine.getMachineProperties().removeDotVisualizationItem(lastItem.getCommand(), formulaItem);
 	}
 
 }

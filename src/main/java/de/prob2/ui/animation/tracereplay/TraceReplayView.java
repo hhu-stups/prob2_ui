@@ -147,7 +147,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			items.unbind();
 			if (to != null) {
-				items.bind(to.tracesProperty());
+				items.bind(to.getMachineProperties().tracesProperty());
 			} else {
 				items.set(FXCollections.observableArrayList());
 			}
