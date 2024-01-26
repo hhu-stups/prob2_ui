@@ -1,0 +1,13 @@
+digraph {
+
+#foreach( $id in $ids) 
+    "$id"; 
+#end
+#foreach($con in $activations)
+    #set($id = $activations.keySet().stream().toList().get($foreach.index))
+    #foreach($toactivate in $con)
+        "$id" -> "$toactivate";
+    #end
+#end
+}
+

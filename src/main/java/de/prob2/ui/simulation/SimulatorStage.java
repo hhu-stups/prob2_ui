@@ -1,15 +1,23 @@
 package de.prob2.ui.simulation;
 
 import java.io.IOException;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Stream;
+
+import org.apache.velocity.*;
+import org.apache.velocity.app.Velocity;
+import org.apache.velocity.app.VelocityEngine;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -684,8 +692,49 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private void generateDiagram(){
+		//Getting Activation data
 		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
-		System.out.println(config.getActivationConfigurations());
+		List<ActivationConfiguration> activations = config.getActivationConfigurations();
+		List<String> ids = new ArrayList<String>();
+		Map<String, List<String>> activating = new HashMap<String, List<String>>();
+		ActivationChoiceConfiguration choiceConfig; 
+		ActivationOperationConfiguration opConfig;
+
 		
+
+		//Initialisation of Velocity engine
+		VelocityContext nodeContext = new VelocityContext();
+		Properties props = new Properties();
+		props.setProperty("resource.loader", "class");
+		props.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		Velocity.init(props);
+		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
+		StringWriter sw = new StringWriter(); 
+		
+		//Getting Nodes
+			for (ActivationConfiguration activation : activations) {
+			ids.add(activation.getId());
+			if (activation.getClass().equals(ActivationChoiceConfiguration.class)) {
+				choiceConfig = (ActivationChoiceConfiguration)activation;
+				activating.put(choiceConfig.getId(), choiceConfig.getActivations().keySet().stream().toList());
+			}
+			else{
+				opConfig = (ActivationOperationConfiguration)activation;
+				activating.put(opConfig.getId(),opConfig.getActivating());
+			}
+		}
+		nodeContext.put("ids", ids);
+		nodeContext.put("activations", activating);
+		
+		
+		nodes.merge(nodeContext, sw);
+		String nodesString = sw.toString();
+
+		System.out.println("ACTIVATIONS:");
+		System.out.println(config.getActivationConfigurations());
+		System.out.println("LISTENERS:");
+		System.out.println(config.getUiListenerConfigurations());
+		System.out.println("DOT: \n" + nodesString);
+
 	}
 }
