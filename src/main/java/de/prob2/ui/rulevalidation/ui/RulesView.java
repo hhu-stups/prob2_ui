@@ -15,9 +15,7 @@ import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.rulevalidation.RuleValidationReport;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
 import de.prob2.ui.rulevalidation.RulesDependencyGraphCreator;
@@ -333,9 +331,7 @@ public class RulesView extends AnchorPane{
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html"));
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
-			RuleValidationReport ruleValidationReport = new RuleValidationReport(currentTrace, i18n,
-				injector.getInstance(VersionInfo.class), dataModel);
-			ruleValidationReport.reportVelocity(path);
+			controller.saveValidationReport(path, injector.getInstance(Locale.class));
 		}
 	}
 

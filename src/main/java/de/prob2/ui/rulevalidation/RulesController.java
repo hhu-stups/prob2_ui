@@ -18,6 +18,9 @@ import javafx.scene.control.ProgressBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -172,5 +175,9 @@ public class RulesController {
 		});
 		new Thread(task).start();
 
+	}
+
+	public void saveValidationReport(final Path path, final Locale language) throws IOException {
+		rulesChecker.saveValidationReport(path, language);
 	}
 }
