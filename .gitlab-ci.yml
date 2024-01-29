@@ -37,6 +37,12 @@ test:jdk-17-linux:
   script:
     - ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar jpackage
 
+test:jdk-21-linux:
+  extends: .test-linux
+  image: eclipse-temurin:21
+  script:
+    - ./gradlew ${GRADLE_OPTIONS} check
+
 test:jdk-17-macos-x86_64:
   extends: .test-common
   script:
