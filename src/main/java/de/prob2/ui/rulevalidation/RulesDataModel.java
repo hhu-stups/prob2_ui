@@ -1,5 +1,6 @@
 package de.prob2.ui.rulevalidation;
 
+import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
@@ -7,7 +8,6 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.brules.*;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import groovy.lang.Singleton;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 

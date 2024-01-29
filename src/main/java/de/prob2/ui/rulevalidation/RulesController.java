@@ -1,6 +1,7 @@
 package de.prob2.ui.rulevalidation;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.FunctionOperation;
 import de.prob.model.brules.RulesChecker;
@@ -9,7 +10,6 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.ui.RulesView;
-import groovy.lang.Singleton;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
