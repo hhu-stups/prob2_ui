@@ -34,7 +34,6 @@ test:jdk-17-linux:
   before_script:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
-    - apt-get install --assume-yes bash
   script:
     - ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar jpackage
 
