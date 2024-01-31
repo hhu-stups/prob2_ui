@@ -326,23 +326,14 @@ public class RailMLStage extends Stage {
 			Path tempDir = Paths.get(System.getProperty("java.io.tmpdir"));
 			Path tempGraphMachine = tempDir.resolve(graphMachineName);
 			Path tempGraphDefs = tempDir.resolve("RailML3_CustomGraphs.def");
-			Path tempPrintMachine = tempDir.resolve("RailML3_printMachines.mch");
-			Path tempImportMachine = tempDir.resolve("RailML3_import.mch");
-			Path tempValidationMachine = tempDir.resolve("RailML3_validation_flat.mch");
 
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(graphMachineName)), tempGraphMachine, StandardCopyOption.REPLACE_EXISTING);
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_CustomGraphs.def")), tempGraphDefs, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_printMachines.mch")), tempPrintMachine, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_import.mch")), tempImportMachine, StandardCopyOption.REPLACE_EXISTING);
-			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_validation_flat.mch")), tempValidationMachine, StandardCopyOption.REPLACE_EXISTING);
 
 			stateSpace = api.b_load(tempGraphMachine.toString());
 
 			Files.delete(tempGraphMachine);
 			Files.delete(tempGraphDefs);
-			Files.delete(tempPrintMachine);
-			Files.delete(tempImportMachine);
-			Files.delete(tempValidationMachine);
 		} else {
 			stateSpace = api.brules_load(Paths.get(graphMachine).toString());
 		}
