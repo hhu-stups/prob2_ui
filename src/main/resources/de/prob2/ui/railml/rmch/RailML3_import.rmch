@@ -3,6 +3,7 @@ REFERENCES RailML3_readFile, RailML3_CO, RailML3_IS, RailML3_VIS, RailML3_IL
 DEFINITIONS
 	"CHOOSE.def";
     "../RailML3_CustomGraphs.def";
+    SET_PREF_MEMOIZE_FUNCTIONS == TRUE;
 
     inverseDirectedPair(Pair) == prj1(Pair) |-> oppositeDirection(prj2(Pair));
     oppositeDirection(dir) == IF dir = direction_normal THEN direction_reverse ELSE direction_normal END;
