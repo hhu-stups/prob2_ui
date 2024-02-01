@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
-import ch.qos.logback.classic.ClassicConstants;
-
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -60,6 +58,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import ch.qos.logback.classic.ClassicConstants;
 
 public class ProB2 extends Application {
 
@@ -284,6 +284,8 @@ public class ProB2 extends Application {
 
 		final Machine currentMachine = currentProject.getCurrentMachine();
 		if (currentMachine != null) {
+			// we use the file name here because it is almost always the same as the machine name anyway
+			// and the file name contains the extension as well which is important to differentiate machine types
 			title.append(currentMachine.getLocation().getFileName());
 			title.append(" - ");
 		}
