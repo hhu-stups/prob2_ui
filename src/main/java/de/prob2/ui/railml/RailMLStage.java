@@ -330,7 +330,7 @@ public class RailMLStage extends Stage {
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream(graphMachineName)), tempGraphMachine, StandardCopyOption.REPLACE_EXISTING);
 			Files.copy(Objects.requireNonNull(getClass().getResourceAsStream("RailML3_CustomGraphs.def")), tempGraphDefs, StandardCopyOption.REPLACE_EXISTING);
 
-			stateSpace = api.b_load(tempGraphMachine.toString());
+			stateSpace = api.brules_load(tempGraphMachine.toString());
 
 			Files.delete(tempGraphMachine);
 			Files.delete(tempGraphDefs);
