@@ -79,13 +79,12 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 		@JsonProperty("goal") final String goal,
 		@JsonProperty("options") final Set<ModelCheckingOptions.Options> options
 	) {
-		Objects.requireNonNull(options);
 		this.id = id;
 		this.searchStrategy = searchStrategy;
 		this.nodesLimit = nodesLimit;
 		this.timeLimit = timeLimit;
 		this.goal = goal;
-		this.options = options;
+		this.options = Objects.requireNonNull(options, "options");
 		this.shouldExecute = new SimpleBooleanProperty(true);
 		this.initListeners();
 	}
