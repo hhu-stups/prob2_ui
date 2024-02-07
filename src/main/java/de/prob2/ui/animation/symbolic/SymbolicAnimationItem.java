@@ -83,6 +83,6 @@ public class SymbolicAnimationItem extends AbstractCheckableItem {
 	
 	@Override
 	public void execute(final ExecutionContext context) {
-		SymbolicAnimationItemHandler.executeItem(this, context.getStateSpace());
+		SymbolicAnimationItemHandler.executeItem(this, context.stateSpace());
 	}
 }

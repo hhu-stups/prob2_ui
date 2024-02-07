@@ -145,9 +145,9 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 	@Override
 	public void execute(final ExecutionContext context) {
 		if (type == TemporalType.LTL) {
-			LTLFormulaChecker.checkFormula(this, context.getMachine(), context.getStateSpace());
+			LTLFormulaChecker.checkFormula(this, context.machine(), context.stateSpace());
 		} else {
-			CTLFormulaChecker.checkFormula(this, context.getStateSpace());
+			CTLFormulaChecker.checkFormula(this, context.stateSpace());
 		}
 	}
 }

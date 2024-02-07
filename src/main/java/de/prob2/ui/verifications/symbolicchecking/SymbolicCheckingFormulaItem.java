@@ -105,6 +105,6 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem implement
 	
 	@Override
 	public void execute(final ExecutionContext context) {
-		SymbolicCheckingFormulaHandler.checkItem(this, context.getStateSpace());
+		SymbolicCheckingFormulaHandler.checkItem(this, context.stateSpace());
 	}
 }

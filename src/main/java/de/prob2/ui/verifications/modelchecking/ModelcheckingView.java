@@ -287,7 +287,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	protected void executeItemSync(final ModelCheckingItem item, final ExecutionContext context) {
 		statsView.updateWhileModelChecking(item);
 		try {
-			final ModelCheckingStep r = Modelchecker.execute(item, context.getStateSpace());
+			final ModelCheckingStep r = Modelchecker.execute(item, context.stateSpace());
 			if (r.getResult() instanceof ITraceDescription) {
 				currentTrace.set(r.getTrace());
 			}

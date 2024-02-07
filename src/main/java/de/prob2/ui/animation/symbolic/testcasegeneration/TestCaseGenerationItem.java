@@ -101,6 +101,6 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	
 	@Override
 	public void execute(final ExecutionContext context) {
-		TestCaseGenerator.generateTestCases(this, context.getStateSpace());
+		TestCaseGenerator.generateTestCases(this, context.stateSpace());
 	}
 }

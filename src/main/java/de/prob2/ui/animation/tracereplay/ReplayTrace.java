@@ -277,6 +277,6 @@ public class ReplayTrace implements IExecutableItem, IValidationTask {
 	
 	@Override
 	public void execute(final ExecutionContext context) {
-		TraceChecker.checkNoninteractive(this, context.getStateSpace());
+		TraceChecker.checkNoninteractive(this, context.stateSpace());
 	}
 }
