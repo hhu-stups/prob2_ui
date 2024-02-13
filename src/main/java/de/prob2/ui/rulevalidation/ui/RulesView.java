@@ -9,7 +9,6 @@ import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResult;
-import de.prob.model.brules.RulesModel;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.internal.FXMLInjected;
@@ -18,7 +17,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
-import de.prob2.ui.rulevalidation.RulesDependencyGraphCreator;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
@@ -318,9 +316,7 @@ public class RulesView extends AnchorPane{
 
 	@FXML
 	public void visualizeCompleteDependencyGraph() {
-		RulesModel rulesModel = (RulesModel) currentTrace.getModel();
-		RulesDependencyGraphCreator.visualizeGraph(injector.getInstance(DotView.class), currentTrace,
-			rulesModel.getRulesProject().getOperationsMap().values());
+		showGraphExpression(controller.getCompleteDependencyGraphExpression());
 	}
 
 	@FXML
@@ -429,7 +425,7 @@ public class RulesView extends AnchorPane{
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				if (row.getItem() instanceof AbstractOperation abstractOperation) {
-					RulesDependencyGraphCreator.visualizeGraph(injector.getInstance(DotView.class), currentTrace, Collections.singleton(abstractOperation));
+					showGraphExpression(controller.getPartialDependencyGraphExpression(Collections.singleton(abstractOperation)));
 				}
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -442,5 +438,12 @@ public class RulesView extends AnchorPane{
 		row.itemProperty().addListener((obs, oldVal, newVal) ->
 			row.setContextMenu(newVal instanceof AbstractOperation ? new ContextMenu(visualizeExpressionAsGraphItem) : null));
 		return row;
+	}
+
+	private void showGraphExpression(String expression) {
+		DotView dotView = injector.getInstance(DotView.class);
+		dotView.show();
+		dotView.toFront();
+		dotView.visualizeFormulaAsGraph(expression);
 	}
 }
