@@ -62,7 +62,7 @@ class ProjectDocumenterTest {
 	private final String outputFilename = "output";
 	final ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
 	final TemporalFormulaItem ltlFormulaItem = new TemporalFormulaItem(TemporalFormulaType.LTL, "", "", "", -1, true);
-	final SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("", "", SymbolicCheckingType.SYMBOLIC_MODEL_CHECK);
+	final SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("", "", SymbolicCheckingType.SYMBOLIC_MODEL_CHECKING);
 	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
 
 	@BeforeAll

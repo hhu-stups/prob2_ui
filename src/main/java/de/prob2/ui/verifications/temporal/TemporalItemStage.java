@@ -18,7 +18,7 @@ import javafx.stage.Stage;
 
 public abstract class TemporalItemStage extends Stage {
 
-	public static class TemporalFormulaChoiceItem {
+	public static final class TemporalFormulaChoiceItem {
 
 		private final TemporalFormulaType type;
 

@@ -39,7 +39,7 @@ public class TemplateUtility {
 	public static String symbolicConfigString(SymbolicCheckingFormulaItem formula, I18n i18n) {
 		String config = formula.getCode();
 		// no configuration is internally represented as 1=1, but that is not intended in the output
-		if(formula.getType().equals(SymbolicCheckingType.DEADLOCK) && config.equals("1=1")){
+		if(formula.getType().equals(SymbolicCheckingType.SYMBOLIC_DEADLOCK) && config.equals("1=1")){
 			return latexSafe(i18n.translate("verifications.symbolicchecking.view.deadlock.noPredicate"));
 		}
 		// & is replaced because otherwise a column change takes place in the template table
