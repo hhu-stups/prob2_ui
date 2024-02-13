@@ -101,7 +101,7 @@ public class TemporalFormulaStage extends TemporalItemStage {
 			}
 		});
 
-		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get().getType() == TemporalFormulaItem.TemporalType.LTL, cbType.getSelectionModel().selectedItemProperty());
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get().getType() == TemporalFormulaType.LTL, cbType.getSelectionModel().selectedItemProperty());
 		btShowBuiltins.visibleProperty().bind(binding);
 		cbType.getSelectionModel().select(cbType.getItems().get(0));
 		cbExpectedResult.getSelectionModel().select(true);
@@ -121,8 +121,9 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		result = null;
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		String code = taCode.getText();
-		if (cbType.getValue().getType() == TemporalFormulaItem.TemporalType.LTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, id, code, taDescription.getText(), this.stateLimitProperty.get(), cbExpectedResult.getValue());
+		TemporalFormulaType type = cbType.getValue().getType();
+		if (type == TemporalFormulaType.LTL) {
+			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.stateLimitProperty.get(), cbExpectedResult.getValue());
 			try {
 				LTLFormulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 			} catch (ProBError e) {
@@ -130,8 +131,8 @@ public class TemporalFormulaStage extends TemporalItemStage {
 				return;
 			}
 			result = item;
-		} else if (cbType.getValue().getType() == TemporalFormulaItem.TemporalType.CTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.CTL, id, code, taDescription.getText(), this.stateLimitProperty.get(), cbExpectedResult.getValue());
+		} else if (type == TemporalFormulaType.CTL) {
+			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.stateLimitProperty.get(), cbExpectedResult.getValue());
 			try {
 				CTLFormulaChecker.parseFormula(item.getCode(), currentTrace.getModel());
 			} catch (ProBError e) {
@@ -139,6 +140,8 @@ public class TemporalFormulaStage extends TemporalItemStage {
 				return;
 			}
 			result = item;
+		} else {
+			throw new AssertionError();
 		}
 
 		this.close();

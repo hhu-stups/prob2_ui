@@ -317,7 +317,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if (path != null) {
 			List<TemporalFormulaItem> formulas = items.stream()
-				.filter(item -> item.getType() == TemporalFormulaItem.TemporalType.LTL)
+				.filter(item -> item.getType() == TemporalFormulaType.LTL)
 				.filter(TemporalFormulaItem::selected)
 				.collect(Collectors.toList());
 			List<LTLPatternItem> patterns = machine.getMachineProperties().getLTLPatterns();

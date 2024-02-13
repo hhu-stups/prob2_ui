@@ -20,13 +20,13 @@ public abstract class TemporalItemStage extends Stage {
 
 	public static class TemporalFormulaChoiceItem {
 
-		private final TemporalFormulaItem.TemporalType type;
+		private final TemporalFormulaType type;
 
-		public TemporalFormulaChoiceItem(@NamedArg("type") TemporalFormulaItem.TemporalType type) {
+		public TemporalFormulaChoiceItem(@NamedArg("type") TemporalFormulaType type) {
 			this.type = type;
 		}
 
-		public TemporalFormulaItem.TemporalType getType() {
+		public TemporalFormulaType getType() {
 			return type;
 		}
 
