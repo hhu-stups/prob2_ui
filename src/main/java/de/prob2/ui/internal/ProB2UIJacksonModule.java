@@ -36,7 +36,7 @@ import javafx.scene.paint.Color;
 /**
  * Jackson module containing custom serializers and deserializers used by the UI.
  */
-final class ProB2UIJacksonModule extends Module {
+public final class ProB2UIJacksonModule extends Module {
 	// Jackson already provides default (de)serializers for Path by default,
 	// but their serialization format doesn't match our previous Gson-based code.
 	// In particular, Jackson's default Path serializer always outputs file:// URLs
@@ -185,10 +185,6 @@ final class ProB2UIJacksonModule extends Module {
 
 			return Color.web(p.getText());
 		}
-	}
-
-	ProB2UIJacksonModule() {
-		super();
 	}
 
 	@Override
