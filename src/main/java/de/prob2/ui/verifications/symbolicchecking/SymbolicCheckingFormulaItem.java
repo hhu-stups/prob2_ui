@@ -14,6 +14,8 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
@@ -29,7 +31,7 @@ import javafx.collections.ObservableList;
 	"code",
 	"selected",
 })
-public class SymbolicCheckingFormulaItem extends AbstractCheckableItem implements IValidationTask {
+public final class SymbolicCheckingFormulaItem extends AbstractCheckableItem implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final SymbolicCheckingType type;
@@ -54,7 +56,12 @@ public class SymbolicCheckingFormulaItem extends AbstractCheckableItem implement
 	public String getId() {
 		return this.id;
 	}
-	
+
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.SYMBOLIC;
+	}
+
 	public SymbolicCheckingType getType() {
 		return this.type;
 	}

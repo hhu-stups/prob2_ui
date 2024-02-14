@@ -16,13 +16,15 @@ import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.temporal.ctl.CTLFormulaChecker;
 import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaChecker;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 @JsonPropertyOrder({ "type", "id", "description", "stateLimit", "code", "expectedResult", "selected", })
-public class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask {
+public final class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask {
 
 	private final TemporalFormulaType type;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -67,6 +69,11 @@ public class TemporalFormulaItem extends AbstractCheckableItem implements IValid
 	@Override
 	public String getId() {
 		return this.id;
+	}
+
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.TEMPORAL;
 	}
 
 	public String getCode() {

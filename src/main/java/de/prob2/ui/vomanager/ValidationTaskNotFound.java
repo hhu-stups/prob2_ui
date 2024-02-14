@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -38,7 +40,12 @@ public final class ValidationTaskNotFound implements IValidationTask {
 	public String getId() {
 		return this.id;
 	}
-	
+
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.INVALID;
+	}
+
 	@Override
 	public String getTaskType(final I18n i18n) {
 		return i18n.translate("vomanager.validationTaskNotFound.type");

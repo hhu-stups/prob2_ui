@@ -20,6 +20,8 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.BooleanProperty;
@@ -42,7 +44,7 @@ import javafx.collections.FXCollections;
 	"goal",
 	"shouldExecute",
 })
-public class ModelCheckingItem implements IExecutableItem, IValidationTask {
+public final class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
@@ -125,6 +127,11 @@ public class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	@Override
 	public String getId() {
 		return this.id;
+	}
+
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.MODEL_CHECKING;
 	}
 
 	public ModelCheckingSearchStrategy getSearchStrategy() {

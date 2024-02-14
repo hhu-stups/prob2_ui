@@ -8,12 +8,14 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ProofObligationItem implements IValidationTask {
+public final class ProofObligationItem implements IValidationTask {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
@@ -40,6 +42,11 @@ public class ProofObligationItem implements IValidationTask {
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.PROOF_OBLIGATION;
 	}
 
 	public ProofObligationItem withId(final String id) {
