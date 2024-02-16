@@ -60,7 +60,11 @@ public class RailMLStage extends Stage {
 	@FXML
 	private TextField fileLocationField;
 	@FXML
+	private Tooltip fileLocationTooltip;
+	@FXML
 	private TextField locationField;
+	@FXML
+	private Tooltip locationTooltip;
 	@FXML
 	private Label visualisationStrategyField;
 	@FXML
@@ -135,8 +139,6 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		this.getScene().addPostLayoutPulseListener(this::sizeToScene);
-
 		btStartImport.disableProperty()
 			.bind(fileLocationField.lengthProperty().lessThanOrEqualTo(0)
 			.or(animationMachineCheckbox.selectedProperty().not()
@@ -146,7 +148,9 @@ public class RailMLStage extends Stage {
 				.and(visualisationStrategyChoiceBox.valueProperty().isNull()))
 			.or(updater.runningProperty()));
 		fileLocationField.setText("");
+		fileLocationTooltip.textProperty().bind(fileLocationField.textProperty());
 		locationField.setText("");
+		locationTooltip.textProperty().bind(locationField.textProperty());
 		visualisationStrategyField.visibleProperty()
 			.bind(visualisationCheckbox.selectedProperty());
 		visualisationStrategyChoiceBox.getItems().addAll(RailMLImportMeta.VisualisationStrategy.values());
@@ -202,8 +206,8 @@ public class RailMLStage extends Stage {
 
 		progressBar.visibleProperty().bind(updater.runningProperty());
 		progressBar.managedProperty().bind(progressBar.visibleProperty());
-		//currentOp.textProperty().bind(currentOperation);
 
+		this.getScene().addPostLayoutPulseListener(this::sizeToScene);
 		setOnCloseRequest(e -> this.cancel());
 	}
 
