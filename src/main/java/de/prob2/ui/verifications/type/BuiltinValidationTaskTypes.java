@@ -32,4 +32,8 @@ public final class BuiltinValidationTaskTypes {
 	private BuiltinValidationTaskTypes() {
 		throw new AssertionError();
 	}
+
+	public static void init() {
+		// NO-OP for classloading
+	}
 }

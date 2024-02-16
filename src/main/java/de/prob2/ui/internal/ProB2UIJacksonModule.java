@@ -30,6 +30,8 @@ import com.fasterxml.jackson.databind.ser.std.StdDelegatingSerializer;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import com.fasterxml.jackson.databind.util.StdConverter;
 
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+
 import javafx.geometry.BoundingBox;
 import javafx.scene.paint.Color;
 
@@ -232,5 +234,7 @@ public final class ProB2UIJacksonModule extends Module {
 		deserializers.put(BoundingBox.class, new BoundingBoxDeserializer());
 		deserializers.put(Color.class, new ColorDeserializer());
 		context.addDeserializers(new SimpleDeserializers(deserializers));
+
+		BuiltinValidationTaskTypes.init();
 	}
 }
