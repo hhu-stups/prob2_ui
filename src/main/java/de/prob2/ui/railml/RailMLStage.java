@@ -135,8 +135,8 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		//this.sizeToScene();
-		//this.getScene().setOnMouseClicked(event -> this.sizeToScene());
+		this.getScene().addPostLayoutPulseListener(this::sizeToScene);
+
 		btStartImport.disableProperty()
 			.bind(fileLocationField.lengthProperty().lessThanOrEqualTo(0)
 			.or(animationMachineCheckbox.selectedProperty().not()

@@ -152,8 +152,6 @@ public class AdvancedMenu extends Menu {
 			railMLInspectDotStage.toFront();
 		} else {
 			railMLStage.show();
-			railMLStage.sizeToScene();
-			railMLStage.getScene().setOnMouseMoved(event -> railMLStage.sizeToScene());
 			railMLStage.toFront();
 		}
 	}

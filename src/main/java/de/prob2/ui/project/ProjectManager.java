@@ -367,26 +367,14 @@ public class ProjectManager {
 		}
 	}
 
-	public void openRailML(Path selected) throws IOException {
-		/*XMLValidator v = new XMLValidator(selected);
-		try {
-			v.validateXML(selected);
-		} catch (SAXException e) {
-			stageManager.makeAlert(Alert.AlertType.ERROR, "XML invalid!",
-				e.getStackTrace().toString()).show();
-			System.out.println("XML is valid against XSD.");
-		}*/
-		RailMLImportMeta railMLImportMeta = injector.getInstance(RailMLImportMeta.class);
-		railMLImportMeta.setPath(selected);
+	public void openRailML(Path selected) {
 		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
 		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 		if (railMLInspectDotStage.isShowing()) {
 			railMLInspectDotStage.toFront();
 		} else {
-		railMLStage.show();
-		railMLStage.sizeToScene();
-		railMLStage.getScene().setOnMouseMoved(event -> railMLStage.sizeToScene());
-		railMLStage.toFront();
+			railMLStage.show();
+			railMLStage.toFront();
 		}
 	}
 

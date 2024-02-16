@@ -18,6 +18,7 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ListView?>
 <fx:root title="RailML Import" type="RailMLStage" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root title="railML Import" type="RailMLStage" xmlns:fx="http://javafx.com/fxml/1" resizable="false">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane prefWidth="600">
