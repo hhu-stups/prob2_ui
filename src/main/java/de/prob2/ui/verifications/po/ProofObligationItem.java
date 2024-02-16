@@ -19,14 +19,12 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public final class ProofObligationItem implements IValidationTask {
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String name;
 	private final String description;
 	private final ObjectProperty<Checked> checked;
 
-	@JsonCreator
-	public ProofObligationItem(@JsonProperty("id") final String id, @JsonProperty("name") final String name, @JsonProperty("description") final String description) {
+	public ProofObligationItem(final String id, final String name, final String description) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
