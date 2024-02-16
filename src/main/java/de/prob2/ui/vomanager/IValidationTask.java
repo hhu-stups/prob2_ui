@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.verifications.type.ValidationTaskTypeResolver;
 
