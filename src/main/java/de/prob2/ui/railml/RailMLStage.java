@@ -435,7 +435,7 @@ public class RailMLStage extends Stage {
 					currentProject.addMachine(animationDefinitions);
 					currentProject.addMachine(animationMachine);
 					currentProject.startAnimation(animationMachine);
-					currentProject.getCurrentMachine().simulationsProperty()
+					currentProject.getCurrentMachine().getMachineProperties().simulationsProperty()
 						.add(new SimulationModel(currentProject.getLocation().relativize(simbPath), Collections.emptyList()));
 				} catch (IOException e) {
 					throw new RuntimeException(e);
