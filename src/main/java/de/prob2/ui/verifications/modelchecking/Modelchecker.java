@@ -52,7 +52,11 @@ public final class Modelchecker {
 				stateSpace.execute(cmd);
 				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, cmd.getResult(), stateSpace);
 				item.setCurrentStep(step);
-				Platform.runLater(() -> item.getSteps().set(stepIndex, step));
+				Platform.runLater(() -> {
+					if (stepIndex < item.getSteps().size()) {
+						item.getSteps().set(stepIndex, step);
+					}
+				});
 			}
 
 			@Override

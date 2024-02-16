@@ -1,15 +1,17 @@
 package de.prob2.ui.rulevalidation;
 
 import com.google.inject.Inject;
+import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.FunctionOperation;
+import de.prob.model.brules.output.RuleValidationReport;
 import de.prob.model.brules.RulesChecker;
+import de.prob.model.brules.output.RulesDependencyGraph;
 import de.prob.model.brules.RulesModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.ui.RulesView;
-import groovy.lang.Singleton;
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.concurrent.Task;
@@ -18,6 +20,10 @@ import javafx.scene.control.ProgressBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Collection;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -32,7 +38,7 @@ public class RulesController {
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
-	private RulesModel ruleModel;
+	private RulesModel rulesModel;
 	private RulesChecker rulesChecker;
 
 	private final ChangeListener<Trace> traceListener;
@@ -56,10 +62,10 @@ public class RulesController {
 				} else if (oldTrace == null || !newTrace.getModel().equals(oldTrace.getModel())) {
 					// the model changed -> rebuild view
 					LOGGER.debug("New rules model in new trace!");
-					ruleModel = (RulesModel) newTrace.getModel();
+					rulesModel = (RulesModel) newTrace.getModel();
 					rulesChecker = new RulesChecker(newTrace);
 					rulesChecker.init();
-					initialize(ruleModel);
+					initialize(rulesModel);
 					model.update(rulesChecker.getCurrentTrace());
 					//plugin.removeOperationsView();
 				} else {
@@ -117,7 +123,7 @@ public class RulesController {
 			protected Void call() {
 			rulesChecker = new RulesChecker(currentTrace.get());
 			rulesChecker.init();
-			int totalNrOfOperations = ruleModel.getRulesProject().getOperationsMap().values().
+			int totalNrOfOperations = rulesModel.getRulesProject().getOperationsMap().values().
 				stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
 			// determine all operations that can be executed in this state
 			Set<AbstractOperation> executableOperations = rulesChecker.getExecutableOperations();
@@ -172,5 +178,18 @@ public class RulesController {
 		});
 		new Thread(task).start();
 
+	}
+
+	public String getPartialDependencyGraphExpression(final Collection<AbstractOperation> operations) {
+		return RulesDependencyGraph.getGraphExpressionAsString(currentTrace.get(), operations);
+	}
+
+	public String getCompleteDependencyGraphExpression() {
+		return RulesDependencyGraph.getGraphExpressionAsString(currentTrace.get(), rulesModel.getRulesProject().getOperationsMap().values());
+	}
+
+	public void saveValidationReport(final Path path, final Locale language) throws IOException {
+		// don't use RuleValidationReport.saveReport directly: duration of checks is measured by RulesChecker
+		rulesChecker.saveValidationReport(path, language);
 	}
 }

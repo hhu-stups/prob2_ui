@@ -5,17 +5,21 @@ import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class DynamicCommandFormulaItem implements IValidationTask {
+public final class DynamicCommandFormulaItem implements IValidationTask {
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String id;
 	private final String commandType;
 	private String formula;
@@ -38,6 +42,11 @@ public class DynamicCommandFormulaItem implements IValidationTask {
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.DYNAMIC_FORMULA;
 	}
 
 	public void setId(String id) {

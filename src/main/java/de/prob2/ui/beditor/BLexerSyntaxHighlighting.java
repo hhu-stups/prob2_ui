@@ -103,7 +103,8 @@ public final class BLexerSyntaxHighlighting {
 			TModel.class, TInvariant.class, TConcreteVariables.class,
 			TAbstractVariables.class, TVariables.class, TProperties.class,
 			TConstants.class, TAbstractConstants.class, TConcreteConstants.class,
-			TConstraints.class, TSets.class, TDefinitions.class, TValue.class);
+			TConstraints.class, TSets.class, TDefinitions.class, TValue.class,
+			TKwFreetypes.class, TKwReferences.class, TExpressions.class, TPredicates.class);
 		addBTokens("editor_comment", TComment.class, TCommentBody.class, TCommentEnd.class,
 			TLineComment.class, TShebang.class, TStar.class);
 		addBTokens("editor_pragma", 

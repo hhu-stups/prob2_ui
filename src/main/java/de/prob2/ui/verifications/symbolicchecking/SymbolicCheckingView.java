@@ -110,7 +110,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			this.items.unbind();
 			if (to != null) {
-				this.items.bind(to.symbolicCheckingFormulasProperty());
+				this.items.bind(to.getMachineProperties().symbolicCheckingFormulasProperty());
 			} else {
 				this.items.clear();
 			}

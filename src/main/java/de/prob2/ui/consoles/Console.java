@@ -35,6 +35,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.TransferMode;
@@ -243,8 +244,8 @@ public abstract class Console extends StyleClassedTextArea {
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.ESCAPE), e -> this.deactivateSearch()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.UP), e -> this.handleUp()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.DOWN), e -> this.handleDown()));
-		Nodes.addInputMap(this, consume(keyPressed(KeyCode.LEFT), e -> this.handleLeft()));
-		Nodes.addInputMap(this, consume(keyPressed(KeyCode.RIGHT), e -> this.handleRight()));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.LEFT, KeyCombination.SHIFT_ANY), this::handleLeft));
+		Nodes.addInputMap(this, consume(keyPressed(KeyCode.RIGHT, KeyCombination.SHIFT_ANY), this::handleRight));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.DELETE), e -> this.handleDelete()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.BACK_SPACE), e -> handleBackspace()));
 		Nodes.addInputMap(this, consume(keyPressed(KeyCode.ENTER), e -> this.handleEnter()));
@@ -328,23 +329,32 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	protected void onEnterSingleLineText(String text) {
-		moveCaretToInputEndIfRequired();
+		this.moveCaretToInputEndIfRequired();
 
 		if (text.isEmpty()) {
 			return;
 		}
 		assert text.indexOf('\n') < 0 && text.indexOf('\r') < 0;
 
-		int inputPosition = getPositionInInput().orElseThrow(() -> new AssertionError("caret not in input"));
-		String prefix = this.input.get().substring(0, inputPosition);
-		String suffix = this.input.get().substring(inputPosition);
+		String input = this.input.get();
+		int anchorPosition = this.getAnchorPositionInInput().orElse(this.getAnchor() <= this.getCaretPosition() ? 0 : input.length());
+		int inputPosition = this.getPositionInInput().orElseThrow(() -> new AssertionError("caret not in input"));
+		int start = Math.min(anchorPosition, inputPosition);
+		int end = Math.max(anchorPosition, inputPosition);
+
+		String prefix = input.substring(0, start);
+		String suffix = input.substring(end);
 		this.input.set(prefix + text + suffix);
-		this.moveCaretToPosInInput(inputPosition + text.length());
+		this.moveCaretToPosInInput(start + text.length());
 	}
 
 	public void moveCaretToPosInInput(int pos) {
+		this.moveCaretToPosInInput(pos, SelectionPolicy.CLEAR);
+	}
+
+	public void moveCaretToPosInInput(int pos, SelectionPolicy selectionPolicy) {
 		assert !this.getParagraphs().isEmpty();
-		this.moveTo(this.getParagraphs().size() - 1, this.inputStart.get() + pos);
+		this.moveTo(this.getParagraphs().size() - 1, this.inputStart.get() + pos, selectionPolicy);
 		this.requestFollowCaret();
 	}
 
@@ -465,7 +475,7 @@ public abstract class Console extends StyleClassedTextArea {
 		historyAndSearchHandler.up();
 	}
 
-	private void handleLeft() {
+	private void handleLeft(KeyEvent e) {
 		if (this.isSearching()) {
 			this.historyAndSearchHandler.setSearchActive(false);
 			return;
@@ -473,13 +483,21 @@ public abstract class Console extends StyleClassedTextArea {
 
 		OptionalInt inputPos = this.getPositionInInput();
 		if (inputPos.isPresent()) {
-			this.moveCaretToPosInInput(Math.max(0, inputPos.getAsInt() - 1));
+			boolean shift = e.isShiftDown();
+			int oldPos = inputPos.getAsInt();
+			String input = this.input.get();
+			if (oldPos > 0) {
+				int newPos = input.offsetByCodePoints(oldPos, -1);
+				this.moveCaretToPosInInput(newPos, shift ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
+			} else if (!shift) {
+				this.getCaretSelectionBind().deselect();
+			}
 		} else {
 			this.moveToInputEnd();
 		}
 	}
 
-	private void handleRight() {
+	private void handleRight(KeyEvent e) {
 		if (this.isSearching()) {
 			this.historyAndSearchHandler.setSearchActive(false);
 			return;
@@ -487,13 +505,46 @@ public abstract class Console extends StyleClassedTextArea {
 
 		OptionalInt inputPos = this.getPositionInInput();
 		if (inputPos.isPresent()) {
-			this.moveCaretToPosInInput(Math.min(this.input.get().length(), inputPos.getAsInt() + 1));
+			boolean shift = e.isShiftDown();
+			int oldPos = inputPos.getAsInt();
+			String input = this.input.get();
+			if (oldPos < input.length()) {
+				int newPos = input.offsetByCodePoints(oldPos, 1);
+				this.moveCaretToPosInInput(newPos, shift ? SelectionPolicy.ADJUST : SelectionPolicy.CLEAR);
+			} else if (!shift) {
+				this.getCaretSelectionBind().deselect();
+			}
 		} else {
 			this.moveToInputStart();
 		}
 	}
 
+	private boolean deleteSelectedText() {
+		String input = this.input.get();
+		OptionalInt anchorPosOpt = this.getAnchorPositionInInput();
+		OptionalInt caretPosOpt = this.getPositionInInput();
+		if (anchorPosOpt.isPresent() || caretPosOpt.isPresent()) {
+			boolean anchorBeforeCaret = this.getAnchor() <= this.getCaretPosition();
+			int anchorPos = anchorPosOpt.orElse(anchorBeforeCaret ? 0 : input.length());
+			int caretPos = caretPosOpt.orElse(anchorBeforeCaret ? input.length() : 0);
+			int start = Math.min(anchorPos, caretPos);
+			int end = Math.max(anchorPos, caretPos);
+			if (start == end) {
+				return false;
+			}
+
+			this.input.set(input.substring(0, start) + input.substring(end));
+			this.moveCaretToPosInInput(start);
+		}
+
+		return true;
+	}
+
 	private void handleBackspace() {
+		if (deleteSelectedText()) {
+			return;
+		}
+
 		this.getPositionInInput().ifPresent(end -> {
 			if (end > 0) {
 				String input = this.input.get();
@@ -505,6 +556,10 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	private void handleDelete() {
+		if (deleteSelectedText()) {
+			return;
+		}
+
 		this.getPositionInInput().ifPresent(start -> {
 			if (start < this.input.get().length()) {
 				String input = this.input.get();
@@ -516,14 +571,21 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	protected OptionalInt getPositionInInput() {
+		return this.getPositionInInput(this.getCurrentParagraph(), this.getCaretColumn());
+	}
+
+	protected OptionalInt getAnchorPositionInInput() {
+		return this.getPositionInInput(this.getCaretSelectionBind().getAnchorParIndex(), this.getCaretSelectionBind().getAnchorColPosition());
+	}
+
+	protected OptionalInt getPositionInInput(int par, int col) {
 		int lastParagraph = this.getParagraphs().size() - 1;
 		assert lastParagraph >= 0;
-		if (lastParagraph != this.getCurrentParagraph()) {
+		if (lastParagraph != par) {
 			return OptionalInt.empty();
 		}
 
-		int caretColumn = this.getCaretColumn();
-		int inputPosition = caretColumn - this.inputStart.get();
+		int inputPosition = col - this.inputStart.get();
 		if (inputPosition < 0 || inputPosition > this.input.get().length()) {
 			return OptionalInt.empty();
 		}

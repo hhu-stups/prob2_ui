@@ -4,6 +4,10 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -81,9 +85,15 @@ public class ProB2Module extends AbstractModule {
 	}
 
 	@Provides
-	private static ObjectMapper provideObjectMapper() {
-		return new ObjectMapper().registerModule(new ProB2UIJacksonModule());
+	public static ObjectMapper provideObjectMapper() {
+		return new ObjectMapper()
+			       .registerModule(new ParameterNamesModule())
+			       .registerModule(new Jdk8Module())
+			       .registerModule(new JavaTimeModule())
+			       .registerModule(new GuavaModule())
+			       .registerModule(new ProB2UIJacksonModule());
 	}
+
 
 	@Provides
 	private static FXMLLoader provideLoader(final Injector injector, I18n i18n) {

@@ -175,7 +175,7 @@ public final class SymbolicCheckingFormulaHandler {
 	
 	private static void checkItemInternal(final SymbolicCheckingFormulaItem item, final StateSpace stateSpace) {
 		switch(item.getType()) {
-			case INVARIANT:
+			case SYMBOLIC_INVARIANT:
 				handleInvariant(item, stateSpace);
 				break;
 			case CHECK_REFINEMENT:
@@ -190,13 +190,13 @@ public final class SymbolicCheckingFormulaHandler {
 			case CHECK_WELL_DEFINEDNESS:
 				handleWellDefinedness(item, stateSpace);
 				break;
-			case DEADLOCK:
+			case SYMBOLIC_DEADLOCK:
 				handleDeadlock(item, stateSpace);
 				break;
 			case FIND_REDUNDANT_INVARIANTS:
 				findRedundantInvariants(item, stateSpace);
 				break;
-			case SYMBOLIC_MODEL_CHECK:
+			case SYMBOLIC_MODEL_CHECKING:
 				handleSymbolic(item, stateSpace);
 				break;
 			default:

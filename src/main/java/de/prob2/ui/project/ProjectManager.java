@@ -244,7 +244,7 @@ public class ProjectManager {
 			project.resetChanged();
 			// Fill in ReplayTrace fields that Jackson cannot set.
 			for (final Machine machine : project.getMachines()) {
-				for (final ReplayTrace trace : machine.getTraces()) {
+				for (final ReplayTrace trace : machine.getMachineProperties().getTraces()) {
 					trace.initAfterLoad(path.resolveSibling(trace.getLocation()), traceManager);
 				}
 			}
@@ -321,7 +321,6 @@ public class ProjectManager {
 		}
 	}
 
-	//TODO: make sure, that no duplicated traces are added
 	public void openTrace(Path selected) {
 		if (currentProject.getCurrentMachine() == null) {
 			stageManager.makeAlert(Alert.AlertType.WARNING, "common.alerts.noMachineLoaded.header",
@@ -361,7 +360,7 @@ public class ProjectManager {
 			case SIMB:
 				injector.getInstance(SimulatorStage.class).show();
 				injector.getInstance(SimulatorStage.class).toFront();
-				currentProject.getCurrentMachine().simulationsProperty().add(new SimulationModel(currentProject.getLocation().relativize(selected), Collections.emptyList()));
+				currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(currentProject.getLocation().relativize(selected), Collections.emptyList()));
 				break;
 			case NONE:
 				break;

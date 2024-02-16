@@ -141,28 +141,28 @@ public class SimulationEventHandler {
 	}
 
 
-	public Transition selectTransition(Activation activation, State currentState) {
+	public Transition selectTransition(Activation activation, State currentState, Map<String, String> variables) {
 		String opName = activation.getOperation();
 		Object probabilisticVariables = activation.getProbabilisticVariables();
 		String predicate = buildPredicateForTransition(currentState, activation);
 		if(probabilisticVariables == null) {
-			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, 1);
+			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
 			if (!transitions.isEmpty()) {
 				return transitions.get(0);
 			}
 		} else if(probabilisticVariables instanceof HashMap) {
-			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
+			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
 			if (!transitions.isEmpty()) {
 				return transitions.get(0);
 			}
 		} else if (probabilisticVariables instanceof String probabilisticVariablesAsString){
 			if("first".equals(probabilisticVariablesAsString)) {
-				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, 1);
+				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
 				if (!transitions.isEmpty()) {
 					return transitions.get(0);
 				}
 			} else if("uniform".equals(probabilisticVariablesAsString)) {
-				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
+				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
 				if (!transitions.isEmpty()) {
 					return transitions.get(random.nextInt(transitions.size()));
 				}

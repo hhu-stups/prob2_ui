@@ -35,10 +35,10 @@ public class ExternalSimulatorExecutor {
 
 	private boolean done;
 
-	public ExternalSimulatorExecutor(Simulator simulator, Path pythonFile, ClassicalBModel model) {
+	public ExternalSimulatorExecutor(Simulator simulator, Path pythonFile) {
 		this.simulator = simulator;
 		this.pythonFile = pythonFile;
-		this.pb = new ProcessBuilder("python3", pythonFile.toString()).directory(pythonFile.getParent().toFile());
+		this.pb = new ProcessBuilder("python3", pythonFile.getFileName().toString()).directory(pythonFile.getParent().toFile());
 		this.done = false;
 	}
 

@@ -5,6 +5,14 @@ import java.util.Collection;
 import java.util.List;
 
 import de.prob.animator.command.CompleteIdentifierCommand;
+import de.prob.model.brules.RulesModel;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.representation.AbstractModel;
+import de.prob.model.representation.AlloyModel;
+import de.prob.model.representation.XTLModel;
+import de.prob.model.representation.ZModel;
+import de.prob.scripting.TLAFactory;
 import de.prob.statespace.StateSpace;
 
 public final class BCodeCompletion {
@@ -58,22 +66,34 @@ public final class BCodeCompletion {
 		return doCompletion(stateSpace, text, true);
 	}
 
-	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text,
-			boolean includeKeywords) {
+	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text, boolean inEditor) {
 		BCodeCompletion cc = new BCodeCompletion(stateSpace, extractPrefix(text));
-		cc.find(true, includeKeywords);
+		cc.find(true, inEditor);
 		return cc.getSuggestions();
 	}
 
-	private void find(boolean ignoreCase, boolean includeKeywords) {
+	private void find(boolean ignoreCase, boolean inEditor) {
 		if (this.stateSpace != null) {
+			boolean allowUnicodeConversions = false;
+			boolean allowLatex = false;
+			AbstractModel m = this.stateSpace.getModel();
+			if (m instanceof ClassicalBModel || m instanceof RulesModel || m instanceof EventBModel) {
+				allowUnicodeConversions = true;
+				allowLatex = true;
+			} else if (!inEditor && (m instanceof AlloyModel || m instanceof XTLModel || m instanceof ZModel)) {
+				// the console is in Classical B mode
+				allowUnicodeConversions = true;
+				allowLatex = true;
+			}
+
 			CompleteIdentifierCommand cmd = new CompleteIdentifierCommand(this.text);
 			cmd.setIgnoreCase(ignoreCase);
-			cmd.setLatexToUnicode(true);
-			cmd.setAsciiToUnicode(true); // TODO: include special chars like !, # or 1 for ascii to unicode conversion
-			cmd.addKeywordContext(includeKeywords ? CompleteIdentifierCommand.KeywordContext.ALL
-					: CompleteIdentifierCommand.KeywordContext.EXPR);
-			cmd.addKeywordContext(CompleteIdentifierCommand.KeywordContext.LATEX);
+			cmd.setLatexToUnicode(allowUnicodeConversions);
+			cmd.setAsciiToUnicode(allowUnicodeConversions); // TODO: include special chars like !, # or 1 for ascii to unicode conversion
+			cmd.addKeywordContext(inEditor ? CompleteIdentifierCommand.KeywordContext.ALL : CompleteIdentifierCommand.KeywordContext.EXPR);
+			if (allowLatex) {
+				cmd.addKeywordContext(CompleteIdentifierCommand.KeywordContext.LATEX);
+			}
 			this.stateSpace.execute(cmd);
 			this.suggestions.addAll(cmd.getCompletions().stream().map(item -> new BCCItem(this.text, item)).toList());
 			// TODO: convert latex commands into unicode directly

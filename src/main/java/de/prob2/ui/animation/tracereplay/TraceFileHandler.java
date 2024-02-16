@@ -6,8 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.CancellationException;
 
 import com.fasterxml.jackson.core.JacksonException;
@@ -157,7 +159,7 @@ public final class TraceFileHandler {
 		alert.showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();
-				currentMachine.getTraces().remove(trace);
+				currentMachine.getMachineProperties().getTraces().remove(trace);
 			}
 		});
 	}
@@ -173,9 +175,16 @@ public final class TraceFileHandler {
 	}
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
-		final ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
-		machine.getTraces().add(replayTrace);
-		return replayTrace;
+		ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
+		Optional<ReplayTrace> existingItem = machine.getMachineProperties().getTraces().stream().filter(replayTrace::settingsEqual).findAny();
+		if (existingItem.isEmpty()) {
+			machine.getMachineProperties().getTraces().add(replayTrace);
+			return replayTrace;
+		} else {
+			ReplayTrace t = existingItem.get();
+			t.reset();
+			return t;
+		}
 	}
 
 	public void save(SimulationItem item, Machine machine) {
@@ -285,5 +294,34 @@ public final class TraceFileHandler {
 		}
 
 		return path;
+	}
+
+	public void deleteTraceFile(ReplayTrace trace) {
+		if (trace == null) {
+			return;
+		}
+
+		Path path = trace.getAbsoluteLocation();
+		if (path == null || !Files.isRegularFile(path)) {
+			return;
+		}
+
+		Optional<ButtonType> selected = stageManager.makeAlert(
+			Alert.AlertType.CONFIRMATION,
+			Arrays.asList(ButtonType.YES, ButtonType.NO),
+			"animation.tracereplay.dialog.deleteTraceFile.title",
+			"animation.tracereplay.dialog.deleteTraceFile.content",
+			path
+		).showAndWait();
+		if (selected.isEmpty() || selected.get() != ButtonType.YES) {
+			return;
+		}
+
+		try {
+			Files.delete(path);
+		} catch (IOException e) {
+			LOGGER.warn("could not delete trace file {}", path, e);
+			stageManager.makeExceptionAlert(e, "common.alerts.couldNotDeleteFile.content").show();
+		}
 	}
 }

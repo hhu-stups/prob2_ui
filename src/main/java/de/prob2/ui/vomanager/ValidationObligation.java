@@ -157,7 +157,7 @@ public final class ValidationObligation {
 	}
 
 	public void parse(final Machine machine) {
-		this.parse(machine.getValidationTasks());
+		this.parse(machine.getMachineProperties().getValidationTasks());
 	}
 
 	public ObjectProperty<Checked> checkedProperty() {

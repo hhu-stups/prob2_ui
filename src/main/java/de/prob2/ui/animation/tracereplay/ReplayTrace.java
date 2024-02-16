@@ -10,6 +10,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.io.MoreFiles;
 
@@ -21,6 +22,8 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.BooleanProperty;
@@ -31,8 +34,10 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ReplayTrace implements IExecutableItem, IValidationTask {
+public final class ReplayTrace implements IExecutableItem, IValidationTask {
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
+	@JsonIgnore
 	private final ObjectProperty<Checked> status;
 	@JsonIgnore
 	private final DoubleProperty progress;
@@ -82,6 +87,11 @@ public class ReplayTrace implements IExecutableItem, IValidationTask {
 		return this.id;
 	}
 
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.REPLAY_TRACE;
+	}
+
 	public ReplayTrace withId(final String id) {
 		return new ReplayTrace(id, this.location, this.absoluteLocation, this.traceManager);
 	}
@@ -105,8 +115,11 @@ public class ReplayTrace implements IExecutableItem, IValidationTask {
 		return this.loadedTrace;
 	}
 
+	@Override
 	public void reset() {
 		this.setChecked(Checked.NOT_CHECKED);
+		this.setProgress(-1);
+		this.loadedTrace.set(null);
 		this.setReplayedTrace(null);
 		this.setAnimatedReplayedTrace(null);
 	}
@@ -271,6 +284,6 @@ public class ReplayTrace implements IExecutableItem, IValidationTask {
 	
 	@Override
 	public void execute(final ExecutionContext context) {
-		TraceChecker.checkNoninteractive(this, context.getStateSpace());
+		TraceChecker.checkNoninteractive(this, context.stateSpace());
 	}
 }

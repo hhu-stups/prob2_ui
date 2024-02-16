@@ -9,6 +9,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.statespace.Trace;
@@ -20,6 +21,8 @@ import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
@@ -28,7 +31,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-public class SimulationItem implements IValidationTask {
+public final class SimulationItem implements IValidationTask {
 
 	public static class SimulationCheckingInformation {
 		private final Map<String, Object> information;
@@ -138,6 +141,7 @@ public class SimulationItem implements IValidationTask {
 		}
 	}
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 
 	private final SimulationType type;
@@ -189,6 +193,11 @@ public class SimulationItem implements IValidationTask {
 	@Override
 	public String getId() {
 		return this.id;
+	}
+
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.SIMULATION;
 	}
 
 	public void setChecked(Checked checked) {

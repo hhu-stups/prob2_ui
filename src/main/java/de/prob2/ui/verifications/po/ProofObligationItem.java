@@ -3,22 +3,30 @@ package de.prob2.ui.verifications.po;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class ProofObligationItem implements IValidationTask {
+public final class ProofObligationItem implements IValidationTask {
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String name;
 	private final String description;
 	private final ObjectProperty<Checked> checked;
 
-	public ProofObligationItem(final String id, final String name, final String description) {
+	@JsonCreator
+	public ProofObligationItem(@JsonProperty("id") final String id, @JsonProperty("name") final String name, @JsonProperty("description") final String description) {
 		this.id = id;
 		this.name = name;
 		this.description = description;
@@ -37,6 +45,11 @@ public class ProofObligationItem implements IValidationTask {
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public ValidationTaskType getTaskType() {
+		return BuiltinValidationTaskTypes.PROOF_OBLIGATION;
 	}
 
 	public ProofObligationItem withId(final String id) {

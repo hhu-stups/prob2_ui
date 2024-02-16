@@ -67,7 +67,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			this.contextMenu.getItems().add(this.editMenuItem);
 			
 			this.removeMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
-			this.removeMenuItem.setOnAction(e -> items.remove(this.getItem()));
+			this.removeMenuItem.setOnAction(e -> removeItem(this.getItem()));
 			this.contextMenu.getItems().add(removeMenuItem);
 			
 			this.itemProperty().addListener((o, from, to) -> {
@@ -150,7 +150,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			items.add(newItem);
 			return newItem;
 		} else {
-			return existingItem.get();
+			T t = existingItem.get();
+			t.reset();
+			return t;
 		}
 	}
 	
@@ -160,7 +162,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			items.set(items.indexOf(oldItem), newItem);
 			return newItem;
 		} else {
-			return existingItem.get();
+			T t = existingItem.get();
+			t.reset();
+			return t;
 		}
 	}
 	
@@ -229,5 +233,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			}
 			return toCheck;
 		});
+	}
+
+	protected void removeItem(T item) {
+		items.remove(item);
 	}
 }

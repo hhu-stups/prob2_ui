@@ -18,6 +18,7 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 
 class ProjectJsonContext extends JacksonManager.Context<Project> {
 	// From VOParser.scc:
@@ -839,6 +840,34 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		);
 	}
 
+	private static void updateV38Machine(final ObjectNode machine) {
+		checkArray(machine.get("temporalFormulas")).forEach(
+			node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.TEMPORAL.getKey())
+		);
+		checkArray(machine.get("symbolicCheckingFormulas")).forEach(
+			node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.SYMBOLIC.getKey())
+		);
+		checkArray(machine.get("traces")).forEach(
+			node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.REPLAY_TRACE.getKey())
+		);
+		checkArray(machine.get("modelcheckingItems")).forEach(
+			node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.MODEL_CHECKING.getKey())
+		);
+		// POs are saved via SavedProofObligationItem
+		checkArray(machine.get("simulations")).forEach(
+			modelNode -> checkArray(checkObject(modelNode).get("simulationItems"))
+				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.SIMULATION.getKey()))
+		);
+		checkObject(machine.get("dotVisualizationItems")).forEach(
+			listNode -> checkArray(listNode)
+				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.DYNAMIC_FORMULA.getKey()))
+		);
+		checkObject(machine.get("tableVisualizationItems")).forEach(
+			listNode -> checkArray(listNode)
+				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.DYNAMIC_FORMULA.getKey()))
+		);
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -976,6 +1005,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 37) {
 				updateV37Machine(machine);
+			}
+			if (oldVersion <= 38) {
+				updateV38Machine(machine);
 			}
 		});
 

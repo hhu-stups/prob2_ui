@@ -97,6 +97,6 @@ public class BInterpreter implements Executable {
 	}
 
 	public Collection<? extends BCCItem> getSuggestions(String text) {
-		return BCodeCompletion.doCompletion(this.currentTrace.getStateSpace(), text);
+		return BCodeCompletion.doCompletion(this.currentTrace.getStateSpace(), text, false);
 	}
 }

@@ -1,6 +1,7 @@
 package de.prob2.ui.rulevalidation.ui;
 
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
+import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.model.brules.RuleResult;
 import javafx.geometry.Pos;
 import javafx.scene.control.TreeTableCell;
@@ -25,6 +26,8 @@ public class NameCell extends TreeTableCell<Object, Object>{
 			setText(null);
 		else if (item instanceof String)
 			setText((String)item);
+		else if (item instanceof RuleOperation && ((RuleOperation) item).getRuleIdString() != null)
+			setText(((RuleOperation)item).getName() + " [" + ((RuleOperation)item).getRuleIdString() + "]");
 		else if (item instanceof AbstractOperation)
 			setText(((AbstractOperation)item).getName());
 		else if (item instanceof RuleResult.CounterExample)

@@ -68,7 +68,7 @@ public class ProofObligationView extends AnchorPane {
 
 		currentTrace.modelProperty().addListener((observable, from, to) -> {
 			if (to != null) {
-				currentProject.getCurrentMachine().updateAllProofObligationsFromModel(to);
+				currentProject.getCurrentMachine().getMachineProperties().updateAllProofObligationsFromModel(to);
 			}
 		});
 
@@ -86,7 +86,7 @@ public class ProofObligationView extends AnchorPane {
 				res.ifPresent(idText -> {
 					final String id = idText.trim().isEmpty() ? null : idText;
 					Machine machine = currentProject.getCurrentMachine();
-					machine.getAllProofObligationItems().set(machine.getAllProofObligationItems().indexOf(item), item.withId(id));
+					machine.getMachineProperties().getAllProofObligationItems().set(machine.getMachineProperties().getAllProofObligationItems().indexOf(item), item.withId(id));
 				});
 			});
 
@@ -108,7 +108,7 @@ public class ProofObligationView extends AnchorPane {
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvProofObligations.itemsProperty().unbind();
 			if(to != null) {
-				tvProofObligations.itemsProperty().bind(to.allProofObligationItemsProperty());
+				tvProofObligations.itemsProperty().bind(to.getMachineProperties().allProofObligationItemsProperty());
 			} else {
 				tvProofObligations.setItems(FXCollections.emptyObservableList());
 			}

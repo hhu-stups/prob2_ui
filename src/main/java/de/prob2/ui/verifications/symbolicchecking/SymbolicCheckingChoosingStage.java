@@ -91,15 +91,15 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 			case FIND_REDUNDANT_INVARIANTS:
 				break;
 			
-			case INVARIANT:
+			case SYMBOLIC_INVARIANT:
 				formulaInput.getChildren().add(0, cbOperations);
 				break;
 			
-			case DEADLOCK:
+			case SYMBOLIC_DEADLOCK:
 				formulaInput.getChildren().add(0, predicateBuilderView);
 				break;
 			
-			case SYMBOLIC_MODEL_CHECK:
+			case SYMBOLIC_MODEL_CHECKING:
 				formulaInput.getChildren().add(0, symbolicModelCheckAlgorithmChoiceBox);
 				break;
 			
@@ -118,17 +118,17 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 			case FIND_REDUNDANT_INVARIANTS:
 				return "";
 			
-			case INVARIANT:
+			case SYMBOLIC_INVARIANT:
 				if (this.checkAllOperations.equals(cbOperations.getSelectionModel().getSelectedItem())) {
 					return "";
 				} else {
 					return cbOperations.getSelectionModel().getSelectedItem();
 				}
 			
-			case DEADLOCK:
+			case SYMBOLIC_DEADLOCK:
 				return predicateBuilderView.getPredicate();
 			
-			case SYMBOLIC_MODEL_CHECK:
+			case SYMBOLIC_MODEL_CHECKING:
 				return symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().getSelectedItem().name();
 			
 			default:
@@ -146,7 +146,7 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 			case FIND_REDUNDANT_INVARIANTS:
 				break;
 			
-			case INVARIANT:
+			case SYMBOLIC_INVARIANT:
 				if (item.getCode().isEmpty()) {
 					cbOperations.getSelectionModel().select(this.checkAllOperations);
 				} else {
@@ -154,11 +154,11 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 				}
 				break;
 			
-			case DEADLOCK:
+			case SYMBOLIC_DEADLOCK:
 				predicateBuilderView.setFromPredicate(item.getCode());
 				break;
 			
-			case SYMBOLIC_MODEL_CHECK:
+			case SYMBOLIC_MODEL_CHECKING:
 				symbolicModelCheckAlgorithmChoiceBox.getSelectionModel().select(SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode()));
 				break;
 			
