@@ -151,10 +151,12 @@ public final class MachineProperties {
 		return trace.statusProperty();
 	}
 
+	@JsonIgnore
 	public MachineCheckingStatus getTraceReplayStatus() {
 		return traceReplayStatusProperty().get();
 	}
 
+	@JsonIgnore
 	public void setTraceReplayStatus(final MachineCheckingStatus status) {
 		this.traceReplayStatusProperty().set(status);
 	}
@@ -163,10 +165,12 @@ public final class MachineProperties {
 		return this.temporal.statusProperty();
 	}
 
+	@JsonIgnore
 	public MachineCheckingStatus getTemporalStatus() {
 		return this.temporalStatusProperty().get();
 	}
 
+	@JsonIgnore
 	public void setTemporalStatus(final MachineCheckingStatus status) {
 		this.temporalStatusProperty().set(status);
 	}
@@ -175,10 +179,12 @@ public final class MachineProperties {
 		return this.symbolic.statusProperty();
 	}
 
+	@JsonIgnore
 	public MachineCheckingStatus getSymbolicCheckingStatus() {
 		return this.symbolicCheckingStatusProperty().get();
 	}
 
+	@JsonIgnore
 	public void setSymbolicCheckingStatus(final MachineCheckingStatus status) {
 		this.symbolicCheckingStatusProperty().set(status);
 	}
@@ -187,10 +193,12 @@ public final class MachineProperties {
 		return this.modelchecking.statusProperty();
 	}
 
+	@JsonIgnore
 	public MachineCheckingStatus getModelcheckingStatus() {
 		return this.modelcheckingStatusProperty().get();
 	}
 
+	@JsonIgnore
 	public void setModelcheckingStatus(final MachineCheckingStatus status) {
 		this.modelcheckingStatusProperty().set(status);
 	}
