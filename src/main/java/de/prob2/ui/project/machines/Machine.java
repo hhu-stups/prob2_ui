@@ -46,19 +46,21 @@ public final class Machine {
 	@JsonIgnore
 	private final BooleanProperty changed = new SimpleBooleanProperty(false);
 
-	// When deserializing from JSON,
-	// all fields that are not listed as constructor parameters
-	// are instead filled in using setters after the Machine object is constructed.
+	public Machine(final String name, final String description, final Path location) {
+		this(name, description, location, null);
+	}
+
 	@JsonCreator
 	public Machine(
 		@JsonProperty("name") final String name,
 		@JsonProperty("description") final String description,
-		@JsonProperty("location") final Path location
+		@JsonProperty("location") final Path location,
+		@JsonProperty("lastUsedPreferenceName") final String lastUsedPreferenceName
 	) {
 		this.name = new SimpleStringProperty(this, "name", name);
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = Objects.requireNonNull(location, "location");
-		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", Preference.DEFAULT.getName());
+		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", lastUsedPreferenceName != null && !lastUsedPreferenceName.isEmpty() ? lastUsedPreferenceName : Preference.DEFAULT.getName());
 		this.cachedEditorState = new CachedEditorState();
 
 		this.machineProperties = new MachineProperties();
@@ -132,6 +134,7 @@ public final class Machine {
 		return this.location;
 	}
 
+	@JsonIgnore
 	public CachedEditorState getCachedEditorState() {
 		return cachedEditorState;
 	}
@@ -140,10 +143,12 @@ public final class Machine {
 		return changed;
 	}
 
+	@JsonIgnore
 	public boolean isChanged() {
 		return this.changedProperty().get();
 	}
 
+	@JsonIgnore
 	public void setChanged(final boolean changed) {
 		this.changedProperty().set(changed);
 	}
