@@ -10,6 +10,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 import de.prob.json.HasMetadata;
 import de.prob.json.JsonMetadata;
@@ -163,5 +164,13 @@ public class Project implements HasMetadata {
 	@Override
 	public int hashCode() {
 		 return Objects.hash(name, description, machines, requirements, preferences, metadata, location);
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			       .add("name", this.getName())
+			       .add("location", this.getLocation())
+			       .toString();
 	}
 }

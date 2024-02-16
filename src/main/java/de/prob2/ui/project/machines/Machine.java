@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.google.common.base.MoreObjects;
 import com.google.common.io.MoreFiles;
 
 import de.prob.scripting.FactoryProvider;
@@ -179,6 +180,9 @@ public final class Machine {
 
 	@Override
 	public String toString() {
-		return Objects.toString(this.getName());
+		return MoreObjects.toStringHelper(this)
+			       .add("name", this.getName())
+			       .add("location", this.getLocation())
+			       .toString();
 	}
 }
