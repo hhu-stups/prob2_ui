@@ -61,9 +61,16 @@ public final class Machine {
 		this.description = new SimpleStringProperty(this, "description", description);
 		this.location = Objects.requireNonNull(location, "location");
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", lastUsedPreferenceName != null && !lastUsedPreferenceName.isEmpty() ? lastUsedPreferenceName : Preference.DEFAULT.getName());
-		this.cachedEditorState = new CachedEditorState();
-
+		// combining @JsonCreator and @JsonUnwrapped is not supported (yet)
+		// let's hope that Jackson uses getters/setters for that property
+		// https://github.com/FasterXML/jackson-databind/issues/1467
+		// https://github.com/FasterXML/jackson-databind/issues/1497
+		// https://github.com/FasterXML/jackson-databind/issues/3726
+		// https://github.com/FasterXML/jackson-databind/issues/3754
+		// https://github.com/FasterXML/jackson-databind/pull/4271
 		this.machineProperties = new MachineProperties();
+
+		this.cachedEditorState = new CachedEditorState();
 
 		this.initListeners();
 	}
@@ -102,8 +109,9 @@ public final class Machine {
 		this.lastUsedPreferenceNameProperty().set(lastUsedPreferenceName);
 	}
 
+	@JsonUnwrapped
 	public MachineProperties getMachineProperties() {
-		return machineProperties;
+		return this.machineProperties;
 	}
 
 	public StringProperty nameProperty() {
