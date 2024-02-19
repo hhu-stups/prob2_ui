@@ -58,7 +58,6 @@ public class RulesController {
 					LOGGER.debug("No rules model in new trace!");
 					rulesView.clear();
 					model.clear();
-					//plugin.restoreOperationsView(true);
 				} else if (oldTrace == null || !newTrace.getModel().equals(oldTrace.getModel())) {
 					// the model changed -> rebuild view
 					LOGGER.debug("New rules model in new trace!");
@@ -67,7 +66,6 @@ public class RulesController {
 					rulesChecker.init();
 					initialize(rulesModel);
 					model.update(rulesChecker.getCurrentTrace());
-					//plugin.removeOperationsView();
 				} else {
 					// model didn't change -> update view
 					LOGGER.debug("Update rules view to new trace!");
