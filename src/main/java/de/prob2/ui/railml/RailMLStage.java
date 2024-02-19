@@ -79,11 +79,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	private ChoiceBox<ImportArguments.VisualisationStrategy> visualisationStrategyChoiceBox;
 	private ImportArguments.ImportArgumentsBuilder importArguments = new ImportArguments.ImportArgumentsBuilder(null);
-	private final SimpleStringProperty validationFileName = new SimpleStringProperty("");
-	private final SimpleStringProperty svgFileName = new SimpleStringProperty("");
 	private String modelName = null;
-
-	private StateSpace stateSpace;
 
 	private final StageManager stageManager;
 
@@ -92,22 +88,21 @@ public class RailMLStage extends Stage {
 	private final Injector injector;
 
 	private final I18n i18n;
-	private final ErrorDisplayFilter errorDisplayFilter;
 
 	private final FileChooserManager fileChooserManager;
 	private final BackgroundUpdater updater;
+	private RailML2B railML2B;
+	private UIProgressListener listener;
 
 	@Inject
 	public RailMLStage(final StageManager stageManager, final CurrentProject currentProject,
-	                   final Injector injector, final I18n i18n, final ErrorDisplayFilter errorDisplayFilter,
-	                   final FileChooserManager fileChooserManager,
+	                   final Injector injector, final I18n i18n, final FileChooserManager fileChooserManager,
 	                   final StopActions stopActions) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.injector = injector;
 		this.i18n = i18n;
-		this.errorDisplayFilter = errorDisplayFilter;
 		this.fileChooserManager = fileChooserManager;
 		this.updater = new BackgroundUpdater("railml2b");
 		stopActions.add(this::cancel);
@@ -147,9 +142,9 @@ public class RailMLStage extends Stage {
 		});
 		validationMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
-				generateFileList.add(validationFileName.getValue());
+				generateFileList.add(modelName + VALIDATION_MCH);
 			} else {
-				generateFileList.remove(validationFileName.getValue());
+				generateFileList.remove(modelName + VALIDATION_MCH);
 			}
 		});
 		animationMachineCheckbox.selectedProperty().or(validationMachineCheckbox.selectedProperty()).addListener((observable, oldValue, newValue) -> {
@@ -162,9 +157,9 @@ public class RailMLStage extends Stage {
 		visualisationStrategyChoiceBox.setValue(ImportArguments.VisualisationStrategy.DOT);
 		visualisationCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
-				generateFileList.add(svgFileName.getValue());
+				generateFileList.add(modelName + ".svg");
 			} else {
-				generateFileList.remove(svgFileName.getValue());
+				generateFileList.remove(modelName + ".svg");
 			}
 		});
 
@@ -221,8 +216,8 @@ public class RailMLStage extends Stage {
 
 		updater.execute(() -> {
 			try {
-				RailML2B railML2B = injector.getInstance(RailML2BFactory.class).createWithArguments(args);
-				UIProgressListener listener = new UIProgressListener(progressBar, progressOperation, progressLabel, progressDescription,
+				railML2B = injector.getInstance(RailML2BFactory.class).createWithArguments(args);
+				listener = new UIProgressListener(progressBar, progressOperation, progressLabel, progressDescription,
 					railML2B.getMachineLoader().getNumberOfOperations());
 				railML2B.loadAndValidate(listener);
 
@@ -240,10 +235,10 @@ public class RailMLStage extends Stage {
 								throw new RuntimeException(e);
 							}
 							if (args.generateAnimationMachine() || args.generateValidationMachine()) {
-								railMLInspectDotStage.setOnHidden(event -> createMachinesAndProject(railML2B, listener));
+								railMLInspectDotStage.setOnHidden(event -> createMachinesAndProject());
 							}
 						} else {
-							createMachinesAndProject(railML2B, listener);
+							createMachinesAndProject();
 							this.close();
 						}
 					});
@@ -271,7 +266,7 @@ public class RailMLStage extends Stage {
 		progressOperation.setText("");
 	}
 
-	private void createMachinesAndProject(RailML2B railML2B, UIProgressListener listener) {
+	private void createMachinesAndProject() {
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if (replacingProject) {
 			try {
@@ -289,9 +284,9 @@ public class RailMLStage extends Stage {
 						"Data machine generated from " + fileName, outputPath.relativize(outputPath.resolve(modelName + DATA_MCH))));
 				}
 				if (args.generateValidationMachine()) {
-					currentProject.addMachine(new Machine(validationFileName.getValue(),
+					currentProject.addMachine(new Machine(modelName + VALIDATION_MCH,
 						"Validation machine generated from " + args.file().getFileName(),
-						args.output().relativize(args.output().resolve(validationFileName.getValue()))));
+						args.output().relativize(args.output().resolve(modelName + VALIDATION_MCH))));
 				}
 				if (args.generateAnimationMachine()) {
 					final Machine animationMachine = new Machine(modelName + ANIMATION_MCH,
@@ -314,7 +309,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	public void cancel() {
 		updater.cancel(true);
-		if (stateSpace != null) stateSpace.kill();
+		if (railML2B != null) railML2B.finish();
 		this.close();
 	}
 }
