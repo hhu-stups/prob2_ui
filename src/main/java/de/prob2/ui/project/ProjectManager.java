@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.inject.Injector;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import de.prob2.ui.railml.RailMLImportMeta;
 import de.prob2.ui.railml.RailMLInspectDotStage;
 import de.prob2.ui.railml.RailMLStage;
 import de.prob2.ui.simulation.SimulatorStage;
@@ -373,6 +372,7 @@ public class ProjectManager {
 		if (railMLInspectDotStage.isShowing()) {
 			railMLInspectDotStage.toFront();
 		} else {
+			railMLStage.initializeForPath(selected);
 			railMLStage.show();
 			railMLStage.toFront();
 		}

@@ -14,6 +14,7 @@ import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
+import de.hhu.stups.railml2b.internal.RailMLModule;
 import de.jangassen.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
@@ -119,6 +120,7 @@ public class ProB2Module extends AbstractModule {
 	protected void configure() {
 		install(new MainModule());
 		install(new DataPathsModule());
+		install(new RailMLModule());
 
 		bind(Application.class).toInstance(this.application);
 		bind(ProB2.class).toInstance(this.application);

@@ -131,6 +131,11 @@ dependencies {
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.3'
 
+	// railML temporary solution until certification:
+	implementation files('railml2b-0.1.0-SNAPSHOT.jar')
+	implementation group: "com.google.inject.extensions", name: "guice-assistedinject", version: "7.0.0"
+	// end railML
+
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava'
 
 	testImplementation platform('org.junit:junit-bom:5.10.1')

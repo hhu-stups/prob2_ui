@@ -3,6 +3,8 @@ package de.prob2.ui.railml;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.hhu.stups.railml2b.load.ImportArguments;
+import de.hhu.stups.railml2b.utils.SvgConverter;
 import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
@@ -37,9 +39,9 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static de.hhu.stups.railml2b.utils.FileUtils.replaceOldFile;
 import static de.prob.animator.domainobjects.DotVisualizationCommand.EXPRESSION_AS_GRAPH_NAME;
 import static de.prob.animator.domainobjects.DotVisualizationCommand.getByName;
-import static de.prob2.ui.railml.RailMLHelper.replaceOldFile;
 
 @FXMLInjected
 @Singleton
@@ -119,7 +121,8 @@ public class RailMLInspectDotStage extends Stage {
 	private final FileChooserManager fileChooserManager;
 	private final BackgroundUpdater updater;
 	private final I18n i18n;
-	private final RailMLImportMeta railMLImportMeta;
+	private ImportArguments importArguments;
+	private State state;
 
 	private double scalingFactor;
 	private String dot;
@@ -138,13 +141,14 @@ public class RailMLInspectDotStage extends Stage {
 
 	@Inject
 	public RailMLInspectDotStage(final StageManager stageManager, final I18n i18n, final FileChooserManager fileChooserManager,
-	                             final StopActions stopActions, final RailMLImportMeta railMLImportMeta) {
+	                             final StopActions stopActions) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.updater = new BackgroundUpdater("railml dot view updater");
 		stopActions.add(this.updater::shutdownNow);
 		this.i18n = i18n;
-		this.railMLImportMeta = railMLImportMeta;
+		this.importArguments = new ImportArguments.ImportArgumentsBuilder().build();
+		this.state = null;
 
 		this.scalingFactor = 0.1;
 		this.dot = null;
@@ -173,9 +177,9 @@ public class RailMLInspectDotStage extends Stage {
 		// TODO: Maybe use ProB preference for dot engine later
 
 		incScalingButton.pressedProperty()
-			.addListener((o,f,t) -> scalingFactor += railMLImportMeta.getVisualisationStrategy() == RailMLImportMeta.VisualisationStrategy.D4R ? 0.001 : 0.1);
+			.addListener((o,f,t) -> scalingFactor += importArguments.visualisationStrategy() == ImportArguments.VisualisationStrategy.D4R ? 0.001 : 0.1);
 		decScalingButton.pressedProperty()
-			.addListener((o,f,t) -> scalingFactor -= railMLImportMeta.getVisualisationStrategy() == RailMLImportMeta.VisualisationStrategy.D4R ? 0.001 : 0.1);
+			.addListener((o,f,t) -> scalingFactor -= importArguments.visualisationStrategy() == ImportArguments.VisualisationStrategy.D4R ? 0.001 : 0.1);
 
 		dotView.visibleProperty().bind(this.updater.runningProperty().not());
 		placeholderLabel.visibleProperty().bind(this.updater.runningProperty());
@@ -189,8 +193,14 @@ public class RailMLInspectDotStage extends Stage {
 		});
 	}
 
-	protected void initializeOptionsForStrategy(RailMLImportMeta.VisualisationStrategy strategy) {
-		boolean isDotCustomGraph = strategy == RailMLImportMeta.VisualisationStrategy.DOT;
+	protected void initializeForArguments(final ImportArguments arguments, final State state) {
+		initializeOptionsForStrategy(arguments.visualisationStrategy());
+		this.importArguments = arguments;
+		this.state = state;
+	}
+
+	private void initializeOptionsForStrategy(ImportArguments.VisualisationStrategy strategy) {
+		boolean isDotCustomGraph = strategy == ImportArguments.VisualisationStrategy.DOT;
 
 		balises.setVisible(!isDotCustomGraph); balises.setManaged(!isDotCustomGraph);
 		borders.setDisable(isDotCustomGraph);
@@ -209,7 +219,7 @@ public class RailMLInspectDotStage extends Stage {
 		curvedsplines.setVisible(isDotCustomGraph); curvedsplines.setManaged(isDotCustomGraph);
 
 		initializeOptions();
-		scalingFactor = railMLImportMeta.getVisualisationStrategy() == RailMLImportMeta.VisualisationStrategy.D4R ? 0.004 : 0.1;
+		scalingFactor = importArguments.visualisationStrategy() == ImportArguments.VisualisationStrategy.D4R ? 0.004 : 0.1;
 	}
 
 	private void initializeOptions() {
@@ -231,8 +241,8 @@ public class RailMLInspectDotStage extends Stage {
 	}
 
 	protected void visualizeCustomGraph() throws InterruptedException {
-		List<IEvalElement> customGraphFormula = Collections.singletonList(railMLImportMeta.getState().getStateSpace().getModel()
-			.parseFormula(railMLImportMeta.getVisualisationStrategy().getCustomGraphDefinition() + this.getArgumentsForGraphDefinition(), FormulaExpand.EXPAND));
+		List<IEvalElement> customGraphFormula = Collections.singletonList(state.getStateSpace().getModel()
+			.parseFormula(importArguments.visualisationStrategy().getCustomGraphDefinition() + this.getArgumentsForGraphDefinition(), FormulaExpand.EXPAND));
 		this.visualizeCustomGraph(customGraphFormula);
 	}
 
@@ -240,7 +250,7 @@ public class RailMLInspectDotStage extends Stage {
 	 * Same method as in DotView.java, but only for "custom_graph".
 	 */
 	private void visualizeCustomGraph(final List<IEvalElement> formulas) throws InterruptedException {
-		DotVisualizationCommand customGraphItem = getByName(EXPRESSION_AS_GRAPH_NAME, railMLImportMeta.getState());
+		DotVisualizationCommand customGraphItem = getByName(EXPRESSION_AS_GRAPH_NAME, state);
 		final String dotLocal = customGraphItem.getState().getStateSpace().getCurrentPreference("DOT");
 		final String dotEngineLocal = customGraphItem.getPreferredDotLayoutEngine()
 				.orElseGet(() -> customGraphItem.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
@@ -338,12 +348,12 @@ public class RailMLInspectDotStage extends Stage {
 		saveConverted(DotOutputFormat.SVG, tempSvgFile);
 
 		try {
-			RailMLSvgConverter.convertSvgForVisB(tempSvgFile.toString(), railMLImportMeta.getVisualisationStrategy());
+			SvgConverter.convertSvgForVisB(tempSvgFile.toString(), importArguments.visualisationStrategy());
 		} catch (Exception e) {
 			throw new ProBError("Failed to convert railML SVG file", e);
 		}
 
-		final Path finalSvg = railMLImportMeta.getPath().resolve(railMLImportMeta.getName() + ".svg").toAbsolutePath();
+		final Path finalSvg = importArguments.output().resolve(importArguments.modelName() + ".svg").toAbsolutePath();
 		try {
 			replaceOldFile(finalSvg);
 			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING);
@@ -392,7 +402,6 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	private void interrupt() {
-		State state = railMLImportMeta.getState();
 		if (state != null && state.getStateSpace() != null)
 			state.getStateSpace().sendInterrupt();
 	}
