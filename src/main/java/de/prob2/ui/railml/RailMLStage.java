@@ -5,13 +5,14 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.hhu.stups.railml2b.RailML2B;
-import de.hhu.stups.railml2b.internal.RailML2BFactory;
 import de.hhu.stups.railml2b.load.ImportArguments;
 import de.hhu.stups.railml2b.load.ImportArguments.ImportArgumentsBuilder;
 import de.prob.exception.ProBError;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.*;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
@@ -19,7 +20,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.model.SimulationModel;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -78,7 +78,7 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	private ChoiceBox<ImportArguments.VisualisationStrategy> visualisationStrategyChoiceBox;
-	private ImportArguments.ImportArgumentsBuilder importArguments = new ImportArguments.ImportArgumentsBuilder(null);
+	private final ImportArgumentsBuilder importArguments;
 	private String modelName = null;
 
 	private final StageManager stageManager;
@@ -102,6 +102,7 @@ public class RailMLStage extends Stage {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.injector = injector;
+		this.importArguments = injector.getInstance(ImportArgumentsBuilder.class);
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.updater = new BackgroundUpdater("railml2b");
@@ -123,8 +124,7 @@ public class RailMLStage extends Stage {
 		fileLocationTooltip.textProperty().bind(fileLocationField.textProperty());
 		locationField.setText("");
 		locationTooltip.textProperty().bind(locationField.textProperty());
-		visualisationStrategyField.visibleProperty()
-			.bind(visualisationCheckbox.selectedProperty());
+		visualisationStrategyField.visibleProperty().bind(visualisationCheckbox.selectedProperty());
 		visualisationStrategyChoiceBox.getItems().addAll(ImportArguments.VisualisationStrategy.values());
 		visualisationStrategyChoiceBox.visibleProperty().bind(visualisationCheckbox.selectedProperty());
 
@@ -188,7 +188,7 @@ public class RailMLStage extends Stage {
 			visualisationCheckbox.setSelected(false);
 			Path outputPath = path.getParent().toAbsolutePath();
 			modelName = MoreFiles.getNameWithoutExtension(path);
-			importArguments = new ImportArgumentsBuilder(path).output(outputPath).modelName(modelName);
+			importArguments.file(path).output(outputPath).modelName(modelName);
 			fileLocationField.setText(path.toAbsolutePath().toString());
 			locationField.setText(outputPath.toString());
 		}
@@ -216,9 +216,9 @@ public class RailMLStage extends Stage {
 
 		updater.execute(() -> {
 			try {
-				railML2B = injector.getInstance(RailML2BFactory.class).createWithArguments(args);
+				railML2B = injector.getInstance(RailML2B.class);
 				listener = new UIProgressListener(progressBar, progressOperation, progressLabel, progressDescription,
-					railML2B.getMachineLoader().getNumberOfOperations());
+					railML2B.machineLoader().getNumberOfOperations());
 				railML2B.loadAndValidate(listener);
 
 				if (!Thread.currentThread().isInterrupted()) {
@@ -226,7 +226,7 @@ public class RailMLStage extends Stage {
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (args.generateVisualisation()) {
 							this.close();
-							railMLInspectDotStage.initializeForArguments(args, railML2B.getMachineLoader().getCurrentTrace().getCurrentState());
+							railMLInspectDotStage.initializeForArguments(args, railML2B.machineLoader().getCurrentTrace().getCurrentState());
 							railMLInspectDotStage.show();
 							railMLInspectDotStage.toFront();
 							try {

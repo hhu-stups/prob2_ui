@@ -133,7 +133,6 @@ dependencies {
 
 	// railML temporary solution until certification:
 	implementation files('railml2b-0.1.0-SNAPSHOT.jar')
-	implementation group: "com.google.inject.extensions", name: "guice-assistedinject", version: "7.0.0"
 	// end railML
 
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava'
