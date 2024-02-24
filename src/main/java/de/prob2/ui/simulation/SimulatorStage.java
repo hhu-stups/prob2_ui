@@ -5,6 +5,7 @@ import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
+import java.security.spec.EdDSAParameterSpec;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,6 +49,9 @@ import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+import de.prob2.ui.simulation.diagram.DiagramEdge;
+import de.prob2.ui.simulation.diagram.DiagramNode;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.simulation.model.SimulationModel;
@@ -695,11 +699,12 @@ public class SimulatorStage extends Stage {
 		//Getting Activation data
 		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		List<ActivationConfiguration> activations = config.getActivationConfigurations();
-		List<String> ids = new ArrayList<String>();
-		Map<String, List<String>> activating = new HashMap<String, List<String>>();
+		List<UIListenerConfiguration> listeners = config.getUiListenerConfigurations();
+		List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
+		List<DiagramEdge> activating = new ArrayList<DiagramEdge>();
 		ActivationChoiceConfiguration choiceConfig; 
 		ActivationOperationConfiguration opConfig;
-
+		DiagramEdge edge = new DiagramEdge("", null, null, ""); 
 		
 
 		//Initialisation of Velocity engine
@@ -713,17 +718,41 @@ public class SimulatorStage extends Stage {
 		
 		//Getting Nodes
 			for (ActivationConfiguration activation : activations) {
-			ids.add(activation.getId());
 			if (activation.getClass().equals(ActivationChoiceConfiguration.class)) {
 				choiceConfig = (ActivationChoiceConfiguration)activation;
-				activating.put(choiceConfig.getId(), choiceConfig.getActivations().keySet().stream().toList());
+				diaNode.add(new DiagramNode(activation.getId(),"red",activation.getId(), "diamond"));
+				edge = new DiagramEdge(choiceConfig.getId(), choiceConfig.getActivations().keySet().stream().toList(), choiceConfig.getActivations().values().stream().toList(), "dotted");
+				activating.add(edge);
 			}
 			else{
 				opConfig = (ActivationOperationConfiguration)activation;
-				activating.put(opConfig.getId(),opConfig.getActivating());
+				
+				diaNode.add(new DiagramNode(opConfig.getOpName()+"_event","white",opConfig.getOpName(), "ellipse"));
+				if(!activation.getId().equals("$initialise_machine")){
+					diaNode.add(new DiagramNode(activation.getId(),"yellow",activation.getId(),"diamond"));
+				}
+				if(!activation.getId().equals("$initialise_machine")){
+				edge = new DiagramEdge(opConfig.getId(), List.of(opConfig.getOpName()+"_event"), List.of(opConfig.getAfter()), "");
+				activating.add(edge);
+				}
+				edge = new DiagramEdge(opConfig.getOpName()+"_event", opConfig.getActivating(), List.of("activating"), "");
+				boolean isPresent = false;
+				for (DiagramEdge compareEdge : activating) {
+					if (compareEdge.getFrom().equals(edge.getFrom())) {
+						isPresent =true;
+					}
+				}
+				if (!isPresent) {
+					activating.add(edge);
+				}
 			}
 		}
-		nodeContext.put("ids", ids);
+
+
+
+
+
+		nodeContext.put("nodes", diaNode);
 		nodeContext.put("activations", activating);
 		
 		
