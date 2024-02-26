@@ -76,6 +76,9 @@ public class RailMLInspectDotStage extends Stage {
 	private MenuItem zoomInMenuButton;
 	@FXML
 	private MenuItem zoomOutMenuButton;
+
+	@FXML
+	private ChoiceBox<ImportArguments.VisualisationStrategy> visualisationStrategyChoiceBox;
 	@FXML
 	private CheckBox balises;
 	@FXML
@@ -121,7 +124,9 @@ public class RailMLInspectDotStage extends Stage {
 	private final FileChooserManager fileChooserManager;
 	private final BackgroundUpdater updater;
 	private final I18n i18n;
-	private ImportArguments importArguments;
+	private String modelName = null;
+	private Path output;
+	private ImportArguments.VisualisationStrategy visualisationStrategy = null;
 	private State state;
 
 	private double scalingFactor;
@@ -147,7 +152,6 @@ public class RailMLInspectDotStage extends Stage {
 		this.updater = new BackgroundUpdater("railml dot view updater");
 		stopActions.add(this.updater::shutdownNow);
 		this.i18n = i18n;
-		this.importArguments = new ImportArguments.ImportArgumentsBuilder().build();
 		this.state = null;
 
 		this.scalingFactor = 0.1;
@@ -171,15 +175,20 @@ public class RailMLInspectDotStage extends Stage {
 		zoomInMenuButton.setAccelerator(new MultiKeyCombination(zoomInChar, zoomInCode, zoomInKeypad));
 		zoomOutMenuButton.setAccelerator(new MultiKeyCombination(zoomOutChar, zoomOutCode, zoomOutKeypad));
 
+		visualisationStrategyChoiceBox.getItems().addAll(ImportArguments.VisualisationStrategy.values());
+		visualisationStrategyChoiceBox.valueProperty().addListener(((obs,o,n) -> {
+			initializeOptionsForStrategy(n);
+			visualisationStrategy = n;
+		}));
 		initializeOptions();
 		languageChoiceBox.getItems().addAll(RailMLInspectDotStage.Language.values());
 		dotEngineChoiceBox.getItems().addAll(RailMLInspectDotStage.DotEngine.values());
 		// TODO: Maybe use ProB preference for dot engine later
 
 		incScalingButton.pressedProperty()
-			.addListener((o,f,t) -> scalingFactor += importArguments.visualisationStrategy() == ImportArguments.VisualisationStrategy.D4R ? 0.001 : 0.1);
+			.addListener((o,f,t) -> scalingFactor += visualisationStrategy.equals(ImportArguments.VisualisationStrategy.D4R) ? 0.001 : 0.1);
 		decScalingButton.pressedProperty()
-			.addListener((o,f,t) -> scalingFactor -= importArguments.visualisationStrategy() == ImportArguments.VisualisationStrategy.D4R ? 0.001 : 0.1);
+			.addListener((o,f,t) -> scalingFactor -= visualisationStrategy.equals(ImportArguments.VisualisationStrategy.D4R) ? 0.001 : 0.1);
 
 		dotView.visibleProperty().bind(this.updater.runningProperty().not());
 		placeholderLabel.visibleProperty().bind(this.updater.runningProperty());
@@ -194,13 +203,17 @@ public class RailMLInspectDotStage extends Stage {
 	}
 
 	protected void initializeForArguments(final ImportArguments arguments, final State state) {
-		initializeOptionsForStrategy(arguments.visualisationStrategy());
-		this.importArguments = arguments;
+		this.modelName = arguments.modelName();
+		this.output = arguments.output();
+		this.visualisationStrategy = arguments.visualisationStrategy();
 		this.state = state;
+		initializeOptionsForStrategy(visualisationStrategy);
 	}
 
 	private void initializeOptionsForStrategy(ImportArguments.VisualisationStrategy strategy) {
-		boolean isDotCustomGraph = strategy == ImportArguments.VisualisationStrategy.DOT;
+		boolean isDotCustomGraph = strategy.equals(ImportArguments.VisualisationStrategy.DOT);
+
+		visualisationStrategyChoiceBox.setValue(strategy);
 
 		balises.setVisible(!isDotCustomGraph); balises.setManaged(!isDotCustomGraph);
 		borders.setDisable(isDotCustomGraph);
@@ -219,7 +232,7 @@ public class RailMLInspectDotStage extends Stage {
 		curvedsplines.setVisible(isDotCustomGraph); curvedsplines.setManaged(isDotCustomGraph);
 
 		initializeOptions();
-		scalingFactor = importArguments.visualisationStrategy() == ImportArguments.VisualisationStrategy.D4R ? 0.004 : 0.1;
+		scalingFactor = visualisationStrategy.equals(ImportArguments.VisualisationStrategy.D4R) ? 0.004 : 0.1;
 	}
 
 	private void initializeOptions() {
@@ -242,7 +255,7 @@ public class RailMLInspectDotStage extends Stage {
 
 	protected void visualizeCustomGraph() throws InterruptedException {
 		List<IEvalElement> customGraphFormula = Collections.singletonList(state.getStateSpace().getModel()
-			.parseFormula(importArguments.visualisationStrategy().getCustomGraphDefinition() + this.getArgumentsForGraphDefinition(), FormulaExpand.EXPAND));
+			.parseFormula(visualisationStrategy.getCustomGraphDefinition() + this.getArgumentsForGraphDefinition(), FormulaExpand.EXPAND));
 		this.visualizeCustomGraph(customGraphFormula);
 	}
 
@@ -348,12 +361,12 @@ public class RailMLInspectDotStage extends Stage {
 		saveConverted(DotOutputFormat.SVG, tempSvgFile);
 
 		try {
-			SvgConverter.convertSvgForVisB(tempSvgFile.toString(), importArguments.visualisationStrategy());
+			SvgConverter.convertSvgForVisB(tempSvgFile.toString(), visualisationStrategy);
 		} catch (Exception e) {
 			throw new ProBError("Failed to convert railML SVG file", e);
 		}
 
-		final Path finalSvg = importArguments.output().resolve(importArguments.modelName() + ".svg").toAbsolutePath();
+		final Path finalSvg = output.resolve(modelName + ".svg").toAbsolutePath();
 		try {
 			replaceOldFile(finalSvg);
 			Files.copy(tempSvgFile, finalSvg, StandardCopyOption.REPLACE_EXISTING);

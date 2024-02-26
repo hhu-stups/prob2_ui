@@ -79,6 +79,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	private ChoiceBox<ImportArguments.VisualisationStrategy> visualisationStrategyChoiceBox;
 	private final ImportArgumentsBuilder importArguments;
+	private Path outputPath = null;
 	private String modelName = null;
 
 	private final StageManager stageManager;
@@ -186,7 +187,7 @@ public class RailMLStage extends Stage {
 			animationMachineCheckbox.setSelected(false);
 			validationMachineCheckbox.setSelected(false);
 			visualisationCheckbox.setSelected(false);
-			Path outputPath = path.getParent().toAbsolutePath();
+			outputPath = path.getParent().toAbsolutePath();
 			modelName = MoreFiles.getNameWithoutExtension(path);
 			importArguments.file(path).output(outputPath).modelName(modelName);
 			fileLocationField.setText(path.toAbsolutePath().toString());
@@ -200,7 +201,8 @@ public class RailMLStage extends Stage {
 		directoryChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
 		if(path != null) {
-			importArguments.output(path.toAbsolutePath());
+			outputPath = path.toAbsolutePath();
+			importArguments.output(outputPath);
 		}
 	}
 
@@ -273,8 +275,6 @@ public class RailMLStage extends Stage {
 				railML2B.generateMachines(listener);
 
 				ImportArguments args = importArguments.build();
-				String modelName = args.modelName();
-				Path outputPath = args.output();
 				currentProject.switchTo(new Project(modelName, "", Collections.emptyList(), Collections.emptyList(),
 					Collections.emptyList(), Project.metadataBuilder().build(), outputPath), true);
 

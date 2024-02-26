@@ -29,8 +29,15 @@
 					</MenuBar>
 				</top>
 				<center>
-					<SplitPane dividerPositions="0.17">
+					<SplitPane dividerPositions="0.21">
 						<VBox>
+							<HBox alignment="CENTER" fx:id="visualisationOptions" spacing="10">
+								<Label text="%railml.stage.visualisation.strategy" fx:id="visualisationStrategyField"/>
+								<ChoiceBox fx:id="visualisationStrategyChoiceBox"/>
+								<padding>
+									<Insets bottom="10"/>
+								</padding>
+							</HBox>
 							<Label text="%railml.inspectDot.chooseElements.title" styleClass="details-title">
 								<padding>
 									<Insets left="10"/>
