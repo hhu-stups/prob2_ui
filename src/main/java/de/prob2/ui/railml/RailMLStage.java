@@ -61,6 +61,8 @@ public class RailMLStage extends Stage {
 	@FXML
 	private CheckBox visualisationCheckbox;
 	@FXML
+	private CheckBox dataMachineCheckbox;
+	@FXML
 	private CheckBox animationMachineCheckbox;
 	@FXML
 	private CheckBox validationMachineCheckbox;
@@ -134,25 +136,33 @@ public class RailMLStage extends Stage {
 		generatedFiles.managedProperty().bind(generatedFiles.visibleProperty());
 		generateFileListView.setFixedCellSize(24);
 		generateFileListView.prefHeightProperty().bind(Bindings.size(generateFileList).multiply(generateFileListView.getFixedCellSize()).add(2));
+		dataMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue) {
+				generateFileList.add(modelName + DATA_MCH);
+			} else {
+				generateFileList.remove(modelName + DATA_MCH);
+			}
+		});
 		animationMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
+				dataMachineCheckbox.setSelected(true);
+				dataMachineCheckbox.setDisable(true);
 				generateFileList.addAll(modelName + ANIMATION_MCH, VISB_DEF, SIMB_JSON);
 			} else {
+				if (!validationMachineCheckbox.isSelected())
+					dataMachineCheckbox.setDisable(false);
 				generateFileList.removeAll(modelName + ANIMATION_MCH, VISB_DEF, SIMB_JSON);
 			}
 		});
 		validationMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
+				dataMachineCheckbox.setSelected(true);
+				dataMachineCheckbox.setDisable(true);
 				generateFileList.add(modelName + VALIDATION_MCH);
 			} else {
+				if (!animationMachineCheckbox.isSelected())
+					dataMachineCheckbox.setDisable(false);
 				generateFileList.remove(modelName + VALIDATION_MCH);
-			}
-		});
-		animationMachineCheckbox.selectedProperty().or(validationMachineCheckbox.selectedProperty()).addListener((observable, oldValue, newValue) -> {
-			if (newValue) {
-				generateFileList.add(modelName + DATA_MCH);
-			} else {
-				generateFileList.remove(modelName + DATA_MCH);
 			}
 		});
 		visualisationStrategyChoiceBox.setValue(ImportArguments.VisualisationStrategy.DOT);
@@ -208,9 +218,9 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	public void startImport() {
-		ImportArguments args = importArguments.generateAnimationMachine(animationMachineCheckbox.isSelected())
+		ImportArguments args = importArguments.generateDataMachine(dataMachineCheckbox.isSelected())
+				.generateAnimationMachine(animationMachineCheckbox.isSelected())
 				.generateValidationMachine(validationMachineCheckbox.isSelected())
-				.generateDataMachine(animationMachineCheckbox.isSelected() || validationMachineCheckbox.isSelected())
 				.generateVisualisation(visualisationCheckbox.isSelected())
 				.visualisationStrategy(visualisationCheckbox.isSelected() ? visualisationStrategyChoiceBox.getValue() : null)
 				.build();

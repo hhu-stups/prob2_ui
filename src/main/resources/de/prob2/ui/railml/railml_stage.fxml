@@ -68,6 +68,7 @@
 						</padding>
 					</Label>
 					<HBox alignment="CENTER" fx:id="machineOptions" spacing="20">
+						<CheckBox text="%railml.stage.machineChoice.data" fx:id="dataMachineCheckbox"/>
 						<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"/>
 						<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"/>
 					</HBox>
