@@ -19,7 +19,12 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.StackPane?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
 <fx:root title="railML Import" type="RailMLStage" xmlns:fx="http://javafx.com/fxml/1" resizable="false">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<AnchorPane prefWidth="600">
@@ -87,24 +92,56 @@
 									<Insets top="15"/>
 								</VBox.margin>
 							</VBox>
+							<VBox fx:id="validationResults" alignment="center_left">
+								<Separator>
+									<padding>
+										<Insets top="10" bottom="10"/>
+									</padding>
+								</Separator>
+								<Label text="Validation Results">
+									<padding>
+										<Insets top="10" bottom="10" />
+									</padding>
+								</Label>
+								<ButtonBar styleClass="dialog">
+									<buttons>
+										<Button fx:id="visualizeGraphButton" text="Dependency Graph"
+												onAction="#visualizeCompleteDependencyGraph" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="&#xf1e0;" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%rulevalidation.view.dependencyGraph.complete"/>
+											</tooltip>
+										</Button>
+										<Button fx:id="validationReportButton" text="%rulevalidation.view.save" onAction="#saveValidationReport">
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+											</graphic>
+										</Button>
+									</buttons>
+								</ButtonBar>
+							</VBox>
 						</VBox>
 					</AnchorPane>
-					<Label text="%railml.stage.machineChoice">
-						<padding>
-							<Insets left="20" top="10" bottom="5" />
-						</padding>
-					</Label>
-					<HBox alignment="CENTER" fx:id="machineOptions" spacing="20">
-						<CheckBox text="%railml.stage.machineChoice.data" fx:id="dataMachineCheckbox"/>
-						<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"/>
-						<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"/>
-					</HBox>
-					<Separator>
-						<padding>
-							<Insets top="10" bottom="10"/>
-						</padding>
-					</Separator>
-					<HBox alignment="CENTER" fx:id="visualisationOptions" spacing="20">
+					<VBox fx:id="machineOptions" visible="false">
+						<Label text="%railml.stage.machineChoice">
+							<padding>
+								<Insets left="20" top="10" bottom="10" />
+							</padding>
+						</Label>
+						<HBox alignment="CENTER" spacing="20">
+							<CheckBox text="%railml.stage.machineChoice.data" fx:id="dataMachineCheckbox"/>
+							<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"/>
+							<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"/>
+						</HBox>
+						<Separator>
+							<padding>
+								<Insets top="10" bottom="10"/>
+							</padding>
+						</Separator>
+					</VBox>
+					<HBox alignment="CENTER" fx:id="visualisationOptions" spacing="20" visible="false">
 						<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox"/>
 						<Label text="%railml.stage.visualisation.strategy" fx:id="visualisationStrategyField" visible="false"/>
 						<ChoiceBox fx:id="visualisationStrategyChoiceBox" visible="false"/>
@@ -127,8 +164,8 @@
 						<buttons>
 							<Button text="%common.buttons.cancel" cancelButton="true"
 									onAction="#cancel" />
-							<Button fx:id="btFinish" text="%railml.stage.button.import"
-									onAction="#startImport" />
+							<Button fx:id="btGenerateAndFinish" text="Dateien erstellen"
+									onAction="#generateAndFinish" />
 						</buttons>
 						<VBox.margin>
 							<Insets left="10" right="10" top="10"/>
