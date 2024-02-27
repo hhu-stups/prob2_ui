@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.hhu.stups.railml2b.load.ImportArguments;
+import de.hhu.stups.railml2b.output.DotVisualizer;
 import de.hhu.stups.railml2b.utils.SvgConverter;
 import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
@@ -254,8 +255,26 @@ public class RailMLInspectDotStage extends Stage {
 	}
 
 	protected void visualizeCustomGraph() throws InterruptedException {
+		String arguments = DotVisualizer.getArgumentsForGraphDefinition(
+				visualisationStrategy,
+				balises.isSelected(),
+				bufferstops.isSelected(),
+				borders.isSelected(),
+				crossings.isSelected(),
+				derailers.isSelected(),
+				operationalpoints.isSelected(),
+				levelcrossings.isSelected(),
+				signals.isSelected(),
+				switches.isSelected(),
+				traindetectionelements.isSelected(),
+				tvdsections.isSelected(),
+				names.isSelected(),
+				languageChoiceBox.getValue().toString().toLowerCase(),
+				dotEngineChoiceBox.getValue().toString().toLowerCase(),
+				curvedsplines.isSelected()
+		);
 		List<IEvalElement> customGraphFormula = Collections.singletonList(state.getStateSpace().getModel()
-			.parseFormula(visualisationStrategy.getCustomGraphDefinition() + this.getArgumentsForGraphDefinition(), FormulaExpand.EXPAND));
+			.parseFormula(visualisationStrategy.getCustomGraphDefinition() + arguments, FormulaExpand.EXPAND));
 		this.visualizeCustomGraph(customGraphFormula);
 	}
 
@@ -306,42 +325,6 @@ public class RailMLInspectDotStage extends Stage {
 
 			loadGraph(new String(svgData, StandardCharsets.UTF_8));
 		}
-	}
-
-	private String getArgumentsForGraphDefinition() {
-		List<Boolean> displayArgs = new ArrayList<>();
-		displayArgs.add(balises.isSelected());
-		displayArgs.add(bufferstops.isSelected());
-		displayArgs.add(borders.isSelected());
-		displayArgs.add(crossings.isSelected());
-		displayArgs.add(derailers.isSelected());
-		displayArgs.add(operationalpoints.isSelected());
-		displayArgs.add(levelcrossings.isSelected());
-		displayArgs.add(signals.isSelected());
-		displayArgs.add(switches.isSelected());
-		displayArgs.add(traindetectionelements.isSelected());
-		displayArgs.add(tvdsections.isSelected());
-		displayArgs.add(names.isSelected());
-
-		StringBuilder sb = new StringBuilder();
-		sb.append("(");
-		sb.append(displayArgs.stream().map(this::bBool).collect(Collectors.joining(",")));
-
-		sb.append(",").append(scalingFactor);
-
-		String language = languageChoiceBox.getValue().toString().toLowerCase();
-		sb.append(",\"").append(language).append("\"");
-
-		String engine = dotEngineChoiceBox.getValue().toString().toLowerCase();
-		sb.append(",\"").append(engine).append("\"");
-
-		sb.append(",").append(bBool(curvedsplines.isSelected()));
-		sb.append(")");
-		return sb.toString();
-	}
-
-	private String bBool(boolean b) {
-		return b ? "TRUE" : "FALSE";
 	}
 
 	/**
