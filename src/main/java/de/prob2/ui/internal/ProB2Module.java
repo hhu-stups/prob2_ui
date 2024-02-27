@@ -1,20 +1,11 @@
 package de.prob2.ui.internal;
 
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.inject.AbstractModule;
-import com.google.inject.Injector;
-import com.google.inject.Key;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
-
-import de.hhu.stups.railml2b.internal.RailMLModule;
+import com.google.inject.*;
 import de.jangassen.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
@@ -23,12 +14,14 @@ import de.prob2.ui.menu.OpenFile;
 import de.prob2.ui.menu.RevealInExplorer;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
-
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.Builder;
 import javafx.util.BuilderFactory;
+
+import java.util.Locale;
+import java.util.ResourceBundle;
 
 public class ProB2Module extends AbstractModule {
 
@@ -120,7 +113,6 @@ public class ProB2Module extends AbstractModule {
 	protected void configure() {
 		install(new MainModule());
 		install(new DataPathsModule());
-		install(new RailMLModule());
 
 		bind(Application.class).toInstance(this.application);
 		bind(ProB2.class).toInstance(this.application);
