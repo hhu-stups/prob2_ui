@@ -224,7 +224,7 @@ public class RailMLStage extends Stage {
 				.generateVisualisation(visualisationCheckbox.isSelected())
 				.visualisationStrategy(visualisationCheckbox.isSelected() ? visualisationStrategyChoiceBox.getValue() : null)
 				.build();
-		clearProgressWithMessage("Initialize import");
+		clearProgressWithMessage("Initialize import", -1);
 
 		updater.execute(() -> {
 			try {
@@ -235,6 +235,8 @@ public class RailMLStage extends Stage {
 
 				if (!Thread.currentThread().isInterrupted()) {
 					Platform.runLater(() -> {
+						clearProgressWithMessage("Import finished.", 1);
+
 						RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 						if (args.generateVisualisation()) {
 							this.close();
@@ -271,10 +273,10 @@ public class RailMLStage extends Stage {
 		});
 	}
 
-	private void clearProgressWithMessage(String message) {
+	private void clearProgressWithMessage(String message, long progress) {
 		progressDescription.setText(message);
 		progressLabel.setText("");
-		progressBar.setProgress(-1);
+		progressBar.setProgress(progress);
 		progressOperation.setText("");
 	}
 
@@ -310,8 +312,8 @@ public class RailMLStage extends Stage {
 				if (!createdMachines.isEmpty()) {
 					currentProject.startAnimation(createdMachines.getLast());
 				}
-			} catch (IOException e) {
-				throw new RuntimeException(e);
+			} catch (RailML2BIOException e) {
+				stageManager.makeExceptionAlert(e, "", "");
 			}
 		}
 	}

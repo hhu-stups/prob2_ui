@@ -60,6 +60,33 @@
 									<Insets top="5"/>
 								</VBox.margin>
 							</HBox>
+							<HBox alignment="CENTER">
+								<HBox alignment="CENTER_LEFT">
+									<Label fx:id="progressDescription" styleClass="bold"/>
+									<Label text="  "/>
+									<Label fx:id="progressLabel"/>
+								</HBox>
+								<ButtonBar styleClass="dialog" HBox.hgrow="ALWAYS">
+									<buttons>
+										<Button fx:id="btLoadRulesMch" text="%rulevalidation.view.executeAll" onAction="#loadRulesMchInAnimator"/>
+										<Button fx:id="btStartImport" text="%railml.stage.button.import" onAction="#startImport"/>
+									</buttons>
+								</ButtonBar>
+								<VBox.margin>
+									<Insets top="20"/>
+								</VBox.margin>
+							</HBox>
+							<VBox fx:id="progressBox" style="-fx-background-color: rgba(255, 255, 255, 0.75);" alignment="CENTER" visible="false">
+								<ProgressBar fx:id="progressBar" progress="0" prefWidth="560">
+									<padding>
+										<Insets bottom="10"/>
+									</padding>
+								</ProgressBar>
+								<Label fx:id="progressOperation"/>
+								<VBox.margin>
+									<Insets top="15"/>
+								</VBox.margin>
+							</VBox>
 						</VBox>
 					</AnchorPane>
 					<Label text="%railml.stage.machineChoice">
@@ -96,29 +123,11 @@
 							<ListView style="-fx-border-width: 0" fx:id="generateFileListView"/>
 						</VBox>
 					</AnchorPane>
-					<HBox alignment="CENTER">
-						<VBox fx:id="progressBox" style="-fx-background-color: rgba(255, 255, 255, 0.75);" alignment="CENTER" visible="false">
-							<HBox alignment="CENTER">
-								<Label fx:id="progressDescription" styleClass="bold"/>
-								<Label text="  "/>
-								<Label fx:id="progressLabel"/>
-							</HBox>
-							<ProgressBar fx:id="progressBar" progress="0" prefWidth="560">
-								<padding>
-									<Insets top="10" bottom="10"/>
-								</padding>
-							</ProgressBar>
-							<Label fx:id="progressOperation"/>
-						</VBox>
-						<HBox.margin>
-							<Insets top="15" />
-						</HBox.margin>
-					</HBox>
 					<ButtonBar styleClass="dialog">
 						<buttons>
 							<Button text="%common.buttons.cancel" cancelButton="true"
 									onAction="#cancel" />
-							<Button fx:id="btStartImport" text="%railml.stage.button.import"
+							<Button fx:id="btFinish" text="%railml.stage.button.import"
 									onAction="#startImport" />
 						</buttons>
 						<VBox.margin>
