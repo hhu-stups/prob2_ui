@@ -10,6 +10,7 @@ import de.hhu.stups.railml2b.exceptions.RailML2BIOException;
 import de.hhu.stups.railml2b.exceptions.RailML2BVisualisationException;
 import de.hhu.stups.railml2b.load.ImportArguments;
 import de.prob.exception.ProBError;
+import de.prob.model.brules.RuleResults;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -46,7 +47,9 @@ import static de.hhu.stups.railml2b.output.MachinePrinter.*;
 public class RailMLStage extends Stage {
 
 	@FXML
-	private VBox machineOptions;
+	private VBox validationResults, machineOptions;
+	@FXML
+	private Label rulesLabel, notCheckedLabel, successLabel, failLabel, disabledLabel;
 	@FXML
 	private HBox visualisationOptions;
 	@FXML
@@ -147,6 +150,9 @@ public class RailMLStage extends Stage {
 		generateFileListView.setFixedCellSize(24);
 		generateFileListView.prefHeightProperty().bind(Bindings.size(generateFileList).multiply(generateFileListView.getFixedCellSize()).add(2));
 
+		validationResults.visibleProperty().bind(importSuccess);
+		validationResults.managedProperty().bind(validationResults.visibleProperty());
+
 		machineOptions.visibleProperty().bind(importSuccess);
 		machineOptions.managedProperty().bind(machineOptions.visibleProperty());
 		dataMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
@@ -245,9 +251,17 @@ public class RailMLStage extends Stage {
 				listener = new UIProgressListener(progressBar, progressOperation, progressLabel, progressDescription,
 					railML2B.getMachineLoader().getNumberOfOperations());
 				railML2B.setCustomProgressListener(listener);
-				railML2B.loadAndValidate();
+				RuleResults results = railML2B.loadAndValidate();
+				RuleResults.ResultSummary summary = results.getSummary();
 
-				Platform.runLater(() -> clearProgressWithMessage("Import successful."));
+				Platform.runLater(() -> {
+					clearProgressWithMessage("Import successful.");
+					rulesLabel.setText(String.valueOf(summary.numberOfRules));
+					notCheckedLabel.setText(String.valueOf(summary.numberOfRulesNotChecked));
+					successLabel.setText(String.valueOf(summary.numberOfRulesSucceeded));
+					failLabel.setText(String.valueOf(summary.numberOfRulesFailed));
+					disabledLabel.setText(String.valueOf(summary.numberOfRulesDisabled));
+				});
 				importSuccess.set(true);
 			} catch (ProBError e) {
 				Platform.runLater(() -> {

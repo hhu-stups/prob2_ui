@@ -98,11 +98,51 @@
 										<Insets top="10" bottom="10"/>
 									</padding>
 								</Separator>
-								<Label text="Validation Results">
-									<padding>
-										<Insets top="10" bottom="10" />
-									</padding>
-								</Label>
+								<HBox HBox.hgrow="ALWAYS" spacing="10" alignment="CENTER_LEFT">
+									<HBox alignment="CENTER_LEFT" >
+										<Label text="%rulevalidation.view.summary.rules"/>
+										<Label text=" "/>
+										<Label fx:id="rulesLabel" text="-"/>
+										<padding>
+											<Insets left="5" right="5"/>
+										</padding>
+									</HBox>
+									<HBox alignment="CENTER_LEFT" >
+										<Label text="%rulevalidation.view.summary.notChecked"/>
+										<Label text=" "/>
+										<Label fx:id="notCheckedLabel" text="-"/>
+										<padding>
+											<Insets left="5" right="5"/>
+										</padding>
+									</HBox>
+									<HBox alignment="CENTER_LEFT"  style="-fx-background-color: rgba(76, 175, 80, 0.15)">
+										<Label text="%rulevalidation.view.summary.success"/>
+										<Label text=" "/>
+										<Label fx:id="successLabel" text="-"/>
+										<padding>
+											<Insets left="5" right="5"/>
+										</padding>
+									</HBox>
+									<HBox alignment="CENTER_LEFT" style="-fx-background-color: rgba(204, 47, 39, 0.15)">
+										<Label text="%rulevalidation.view.summary.fail"/>
+										<Label text=" "/>
+										<Label fx:id="failLabel" text="-"/>
+										<padding>
+											<Insets left="5" right="5"/>
+										</padding>
+									</HBox>
+									<HBox alignment="CENTER_LEFT" style="-fx-background-color:lightgray">
+										<Label text="%rulevalidation.view.summary.disabled"/>
+										<Label text=" "/>
+										<Label fx:id="disabledLabel" text="-"/>
+										<padding>
+											<Insets left="5" right="5"/>
+										</padding>
+									</HBox>
+									<VBox.margin>
+										<Insets bottom="15"/>
+									</VBox.margin>
+								</HBox>
 								<ButtonBar styleClass="dialog">
 									<buttons>
 										<Button fx:id="visualizeGraphButton" text="Dependency Graph"
