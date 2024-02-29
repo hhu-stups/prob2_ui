@@ -318,7 +318,7 @@ public class RailMLStage extends Stage {
 
 				List<Machine> createdMachines = currentProject.getMachines();
 				if (!createdMachines.isEmpty()) {
-					currentProject.startAnimation(createdMachines.getLast());
+					currentProject.startAnimation(createdMachines.get(createdMachines.size() - 1));
 				}
 			} catch (RailML2BIOException e) {
 				// TODO: exception handling
