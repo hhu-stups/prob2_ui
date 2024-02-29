@@ -7,11 +7,11 @@ import java.util.Objects;
 
 import de.prob2.ui.vomanager.IValidationTask;
 
-public class ValidationTaskType {
+public class ValidationTaskType<T extends IValidationTask<T>> implements Comparable<ValidationTaskType<?>> {
 
-	private static final Map<String, ValidationTaskType> REGISTRY = new HashMap<>();
+	private static final Map<String, ValidationTaskType<?>> REGISTRY = new HashMap<>();
 
-	public static synchronized <T extends ValidationTaskType> T register(T taskType) {
+	public static synchronized <T extends IValidationTask<T>> ValidationTaskType<T> register(ValidationTaskType<T> taskType) {
 		Objects.requireNonNull(taskType, "taskType");
 		if (REGISTRY.putIfAbsent(taskType.getKey(), taskType) != null) {
 			throw new IllegalArgumentException("task type already registered: " + taskType.getKey());
@@ -19,9 +19,9 @@ public class ValidationTaskType {
 		return taskType;
 	}
 
-	public static synchronized ValidationTaskType get(String key) {
+	public static synchronized ValidationTaskType<?> get(String key) {
 		Objects.requireNonNull(key, "key");
-		ValidationTaskType taskType = REGISTRY.get(key);
+		ValidationTaskType<?> taskType = REGISTRY.get(key);
 		if (taskType == null) {
 			throw new NoSuchElementException("task type not found: " + key);
 		}
@@ -29,9 +29,9 @@ public class ValidationTaskType {
 	}
 
 	private final String key;
-	private final Class<? extends IValidationTask> taskClass;
+	private final Class<T> taskClass;
 
-	public ValidationTaskType(String key, Class<? extends IValidationTask> taskClass) {
+	public ValidationTaskType(String key, Class<T> taskClass) {
 		this.key = Objects.requireNonNull(key, "key");
 		this.taskClass = Objects.requireNonNull(taskClass, "taskClass");
 	}
@@ -40,7 +40,28 @@ public class ValidationTaskType {
 		return this.key;
 	}
 
-	public Class<? extends IValidationTask> getTaskClass() {
-		return taskClass;
+	public Class<T> getTaskClass() {
+		return this.taskClass;
+	}
+
+	@Override
+	public int compareTo(ValidationTaskType<?> o) {
+		return this.getKey().compareTo(o.getKey());
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		} else if (!(o instanceof ValidationTaskType<?> that)) {
+			return false;
+		} else {
+			return Objects.equals(this.getKey(), that.getKey());
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.getKey());
 	}
 }

@@ -44,7 +44,7 @@ import javafx.collections.FXCollections;
 	"goal",
 	"shouldExecute",
 })
-public final class ModelCheckingItem implements IExecutableItem, IValidationTask {
+public final class ModelCheckingItem implements IExecutableItem, IValidationTask<ModelCheckingItem> {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
@@ -130,7 +130,7 @@ public final class ModelCheckingItem implements IExecutableItem, IValidationTask
 	}
 
 	@Override
-	public ValidationTaskType getTaskType() {
+	public ValidationTaskType<ModelCheckingItem> getTaskType() {
 		return BuiltinValidationTaskTypes.MODEL_CHECKING;
 	}
 

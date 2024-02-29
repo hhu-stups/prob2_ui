@@ -24,7 +24,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 @JsonPropertyOrder({ "type", "id", "description", "stateLimit", "code", "expectedResult", "selected", })
-public final class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask {
+public final class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask<TemporalFormulaItem> {
 
 	private final TemporalFormulaType type;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -72,7 +72,7 @@ public final class TemporalFormulaItem extends AbstractCheckableItem implements 
 	}
 
 	@Override
-	public ValidationTaskType getTaskType() {
+	public ValidationTaskType<TemporalFormulaItem> getTaskType() {
 		return BuiltinValidationTaskTypes.TEMPORAL;
 	}
 

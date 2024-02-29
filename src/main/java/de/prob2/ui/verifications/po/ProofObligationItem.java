@@ -17,7 +17,7 @@ import de.prob2.ui.vomanager.IValidationTask;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public final class ProofObligationItem implements IValidationTask {
+public final class ProofObligationItem implements IValidationTask<ProofObligationItem> {
 
 	private final String id;
 	private final String name;
@@ -46,7 +46,7 @@ public final class ProofObligationItem implements IValidationTask {
 	}
 
 	@Override
-	public ValidationTaskType getTaskType() {
+	public ValidationTaskType<ProofObligationItem> getTaskType() {
 		return BuiltinValidationTaskTypes.PROOF_OBLIGATION;
 	}
 

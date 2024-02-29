@@ -103,7 +103,7 @@ public class VOChecker {
 		checkVOExpression(validationObligation.getParsedExpression());
 	}
 
-	private CompletableFuture<?> checkVT(IValidationTask validationTask) {
+	private CompletableFuture<?> checkVT(IValidationTask<?> validationTask) {
 		final ExecutionContext context = new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), currentTrace.getStateSpace());
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status

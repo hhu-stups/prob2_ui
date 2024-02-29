@@ -12,15 +12,16 @@ import de.prob2.ui.verifications.type.ValidationTaskTypeResolver;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
 
+// we use the curiously recurring template pattern (crtp) here
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, property = "taskType")
 @JsonTypeIdResolver(ValidationTaskTypeResolver.class)
 @JsonPropertyOrder({ "taskType", "id" })
-public interface IValidationTask {
+public interface IValidationTask<T extends IValidationTask<T>> {
 
 	String getId();
 
 	@JsonIgnore
-	ValidationTaskType getTaskType();
+	ValidationTaskType<T> getTaskType();
 
 	@JsonIgnore
 	String getTaskType(I18n i18n);

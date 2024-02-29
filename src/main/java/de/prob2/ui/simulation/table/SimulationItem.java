@@ -31,7 +31,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-public final class SimulationItem implements IValidationTask {
+public final class SimulationItem implements IValidationTask<SimulationItem> {
 
 	public static class SimulationCheckingInformation {
 		private final Map<String, Object> information;
@@ -196,7 +196,7 @@ public final class SimulationItem implements IValidationTask {
 	}
 
 	@Override
-	public ValidationTaskType getTaskType() {
+	public ValidationTaskType<SimulationItem> getTaskType() {
 		return BuiltinValidationTaskTypes.SIMULATION;
 	}
 

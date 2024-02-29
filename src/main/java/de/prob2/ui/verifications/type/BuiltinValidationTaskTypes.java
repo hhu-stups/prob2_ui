@@ -15,19 +15,19 @@ import static de.prob2.ui.verifications.type.ValidationTaskType.register;
 
 public final class BuiltinValidationTaskTypes {
 
-	public static final ValidationTaskType INVALID = register(new ValidationTaskType("INVALID", ValidationTaskNotFound.class));
-	public static final ValidationTaskType TEMPORAL = register(new ValidationTaskType("TEMPORAL", TemporalFormulaItem.class));
-	public static final ValidationTaskType SYMBOLIC = register(new ValidationTaskType("SYMBOLIC", SymbolicCheckingFormulaItem.class));
-	public static final ValidationTaskType SIMULATION = register(new ValidationTaskType("SIMULATION", SimulationItem.class));
-	public static final ValidationTaskType REPLAY_TRACE = register(new ValidationTaskType("REPLAY_TRACE", ReplayTrace.class));
-	public static final ValidationTaskType MODEL_CHECKING = register(new ValidationTaskType("MODEL_CHECKING", ModelCheckingItem.class));
+	public static final ValidationTaskType<ValidationTaskNotFound> INVALID = register(new ValidationTaskType<>("INVALID", ValidationTaskNotFound.class));
+	public static final ValidationTaskType<TemporalFormulaItem> TEMPORAL = register(new ValidationTaskType<>("TEMPORAL", TemporalFormulaItem.class));
+	public static final ValidationTaskType<SymbolicCheckingFormulaItem> SYMBOLIC = register(new ValidationTaskType<>("SYMBOLIC", SymbolicCheckingFormulaItem.class));
+	public static final ValidationTaskType<SimulationItem> SIMULATION = register(new ValidationTaskType<>("SIMULATION", SimulationItem.class));
+	public static final ValidationTaskType<ReplayTrace> REPLAY_TRACE = register(new ValidationTaskType<>("REPLAY_TRACE", ReplayTrace.class));
+	public static final ValidationTaskType<ModelCheckingItem> MODEL_CHECKING = register(new ValidationTaskType<>("MODEL_CHECKING", ModelCheckingItem.class));
 	/**
 	 * Proof Obligations are saved via {@link SavedProofObligationItem},
 	 * and this class does not implement {@link IValidationTask}.
 	 * So this type is not used for (de-)serializing.
 	 */
-	public static final ValidationTaskType PROOF_OBLIGATION = register(new ValidationTaskType("PROOF_OBLIGATION", ProofObligationItem.class));
-	public static final ValidationTaskType DYNAMIC_FORMULA = register(new ValidationTaskType("DYNAMIC_FORMULA", DynamicCommandFormulaItem.class));
+	public static final ValidationTaskType<ProofObligationItem> PROOF_OBLIGATION = register(new ValidationTaskType<>("PROOF_OBLIGATION", ProofObligationItem.class));
+	public static final ValidationTaskType<DynamicCommandFormulaItem> DYNAMIC_FORMULA = register(new ValidationTaskType<>("DYNAMIC_FORMULA", DynamicCommandFormulaItem.class));
 
 	private BuiltinValidationTaskTypes() {
 		throw new AssertionError();

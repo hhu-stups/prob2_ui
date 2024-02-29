@@ -17,7 +17,7 @@ import de.prob2.ui.vomanager.IValidationTask;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public final class DynamicCommandFormulaItem implements IValidationTask {
+public final class DynamicCommandFormulaItem implements IValidationTask<DynamicCommandFormulaItem> {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String id;
@@ -45,7 +45,7 @@ public final class DynamicCommandFormulaItem implements IValidationTask {
 	}
 
 	@Override
-	public ValidationTaskType getTaskType() {
+	public ValidationTaskType<DynamicCommandFormulaItem> getTaskType() {
 		return BuiltinValidationTaskTypes.DYNAMIC_FORMULA;
 	}
 

@@ -11,7 +11,7 @@ public final class ValidationTaskTypeResolver extends TypeIdResolverBase {
 
 	@Override
 	public String idFromValue(Object value) {
-		return ((IValidationTask) value).getTaskType().getKey();
+		return ((IValidationTask<?>) value).getTaskType().getKey();
 	}
 
 	@Override

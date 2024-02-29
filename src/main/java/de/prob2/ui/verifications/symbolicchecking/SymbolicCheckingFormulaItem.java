@@ -31,7 +31,7 @@ import javafx.collections.ObservableList;
 	"code",
 	"selected",
 })
-public final class SymbolicCheckingFormulaItem extends AbstractCheckableItem implements IValidationTask {
+public final class SymbolicCheckingFormulaItem extends AbstractCheckableItem implements IValidationTask<SymbolicCheckingFormulaItem> {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final SymbolicCheckingType type;
@@ -58,7 +58,7 @@ public final class SymbolicCheckingFormulaItem extends AbstractCheckableItem imp
 	}
 
 	@Override
-	public ValidationTaskType getTaskType() {
+	public ValidationTaskType<SymbolicCheckingFormulaItem> getTaskType() {
 		return BuiltinValidationTaskTypes.SYMBOLIC;
 	}
 

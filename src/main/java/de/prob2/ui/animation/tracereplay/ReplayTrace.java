@@ -34,7 +34,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public final class ReplayTrace implements IExecutableItem, IValidationTask {
+public final class ReplayTrace implements IExecutableItem, IValidationTask<ReplayTrace> {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	@JsonIgnore
@@ -88,7 +88,7 @@ public final class ReplayTrace implements IExecutableItem, IValidationTask {
 	}
 
 	@Override
-	public ValidationTaskType getTaskType() {
+	public ValidationTaskType<ReplayTrace> getTaskType() {
 		return BuiltinValidationTaskTypes.REPLAY_TRACE;
 	}
 

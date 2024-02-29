@@ -17,7 +17,7 @@ import javafx.beans.property.SimpleObjectProperty;
  * Placeholder representing an invalid validation task ID that appeared in a VO expression.
  * This "task" always has an error status.
  */
-public final class ValidationTaskNotFound implements IValidationTask {
+public final class ValidationTaskNotFound implements IValidationTask<ValidationTaskNotFound> {
 	private final ReadOnlyObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
@@ -42,7 +42,7 @@ public final class ValidationTaskNotFound implements IValidationTask {
 	}
 
 	@Override
-	public ValidationTaskType getTaskType() {
+	public ValidationTaskType<ValidationTaskNotFound> getTaskType() {
 		return BuiltinValidationTaskTypes.INVALID;
 	}
 
