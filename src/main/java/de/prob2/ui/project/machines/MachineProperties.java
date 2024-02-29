@@ -4,11 +4,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -613,7 +615,7 @@ public final class MachineProperties {
 	}
 
 	public void resetStatus() {
-		for (IValidationTask<?> vt : this.getValidationTasks()) {
+		for (var vt : this.getValidationTasks()) {
 			if (vt instanceof IExecutableItem executableItem) {
 				executableItem.reset();
 			}
@@ -626,5 +628,16 @@ public final class MachineProperties {
 		testCases.forEach(TestCaseGenerationItem::reset);
 		tracesProperty().forEach(ReplayTrace::reset);
 		modelcheckingItemsProperty().forEach(ModelCheckingItem::reset);
+	}
+
+	public Set<String> getValidationTaskIds() {
+		Set<String> ids = new HashSet<>(this.validationTasksOldProperty().get().keySet());
+		for (var vt : this.getValidationTasks()) {
+			var id = vt.getId();
+			if (id != null) {
+				ids.add(id);
+			}
+		}
+		return ids;
 	}
 }
