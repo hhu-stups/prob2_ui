@@ -143,7 +143,7 @@ public final class MachineProperties {
 		this.initListeners();
 	}
 
-	public <T extends IValidationTask<T>> void addValidationTaskListener(final ObservableList<T> tasks) {
+	private <T extends IValidationTask<T>> void addValidationTaskListener(final ObservableList<T> tasks) {
 		tasks.addListener(this.validationTasksOldListener);
 		for (final IValidationTask<T> task : tasks) {
 			if (task.getId() != null) {
@@ -152,7 +152,7 @@ public final class MachineProperties {
 		}
 	}
 
-	public <T extends IValidationTask<T>> void removeValidationTaskListener(final ObservableList<T> tasks) {
+	private <T extends IValidationTask<T>> void removeValidationTaskListener(final ObservableList<T> tasks) {
 		tasks.removeListener(this.validationTasksOldListener);
 		for (final IValidationTask<T> task : tasks) {
 			if (task.getId() != null) {
@@ -186,7 +186,7 @@ public final class MachineProperties {
 	}
 
 	@JsonIgnore
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public <T extends IValidationTask<T>> ListProperty<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
 		return (ListProperty<T>) this.validationTasks.computeIfAbsent(
 			Objects.requireNonNull(taskType, "taskType"),
@@ -194,6 +194,10 @@ public final class MachineProperties {
 				SimpleListProperty<T> p = new SimpleListProperty<>(FXCollections.observableArrayList());
 				p.addListener((InvalidationListener) o -> this.setChanged(true));
 				p.addListener(this.validationTasksOldListener);
+				if (taskType.isExecutableItem()) {
+					addCheckingStatusListener((ReadOnlyListProperty<? extends IExecutableItem>) p, this.getCheckingStatusByType((ValidationTaskType) taskType));
+				}
+
 				return p;
 			}
 		);
@@ -569,7 +573,6 @@ public final class MachineProperties {
 		this.dotVisualizationItemsProperty().addListener(changedListener);
 		this.tableVisualizationItemsProperty().addListener(changedListener);
 
-		addCheckingStatusListener(this.temporalFormulasProperty(), this.temporalStatusProperty());
 		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolicCheckingStatusProperty());
 		addCheckingStatusListener(this.tracesProperty(), this.traceReplayStatusProperty());
 		addCheckingStatusListener(this.modelcheckingItemsProperty(), this.modelcheckingStatusProperty());

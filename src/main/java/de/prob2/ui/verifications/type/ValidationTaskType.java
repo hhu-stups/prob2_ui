@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
+import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
 public class ValidationTaskType<T extends IValidationTask<T>> implements Comparable<ValidationTaskType<?>> {
@@ -42,6 +43,10 @@ public class ValidationTaskType<T extends IValidationTask<T>> implements Compara
 
 	public Class<T> getTaskClass() {
 		return this.taskClass;
+	}
+
+	public boolean isExecutableItem() {
+		return IExecutableItem.class.isAssignableFrom(this.getTaskClass());
 	}
 
 	@Override
