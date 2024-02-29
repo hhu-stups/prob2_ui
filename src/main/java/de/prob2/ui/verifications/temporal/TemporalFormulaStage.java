@@ -14,8 +14,6 @@ import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -53,7 +51,6 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	private Button btShowBuiltins;
 
 	private final CurrentTrace currentTrace;
-	private final IntegerProperty stateLimitProperty;
 
 	private TemporalFormulaItem result;
 
@@ -64,7 +61,6 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	) {
 		super(currentProject, fontSize, builtinsStage);
 		this.currentTrace = currentTrace;
-		this.stateLimitProperty = new SimpleIntegerProperty();
 		this.result = null;
 		stageManager.loadFXML(this, "temporal_formula_stage.fxml");
 	}
@@ -78,29 +74,6 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		this.stateLimit.setValueFactory(new ImprovedIntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 500_000, 1_000));
 
 		// bind the UI elements
-		this.stateLimit.valueProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue >= 1) {
-				this.stateLimitProperty.set(newValue);
-			}
-		});
-		this.chooseStateLimit.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && !newValue) {
-				this.stateLimitProperty.set(-1);
-			}
-		});
-		// reverse binding, used by "setData(TemporalFormulaItem)"
-		this.stateLimitProperty.addListener((observable, oldValue, newValue) -> {
-			if (newValue instanceof Integer) {
-				int n = newValue.intValue();
-				if (n >= 1) {
-					this.stateLimit.getValueFactory().setValue(n);
-					this.chooseStateLimit.setSelected(true);
-				} else {
-					this.chooseStateLimit.setSelected(false);
-				}
-			}
-		});
-
 		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get().getType() == TemporalFormulaType.LTL, cbType.getSelectionModel().selectedItemProperty());
 		btShowBuiltins.visibleProperty().bind(binding);
 		cbType.getSelectionModel().select(cbType.getItems().get(0));
@@ -113,7 +86,23 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		this.taCode.replaceText(item.getCode());
 		this.taDescription.setText(item.getDescription());
 		this.cbExpectedResult.setValue(item.getExpectedResult());
-		this.stateLimitProperty.set(item.getStateLimit());
+		if (item.getStateLimit() >= 1) {
+			this.stateLimit.getValueFactory().setValue(item.getStateLimit());
+			this.chooseStateLimit.setSelected(true);
+		} else {
+			this.chooseStateLimit.setSelected(false);
+		}
+	}
+
+	private int getStateLimit() {
+		if (this.chooseStateLimit.isSelected()) {
+			Integer stateLimit = this.stateLimit.getValue();
+			if (stateLimit != null && stateLimit >= 1) {
+				return stateLimit;
+			}
+		}
+
+		return -1;
 	}
 
 	@FXML
@@ -123,7 +112,7 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		String code = taCode.getText();
 		TemporalFormulaType type = cbType.getValue().getType();
 		if (type == TemporalFormulaType.LTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.stateLimitProperty.get(), cbExpectedResult.getValue());
+			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
 			try {
 				LTLFormulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 			} catch (ProBError e) {
@@ -132,7 +121,7 @@ public class TemporalFormulaStage extends TemporalItemStage {
 			}
 			result = item;
 		} else if (type == TemporalFormulaType.CTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.stateLimitProperty.get(), cbExpectedResult.getValue());
+			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
 			try {
 				CTLFormulaChecker.parseFormula(item.getCode(), currentTrace.getModel());
 			} catch (ProBError e) {
