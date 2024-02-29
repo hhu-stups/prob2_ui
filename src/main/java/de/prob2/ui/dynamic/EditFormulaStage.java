@@ -84,7 +84,7 @@ public class EditFormulaStage extends Stage {
 	}
 
 	private void checkId() {
-		Set<String> idList = currentProject.getCurrentMachine().getMachineProperties().getValidationTasks().values().stream()
+		Set<String> idList = currentProject.getCurrentMachine().getMachineProperties().validationTasksOldProperty().get().values().stream()
 			                     .map(IValidationTask::getId)
 			                     .collect(Collectors.toSet());
 		idField.textProperty().addListener((observable, from, to) -> {

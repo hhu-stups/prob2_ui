@@ -67,6 +67,7 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 })
 public final class MachineProperties {
 
+	private final ListProperty<IValidationTask> validationTasks;
 	private final CheckingProperty<TemporalFormulaItem> temporal;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final CheckingProperty<SymbolicCheckingFormulaItem> symbolic;
@@ -85,8 +86,8 @@ public final class MachineProperties {
 	private final MapProperty<String, ListProperty<DynamicCommandFormulaItem>> tableVisualizationItems;
 	// dynamically collected from individual lists
 	@JsonIgnore
-	private final MapProperty<String, IValidationTask> validationTasks;
-	private final ListChangeListener<IValidationTask> validationTaskListener;
+	private final MapProperty<String, IValidationTask> validationTasksOld;
+	private final ListChangeListener<IValidationTask> validationTasksOldListener;
 
 	@JsonIgnore
 	private final BooleanProperty changed = new SimpleBooleanProperty(false);
@@ -95,6 +96,8 @@ public final class MachineProperties {
 	private PatternManager patternManager = new PatternManager();
 
 	public MachineProperties() {
+		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
+
 		this.temporal = new CheckingProperty<>(new SimpleObjectProperty<>(this, "temporalStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "temporalFormulas", FXCollections.observableArrayList()));
 		this.symbolic = new CheckingProperty<>(new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList()));
 		this.modelchecking = new CheckingProperty<>(new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList()));
@@ -112,15 +115,15 @@ public final class MachineProperties {
 		this.dotVisualizationItems = new SimpleMapProperty<>(this, "dotVisualizationItems", FXCollections.observableHashMap());
 		this.tableVisualizationItems = new SimpleMapProperty<>(this, "tableVisualizationItems", FXCollections.observableHashMap());
 
-		this.validationTasks = new SimpleMapProperty<>(this, "validationTasks", FXCollections.observableHashMap());
-		this.validationTaskListener = change -> {
+		this.validationTasksOld = new SimpleMapProperty<>(this, "validationTasks", FXCollections.observableHashMap());
+		this.validationTasksOldListener = change -> {
 			while (change.next()) {
 				for (final IValidationTask vt : change.getRemoved()) {
-					this.validationTasks.remove(vt.getId(), vt);
+					this.validationTasksOld.remove(vt.getId(), vt);
 				}
 				for (final IValidationTask vt : change.getAddedSubList()) {
 					if (vt.getId() != null) {
-						this.validationTasks.put(vt.getId(), vt);
+						this.validationTasksOld.put(vt.getId(), vt);
 					}
 				}
 			}
@@ -130,21 +133,35 @@ public final class MachineProperties {
 	}
 
 	public void addValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
-		tasks.addListener(this.validationTaskListener);
+		tasks.addListener(this.validationTasksOldListener);
 		for (final IValidationTask task : tasks) {
 			if (task.getId() != null) {
-				this.validationTasks.put(task.getId(), task);
+				this.validationTasksOld.put(task.getId(), task);
 			}
 		}
 	}
 
 	public void removeValidationTaskListener(final ObservableList<? extends IValidationTask> tasks) {
-		tasks.removeListener(this.validationTaskListener);
+		tasks.removeListener(this.validationTasksOldListener);
 		for (final IValidationTask task : tasks) {
 			if (task.getId() != null) {
-				this.validationTasks.remove(task.getId(), task);
+				this.validationTasksOld.remove(task.getId(), task);
 			}
 		}
+	}
+
+	public ListProperty<IValidationTask> validationTasksProperty() {
+		return this.validationTasks;
+	}
+
+	@JsonProperty("validationTasks")
+	public List<IValidationTask> getValidationTasks() {
+		return this.validationTasksProperty().get();
+	}
+
+	@JsonProperty("validationTasks")
+	public void setValidationTasks(List<IValidationTask> validationTasks) {
+		this.validationTasksProperty().setAll(validationTasks);
 	}
 
 	public ObjectProperty<MachineCheckingStatus> traceReplayStatusProperty() {
@@ -183,13 +200,8 @@ public final class MachineProperties {
 		return this.modelcheckingStatusProperty().get();
 	}
 
-	public ReadOnlyMapProperty<String, IValidationTask> validationTasksProperty() {
-		return this.validationTasks;
-	}
-
-	@JsonIgnore
-	public ObservableMap<String, IValidationTask> getValidationTasks() {
-		return this.validationTasksProperty().get();
+	public ReadOnlyMapProperty<String, IValidationTask> validationTasksOldProperty() {
+		return this.validationTasksOld;
 	}
 
 	public ListProperty<TemporalFormulaItem> temporalFormulasProperty() {
