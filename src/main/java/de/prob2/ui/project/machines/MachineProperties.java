@@ -220,6 +220,11 @@ public final class MachineProperties {
 		return this.getValidationTasksByType(BuiltinValidationTaskTypes.TEMPORAL);
 	}
 
+	@JsonIgnore
+	public List<TemporalFormulaItem> getTemporalFormulas() {
+		return this.temporalFormulasProperty().get();
+	}
+
 	public ObjectProperty<MachineCheckingStatus> temporalStatusProperty() {
 		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.TEMPORAL);
 	}
