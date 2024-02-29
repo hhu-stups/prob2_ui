@@ -156,11 +156,6 @@ public final class MachineProperties {
 		return traceReplayStatusProperty().get();
 	}
 
-	@JsonIgnore
-	public void setTraceReplayStatus(final MachineCheckingStatus status) {
-		this.traceReplayStatusProperty().set(status);
-	}
-
 	public ObjectProperty<MachineCheckingStatus> temporalStatusProperty() {
 		return this.temporal.statusProperty();
 	}
@@ -168,11 +163,6 @@ public final class MachineProperties {
 	@JsonIgnore
 	public MachineCheckingStatus getTemporalStatus() {
 		return this.temporalStatusProperty().get();
-	}
-
-	@JsonIgnore
-	public void setTemporalStatus(final MachineCheckingStatus status) {
-		this.temporalStatusProperty().set(status);
 	}
 
 	public ObjectProperty<MachineCheckingStatus> symbolicCheckingStatusProperty() {
@@ -184,11 +174,6 @@ public final class MachineProperties {
 		return this.symbolicCheckingStatusProperty().get();
 	}
 
-	@JsonIgnore
-	public void setSymbolicCheckingStatus(final MachineCheckingStatus status) {
-		this.symbolicCheckingStatusProperty().set(status);
-	}
-
 	public ObjectProperty<MachineCheckingStatus> modelcheckingStatusProperty() {
 		return this.modelchecking.statusProperty();
 	}
@@ -196,11 +181,6 @@ public final class MachineProperties {
 	@JsonIgnore
 	public MachineCheckingStatus getModelcheckingStatus() {
 		return this.modelcheckingStatusProperty().get();
-	}
-
-	@JsonIgnore
-	public void setModelcheckingStatus(final MachineCheckingStatus status) {
-		this.modelcheckingStatusProperty().set(status);
 	}
 
 	public ReadOnlyMapProperty<String, IValidationTask> validationTasksProperty() {
