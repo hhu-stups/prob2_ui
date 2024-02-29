@@ -47,25 +47,17 @@ import static de.hhu.stups.railml2b.output.MachinePrinter.*;
 public class RailMLStage extends Stage {
 
 	@FXML
-	private VBox validationResults, machineOptions;
+	private VBox mainPane, validationResults, machineOptions;
 	@FXML
-	private Label rulesLabel, notCheckedLabel, successLabel, failLabel, disabledLabel;
+	private Label rulesLabel, notCheckedLabel, successLabel, failLabel, disabledLabel, validationInfoMessage;
 	@FXML
 	private HBox visualisationOptions;
 	@FXML
-	private Button btLoadRulesMch;
+	private Button btGenerateAndFinish, btCancelImport, btStartImport;
 	@FXML
-	private Button btStartImport;
+	private TextField fileLocationField, locationField;
 	@FXML
-	private Button btGenerateAndFinish;
-	@FXML
-	private TextField fileLocationField;
-	@FXML
-	private Tooltip fileLocationTooltip;
-	@FXML
-	private TextField locationField;
-	@FXML
-	private Tooltip locationTooltip;
+	private Tooltip fileLocationTooltip, locationTooltip;
 	@FXML
 	private Label visualisationStrategyField;
 	@FXML
@@ -74,23 +66,15 @@ public class RailMLStage extends Stage {
 	private ListView<String> generateFileListView;
 	private final ObservableList<String> generateFileList = FXCollections.observableArrayList();
 	@FXML
-	private CheckBox visualisationCheckbox;
-	@FXML
-	private CheckBox dataMachineCheckbox;
-	@FXML
-	private CheckBox animationMachineCheckbox;
-	@FXML
-	private CheckBox validationMachineCheckbox;
+	private CheckBox animationMachineCheckbox, dataMachineCheckbox, validationMachineCheckbox, visualisationCheckbox;
 	@FXML
 	public VBox progressBox;
 	@FXML
-	public Label progressDescription;
-	@FXML
-	public Label progressLabel;
-	@FXML
-	public Label progressOperation;
+	public Label progressDescription, progressLabel, progressOperation;
 	@FXML
 	public ProgressBar progressBar;
+	@FXML
+	private ButtonBar generateButtonBar;
 
 
 	@FXML
@@ -131,14 +115,19 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	public void initialize() {
+		btCancelImport.visibleProperty().bind(importSuccess.not().or(updater.runningProperty()));
 		btStartImport.disableProperty()
 			.bind(fileLocationField.lengthProperty().lessThanOrEqualTo(0)
-			/*.or(animationMachineCheckbox.selectedProperty().not()
-				.and(validationMachineCheckbox.selectedProperty().not()
-				.and(visualisationCheckbox.selectedProperty().not())))
-			.or(visualisationCheckbox.selectedProperty()
-				.and(visualisationStrategyChoiceBox.valueProperty().isNull()))*/
 			.or(updater.runningProperty()));
+		btGenerateAndFinish.disableProperty().bind(
+				(dataMachineCheckbox.selectedProperty()
+				.or(animationMachineCheckbox.selectedProperty())
+				.or(validationMachineCheckbox.selectedProperty())
+				.or(visualisationCheckbox.selectedProperty()
+						.and(visualisationStrategyChoiceBox.valueProperty().isNull().not())))
+				.not());
+		generateButtonBar.visibleProperty().bind(importSuccess);
+		generateButtonBar.managedProperty().bind(generateButtonBar.visibleProperty());
 		fileLocationField.setText("");
 		fileLocationTooltip.textProperty().bind(fileLocationField.textProperty());
 		locationField.setText("");
@@ -218,11 +207,7 @@ public class RailMLStage extends Stage {
 
 	public void initializeForPath(Path path) {
 		if (path != null) {
-			generateFileList.clear();
-			animationMachineCheckbox.setSelected(false);
-			validationMachineCheckbox.setSelected(false);
-			visualisationCheckbox.setSelected(false);
-			importSuccess.set(false);
+			resetUI();
 			outputPath = path.getParent().toAbsolutePath();
 			modelName = MoreFiles.getNameWithoutExtension(path);
 			importArguments.file(path).output(outputPath).modelName(modelName);
@@ -277,13 +262,6 @@ public class RailMLStage extends Stage {
 				throw new RuntimeException(e);
 			}
 		});
-	}
-
-	private void clearProgressWithMessage(String message) {
-		progressDescription.setText(message);
-		progressLabel.setText("");
-		progressBar.setProgress(-1);
-		progressOperation.setText("");
 	}
 
 	@FXML
@@ -353,34 +331,51 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	private void saveValidationReport() throws RailML2BIOException {
-		if (railML2B != null) {
+		if (railML2B != null && importSuccess.get()) {
 			railML2B.saveValidationReport();
+			validationInfoMessage.setText("Saved report at output location.");
+		} else {
+			validationInfoMessage.setText("Report could NOT be saved!");
 		}
 	}
 
 	@FXML
 	private void visualizeCompleteDependencyGraph() throws RailML2BVisualisationException {
-		if (railML2B != null) {
+		if (railML2B != null && importSuccess.get()) {
 			railML2B.saveRuleDependencyGraphAsPdf();
+			validationInfoMessage.setText("Saved graph at output location.");
+		} else {
+			validationInfoMessage.setText("Graph could NOT be saved!");
 		}
 	}
 
-	@FXML
-	public void loadRulesMchInAnimator() {
-		/*if (currentProject.confirmReplacingProject()) {
-			currentProject.switchTo(new Project(modelName, "", Collections.emptyList(), Collections.emptyList(),
-					Collections.emptyList(), Project.metadataBuilder().build(), outputPath), true);
-		}*/
-		railML2B = injector.getInstance(RailML2B.class);
-		InteractiveValidation validation = injector.getInstance(InteractiveValidation.class);
-		validation.start(importArguments, railML2B.getMachineLoader().getCurrentTrace());
+	private void clearProgressWithMessage(String message) {
+		progressDescription.setText(message);
+		progressLabel.setText("");
+		progressBar.setProgress(-1);
+		progressOperation.setText("");
 	}
 
 	@FXML
-	public void cancel() {
+	private void cancel() {
+		cancelImport();
+		this.close();
+	}
+
+	@FXML
+	private void cancelImport() {
 		updater.cancel(true);
 		if (railML2B != null) railML2B.finish();
+		resetUI();
+	}
+
+	private void resetUI() {
 		importSuccess.set(false);
-		this.close();
+		clearProgressWithMessage("");
+		animationMachineCheckbox.setSelected(false);
+		validationMachineCheckbox.setSelected(false);
+		visualisationCheckbox.setSelected(false);
+		validationInfoMessage.setText("");
+		generateFileList.clear();
 	}
 }
