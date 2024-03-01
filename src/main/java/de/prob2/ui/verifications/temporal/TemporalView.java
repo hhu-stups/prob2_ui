@@ -38,7 +38,9 @@ import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableListValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -153,7 +155,27 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		});
 		stageManager.loadFXML(this, "temporal_view.fxml");
 	}
-	
+
+	@Override
+	protected ObservableList<TemporalFormulaItem> getItemsProperty(Machine machine) {
+		return machine.getMachineProperties().getTemporalFormulas();
+	}
+
+	@Override
+	protected void addItem(Machine machine, TemporalFormulaItem item) {
+		machine.getMachineProperties().addValidationTask(item);
+	}
+
+	@Override
+	protected void removeItem(Machine machine, TemporalFormulaItem item) {
+		machine.getMachineProperties().removeValidationTask(item);
+	}
+
+	@Override
+	protected void replaceItem(Machine machine, TemporalFormulaItem oldItem, TemporalFormulaItem newItem) {
+		machine.getMachineProperties().replaceValidationTask(oldItem, newItem);
+	}
+
 	@Override
 	@FXML
 	public void initialize() {
@@ -162,17 +184,14 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		setContextMenus();
 		setBindings();
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			items.unbind();
 			tvPattern.itemsProperty().unbind();
-			if(to != null) {
-				if(from != null) {
-					from.getMachineProperties().clearPatternManager();
-				}
-				items.bind(to.getMachineProperties().temporalFormulasProperty());
+			if (from != null) {
+				from.getMachineProperties().clearPatternManager();
+			}
+			if (to != null) {
 				tvPattern.itemsProperty().bind(to.getMachineProperties().ltlPatternsProperty());
 				managePatternTable(to.getMachineProperties().ltlPatternsProperty());
 			} else {
-				items.set(FXCollections.emptyObservableList());
 				tvPattern.setItems(FXCollections.emptyObservableList());
 			}
 		};
@@ -235,7 +254,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		addMenuButton.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
-		saveLTLButton.disableProperty().bind(items.emptyProperty().or(currentTrace.isNull().or(selectAll.selectedProperty().not())));
+		saveLTLButton.disableProperty().bind(emptyProperty.or(currentTrace.isNull().or(selectAll.selectedProperty().not())));
 		loadLTLButton.disableProperty().bind(currentTrace.isNull());
 
 		itemsTable.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
@@ -316,7 +335,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if (path != null) {
-			List<TemporalFormulaItem> formulas = items.stream()
+			List<TemporalFormulaItem> formulas = itemsTable.getItems().stream()
 				.filter(item -> item.getType() == TemporalFormulaType.LTL)
 				.filter(TemporalFormulaItem::selected)
 				.collect(Collectors.toList());
@@ -353,9 +372,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			LOGGER.error("Could not load LTL file: ", e);
 			return;
 		}
-		data.getFormulas().stream()
-				.filter(formula -> !items.contains(formula))
-				.forEach(items::add);
+		data.getFormulas().forEach(this::addItem);
 		data.getPatterns().stream()
 				.filter(pattern -> !machine.getMachineProperties().getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {

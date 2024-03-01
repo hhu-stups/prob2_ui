@@ -20,7 +20,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.ExecutionContext;
 
-import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuItem;
@@ -75,23 +75,17 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_animation_view.fxml");
 	}
-	
+
+	@Override
+	protected ObservableList<SymbolicAnimationItem> getItemsProperty(Machine machine) {
+		return machine.getMachineProperties().symbolicAnimationFormulasProperty();
+	}
+
 	@Override
 	public void initialize() {
 		super.initialize();
 		itemsTable.setRowFactory(table -> new Row());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
-		
-		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
-			this.items.unbind();
-			if (to != null) {
-				this.items.bind(to.getMachineProperties().symbolicAnimationFormulasProperty());
-			} else {
-				this.items.clear();
-			}
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 		
 		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
 		helpButton.setHelpContent("animation", "Symbolic");

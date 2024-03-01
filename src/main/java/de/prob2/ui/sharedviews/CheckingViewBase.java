@@ -5,9 +5,11 @@ import java.util.Optional;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.ExecutionContext;
@@ -16,11 +18,12 @@ import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
@@ -40,7 +43,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		protected final MenuItem executeMenuItem;
 		protected final MenuItem editMenuItem;
 		protected final MenuItem removeMenuItem;
-		
+
 		protected RowBase() {
 			// Execute item (if possible) when double-clicked.
 			this.setOnMouseClicked(event -> {
@@ -48,13 +51,13 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 					executeItemIfEnabled(this.getItem());
 				}
 			});
-			
+
 			this.contextMenu = new ContextMenu();
-			
+
 			this.executeMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.execute"));
 			this.executeMenuItem.setOnAction(e -> executeItem(this.getItem()));
 			this.contextMenu.getItems().add(this.executeMenuItem);
-			
+
 			this.editMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			this.editMenuItem.setOnAction(e -> {
 				final T oldItem = this.getItem();
@@ -65,11 +68,11 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 				});
 			});
 			this.contextMenu.getItems().add(this.editMenuItem);
-			
+
 			this.removeMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
 			this.removeMenuItem.setOnAction(e -> removeItem(this.getItem()));
 			this.contextMenu.getItems().add(removeMenuItem);
-			
+
 			this.itemProperty().addListener((o, from, to) -> {
 				if (to == null) {
 					executeMenuItem.disableProperty().unbind();
@@ -78,60 +81,84 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 					executeMenuItem.disableProperty().bind(disableItemBinding(to));
 				}
 			});
-			
+
 			this.contextMenuProperty().bind(Bindings.when(this.emptyProperty())
-				.then((ContextMenu)null)
-				.otherwise(this.contextMenu));
+				                                .then((ContextMenu) null)
+				                                .otherwise(this.contextMenu));
 		}
 	}
-	
+
 	@FXML
 	protected TableView<T> itemsTable;
-	
+
 	@FXML
 	protected TableColumn<T, Checked> statusColumn;
-	
+
 	@FXML
 	protected TableColumn<T, CheckBox> shouldExecuteColumn;
-	
+
 	@FXML
 	protected TableColumn<T, String> configurationColumn;
-	
+
 	@FXML
 	protected Button checkMachineButton;
-	
+
 	private final I18n i18n;
 	protected final DisablePropertyController disablePropertyController;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final CliTaskExecutor cliExecutor;
-	
-	// This is a proper ListProperty, so it supports emptyProperty(),
-	// unlike TableView.itemsProperty(), which is only an ObjectProperty.
-	protected final ListProperty<T> items;
-	
+
 	protected final CheckBox selectAll;
-	
+	protected BooleanBinding emptyProperty;
+
 	protected CheckingViewBase(final I18n i18n, final DisablePropertyController disablePropertyController, final CurrentTrace currentTrace, final CurrentProject currentProject, final CliTaskExecutor cliExecutor) {
 		this.i18n = i18n;
 		this.disablePropertyController = disablePropertyController;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.cliExecutor = cliExecutor;
-		
-		this.items = new SimpleListProperty<>(this, "items", FXCollections.emptyObservableList());
+
 		this.selectAll = new CheckBox();
 	}
-	
+
+	protected abstract ObservableList<T> getItemsProperty(Machine machine);
+
+	protected void addItem(Machine machine, T item) {
+		this.getItemsProperty(machine).add(item);
+	}
+
+	protected void removeItem(Machine machine, T item) {
+		this.getItemsProperty(machine).remove(item);
+	}
+
+	protected void replaceItem(Machine machine, T oldItem, T newItem) {
+		ObservableList<T> items = this.getItemsProperty(machine);
+		items.set(items.indexOf(oldItem), newItem);
+	}
+
 	@FXML
-	public void initialize() {
-		checkMachineButton.disableProperty().bind(this.items.emptyProperty().or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
-		checkMachineButton.setOnAction(e -> this.executeAllSelectedItems());
+	protected void initialize() {
+		// we have to use ths wrapped binding because we directly set the contained list in "this.itemsTable.itemsProperty()"
+		this.emptyProperty = SafeBindings.wrappedBooleanBinding(l -> l == null || l.isEmpty(), this.itemsTable.itemsProperty());
+
 		itemsTable.setRowFactory(table -> new RowBase());
-		itemsTable.itemsProperty().bind(this.items);
+		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			itemsTable.itemsProperty().unbind(); // unbind for safety, this should never be bound though
+			if (to != null) {
+				itemsTable.itemsProperty().set(this.getItemsProperty(to));
+			} else {
+				itemsTable.itemsProperty().set(FXCollections.observableArrayList());
+			}
+		};
+		currentProject.currentMachineProperty().addListener(machineChangeListener);
+
+		checkMachineButton.disableProperty().bind(this.emptyProperty.or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
+		checkMachineButton.setOnAction(e -> this.executeAllSelectedItems());
+
 		statusColumn.setCellFactory(col -> new CheckedCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory<>(itemsTable,  selectAll));
+		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory<>(itemsTable, selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		configurationColumn.setCellValueFactory(features -> {
 			String configuration = configurationForItem(features.getValue());
@@ -142,12 +169,14 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			}
 			return new SimpleStringProperty(configuration);
 		});
+
+		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
-	
+
 	protected T addItem(final T newItem) {
-		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+		final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
 		if (existingItem.isEmpty()) {
-			items.add(newItem);
+			addItem(currentProject.getCurrentMachine(), newItem);
 			return newItem;
 		} else {
 			T t = existingItem.get();
@@ -155,11 +184,15 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			return t;
 		}
 	}
-	
+
+	protected void removeItem(final T item) {
+		removeItem(currentProject.getCurrentMachine(), item);
+	}
+
 	protected T replaceItem(final T oldItem, final T newItem) {
-		final Optional<T> existingItem = items.stream().filter(newItem::settingsEqual).findAny();
+		final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
 		if (existingItem.isEmpty()) {
-			items.set(items.indexOf(oldItem), newItem);
+			replaceItem(currentProject.getCurrentMachine(), oldItem, newItem);
 			return newItem;
 		} else {
 			T t = existingItem.get();
@@ -167,60 +200,60 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			return t;
 		}
 	}
-	
+
 	/**
 	 * Describe the item's configuration as a string,
 	 * which will be displayed in the {@link #configurationColumn}.
 	 * If the item is an instance of {@link IValidationTask},
 	 * the validation task ID (if any) is automatically prepended to this configuration string.
-	 * 
+	 *
 	 * @param item the item to describe
 	 * @return a string description of the item's configuration
 	 */
 	protected abstract String configurationForItem(final T item);
-	
+
 	protected BooleanExpression disableItemBinding(final T item) {
 		return disablePropertyController.disableProperty();
 	}
-	
+
 	protected ExecutionContext getCurrentExecutionContext() {
 		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), currentTrace.getStateSpace());
 	}
-	
+
 	protected abstract void executeItemSync(final T item, final ExecutionContext context);
-	
+
 	protected void executeItem(final T item) {
 		final ExecutionContext context = getCurrentExecutionContext();
 		cliExecutor.submit(() -> executeItemSync(item, context));
 	}
-	
+
 	protected void executeItemIfEnabled(final T item) {
 		if (!disableItemBinding(item).get()) {
 			executeItem(item);
 		}
 	}
-	
+
 	protected void executeAllSelectedItems() {
 		final ExecutionContext context = getCurrentExecutionContext();
 		cliExecutor.submit(() -> {
-			for (final T item : items) {
+			for (final T item : itemsTable.getItems()) {
 				if (!item.selected()) {
 					continue;
 				}
-				
+
 				item.execute(context);
 			}
 		});
 	}
-	
+
 	/**
 	 * Show a dialog asking the user to input a new item or edit an existing one.
-	 * 
+	 *
 	 * @param oldItem the existing item to edit, or {@code null} to ask the user to create a new item
 	 * @return the created/edited item, or {@link Optional#empty()} if the user cancelled/closed the dialog
 	 */
 	protected abstract Optional<T> showItemDialog(final T oldItem);
-	
+
 	@FXML
 	protected Optional<T> askToAddItem() {
 		return this.showItemDialog(null).map(newItem -> {
@@ -233,9 +266,5 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			}
 			return toCheck;
 		});
-	}
-
-	protected void removeItem(T item) {
-		items.remove(item);
 	}
 }

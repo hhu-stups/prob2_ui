@@ -4,13 +4,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -55,8 +54,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
-
-import se.sawano.java.text.AlphanumericComparator;
+import javafx.collections.transformation.FilteredList;
 
 import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineCheckingStatus;
 
@@ -77,7 +75,7 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 })
 public final class MachineProperties {
 
-	private final Map<ValidationTaskType<?>, ListProperty<? extends IValidationTask<?>>> validationTasks;
+	private final ReadOnlyListProperty<IValidationTask<?>> validationTasks;
 	@JsonIgnore
 	private final Map<ValidationTaskType<? extends IExecutableItem>, ObjectProperty<MachineCheckingStatus>> statusProperties;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
@@ -107,7 +105,7 @@ public final class MachineProperties {
 	private PatternManager patternManager = new PatternManager();
 
 	public MachineProperties() {
-		this.validationTasks = new HashMap<>();
+		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
 		this.statusProperties = new HashMap<>();
 
 		this.symbolic = new CheckingProperty<>(new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList()));
@@ -161,25 +159,18 @@ public final class MachineProperties {
 		}
 	}
 
-	@JsonGetter("validationTasks")
-	private List<IValidationTask<?>> getValidationTasks() {
-		final Comparator<IValidationTask<?>> typeComparator = Comparator.<IValidationTask<?>, ValidationTaskType<?>>comparing(IValidationTask::getTaskType)
-			                                                      .thenComparing(IValidationTask::getId, Comparator.nullsLast(new AlphanumericComparator(Locale.ROOT)));
+	public ReadOnlyListProperty<IValidationTask<?>> getValidationTasks() {
+		return this.validationTasks;
+	}
 
-		List<IValidationTask<?>> validationTasks = new ArrayList<>();
-		for (var values : this.validationTasks.values()) {
-			validationTasks.addAll(values);
-		}
-		validationTasks.sort(typeComparator);
-		return validationTasks;
+	@JsonGetter("validationTasks")
+	private List<IValidationTask<?>> getValidationTasksForSerialization() {
+		return this.getValidationTasks();
 	}
 
 	@JsonSetter("validationTasks")
-	private <T extends IValidationTask<T>> void setValidationTasks(List<T> validationTasks) {
-		this.validationTasks.clear();
-		for (T vt : Objects.requireNonNull(validationTasks, "validationTasks")) {
-			this.addValidationTask(vt);
-		}
+	private void setValidationTasksForDeserialization(List<IValidationTask<?>> validationTasks) {
+		this.getValidationTasks().setAll(validationTasks);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -197,12 +188,27 @@ public final class MachineProperties {
 	}
 
 	@JsonIgnore
-	@SuppressWarnings({ "unchecked" })
-	public <T extends IValidationTask<T>> ListProperty<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
-		return (ListProperty<T>) this.validationTasks.computeIfAbsent(
-			Objects.requireNonNull(taskType, "taskType"),
-			this::createTaskList
-		);
+	private FilteredList<IValidationTask<?>> getValidationTasksByPredicate(Predicate<IValidationTask<?>> predicate) {
+		return this.getValidationTasks().filtered(predicate);
+	}
+
+	@JsonIgnore
+	public FilteredList<IValidationTask<?>> getValidationTasksWithId() {
+		return this.getValidationTasksByPredicate(vt -> vt.getId() != null);
+	}
+
+	@JsonIgnore
+	public Set<String> getValidationTaskIds() {
+		Set<String> ids = this.getValidationTasksWithId().stream().map(IValidationTask::getId).collect(Collectors.toSet());
+		ids.addAll(this.validationTasksOldProperty().get().keySet());
+		return ids;
+	}
+
+	@JsonIgnore
+	@SuppressWarnings("unchecked")
+	public <T extends IValidationTask<T>> FilteredList<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
+		Objects.requireNonNull(taskType, "taskType");
+		return (FilteredList<T>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()));
 	}
 
 	@JsonIgnore
@@ -214,17 +220,27 @@ public final class MachineProperties {
 	}
 
 	public <T extends IValidationTask<T>> void addValidationTask(T validationTask) {
-		Objects.requireNonNull(validationTask, "validationTask");
-		this.getValidationTasksByType(validationTask.getTaskType()).add(validationTask);
+		this.getValidationTasks().add(Objects.requireNonNull(validationTask, "validationTask"));
 	}
 
-	public ListProperty<TemporalFormulaItem> temporalFormulasProperty() {
-		return this.getValidationTasksByType(BuiltinValidationTaskTypes.TEMPORAL);
+	public <T extends IValidationTask<T>> void removeValidationTask(T validationTask) {
+		this.getValidationTasks().remove(Objects.requireNonNull(validationTask, "validationTask"));
+	}
+
+	public <T extends IValidationTask<T>> void replaceValidationTask(T oldValidationTask, T newValidationTask) {
+		Objects.requireNonNull(oldValidationTask, "oldValidationTask");
+		Objects.requireNonNull(newValidationTask, "newValidationTask");
+		int index = this.getValidationTasks().indexOf(oldValidationTask);
+		if (index < 0) {
+			throw new IllegalArgumentException("oldValidationTask not found");
+		}
+
+		this.getValidationTasks().set(index, newValidationTask);
 	}
 
 	@JsonIgnore
-	public List<TemporalFormulaItem> getTemporalFormulas() {
-		return this.temporalFormulasProperty().get();
+	public ObservableList<TemporalFormulaItem> getTemporalFormulas() {
+		return this.getValidationTasksByType(BuiltinValidationTaskTypes.TEMPORAL);
 	}
 
 	public ObjectProperty<MachineCheckingStatus> temporalStatusProperty() {
@@ -638,17 +654,5 @@ public final class MachineProperties {
 		testCases.forEach(TestCaseGenerationItem::reset);
 		tracesProperty().forEach(ReplayTrace::reset);
 		modelcheckingItemsProperty().forEach(ModelCheckingItem::reset);
-	}
-
-	@JsonIgnore
-	public Set<String> getValidationTaskIds() {
-		Set<String> ids = new HashSet<>(this.validationTasksOldProperty().get().keySet());
-		for (var vt : this.getValidationTasks()) {
-			var id = vt.getId();
-			if (id != null) {
-				ids.add(id);
-			}
-		}
-		return ids;
 	}
 }

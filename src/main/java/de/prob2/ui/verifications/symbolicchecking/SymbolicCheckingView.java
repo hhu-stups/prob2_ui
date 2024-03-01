@@ -22,7 +22,7 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.value.ChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
@@ -35,15 +35,15 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
-			
+
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
 			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
-			
+
 			Menu showCounterExampleItem = new Menu(i18n.translate("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
 			showCounterExampleItem.setDisable(true);
 			contextMenu.getItems().add(showCounterExampleItem);
-			
+
 			this.itemProperty().addListener((observable, from, to) -> {
 				final InvalidationListener updateCounterExamplesListener = o -> showCounterExamples(to, showCounterExampleItem);
 
@@ -59,7 +59,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 				}
 			});
 		}
-		
+
 		private void showCounterExamples(SymbolicCheckingFormulaItem item, Menu counterExampleItem) {
 			counterExampleItem.getItems().clear();
 			List<Trace> counterExamples = item.getCounterExamples();
@@ -97,35 +97,29 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		this.choosingStageProvider = choosingStageProvider;
 		stageManager.loadFXML(this, "symbolic_checking_view.fxml");
 	}
-	
+
+	@Override
+	protected ObservableList<SymbolicCheckingFormulaItem> getItemsProperty(Machine machine) {
+		return machine.getMachineProperties().symbolicCheckingFormulasProperty();
+	}
+
 	@Override
 	public void initialize() {
 		super.initialize();
-		
+
 		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
-		
+
 		itemsTable.setRowFactory(table -> new Row());
 		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
-		
-		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
-			this.items.unbind();
-			if (to != null) {
-				this.items.bind(to.getMachineProperties().symbolicCheckingFormulasProperty());
-			} else {
-				this.items.clear();
-			}
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
-		
+
 		helpButton.setHelpContent("verification", "Symbolic");
 	}
-	
+
 	@Override
 	protected String configurationForItem(final SymbolicCheckingFormulaItem item) {
 		return item.getCode();
 	}
-	
+
 	@Override
 	protected void executeItemSync(final SymbolicCheckingFormulaItem item, final ExecutionContext context) {
 		item.execute(context);
@@ -134,7 +128,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 			currentTrace.set(counterExamples.get(0));
 		}
 	}
-	
+
 	@Override
 	protected Optional<SymbolicCheckingFormulaItem> showItemDialog(final SymbolicCheckingFormulaItem oldItem) {
 		final SymbolicCheckingChoosingStage choosingStage = choosingStageProvider.get();

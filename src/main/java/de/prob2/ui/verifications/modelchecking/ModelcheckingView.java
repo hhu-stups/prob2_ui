@@ -34,6 +34,7 @@ import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -135,6 +136,11 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 
 	@Override
+	protected ObservableList<ModelCheckingItem> getItemsProperty(Machine machine) {
+		return machine.getMachineProperties().modelcheckingItemsProperty();
+	}
+
+	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();
@@ -158,7 +164,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 				});
 			}
 		};
-		items.addListener((ListChangeListener<ModelCheckingItem>)change -> {
+		itemsTable.getItems().addListener((ListChangeListener<ModelCheckingItem>) change -> {
 			while (change.next()) {
 				if (change.wasAdded()) {
 					for (final ModelCheckingItem item : change.getRemoved()) {
@@ -171,17 +177,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 				}
 			}
 		});
-
-		final ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
-			items.unbind();
-			if (to != null) {
-				items.bind(to.getMachineProperties().modelcheckingItemsProperty());
-			} else {
-				items.set(FXCollections.observableArrayList());
-			}
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
 		stepStatusColumn.setCellFactory(col -> new CheckedCell<>());
 		stepStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
@@ -340,7 +335,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	protected void executeAllSelectedItems() {
 		final ExecutionContext context = this.getCurrentExecutionContext();
 		cliExecutor.submit(() -> {
-			for (ModelCheckingItem item : items) {
+			for (ModelCheckingItem item : itemsTable.getItems()) {
 				if (!item.selected()) {
 					continue;
 				}

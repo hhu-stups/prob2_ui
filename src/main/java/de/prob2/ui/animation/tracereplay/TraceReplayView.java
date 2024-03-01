@@ -39,8 +39,8 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
+import javafx.beans.value.ObservableListValue;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -139,21 +139,15 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
+	protected ObservableList<ReplayTrace> getItemsProperty(Machine machine) {
+		return machine.getMachineProperties().tracesProperty();
+	}
+
+	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();
 		helpButton.setHelpContent("animation", "Trace");
-
-		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			items.unbind();
-			if (to != null) {
-				items.bind(to.getMachineProperties().tracesProperty());
-			} else {
-				items.set(FXCollections.observableArrayList());
-			}
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
 		statusProgressColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
@@ -289,8 +283,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected void removeItem(ReplayTrace item) {
-		super.removeItem(item);
+	protected void removeItem(Machine machine, ReplayTrace item) {
+		super.removeItem(machine, item);
 		traceFileHandler.deleteTraceFile(item);
 	}
 }
