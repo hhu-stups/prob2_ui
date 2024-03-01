@@ -175,13 +175,10 @@ public final class MachineProperties {
 	}
 
 	@JsonSetter("validationTasks")
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private void setValidationTasks(List<IValidationTask<?>> validationTasks) {
+	private <T extends IValidationTask<T>> void setValidationTasks(List<T> validationTasks) {
 		this.validationTasks.clear();
-		for (IValidationTask<?> vt : Objects.requireNonNull(validationTasks, "validationTasks")) {
-			// due to the bounds on IValidationTask<T> we know that vt is an instance of a class T that correctly
-			// implements IValidationTask<T> and thus there is a 1:1 correspondence between its TaskType and itself
-			this.addValidationTask((IValidationTask) vt);
+		for (T vt : Objects.requireNonNull(validationTasks, "validationTasks")) {
+			this.addValidationTask(vt);
 		}
 	}
 
