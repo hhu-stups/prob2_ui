@@ -1,7 +1,6 @@
 package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
@@ -77,12 +75,18 @@ public final class MachineProperties {
 	@JsonIgnore
 	private final Map<ValidationTaskType<? extends IExecutableItem>, ObjectProperty<MachineCheckingStatus>> statusProperties;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
+	/**
+	 * View of all proof obligation items.
+	 * {@link MachineProperties#proofObligationItemsWithIds} only saves POs with ids.
+	 */
+	@JsonIgnore
+	private final ListProperty<ProofObligationItem> allProofObligationItems;
+	/**
+	 * All POs with ids.
+	 */
+	private final ListProperty<SavedProofObligationItem> proofObligationItemsWithIds;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
-	@JsonIgnore // Saved as proofObligationItems instead
-	private final ListProperty<ProofObligationItem> allProofObligationItems;
-	// Contains only proof obligations that have an ID.
-	private final ListProperty<SavedProofObligationItem> proofObligationItems;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
@@ -108,7 +112,7 @@ public final class MachineProperties {
 
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.allProofObligationItems = new SimpleListProperty<>(this, "allProofObligationItems", FXCollections.observableArrayList());
-		this.proofObligationItems = new SimpleListProperty<>(this, "proofObligationItems", FXCollections.observableArrayList());
+		this.proofObligationItemsWithIds = new SimpleListProperty<>(this, "proofObligationItemsWithIds", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
@@ -119,11 +123,11 @@ public final class MachineProperties {
 		this.validationTasksOldListener = change -> {
 			while (change.next()) {
 				for (final IValidationTask<?> vt : change.getRemoved()) {
-					this.validationTasksOldProperty().remove(vt.getId(), vt);
+					this.getValidationTasksOld().remove(vt.getId(), vt);
 				}
 				for (final IValidationTask<?> vt : change.getAddedSubList()) {
 					if (vt.getId() != null) {
-						this.validationTasksOldProperty().put(vt.getId(), vt);
+						this.getValidationTasksOld().put(vt.getId(), vt);
 					}
 				}
 			}
@@ -136,7 +140,7 @@ public final class MachineProperties {
 		tasks.addListener(this.validationTasksOldListener);
 		for (final IValidationTask<?> task : tasks) {
 			if (task.getId() != null) {
-				this.validationTasksOldProperty().put(task.getId(), task);
+				this.getValidationTasksOld().put(task.getId(), task);
 			}
 		}
 	}
@@ -145,11 +149,12 @@ public final class MachineProperties {
 		tasks.removeListener(this.validationTasksOldListener);
 		for (final IValidationTask<?> task : tasks) {
 			if (task.getId() != null) {
-				this.validationTasksOldProperty().remove(task.getId(), task);
+				this.getValidationTasksOld().remove(task.getId(), task);
 			}
 		}
 	}
 
+	@JsonIgnore
 	public ReadOnlyListProperty<IValidationTask<?>> getValidationTasks() {
 		return this.validationTasks;
 	}
@@ -184,7 +189,7 @@ public final class MachineProperties {
 	@JsonIgnore
 	public Set<String> getValidationTaskIds() {
 		Set<String> ids = this.getValidationTasksWithId().stream().map(IValidationTask::getId).collect(Collectors.toSet());
-		ids.addAll(this.validationTasksOldProperty().get().keySet());
+		ids.addAll(this.getValidationTasksOld().get().keySet());
 		return ids;
 	}
 
@@ -258,71 +263,56 @@ public final class MachineProperties {
 		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.MODEL_CHECKING);
 	}
 
-	public ReadOnlyMapProperty<String, IValidationTask<?>> validationTasksOldProperty() {
+	@JsonIgnore
+	public ReadOnlyMapProperty<String, IValidationTask<?>> getValidationTasksOld() {
 		return this.validationTasksOld;
 	}
 
-	public ListProperty<LTLPatternItem> ltlPatternsProperty() {
-		return ltlPatterns;
+	@JsonGetter("ltlPatterns")
+	public ReadOnlyListProperty<LTLPatternItem> getLTLPatterns() {
+		return this.ltlPatterns;
 	}
 
-	@JsonProperty("ltlPatterns")
-	public List<LTLPatternItem> getLTLPatterns() {
-		return ltlPatternsProperty().get();
-	}
-
-	@JsonProperty("ltlPatterns")
+	@JsonSetter("ltlPatterns")
 	private void setLTLPatterns(final List<LTLPatternItem> ltlPatterns) {
-		this.ltlPatternsProperty().setAll(ltlPatterns);
+		this.getLTLPatterns().setAll(ltlPatterns);
 	}
 
-	public ListProperty<SymbolicAnimationItem> symbolicAnimationFormulasProperty() {
-		return symbolicAnimationFormulas;
+	@JsonGetter("symbolicAnimationFormulas")
+	public ReadOnlyListProperty<SymbolicAnimationItem> getSymbolicAnimationFormulas() {
+		return this.symbolicAnimationFormulas;
 	}
 
-	public List<SymbolicAnimationItem> getSymbolicAnimationFormulas() {
-		return symbolicAnimationFormulas.get();
-	}
-
-	@JsonProperty
+	@JsonSetter("symbolicAnimationFormulas")
 	private void setSymbolicAnimationFormulas(final List<SymbolicAnimationItem> symbolicAnimationFormulas) {
-		this.symbolicAnimationFormulasProperty().setAll(symbolicAnimationFormulas);
+		this.getSymbolicAnimationFormulas().setAll(symbolicAnimationFormulas);
 	}
 
-	public ListProperty<TestCaseGenerationItem> testCasesProperty() {
-		return testCases;
+	@JsonGetter("testCases")
+	public ReadOnlyListProperty<TestCaseGenerationItem> getTestCases() {
+		return this.testCases;
 	}
 
-	public List<TestCaseGenerationItem> getTestCases() {
-		return testCases.get();
-	}
-
-	@JsonProperty
+	@JsonSetter("testCases")
 	private void setTestCases(final List<TestCaseGenerationItem> testCases) {
-		this.testCasesProperty().setAll(testCases);
+		this.getTestCases().setAll(testCases);
 	}
 
-	public ListProperty<ProofObligationItem> allProofObligationItemsProperty() {
-		return allProofObligationItems;
+	@JsonIgnore
+	public ReadOnlyListProperty<ProofObligationItem> getAllProofObligationItems() {
+		return this.allProofObligationItems;
 	}
 
-	public List<ProofObligationItem> getAllProofObligationItems() {
-		return allProofObligationItems.get();
+	@JsonGetter("proofObligationItems")
+	private ReadOnlyListProperty<SavedProofObligationItem> getProofObligationItemsWithIds() {
+		return this.proofObligationItemsWithIds;
 	}
 
-	public ListProperty<SavedProofObligationItem> proofObligationItemsProperty() {
-		return this.proofObligationItems;
-	}
-
-	public List<SavedProofObligationItem> getProofObligationItems() {
-		return this.proofObligationItemsProperty().get();
-	}
-
-	// After setting proofObligationItems,
-	// allProofObligationItems must be updated manually using updateAllProofObligationsFromModel.
-	@JsonProperty
-	private void setProofObligationItems(final List<SavedProofObligationItem> proofObligationItems) {
-		this.proofObligationItemsProperty().setAll(proofObligationItems);
+	@JsonSetter("proofObligationItems")
+	private void setProofObligationItemsWithIds(final List<SavedProofObligationItem> proofObligationItems) {
+		// After setting proofObligationItems,
+		// allProofObligationItems must be updated manually using updateAllProofObligationsFromModel.
+		this.getProofObligationItemsWithIds().setAll(proofObligationItems);
 	}
 
 	public void updateAllProofObligationsFromModel(final AbstractModel model) {
@@ -332,7 +322,7 @@ public final class MachineProperties {
 		}
 
 		// Save the previous POs and allow lookup by name.
-		Map<String, SavedProofObligationItem> previousPOsByName = this.getProofObligationItems().stream()
+		Map<String, SavedProofObligationItem> previousPOsByName = this.getProofObligationItemsWithIds().stream()
 			                                                          .collect(Collectors.toMap(SavedProofObligationItem::getName, x -> x));
 
 		// Read the current POs from the model.
@@ -362,22 +352,17 @@ public final class MachineProperties {
 			.collect(Collectors.toCollection(() -> proofObligations));
 
 		// Store the updated POs in the machine.
-		this.allProofObligationItemsProperty().setAll(proofObligations);
+		this.getAllProofObligationItems().setAll(proofObligations);
 	}
 
-	public ListProperty<SimulationModel> simulationsProperty() {
-		return simulations;
+	@JsonGetter("simulations")
+	public ReadOnlyListProperty<SimulationModel> getSimulations() {
+		return this.simulations;
 	}
 
-	@JsonProperty("simulations")
-	public List<SimulationModel> getSimulations() {
-		return simulations.get();
-	}
-
-	@JsonProperty("simulations")
-	public void setSimulations(List<SimulationModel> simulations) {
-		this.simulationsProperty().clear();
-		this.simulationsProperty().addAll(simulations);
+	@JsonSetter("simulations")
+	private void setSimulations(List<SimulationModel> simulations) {
+		this.getSimulations().setAll(simulations);
 		for (SimulationModel simulationModel : simulations) {
 			for (SimulationItem simulationItem : simulationModel.getSimulationItems()) {
 				simulationItem.setSimulationModel(simulationModel);
@@ -389,39 +374,34 @@ public final class MachineProperties {
 		return visBVisualisation;
 	}
 
+	@JsonGetter("visBVisualisation")
 	public Path getVisBVisualisation() {
 		return visBVisualisation.get();
 	}
 
+	@JsonSetter("visBVisualisation")
 	public void setVisBVisualisation(Path visBVisualisation) {
 		this.visBVisualizationProperty().set(visBVisualisation);
 	}
 
-	public ListProperty<String> historyChartItemsProperty() {
-		return historyChartItems;
+	@JsonGetter("historyChartItems")
+	public ReadOnlyListProperty<String> getHistoryChartItems() {
+		return this.historyChartItems;
 	}
 
-	@JsonProperty("historyChartItems")
-	public List<String> getHistoryChartItems() {
-		return historyChartItems.get();
+	@JsonSetter("historyChartItems")
+	public void setHistoryChartItems(List<String> historyChartItems) {
+		this.getHistoryChartItems().setAll(historyChartItems);
 	}
 
-	@JsonProperty("historyChartItems")
-	public void setHistoryChartItems(ArrayList<String> historyChartItems) {
-		this.historyChartItems.setValue(FXCollections.observableArrayList(historyChartItems));
+	@JsonGetter("dotVisualizationItems")
+	public ReadOnlyMapProperty<String, ListProperty<DynamicCommandFormulaItem>> getDotVisualizationItems() {
+		return this.dotVisualizationItems;
 	}
 
-	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> dotVisualizationItemsProperty() {
-		return dotVisualizationItems;
-	}
-
-	public Map<String, ListProperty<DynamicCommandFormulaItem>> getDotVisualizationItems() {
-		return dotVisualizationItems.get();
-	}
-
-	@JsonProperty("dotVisualizationItems")
-	public void setDotVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> dotVisualizationItems) {
-		this.dotVisualizationItems.setValue(convertToObservable(dotVisualizationItems));
+	@JsonSetter("dotVisualizationItems")
+	private void setDotVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> dotVisualizationItems) {
+		this.dotVisualizationItems.set(convertToObservable(dotVisualizationItems));
 	}
 
 	private ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> convertToObservable(Map<String, List<DynamicCommandFormulaItem>> VisualizationItems) {
@@ -454,22 +434,19 @@ public final class MachineProperties {
 
 	public void addDotVisualizationListProperty(String commandType) {
 		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
-		dotVisualizationItems.put(commandType, listProperty);
+		this.getDotVisualizationItems().put(commandType, listProperty);
 		listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
 		this.addValidationTaskListener(listProperty);
 	}
 
-	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> tableVisualizationItemsProperty() {
-		return tableVisualizationItems;
+	@JsonGetter("tableVisualizationItems")
+	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> getTableVisualizationItems() {
+		return this.tableVisualizationItems;
 	}
 
-	public Map<String, ListProperty<DynamicCommandFormulaItem>> getTableVisualizationItems() {
-		return tableVisualizationItems.get();
-	}
-
-	@JsonProperty("tableVisualizationItems")
+	@JsonSetter("tableVisualizationItems")
 	public void setTableVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> tableVisualizationItems) {
-		this.tableVisualizationItems.setValue(convertToObservable(tableVisualizationItems));
+		this.getTableVisualizationItems().setValue(convertToObservable(tableVisualizationItems));
 	}
 
 	public void addTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
@@ -489,7 +466,7 @@ public final class MachineProperties {
 
 	public void addTableVisualizationListProperty(String commandType) {
 		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
-		tableVisualizationItems.put(commandType, listProperty);
+		this.getTableVisualizationItems().put(commandType, listProperty);
 		listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
 		this.addValidationTaskListener(listProperty);
 	}
@@ -498,30 +475,33 @@ public final class MachineProperties {
 		return this.changed;
 	}
 
+	@JsonIgnore
 	public boolean isChanged() {
 		return this.changedProperty().get();
 	}
 
+	@JsonIgnore
 	public void setChanged(final boolean changed) {
 		this.changedProperty().set(changed);
 	}
 
+	@JsonIgnore
 	public PatternManager getPatternManager() {
 		return patternManager;
 	}
 
 	public void clearPatternManager() {
-		patternManager.getPatterns().clear();
+		this.getPatternManager().getPatterns().clear();
 	}
 
 	private void initListeners() {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
 		this.getValidationTasks().addListener(changedListener);
 		// TODO: remove this for all validation tasks
-		this.ltlPatternsProperty().addListener(changedListener);
-		this.symbolicAnimationFormulasProperty().addListener(changedListener);
-		this.testCasesProperty().addListener(changedListener);
-		this.allProofObligationItemsProperty().addListener((o, from, to) -> {
+		this.getLTLPatterns().addListener(changedListener);
+		this.getSymbolicAnimationFormulas().addListener(changedListener);
+		this.getTestCases().addListener(changedListener);
+		this.getAllProofObligationItems().addListener((o, from, to) -> {
 			// Update the saved POs whenever the real PO list changes.
 			final List<SavedProofObligationItem> updatedSavedPOs = to.stream()
 				                                                       .filter(po -> po.getId() != null)
@@ -529,23 +509,22 @@ public final class MachineProperties {
 				                                                       .collect(Collectors.toList());
 
 			// Avoid marking the machine as unsaved if the POs didn't actually change.
-			if (!this.getProofObligationItems().equals(updatedSavedPOs)) {
-				this.setProofObligationItems(updatedSavedPOs);
+			if (!this.getProofObligationItemsWithIds().equals(updatedSavedPOs)) {
+				this.setProofObligationItemsWithIds(updatedSavedPOs);
 			}
 		});
-		this.proofObligationItemsProperty().addListener(changedListener);
-		this.simulationsProperty().addListener(changedListener);
+		this.getProofObligationItemsWithIds().addListener(changedListener);
+		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
-		this.historyChartItemsProperty().addListener(changedListener);
-		this.dotVisualizationItemsProperty().addListener(changedListener);
-		this.tableVisualizationItemsProperty().addListener(changedListener);
+		this.getHistoryChartItems().addListener(changedListener);
+		this.getDotVisualizationItems().addListener(changedListener);
+		this.getTableVisualizationItems().addListener(changedListener);
 
 		// Collect all validation tasks that have a non-null ID
 		this.addValidationTaskListener(this.getValidationTasks());
 		// TODO: remove this
-		this.addValidationTaskListener(this.allProofObligationItemsProperty());
-
-		this.simulationsProperty().addListener((ListChangeListener<SimulationModel>) change -> {
+		this.addValidationTaskListener(this.getAllProofObligationItems());
+		this.getSimulations().addListener((ListChangeListener<SimulationModel>) change -> {
 			while (change.next()) {
 				for (final SimulationModel simulationModel : change.getRemoved()) {
 					this.removeValidationTaskListener(simulationModel.simulationItemsProperty());
@@ -585,10 +564,10 @@ public final class MachineProperties {
 				et.reset();
 			}
 		}
-		ltlPatterns.forEach(LTLPatternItem::reset);
-		patternManager = new PatternManager();
-		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
-		simulations.forEach(SimulationModel::reset);
-		testCases.forEach(TestCaseGenerationItem::reset);
+		this.getSymbolicAnimationFormulas().forEach(IExecutableItem::reset);
+		this.getTestCases().forEach(IExecutableItem::reset);
+		this.getLTLPatterns().forEach(LTLPatternItem::reset);
+		this.getSimulations().forEach(SimulationModel::reset);
+		this.patternManager = new PatternManager();
 	}
 }

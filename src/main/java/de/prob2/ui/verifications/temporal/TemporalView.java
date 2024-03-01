@@ -36,9 +36,7 @@ import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ListProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableListValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -174,8 +172,8 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 				from.getMachineProperties().clearPatternManager();
 			}
 			if (to != null) {
-				tvPattern.itemsProperty().bind(to.getMachineProperties().ltlPatternsProperty());
-				managePatternTable(to.getMachineProperties().ltlPatternsProperty());
+				tvPattern.itemsProperty().bind(to.getMachineProperties().getLTLPatterns());
+				managePatternTable(to.getMachineProperties().getLTLPatterns());
 			} else {
 				tvPattern.setItems(FXCollections.emptyObservableList());
 			}
@@ -198,7 +196,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 				LTLPatternItem item = row.getItem();
 				machine.getMachineProperties().getLTLPatterns().remove(item);
 				LTLPatternParser.removePattern(item, machine);
-				managePatternTable(machine.getMachineProperties().ltlPatternsProperty());
+				managePatternTable(machine.getMachineProperties().getLTLPatterns());
 			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
@@ -220,12 +218,11 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		});
 	}
 
-	private void managePatternTable(ListProperty<LTLPatternItem> ltlPatternItems){
-		if (ltlPatternItems.isEmpty()){
+	private void managePatternTable(ObservableList<LTLPatternItem> ltlPatternItems){
+		if (ltlPatternItems.isEmpty()) {
 			tvPattern.setVisible(false);
 			tvPattern.setManaged(false);
-		}
-		else {
+		} else {
 			tvPattern.setVisible(true);
 			tvPattern.setManaged(true);
 		}
@@ -271,7 +268,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		if (machine.getMachineProperties().getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
 			LTLPatternParser.addPattern(newItem, machine);
 			machine.getMachineProperties().getLTLPatterns().add(newItem);
-			managePatternTable(machine.getMachineProperties().ltlPatternsProperty());
+			managePatternTable(machine.getMachineProperties().getLTLPatterns());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",

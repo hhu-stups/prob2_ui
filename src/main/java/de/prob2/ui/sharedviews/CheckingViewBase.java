@@ -170,9 +170,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			itemsTable.itemsProperty().unbind(); // unbind for safety, this should never be bound though
 			if (to != null) {
-				itemsTable.itemsProperty().set(this.getItemsProperty(to));
+				itemsTable.setItems(this.getItemsProperty(to));
 			} else {
-				itemsTable.itemsProperty().set(FXCollections.observableArrayList());
+				itemsTable.setItems(FXCollections.observableArrayList());
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);

@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -34,6 +33,7 @@ import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaType;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 
+import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 
 import org.junit.jupiter.api.AfterEach;
@@ -74,7 +74,7 @@ class ProjectDocumenterTest {
 		Mockito.when(machineProperties.getTraces()).thenReturn(FXCollections.singletonObservableList(trace));
 		Mockito.when(machineProperties.getModelCheckingTasks()).thenReturn(FXCollections.singletonObservableList(modelCheckingItem));
 		Mockito.when(machineProperties.getTemporalFormulas()).thenReturn(FXCollections.singletonObservableList(ltlFormulaItem));
-		Mockito.when(machineProperties.getLTLPatterns()).thenReturn(Collections.singletonList(ltlPatternItem));
+		Mockito.when(machineProperties.getLTLPatterns()).thenReturn(new SimpleListProperty<>(FXCollections.singletonObservableList(ltlPatternItem)));
 		Mockito.when(machineProperties.getSymbolicCheckingFormulas()).thenReturn(FXCollections.singletonObservableList(symbolicCheckingFormulaItem));
 
 		Mockito.when(trace.getName()).thenReturn("TrafficLight_Cars");

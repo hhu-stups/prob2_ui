@@ -107,8 +107,8 @@ public class ProofObligationView extends AnchorPane {
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvProofObligations.itemsProperty().unbind();
-			if(to != null) {
-				tvProofObligations.itemsProperty().bind(to.getMachineProperties().allProofObligationItemsProperty());
+			if (to != null) {
+				tvProofObligations.setItems(to.getMachineProperties().getAllProofObligationItems());
 			} else {
 				tvProofObligations.setItems(FXCollections.emptyObservableList());
 			}

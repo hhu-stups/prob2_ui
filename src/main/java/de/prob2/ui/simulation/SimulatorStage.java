@@ -517,7 +517,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
 	}
 
@@ -528,7 +528,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
 	}
 
@@ -542,7 +542,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if(path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
 	}
 
@@ -657,7 +657,7 @@ public class SimulatorStage extends Stage {
 			cbSimulation.setItems(FXCollections.observableArrayList());
 			return;
 		}
-		cbSimulation.itemsProperty().bind(machine.getMachineProperties().simulationsProperty());
+		cbSimulation.itemsProperty().bind(machine.getMachineProperties().getSimulations());
 	}
 
 	public void loadSimulationIntoSimulator(SimulationModel simulation) {
