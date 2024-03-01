@@ -140,7 +140,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Override
 	protected ObservableList<ReplayTrace> getItemsProperty(Machine machine) {
-		return machine.getMachineProperties().tracesProperty();
+		return machine.getMachineProperties().getTraces();
 	}
 
 	@Override

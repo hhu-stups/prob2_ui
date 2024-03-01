@@ -82,7 +82,6 @@ public final class MachineProperties {
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
-	private final CheckingProperty<ReplayTrace> trace;
 	private final CheckingProperty<ModelCheckingItem> modelchecking;
 	@JsonIgnore // Saved as proofObligationItems instead
 	private final ListProperty<ProofObligationItem> allProofObligationItems;
@@ -109,7 +108,6 @@ public final class MachineProperties {
 		this.statusProperties = new HashMap<>();
 
 		this.modelchecking = new CheckingProperty<>(new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList()));
-		this.trace = new CheckingProperty<>(new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList()));
 
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
@@ -248,8 +246,13 @@ public final class MachineProperties {
 		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.SYMBOLIC);
 	}
 
-	public ReadOnlyObjectProperty<MachineCheckingStatus> traceReplayStatusProperty() {
-		return trace.statusProperty();
+	@JsonIgnore
+	public ObservableList<ReplayTrace> getTraces() {
+		return this.getValidationTasksByType(BuiltinValidationTaskTypes.REPLAY_TRACE);
+	}
+
+	public ReadOnlyObjectProperty<MachineCheckingStatus> traceStatusProperty() {
+		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.REPLAY_TRACE);
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> modelcheckingStatusProperty() {
@@ -374,19 +377,6 @@ public final class MachineProperties {
 
 		// Store the updated POs in the machine.
 		this.allProofObligationItemsProperty().setAll(proofObligations);
-	}
-
-	public ListProperty<ReplayTrace> tracesProperty() {
-		return this.trace.itemProperty();
-	}
-
-	public ObservableList<ReplayTrace> getTraces() {
-		return this.tracesProperty().get();
-	}
-
-	@JsonProperty
-	private void setTraces(final List<ReplayTrace> traces) {
-		this.tracesProperty().setAll(traces);
 	}
 
 	public ListProperty<SimulationModel> simulationsProperty() {
@@ -545,7 +535,6 @@ public final class MachineProperties {
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicAnimationFormulasProperty().addListener(changedListener);
 		this.testCasesProperty().addListener(changedListener);
-		this.tracesProperty().addListener(changedListener);
 		this.modelcheckingItemsProperty().addListener(changedListener);
 		this.allProofObligationItemsProperty().addListener((o, from, to) -> {
 			// Update the saved POs whenever the real PO list changes.
@@ -567,13 +556,11 @@ public final class MachineProperties {
 		this.tableVisualizationItemsProperty().addListener(changedListener);
 
 		// TODO: remove this
-		addCheckingStatusListener(this.tracesProperty(), this.trace.statusProperty());
 		addCheckingStatusListener(this.modelcheckingItemsProperty(), this.modelchecking.statusProperty());
 
 		// Collect all validation tasks that have a non-null ID
 		this.addValidationTaskListener(this.getValidationTasks());
 		// TODO: remove this
-		this.addValidationTaskListener(this.tracesProperty());
 		this.addValidationTaskListener(this.modelcheckingItemsProperty());
 		this.addValidationTaskListener(this.allProofObligationItemsProperty());
 
@@ -622,7 +609,6 @@ public final class MachineProperties {
 		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
 		simulations.forEach(SimulationModel::reset);
 		testCases.forEach(TestCaseGenerationItem::reset);
-		tracesProperty().forEach(ReplayTrace::reset);
 		modelcheckingItemsProperty().forEach(ModelCheckingItem::reset);
 	}
 }
