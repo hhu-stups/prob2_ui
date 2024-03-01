@@ -72,7 +72,7 @@ class ProjectDocumenterTest {
 		MachineProperties machineProperties = Mockito.mock(MachineProperties.class);
 		Mockito.when(trafficLight.getMachineProperties()).thenReturn(machineProperties);
 		Mockito.when(machineProperties.getTraces()).thenReturn(FXCollections.singletonObservableList(trace));
-		Mockito.when(machineProperties.getModelcheckingItems()).thenReturn(Collections.singletonList(modelCheckingItem));
+		Mockito.when(machineProperties.getModelCheckingTasks()).thenReturn(FXCollections.singletonObservableList(modelCheckingItem));
 		Mockito.when(machineProperties.getTemporalFormulas()).thenReturn(FXCollections.singletonObservableList(ltlFormulaItem));
 		Mockito.when(machineProperties.getLTLPatterns()).thenReturn(Collections.singletonList(ltlPatternItem));
 		Mockito.when(machineProperties.getSymbolicCheckingFormulas()).thenReturn(FXCollections.singletonObservableList(symbolicCheckingFormulaItem));

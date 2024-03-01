@@ -137,7 +137,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	@Override
 	protected ObservableList<ModelCheckingItem> getItemsProperty(Machine machine) {
-		return machine.getMachineProperties().modelcheckingItemsProperty();
+		return machine.getMachineProperties().getModelCheckingTasks();
 	}
 
 	@Override

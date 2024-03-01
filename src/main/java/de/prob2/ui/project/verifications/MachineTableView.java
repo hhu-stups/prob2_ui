@@ -107,7 +107,7 @@ public class MachineTableView extends TableView<Machine> {
 		machineSymbolicColumn.setCellFactory(col -> new StatusIconCell(i18n));
 		machineSymbolicColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().symbolicCheckingStatusProperty());
 		machineModelcheckColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineModelcheckColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().modelcheckingStatusProperty());
+		machineModelcheckColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().modelCheckingStatusProperty());
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		this.itemsProperty().bind(currentProject.machinesProperty());
 	}

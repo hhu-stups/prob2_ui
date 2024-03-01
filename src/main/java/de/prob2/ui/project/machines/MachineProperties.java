@@ -62,11 +62,8 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 @JsonPropertyOrder({
 	"validationTasks",
 	"ltlPatterns",
-	"symbolicCheckingFormulas",
 	"symbolicAnimationFormulas",
 	"testCases",
-	"traces",
-	"modelcheckingItems",
 	"proofObligationItems",
 	"simulations",
 	"visBVisualisation",
@@ -82,7 +79,6 @@ public final class MachineProperties {
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
-	private final CheckingProperty<ModelCheckingItem> modelchecking;
 	@JsonIgnore // Saved as proofObligationItems instead
 	private final ListProperty<ProofObligationItem> allProofObligationItems;
 	// Contains only proof obligations that have an ID.
@@ -106,8 +102,6 @@ public final class MachineProperties {
 	public MachineProperties() {
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
 		this.statusProperties = new HashMap<>();
-
-		this.modelchecking = new CheckingProperty<>(new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList()));
 
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
@@ -255,8 +249,13 @@ public final class MachineProperties {
 		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.REPLAY_TRACE);
 	}
 
-	public ReadOnlyObjectProperty<MachineCheckingStatus> modelcheckingStatusProperty() {
-		return this.modelchecking.statusProperty();
+	@JsonIgnore
+	public ObservableList<ModelCheckingItem> getModelCheckingTasks() {
+		return this.getValidationTasksByType(BuiltinValidationTaskTypes.MODEL_CHECKING);
+	}
+
+	public ReadOnlyObjectProperty<MachineCheckingStatus> modelCheckingStatusProperty() {
+		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.MODEL_CHECKING);
 	}
 
 	public ReadOnlyMapProperty<String, IValidationTask<?>> validationTasksOldProperty() {
@@ -301,19 +300,6 @@ public final class MachineProperties {
 	@JsonProperty
 	private void setTestCases(final List<TestCaseGenerationItem> testCases) {
 		this.testCasesProperty().setAll(testCases);
-	}
-
-	public ListProperty<ModelCheckingItem> modelcheckingItemsProperty() {
-		return this.modelchecking.itemProperty();
-	}
-
-	public List<ModelCheckingItem> getModelcheckingItems() {
-		return this.modelcheckingItemsProperty().get();
-	}
-
-	@JsonProperty
-	private void setModelcheckingItems(final List<ModelCheckingItem> modelcheckingItems) {
-		this.modelcheckingItemsProperty().setAll(modelcheckingItems);
 	}
 
 	public ListProperty<ProofObligationItem> allProofObligationItemsProperty() {
@@ -535,7 +521,6 @@ public final class MachineProperties {
 		this.ltlPatternsProperty().addListener(changedListener);
 		this.symbolicAnimationFormulasProperty().addListener(changedListener);
 		this.testCasesProperty().addListener(changedListener);
-		this.modelcheckingItemsProperty().addListener(changedListener);
 		this.allProofObligationItemsProperty().addListener((o, from, to) -> {
 			// Update the saved POs whenever the real PO list changes.
 			final List<SavedProofObligationItem> updatedSavedPOs = to.stream()
@@ -555,13 +540,9 @@ public final class MachineProperties {
 		this.dotVisualizationItemsProperty().addListener(changedListener);
 		this.tableVisualizationItemsProperty().addListener(changedListener);
 
-		// TODO: remove this
-		addCheckingStatusListener(this.modelcheckingItemsProperty(), this.modelchecking.statusProperty());
-
 		// Collect all validation tasks that have a non-null ID
 		this.addValidationTaskListener(this.getValidationTasks());
 		// TODO: remove this
-		this.addValidationTaskListener(this.modelcheckingItemsProperty());
 		this.addValidationTaskListener(this.allProofObligationItemsProperty());
 
 		this.simulationsProperty().addListener((ListChangeListener<SimulationModel>) change -> {
@@ -609,6 +590,5 @@ public final class MachineProperties {
 		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
 		simulations.forEach(SimulationModel::reset);
 		testCases.forEach(TestCaseGenerationItem::reset);
-		modelcheckingItemsProperty().forEach(ModelCheckingItem::reset);
 	}
 }
