@@ -125,16 +125,40 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	protected abstract ObservableList<T> getItemsProperty(Machine machine);
 
 	protected void addItem(Machine machine, T item) {
-		this.getItemsProperty(machine).add(item);
+		try {
+			this.getItemsProperty(machine).add(item);
+		} catch (UnsupportedOperationException e) {
+			if (item instanceof IValidationTask<?> vt) {
+				machine.getMachineProperties().addValidationTask(vt);
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	protected void removeItem(Machine machine, T item) {
-		this.getItemsProperty(machine).remove(item);
+		try {
+			this.getItemsProperty(machine).remove(item);
+		} catch (UnsupportedOperationException e) {
+			if (item instanceof IValidationTask<?> vt) {
+				machine.getMachineProperties().removeValidationTask(vt);
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	protected void replaceItem(Machine machine, T oldItem, T newItem) {
-		ObservableList<T> items = this.getItemsProperty(machine);
-		items.set(items.indexOf(oldItem), newItem);
+		try {
+			ObservableList<T> items = this.getItemsProperty(machine);
+			items.set(items.indexOf(oldItem), newItem);
+		} catch (UnsupportedOperationException e) {
+			if (oldItem instanceof IValidationTask<?> vtOld && newItem instanceof IValidationTask<?> vtNew) {
+				machine.getMachineProperties().replaceValidationTask(vtOld, vtNew);
+			} else {
+				throw e;
+			}
+		}
 	}
 
 	@FXML

@@ -162,21 +162,6 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	}
 
 	@Override
-	protected void addItem(Machine machine, TemporalFormulaItem item) {
-		machine.getMachineProperties().addValidationTask(item);
-	}
-
-	@Override
-	protected void removeItem(Machine machine, TemporalFormulaItem item) {
-		machine.getMachineProperties().removeValidationTask(item);
-	}
-
-	@Override
-	protected void replaceItem(Machine machine, TemporalFormulaItem oldItem, TemporalFormulaItem newItem) {
-		machine.getMachineProperties().replaceValidationTask(oldItem, newItem);
-	}
-
-	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();

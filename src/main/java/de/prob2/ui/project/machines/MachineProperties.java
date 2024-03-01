@@ -80,7 +80,6 @@ public final class MachineProperties {
 	@JsonIgnore
 	private final Map<ValidationTaskType<? extends IExecutableItem>, ObjectProperty<MachineCheckingStatus>> statusProperties;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
-	private final CheckingProperty<SymbolicCheckingFormulaItem> symbolic;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final CheckingProperty<ReplayTrace> trace;
@@ -109,7 +108,6 @@ public final class MachineProperties {
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
 		this.statusProperties = new HashMap<>();
 
-		this.symbolic = new CheckingProperty<>(new SimpleObjectProperty<>(this, "symbolicCheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "symbolicCheckingFormulas", FXCollections.observableArrayList()));
 		this.modelchecking = new CheckingProperty<>(new SimpleObjectProperty<>(this, "modelcheckingStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "modelcheckingItems", FXCollections.observableArrayList()));
 		this.trace = new CheckingProperty<>(new SimpleObjectProperty<>(this, "traceReplayStatus", new MachineCheckingStatus()), new SimpleListProperty<>(this, "traces", FXCollections.observableArrayList()));
 
@@ -213,15 +211,15 @@ public final class MachineProperties {
 		);
 	}
 
-	public <T extends IValidationTask<T>> void addValidationTask(T validationTask) {
+	public void addValidationTask(IValidationTask<?> validationTask) {
 		this.getValidationTasks().add(Objects.requireNonNull(validationTask, "validationTask"));
 	}
 
-	public <T extends IValidationTask<T>> void removeValidationTask(T validationTask) {
+	public void removeValidationTask(IValidationTask<?> validationTask) {
 		this.getValidationTasks().remove(Objects.requireNonNull(validationTask, "validationTask"));
 	}
 
-	public <T extends IValidationTask<T>> void replaceValidationTask(T oldValidationTask, T newValidationTask) {
+	public void replaceValidationTask(IValidationTask<?> oldValidationTask, IValidationTask<?> newValidationTask) {
 		Objects.requireNonNull(oldValidationTask, "oldValidationTask");
 		Objects.requireNonNull(newValidationTask, "newValidationTask");
 		int index = this.getValidationTasks().indexOf(oldValidationTask);
@@ -241,12 +239,17 @@ public final class MachineProperties {
 		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.TEMPORAL);
 	}
 
-	public ReadOnlyObjectProperty<MachineCheckingStatus> traceReplayStatusProperty() {
-		return trace.statusProperty();
+	@JsonIgnore
+	public ObservableList<SymbolicCheckingFormulaItem> getSymbolicCheckingFormulas() {
+		return this.getValidationTasksByType(BuiltinValidationTaskTypes.SYMBOLIC);
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> symbolicCheckingStatusProperty() {
-		return this.symbolic.statusProperty();
+		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.SYMBOLIC);
+	}
+
+	public ReadOnlyObjectProperty<MachineCheckingStatus> traceReplayStatusProperty() {
+		return trace.statusProperty();
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> modelcheckingStatusProperty() {
@@ -269,19 +272,6 @@ public final class MachineProperties {
 	@JsonProperty("ltlPatterns")
 	private void setLTLPatterns(final List<LTLPatternItem> ltlPatterns) {
 		this.ltlPatternsProperty().setAll(ltlPatterns);
-	}
-
-	public ListProperty<SymbolicCheckingFormulaItem> symbolicCheckingFormulasProperty() {
-		return this.symbolic.itemProperty();
-	}
-
-	public List<SymbolicCheckingFormulaItem> getSymbolicCheckingFormulas() {
-		return this.symbolicCheckingFormulasProperty().get();
-	}
-
-	@JsonProperty
-	private void setSymbolicCheckingFormulas(final List<SymbolicCheckingFormulaItem> symbolicCheckingFormulas) {
-		this.symbolicCheckingFormulasProperty().setAll(symbolicCheckingFormulas);
 	}
 
 	public ListProperty<SymbolicAnimationItem> symbolicAnimationFormulasProperty() {
@@ -553,7 +543,6 @@ public final class MachineProperties {
 		this.getValidationTasks().addListener(changedListener);
 		// TODO: remove this for all validation tasks
 		this.ltlPatternsProperty().addListener(changedListener);
-		this.symbolicCheckingFormulasProperty().addListener(changedListener);
 		this.symbolicAnimationFormulasProperty().addListener(changedListener);
 		this.testCasesProperty().addListener(changedListener);
 		this.tracesProperty().addListener(changedListener);
@@ -578,14 +567,12 @@ public final class MachineProperties {
 		this.tableVisualizationItemsProperty().addListener(changedListener);
 
 		// TODO: remove this
-		addCheckingStatusListener(this.symbolicCheckingFormulasProperty(), this.symbolic.statusProperty());
 		addCheckingStatusListener(this.tracesProperty(), this.trace.statusProperty());
 		addCheckingStatusListener(this.modelcheckingItemsProperty(), this.modelchecking.statusProperty());
 
 		// Collect all validation tasks that have a non-null ID
-		// TODO: remove this
 		this.addValidationTaskListener(this.getValidationTasks());
-		this.addValidationTaskListener(this.symbolicCheckingFormulasProperty());
+		// TODO: remove this
 		this.addValidationTaskListener(this.tracesProperty());
 		this.addValidationTaskListener(this.modelcheckingItemsProperty());
 		this.addValidationTaskListener(this.allProofObligationItemsProperty());
@@ -632,7 +619,6 @@ public final class MachineProperties {
 		}
 		ltlPatterns.forEach(LTLPatternItem::reset);
 		patternManager = new PatternManager();
-		symbolicCheckingFormulasProperty().forEach(SymbolicCheckingFormulaItem::reset);
 		symbolicAnimationFormulas.forEach(SymbolicAnimationItem::reset);
 		simulations.forEach(SimulationModel::reset);
 		testCases.forEach(TestCaseGenerationItem::reset);

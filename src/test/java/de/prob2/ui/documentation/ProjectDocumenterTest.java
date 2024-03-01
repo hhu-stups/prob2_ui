@@ -75,7 +75,7 @@ class ProjectDocumenterTest {
 		Mockito.when(machineProperties.getModelcheckingItems()).thenReturn(Collections.singletonList(modelCheckingItem));
 		Mockito.when(machineProperties.getTemporalFormulas()).thenReturn(FXCollections.singletonObservableList(ltlFormulaItem));
 		Mockito.when(machineProperties.getLTLPatterns()).thenReturn(Collections.singletonList(ltlPatternItem));
-		Mockito.when(machineProperties.getSymbolicCheckingFormulas()).thenReturn(Collections.singletonList(symbolicCheckingFormulaItem));
+		Mockito.when(machineProperties.getSymbolicCheckingFormulas()).thenReturn(FXCollections.singletonObservableList(symbolicCheckingFormulaItem));
 
 		Mockito.when(trace.getName()).thenReturn("TrafficLight_Cars");
 		TraceJsonFile jsonFile = Mockito.mock(TraceJsonFile.class);
