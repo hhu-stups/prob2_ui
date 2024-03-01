@@ -185,21 +185,26 @@ public final class MachineProperties {
 		}
 	}
 
-	@JsonIgnore
 	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private <T extends IValidationTask<T>> ListProperty<T> createTaskList(ValidationTaskType<T> taskType) {
+		final InvalidationListener changedListener = o -> this.setChanged(true);
+
+		SimpleListProperty<T> p = new SimpleListProperty<>(FXCollections.observableArrayList());
+		p.addListener(changedListener);
+		p.addListener(this.validationTasksOldListener);
+		if (taskType.isExecutableItem()) {
+			addCheckingStatusListener((ReadOnlyListProperty<? extends IExecutableItem>) p, this.getCheckingStatusByType((ValidationTaskType) taskType));
+		}
+
+		return p;
+	}
+
+	@JsonIgnore
+	@SuppressWarnings({ "unchecked" })
 	public <T extends IValidationTask<T>> ListProperty<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
 		return (ListProperty<T>) this.validationTasks.computeIfAbsent(
 			Objects.requireNonNull(taskType, "taskType"),
-			k -> {
-				SimpleListProperty<T> p = new SimpleListProperty<>(FXCollections.observableArrayList());
-				p.addListener((InvalidationListener) o -> this.setChanged(true));
-				p.addListener(this.validationTasksOldListener);
-				if (taskType.isExecutableItem()) {
-					addCheckingStatusListener((ReadOnlyListProperty<? extends IExecutableItem>) p, this.getCheckingStatusByType((ValidationTaskType) taskType));
-				}
-
-				return p;
-			}
+			this::createTaskList
 		);
 	}
 
@@ -638,6 +643,7 @@ public final class MachineProperties {
 		modelcheckingItemsProperty().forEach(ModelCheckingItem::reset);
 	}
 
+	@JsonIgnore
 	public Set<String> getValidationTaskIds() {
 		Set<String> ids = new HashSet<>(this.validationTasksOldProperty().get().keySet());
 		for (var vt : this.getValidationTasks()) {
