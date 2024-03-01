@@ -95,6 +95,7 @@ public final class MachineProperties {
 	// dynamically collected from individual lists
 	@JsonIgnore
 	private final MapProperty<String, IValidationTask<?>> validationTasksOld;
+	@JsonIgnore
 	private final ListChangeListener<IValidationTask<?>> validationTasksOldListener;
 
 	@JsonIgnore
