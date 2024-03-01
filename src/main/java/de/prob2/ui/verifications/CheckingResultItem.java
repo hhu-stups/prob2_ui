@@ -29,7 +29,7 @@ public class CheckingResultItem {
 			case FAIL -> "verifications.result.failed.header";
 			case TIMEOUT -> "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout";
 			case INTERRUPTED -> "common.result.interrupted.header";
-			case PARSE_ERROR -> "common.result.couldNotParseFormula.header";
+			case INVALID_TASK -> "common.result.couldNotParseFormula.header";
 		};
 	}
 	

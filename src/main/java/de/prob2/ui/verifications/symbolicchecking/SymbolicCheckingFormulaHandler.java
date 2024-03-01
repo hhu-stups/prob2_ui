@@ -46,7 +46,7 @@ public final class SymbolicCheckingFormulaHandler {
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
 			res = new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage());
 		} else if (result instanceof CheckError) {
-			res = new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", result.getMessage());
+			res = new CheckingResultItem(Checked.INVALID_TASK, "common.result.message", result.getMessage());
 		} else {
 			throw new AssertionError("Unhandled symbolic checking result type: " + result.getClass());
 		}
@@ -212,7 +212,7 @@ public final class SymbolicCheckingFormulaHandler {
 			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
 		} catch (RuntimeException exc) {
 			LOGGER.error("Exception during symbolic checking", exc);
-			item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", exc.getMessage()));
+			item.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "common.result.message", exc.getMessage()));
 		}
 	}
 }

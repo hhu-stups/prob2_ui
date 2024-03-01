@@ -3,10 +3,6 @@ package de.prob2.ui.verifications.po;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
@@ -28,7 +24,7 @@ public final class ProofObligationItem implements IValidationTask<ProofObligatio
 		this.id = id;
 		this.name = name;
 		this.description = description;
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
+		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.INVALID_TASK);
 	}
 
 	public ProofObligationItem(final SavedProofObligationItem po) {

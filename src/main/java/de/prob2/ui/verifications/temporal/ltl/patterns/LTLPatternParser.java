@@ -33,10 +33,10 @@ public final class LTLPatternParser {
 		} else {
 			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {
-				resultItem = new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.temporal.ltl.pattern.empty");
+				resultItem = new TemporalCheckingResultItem(Checked.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.empty");
 			} else {
 				final String msg = parseListener.getErrorMarkers().stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
-				resultItem = new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.temporal.ltl.pattern.couldNotParsePattern", msg);
+				resultItem = new TemporalCheckingResultItem(Checked.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.couldNotParsePattern", msg);
 			}
 		}
 		item.setResultItem(resultItem);

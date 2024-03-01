@@ -18,7 +18,7 @@ import javafx.beans.property.SimpleObjectProperty;
  * This "task" always has an error status.
  */
 public final class ValidationTaskNotFound implements IValidationTask<ValidationTaskNotFound> {
-	private final ReadOnlyObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
+	private final ReadOnlyObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.INVALID_TASK);
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	

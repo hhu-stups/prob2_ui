@@ -96,7 +96,7 @@ public final class CTLFormulaChecker {
 		if(errorMessage.isEmpty()) {
 			errorMessage = "Parse Error in typed formula";
 		}
-		item.setResultItem(new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.message", errorMessage));
+		item.setResultItem(new TemporalCheckingResultItem(Checked.INVALID_TASK, errorMarkers, "common.result.message", errorMessage));
 	}
 	
 	public static void checkFormula(TemporalFormulaItem item, StateSpace stateSpace) {

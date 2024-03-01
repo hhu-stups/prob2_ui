@@ -70,7 +70,7 @@ public final class ValidationObligation {
 
 		final InvalidationListener checkedListener = o -> {
 			if (this.parsedExpression == null) {
-				this.checked.set(Checked.PARSE_ERROR);
+				this.checked.set(Checked.INVALID_TASK);
 			} else {
 				this.checked.set(this.parsedExpression.getChecked());
 			}
@@ -95,7 +95,7 @@ public final class ValidationObligation {
 	public void setParsedExpression(final IValidationExpression expression) {
 		this.parsedExpression = expression;
 		if (expression == null) {
-			this.checked.set(Checked.PARSE_ERROR);
+			this.checked.set(Checked.INVALID_TASK);
 			this.getTasks().clear();
 		} else {
 			this.getTasks().setAll(expression.getAllTasks()

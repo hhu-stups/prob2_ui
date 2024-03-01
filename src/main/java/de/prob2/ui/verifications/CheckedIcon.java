@@ -12,7 +12,7 @@ public final class CheckedIcon extends BindableGlyph {
 	}
 	
 	public void setChecked(final Checked checked) {
-		this.getStyleClass().removeAll("not-checked", "success", "fail", "interrupted", "timeout", "parse-error");
+		this.getStyleClass().removeAll("not-checked", "success", "fail", "interrupted", "timeout", "invalid-task");
 		final String styleClass;
 		final FontAwesome.Glyph icon = switch (checked) {
 			case NOT_CHECKED -> {
@@ -35,8 +35,8 @@ public final class CheckedIcon extends BindableGlyph {
 				styleClass = "timeout";
 				yield FontAwesome.Glyph.CLOCK_ALT;
 			}
-			case PARSE_ERROR -> {
-				styleClass = "parse-error";
+			case INVALID_TASK -> {
+				styleClass = "invalid-task";
 				yield FontAwesome.Glyph.EXCLAMATION_TRIANGLE;
 			}
 			default -> throw new IllegalArgumentException("Unknown checking status: " + checked);

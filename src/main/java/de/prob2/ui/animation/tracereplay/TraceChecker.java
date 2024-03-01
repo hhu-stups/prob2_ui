@@ -81,7 +81,7 @@ public class TraceChecker {
 			LOGGER.info("Trace check interrupted by user", exc);
 			replayTrace.setChecked(Checked.NOT_CHECKED);
 		} catch (RuntimeException exc) {
-			replayTrace.setChecked(Checked.PARSE_ERROR);
+			replayTrace.setChecked(Checked.INVALID_TASK);
 			throw exc;
 		} finally {
 			Platform.runLater(() -> replayTrace.setProgress(-1));

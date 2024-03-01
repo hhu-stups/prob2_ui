@@ -41,7 +41,7 @@ public final class SymbolicAnimationItemHandler {
 				item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted"));
 				break;
 			case ERROR:
-				item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "animation.symbolic.resultHandler.sequence.result.error"));
+				item.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "animation.symbolic.resultHandler.sequence.result.error"));
 				break;
 			default:
 				break;
@@ -62,7 +62,7 @@ public final class SymbolicAnimationItemHandler {
 		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
 			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
 		} else {
-			item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "animation.symbolic.resultHandler.findValidState.result.error"));
+			item.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "animation.symbolic.resultHandler.findValidState.result.error"));
 		}
 	}
 
@@ -84,7 +84,7 @@ public final class SymbolicAnimationItemHandler {
 			executeItemInternal(item, stateSpace);
 		} catch (RuntimeException exc) {
 			LOGGER.error("Exception during symbolic animation", exc);
-			item.setResultItem(new CheckingResultItem(Checked.PARSE_ERROR, "common.result.message", exc));
+			item.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "common.result.message", exc));
 		}
 	}
 }

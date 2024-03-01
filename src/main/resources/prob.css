@@ -999,7 +999,7 @@
 
 .checked-icon.interrupted,
 .checked-icon.timeout,
-.checked-icon.parse-error {
+.checked-icon.invalid-task {
 	-fx-text-fill: orange;
 }
 
