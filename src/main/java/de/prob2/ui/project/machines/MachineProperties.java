@@ -193,7 +193,7 @@ public final class MachineProperties {
 	@JsonIgnore
 	public Set<String> getValidationTaskIds() {
 		Set<String> ids = this.getValidationTasksWithId().stream().map(IValidationTask::getId).collect(Collectors.toSet());
-		ids.addAll(this.getValidationTasksOld().get().keySet());
+		ids.addAll(this.getValidationTasksOld().keySet());
 		return ids;
 	}
 
