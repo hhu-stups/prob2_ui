@@ -1,38 +1,28 @@
 package de.prob2.ui.dynamic;
 
 import java.util.Objects;
-import java.util.StringJoiner;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
-import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public final class DynamicCommandFormulaItem implements IValidationTask<DynamicCommandFormulaItem> {
+public abstract class DynamicFormulaTask<T extends DynamicFormulaTask<T>> implements IValidationTask<T> {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String id;
+	private final String id;
 	private final String commandType;
-	private String formula;
+	private final String formula;
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked;
 
-	@JsonCreator
-	public DynamicCommandFormulaItem(
-			@JsonProperty("id") final String id,
-			@JsonProperty("commandType") final String commandType,
-			@JsonProperty("formula") final String formula
-	) {
-		super();
+	protected DynamicFormulaTask(final String id, final String commandType, final String formula) {
 		this.id = id;
 		this.commandType = commandType;
 		this.formula = formula;
@@ -42,15 +32,6 @@ public final class DynamicCommandFormulaItem implements IValidationTask<DynamicC
 	@Override
 	public String getId() {
 		return id;
-	}
-
-	@Override
-	public ValidationTaskType<DynamicCommandFormulaItem> getTaskType() {
-		return BuiltinValidationTaskTypes.DYNAMIC_FORMULA;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	@Override
@@ -65,10 +46,6 @@ public final class DynamicCommandFormulaItem implements IValidationTask<DynamicC
 
 	public String getCommandType() {
 		return commandType;
-	}
-
-	public void setFormula(String formula) {
-		this.formula = formula;
 	}
 
 	public String getFormula() {
@@ -91,18 +68,21 @@ public final class DynamicCommandFormulaItem implements IValidationTask<DynamicC
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", DynamicCommandFormulaItem.class.getSimpleName() + "[", "]")
-				.add("id='" + id + "'")
-				.add("commandType='" + commandType + "'")
-				.add("formula='" + formula + "'")
-				.toString();
+		return MoreObjects.toStringHelper(this)
+			.add("id", id)
+			.add("commandType", commandType)
+			.add("formula", formula)
+			.toString();
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		DynamicCommandFormulaItem that = (DynamicCommandFormulaItem) o;
+		if (this == o) {
+			return true;
+		} else if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+		DynamicFormulaTask<?> that = (DynamicFormulaTask<?>) o;
 		return Objects.equals(id, that.id) && Objects.equals(commandType, that.commandType) && Objects.equals(formula, that.formula);
 	}
 

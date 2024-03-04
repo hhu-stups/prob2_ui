@@ -1,9 +1,16 @@
 package de.prob2.ui.dynamic.dotty;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
+
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
 import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
@@ -11,10 +18,8 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
-import de.prob2.ui.dynamic.DynamicCommandStage;
+import de.prob2.ui.dynamic.DynamicFormulaStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
-import de.prob2.ui.dynamic.EditFormulaStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.MultiKeyCombination;
@@ -23,15 +28,20 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.application.Platform;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -39,21 +49,14 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 @Singleton
-public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
+public class DotView extends DynamicFormulaStage<DotVisualizationCommand, DotFormulaTask> {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(DotView.class);
-	private final Injector injector;
 
 	@FXML
 	private WebView dotView;
@@ -104,9 +107,8 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 
 	@Inject
 	public DotView(final StageManager stageManager, final Provider<DynamicPreferencesStage> preferencesStageProvider, final CurrentTrace currentTrace,
-				   final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions, final Injector injector) {
+	               final CurrentProject currentProject, final I18n i18n, final FileChooserManager fileChooserManager, final StopActions stopActions) {
 		super(preferencesStageProvider, stageManager, currentTrace, currentProject, i18n, stopActions, "Graph Visualizer");
-		this.injector = injector;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.dot = null;
@@ -133,16 +135,13 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		zoomOutMenuButton.setAccelerator(new MultiKeyCombination(zoomOutChar, zoomOutCode, zoomOutKeypad));
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			Machine machine = currentProject.getCurrentMachine();
 			tvFormula.itemsProperty().unbind();
-			if(machine == null || to == null) {
-				return;
+			Machine machine = currentProject.getCurrentMachine();
+			if (machine == null || to == null) {
+				tvFormula.setItems(FXCollections.observableArrayList());
+			} else {
+				tvFormula.setItems(machine.getMachineProperties().getDotFormulaTasksByCommand(to.getCommand()));
 			}
-			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getMachineProperties().getDotVisualizationItems();
-			if(!items.containsKey(to.getCommand())) {
-				machine.getMachineProperties().addDotVisualizationListProperty(to.getCommand());
-			}
-			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});
 	}
 
@@ -158,7 +157,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 		// while this method is still running in the background thread.
 		final String dotLocal = item.getState().getStateSpace().getCurrentPreference("DOT");
 		final String dotEngineLocal = item.getPreferredDotLayoutEngine()
-				.orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
+			                              .orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
 		this.dot = dotLocal;
 		this.dotEngine = dotEngineLocal;
 
@@ -183,9 +182,9 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 			final String outputFormat = DotOutputFormat.SVG;
 			final byte[] svgData;
 			final DotCall dotCall = new DotCall(dotLocal)
-					                  .layoutEngine(dotEngineLocal)
-					                  .outputFormat(outputFormat)
-					                  .input(dotInput);
+				                        .layoutEngine(dotEngineLocal)
+				                        .outputFormat(outputFormat)
+				                        .input(dotInput);
 			try {
 				svgData = dotCall.call();
 			} catch (ProBError e) {
@@ -258,15 +257,14 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private void saveConverted(String format, final Path path) {
 		try {
 			Files.write(path, new DotCall(this.dot)
-					.layoutEngine(this.dotEngine)
-					.outputFormat(format)
-					.input(this.currentDotContent.get())
-					.call());
+				                  .layoutEngine(this.dotEngine)
+				                  .outputFormat(format)
+				                  .input(this.currentDotContent.get())
+				                  .call());
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}
 	}
-
 
 	@FXML
 	private void defaultSize() {
@@ -283,14 +281,6 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	private void zoomOut() {
 		zoomByFactor(0.85);
 		adjustScroll();
-	}
-
-	@Override
-	protected void addFormulaButton(){
-		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
-		currentProject.getCurrentMachine().getMachineProperties().addDotVisualizationItem(lastItem.getCommand(), item);
-		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
-		evaluateFormula(item.getFormula());
 	}
 
 	private void zoomByFactor(double factor) {
@@ -336,46 +326,7 @@ public class DotView extends DynamicCommandStage<DotVisualizationCommand> {
 	}
 
 	@Override
-	protected void editFormula(TableRow<DynamicCommandFormulaItem> row){
-		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
-		stage.initOwner(this);
-		stage.editItem(row.getItem(),errors);
-		stage.showAndWait();
-		DynamicCommandFormulaItem item = stage.getItem();
-        Machine machine = currentProject.getCurrentMachine();
-		if(item != null ) {
-			ListProperty<DynamicCommandFormulaItem> dotVisualisationItem = machine.getMachineProperties().getDotVisualizationItems().get(lastItem.getCommand());
-			dotVisualisationItem.set(dotVisualisationItem.indexOf(item), item);
-			machine.setChanged(true);
-			tvFormula.refresh();
-			evaluateFormula(item.getFormula());
-		}
+	protected DotFormulaTask createNewTask(String id, String command, String formula) {
+		return new DotFormulaTask(id, command, formula);
 	}
-
-	@Override
-	protected void addFormula(){
-		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
-		stage.initOwner(this);
-		stage.createNewItem(lastItem.getCommand());
-		stage.showAndWait();
-		DynamicCommandFormulaItem item = stage.getItem();
-		Machine machine = currentProject.getCurrentMachine();
-		if(item != null ) {
-			machine.getMachineProperties().addDotVisualizationItem(lastItem.getCommand(), item);
-			this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
-			tvFormula.refresh();
-			evaluateFormula(item.getFormula());
-		}
-	}
-
-	@Override
-	protected void removeFormula() {
-		if(this.tvFormula.getSelectionModel().getSelectedIndex() < 0) {
-			return;
-		}
-		DynamicCommandFormulaItem formulaItem = this.tvFormula.getItems().get(this.tvFormula.getSelectionModel().getSelectedIndex());
-		Machine machine = currentProject.getCurrentMachine();
-		machine.getMachineProperties().removeDotVisualizationItem(lastItem.getCommand(), formulaItem);
-	}
-
 }

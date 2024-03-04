@@ -15,7 +15,7 @@ import de.prob.voparser.VOException;
 import de.prob.voparser.VOParser;
 import de.prob.voparser.VTType;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
+import de.prob2.ui.dynamic.DynamicFormulaTask;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -129,7 +129,7 @@ public final class ValidationObligation {
 			return VTType.STATIC;
 		} else if(validationTask instanceof ProofObligationItem) {
 			return VTType.STATIC;
-		} else if(validationTask instanceof DynamicCommandFormulaItem) {
+		} else if(validationTask instanceof DynamicFormulaTask) {
 			return VTType.STATE_SPACE;
 		}
 		return null;

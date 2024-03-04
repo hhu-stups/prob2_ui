@@ -22,7 +22,9 @@ import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
+import de.prob2.ui.dynamic.DynamicFormulaTask;
+import de.prob2.ui.dynamic.dotty.DotFormulaTask;
+import de.prob2.ui.dynamic.table.TableFormulaTask;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.IExecutableItem;
@@ -52,8 +54,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.collections.ObservableMap;
-import javafx.collections.transformation.FilteredList;
 
 import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineCheckingStatus;
 
@@ -66,8 +66,6 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 	"simulations",
 	"visBVisualisation",
 	"historyChartItems",
-	"dotVisualizationItems",
-	"tableVisualizationItems"
 })
 public final class MachineProperties {
 
@@ -90,8 +88,6 @@ public final class MachineProperties {
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
-	private final MapProperty<String, ListProperty<DynamicCommandFormulaItem>> dotVisualizationItems;
-	private final MapProperty<String, ListProperty<DynamicCommandFormulaItem>> tableVisualizationItems;
 	// dynamically collected from individual lists
 	@JsonIgnore
 	private final MapProperty<String, IValidationTask<?>> validationTasksOld;
@@ -117,8 +113,6 @@ public final class MachineProperties {
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
-		this.dotVisualizationItems = new SimpleMapProperty<>(this, "dotVisualizationItems", FXCollections.observableHashMap());
-		this.tableVisualizationItems = new SimpleMapProperty<>(this, "tableVisualizationItems", FXCollections.observableHashMap());
 
 		this.validationTasksOld = new SimpleMapProperty<>(this, "validationTasks", FXCollections.observableHashMap());
 		this.validationTasksOldListener = change -> {
@@ -171,20 +165,29 @@ public final class MachineProperties {
 	}
 
 	@JsonIgnore
-	private FilteredList<IValidationTask<?>> getValidationTasksByPredicate(Predicate<IValidationTask<?>> predicate) {
+	private ObservableList<IValidationTask<?>> getValidationTasksByPredicate(Predicate<IValidationTask<?>> predicate) {
 		return this.getValidationTasks().filtered(predicate);
 	}
 
 	@JsonIgnore
-	@SuppressWarnings("unchecked")
-	public <T extends IValidationTask<T>> FilteredList<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
-		Objects.requireNonNull(taskType, "taskType");
-		return (FilteredList<T>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()));
+	public ObservableList<IValidationTask<?>> getValidationTasksWithId() {
+		return this.getValidationTasksByPredicate(vt -> vt.getId() != null);
 	}
 
 	@JsonIgnore
-	public FilteredList<IValidationTask<?>> getValidationTasksWithId() {
-		return this.getValidationTasksByPredicate(vt -> vt.getId() != null);
+	@SuppressWarnings("unchecked")
+	public <T extends IValidationTask<T>> ObservableList<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
+		Objects.requireNonNull(taskType, "taskType");
+		return (ObservableList<T>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()));
+	}
+
+	@JsonIgnore
+	@SuppressWarnings("unchecked")
+	public <T extends DynamicFormulaTask<T>> ObservableList<T> getDynamicFormulaTasksByCommand(ValidationTaskType<T> taskType, String command) {
+		Objects.requireNonNull(taskType, "taskType");
+		Objects.requireNonNull(command, "command");
+		// casting shenanigans to make java's type inference happy
+		return (ObservableList<T>) (ObservableList<?>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()) && command.equals(((DynamicFormulaTask<T>) vt).getCommandType()));
 	}
 
 	@JsonIgnore
@@ -195,7 +198,7 @@ public final class MachineProperties {
 	}
 
 	private ObjectProperty<MachineCheckingStatus> createStatusProperty(ValidationTaskType<? extends IExecutableItem> taskType) {
-		FilteredList<? extends IExecutableItem> items = this.getValidationTasksByType(taskType);
+		ObservableList<? extends IExecutableItem> items = this.getValidationTasksByType(taskType);
 		ObjectProperty<MachineCheckingStatus> p = new SimpleObjectProperty<>();
 		addCheckingStatusListener(items, p);
 		return p;
@@ -262,6 +265,16 @@ public final class MachineProperties {
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> modelCheckingStatusProperty() {
 		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.MODEL_CHECKING);
+	}
+
+	@JsonIgnore
+	public ObservableList<DotFormulaTask> getDotFormulaTasksByCommand(String command) {
+		return this.getDynamicFormulaTasksByCommand(BuiltinValidationTaskTypes.DOT_FORMULA, command);
+	}
+
+	@JsonIgnore
+	public ObservableList<TableFormulaTask> getTableFormulaTasksByCommand(String command) {
+		return this.getDynamicFormulaTasksByCommand(BuiltinValidationTaskTypes.TABLE_FORMULA, command);
 	}
 
 	@JsonIgnore
@@ -395,83 +408,6 @@ public final class MachineProperties {
 		this.getHistoryChartItems().setAll(historyChartItems);
 	}
 
-	@JsonGetter("dotVisualizationItems")
-	public ReadOnlyMapProperty<String, ListProperty<DynamicCommandFormulaItem>> getDotVisualizationItems() {
-		return this.dotVisualizationItems;
-	}
-
-	@JsonSetter("dotVisualizationItems")
-	private void setDotVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> dotVisualizationItems) {
-		this.dotVisualizationItems.set(convertToObservable(dotVisualizationItems));
-	}
-
-	private ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> convertToObservable(Map<String, List<DynamicCommandFormulaItem>> VisualizationItems) {
-		ObservableMap<String, ListProperty<DynamicCommandFormulaItem>> map = FXCollections.observableHashMap();
-		for (String key : VisualizationItems.keySet()) {
-			ObservableList<DynamicCommandFormulaItem> collections = FXCollections.observableArrayList();
-			collections.addAll(VisualizationItems.get(key));
-			ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(collections);
-			map.put(key, listProperty);
-			listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
-			this.addValidationTaskListener(listProperty);
-		}
-		return map;
-	}
-
-	public void addDotVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
-		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getDotVisualizationItems();
-		if (!map.containsKey(commandType)) {
-			addDotVisualizationListProperty(commandType);
-		}
-		map.get(commandType).add(formula);
-	}
-
-	public void removeDotVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
-		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getDotVisualizationItems();
-		if (map.containsKey(commandType)) {
-			map.get(commandType).remove(formula);
-		}
-	}
-
-	public void addDotVisualizationListProperty(String commandType) {
-		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.getDotVisualizationItems().put(commandType, listProperty);
-		listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
-		this.addValidationTaskListener(listProperty);
-	}
-
-	@JsonGetter("tableVisualizationItems")
-	public MapProperty<String, ListProperty<DynamicCommandFormulaItem>> getTableVisualizationItems() {
-		return this.tableVisualizationItems;
-	}
-
-	@JsonSetter("tableVisualizationItems")
-	public void setTableVisualizationItems(Map<String, List<DynamicCommandFormulaItem>> tableVisualizationItems) {
-		this.getTableVisualizationItems().setValue(convertToObservable(tableVisualizationItems));
-	}
-
-	public void addTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
-		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getTableVisualizationItems();
-		if (!map.containsKey(commandType)) {
-			addTableVisualizationListProperty(commandType);
-		}
-		map.get(commandType).add(formula);
-	}
-
-	public void removeTableVisualizationItem(String commandType, DynamicCommandFormulaItem formula) {
-		Map<String, ListProperty<DynamicCommandFormulaItem>> map = getTableVisualizationItems();
-		if (map.containsKey(commandType)) {
-			map.get(commandType).remove(formula);
-		}
-	}
-
-	public void addTableVisualizationListProperty(String commandType) {
-		ListProperty<DynamicCommandFormulaItem> listProperty = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.getTableVisualizationItems().put(commandType, listProperty);
-		listProperty.addListener((InvalidationListener) o -> this.setChanged(true));
-		this.addValidationTaskListener(listProperty);
-	}
-
 	public BooleanProperty changedProperty() {
 		return this.changed;
 	}
@@ -518,8 +454,6 @@ public final class MachineProperties {
 		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.getHistoryChartItems().addListener(changedListener);
-		this.getDotVisualizationItems().addListener(changedListener);
-		this.getTableVisualizationItems().addListener(changedListener);
 
 		// Collect all validation tasks that have a non-null ID
 		this.addValidationTaskListener(this.getValidationTasks());
