@@ -136,7 +136,7 @@ public class Project implements HasMetadata {
 	
 	public void resetChanged() {
 		for (Machine machine : this.getMachines()) {
-			machine.changedProperty().set(false);
+			machine.resetChanged();
 		}
 		for (Preference pref : this.getPreferences()) {
 			pref.changedProperty().set(false);
