@@ -59,7 +59,7 @@
 								</HBox>
 								<ButtonBar styleClass="dialog" HBox.hgrow="ALWAYS">
 									<buttons>
-										<Button fx:id="btCancelImport" text="%common.buttons.cancel" cancelButton="true" onAction="#cancelImport" />
+										<Button fx:id="btCancelImport" text="%common.buttons.cancel" cancelButton="true" onAction="#cancel" />
 										<Button fx:id="btStartImport" text="%railml.stage.button.import" onAction="#startImport"/>
 									</buttons>
 								</ButtonBar>

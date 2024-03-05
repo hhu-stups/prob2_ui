@@ -412,7 +412,7 @@ public class RailMLInspectDotStage extends Stage {
 		}
 	}
 
-	public boolean confirmAbortImport() {
+	private boolean confirmAbortImport() {
 		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
 				"railml.inspectDot.alerts.confirmAbortImport.header",
 				"railml.inspectDot.alerts.confirmAbortImport.content");

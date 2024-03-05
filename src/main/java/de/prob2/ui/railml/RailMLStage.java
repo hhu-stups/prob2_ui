@@ -39,6 +39,7 @@ import javafx.stage.Stage;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static de.hhu.stups.railml2b.output.MachinePrinter.*;
 
@@ -198,7 +199,7 @@ public class RailMLStage extends Stage {
 	}
 
 	@FXML
-	public void selectRailMLFile() {
+	private void selectRailMLFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("railml.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getRailMLFilter());
@@ -217,7 +218,7 @@ public class RailMLStage extends Stage {
 	}
 
 	@FXML
-	public void selectRailMLDirectory() {
+	private void selectRailMLDirectory() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
@@ -228,7 +229,7 @@ public class RailMLStage extends Stage {
 	}
 
 	@FXML
-	public void startImport() {
+	private void startImport() {
 		clearProgressWithMessage("Initialize import");
 		updater.execute(() -> {
 			try {
@@ -236,6 +237,9 @@ public class RailMLStage extends Stage {
 				listener = new UIProgressListener(progressBar, progressOperation, progressLabel, progressDescription,
 					railML2B.getMachineLoader().getNumberOfOperations());
 				railML2B.setCustomProgressListener(listener);
+				if (Thread.currentThread().isInterrupted()) {
+					return;
+				}
 				RuleResults results = railML2B.loadAndValidate();
 				RuleResults.ResultSummary summary = results.getSummary();
 
@@ -358,15 +362,24 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	private void cancel() {
-		cancelImport();
-		this.close();
+		if (confirmAbortImport()) {
+			if (!updater.isRunning()) {
+				this.close();
+			} else {
+				updater.cancel(true);
+			}
+			this.resetUI();
+			if (railML2B != null) railML2B.finish();
+		}
+		this.toFront();
 	}
 
-	@FXML
-	private void cancelImport() {
-		updater.cancel(true);
-		if (railML2B != null) railML2B.finish();
-		resetUI();
+	private boolean confirmAbortImport() {
+		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
+			"railml.inspectDot.alerts.confirmAbortImport.header",
+			"railml.inspectDot.alerts.confirmAbortImport.content");
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.isPresent() && ButtonType.OK.equals(result.get());
 	}
 
 	private void resetUI() {
