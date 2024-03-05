@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.velocity.*;
@@ -717,7 +718,7 @@ public class SimulatorStage extends Stage {
 		StringWriter sw = new StringWriter(); 
 		
 		//Getting Nodes
-			for (ActivationConfiguration activation : activations) {
+		for (ActivationConfiguration activation : activations) {
 			if (activation.getClass().equals(ActivationChoiceConfiguration.class)) {
 				choiceConfig = (ActivationChoiceConfiguration)activation;
 				diaNode.add(new DiagramNode(activation.getId(),"red",activation.getId(), "diamond"));
@@ -735,7 +736,7 @@ public class SimulatorStage extends Stage {
 				edge = new DiagramEdge(opConfig.getId(), List.of(opConfig.getOpName()+"_event"), List.of(opConfig.getAfter()), "");
 				activating.add(edge);
 				}
-				edge = new DiagramEdge(opConfig.getOpName()+"_event", opConfig.getActivating(), List.of("activating"), "");
+				edge = new DiagramEdge(opConfig.getOpName()+"_event", opConfig.getActivating(), opConfig.getActivating().stream().map(n -> "Activating").toList(), "");
 				boolean isPresent = false;
 				for (DiagramEdge compareEdge : activating) {
 					if (compareEdge.getFrom().equals(edge.getFrom())) {
@@ -747,7 +748,12 @@ public class SimulatorStage extends Stage {
 				}
 			}
 		}
-
+		
+		for(UIListenerConfiguration listener : listeners){
+			diaNode.add(new DiagramNode(listener.getEvent(),"white",listener.getEvent(),"ellipse"));
+			edge = new DiagramEdge(listener.getEvent(), listener.getActivating(), listener.getActivating().stream().map(n -> "Interaction").toList(), "");
+			activating.add(edge);
+		}
 
 
 

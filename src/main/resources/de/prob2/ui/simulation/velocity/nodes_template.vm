@@ -13,7 +13,7 @@ node [style="filled"]
         #if($id == "$initialise_machine_event")
             "$id" -> "$toactivate" [style= "$con.getColour()"];
         #else
-            "$id" -> "$toactivate" [label = $con.getEdgeLabel().get($foreach.index) ][style= "$con.getColour()"];
+            "$id" -> "$toactivate" [label = "$con.getEdgeLabel().get($foreach.index)" ][style= "$con.getColour()"];
         #end
     #end
 #end
