@@ -191,17 +191,26 @@
 							<ListView style="-fx-border-width: 0" fx:id="generateFileListView"/>
 						</VBox>
 					</AnchorPane>
-					<ButtonBar fx:id="generateButtonBar" styleClass="dialog" visible="false">
-						<buttons>
-							<Button text="%common.buttons.cancel" cancelButton="true"
-									onAction="#cancel" />
-							<Button fx:id="btGenerateAndFinish" text="Dateien erstellen"
-									onAction="#generateAndFinish" />
-						</buttons>
+					<HBox fx:id="finishBox" alignment="CENTER_RIGHT" visible="false">
+						<HBox alignment="CENTER">
+							<CheckBox fx:id="closeAfterGeneration" text="Fenster nach Abschluss schließen"/>
+						</HBox>
+						<ButtonBar fx:id="generateButtonBar" styleClass="dialog">
+							<buttons>
+								<Button text="%common.buttons.cancel" cancelButton="true"
+										onAction="#cancel" />
+								<Button fx:id="btGenerateAndFinish" text="Dateien erstellen"
+										onAction="#generateAndFinish">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+									</graphic>
+								</Button>
+							</buttons>
+						</ButtonBar>
 						<VBox.margin>
-							<Insets left="10" right="10" top="10"/>
+							<Insets right="20" top="10"/>
 						</VBox.margin>
-					</ButtonBar>
+					</HBox>
 				</VBox>
 			</AnchorPane>
 		</Scene>

@@ -52,7 +52,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	private Label rulesLabel, notCheckedLabel, successLabel, failLabel, disabledLabel, validationInfoMessage;
 	@FXML
-	private HBox visualisationOptions;
+	private HBox visualisationOptions, finishBox;
 	@FXML
 	private Button btGenerateAndFinish, btCancelImport, btStartImport;
 	@FXML
@@ -67,7 +67,7 @@ public class RailMLStage extends Stage {
 	private ListView<String> generateFileListView;
 	private final ObservableList<String> generateFileList = FXCollections.observableArrayList();
 	@FXML
-	private CheckBox animationMachineCheckbox, dataMachineCheckbox, validationMachineCheckbox, visualisationCheckbox;
+	private CheckBox animationMachineCheckbox, dataMachineCheckbox, validationMachineCheckbox, visualisationCheckbox, closeAfterGeneration;
 	@FXML
 	public VBox progressBox;
 	@FXML
@@ -84,6 +84,7 @@ public class RailMLStage extends Stage {
 	private Path outputPath = null;
 	private String modelName = null;
 	private final BooleanProperty importSuccess = new SimpleBooleanProperty(false);
+	private final BooleanProperty generationRunning = new SimpleBooleanProperty(false);
 
 	private final StageManager stageManager;
 
@@ -119,16 +120,18 @@ public class RailMLStage extends Stage {
 		btCancelImport.visibleProperty().bind(importSuccess.not().or(updater.runningProperty()));
 		btStartImport.disableProperty()
 			.bind(fileLocationField.lengthProperty().lessThanOrEqualTo(0)
-			.or(updater.runningProperty()));
+			.or(updater.runningProperty())
+			.or(importSuccess));
 		btGenerateAndFinish.disableProperty().bind(
 				(dataMachineCheckbox.selectedProperty()
 				.or(animationMachineCheckbox.selectedProperty())
 				.or(validationMachineCheckbox.selectedProperty())
 				.or(visualisationCheckbox.selectedProperty()
-						.and(visualisationStrategyChoiceBox.valueProperty().isNull().not())))
+						.and(visualisationStrategyChoiceBox.valueProperty().isNull().not()))
+				.or(generationRunning))
 				.not());
-		generateButtonBar.visibleProperty().bind(importSuccess);
-		generateButtonBar.managedProperty().bind(generateButtonBar.visibleProperty());
+		finishBox.visibleProperty().bind(importSuccess);
+		finishBox.managedProperty().bind(finishBox.visibleProperty());
 		fileLocationField.setText("");
 		fileLocationTooltip.textProperty().bind(fileLocationField.textProperty());
 		locationField.setText("");
@@ -270,6 +273,7 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	private void generateAndFinish() {
+		generationRunning.set(true);
 		importArguments.generateDataMachine(dataMachineCheckbox.isSelected())
 				.generateAnimationMachine(animationMachineCheckbox.isSelected())
 				.generateValidationMachine(validationMachineCheckbox.isSelected())
@@ -291,6 +295,9 @@ public class RailMLStage extends Stage {
 		} else {
 			createMachinesAndProject();
 		}
+		if (closeAfterGeneration.isSelected())
+			this.close();
+		generationRunning.set(false);
 	}
 
 	private void createMachinesAndProject() {
@@ -390,5 +397,7 @@ public class RailMLStage extends Stage {
 		visualisationCheckbox.setSelected(false);
 		validationInfoMessage.setText("");
 		generateFileList.clear();
+		closeAfterGeneration.setSelected(true);
+		generationRunning.set(false);
 	}
 }
