@@ -4,6 +4,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
 import de.prob2.ui.internal.I18n;
@@ -13,6 +14,7 @@ import de.prob2.ui.vomanager.IValidationTask;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
+@JsonPropertyOrder({ "commandType", "formula" })
 public abstract class DynamicFormulaTask<T extends DynamicFormulaTask<T>> implements IValidationTask<T> {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -69,10 +71,10 @@ public abstract class DynamicFormulaTask<T extends DynamicFormulaTask<T>> implem
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
-			.add("id", id)
-			.add("commandType", commandType)
-			.add("formula", formula)
-			.toString();
+			       .add("id", id)
+			       .add("commandType", commandType)
+			       .add("formula", formula)
+			       .toString();
 	}
 
 	@Override

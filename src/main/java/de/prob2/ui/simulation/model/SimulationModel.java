@@ -1,38 +1,37 @@
 package de.prob2.ui.simulation.model;
 
+import java.nio.file.Path;
+import java.util.List;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.annotation.JsonSetter;
+
 import de.prob2.ui.simulation.table.SimulationItem;
+
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
-
-@JsonPropertyOrder({
-		"path",
-		"simulationItems"
-})
-public class SimulationModel {
+@JsonPropertyOrder({ "path", "simulationItems" })
+public final class SimulationModel {
 
 	private final ObjectProperty<Path> path;
-
 	private final ListProperty<SimulationItem> simulationItems;
 
 	@JsonCreator
 	public SimulationModel(
-			@JsonProperty("path") final Path path,
-			@JsonProperty("simulationItems") final List<SimulationItem> simulationItems
+		@JsonProperty("path") Path path,
+		@JsonProperty("simulationItems") List<SimulationItem> simulationItems
 	) {
 		this();
-		this.path.set(path);
-		this.simulationItems.clear();
-		this.simulationItems.addAll(simulationItems);
+		this.setPath(path);
+		this.setSimulationItems(simulationItems);
 	}
 
 	public SimulationModel() {
@@ -41,58 +40,57 @@ public class SimulationModel {
 	}
 
 	public ObjectProperty<Path> pathProperty() {
-		return path;
+		return this.path;
 	}
 
-	@JsonProperty("path")
+	@JsonGetter("path")
 	public Path getPath() {
-		return path.get();
+		return this.pathProperty().get();
 	}
 
-	@JsonProperty
-	public void setPath(Path path) {
-		this.path.set(path);
+	@JsonSetter("path")
+	private void setPath(Path path) {
+		this.pathProperty().set(path);
 	}
-
 
 	public ListProperty<SimulationItem> simulationItemsProperty() {
-		return simulationItems;
+		return this.simulationItems;
 	}
 
-	@JsonProperty("simulationItems")
+	@JsonGetter("simulationItems")
 	public List<SimulationItem> getSimulationItems() {
-		return simulationItems.get();
+		return this.simulationItemsProperty().get();
 	}
 
-	@JsonProperty
-	private void setSimulationItems(final List<SimulationItem> simulationItems) {
+	@JsonSetter("simulationItems")
+	private void setSimulationItems(List<SimulationItem> simulationItems) {
 		this.simulationItemsProperty().setAll(simulationItems);
 	}
 
 	public void reset() {
-		for(SimulationItem item : this.simulationItems) {
+		for (SimulationItem item : this.getSimulationItems()) {
 			item.reset();
 		}
 	}
 
 	@Override
-	public String toString() {
-		if(path.get() == null) {
-			return "";
-		}
-		return path.get().toString();
-	}
-
-	@Override
 	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		SimulationModel that = (SimulationModel) o;
-		return Objects.equals(path, that.path);
+		if (this == o) {
+			return true;
+		} else if (!(o instanceof SimulationModel that)) {
+			return false;
+		} else {
+			return Objects.equals(this.getPath(), that.getPath());
+		}
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(path);
+		return Objects.hash(this.getPath());
+	}
+
+	@Override
+	public String toString() {
+		return Objects.toString(this.getPath(), "<null>");
 	}
 }

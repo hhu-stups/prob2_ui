@@ -377,11 +377,6 @@ public final class MachineProperties {
 	@JsonSetter("simulations")
 	private void setSimulations(List<SimulationModel> simulations) {
 		this.getSimulations().setAll(simulations);
-		for (SimulationModel simulationModel : simulations) {
-			for (SimulationItem simulationItem : simulationModel.getSimulationItems()) {
-				simulationItem.setSimulationModel(simulationModel);
-			}
-		}
 	}
 
 	public ObjectProperty<Path> visBVisualizationProperty() {
@@ -497,6 +492,8 @@ public final class MachineProperties {
 		for (var vt : this.getValidationTasks()) {
 			if (vt instanceof IExecutableItem et) {
 				et.reset();
+			} else if (vt instanceof SimulationItem si) {
+				si.reset();
 			}
 		}
 		this.getSymbolicAnimationFormulas().forEach(IExecutableItem::reset);

@@ -137,9 +137,7 @@ public class SimulationChoosingStage extends Stage {
 		} else {
 			type = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
 		}
-		SimulationItem simulationItem = new SimulationItem(id, type, this.extractInformation());
-		simulationItem.setSimulationModel(simulation);
-		return simulationItem;
+		return new SimulationItem(id, type, this.extractInformation());
 	}
 
 	private Map<String, Object> extractInformation() {
