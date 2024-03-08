@@ -1,8 +1,25 @@
 package de.prob2.ui.beditor;
 
+import java.io.IOException;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.rules.IModel;
 import de.prob.animator.command.GetInternalRepresentationCommand;
 import de.prob.animator.domainobjects.ErrorItem;
@@ -14,37 +31,45 @@ import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.*;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.TextAreaState;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.util.StringConverter;
+
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.charset.CharacterCodingException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.*;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @FXMLInjected
 @Singleton
@@ -89,7 +114,6 @@ public class BEditorView extends BorderPane {
 
 	private Thread watchThread;
 	private WatchKey key;
-	private boolean changingText;
 	private boolean saving;
 
 	@Inject
@@ -165,7 +189,7 @@ public class BEditorView extends BorderPane {
 		});
 
 		beditor.caretPositionProperty().addListener((observable, from, to) -> {
-			if (!changingText) {
+			if (!beditor.isChangingText()) {
 				Machine m = currentProject.getCurrentMachine();
 				if (m != null) {
 					Path machine = machineChoice.getSelectionModel().getSelectedItem();
@@ -176,7 +200,7 @@ public class BEditorView extends BorderPane {
 			}
 		});
 		beditor.estimatedScrollXProperty().addListener((observable, from, to) -> {
-			if (!changingText) {
+			if (!beditor.isChangingText()) {
 				Machine m = currentProject.getCurrentMachine();
 				if (m != null) {
 					Path machine = machineChoice.getSelectionModel().getSelectedItem();
@@ -187,7 +211,7 @@ public class BEditorView extends BorderPane {
 			}
 		});
 		beditor.estimatedScrollYProperty().addListener((observable, from, to) -> {
-			if (!changingText) {
+			if (!beditor.isChangingText()) {
 				Machine m = currentProject.getCurrentMachine();
 				if (m != null) {
 					Path machine = machineChoice.getSelectionModel().getSelectedItem();
@@ -304,10 +328,10 @@ public class BEditorView extends BorderPane {
 		} else if (model instanceof RulesModel) {
 			// references of main machine are not enough; referenced can reference other rmch again
 			machineChoice.getItems().setAll(((RulesModel) model).getRulesProject().getBModels().stream()
-				.map(IModel::getMachineReferences)
-				.flatMap(refs -> refs.stream()
-					.map(ref -> Paths.get(ref.getFile().getPath())))
-				.distinct().toList());
+				                                .map(IModel::getMachineReferences)
+				                                .flatMap(refs -> refs.stream()
+					                                                 .map(ref -> Paths.get(ref.getFile().getPath())))
+				                                .distinct().toList());
 			// main machine is not included in list of referenced rmch
 			machineChoice.getItems().add(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
 		} else {
@@ -382,7 +406,7 @@ public class BEditorView extends BorderPane {
 			return;
 		}
 
-		changingText = true;
+		beditor.setChangingText(true);
 		try {
 			if (
 				this.getPath() != null && this.getPath().equals(path)
@@ -401,10 +425,10 @@ public class BEditorView extends BorderPane {
 			beditor.moveTo(0);
 			beditor.requestFollowCaret();
 			lastSavedText.set(beditor.getText());
-			beditor.reloadHighlighting();
 			beditor.setEditable(true);
 		} finally {
-			changingText = false;
+			beditor.setChangingText(false);
+			beditor.reloadHighlighting();
 		}
 	}
 
