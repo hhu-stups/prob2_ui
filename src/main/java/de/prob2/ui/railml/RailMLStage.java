@@ -213,8 +213,8 @@ public class RailMLStage extends Stage {
 		if (path != null) {
 			resetUI();
 			outputPath = path.getParent().toAbsolutePath();
-			modelName = MoreFiles.getNameWithoutExtension(path);
-			importArguments.file(path).output(outputPath).modelName(modelName);
+			importArguments.file(path).output(outputPath).modelName(MoreFiles.getNameWithoutExtension(path));
+			modelName = importArguments.modelName();
 			fileLocationField.setText(path.toAbsolutePath().toString());
 			locationField.setText(outputPath.toString());
 		}
