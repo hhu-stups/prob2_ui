@@ -301,7 +301,7 @@ public class RailMLStage extends Stage {
 	}
 
 	private void createMachinesAndProject() {
-		if (!currentProject.isNewProject() && currentProject.confirmReplacingProject()) {
+		if (currentProject.confirmReplacingProject()) {
 			try {
 				currentProject.switchTo(new Project(modelName, "", Collections.emptyList(), Collections.emptyList(),
 					Collections.emptyList(), Project.metadataBuilder().build(), outputPath), true);
