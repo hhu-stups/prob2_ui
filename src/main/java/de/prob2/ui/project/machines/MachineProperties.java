@@ -457,10 +457,10 @@ public final class MachineProperties {
 		this.getSimulations().addListener((ListChangeListener<SimulationModel>) change -> {
 			while (change.next()) {
 				for (final SimulationModel simulationModel : change.getRemoved()) {
-					this.removeValidationTaskListener(simulationModel.simulationItemsProperty());
+					this.removeValidationTaskListener(simulationModel.getSimulationItems());
 				}
 				for (final SimulationModel simulationModel : change.getAddedSubList()) {
-					this.addValidationTaskListener(simulationModel.simulationItemsProperty());
+					this.addValidationTaskListener(simulationModel.getSimulationItems());
 				}
 			}
 		});

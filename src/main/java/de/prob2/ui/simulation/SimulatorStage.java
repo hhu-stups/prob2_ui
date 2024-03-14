@@ -57,10 +57,7 @@ import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -108,7 +105,7 @@ public class SimulatorStage extends Stage {
 		protected void updateItem(final SimulationItem item, final boolean empty) {
 			super.updateItem(item, empty);
 
-			if(item != null && !empty) {
+			if (item != null && !empty) {
 				this.setContextMenu(null);
 				ContextMenu contextMenu = new ContextMenu();
 
@@ -116,7 +113,7 @@ public class SimulatorStage extends Stage {
 
 				MenuItem checkItem = new MenuItem(i18n.translate("simulation.contextMenu.check"));
 				checkItem.disableProperty().bind(configurationPath.isNull().or(simulationItemHandler.runningProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
-				checkItem.setOnAction(e-> simulationItemHandler.checkItem(this.getItem()));
+				checkItem.setOnAction(e -> simulationItemHandler.checkItem(this.getItem()));
 
 				MenuItem removeItem = new MenuItem(i18n.translate("simulation.contextMenu.remove"));
 				removeItem.setOnAction(e -> simulationItemHandler.removeItem(cbSimulation.getSelectionModel().getSelectedItem(), this.getItem()));
@@ -126,14 +123,14 @@ public class SimulatorStage extends Stage {
 
 				Menu copyMenu = new Menu(i18n.translate("simulation.contextMenu.copy"));
 				copyMenu.getItems().clear();
-				for(SimulationModel model : currentProject.getCurrentMachine().getMachineProperties().getSimulations()) {
+				for (SimulationModel model : currentProject.getCurrentMachine().getMachineProperties().getSimulations()) {
 					SimulationModel simulationModel = cbSimulation.getSelectionModel().getSelectedItem();
-					if(simulationModel.equals(model)) {
+					if (simulationModel.equals(model)) {
 						continue;
 					}
 					MenuItem menuItem = new MenuItem(model.getPath().toString());
 					menuItem.setOnAction(e -> {
-						if(!model.getSimulationItems().contains(item)) {
+						if (!model.getSimulationItems().contains(item)) {
 							model.getSimulationItems().add(item);
 						}
 					});
@@ -145,7 +142,7 @@ public class SimulatorStage extends Stage {
 				MenuItem showTraces = new MenuItem(i18n.translate("simulation.contextMenu.showTraces"));
 				showTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
 				showTraces.setOnAction(e -> {
-					if(item.getTraces().size() == 1) {
+					if (item.getTraces().size() == 1) {
 						currentTrace.set(item.getTraces().get(0));
 					} else {
 						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
@@ -168,7 +165,7 @@ public class SimulatorStage extends Stage {
 
 				MenuItem saveTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTraces"));
 				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
-						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
+					Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
 				saveTraces.setOnAction(e -> {
 					if (currentTrace.get() != null) {
 						traceFileHandler.save(item, currentProject.getCurrentMachine());
@@ -178,7 +175,7 @@ public class SimulatorStage extends Stage {
 
 				MenuItem saveTimedTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTimedTraces"));
 				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
-						Bindings.createBooleanBinding(() -> this.itemProperty().get() == null,this.itemProperty())));
+					Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
 				saveTimedTraces.setOnAction(e -> {
 					SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
 					simulationSaver.saveConfigurations(item);
@@ -280,9 +277,9 @@ public class SimulatorStage extends Stage {
 
 	@Inject
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
-						  final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode, final I18n i18n, final FileChooserManager fileChooserManager, final TraceFileHandler traceFileHandler,
-						  final StopActions stopActions) {
+	                      final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
+	                      final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode, final I18n i18n, final FileChooserManager fileChooserManager, final TraceFileHandler traceFileHandler,
+	                      final StopActions stopActions) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -306,7 +303,7 @@ public class SimulatorStage extends Stage {
 	@FXML
 	public void initialize() {
 		realTimeSimulator.runningProperty().addListener((observable, from, to) -> {
-			if(to) {
+			if (to) {
 				Platform.runLater(() -> {
 					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PAUSE));
 					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.stop")));
@@ -320,7 +317,9 @@ public class SimulatorStage extends Stage {
 		});
 		btLoadConfiguration.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
 		btSimulate.disableProperty().bind(configurationPath.isNull().or(currentProject.currentMachineProperty().isNull()));
+
 		final BooleanProperty noSimulations = new SimpleBooleanProperty();
+		noSimulations.bind(SafeBindings.wrappedBooleanBinding(List::isEmpty, simulationItems.itemsProperty()));
 
 		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(simulationItemHandler.runningProperty().or(noSimulations.or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
 		btCancel.runningProperty().bind(simulationItemHandler.runningProperty());
@@ -329,14 +328,14 @@ public class SimulatorStage extends Stage {
 			currentTrace.getStateSpace().sendInterrupt();
 		});
 		this.titleProperty().bind(
-				Bindings.when(configurationPath.isNull())
-						.then(i18n.translateBinding("simulation.stage.title"))
-						.otherwise(i18n.translateBinding("simulation.currentSimulation",
-								SafeBindings.createSafeStringBinding(
-										() -> currentProject.getLocation().relativize(configurationPath.get()).toString(),
-										currentProject, configurationPath
-								)
-						))
+			Bindings.when(configurationPath.isNull())
+				.then(i18n.translateBinding("simulation.stage.title"))
+				.otherwise(i18n.translateBinding("simulation.currentSimulation",
+					SafeBindings.createSafeStringBinding(
+						() -> currentProject.getLocation().relativize(configurationPath.get()).toString(),
+						currentProject, configurationPath
+					)
+				))
 		);
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
@@ -382,7 +381,6 @@ public class SimulatorStage extends Stage {
 			configurationPath.set(null);
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
-			noSimulations.unbind();
 			loadSimulationsFromMachine(to);
 		};
 
@@ -401,11 +399,11 @@ public class SimulatorStage extends Stage {
 
 		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
 
-		simulationItems.setOnMouseClicked(e-> {
+		simulationItems.setOnMouseClicked(e -> {
 			SimulationItem item = simulationItems.getSelectionModel().getSelectedItem();
-			if(e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null &&
-				configurationPath.get() != null && !simulationItemHandler.runningProperty().get() && lastSimulator.get() != null &&
-				!lastSimulator.get().isRunning()) {
+			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null &&
+				    configurationPath.get() != null && !simulationItemHandler.runningProperty().get() && lastSimulator.get() != null &&
+				    !lastSimulator.get().isRunning()) {
 				simulationItemHandler.checkItem(item);
 			}
 		});
@@ -413,18 +411,15 @@ public class SimulatorStage extends Stage {
 		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			configurationPath.set(null);
 			simulationMode.setMode(to == null ? null :
-					currentProject.getLocation().resolve(to.getPath()).toFile().isDirectory() ? SimulationMode.Mode.BLACK_BOX :
-							SimulationMode.Mode.MONTE_CARLO);
+				                       currentProject.getLocation().resolve(to.getPath()).toFile().isDirectory() ? SimulationMode.Mode.BLACK_BOX :
+					                       SimulationMode.Mode.MONTE_CARLO);
 			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
 			simulationDebugItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
-			noSimulations.unbind();
 
-			if(to != null) {
-				noSimulations.bind(to.simulationItemsProperty().emptyProperty());
-				simulationItems.itemsProperty().bind(to.simulationItemsProperty());
+			if (to != null) {
+				simulationItems.setItems(to.getSimulationItems());
 			} else {
-				noSimulations.set(true);
 				simulationItems.setItems(FXCollections.observableArrayList());
 			}
 
@@ -438,7 +433,8 @@ public class SimulatorStage extends Stage {
 		btRemoveSimulation.disableProperty().bind(cbSimulation.getSelectionModel().selectedItemProperty().isNull());
 
 		setOnCloseRequest(e -> {
-			if(realTimeSimulator.isRunning()) stopSimulator(realTimeSimulator);
+			if (realTimeSimulator.isRunning())
+				stopSimulator(realTimeSimulator);
 		});
 	}
 
@@ -449,7 +445,7 @@ public class SimulatorStage extends Stage {
 	}
 
 	public void simulate(RealTimeSimulator realTimeSimulator) {
-		if(!realTimeSimulator.isRunning()) {
+		if (!realTimeSimulator.isRunning()) {
 			runSimulator(realTimeSimulator);
 		} else {
 			stopSimulator(realTimeSimulator);
@@ -458,10 +454,10 @@ public class SimulatorStage extends Stage {
 
 	private void runSimulator(RealTimeSimulator realTimeSimulator) {
 		Path path = configurationPath.get();
-		if(path != null) {
+		if (path != null) {
 			ISimulationModelConfiguration config = realTimeSimulator.getConfig();
 			Path configPath;
-			if(config instanceof SimulationModelConfiguration || config instanceof SimulationExternalConfiguration) {
+			if (config instanceof SimulationModelConfiguration || config instanceof SimulationExternalConfiguration) {
 				configPath = configurationPath.get();
 				injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
 				if (lastSimulator.isNull().get() || !lastSimulator.get().equals(realTimeSimulator)) {
@@ -502,7 +498,7 @@ public class SimulatorStage extends Stage {
 		}
 		realTimeSimulator.stop();
 		cancelTimer();
-		if(timeListener != null) {
+		if (timeListener != null) {
 			realTimeSimulator.timeProperty().removeListener(timeListener);
 		}
 	}
@@ -512,10 +508,10 @@ public class SimulatorStage extends Stage {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("simulation.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json")
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "json")
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
-		if(path != null) {
+		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
 			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
@@ -526,7 +522,7 @@ public class SimulatorStage extends Stage {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(i18n.translate("simulation.stage.filechooser.title"));
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
-		if(path != null) {
+		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
 			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
@@ -537,10 +533,10 @@ public class SimulatorStage extends Stage {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("simulation.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "py")
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", "py")
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
-		if(path != null) {
+		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
 			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
 		}
@@ -564,7 +560,7 @@ public class SimulatorStage extends Stage {
 		Map<String, String> fixedVariables = opConfig.getFixedVariables();
 		Object probabilisticVariables = opConfig.getProbabilisticVariables();
 		return new SimulationOperationDebugItem(id, opName, time, priority, activations, activationKind,
-				additionalGuards, fixedVariables, probabilisticVariables);
+			additionalGuards, fixedVariables, probabilisticVariables);
 	}
 
 	private SimulationChoiceDebugItem createChoiceDebugItem(ActivationConfiguration activationConfig) {
@@ -578,8 +574,8 @@ public class SimulatorStage extends Stage {
 		ISimulationModelConfiguration config = realTimeSimulator.getConfig();
 
 		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
-		if(config != null) {
-			if(config instanceof SimulationModelConfiguration modelConfig) {
+		if (config != null) {
+			if (config instanceof SimulationModelConfiguration modelConfig) {
 				for (ActivationConfiguration activationConfig : modelConfig.getActivationConfigurations()) {
 					if (activationConfig instanceof ActivationOperationConfiguration) {
 						observableList.add(createOperationDebugItem(activationConfig));
@@ -605,9 +601,9 @@ public class SimulatorStage extends Stage {
 		lastSimulator.set(realTimeSimulator);
 		List<Boolean> firstStart = new ArrayList<>(Collections.singletonList(true));
 		timeListener = (observable, from, to) -> {
-			if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
+			if (!realTimeSimulator.endingConditionReached(currentTrace.get())) {
 				time = to.intValue();
-				if(time == 0) {
+				if (time == 0) {
 					Platform.runLater(() -> lbTime.setText(""));
 				} else {
 					BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
@@ -620,11 +616,11 @@ public class SimulatorStage extends Stage {
 		timer.scheduleAtFixedRate(new TimerTask() {
 			@Override
 			public void run() {
-				if(firstStart.get(0)) {
+				if (firstStart.get(0)) {
 					time = realTimeSimulator.timeProperty().get();
 					firstStart.set(0, false);
-				} else if(!realTimeSimulator.endingConditionReached(currentTrace.get())) {
-					if(currentTrace.getCurrentState().isInitialised() && time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
+				} else if (!realTimeSimulator.endingConditionReached(currentTrace.get())) {
+					if (currentTrace.getCurrentState().isInitialised() && time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
 						time += 100;
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 						Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.time.second", seconds.doubleValue())));
@@ -640,7 +636,7 @@ public class SimulatorStage extends Stage {
 	}
 
 	private void cancelTimer() {
-		if(timer != null) {
+		if (timer != null) {
 			timer.cancel();
 			timer = null;
 		}
@@ -653,7 +649,7 @@ public class SimulatorStage extends Stage {
 
 	public void loadSimulationsFromMachine(Machine machine) {
 		cbSimulation.itemsProperty().unbind();
-		if(machine == null) {
+		if (machine == null) {
 			cbSimulation.setItems(FXCollections.observableArrayList());
 			return;
 		}
@@ -662,7 +658,7 @@ public class SimulatorStage extends Stage {
 
 	public void loadSimulationIntoSimulator(SimulationModel simulation) {
 		configurationPath.set(simulation == null ? null : currentProject.getLocation().resolve(simulation.getPath()));
-		if(simulation != null) {
+		if (simulation != null) {
 			injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
 			lbTime.setText("");
 			this.time = 0;
@@ -676,7 +672,7 @@ public class SimulatorStage extends Stage {
 	@FXML
 	private void removeSimulation() {
 		SimulationModel simulationModel = cbSimulation.getSelectionModel().getSelectedItem();
-		if(simulationModel == null) {
+		if (simulationModel == null) {
 			return;
 		}
 		currentProject.getCurrentMachine().getMachineProperties().getSimulations().remove(simulationModel);

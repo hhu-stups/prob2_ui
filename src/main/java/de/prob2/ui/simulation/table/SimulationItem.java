@@ -1,11 +1,11 @@
 package de.prob2.ui.simulation.table;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -32,10 +32,7 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-@JsonPropertyOrder({
-	"type",
-	"information",
-})
+@JsonPropertyOrder({ "type", "information", })
 public final class SimulationItem implements IValidationTask<SimulationItem> {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -93,6 +90,7 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		return checked.get();
 	}
 
+	@JsonIgnore
 	public void setChecked(Checked checked) {
 		this.checked.set(checked);
 	}
@@ -126,18 +124,16 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		return information.containsKey(key);
 	}
 
+	@JsonIgnore
 	public Object getField(String key) {
 		return information.get(key);
 	}
 
 	@JsonIgnore
 	public String getConfiguration() {
-		List<String> configurations = new ArrayList<>();
-		for (String key : information.keySet()) {
-			Object obj = information.get(key);
-			configurations.add(String.format(Locale.ROOT, "%s : %s", key, obj.toString()));
-		}
-		return String.join(",\n", configurations);
+		return information.entrySet().stream()
+			       .map(entry -> String.format(Locale.ROOT, "%s : %s", entry.getKey(), entry.getValue()))
+			       .collect(Collectors.joining(",\n"));
 	}
 
 	@Override
@@ -149,10 +145,12 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		return traces;
 	}
 
+	@JsonIgnore
 	public List<Trace> getTraces() {
 		return traces.get();
 	}
 
+	@JsonIgnore
 	public void setTraces(List<Trace> traces) {
 		this.traces.setAll(traces);
 	}
@@ -161,10 +159,12 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		return timestamps;
 	}
 
+	@JsonIgnore
 	public List<List<Integer>> getTimestamps() {
 		return timestamps.get();
 	}
 
+	@JsonIgnore
 	public void setTimestamps(List<List<Integer>> timestamps) {
 		this.timestamps.setAll(timestamps);
 	}
@@ -173,18 +173,22 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		return statuses;
 	}
 
+	@JsonIgnore
 	public List<Checked> getStatuses() {
 		return statuses.get();
 	}
 
+	@JsonIgnore
 	public void setStatuses(List<Checked> statuses) {
 		this.statuses.setAll(statuses);
 	}
 
+	@JsonIgnore
 	public SimulationStats getSimulationStats() {
 		return simulationStats;
 	}
 
+	@JsonIgnore
 	public void setSimulationStats(SimulationStats simulationStats) {
 		this.simulationStats = simulationStats;
 	}
@@ -201,7 +205,9 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		} else if (!(o instanceof SimulationItem that)) {
 			return false;
 		} else {
-			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getType(), that.getType()) && Objects.equals(this.getInformation(), that.getInformation());
+			return Objects.equals(this.getId(), that.getId())
+				       && Objects.equals(this.getType(), that.getType())
+				       && Objects.equals(this.getInformation(), that.getInformation());
 		}
 	}
 
@@ -216,8 +222,7 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())
 			       .add("type", this.getType())
-			       .add("information", this.getInformation())
-			       .toString();
+			       .add("information", this.getInformation()).toString();
 	}
 
 	public static final class SimulationCheckingInformation {
