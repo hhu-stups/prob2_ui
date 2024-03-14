@@ -86,7 +86,7 @@ public class SimulationEstimationChoice extends GridPane {
 	public boolean checkSelection() {
 		SimulationPropertyChoice simulationPropertyChoice = injector.getInstance(SimulationPropertyChoice.class);
 		SimulationCheckingType checkingType = simulationPropertyChoice.getCheckingChoice().getSelectionModel().getSelectedItem().getCheckingType();
-		boolean estimateProbability = checkingType != SimulationCheckingType.AVERAGE && checkingType != SimulationCheckingType.SUM;
+		boolean estimateProbability = checkingType != SimulationCheckingType.AVERAGE && checkingType != SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS && checkingType != SimulationCheckingType.SUM && checkingType != SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS;
 
 		try {
 			double desiredValue = Double.parseDouble(tfDesiredValue.getText());
