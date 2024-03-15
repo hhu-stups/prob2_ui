@@ -269,6 +269,8 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void switchMachine(final Path machinePath) {
+		Objects.requireNonNull(machinePath, "machinePath");
+
 		resetWatching();
 		registerFile(machinePath);
 		loadText(machinePath);
@@ -350,7 +352,12 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void registerFile(Path path) {
-		Path directory = path.getParent();
+		Path directory = Objects.requireNonNull(path, "path").getParent();
+		if (!Files.isRegularFile(path) || directory == null) {
+			LOGGER.error("Could not register watch service for invalid file path {} with parent {}", path, directory);
+			return;
+		}
+
 		WatchService watcher;
 		try {
 			watcher = directory.getFileSystem().newWatchService();
@@ -433,25 +440,28 @@ public class BEditorView extends BorderPane {
 	}
 
 	private void setText(Path path) {
-		if (Files.isRegularFile(path)) {
-			String text;
-			try {
-				text = Files.readString(path, EDITOR_CHARSET);
-			} catch (IOException e) {
-				LOGGER.error("Could not read file: {}", path, e);
-				final Alert alert;
-				if (e instanceof CharacterCodingException) {
-					alert = stageManager.makeExceptionAlert(e, "beditor.encodingError.header", "beditor.encodingError.content", path);
-				} else {
-					alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", path);
-				}
-
-				alert.initOwner(this.getScene().getWindow());
-				alert.show();
-				return;
-			}
-			this.setEditorText(text, path);
+		if (!Files.isRegularFile(Objects.requireNonNull(path, "path"))) {
+			LOGGER.error("Could not read text of invalid file path {}", path);
+			return;
 		}
+
+		String text;
+		try {
+			text = Files.readString(path, EDITOR_CHARSET);
+		} catch (IOException e) {
+			LOGGER.error("Could not read file: {}", path, e);
+			final Alert alert;
+			if (e instanceof CharacterCodingException) {
+				alert = stageManager.makeExceptionAlert(e, "beditor.encodingError.header", "beditor.encodingError.content", path);
+			} else {
+				alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", path);
+			}
+
+			alert.initOwner(this.getScene().getWindow());
+			alert.show();
+			return;
+		}
+		this.setEditorText(text, path);
 	}
 
 	@FXML
