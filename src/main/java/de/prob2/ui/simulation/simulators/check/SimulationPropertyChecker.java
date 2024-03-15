@@ -52,7 +52,9 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			case TIMING:
 				return checkTiming(time);
 			case AVERAGE:
+			case AVERAGE_MEAN_BETWEEN_STEPS:
 			case SUM:
+			case SUM_MEAN_BETWEEN_STEPS:
 				return estimateValue(trace);
 			default:
 				break;
@@ -64,8 +66,12 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		switch (type) {
 			case AVERAGE:
 				return estimateAverage(trace);
+			case AVERAGE_MEAN_BETWEEN_STEPS:
+				return estimateAverageWithMeanBetweenSteps(trace);
 			case SUM:
 				return estimateSum(trace);
+			case SUM_MEAN_BETWEEN_STEPS:
+				return estimateSumWithMeanBetweenSteps(trace);
 			default:
 				break;
 		}
@@ -191,6 +197,37 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		return success ? Checked.SUCCESS : Checked.FAIL;
 	}
 
+	public Checked estimateAverageWithMeanBetweenSteps(Trace trace) {
+		double value = 0.0;
+		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
+		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
+		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		int steps = 0;
+		for(int i = 0; i < trace.getTransitionList().size(); i++) {
+			Transition transition = trace.getTransitionList().get(i);
+			State startState = transition.getSource();
+			State endState = transition.getDestination();
+			if(startState.isInitialised()) {
+				String evalStartResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(startState, simulationCheckingSimulator.getVariables(), expression, mode);
+				String evalEndResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(endState, simulationCheckingSimulator.getVariables(), expression, mode);
+				if (i >= simulationCheckingSimulator.getStartAtStep()) {
+					value = value + (Double.parseDouble(evalStartResult) + Double.parseDouble(evalEndResult))/2.0;
+					steps++;
+				}
+			}
+		}
+		double res = steps == 0 ? 0.0 : value / steps;
+
+		boolean success = ((SimulationEstimator) hypothesisCheckerOrEstimator).check(res, desiredValue, epsilon);
+		if(success) {
+			numberSuccess++;
+		}
+
+		estimatedValues.add(res);
+		return success ? Checked.SUCCESS : Checked.FAIL;
+	}
+
 	public Checked estimateSum(Trace trace) {
 		double value = 0.0;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
@@ -205,6 +242,35 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 				String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), expression, mode);
 				if (i >= simulationCheckingSimulator.getStartAtStep()) {
 					value = value + Double.parseDouble(evalResult);
+				}
+			}
+		}
+
+		boolean success = ((SimulationEstimator) hypothesisCheckerOrEstimator).check(value, desiredValue, epsilon);
+		if(success) {
+			numberSuccess++;
+		}
+
+		estimatedValues.add(value);
+		return success ? Checked.SUCCESS : Checked.FAIL;
+	}
+
+	public Checked estimateSumWithMeanBetweenSteps(Trace trace) {
+		double value = 0.0;
+		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
+		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
+		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
+
+		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		for(int i = 0; i < trace.getTransitionList().size(); i++) {
+			Transition transition = trace.getTransitionList().get(i);
+			State startState = transition.getSource();
+			State endState = transition.getDestination();
+			if(startState.isInitialised()) {
+				String evalStartResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(startState, simulationCheckingSimulator.getVariables(), expression, mode);
+				String evalEndResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(endState, simulationCheckingSimulator.getVariables(), expression, mode);
+				if (i >= simulationCheckingSimulator.getStartAtStep()) {
+					value = value + (Double.parseDouble(evalStartResult) + Double.parseDouble(evalEndResult))/2.0;
 				}
 			}
 		}

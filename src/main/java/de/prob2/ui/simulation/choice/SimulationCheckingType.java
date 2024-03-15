@@ -9,7 +9,9 @@ public enum SimulationCheckingType {
 	PREDICATE_EVENTUALLY("simulation.type.property.eventually"),
 	TIMING("simulation.type.property.timing"),
 	AVERAGE("simulation.type.property.average"),
-	SUM("simulation.type.property.sum");
+	SUM("simulation.type.property.sum"),
+	AVERAGE_MEAN_BETWEEN_STEPS("simulation.type.property.averageBetweenSteps"),
+	SUM_MEAN_BETWEEN_STEPS("simulation.type.property.sumBetweenSteps");
 
 	private final String key;
 
