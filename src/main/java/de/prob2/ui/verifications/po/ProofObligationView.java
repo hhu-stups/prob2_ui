@@ -54,7 +54,7 @@ public class ProofObligationView extends AnchorPane {
 
 	private final MapProperty<String, ProofObligationItem> modelProofObligations;
 	private final ListProperty<ProofObligationItem> savedProofObligations;
-	private final ObservableList<ProofObligationItem> allProofObligationItems;
+	private final ObservableList<ProofObligationItem> allProofObligations;
 
 	@FXML
 	private TableView<ProofObligationItem> tvProofObligations;
@@ -74,7 +74,7 @@ public class ProofObligationView extends AnchorPane {
 		this.i18n = i18n;
 		this.modelProofObligations = new SimpleMapProperty<>(FXCollections.emptyObservableMap());
 		this.savedProofObligations = new SimpleListProperty<>(FXCollections.emptyObservableList());
-		this.allProofObligationItems = FXCollections.observableArrayList();
+		this.allProofObligations = FXCollections.observableArrayList();
 		stageManager.loadFXML(this, "po_view.fxml");
 	}
 
@@ -101,9 +101,9 @@ public class ProofObligationView extends AnchorPane {
 			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(new ContextMenu(editItem)));
 			return row;
 		});
-		this.tvProofObligations.setItems(this.allProofObligationItems.sorted(Comparator.comparing(ProofObligationItem::getName)));
+		this.tvProofObligations.setItems(this.allProofObligations.sorted(Comparator.comparing(ProofObligationItem::getName)));
 
-		InvalidationListener invalidationListener = observable -> this.allProofObligationItems.setAll(combinePOs());
+		InvalidationListener invalidationListener = observable -> this.allProofObligations.setAll(combinePOs());
 		this.modelProofObligations.addListener(invalidationListener);
 		this.savedProofObligations.addListener(invalidationListener);
 
