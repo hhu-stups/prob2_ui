@@ -14,6 +14,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
@@ -26,16 +27,19 @@ import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 @Singleton
 public class SimulationItemHandler {
 
+	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 
 	private final StageManager stageManager;
@@ -49,7 +53,8 @@ public class SimulationItemHandler {
 	private ISimulationModelConfiguration simulationModelConfiguration;
 
 	@Inject
-	private SimulationItemHandler(final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector, final DisablePropertyController disablePropertyController) {
+	private SimulationItemHandler(final CurrentProject currentProject, final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector, final DisablePropertyController disablePropertyController) {
+		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.injector = injector;
@@ -57,45 +62,48 @@ public class SimulationItemHandler {
 		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
-	public List<SimulationItem> getItems(final SimulationModel simulationModel) {
-		if(simulationModel == null) {
-			return new ArrayList<>();
-		}
-		return simulationModel.getSimulationItems();
+	public ObservableList<SimulationItem> getSimulationItems(SimulationModel simulationModel) {
+		return this.currentProject.getCurrentMachine().getMachineProperties().getSimulationTasksByModel(simulationModel);
 	}
 
-	public Optional<SimulationItem> addItem(final SimulationModel simulationModel, final SimulationItem item) {
-		final List<SimulationItem> items = this.getItems(simulationModel);
-		final Optional<SimulationItem> existingItem = items.stream().filter(item::equals).findAny();
-		if(existingItem.isEmpty()) {
-			items.add(item);
-		}
-		return existingItem;
+	public void reset(SimulationModel simulationModel) {
+		this.getSimulationItems(simulationModel).forEach(SimulationItem::reset);
 	}
 
-	public void removeItem(final SimulationModel simulationModel, SimulationItem item) {
-		final List<SimulationItem> items = this.getItems(simulationModel);
-		items.remove(item);
+	public SimulationItem addItem(SimulationItem newItem) {
+		Optional<SimulationItem> existingItem = this.currentProject.getCurrentMachine().getMachineProperties().getValidationTasksByType(BuiltinValidationTaskTypes.SIMULATION).stream().filter(newItem::equals).findAny();
+		if (existingItem.isPresent()) {
+			SimulationItem item = existingItem.get();
+			item.reset();
+			return item;
+		} else {
+			this.currentProject.getCurrentMachine().getMachineProperties().addValidationTask(newItem);
+			return newItem;
+		}
+	}
+
+	public void removeItem(SimulationItem item) {
+		this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(item);
 	}
 
 	private Map<String, Object> extractAdditionalInformation(SimulationItem item) {
 		Map<String, Object> additionalInformation = new HashMap<>();
 
-		if(item.containsField("START_AFTER_STEPS")) {
+		if (item.containsField("START_AFTER_STEPS")) {
 			additionalInformation.put("START_AFTER_STEPS", item.getField("START_AFTER_STEPS"));
-		} else if(item.containsField("STARTING_PREDICATE")) {
+		} else if (item.containsField("STARTING_PREDICATE")) {
 			additionalInformation.put("STARTING_PREDICATE", item.getField("STARTING_PREDICATE"));
-		} else if(item.containsField("STARTING_PREDICATE_ACTIVATED")) {
+		} else if (item.containsField("STARTING_PREDICATE_ACTIVATED")) {
 			additionalInformation.put("STARTING_PREDICATE_ACTIVATED", item.getField("STARTING_PREDICATE_ACTIVATED"));
-		} else if(item.containsField("STARTING_TIME")) {
+		} else if (item.containsField("STARTING_TIME")) {
 			additionalInformation.put("STARTING_TIME", item.getField("STARTING_TIME"));
 		}
 
-		if(item.containsField("STEPS_PER_EXECUTION")) {
+		if (item.containsField("STEPS_PER_EXECUTION")) {
 			additionalInformation.put("STEPS_PER_EXECUTION", item.getField("STEPS_PER_EXECUTION"));
-		} else if(item.containsField("ENDING_PREDICATE")) {
+		} else if (item.containsField("ENDING_PREDICATE")) {
 			additionalInformation.put("ENDING_PREDICATE", item.getField("ENDING_PREDICATE"));
-		} else if(item.containsField("ENDING_TIME")) {
+		} else if (item.containsField("ENDING_TIME")) {
 			additionalInformation.put("ENDING_TIME", item.getField("ENDING_TIME"));
 		}
 
@@ -152,19 +160,19 @@ public class SimulationItemHandler {
 		double probability = (double) item.getField("PROBABILITY");
 		double significance = (double) item.getField("SIGNIFICANCE");
 
-		if(item.containsField("PROBABILITY")) {
+		if (item.containsField("PROBABILITY")) {
 			additionalInformation.put("PROBABILITY", probability);
 		}
 
-		if(item.containsField("SIGNIFICANCE")) {
+		if (item.containsField("SIGNIFICANCE")) {
 			additionalInformation.put("SIGNIFICANCE", significance);
 		}
 
-		if(item.containsField("PREDICATE")) {
+		if (item.containsField("PREDICATE")) {
 			additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
 		}
 
-		if(item.containsField("TIME")) {
+		if (item.containsField("TIME")) {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
@@ -187,23 +195,23 @@ public class SimulationItemHandler {
 		double desiredValue = (double) item.getField("DESIRED_VALUE");
 		double epsilon = (double) item.getField("EPSILON");
 
-		if(item.containsField("DESIRED_VALUE")) {
+		if (item.containsField("DESIRED_VALUE")) {
 			additionalInformation.put("DESIRED_VALUE", desiredValue);
 		}
 
-		if(item.containsField("EPSILON")) {
+		if (item.containsField("EPSILON")) {
 			additionalInformation.put("EPSILON", epsilon);
 		}
 
-		if(item.containsField("PREDICATE")) {
+		if (item.containsField("PREDICATE")) {
 			additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
 		}
 
-		if(item.containsField("TIME")) {
+		if (item.containsField("TIME")) {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		if(item.containsField("EXPRESSION")) {
+		if (item.containsField("EXPRESSION")) {
 			additionalInformation.put("EXPRESSION", item.getField("EXPRESSION"));
 		}
 
@@ -223,7 +231,7 @@ public class SimulationItemHandler {
 		}*/
 		// TODO
 		SimulationType type = item.getType();
-		switch(type) {
+		switch (type) {
 			case MONTE_CARLO_SIMULATION:
 				handleMonteCarloSimulation(item);
 				break;
@@ -239,10 +247,11 @@ public class SimulationItemHandler {
 	}
 
 	public void handleMachine(SimulationModel simulationModel) {
+		List<SimulationItem> items = this.currentProject.getCurrentMachine().getMachineProperties().getSimulationTasksByModel(simulationModel);
 		Thread thread = new Thread(() -> {
-			for (SimulationItem item : simulationModel.getSimulationItems()) {
+			for (SimulationItem item : items) {
 				this.checkItem(item);
-				if(Thread.currentThread().isInterrupted()) {
+				if (Thread.currentThread().isInterrupted()) {
 					break;
 				}
 			}

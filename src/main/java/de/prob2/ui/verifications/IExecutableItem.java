@@ -3,7 +3,7 @@ package de.prob2.ui.verifications;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 
-public interface IExecutableItem {
+public interface IExecutableItem extends IResettable {
 	boolean selected();
 	BooleanProperty selectedProperty();
 	void setSelected(boolean selected);
@@ -11,5 +11,4 @@ public interface IExecutableItem {
 	Checked getChecked();
 	boolean settingsEqual(IExecutableItem obj);
 	void execute(ExecutionContext context);
-	void reset();
 }

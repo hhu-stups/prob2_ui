@@ -116,28 +116,27 @@ public class SimulatorStage extends Stage {
 				checkItem.setOnAction(e -> simulationItemHandler.checkItem(this.getItem()));
 
 				MenuItem removeItem = new MenuItem(i18n.translate("simulation.contextMenu.remove"));
-				removeItem.setOnAction(e -> simulationItemHandler.removeItem(cbSimulation.getSelectionModel().getSelectedItem(), this.getItem()));
+				removeItem.setOnAction(e -> simulationItemHandler.removeItem(this.getItem()));
 
 				menuItems.add(checkItem);
 				menuItems.add(removeItem);
 
 				Menu copyMenu = new Menu(i18n.translate("simulation.contextMenu.copy"));
-				copyMenu.getItems().clear();
-				for (SimulationModel model : currentProject.getCurrentMachine().getMachineProperties().getSimulations()) {
-					SimulationModel simulationModel = cbSimulation.getSelectionModel().getSelectedItem();
-					if (simulationModel.equals(model)) {
-						continue;
-					}
-					MenuItem menuItem = new MenuItem(model.getPath().toString());
-					menuItem.setOnAction(e -> {
-						if (!model.getSimulationItems().contains(item)) {
-							model.getSimulationItems().add(item);
+				{
+					copyMenu.getItems().clear();
+					SimulationModel sourceModel = cbSimulation.getSelectionModel().getSelectedItem();
+					for (SimulationModel targetModel : currentProject.getCurrentMachine().getMachineProperties().getSimulations()) {
+						if (sourceModel.equals(targetModel)) {
+							continue;
 						}
-					});
-					copyMenu.getItems().add(menuItem);
+
+						MenuItem menuItem = new MenuItem(targetModel.getPath().toString());
+						menuItem.setOnAction(e -> simulationItemHandler.addItem(item.withSimulationPath(targetModel.getPath())));
+						copyMenu.getItems().add(menuItem);
+					}
+					copyMenu.setDisable(copyMenu.getItems().isEmpty());
 				}
 				menuItems.add(copyMenu);
-				copyMenu.setDisable(copyMenu.getItems().isEmpty());
 
 				MenuItem showTraces = new MenuItem(i18n.translate("simulation.contextMenu.showTraces"));
 				showTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
@@ -418,7 +417,7 @@ public class SimulatorStage extends Stage {
 			simulationItems.itemsProperty().unbind();
 
 			if (to != null) {
-				simulationItems.setItems(to.getSimulationItems());
+				simulationItems.setItems(simulationItemHandler.getSimulationItems(to));
 			} else {
 				simulationItems.setItems(FXCollections.observableArrayList());
 			}
@@ -513,7 +512,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -524,7 +523,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -538,7 +537,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath, Collections.emptyList()));
+			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -649,11 +648,11 @@ public class SimulatorStage extends Stage {
 
 	public void loadSimulationsFromMachine(Machine machine) {
 		cbSimulation.itemsProperty().unbind();
-		if (machine == null) {
+		if (machine != null) {
+			cbSimulation.setItems(machine.getMachineProperties().getSimulations());
+		} else {
 			cbSimulation.setItems(FXCollections.observableArrayList());
-			return;
 		}
-		cbSimulation.itemsProperty().bind(machine.getMachineProperties().getSimulations());
 	}
 
 	public void loadSimulationIntoSimulator(SimulationModel simulation) {
@@ -662,7 +661,7 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
 			lbTime.setText("");
 			this.time = 0;
-			simulation.reset();
+			simulationItemHandler.reset(simulation);
 			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, configurationPath.get());
 			loadSimulationItems();
 			simulationItemHandler.setSimulationModelConfiguration(realTimeSimulator.getConfig());

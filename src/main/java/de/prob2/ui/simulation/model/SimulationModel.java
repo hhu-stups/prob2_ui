@@ -1,45 +1,25 @@
 package de.prob2.ui.simulation.model;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.common.base.MoreObjects;
 
-import de.prob2.ui.simulation.table.SimulationItem;
-
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-
-@JsonPropertyOrder({ "path", "simulationItems" })
+@JsonPropertyOrder({ "path" })
 public final class SimulationModel {
 
 	private final Path path;
-	private final ObservableList<SimulationItem> simulationItems;
 
 	@JsonCreator
-	public SimulationModel(
-		@JsonProperty("path") Path path,
-		@JsonProperty("simulationItems") List<SimulationItem> simulationItems
-	) {
+	public SimulationModel(@JsonProperty("path") Path path) {
 		this.path = Objects.requireNonNull(path, "path");
-		this.simulationItems = FXCollections.observableArrayList(simulationItems);
 	}
 
 	public Path getPath() {
 		return this.path;
-	}
-
-	public ObservableList<SimulationItem> getSimulationItems() {
-		return this.simulationItems;
-	}
-
-	public void reset() {
-		for (SimulationItem item : this.getSimulationItems()) {
-			item.reset();
-		}
 	}
 
 	@Override
@@ -60,6 +40,8 @@ public final class SimulationModel {
 
 	@Override
 	public String toString() {
-		return Objects.toString(this.getPath(), "<null>");
+		return MoreObjects.toStringHelper(this)
+			       .add("path", this.getPath())
+			       .toString();
 	}
 }

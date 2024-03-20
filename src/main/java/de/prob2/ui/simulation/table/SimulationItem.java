@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.table;
 
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -22,6 +23,7 @@ import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IResettable;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -32,11 +34,12 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-@JsonPropertyOrder({ "type", "information", })
-public final class SimulationItem implements IValidationTask<SimulationItem> {
+@JsonPropertyOrder({ "simulationPath", "type", "information", })
+public final class SimulationItem implements IValidationTask<SimulationItem>, IResettable {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
+	private final Path simulationPath;
 	private final SimulationType type;
 	private final Map<String, Object> information;
 	@JsonIgnore
@@ -50,16 +53,17 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 	@JsonIgnore
 	private ListProperty<Checked> statuses;
 
-	public SimulationItem(String id, SimulationType type, Map<String, Object> information) {
+	public SimulationItem(String id, Path simulationPath, SimulationType type, Map<String, Object> information) {
 		this.id = id;
-		this.type = type;
-		this.information = information;
+		this.simulationPath = Objects.requireNonNull(simulationPath, "simulationPath");
+		this.type = Objects.requireNonNull(type, "type");
+		this.information = Objects.requireNonNull(information, "information");
 		initListeners();
 	}
 
 	@JsonCreator
-	private SimulationItem(@JsonProperty("id") final String id, @JsonProperty("type") final SimulationType type, @JsonProperty("information") final SimulationCheckingInformation information) {
-		this(id, type, information.getInformation());
+	private SimulationItem(@JsonProperty("id") String id, @JsonProperty("simulationPath") Path simulationPath, @JsonProperty("type") SimulationType type, @JsonProperty("information") SimulationCheckingInformation information) {
+		this(id, simulationPath, type, information.getInformation());
 	}
 
 	private void initListeners() {
@@ -78,6 +82,11 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 	@Override
 	public ValidationTaskType<SimulationItem> getTaskType() {
 		return BuiltinValidationTaskTypes.SIMULATION;
+	}
+
+	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate(this.getType());
 	}
 
 	@Override
@@ -100,15 +109,15 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		return type.toString();
 	}
 
+	public Path getSimulationPath() {
+		return this.simulationPath;
+	}
+
 	public SimulationType getType() {
 		return type;
 	}
 
 	@Override
-	public String getTaskType(final I18n i18n) {
-		return i18n.translate(this.getType());
-	}
-
 	public void reset() {
 		this.setChecked(Checked.NOT_CHECKED);
 		this.simulationStats = null;
@@ -206,6 +215,7 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 			return false;
 		} else {
 			return Objects.equals(this.getId(), that.getId())
+				       && Objects.equals(this.getSimulationPath(), that.getSimulationPath())
 				       && Objects.equals(this.getType(), that.getType())
 				       && Objects.equals(this.getInformation(), that.getInformation());
 		}
@@ -213,7 +223,7 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getId(), this.getType(), this.getInformation());
+		return Objects.hash(this.getId(), this.getSimulationPath(), this.getType(), this.getInformation());
 	}
 
 	@Override
@@ -221,8 +231,13 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())
+			       .add("simulationPath", this.getSimulationPath())
 			       .add("type", this.getType())
 			       .add("information", this.getInformation()).toString();
+	}
+
+	public SimulationItem withSimulationPath(Path simulationPath) {
+		return new SimulationItem(this.getId(), simulationPath, this.getType(), new HashMap<>(this.getInformation()));
 	}
 
 	public static final class SimulationCheckingInformation {

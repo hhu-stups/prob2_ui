@@ -28,6 +28,7 @@ import de.prob2.ui.dynamic.table.TableFormulaTask;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.IResettable;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.po.SavedProofObligationItem;
@@ -188,6 +189,14 @@ public final class MachineProperties {
 		Objects.requireNonNull(command, "command");
 		// casting shenanigans to make java's type inference happy
 		return (ObservableList<T>) (ObservableList<?>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()) && command.equals(((DynamicFormulaTask<T>) vt).getCommandType()));
+	}
+
+	@JsonIgnore
+	@SuppressWarnings("unchecked")
+	public ObservableList<SimulationItem> getSimulationTasksByModel(SimulationModel model) {
+		Objects.requireNonNull(model, "model");
+		// casting shenanigans to make java's type inference happy
+		return (ObservableList<SimulationItem>) (ObservableList<?>) this.getValidationTasksByPredicate(vt -> BuiltinValidationTaskTypes.SIMULATION.equals(vt.getTaskType()) && model.getPath().equals(((SimulationItem) vt).getSimulationPath()));
 	}
 
 	@JsonIgnore
@@ -454,16 +463,6 @@ public final class MachineProperties {
 		this.addValidationTaskListener(this.getValidationTasks());
 		// TODO: remove this
 		this.addValidationTaskListener(this.getAllProofObligationItems());
-		this.getSimulations().addListener((ListChangeListener<SimulationModel>) change -> {
-			while (change.next()) {
-				for (final SimulationModel simulationModel : change.getRemoved()) {
-					this.removeValidationTaskListener(simulationModel.getSimulationItems());
-				}
-				for (final SimulationModel simulationModel : change.getAddedSubList()) {
-					this.addValidationTaskListener(simulationModel.getSimulationItems());
-				}
-			}
-		});
 	}
 
 	private void addCheckingStatusListener(final ObservableList<? extends IExecutableItem> items, final ObjectProperty<MachineCheckingStatus> statusProperty) {
@@ -490,16 +489,13 @@ public final class MachineProperties {
 
 	public void resetStatus() {
 		for (var vt : this.getValidationTasks()) {
-			if (vt instanceof IExecutableItem et) {
-				et.reset();
-			} else if (vt instanceof SimulationItem si) {
-				si.reset();
+			if (vt instanceof IResettable r) {
+				r.reset();
 			}
 		}
 		this.getSymbolicAnimationFormulas().forEach(IExecutableItem::reset);
 		this.getTestCases().forEach(IExecutableItem::reset);
 		this.getLTLPatterns().forEach(LTLPatternItem::reset);
-		this.getSimulations().forEach(SimulationModel::reset);
 		this.patternManager = new PatternManager();
 	}
 }

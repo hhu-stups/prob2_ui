@@ -3,7 +3,6 @@ package de.prob2.ui.simulation.choice;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -90,23 +89,23 @@ public class SimulationChoosingStage extends Stage {
 		btCheck.setOnAction(e -> {
 			lastItem = null;
 			boolean validChoice = checkSelection();
-			if(!validChoice) {
+			if (!validChoice) {
 				showInvalidSelection();
 				return;
 			}
-			final SimulationItem newItem = this.extractItem();
-			final Optional<SimulationItem> existingItem = this.simulationItemHandler.addItem(simulation, newItem);
-			lastItem = existingItem.orElse(newItem);
+			final SimulationItem newItem = this.extractItem(simulation);
+			final SimulationItem addedItem = this.simulationItemHandler.addItem(newItem);
+			lastItem = addedItem;
 			this.close();
-			this.simulationItemHandler.checkItem(existingItem.orElse(newItem));
+			this.simulationItemHandler.checkItem(addedItem);
 		});
 	}
 
 	private boolean checkSelection() {
-		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationConditionChoice.checkProperty()) {
+		if (simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationConditionChoice.checkProperty()) {
 			return simulationMonteCarloChoice.checkSelection();
 		}
-		if(!simulationConditionChoice.checkSelection()) {
+		if (!simulationConditionChoice.checkSelection()) {
 			// TODO
 			return false;
 		}
@@ -129,15 +128,15 @@ public class SimulationChoosingStage extends Stage {
 	}
 
 
-	private SimulationItem extractItem() {
+	private SimulationItem extractItem(SimulationModel simulation) {
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		SimulationType type;
-		if(simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationConditionChoice.checkProperty()) {
+		if (simulationMode.getMode() == SimulationMode.Mode.MONTE_CARLO && !simulationConditionChoice.checkProperty()) {
 			type = SimulationType.MONTE_CARLO_SIMULATION;
 		} else {
 			type = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
 		}
-		return new SimulationItem(id, type, this.extractInformation());
+		return new SimulationItem(id, simulation.getPath(), type, this.extractInformation());
 	}
 
 	private Map<String, Object> extractInformation() {
@@ -146,7 +145,7 @@ public class SimulationChoosingStage extends Stage {
 		information.putAll(simulationMonteCarloChoice.extractInformation());
 		information.putAll(simulationConditionChoice.extractInformation());
 
-		if(simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationConditionChoice.checkProperty()) {
+		if (simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationConditionChoice.checkProperty()) {
 			SimulationType simulationType = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
 			information.putAll(simulationPropertyChoice.extractInformation());
 			switch (simulationType) {
@@ -169,22 +168,22 @@ public class SimulationChoosingStage extends Stage {
 		SimulationMode.Mode mode = simulationMode.getMode();
 
 		SimulationType type = simulationConditionChoice.checkProperty() ? simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem() : SimulationType.MONTE_CARLO_SIMULATION;
-		if(type != null) {
-			if(type == SimulationType.ESTIMATION) {
+		if (type != null) {
+			if (type == SimulationType.ESTIMATION) {
 				inputBox.getChildren().add(0, simulationEstimationChoice);
-			} else if(type == SimulationType.HYPOTHESIS_TEST) {
+			} else if (type == SimulationType.HYPOTHESIS_TEST) {
 				inputBox.getChildren().add(0, simulationHypothesisChoice);
 			}
 		}
 		simulationPropertyChoice.updateCheck(type);
 
-		if(simulationConditionChoice.checkProperty() || mode == SimulationMode.Mode.BLACK_BOX) {
+		if (simulationConditionChoice.checkProperty() || mode == SimulationMode.Mode.BLACK_BOX) {
 			inputBox.getChildren().add(0, simulationPropertyChoice);
 		}
 
 		inputBox.getChildren().add(0, simulationConditionChoice);
 
-		if(mode == SimulationMode.Mode.MONTE_CARLO) {
+		if (mode == SimulationMode.Mode.MONTE_CARLO) {
 			inputBox.getChildren().add(0, simulationMonteCarloChoice);
 		}
 
