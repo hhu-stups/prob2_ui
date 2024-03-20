@@ -926,6 +926,12 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 
+	private static void updateV45Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("proofObligationItems"))
+			.forEach(node -> validationTasks.add(checkObject(node)));
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -1084,6 +1090,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 44) {
 				updateV44Machine(machine);
+			}
+			if (oldVersion <= 45) {
+				updateV45Machine(machine);
 			}
 		});
 

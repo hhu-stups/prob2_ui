@@ -1,22 +1,34 @@
 package de.prob2.ui.verifications.po;
 
-import java.util.Optional;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.project.machines.MachineProperties;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.MapProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableMap;
 import javafx.fxml.FXML;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -40,6 +52,10 @@ public class ProofObligationView extends AnchorPane {
 
 	private final I18n i18n;
 
+	private final MapProperty<String, ProofObligationItem> modelProofObligations;
+	private final ListProperty<ProofObligationItem> savedProofObligations;
+	private final ObservableList<ProofObligationItem> allProofObligationItems;
+
 	@FXML
 	private TableView<ProofObligationItem> tvProofObligations;
 
@@ -56,6 +72,9 @@ public class ProofObligationView extends AnchorPane {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.i18n = i18n;
+		this.modelProofObligations = new SimpleMapProperty<>(FXCollections.emptyObservableMap());
+		this.savedProofObligations = new SimpleListProperty<>(FXCollections.emptyObservableList());
+		this.allProofObligationItems = FXCollections.observableArrayList();
 		stageManager.loadFXML(this, "po_view.fxml");
 	}
 
@@ -66,55 +85,90 @@ public class ProofObligationView extends AnchorPane {
 		poIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		poColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 
-		currentTrace.modelProperty().addListener((observable, from, to) -> {
-			if (to != null) {
-				currentProject.getCurrentMachine().getMachineProperties().updateAllProofObligationsFromModel(to);
-			}
-		});
-
 		this.tvProofObligations.setRowFactory(param -> {
 			final TableRow<ProofObligationItem> row = new TableRow<>();
 			MenuItem editItem = new MenuItem(i18n.translate("verifications.po.poView.contextMenu.editId"));
-			editItem.setOnAction(event -> {
-				ProofObligationItem item = row.getItem();
-				final TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
-				stageManager.register(dialog);
-				dialog.setTitle(i18n.translate("verifications.po.poView.contextMenu.editId"));
-				dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
-				dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
-				final Optional<String> res = dialog.showAndWait();
-				res.ifPresent(idText -> {
-					final String id = idText.trim().isEmpty() ? null : idText;
-					Machine machine = currentProject.getCurrentMachine();
-					machine.getMachineProperties().getAllProofObligationItems().set(machine.getMachineProperties().getAllProofObligationItems().indexOf(item), item.withId(id));
-				});
-			});
+			editItem.setOnAction(event -> this.editItem(row.getItem()));
 
 			row.itemProperty().addListener((observable, from, to) -> {
-				if(to == null) {
+				if (to != null) {
+					row.setTooltip(new Tooltip(to.getDescription()));
+				} else {
 					row.setTooltip(null);
-					return;
 				}
-				row.setTooltip(new Tooltip(to.getDescription()));
 			});
 
-			row.contextMenuProperty().bind(
-					Bindings.when(row.emptyProperty())
-							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(editItem)));
+			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(new ContextMenu(editItem)));
 			return row;
 		});
+		this.tvProofObligations.setItems(this.allProofObligationItems.sorted(Comparator.comparing(ProofObligationItem::getName)));
 
-		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			tvProofObligations.itemsProperty().unbind();
+		InvalidationListener invalidationListener = observable -> this.allProofObligationItems.setAll(combinePOs());
+		this.modelProofObligations.addListener(invalidationListener);
+		this.savedProofObligations.addListener(invalidationListener);
+
+		ChangeListener<AbstractModel> modelChangeListener = (observable, from, to) -> this.modelProofObligations.set(extractModelPOs(to));
+		this.currentTrace.modelProperty().addListener(modelChangeListener);
+		modelChangeListener.changed(null, null, this.currentTrace.getModel());
+
+		ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			if (to != null) {
-				tvProofObligations.setItems(to.getMachineProperties().getAllProofObligationItems());
+				this.savedProofObligations.set(to.getMachineProperties().getProofObligationTasks());
 			} else {
-				tvProofObligations.setItems(FXCollections.emptyObservableList());
+				this.savedProofObligations.set(FXCollections.emptyObservableList());
 			}
 		};
+		this.currentProject.currentMachineProperty().addListener(machineChangeListener);
+		machineChangeListener.changed(null, null, this.currentProject.getCurrentMachine());
+	}
 
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
+	private ObservableMap<String, ProofObligationItem> extractModelPOs(AbstractModel model) {
+		// TODO: Does not yet work with .eventb files
+		if (!(model instanceof EventBModel eventBModel) || eventBModel.getTopLevelMachine() == null) {
+			return FXCollections.emptyObservableMap();
+		}
+
+		ObservableMap<String, ProofObligationItem> pos = FXCollections.observableHashMap();
+		eventBModel.getTopLevelMachine().getProofs().stream().map(ProofObligationItem::new).forEach(po -> pos.put(po.getName(), po));
+		return pos;
+	}
+
+	private ObservableList<ProofObligationItem> combinePOs() {
+		ObservableList<ProofObligationItem> visiblePOs = FXCollections.observableArrayList();
+		HashMap<String, ProofObligationItem> modelProofObligationsCopy = new HashMap<>(this.modelProofObligations);
+		for (ProofObligationItem savedPO : this.savedProofObligations) {
+			ProofObligationItem modelPO = modelProofObligationsCopy.remove(savedPO.getName());
+			if (modelPO != null) {
+				if (modelPO.getId() != null) {
+					throw new IllegalStateException("model POs should have no id");
+				}
+
+				visiblePOs.add(modelPO.withId(savedPO.getId()));
+			} else {
+				// don't silently remove saved POs that have no matching PO in the model
+				visiblePOs.add(savedPO);
+			}
+		}
+		visiblePOs.addAll(modelProofObligationsCopy.values());
+		return visiblePOs;
+	}
+
+	private void editItem(ProofObligationItem item) {
+		TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
+		stageManager.register(dialog);
+		dialog.setTitle(i18n.translate("verifications.po.poView.contextMenu.editId"));
+		dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
+		dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
+		dialog.showAndWait().ifPresent(idText -> {
+			String id = idText.trim().isEmpty() ? null : idText;
+			if (!Objects.equals(id, item.getId())) {
+				MachineProperties mp = currentProject.getCurrentMachine().getMachineProperties();
+				if (id != null) {
+					mp.replaceValidationTask(item, item.withId(id));
+				} else {
+					mp.removeValidationTask(item);
+				}
+			}
+		});
 	}
 }

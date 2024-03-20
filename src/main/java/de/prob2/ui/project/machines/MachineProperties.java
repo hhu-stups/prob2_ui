@@ -1,10 +1,8 @@
 package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -17,8 +15,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
 import de.prob.ltl.parser.pattern.PatternManager;
-import de.prob.model.eventb.EventBModel;
-import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -31,7 +27,6 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.IResettable;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
-import de.prob2.ui.verifications.po.SavedProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
@@ -43,14 +38,11 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
-import javafx.beans.property.MapProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyListProperty;
-import javafx.beans.property.ReadOnlyMapProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -74,26 +66,11 @@ public final class MachineProperties {
 	@JsonIgnore
 	private final Map<ValidationTaskType<? extends IExecutableItem>, ObjectProperty<MachineCheckingStatus>> statusProperties;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
-	/**
-	 * View of all proof obligation items.
-	 * {@link MachineProperties#proofObligationItemsWithIds} only saves POs with ids.
-	 */
-	@JsonIgnore
-	private final ListProperty<ProofObligationItem> allProofObligationItems;
-	/**
-	 * All POs with ids.
-	 */
-	private final ListProperty<SavedProofObligationItem> proofObligationItemsWithIds;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
-	// dynamically collected from individual lists
-	@JsonIgnore
-	private final MapProperty<String, IValidationTask<?>> validationTasksOld;
-	@JsonIgnore
-	private final ListChangeListener<IValidationTask<?>> validationTasksOldListener;
 
 	@JsonIgnore
 	private final BooleanProperty changed = new SimpleBooleanProperty(false);
@@ -109,45 +86,11 @@ public final class MachineProperties {
 		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
 
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
-		this.allProofObligationItems = new SimpleListProperty<>(this, "allProofObligationItems", FXCollections.observableArrayList());
-		this.proofObligationItemsWithIds = new SimpleListProperty<>(this, "proofObligationItemsWithIds", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
 
-		this.validationTasksOld = new SimpleMapProperty<>(this, "validationTasks", FXCollections.observableHashMap());
-		this.validationTasksOldListener = change -> {
-			while (change.next()) {
-				for (final IValidationTask<?> vt : change.getRemoved()) {
-					this.getValidationTasksOld().remove(vt.getId(), vt);
-				}
-				for (final IValidationTask<?> vt : change.getAddedSubList()) {
-					if (vt.getId() != null) {
-						this.getValidationTasksOld().put(vt.getId(), vt);
-					}
-				}
-			}
-		};
-
 		this.initListeners();
-	}
-
-	private void addValidationTaskListener(final ObservableList<? extends IValidationTask<?>> tasks) {
-		tasks.addListener(this.validationTasksOldListener);
-		for (final IValidationTask<?> task : tasks) {
-			if (task.getId() != null) {
-				this.getValidationTasksOld().put(task.getId(), task);
-			}
-		}
-	}
-
-	private void removeValidationTaskListener(final ObservableList<? extends IValidationTask<?>> tasks) {
-		tasks.removeListener(this.validationTasksOldListener);
-		for (final IValidationTask<?> task : tasks) {
-			if (task.getId() != null) {
-				this.getValidationTasksOld().remove(task.getId(), task);
-			}
-		}
 	}
 
 	@JsonIgnore
@@ -201,9 +144,9 @@ public final class MachineProperties {
 
 	@JsonIgnore
 	public Set<String> getValidationTaskIds() {
-		Set<String> ids = this.getValidationTasksWithId().stream().map(IValidationTask::getId).collect(Collectors.toSet());
-		ids.addAll(this.getValidationTasksOld().keySet());
-		return ids;
+		return this.getValidationTasksWithId().stream()
+			       .map(IValidationTask::getId)
+			       .collect(Collectors.toSet());
 	}
 
 	private ObjectProperty<MachineCheckingStatus> createStatusProperty(ValidationTaskType<? extends IExecutableItem> taskType) {
@@ -287,8 +230,8 @@ public final class MachineProperties {
 	}
 
 	@JsonIgnore
-	public ReadOnlyMapProperty<String, IValidationTask<?>> getValidationTasksOld() {
-		return this.validationTasksOld;
+	public ObservableList<ProofObligationItem> getProofObligationTasks() {
+		return this.getValidationTasksByType(BuiltinValidationTaskTypes.PROOF_OBLIGATION);
 	}
 
 	@JsonGetter("ltlPatterns")
@@ -319,63 +262,6 @@ public final class MachineProperties {
 	@JsonSetter("testCases")
 	private void setTestCases(final List<TestCaseGenerationItem> testCases) {
 		this.getTestCases().setAll(testCases);
-	}
-
-	@JsonIgnore
-	public ReadOnlyListProperty<ProofObligationItem> getAllProofObligationItems() {
-		return this.allProofObligationItems;
-	}
-
-	@JsonGetter("proofObligationItems")
-	private ReadOnlyListProperty<SavedProofObligationItem> getProofObligationItemsWithIds() {
-		return this.proofObligationItemsWithIds;
-	}
-
-	@JsonSetter("proofObligationItems")
-	private void setProofObligationItemsWithIds(final List<SavedProofObligationItem> proofObligationItems) {
-		// After setting proofObligationItems,
-		// allProofObligationItems must be updated manually using updateAllProofObligationsFromModel.
-		this.getProofObligationItemsWithIds().setAll(proofObligationItems);
-	}
-
-	public void updateAllProofObligationsFromModel(final AbstractModel model) {
-		// TODO: Does not yet work with .eventb files
-		if (!(model instanceof EventBModel) || ((EventBModel) model).getTopLevelMachine() == null) {
-			return;
-		}
-
-		// Save the previous POs and allow lookup by name.
-		Map<String, SavedProofObligationItem> previousPOsByName = this.getProofObligationItemsWithIds().stream()
-			                                                          .collect(Collectors.toMap(SavedProofObligationItem::getName, x -> x));
-
-		// Read the current POs from the model.
-		List<ProofObligationItem> proofObligations = ((EventBModel) model).getTopLevelMachine()
-			                                             .getProofs()
-			                                             .stream()
-			                                             .map(ProofObligationItem::new)
-			                                             .collect(Collectors.toList());
-
-		// Copy any PO validation task IDs from the previous POs.
-		// This also removes all POs from previousPOsByName that have a corresponding current PO,
-		// leaving only the POs that no longer exist in the model.
-		for (ListIterator<ProofObligationItem> iterator = proofObligations.listIterator(); iterator.hasNext(); ) {
-			final ProofObligationItem po = iterator.next();
-			final SavedProofObligationItem previousPO = previousPOsByName.remove(po.getName());
-			if (previousPO != null) {
-				iterator.set(po.withId(previousPO.getId()));
-			}
-		}
-
-		// Look for removed POs that have an ID and keep them,
-		// so that POs for which the user assigned an ID don't silently disappear.
-		previousPOsByName.values().stream()
-			.filter(po -> po.getId() != null)
-			.sorted(Comparator.comparing(SavedProofObligationItem::getName))
-			.map(ProofObligationItem::new)
-			.collect(Collectors.toCollection(() -> proofObligations));
-
-		// Store the updated POs in the machine.
-		this.getAllProofObligationItems().setAll(proofObligations);
 	}
 
 	@JsonGetter("simulations")
@@ -438,31 +324,12 @@ public final class MachineProperties {
 	private void initListeners() {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
 		this.getValidationTasks().addListener(changedListener);
-		// TODO: remove this for all validation tasks
 		this.getLTLPatterns().addListener(changedListener);
 		this.getSymbolicAnimationFormulas().addListener(changedListener);
 		this.getTestCases().addListener(changedListener);
-		this.getAllProofObligationItems().addListener((o, from, to) -> {
-			// Update the saved POs whenever the real PO list changes.
-			final List<SavedProofObligationItem> updatedSavedPOs = to.stream()
-				                                                       .filter(po -> po.getId() != null)
-				                                                       .map(SavedProofObligationItem::new)
-				                                                       .collect(Collectors.toList());
-
-			// Avoid marking the machine as unsaved if the POs didn't actually change.
-			if (!this.getProofObligationItemsWithIds().equals(updatedSavedPOs)) {
-				this.setProofObligationItemsWithIds(updatedSavedPOs);
-			}
-		});
-		this.getProofObligationItemsWithIds().addListener(changedListener);
 		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.getHistoryChartItems().addListener(changedListener);
-
-		// Collect all validation tasks that have a non-null ID
-		this.addValidationTaskListener(this.getValidationTasks());
-		// TODO: remove this
-		this.addValidationTaskListener(this.getAllProofObligationItems());
 	}
 
 	private void addCheckingStatusListener(final ObservableList<? extends IExecutableItem> items, final ObjectProperty<MachineCheckingStatus> statusProperty) {

@@ -1,7 +1,12 @@
 package de.prob2.ui.verifications.po;
 
 import java.util.Objects;
-import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
@@ -15,24 +20,28 @@ import javafx.beans.property.SimpleObjectProperty;
 
 public final class ProofObligationItem implements IValidationTask<ProofObligationItem> {
 
+	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String name;
+	@JsonIgnore
 	private final String description;
+	@JsonIgnore
 	private final ObjectProperty<Checked> checked;
 
-	public ProofObligationItem(final String id, final String name, final String description) {
+	public ProofObligationItem(String id, String name, String description) {
 		this.id = id;
-		this.name = name;
-		this.description = description;
+		this.name = Objects.requireNonNull(name, "name");
+		this.description = Objects.requireNonNull(description, "description");
 		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.INVALID_TASK);
 	}
 
-	public ProofObligationItem(final SavedProofObligationItem po) {
-		this(po.getId(), po.getName(), "");
+	@JsonCreator
+	public ProofObligationItem(@JsonProperty("id") String id, @JsonProperty("name") String name) {
+		this(id, name, "");
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
-		this(null, proofObligation.getName(), proofObligation.getDescription());
+		this(null, proofObligation.getName(), Objects.requireNonNullElse(proofObligation.getDescription(), ""));
 		this.setChecked(proofObligation.isDischarged() ? Checked.SUCCESS : Checked.NOT_CHECKED);
 	}
 
@@ -67,11 +76,12 @@ public final class ProofObligationItem implements IValidationTask<ProofObligatio
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
+	@JsonIgnore
 	public String getDescription() {
-		return description;
+		return this.description;
 	}
 
 	@Override
@@ -84,21 +94,33 @@ public final class ProofObligationItem implements IValidationTask<ProofObligatio
 		return this.checkedProperty().get();
 	}
 
+
+	@JsonIgnore
 	public void setChecked(final Checked checked) {
 		this.checkedProperty().set(checked);
 	}
 
 	@Override
-	public String toString() {
-		return new StringJoiner(", ", ProofObligationItem.class.getSimpleName() + "[", "]")
-				.add("id='" + id + "'")
-				.add("name='" + name + "'")
-				.add("description='" + description + "'")
-				.add("checked=" + getChecked())
-				.toString();
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		} else if (!(o instanceof ProofObligationItem that)) {
+			return false;
+		} else {
+			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getName(), that.getName());
+		}
 	}
 
-	public boolean settingsEqual(final ProofObligationItem that) {
-		return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description);
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.getId(), this.getName());
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			       .add("id", this.getId())
+			       .add("name", this.getName())
+			       .toString();
 	}
 }
