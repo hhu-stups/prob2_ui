@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications;
 
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -35,7 +36,7 @@ class ValidationTaskTest {
 		List<IValidationTask<?>> tasks = List.of(
 			new ModelCheckingItem(null, ModelCheckingSearchStrategy.MIXED_BF_DF, null, null, null, Set.of(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS)),
 			new DotFormulaTask(null, "do_some_dot_things", "1=1"),
-			new SimulationItem("xyz", SimulationType.MONTE_CARLO_SIMULATION, Map.of())
+			new SimulationItem("xyz", Path.of("a/b/c"), SimulationType.MONTE_CARLO_SIMULATION, Map.of())
 		);
 
 		String json = mapper.writerFor(new TypeReference<List<IValidationTask<?>>>() {}).withDefaultPrettyPrinter().writeValueAsString(tasks);
