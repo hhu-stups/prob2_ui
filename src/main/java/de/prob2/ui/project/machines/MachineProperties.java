@@ -55,7 +55,6 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 	"ltlPatterns",
 	"symbolicAnimationFormulas",
 	"testCases",
-	"proofObligationItems",
 	"simulations",
 	"visBVisualisation",
 	"historyChartItems",
