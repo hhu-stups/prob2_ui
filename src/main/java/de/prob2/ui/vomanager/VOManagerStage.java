@@ -254,8 +254,10 @@ public class VOManagerStage extends Stage {
 				}
 				for (IValidationTask<?> added : c.getAddedSubList()) {
 					vtTable.getItems().add(added);
-					vtTable.sort();
 					added.checkedProperty().addListener(validationFeedbackListener);
+				}
+				if (c.wasPermutated() || c.wasAdded()) {
+					vtTable.sort();
 				}
 			}
 		});
