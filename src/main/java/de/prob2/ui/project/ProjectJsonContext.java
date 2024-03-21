@@ -925,7 +925,11 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 	private static void updateV45Machine(final ObjectNode machine) {
 		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
 		checkArray(machine.remove("proofObligationItems"))
-			.forEach(node -> validationTasks.add(checkObject(node)));
+			.forEach(node -> {
+				ObjectNode obj = checkObject(node);
+				obj.put("taskType", BuiltinValidationTaskTypes.PROOF_OBLIGATION.getKey());
+				validationTasks.add(obj);
+			});
 	}
 
 	@Override
