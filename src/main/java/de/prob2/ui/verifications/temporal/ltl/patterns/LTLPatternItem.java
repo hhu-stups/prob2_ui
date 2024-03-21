@@ -12,7 +12,7 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public class LTLPatternItem implements IResettable {
+public final class LTLPatternItem implements IResettable {
 	// The pattern name is automatically parsed from the code.
 	// We store the parsed name in the project file
 	// so that we don't need to re-parse the pattern just to get its name
