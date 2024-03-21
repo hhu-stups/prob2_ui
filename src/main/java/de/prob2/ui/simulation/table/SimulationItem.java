@@ -34,7 +34,12 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-@JsonPropertyOrder({ "simulationPath", "type", "information", })
+@JsonPropertyOrder({
+	"id",
+	"simulationPath",
+	"type",
+	"information",
+})
 public final class SimulationItem implements IValidationTask<SimulationItem>, IResettable {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)

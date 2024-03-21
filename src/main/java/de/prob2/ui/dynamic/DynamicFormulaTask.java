@@ -14,7 +14,11 @@ import de.prob2.ui.vomanager.IValidationTask;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-@JsonPropertyOrder({ "commandType", "formula" })
+@JsonPropertyOrder({
+	"id",
+	"commandType",
+	"formula",
+})
 public abstract class DynamicFormulaTask<T extends DynamicFormulaTask<T>> implements IValidationTask<T> {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)

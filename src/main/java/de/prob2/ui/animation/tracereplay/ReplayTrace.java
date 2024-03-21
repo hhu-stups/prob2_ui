@@ -35,7 +35,11 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-@JsonPropertyOrder({ "location", "selected" })
+@JsonPropertyOrder({
+	"id",
+	"location",
+	"selected",
+})
 public final class ReplayTrace implements IExecutableItem, IValidationTask<ReplayTrace> {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
