@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.po;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -154,6 +155,10 @@ public class ProofObligationView extends AnchorPane {
 	}
 
 	private void editItem(ProofObligationItem item) {
+		Optional<ProofObligationItem> existingSavedPO = this.savedProofObligations.stream()
+			                                                .filter(savedPO -> Objects.equals(savedPO.getName(), item.getName()))
+			                                                .findAny();
+
 		TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
 		stageManager.register(dialog);
 		dialog.setTitle(i18n.translate("verifications.po.poView.contextMenu.editId"));
@@ -164,9 +169,14 @@ public class ProofObligationView extends AnchorPane {
 			if (!Objects.equals(id, item.getId())) {
 				MachineProperties mp = currentProject.getCurrentMachine().getMachineProperties();
 				if (id != null) {
-					mp.replaceValidationTask(item, item.withId(id));
+					// we are adding or changing an id
+					existingSavedPO.ifPresentOrElse(
+						savedPO -> mp.replaceValidationTask(savedPO, item.withId(id)),
+						() -> mp.addValidationTask(item.withId(id))
+					);
 				} else {
-					mp.removeValidationTask(item);
+					// we are removing an id
+					existingSavedPO.ifPresent(mp::removeValidationTask);
 				}
 			}
 		});
