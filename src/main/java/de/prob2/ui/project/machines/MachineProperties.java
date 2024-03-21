@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
@@ -92,18 +93,12 @@ public final class MachineProperties {
 		this.initListeners();
 	}
 
-	@JsonIgnore
 	public ReadOnlyListProperty<IValidationTask<?>> getValidationTasks() {
 		return this.validationTasks;
 	}
 
-	@JsonGetter("validationTasks")
-	private List<IValidationTask<?>> getValidationTasksForSerialization() {
-		return this.getValidationTasks();
-	}
-
-	@JsonSetter("validationTasks")
-	private void setValidationTasksForDeserialization(List<IValidationTask<?>> validationTasks) {
+	@JsonProperty("validationTasks")
+	private void setValidationTasks(List<IValidationTask<?>> validationTasks) {
 		this.getValidationTasks().setAll(validationTasks);
 	}
 
