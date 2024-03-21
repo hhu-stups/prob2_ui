@@ -1,7 +1,6 @@
 package de.prob2.ui.vomanager;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 
@@ -15,7 +14,6 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 // we use the curiously recurring template pattern (crtp) here
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, property = "taskType")
 @JsonTypeIdResolver(ValidationTaskTypeResolver.class)
-@JsonPropertyOrder({ "taskType", "id" })
 public interface IValidationTask<T extends IValidationTask<T>> {
 
 	String getId();
