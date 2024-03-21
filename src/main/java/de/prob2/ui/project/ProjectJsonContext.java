@@ -18,7 +18,6 @@ import com.fasterxml.jackson.databind.node.TextNode;
 
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
-import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 
 class ProjectJsonContext extends JacksonManager.Context<Project> {
 	// From VOParser.scc:
@@ -842,29 +841,29 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 
 	private static void updateV38Machine(final ObjectNode machine) {
 		checkArray(machine.get("temporalFormulas")).forEach(
-			node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.TEMPORAL.getKey())
+			node -> checkObject(node).put("taskType", "TEMPORAL")
 		);
 		checkArray(machine.get("symbolicCheckingFormulas")).forEach(
-			node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.SYMBOLIC.getKey())
+			node -> checkObject(node).put("taskType", "SYMBOLIC")
 		);
 		checkArray(machine.get("traces")).forEach(
-			node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.REPLAY_TRACE.getKey())
+			node -> checkObject(node).put("taskType", "REPLAY_TRACE")
 		);
 		checkArray(machine.get("modelcheckingItems")).forEach(
-			node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.MODEL_CHECKING.getKey())
+			node -> checkObject(node).put("taskType", "MODEL_CHECKING")
 		);
 		// POs are saved via SavedProofObligationItem
 		checkArray(machine.get("simulations")).forEach(
 			modelNode -> checkArray(checkObject(modelNode).get("simulationItems"))
-				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.SIMULATION.getKey()))
+				.forEach(node -> checkObject(node).put("taskType", "SIMULATION"))
 		);
 		checkObject(machine.get("dotVisualizationItems")).forEach(
 			listNode -> checkArray(listNode)
-				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.DOT_FORMULA.getKey()))
+				.forEach(node -> checkObject(node).put("taskType", "DOT_FORMULA"))
 		);
 		checkObject(machine.get("tableVisualizationItems")).forEach(
 			listNode -> checkArray(listNode)
-				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.TABLE_FORMULA.getKey()))
+				.forEach(node -> checkObject(node).put("taskType", "TABLE_FORMULA"))
 		);
 	}
 
@@ -927,7 +926,7 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		checkArray(machine.remove("proofObligationItems"))
 			.forEach(node -> {
 				ObjectNode obj = checkObject(node);
-				obj.put("taskType", BuiltinValidationTaskTypes.PROOF_OBLIGATION.getKey());
+				obj.put("taskType", "PROOF_OBLIGATION");
 				validationTasks.add(obj);
 			});
 	}
