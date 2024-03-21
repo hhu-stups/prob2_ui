@@ -332,8 +332,8 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 
 		F newTask = stage.getResult();
 		if (newTask != null) {
-			this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTask(oldTask, newTask);
-			this.evaluateFormula(newTask.getFormula());
+			F added = this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(oldTask, newTask);
+			this.evaluateFormula(added.getFormula());
 		}
 	}
 
@@ -344,8 +344,8 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 
 		F task = stage.getResult();
 		if (task != null) {
-			this.currentProject.getCurrentMachine().getMachineProperties().addValidationTask(task);
-			this.evaluateFormula(task.getFormula());
+			F added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
+			this.evaluateFormula(added.getFormula());
 		}
 	}
 
@@ -353,8 +353,8 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 	protected void addFormulaButton() {
 		F task = createNewTask(null, lastItem.getCommand(), taFormula.getText());
 		if (task != null) {
-			this.currentProject.getCurrentMachine().getMachineProperties().addValidationTask(task);
-			this.evaluateFormula(task.getFormula());
+			F added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
+			this.evaluateFormula(added.getFormula());
 		}
 	}
 

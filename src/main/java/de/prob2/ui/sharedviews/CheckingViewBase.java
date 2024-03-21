@@ -124,43 +124,6 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 
 	protected abstract ObservableList<T> getItemsProperty(Machine machine);
 
-	protected void addItem(Machine machine, T item) {
-		try {
-			this.getItemsProperty(machine).add(item);
-		} catch (UnsupportedOperationException e) {
-			if (item instanceof IValidationTask<?> vt) {
-				machine.getMachineProperties().addValidationTask(vt);
-			} else {
-				throw e;
-			}
-		}
-	}
-
-	protected void removeItem(Machine machine, T item) {
-		try {
-			this.getItemsProperty(machine).remove(item);
-		} catch (UnsupportedOperationException e) {
-			if (item instanceof IValidationTask<?> vt) {
-				machine.getMachineProperties().removeValidationTask(vt);
-			} else {
-				throw e;
-			}
-		}
-	}
-
-	protected void replaceItem(Machine machine, T oldItem, T newItem) {
-		try {
-			ObservableList<T> items = this.getItemsProperty(machine);
-			items.set(items.indexOf(oldItem), newItem);
-		} catch (UnsupportedOperationException e) {
-			if (oldItem instanceof IValidationTask<?> vtOld && newItem instanceof IValidationTask<?> vtNew) {
-				machine.getMachineProperties().replaceValidationTask(vtOld, vtNew);
-			} else {
-				throw e;
-			}
-		}
-	}
-
 	@FXML
 	protected void initialize() {
 		// we have to use ths wrapped binding because we directly set the contained list in "this.itemsTable.itemsProperty()"
@@ -197,31 +160,46 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 
-	protected T addItem(final T newItem) {
-		final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
-		if (existingItem.isEmpty()) {
-			addItem(currentProject.getCurrentMachine(), newItem);
-			return newItem;
+	@SuppressWarnings("unchecked")
+	protected T addItem(T newItem) {
+		if (newItem instanceof IValidationTask<?> vt) {
+			return (T) this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(vt);
 		} else {
-			T t = existingItem.get();
-			t.reset();
-			return t;
+			final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
+			if (existingItem.isEmpty()) {
+				this.getItemsProperty(this.currentProject.getCurrentMachine()).add(newItem);
+				return newItem;
+			} else {
+				T t = existingItem.get();
+				t.reset();
+				return t;
+			}
 		}
 	}
 
 	protected void removeItem(final T item) {
-		removeItem(currentProject.getCurrentMachine(), item);
+		if (item instanceof IValidationTask<?> vt) {
+			this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(vt);
+		} else {
+			this.getItemsProperty(this.currentProject.getCurrentMachine()).remove(item);
+		}
 	}
 
+	@SuppressWarnings("unchecked")
 	protected T replaceItem(final T oldItem, final T newItem) {
-		final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
-		if (existingItem.isEmpty()) {
-			replaceItem(currentProject.getCurrentMachine(), oldItem, newItem);
-			return newItem;
+		if (oldItem instanceof IValidationTask<?> vtOld && newItem instanceof IValidationTask<?> vtNew) {
+			return (T) this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(vtOld, vtNew);
 		} else {
-			T t = existingItem.get();
-			t.reset();
-			return t;
+			final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
+			if (existingItem.isEmpty()) {
+				ObservableList<T> items = this.getItemsProperty(this.currentProject.getCurrentMachine());
+				items.set(items.indexOf(oldItem), newItem);
+				return newItem;
+			} else {
+				T t = existingItem.get();
+				t.reset();
+				return t;
+			}
 		}
 	}
 

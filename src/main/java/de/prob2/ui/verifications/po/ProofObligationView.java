@@ -171,8 +171,8 @@ public class ProofObligationView extends AnchorPane {
 				if (id != null) {
 					// we are adding or changing an id
 					existingSavedPO.ifPresentOrElse(
-						savedPO -> mp.replaceValidationTask(savedPO, item.withId(id)),
-						() -> mp.addValidationTask(item.withId(id))
+						savedPO -> mp.replaceValidationTaskIfNotExist(savedPO, item.withId(id)),
+						() -> mp.addValidationTaskIfNotExist(item.withId(id))
 					);
 				} else {
 					// we are removing an id

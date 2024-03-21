@@ -71,15 +71,7 @@ public class SimulationItemHandler {
 	}
 
 	public SimulationItem addItem(SimulationItem newItem) {
-		Optional<SimulationItem> existingItem = this.currentProject.getCurrentMachine().getMachineProperties().getValidationTasksByType(BuiltinValidationTaskTypes.SIMULATION).stream().filter(newItem::equals).findAny();
-		if (existingItem.isPresent()) {
-			SimulationItem item = existingItem.get();
-			item.reset();
-			return item;
-		} else {
-			this.currentProject.getCurrentMachine().getMachineProperties().addValidationTask(newItem);
-			return newItem;
-		}
+		return this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(newItem);
 	}
 
 	public void removeItem(SimulationItem item) {

@@ -5,13 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
@@ -25,7 +25,6 @@ import de.prob2.ui.dynamic.table.TableFormulaTask;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.IResettable;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
@@ -163,6 +162,20 @@ public final class MachineProperties {
 		this.getValidationTasks().add(Objects.requireNonNull(validationTask, "validationTask"));
 	}
 
+	@SuppressWarnings("unchecked")
+	public <T extends IValidationTask<?>> T addValidationTaskIfNotExist(T validationTask) {
+		Objects.requireNonNull(validationTask, "validationTask");
+		Optional<IValidationTask<?>> existingItem = this.getValidationTasks().stream().filter(validationTask::settingsEqual).findAny();
+		if (existingItem.isPresent()) {
+			IValidationTask<?> vt = existingItem.get();
+			vt.reset();
+			return (T) vt;
+		} else {
+			this.addValidationTask(validationTask);
+			return validationTask;
+		}
+	}
+
 	public void removeValidationTask(IValidationTask<?> validationTask) {
 		this.getValidationTasks().remove(Objects.requireNonNull(validationTask, "validationTask"));
 	}
@@ -176,6 +189,21 @@ public final class MachineProperties {
 		}
 
 		this.getValidationTasks().set(index, newValidationTask);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T extends IValidationTask<?>> T replaceValidationTaskIfNotExist(T oldValidationTask, T newValidationTask) {
+		Objects.requireNonNull(oldValidationTask, "oldValidationTask");
+		Objects.requireNonNull(newValidationTask, "newValidationTask");
+		Optional<IValidationTask<?>> existingItem = this.getValidationTasks().stream().filter(newValidationTask::settingsEqual).findAny();
+		if (existingItem.isPresent()) {
+			IValidationTask<?> vt = existingItem.get();
+			vt.reset();
+			return (T) vt;
+		} else {
+			this.replaceValidationTask(oldValidationTask, newValidationTask);
+			return newValidationTask;
+		}
 	}
 
 	@JsonIgnore

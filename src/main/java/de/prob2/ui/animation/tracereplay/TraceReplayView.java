@@ -39,7 +39,6 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableListValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -283,8 +282,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected void removeItem(Machine machine, ReplayTrace item) {
-		super.removeItem(machine, item);
-		traceFileHandler.deleteTraceFile(item);
+	protected void removeItem(ReplayTrace item) {
+		super.removeItem(item);
+		this.traceFileHandler.deleteTraceFile(item);
 	}
 }
