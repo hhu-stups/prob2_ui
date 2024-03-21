@@ -23,7 +23,15 @@ import de.prob2.ui.vomanager.IValidationTask;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-@JsonPropertyOrder({ "id", "type", "description", "stateLimit", "code", "expectedResult", "selected", })
+@JsonPropertyOrder({
+	"type",
+	"id",
+	"description",
+	"stateLimit",
+	"code",
+	"expectedResult",
+	"selected",
+})
 public final class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask<TemporalFormulaItem> {
 
 	private final TemporalFormulaType type;
