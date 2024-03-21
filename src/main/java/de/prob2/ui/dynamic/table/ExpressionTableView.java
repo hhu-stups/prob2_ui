@@ -1,9 +1,17 @@
 package de.prob2.ui.dynamic.table;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
 import de.prob.animator.command.GetShortestTraceCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
@@ -11,10 +19,8 @@ import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.statespace.State;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
-import de.prob2.ui.dynamic.DynamicCommandStage;
+import de.prob2.ui.dynamic.DynamicFormulaStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
-import de.prob2.ui.dynamic.EditFormulaStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -23,29 +29,28 @@ import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+
 import javafx.application.Platform;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 @Singleton
-public class ExpressionTableView extends DynamicCommandStage<TableVisualizationCommand> {
+public class ExpressionTableView extends DynamicFormulaStage<TableVisualizationCommand, TableFormulaTask> {
 
 	private final class ValueItemRow extends TableRow<ObservableList<String>> {
 
@@ -58,7 +63,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		protected void updateItem(final ObservableList<String> item, final boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll("true-val", "false-val");
-			if(item != null && !empty) {
+			if (item != null && !empty) {
 				List<MenuItem> contextMenuItems = new ArrayList<>();
 				this.setContextMenu(null);
 				if (header.contains(SOURCE_COLUMN_NAME)) {
@@ -134,23 +139,20 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 		super.initialize();
 		helpButton.setHelpContent("mainmenu.visualisations.formulaTableVisualisation", null);
 		currentTable.addListener((observable, from, to) -> {
-			if(to != null) {
+			if (to != null) {
 				fillTable(to);
 			}
 		});
 		saveButton.disableProperty().bind(currentTable.isNull());
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			Machine machine = currentProject.getCurrentMachine();
 			tvFormula.itemsProperty().unbind();
-			if(machine == null || to == null) {
-				return;
+			Machine machine = currentProject.getCurrentMachine();
+			if (machine == null || to == null) {
+				tvFormula.setItems(FXCollections.observableArrayList());
+			} else {
+				tvFormula.setItems(machine.getMachineProperties().getTableFormulaTasksByCommand(to.getCommand()));
 			}
-			Map<String, ListProperty<DynamicCommandFormulaItem>> items = machine.getMachineProperties().getTableVisualizationItems();
-			if(!items.containsKey(to.getCommand())) {
-				machine.getMachineProperties().addTableVisualizationListProperty(to.getCommand());
-			}
-			tvFormula.itemsProperty().bind(items.get(to.getCommand()));
 		});
 	}
 
@@ -211,7 +213,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private void handleSource(List<String> header, List<String> item, List<MenuItem> contextMenuItems) {
 		MenuItem showSourceItem = new MenuItem(i18n.translate("dynamic.tableview.showSource"));
 		int indexOfSource = header.indexOf(SOURCE_COLUMN_NAME);
-		if(item != null) {
+		if (item != null) {
 			String source = item.get(indexOfSource);
 			String[] start;
 			final int line;
@@ -229,7 +231,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 				line = Integer.parseInt(start[0]) - 1;
 				column = Integer.parseInt(start[1]);
 				path = currentTrace.getModel().getModelFile().toPath();
-			} else if(source.startsWith("Line: ")) {
+			} else if (source.startsWith("Line: ")) {
 				source = source.replaceFirst("Line: ", "");
 				int nextWhiteSpaceIndex = source.indexOf(" ");
 				line = Integer.parseInt(source.substring(0, nextWhiteSpaceIndex)) - 1;
@@ -262,7 +264,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	private void handleStateID(List<String> header, List<String> item, List<MenuItem> contextMenuItems) {
 		MenuItem jumpToStateItem = new MenuItem(i18n.translate("dynamic.tableview.jumpToState"));
 		int indexOfStateID = header.indexOf(STATE_ID_COLUMN_NAME);
-		if(item != null) {
+		if (item != null) {
 			String stateID = item.get(indexOfStateID);
 			jumpToStateItem.setOnAction(e -> {
 				GetShortestTraceCommand cmd = new GetShortestTraceCommand(currentTrace.getStateSpace(), stateID);
@@ -282,14 +284,6 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			data.add(FXCollections.observableArrayList(row));
 		}
 		return data;
-	}
-
-	@Override
-	protected void addFormulaButton(){
-		DynamicCommandFormulaItem item = new DynamicCommandFormulaItem(null, lastItem.getCommand(), taFormula.getText());
-		currentProject.getCurrentMachine().getMachineProperties().addTableVisualizationItem(lastItem.getCommand(), item);
-		this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
-		evaluateFormula(item.getFormula());
 	}
 
 	@FXML
@@ -317,7 +311,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 			}
 		} catch (IOException e) {
 			LOGGER.error("Saving as CSV failed", e);
-			final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
+			final Alert alert = stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
 			alert.initOwner(this);
 			alert.showAndWait();
 		}
@@ -333,45 +327,7 @@ public class ExpressionTableView extends DynamicCommandStage<TableVisualizationC
 	}
 
 	@Override
-	protected void editFormula(TableRow<DynamicCommandFormulaItem> row){
-		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
-		stage.initOwner(this);
-		stage.editItem(row.getItem(),errors);
-		stage.showAndWait();
-		DynamicCommandFormulaItem item = stage.getItem();
-		Machine machine = currentProject.getCurrentMachine();
-		if(item != null ) {
-			ListProperty<DynamicCommandFormulaItem> tableVisualisationItem = machine.getMachineProperties().getTableVisualizationItems().get(lastItem.getCommand());
-			tableVisualisationItem.set(tableVisualisationItem.indexOf(item), item);
-			machine.setChanged(true);
-			tvFormula.refresh();
-			evaluateFormula(item.getFormula());
-		}
-	}
-
-	@Override
-	protected void addFormula(){
-		final EditFormulaStage stage = injector.getInstance(EditFormulaStage.class);
-		stage.initOwner(this);
-		stage.createNewItem(lastItem.getCommand());
-		stage.showAndWait();
-		DynamicCommandFormulaItem item = stage.getItem();
-		Machine machine = currentProject.getCurrentMachine();
-		if(item != null ) {
-			machine.getMachineProperties().addTableVisualizationItem(lastItem.getCommand(), item);
-			this.tvFormula.edit(this.tvFormula.getItems().size() - 1, formulaColumn);
-			tvFormula.refresh();
-			evaluateFormula(item.getFormula());
-		}
-	}
-
-	@Override
-	protected void removeFormula() {
-		if(this.tvFormula.getSelectionModel().getSelectedIndex() < 0) {
-			return;
-		}
-		DynamicCommandFormulaItem formulaItem = this.tvFormula.getItems().get(this.tvFormula.getSelectionModel().getSelectedIndex());
-		Machine machine = currentProject.getCurrentMachine();
-		machine.getMachineProperties().removeTableVisualizationItem(lastItem.getCommand(), formulaItem);
+	protected TableFormulaTask createNewTask(String id, String command, String formula) {
+		return new TableFormulaTask(id, command, formula);
 	}
 }

@@ -1,26 +1,29 @@
 package de.prob2.ui.simulation.table;
 
-import java.util.ArrayList;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IResettable;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -31,9 +34,214 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-public final class SimulationItem implements IValidationTask<SimulationItem> {
+@JsonPropertyOrder({ "simulationPath", "type", "information", })
+public final class SimulationItem implements IValidationTask<SimulationItem>, IResettable {
 
-	public static class SimulationCheckingInformation {
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private final String id;
+	private final Path simulationPath;
+	private final SimulationType type;
+	private final Map<String, Object> information;
+	@JsonIgnore
+	private ObjectProperty<Checked> checked;
+	@JsonIgnore
+	private SimulationStats simulationStats;
+	@JsonIgnore
+	private ListProperty<Trace> traces;
+	@JsonIgnore
+	private ListProperty<List<Integer>> timestamps;
+	@JsonIgnore
+	private ListProperty<Checked> statuses;
+
+	public SimulationItem(String id, Path simulationPath, SimulationType type, Map<String, Object> information) {
+		this.id = id;
+		this.simulationPath = Objects.requireNonNull(simulationPath, "simulationPath");
+		this.type = Objects.requireNonNull(type, "type");
+		this.information = Objects.requireNonNull(information, "information");
+		initListeners();
+	}
+
+	@JsonCreator
+	private SimulationItem(@JsonProperty("id") String id, @JsonProperty("simulationPath") Path simulationPath, @JsonProperty("type") SimulationType type, @JsonProperty("information") SimulationCheckingInformation information) {
+		this(id, simulationPath, type, information.getInformation());
+	}
+
+	private void initListeners() {
+		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+		this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
+		this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
+		this.statuses = new SimpleListProperty<>(FXCollections.observableArrayList());
+		this.simulationStats = null;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
+	}
+
+	@Override
+	public ValidationTaskType<SimulationItem> getTaskType() {
+		return BuiltinValidationTaskTypes.SIMULATION;
+	}
+
+	@Override
+	public String getTaskType(final I18n i18n) {
+		return i18n.translate(this.getType());
+	}
+
+	@Override
+	public ObjectProperty<Checked> checkedProperty() {
+		return checked;
+	}
+
+	@Override
+	public Checked getChecked() {
+		return checked.get();
+	}
+
+	@JsonIgnore
+	public void setChecked(Checked checked) {
+		this.checked.set(checked);
+	}
+
+	@JsonIgnore
+	public String getTypeAsName() {
+		return type.toString();
+	}
+
+	public Path getSimulationPath() {
+		return this.simulationPath;
+	}
+
+	public SimulationType getType() {
+		return type;
+	}
+
+	@Override
+	public void reset() {
+		this.setChecked(Checked.NOT_CHECKED);
+		this.simulationStats = null;
+		this.timestamps.clear();
+		this.traces.clear();
+	}
+
+	public Map<String, Object> getInformation() {
+		return information;
+	}
+
+	public boolean containsField(String key) {
+		return information.containsKey(key);
+	}
+
+	@JsonIgnore
+	public Object getField(String key) {
+		return information.get(key);
+	}
+
+	@JsonIgnore
+	public String getConfiguration() {
+		return information.entrySet().stream()
+			       .map(entry -> String.format(Locale.ROOT, "%s : %s", entry.getKey(), entry.getValue()))
+			       .collect(Collectors.joining(",\n"));
+	}
+
+	@Override
+	public String getTaskDescription(final I18n i18n) {
+		return this.getConfiguration();
+	}
+
+	public ListProperty<Trace> tracesProperty() {
+		return traces;
+	}
+
+	@JsonIgnore
+	public List<Trace> getTraces() {
+		return traces.get();
+	}
+
+	@JsonIgnore
+	public void setTraces(List<Trace> traces) {
+		this.traces.setAll(traces);
+	}
+
+	public ListProperty<List<Integer>> timestampsProperty() {
+		return timestamps;
+	}
+
+	@JsonIgnore
+	public List<List<Integer>> getTimestamps() {
+		return timestamps.get();
+	}
+
+	@JsonIgnore
+	public void setTimestamps(List<List<Integer>> timestamps) {
+		this.timestamps.setAll(timestamps);
+	}
+
+	public ListProperty<Checked> statusesProperty() {
+		return statuses;
+	}
+
+	@JsonIgnore
+	public List<Checked> getStatuses() {
+		return statuses.get();
+	}
+
+	@JsonIgnore
+	public void setStatuses(List<Checked> statuses) {
+		this.statuses.setAll(statuses);
+	}
+
+	@JsonIgnore
+	public SimulationStats getSimulationStats() {
+		return simulationStats;
+	}
+
+	@JsonIgnore
+	public void setSimulationStats(SimulationStats simulationStats) {
+		this.simulationStats = simulationStats;
+	}
+
+	public String createdByForMetadata() {
+		String createdBy = "Simulation: " + getTypeAsName() + "; " + getConfiguration();
+		return createdBy.replaceAll("\n", " ");
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		} else if (!(o instanceof SimulationItem that)) {
+			return false;
+		} else {
+			return Objects.equals(this.getId(), that.getId())
+				       && Objects.equals(this.getSimulationPath(), that.getSimulationPath())
+				       && Objects.equals(this.getType(), that.getType())
+				       && Objects.equals(this.getInformation(), that.getInformation());
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.getId(), this.getSimulationPath(), this.getType(), this.getInformation());
+	}
+
+	@Override
+	@JsonIgnore
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			       .add("id", this.getId())
+			       .add("simulationPath", this.getSimulationPath())
+			       .add("type", this.getType())
+			       .add("information", this.getInformation()).toString();
+	}
+
+	public SimulationItem withSimulationPath(Path simulationPath) {
+		return new SimulationItem(this.getId(), simulationPath, this.getType(), new HashMap<>(this.getInformation()));
+	}
+
+	public static final class SimulationCheckingInformation {
+
 		private final Map<String, Object> information;
 
 		@JsonCreator
@@ -139,204 +347,5 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 		private void setTime(final int time) {
 			this.information.put("TIME", time);
 		}
-	}
-
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final String id;
-
-	private final SimulationType type;
-
-	private final Map<String, Object> information;
-
-	@JsonIgnore
-	private ObjectProperty<Checked> checked;
-
-	@JsonIgnore
-	private SimulationStats simulationStats;
-
-	@JsonIgnore
-	private ListProperty<Trace> traces;
-
-	@JsonIgnore
-	private ListProperty<List<Integer>> timestamps;
-
-	@JsonIgnore
-	private ListProperty<Checked> statuses;
-
-	@JsonIgnore
-	private SimulationModel simulationModel;
-
-	public SimulationItem(String id, SimulationType type, Map<String, Object> information) {
-		this.id = id;
-		this.type = type;
-		this.information = information;
-		initListeners();
-	}
-
-	@JsonCreator
-	private SimulationItem(
-		@JsonProperty("id") final String id,
-		@JsonProperty("type") final SimulationType type,
-		@JsonProperty("information") final SimulationCheckingInformation information
-	) {
-		this(id, type, information.getInformation());
-	}
-
-	private void initListeners() {
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
-		this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.statuses = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.simulationStats = null;
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
-	}
-
-	@Override
-	public ValidationTaskType<SimulationItem> getTaskType() {
-		return BuiltinValidationTaskTypes.SIMULATION;
-	}
-
-	public void setChecked(Checked checked) {
-		this.checked.set(checked);
-	}
-
-	@Override
-	public ObjectProperty<Checked> checkedProperty() {
-		return checked;
-	}
-
-	@Override
-	public Checked getChecked() {
-		return checked.get();
-	}
-
-	@JsonIgnore
-	public String getTypeAsName() {
-		return type.toString();
-	}
-
-	public SimulationType getType() {
-		return type;
-	}
-
-	@Override
-	public String getTaskType(final I18n i18n) {
-		return i18n.translate(this.getType());
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(type, information);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if(!(obj instanceof SimulationItem otherItem)) {
-			return false;
-		}
-		return Objects.equals(this.id, otherItem.id) && this.type == otherItem.type && this.information.equals(otherItem.information);
-	}
-
-	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
-		this.simulationStats = null;
-		this.timestamps.clear();
-		this.traces.clear();
-	}
-
-	public Map<String, Object> getInformation() {
-		return information;
-	}
-
-	public boolean containsField(String key) {
-		return information.containsKey(key);
-	}
-
-	public Object getField(String key) {
-		return information.get(key);
-	}
-
-	@JsonIgnore
-	public String getConfiguration() {
-		List<String> configurations = new ArrayList<>();
-		for(String key : information.keySet()) {
-			Object obj = information.get(key);
-			configurations.add(String.format(Locale.ROOT, "%s : %s", key, obj.toString()));
-		}
-		return String.join(",\n", configurations);
-	}
-
-	@Override
-	public String getTaskDescription(final I18n i18n) {
-		return this.getConfiguration();
-	}
-
-	public void setTraces(List<Trace> traces) {
-		this.traces.setAll(traces);
-	}
-
-	public ListProperty<Trace> tracesProperty() {
-		return traces;
-	}
-
-	public List<Trace> getTraces() {
-		return traces.get();
-	}
-
-	public void setTimestamps(List<List<Integer>> timestamps) {
-		this.timestamps.setAll(timestamps);
-	}
-
-	public ListProperty<List<Integer>> timestampsProperty() {
-		return timestamps;
-	}
-
-	public List<List<Integer>> getTimestamps() {
-		return timestamps.get();
-	}
-
-	public void setStatuses(List<Checked> statuses) {
-		this.statuses.setAll(statuses);
-	}
-
-	public ListProperty<Checked> statusesProperty() {
-		return statuses;
-	}
-
-	public List<Checked> getStatuses() {
-		return statuses.get();
-	}
-
-	public void setSimulationStats(SimulationStats simulationStats) {
-		this.simulationStats = simulationStats;
-	}
-
-	public SimulationStats getSimulationStats() {
-		return simulationStats;
-	}
-
-	@JsonIgnore
-	public void setSimulationModel(SimulationModel simulationModel) {
-		this.simulationModel = simulationModel;
-	}
-
-	@JsonIgnore
-	public SimulationModel getSimulationModel() {
-		return simulationModel;
-	}
-
-	public String createdByForMetadata() {
-		String createdBy = "Simulation: " + getTypeAsName() + "; " + getConfiguration();
-		return createdBy.replaceAll("\n", " ");
-	}
-
-	@Override
-	@JsonIgnore
-	public String toString() {
-		return String.format(Locale.ROOT, "%s(%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getInformation());
 	}
 }

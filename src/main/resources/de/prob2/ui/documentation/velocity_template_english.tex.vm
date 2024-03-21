@@ -35,10 +35,10 @@ The B Machine $util.latexSafe($machine.getName()) is encoded by its Code, shown 
 $util.getMachineCode($machine,$project)
 \end{lstlisting}
 
-#if($modelchecking && !$machine.getMachineProperties().getModelcheckingItems().isEmpty())
+#if($modelchecking && !$machine.getMachineProperties().getModelCheckingTasks().isEmpty())
 \subsection{Model Checking}
-	The B Machine $util.latexSafe($machine.getName()) has $util.getNumberSelectedTasks($machine.getMachineProperties().getModelcheckingItems())  Modelchecking Tasks of which $util.getNumberSuccessfulTasks($machine.getMachineProperties().getModelcheckingItems()) were checked successfully
-	$util.getNumberFailedTasks($machine.getMachineProperties().getModelcheckingItems()) failed and $util.getNumberNotCheckedTasks($machine.getMachineProperties().getModelcheckingItems()) were not checked at all.
+	The B Machine $util.latexSafe($machine.getName()) has $util.getNumberSelectedTasks($machine.getMachineProperties().getModelCheckingTasks())  Modelchecking Tasks of which $util.getNumberSuccessfulTasks($machine.getMachineProperties().getModelCheckingTasks()) were checked successfully
+	$util.getNumberFailedTasks($machine.getMachineProperties().getModelCheckingTasks()) failed and $util.getNumberNotCheckedTasks($machine.getMachineProperties().getModelCheckingTasks()) were not checked at all.
 	\begin{tablestyling}
 	\begin{longtable}{p{0.4\textwidth} P{0.4\textwidth}}
 		\toprule
@@ -47,7 +47,7 @@ $util.getMachineCode($machine,$project)
 		\rowcolor{headerGray}  \thead{Modelchecking Task} &  \thead{Modelchecking Result}\\
 		\endhead
 		\midrule
-		#foreach($item in $machine.getMachineProperties().getModelcheckingItems())
+		#foreach($item in $machine.getMachineProperties().getModelCheckingTasks())
 			#if($item.selected())
 				#if($item.getItems().isEmpty())
 			$util.modelcheckingToUIString($item,$i18n) & $i18n.translate("verifications.result.notChecked.header")\\

@@ -49,7 +49,7 @@ public final class TraceReplayMenuButton extends MenuButton {
 			if (to == null) {
 				this.traces.set(FXCollections.emptyObservableList());
 			} else {
-				this.traces.bind(to.getMachineProperties().tracesProperty());
+				this.traces.set(to.getMachineProperties().getTraces());
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);

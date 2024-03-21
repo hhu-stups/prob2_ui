@@ -36,9 +36,9 @@ import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.ListProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -153,7 +153,12 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		});
 		stageManager.loadFXML(this, "temporal_view.fxml");
 	}
-	
+
+	@Override
+	protected ObservableList<TemporalFormulaItem> getItemsProperty(Machine machine) {
+		return machine.getMachineProperties().getTemporalFormulas();
+	}
+
 	@Override
 	@FXML
 	public void initialize() {
@@ -162,17 +167,14 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		setContextMenus();
 		setBindings();
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			items.unbind();
 			tvPattern.itemsProperty().unbind();
-			if(to != null) {
-				if(from != null) {
-					from.getMachineProperties().clearPatternManager();
-				}
-				items.bind(to.getMachineProperties().temporalFormulasProperty());
-				tvPattern.itemsProperty().bind(to.getMachineProperties().ltlPatternsProperty());
-				managePatternTable(to.getMachineProperties().ltlPatternsProperty());
+			if (from != null) {
+				from.getMachineProperties().clearPatternManager();
+			}
+			if (to != null) {
+				tvPattern.itemsProperty().bind(to.getMachineProperties().getLTLPatterns());
+				managePatternTable(to.getMachineProperties().getLTLPatterns());
 			} else {
-				items.set(FXCollections.emptyObservableList());
 				tvPattern.setItems(FXCollections.emptyObservableList());
 			}
 		};
@@ -194,7 +196,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 				LTLPatternItem item = row.getItem();
 				machine.getMachineProperties().getLTLPatterns().remove(item);
 				LTLPatternParser.removePattern(item, machine);
-				managePatternTable(machine.getMachineProperties().ltlPatternsProperty());
+				managePatternTable(machine.getMachineProperties().getLTLPatterns());
 			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
@@ -216,12 +218,11 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		});
 	}
 
-	private void managePatternTable(ListProperty<LTLPatternItem> ltlPatternItems){
-		if (ltlPatternItems.isEmpty()){
+	private void managePatternTable(ObservableList<LTLPatternItem> ltlPatternItems){
+		if (ltlPatternItems.isEmpty()) {
 			tvPattern.setVisible(false);
 			tvPattern.setManaged(false);
-		}
-		else {
+		} else {
 			tvPattern.setVisible(true);
 			tvPattern.setManaged(true);
 		}
@@ -235,7 +236,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		addMenuButton.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
-		saveLTLButton.disableProperty().bind(items.emptyProperty().or(currentTrace.isNull().or(selectAll.selectedProperty().not())));
+		saveLTLButton.disableProperty().bind(emptyProperty.or(currentTrace.isNull().or(selectAll.selectedProperty().not())));
 		loadLTLButton.disableProperty().bind(currentTrace.isNull());
 
 		itemsTable.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
@@ -267,7 +268,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		if (machine.getMachineProperties().getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
 			LTLPatternParser.addPattern(newItem, machine);
 			machine.getMachineProperties().getLTLPatterns().add(newItem);
-			managePatternTable(machine.getMachineProperties().ltlPatternsProperty());
+			managePatternTable(machine.getMachineProperties().getLTLPatterns());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
@@ -316,7 +317,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if (path != null) {
-			List<TemporalFormulaItem> formulas = items.stream()
+			List<TemporalFormulaItem> formulas = itemsTable.getItems().stream()
 				.filter(item -> item.getType() == TemporalFormulaType.LTL)
 				.filter(TemporalFormulaItem::selected)
 				.collect(Collectors.toList());
@@ -353,9 +354,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			LOGGER.error("Could not load LTL file: ", e);
 			return;
 		}
-		data.getFormulas().stream()
-				.filter(formula -> !items.contains(formula))
-				.forEach(items::add);
+		data.getFormulas().forEach(this::addItem);
 		data.getPatterns().stream()
 				.filter(pattern -> !machine.getMachineProperties().getLTLPatterns().contains(pattern))
 				.forEach(pattern -> {

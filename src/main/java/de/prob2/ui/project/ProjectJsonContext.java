@@ -860,11 +860,11 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		);
 		checkObject(machine.get("dotVisualizationItems")).forEach(
 			listNode -> checkArray(listNode)
-				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.DYNAMIC_FORMULA.getKey()))
+				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.DOT_FORMULA.getKey()))
 		);
 		checkObject(machine.get("tableVisualizationItems")).forEach(
 			listNode -> checkArray(listNode)
-				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.DYNAMIC_FORMULA.getKey()))
+				             .forEach(node -> checkObject(node).put("taskType", BuiltinValidationTaskTypes.TABLE_FORMULA.getKey()))
 		);
 	}
 
@@ -880,6 +880,56 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 
 		checkArray(machine.remove("temporalFormulas"))
 			.forEach(node -> validationTasks.add(checkObject(node)));
+	}
+
+	private static void updateV40Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("symbolicCheckingFormulas"))
+			.forEach(node -> validationTasks.add(checkObject(node)));
+	}
+
+	private static void updateV41Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("traces"))
+			.forEach(node -> validationTasks.add(checkObject(node)));
+	}
+
+	private static void updateV42Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("modelcheckingItems"))
+			.forEach(node -> validationTasks.add(checkObject(node)));
+	}
+
+	private static void updateV43Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkObject(machine.remove("dotVisualizationItems"))
+			.forEach(listNode -> checkArray(listNode)
+				                     .forEach(node -> validationTasks.add(checkObject(node))));
+		checkObject(machine.remove("tableVisualizationItems"))
+			.forEach(listNode -> checkArray(listNode)
+				                     .forEach(node -> validationTasks.add(checkObject(node))));
+	}
+
+	private static void updateV44Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.get("simulations")).forEach(modelNode -> {
+			ObjectNode model = checkObject(modelNode);
+			checkArray(model.remove("simulationItems")).forEach(itemNode -> {
+				ObjectNode item = checkObject(itemNode);
+				item.put("simulationPath", checkText(model.get("path")));
+				validationTasks.add(item);
+			});
+		});
+	}
+
+	private static void updateV45Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("proofObligationItems"))
+			.forEach(node -> {
+				ObjectNode obj = checkObject(node);
+				obj.put("taskType", BuiltinValidationTaskTypes.PROOF_OBLIGATION.getKey());
+				validationTasks.add(obj);
+			});
 	}
 
 	@Override
@@ -1025,6 +1075,24 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 39) {
 				updateV39Machine(machine);
+			}
+			if (oldVersion <= 40) {
+				updateV40Machine(machine);
+			}
+			if (oldVersion <= 41) {
+				updateV41Machine(machine);
+			}
+			if (oldVersion <= 42) {
+				updateV42Machine(machine);
+			}
+			if (oldVersion <= 43) {
+				updateV43Machine(machine);
+			}
+			if (oldVersion <= 44) {
+				updateV44Machine(machine);
+			}
+			if (oldVersion <= 45) {
+				updateV45Machine(machine);
 			}
 		});
 

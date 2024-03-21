@@ -1,11 +1,11 @@
 package de.prob2.ui.verifications.type;
 
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
+import de.prob2.ui.dynamic.dotty.DotFormulaTask;
+import de.prob2.ui.dynamic.table.TableFormulaTask;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
-import de.prob2.ui.verifications.po.SavedProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -27,7 +27,8 @@ public final class BuiltinValidationTaskTypes {
 	 * So this type is not used for (de-)serializing.
 	 */
 	public static final ValidationTaskType<ProofObligationItem> PROOF_OBLIGATION = register(new ValidationTaskType<>("PROOF_OBLIGATION", ProofObligationItem.class));
-	public static final ValidationTaskType<DynamicCommandFormulaItem> DYNAMIC_FORMULA = register(new ValidationTaskType<>("DYNAMIC_FORMULA", DynamicCommandFormulaItem.class));
+	public static final ValidationTaskType<DotFormulaTask> DOT_FORMULA = register(new ValidationTaskType<>("DOT_FORMULA", DotFormulaTask.class));
+	public static final ValidationTaskType<TableFormulaTask> TABLE_FORMULA = register(new ValidationTaskType<>("TABLE_FORMULA", TableFormulaTask.class));
 
 	private BuiltinValidationTaskTypes() {
 		throw new AssertionError();

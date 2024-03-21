@@ -81,6 +81,12 @@ public final class Machine {
 		this.nameProperty().addListener(changedListener);
 		this.descriptionProperty().addListener(changedListener);
 		this.lastUsedPreferenceNameProperty().addListener(changedListener);
+
+		this.getMachineProperties().changedProperty().addListener(((observable, from, to) -> {
+			if (to != null && to) {
+				this.setChanged(true);
+			}
+		}));
 	}
 
 	// these getters might be required for the UI (via reflection)
@@ -160,6 +166,11 @@ public final class Machine {
 	@JsonIgnore
 	public void setChanged(final boolean changed) {
 		this.changedProperty().set(changed);
+	}
+
+	public void resetChanged() {
+		this.getMachineProperties().setChanged(false);
+		this.setChanged(false);
 	}
 
 	@Override
