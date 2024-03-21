@@ -59,11 +59,6 @@ public class LTLPatternItem implements IResettable {
 		return this.getName().equals(other.getName());
 	}
 
-	@Override
-	public void reset() {
-		this.setResultItem(null);
-	}
-
 	public ObjectProperty<CheckingResultItem> resultItemProperty() {
 		return this.resultItem;
 	}
@@ -82,5 +77,10 @@ public class LTLPatternItem implements IResettable {
 
 	public Checked getChecked() {
 		return this.checkedProperty().get();
+	}
+
+	@Override
+	public void reset() {
+		this.setResultItem(null);
 	}
 }

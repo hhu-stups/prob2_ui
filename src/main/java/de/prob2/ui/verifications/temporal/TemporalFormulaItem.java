@@ -13,7 +13,6 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.temporal.ctl.CTLFormulaChecker;
 import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
@@ -33,10 +32,9 @@ import javafx.beans.property.SimpleObjectProperty;
 	"selected",
 })
 public final class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask<TemporalFormulaItem> {
-
-	private final TemporalFormulaType type;
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
+	private final TemporalFormulaType type;
 	private final String code;
 	private final String description;
 	private final int stateLimit;
@@ -62,12 +60,6 @@ public final class TemporalFormulaItem extends AbstractCheckableItem implements 
 		this.description = description;
 		this.stateLimit = stateLimit;
 		this.expectedResult = expectedResult;
-	}
-
-	@Override
-	public void reset() {
-		super.reset();
-		this.setCounterExample(null);
 	}
 
 	public TemporalFormulaType getType() {
@@ -127,25 +119,6 @@ public final class TemporalFormulaItem extends AbstractCheckableItem implements 
 	}
 
 	@Override
-	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof TemporalFormulaItem other)) {
-			return false;
-		}
-		return this.type == other.type
-			       && Objects.equals(this.getId(), other.getId())
-			       && this.getCode().equals(other.getCode())
-			       && this.getDescription().equals(other.getDescription())
-			       && this.stateLimit == other.stateLimit
-			       && this.expectedResult == other.expectedResult;
-	}
-
-	@Override
-	@JsonIgnore
-	public String toString() {
-		return String.format(Locale.ROOT, "%s(%s,%s,%s,%s)", type, this.getClass().getSimpleName(), this.getId(), this.getCode(), this.getExpectedResult());
-	}
-
-	@Override
 	public void execute(final ExecutionContext context) {
 		if (type == TemporalFormulaType.LTL) {
 			LTLFormulaChecker.checkFormula(this, context.machine(), context.stateSpace());
@@ -154,5 +127,28 @@ public final class TemporalFormulaItem extends AbstractCheckableItem implements 
 		} else {
 			throw new AssertionError();
 		}
+	}
+
+	@Override
+	public void reset() {
+		super.reset();
+		this.setCounterExample(null);
+	}
+
+	@Override
+	public boolean settingsEqual(Object other) {
+		return other instanceof TemporalFormulaItem that
+			       && Objects.equals(this.getTaskType(), that.getTaskType())
+			       && Objects.equals(this.getId(), that.getId())
+			       && Objects.equals(this.getType(), that.getType())
+			       && Objects.equals(this.getCode(), that.getCode())
+			       && Objects.equals(this.getDescription(), that.getDescription())
+			       && Objects.equals(this.getStateLimit(), that.getStateLimit())
+			       && Objects.equals(this.getExpectedResult(), that.getExpectedResult());
+	}
+
+	@Override
+	public String toString() {
+		return String.format(Locale.ROOT, "%s(%s,%s,%s,%s)", type, this.getClass().getSimpleName(), this.getId(), this.getCode(), this.getExpectedResult());
 	}
 }

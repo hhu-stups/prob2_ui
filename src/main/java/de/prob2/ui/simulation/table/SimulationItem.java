@@ -23,7 +23,6 @@ import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.IResettable;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -40,7 +39,7 @@ import javafx.collections.FXCollections;
 	"type",
 	"information",
 })
-public final class SimulationItem implements IValidationTask<SimulationItem>, IResettable {
+public final class SimulationItem implements IValidationTask<SimulationItem> {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
@@ -120,14 +119,6 @@ public final class SimulationItem implements IValidationTask<SimulationItem>, IR
 
 	public SimulationType getType() {
 		return type;
-	}
-
-	@Override
-	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
-		this.simulationStats = null;
-		this.timestamps.clear();
-		this.traces.clear();
 	}
 
 	public Map<String, Object> getInformation() {
@@ -213,32 +204,31 @@ public final class SimulationItem implements IValidationTask<SimulationItem>, IR
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		} else if (!(o instanceof SimulationItem that)) {
-			return false;
-		} else {
-			return Objects.equals(this.getId(), that.getId())
-				       && Objects.equals(this.getSimulationPath(), that.getSimulationPath())
-				       && Objects.equals(this.getType(), that.getType())
-				       && Objects.equals(this.getInformation(), that.getInformation());
-		}
+	public void reset() {
+		this.setChecked(Checked.NOT_CHECKED);
+		this.simulationStats = null;
+		this.timestamps.clear();
+		this.traces.clear();
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(this.getId(), this.getSimulationPath(), this.getType(), this.getInformation());
+	public boolean settingsEqual(Object other) {
+		return other instanceof SimulationItem that
+			       && Objects.equals(this.getTaskType(), that.getTaskType())
+			       && Objects.equals(this.getId(), that.getId())
+			       && Objects.equals(this.getSimulationPath(), that.getSimulationPath())
+			       && Objects.equals(this.getType(), that.getType())
+			       && Objects.equals(this.getInformation(), that.getInformation());
 	}
 
 	@Override
-	@JsonIgnore
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())
 			       .add("simulationPath", this.getSimulationPath())
 			       .add("type", this.getType())
-			       .add("information", this.getInformation()).toString();
+			       .add("information", this.getInformation())
+			       .toString();
 	}
 
 	public SimulationItem withSimulationPath(Path simulationPath) {

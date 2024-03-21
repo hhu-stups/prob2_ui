@@ -73,27 +73,25 @@ public abstract class DynamicFormulaTask<T extends DynamicFormulaTask<T>> implem
 	}
 
 	@Override
+	public void reset() {
+		this.setChecked(Checked.NOT_CHECKED);
+	}
+
+	@Override
+	public boolean settingsEqual(Object other) {
+		return other instanceof DynamicFormulaTask<?> that
+			       && Objects.equals(this.getTaskType(), that.getTaskType())
+			       && Objects.equals(this.getId(), that.getId())
+			       && Objects.equals(this.getCommandType(), that.getCommandType())
+			       && Objects.equals(this.getFormula(), that.getFormula());
+	}
+
+	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
-			       .add("id", id)
-			       .add("commandType", commandType)
-			       .add("formula", formula)
+			       .add("id", this.getId())
+			       .add("commandType", this.getCommandType())
+			       .add("formula", this.getFormula())
 			       .toString();
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		} else if (o == null || getClass() != o.getClass()) {
-			return false;
-		}
-		DynamicFormulaTask<?> that = (DynamicFormulaTask<?>) o;
-		return Objects.equals(id, that.id) && Objects.equals(commandType, that.commandType) && Objects.equals(formula, that.formula);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(id, commandType, formula);
 	}
 }

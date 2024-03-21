@@ -93,11 +93,12 @@ public final class MachineProperties {
 		this.initListeners();
 	}
 
-	public ReadOnlyListProperty<IValidationTask<?>> getValidationTasks() {
+	@JsonGetter("validationTasks")
+	public ObservableList<IValidationTask<?>> getValidationTasks() {
 		return this.validationTasks;
 	}
 
-	@JsonProperty("validationTasks")
+	@JsonSetter("validationTasks")
 	private void setValidationTasks(List<IValidationTask<?>> validationTasks) {
 		this.getValidationTasks().setAll(validationTasks);
 	}
@@ -350,9 +351,7 @@ public final class MachineProperties {
 
 	public void resetStatus() {
 		for (var vt : this.getValidationTasks()) {
-			if (vt instanceof IResettable r) {
-				r.reset();
-			}
+			vt.reset();
 		}
 		this.getSymbolicAnimationFormulas().forEach(IExecutableItem::reset);
 		this.getTestCases().forEach(IExecutableItem::reset);

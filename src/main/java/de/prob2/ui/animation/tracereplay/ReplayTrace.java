@@ -13,6 +13,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.common.base.MoreObjects;
 import com.google.common.io.MoreFiles;
 
 import de.prob.check.tracereplay.ReplayedTrace;
@@ -23,6 +24,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -119,15 +121,6 @@ public final class ReplayTrace implements IExecutableItem, IValidationTask<Repla
 
 	public ReadOnlyObjectProperty<TraceJsonFile> loadedTraceProperty() {
 		return this.loadedTrace;
-	}
-
-	@Override
-	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
-		this.setProgress(-1);
-		this.loadedTrace.set(null);
-		this.setReplayedTrace(null);
-		this.setAnimatedReplayedTrace(null);
 	}
 
 	/**
@@ -256,40 +249,32 @@ public final class ReplayTrace implements IExecutableItem, IValidationTask<Repla
 	}
 
 	@Override
-	public boolean settingsEqual(final IExecutableItem obj) {
-		if (!(obj instanceof ReplayTrace other)) {
-			return false;
-		}
-		return Objects.equals(this.getId(), other.getId())
-			       && this.getLocation().equals(other.getLocation());
-	}
-
-	// FIXME Is it safe to not consider id, selected, etc. in equals/hashCode? This may cause view update problems if JavaFX can't tell if fields other than location have changed.
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(location);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == this) {
-			return true;
-		}
-		if (!(obj instanceof ReplayTrace)) {
-			return false;
-		}
-		return location.equals(((ReplayTrace) obj).getLocation());
-	}
-
-	@Override
-	@JsonIgnore
-	public String toString() {
-		return String.format(Locale.ROOT, "%s(%s)", this.getClass().getSimpleName(), this.getId());
-	}
-
-	@Override
 	public void execute(final ExecutionContext context) {
 		TraceChecker.checkNoninteractive(this, context.stateSpace());
+	}
+
+	@Override
+	public void reset() {
+		this.setChecked(Checked.NOT_CHECKED);
+		this.setProgress(-1);
+		this.loadedTrace.set(null);
+		this.setReplayedTrace(null);
+		this.setAnimatedReplayedTrace(null);
+	}
+
+	@Override
+	public boolean settingsEqual(Object other) {
+		return other instanceof ReplayTrace that
+			       && Objects.equals(this.getTaskType(), that.getTaskType())
+			       && Objects.equals(this.getId(), that.getId())
+			       && Objects.equals(this.getLocation(), that.getLocation());
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			       .add("id", this.getId())
+			       .add("location", this.getLocation())
+			       .toString();
 	}
 }

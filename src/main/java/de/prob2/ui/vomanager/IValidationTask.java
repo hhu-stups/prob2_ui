@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.IHasSettings;
+import de.prob2.ui.verifications.IResettable;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.verifications.type.ValidationTaskTypeResolver;
 
@@ -14,7 +16,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 // we use the curiously recurring template pattern (crtp) here
 @JsonTypeInfo(use = JsonTypeInfo.Id.CUSTOM, property = "taskType")
 @JsonTypeIdResolver(ValidationTaskTypeResolver.class)
-public interface IValidationTask<T extends IValidationTask<T>> {
+public interface IValidationTask<T extends IValidationTask<T>> extends IResettable, IHasSettings {
 
 	String getId();
 
@@ -31,5 +33,4 @@ public interface IValidationTask<T extends IValidationTask<T>> {
 
 	@JsonIgnore
 	Checked getChecked();
-
 }

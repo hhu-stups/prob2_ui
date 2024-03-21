@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
 import de.prob.model.eventb.ProofObligation;
+import de.prob2.ui.dynamic.DynamicFormulaTask;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
@@ -94,26 +95,22 @@ public final class ProofObligationItem implements IValidationTask<ProofObligatio
 		return this.checkedProperty().get();
 	}
 
-
 	@JsonIgnore
 	public void setChecked(final Checked checked) {
 		this.checkedProperty().set(checked);
 	}
 
 	@Override
-	public boolean equals(Object o) {
-		if (this == o) {
-			return true;
-		} else if (!(o instanceof ProofObligationItem that)) {
-			return false;
-		} else {
-			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getName(), that.getName());
-		}
+	public void reset() {
+		this.setChecked(Checked.NOT_CHECKED);
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(this.getId(), this.getName());
+	public boolean settingsEqual(Object other) {
+		return other instanceof ProofObligationItem that
+			       && Objects.equals(this.getTaskType(), that.getTaskType())
+			       && Objects.equals(this.getId(), that.getId())
+			       && Objects.equals(this.getName(), that.getName());
 	}
 
 	@Override
@@ -121,6 +118,7 @@ public final class ProofObligationItem implements IValidationTask<ProofObligatio
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())
 			       .add("name", this.getName())
+			       .add("description", this.getDescription())
 			       .toString();
 	}
 }

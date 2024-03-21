@@ -1,8 +1,8 @@
 package de.prob2.ui.vomanager;
 
 import java.util.Locale;
+import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import de.prob2.ui.internal.I18n;
@@ -21,21 +21,21 @@ public final class ValidationTaskNotFound implements IValidationTask<ValidationT
 	private final ReadOnlyObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.INVALID_TASK);
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
-	
+
 	public ValidationTaskNotFound(final String id) {
 		this.id = id;
 	}
-	
+
 	@Override
 	public ReadOnlyObjectProperty<Checked> checkedProperty() {
 		return this.checked;
 	}
-	
+
 	@Override
 	public Checked getChecked() {
 		return this.checkedProperty().get();
 	}
-	
+
 	@Override
 	public String getId() {
 		return this.id;
@@ -50,14 +50,24 @@ public final class ValidationTaskNotFound implements IValidationTask<ValidationT
 	public String getTaskType(final I18n i18n) {
 		return i18n.translate("vomanager.validationTaskNotFound.type");
 	}
-	
+
 	@Override
 	public String getTaskDescription(final I18n i18n) {
 		return i18n.translate("vomanager.validationTaskNotFound.description");
 	}
 
 	@Override
-	@JsonIgnore
+	public void reset() {
+	}
+
+	@Override
+	public boolean settingsEqual(Object other) {
+		return other instanceof ValidationTaskNotFound that
+			       && Objects.equals(this.getTaskType(), that.getTaskType())
+			       && Objects.equals(this.getId(), that.getId());
+	}
+
+	@Override
 	public String toString() {
 		return String.format(Locale.ROOT, "%s(%s)", this.getClass().getSimpleName(), this.getId());
 	}
