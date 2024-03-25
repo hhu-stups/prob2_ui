@@ -903,10 +903,16 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
 		checkObject(machine.remove("dotVisualizationItems"))
 			.forEach(listNode -> checkArray(listNode)
-				                     .forEach(node -> validationTasks.add(checkObject(node))));
+				                     .forEach(node -> {
+										 checkObject(node).put("taskType", "DOT_FORMULA");
+					                     validationTasks.add(checkObject(node));
+				                     }));
 		checkObject(machine.remove("tableVisualizationItems"))
 			.forEach(listNode -> checkArray(listNode)
-				                     .forEach(node -> validationTasks.add(checkObject(node))));
+				                     .forEach(node -> {
+					                     checkObject(node).put("taskType", "TABLE_FORMULA");
+					                     validationTasks.add(checkObject(node));
+				                     }));
 	}
 
 	private static void updateV44Machine(final ObjectNode machine) {
