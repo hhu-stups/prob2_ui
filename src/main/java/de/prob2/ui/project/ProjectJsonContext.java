@@ -859,11 +859,11 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		);
 		checkObject(machine.get("dotVisualizationItems")).forEach(
 			listNode -> checkArray(listNode)
-				.forEach(node -> checkObject(node).put("taskType", "DOT_FORMULA"))
+				.forEach(node -> checkObject(node).put("taskType", "DYNAMIC_FORMULA"))
 		);
 		checkObject(machine.get("tableVisualizationItems")).forEach(
 			listNode -> checkArray(listNode)
-				.forEach(node -> checkObject(node).put("taskType", "TABLE_FORMULA"))
+				.forEach(node -> checkObject(node).put("taskType", "DYNAMIC_FORMULA"))
 		);
 	}
 
