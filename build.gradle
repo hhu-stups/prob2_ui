@@ -120,7 +120,7 @@ dependencies {
 	implementation group: "io.github.java-diff-utils", name: "java-diff-utils", version: "4.12"
 	implementation group: "commons-cli", name: "commons-cli", version: "1.6.0"
 	implementation group: "de.jangassen", name: "nsmenufx", version: "3.1.0"
-	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.13.0"))
+	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.13.1"))
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel"
 	implementation group: "de.hhu.stups", name: "voparser", version: "0.2.1"
 	// cannot update to 1.2.2 as this breaks nsmenufx due to a transitive dependency on jna
