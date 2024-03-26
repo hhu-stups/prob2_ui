@@ -903,14 +903,16 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
 		checkObject(machine.remove("dotVisualizationItems")).forEach(listNode ->
 			checkArray(listNode).forEach(node -> {
-				checkObject(node).put("taskType", "DOT_FORMULA");
-				validationTasks.add(checkObject(node));
+				ObjectNode obj = checkObject(node);
+				obj.put("taskType", "DOT_FORMULA");
+				validationTasks.add(obj);
 			})
 		);
 		checkObject(machine.remove("tableVisualizationItems")).forEach(listNode ->
 			checkArray(listNode).forEach(node -> {
-				checkObject(node).put("taskType", "TABLE_FORMULA");
-				validationTasks.add(checkObject(node));
+				ObjectNode obj = checkObject(node);
+				obj.put("taskType", "TABLE_FORMULA");
+				validationTasks.add(obj);
 			})
 		);
 	}
@@ -919,10 +921,10 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
 		checkArray(machine.get("simulations")).forEach(modelNode -> {
 			ObjectNode model = checkObject(modelNode);
-			checkArray(model.remove("simulationItems")).forEach(itemNode -> {
-				ObjectNode item = checkObject(itemNode);
-				item.put("simulationPath", checkText(model.get("path")));
-				validationTasks.add(item);
+			checkArray(model.remove("simulationItems")).forEach(node -> {
+				ObjectNode obj = checkObject(node);
+				obj.put("simulationPath", checkText(model.get("path")));
+				validationTasks.add(obj);
 			});
 		});
 	}
