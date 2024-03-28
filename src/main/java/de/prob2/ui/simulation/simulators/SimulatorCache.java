@@ -13,6 +13,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
+import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 
 public class SimulatorCache {
 	private final Map<String, IEvalElement> formulasCache = new HashMap<>();
@@ -41,6 +42,7 @@ public class SimulatorCache {
 	}
 
 	public List<Transition> readTransitionsWithCaching(State bState, Map<String, String> variables, String opName, String predicate, int maxTransitions) {
+
 		if(transitionCache.keySet().size() > 5000) {
 			transitionCache.clear();
 		}

@@ -10,8 +10,12 @@ public enum SimulationCheckingType {
 	TIMING("simulation.type.property.timing"),
 	AVERAGE("simulation.type.property.average"),
 	SUM("simulation.type.property.sum"),
+	MINIMUM("simulation.type.property.minimum"),
+	MAXIMUM("simulation.type.property.maximum"),
 	AVERAGE_MEAN_BETWEEN_STEPS("simulation.type.property.averageBetweenSteps"),
-	SUM_MEAN_BETWEEN_STEPS("simulation.type.property.sumBetweenSteps");
+	SUM_MEAN_BETWEEN_STEPS("simulation.type.property.sumBetweenSteps"),
+	MINIMUM_MEAN_BETWEEN_STEPS("simulation.type.property.minimumBetweenSteps"),
+	MAXIMUM_MEAN_BETWEEN_STEPS("simulation.type.property.maximumBetweenSteps");
 
 	private final String key;
 

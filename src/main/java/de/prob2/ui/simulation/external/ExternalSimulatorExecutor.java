@@ -99,6 +99,7 @@ public class ExternalSimulatorExecutor {
 			} catch(Exception e){
 				e.printStackTrace();
 			}
+
 			setDone(done);
 			return new ExternalSimulationStep(operation, predicate, delta, done);
 		});
