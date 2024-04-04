@@ -6,14 +6,16 @@ import com.google.inject.Injector;
 import de.prob.animator.domainobjects.ErrorItem;
 
 import de.prob2.ui.internal.I18n;
-import javafx.scene.control.*;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.OverrunStyle;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.text.Text;
 
-import java.awt.*;
-import java.awt.datatransfer.StringSelection;
 import java.nio.file.FileSystems;
 
 final class MessageCell extends TreeTableCell<Object, Object> {
