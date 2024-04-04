@@ -41,7 +41,8 @@ public class SimulationModelConfiguration implements HasMetadata, ISimulationMod
 	private final List<UIListenerConfiguration> uiListenerConfigurations;
 	private final JsonMetadata metadata;
 
-	public SimulationModelConfiguration(Map<String, String> variables, List<ActivationConfiguration> activations, List<UIListenerConfiguration> uiListenerConfigurations, JsonMetadata metadata) {
+	public SimulationModelConfiguration(Map<String, String> variables, List<ActivationConfiguration> activations,
+										List<UIListenerConfiguration> uiListenerConfigurations, JsonMetadata metadata) {
 		this.variables = variables;
 		this.activations = activations;
 		this.uiListenerConfigurations = uiListenerConfigurations;

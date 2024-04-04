@@ -241,7 +241,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	private void initForBlackBoxValidationIfNecessary(boolean isBlackBox, int index) {
 		if(isBlackBox) {
 			try {
-				this.initSimulator(SimulationFileHandler.constructConfiguration(blackBoxTimedTraces.get(index)));
+				this.initSimulator(SimulationFileHandler.constructConfiguration(blackBoxTimedTraces.get(index), currentTrace.getStateSpace().getLoadedMachine()));
 			} catch (Exception e) {
 				Platform.runLater(() -> {
 					final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");

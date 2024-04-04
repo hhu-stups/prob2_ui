@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -63,6 +64,9 @@ public class SimulationItemHandler {
 	}
 
 	public ObservableList<SimulationItem> getSimulationItems(SimulationModel simulationModel) {
+		if(simulationModel.getPath().equals(Paths.get(""))) {
+			return FXCollections.observableArrayList();
+		}
 		return this.currentProject.getCurrentMachine().getMachineProperties().getSimulationTasksByModel(simulationModel);
 	}
 
@@ -139,7 +143,7 @@ public class SimulationItemHandler {
 		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, path);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, currentTrace.getStateSpace().getLoadedMachine(), path);
 		runAndCheck(item, simulationCheckingSimulator);
 	}
 
@@ -175,7 +179,7 @@ public class SimulationItemHandler {
 
 	private void initializeHypothesisChecker(SimulationHypothesisChecker simulationHypothesisChecker, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
 		simulationHypothesisChecker.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), path);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), currentTrace.getStateSpace().getLoadedMachine(), path);
 	}
 
 	private void handleEstimation(SimulationItem item) {
@@ -214,7 +218,7 @@ public class SimulationItemHandler {
 
 	private void initializeEstimator(SimulationEstimator simulationEstimator, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
 		simulationEstimator.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), path);
+		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), currentTrace.getStateSpace().getLoadedMachine(), path);
 	}
 
 	public void checkItem(SimulationItem item) {

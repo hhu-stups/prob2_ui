@@ -15,7 +15,7 @@ public final class SimulationModel {
 
 	@JsonCreator
 	public SimulationModel(@JsonProperty("path") Path path) {
-		this.path = Objects.requireNonNull(path, "path");
+		this.path = path;
 	}
 
 	public Path getPath() {

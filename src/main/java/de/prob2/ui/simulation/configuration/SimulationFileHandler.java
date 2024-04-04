@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import de.prob.json.JsonMetadata;
+import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Transition;
 
 public class SimulationFileHandler {
@@ -32,7 +34,10 @@ public class SimulationFileHandler {
 			.setPrettyPrinting()
 			.create();
 
-	public static ISimulationModelConfiguration constructConfiguration(Path inputFile) throws IOException, JsonSyntaxException {
+	public static ISimulationModelConfiguration constructConfiguration(Path inputFile, LoadedMachine loadedMachine) throws IOException, JsonSyntaxException {
+		if(inputFile.equals(Paths.get(""))) {
+			return DefaultSimulationCreator.createDefaultSimulation(loadedMachine);
+		}
 		if(!inputFile.toFile().isDirectory()) {
 			if(inputFile.toFile().getName().endsWith("json")) {
 				Gson gson = new Gson();
