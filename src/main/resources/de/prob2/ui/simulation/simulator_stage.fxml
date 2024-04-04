@@ -29,8 +29,20 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<StackPane>
-				<SplitPane dividerPositions="0.6" orientation="HORIZONTAL">
-					<VBox>
+				<SplitPane dividerPositions="0.8" orientation="HORIZONTAL">
+					<VBox spacing="5.0">
+						<Label text="%simulation.label.model"/>
+						<HBox>
+							<ChoiceBox fx:id="cbSimulation"/>
+							<Button fx:id="btRemoveSimulation" onAction="#removeSimulation">
+								<graphic>
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize + 2}" />
+								</graphic>
+								<tooltip>
+									<Tooltip text="%common.buttons.cancel" />
+								</tooltip>
+							</Button>
+						</HBox>
 						<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
 							<padding>
 								<Insets left="5.0"/>
@@ -99,6 +111,10 @@
 							</MenuButton>
 							<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
 						</HBox>
+						<ListView fx:id="simulationDebugItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
+					</VBox>
+					<VBox>
+
 						<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
 							<TableView fx:id="simulationItems">
 								<columnResizePolicy>
@@ -116,21 +132,6 @@
 								</placeholder>
 							</TableView>
 						</ScrollPane>
-					</VBox>
-					<VBox spacing="5.0">
-						<Label text="%simulation.label.model"/>
-						<HBox>
-							<ChoiceBox fx:id="cbSimulation"/>
-							<Button fx:id="btRemoveSimulation" onAction="#removeSimulation">
-								<graphic>
-									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 1.5}" />
-								</graphic>
-								<tooltip>
-									<Tooltip text="%common.buttons.cancel" />
-								</tooltip>
-							</Button>
-						</HBox>
-						<ListView fx:id="simulationDebugItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
 					</VBox>
 				</SplitPane>
 			</StackPane>
