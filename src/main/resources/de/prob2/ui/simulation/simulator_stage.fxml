@@ -13,6 +13,7 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
@@ -56,6 +57,8 @@
 								</tooltip>
 								<items>
 									<MenuItem fx:id="loadSimBModelItem" text="%simulation.file.open.model" onAction="#loadSimBModel"/>
+									<SeparatorMenuItem/>
+									<MenuItem fx:id="advancedItem" style="-fx-text-fill:white; -fx-font-weight: bold;" text="%simulation.file.open.advanced"/>
 									<MenuItem fx:id="loadSimBTraces" text="%simulation.file.open.blackbox" onAction="#loadSimBTraces"/>
 									<MenuItem fx:id="loadExternalSimulation" text="%simulation.file.open.external" onAction="#loadExternal"/>
 								</items>

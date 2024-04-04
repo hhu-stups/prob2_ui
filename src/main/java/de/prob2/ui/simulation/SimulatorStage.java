@@ -65,6 +65,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -241,6 +242,9 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private Button btRemoveSimulation;
+
+	@FXML
+	private MenuItem advancedItem;
 
 	private final StageManager stageManager;
 
@@ -430,6 +434,8 @@ public class SimulatorStage extends Stage {
 		});
 
 		btRemoveSimulation.disableProperty().bind(cbSimulation.getSelectionModel().selectedItemProperty().isNull());
+
+		advancedItem.setDisable(true);
 
 		setOnCloseRequest(e -> {
 			if (realTimeSimulator.isRunning())
