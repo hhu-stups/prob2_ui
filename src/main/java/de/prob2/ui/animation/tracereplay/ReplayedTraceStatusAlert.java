@@ -36,7 +36,9 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
+import javafx.scene.text.Font;
 
 import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 
@@ -57,6 +59,8 @@ public class ReplayedTraceStatusAlert extends Alert {
 	private ReplayedTraceTable traceTable;
 	@FXML
 	private ErrorTableView errorTable;
+	@FXML
+	private Label keepOrDiscardQuestion;
 
 	public ReplayedTraceStatusAlert(Injector injector, ReplayTrace replayTrace) {
 		super(AlertType.NONE);
@@ -198,6 +202,8 @@ public class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	public void handleAcceptDiscard() {
+		this.keepOrDiscardQuestion.setText(i18n.translate("animation.tracereplay.replayedStatus.button.question"));
+		this.keepOrDiscardQuestion.setFont(new Font(16));
 		this.getButtonTypes().setAll(this.accept, this.discard);
 		ButtonType response = this.showAndWait().orElse(null);
 		if (response == this.accept) {

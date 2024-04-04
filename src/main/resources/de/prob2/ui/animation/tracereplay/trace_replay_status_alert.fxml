@@ -5,6 +5,7 @@
 <?import javafx.scene.control.DialogPane?>
 <?import javafx.scene.layout.VBox?>
 <?import de.prob2.ui.error.ErrorTableView?>
+<?import javafx.scene.control.Label?>
 <fx:root type="Alert" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane>
@@ -12,6 +13,7 @@
 				<VBox stylesheets="@/prob.css">
 					<ReplayedTraceTable fx:id="traceTable" VBox.vgrow="ALWAYS" />
 					<ErrorTableView fx:id="errorTable" />
+					<Label fx:id="keepOrDiscardQuestion" VBox.vgrow="ALWAYS" style="-fx-padding: 10 0 0 0"/>
 				</VBox>
 			</content>
 		</DialogPane>
