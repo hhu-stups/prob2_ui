@@ -2,19 +2,26 @@ package de.prob2.ui.error;
 
 import com.google.inject.Inject;
 
+import com.google.inject.Injector;
 import de.prob.animator.domainobjects.ErrorItem;
 
-import javafx.scene.control.OverrunStyle;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeTableCell;
-import javafx.scene.control.TreeTableRow;
+import de.prob2.ui.internal.I18n;
+import javafx.scene.control.*;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.text.Text;
 
+import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.nio.file.FileSystems;
 
 final class MessageCell extends TreeTableCell<Object, Object> {
+	private final Injector injector;
 	@Inject
-	private MessageCell() {}
+	private MessageCell(Injector injector) {
+		this.injector = injector;
+	}
 	
 	@Override
 	protected void updateItem(final Object item, final boolean empty) {
@@ -37,10 +44,19 @@ final class MessageCell extends TreeTableCell<Object, Object> {
 			this.setGraphic(null);
 		} else if (item instanceof ErrorItem) {
 			this.setText(null);
-			Text text = new Text(((ErrorItem) item).getMessage());
+			String errorItemMessageContent = ((ErrorItem) item).getMessage();
+			Text text = new Text(errorItemMessageContent);
 			text.wrappingWidthProperty().bind(this.getTableColumn().widthProperty().subtract(5));
 			this.setWrapText(true);
 			this.setGraphic(text);
+			//Add ContextMenu to MessageCell for copying messages
+			MenuItem mi = new MenuItem(injector.getInstance(I18n.class).translate("error.errorTable.message.copy"));
+			mi.setOnAction(e -> {
+				ClipboardContent cc = new ClipboardContent();
+				cc.putString(errorItemMessageContent);
+				Clipboard.getSystemClipboard().setContent(cc);
+			});
+			this.setContextMenu(new ContextMenu(mi));
 		} else {
 			throw new AssertionError("Invalid table element type: " + item.getClass());
 		}
