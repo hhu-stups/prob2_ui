@@ -2,6 +2,7 @@ package de.prob2.ui.dynamic;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import com.google.inject.Provider;
 
@@ -172,7 +173,11 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.updatePlaceholderLabel();
 			if (to == null || currentTrace.get() == null || !this.isShowing()) {
+				enterFormulaBox.setVisible(false);
 				tvFormula.setVisible(false);
+				addButton.setVisible(false);
+				removeButton.setVisible(false);
+				this.interrupt();
 				return;
 			}
 			if (!to.isAvailable()) {
@@ -188,8 +193,10 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 			// Update the visualization automatically if possible.
 			// If the command selection changed and the new command requires a formula,
 			// clear the visualization and wait for the user to input one.
-			if (to.isAvailable() && (!needFormula || to.equals(lastItem))) {
-				visualize(to, "");
+			// We cannot blindly execute the last formula, as we do not what it was,
+			// and we do not know if it is applicable to this item and model
+			if (to.isAvailable() && !needFormula) {
+				visualize(to, null);
 			} else {
 				this.interrupt();
 			}
@@ -219,8 +226,6 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 
 		currentProject.currentMachineProperty().addListener((o, from, to) -> {
 			this.interrupt();
-			lvChoice.getSelectionModel().clearSelection();
-			this.lastItem = null;
 			this.refresh();
 		});
 
@@ -230,13 +235,13 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 		taFormula.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
 				if (!e.isShiftDown()) {
-					evaluateFormulaButton();
+					evaluateFormulaDirect();
 					e.consume();
 				} else {
 					taFormula.insertText(taFormula.getCaretPosition(), "\n");
 				}
 			} else if (e.getCode().equals(KeyCode.INSERT)) {
-				addFormulaButton();
+				addFormulaDirect();
 				e.consume();
 			}
 		});
@@ -247,7 +252,7 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 		idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		formulaColumn.setCellValueFactory(new PropertyValueFactory<>("formula"));
 
-		tvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> evaluateFormulaFromTable());
+		tvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> evaluateSelectedFormulaFromTable());
 
 		lvChoice.setCellFactory(item -> new DynamicCommandItemCell<>());
 		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
@@ -266,7 +271,7 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 			});
 
 			MenuItem editFormula = new MenuItem(i18n.translate("dynamic.editFormula"));
-			editFormula.setOnAction(event -> editFormula(row));
+			editFormula.setOnAction(event -> editFormulaWithDialog(row.getItem()));
 
 			MenuItem evaluateItem = new MenuItem(i18n.translate("dynamic.evaluateFormula"));
 			evaluateItem.setOnAction(event -> evaluateFormula(row.getItem().getFormula()));
@@ -323,8 +328,10 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 
 	protected abstract F createNewTask(String id, String command, String formula);
 
-	protected void editFormula(TableRow<F> row) {
-		F oldTask = row.getItem();
+	protected void editFormulaWithDialog(F oldTask) {
+		if (oldTask == null) {
+			return;
+		}
 
 		final EditDynamicFormulaStage<F> stage = this.createEditStage();
 		stage.setInitialTask(oldTask, this.errors);
@@ -337,9 +344,14 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 		}
 	}
 
-	protected void addFormula() {
+	protected void addFormulaWithDialog() {
+		T item = this.lvChoice.getSelectionModel().getSelectedItem();
+		if (item == null) {
+			return;
+		}
+
 		final EditDynamicFormulaStage<F> stage = this.createEditStage();
-		stage.createNewItem(lastItem.getCommand());
+		stage.createNewItem(item.getCommand());
 		stage.showAndWait();
 
 		F task = stage.getResult();
@@ -350,15 +362,20 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 	}
 
 	@FXML
-	protected void addFormulaButton() {
-		F task = createNewTask(null, lastItem.getCommand(), taFormula.getText());
+	protected void addFormulaDirect() {
+		T item = this.lvChoice.getSelectionModel().getSelectedItem();
+		if (item == null) {
+			return;
+		}
+
+		F task = createNewTask(null, item.getCommand(), taFormula.getText());
 		if (task != null) {
 			F added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
 			this.evaluateFormula(added.getFormula());
 		}
 	}
 
-	private void evaluateFormulaFromTable() {
+	private void evaluateSelectedFormulaFromTable() {
 		F item = tvFormula.getSelectionModel().getSelectedItem();
 		if (item != null) {
 			this.evaluateFormula(item.getFormula());
@@ -366,7 +383,7 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 	}
 
 	@FXML
-	private void evaluateFormulaButton() {
+	private void evaluateFormulaDirect() {
 		evaluateFormula(taFormula.getText());
 	}
 
@@ -384,6 +401,10 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 		preferences.initModality(Modality.WINDOW_MODAL);
 		preferences.setToRefresh(this);
 		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
+		if (currentItem == null) {
+			return;
+		}
+
 		preferences.setIncludedPreferenceNames(currentItem.getRelevantPreferences());
 		preferences.setTitle(i18n.translate("dynamic.preferences.stage.title", currentItem.getName()));
 		preferences.show();
@@ -419,19 +440,17 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 
 	public void refresh() {
 		this.updatePlaceholderLabel();
-		int index = lvChoice.getSelectionModel().getSelectedIndex();
 		final State currentState = currentTrace.getCurrentState();
 		if (currentState == null) {
 			lvChoice.getItems().clear();
 		} else {
 			lvChoice.getItems().setAll(this.getCommandsInState(currentState));
 		}
-		if (index == -1) {
-			if (this.lastItem != null) {
-				lvChoice.getSelectionModel().select(this.lastItem);
-			}
+
+		if (this.lastItem != null && this.lvChoice.getItems().contains(this.lastItem)) {
+			this.lvChoice.getSelectionModel().select(this.lastItem);
 		} else {
-			lvChoice.getSelectionModel().select(index);
+			this.lvChoice.getSelectionModel().clearSelection();
 		}
 	}
 
@@ -456,7 +475,7 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 		this.updater.execute(() -> {
 			try {
 				final Trace trace = currentTrace.get();
-				if (trace == null || (item.getArity() > 0 && formula.isEmpty())) {
+				if (trace == null || (item.getArity() > 0 && (formula == null || formula.isEmpty()))) {
 					return;
 				}
 				final List<IEvalElement> formulas;
@@ -504,36 +523,42 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 	protected abstract List<T> getCommandsInState(final State state);
 
 	public void selectCommand(final String command, final String formula) {
+		Objects.requireNonNull(command, "command");
 		final T choice = lvChoice.getItems().stream()
-			                 .filter(item -> command.equals(item.getCommand()))
+			                 .filter(item -> item != null && command.equals(item.getCommand()))
 			                 .findAny()
 			                 .orElseThrow(() -> new IllegalArgumentException("Visualization command not found: " + command));
-		lvChoice.getSelectionModel().select(choice);
-		if (formula != null) {
+
+		if (formula == null || formula.isEmpty()) {
+			if (choice.getArity() != 0) {
+				throw new IllegalArgumentException("Visualization command needs " + choice.getArity() + " argument(s): " + command);
+			}
+		} else {
 			if (choice.getArity() == 0) {
 				throw new IllegalArgumentException("Visualization command does not take an argument: " + command);
 			}
-			taFormula.replaceText(formula);
-			visualize(choice, formula);
 		}
+
+		lvChoice.getSelectionModel().select(choice);
+		taFormula.replaceText(formula != null ? formula : "");
+		visualize(choice, formula);
 	}
 
 	public void selectCommand(final String command) {
 		this.selectCommand(command, null);
 	}
 
-
 	@FXML
 	private void handleAddFormula() {
-		addFormula();
+		addFormulaWithDialog();
 	}
 
 	@FXML
 	private void handleRemoveFormula() {
-		removeFormula();
+		removeSelectedFormula();
 	}
 
-	protected void removeFormula() {
+	protected void removeSelectedFormula() {
 		F formulaTask = this.tvFormula.getSelectionModel().getSelectedItem();
 		if (formulaTask != null) {
 			this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(formulaTask);
