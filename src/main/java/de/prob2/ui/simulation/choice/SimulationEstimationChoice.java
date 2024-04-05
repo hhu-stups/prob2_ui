@@ -11,6 +11,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 
+import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
@@ -119,6 +120,26 @@ public class SimulationEstimationChoice extends GridPane {
 		information.put("DESIRED_VALUE", Double.parseDouble(tfDesiredValue.getText()));
 		information.put("EPSILON", Double.parseDouble(tfEpsilon.getText()));
 		return information;
+	}
+
+	public void setInformation(Map<String, Object> object) {
+		if(object.containsKey("ESTIMATION_TYPE")) {
+			estimationChoice.getSelectionModel().select(new SimulationEstimationChoiceItem(SimulationEstimator.EstimationType.valueOf(object.get("ESTIMATION_TYPE").toString())));
+		}
+
+		if(object.containsKey("DESIRED_VALUE")) {
+			tfDesiredValue.setText(object.get("DESIRED_VALUE").toString());
+		}
+
+		if(object.containsKey("EPSILON")) {
+			tfEpsilon.setText(object.get("EPSILON").toString());
+		}
+	}
+
+	public void reset() {
+		estimationChoice.getSelectionModel().clearSelection();
+		tfDesiredValue.clear();
+		tfEpsilon.clear();
 	}
 
 }

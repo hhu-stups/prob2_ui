@@ -61,12 +61,18 @@ public class SimulationChoosingStage extends Stage {
 
 	private SimulationItem lastItem;
 
+	private boolean isModifying;
+
+	private SimulationItem modifyingItem;
+
 	@Inject
 	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode) {
 		this.i18n = i18n;
 		this.stageManager = stageManager;
 		this.simulationItemHandler = simulationItemHandler;
 		this.simulationMode = simulationMode;
+		this.isModifying = false;
+		this.modifyingItem = null;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "simulation_choice.fxml");
 	}
@@ -94,10 +100,17 @@ public class SimulationChoosingStage extends Stage {
 				return;
 			}
 			final SimulationItem newItem = this.extractItem(simulation);
-			final SimulationItem addedItem = this.simulationItemHandler.addItem(newItem);
-			lastItem = addedItem;
+			if(isModifying) {
+				modifyingItem.reset();
+				modifyingItem.setSimulationType(newItem.getType());
+				modifyingItem.setInformation(newItem.getInformation());
+				lastItem = modifyingItem;
+			} else {
+				lastItem = this.simulationItemHandler.addItem(newItem);
+			}
+
 			this.close();
-			this.simulationItemHandler.checkItem(addedItem);
+			this.simulationItemHandler.checkItem(lastItem);
 		});
 	}
 
@@ -199,8 +212,37 @@ public class SimulationChoosingStage extends Stage {
 		simulationItemHandler.setPath(path);
 	}
 
+	public void setData(SimulationItem item) {
+		SimulationType type = item.getType();
+		Map<String, Object> information = item.getInformation();
+		simulationMonteCarloChoice.setInformation(information);
+		simulationConditionChoice.setInformation(type, information);
+		simulationPropertyChoice.setInformation(information);
+		simulationEstimationChoice.setInformation(information);
+		simulationHypothesisChoice.setInformation(information);
+	}
+
+	public void reset() {
+		simulationMonteCarloChoice.reset();
+		simulationConditionChoice.reset();
+		simulationPropertyChoice.reset();
+		simulationEstimationChoice.reset();
+		simulationHypothesisChoice.reset();
+	}
+
 	public SimulationItem getLastItem() {
 		return lastItem;
+	}
+
+	public boolean isModifying() {
+		return isModifying;
+	}
+
+	public void setModifying(boolean modifying, SimulationItem item) {
+		isModifying = modifying;
+		if(modifying) {
+			this.modifyingItem = item;
+		}
 	}
 
 	public void setSimulation(SimulationModel simulation) {

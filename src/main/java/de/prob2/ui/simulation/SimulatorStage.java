@@ -118,10 +118,14 @@ public class SimulatorStage extends Stage {
 				checkItem.disableProperty().bind(configurationPath.isNull().or(simulationItemHandler.runningProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
 				checkItem.setOnAction(e -> simulationItemHandler.checkItem(this.getItem()));
 
+				MenuItem editItem = new MenuItem(i18n.translate("simulation.contextMenu.edit"));
+				editItem.setOnAction(e -> editSimulation(this.getItem()));
+
 				MenuItem removeItem = new MenuItem(i18n.translate("simulation.contextMenu.remove"));
 				removeItem.setOnAction(e -> simulationItemHandler.removeItem(this.getItem()));
 
 				menuItems.add(checkItem);
+				menuItems.add(editItem);
 				menuItems.add(removeItem);
 
 				Menu copyMenu = new Menu(i18n.translate("simulation.contextMenu.copy"));
@@ -600,7 +604,19 @@ public class SimulatorStage extends Stage {
 	@FXML
 	public void addSimulation() {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
+		choosingStage.reset();
+		choosingStage.setModifying(false, null);
 		choosingStage.showAndWait();
+		simulationItems.refresh();
+	}
+
+	public void editSimulation(SimulationItem item) {
+		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
+		choosingStage.reset();
+		choosingStage.setData(item);
+		choosingStage.setModifying(true, item);
+		choosingStage.showAndWait();
+		simulationItems.refresh();
 	}
 
 	private void startTimer(RealTimeSimulator realTimeSimulator) {

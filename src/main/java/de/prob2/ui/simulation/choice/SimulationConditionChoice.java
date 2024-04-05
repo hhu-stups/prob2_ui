@@ -13,6 +13,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.SimulationMode;
 import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 
+import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -154,14 +155,11 @@ public class SimulationConditionChoice extends GridPane {
 
 	private final I18n i18n;
 
-	private final SimulationMode simulationMode;
-
 
 	@Inject
-	private SimulationConditionChoice(final StageManager stageManager, final I18n i18n, final SimulationMode simulationMode) {
+	private SimulationConditionChoice(final StageManager stageManager, final I18n i18n) {
 		super();
 		this.i18n = i18n;
-		this.simulationMode = simulationMode;
 		stageManager.loadFXML(this, "simulation_condition_choice.fxml");
 	}
 
@@ -362,6 +360,73 @@ public class SimulationConditionChoice extends GridPane {
 		}
 		return information;
 	}
+
+	public void setInformation(SimulationType type, Map<String, Object> object) {
+		cbMaxStepsBeforeProperty.setSelected(false);
+		cbStartingChoice.setSelected(false);
+
+		if(object.containsKey("MAX_STEPS_BEFORE_PROPERTY") && !"0".equals(object.get("MAX_STEPS_BEFORE_PROPERTY").toString())) {
+			cbMaxStepsBeforeProperty.setSelected(true);
+			tfMaxStepsBeforeProperty.setText(object.get("MAX_STEPS_BEFORE_PROPERTY").toString());
+		}
+
+		if(object.containsKey("START_AFTER_STEPS")) {
+			cbStartingChoice.setSelected(true);
+			startingChoice.getSelectionModel().select(new SimulationStartingItem(SimulationCheckingSimulator.StartingType.START_AFTER_STEPS));
+			tfStartAfter.setText(object.get("START_AFTER_STEPS").toString());
+		}
+
+		if(object.containsKey("STARTING_PREDICATE")) {
+			cbStartingChoice.setSelected(true);
+			startingChoice.getSelectionModel().select(new SimulationStartingItem(SimulationCheckingSimulator.StartingType.STARTING_PREDICATE));
+			tfStartingPredicate.setText(object.get("STARTING_PREDICATE").toString());
+		}
+
+		if(object.containsKey("STARTING_PREDICATE_ACTIVATED")) {
+			cbStartingChoice.setSelected(true);
+			startingChoice.getSelectionModel().select(new SimulationStartingItem(SimulationCheckingSimulator.StartingType.STARTING_PREDICATE_ACTIVATED));
+			tfStartingPredicate.setText(object.get("STARTING_PREDICATE_ACTIVATED").toString());
+		}
+
+		if(object.containsKey("STARTING_TIME")) {
+			cbStartingChoice.setSelected(true);
+			startingChoice.getSelectionModel().select(new SimulationStartingItem(SimulationCheckingSimulator.StartingType.STARTING_TIME));
+			tfStartingTime.setText(object.get("STARTING_TIME").toString());
+		}
+
+
+		if(object.containsKey("STEPS_PER_EXECUTION")) {
+			endingChoice.getSelectionModel().select(new SimulationEndingItem(SimulationCheckingSimulator.EndingType.NUMBER_STEPS));
+			tfSteps.setText(object.get("STEPS_PER_EXECUTION").toString());
+		}
+
+		if(object.containsKey("ENDING_PREDICATE")) {
+			endingChoice.getSelectionModel().select(new SimulationEndingItem(SimulationCheckingSimulator.EndingType.ENDING_PREDICATE));
+			tfEndingPredicate.setText(object.get("ENDING_PREDICATE").toString());
+		}
+
+		if(object.containsKey("ENDING_TIME")) {
+			endingChoice.getSelectionModel().select(new SimulationEndingItem(SimulationCheckingSimulator.EndingType.ENDING_TIME));
+			tfEndingTime.setText(object.get("ENDING_TIME").toString());
+		}
+
+		simulationChoice.getSelectionModel().select(type);
+	}
+
+	public void reset() {
+		cbMaxStepsBeforeProperty.setSelected(false);
+		cbStartingChoice.setSelected(false);
+		tfMaxStepsBeforeProperty.clear();
+		tfStartingTime.clear();
+		tfStartingPredicate.clear();
+		tfStartAfter.clear();
+		tfSteps.clear();
+		tfEndingTime.clear();
+		tfEndingPredicate.clear();
+		endingChoice.getSelectionModel().select(new SimulationEndingItem(SimulationCheckingSimulator.EndingType.NUMBER_STEPS));
+		simulationChoice.getSelectionModel().select(SimulationType.MONTE_CARLO_SIMULATION);
+	}
+
 
 	public ChoiceBox<SimulationType> simulationChoice() {
 		return simulationChoice;

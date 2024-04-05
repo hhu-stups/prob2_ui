@@ -41,6 +41,7 @@ import javafx.collections.ObservableList;
 public class SimulationItemHandler {
 
 	private final CurrentProject currentProject;
+
 	private final CurrentTrace currentTrace;
 
 	private final StageManager stageManager;

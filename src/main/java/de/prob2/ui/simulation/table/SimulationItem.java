@@ -42,10 +42,10 @@ import javafx.collections.FXCollections;
 public final class SimulationItem implements IValidationTask<SimulationItem> {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final String id;
+	private String id;
 	private final Path simulationPath;
-	private final SimulationType type;
-	private final Map<String, Object> information;
+	private SimulationType type;
+	private Map<String, Object> information;
 	@JsonIgnore
 	private ObjectProperty<Checked> checked;
 	@JsonIgnore
@@ -196,6 +196,21 @@ public final class SimulationItem implements IValidationTask<SimulationItem> {
 	@JsonIgnore
 	public void setSimulationStats(SimulationStats simulationStats) {
 		this.simulationStats = simulationStats;
+	}
+
+	@JsonIgnore
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	@JsonIgnore
+	public void setSimulationType(SimulationType type) {
+		this.type = type;
+	}
+
+	@JsonIgnore
+	public void setInformation(Map<String, Object> information) {
+		this.information = information;
 	}
 
 	public String createdByForMetadata() {

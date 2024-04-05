@@ -160,6 +160,31 @@ public class SimulationPropertyChoice extends GridPane {
 		return information;
 	}
 
+	public void setInformation(Map<String, Object> object) {
+		if(object.containsKey("CHECKING_TYPE")) {
+			checkingChoice.getSelectionModel().select(new SimulationPropertyItem(SimulationCheckingType.valueOf(object.get("CHECKING_TYPE").toString())));
+		}
+
+		if(object.containsKey("PREDICATE")) {
+			tfPredicate.setText(object.get("PREDICATE").toString());
+		}
+
+		if(object.containsKey("EXPRESSION")) {
+			tfExpression.setText(object.get("EXPRESSION").toString());
+		}
+
+		if(object.containsKey("TIME")) {
+			tfMonteCarloTime.setText(object.get("TIME").toString());
+		}
+	}
+
+	public void reset() {
+		checkingChoice.getSelectionModel().clearSelection();
+		tfPredicate.clear();
+		tfExpression.clear();
+		tfMonteCarloTime.clear();
+	}
+
 	public void setChoosingStage(SimulationChoosingStage choosingStage) {
 		this.choosingStage = choosingStage;
 	}
