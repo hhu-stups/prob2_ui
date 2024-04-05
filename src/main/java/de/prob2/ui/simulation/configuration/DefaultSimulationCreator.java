@@ -1,10 +1,7 @@
 package de.prob2.ui.simulation.configuration;
 
-import com.google.inject.Inject;
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.LoadedMachine;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.model.SimulationModel;
 
 import java.util.ArrayList;
 import java.util.HashMap;
