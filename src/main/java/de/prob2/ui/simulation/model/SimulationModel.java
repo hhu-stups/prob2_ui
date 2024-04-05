@@ -40,8 +40,6 @@ public final class SimulationModel {
 
 	@Override
 	public String toString() {
-		return MoreObjects.toStringHelper(this)
-			       .add("path", this.getPath())
-			       .toString();
+		return path.toString().isEmpty() ? "Default Simulation" : path.toString();
 	}
 }
