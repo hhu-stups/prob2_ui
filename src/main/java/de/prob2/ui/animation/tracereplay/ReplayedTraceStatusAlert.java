@@ -202,12 +202,20 @@ public class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	public void handleAcceptDiscard() {
-		this.keepOrDiscardQuestion.setText(i18n.translate("animation.tracereplay.replayedStatus.button.question", replayTrace.getReplayedTrace().getReplayStatus()));
+		this.keepOrDiscardQuestion.setText(i18n.translate("animation.tracereplay.replayedStatus.button.question", statusOfReplayedTrace()));
 		this.keepOrDiscardQuestion.setFont(new Font(16));
 		this.getButtonTypes().setAll(this.accept, this.cancel);
 		ButtonType response = this.showAndWait().orElse(null);
 		if (response == this.accept) {
 			this.currentTrace.set(this.replayTrace.getAnimatedReplayedTrace());
 		}
+	}
+
+	private String statusOfReplayedTrace() {
+        return switch (replayTrace.getReplayedTrace().getReplayStatus()) {
+            case PARTIAL -> i18n.translate("animation.tracereplay.replayedStatus.button.question.partial");
+            case IMPERFECT -> i18n.translate("animation.tracereplay.replayedStatus.button.question.imperfect");
+            default -> "";
+        };
 	}
 }
