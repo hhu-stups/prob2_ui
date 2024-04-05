@@ -53,7 +53,7 @@ public class ReplayedTraceStatusAlert extends Alert {
 	private final ReplayTrace replayTrace;
 
 	private ButtonType accept;
-	private ButtonType discard;
+	private ButtonType cancel;
 
 	@FXML
 	private ReplayedTraceTable traceTable;
@@ -83,7 +83,7 @@ public class ReplayedTraceStatusAlert extends Alert {
 	@FXML
 	private void initialize() {
 		this.accept = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.accept"), ButtonBar.ButtonData.OK_DONE);
-		this.discard = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.discard"), ButtonBar.ButtonData.CANCEL_CLOSE);
+		this.cancel = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
 
 		stageManager.register(this);
 
@@ -202,9 +202,9 @@ public class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	public void handleAcceptDiscard() {
-		this.keepOrDiscardQuestion.setText(i18n.translate("animation.tracereplay.replayedStatus.button.question"));
+		this.keepOrDiscardQuestion.setText(i18n.translate("animation.tracereplay.replayedStatus.button.question", replayTrace.getReplayedTrace().getReplayStatus()));
 		this.keepOrDiscardQuestion.setFont(new Font(16));
-		this.getButtonTypes().setAll(this.accept, this.discard);
+		this.getButtonTypes().setAll(this.accept, this.cancel);
 		ButtonType response = this.showAndWait().orElse(null);
 		if (response == this.accept) {
 			this.currentTrace.set(this.replayTrace.getAnimatedReplayedTrace());
