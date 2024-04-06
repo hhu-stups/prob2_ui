@@ -1,11 +1,11 @@
 package de.prob2.ui.simulation.configuration;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 import java.util.Objects;
 
-public class UIListenerConfiguration {
-
-	private final String id;
+public class UIListenerConfiguration extends DiagramConfiguration {
 
 	private final String event;
 
@@ -14,14 +14,10 @@ public class UIListenerConfiguration {
 	private final List<String> activating;
 
 	public UIListenerConfiguration(String id, String event, String predicate, List<String> activating) {
-		this.id = id;
+		super(id);
 		this.event = event;
 		this.predicate = predicate;
 		this.activating = activating;
-	}
-
-	public String getId() {
-		return id;
 	}
 
 	public String getEvent() {
@@ -35,6 +31,12 @@ public class UIListenerConfiguration {
 	public List<String> getActivating() {
 		return activating;
 	}
+
+	@JsonIgnore
+	public String getActivatingAsString() {
+		return activating == null ? "" : activating.toString();
+	}
+
 
 	@Override
 	public boolean equals(Object o) {

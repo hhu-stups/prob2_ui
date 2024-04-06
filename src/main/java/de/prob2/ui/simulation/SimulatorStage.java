@@ -33,7 +33,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
-import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
@@ -229,7 +229,7 @@ public class SimulatorStage extends Stage {
 	private TableView<SimulationItem> simulationItems;
 
 	@FXML
-	private ListView<ActivationConfiguration> simulationDiagramItems;
+	private ListView<DiagramConfiguration> simulationDiagramItems;
 
 	@FXML
 	private TableColumn<SimulationItem, Checked> simulationStatusColumn;
@@ -556,10 +556,11 @@ public class SimulatorStage extends Stage {
 	private void loadSimulationItems() {
 		ISimulationModelConfiguration config = realTimeSimulator.getConfig();
 
-		ObservableList<ActivationConfiguration> observableList = FXCollections.observableArrayList();
+		ObservableList<DiagramConfiguration> observableList = FXCollections.observableArrayList();
 		if (config != null) {
 			if (config instanceof SimulationModelConfiguration modelConfig) {
 				observableList.addAll(modelConfig.getActivationConfigurations());
+				observableList.addAll(modelConfig.getUiListenerConfigurations());
 			}
 		}
 

@@ -37,11 +37,11 @@ public class SimulationModelConfiguration implements HasMetadata, ISimulationMod
 	public static final int CURRENT_FORMAT_VERSION = 3;
 
 	private final Map<String, String> variables;
-	private final List<ActivationConfiguration> activations;
+	private final List<DiagramConfiguration> activations;
 	private final List<UIListenerConfiguration> uiListenerConfigurations;
 	private final JsonMetadata metadata;
 
-	public SimulationModelConfiguration(Map<String, String> variables, List<ActivationConfiguration> activations,
+	public SimulationModelConfiguration(Map<String, String> variables, List<DiagramConfiguration> activations,
 										List<UIListenerConfiguration> uiListenerConfigurations, JsonMetadata metadata) {
 		this.variables = variables;
 		this.activations = activations;
@@ -61,7 +61,7 @@ public class SimulationModelConfiguration implements HasMetadata, ISimulationMod
 	}
 
 	@JsonProperty("activations")
-	public List<ActivationConfiguration> getActivationConfigurations() {
+	public List<DiagramConfiguration> getActivationConfigurations() {
 		return activations;
 	}
 

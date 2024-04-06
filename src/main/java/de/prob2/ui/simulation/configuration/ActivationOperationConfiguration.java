@@ -13,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 	"execute",
 	// For all other properties, the default order (i. e. field order in class) is used.
 })
-public class ActivationOperationConfiguration extends ActivationConfiguration {
+public class ActivationOperationConfiguration extends DiagramConfiguration {
 
 	public enum ActivationKind {
 		SINGLE("single"),

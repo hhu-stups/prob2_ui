@@ -1,12 +1,11 @@
 package de.prob2.ui.simulation.simulators;
 
 import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
@@ -47,7 +46,7 @@ public abstract class Simulator {
 
 	protected List<ActivationOperationConfiguration> activationConfigurationsSorted;
 
-	protected Map<String, ActivationConfiguration> activationConfigurationMap;
+	protected Map<String, DiagramConfiguration> activationConfigurationMap;
 
 	protected Map<String, Set<String>> operationToActivations;
 
@@ -322,7 +321,7 @@ public abstract class Simulator {
 		// This is used in Monte Carlo Simulation to check when the starting condition is reached
 	}
 
-	public void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
+	public void handleOperationConfiguration(State state, DiagramConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
 		simulationEventHandler.handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
 	}
 
@@ -364,7 +363,7 @@ public abstract class Simulator {
 		return maxTransitionsBeforeInitialisation;
 	}
 
-	public Map<String, ActivationConfiguration> getActivationConfigurationMap() {
+	public Map<String, DiagramConfiguration> getActivationConfigurationMap() {
 		return activationConfigurationMap;
 	}
 

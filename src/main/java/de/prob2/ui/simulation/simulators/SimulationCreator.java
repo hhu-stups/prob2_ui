@@ -8,7 +8,7 @@ import de.prob.statespace.OperationInfo;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 
@@ -23,7 +23,7 @@ public class SimulationCreator {
 	public static SimulationModelConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
 		List<Transition> transitions = trace.getTransitionList();
 
-		List<ActivationConfiguration> activationConfigurations = new ArrayList<>();
+		List<DiagramConfiguration> activationConfigurations = new ArrayList<>();
 		int currentTimestamp = 0;
 
 		for(int i = 0; i < transitions.size(); i++) {

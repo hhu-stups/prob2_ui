@@ -16,7 +16,7 @@ public class DefaultSimulationCreator {
 
 	public static SimulationModelConfiguration createDefaultSimulation(LoadedMachine loadedMachine) {
 		Map<String, String> variables = new HashMap<>();
-		List<ActivationConfiguration> activations = new ArrayList<>();
+		List<DiagramConfiguration> activations = new ArrayList<>();
 		List<UIListenerConfiguration> uiListenerConfigurations = new ArrayList<>();
 		JsonMetadata metadata = SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.SIMULATION)
 				.withUserCreator()

@@ -1,10 +1,10 @@
 package de.prob2.ui.simulation.configuration;
 
-public abstract class ActivationConfiguration {
+public abstract class DiagramConfiguration {
 
 	protected final String id;
 
-	public ActivationConfiguration(String id) {
+	public DiagramConfiguration(String id) {
 		this.id = id;
 	}
 

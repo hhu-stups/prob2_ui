@@ -10,7 +10,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
-import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
@@ -141,17 +141,17 @@ public class UIInteractionHandler {
 		timestamps.add(realTimeSimulator.getTime());
 	}
 
-	private List<ActivationConfiguration> createUserInteractions(RealTimeSimulator realTimeSimulator) {
+	private List<DiagramConfiguration> createUserInteractions(RealTimeSimulator realTimeSimulator) {
 		SimulationModelConfiguration simulationModelConfiguration = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		List<UIListenerConfiguration> uiListeners = simulationModelConfiguration.getUiListenerConfigurations();
-		List<ActivationConfiguration> userInteractions = new ArrayList<>();
+		List<DiagramConfiguration> userInteractions = new ArrayList<>();
 		for(int interactionCounter = 0; interactionCounter < userTransitions.size(); interactionCounter++) {
 			userInteractions.add(createUserInteraction(realTimeSimulator, interactionCounter, uiListeners));
 		}
 		return userInteractions;
 	}
 
-	private ActivationConfiguration createUserInteraction(RealTimeSimulator realTimeSimulator, int interactionCounter, List<UIListenerConfiguration> uiListeners) {
+	private DiagramConfiguration createUserInteraction(RealTimeSimulator realTimeSimulator, int interactionCounter, List<UIListenerConfiguration> uiListeners) {
 		Transition transition = userTransitions.get(interactionCounter);
 		int time = timestamps.get(interactionCounter);
 
@@ -183,23 +183,23 @@ public class UIInteractionHandler {
 		return activations;
 	}
 
-	private List<ActivationConfiguration> createActivationConfigurationsFromUserInteraction(List<ActivationConfiguration> activationConfigurations, List<ActivationConfiguration> userInteractions) {
-		List<ActivationConfiguration> activationConfigurationsForResult = new ArrayList<>();
+	private List<DiagramConfiguration> createActivationConfigurationsFromUserInteraction(List<DiagramConfiguration> activationConfigurations, List<DiagramConfiguration> userInteractions) {
+		List<DiagramConfiguration> activationConfigurationsForResult = new ArrayList<>();
 
 		boolean hasSetupConstants = false;
 		boolean hasInitialization = false;
 		List<String> activations = new ArrayList<>();
-		for(ActivationConfiguration activationConfiguration : activationConfigurations) {
-			if(Transition.INITIALISE_MACHINE_NAME.equals(activationConfiguration.getId())) {
+		for(DiagramConfiguration diagramConfiguration : activationConfigurations) {
+			if(Transition.INITIALISE_MACHINE_NAME.equals(diagramConfiguration.getId())) {
 				hasInitialization = true;
-				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) activationConfiguration;
+				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) diagramConfiguration;
 				activations = new ArrayList<>(initializationConfiguration.getActivating());
-				activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).toList());
+				activations.addAll(userInteractions.stream().map(DiagramConfiguration::getId).toList());
 				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), activations, true, null, null));
-			} else if(Transition.SETUP_CONSTANTS_NAME.equals(activationConfiguration.getId())) {
+			} else if(Transition.SETUP_CONSTANTS_NAME.equals(diagramConfiguration.getId())) {
 				hasSetupConstants = true;
 			} else {
-				activationConfigurationsForResult.add(activationConfiguration);
+				activationConfigurationsForResult.add(diagramConfiguration);
 			}
 		}
 
@@ -215,7 +215,7 @@ public class UIInteractionHandler {
 		}
 
 		if(!hasInitialization) {
-			activations.addAll(userInteractions.stream().map(ActivationConfiguration::getId).toList());
+			activations.addAll(userInteractions.stream().map(DiagramConfiguration::getId).toList());
 			OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.INITIALISE_MACHINE_NAME);
 			// Somehow the constructor with 1 argument always sets using destination state to false
 			State destination = initializationTransition.getDestination();
@@ -230,9 +230,9 @@ public class UIInteractionHandler {
 	public SimulationModelConfiguration createUserInteractionSimulation(RealTimeSimulator realTimeSimulator) {
 		SimulationModelConfiguration simulationModelConfiguration = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		Map<String, String> variables = simulationModelConfiguration.getVariables();
-		List<ActivationConfiguration> activationConfigurations = simulationModelConfiguration.getActivationConfigurations();
-		List<ActivationConfiguration> userInteractions = createUserInteractions(realTimeSimulator);
-		List<ActivationConfiguration> activationConfigurationsForResult = createActivationConfigurationsFromUserInteraction(activationConfigurations, userInteractions);
+		List<DiagramConfiguration> activationConfigurations = simulationModelConfiguration.getActivationConfigurations();
+		List<DiagramConfiguration> userInteractions = createUserInteractions(realTimeSimulator);
+		List<DiagramConfiguration> activationConfigurationsForResult = createActivationConfigurationsFromUserInteraction(activationConfigurations, userInteractions);
 		return new SimulationModelConfiguration(variables, activationConfigurationsForResult, new ArrayList<>(), SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.INTERACTION_REPLAY).withSavedNow().withUserCreator().build());
 	}
 

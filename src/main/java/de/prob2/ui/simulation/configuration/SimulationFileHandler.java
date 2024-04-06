@@ -46,7 +46,7 @@ public class SimulationFileHandler {
 					simulationFile = gson.fromJson(reader, JsonObject.class);
 				}
 				Map<String, String> variables = buildVariables(simulationFile.get("variables"));
-				List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
+				List<DiagramConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
 				List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
 				final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
 				return new SimulationModelConfiguration(variables, activationConfigurations, uiListenerConfigurations, metadata);
@@ -66,11 +66,11 @@ public class SimulationFileHandler {
 		return new SimulationBlackBoxModelConfiguration(timedTraces);
 	}
 
-	private static List<ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
-		List<ActivationConfiguration> activationConfigurations = new ArrayList<>();
+	private static List<DiagramConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
+		List<DiagramConfiguration> activationConfigurations = new ArrayList<>();
 		JsonArray activationConfigurationsAsArray = jsonElement.getAsJsonArray();
 		for (JsonElement activationElement : activationConfigurationsAsArray) {
-			ActivationConfiguration activationConfiguration = buildActivationConfiguration(activationElement);
+			DiagramConfiguration activationConfiguration = buildActivationConfiguration(activationElement);
 			activationConfigurations.add(activationConfiguration);
 		}
 		return activationConfigurations;
@@ -139,7 +139,7 @@ public class SimulationFileHandler {
 	}
 
 
-	private static ActivationConfiguration buildActivationConfiguration(JsonElement activationElement) {
+	private static DiagramConfiguration buildActivationConfiguration(JsonElement activationElement) {
 		if(!activationElement.getAsJsonObject().has("execute")) {
 			return buildChoiceActivationConfiguration(activationElement);
 		} else {
