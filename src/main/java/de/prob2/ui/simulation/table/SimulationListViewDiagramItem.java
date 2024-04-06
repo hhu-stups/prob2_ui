@@ -11,7 +11,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
-public class SimulationListViewDebugItem extends ListCell<ActivationConfiguration> {
+public class SimulationListViewDiagramItem extends ListCell<ActivationConfiguration> {
 
 	@FXML
 	private VBox itemBox;
@@ -20,7 +20,7 @@ public class SimulationListViewDebugItem extends ListCell<ActivationConfiguratio
 
 	private final I18n i18n;
 
-	public SimulationListViewDebugItem(final StageManager stageManager, final I18n i18n) {
+	public SimulationListViewDiagramItem(final StageManager stageManager, final I18n i18n) {
 		super();
 		stageManager.loadFXML(this,"simulation_list_view_item.fxml");
 		this.item = null;

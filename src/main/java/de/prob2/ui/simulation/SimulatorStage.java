@@ -48,7 +48,7 @@ import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
+import de.prob2.ui.simulation.table.SimulationListViewDiagramItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
@@ -392,7 +392,7 @@ public class SimulatorStage extends Stage {
 			}
 		});
 
-		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, i18n));
+		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
 			if (to) {
