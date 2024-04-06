@@ -115,7 +115,7 @@
 									</tooltip>
 								</Button>
 							</HBox>
-							<ListView fx:id="simulationDebugItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
+							<ListView fx:id="simulationDiagramItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
 						</VBox>
 						<VBox>
 							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">

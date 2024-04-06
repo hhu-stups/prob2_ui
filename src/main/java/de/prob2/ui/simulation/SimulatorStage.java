@@ -8,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,9 +33,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
-import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
@@ -50,11 +47,8 @@ import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
-import de.prob2.ui.simulation.table.SimulationChoiceDebugItem;
-import de.prob2.ui.simulation.table.SimulationDebugItem;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDebugItem;
-import de.prob2.ui.simulation.table.SimulationOperationDebugItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
@@ -235,7 +229,7 @@ public class SimulatorStage extends Stage {
 	private TableView<SimulationItem> simulationItems;
 
 	@FXML
-	private ListView<SimulationDebugItem> simulationDebugItems;
+	private ListView<ActivationConfiguration> simulationDiagramItems;
 
 	@FXML
 	private TableColumn<SimulationItem, Checked> simulationStatusColumn;
@@ -354,7 +348,7 @@ public class SimulatorStage extends Stage {
 					currentProject.getLocation().resolve(to.getPath()).toFile().isDirectory() ? SimulationMode.Mode.BLACK_BOX :
 					SimulationMode.Mode.MONTE_CARLO);
 			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
-			simulationDebugItems.getItems().clear();
+			simulationDiagramItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 
 			if (to != null) {
@@ -398,7 +392,7 @@ public class SimulatorStage extends Stage {
 			}
 		});
 
-		this.simulationDebugItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, i18n));
+		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDebugItem(stageManager, i18n));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -411,7 +405,7 @@ public class SimulatorStage extends Stage {
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			configurationPath.set(null);
-			simulationDebugItems.getItems().clear();
+			simulationDiagramItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 			loadSimulationsFromMachine(to);
 		};
@@ -429,7 +423,7 @@ public class SimulatorStage extends Stage {
 
 		simulationItems.setRowFactory(table -> new SimulationItemRow(this));
 
-		this.currentTrace.addListener((observable, from, to) -> simulationDebugItems.refresh());
+		this.currentTrace.addListener((observable, from, to) -> simulationDiagramItems.refresh());
 
 		simulationItems.setOnMouseClicked(e -> {
 			SimulationItem item = simulationItems.getSelectionModel().getSelectedItem();
@@ -559,46 +553,18 @@ public class SimulatorStage extends Stage {
 		realTimeSimulator.resetSimulator();
 	}
 
-	private SimulationOperationDebugItem createOperationDebugItem(ActivationConfiguration activationConfig) {
-		ActivationOperationConfiguration opConfig = (ActivationOperationConfiguration) activationConfig;
-		String id = opConfig.getId();
-		String opName = opConfig.getOpName();
-		String time = opConfig.getAfter();
-		String priority = String.valueOf(opConfig.getPriority());
-		List<String> activations = opConfig.getActivating();
-		ActivationOperationConfiguration.ActivationKind activationKind = opConfig.getActivationKind();
-		String additionalGuards = opConfig.getAdditionalGuards();
-		Map<String, String> fixedVariables = opConfig.getFixedVariables();
-		Object probabilisticVariables = opConfig.getProbabilisticVariables();
-		return new SimulationOperationDebugItem(id, opName, time, priority, activations, activationKind,
-			additionalGuards, fixedVariables, probabilisticVariables);
-	}
-
-	private SimulationChoiceDebugItem createChoiceDebugItem(ActivationConfiguration activationConfig) {
-		ActivationChoiceConfiguration choiceConfig = (ActivationChoiceConfiguration) activationConfig;
-		String id = choiceConfig.getId();
-		Map<String, String> activations = choiceConfig.getActivations();
-		return new SimulationChoiceDebugItem(id, activations);
-	}
-
 	private void loadSimulationItems() {
 		ISimulationModelConfiguration config = realTimeSimulator.getConfig();
 
-		ObservableList<SimulationDebugItem> observableList = FXCollections.observableArrayList();
+		ObservableList<ActivationConfiguration> observableList = FXCollections.observableArrayList();
 		if (config != null) {
 			if (config instanceof SimulationModelConfiguration modelConfig) {
-				for (ActivationConfiguration activationConfig : modelConfig.getActivationConfigurations()) {
-					if (activationConfig instanceof ActivationOperationConfiguration) {
-						observableList.add(createOperationDebugItem(activationConfig));
-					} else {
-						observableList.add(createChoiceDebugItem(activationConfig));
-					}
-				}
+				observableList.addAll(modelConfig.getActivationConfigurations());
 			}
 		}
 
-		simulationDebugItems.setItems(observableList);
-		simulationDebugItems.refresh();
+		simulationDiagramItems.setItems(observableList);
+		simulationDiagramItems.refresh();
 	}
 
 	@FXML

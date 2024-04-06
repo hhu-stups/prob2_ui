@@ -18,6 +18,10 @@ public class ActivationChoiceConfiguration extends ActivationConfiguration {
 		return activations;
 	}
 
+	public String getActivationsAsString() {
+		return activations.toString();
+	}
+
 	@Override
 	public String toString() {
 		return "ActivationChoiceActivation(id=" + id + ", activations=" + activations + ")";

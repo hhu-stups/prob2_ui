@@ -3,18 +3,20 @@ package de.prob2.ui.simulation.table;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
-public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
+public class SimulationListViewDebugItem extends ListCell<ActivationConfiguration> {
 
 	@FXML
 	private VBox itemBox;
 
-
-	private SimulationDebugItem item;
+	private ActivationConfiguration item;
 
 	private final I18n i18n;
 
@@ -32,12 +34,12 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 	}
 
 	@Override
-	protected void updateItem(final SimulationDebugItem item, final boolean empty) {
+	protected void updateItem(final ActivationConfiguration item, final boolean empty) {
 		super.updateItem(item, empty);
 		this.item = item;
 		if(item != null) {
 			this.itemBox.getChildren().clear();
-			if(item instanceof SimulationOperationDebugItem) {
+			if(item instanceof ActivationOperationConfiguration) {
 				updateOperationDebugItem();
 			} else {
 				updateChoiceDebugItem();
@@ -51,7 +53,7 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 	}
 
 	public void updateOperationDebugItem() {
-		SimulationOperationDebugItem item = (SimulationOperationDebugItem) this.item;
+		ActivationOperationConfiguration item = (ActivationOperationConfiguration) this.item;
 		Label lbID = new Label(item.getId());
 		lbID.getStyleClass().add("id");
 		this.itemBox.getChildren().add(lbID);
@@ -60,19 +62,19 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 		lbOpName.getStyleClass().add("information");
 		this.itemBox.getChildren().add(lbOpName);
 
-		Label lbTime = new Label(i18n.translate("simulation.item.time", item.getTime()));
+		Label lbTime = new Label(i18n.translate("simulation.item.time", item.getAfter()));
 		lbTime.getStyleClass().add("information");
 		this.itemBox.getChildren().add(lbTime);
 
-		if(!item.getPriority().isEmpty()) {
+		if(item.getPriority() == 0) {
 			Label lbPriority = new Label(i18n.translate("simulation.item.priority", item.getPriority()));
 			lbPriority.getStyleClass().add("information");
 			this.itemBox.getChildren().add(lbPriority);
 		}
 
 
-		if(!item.getActivationsAsString().isEmpty()) {
-			Label lbActivation = new Label(i18n.translate("simulation.item.activations", item.getActivationsAsString()));
+		if(item.getActivating() != null) {
+			Label lbActivation = new Label(i18n.translate("simulation.item.activations", item.getActivatingAsString()));
 			lbActivation.getStyleClass().add("information");
 			this.itemBox.getChildren().add(lbActivation);
 		}
@@ -82,19 +84,19 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 		this.itemBox.getChildren().add(lbActivationKind);
 
 
-		if(!item.getAdditionalGuardsAsString().isEmpty()) {
+		if(item.getAdditionalGuards() != null) {
 			Label lbAdditionalGuards = new Label(i18n.translate("simulation.item.additionalGuards", item.getAdditionalGuards()));
 			lbAdditionalGuards.getStyleClass().add("information");
 			this.itemBox.getChildren().add(lbAdditionalGuards);
 		}
 
-		if(!item.getFixedVariablesAsString().isEmpty()) {
+		if(item.getFixedVariables() != null) {
 			Label lbFixedVariables = new Label(i18n.translate("simulation.item.fixedVariables", item.getFixedVariablesAsString()));
 			lbFixedVariables.getStyleClass().add("information");
 			this.itemBox.getChildren().add(lbFixedVariables);
 		}
 
-		if(!item.getProbabilisticVariablesAsString().isEmpty()) {
+		if(item.getProbabilisticVariables() != null) {
 			Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables", item.getProbabilisticVariablesAsString()));
 			lbProbabilisticVariables.getStyleClass().add("information");
 			this.itemBox.getChildren().add(lbProbabilisticVariables);
@@ -104,12 +106,12 @@ public class SimulationListViewDebugItem extends ListCell<SimulationDebugItem> {
 	}
 
 	public void updateChoiceDebugItem() {
-		SimulationChoiceDebugItem item = (SimulationChoiceDebugItem) this.item;
+		ActivationChoiceConfiguration item = (ActivationChoiceConfiguration) this.item;
 		Label lbID = new Label(item.getId());
 		lbID.getStyleClass().add("id");
 		this.itemBox.getChildren().add(lbID);
 
-		if(!item.getActivationsAsString().isEmpty()) {
+		if(!item.getActivations().isEmpty()) {
 			Label lbActivation = new Label(i18n.translate("simulation.item.activations", item.getActivationsAsString()));
 			lbActivation.getStyleClass().add("information");
 			this.itemBox.getChildren().add(lbActivation);

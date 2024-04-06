@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.configuration;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -89,6 +90,11 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 		return additionalGuards;
 	}
 
+	@JsonIgnore
+	public String getAdditionalGuardsAsString() {
+		return additionalGuards == null ? "" : additionalGuards;
+	}
+
 	public ActivationKind getActivationKind() {
 		return activationKind;
 	}
@@ -97,12 +103,27 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 		return fixedVariables;
 	}
 
+	@JsonIgnore
+	public String getFixedVariablesAsString() {
+		return fixedVariables == null ? "" : fixedVariables.toString();
+	}
+
 	public Object getProbabilisticVariables() {
 		return probabilisticVariables;
 	}
 
+	@JsonIgnore
+	public String getProbabilisticVariablesAsString() {
+		return probabilisticVariables == null ? "" : probabilisticVariables.toString();
+	}
+
 	public List<String> getActivating() {
 		return activating;
+	}
+
+	@JsonIgnore
+	public String getActivatingAsString() {
+		return activating == null ? "" : activating.toString();
 	}
 
 	public boolean isActivatingOnlyWhenExecuted() {
