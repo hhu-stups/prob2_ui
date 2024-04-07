@@ -7,11 +7,11 @@ import java.util.Objects;
 
 public class UIListenerConfiguration extends DiagramConfiguration {
 
-	private final String event;
+	private String event;
 
-	private final String predicate;
+	private String predicate;
 
-	private final List<String> activating;
+	private List<String> activating;
 
 	public UIListenerConfiguration(String id, String event, String predicate, List<String> activating) {
 		super(id);
@@ -24,19 +24,30 @@ public class UIListenerConfiguration extends DiagramConfiguration {
 		return event;
 	}
 
+	public void setEvent(String event) {
+		this.event = event;
+	}
+
 	public String getPredicate() {
 		return predicate;
+	}
+
+	public void setPredicate(String predicate) {
+		this.predicate = predicate;
 	}
 
 	public List<String> getActivating() {
 		return activating;
 	}
 
+	public void setActivating(List<String> activating) {
+		this.activating = activating;
+	}
+	
 	@JsonIgnore
 	public String getActivatingAsString() {
-		return activating == null ? "" : activating.toString();
+		return activating == null ? "" : activating.toString().substring(1, activating.toString().length() - 1);
 	}
-
 
 	@Override
 	public boolean equals(Object o) {

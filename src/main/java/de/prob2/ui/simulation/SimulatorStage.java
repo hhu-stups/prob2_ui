@@ -7,7 +7,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -33,6 +35,8 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
@@ -40,6 +44,7 @@ import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.simulation.model.SimulationModel;
@@ -673,5 +678,22 @@ public class SimulatorStage extends Stage {
 			return;
 		}
 		currentProject.getCurrentMachine().getMachineProperties().getSimulations().remove(simulationModel);
+	}
+
+	private SimulationModelConfiguration buildSimulationModel() {
+		Map<String, String> variables = new HashMap<>();
+		List<DiagramConfiguration> activations = new ArrayList<>();
+		List<UIListenerConfiguration> listeners = new ArrayList<>();
+
+		for(DiagramConfiguration diagramConfiguration : simulationDiagramItems.getItems()) {
+			if(diagramConfiguration instanceof ActivationChoiceConfiguration || diagramConfiguration instanceof ActivationOperationConfiguration) {
+				activations.add(diagramConfiguration);
+			} else {
+				listeners.add((UIListenerConfiguration) diagramConfiguration);
+			}
+		}
+
+		return new SimulationModelConfiguration(variables, activations, listeners, SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.SIMULATION)
+				.build());
 	}
 }

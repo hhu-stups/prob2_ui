@@ -7,10 +7,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ActivationChoiceConfiguration extends DiagramConfiguration {
 
 	@JsonProperty("chooseActivation")
-	private final Map<String, String> activations;
+	private Map<String, String> activations;
 
 	public ActivationChoiceConfiguration(String id, Map<String, String> activations) {
 		super(id);
+		this.activations = activations;
+	}
+
+	public void setActivations(Map<String, String> activations) {
 		this.activations = activations;
 	}
 

@@ -34,27 +34,27 @@ public class ActivationOperationConfiguration extends DiagramConfiguration {
 
 	}
 
-	private final String execute;
+	private String execute;
 
-	private final String after;
+	private String after;
 
-	private final int priority;
+	private int priority;
 
-	private final String additionalGuards;
+	private String additionalGuards;
 
-	private final ActivationKind activationKind;
+	private ActivationKind activationKind;
 
-	private final Map<String, String> fixedVariables;
+	private Map<String, String> fixedVariables;
 
-	private final Object probabilisticVariables;
+	private Object probabilisticVariables;
 
-	private final List<String> activating;
+	private List<String> activating;
 
-	private final boolean activatingOnlyWhenExecuted;
+	private boolean activatingOnlyWhenExecuted;
 
-	private final Map<String, String> updating;
+	private Map<String, String> updating;
 
-	private final String withPredicate;
+	private String withPredicate;
 
 	public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
 			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
@@ -78,16 +78,32 @@ public class ActivationOperationConfiguration extends DiagramConfiguration {
 		return execute;
 	}
 
+	public void setOpName(String execute) {
+		this.execute = execute;
+	}
+
 	public String getAfter() {
 		return after;
+	}
+
+	public void setAfter(String after) {
+		this.after = after;
 	}
 
 	public int getPriority() {
 		return priority;
 	}
 
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+
 	public String getAdditionalGuards() {
 		return additionalGuards;
+	}
+
+	public void setAdditionalGuards(String additionalGuards) {
+		this.additionalGuards = additionalGuards;
 	}
 
 	@JsonIgnore
@@ -99,8 +115,16 @@ public class ActivationOperationConfiguration extends DiagramConfiguration {
 		return activationKind;
 	}
 
+	public void setActivationKind(ActivationKind activationKind) {
+		this.activationKind = activationKind;
+	}
+
 	public Map<String, String> getFixedVariables() {
 		return fixedVariables;
+	}
+
+	public void setFixedVariables(Map<String, String> fixedVariables) {
+		this.fixedVariables = fixedVariables;
 	}
 
 	@JsonIgnore
@@ -112,6 +136,10 @@ public class ActivationOperationConfiguration extends DiagramConfiguration {
 		return probabilisticVariables;
 	}
 
+	public void setProbabilisticVariables(Object probabilisticVariables) {
+		this.probabilisticVariables = probabilisticVariables;
+	}
+
 	@JsonIgnore
 	public String getProbabilisticVariablesAsString() {
 		return probabilisticVariables == null ? "" : probabilisticVariables.toString();
@@ -121,21 +149,37 @@ public class ActivationOperationConfiguration extends DiagramConfiguration {
 		return activating;
 	}
 
+	public void setActivating(List<String> activating) {
+		this.activating = activating;
+	}
+
 	@JsonIgnore
 	public String getActivatingAsString() {
-		return activating == null ? "" : activating.toString();
+		return activating == null ? "" : activating.toString().substring(1, activating.toString().length() - 1);
 	}
 
 	public boolean isActivatingOnlyWhenExecuted() {
 		return activatingOnlyWhenExecuted;
 	}
 
+	public void setActivatingOnlyWhenExecuted(boolean activatingOnlyWhenExecuted) {
+		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted;
+	}
+
 	public Map<String, String> getUpdating() {
 		return updating;
 	}
 
+	public void setUpdating(Map<String, String> updating) {
+		this.updating = updating;
+	}
+
 	public String getWithPredicate() {
 		return withPredicate;
+	}
+
+	public void setWithPredicate(String withPredicate) {
+		this.withPredicate = withPredicate;
 	}
 
 	@Override
