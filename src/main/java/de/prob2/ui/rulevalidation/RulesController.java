@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.FunctionOperation;
-import de.prob.model.brules.output.RuleValidationReport;
 import de.prob.model.brules.RulesChecker;
 import de.prob.model.brules.output.RulesDependencyGraph;
 import de.prob.model.brules.RulesModel;
@@ -155,10 +154,10 @@ public class RulesController {
 		});
 		task.setOnFailed(event -> {
 			if (operation != null) {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.singleRule", operation).showAndWait();
+				stageManager.makeExceptionAlert(task.getException(), "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.singleRule", operation).showAndWait();
 				LOGGER.debug("Task for execution of rule " + operation + " failed or cancelled!");
 			} else {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.allRules").showAndWait();
+				stageManager.makeExceptionAlert(task.getException(),"rulevalidation.execute.error.header", "rulevalidation.execute.error.content.allRules").showAndWait();
 				LOGGER.debug("Task for execution of all rules failed or cancelled!");
 			}
 			currentTrace.set(currentTrace.get());
