@@ -61,7 +61,6 @@ import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -86,6 +85,9 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -331,27 +333,13 @@ public class SimulatorStage extends Stage {
 
 			MenuItem saveItem = new MenuItem(i18n.translate("simulation.menuBar.save"));
 			saveItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().endsWith(".json"), configurationPath));
-			saveItem.setOnAction(e -> {
-				try {
-					simulationSaver.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
-				} catch (IOException ex) {
-					injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
-				}
-			});
+			saveItem.setOnAction(e -> saveSimulation());
+			saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_ANY));
 
 			MenuItem saveAsItem = new MenuItem(i18n.translate("simulation.menuBar.saveAs"));
-			saveAsItem.setOnAction(e -> {
-				final FileChooser chooser = new FileChooser();
-				chooser.getExtensionFilters().addAll(fileChooserManager.getSimBFilter());
-				chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getLocation()) + ".json");
-				Path path = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.SIMULATION, this);
-				try {
-					simulationSaver.saveConfiguration(buildSimulationModel(), path);
-				} catch (IOException ex) {
-					injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
-				}
-			});
 			saveAsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().endsWith(".json"), configurationPath));
+			saveAsItem.setOnAction(e -> saveSimulationAs());
+			saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.ALT_ANY, KeyCombination.SHORTCUT_ANY));
 
 			MenuItem closeItem = new MenuItem(i18n.translate("simulation.menuBar.close"));
 			closeItem.setOnAction(e -> this.close());
@@ -363,7 +351,7 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
-	public void setMacMenu(MenuBar menuBar) {
+	private void setMacMenu(MenuBar menuBar) {
 		if (this.menuToolkit != null) {
 			Platform.runLater(() -> {
 				this.menuToolkit.setMenuBar(this, menuBar);
@@ -404,8 +392,8 @@ public class SimulatorStage extends Stage {
 				.then(i18n.translateBinding("simulation.stage.title"))
 				.otherwise(i18n.translateBinding("simulation.currentSimulation",
 					SafeBindings.createSafeStringBinding(
-						() -> configurationPath.get().toString().isEmpty() ? i18n.translate("simulation.defaultSimulation") : currentProject.getLocation().relativize(configurationPath.get()).toString(),
-						currentProject, configurationPath
+						() -> configurationPath.get().toString().isEmpty() ? i18n.translate("simulation.defaultSimulation") : currentProject.getLocation().relativize(configurationPath.get()) + (savedProperty.get() ? "": "*"),
+						currentProject, configurationPath, savedProperty
 					)
 				))
 		);
@@ -460,7 +448,7 @@ public class SimulatorStage extends Stage {
 			}
 		});
 
-		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n));
+		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n, savedProperty));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -632,6 +620,7 @@ public class SimulatorStage extends Stage {
 			}
 		}
 
+		simulationDiagramItems.getItems().clear();
 		simulationDiagramItems.setItems(observableList);
 		simulationDiagramItems.refresh();
 	}
@@ -758,5 +747,32 @@ public class SimulatorStage extends Stage {
 
 		return new SimulationModelConfiguration(variables, activations, listeners, SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.SIMULATION)
 				.build());
+	}
+
+	private void saveSimulation() {
+		if(configurationPath.get().toString().isEmpty()) {
+			saveSimulationAs();
+			return;
+		}
+
+		try {
+			simulationSaver.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
+			savedProperty.set(true);
+		} catch (IOException ex) {
+			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+		}
+	}
+
+	private void saveSimulationAs() {
+		final FileChooser chooser = new FileChooser();
+		chooser.getExtensionFilters().addAll(fileChooserManager.getSimBFilter());
+		chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getLocation()) + ".json");
+		Path path = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.SIMULATION, this);
+		try {
+			simulationSaver.saveConfiguration(buildSimulationModel(), path);
+			savedProperty.set(true);
+		} catch (IOException ex) {
+			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+		}
 	}
 }
