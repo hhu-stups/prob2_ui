@@ -370,7 +370,7 @@ public class RulesView extends AnchorPane{
 			List<TreeItem<Object>> noClassificationItem = new ArrayList<>();
 			for (Map.Entry<String, RuleOperation> entry : dataModel.getRuleMap().entrySet()) {
 				LOGGER.debug("Add item for rule {}   {}.", entry.getKey(), entry.getValue());
-				TreeItem<Object> operationItem = new OperationItem(entry.getValue(), dataModel.getRuleValue(entry.getKey()), dataModel);
+				TreeItem<Object> operationItem = new OperationItem(i18n, entry.getValue(), dataModel.getRuleValue(entry.getKey()), dataModel);
 				String classification = entry.getValue().getClassification();
 				if (classification != null && classificationItems.containsKey(classification)) {
 					classificationItems.get(classification).add(operationItem);
@@ -395,7 +395,7 @@ public class RulesView extends AnchorPane{
 			for (Map.Entry<String, ComputationOperation> entry : dataModel.getComputationMap().entrySet()) {
 				LOGGER.debug("Add item for computation {}.", entry.getKey());
 				tvComputationsItem.getChildren()
-						.add(new OperationItem(entry.getValue(), dataModel.getComputationValue(entry.getKey()), dataModel));
+						.add(new OperationItem(i18n, entry.getValue(), dataModel.getComputationValue(entry.getKey()), dataModel));
 			}
 			tvRootItem.getChildren().add(tvComputationsItem);
 		}
