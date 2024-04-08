@@ -78,12 +78,8 @@ class OperationItem extends TreeItem<Object> {
 		switch(result.getRuleState()) {
 			case FAIL:
 				// create child items to show why the rule failed
-				TreeItem<Object> violationItem = new TreeItem<>("VIOLATIONS");
 				result.getCounterExamples().sort(Comparator.comparingInt(RuleResult.CounterExample::getErrorType));
-				for (RuleResult.CounterExample example : result.getCounterExamples()) {
-					violationItem.getChildren().add(new TreeItem<>(example));
-				}
-				this.getChildren().add(violationItem);
+				addCounterExamples(result.getCounterExamples());
 				executable = false;
 				break;
 			case NOT_CHECKED:
@@ -113,6 +109,27 @@ class OperationItem extends TreeItem<Object> {
 				addDisabledDependencies(disabledDependencies);
 				break;
 		}
+	}
+
+	private void addCounterExamples(List<RuleResult.CounterExample> counterExamples) {
+		TreeItem<Object> violationItem = new TreeItem<>("VIOLATIONS");
+		int size = counterExamples.size();
+		if (size > 10) {
+			TreeItem<Object> collapsedExamples = new TreeItem<>("show all (" + size + ")");
+			// display the first ten violations and collapse the others
+			for (int i = 0; i < 10; i++) {
+				violationItem.getChildren().add(new TreeItem<>(counterExamples.get(i)));
+			}
+			for (int i = 10; i < size; i++) {
+				collapsedExamples.getChildren().add(new TreeItem<>(counterExamples.get(i)));
+			}
+			violationItem.getChildren().add(collapsedExamples);
+		} else {
+			for (RuleResult.CounterExample example : counterExamples) {
+				violationItem.getChildren().add(new TreeItem<>(example));
+			}
+		}
+		this.getChildren().add(violationItem);
 	}
 
 	private void addDisabledDependencies(List<String> disabledDependencies) {
