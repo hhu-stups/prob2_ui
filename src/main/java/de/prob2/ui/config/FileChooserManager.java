@@ -36,6 +36,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
 
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
@@ -192,9 +193,13 @@ public class FileChooserManager {
 	public FileChooser.ExtensionFilter getProB2ProjectFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", ProjectManager.PROJECT_FILE_EXTENSION);
 	}
-	
+
 	public FileChooser.ExtensionFilter getProB2TraceFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION);
+	}
+
+	public FileChooser.ExtensionFilter getSimBFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.simulation", SimulationFileHandler.SIMULATION_FILE_EXTENSION);
 	}
 	
 	public FileChooser.ExtensionFilter getPlainTextFilter() {

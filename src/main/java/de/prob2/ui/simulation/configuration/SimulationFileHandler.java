@@ -28,6 +28,8 @@ public class SimulationFileHandler {
 
 	public static final String TRACE_FILE_EXTENSION = "json";
 
+	public static final String SIMULATION_FILE_EXTENSION = "json";
+
 	private static final Gson METADATA_GSON = Converters.registerAll(new GsonBuilder())
 			.disableHtmlEscaping()
 			.serializeNulls()

@@ -13,10 +13,12 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.jangassen.MenuToolkit;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -59,6 +61,7 @@ import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -75,6 +78,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -89,6 +93,8 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import org.controlsfx.glyphfont.FontAwesome;
+
+import javax.annotation.Nullable;
 
 @FXMLInjected
 @Singleton
@@ -267,9 +273,15 @@ public class SimulatorStage extends Stage {
 
 	private final FileChooserManager fileChooserManager;
 
+	private final SimulationSaver simulationSaver;
+
 	private final TraceFileHandler traceFileHandler;
 
 	private final ObjectProperty<Path> configurationPath;
+
+	private final BooleanProperty savedProperty;
+
+	private final MenuToolkit menuToolkit;
 
 	private final SimulationItemHandler simulationItemHandler;
 
@@ -287,8 +299,9 @@ public class SimulatorStage extends Stage {
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 	                      final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
 	                      final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
-						  final I18n i18n, final FileChooserManager fileChooserManager, final TraceFileHandler traceFileHandler,
-	                      final StopActions stopActions) {
+						  final I18n i18n, final FileChooserManager fileChooserManager,
+						  final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
+	                      final StopActions stopActions, @Nullable final MenuToolkit menuToolkit) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -301,12 +314,62 @@ public class SimulatorStage extends Stage {
 		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
+		this.simulationSaver = simulationSaver;
 		this.traceFileHandler = traceFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
+		this.savedProperty = new SimpleBooleanProperty(this, "savedProperty", true);
+		this.menuToolkit = menuToolkit;
 		this.time = 0;
 		this.timer = new Timer(true);
 		stopActions.add(this::cancelTimer);
 		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
+
+		if (this.menuToolkit != null) {
+			MenuBar menuBar = new MenuBar();
+			menuBar.setUseSystemMenuBar(true);
+			final Menu openMenu = new Menu(i18n.translate("simulation.menuBar.file"));
+
+			MenuItem saveItem = new MenuItem(i18n.translate("simulation.menuBar.save"));
+			saveItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().endsWith(".json"), configurationPath));
+			saveItem.setOnAction(e -> {
+				try {
+					simulationSaver.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
+				} catch (IOException ex) {
+					injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+				}
+			});
+
+			MenuItem saveAsItem = new MenuItem(i18n.translate("simulation.menuBar.saveAs"));
+			saveAsItem.setOnAction(e -> {
+				final FileChooser chooser = new FileChooser();
+				chooser.getExtensionFilters().addAll(fileChooserManager.getSimBFilter());
+				chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getLocation()) + ".json");
+				Path path = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.SIMULATION, this);
+				try {
+					simulationSaver.saveConfiguration(buildSimulationModel(), path);
+				} catch (IOException ex) {
+					injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+				}
+			});
+			saveAsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().endsWith(".json"), configurationPath));
+
+			MenuItem closeItem = new MenuItem(i18n.translate("simulation.menuBar.close"));
+			closeItem.setOnAction(e -> this.close());
+
+			openMenu.getItems().addAll(saveItem, saveAsItem, closeItem);
+
+			menuBar.getMenus().add(0, openMenu);
+			setMacMenu(menuBar);
+		}
+	}
+
+	public void setMacMenu(MenuBar menuBar) {
+		if (this.menuToolkit != null) {
+			Platform.runLater(() -> {
+				this.menuToolkit.setMenuBar(this, menuBar);
+				this.stageManager.setMacMenuBar(this, menuBar);
+			});
+		}
 	}
 
 	@FXML
