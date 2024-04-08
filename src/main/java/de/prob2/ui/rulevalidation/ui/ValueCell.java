@@ -29,14 +29,14 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 			executable = ((OperationItem) treeItem).isExecutable();
 		}
 		configureEmptyCell();
-		if (item instanceof RuleResult)
-			configureForRuleResult((RuleResult)item);
-		else if (item instanceof RuleResult.CounterExample)
-			setText(((RuleResult.CounterExample)item).getMessage());
-		else if (item instanceof Map.Entry)
-			configureForComputationResult((ComputationStatus)((Map.Entry<?, ?>)item).getValue());
-		else if (item instanceof IdentifierNotInitialised)
-			configureForNotInitialised((IdentifierNotInitialised)item);
+		if (item instanceof RuleResult ruleResult)
+			configureForRuleResult(ruleResult);
+		else if (item instanceof RuleResult.CounterExample counterExample)
+			setText(counterExample.getMessage());
+		else if (item instanceof Map.Entry<?,?> entry)
+			configureForComputationResult((ComputationStatus) entry.getValue());
+		else if (item instanceof IdentifierNotInitialised notInitialised)
+			configureForNotInitialised(notInitialised);
 		setGraphic(null);
 	}
 

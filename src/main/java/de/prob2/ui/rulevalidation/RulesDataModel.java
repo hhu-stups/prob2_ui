@@ -183,7 +183,7 @@ public class RulesDataModel {
 			} else if (op instanceof ComputationOperation && computationValueMap.containsKey(op.getName()) &&
 					getComputationValue(op.getName()).get() instanceof Map.Entry) {
 				Object stateObject = getComputationValue(op.getName()).get();
-				if (stateObject instanceof ComputationStatus && (ComputationStatus)stateObject == ComputationStatus.NOT_EXECUTED) {
+				if (stateObject == ComputationStatus.NOT_EXECUTED) {
 					notCheckedDependencies.add(op.getName());
 				}
 			}

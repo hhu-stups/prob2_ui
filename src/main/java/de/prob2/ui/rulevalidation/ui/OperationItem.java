@@ -42,8 +42,8 @@ class OperationItem extends TreeItem<Object> {
 						executable = false;
 					}
 				}
-			} else if (newValue instanceof Map.Entry<?, ?> && operation instanceof ComputationOperation) {
-				createComputationChildren((Map.Entry<?, ?>)newValue, (ComputationOperation) operation);
+			} else if (newValue instanceof Map.Entry<?, ?> entry && operation instanceof ComputationOperation computationOperation) {
+				createComputationChildren(entry, computationOperation);
 			}
 		});
 	}

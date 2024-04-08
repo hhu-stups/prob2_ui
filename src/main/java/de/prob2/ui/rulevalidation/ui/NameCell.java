@@ -21,14 +21,14 @@ public class NameCell extends TreeTableCell<Object, Object>{
 		super.updateItem(item, empty);
 		if (item == null || empty)
 			setText(null);
-		else if (item instanceof String)
-			setText((String)item);
-		else if (item instanceof RuleOperation && ((RuleOperation) item).getRuleIdString() != null)
-			setText(((RuleOperation)item).getName() + " [" + ((RuleOperation)item).getRuleIdString() + "]");
-		else if (item instanceof AbstractOperation)
-			setText(((AbstractOperation)item).getName());
-		else if (item instanceof RuleResult.CounterExample)
-			setText(((RuleResult.CounterExample)item).getErrorType() + "");
+		else if (item instanceof String string)
+			setText(string);
+		else if (item instanceof RuleOperation ruleOperation && ruleOperation.getRuleIdString() != null)
+			setText(ruleOperation.getName() + " [" + ruleOperation.getRuleIdString() + "]");
+		else if (item instanceof AbstractOperation abstractOperation)
+			setText(abstractOperation.getName());
+		else if (item instanceof RuleResult.CounterExample counterExample)
+			setText(counterExample.getErrorType() + "");
 		setGraphic(null);
 	}
 }
