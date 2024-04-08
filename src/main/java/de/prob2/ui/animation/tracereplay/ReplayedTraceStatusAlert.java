@@ -212,10 +212,10 @@ public class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	private String statusOfReplayedTrace() {
-        return switch (replayTrace.getReplayedTrace().getReplayStatus()) {
-            case PARTIAL -> i18n.translate("animation.tracereplay.replayedStatus.button.question.partial");
-            case IMPERFECT -> i18n.translate("animation.tracereplay.replayedStatus.button.question.imperfect");
-            default -> "";
-        };
+		return switch (replayTrace.getReplayedTrace().getReplayStatus()) {
+			case PARTIAL -> i18n.translate("animation.tracereplay.replayedStatus.button.question.partial");
+			case IMPERFECT -> i18n.translate("animation.tracereplay.replayedStatus.button.question.imperfect");
+			default -> "";
+		};
 	}
 }
