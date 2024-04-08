@@ -52,7 +52,8 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 				break;
 			case NOT_EXECUTED:
 				if (!executable) {
-					setText("NOT_EXECUTABLE");
+					// should not be translated? Appears next to rule states SUCCESS, FAIL, …
+					setText("NOT EXECUTABLE");
 				}
 				setStyle(null);
 				break;
