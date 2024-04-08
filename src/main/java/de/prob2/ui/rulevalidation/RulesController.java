@@ -27,7 +27,6 @@ import java.util.Set;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 20.12.17
  */
 @Singleton

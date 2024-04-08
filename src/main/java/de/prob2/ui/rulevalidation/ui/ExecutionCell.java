@@ -17,7 +17,6 @@ import java.util.Map;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 20.12.17
  */
 public class ExecutionCell extends TreeTableCell<Object, Object> {

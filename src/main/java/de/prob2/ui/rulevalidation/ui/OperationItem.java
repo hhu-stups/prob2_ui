@@ -15,7 +15,6 @@ import java.util.Map;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 16.12.17
  */
 class OperationItem extends TreeItem<Object> {
@@ -33,15 +32,11 @@ class OperationItem extends TreeItem<Object> {
 			if (newValue instanceof RuleResult ruleResult) {
 				executable = true;
 				switch (ruleResult.getRuleState()) {
-					case FAIL:
-					case NOT_CHECKED:
-						createRuleChildren(ruleResult);
-						break;
-					case DISABLED:
-					case SUCCESS:
+					case FAIL, NOT_CHECKED -> createRuleChildren(ruleResult);
+					case DISABLED, SUCCESS -> {
 						OperationItem.this.getChildren().clear();
 						executable = false;
-						break;
+					}
 				}
 			} else if (newValue instanceof Map.Entry<?, ?> && operation instanceof ComputationOperation) {
 				createComputationChildren((Map.Entry<?, ?>)newValue, (ComputationOperation) operation);

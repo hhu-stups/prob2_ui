@@ -35,10 +35,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 /**
- * Description of class
- *
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 11.12.17
  */
 @FXMLInjected
@@ -173,17 +170,17 @@ public class RulesView extends AnchorPane{
 		tvValueColumn.setCellFactory(column -> new ValueCell());
 		tvValueColumn.setCellValueFactory(param -> {
 			Object item = param.getValue().getValue();
-			if (item instanceof RuleOperation) {
-				return dataModel.getRuleValue(((RuleOperation) item).getName());
-			} else if (item instanceof ComputationOperation) {
-				return dataModel.getComputationValue(((ComputationOperation) item).getName());
+			if (item instanceof RuleOperation ruleItem) {
+				return dataModel.getRuleValue(ruleItem.getName());
+			} else if (item instanceof ComputationOperation compItem) {
+				return dataModel.getComputationValue(compItem.getName());
 			} else if (item instanceof RuleResult.CounterExample) {
 				return new ReadOnlyObjectWrapper<>(item);
-			} else if (item instanceof String) {
-				if (dataModel.getRuleValueMap().containsKey(item)) {
-					return dataModel.getRuleValue((String)item);
-				} else if (dataModel.getComputationValueMap().containsKey(item)) {
-					return dataModel.getComputationValue((String) item);
+			} else if (item instanceof String stringItem) {
+				if (dataModel.getRuleValueMap().containsKey(stringItem)) {
+					return dataModel.getRuleValue(stringItem);
+				} else if (dataModel.getComputationValueMap().containsKey(stringItem)) {
+					return dataModel.getComputationValue(stringItem);
 				}
 			}
 			return null;
@@ -192,10 +189,10 @@ public class RulesView extends AnchorPane{
 		tvExecuteColumn.setCellFactory(column -> new ExecutionCell(controller, i18n));
 		tvExecuteColumn.setCellValueFactory(param -> {
 			Object item = param.getValue().getValue();
-			if (item instanceof RuleOperation) {
-				return dataModel.getRuleValue(((RuleOperation) item).getName());
-			} else if (item instanceof ComputationOperation) {
-				return dataModel.getComputationValue(((ComputationOperation) item).getName());
+			if (item instanceof RuleOperation ruleOperation) {
+				return dataModel.getRuleValue(ruleOperation.getName());
+			} else if (item instanceof ComputationOperation computationOperation) {
+				return dataModel.getComputationValue(computationOperation.getName());
 			}
 			return null;
 		});

@@ -11,7 +11,6 @@ import java.util.Map;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 14.12.17
  */
 public class ValueCell extends TreeTableCell<Object, Object>{
