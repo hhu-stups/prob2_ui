@@ -35,6 +35,10 @@ public class NameCell extends TreeTableCell<Object, Object>{
 
 	private void updateContent(String content) {
 		setText(content);
-		setTooltip(new Tooltip(content));
+		if (content != null && !content.isEmpty()) {
+			setTooltip(new Tooltip(content));
+		} else {
+			setTooltip(null);
+		}
 	}
 }
