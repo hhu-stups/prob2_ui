@@ -4,6 +4,7 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.brules.ComputationStatus;
 import de.prob.model.brules.RuleResult;
 import javafx.geometry.Pos;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 
@@ -32,7 +33,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		if (item instanceof RuleResult ruleResult)
 			configureForRuleResult(ruleResult);
 		else if (item instanceof RuleResult.CounterExample counterExample)
-			setText(counterExample.getMessage());
+			updateContent(counterExample.getMessage());
 		else if (item instanceof Map.Entry<?,?> entry)
 			configureForComputationResult((ComputationStatus) entry.getValue());
 		else if (item instanceof IdentifierNotInitialised notInitialised)
@@ -42,7 +43,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 
 	private void configureForComputationResult(ComputationStatus result) {
 		getTableRow().getTreeItem();
-		setText(result.toString());
+		updateContent(result.toString());
 		switch (result) {
 			case EXECUTED:
 				getStyleClass().add("true");
@@ -53,7 +54,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 			case NOT_EXECUTED:
 				if (!executable) {
 					// should not be translated? Appears next to rule states SUCCESS, FAIL, …
-					setText("NOT EXECUTABLE");
+					updateContent("NOT EXECUTABLE");
 				}
 				setStyle(null);
 				break;
@@ -61,13 +62,13 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	}
 
 	private void configureEmptyCell() {
-		setText(null);
+		updateContent(null);
 		setStyle(null);
 		getStyleClass().removeAll("true","false");
 	}
 
 	private void configureForRuleResult(RuleResult result) {
-		setText(result.getRuleState().name());
+		updateContent(result.getRuleState().name());
 		switch (result.getRuleState()) {
 			case FAIL:
 				getStyleClass().add("false");
@@ -77,7 +78,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 				break;
 			case NOT_CHECKED:
 				if (!executable) {
-					setText("NOT CHECKABLE");
+					updateContent("NOT CHECKABLE");
 				}
 				setStyle(null);
 				break;
@@ -88,8 +89,16 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	}
 
 	private void configureForNotInitialised(IdentifierNotInitialised item) {
-		setText(item.getResult());
+		updateContent(item.getResult());
 		setStyle(null);
 	}
 
+	private void updateContent(String content) {
+		setText(content);
+		if (content != null && !content.isEmpty()) {
+			setTooltip(new Tooltip(content));
+		} else {
+			setTooltip(null);
+		}
+	}
 }

@@ -4,6 +4,7 @@ import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.model.brules.RuleResult;
 import javafx.geometry.Pos;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeTableCell;
 
 /**
@@ -20,15 +21,20 @@ public class NameCell extends TreeTableCell<Object, Object>{
 	protected void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
 		if (item == null || empty)
-			setText(null);
+			updateContent(null);
 		else if (item instanceof String string)
-			setText(string);
+			updateContent(string);
 		else if (item instanceof RuleOperation ruleOperation && ruleOperation.getRuleIdString() != null)
-			setText(ruleOperation.getName() + " [" + ruleOperation.getRuleIdString() + "]");
+			updateContent(ruleOperation.getName() + " [" + ruleOperation.getRuleIdString() + "]");
 		else if (item instanceof AbstractOperation abstractOperation)
-			setText(abstractOperation.getName());
+			updateContent(abstractOperation.getName());
 		else if (item instanceof RuleResult.CounterExample counterExample)
-			setText(counterExample.getErrorType() + "");
+			updateContent(counterExample.getErrorType() + "");
 		setGraphic(null);
+	}
+
+	private void updateContent(String content) {
+		setText(content);
+		setTooltip(new Tooltip(content));
 	}
 }
