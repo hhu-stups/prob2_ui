@@ -39,6 +39,14 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		this.modifiedItem = null;
 		this.i18n = i18n;
 		this.savedProperty = savedProperty;
+		this.savedProperty.addListener((observable, from, to) -> {
+			if(getIndex() < 1) {
+				return;
+			}
+			if(!from && to) {
+				this.getListView().getItems().set(getIndex(), modifiedItem);
+			}
+		});
 		stageManager.loadFXML(this,"simulation_list_view_item.fxml");
 	}
 
@@ -83,7 +91,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setId(to);
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(tfID);
 
@@ -93,7 +100,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfOpName.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setOpName(from);
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbOpName, tfOpName));
 
@@ -103,7 +109,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfTime.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setAfter(to.isEmpty() ? "0" : to);
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbTime, tfTime));
 
@@ -117,7 +122,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 			} catch (NumberFormatException e) {
 				item.setPriority(0);
 			}
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbPriority, tfPriority));
 
@@ -128,7 +132,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(processActivating(to));
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 
@@ -142,7 +145,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 			} catch (IllegalArgumentException e) {
 				item.setActivationKind(null);
 			}
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbActivationKind, tfActivationKind));
 
@@ -152,7 +154,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfAdditionalGuards.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setAdditionalGuards(to.isEmpty() ? null : to);
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbAdditionalGuards, tfAdditionalGuards));
 
@@ -163,7 +164,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfFixedVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setFixedVariables(processFixedVariables(to));
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbFixedVariables, tfFixedVariables));
 
@@ -173,7 +173,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfProbabilisticVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setProbabilisticVariables(processProbabilisticVariables(to));
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, tfProbabilisticVariables));
 	}
@@ -183,7 +182,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setId(to);
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(tfID);
 
@@ -193,7 +191,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivations(processChoiceActivation(to));
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 	}
@@ -203,7 +200,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setId(to);
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(tfID);
 
@@ -214,7 +210,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfEvent.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setEvent(to);
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbEvent, tfEvent));
 
@@ -224,7 +219,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfPredicate.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setPredicate(to.isEmpty() ? null : to);
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbPredicate, tfPredicate));
 
@@ -235,7 +229,6 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(processActivating(to));
-			this.getListView().getItems().set(getIndex(), modifiedItem);
 		});
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 

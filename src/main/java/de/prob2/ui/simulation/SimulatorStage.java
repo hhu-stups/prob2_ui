@@ -795,6 +795,7 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
 		Path previousPath = configurationPath.get();
+		List<SimulationItem> simulationTasks = simulationItems.getItems();
 		SimulationModel simulationModel = new SimulationModel(currentProject.getLocation().resolve(path));
 		if(cbSimulation.getItems().contains(simulationModel)) {
 			cbSimulation.getSelectionModel().select(simulationModel);
