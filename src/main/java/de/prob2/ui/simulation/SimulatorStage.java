@@ -78,6 +78,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
@@ -775,8 +776,8 @@ public class SimulatorStage extends Stage {
 		}
 
 		try {
-			simulationSaver.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
 			savedProperty.set(true);
+			simulationSaver.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
 		} catch (IOException ex) {
 			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
@@ -788,8 +789,8 @@ public class SimulatorStage extends Stage {
 		chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getLocation()) + ".json");
 		Path path = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.SIMULATION, this);
 		try {
-			simulationSaver.saveConfiguration(buildSimulationModel(), path);
 			savedProperty.set(true);
+			simulationSaver.saveConfiguration(buildSimulationModel(), path);
 		} catch (IOException ex) {
 			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
