@@ -6,10 +6,12 @@ import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -72,6 +74,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -332,14 +335,14 @@ public class SimulatorStage extends Stage {
 			final Menu openMenu = new Menu(i18n.translate("simulation.menuBar.file"));
 
 			MenuItem saveItem = new MenuItem(i18n.translate("simulation.menuBar.save"));
-			saveItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().endsWith(".json"), configurationPath));
+			saveItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
 			saveItem.setOnAction(e -> saveSimulation());
-			saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_ANY));
+			saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
 
 			MenuItem saveAsItem = new MenuItem(i18n.translate("simulation.menuBar.saveAs"));
-			saveAsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().endsWith(".json"), configurationPath));
+			saveAsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
 			saveAsItem.setOnAction(e -> saveSimulationAs());
-			saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.ALT_ANY, KeyCombination.SHORTCUT_ANY));
+			saveAsItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN));
 
 			MenuItem closeItem = new MenuItem(i18n.translate("simulation.menuBar.close"));
 			closeItem.setOnAction(e -> this.close());
@@ -399,6 +402,7 @@ public class SimulatorStage extends Stage {
 		);
 
 		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			checkIfSimulationShouldBeSaved();
 			configurationPath.set(null);
 			simulationMode.setMode(to == null ? null :
 					currentProject.getLocation().resolve(to.getPath()).toFile().isDirectory() ? SimulationMode.Mode.BLACK_BOX :
@@ -460,6 +464,7 @@ public class SimulatorStage extends Stage {
 		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadSimulationsFromMachine(currentProject.getCurrentMachine()));
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			checkIfSimulationShouldBeSaved();
 			configurationPath.set(null);
 			simulationDiagramItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
@@ -749,6 +754,15 @@ public class SimulatorStage extends Stage {
 				.build());
 	}
 
+	private void checkIfSimulationShouldBeSaved() {
+		if(!savedProperty.get()) {
+			Optional<ButtonType> selected = stageManager.makeAlert(Alert.AlertType.WARNING, Arrays.asList(ButtonType.YES, ButtonType.NO), "simulation.file.unsaved.title", "simulation.file.unsaved.text").showAndWait();
+			if(selected.isPresent() && selected.get() == ButtonType.YES) {
+				saveSimulation();
+			}
+		}
+	}
+
 	private void saveSimulation() {
 		if(configurationPath.get().toString().isEmpty()) {
 			saveSimulationAs();
@@ -773,6 +787,17 @@ public class SimulatorStage extends Stage {
 			savedProperty.set(true);
 		} catch (IOException ex) {
 			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+		}
+		Path previousPath = configurationPath.get();
+		SimulationModel simulationModel = new SimulationModel(path);
+		if(cbSimulation.getItems().contains(simulationModel)) {
+			cbSimulation.getSelectionModel().select(simulationModel);
+		} else {
+			if(previousPath.toString().isEmpty()) {
+				cbSimulation.getItems().remove(new SimulationModel(Paths.get("")));
+			}
+			cbSimulation.getItems().add(new SimulationModel(path));
+			cbSimulation.getSelectionModel().selectLast();
 		}
 	}
 }
