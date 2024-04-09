@@ -735,6 +735,11 @@ public class SimulatorStage extends Stage {
 			return;
 		}
 		currentProject.getCurrentMachine().getMachineProperties().getSimulations().remove(simulationModel);
+		if(cbSimulation.getItems().isEmpty()) {
+			cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
+			cbSimulation.getSelectionModel().clearSelection();
+			cbSimulation.getSelectionModel().select(0);
+		}
 	}
 
 	private SimulationModelConfiguration buildSimulationModel() {
@@ -789,14 +794,14 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
 		Path previousPath = configurationPath.get();
-		SimulationModel simulationModel = new SimulationModel(path);
+		SimulationModel simulationModel = new SimulationModel(currentProject.getLocation().resolve(path));
 		if(cbSimulation.getItems().contains(simulationModel)) {
 			cbSimulation.getSelectionModel().select(simulationModel);
 		} else {
 			if(previousPath.toString().isEmpty()) {
 				cbSimulation.getItems().remove(new SimulationModel(Paths.get("")));
 			}
-			cbSimulation.getItems().add(new SimulationModel(path));
+			cbSimulation.getItems().add(new SimulationModel(currentProject.getLocation().relativize(path)));
 			cbSimulation.getSelectionModel().selectLast();
 		}
 	}
