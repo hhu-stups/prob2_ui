@@ -125,7 +125,7 @@ public class UIInteractionHandler {
 	}
 
 	public void addUserInteraction(RealTimeSimulator realTimeSimulator, Transition transition) {
-		if(!realTimeSimulator.isRunning()) {
+		if(realTimeSimulator.getConfig() == null) {
 			return;
 		}
 		String name = transition.getName();
@@ -138,6 +138,7 @@ public class UIInteractionHandler {
 		}
 		lastUserInteraction.set(transition);
 		userTransitions.add(transition);
+		realTimeSimulator.getTimestamps().add(realTimeSimulator.getTime());
 		timestamps.add(realTimeSimulator.getTime());
 	}
 
