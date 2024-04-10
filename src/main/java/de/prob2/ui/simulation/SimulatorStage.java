@@ -791,20 +791,23 @@ public class SimulatorStage extends Stage {
 		try {
 			savedProperty.set(true);
 			simulationSaver.saveConfiguration(buildSimulationModel(), path);
+			Path previousPath = configurationPath.get();
+			Path relativePath = currentProject.getLocation().relativize(path);
+			SimulationModel simulationModel = new SimulationModel(relativePath);
+			Machine currentMachine = currentProject.getCurrentMachine();
+			List<SimulationItem> simulationTasks = simulationItems.getItems();
+			simulationTasks.forEach(task -> currentMachine.getMachineProperties().addValidationTaskIfNotExist(task.withSimulationPath(relativePath)));
+			if(currentMachine.getMachineProperties().getSimulations().contains(simulationModel)) {
+				cbSimulation.getSelectionModel().select(simulationModel);
+			} else {
+				if(previousPath.toString().isEmpty()) {
+					cbSimulation.getItems().remove(new SimulationModel(Paths.get("")));
+				}
+				currentMachine.getMachineProperties().getSimulations().add(simulationModel);
+				cbSimulation.getSelectionModel().selectLast();
+			}
 		} catch (IOException ex) {
 			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
-		}
-		Path previousPath = configurationPath.get();
-		List<SimulationItem> simulationTasks = simulationItems.getItems();
-		SimulationModel simulationModel = new SimulationModel(currentProject.getLocation().resolve(path));
-		if(cbSimulation.getItems().contains(simulationModel)) {
-			cbSimulation.getSelectionModel().select(simulationModel);
-		} else {
-			if(previousPath.toString().isEmpty()) {
-				cbSimulation.getItems().remove(new SimulationModel(Paths.get("")));
-			}
-			cbSimulation.getItems().add(new SimulationModel(currentProject.getLocation().relativize(path)));
-			cbSimulation.getSelectionModel().selectLast();
 		}
 	}
 }
