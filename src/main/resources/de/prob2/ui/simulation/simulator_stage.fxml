@@ -104,16 +104,41 @@
 					<SplitPane dividerPositions="0.8" orientation="HORIZONTAL" VBox.vgrow="ALWAYS">
 						<VBox spacing="5.0">
 							<Label text="%simulation.label.model"/>
-							<HBox>
-								<ChoiceBox fx:id="cbSimulation"/>
-								<Button fx:id="btRemoveSimulation" onAction="#removeSimulation">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize + 2}" />
-									</graphic>
-									<tooltip>
-										<Tooltip text="%common.buttons.cancel" />
-									</tooltip>
-								</Button>
+							<HBox spacing="20.0">
+								<HBox>
+									<ChoiceBox fx:id="cbSimulation"/>
+									<Button fx:id="btRemoveSimulation" onAction="#removeSimulation">
+										<graphic>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 1.5}" />
+										</graphic>
+										<tooltip>
+											<Tooltip text="%common.buttons.cancel" />
+										</tooltip>
+									</Button>
+								</HBox>
+								<HBox>
+									<MenuButton fx:id="btAddDiagramElement" contentDisplay="GRAPHIC_ONLY">
+										<graphic>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 1.5}" />
+										</graphic>
+										<tooltip>
+											<Tooltip text="%simulation.tooltips.addDiagramElement" />
+										</tooltip>
+										<items>
+											<MenuItem fx:id="addDirectActivation" text="%simulation.contextMenu.addDirectActivation" onAction="#addDirectActivation"/>
+											<MenuItem fx:id="addChoiceActivation" text="%simulation.contextMenu.addChoiceActivation" onAction="#addChoiceActivation"/>
+											<MenuItem fx:id="addUiListener" text="%simulation.contextMenu.addUiListener" onAction="#addUiListener"/>
+										</items>
+									</MenuButton>
+									<Button fx:id="btRemoveDiagramElement" contentDisplay="GRAPHIC_ONLY" onAction="#removeDiagramElement">
+										<graphic>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 1.5}" />
+										</graphic>
+										<tooltip>
+											<Tooltip text="%simulation.tooltips.removeDiagramElement" />
+										</tooltip>
+									</Button>
+								</HBox>
 							</HBox>
 							<ListView fx:id="simulationDiagramItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
 						</VBox>

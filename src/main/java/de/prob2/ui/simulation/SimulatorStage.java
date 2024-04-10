@@ -261,6 +261,12 @@ public class SimulatorStage extends Stage {
 	private Button btRemoveSimulation;
 
 	@FXML
+	private MenuButton btAddDiagramElement;
+
+	@FXML
+	private Button btRemoveDiagramElement;
+
+	@FXML
 	private MenuItem advancedItem;
 
 	private final StageManager stageManager;
@@ -496,8 +502,12 @@ public class SimulatorStage extends Stage {
 			}
 		});
 
-
 		btRemoveSimulation.disableProperty().bind(cbSimulation.getSelectionModel().selectedItemProperty().isNull());
+		btAddDiagramElement.disableProperty().bind(Bindings.createBooleanBinding(() ->
+				cbSimulation.getSelectionModel().selectedItemProperty().get() == null || !configurationPath.get().toString().endsWith(".json"),
+				cbSimulation.getSelectionModel().selectedItemProperty()));
+
+		btRemoveDiagramElement.disableProperty().bind(simulationDiagramItems.getSelectionModel().selectedItemProperty().isNull());
 
 		setOnCloseRequest(e -> {
 			if (realTimeSimulator.isRunning())
@@ -809,5 +819,27 @@ public class SimulatorStage extends Stage {
 		} catch (IOException ex) {
 			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
+	}
+
+	@FXML
+	private void addDirectActivation() {
+		simulationDiagramItems.getItems().add(new ActivationOperationConfiguration(i18n.translate("simulation.item.newDirectActivation"), "Event", "0", 0, null, ActivationOperationConfiguration.ActivationKind.MULTI,
+		null, null, null, true, null, null));
+	}
+
+	@FXML
+	private void addChoiceActivation() {
+		simulationDiagramItems.getItems().add(new ActivationChoiceConfiguration(i18n.translate("simulation.item.newChoiceActivation"), new HashMap<>()));
+	}
+
+	@FXML
+	private void addUiListener() {
+		simulationDiagramItems.getItems().add(new UIListenerConfiguration(i18n.translate("simulation.item.newUiListener"), "Event", null, new ArrayList<>()));
+	}
+
+	@FXML
+	private void removeDiagramElement() {
+		DiagramConfiguration diagramConfiguration = simulationDiagramItems.getSelectionModel().getSelectedItem();
+		simulationDiagramItems.getItems().remove(diagramConfiguration);
 	}
 }
