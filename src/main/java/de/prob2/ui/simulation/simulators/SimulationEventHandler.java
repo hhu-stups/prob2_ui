@@ -11,6 +11,7 @@ import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,11 +31,14 @@ public class SimulationEventHandler {
 
 	private final CurrentTrace currentTrace;
 
+	private final LinkedList<String> visitedChoiceIDs;
+
 
 	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace) {
 		this.simulator = simulator;
 		this.cache = new SimulatorCache();
 		this.currentTrace = currentTrace;
+		this.visitedChoiceIDs = new LinkedList<>();
 		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> cache.clear());
 	}
 
@@ -225,7 +229,12 @@ public class SimulationEventHandler {
 
 	public void handleOperationConfiguration(State state, DiagramConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
 		if(activationConfiguration instanceof ActivationChoiceConfiguration) {
+			if(visitedChoiceIDs.contains(activationConfiguration.getId())) {
+				throw new RuntimeException("Cycle in activation diagram detected");
+			}
+			visitedChoiceIDs.push(activationConfiguration.getId());
 			chooseOperation(state, (ActivationChoiceConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
+			visitedChoiceIDs.pop();
 		} else if(activationConfiguration instanceof ActivationOperationConfiguration) {
 			activateOperation(state, (ActivationOperationConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
 		}
