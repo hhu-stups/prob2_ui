@@ -3,10 +3,11 @@ package de.prob2.ui.rulevalidation.ui;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.brules.ComputationStatus;
 import de.prob.model.brules.RuleResult;
+import de.prob2.ui.internal.I18n;
 import javafx.geometry.Pos;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 
 import java.util.Map;
 
@@ -16,9 +17,11 @@ import java.util.Map;
  */
 public class ValueCell extends TreeTableCell<Object, Object>{
 
+	private final I18n i18n;
 	private boolean executable;
 
-	ValueCell() {
+	ValueCell(I18n i18n) {
+		this.i18n = i18n;
 		setAlignment(Pos.CENTER_LEFT);
 	}
 
@@ -32,8 +35,12 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		configureEmptyCell();
 		if (item instanceof RuleResult ruleResult)
 			configureForRuleResult(ruleResult);
-		else if (item instanceof RuleResult.CounterExample counterExample)
+		else if (item instanceof RuleResult.CounterExample counterExample) {
 			updateContent(counterExample.getMessage());
+			MenuItem copyItem = new MenuItem(i18n.translate("rulevalidation.table.contextMenu.copyMessage"));
+			copyItem.setOnAction(e -> handleCopyName());
+			setContextMenu(new ContextMenu(copyItem));
+		}
 		else if (item instanceof Map.Entry<?,?> entry)
 			configureForComputationResult((ComputationStatus) entry.getValue());
 		else if (item instanceof IdentifierNotInitialised notInitialised)
@@ -65,6 +72,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		updateContent(null);
 		setStyle(null);
 		getStyleClass().removeAll("true","false");
+		setContextMenu(null);
 	}
 
 	private void configureForRuleResult(RuleResult result) {
@@ -91,6 +99,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	private void configureForNotInitialised(IdentifierNotInitialised item) {
 		updateContent(item.getResult());
 		setStyle(null);
+		setContextMenu(null);
 	}
 
 	private void updateContent(String content) {
@@ -100,5 +109,12 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		} else {
 			setTooltip(null);
 		}
+	}
+
+	private void handleCopyName() {
+		final Clipboard clipboard = Clipboard.getSystemClipboard();
+		final ClipboardContent content = new ClipboardContent();
+		content.putString(this.getItem().toString());
+		clipboard.setContent(content);
 	}
 }

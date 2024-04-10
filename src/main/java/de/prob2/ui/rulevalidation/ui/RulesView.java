@@ -167,7 +167,7 @@ public class RulesView extends AnchorPane{
 		tvNameColumn.setCellFactory(column -> new NameCell());
 		tvNameColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
 
-		tvValueColumn.setCellFactory(column -> new ValueCell());
+		tvValueColumn.setCellFactory(column -> new ValueCell(i18n));
 		tvValueColumn.setCellValueFactory(param -> {
 			Object item = param.getValue().getValue();
 			if (item instanceof RuleOperation ruleItem) {
@@ -418,7 +418,7 @@ public class RulesView extends AnchorPane{
 		final TreeTableRow<Object> row = new TreeTableRow<>();
 
 		final MenuItem visualizeExpressionAsGraphItem = new MenuItem(
-			i18n.translate("rulevalidation.view.contextMenu.dependencyGraph"));
+			i18n.translate("rulevalidation.table.contextMenu.dependencyGraph"));
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				if (row.getItem() instanceof AbstractOperation abstractOperation) {
