@@ -85,10 +85,7 @@ public class ReplayedTraceStatusAlert extends Alert {
 		this.accept = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.accept"), ButtonBar.ButtonData.OK_DONE);
 		this.cancel = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.cancel"), ButtonBar.ButtonData.CANCEL_CLOSE);
 
-		stageManager.register(this);
-
 		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
-		this.getButtonTypes().setAll(ButtonType.OK);
 
 		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 
@@ -99,12 +96,21 @@ public class ReplayedTraceStatusAlert extends Alert {
 		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
 		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
 
+		this.keepOrDiscardQuestion.setFont(new Font(16));
 		if (replayedTrace != null) {
-			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithReplayStatus", replayedTrace.getReplayStatus()));
+			String statusOfReplayedTrace = i18n.translate(
+					enumNameAdapter("animation.tracereplay.replayedStatus.replayStatus"),
+					replayedTrace.getReplayStatus()
+			);
+			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithReplayStatus", statusOfReplayedTrace));
 			this.errorTable.getErrorItems().setAll(replayedTrace.getErrors());
+			this.keepOrDiscardQuestion.setText(i18n.translate("animation.tracereplay.replayedStatus.button.question", statusOfReplayedTrace));
+			this.getButtonTypes().setAll(this.accept, this.cancel);
 		} else {
 			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithoutReplayStatus"));
 			this.errorTable.getErrorItems().clear();
+			this.keepOrDiscardQuestion.setVisible(false);
+			this.getButtonTypes().setAll(ButtonType.OK);
 		}
 
 		if (replayedTrace == null || traceFromReplayed == null) {
@@ -183,7 +189,7 @@ public class ReplayedTraceStatusAlert extends Alert {
 			}
 
 			String precision = i18n.translate(enumNameAdapter("animation.tracereplay.replayedStatus.transitionReplayPrecision"), transitionReplayPrecision);
-			String errorMessage = transitionErrorMessages != null ? String.join("; ", transitionErrorMessages) : ""; // TODO: prettify
+			String errorMessage = transitionErrorMessages != null ? String.join("\n", transitionErrorMessages) : "";
 
 			Collection<String> styleClasses;
 			if (
@@ -202,20 +208,9 @@ public class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	public void handleAcceptDiscard() {
-		this.keepOrDiscardQuestion.setText(i18n.translate("animation.tracereplay.replayedStatus.button.question", statusOfReplayedTrace()));
-		this.keepOrDiscardQuestion.setFont(new Font(16));
-		this.getButtonTypes().setAll(this.accept, this.cancel);
 		ButtonType response = this.showAndWait().orElse(null);
 		if (response == this.accept) {
 			this.currentTrace.set(this.replayTrace.getAnimatedReplayedTrace());
 		}
-	}
-
-	private String statusOfReplayedTrace() {
-		return switch (replayTrace.getReplayedTrace().getReplayStatus()) {
-			case PARTIAL -> i18n.translate("animation.tracereplay.replayedStatus.button.question.partial");
-			case IMPERFECT -> i18n.translate("animation.tracereplay.replayedStatus.button.question.imperfect");
-			default -> "";
-		};
 	}
 }

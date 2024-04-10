@@ -10,11 +10,11 @@
 		<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 	</columnResizePolicy>
 	<columns>
-		<TableColumn fx:id="stepColumn" minWidth="40.0" style="-fx-alignment: CENTER;" text="%animation.tracereplay.replayedStatus.column.step" />
-		<TableColumn fx:id="fileTransitionColumn" minWidth="160.0" text="%animation.tracereplay.replayedStatus.column.fileTransition" />
-		<TableColumn fx:id="replayedTransitionColumn" minWidth="160.0" text="%animation.tracereplay.replayedStatus.column.replayedTransition" />
-		<TableColumn fx:id="precisionColumn" minWidth="160.0" text="%animation.tracereplay.replayedStatus.column.precision" />
-		<TableColumn fx:id="errorMessageColumn" minWidth="160.0" text="%animation.tracereplay.replayedStatus.column.errorMessage" />
+		<TableColumn fx:id="stepColumn" prefWidth="40.0" style="-fx-alignment: CENTER;" text="%animation.tracereplay.replayedStatus.column.step" />
+		<TableColumn fx:id="fileTransitionColumn" prefWidth="200.0" text="%animation.tracereplay.replayedStatus.column.fileTransition" />
+		<TableColumn fx:id="replayedTransitionColumn" prefWidth="200.0" text="%animation.tracereplay.replayedStatus.column.replayedTransition" />
+		<TableColumn fx:id="precisionColumn" prefWidth="80.0" text="%animation.tracereplay.replayedStatus.column.precision" />
+		<TableColumn fx:id="errorMessageColumn" prefWidth="400.0" text="%animation.tracereplay.replayedStatus.column.errorMessage" />
 	</columns>
 	<placeholder>
 		<Label text="%animation.tracereplay.replayedStatus.placeholder" />
