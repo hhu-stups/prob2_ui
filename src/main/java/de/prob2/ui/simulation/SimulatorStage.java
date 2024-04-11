@@ -503,7 +503,7 @@ public class SimulatorStage extends Stage {
 
 		btRemoveSimulation.disableProperty().bind(cbSimulation.getSelectionModel().selectedItemProperty().isNull());
 		btAddDiagramElement.disableProperty().bind(Bindings.createBooleanBinding(() ->
-				cbSimulation.getSelectionModel().selectedItemProperty().get() == null || !configurationPath.get().toString().endsWith(".json"),
+				cbSimulation.getSelectionModel().selectedItemProperty().get() == null || configurationPath.get() == null || !configurationPath.get().toString().endsWith(".json"),
 				cbSimulation.getSelectionModel().selectedItemProperty()));
 
 		btRemoveDiagramElement.disableProperty().bind(simulationDiagramItems.getSelectionModel().selectedItemProperty().isNull());
