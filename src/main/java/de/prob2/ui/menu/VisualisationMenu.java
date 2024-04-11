@@ -10,6 +10,7 @@ import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutView;
+import de.prob2.ui.visualisation.sequencechart.SequenceChartStage;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
@@ -39,7 +40,7 @@ public class VisualisationMenu extends Menu {
 		expressionTableView.show();
 		expressionTableView.toFront();
 	}
-	
+
 	@FXML
 	private void openMagicLayout() {
 		MagicLayoutView magicLayout = injector.getInstance(MagicLayoutView.class);
@@ -54,4 +55,10 @@ public class VisualisationMenu extends Menu {
 		chartStage.toFront();
 	}
 
+	@FXML
+	private void handleSequenceChart() {
+		final Stage chartStage = injector.getInstance(SequenceChartStage.class);
+		chartStage.show();
+		chartStage.toFront();
+	}
 }

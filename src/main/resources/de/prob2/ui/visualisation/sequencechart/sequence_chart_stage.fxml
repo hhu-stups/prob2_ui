@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.visualisation.sequencechart.SequenceChartStage?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.web.WebView?>
+<fx:root type="SequenceChartStage" title="%visualisation.sequenceChart.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<WebView fx:id="dotView" />
+		</Scene>
+	</scene>
+</fx:root>

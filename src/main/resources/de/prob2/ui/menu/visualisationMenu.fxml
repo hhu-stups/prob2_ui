@@ -8,7 +8,9 @@
 	<MenuItem fx:id="graphVisualization" text="%menu.visualisation.items.graph" onAction="#openGraphVisualisation"/>
 	<MenuItem fx:id="tableVisualization" text="%menu.visualisation.items.table" onAction="#openTableVisualisation"/>
 	<MenuItem text="%menu.visualisation.items.magicLayout" onAction="#openMagicLayout"/>
-	<SeparatorMenuItem />
+	<SeparatorMenuItem/>
 	<MenuItem text="%menu.visualisation.items.showHistoryChart"
-			  onAction="#handleHistoryChart" />
+			  onAction="#handleHistoryChart"/>
+	<MenuItem text="%menu.visualisation.items.showSequenceChart"
+			  onAction="#handleSequenceChart"/>
 </fx:root>
