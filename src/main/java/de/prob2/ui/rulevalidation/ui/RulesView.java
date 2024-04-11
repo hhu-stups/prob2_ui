@@ -382,14 +382,14 @@ public class RulesView extends AnchorPane{
 				}
 			}
 			for (String cl : classificationItems.keySet()) {
-				TreeItem<Object> classificationItem = new TreeItem<>(cl);
+				TreeItem<Object> classificationItem = new TreeItem<>(cl + " (" + classificationItems.get(cl).size() + ")");
 				classificationItem.getChildren().addAll(classificationItems.get(cl));
 				tvRulesItem.getChildren().add(classificationItem);
 			}
 			tvRulesItem.getChildren().addAll(noClassificationItem);
 			tvRootItem.getChildren().add(tvRulesItem);
-
 		}
+
 		tvComputationsItem = new TreeItem<>("COMPUTATIONS");
 		if (!dataModel.getComputationMap().isEmpty()) {
 			for (Map.Entry<String, ComputationOperation> entry : dataModel.getComputationMap().entrySet()) {
