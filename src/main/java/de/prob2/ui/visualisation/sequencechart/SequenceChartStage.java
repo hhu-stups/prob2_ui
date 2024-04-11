@@ -2,6 +2,7 @@ package de.prob2.ui.visualisation.sequencechart;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -22,15 +23,19 @@ import javafx.stage.Stage;
 public final class SequenceChartStage extends Stage {
 
 	private final CurrentTrace trace;
+	private final JavaLocator javaLocator;
+	private final PlantUmlLocator plantUmlLocator;
 	private final BackgroundUpdater updater;
 
 	@FXML
 	private WebView dotView;
 
 	@Inject
-	private SequenceChartStage(StageManager stageManager, StopActions stopActions, CurrentTrace trace) {
+	private SequenceChartStage(StageManager stageManager, StopActions stopActions, CurrentTrace trace, JavaLocator javaLocator, PlantUmlLocator plantUmlLocator) {
 		super();
 		this.trace = trace;
+		this.javaLocator = javaLocator;
+		this.plantUmlLocator = plantUmlLocator;
 		this.updater = new BackgroundUpdater("Sequence Chart Updater");
 
 		stopActions.add(this.updater::shutdownNow);
@@ -54,7 +59,7 @@ public final class SequenceChartStage extends Stage {
 				"Bob --> Alice: Authentication Response\n" +
 				"Alice -> Bob: Another authentication Request\n" +
 				"Alice <-- Bob: Another authentication Response\n" +
-				"@enduml\n");
+				"@enduml");
 		};
 		this.trace.addListener(listener);
 		listener.changed(this.trace, null, this.trace.get());
@@ -65,14 +70,20 @@ public final class SequenceChartStage extends Stage {
 		this.updater.execute(() -> {
 			String output;
 			try {
-				Path plantUmlJar = Path.of(System.getProperty("user.home"), "Documents/HHU/STUPS/prob/lib/plantuml.jar").toRealPath();
-				PlantUmlCall c = new PlantUmlCall(plantUmlJar).outputFormat(PlantUmlCall.SVG);
+				Optional<Path> plantUmlJar = this.plantUmlLocator.findPlantUmlJar();
+				if (plantUmlJar.isEmpty()) {
+					return;
+				}
+
+				PlantUmlCall c = new PlantUmlCall(this.javaLocator.getJavaExecutable(), plantUmlJar.get()).outputFormat(PlantUmlCall.SVG);
 				if (this.trace.getStateSpace() != null) {
 					String dot = this.trace.getStateSpace().getCurrentPreference("DOT");
 					c.dotExecutable(dot);
 				}
 				byte[] data = c.input(uml).call();
 				output = new String(data, StandardCharsets.UTF_8);
+			} catch (InterruptedException ignored) {
+				return;
 			} catch (Exception e) {
 				throw new RuntimeException(e);
 			}

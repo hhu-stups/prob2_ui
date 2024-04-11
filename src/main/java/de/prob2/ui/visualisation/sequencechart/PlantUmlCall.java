@@ -30,10 +30,6 @@ public final class PlantUmlCall {
 		this.plantUmlJar = Objects.requireNonNull(plantUmlJar, "plantUmlJar");
 	}
 
-	public PlantUmlCall(Path plantUmlJar) {
-		this(getJavaCommand(), plantUmlJar);
-	}
-
 	public PlantUmlCall input(byte[] input) {
 		if (this.input != null) {
 			throw new IllegalStateException("input");
@@ -60,18 +56,6 @@ public final class PlantUmlCall {
 		}
 		this.dotExecutable = Objects.requireNonNull(dotExecutable, "dotExecutable");
 		return this;
-	}
-
-	private static String getJavaCommand() {
-		String javaHome = System.getProperty("java.home");
-		Path javaBinPath;
-		if (javaHome != null && !javaHome.isEmpty()) {
-			javaBinPath = Path.of(javaHome, "bin/java");
-		} else {
-			javaBinPath = Path.of("java");
-		}
-
-		return javaBinPath.toString();
 	}
 
 	public RunnableFuture<byte[]> getRunnableFuture() {
