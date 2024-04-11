@@ -241,6 +241,7 @@ public class RulesView extends AnchorPane{
 		for (TreeItem<Object> item : ruleItems) {
 			item.getChildren().clear();
 			if (item.getValue() instanceof String classification) {
+				classification = classification.substring(0, classification.lastIndexOf("(") - 1);
 				item.getChildren().addAll(classificationItems.get(classification));
 			}
 		}
