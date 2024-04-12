@@ -364,10 +364,22 @@ public class SimulatorStage extends Stage {
 			saveAsItem.setOnAction(e -> saveSimulationAs());
 			saveAsItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN));
 
+			MenuItem saveTraceItem = new MenuItem(i18n.translate("simulation.contextMenu.saveTrace"));
+			saveTraceItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
+			saveTraceItem.setOnAction(e -> saveTrace());
+
+			MenuItem saveTimedTraceItem = new MenuItem(i18n.translate("simulation.contextMenu.saveTimedTrace"));
+			saveTimedTraceItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
+			saveTimedTraceItem.setOnAction(e -> saveTimedTrace());
+
+			MenuItem saveAutomaticSimulationItem = new MenuItem(i18n.translate("simulation.contextMenu.saveUIReplay"));
+			saveAutomaticSimulationItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
+			saveAutomaticSimulationItem.setOnAction(e -> saveAutomaticSimulation());
+
 			MenuItem closeItem = new MenuItem(i18n.translate("simulation.menuBar.close"));
 			closeItem.setOnAction(e -> this.close());
 
-			openMenu.getItems().addAll(loadSimBModelItem, loadSimBTracesItem, loadExternalSimulationItem, new SeparatorMenuItem(), saveItem, saveAsItem, closeItem);
+			openMenu.getItems().addAll(loadSimBModelItem, loadSimBTracesItem, loadExternalSimulationItem, new SeparatorMenuItem(), saveItem, saveAsItem, new SeparatorMenuItem(), saveTraceItem, saveTimedTraceItem, saveAutomaticSimulationItem, new SeparatorMenuItem(), closeItem);
 
 			menuBar.getMenus().add(0, openMenu);
 			setMacMenu(menuBar);
@@ -450,27 +462,9 @@ public class SimulatorStage extends Stage {
 			return config == null || config instanceof SimulationExternalConfiguration;
 		}, configurationPath, cbSimulation.itemsProperty(), cbSimulation.getSelectionModel().selectedItemProperty()));
 		helpButton.setHelpContent("mainmenu.advanced.simB", null);
-		saveTraceItem.setOnAction(e -> {
-			try {
-				traceFileHandler.save(currentTrace.get(), currentProject.getCurrentMachine());
-			} catch (IOException | RuntimeException exc) {
-				traceFileHandler.showSaveError(exc);
-			}
-		});
-		saveTimedTraceItem.setOnAction(e -> {
-			try {
-				injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
-			} catch (IOException exception) {
-				injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.error").showAndWait();
-			}
-		});
-		saveAutomaticSimulationItem.setOnAction(e -> {
-			try {
-				injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
-			} catch (IOException exception) {
-				injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
-			}
-		});
+		saveTraceItem.setOnAction(e -> saveTrace());
+		saveTimedTraceItem.setOnAction(e -> saveTimedTrace());
+		saveAutomaticSimulationItem.setOnAction(e -> saveAutomaticSimulation());
 
 		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n, savedProperty));
 
@@ -527,7 +521,6 @@ public class SimulatorStage extends Stage {
 				stopSimulator(realTimeSimulator);
 		});
 	}
-
 
 	@FXML
 	public void simulate() {
@@ -857,5 +850,29 @@ public class SimulatorStage extends Stage {
 	private void removeDiagramElement() {
 		DiagramConfiguration diagramConfiguration = simulationDiagramItems.getSelectionModel().getSelectedItem();
 		simulationDiagramItems.getItems().remove(diagramConfiguration);
+	}
+
+	private void saveTrace() {
+		try {
+			traceFileHandler.save(currentTrace.get(), currentProject.getCurrentMachine());
+		} catch (IOException | RuntimeException exc) {
+			traceFileHandler.showSaveError(exc);
+		}
+	}
+
+	private void saveTimedTrace() {
+		try {
+			injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
+		} catch (IOException exception) {
+			injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.error").showAndWait();
+		}
+	}
+
+	private void saveAutomaticSimulation() {
+		try {
+			injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
+		} catch (IOException exception) {
+			injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
+		}
 	}
 }
