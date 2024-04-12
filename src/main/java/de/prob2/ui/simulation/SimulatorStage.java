@@ -309,12 +309,14 @@ public class SimulatorStage extends Stage {
 	private ChangeListener<Number> timeListener;
 
 	@Inject
-	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-	                      final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
-	                      final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
-						  final I18n i18n, final FileChooserManager fileChooserManager,
-						  final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
-	                      final StopActions stopActions, @Nullable final MenuToolkit menuToolkit) {
+	public SimulatorStage(
+		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
+		final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
+		final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
+		final I18n i18n, final FileChooserManager fileChooserManager,
+		final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
+		final StopActions stopActions, @Nullable final MenuToolkit menuToolkit
+	) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -502,9 +504,11 @@ public class SimulatorStage extends Stage {
 
 		simulationItems.setOnMouseClicked(e -> {
 			SimulationItem item = simulationItems.getSelectionModel().getSelectedItem();
-			if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null &&
-				    configurationPath.get() != null && !simulationItemHandler.runningProperty().get() && lastSimulator.get() != null &&
-				    !lastSimulator.get().isRunning()) {
+			if (
+				e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null &&
+				configurationPath.get() != null && !simulationItemHandler.runningProperty().get() && lastSimulator.get() != null &&
+				!lastSimulator.get().isRunning()
+			) {
 				simulationItemHandler.checkItem(item);
 			}
 		});
