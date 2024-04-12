@@ -769,9 +769,9 @@ public class SimulatorStage extends Stage {
 		currentProject.getCurrentMachine().getMachineProperties().getSimulations().remove(simulationModel);
 		if(cbSimulation.getItems().isEmpty()) {
 			cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
-			cbSimulation.getSelectionModel().clearSelection();
-			cbSimulation.getSelectionModel().select(0);
 		}
+		cbSimulation.getSelectionModel().clearSelection();
+		cbSimulation.getSelectionModel().select(0);
 	}
 
 	private SimulationModelConfiguration buildSimulationModel() {
