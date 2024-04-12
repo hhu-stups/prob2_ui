@@ -797,6 +797,9 @@ public class SimulatorStage extends Stage {
 		chooser.getExtensionFilters().addAll(fileChooserManager.getSimBFilter());
 		chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getLocation()) + ".json");
 		Path path = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.SIMULATION, this);
+		if(path == null) {
+			return;
+		}
 		try {
 			savedProperty.set(true);
 			simulationSaver.saveConfiguration(buildSimulationModel(), path);

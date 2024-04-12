@@ -73,8 +73,6 @@
 							</Button>
 						</InterruptIfRunningButton>
 						<Spacer/>
-						<fx:include source="../sharedviews/navigation_buttons.fxml"/>
-						<Spacer/>
 						<Label fx:id="lbTime" prefWidth="${fontSize.fontSize * 10}"  textAlignment="RIGHT"/>
 						<Button fx:id="btAddSimulation" disable="true"
 								contentDisplay="GRAPHIC_ONLY" onAction="#addSimulation">
