@@ -48,8 +48,13 @@ public class RealTimeSimulator extends Simulator {
 		scheduler.startSimulationStep();
 		// Read trace and pass it through chooseOperation to avoid race condition
 		Trace trace = currentTrace.get();
-		Trace newTrace = simulationStep(trace);
-		currentTrace.set(newTrace);
+		try {
+			Trace newTrace = simulationStep(trace);
+			currentTrace.set(newTrace);
+		} catch (Exception e) {
+			scheduler.endSimulationStep();
+			throw e;
+		}
 		scheduler.endSimulationStep();
 	}
 
