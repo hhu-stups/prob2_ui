@@ -15,6 +15,8 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.annotation.Nullable;
+
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -32,8 +34,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.layout.BindableGlyph;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
@@ -43,7 +43,6 @@ import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
-
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
@@ -100,8 +99,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
 import org.controlsfx.glyphfont.FontAwesome;
-
-import javax.annotation.Nullable;
+import org.controlsfx.glyphfont.Glyph;
 
 @FXMLInjected
 @Singleton
@@ -402,12 +400,12 @@ public class SimulatorStage extends Stage {
 		realTimeSimulator.runningProperty().addListener((observable, from, to) -> {
 			if (to) {
 				Platform.runLater(() -> {
-					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PAUSE, FontSize.DEFAULT_FONT_SIZE + 2));
+					((Glyph)btSimulate.getGraphic()).setIcon(FontAwesome.Glyph.PAUSE);
 					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.stop")));
 				});
 			} else {
 				Platform.runLater(() -> {
-					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLAY, FontSize.DEFAULT_FONT_SIZE + 2));
+					((Glyph)btSimulate.getGraphic()).setIcon(FontAwesome.Glyph.PLAY);
 					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.start")));
 				});
 			}

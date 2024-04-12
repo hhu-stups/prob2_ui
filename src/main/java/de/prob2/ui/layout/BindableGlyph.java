@@ -22,14 +22,6 @@ public class BindableGlyph extends Glyph {
 		this.setIcon(icon);
 	}
 
-	public BindableGlyph(final String fontFamily, final Object icon, final double bindableFontSize) {
-		this();
-
-		this.setFontFamily(fontFamily);
-		this.setIcon(icon);
-		this.setBindableFontSize(bindableFontSize);
-	}
-	
 	public DoubleProperty bindableFontSizeProperty() {
 		return this.bindableFontSize;
 	}
