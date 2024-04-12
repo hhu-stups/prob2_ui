@@ -93,7 +93,7 @@ public final class SequenceChartStage extends Stage {
 		Path plantUmlJar = optPlantUmlJar.get();
 
 		this.updater.cancel(true);
-		if (!this.updater.isRunning()) {
+		if (this.updater.isShutdown()) {
 			return;
 		}
 

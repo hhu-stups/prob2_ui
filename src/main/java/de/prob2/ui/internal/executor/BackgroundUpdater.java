@@ -95,4 +95,8 @@ public final class BackgroundUpdater implements Executor {
 	public List<Runnable> shutdownNow() {
 		return this.executor.shutdownNow();
 	}
+
+	public boolean isShutdown() {
+		return this.executor.isShutdown();
+	}
 }
