@@ -14,12 +14,20 @@ public class BindableGlyph extends Glyph {
 		this.bindableFontSize = new SimpleDoubleProperty(this, "bindableFontSize", 1.0);
 		this.bindableFontSize.addListener((o, from, to) -> this.setFontSize(to.doubleValue()));
 	}
-	
+
 	public BindableGlyph(final String fontFamily, final Object icon) {
 		this();
-		
+
 		this.setFontFamily(fontFamily);
 		this.setIcon(icon);
+	}
+
+	public BindableGlyph(final String fontFamily, final Object icon, final double bindableFontSize) {
+		this();
+
+		this.setFontFamily(fontFamily);
+		this.setIcon(icon);
+		this.setBindableFontSize(bindableFontSize);
 	}
 	
 	public DoubleProperty bindableFontSizeProperty() {

@@ -30,137 +30,133 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<StackPane>
-				<VBox>
-					<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-						<padding>
-							<Insets left="5.0"/>
-						</padding>
-						<MenuButton fx:id="btLoadConfiguration">
-							<graphic>
-								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip text="%simulation.file.open" />
-							</tooltip>
-							<items>
-								<MenuItem fx:id="loadSimBModelItem" text="%simulation.file.open.model" onAction="#loadSimBModel"/>
-								<SeparatorMenuItem/>
-								<MenuItem fx:id="advancedItem" style="-fx-text-fill:white; -fx-font-weight: bold;" text="%simulation.file.open.advanced"/>
-								<MenuItem fx:id="loadSimBTraces" text="%simulation.file.open.blackbox" onAction="#loadSimBTraces"/>
-								<MenuItem fx:id="loadExternalSimulation" text="%simulation.file.open.external" onAction="#loadExternal"/>
-							</items>
-						</MenuButton>
-						<Button fx:id="btSimulate" onAction="#simulate">
-							<graphic>
-								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY" bindableFontSize="${fontSize.fontSize + 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip text="%simulation.button.start" />
-							</tooltip>
-						</Button>
-						<Spacer/>
-						<InterruptIfRunningButton fx:id="btCancel">
-							<graphic>
-								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
-							</graphic>
-							<Button fx:id="btCheckMachine" disable="true" onAction="#checkMachine">
+				<SplitPane dividerPositions="0.7" orientation="HORIZONTAL" VBox.vgrow="ALWAYS">
+					<VBox>
+						<Label text="%simulation.label.model"/>
+						<HBox spacing="40.0">
+							<HBox>
+								<ChoiceBox fx:id="cbSimulation" bindableFontSize="${fontSize.fontSize + 4.0}"/>
+								<Button fx:id="btRemoveSimulation" onAction="#removeSimulation" >
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize + 4.0}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.cancel" />
+									</tooltip>
+								</Button>
+							</HBox>
+							<HBox>
+								<MenuButton fx:id="btLoadConfiguration" >
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 4.0}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%simulation.file.open" />
+									</tooltip>
+									<items>
+										<MenuItem fx:id="loadSimBModelItem" text="%simulation.file.open.model" onAction="#loadSimBModel"/>
+										<SeparatorMenuItem/>
+										<MenuItem fx:id="advancedItem" style="-fx-text-fill:white; -fx-font-weight: bold;" text="%simulation.file.open.advanced"/>
+										<MenuItem fx:id="loadSimBTraces" text="%simulation.file.open.blackbox" onAction="#loadSimBTraces"/>
+										<MenuItem fx:id="loadExternalSimulation" text="%simulation.file.open.external" onAction="#loadExternal"/>
+									</items>
+								</MenuButton>
+								<MenuButton fx:id="btAddDiagramElement" contentDisplay="GRAPHIC_ONLY" >
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 4.0}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%simulation.tooltips.addDiagramElement" />
+									</tooltip>
+									<items>
+										<MenuItem fx:id="addDirectActivation" text="%simulation.contextMenu.addDirectActivation" onAction="#addDirectActivation"/>
+										<MenuItem fx:id="addChoiceActivation" text="%simulation.contextMenu.addChoiceActivation" onAction="#addChoiceActivation"/>
+										<MenuItem fx:id="addUiListener" text="%simulation.contextMenu.addUiListener" onAction="#addUiListener"/>
+									</items>
+								</MenuButton>
+								<Button fx:id="btRemoveDiagramElement" contentDisplay="GRAPHIC_ONLY" onAction="#removeDiagramElement" >
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 4.0}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%simulation.tooltips.removeDiagramElement" />
+									</tooltip>
+								</Button>
+								<Spacer/>
+								<MenuButton fx:id="saveTraceButton" >
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 4.0}"/>
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.saveTrace" />
+									</tooltip>
+									<items>
+										<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace"/>
+										<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace"/>
+										<MenuItem fx:id="saveAutomaticSimulationItem" text="%simulation.contextMenu.saveUIReplay"/>
+									</items>
+								</MenuButton>
+								<Button fx:id="btSimulate" onAction="#simulate" >
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY" bindableFontSize="${fontSize.fontSize + 4.0}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%simulation.button.start" />
+									</tooltip>
+								</Button>
+								<Label fx:id="lbTime" prefWidth="${fontSize.fontSize * 10}" textAlignment="RIGHT" alignment="BOTTOM_RIGHT" prefHeight="${fontSize.fontSize + 8.0}"/>
+							</HBox>
+							<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
+						</HBox>
+						<ListView fx:id="simulationDiagramItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
+					</VBox>
+					<VBox>
+						<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
+							<padding>
+								<Insets left="5.0"/>
+							</padding>
+							<InterruptIfRunningButton fx:id="btCancel">
 								<graphic>
-									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize + 4.0}" />
+								</graphic>
+								<Button fx:id="btCheckMachine" disable="true" onAction="#checkMachine">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.checkMachine" />
+									</tooltip>
+								</Button>
+							</InterruptIfRunningButton>
+							<Button fx:id="btAddSimulation" disable="true"
+									contentDisplay="GRAPHIC_ONLY" onAction="#addSimulation" >
+								<graphic>
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 								</graphic>
 								<tooltip>
-									<Tooltip text="%common.checkMachine" />
+									<Tooltip text="%simulation.tooltips.addSimulation" />
 								</tooltip>
 							</Button>
-						</InterruptIfRunningButton>
-						<Spacer/>
-						<Label fx:id="lbTime" prefWidth="${fontSize.fontSize * 10}"  textAlignment="RIGHT"/>
-						<Button fx:id="btAddSimulation" disable="true"
-								contentDisplay="GRAPHIC_ONLY" onAction="#addSimulation">
-							<graphic>
-								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip
-										text="%simulation.tooltips.addSimulation" />
-							</tooltip>
-						</Button>
-						<MenuButton fx:id="saveTraceButton">
-							<graphic>
-								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-							</graphic>
-							<tooltip>
-								<Tooltip text="%common.buttons.saveTrace" />
-							</tooltip>
-							<items>
-								<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace"/>
-								<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace"/>
-								<MenuItem fx:id="saveAutomaticSimulationItem" text="%simulation.contextMenu.saveUIReplay"/>
-							</items>
-						</MenuButton>
-						<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
-					</HBox>
-					<SplitPane dividerPositions="0.8" orientation="HORIZONTAL" VBox.vgrow="ALWAYS">
-						<VBox spacing="5.0">
-							<Label text="%simulation.label.model"/>
-							<HBox spacing="20.0">
-								<HBox>
-									<ChoiceBox fx:id="cbSimulation"/>
-									<Button fx:id="btRemoveSimulation" onAction="#removeSimulation">
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 1.5}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%common.buttons.cancel" />
-										</tooltip>
-									</Button>
-								</HBox>
-								<HBox>
-									<MenuButton fx:id="btAddDiagramElement" contentDisplay="GRAPHIC_ONLY">
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 1.5}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.tooltips.addDiagramElement" />
-										</tooltip>
-										<items>
-											<MenuItem fx:id="addDirectActivation" text="%simulation.contextMenu.addDirectActivation" onAction="#addDirectActivation"/>
-											<MenuItem fx:id="addChoiceActivation" text="%simulation.contextMenu.addChoiceActivation" onAction="#addChoiceActivation"/>
-											<MenuItem fx:id="addUiListener" text="%simulation.contextMenu.addUiListener" onAction="#addUiListener"/>
-										</items>
-									</MenuButton>
-									<Button fx:id="btRemoveDiagramElement" contentDisplay="GRAPHIC_ONLY" onAction="#removeDiagramElement">
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 1.5}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.tooltips.removeDiagramElement" />
-										</tooltip>
-									</Button>
-								</HBox>
-							</HBox>
-							<ListView fx:id="simulationDiagramItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
-						</VBox>
-						<VBox>
-							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
-								<TableView fx:id="simulationItems">
-									<columnResizePolicy>
-										<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-									</columnResizePolicy>
-									<columns>
-										<TableColumn fx:id="simulationStatusColumn" style="-fx-alignment: CENTER;"
-													 minWidth="${fontSize.fontSize * 6}"
-													 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-										<TableColumn fx:id="simulationConfigurationColumn" minWidth="80.0"
-													 text="%simulation.tableView.configuration"/>
-									</columns>
-									<placeholder>
-										<Label text="%simulation.tableView.noSimulation"/>
-									</placeholder>
-								</TableView>
-							</ScrollPane>
-						</VBox>
-					</SplitPane>
-				</VBox>
+						</HBox>
+						<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
+							<TableView fx:id="simulationItems">
+								<columnResizePolicy>
+									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+								</columnResizePolicy>
+								<columns>
+									<TableColumn fx:id="simulationStatusColumn" style="-fx-alignment: CENTER;"
+												 minWidth="${fontSize.fontSize * 6}"
+												 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+									<TableColumn fx:id="simulationConfigurationColumn" minWidth="80.0"
+												 text="%simulation.tableView.configuration"/>
+								</columns>
+								<placeholder>
+									<Label text="%simulation.tableView.noSimulation"/>
+								</placeholder>
+							</TableView>
+						</ScrollPane>
+					</VBox>
+				</SplitPane>
 			</StackPane>
 		</Scene>
 	</scene>

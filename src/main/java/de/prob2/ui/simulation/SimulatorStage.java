@@ -33,6 +33,7 @@ import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.BindableGlyph;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
@@ -374,12 +375,12 @@ public class SimulatorStage extends Stage {
 		realTimeSimulator.runningProperty().addListener((observable, from, to) -> {
 			if (to) {
 				Platform.runLater(() -> {
-					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PAUSE));
+					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PAUSE, FontSize.DEFAULT_FONT_SIZE + 2));
 					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.stop")));
 				});
 			} else {
 				Platform.runLater(() -> {
-					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLAY));
+					btSimulate.setGraphic(new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLAY, FontSize.DEFAULT_FONT_SIZE + 2));
 					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.start")));
 				});
 			}
