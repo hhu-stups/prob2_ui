@@ -40,7 +40,7 @@ public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration
 		this.i18n = i18n;
 		this.savedProperty = savedProperty;
 		this.savedProperty.addListener((observable, from, to) -> {
-			if(getIndex() < 1) {
+			if(getIndex() < 0) {
 				return;
 			}
 			if(!from && to) {
