@@ -84,6 +84,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -341,6 +342,18 @@ public class SimulatorStage extends Stage {
 			menuBar.setUseSystemMenuBar(true);
 			final Menu openMenu = new Menu(i18n.translate("simulation.menuBar.file"));
 
+			MenuItem loadSimBModelItem = new MenuItem(i18n.translate("simulation.file.open.model"));
+			loadSimBModelItem.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
+			loadSimBModelItem.setOnAction(e -> loadSimBModel());
+
+			MenuItem loadSimBTracesItem = new MenuItem(i18n.translate("simulation.file.open.blackbox"));
+			loadSimBTracesItem.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
+			loadSimBTracesItem.setOnAction(e -> loadSimBTraces());
+
+			MenuItem loadExternalSimulationItem = new MenuItem(i18n.translate("simulation.file.open.external"));
+			loadExternalSimulationItem.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
+			loadExternalSimulationItem.setOnAction(e -> loadExternal());
+
 			MenuItem saveItem = new MenuItem(i18n.translate("simulation.menuBar.save"));
 			saveItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
 			saveItem.setOnAction(e -> saveSimulation());
@@ -354,7 +367,7 @@ public class SimulatorStage extends Stage {
 			MenuItem closeItem = new MenuItem(i18n.translate("simulation.menuBar.close"));
 			closeItem.setOnAction(e -> this.close());
 
-			openMenu.getItems().addAll(saveItem, saveAsItem, closeItem);
+			openMenu.getItems().addAll(loadSimBModelItem, loadSimBTracesItem, loadExternalSimulationItem, new SeparatorMenuItem(), saveItem, saveAsItem, closeItem);
 
 			menuBar.getMenus().add(0, openMenu);
 			setMacMenu(menuBar);
