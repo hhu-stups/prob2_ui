@@ -233,6 +233,12 @@ public class SimulatorStage extends Stage {
 	private MenuButton saveTraceButton;
 
 	@FXML
+	private MenuItem saveItem;
+
+	@FXML
+	private MenuItem saveAsItem;
+
+	@FXML
 	private MenuItem saveTraceItem;
 
 	@FXML
@@ -462,6 +468,13 @@ public class SimulatorStage extends Stage {
 			return config == null || config instanceof SimulationExternalConfiguration;
 		}, configurationPath, cbSimulation.itemsProperty(), cbSimulation.getSelectionModel().selectedItemProperty()));
 		helpButton.setHelpContent("mainmenu.advanced.simB", null);
+
+		saveItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
+		saveItem.setOnAction(e -> saveSimulation());
+
+		saveAsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
+		saveAsItem.setOnAction(e -> saveSimulationAs());
+		
 		saveTraceItem.setOnAction(e -> saveTrace());
 		saveTimedTraceItem.setOnAction(e -> saveTimedTrace());
 		saveAutomaticSimulationItem.setOnAction(e -> saveAutomaticSimulation());

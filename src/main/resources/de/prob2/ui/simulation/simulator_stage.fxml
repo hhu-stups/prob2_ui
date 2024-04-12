@@ -91,6 +91,9 @@
 										<Tooltip text="%common.buttons.saveTrace" />
 									</tooltip>
 									<items>
+										<MenuItem fx:id="saveItem" text="%simulation.menuBar.save"/>
+										<MenuItem fx:id="saveAsItem" text="%simulation.menuBar.saveAs"/>
+										<SeparatorMenuItem/>
 										<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace"/>
 										<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace"/>
 										<MenuItem fx:id="saveAutomaticSimulationItem" text="%simulation.contextMenu.saveUIReplay"/>
