@@ -474,7 +474,7 @@ public class SimulatorStage extends Stage {
 
 		saveAsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
 		saveAsItem.setOnAction(e -> saveSimulationAs());
-		
+
 		saveTraceItem.setOnAction(e -> saveTrace());
 		saveTimedTraceItem.setOnAction(e -> saveTimedTrace());
 		saveAutomaticSimulationItem.setOnAction(e -> saveAutomaticSimulation());
