@@ -33,6 +33,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.InputMethodEvent;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -44,18 +45,21 @@ import javafx.stage.Window;
 import org.controlsfx.tools.Platform;
 import org.fxmisc.richtext.StyleClassedTextArea;
 import org.fxmisc.wellbehaved.event.Nodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static javafx.scene.input.KeyCombination.CONTROL_DOWN;
 import static javafx.scene.input.KeyCombination.SHIFT_DOWN;
 import static javafx.scene.input.KeyCombination.SHORTCUT_DOWN;
 import static org.fxmisc.wellbehaved.event.EventPattern.anyOf;
 import static org.fxmisc.wellbehaved.event.EventPattern.keyPressed;
-import static org.fxmisc.wellbehaved.event.EventPattern.keyReleased;
 import static org.fxmisc.wellbehaved.event.EventPattern.keyTyped;
 import static org.fxmisc.wellbehaved.event.EventPattern.mouseClicked;
 import static org.fxmisc.wellbehaved.event.InputMap.consume;
 
 public abstract class Console extends StyleClassedTextArea {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(Console.class);
 
 	private final I18n i18n;
 	private final Executable interpreter;
@@ -157,13 +161,14 @@ public abstract class Console extends StyleClassedTextArea {
 		this.reset();
 	}
 
-	private static boolean hasInsertableText(KeyEvent event) {
-		if (event.getCharacter().isEmpty() || !StringHelper.containsNoControlCharacters(event.getCharacter())) {
+	private static boolean checkControlKeys(KeyEvent event) {
+		if (event == null || event.getCharacter() == null) {
 			return false;
 		}
 
+		// this code is copied from RichTextFX's GenericStyledAreaBehavior
 		if (Platform.getCurrent() == Platform.WINDOWS) {
-			if (event.isControlDown() && event.isAltDown() && !event.getCharacter().isEmpty() && event.getCharacter().charAt(0) != '\0') {
+			if (event.isControlDown() && event.isAltDown() && !event.isMetaDown() && event.getCharacter().length() == 1 && event.getCharacter().getBytes()[0] != 0) {
 				return true;
 			} else {
 				return !event.isControlDown() && !event.isAltDown() && !event.isMetaDown();
@@ -218,10 +223,8 @@ public abstract class Console extends StyleClassedTextArea {
 
 	public void setEvents() {
 		Nodes.addInputMap(this, consume(mouseClicked(MouseButton.PRIMARY)));
-		Nodes.addInputMap(this, consume(keyPressed()));
-		Nodes.addInputMap(this, consume(keyReleased()));
-		Nodes.addInputMap(this, consume(keyTyped()));
-		Nodes.addInputMap(this, consume(keyTyped().onlyIf(Console::hasInsertableText), e -> this.onEnterText(e.getCharacter())));
+		Nodes.addInputMap(this, consume(keyPressed().onlyIf(e -> (e.getCode().isLetterKey() || e.getCode().isDigitKey() || e.getCode().isWhitespaceKey()) && checkControlKeys(e))));
+		Nodes.addInputMap(this, consume(keyTyped().onlyIf(e -> checkControlKeys(e) && StringHelper.containsNoControlCharacters(e.getCharacter())), e -> this.onEnterText(e.getCharacter())));
 
 		// GUI-style shortcuts, these should use the Shortcut key (i. e. Command on Mac, Control on other systems).
 		Nodes.addInputMap(this, consume(anyOf(
@@ -275,6 +278,15 @@ public abstract class Console extends StyleClassedTextArea {
 			e.setDropCompleted(success);
 			e.consume();
 		});
+	}
+
+	@Override
+	protected void handleInputMethodEvent(InputMethodEvent event) {
+		if (!event.getComposed().isEmpty()) {
+			LOGGER.warn("ignoring InputMethodEvent composed elements {}", event.getComposed());
+		}
+
+		this.onEnterText(event.getCommitted());
 	}
 
 	@Override
