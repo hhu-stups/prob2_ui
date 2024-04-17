@@ -17,6 +17,9 @@ import java.util.TimerTask;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.swing.plaf.synth.SynthRadioButtonMenuItemUI;
+
+import org.apache.commons.math3.complex.Complex;
 import org.apache.velocity.*;
 import org.apache.velocity.app.Velocity;
 import org.apache.velocity.app.VelocityEngine;
@@ -25,6 +28,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.jangassen.MenuToolkit;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
@@ -51,7 +55,9 @@ import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+import de.prob2.ui.simulation.diagram.ComplexNode;
 import de.prob2.ui.simulation.diagram.DiagramEdge;
+import de.prob2.ui.simulation.diagram.DiagramGenerator;
 import de.prob2.ui.simulation.diagram.DiagramNode;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.interactive.UIInteractionSaver;
@@ -230,6 +236,18 @@ public class SimulatorStage extends Stage {
 	private Button openVisBButton;
 
 	@FXML
+	private MenuButton btgenerateDiagram;
+
+	@FXML
+	private MenuItem generateDiagram;
+
+	@FXML
+	private MenuItem generateComplexDiagram;
+	
+	@FXML
+	private MenuItem generateLiveDiagram;
+
+	@FXML
 	private MenuButton saveTraceButton;
 
 	@FXML
@@ -283,6 +301,8 @@ public class SimulatorStage extends Stage {
 
 	private final SimulationMode simulationMode;
 
+	private final DiagramGenerator diagramGenerator;
+
 	private int time;
 
 	private Timer timer;
@@ -295,7 +315,7 @@ public class SimulatorStage extends Stage {
 	public SimulatorStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 						  final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
 						  final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode, final I18n i18n, final FileChooserManager fileChooserManager, final TraceFileHandler traceFileHandler,
-						  final StopActions stopActions) {
+						  final StopActions stopActions, final DiagramGenerator diagramGenerator) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -309,6 +329,7 @@ public class SimulatorStage extends Stage {
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.traceFileHandler = traceFileHandler;
+		this.diagramGenerator = diagramGenerator;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
 		this.time = 0;
 		this.timer = new Timer(true);
@@ -695,81 +716,25 @@ public class SimulatorStage extends Stage {
 		currentProject.getCurrentMachine().getMachineProperties().getSimulations().remove(simulationModel);
 	}
 
+	
+
+	//Generates activation diagrams
 	@FXML
 	private void generateDiagram(){
-		//Getting Activation data
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
-		List<ActivationConfiguration> activations = config.getActivationConfigurations();
-		List<UIListenerConfiguration> listeners = config.getUiListenerConfigurations();
-		List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
-		List<DiagramEdge> activating = new ArrayList<DiagramEdge>();
-		ActivationChoiceConfiguration choiceConfig; 
-		ActivationOperationConfiguration opConfig;
-		DiagramEdge edge = new DiagramEdge("", null, null, ""); 
-		
-
-		//Initialisation of Velocity engine
-		VelocityContext nodeContext = new VelocityContext();
-		Properties props = new Properties();
-		props.setProperty("resource.loader", "class");
-		props.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
-		Velocity.init(props);
-		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
-		StringWriter sw = new StringWriter(); 
-		
-		//Getting Nodes
-		for (ActivationConfiguration activation : activations) {
-			if (activation.getClass().equals(ActivationChoiceConfiguration.class)) {
-				choiceConfig = (ActivationChoiceConfiguration)activation;
-				diaNode.add(new DiagramNode(activation.getId(),"red",activation.getId(), "diamond"));
-				edge = new DiagramEdge(choiceConfig.getId(), choiceConfig.getActivations().keySet().stream().toList(), choiceConfig.getActivations().values().stream().toList(), "dotted");
-				activating.add(edge);
-			}
-			else{
-				opConfig = (ActivationOperationConfiguration)activation;
-				
-				diaNode.add(new DiagramNode(opConfig.getOpName()+"_event","white",opConfig.getOpName(), "ellipse"));
-				if(!activation.getId().equals("$initialise_machine")){
-					diaNode.add(new DiagramNode(activation.getId(),"yellow",activation.getId(),"diamond"));
-				}
-				if(!activation.getId().equals("$initialise_machine")){
-				edge = new DiagramEdge(opConfig.getId(), List.of(opConfig.getOpName()+"_event"), List.of(opConfig.getAfter()), "");
-				activating.add(edge);
-				}
-				edge = new DiagramEdge(opConfig.getOpName()+"_event", opConfig.getActivating(), opConfig.getActivating().stream().map(n -> "Activating").toList(), "");
-				boolean isPresent = false;
-				for (DiagramEdge compareEdge : activating) {
-					if (compareEdge.getFrom().equals(edge.getFrom())) {
-						isPresent =true;
-					}
-				}
-				if (!isPresent) {
-					activating.add(edge);
-				}
-			}
-		}
-		
-		for(UIListenerConfiguration listener : listeners){
-			diaNode.add(new DiagramNode(listener.getEvent(),"white",listener.getEvent(),"ellipse"));
-			edge = new DiagramEdge(listener.getEvent(), listener.getActivating(), listener.getActivating().stream().map(n -> "Interaction").toList(), "");
-			activating.add(edge);
-		}
-
-
-
-
-		nodeContext.put("nodes", diaNode);
-		nodeContext.put("activations", activating);
-		
-		
-		nodes.merge(nodeContext, sw);
-		String nodesString = sw.toString();
-
-		System.out.println("ACTIVATIONS:");
-		System.out.println(config.getActivationConfigurations());
-		System.out.println("LISTENERS:");
-		System.out.println(config.getUiListenerConfigurations());
-		System.out.println("DOT: \n" + nodesString);
-
+		diagramGenerator.generateDiagram();
 	}
+
+	
+	//generates complex activation diagrams
+	@FXML
+	private void generateComplexDiagram(){
+		diagramGenerator.generateComplexDiagram();
+	}
+
+	@FXML
+	private void generateLiveDiagram(){
+		diagramGenerator.generateLiveDiagram();
+	}
+
+
 }

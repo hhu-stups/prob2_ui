@@ -84,16 +84,21 @@
 											text="%simulation.tooltips.addSimulation" />
 								</tooltip>
 							</Button>
-							<Button fx:id="btGenerateDiagram" disable="false"
-									contentDisplay="GRAPHIC_ONLY" onAction="#generateDiagram">
+							<MenuButton fx:id="btGenerateDiagram" disable="false"
+									contentDisplay="GRAPHIC_ONLY" >
 								<graphic>
-									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="REORDER" bindableFontSize="${fontSize.fontSize * 2}" />
 								</graphic>
 								<tooltip>
 									<Tooltip
 											text="%simulation.tooltips.generateDiagram" />
 								</tooltip>
-							</Button>
+								<items>
+									<MenuItem fx:id="generateDiagram" text="%simulation.contextMenu.generateDiagram" onAction="#generateDiagram"/>
+									<MenuItem fx:id="generateComplexDiagram" text="%simulation.contextMenu.generateComplexDiagram" onAction="#generateComplexDiagram"/>
+									<MenuItem fx:id="generateLiveDiagram" text="%simulation.contextMenu.generateLiveDiagram" onAction="#generateLiveDiagram"/>
+								</items>
+							</MenuButton>
 							<MenuButton fx:id="saveTraceButton">
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
