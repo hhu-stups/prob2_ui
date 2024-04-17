@@ -1,29 +1,10 @@
 package de.prob2.ui.internal;
 
-import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
-
 import com.google.inject.Inject;
-
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.codecompletion.CodeCompletionItem;
 import de.prob2.ui.codecompletion.ParentWithEditableText;
 import de.prob2.ui.layout.FontSize;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -39,14 +20,23 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Popup;
 import javafx.stage.Window;
 import javafx.util.Builder;
-
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.event.MouseOverTextEvent;
+import org.fxmisc.richtext.model.Paragraph;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 /**
  * CodeArea with error highlighting support.
@@ -399,13 +389,16 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 
 	private boolean checkTextLengthForStyling() {
 		int length = this.getLength();
+		// first check if text is too long, then if there are too long paragraphs (otherwise long text with short pars is ok(?))
 		if (length >= MAX_TEXT_LENGTH_FOR_STYLING) {
-			if (this.showLongTextWarning) {
-				LOGGER.warn("Disabling styling in text area, text is too long ({})", length);
-				this.showLongTextWarning = false;
+			int maxParLength = this.getParagraphs().stream().map(Paragraph::length).max(Integer::compare).orElse(0);
+			if (maxParLength >= MAX_TEXT_LENGTH_FOR_STYLING) {
+				if (this.showLongTextWarning) {
+					LOGGER.warn("Disabling styling in text area, paragraph/text is too long ({}/{})", maxParLength, length);
+					this.showLongTextWarning = false;
+				}
+				return false;
 			}
-
-			return false;
 		}
 
 		return true;
