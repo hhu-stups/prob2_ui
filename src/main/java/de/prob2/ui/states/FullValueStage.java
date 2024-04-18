@@ -22,12 +22,12 @@ import de.prob.animator.domainobjects.BVisual2Value;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.exception.ProBError;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.dotty.DotView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 
 import javafx.beans.property.BooleanProperty;
@@ -94,18 +94,18 @@ public class FullValueStage extends Stage {
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
 	private final I18n i18n;
+	private final CurrentTrace trace;
 
 	private final ObjectProperty<StateItem> value;
-	private final StateSpace sp;
 
 	@Inject
-	public FullValueStage(final StageManager stageManager, final Injector injector, final FileChooserManager fileChooserManager, final I18n i18n, final MachineLoader machineLoader, StatesView statesView) {
+	public FullValueStage(final StageManager stageManager, final Injector injector, final FileChooserManager fileChooserManager, final I18n i18n, final CurrentTrace trace, final MachineLoader machineLoader, StatesView statesView) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
+		this.trace = trace;
 		this.statesView = statesView;
 		this.value = new SimpleObjectProperty<>(this, "value", null);
-		this.sp = machineLoader.getActiveStateSpace();
 		this.injector = injector;
 		stageManager.loadFXML(this, "full_value_stage.fxml");
 	}
@@ -325,11 +325,11 @@ public class FullValueStage extends Stage {
 
 		this.formulaTextarea.setText(newValue.getLabel());
 		this.descriptionTextarea.setText(newValue.getDescription());
-		String oldMaxDisplayPref = sp.getCurrentPreference("MAX_DISPLAY_SET");
+		String oldMaxDisplayPref = this.trace.getStateSpace().getCurrentPreference("MAX_DISPLAY_SET");
 		Map<String, String> pref = new HashMap<>();
 		if (showFullValueCheckBox.isSelected()) {
 			pref.put("MAX_DISPLAY_SET", "-1");
-			sp.changePreferences(pref);
+			this.trace.getStateSpace().changePreferences(pref);
 		}
 		final String cv = prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getCurrentState())));
 		final String pv = newValue.getPreviousState() == null ? "" : prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getPreviousState())));
@@ -338,7 +338,7 @@ public class FullValueStage extends Stage {
 		this.updateDiff(cv, pv);
 		if (showFullValueCheckBox.isSelected()) {
 			pref.put("MAX_DISPLAY_SET", oldMaxDisplayPref);
-			sp.changePreferences(pref);
+			this.trace.getStateSpace().changePreferences(pref);
 		}
 	}
 
