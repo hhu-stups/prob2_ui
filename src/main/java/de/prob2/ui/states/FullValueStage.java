@@ -325,18 +325,22 @@ public class FullValueStage extends Stage {
 
 		this.formulaTextarea.setText(newValue.getLabel());
 		this.descriptionTextarea.setText(newValue.getDescription());
+
+		boolean unlimited = showFullValueCheckBox.isSelected();
 		String oldMaxDisplayPref = this.trace.getStateSpace().getCurrentPreference("MAX_DISPLAY_SET");
 		Map<String, String> pref = new HashMap<>();
-		if (showFullValueCheckBox.isSelected()) {
+		if (unlimited) {
 			pref.put("MAX_DISPLAY_SET", "-1");
 			this.trace.getStateSpace().changePreferences(pref);
 		}
-		final String cv = prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getCurrentState())));
-		final String pv = newValue.getPreviousState() == null ? "" : prettifyIfEnabled(valueToString(newValue.getFormula().evaluate(newValue.getPreviousState())));
+
+		final String cv = prettifyIfEnabled(valueToString(unlimited ? newValue.getCurrentValueUnlimited() : newValue.getCurrentValue()));
+		final String pv = prettifyIfEnabled(valueToString(unlimited ? newValue.getPreviousValueUnlimited() : newValue.getPreviousValue()));
 		this.currentValueTextarea.setText(cv);
 		this.previousValueTextarea.setText(pv);
 		this.updateDiff(cv, pv);
-		if (showFullValueCheckBox.isSelected()) {
+
+		if (unlimited) {
 			pref.put("MAX_DISPLAY_SET", oldMaxDisplayPref);
 			this.trace.getStateSpace().changePreferences(pref);
 		}

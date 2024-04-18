@@ -107,6 +107,7 @@ public final class StatesView extends StackPane {
 	private final Map<BVisual2Formula, ExpandedFormula> formulaStructureCache;
 	private boolean structureFullyExpanded;
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCache;
+	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCacheUnlimited;
 	private final StateItem.FormulaEvaluator cachingEvaluator;
 	private final BooleanProperty fullValuePrettify;
 	private final BooleanProperty fullValueShowFullValue;
@@ -130,6 +131,7 @@ public final class StatesView extends StackPane {
 		this.formulaStructureCache = new HashMap<>();
 		this.structureFullyExpanded = false;
 		this.formulaValueCache = new HashMap<>();
+		this.formulaValueCacheUnlimited = new HashMap<>();
 		this.cachingEvaluator = new StateItem.FormulaEvaluator() {
 			@Override
 			public ExpandedFormula expand(final BVisual2Formula formula) {
@@ -139,6 +141,11 @@ public final class StatesView extends StackPane {
 			@Override
 			public BVisual2Value evaluate(final BVisual2Formula formula, final State state) {
 				return evaluateFormulaWithCaching(formula, state);
+			}
+
+			@Override
+			public BVisual2Value evaluateUnlimited(BVisual2Formula formula, State state) {
+				return evaluateFormulaUnlimitedWithCaching(formula, state);
 			}
 		};
 		this.fullValuePrettify = new SimpleBooleanProperty();
@@ -412,6 +419,19 @@ public final class StatesView extends StackPane {
 		return newValue;
 	}
 
+	private BVisual2Value evaluateFormulaUnlimitedWithCaching(final BVisual2Formula formula, final State state) {
+		Map<BVisual2Formula, BVisual2Value> cacheByState = this.formulaValueCacheUnlimited.computeIfAbsent(state, s -> new HashMap<>());
+		BVisual2Value value = cacheByState.get(formula);
+		if (value != null) {
+			return value;
+		}
+
+		// TODO: use evaluateUnlimited
+		BVisual2Value newValue = formula.evaluate(state);
+		cacheByState.put(formula, newValue);
+		return newValue;
+	}
+
 	private Map<BVisual2Formula, BVisual2Value> getFormulaValueCacheForState(final State state) {
 		return this.formulaValueCache.computeIfAbsent(state, s -> new HashMap<>());
 	}
@@ -656,6 +676,7 @@ public final class StatesView extends StackPane {
 			this.formulaStructureCache.clear();
 			this.structureFullyExpanded = false;
 			this.formulaValueCache.clear();
+			this.formulaValueCacheUnlimited.clear();
 			return;
 		}
 
@@ -664,6 +685,7 @@ public final class StatesView extends StackPane {
 			this.formulaStructureCache.clear();
 			this.structureFullyExpanded = false;
 			this.formulaValueCache.clear();
+			this.formulaValueCacheUnlimited.clear();
 		} else {
 			// Pre-cache the current and previous values of all visible formulas.
 			// The structures have already been cached when the formulas first became visible.
