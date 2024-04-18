@@ -189,7 +189,14 @@ public class DotView extends DynamicFormulaStage<DotVisualizationCommand, DotFor
 				svgData = dotCall.call();
 			} catch (ProBError e) {
 				LOGGER.error("could not visualize graph with dot (command={}, layoutEngine={}, outputFormat={})", dotLocal, dotEngineLocal, outputFormat, e);
-				Platform.runLater(() -> this.stageManager.makeExceptionAlert(e, "dotty.error.dotVisualization.message").show());
+				Platform.runLater(() -> this.stageManager.makeExceptionAlert(
+						e,
+						"dotty.error.dotVisualization.header",
+						"dotty.error.dotVisualization.message",
+						dotLocal,
+						dotEngineLocal,
+						outputFormat
+				).show());
 				return;
 			}
 
