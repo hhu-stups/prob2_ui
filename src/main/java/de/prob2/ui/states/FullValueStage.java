@@ -293,7 +293,12 @@ public class FullValueStage extends Stage {
 	}
 
 	private void updateValue(final StateItem newValue) {
-		if (newValue == null) {
+		// disable any updates when the formula's statespace does not equal the current statespace
+		// this leads to crashes because the formula cannot be evaluated
+		// we might have switched machines!
+		if (newValue == null
+				    || newValue.getCurrentState() == null
+				    || !newValue.getCurrentState().getStateSpace().equals(this.trace.getStateSpace())) {
 			this.setTitle(null);
 			this.formulaTextarea.clear();
 			this.labelTextarea.setDisable(true);
@@ -338,7 +343,7 @@ public class FullValueStage extends Stage {
 		final String pv = prettifyIfEnabled(valueToString(unlimited ? newValue.getPreviousValueUnlimited() : newValue.getPreviousValue()));
 		this.currentValueTextarea.setText(cv);
 		this.previousValueTextarea.setText(pv);
-		this.updateDiff(cv, pv);
+		this.updateDiff(newValue.getCurrentState() != null ? cv : "", newValue.getPreviousState() != null ? pv : "");
 
 		if (unlimited) {
 			pref.put("MAX_DISPLAY_SET", oldMaxDisplayPref);
