@@ -1,6 +1,7 @@
 package de.prob2.ui.consoles.groovy.codecompletion;
 
-import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -69,7 +70,7 @@ public final class GroovyCodeCompletion {
 		return new String[] { "", text };
 	}
 
-	public Collection<? extends GroovyCCItem> getSuggestions(String text) {
+	public List<? extends GroovyCCItem> getSuggestions(String text) {
 		String[] currentPrefixAndSuffix = extractPrefixAndSuffix(text);
 		String namespace = currentPrefixAndSuffix[0];
 		String member = currentPrefixAndSuffix[1];
@@ -79,6 +80,7 @@ public final class GroovyCodeCompletion {
 
 		return handler.getSuggestions().stream()
 			       .map(x -> new GroovyCCItem(member, x.getNameAndParams()))
+			       .sorted(Comparator.comparing(Object::toString, String.CASE_INSENSITIVE_ORDER))
 			       .collect(Collectors.toList());
 	}
 }

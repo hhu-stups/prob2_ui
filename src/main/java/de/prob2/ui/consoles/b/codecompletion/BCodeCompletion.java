@@ -1,7 +1,6 @@
 package de.prob2.ui.consoles.b.codecompletion;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import de.prob.animator.command.CompleteIdentifierCommand;
@@ -12,7 +11,6 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.AlloyModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.model.representation.ZModel;
-import de.prob.scripting.TLAFactory;
 import de.prob.statespace.StateSpace;
 
 public final class BCodeCompletion {
@@ -62,11 +60,11 @@ public final class BCodeCompletion {
 		return text.substring(first);
 	}
 
-	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text) {
+	public static List<? extends BCCItem> doCompletion(StateSpace stateSpace, String text) {
 		return doCompletion(stateSpace, text, true);
 	}
 
-	public static Collection<? extends BCCItem> doCompletion(StateSpace stateSpace, String text, boolean inEditor) {
+	public static List<? extends BCCItem> doCompletion(StateSpace stateSpace, String text, boolean inEditor) {
 		BCodeCompletion cc = new BCodeCompletion(stateSpace, extractPrefix(text));
 		cc.find(true, inEditor);
 		return cc.getSuggestions();
