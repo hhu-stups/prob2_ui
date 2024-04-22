@@ -20,10 +20,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	protected AbstractCheckableItem() {
 		this.selected = new SimpleBooleanProperty(true);
 
-		this.initListeners();
-	}
-
-	private void initListeners() {
 		this.resultItemProperty().addListener((o, from, to) -> this.checked.set(to == null ? Checked.NOT_CHECKED : to.getChecked()));
 	}
 
