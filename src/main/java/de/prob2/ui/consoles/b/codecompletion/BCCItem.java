@@ -5,7 +5,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -39,34 +38,41 @@ public class BCCItem implements CodeCompletionItem {
 	}
 
 	@Override
-	public Node getListNode() {
+	public Node getListNode(boolean selected) {
 		if (!type.isEmpty()) {
-			HBox hBox = new HBox();
-
-			Text replaceText = new Text(replacement);
-			double replaceWidth = Math.min(replaceText.getLayoutBounds().getWidth(), MAX_WRAPPING_WIDTH_REPLACEMENT);
-			replaceText.setWrappingWidth(replaceWidth);
-			hBox.getChildren().add(replaceText);
-
-			Text typeText = new Text(type);
-			double typeWidth = Math.min(MAX_WIDTH - replaceWidth, MAX_WRAPPING_WIDTH_TYPE);
-			typeText.setFont(new Font(replaceText.getFont().getSize() - 3));
-			typeText.setFill(Paint.valueOf(Color.GRAY.toString()));
-			typeText.setTextAlignment(TextAlignment.RIGHT);
-			typeText.setWrappingWidth(typeWidth);
-			hBox.getChildren().add(typeText);
-
-			hBox.setMaxWidth(MAX_WIDTH);
-			hBox.setAlignment(Pos.CENTER_LEFT);
-			hBox.setSpacing(MAX_WIDTH - typeWidth - replaceWidth);
-			return hBox;
+			return selected ? getReplacementTypeBox(Color.WHITE, Color.WHITE) : getReplacementTypeBox(Color.BLACK, Color.GRAY);
 		} else {
-			return new Text(this.replacement);
+			Text text = new Text(replacement);
+			text.setFill(selected ? Color.WHITE : Color.BLACK);
+			return text;
 		}
 	}
 
 	@Override
 	public String toString() {
 		return this.getReplacement();
+	}
+
+	private HBox getReplacementTypeBox(Color replacementColor, Color typeColor) {
+		HBox hBox = new HBox();
+
+		Text replaceText = new Text(replacement);
+		double replaceWidth = Math.min(replaceText.getLayoutBounds().getWidth(), MAX_WRAPPING_WIDTH_REPLACEMENT);
+		replaceText.setFill(replacementColor);
+		replaceText.setWrappingWidth(replaceWidth);
+		hBox.getChildren().add(replaceText);
+
+		Text typeText = new Text(type);
+		double typeWidth = Math.min(MAX_WIDTH - replaceWidth, MAX_WRAPPING_WIDTH_TYPE);
+		typeText.setFont(new Font(replaceText.getFont().getSize() - 2));
+		typeText.setFill(typeColor);
+		typeText.setTextAlignment(TextAlignment.RIGHT);
+		typeText.setWrappingWidth(typeWidth);
+		hBox.getChildren().add(typeText);
+
+		hBox.setMaxWidth(MAX_WIDTH);
+		hBox.setAlignment(Pos.CENTER_LEFT);
+		hBox.setSpacing(MAX_WIDTH - typeWidth - replaceWidth);
+		return hBox;
 	}
 }

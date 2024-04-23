@@ -18,7 +18,7 @@ public interface CodeCompletionItem {
 	 * Optional JavaFX node that gets shown in the CodeCompletion ListView.
 	 * If {@literal null} is returned the string representation is shown instead.
 	 */
-	default Node getListNode() {
+	default Node getListNode(boolean selected) {
 		return null;
 	}
 }

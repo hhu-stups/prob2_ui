@@ -57,7 +57,7 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 					setText(null);
 					setGraphic(null);
 				} else {
-					Node node = item.getListNode();
+					Node node = item.getListNode(this.isSelected());
 					if (node != null) {
 						setText(null);
 						setGraphic(node);
