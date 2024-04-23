@@ -14,7 +14,6 @@ import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
 import de.prob2.ui.verifications.temporal.ltl.LTLParseListener;
 
@@ -26,7 +25,7 @@ public final class LTLPatternParser {
 	}
 	
 	private static void handlePatternResult(LTLParseListener parseListener, LTLPatternItem item) {
-		CheckingResultItem resultItem;
+		TemporalCheckingResultItem resultItem;
 		// Empty Patterns do not have parse errors which is a little bit confusing
 		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
 			resultItem = new TemporalCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully");

@@ -37,7 +37,7 @@ public class LTLPatternStage extends TemporalItemStage {
 		this.result = null;
 		String code = this.taCode.getText();
 		LTLPatternItem item = LTLPatternParser.parsePattern(this.taDescription.getText(), code, this.currentProject.getCurrentMachine());
-		final TemporalCheckingResultItem resultItem = (TemporalCheckingResultItem) item.getResultItem();
+		final TemporalCheckingResultItem resultItem = item.getResultItem();
 		if (resultItem.getChecked() == Checked.INVALID_TASK) {
 			showErrors(resultItem.getErrorMarkers());
 		} else {

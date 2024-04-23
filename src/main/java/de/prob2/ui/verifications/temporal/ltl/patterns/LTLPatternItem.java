@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
 import de.prob2.ui.verifications.IResettable;
 
 import javafx.beans.property.ObjectProperty;
@@ -22,7 +22,7 @@ public final class LTLPatternItem implements IResettable {
 	private final String code;
 
 	@JsonIgnore
-	final ObjectProperty<CheckingResultItem> resultItem;
+	final ObjectProperty<TemporalCheckingResultItem> resultItem;
 	@JsonIgnore
 	final ObjectProperty<Checked> checked;
 
@@ -59,15 +59,15 @@ public final class LTLPatternItem implements IResettable {
 		return this.getName().equals(other.getName());
 	}
 
-	public ObjectProperty<CheckingResultItem> resultItemProperty() {
+	public ObjectProperty<TemporalCheckingResultItem> resultItemProperty() {
 		return this.resultItem;
 	}
 
-	public CheckingResultItem getResultItem() {
+	public TemporalCheckingResultItem getResultItem() {
 		return this.resultItemProperty().get();
 	}
 
-	public void setResultItem(final CheckingResultItem resultItem) {
+	public void setResultItem(final TemporalCheckingResultItem resultItem) {
 		this.resultItemProperty().set(resultItem);
 	}
 
