@@ -40,7 +40,7 @@ import javafx.collections.FXCollections;
 	"timeLimit",
 	"options",
 	"goal",
-	"shouldExecute",
+	"selected",
 })
 public final class ModelCheckingItem implements IExecutableItem, IValidationTask<ModelCheckingItem> {
 	@JsonIgnore
@@ -62,7 +62,7 @@ public final class ModelCheckingItem implements IExecutableItem, IValidationTask
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String goal;
 
-	private final BooleanProperty shouldExecute;
+	private final BooleanProperty selected;
 
 	@JsonIgnore
 	private final ListProperty<ModelCheckingStep> steps = new SimpleListProperty<>(this, "steps", FXCollections.observableArrayList());
@@ -85,7 +85,7 @@ public final class ModelCheckingItem implements IExecutableItem, IValidationTask
 		this.timeLimit = timeLimit;
 		this.goal = goal;
 		this.options = Objects.requireNonNull(options, "options");
-		this.shouldExecute = new SimpleBooleanProperty(true);
+		this.selected = new SimpleBooleanProperty(true);
 		this.initListeners();
 	}
 
@@ -204,20 +204,20 @@ public final class ModelCheckingItem implements IExecutableItem, IValidationTask
 	}
 
 	@Override
-	@JsonProperty("shouldExecute")
+	@JsonProperty("selected")
 	public void setSelected(boolean selected) {
-		this.shouldExecute.set(selected);
+		this.selected.set(selected);
 	}
 
-	@JsonProperty("shouldExecute")
+	@JsonProperty("selected")
 	@Override
 	public boolean selected() {
-		return shouldExecute.get();
+		return selected.get();
 	}
 
 	@Override
 	public BooleanProperty selectedProperty() {
-		return shouldExecute;
+		return selected;
 	}
 
 	public ListProperty<ModelCheckingStep> stepsProperty() {
