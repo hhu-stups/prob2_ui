@@ -4,6 +4,6 @@
 <?import javafx.stage.Popup?>
 <fx:root type="Popup" autoHide="true" xmlns:fx="http://javafx.com/fxml/1">
 	<content>
-		<ListView fx:id="lvSuggestions" maxHeight="200" maxWidth="400" prefHeight="200" prefWidth="400"/>
+		<ListView fx:id="lvSuggestions" maxHeight="200" maxWidth="500" prefHeight="200" prefWidth="500"/>
 	</content>
 </fx:root>
