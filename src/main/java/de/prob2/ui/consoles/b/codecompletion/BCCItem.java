@@ -1,7 +1,5 @@
 package de.prob2.ui.consoles.b.codecompletion;
 
-import java.util.Objects;
-
 import de.prob2.ui.codecompletion.CodeCompletionItem;
 
 public class BCCItem implements CodeCompletionItem {
@@ -10,13 +8,9 @@ public class BCCItem implements CodeCompletionItem {
 	private final String replacement;
 	private final String type;
 
-	public BCCItem(String originalText, String replacement) {
-		this(originalText, replacement, null);
-	}
-
 	public BCCItem(String originalText, String replacement, String type) {
-		this.originalText = Objects.requireNonNull(originalText, "originalText");
-		this.replacement = Objects.requireNonNull(originalText, "replacement");
+		this.originalText = originalText;
+		this.replacement = replacement;
 		this.type = type;
 	}
 

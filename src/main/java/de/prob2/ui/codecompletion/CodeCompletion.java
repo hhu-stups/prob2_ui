@@ -1,10 +1,6 @@
 package de.prob2.ui.codecompletion;
 
-import java.util.List;
-import java.util.Optional;
-
 import de.prob2.ui.internal.StageManager;
-
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
@@ -16,6 +12,9 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Popup;
 import javafx.util.Callback;
+
+import java.util.List;
+import java.util.Optional;
 
 public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 
