@@ -23,7 +23,6 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
-import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
 public class TemporalFormulaStage extends TemporalItemStage {
@@ -52,6 +51,8 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	@FXML
 	private Button btShowBuiltins;
 
+	private final CurrentProject currentProject;
+
 	private final CurrentTrace currentTrace;
 
 	private final I18n i18n;
@@ -63,7 +64,8 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final I18n i18n, final FontSize fontSize,
 		final LTLBuiltinsStage builtinsStage
 	) {
-		super(currentProject, fontSize, builtinsStage);
+		super(fontSize, builtinsStage);
+		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.i18n = i18n;
 		this.result = null;

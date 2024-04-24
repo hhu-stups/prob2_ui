@@ -13,12 +13,14 @@ import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage
 import javafx.fxml.FXML;
 
 public class LTLPatternStage extends TemporalItemStage {
+	private final CurrentProject currentProject;
 
 	private LTLPatternItem result;
 
 	@Inject
 	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize, final LTLBuiltinsStage builtinsStage) {
-		super(currentProject, fontSize, builtinsStage);
+		super(fontSize, builtinsStage);
+		this.currentProject = currentProject;
 		this.result = null;
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}

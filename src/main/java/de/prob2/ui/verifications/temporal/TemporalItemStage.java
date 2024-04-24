@@ -7,7 +7,6 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
 
 import javafx.fxml.FXML;
@@ -27,15 +26,12 @@ public abstract class TemporalItemStage extends Stage {
 	@FXML
 	protected HelpButton helpButton;
 
-	protected final CurrentProject currentProject;
-
 	protected final FontSize fontSize;
 
 	protected final LTLBuiltinsStage builtinsStage;
 
-	public TemporalItemStage(final CurrentProject currentProject, final FontSize fontSize, final LTLBuiltinsStage builtinsStage) {
+	public TemporalItemStage(final FontSize fontSize, final LTLBuiltinsStage builtinsStage) {
 		super();
-		this.currentProject = currentProject;
 		this.fontSize = fontSize;
 		this.builtinsStage = builtinsStage;
 	}
