@@ -15,11 +15,6 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
-<!-- Do not remove the following imports as they are detected as unused accidentally -->
-<?import de.prob2.ui.verifications.temporal.TemporalFormulaType?>
-
-
 <fx:root type="TemporalView" fitToHeight="true" fitToWidth="true"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
