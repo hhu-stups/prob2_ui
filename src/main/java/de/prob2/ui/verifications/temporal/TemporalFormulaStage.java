@@ -22,12 +22,13 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
+import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
 public class TemporalFormulaStage extends TemporalItemStage {
 
 	@FXML
-	private ChoiceBox<TemporalItemStage.TemporalFormulaChoiceItem> cbType;
+	private ChoiceBox<TemporalFormulaType> cbType;
 
 	@FXML
 	private TextField idTextField;
@@ -69,19 +70,31 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	public void initialize() {
 		super.initialize();
 
+		cbType.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(TemporalFormulaType object) {
+				return object.name();
+			}
+
+			@Override
+			public TemporalFormulaType fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to TemporalFormulaType not supported");
+			}
+		});
+
 		this.stateLimit.visibleProperty().bind(this.chooseStateLimit.selectedProperty());
 		this.stateLimit.getEditor().setTextFormatter(new TextFormatter<>(new IntegerStringConverter()));
 		this.stateLimit.setValueFactory(new ImprovedIntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 500_000, 1_000));
 
 		// bind the UI elements
-		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get().getType() == TemporalFormulaType.LTL, cbType.getSelectionModel().selectedItemProperty());
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get() == TemporalFormulaType.LTL, cbType.getSelectionModel().selectedItemProperty());
 		btShowBuiltins.visibleProperty().bind(binding);
 		cbType.getSelectionModel().select(cbType.getItems().get(0));
 		cbExpectedResult.getSelectionModel().select(true);
 	}
 
 	public void setData(final TemporalFormulaItem item) {
-		this.cbType.setValue(new TemporalFormulaChoiceItem(item.getType()));
+		this.cbType.setValue(item.getType());
 		this.idTextField.setText(item.getId() == null ? "" : item.getId());
 		this.taCode.replaceText(item.getCode());
 		this.taDescription.setText(item.getDescription());
@@ -110,7 +123,7 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		result = null;
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		String code = taCode.getText();
-		TemporalFormulaType type = cbType.getValue().getType();
+		TemporalFormulaType type = cbType.getValue();
 		if (type == TemporalFormulaType.LTL) {
 			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
 			try {

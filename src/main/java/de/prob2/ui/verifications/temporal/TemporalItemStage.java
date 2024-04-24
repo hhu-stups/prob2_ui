@@ -1,7 +1,6 @@
 package de.prob2.ui.verifications.temporal;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import de.prob.animator.domainobjects.ErrorItem;
@@ -11,44 +10,11 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
 
-import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import javafx.stage.Stage;
 
 public abstract class TemporalItemStage extends Stage {
-
-	public static final class TemporalFormulaChoiceItem {
-
-		private final TemporalFormulaType type;
-
-		public TemporalFormulaChoiceItem(@NamedArg("type") TemporalFormulaType type) {
-			this.type = type;
-		}
-
-		public TemporalFormulaType getType() {
-			return type;
-		}
-
-		@Override
-		public String toString() {
-			return type.name();
-		}
-
-		@Override
-		public boolean equals(Object o) {
-			if (this == o) return true;
-			if (o == null || getClass() != o.getClass()) return false;
-			TemporalFormulaChoiceItem that = (TemporalFormulaChoiceItem) o;
-			return type == that.type;
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(type);
-		}
-	}
-
 	@FXML
 	protected TemporalFormulaEditor taCode;
 
