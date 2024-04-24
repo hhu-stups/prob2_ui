@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.temporal;
 import com.google.inject.Inject;
 
 import de.prob.exception.ProBError;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
@@ -53,15 +54,18 @@ public class TemporalFormulaStage extends TemporalItemStage {
 
 	private final CurrentTrace currentTrace;
 
+	private final I18n i18n;
+
 	private TemporalFormulaItem result;
 
 	@Inject
 	public TemporalFormulaStage(
-		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final FontSize fontSize,
+		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final I18n i18n, final FontSize fontSize,
 		final LTLBuiltinsStage builtinsStage
 	) {
 		super(currentProject, fontSize, builtinsStage);
 		this.currentTrace = currentTrace;
+		this.i18n = i18n;
 		this.result = null;
 		stageManager.loadFXML(this, "temporal_formula_stage.fxml");
 	}
@@ -70,17 +74,7 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	public void initialize() {
 		super.initialize();
 
-		cbType.setConverter(new StringConverter<>() {
-			@Override
-			public String toString(TemporalFormulaType object) {
-				return object.name();
-			}
-
-			@Override
-			public TemporalFormulaType fromString(String string) {
-				throw new UnsupportedOperationException("Conversion from String to TemporalFormulaType not supported");
-			}
-		});
+		cbType.setConverter(i18n.translateConverter());
 
 		this.stateLimit.visibleProperty().bind(this.chooseStateLimit.selectedProperty());
 		this.stateLimit.getEditor().setTextFormatter(new TextFormatter<>(new IntegerStringConverter()));
