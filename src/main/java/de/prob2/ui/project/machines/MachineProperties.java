@@ -34,7 +34,6 @@ import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -45,10 +44,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-
-import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineCheckingStatus;
 
 @JsonPropertyOrder({
 	"validationTasks",
@@ -62,8 +58,6 @@ import static de.prob2.ui.project.machines.MachineCheckingStatus.combineMachineC
 public final class MachineProperties {
 
 	private final ReadOnlyListProperty<IValidationTask<?>> validationTasks;
-	@JsonIgnore
-	private final Map<ValidationTaskType<? extends IExecutableItem>, ReadOnlyObjectProperty<MachineCheckingStatus>> statusProperties;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
@@ -79,7 +73,6 @@ public final class MachineProperties {
 
 	public MachineProperties() {
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
-		this.statusProperties = new HashMap<>();
 
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
 		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
@@ -143,19 +136,6 @@ public final class MachineProperties {
 			       .collect(Collectors.toSet());
 	}
 
-	private ReadOnlyObjectProperty<MachineCheckingStatus> createStatusProperty(ValidationTaskType<? extends IExecutableItem> taskType) {
-		ObservableList<? extends IExecutableItem> items = this.getValidationTasksByType(taskType);
-		return new MachineCheckingStatusProperty(items);
-	}
-
-	@JsonIgnore
-	public <T extends IValidationTask<T> & IExecutableItem> ReadOnlyObjectProperty<MachineCheckingStatus> getCheckingStatusByType(ValidationTaskType<T> taskType) {
-		return this.statusProperties.computeIfAbsent(
-			Objects.requireNonNull(taskType, "taskType"),
-			this::createStatusProperty
-		);
-	}
-
 	public void addValidationTask(IValidationTask<?> validationTask) {
 		this.getValidationTasks().add(Objects.requireNonNull(validationTask, "validationTask"));
 	}
@@ -210,7 +190,7 @@ public final class MachineProperties {
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> temporalStatusProperty() {
-		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.TEMPORAL);
+		return new MachineCheckingStatusProperty(this.getTemporalFormulas());
 	}
 
 	@JsonIgnore
@@ -219,7 +199,7 @@ public final class MachineProperties {
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> symbolicCheckingStatusProperty() {
-		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.SYMBOLIC);
+		return new MachineCheckingStatusProperty(this.getSymbolicCheckingFormulas());
 	}
 
 	@JsonIgnore
@@ -228,7 +208,7 @@ public final class MachineProperties {
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> traceStatusProperty() {
-		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.REPLAY_TRACE);
+		return new MachineCheckingStatusProperty(this.getTraces());
 	}
 
 	@JsonIgnore
@@ -237,7 +217,7 @@ public final class MachineProperties {
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> modelCheckingStatusProperty() {
-		return this.getCheckingStatusByType(BuiltinValidationTaskTypes.MODEL_CHECKING);
+		return new MachineCheckingStatusProperty(this.getModelCheckingTasks());
 	}
 
 	@JsonIgnore
