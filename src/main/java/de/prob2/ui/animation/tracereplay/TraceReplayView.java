@@ -38,7 +38,6 @@ import de.prob2.ui.verifications.ExecutionContext;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -166,23 +165,22 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 		stepsColumn.setCellValueFactory(features -> {
 			ReplayTrace trace = features.getValue();
-			TraceJsonFile traceFile = trace.getLoadedTrace();
-			if (traceFile == null) {
-				try {
-					traceFile = trace.load();
-				} catch (IOException ignore) {
-					// ignore errors, so the user does not get bombarded with errors on startup
+			return Bindings.createStringBinding(() -> {
+				TraceJsonFile traceFile = trace.getLoadedTrace();
+				if (traceFile == null) {
+					try {
+						traceFile = trace.load();
+					} catch (IOException ignore) {
+						// ignore errors, so the user does not get bombarded with errors on startup
+					}
 				}
-			}
 
-			String steps;
-			if (traceFile != null) {
-				steps = String.valueOf(traceFile.getTransitionList().size());
-			} else {
-				steps = i18n.translate("common.notAvailable");
-			}
-
-			return new SimpleStringProperty(steps);
+				if (traceFile != null) {
+					return String.valueOf(traceFile.getTransitionList().size());
+				} else {
+					return i18n.translate("common.notAvailable");
+				}
+			}, trace.loadedTraceProperty());
 		});
 
 		itemsTable.setRowFactory(table -> new Row());
