@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
@@ -266,8 +265,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (directory != null) {
 			try (Stream<Path> walk = Files.walk(directory)) {
 				paths = walk.filter(Files::isRegularFile)
-					        .filter(p -> MoreFiles.getFileExtension(p).equals(TraceFileHandler.TRACE_FILE_EXTENSION))
-					        .collect(Collectors.toList());
+						        .filter(p -> MoreFiles.getFileExtension(p).equals(TraceFileHandler.TRACE_FILE_EXTENSION))
+						        .toList();
 			} catch (IOException e) {
 				final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.traceDirectoryError.header", "animation.tracereplay.alerts.traceDirectoryError.error");
 				alert.initOwner(this.getScene().getWindow());

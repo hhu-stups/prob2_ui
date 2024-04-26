@@ -35,8 +35,8 @@ import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
-
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
+
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
@@ -260,7 +260,7 @@ public class FileChooserManager {
 		final File dirFile = directoryChooser.showDialog(window);
 		final Path dirPath = dirFile == null ? null : dirFile.toPath();
 		if (dirPath != null) {
-			setInitialDirectory(kind, dirPath);
+			setInitialDirectory(kind, dirPath.getParent());
 		}
 		return dirPath;
 	}
@@ -378,7 +378,7 @@ public class FileChooserManager {
 	}
 
 	private boolean containsValidInitialDirectory(Kind kind) {
-		return kind != null && initialDirectories.containsKey(kind) && Files.exists(initialDirectories.get(kind));
+		return kind != null && initialDirectories.containsKey(kind) && Files.isDirectory(initialDirectories.get(kind));
 	}
 
 	private Path getInitialDirectory(Kind kind) {
@@ -386,7 +386,7 @@ public class FileChooserManager {
 	}
 
 	private void setInitialDirectory(Kind kind, Path dir) {
-		if (kind != null && dir != null && Files.exists(dir)) {
+		if (kind != null && dir != null && Files.isDirectory(dir)) {
 			initialDirectories.put(kind, dir);
 		}
 	}
