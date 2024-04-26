@@ -63,7 +63,7 @@ public final class MachineProperties {
 
 	private final ReadOnlyListProperty<IValidationTask<?>> validationTasks;
 	@JsonIgnore
-	private final Map<ValidationTaskType<? extends IExecutableItem>, ObjectProperty<MachineCheckingStatus>> statusProperties;
+	private final Map<ValidationTaskType<? extends IExecutableItem>, ReadOnlyObjectProperty<MachineCheckingStatus>> statusProperties;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
@@ -143,11 +143,9 @@ public final class MachineProperties {
 			       .collect(Collectors.toSet());
 	}
 
-	private ObjectProperty<MachineCheckingStatus> createStatusProperty(ValidationTaskType<? extends IExecutableItem> taskType) {
+	private ReadOnlyObjectProperty<MachineCheckingStatus> createStatusProperty(ValidationTaskType<? extends IExecutableItem> taskType) {
 		ObservableList<? extends IExecutableItem> items = this.getValidationTasksByType(taskType);
-		ObjectProperty<MachineCheckingStatus> p = new SimpleObjectProperty<>();
-		addCheckingStatusListener(items, p);
-		return p;
+		return new MachineCheckingStatusProperty(items);
 	}
 
 	@JsonIgnore
@@ -353,28 +351,6 @@ public final class MachineProperties {
 		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.getHistoryChartItems().addListener(changedListener);
-	}
-
-	private void addCheckingStatusListener(final ObservableList<? extends IExecutableItem> items, final ObjectProperty<MachineCheckingStatus> statusProperty) {
-		final InvalidationListener updateListener = o -> Platform.runLater(() -> statusProperty.set(combineMachineCheckingStatus(items)));
-		items.addListener((ListChangeListener<IExecutableItem>) change -> {
-			while (change.next()) {
-				change.getRemoved().forEach(item -> {
-					item.selectedProperty().removeListener(updateListener);
-					item.checkedProperty().removeListener(updateListener);
-				});
-				change.getAddedSubList().forEach(item -> {
-					item.selectedProperty().addListener(updateListener);
-					item.checkedProperty().addListener(updateListener);
-				});
-			}
-			updateListener.invalidated(null);
-		});
-		items.forEach(item -> {
-			item.selectedProperty().addListener(updateListener);
-			item.checkedProperty().addListener(updateListener);
-		});
-		updateListener.invalidated(null);
 	}
 
 	public void resetStatus() {
