@@ -426,8 +426,7 @@ public final class StatesView extends StackPane {
 			return value;
 		}
 
-		// TODO: use evaluateUnlimited
-		BVisual2Value newValue = formula.evaluate(state);
+		BVisual2Value newValue = formula.evaluateUnlimited(state);
 		cacheByState.put(formula, newValue);
 		return newValue;
 	}
