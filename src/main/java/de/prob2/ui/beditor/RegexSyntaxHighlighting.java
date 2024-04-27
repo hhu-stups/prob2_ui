@@ -1,28 +1,14 @@
 package de.prob2.ui.beditor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.model.brules.RulesModelFactory;
-import de.prob.scripting.AlloyFactory;
-import de.prob.scripting.CSPFactory;
-import de.prob.scripting.EventBFactory;
-import de.prob.scripting.EventBPackageFactory;
-import de.prob.scripting.ModelFactory;
-import de.prob.scripting.TLAFactory;
-import de.prob.scripting.XTLFactory;
-import de.prob.scripting.ZFactory;
-
+import de.prob.scripting.*;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
+
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.util.Map.entry;
 import static java.util.regex.Pattern.compile;
@@ -65,7 +51,7 @@ public final class RegexSyntaxHighlighting {
 			new Token("editor_ctrlkeyword", compile("IF|THEN|ELSE|UNION|CHOOSE|LET|IN|UNCHANGED|SUBSET|CASE|DOMAIN|EXCEPT|ENABLED|SF_|WF_|WITH|OTHER|BOOLEAN|STRING")),
 			new Token("editor_types", compile("Next|Init|Spec|Inv")),
 			new Token("editor_comment", compile("\\\\\\*[^\n\r]*|\\(\\*.*?\\*\\)", Pattern.DOTALL)),
-			new Token("editor_arithmetic", compile("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|Int|Nat")),
+			new Token("editor_arithmetic", compile("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|Int|Nat|Real")),
 			new Token("editor_logical", compile("<=>|=>|<<|>>|!|#|/=|~|<>|->|~\\\\|\"|\\[]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\")),
 			new Token("editor_identifier", compile("[_a-zA-Z][_a-zA-Z0-9]*")),
 			new Token("editor_ignored", compile("[ \t\r\n]+"))
