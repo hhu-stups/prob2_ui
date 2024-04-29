@@ -16,7 +16,7 @@ import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-import de.prob.statespace.State;
+import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicFormulaStage;
 import de.prob2.ui.dynamic.DynamicPreferencesStage;
@@ -146,8 +146,8 @@ public class DotView extends DynamicFormulaStage<DotVisualizationCommand, DotFor
 	}
 
 	@Override
-	protected List<DotVisualizationCommand> getCommandsInState(final State state) {
-		return DotVisualizationCommand.getAll(state);
+	protected List<DotVisualizationCommand> getCommandsWithTrace(final Trace trace) {
+		return DotVisualizationCommand.getAll(trace);
 	}
 
 	@Override
@@ -155,9 +155,9 @@ public class DotView extends DynamicFormulaStage<DotVisualizationCommand, DotFor
 		// Store dot and dotEngine as local variables in addition to the fields
 		// to avoid a race condition where clearContent sets them to null
 		// while this method is still running in the background thread.
-		final String dotLocal = item.getState().getStateSpace().getCurrentPreference("DOT");
+		final String dotLocal = item.getTrace().getStateSpace().getCurrentPreference("DOT");
 		final String dotEngineLocal = item.getPreferredDotLayoutEngine()
-			                              .orElseGet(() -> item.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
+			                              .orElseGet(() -> item.getTrace().getStateSpace().getCurrentPreference("DOT_ENGINE"));
 		this.dot = dotLocal;
 		this.dotEngine = dotEngineLocal;
 

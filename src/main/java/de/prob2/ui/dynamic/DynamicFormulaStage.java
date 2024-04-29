@@ -444,7 +444,7 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 		if (currentState == null) {
 			lvChoice.getItems().clear();
 		} else {
-			lvChoice.getItems().setAll(this.getCommandsInState(currentState));
+			lvChoice.getItems().setAll(this.getCommandsWithTrace(currentTrace.get()));
 		}
 
 		if (this.lastItem != null && this.lvChoice.getItems().contains(this.lastItem)) {
@@ -520,7 +520,7 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 
 	protected abstract void visualizeInternal(final T item, final List<IEvalElement> formulas) throws InterruptedException;
 
-	protected abstract List<T> getCommandsInState(final State state);
+	protected abstract List<T> getCommandsWithTrace(final Trace trace);
 
 	public void selectCommand(final String command, final String formula) {
 		Objects.requireNonNull(command, "command");

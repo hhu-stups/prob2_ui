@@ -16,7 +16,7 @@ import de.prob.animator.command.GetShortestTraceCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.TableData;
 import de.prob.animator.domainobjects.TableVisualizationCommand;
-import de.prob.statespace.State;
+import de.prob.statespace.Trace;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.DynamicFormulaStage;
@@ -157,8 +157,8 @@ public class ExpressionTableView extends DynamicFormulaStage<TableVisualizationC
 	}
 
 	@Override
-	protected List<TableVisualizationCommand> getCommandsInState(final State state) {
-		return TableVisualizationCommand.getAll(state);
+	protected List<TableVisualizationCommand> getCommandsWithTrace(final Trace trace) {
+		return TableVisualizationCommand.getAll(trace);
 	}
 
 	public void visualizeExpression(String expression) {
