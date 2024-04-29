@@ -21,6 +21,7 @@ import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.dynamic.DynamicFormulaTask;
 import de.prob2.ui.dynamic.dotty.DotFormulaTask;
+import de.prob2.ui.dynamic.plantuml.PlantUmlFormulaTask;
 import de.prob2.ui.dynamic.table.TableFormulaTask;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -223,6 +224,11 @@ public final class MachineProperties {
 	@JsonIgnore
 	public ObservableList<DotFormulaTask> getDotFormulaTasksByCommand(String command) {
 		return this.getDynamicFormulaTasksByCommand(BuiltinValidationTaskTypes.DOT_FORMULA, command);
+	}
+
+	@JsonIgnore
+	public ObservableList<PlantUmlFormulaTask> getPlantUmlFormulaTasksByCommand(String command) {
+		return this.getDynamicFormulaTasksByCommand(BuiltinValidationTaskTypes.PLANTUML_FORMULA, command);
 	}
 
 	@JsonIgnore

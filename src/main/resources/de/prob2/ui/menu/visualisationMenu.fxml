@@ -6,6 +6,7 @@
 
 <fx:root type="Menu" text="%menu.visualisation" xmlns:fx="http://javafx.com/fxml/1">
 	<MenuItem fx:id="graphVisualization" text="%menu.visualisation.items.graph" onAction="#openGraphVisualisation"/>
+	<MenuItem fx:id="pumlVisualization" text="%menu.visualisation.items.plantuml" onAction="#openPlantUmlVisualisation"/>
 	<MenuItem fx:id="tableVisualization" text="%menu.visualisation.items.table" onAction="#openTableVisualisation"/>
 	<MenuItem text="%menu.visualisation.items.magicLayout" onAction="#openMagicLayout"/>
 	<SeparatorMenuItem />

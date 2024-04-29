@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.dynamic.dotty.DotView;
+import de.prob2.ui.dynamic.plantuml.PlantUmlView;
 import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
@@ -31,6 +32,13 @@ public class VisualisationMenu extends Menu {
 		DotView dotView = injector.getInstance(DotView.class);
 		dotView.show();
 		dotView.toFront();
+	}
+
+	@FXML
+	private void openPlantUmlVisualisation() {
+		PlantUmlView pumlView = injector.getInstance(PlantUmlView.class);
+		pumlView.show();
+		pumlView.toFront();
 	}
 
 	@FXML
