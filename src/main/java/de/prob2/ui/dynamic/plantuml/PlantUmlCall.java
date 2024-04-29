@@ -17,7 +17,6 @@ public final class PlantUmlCall {
 
 	public static final String PNG = "png";
 	public static final String SVG = "svg";
-	public static final String PDF = "pdf";
 
 	private final String javaCommand;
 	private final Path plantUmlJar;

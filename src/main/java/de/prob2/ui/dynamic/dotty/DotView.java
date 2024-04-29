@@ -221,6 +221,10 @@ public class DotView extends DynamicFormulaStage<DotVisualizationCommand, DotFor
 
 	@FXML
 	private void save() {
+		if (this.currentDotContent.get() == null) {
+			return;
+		}
+
 		final FileChooser fileChooser = new FileChooser();
 		FileChooser.ExtensionFilter svgFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
 		FileChooser.ExtensionFilter pngFilter = fileChooserManager.getPngFilter();

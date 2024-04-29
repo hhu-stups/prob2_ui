@@ -1,6 +1,8 @@
 package de.prob2.ui.dynamic.plantuml;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -41,6 +43,7 @@ import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
+import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -204,58 +207,59 @@ public class PlantUmlView extends DynamicFormulaStage<PlantUmlVisualizationComma
 
 	@FXML
 	private void save() {
-		throw new UnsupportedOperationException();
-		/*final FileChooser fileChooser = new FileChooser();
+		if (this.currentPumlContent.get() == null) {
+			return;
+		}
+
+		final FileChooser fileChooser = new FileChooser();
 		FileChooser.ExtensionFilter svgFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
 		FileChooser.ExtensionFilter pngFilter = fileChooserManager.getPngFilter();
-		FileChooser.ExtensionFilter dotFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.dot", "dot");
-		FileChooser.ExtensionFilter pdfFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.pdf", "pdf");
-		fileChooser.getExtensionFilters().setAll(svgFilter, pngFilter, dotFilter, pdfFilter);
+		FileChooser.ExtensionFilter pumlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.puml", "puml");
+		fileChooser.getExtensionFilters().setAll(svgFilter, pngFilter, pumlFilter);
 		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this.getScene().getWindow());
 		if (path == null) {
 			return;
 		}
 		FileChooser.ExtensionFilter selectedFilter = fileChooser.getSelectedExtensionFilter();
-		if (selectedFilter.equals(dotFilter)) {
-			saveDot(path);
+		if (selectedFilter.equals(pumlFilter)) {
+			savePuml(path);
 		} else {
-			final String format = getTargetFormat(selectedFilter, svgFilter, pngFilter, pdfFilter);
+			final String format = getTargetFormat(selectedFilter, svgFilter, pngFilter);
 			saveConverted(format, path);
-		}*/
+		}
 	}
 
-	/*private String getTargetFormat(FileChooser.ExtensionFilter selectedFilter, FileChooser.ExtensionFilter svgFilter, FileChooser.ExtensionFilter pngFilter, FileChooser.ExtensionFilter pdfFilter) {
+	private String getTargetFormat(FileChooser.ExtensionFilter selectedFilter, FileChooser.ExtensionFilter svgFilter, FileChooser.ExtensionFilter pngFilter) {
 		if (selectedFilter.equals(svgFilter)) {
-			return DotOutputFormat.SVG;
+			return PlantUmlCall.SVG;
 		} else if (selectedFilter.equals(pngFilter)) {
-			return DotOutputFormat.PNG;
-		} else if (selectedFilter.equals(pdfFilter)) {
-			return DotOutputFormat.PDF;
+			return PlantUmlCall.PNG;
 		} else {
 			throw new RuntimeException("Target Format cannot be extracted from selected filter: " + selectedFilter);
 		}
 	}
 
-	private void saveDot(final Path path) {
+	private void savePuml(final Path path) {
 		try {
 			Files.write(path, this.currentPumlContent.get());
 		} catch (IOException e) {
-			LOGGER.error("Failed to save Dot", e);
+			LOGGER.error("Failed to save puml", e);
 		}
 	}
 
 	private void saveConverted(String format, final Path path) {
 		try {
-			Files.write(path, new DotCall(this.dot)
-				                  .layoutEngine(this.dotEngine)
+			String javaExecutable = this.javaLocator.getJavaExecutable();
+			Path plantUmlJar = this.plantUmlLocator.findPlantUmlJar().orElseThrow();
+			Files.write(path, new PlantUmlCall(javaExecutable, plantUmlJar)
 				                  .outputFormat(format)
 				                  .input(this.currentPumlContent.get())
 				                  .call());
-		} catch (IOException | InterruptedException e) {
-			LOGGER.error("Failed to save file converted from dot", e);
+		} catch (Exception e) {
+			LOGGER.error("Failed to save file converted from puml", e);
 		}
-	}*/
+	}
 
 	@FXML
 	private void defaultSize() {
