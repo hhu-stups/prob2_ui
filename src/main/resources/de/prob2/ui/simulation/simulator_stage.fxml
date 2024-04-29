@@ -84,7 +84,7 @@
 											text="%simulation.tooltips.addSimulation" />
 								</tooltip>
 							</Button>
-							<MenuButton fx:id="btGenerateDiagram" disable="false"
+							<MenuButton fx:id="btGenerateDiagram" disable="true"
 									contentDisplay="GRAPHIC_ONLY" >
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="REORDER" bindableFontSize="${fontSize.fontSize * 2}" />

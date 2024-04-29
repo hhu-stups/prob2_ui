@@ -20,6 +20,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.web.WebView;
@@ -31,6 +32,8 @@ import javafx.stage.Stage;
 public class DiagramStage extends Stage {
 
     private final StageManager stageManager;
+
+	private final boolean islive;
 
     private final FileChooserManager fileChooserManager;
 
@@ -57,10 +60,11 @@ public class DiagramStage extends Stage {
 
     @FXML
     private Button saveButton;
-    
+
     @Inject
     public DiagramStage(StageManager stageManager, CurrentProject currentProject, CurrentTrace currentTrace,
-            Injector injector, I18n i18n, String nodesString, FileChooserManager fileChooserManager) {
+            Injector injector, I18n i18n, String nodesString, FileChooserManager fileChooserManager, boolean islive) {
+		
         super();
         this.stageManager = stageManager;
         this.fileChooserManager = fileChooserManager;
@@ -70,6 +74,7 @@ public class DiagramStage extends Stage {
         this.i18n = i18n;
         this.nodesString = nodesString;
         stageManager.loadFXML(this, "activation_Diagram_Stage.fxml", this.getClass().getName());
+		this.islive = islive;
         }
 
 
@@ -173,5 +178,9 @@ public class DiagramStage extends Stage {
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}
+	}
+
+	public boolean getIsLive(){
+		return islive;
 	}
 }

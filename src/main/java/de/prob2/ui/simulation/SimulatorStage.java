@@ -236,7 +236,7 @@ public class SimulatorStage extends Stage {
 	private Button openVisBButton;
 
 	@FXML
-	private MenuButton btgenerateDiagram;
+	private MenuButton btGenerateDiagram;
 
 	@FXML
 	private MenuItem generateDiagram;
@@ -354,6 +354,7 @@ public class SimulatorStage extends Stage {
 		});
 		btLoadConfiguration.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
 		btSimulate.disableProperty().bind(configurationPath.isNull().or(currentProject.currentMachineProperty().isNull()));
+		btGenerateDiagram.disableProperty().bind(configurationPath.isNull().or(currentProject.currentMachineProperty().isNull()));
 		final BooleanProperty noSimulations = new SimpleBooleanProperty();
 
 		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(simulationItemHandler.runningProperty().or(noSimulations.or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
@@ -733,7 +734,7 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private void generateLiveDiagram(){
-		diagramGenerator.generateLiveDiagram();
+		diagramGenerator.generateLiveDiagram(false);
 	}
 
 

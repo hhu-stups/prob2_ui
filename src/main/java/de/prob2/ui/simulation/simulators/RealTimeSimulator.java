@@ -11,6 +11,7 @@ import de.prob2.ui.simulation.diagram.DiagramStage;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
@@ -59,9 +60,13 @@ public class RealTimeSimulator extends Simulator {
 		Trace newTrace = simulationStep(trace);
 		currentTrace.set(newTrace);
 		scheduler.endSimulationStep();
-		if (injector.getInstance(DiagramStage.class).isShowing()) {
-			diagramGenerator.updateGraph();
-		}
+		Platform.runLater(()->{
+			if (diagramGenerator.getDiaStage()!= null ) {
+				if (diagramGenerator.getDiaStage().isShowing() && diagramGenerator.getDiaStage().getIsLive()) {
+					diagramGenerator.updateGraph();
+				}
+			}
+		});
 	}
 
 	public BooleanProperty runningProperty() {

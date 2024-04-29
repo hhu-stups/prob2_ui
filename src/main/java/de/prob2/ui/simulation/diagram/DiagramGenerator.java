@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
@@ -86,7 +87,7 @@ public class DiagramGenerator {
 
 		//To be enhanced with pop up window that contains the diagram
 
-		printSimulationDiagramm(nodesString);
+		printSimulationDiagramm(nodesString, false);
 	}
 
 	
@@ -104,10 +105,10 @@ public class DiagramGenerator {
 
 
 		//To be replaced with pop up window that contains the diagram
-		printSimulationDiagramm(nodesString);
+		printSimulationDiagramm(nodesString, false);
 	}
 
-	public void generateLiveDiagram(){
+	public void generateLiveDiagram(boolean updatetoggle){
 		//Initialisation of Velocity engine
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
@@ -121,8 +122,11 @@ public class DiagramGenerator {
 
 
 		//To be enhanced with pop up window that contains the diagram
-
-		printSimulationDiagramm(nodesString);
+		if (!updatetoggle) {
+			printSimulationDiagramm(nodesString, true);
+		} else {
+			diaStage.updateGraph(nodesString);
+		}
 
 	}
 
@@ -185,8 +189,11 @@ public class DiagramGenerator {
 	
 				} else {
 					opConfig = (ActivationOperationConfiguration)activation;
-					diaNode.add(new DiagramNode(opConfig.getOpName()+"_event","white",opConfig.getOpName(), "ellipse"));
-					
+					if (opConfig.getWithPredicate() == null) {
+						diaNode.add(new DiagramNode(opConfig.getOpName()+"_event","white",opConfig.getOpName(), "ellipse"));
+					} else {
+						diaNode.add(new ComplexListener(opConfig.getOpName()+"_event", "white", opConfig.getOpName(), "ellipse", opConfig.getWithPredicate()));
+					}
 	
 					if(!activation.getId().equals("$initialise_machine")){
 						diaNode.add(new ComplexNode(activation.getId(),
@@ -224,24 +231,58 @@ public class DiagramGenerator {
 		for (ActivationConfiguration activation : activations) {
 			if (activation.getClass().equals(ActivationChoiceConfiguration.class)) {
 				choiceConfig = (ActivationChoiceConfiguration)activation;
-				edge = new DiagramEdge(choiceConfig.getId(), choiceConfig.getActivations().keySet().stream().toList(), choiceConfig.getActivations().values().stream().toList(), "dotted");
-				activating.add(edge);
+				if (choiceConfig.getActivations() != null) {
+					edge = new DiagramEdge(choiceConfig.getId(), choiceConfig.getActivations().keySet().stream().toList(), choiceConfig.getActivations().values().stream().toList(), "dotted");
+					activating.add(edge);
+				}
 			} else {
 				opConfig = (ActivationOperationConfiguration)activation;
 				if(!activation.getId().equals("$initialise_machine")){
 				edge = new DiagramEdge(opConfig.getId(), List.of(opConfig.getOpName()+"_event"), List.of(opConfig.getAfter()), "");
 				activating.add(edge);
 				}
-				edge = new DiagramEdge(opConfig.getOpName()+"_event", opConfig.getActivating(), opConfig.getActivating().stream().map(n -> "Activating").toList(), "");
-				boolean isPresent = false;
-				for (DiagramEdge compareEdge : activating) {
-					if (compareEdge.getFrom().equals(edge.getFrom())) {
-						isPresent = true;
+				if (opConfig.getActivating() != null ) {
+					edge = new DiagramEdge(opConfig.getOpName()+"_event", opConfig.getActivating(), opConfig.getActivating().stream().map(n -> "Activating").collect(Collectors.toList()), "");
+					boolean isPresent = false;
+					for (DiagramEdge compareEdge : activating) {
+						
+						if (compareEdge.getFrom().equals(edge.getFrom())) {
+							//original unclean solution to isolate already present edges
+							/*
+							for ( String compareTo: compareEdge.getTo()) {
+								if (edge.getTo().contains(compareTo)) {
+									isPresent = true;
+								}
+							}
+							*/
+							
+							edge.getTo().stream().forEach(x->{
+								if(!compareEdge.getTo().contains(x)){
+									compareEdge.getTo().add(x);
+									compareEdge.getEdgeLabel().add("activating");
+
+									//alternate version that is longer but more "thorough"
+									/* 
+									List<String> toList = compareEdge.getTo();
+									List<String> labelList = compareEdge.getEdgeLabel();
+									toList.add(x);
+									compareEdge.setTo(toList);
+									labelList = compareEdge.getEdgeLabel();
+									labelList.add("activating");
+									compareEdge.setEdgeLabel(labelList);
+									*/
+								}						
+						});
+						isPresent=true;
+											
+						
+						}
 					}
+					if (!isPresent) {
+						activating.add(edge);
 				}
-				if (!isPresent) {
-					activating.add(edge);
 				}
+				
 			}
 		}
 		//Same as above but for listeners
@@ -256,7 +297,7 @@ public class DiagramGenerator {
 
 
 
-	private void printSimulationDiagramm(String nodesString){
+	private void printSimulationDiagramm(String nodesString, boolean islive){
 		//Getting Activation data; Only used for console information
 		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		System.out.println("ACTIVATIONS:");
@@ -265,19 +306,26 @@ public class DiagramGenerator {
 		System.out.println(config.getUiListenerConfigurations());
 		System.out.println("DOT: \n" + nodesString);
 
-		makeDiagramStage(nodesString);
+		makeDiagramStage(nodesString, islive);
 	}
 	
 
-	private void makeDiagramStage(String nodesString){
+	private void makeDiagramStage(String nodesString, boolean islive){
 		//DiagramStage diagramStage = new DiagramStage(stageManager, currentProject, currentTrace, injector, i18n, nodesString, fileChooserManager);
 		//diagramStage.show();
-		diaStage = new DiagramStage(stageManager, currentProject, currentTrace, injector, i18n, nodesString, fileChooserManager);
+		diaStage = new DiagramStage(stageManager, currentProject, currentTrace, injector, i18n, nodesString, fileChooserManager, islive);
 		diaStage.show();
 	}
 
 	public void updateGraph(){
-		
-		diaStage.updateGraph("");
+		generateLiveDiagram(true);
+		//diaStage.updateGraph("");
 	}
+
+
+	public DiagramStage getDiaStage() {
+		return diaStage;
+	}
+
+	
 }
