@@ -425,6 +425,15 @@ File Extensions:
    .def   for DEFINITIONS files
    .rmch  for Rules machines for data validation
 
+Freetypes:
+----------
+Freetypes exist in Z and in the Rodin theory plugin and are supported by ProB.
+You can also define new freetypes in classicl B by adding a FREETYPES clause
+with equations separated by semicolon.
+Here is a definition of an inductive type IntList for lists of
+integers constructed using inil and icons:
+FREETYPES
+  IntList = inil, icons(INTEGER*IntList)
   
 Differences with Atelier B
 --------------------------
