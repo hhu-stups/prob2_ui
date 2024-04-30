@@ -428,7 +428,7 @@ File Extensions:
 Freetypes:
 ----------
 Freetypes exist in Z and in the Rodin theory plugin and are supported by ProB.
-You can also define new freetypes in classicl B by adding a FREETYPES clause
+You can also define new freetypes in classical B by adding a FREETYPES clause
 with equations separated by semicolon.
 Here is a definition of an inductive type IntList for lists of
 integers constructed using inil and icons:
