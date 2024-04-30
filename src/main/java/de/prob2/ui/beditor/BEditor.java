@@ -13,11 +13,7 @@ import de.prob.scripting.ModelFactory;
 import de.prob2.ui.codecompletion.CodeCompletion;
 import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.consoles.b.codecompletion.BCodeCompletion;
-import de.prob2.ui.internal.ExtendedCodeArea;
-import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.*;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -25,7 +21,6 @@ import de.prob2.ui.project.machines.Machine;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
-
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
@@ -80,6 +75,8 @@ public class BEditor extends ExtendedCodeArea {
 		Optional<StyleSpans<Collection<String>>> styleSpansOpt = super.computeHighlighting(text);
 		if (styleSpansOpt.isEmpty()) {
 			return Optional.empty();
+		} else if (text.isEmpty()) {
+			return styleSpansOpt;
 		}
 
 		StyleSpans<Collection<String>> styleSpans = styleSpansOpt.get();
