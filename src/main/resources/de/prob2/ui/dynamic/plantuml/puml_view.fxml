@@ -35,6 +35,8 @@
 				<top>
 					<MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
 						<Menu text="%menu.view">
+							<MenuItem fx:id="reloadButton" text="%visb.menu.edit.reload" onAction="#reload" />
+							<SeparatorMenuItem/>
 							<MenuItem fx:id="zoomResetMenuButton" text="%menu.view.items.zoomDefault" visible="false" onAction="#defaultSize" />
 							<MenuItem fx:id="fakeZoomResetMenuButton" text="%menu.view.items.zoomDefault" accelerator="Shortcut+'0'" onAction="#defaultSize" />
 							<MenuItem fx:id="zoomInMenuButton" text="%menu.view.items.zoomIn" visible="false" onAction="#zoomIn" />

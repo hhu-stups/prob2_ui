@@ -262,6 +262,11 @@ public class PlantUmlView extends DynamicFormulaStage<PlantUmlVisualizationComma
 	}
 
 	@FXML
+	private void reload() {
+		this.refresh();
+	}
+
+	@FXML
 	private void defaultSize() {
 		pumlView.setZoom(1);
 	}
