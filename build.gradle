@@ -116,38 +116,33 @@ dependencies {
 	implementation group: "ch.qos.logback", name: "logback-classic", version: "1.4.14"
 	implementation group: "com.fatboyindustrial.gson-javatime-serialisers", name: "gson-javatime-serialisers", version: "1.1.2"
 	implementation group: "com.google.code.gson", name: "gson", version: "2.10.1"
-	implementation group: "com.google.guava", name: "guava", version: "33.0.0-jre"
+	implementation group: "com.google.guava", name: "guava", version: "33.1.0-jre"
 	implementation group: "io.github.java-diff-utils", name: "java-diff-utils", version: "4.12"
-	implementation group: "commons-cli", name: "commons-cli", version: "1.6.0"
+	implementation group: "commons-cli", name: "commons-cli", version: "1.7.0"
 	implementation group: "de.jangassen", name: "nsmenufx", version: "3.1.0"
 	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.13.2-SNAPSHOT"))
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel"
 	implementation group: "de.hhu.stups", name: "voparser", version: "0.2.1"
 	// cannot update to 1.2.2 as this breaks nsmenufx due to a transitive dependency on jna
 	implementation group: "net.harawata", name: "appdirs", version: "1.2.1"
-	implementation group: "org.controlsfx", name: "controlsfx", version: "11.2.0"
+	implementation group: "org.controlsfx", name: "controlsfx", version: "11.2.1"
 	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.2"
-	implementation group: "org.pf4j", name: "pf4j", version: "3.10.0"
+	implementation group: "org.pf4j", name: "pf4j", version: "3.11.0"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.3'
 
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava'
 
-	testImplementation platform('org.junit:junit-bom:5.10.1')
+	testImplementation platform('org.junit:junit-bom:5.10.2')
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
 	testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
-	testImplementation group: 'org.assertj', name : 'assertj-core', version: '3.25.1'
-	testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.9.0'
+	testImplementation group: 'org.assertj', name : 'assertj-core', version: '3.25.3'
+	testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.11.0'
 }
 
 final osArch = System.getProperty("os.arch")
-final javafxVersion = "21.0.2"
-
-// Split off everything starting at the first non-digit (e. g. "11.0.2" -> "11", "17" -> "17", "18-ea+12" -> "18").
-// Used when creating a multi-release jar below (multiPlatformShadowJar) -
-// the major version of OpenJFX is equal to its minimum required Java version.
-final javafxMajorVersion = javafxVersion.split(/\D/, 2)[0]
+final javafxVersion = "22.0.1"
 
 final javafxModules = [
 	"javafx.base",
