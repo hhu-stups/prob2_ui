@@ -263,6 +263,7 @@ public class PlantUmlView extends DynamicFormulaStage<PlantUmlVisualizationComma
 
 	@FXML
 	private void reload() {
+		this.interrupt();
 		this.refresh();
 	}
 
