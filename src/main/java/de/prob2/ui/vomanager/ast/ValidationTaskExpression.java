@@ -9,7 +9,7 @@ import de.prob2.ui.vomanager.IValidationTask;
 public final class ValidationTaskExpression implements IValidationExpression {
 	private final String identifier;
 	
-	private IValidationTask<?> task;
+	private IValidationTask task;
 	
 	public ValidationTaskExpression(final String identifier) {
 		this.identifier = identifier;
@@ -33,11 +33,11 @@ public final class ValidationTaskExpression implements IValidationExpression {
 		return Stream.of(this);
 	}
 	
-	public IValidationTask<?> getTask() {
+	public IValidationTask getTask() {
 		return task;
 	}
 	
-	public void setTask(final IValidationTask<?> task) {
+	public void setTask(final IValidationTask task) {
 		this.task = task;
 	}
 	

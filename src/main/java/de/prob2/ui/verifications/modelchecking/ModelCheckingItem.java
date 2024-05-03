@@ -42,7 +42,7 @@ import javafx.collections.FXCollections;
 	"goal",
 	"selected",
 })
-public final class ModelCheckingItem implements IExecutableItem, IValidationTask<ModelCheckingItem> {
+public final class ModelCheckingItem implements IExecutableItem, IValidationTask {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 

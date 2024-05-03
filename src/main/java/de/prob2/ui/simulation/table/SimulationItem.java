@@ -39,8 +39,7 @@ import javafx.collections.FXCollections;
 	"type",
 	"information",
 })
-public final class SimulationItem implements IValidationTask<SimulationItem> {
-
+public final class SimulationItem implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String id;
 	private final Path simulationPath;

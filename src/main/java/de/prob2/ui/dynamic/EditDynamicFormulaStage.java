@@ -16,8 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
-public abstract class EditDynamicFormulaStage<T extends DynamicFormulaTask<T>> extends Stage {
-
+public abstract class EditDynamicFormulaStage<T extends DynamicFormulaTask> extends Stage {
 	@FXML
 	private Label formulaTitleLabel;
 	@FXML

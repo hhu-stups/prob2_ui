@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
 import de.prob.model.eventb.ProofObligation;
-import de.prob2.ui.dynamic.DynamicFormulaTask;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
@@ -19,8 +18,7 @@ import de.prob2.ui.vomanager.IValidationTask;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public final class ProofObligationItem implements IValidationTask<ProofObligationItem> {
-
+public final class ProofObligationItem implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String name;

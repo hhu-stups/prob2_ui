@@ -8,11 +8,10 @@ import java.util.Objects;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.IValidationTask;
 
-public class ValidationTaskType<T extends IValidationTask<T>> implements Comparable<ValidationTaskType<?>> {
-
+public class ValidationTaskType<T extends IValidationTask> implements Comparable<ValidationTaskType<?>> {
 	private static final Map<String, ValidationTaskType<?>> REGISTRY = new HashMap<>();
 
-	public static synchronized <T extends IValidationTask<T>> ValidationTaskType<T> register(ValidationTaskType<T> taskType) {
+	public static synchronized <T extends IValidationTask> ValidationTaskType<T> register(ValidationTaskType<T> taskType) {
 		Objects.requireNonNull(taskType, "taskType");
 		if (REGISTRY.putIfAbsent(taskType.getKey(), taskType) != null) {
 			throw new IllegalArgumentException("task type already registered: " + taskType.getKey());

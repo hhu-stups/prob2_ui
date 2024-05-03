@@ -51,8 +51,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extends DynamicFormulaTask<F>> extends Stage {
-
+public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extends DynamicFormulaTask> extends Stage {
 	private static final class DynamicCommandItemCell<T extends DynamicCommandItem> extends ListCell<T> {
 		private DynamicCommandItemCell() {
 			super();

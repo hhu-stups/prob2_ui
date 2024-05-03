@@ -97,19 +97,19 @@ public class VOManagerStage extends Stage {
 	private TextArea taFeedback;
 
 	@FXML
-	private TableView<IValidationTask<?>> vtTable;
+	private TableView<IValidationTask> vtTable;
 
 	@FXML
-	private TableColumn<IValidationTask<?>, Checked> vtStatusColumn;
+	private TableColumn<IValidationTask, Checked> vtStatusColumn;
 
 	@FXML
-	private TableColumn<IValidationTask<?>, String> vtIdColumn;
+	private TableColumn<IValidationTask, String> vtIdColumn;
 
 	@FXML
-	private TableColumn<IValidationTask<?>, String> vtTypeColumn;
+	private TableColumn<IValidationTask, String> vtTypeColumn;
 
 	@FXML
-	private TableColumn<IValidationTask<?>, String> vtConfigurationColumn;
+	private TableColumn<IValidationTask, String> vtConfigurationColumn;
 
 	private final CurrentProject currentProject;
 
@@ -125,7 +125,7 @@ public class VOManagerStage extends Stage {
 
 	private final ObservableSet<String> relatedMachineNames;
 
-	private final ListProperty<IValidationTask<?>> currentMachineVTs;
+	private final ListProperty<IValidationTask> currentMachineVTs;
 
 	@Inject
 	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
@@ -220,7 +220,7 @@ public class VOManagerStage extends Stage {
 		});
 
 		vtTable.setRowFactory(table -> {
-			final TableRow<IValidationTask<?>> row = new TableRow<>();
+			final TableRow<IValidationTask> row = new TableRow<>();
 
 			row.setOnMouseClicked(e -> {
 				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
@@ -246,13 +246,13 @@ public class VOManagerStage extends Stage {
 		vtConfigurationColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskDescription(i18n)));
 
 		final InvalidationListener validationFeedbackListener = o -> showFeedback();
-		currentMachineVTs.addListener((ListChangeListener<IValidationTask<?>>) c -> {
+		currentMachineVTs.addListener((ListChangeListener<IValidationTask>) c -> {
 			while (c.next()) {
-				for (IValidationTask<?> removed : c.getRemoved()) {
+				for (IValidationTask removed : c.getRemoved()) {
 					vtTable.getItems().remove(removed);
 					removed.checkedProperty().removeListener(validationFeedbackListener);
 				}
-				for (IValidationTask<?> added : c.getAddedSubList()) {
+				for (IValidationTask added : c.getAddedSubList()) {
 					vtTable.getItems().add(added);
 					added.checkedProperty().addListener(validationFeedbackListener);
 				}
@@ -308,7 +308,7 @@ public class VOManagerStage extends Stage {
 		}
 	}
 
-	private void checkSingleTask(final IValidationTask<?> task) {
+	private void checkSingleTask(final IValidationTask task) {
 		// FIXME This parses the ID as a validation expression - we should simplify this once we have a proper way to check a generic IValidationTask
 		voChecker.checkVO(new ValidationObligation(currentProject.getCurrentMachine().getName(), task.getId()));
 	}

@@ -5,7 +5,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -24,7 +23,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
-import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -42,7 +40,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"location",
 	"selected",
 })
-public final class ReplayTrace implements IExecutableItem, IValidationTask<ReplayTrace> {
+public final class ReplayTrace implements IExecutableItem, IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	@JsonIgnore

@@ -6,8 +6,7 @@ import de.prob2.ui.dynamic.DynamicFormulaTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
-public final class DotFormulaTask extends DynamicFormulaTask<DotFormulaTask> {
-
+public final class DotFormulaTask extends DynamicFormulaTask {
 	public DotFormulaTask(
 		@JsonProperty("id") final String id,
 		@JsonProperty("commandType") final String commandType,

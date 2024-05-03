@@ -51,7 +51,7 @@ public final class ValidationObligation {
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 
 	@JsonIgnore
-	private final ObservableList<IValidationTask<?>> tasks = FXCollections.observableArrayList();
+	private final ObservableList<IValidationTask> tasks = FXCollections.observableArrayList();
 
 	@JsonCreator
 	public ValidationObligation(
@@ -74,15 +74,15 @@ public final class ValidationObligation {
 				this.checked.set(this.parsedExpression.getChecked());
 			}
 		};
-		this.getTasks().addListener((ListChangeListener<IValidationTask<?>>) o -> {
+		this.getTasks().addListener((ListChangeListener<IValidationTask>) o -> {
 			while (o.next()) {
 				if (o.wasRemoved()) {
-					for (final IValidationTask<?> task : o.getRemoved()) {
+					for (final IValidationTask task : o.getRemoved()) {
 						task.checkedProperty().removeListener(checkedListener);
 					}
 				}
 				if (o.wasAdded()) {
-					for (final IValidationTask<?> task : o.getAddedSubList()) {
+					for (final IValidationTask task : o.getAddedSubList()) {
 						task.checkedProperty().addListener(checkedListener);
 					}
 				}
@@ -103,7 +103,7 @@ public final class ValidationObligation {
 		}
 	}
 
-	private static VTType extractType(IValidationTask<?> validationTask) {
+	private static VTType extractType(IValidationTask validationTask) {
 		if (validationTask instanceof ReplayTrace) {
 			return VTType.TRACE;
 		} else if (validationTask instanceof SimulationItem) {
@@ -134,8 +134,8 @@ public final class ValidationObligation {
 		return null;
 	}
 
-	public void parse(final List<IValidationTask<?>> validationTasksList) {
-		Map<String, IValidationTask<?>> validationTasks = validationTasksList.stream()
+	public void parse(final List<IValidationTask> validationTasksList) {
+		Map<String, IValidationTask> validationTasks = validationTasksList.stream()
 			                                                  .filter(vt -> vt.getId() != null)
 			                                                  .collect(Collectors.toMap(IValidationTask::getId, Function.identity()));
 
@@ -144,7 +144,7 @@ public final class ValidationObligation {
 		try {
 			final IValidationExpression parsed = IValidationExpression.parse(voParser, this.getExpression());
 			parsed.getAllTasks().forEach(taskExpr -> {
-				IValidationTask<?> validationTask;
+				IValidationTask validationTask;
 				if (validationTasks.containsKey(taskExpr.getIdentifier())) {
 					validationTask = validationTasks.get(taskExpr.getIdentifier());
 				} else {
@@ -171,7 +171,7 @@ public final class ValidationObligation {
 		return checked.get();
 	}
 
-	public ObservableList<IValidationTask<?>> getTasks() {
+	public ObservableList<IValidationTask> getTasks() {
 		return this.tasks;
 	}
 

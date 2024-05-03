@@ -28,7 +28,7 @@ import javafx.collections.ObservableList;
 	"code",
 	"selected",
 })
-public final class SymbolicCheckingFormulaItem extends AbstractCheckableItem implements IValidationTask<SymbolicCheckingFormulaItem> {
+public final class SymbolicCheckingFormulaItem extends AbstractCheckableItem implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final SymbolicCheckingType type;

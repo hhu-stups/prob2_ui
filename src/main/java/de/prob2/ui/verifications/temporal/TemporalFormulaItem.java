@@ -31,7 +31,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"expectedResult",
 	"selected",
 })
-public final class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask<TemporalFormulaItem> {
+public final class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final TemporalFormulaType type;

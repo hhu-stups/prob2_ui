@@ -1,9 +1,7 @@
 package de.prob2.ui.project.machines;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -57,8 +55,7 @@ import javafx.collections.ObservableList;
 	"historyChartItems",
 })
 public final class MachineProperties {
-
-	private final ReadOnlyListProperty<IValidationTask<?>> validationTasks;
+	private final ReadOnlyListProperty<IValidationTask> validationTasks;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
@@ -87,39 +84,39 @@ public final class MachineProperties {
 	}
 
 	@JsonGetter("validationTasks")
-	public ObservableList<IValidationTask<?>> getValidationTasks() {
+	public ObservableList<IValidationTask> getValidationTasks() {
 		return this.validationTasks;
 	}
 
 	@JsonSetter("validationTasks")
-	private void setValidationTasks(List<IValidationTask<?>> validationTasks) {
+	private void setValidationTasks(List<IValidationTask> validationTasks) {
 		this.getValidationTasks().setAll(validationTasks);
 	}
 
 	@JsonIgnore
-	private ObservableList<IValidationTask<?>> getValidationTasksByPredicate(Predicate<IValidationTask<?>> predicate) {
+	private ObservableList<IValidationTask> getValidationTasksByPredicate(Predicate<IValidationTask> predicate) {
 		return this.getValidationTasks().filtered(predicate);
 	}
 
 	@JsonIgnore
-	public ObservableList<IValidationTask<?>> getValidationTasksWithId() {
+	public ObservableList<IValidationTask> getValidationTasksWithId() {
 		return this.getValidationTasksByPredicate(vt -> vt.getId() != null);
 	}
 
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
-	public <T extends IValidationTask<T>> ObservableList<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
+	public <T extends IValidationTask> ObservableList<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
 		Objects.requireNonNull(taskType, "taskType");
 		return (ObservableList<T>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()));
 	}
 
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
-	public <T extends DynamicFormulaTask<T>> ObservableList<T> getDynamicFormulaTasksByCommand(ValidationTaskType<T> taskType, String command) {
+	public <T extends DynamicFormulaTask> ObservableList<T> getDynamicFormulaTasksByCommand(ValidationTaskType<T> taskType, String command) {
 		Objects.requireNonNull(taskType, "taskType");
 		Objects.requireNonNull(command, "command");
 		// casting shenanigans to make java's type inference happy
-		return (ObservableList<T>) (ObservableList<?>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()) && command.equals(((DynamicFormulaTask<T>) vt).getCommandType()));
+		return (ObservableList<T>) (ObservableList<?>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()) && command.equals(((DynamicFormulaTask) vt).getCommandType()));
 	}
 
 	@JsonIgnore
@@ -137,16 +134,16 @@ public final class MachineProperties {
 			       .collect(Collectors.toSet());
 	}
 
-	public void addValidationTask(IValidationTask<?> validationTask) {
+	public void addValidationTask(IValidationTask validationTask) {
 		this.getValidationTasks().add(Objects.requireNonNull(validationTask, "validationTask"));
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends IValidationTask<?>> T addValidationTaskIfNotExist(T validationTask) {
+	public <T extends IValidationTask> T addValidationTaskIfNotExist(T validationTask) {
 		Objects.requireNonNull(validationTask, "validationTask");
-		Optional<IValidationTask<?>> existingItem = this.getValidationTasks().stream().filter(validationTask::settingsEqual).findAny();
+		Optional<IValidationTask> existingItem = this.getValidationTasks().stream().filter(validationTask::settingsEqual).findAny();
 		if (existingItem.isPresent()) {
-			IValidationTask<?> vt = existingItem.get();
+			IValidationTask vt = existingItem.get();
 			vt.reset();
 			return (T) vt;
 		} else {
@@ -155,11 +152,11 @@ public final class MachineProperties {
 		}
 	}
 
-	public void removeValidationTask(IValidationTask<?> validationTask) {
+	public void removeValidationTask(IValidationTask validationTask) {
 		this.getValidationTasks().remove(Objects.requireNonNull(validationTask, "validationTask"));
 	}
 
-	public void replaceValidationTask(IValidationTask<?> oldValidationTask, IValidationTask<?> newValidationTask) {
+	public void replaceValidationTask(IValidationTask oldValidationTask, IValidationTask newValidationTask) {
 		Objects.requireNonNull(oldValidationTask, "oldValidationTask");
 		Objects.requireNonNull(newValidationTask, "newValidationTask");
 		int index = this.getValidationTasks().indexOf(oldValidationTask);
@@ -171,12 +168,12 @@ public final class MachineProperties {
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T extends IValidationTask<?>> T replaceValidationTaskIfNotExist(T oldValidationTask, T newValidationTask) {
+	public <T extends IValidationTask> T replaceValidationTaskIfNotExist(T oldValidationTask, T newValidationTask) {
 		Objects.requireNonNull(oldValidationTask, "oldValidationTask");
 		Objects.requireNonNull(newValidationTask, "newValidationTask");
-		Optional<IValidationTask<?>> existingItem = this.getValidationTasks().stream().filter(newValidationTask::settingsEqual).findAny();
+		Optional<IValidationTask> existingItem = this.getValidationTasks().stream().filter(newValidationTask::settingsEqual).findAny();
 		if (existingItem.isPresent()) {
-			IValidationTask<?> vt = existingItem.get();
+			IValidationTask vt = existingItem.get();
 			vt.reset();
 			return (T) vt;
 		} else {

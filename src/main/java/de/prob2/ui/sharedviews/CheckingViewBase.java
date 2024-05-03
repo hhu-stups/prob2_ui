@@ -149,7 +149,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		shouldExecuteColumn.setGraphic(selectAll);
 		configurationColumn.setCellValueFactory(features -> {
 			String configuration = configurationForItem(features.getValue());
-			if (features.getValue() instanceof IValidationTask<?> task) {
+			if (features.getValue() instanceof IValidationTask task) {
 				if (task.getId() != null) {
 					configuration = "[" + task.getId() + "] " + configuration;
 				}
@@ -162,7 +162,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 
 	@SuppressWarnings("unchecked")
 	protected T addItem(T newItem) {
-		if (newItem instanceof IValidationTask<?> vt) {
+		if (newItem instanceof IValidationTask vt) {
 			return (T) this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(vt);
 		} else {
 			final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
@@ -178,7 +178,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	}
 
 	protected void removeItem(final T item) {
-		if (item instanceof IValidationTask<?> vt) {
+		if (item instanceof IValidationTask vt) {
 			this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(vt);
 		} else {
 			this.getItemsProperty(this.currentProject.getCurrentMachine()).remove(item);
@@ -187,7 +187,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 
 	@SuppressWarnings("unchecked")
 	protected T replaceItem(final T oldItem, final T newItem) {
-		if (oldItem instanceof IValidationTask<?> vtOld && newItem instanceof IValidationTask<?> vtNew) {
+		if (oldItem instanceof IValidationTask vtOld && newItem instanceof IValidationTask vtNew) {
 			return (T) this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(vtOld, vtNew);
 		} else {
 			final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();

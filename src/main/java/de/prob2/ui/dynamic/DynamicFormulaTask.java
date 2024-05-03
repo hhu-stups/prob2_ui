@@ -19,8 +19,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"commandType",
 	"formula",
 })
-public abstract class DynamicFormulaTask<T extends DynamicFormulaTask<T>> implements IValidationTask<T> {
-
+public abstract class DynamicFormulaTask implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String commandType;
@@ -79,7 +78,7 @@ public abstract class DynamicFormulaTask<T extends DynamicFormulaTask<T>> implem
 
 	@Override
 	public boolean settingsEqual(Object other) {
-		return other instanceof DynamicFormulaTask<?> that
+		return other instanceof DynamicFormulaTask that
 			       && Objects.equals(this.getTaskType(), that.getTaskType())
 			       && Objects.equals(this.getId(), that.getId())
 			       && Objects.equals(this.getCommandType(), that.getCommandType())
