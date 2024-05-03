@@ -202,6 +202,7 @@ Corresponding B types to TLA+ data values (let type(e) be the type of the expres
 TLA+ data                               B Type
 --------------------------------------------------
 number e.g. 123                         INTEGER
+decimal number e.g. 123.4               REAL
 string e.g. "abc"                       STRING
 bool value e.g. TRUE                    BOOL
 set e.g. {e,f}                          POW(type(e)), type(e) = type(f)
