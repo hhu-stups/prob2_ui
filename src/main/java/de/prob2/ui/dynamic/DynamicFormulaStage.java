@@ -63,8 +63,12 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 		protected void updateItem(final T item, final boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll("disabled");
-			if (item != null && !empty) {
+			if (empty || item == null) {
+				setText(null);
+				setGraphic(null);
+			} else {
 				setText(item.getName());
+				setGraphic(null);
 				if (!item.isAvailable()) {
 					getStyleClass().add("disabled");
 				}
@@ -161,14 +165,12 @@ public abstract class DynamicFormulaStage<T extends DynamicCommandItem, F extend
 	protected void initialize() {
 		this.refresh();
 
-		/*this.showingProperty().addListener((observable, from, to) -> {
-			if(!from && to) {
-				T choice = lvChoice.getSelectionModel().getSelectedItem();
-				if (choice != null) {
-					visualize(choice);
-				}
+		this.showingProperty().addListener((observable, from, to) -> {
+			this.interrupt();
+			if (to) {
+				this.refresh();
 			}
-		});*/
+		});
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.updatePlaceholderLabel();
