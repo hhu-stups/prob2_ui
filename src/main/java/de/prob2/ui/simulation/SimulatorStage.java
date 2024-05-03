@@ -446,15 +446,9 @@ public class SimulatorStage extends Stage {
 
 		saveMenuItem.disableProperty().bind(disableSaveProperty);
 		saveItem.disableProperty().bind(disableSaveProperty);
-		saveItem.setOnAction(e -> saveSimulation());
 
 		saveAsMenuItem.disableProperty().bind(disableSaveProperty);
 		saveAsItem.disableProperty().bind(disableSaveProperty);
-		saveAsItem.setOnAction(e -> saveSimulationAs());
-
-		saveTraceItem.setOnAction(e -> saveTrace());
-		saveTimedTraceItem.setOnAction(e -> saveTimedTrace());
-		saveAutomaticSimulationItem.setOnAction(e -> saveAutomaticSimulation());
 
 		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n, savedProperty));
 

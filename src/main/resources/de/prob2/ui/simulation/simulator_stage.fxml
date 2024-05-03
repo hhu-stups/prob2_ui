@@ -112,12 +112,12 @@
 											<Tooltip text="%common.buttons.saveTrace" />
 										</tooltip>
 										<items>
-											<MenuItem fx:id="saveItem" text="%simulation.menuBar.save"/>
-											<MenuItem fx:id="saveAsItem" text="%simulation.menuBar.saveAs"/>
+											<MenuItem fx:id="saveItem" text="%simulation.menuBar.save" onAction="#saveSimulation"/>
+											<MenuItem fx:id="saveAsItem" text="%simulation.menuBar.saveAs" onAction="#saveSimulationAs"/>
 											<SeparatorMenuItem/>
-											<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace"/>
-											<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace"/>
-											<MenuItem fx:id="saveAutomaticSimulationItem" text="%simulation.contextMenu.saveUIReplay"/>
+											<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace" onAction="#saveTrace"/>
+											<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace" onAction="#saveTimedTrace"/>
+											<MenuItem fx:id="saveAutomaticSimulationItem" text="%simulation.contextMenu.saveUIReplay" onAction="#saveAutomaticSimulation"/>
 										</items>
 									</MenuButton>
 									<Button fx:id="btSimulate" onAction="#simulate" >
