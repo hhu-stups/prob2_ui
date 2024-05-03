@@ -1,12 +1,8 @@
 package de.prob2.ui.history;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
-
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -17,7 +13,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationDetailsStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleObjectProperty;
@@ -26,15 +21,13 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
-import javafx.scene.control.Button;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.VBox;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 @FXMLInjected
 @Singleton
@@ -47,6 +40,7 @@ public final class HistoryView extends VBox {
 				final Trace trace = currentTrace.get();
 				if (!this.isEmpty() && trace != null && MouseButton.PRIMARY.equals(event.getButton())) {
 					currentTrace.set(trace.gotoPosition(this.getItem().getIndex()));
+					lastSelectedIndex = this.getItem().getIndex() + 1;
 				}
 			});
 		}
@@ -104,6 +98,7 @@ public final class HistoryView extends VBox {
 	private final Injector injector;
 	private final CurrentProject currentProject;
 	private final TraceFileHandler traceFileHandler;
+	private int lastSelectedIndex = -1;
 
 	@Inject
 	private HistoryView(
@@ -131,11 +126,21 @@ public final class HistoryView extends VBox {
 		positionColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getIndex() + 1));
 		transitionColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().toPrettyString()));
 
+		this.setOnKeyPressed(event -> {
+			final Trace trace = currentTrace.get();
+			final HistoryItem selected = historyTableView.getSelectionModel().getSelectedItem();
+			if (event.getCode().equals(KeyCode.ENTER) && selected != null && trace != null) {
+				currentTrace.set(trace.gotoPosition(selected.getIndex()));
+				lastSelectedIndex = selected.getIndex() + 1;
+			}
+		});
+
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			historyTableView.getItems().clear();
 			if (to != null) {
 				historyTableView.getItems().addAll(HistoryItem.itemsForTrace(to));
 				historyTableView.sort();
+				historyTableView.getSelectionModel().focus(lastSelectedIndex);
 			}
 		};
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
