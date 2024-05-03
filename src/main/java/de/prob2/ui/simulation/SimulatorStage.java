@@ -15,14 +15,11 @@ import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.annotation.Nullable;
-
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jangassen.MenuToolkit;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -63,6 +60,8 @@ import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -83,15 +82,11 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
@@ -204,6 +199,32 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
+	@FXML
+	private MenuBar menuBar;
+
+	@FXML
+	private MenuItem loadSimBModelMenuItem;
+
+	@FXML
+	private MenuItem loadSimBTracesMenuItem;
+
+	@FXML
+	private MenuItem loadExternalSimulationMenuItem;
+
+	@FXML
+	private MenuItem saveMenuItem;
+
+	@FXML
+	private MenuItem saveAsMenuItem;
+
+	@FXML
+	private MenuItem saveTraceMenuItem;
+
+	@FXML
+	private MenuItem saveTimedTraceMenuItem;
+
+	@FXML
+	private MenuItem saveAutomaticSimulationMenuItem;
 
 	@FXML
 	private MenuButton btLoadConfiguration;
@@ -298,8 +319,6 @@ public class SimulatorStage extends Stage {
 
 	private final BooleanProperty savedProperty;
 
-	private final MenuToolkit menuToolkit;
-
 	private final SimulationItemHandler simulationItemHandler;
 
 	private final SimulationMode simulationMode;
@@ -319,7 +338,7 @@ public class SimulatorStage extends Stage {
 		final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
 		final I18n i18n, final FileChooserManager fileChooserManager,
 		final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
-		final StopActions stopActions, @Nullable final MenuToolkit menuToolkit
+		final StopActions stopActions
 	) {
 		super();
 		this.stageManager = stageManager;
@@ -337,72 +356,16 @@ public class SimulatorStage extends Stage {
 		this.traceFileHandler = traceFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
 		this.savedProperty = new SimpleBooleanProperty(this, "savedProperty", true);
-		this.menuToolkit = menuToolkit;
 		this.time = 0;
 		this.timer = new Timer(true);
 		stopActions.add(this::cancelTimer);
 		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
-
-		if (this.menuToolkit != null) {
-			MenuBar menuBar = new MenuBar();
-			menuBar.setUseSystemMenuBar(true);
-			final Menu openMenu = new Menu(i18n.translate("simulation.menuBar.file"));
-
-			MenuItem loadSimBModelItem = new MenuItem(i18n.translate("simulation.file.open.model"));
-			loadSimBModelItem.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
-			loadSimBModelItem.setOnAction(e -> loadSimBModel());
-
-			MenuItem loadSimBTracesItem = new MenuItem(i18n.translate("simulation.file.open.blackbox"));
-			loadSimBTracesItem.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
-			loadSimBTracesItem.setOnAction(e -> loadSimBTraces());
-
-			MenuItem loadExternalSimulationItem = new MenuItem(i18n.translate("simulation.file.open.external"));
-			loadExternalSimulationItem.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
-			loadExternalSimulationItem.setOnAction(e -> loadExternal());
-
-			MenuItem saveItem = new MenuItem(i18n.translate("simulation.menuBar.save"));
-			saveItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
-			saveItem.setOnAction(e -> saveSimulation());
-			saveItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHORTCUT_DOWN));
-
-			MenuItem saveAsItem = new MenuItem(i18n.translate("simulation.menuBar.saveAs"));
-			saveAsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
-			saveAsItem.setOnAction(e -> saveSimulationAs());
-			saveAsItem.setAccelerator(new KeyCodeCombination(KeyCode.S, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN));
-
-			MenuItem saveTraceItem = new MenuItem(i18n.translate("simulation.contextMenu.saveTrace"));
-			saveTraceItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
-			saveTraceItem.setOnAction(e -> saveTrace());
-
-			MenuItem saveTimedTraceItem = new MenuItem(i18n.translate("simulation.contextMenu.saveTimedTrace"));
-			saveTimedTraceItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
-			saveTimedTraceItem.setOnAction(e -> saveTimedTrace());
-
-			MenuItem saveAutomaticSimulationItem = new MenuItem(i18n.translate("simulation.contextMenu.saveUIReplay"));
-			saveAutomaticSimulationItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
-			saveAutomaticSimulationItem.setOnAction(e -> saveAutomaticSimulation());
-
-			MenuItem closeItem = new MenuItem(i18n.translate("simulation.menuBar.close"));
-			closeItem.setOnAction(e -> this.close());
-
-			openMenu.getItems().addAll(loadSimBModelItem, loadSimBTracesItem, loadExternalSimulationItem, new SeparatorMenuItem(), saveItem, saveAsItem, new SeparatorMenuItem(), saveTraceItem, saveTimedTraceItem, saveAutomaticSimulationItem, new SeparatorMenuItem(), closeItem);
-
-			menuBar.getMenus().add(0, openMenu);
-			setMacMenu(menuBar);
-		}
-	}
-
-	private void setMacMenu(MenuBar menuBar) {
-		if (this.menuToolkit != null) {
-			Platform.runLater(() -> {
-				this.menuToolkit.setMenuBar(this, menuBar);
-				this.stageManager.setMacMenuBar(this, menuBar);
-			});
-		}
 	}
 
 	@FXML
 	public void initialize() {
+		stageManager.setMacMenuBar(this, menuBar);
+
 		realTimeSimulator.runningProperty().addListener((observable, from, to) -> {
 			if (to) {
 				Platform.runLater(() -> {
@@ -416,7 +379,12 @@ public class SimulatorStage extends Stage {
 				});
 			}
 		});
-		btLoadConfiguration.disableProperty().bind(realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull()));
+
+		BooleanExpression disableOpenProperty = realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull());
+		loadSimBModelMenuItem.disableProperty().bind(disableOpenProperty);
+		loadSimBTracesMenuItem.disableProperty().bind(disableOpenProperty);
+		loadExternalSimulationMenuItem.disableProperty().bind(disableOpenProperty);
+		btLoadConfiguration.disableProperty().bind(disableOpenProperty);
 		btSimulate.disableProperty().bind(configurationPath.isNull().or(currentProject.currentMachineProperty().isNull()));
 
 		final BooleanProperty noSimulations = new SimpleBooleanProperty();
@@ -462,17 +430,26 @@ public class SimulatorStage extends Stage {
 		});
 
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
-		saveTraceButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.isNull()));
+
+		BooleanExpression disableSaveTraceProperty = currentProject.currentMachineProperty().isNull().or(currentTrace.isNull());
+		saveTraceMenuItem.disableProperty().bind(disableSaveTraceProperty);
+		saveTimedTraceMenuItem.disableProperty().bind(disableSaveTraceProperty);
+		saveAutomaticSimulationMenuItem.disableProperty().bind(disableSaveTraceProperty);
+		saveTraceButton.disableProperty().bind(disableSaveTraceProperty);
 		saveAutomaticSimulationItem.disableProperty().bind(Bindings.createBooleanBinding(() -> {
 			ISimulationModelConfiguration config = realTimeSimulator.getConfig();
 			return config == null || config instanceof SimulationExternalConfiguration;
 		}, configurationPath, cbSimulation.itemsProperty(), cbSimulation.getSelectionModel().selectedItemProperty()));
 		helpButton.setHelpContent("mainmenu.advanced.simB", null);
 
-		saveItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
+		BooleanExpression disableSaveProperty = Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath);
+
+		saveMenuItem.disableProperty().bind(disableSaveProperty);
+		saveItem.disableProperty().bind(disableSaveProperty);
 		saveItem.setOnAction(e -> saveSimulation());
 
-		saveAsItem.disableProperty().bind(Bindings.createBooleanBinding(() -> configurationPath.get() == null || !configurationPath.get().toString().isEmpty() && !configurationPath.get().toString().endsWith(".json"), configurationPath));
+		saveAsMenuItem.disableProperty().bind(disableSaveProperty);
+		saveAsItem.disableProperty().bind(disableSaveProperty);
 		saveAsItem.setOnAction(e -> saveSimulationAs());
 
 		saveTraceItem.setOnAction(e -> saveTrace());
@@ -800,6 +777,7 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
+	@FXML
 	private void saveSimulation() {
 		if(configurationPath.get().toString().isEmpty()) {
 			saveSimulationAs();
@@ -814,6 +792,7 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
+	@FXML
 	private void saveSimulationAs() {
 		final FileChooser chooser = new FileChooser();
 		chooser.getExtensionFilters().addAll(fileChooserManager.getSimBFilter());
@@ -867,6 +846,7 @@ public class SimulatorStage extends Stage {
 		simulationDiagramItems.getItems().remove(diagramConfiguration);
 	}
 
+	@FXML
 	private void saveTrace() {
 		try {
 			traceFileHandler.save(currentTrace.get(), currentProject.getCurrentMachine());
@@ -875,6 +855,7 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
+	@FXML
 	private void saveTimedTrace() {
 		try {
 			injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
@@ -883,6 +864,7 @@ public class SimulatorStage extends Stage {
 		}
 	}
 
+	@FXML
 	private void saveAutomaticSimulation() {
 		try {
 			injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
