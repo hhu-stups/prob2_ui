@@ -142,14 +142,7 @@ dependencies {
 }
 
 final osArch = System.getProperty("os.arch")
-// JavaFX 22.0.1 has occasional errors on macOS when opening some windows,
-// apparently related to NSMenuFX.
-// For example, an IndexOutOfBoundsException from inside the NSMenuFX WindowMenuUpdateListener.
-// When this happens, it causes further exceptions when displaying the uncaught exception alert,
-// leading to an infinite cycle of errors.
-// We should check if this goes away again in future JavaFX versions,
-// and if not, consider replacing/removing the NSMenuFX dependency.
-final javafxVersion = "21.0.2"
+final javafxVersion = "22.0.1"
 
 final javafxModules = [
 	"javafx.base",

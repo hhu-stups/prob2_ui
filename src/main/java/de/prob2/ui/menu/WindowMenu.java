@@ -71,7 +71,6 @@ public class WindowMenu extends Menu {
 					menuToolkit.createCycleWindowsItem(), new SeparatorMenuItem()));
 			this.getItems().addAll(new SeparatorMenuItem(), menuToolkit.createBringAllToFrontItem(),
 					new SeparatorMenuItem());
-			menuToolkit.autoAddWindowMenuItems(this);
 		}
 	}
 
