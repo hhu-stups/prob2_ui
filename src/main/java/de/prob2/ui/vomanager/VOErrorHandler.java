@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 
 import de.prob.voparser.VOException;
 import de.prob.voparser.VOParseException;
-import de.prob.voparser.VOTypeCheckException;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.scene.control.Alert;
@@ -24,8 +23,6 @@ public class VOErrorHandler {
 		String contentKey;
 		if (exception instanceof VOParseException) {
 			contentKey = "vomanager.error.parsing.content";
-		} else if (exception instanceof VOTypeCheckException) {
-			contentKey = "vomanager.error.typechecking";
 		} else {
 			contentKey = "vomanager.error.generic";
 		}

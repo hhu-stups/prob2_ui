@@ -3,7 +3,6 @@ package de.prob2.ui.vomanager;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -12,20 +11,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
-import de.prob.check.ModelCheckingOptions;
 import de.prob.voparser.VOException;
 import de.prob.voparser.VOParser;
-import de.prob.voparser.VTType;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.dynamic.DynamicFormulaTask;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.simulation.choice.SimulationType;
-import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
-import de.prob2.ui.verifications.po.ProofObligationItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
@@ -103,44 +92,12 @@ public final class ValidationObligation {
 		}
 	}
 
-	private static VTType extractType(IValidationTask validationTask) {
-		if (validationTask instanceof ReplayTrace) {
-			return VTType.TRACE;
-		} else if (validationTask instanceof SimulationItem) {
-			SimulationType simulationType = ((SimulationItem) validationTask).getType();
-			if (simulationType == SimulationType.MONTE_CARLO_SIMULATION || simulationType == SimulationType.HYPOTHESIS_TEST || simulationType == SimulationType.ESTIMATION) {
-				return VTType.EXPLORE;
-			}
-			// TODO: Implement a single simulation
-			return VTType.TRACE;
-		} else if (validationTask instanceof TemporalFormulaItem) {
-			return VTType.EXPLORE;
-		} else if (validationTask instanceof ModelCheckingItem) {
-			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
-			if (options.contains(ModelCheckingOptions.Options.FIND_GOAL) ||
-				    ((ModelCheckingItem) validationTask).getGoal() == null ||
-				    !((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
-				return VTType.TRACE;
-			}
-			// Otherwise invariant/deadlock checking, or just covering state space
-			return VTType.EXPLORE;
-		} else if (validationTask instanceof SymbolicCheckingFormulaItem) {
-			return VTType.STATIC;
-		} else if (validationTask instanceof ProofObligationItem) {
-			return VTType.STATIC;
-		} else if (validationTask instanceof DynamicFormulaTask) {
-			return VTType.STATE_SPACE;
-		}
-		return null;
-	}
-
 	public void parse(final List<IValidationTask> validationTasksList) {
 		Map<String, IValidationTask> validationTasks = validationTasksList.stream()
 			                                                  .filter(vt -> vt.getId() != null)
 			                                                  .collect(Collectors.toMap(IValidationTask::getId, Function.identity()));
 
 		final VOParser voParser = new VOParser();
-		validationTasks.forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
 		try {
 			final IValidationExpression parsed = IValidationExpression.parse(voParser, this.getExpression());
 			parsed.getAllTasks().forEach(taskExpr -> {

@@ -17,7 +17,6 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.OrValidationExpression;
-import de.prob2.ui.vomanager.ast.SequentialValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
 @Singleton
@@ -51,8 +50,6 @@ public class VOChecker {
 			return checkAndExpression((AndValidationExpression)expression);
 		} else if (expression instanceof OrValidationExpression) {
 			return checkOrExpression((OrValidationExpression)expression);
-		} else if (expression instanceof SequentialValidationExpression) {
-			return checkSequentialExpression((SequentialValidationExpression)expression);
 		} else {
 			throw new RuntimeException("VO expression type is unknown: " + expression.getClass());
 		}
@@ -81,19 +78,6 @@ public class VOChecker {
 			return future;
 		});
 	}
-
-	private CompletableFuture<?> checkSequentialExpression(SequentialValidationExpression expression) {
-		return checkVOExpression(expression.getLeft()).thenCompose(r -> {
-			final CompletableFuture<?> future;
-			if (expression.getLeft().getChecked() == Checked.SUCCESS) {
-				future = checkVOExpression(expression.getRight());
-			} else {
-				future = CompletableFuture.completedFuture(r);
-			}
-			return future;
-		});
-	}
-
 
 	public void checkVO(ValidationObligation validationObligation) {
 		if (validationObligation.getParsedExpression() == null) {
