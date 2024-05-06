@@ -41,6 +41,7 @@ import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.ContextMenu;
@@ -111,13 +112,13 @@ public class VOManagerStage extends Stage {
 	@FXML
 	private TableColumn<IValidationTask, String> vtConfigurationColumn;
 
+	private final StageManager stageManager;
+
 	private final CurrentProject currentProject;
 
 	private final CurrentTrace currentTrace;
 
 	private final VOChecker voChecker;
-
-	private final VOErrorHandler voErrorHandler;
 
 	private final I18n i18n;
 
@@ -128,13 +129,12 @@ public class VOManagerStage extends Stage {
 	private final ListProperty<IValidationTask> currentMachineVTs;
 
 	@Inject
-	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-	                      final VOChecker voChecker, final VOErrorHandler voErrorHandler, final I18n i18n) {
+	public VOManagerStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final VOChecker voChecker, final I18n i18n) {
 		super();
+		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.voChecker = voChecker;
-		this.voErrorHandler = voErrorHandler;
 		this.i18n = i18n;
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.relatedMachineNames = FXCollections.observableSet();
@@ -304,7 +304,9 @@ public class VOManagerStage extends Stage {
 				voChecker.checkRequirement(item.getRequirement());
 			}
 		} catch (VOParseException exc) {
-			voErrorHandler.handleError(this.getScene().getWindow(), exc);
+			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");
+			alert.initOwner(this);
+			alert.show();
 		}
 	}
 
