@@ -8,6 +8,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.util.Duration;
 
 import java.util.Map;
 
@@ -105,7 +106,9 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	private void updateContent(String content) {
 		setText(content);
 		if (content != null && !content.isEmpty()) {
-			setTooltip(new Tooltip(content));
+			Tooltip tooltip = new Tooltip(content);
+			tooltip.setShowDuration(Duration.INDEFINITE);
+			setTooltip(tooltip);
 		} else {
 			setTooltip(null);
 		}
