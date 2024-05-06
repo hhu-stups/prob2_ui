@@ -105,6 +105,13 @@ public final class MachineProperties {
 
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
+	public <T extends IValidationTask> ObservableList<T> getValidationTasksByClass(Class<T> clazz) {
+		Objects.requireNonNull(clazz, "clazz");
+		return (ObservableList<T>) this.getValidationTasksByPredicate(clazz::isInstance);
+	}
+
+	@JsonIgnore
+	@SuppressWarnings("unchecked")
 	public <T extends IValidationTask> ObservableList<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
 		Objects.requireNonNull(taskType, "taskType");
 		return (ObservableList<T>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()));
@@ -182,10 +189,9 @@ public final class MachineProperties {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public ObservableList<TemporalFormulaItem> getTemporalFormulas() {
-		return (ObservableList<TemporalFormulaItem>)(ObservableList<?>)this.getValidationTasksByPredicate(TemporalFormulaItem.class::isInstance);
+		return this.getValidationTasksByClass(TemporalFormulaItem.class);
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> temporalStatusProperty() {
