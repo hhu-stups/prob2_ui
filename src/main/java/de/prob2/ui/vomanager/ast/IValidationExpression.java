@@ -7,7 +7,6 @@ import de.prob.voparser.node.AAndVo;
 import de.prob.voparser.node.AIdentifierVo;
 import de.prob.voparser.node.AOrVo;
 import de.prob.voparser.node.PVo;
-import de.prob.voparser.node.Start;
 import de.prob2.ui.verifications.Checked;
 
 public interface IValidationExpression {
@@ -23,9 +22,8 @@ public interface IValidationExpression {
 		}
 	}
 	
-	static IValidationExpression parse(final VOParser parser, final String expression) {
-		final Start ast = parser.parseFormula(expression);
-		return fromAst(ast.getPVo());
+	static IValidationExpression parse(final String expression) {
+		return fromAst(VOParser.parse(expression).getPVo());
 	}
 	
 	Stream<? extends IValidationExpression> getChildren();

@@ -12,7 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
 import de.prob.voparser.VOParseException;
-import de.prob.voparser.VOParser;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
@@ -97,9 +96,8 @@ public final class ValidationObligation {
 			                                                  .filter(vt -> vt.getId() != null)
 			                                                  .collect(Collectors.toMap(IValidationTask::getId, Function.identity()));
 
-		final VOParser voParser = new VOParser();
 		try {
-			final IValidationExpression parsed = IValidationExpression.parse(voParser, this.getExpression());
+			final IValidationExpression parsed = IValidationExpression.parse(this.getExpression());
 			parsed.getAllTasks().forEach(taskExpr -> {
 				IValidationTask validationTask;
 				if (validationTasks.containsKey(taskExpr.getIdentifier())) {
