@@ -10,8 +10,12 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.temporal.ctl.CTLFormulaChecker;
+import de.prob2.ui.verifications.temporal.ctl.CTLFormulaItem;
+import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaChecker;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -23,12 +27,13 @@ import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
+import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
 public class TemporalFormulaStage extends TemporalItemStage {
 
 	@FXML
-	private ChoiceBox<TemporalFormulaType> cbType;
+	private ChoiceBox<ValidationTaskType<?>> cbType;
 
 	@FXML
 	private TextField idTextField;
@@ -76,21 +81,37 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	public void initialize() {
 		super.initialize();
 
-		cbType.setConverter(i18n.translateConverter());
+		cbType.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(ValidationTaskType<?> object) {
+				if (object == BuiltinValidationTaskTypes.LTL) {
+					return i18n.translate("verifications.temporal.type.ltl");
+				} else if (object == BuiltinValidationTaskTypes.CTL) {
+					return i18n.translate("verifications.temporal.type.ctl");
+				} else {
+					throw new AssertionError("Unhandled temporal formula type: " + object);
+				}
+			}
+
+			@Override
+			public ValidationTaskType<? extends TemporalFormulaItem> fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to ValidationTaskType not supported");
+			}
+		});
 
 		this.stateLimit.visibleProperty().bind(this.chooseStateLimit.selectedProperty());
 		this.stateLimit.getEditor().setTextFormatter(new TextFormatter<>(new IntegerStringConverter()));
 		this.stateLimit.setValueFactory(new ImprovedIntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 500_000, 1_000));
 
 		// bind the UI elements
-		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get() == TemporalFormulaType.LTL, cbType.getSelectionModel().selectedItemProperty());
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get() == BuiltinValidationTaskTypes.LTL, cbType.getSelectionModel().selectedItemProperty());
 		btShowBuiltins.visibleProperty().bind(binding);
 		cbType.getSelectionModel().select(cbType.getItems().get(0));
 		cbExpectedResult.getSelectionModel().select(true);
 	}
 
 	public void setData(final TemporalFormulaItem item) {
-		this.cbType.setValue(item.getType());
+		this.cbType.setValue(item.getTaskType());
 		this.idTextField.setText(item.getId() == null ? "" : item.getId());
 		this.taCode.replaceText(item.getCode());
 		this.taDescription.setText(item.getDescription());
@@ -119,9 +140,9 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		result = null;
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		String code = taCode.getText();
-		TemporalFormulaType type = cbType.getValue();
-		if (type == TemporalFormulaType.LTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
+		ValidationTaskType<?> type = cbType.getValue();
+		if (type == BuiltinValidationTaskTypes.LTL) {
+			LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
 			try {
 				LTLFormulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 			} catch (ProBError e) {
@@ -129,8 +150,8 @@ public class TemporalFormulaStage extends TemporalItemStage {
 				return;
 			}
 			result = item;
-		} else if (type == TemporalFormulaType.CTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(type, id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
+		} else if (type == BuiltinValidationTaskTypes.CTL) {
+			CTLFormulaItem item = new CTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
 			try {
 				CTLFormulaChecker.parseFormula(item.getCode(), currentTrace.getModel());
 			} catch (ProBError e) {

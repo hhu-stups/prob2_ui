@@ -21,7 +21,7 @@ import de.prob2.ui.vomanager.Requirement;
 
 public class Project implements HasMetadata {
 	public static final String FILE_TYPE = "Project";
-	public static final int CURRENT_FORMAT_VERSION = 47;
+	public static final int CURRENT_FORMAT_VERSION = 48;
 	
 	private final String name;
 	private final String description;

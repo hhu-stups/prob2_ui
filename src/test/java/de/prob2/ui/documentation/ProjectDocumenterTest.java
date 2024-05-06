@@ -29,8 +29,7 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
-import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
-import de.prob2.ui.verifications.temporal.TemporalFormulaType;
+import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 
 import javafx.beans.property.SimpleListProperty;
@@ -61,7 +60,7 @@ class ProjectDocumenterTest {
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
 	final ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
-	final TemporalFormulaItem ltlFormulaItem = new TemporalFormulaItem(TemporalFormulaType.LTL, "", "", "", -1, true);
+	final LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "", -1, true);
 	final SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("", "", SymbolicCheckingType.SYMBOLIC_MODEL_CHECKING);
 	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
 

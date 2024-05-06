@@ -182,9 +182,10 @@ public final class MachineProperties {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	@JsonIgnore
 	public ObservableList<TemporalFormulaItem> getTemporalFormulas() {
-		return this.getValidationTasksByType(BuiltinValidationTaskTypes.TEMPORAL);
+		return (ObservableList<TemporalFormulaItem>)(ObservableList<?>)this.getValidationTasksByPredicate(TemporalFormulaItem.class::isInstance);
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> temporalStatusProperty() {

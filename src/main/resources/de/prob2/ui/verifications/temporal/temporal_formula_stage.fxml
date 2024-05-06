@@ -5,7 +5,7 @@
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.verifications.temporal.TemporalFormulaEditor?>
 <?import de.prob2.ui.verifications.temporal.TemporalFormulaStage?>
-<?import de.prob2.ui.verifications.temporal.TemporalFormulaType?>
+<?import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -35,8 +35,8 @@
 							<ChoiceBox fx:id="cbType" HBox.hgrow="NEVER">
 								<items>
 									<FXCollections fx:factory="observableArrayList">
-										<TemporalFormulaType fx:constant="LTL"/>
-										<TemporalFormulaType fx:constant="CTL"/>
+										<BuiltinValidationTaskTypes fx:constant="LTL"/>
+										<BuiltinValidationTaskTypes fx:constant="CTL"/>
 									</FXCollections>
 								</items>
 							</ChoiceBox>

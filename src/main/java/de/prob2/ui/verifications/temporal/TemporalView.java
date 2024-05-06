@@ -31,9 +31,11 @@ import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.temporal.ltl.LTLData;
+import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -317,9 +319,10 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
 		if (path != null) {
-			List<TemporalFormulaItem> formulas = itemsTable.getItems().stream()
-				.filter(item -> item.getType() == TemporalFormulaType.LTL)
-				.filter(TemporalFormulaItem::selected)
+			List<LTLFormulaItem> formulas = machine.getMachineProperties()
+				.getValidationTasksByType(BuiltinValidationTaskTypes.LTL)
+				.stream()
+				.filter(LTLFormulaItem::selected)
 				.collect(Collectors.toList());
 			List<LTLPatternItem> patterns = machine.getMachineProperties().getLTLPatterns();
 			try {
