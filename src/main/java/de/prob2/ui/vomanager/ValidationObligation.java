@@ -11,7 +11,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
-import de.prob.voparser.VOException;
+import de.prob.voparser.VOParseException;
 import de.prob.voparser.VOParser;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
@@ -110,7 +110,7 @@ public final class ValidationObligation {
 				taskExpr.setTask(validationTask);
 			});
 			this.setParsedExpression(parsed);
-		} catch (VOException e) {
+		} catch (VOParseException e) {
 			this.setParsedExpression(null);
 			throw e;
 		}

@@ -2,7 +2,6 @@ package de.prob2.ui.vomanager;
 
 import com.google.inject.Inject;
 
-import de.prob.voparser.VOException;
 import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.StageManager;
 
@@ -18,15 +17,8 @@ public class VOErrorHandler {
 		this.stageManager = stageManager;
 	}
 
-	public void handleError(Window window, VOException exception) {
-		String headerKey = "vomanager.error.parsing.header";
-		String contentKey;
-		if (exception instanceof VOParseException) {
-			contentKey = "vomanager.error.parsing.content";
-		} else {
-			contentKey = "vomanager.error.generic";
-		}
-		final Alert alert = stageManager.makeExceptionAlert(exception, headerKey, contentKey);
+	public void handleError(Window window, VOParseException exception) {
+		final Alert alert = stageManager.makeExceptionAlert(exception, "vomanager.error.parsing.header", "vomanager.error.parsing.content");
 		alert.initOwner(window);
 		alert.show();
 	}

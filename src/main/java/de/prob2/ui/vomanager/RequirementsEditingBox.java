@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.voparser.VOException;
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -189,7 +189,7 @@ public class RequirementsEditingBox extends VBox {
 		final Machine machine = currentProject.get().getMachine(vo.getMachine());
 		try {
 			vo.parse(machine);
-		} catch (VOException exc) {
+		} catch (VOParseException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}
 	}

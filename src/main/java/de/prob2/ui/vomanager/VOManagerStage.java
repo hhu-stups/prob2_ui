@@ -14,7 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.model.representation.AbstractModel;
-import de.prob.voparser.VOException;
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -271,7 +271,7 @@ public class VOManagerStage extends Stage {
 				requirement.getValidationObligation(machine).ifPresent(vo -> {
 					try {
 						vo.parse(machine);
-					} catch (VOException e) {
+					} catch (VOParseException e) {
 						LOGGER.warn("Error in validation expression", e);
 					}
 				});
@@ -303,7 +303,7 @@ public class VOManagerStage extends Stage {
 			} else if (item.getRequirement() != null) {
 				voChecker.checkRequirement(item.getRequirement());
 			}
-		} catch (VOException exc) {
+		} catch (VOParseException exc) {
 			voErrorHandler.handleError(this.getScene().getWindow(), exc);
 		}
 	}
