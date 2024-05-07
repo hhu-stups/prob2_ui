@@ -50,11 +50,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProjectDocumenterTest {
-
+	private static final Locale TEST_LOCALE = Locale.ENGLISH;
 	final List<Machine> machines = new ArrayList<>();
 	final Machine trafficLight = Mockito.mock(Machine.class);
 	final ReplayTrace trace = Mockito.mock(ReplayTrace.class);
-	final I18n i18n = Mockito.mock(I18n.class);
+	final I18n i18n = new I18n(TEST_LOCALE);
 	final Injector injector = Mockito.mock(Injector.class);
 	final CurrentProject currentProject = Mockito.mock(CurrentProject.class);
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
@@ -87,7 +87,7 @@ class ProjectDocumenterTest {
 		Mockito.when(currentProject.get()).thenReturn(Mockito.mock(Project.class));
 		Mockito.when(currentProject.get().getPreference(ArgumentMatchers.any(String.class))).thenReturn(Preference.DEFAULT);
 
-		Mockito.when(injector.getInstance(Locale.class)).thenReturn(new Locale("en"));
+		Mockito.when(injector.getInstance(Locale.class)).thenReturn(TEST_LOCALE);
 	}
 
 	@BeforeEach
