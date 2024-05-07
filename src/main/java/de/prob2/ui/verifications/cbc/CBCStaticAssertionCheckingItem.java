@@ -3,12 +3,12 @@ package de.prob2.ui.verifications.cbc;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
-public final class CBCStaticAssertionCheckingItem extends SymbolicCheckingFormulaItem {
+public final class CBCStaticAssertionCheckingItem extends CBCAssertionCheckingItem {
 	@JsonCreator
 	public CBCStaticAssertionCheckingItem(@JsonProperty("id") String id) {
 		super(id);
@@ -27,5 +27,10 @@ public final class CBCStaticAssertionCheckingItem extends SymbolicCheckingFormul
 	@Override
 	public String getTaskDescription(I18n i18n) {
 		return "";
+	}
+	
+	@Override
+	protected ConstraintBasedAssertionCheckCommand.CheckingType getAssertionCheckingType() {
+		return ConstraintBasedAssertionCheckCommand.CheckingType.STATIC;
 	}
 }

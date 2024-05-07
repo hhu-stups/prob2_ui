@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.cbc;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -7,7 +9,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
+import de.prob.check.CBCInvariantChecker;
+import de.prob.check.CBCInvariantViolationFound;
+import de.prob.check.CheckError;
+import de.prob.check.CheckInterrupted;
+import de.prob.check.IModelCheckingResult;
+import de.prob.check.ModelCheckOk;
+import de.prob.check.NotYetFinished;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -50,6 +63,40 @@ public final class CBCInvariantPreservationCheckingItem extends SymbolicChecking
 			return i18n.translate("verifications.symbolicchecking.choice.checkAllOperations");
 		} else {
 			return this.getOperationName();
+		}
+	}
+	
+	@Override
+	public void execute(ExecutionContext context) {
+		this.getCounterExamples().clear();
+		
+		ArrayList<String> eventNames;
+		if (getOperationName() == null) {
+			// Check all operations/events
+			eventNames = null;
+		} else {
+			// Check only one specific operation/event
+			eventNames = new ArrayList<>();
+			eventNames.add(getOperationName());
+		}
+		IModelCheckingResult result = new CBCInvariantChecker(context.stateSpace(), eventNames).call();
+		
+		if (result instanceof ModelCheckOk) {
+			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success"));
+		} else if (result instanceof CBCInvariantViolationFound violation) {
+			this.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample"));
+			List<Trace> counterExamples = new ArrayList<>();
+			int size = violation.getCounterexamples().size();
+			for (int i = 0; i < size; i++) {
+				counterExamples.add(violation.getTrace(i, context.stateSpace()));
+			}
+			this.getCounterExamples().setAll(counterExamples);
+		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
+			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage()));
+		} else if (result instanceof CheckError) {
+			this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "common.result.message", result.getMessage()));
+		} else {
+			throw new AssertionError("Unhandled CBC invariant checking result type: " + result.getClass());
 		}
 	}
 	

@@ -9,7 +9,6 @@ import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
@@ -44,11 +43,6 @@ public abstract class SymbolicCheckingFormulaItem extends AbstractCheckableItem 
 
 	public ListProperty<Trace> counterExamplesProperty() {
 		return counterExamples;
-	}
-
-	@Override
-	public void execute(final ExecutionContext context) {
-		SymbolicCheckingFormulaHandler.checkItem(this, context.stateSpace());
 	}
 
 	@Override
