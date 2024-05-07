@@ -960,6 +960,39 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 
+	private static void updateV48Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		validationTasks.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String taskType = checkText(task.get("taskType"));
+			if ("SYMBOLIC".equals(taskType)) {
+				String symbolicType = checkText(task.remove("type"));
+				String code = checkText(task.remove("code"));
+				String newTaskType = switch (symbolicType) {
+					case "INVARIANT" -> {
+						task.put("operationName", code.isEmpty() ? null : code);
+						yield "CBC_INVARIANT_PRESERVATION_CHECKING";
+					}
+					case "DEADLOCK" -> {
+						task.put("predicate", code);
+						yield "CBC_DEADLOCK_FREEDOM_CHECKING";
+					}
+					case "CHECK_REFINEMENT" -> "CBC_REFINEMENT_CHECKING";
+					case "CHECK_STATIC_ASSERTIONS" -> "CBC_STATIC_ASSERTION_CHECKING";
+					case "CHECK_DYNAMIC_ASSERTIONS" -> "CBC_DYNAMIC_ASSERTION_CHECKING";
+					case "CHECK_WELL_DEFINEDNESS" -> "WELL_DEFINEDNESS_CHECKING";
+					case "FIND_REDUNDANT_INVARIANTS" -> "CBC_FIND_REDUNDANT_INVARIANTS";
+					case "SYMBOLIC_MODEL_CHECK" -> {
+						task.put("algorithm", code);
+						yield "SYMBOLIC_MODEL_CHECKING";
+					}
+					default -> throw new JsonConversionException("Invalid symbolic checking type: " + symbolicType);
+				};
+				task.put("taskType", newTaskType);
+			}
+		});
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -1127,6 +1160,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 47) {
 				updateV47Machine(machine);
+			}
+			if (oldVersion <= 48) {
+				updateV48Machine(machine);
 			}
 		});
 

@@ -15,9 +15,11 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.cbc.CBCDeadlockFreedomCheckingItem;
+import de.prob2.ui.verifications.cbc.CBCInvariantPreservationCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 
@@ -37,10 +39,12 @@ public class TemplateUtility {
 	}
 
 	public static String symbolicConfigString(SymbolicCheckingFormulaItem formula, I18n i18n) {
-		String config = formula.getCode();
-		// no configuration is internally represented as 1=1, but that is not intended in the output
-		if(formula.getType().equals(SymbolicCheckingType.CBC_DEADLOCK_FREEDOM_CHECKING) && config.equals("1=1")){
+		String config;
+		// no predicate is internally represented as 1=1, but that is not intended in the output
+		if (formula instanceof CBCDeadlockFreedomCheckingItem deadlockItem && "1=1".equals(deadlockItem.getPredicate())){
 			return latexSafe(i18n.translate("verifications.symbolicchecking.view.deadlock.noPredicate"));
+		} else {
+			config = formula.getTaskDescription(i18n);
 		}
 		// & is replaced because otherwise a column change takes place in the template table
 		config = config.replaceAll("&",", \\\\newline");
@@ -103,7 +107,7 @@ public class TemplateUtility {
 	}
 	public static boolean symbolicConfigurationColumnNecessary(List<SymbolicCheckingFormulaItem> symbolicFormulas){
 		for (SymbolicCheckingFormulaItem formula : symbolicFormulas) {
-			if (!formula.getCode().isEmpty()) {
+			if (formula instanceof CBCInvariantPreservationCheckingItem || formula instanceof CBCDeadlockFreedomCheckingItem || formula instanceof SymbolicModelCheckingItem) {
 				return true;
 			}
 		}

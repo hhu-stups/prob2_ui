@@ -26,6 +26,13 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.WellDefinednessCheckingItem;
+import de.prob2.ui.verifications.cbc.CBCDeadlockFreedomCheckingItem;
+import de.prob2.ui.verifications.cbc.CBCDynamicAssertionCheckingItem;
+import de.prob2.ui.verifications.cbc.CBCFindRedundantInvariantsItem;
+import de.prob2.ui.verifications.cbc.CBCInvariantPreservationCheckingItem;
+import de.prob2.ui.verifications.cbc.CBCRefinementCheckingItem;
+import de.prob2.ui.verifications.cbc.CBCStaticAssertionCheckingItem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -67,21 +74,21 @@ public final class SymbolicCheckingFormulaHandler {
 		item.getCounterExamples().setAll(counterExamples);
 	}
 	
-	private static void handleInvariant(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void handleInvariant(CBCInvariantPreservationCheckingItem item, StateSpace stateSpace) {
 		final ArrayList<String> eventNames;
-		if (item.getCode().isEmpty()) {
+		if (item.getOperationName() == null) {
 			// Check all operations/events
 			eventNames = null;
 		} else {
 			// Check only one specific operation/event
 			eventNames = new ArrayList<>();
-			eventNames.add(item.getCode());
+			eventNames.add(item.getOperationName());
 		}
 		CBCInvariantChecker checker = new CBCInvariantChecker(stateSpace, eventNames);
 		handleFormulaResult(item, stateSpace, checker.call());
 	}
 		
-	private static void handleRefinement(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void handleRefinement(CBCRefinementCheckingItem item, StateSpace stateSpace) {
 		ConstraintBasedRefinementCheckCommand cmd = new ConstraintBasedRefinementCheckCommand();
 		stateSpace.execute(cmd);
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
@@ -120,7 +127,7 @@ public final class SymbolicCheckingFormulaHandler {
 		}
 	}
 	
-	private static void handleWellDefinedness(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void handleWellDefinedness(WellDefinednessCheckingItem item, StateSpace stateSpace) {
 		CheckWellDefinednessCommand cmd = new CheckWellDefinednessCommand();
 		stateSpace.execute(cmd);
 		if (cmd.getDischargedCount().equals(cmd.getTotalCount())) {
@@ -130,9 +137,8 @@ public final class SymbolicCheckingFormulaHandler {
 		}
 	}
 	
-	private static void handleSymbolic(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
-		final SymbolicModelcheckCommand.Algorithm algorithm = SymbolicModelcheckCommand.Algorithm.valueOf(item.getCode());
-		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(algorithm);
+	private static void handleSymbolic(SymbolicModelCheckingItem item, StateSpace stateSpace) {
+		SymbolicModelcheckCommand cmd = new SymbolicModelcheckCommand(item.getAlgorithm());
 		stateSpace.execute(cmd);
 		SymbolicModelcheckCommand.ResultType result = cmd.getResult();
 		switch(result) {
@@ -156,13 +162,13 @@ public final class SymbolicCheckingFormulaHandler {
 		}
 	}
 	
-	private static void handleDeadlock(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
-		IEvalElement constraint = new ClassicalB(item.getCode());
+	private static void handleDeadlock(CBCDeadlockFreedomCheckingItem item, StateSpace stateSpace) {
+		IEvalElement constraint = new ClassicalB(item.getPredicate());
 		CBCDeadlockChecker checker = new CBCDeadlockChecker(stateSpace, constraint);
 		handleFormulaResult(item, stateSpace, checker.call());
 	}
 	
-	private static void findRedundantInvariants(SymbolicCheckingFormulaItem item, StateSpace stateSpace) {
+	private static void findRedundantInvariants(CBCFindRedundantInvariantsItem item, StateSpace stateSpace) {
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();
 		stateSpace.execute(cmd);
 		List<String> result = cmd.getRedundantInvariants();
@@ -174,33 +180,24 @@ public final class SymbolicCheckingFormulaHandler {
 	}
 	
 	private static void checkItemInternal(final SymbolicCheckingFormulaItem item, final StateSpace stateSpace) {
-		switch(item.getType()) {
-			case CBC_INVARIANT_PRESERVATION_CHECKING:
-				handleInvariant(item, stateSpace);
-				break;
-			case CBC_REFINEMENT_CHECKING:
-				handleRefinement(item, stateSpace);
-				break;
-			case CBC_STATIC_ASSERTION_CHECKING:
-				handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
-				break;
-			case CBC_DYNAMIC_ASSERTION_CHECKING:
-				handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
-				break;
-			case WELL_DEFINEDNESS_CHECKING:
-				handleWellDefinedness(item, stateSpace);
-				break;
-			case CBC_DEADLOCK_FREEDOM_CHECKING:
-				handleDeadlock(item, stateSpace);
-				break;
-			case CBC_FIND_REDUNDANT_INVARIANTS:
-				findRedundantInvariants(item, stateSpace);
-				break;
-			case SYMBOLIC_MODEL_CHECKING:
-				handleSymbolic(item, stateSpace);
-				break;
-			default:
-				throw new AssertionError("Unhandled symbolic checking type: " + item.getType());
+		if (item instanceof CBCInvariantPreservationCheckingItem invariantItem) {
+			handleInvariant(invariantItem, stateSpace);
+		} else if (item instanceof CBCRefinementCheckingItem refinementItem) {
+			handleRefinement(refinementItem, stateSpace);
+		} else if (item instanceof CBCStaticAssertionCheckingItem staticAssertionsItem) {
+			handleAssertions(staticAssertionsItem, ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
+		} else if (item instanceof CBCDynamicAssertionCheckingItem dynamicAssertionsItem) {
+			handleAssertions(dynamicAssertionsItem, ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
+		} else if (item instanceof WellDefinednessCheckingItem wdItem) {
+			handleWellDefinedness(wdItem, stateSpace);
+		} else if (item instanceof CBCDeadlockFreedomCheckingItem deadlockItem) {
+			handleDeadlock(deadlockItem, stateSpace);
+		} else if (item instanceof CBCFindRedundantInvariantsItem redundantInvariantsItem) {
+			findRedundantInvariants(redundantInvariantsItem, stateSpace);
+		} else if (item instanceof SymbolicModelCheckingItem symbolicItem) {
+			handleSymbolic(symbolicItem, stateSpace);
+		} else {
+			throw new AssertionError("Unhandled symbolic checking type: " + item.getClass());
 		}
 	}
 	

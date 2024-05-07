@@ -200,7 +200,7 @@ public final class MachineProperties {
 
 	@JsonIgnore
 	public ObservableList<SymbolicCheckingFormulaItem> getSymbolicCheckingFormulas() {
-		return this.getValidationTasksByType(BuiltinValidationTaskTypes.SYMBOLIC);
+		return this.getValidationTasksByClass(SymbolicCheckingFormulaItem.class);
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> symbolicCheckingStatusProperty() {

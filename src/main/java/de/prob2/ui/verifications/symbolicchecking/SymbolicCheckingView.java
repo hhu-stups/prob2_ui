@@ -22,6 +22,7 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.InvalidationListener;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -110,14 +111,14 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
 
 		itemsTable.setRowFactory(table -> new Row());
-		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
+		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getTaskType(i18n)));
 
 		helpButton.setHelpContent("verification", "Symbolic");
 	}
 
 	@Override
 	protected String configurationForItem(final SymbolicCheckingFormulaItem item) {
-		return item.getCode();
+		return item.getTaskDescription(i18n);
 	}
 
 	@Override
