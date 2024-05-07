@@ -141,7 +141,7 @@ $pattern.getCode()
 		\midrule
 		#foreach($sitem in $machine.getMachineProperties().getSymbolicCheckingFormulas())
 			#if($sitem.selected())
-				\seqsplit{$util.latexSafe($sitem.getType().toString())} & #if($createConfigurationColumn)  \seqsplit{$util.symbolicConfigString($sitem,$i18n)} & #end
+				\seqsplit{$util.latexSafe($sitem.getTaskType($i18n))} & #if($createConfigurationColumn)  \seqsplit{$util.symbolicConfigString($sitem,$i18n)} & #end
 				#if($util.symbolicHasResult($sitem))
 					$i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
 				#else
