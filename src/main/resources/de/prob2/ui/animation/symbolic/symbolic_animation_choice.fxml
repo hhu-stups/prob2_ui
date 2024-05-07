@@ -30,7 +30,7 @@
 						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicAnimationType fx:constant="SEQUENCE"/>
+									<SymbolicAnimationType fx:constant="CBC_FIND_SEQUENCE"/>
 									<SymbolicAnimationType fx:constant="FIND_VALID_STATE"/>
 								</FXCollections>
 							</items>

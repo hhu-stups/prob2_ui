@@ -175,25 +175,25 @@ public final class SymbolicCheckingFormulaHandler {
 	
 	private static void checkItemInternal(final SymbolicCheckingFormulaItem item, final StateSpace stateSpace) {
 		switch(item.getType()) {
-			case SYMBOLIC_INVARIANT:
+			case CBC_INVARIANT_PRESERVATION_CHECKING:
 				handleInvariant(item, stateSpace);
 				break;
-			case CHECK_REFINEMENT:
+			case CBC_REFINEMENT_CHECKING:
 				handleRefinement(item, stateSpace);
 				break;
-			case CHECK_STATIC_ASSERTIONS:
+			case CBC_STATIC_ASSERTION_CHECKING:
 				handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.STATIC, stateSpace);
 				break;
-			case CHECK_DYNAMIC_ASSERTIONS:
+			case CBC_DYNAMIC_ASSERTION_CHECKING:
 				handleAssertions(item, ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC, stateSpace);
 				break;
-			case CHECK_WELL_DEFINEDNESS:
+			case WELL_DEFINEDNESS_CHECKING:
 				handleWellDefinedness(item, stateSpace);
 				break;
-			case SYMBOLIC_DEADLOCK:
+			case CBC_DEADLOCK_FREEDOM_CHECKING:
 				handleDeadlock(item, stateSpace);
 				break;
-			case FIND_REDUNDANT_INVARIANTS:
+			case CBC_FIND_REDUNDANT_INVARIANTS:
 				findRedundantInvariants(item, stateSpace);
 				break;
 			case SYMBOLIC_MODEL_CHECKING:

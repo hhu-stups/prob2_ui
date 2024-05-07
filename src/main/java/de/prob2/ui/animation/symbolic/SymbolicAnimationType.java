@@ -1,9 +1,12 @@
 package de.prob2.ui.animation.symbolic;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import de.prob2.ui.internal.Translatable;
 
 public enum SymbolicAnimationType implements Translatable {
-	SEQUENCE("animation.type.sequence"),
+	@JsonProperty("SEQUENCE")
+	CBC_FIND_SEQUENCE("animation.type.sequence"),
 	FIND_VALID_STATE("animation.type.findValidState"),
 	;
 

@@ -31,13 +31,13 @@
 						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicCheckingType fx:constant="SYMBOLIC_INVARIANT"/>
-									<SymbolicCheckingType fx:constant="SYMBOLIC_DEADLOCK"/>
-									<SymbolicCheckingType fx:constant="CHECK_REFINEMENT"/>
-									<SymbolicCheckingType fx:constant="CHECK_STATIC_ASSERTIONS"/>
-									<SymbolicCheckingType fx:constant="CHECK_DYNAMIC_ASSERTIONS"/>
-									<SymbolicCheckingType fx:constant="CHECK_WELL_DEFINEDNESS"/>
-									<SymbolicCheckingType fx:constant="FIND_REDUNDANT_INVARIANTS"/>
+									<SymbolicCheckingType fx:constant="CBC_INVARIANT_PRESERVATION_CHECKING"/>
+									<SymbolicCheckingType fx:constant="CBC_DEADLOCK_FREEDOM_CHECKING"/>
+									<SymbolicCheckingType fx:constant="CBC_REFINEMENT_CHECKING"/>
+									<SymbolicCheckingType fx:constant="CBC_STATIC_ASSERTION_CHECKING"/>
+									<SymbolicCheckingType fx:constant="CBC_DYNAMIC_ASSERTION_CHECKING"/>
+									<SymbolicCheckingType fx:constant="WELL_DEFINEDNESS_CHECKING"/>
+									<SymbolicCheckingType fx:constant="CBC_FIND_REDUNDANT_INVARIANTS"/>
 									<SymbolicCheckingType fx:constant="SYMBOLIC_MODEL_CHECKING"/>
 								</FXCollections>
 							</items>

@@ -84,18 +84,18 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 	private void changeGUIType(final SymbolicCheckingType type) {
 		formulaInput.getChildren().removeAll(cbOperations, predicateBuilderView, symbolicModelCheckAlgorithmChoiceBox);
 		switch (type) {
-			case CHECK_REFINEMENT:
-			case CHECK_STATIC_ASSERTIONS:
-			case CHECK_DYNAMIC_ASSERTIONS:
-			case CHECK_WELL_DEFINEDNESS:
-			case FIND_REDUNDANT_INVARIANTS:
+			case CBC_REFINEMENT_CHECKING:
+			case CBC_STATIC_ASSERTION_CHECKING:
+			case CBC_DYNAMIC_ASSERTION_CHECKING:
+			case WELL_DEFINEDNESS_CHECKING:
+			case CBC_FIND_REDUNDANT_INVARIANTS:
 				break;
 			
-			case SYMBOLIC_INVARIANT:
+			case CBC_INVARIANT_PRESERVATION_CHECKING:
 				formulaInput.getChildren().add(0, cbOperations);
 				break;
 			
-			case SYMBOLIC_DEADLOCK:
+			case CBC_DEADLOCK_FREEDOM_CHECKING:
 				formulaInput.getChildren().add(0, predicateBuilderView);
 				break;
 			
@@ -111,21 +111,21 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 	
 	private String extractFormula() {
 		switch (cbChoice.getValue()) {
-			case CHECK_REFINEMENT:
-			case CHECK_STATIC_ASSERTIONS:
-			case CHECK_DYNAMIC_ASSERTIONS:
-			case CHECK_WELL_DEFINEDNESS:
-			case FIND_REDUNDANT_INVARIANTS:
+			case CBC_REFINEMENT_CHECKING:
+			case CBC_STATIC_ASSERTION_CHECKING:
+			case CBC_DYNAMIC_ASSERTION_CHECKING:
+			case WELL_DEFINEDNESS_CHECKING:
+			case CBC_FIND_REDUNDANT_INVARIANTS:
 				return "";
 			
-			case SYMBOLIC_INVARIANT:
+			case CBC_INVARIANT_PRESERVATION_CHECKING:
 				if (this.checkAllOperations.equals(cbOperations.getSelectionModel().getSelectedItem())) {
 					return "";
 				} else {
 					return cbOperations.getSelectionModel().getSelectedItem();
 				}
 			
-			case SYMBOLIC_DEADLOCK:
+			case CBC_DEADLOCK_FREEDOM_CHECKING:
 				return predicateBuilderView.getPredicate();
 			
 			case SYMBOLIC_MODEL_CHECKING:
@@ -139,14 +139,14 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 	public void setData(SymbolicCheckingFormulaItem item) {
 		cbChoice.getSelectionModel().select(item.getType());
 		switch (item.getType()) {
-			case CHECK_REFINEMENT:
-			case CHECK_STATIC_ASSERTIONS:
-			case CHECK_DYNAMIC_ASSERTIONS:
-			case CHECK_WELL_DEFINEDNESS:
-			case FIND_REDUNDANT_INVARIANTS:
+			case CBC_REFINEMENT_CHECKING:
+			case CBC_STATIC_ASSERTION_CHECKING:
+			case CBC_DYNAMIC_ASSERTION_CHECKING:
+			case WELL_DEFINEDNESS_CHECKING:
+			case CBC_FIND_REDUNDANT_INVARIANTS:
 				break;
 			
-			case SYMBOLIC_INVARIANT:
+			case CBC_INVARIANT_PRESERVATION_CHECKING:
 				if (item.getCode().isEmpty()) {
 					cbOperations.getSelectionModel().select(this.checkAllOperations);
 				} else {
@@ -154,7 +154,7 @@ public final class SymbolicCheckingChoosingStage extends Stage {
 				}
 				break;
 			
-			case SYMBOLIC_DEADLOCK:
+			case CBC_DEADLOCK_FREEDOM_CHECKING:
 				predicateBuilderView.setFromPredicate(item.getCode());
 				break;
 			

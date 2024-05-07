@@ -68,7 +68,7 @@ public final class SymbolicAnimationItemHandler {
 
 	private static void executeItemInternal(final SymbolicAnimationItem item, final StateSpace stateSpace) {
 		switch(item.getType()) {
-			case SEQUENCE:
+			case CBC_FIND_SEQUENCE:
 				handleSequence(item, stateSpace);
 				break;
 			case FIND_VALID_STATE:

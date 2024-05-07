@@ -69,7 +69,7 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	public void changeGUIType(final SymbolicAnimationType type) {
 		formulaInput.getChildren().removeAll(tfFormula, predicateBuilderView);
 		switch (type) {
-			case SEQUENCE:
+			case CBC_FIND_SEQUENCE:
 				formulaInput.getChildren().add(0, tfFormula);
 				break;
 			
@@ -85,7 +85,7 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	
 	protected String extractFormula() {
 		return switch (cbChoice.getValue()) {
-			case SEQUENCE -> tfFormula.getText();
+			case CBC_FIND_SEQUENCE -> tfFormula.getText();
 			case FIND_VALID_STATE -> predicateBuilderView.getPredicate();
 		};
 	}
@@ -93,7 +93,7 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	public void setData(SymbolicAnimationItem item) {
 		cbChoice.getSelectionModel().select(item.getType());
 		switch (item.getType()) {
-			case SEQUENCE:
+			case CBC_FIND_SEQUENCE:
 				tfFormula.setText(item.getCode());
 				break;
 			
