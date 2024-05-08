@@ -3,6 +3,7 @@ package de.prob2.ui.animation.symbolic;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.statespace.Trace;
@@ -14,20 +15,24 @@ import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 @JsonPropertyOrder({
+	"id",
 	"selected",
 })
 public abstract class SymbolicAnimationItem extends AbstractCheckableItem implements IValidationTask {
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private final String id;
+
 	@JsonIgnore
 	private final ObjectProperty<Trace> example = new SimpleObjectProperty<>(this, "example", null);
 
-	protected SymbolicAnimationItem() {
+	protected SymbolicAnimationItem(String id) {
 		super();
+		this.id = id;
 	}
 
-	@JsonIgnore // TODO
 	@Override
 	public String getId() {
-		return null; // TODO
+		return this.id;
 	}
 
 	@Override

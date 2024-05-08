@@ -12,6 +12,7 @@ import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
 @JsonPropertyOrder({
+	"id",
 	"selected",
 	"operationNames",
 })
@@ -20,9 +21,10 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 	
 	@JsonCreator
 	public FindValidStateItem(
+		@JsonProperty("id") String id,
 		@JsonProperty("predicate") String predicate
 	) {
-		super();
+		super(id);
 		
 		this.predicate = Objects.requireNonNull(predicate, "predicate");
 	}

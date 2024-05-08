@@ -14,6 +14,7 @@ import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
 @JsonPropertyOrder({
+	"id",
 	"selected",
 	"operationNames",
 })
@@ -22,9 +23,10 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 	
 	@JsonCreator
 	public CBCFindSequenceItem(
+		@JsonProperty("id") String id,
 		@JsonProperty("operationNames") List<String> operationNames
 	) {
-		super();
+		super(id);
 		
 		this.operationNames = new ArrayList<>(operationNames);
 	}
