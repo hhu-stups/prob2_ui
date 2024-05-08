@@ -9,9 +9,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
+import de.prob.animator.CommandInterruptedException;
+import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
+import de.prob.animator.domainobjects.ClassicalB;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @JsonPropertyOrder({
 	"id",
@@ -19,6 +28,8 @@ import de.prob2.ui.verifications.type.ValidationTaskType;
 	"operationNames",
 })
 public final class CBCFindSequenceItem extends SymbolicAnimationItem {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CBCFindSequenceItem.class);
+	
 	private final List<String> operationNames;
 	
 	@JsonCreator
@@ -48,6 +59,41 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 	@Override
 	public String getTaskDescription(I18n i18n) {
 		return String.join(";", this.getOperationNames());
+	}
+	
+	@Override
+	public void execute(ExecutionContext context) {
+		this.setExample(null);
+		
+		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(context.stateSpace(), getOperationNames(), new ClassicalB("1=1"));
+		try {
+			context.stateSpace().execute(cmd);
+		} catch (CommandInterruptedException exc) {
+			LOGGER.info("CBC find sequence interrupted by user", exc);
+			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+			return;
+		}
+		
+		switch (cmd.getResult()) {
+			case PATH_FOUND:
+				this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found"));
+				this.setExample(cmd.getTrace());
+				break;
+			case NO_PATH_FOUND:
+				this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound"));
+				break;
+			case TIMEOUT:
+				this.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "animation.symbolic.resultHandler.sequence.result.timeout"));
+				break;
+			case INTERRUPTED:
+				this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted"));
+				break;
+			case ERROR:
+				this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "animation.symbolic.resultHandler.sequence.result.error"));
+				break;
+			default:
+				throw new AssertionError("Unhandled CBC find sequence result: " + cmd.getResult());
+		}
 	}
 	
 	@Override

@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
@@ -58,10 +57,5 @@ public abstract class SymbolicAnimationItem extends AbstractCheckableItem implem
 
 	public void setExample(final Trace example) {
 		this.exampleProperty().set(example);
-	}
-
-	@Override
-	public void execute(final ExecutionContext context) {
-		SymbolicAnimationItemHandler.executeItem(this, context.stateSpace());
 	}
 }

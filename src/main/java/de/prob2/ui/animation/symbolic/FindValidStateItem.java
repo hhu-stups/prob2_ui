@@ -7,9 +7,18 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
+import de.prob.animator.CommandInterruptedException;
+import de.prob.animator.command.FindStateCommand;
+import de.prob.animator.domainobjects.ClassicalB;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @JsonPropertyOrder({
 	"id",
@@ -17,6 +26,8 @@ import de.prob2.ui.verifications.type.ValidationTaskType;
 	"operationNames",
 })
 public final class FindValidStateItem extends SymbolicAnimationItem {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FindValidStateItem.class);
+	
 	private final String predicate;
 	
 	@JsonCreator
@@ -46,6 +57,33 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 	@Override
 	public String getTaskDescription(I18n i18n) {
 		return this.getPredicate();
+	}
+	
+	@Override
+	public void execute(ExecutionContext context) {
+		this.setExample(null);
+		
+		FindStateCommand cmd = new FindStateCommand(context.stateSpace(), new ClassicalB(getPredicate()), true);
+		try {
+			context.stateSpace().execute(cmd);
+		} catch (CommandInterruptedException exc) {
+			LOGGER.info("Find valid state interrupted by user", exc);
+			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+			return;
+		}
+		
+		FindStateCommand.ResultType result = cmd.getResult();
+		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
+		if (result == FindStateCommand.ResultType.STATE_FOUND) {
+			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
+			this.setExample(cmd.getTrace(context.stateSpace()));
+		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
+			this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
+		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
+			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
+		} else {
+			this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "animation.symbolic.resultHandler.findValidState.result.error"));
+		}
 	}
 	
 	@Override
