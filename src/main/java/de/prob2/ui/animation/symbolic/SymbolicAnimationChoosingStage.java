@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.symbolic;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import com.google.inject.Inject;
@@ -10,6 +11,8 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.sharedviews.PredicateBuilderTableItem;
 import de.prob2.ui.sharedviews.PredicateBuilderView;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
@@ -17,6 +20,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 public class SymbolicAnimationChoosingStage extends Stage {
 	@FXML
@@ -29,7 +33,7 @@ public class SymbolicAnimationChoosingStage extends Stage {
 	private VBox formulaInput;
 	
 	@FXML
-	private ChoiceBox<SymbolicAnimationType> cbChoice;
+	private ChoiceBox<ValidationTaskType<?>> cbChoice;
 	
 	private final I18n i18n;
 	
@@ -53,7 +57,25 @@ public class SymbolicAnimationChoosingStage extends Stage {
 			changeGUIType(to);
 			this.sizeToScene();
 		});
-		cbChoice.setConverter(i18n.translateConverter());
+		cbChoice.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(ValidationTaskType<?> object) {
+				if (object == null) {
+					return "";
+				} else if (BuiltinValidationTaskTypes.CBC_FIND_SEQUENCE.equals(object)) {
+					return i18n.translate("animation.type.sequence");
+				} else if (BuiltinValidationTaskTypes.FIND_VALID_STATE.equals(object)) {
+					return i18n.translate("animation.type.findValidState");
+				} else {
+					return object.getKey();
+				}
+			}
+			
+			@Override
+			public ValidationTaskType<?> fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to ValidationTaskType not supported");
+			}
+		});
 		this.setResizable(true);
 	}
 	
@@ -66,49 +88,38 @@ public class SymbolicAnimationChoosingStage extends Stage {
 		predicateBuilderView.setItems(items);
 	}
 	
-	public void changeGUIType(final SymbolicAnimationType type) {
+	public void changeGUIType(ValidationTaskType<?> type) {
 		formulaInput.getChildren().removeAll(tfFormula, predicateBuilderView);
-		switch (type) {
-			case CBC_FIND_SEQUENCE:
-				formulaInput.getChildren().add(0, tfFormula);
-				break;
-			
-			case FIND_VALID_STATE:
-				formulaInput.getChildren().add(0, predicateBuilderView);
-				break;
-			
-			default:
-				throw new AssertionError("Unhandled symbolic animation type: " + type);
+		if (BuiltinValidationTaskTypes.CBC_FIND_SEQUENCE.equals(type)) {
+			formulaInput.getChildren().add(0, tfFormula);
+		} else if (BuiltinValidationTaskTypes.FIND_VALID_STATE.equals(type)) {
+			formulaInput.getChildren().add(0, predicateBuilderView);
 		}
 		this.sizeToScene();
 	}
 	
-	protected String extractFormula() {
-		return switch (cbChoice.getValue()) {
-			case CBC_FIND_SEQUENCE -> tfFormula.getText();
-			case FIND_VALID_STATE -> predicateBuilderView.getPredicate();
-		};
-	}
-	
 	public void setData(SymbolicAnimationItem item) {
-		cbChoice.getSelectionModel().select(item.getType());
-		switch (item.getType()) {
-			case CBC_FIND_SEQUENCE:
-				tfFormula.setText(item.getCode());
-				break;
-			
-			case FIND_VALID_STATE:
-				predicateBuilderView.setFromPredicate(item.getCode());
-				break;
-			
-			default:
-				throw new AssertionError("Unhandled symbolic animation type: " + cbChoice.getValue());
+		cbChoice.getSelectionModel().select(item.getTaskType());
+		if (item instanceof CBCFindSequenceItem findSequenceItem) {
+			tfFormula.setText(String.join(";", findSequenceItem.getOperationNames()));
+		} else if (item instanceof FindValidStateItem findValidStateItem) {
+			predicateBuilderView.setFromPredicate(findValidStateItem.getPredicate());
+		} else {
+			throw new AssertionError("Unhandled symbolic animation type: " + item.getClass());
 		}
 	}
 	
 	@FXML
 	private void ok() {
-		this.result = new SymbolicAnimationItem(this.extractFormula(), cbChoice.getSelectionModel().getSelectedItem());
+		ValidationTaskType<?> type = cbChoice.getValue();
+		if (BuiltinValidationTaskTypes.CBC_FIND_SEQUENCE.equals(type)) {
+			List<String> operationNames = Arrays.asList(tfFormula.getText().replace(" ", "").split(";"));
+			this.result = new CBCFindSequenceItem(operationNames);
+		} else if (BuiltinValidationTaskTypes.FIND_VALID_STATE.equals(type)) {
+			this.result = new FindValidStateItem(predicateBuilderView.getPredicate());
+		} else {
+			throw new AssertionError("Unhandled symbolic animation type: " + type);
+		}
 		this.close();
 	}
 	

@@ -20,6 +20,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.ExecutionContext;
 
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -85,7 +86,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	public void initialize() {
 		super.initialize();
 		itemsTable.setRowFactory(table -> new Row());
-		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
+		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getTaskType(i18n)));
 		
 		addFormulaButton.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B).or(disablePropertyController.disableProperty()));
 		helpButton.setHelpContent("animation", "Symbolic");
@@ -93,7 +94,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	
 	@Override
 	protected String configurationForItem(final SymbolicAnimationItem item) {
-		return item.getCode();
+		return item.getTaskDescription(i18n);
 	}
 	
 	@Override

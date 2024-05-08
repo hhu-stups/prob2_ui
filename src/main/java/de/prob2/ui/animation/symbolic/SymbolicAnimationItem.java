@@ -1,55 +1,40 @@
 package de.prob2.ui.animation.symbolic;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 @JsonPropertyOrder({
-	"type",
-	"code",
 	"selected",
 })
-public class SymbolicAnimationItem extends AbstractCheckableItem {
-	private final SymbolicAnimationType type;
-	private final String code;
-
+public abstract class SymbolicAnimationItem extends AbstractCheckableItem implements IValidationTask {
 	@JsonIgnore
 	private final ObjectProperty<Trace> example = new SimpleObjectProperty<>(this, "example", null);
 
-	@JsonCreator
-	public SymbolicAnimationItem(
-		@JsonProperty("code") final String code,
-		@JsonProperty("type") final SymbolicAnimationType type
-	) {
+	protected SymbolicAnimationItem() {
 		super();
-		this.type = type;
-		this.code = code;
 	}
 
-	public SymbolicAnimationType getType() {
-		return this.type;
-	}
-
-	public String getCode() {
-		return this.code;
+	@JsonIgnore // TODO
+	@Override
+	public String getId() {
+		return null; // TODO
 	}
 
 	@Override
 	public boolean settingsEqual(Object other) {
-		if (!(other instanceof SymbolicAnimationItem that)) {
-			return false;
-		}
-		return this.getType().equals(that.getType())
-			       && this.getCode().equals(that.getCode());
+		return other instanceof SymbolicAnimationItem o
+			&& this.getTaskType().equals(o.getTaskType())
+			&& Objects.equals(this.getId(), o.getId());
 	}
 
 	@Override
@@ -68,14 +53,6 @@ public class SymbolicAnimationItem extends AbstractCheckableItem {
 
 	public void setExample(final Trace example) {
 		this.exampleProperty().set(example);
-	}
-
-	@Override
-	public String toString() {
-		return MoreObjects.toStringHelper(this)
-			       .add("type", this.getType())
-			       .add("code", this.getCode())
-			       .toString();
 	}
 
 	@Override

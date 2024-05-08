@@ -48,7 +48,6 @@ import javafx.collections.ObservableList;
 @JsonPropertyOrder({
 	"validationTasks",
 	"ltlPatterns",
-	"symbolicAnimationFormulas",
 	"testCases",
 	"simulations",
 	"visBVisualisation",
@@ -57,7 +56,6 @@ import javafx.collections.ObservableList;
 public final class MachineProperties {
 	private final ReadOnlyListProperty<IValidationTask> validationTasks;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
-	private final ListProperty<SymbolicAnimationItem> symbolicAnimationFormulas;
 	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
@@ -73,8 +71,6 @@ public final class MachineProperties {
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
 
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
-		this.symbolicAnimationFormulas = new SimpleListProperty<>(this, "symbolicAnimationFormulas", FXCollections.observableArrayList());
-
 		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
@@ -255,14 +251,9 @@ public final class MachineProperties {
 		this.getLTLPatterns().setAll(ltlPatterns);
 	}
 
-	@JsonGetter("symbolicAnimationFormulas")
-	public ReadOnlyListProperty<SymbolicAnimationItem> getSymbolicAnimationFormulas() {
-		return this.symbolicAnimationFormulas;
-	}
-
-	@JsonSetter("symbolicAnimationFormulas")
-	private void setSymbolicAnimationFormulas(final List<SymbolicAnimationItem> symbolicAnimationFormulas) {
-		this.getSymbolicAnimationFormulas().setAll(symbolicAnimationFormulas);
+	@JsonIgnore
+	public ObservableList<SymbolicAnimationItem> getSymbolicAnimationFormulas() {
+		return this.getValidationTasksByClass(SymbolicAnimationItem.class);
 	}
 
 	@JsonGetter("testCases")
@@ -336,7 +327,6 @@ public final class MachineProperties {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
 		this.getValidationTasks().addListener(changedListener);
 		this.getLTLPatterns().addListener(changedListener);
-		this.getSymbolicAnimationFormulas().addListener(changedListener);
 		this.getTestCases().addListener(changedListener);
 		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
@@ -347,7 +337,6 @@ public final class MachineProperties {
 		for (var vt : this.getValidationTasks()) {
 			vt.reset();
 		}
-		this.getSymbolicAnimationFormulas().forEach(IExecutableItem::reset);
 		this.getTestCases().forEach(IExecutableItem::reset);
 		this.getLTLPatterns().forEach(LTLPatternItem::reset);
 		this.patternManager = new PatternManager();

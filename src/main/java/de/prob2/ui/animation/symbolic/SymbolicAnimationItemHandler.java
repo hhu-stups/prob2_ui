@@ -1,8 +1,5 @@
 package de.prob2.ui.animation.symbolic;
 
-import java.util.Arrays;
-import java.util.List;
-
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.ClassicalB;
@@ -20,9 +17,8 @@ public final class SymbolicAnimationItemHandler {
 		throw new AssertionError("Utility class");
 	}
 
-	private static void handleSequence(SymbolicAnimationItem item, StateSpace stateSpace) {
-		List<String> events = Arrays.asList(item.getCode().replace(" ", "").split(";"));
-		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(stateSpace, events, new ClassicalB("1=1"));
+	private static void handleSequence(CBCFindSequenceItem item, StateSpace stateSpace) {
+		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(stateSpace, item.getOperationNames(), new ClassicalB("1=1"));
 		stateSpace.execute(cmd);
 		ConstraintBasedSequenceCheckCommand.ResultType result = cmd.getResult();
 		item.setExample(null);
@@ -48,8 +44,8 @@ public final class SymbolicAnimationItemHandler {
 		}
 	}
 
-	private static void findValidState(SymbolicAnimationItem item, StateSpace stateSpace) {
-		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getCode()), true);
+	private static void findValidState(FindValidStateItem item, StateSpace stateSpace) {
+		FindStateCommand cmd = new FindStateCommand(stateSpace, new ClassicalB(item.getPredicate()), true);
 		stateSpace.execute(cmd);
 		FindStateCommand.ResultType result = cmd.getResult();
 		item.setExample(null);
@@ -67,15 +63,12 @@ public final class SymbolicAnimationItemHandler {
 	}
 
 	private static void executeItemInternal(final SymbolicAnimationItem item, final StateSpace stateSpace) {
-		switch(item.getType()) {
-			case CBC_FIND_SEQUENCE:
-				handleSequence(item, stateSpace);
-				break;
-			case FIND_VALID_STATE:
-				findValidState(item, stateSpace);
-				break;
-			default:
-				throw new AssertionError("Unhandled symbolic animation type: " + item.getType());
+		if (item instanceof CBCFindSequenceItem findSequenceItem) {
+			handleSequence(findSequenceItem, stateSpace);
+		} else if (item instanceof FindValidStateItem findValidStateItem) {
+			findValidState(findValidStateItem, stateSpace);
+		} else {
+			throw new AssertionError("Unhandled symbolic animation type: " + item.getClass());
 		}
 	}
 

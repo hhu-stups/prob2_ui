@@ -993,6 +993,33 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 
+	private static void updateV49Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		ArrayNode symbolicAnimationFormulas = checkArray(machine.remove("symbolicAnimationFormulas"));
+		symbolicAnimationFormulas.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String symbolicType = checkText(task.remove("type"));
+			String code = checkText(task.remove("code"));
+			String newTaskType = switch (symbolicType) {
+				case "SEQUENCE" -> {
+					String[] operationNames = code.replace(" ", "").split(";");
+					ArrayNode operationNamesNode = task.putArray("operationNames");
+					for (String operationName : operationNames) {
+						operationNamesNode.add(operationName);
+					}
+					yield "CBC_FIND_SEQUENCE";
+				}
+				case "FIND_VALID_STATE" -> {
+					task.put("predicate", code);
+					yield "FIND_VALID_STATE";
+				}
+				default -> throw new JsonConversionException("Invalid symbolic animation type: " + symbolicType);
+			};
+			task.put("taskType", newTaskType);
+			validationTasks.add(task);
+		});
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -1163,6 +1190,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 48) {
 				updateV48Machine(machine);
+			}
+			if (oldVersion <= 49) {
+				updateV49Machine(machine);
 			}
 		});
 
