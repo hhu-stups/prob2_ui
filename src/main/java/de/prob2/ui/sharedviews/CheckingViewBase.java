@@ -226,7 +226,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 
 	protected void executeItem(final T item) {
 		final ExecutionContext context = getCurrentExecutionContext();
-		cliExecutor.submit(() -> executeItemSync(item, context));
+		cliExecutor.execute(() -> executeItemSync(item, context));
 	}
 
 	protected void executeItemIfEnabled(final T item) {
@@ -237,7 +237,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 
 	protected void executeAllSelectedItems() {
 		final ExecutionContext context = getCurrentExecutionContext();
-		cliExecutor.submit(() -> {
+		cliExecutor.execute(() -> {
 			for (final T item : itemsTable.getItems()) {
 				if (!item.selected()) {
 					continue;

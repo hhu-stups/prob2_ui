@@ -360,7 +360,7 @@ public final class OperationsView extends VBox {
 			// but changing the current trace can be slow,
 			// because the destination state may not be explored yet.
 			// TODO This might be better solved by moving the state exploring out of CurrentTrace.
-			cliExecutor.submit(() -> {
+			cliExecutor.execute(() -> {
 				Trace forward = trace.forward();
 				if (forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
 					currentTrace.set(forward);
@@ -549,7 +549,7 @@ public final class OperationsView extends VBox {
 			throw new AssertionError("Unhandled random animation event source: " + event.getSource());
 		}
 		
-		cliExecutor.submit(() -> {
+		cliExecutor.execute(() -> {
 			final Trace trace = currentTrace.get();
 			if (trace != null) {
 				currentTrace.set(trace.randomAnimation(operationCount));

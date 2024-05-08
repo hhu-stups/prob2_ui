@@ -200,7 +200,7 @@ public final class ExecuteByPredicateStage extends Stage {
 
 	@FXML
 	private void handleExecute() {
-		cliExecutor.submit(this::executeSync);
+		cliExecutor.execute(this::executeSync);
 	}
 
 	@FXML

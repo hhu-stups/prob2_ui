@@ -334,7 +334,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	@Override
 	protected void executeAllSelectedItems() {
 		final ExecutionContext context = this.getCurrentExecutionContext();
-		cliExecutor.submit(() -> {
+		cliExecutor.execute(() -> {
 			for (ModelCheckingItem item : itemsTable.getItems()) {
 				if (!item.selected()) {
 					continue;
