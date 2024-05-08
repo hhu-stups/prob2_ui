@@ -72,17 +72,22 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 			return;
 		}
 		
-		FindStateCommand.ResultType result = cmd.getResult();
-		// noinspection IfCanBeSwitch // Do not replace with switch, because result can be null
-		if (result == FindStateCommand.ResultType.STATE_FOUND) {
-			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
-			this.setExample(cmd.getTrace(context.stateSpace()));
-		} else if (result == FindStateCommand.ResultType.NO_STATE_FOUND) {
-			this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
-		} else if (result == FindStateCommand.ResultType.INTERRUPTED) {
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
-		} else {
-			this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "animation.symbolic.resultHandler.findValidState.result.error"));
+		switch (cmd.getResult()) {
+			case STATE_FOUND:
+				this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
+				this.setExample(cmd.getTrace(context.stateSpace()));
+				break;
+			case NO_STATE_FOUND:
+				this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
+				break;
+			case INTERRUPTED:
+				this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
+				break;
+			case ERROR:
+				this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "animation.symbolic.resultHandler.findValidState.result.error"));
+				break;
+			default:
+				throw new AssertionError("Unhandled find valid state result: " + cmd.getResult());
 		}
 	}
 	
