@@ -10,8 +10,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -23,15 +21,16 @@ import com.google.inject.Inject;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.codecompletion.CodeCompletionItem;
 import de.prob2.ui.codecompletion.ParentWithEditableText;
+import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.layout.FontSize;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.scene.control.ContextMenu;
@@ -45,6 +44,7 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.event.MouseOverTextEvent;
 import org.fxmisc.richtext.model.Paragraph;
+import org.fxmisc.richtext.model.StyleSpan;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.slf4j.Logger;
@@ -76,7 +76,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	protected final Label errorPopupLabel;
 	protected final SimpleObjectProperty<ErrorItem.Location> errorHighlight;
 	protected final SimpleObjectProperty<ErrorItem.Location> searchResult;
-	private final ExecutorService executor;
+	private final BackgroundUpdater executor;
 	private final ObservableValue<Optional<Point2D>> caretPos;
 	private final ObservableValue<Optional<String>> textBeforeCaret;
 	private final AtomicBoolean changingText;
@@ -87,7 +87,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	public ExtendedCodeArea(FontSize fontSize, I18n i18n, StopActions stopActions) {
 		this.fontSize = fontSize;
 		this.i18n = i18n;
-		this.executor = Executors.newSingleThreadExecutor();
+		this.executor = new BackgroundUpdater("ExtendedCodeArea Highlighting Updater");
 		stopActions.add(this.executor::shutdownNow);
 
 		this.errors = FXCollections.observableArrayList();
@@ -135,21 +135,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			this.setParagraphGraphicFactory(LineNumberFactory.get(this));
 		}
 
-		this.multiPlainChanges()
-			.successionEnds(Duration.ofMillis(50))
-			.retainLatestUntilLater(this.executor)
-			.filter(x -> !this.isChangingText() && checkTextLengthForStyling())
-			.supplyTask(this::computeHighlightingAsync)
-			.awaitLatest(this.multiPlainChanges())
-			.filterMap(t -> {
-				if (t.isSuccess()) {
-					return Optional.of(t.get());
-				} else {
-					LOGGER.warn("Highlighting failed", t.getFailure());
-					return Optional.empty();
-				}
-			})
-			.subscribe(this::applyHighlighting);
+		this.multiPlainChanges().subscribe(e -> this.reloadHighlighting());
 		this.errors.addListener((ListChangeListener<ErrorItem>) change -> {
 			if (this.errors.isEmpty()) {
 				this.setErrorHighlight(null);
@@ -383,25 +369,6 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		return highlighting;
 	}
 
-	private void applyHighlighting(Optional<StyleSpans<Collection<String>>> highlighting) {
-		Stopwatch sw = Stopwatch.createStarted();
-		highlighting.ifPresent(styleSpans -> this.setStyleSpans(0, styleSpans));
-		LOGGER.trace("Applying highlighting took {}", sw.stop());
-	}
-
-	private Task<Optional<StyleSpans<Collection<String>>>> computeHighlightingAsync() {
-		final String text = this.getText();
-		final Task<Optional<StyleSpans<Collection<String>>>> task = new Task<>() {
-
-			@Override
-			protected Optional<StyleSpans<Collection<String>>> call() {
-				return computeHighlighting(text);
-			}
-		};
-		executor.execute(task);
-		return task;
-	}
-
 	private boolean checkTextLengthForStyling() {
 		int length = this.getLength();
 		// first check if text is too long, then if there are too long paragraphs (otherwise long text with short pars is ok(?))
@@ -419,26 +386,34 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		return true;
 	}
 
-	protected Optional<StyleSpans<Collection<String>>> computeHighlighting(String text) {
-		if (!checkTextLengthForStyling()) {
-			return Optional.empty();
-		}
-
+	protected StyleSpans<Collection<String>> computeHighlighting(String text) {
 		StyleSpans<Collection<String>> highlighting = StyleSpans.singleton(Collections.emptySet(), text.length());
 		highlighting = addErrorHighlighting(highlighting);
 		highlighting = addSearchHighlighting(highlighting);
-		return Optional.of(highlighting);
+		return highlighting;
 	}
 
 	public void reloadHighlighting() {
-		if (!checkTextLengthForStyling()) {
+		String text = this.getText();
+		if (!this.checkTextLengthForStyling()) {
+			this.setStyleSpans(0, StyleSpans.singleton(new StyleSpan<>(Collections.emptySet(), text.length())));
 			return;
 		}
 
-		Stopwatch sw = Stopwatch.createStarted();
-		Optional<StyleSpans<Collection<String>>> highlighting = this.computeHighlighting(this.getText());
-		LOGGER.trace("Computing highlighting took {}", sw.stop());
-		this.applyHighlighting(highlighting);
+		this.executor.execute(() -> {
+			Stopwatch sw = Stopwatch.createStarted();
+			StyleSpans<Collection<String>> highlighting = this.computeHighlighting(text);
+			if (highlighting == null || Thread.currentThread().isInterrupted()) {
+				return;
+			}
+			LOGGER.trace("Computing highlighting for text of length {} took {}", text.length(), sw.stop());
+
+			Platform.runLater(() -> {
+				Stopwatch sw_ = Stopwatch.createStarted();
+				this.setStyleSpans(0, highlighting);
+				LOGGER.trace("Applying {} highlighting style spans took {}", highlighting.length(), sw_.stop());
+			});
+		}, true);
 	}
 
 	public void clearHistory() {

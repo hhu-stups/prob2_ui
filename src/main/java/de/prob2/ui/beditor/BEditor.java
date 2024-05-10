@@ -2,7 +2,6 @@ package de.prob2.ui.beditor;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -76,16 +75,14 @@ public class BEditor extends ExtendedCodeArea {
 	}
 
 	@Override
-	protected Optional<StyleSpans<Collection<String>>> computeHighlighting(String text) {
-		Optional<StyleSpans<Collection<String>>> styleSpansOpt = super.computeHighlighting(text);
-		if (styleSpansOpt.isEmpty()) {
-			return Optional.empty();
-		} else if (text.isEmpty()) {
-			return styleSpansOpt;
+	protected StyleSpans<Collection<String>> computeHighlighting(String text) {
+		StyleSpans<Collection<String>> styleSpans = super.computeHighlighting(text);
+		if (styleSpans == null || text.isEmpty()) {
+			return styleSpans;
 		}
 
-		StyleSpans<Collection<String>> styleSpans = styleSpansOpt.get();
 		StyleSpans<Collection<String>> highlighting = null;
+		StyleSpans<Collection<String>> overlay = null;
 
 		Machine machine = currentProject.getCurrentMachine();
 		if (machine == null) {
@@ -93,22 +90,32 @@ public class BEditor extends ExtendedCodeArea {
 			highlighting = StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
 		} else {
 			Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
+			if (modelFactoryClass == RulesModelFactory.class) {
+				// B-Rules DSL keywords are not recognized by the lexer and are added by an additional regex highlighting
+				overlay = RegexSyntaxHighlighting.computeHighlighting(modelFactoryClass, text);
+				modelFactoryClass = ClassicalBFactory.class;
+			}
+
 			if (modelFactoryClass == ClassicalBFactory.class) {
 				highlighting = BLexerSyntaxHighlighting.computeBHighlighting(text);
-			} else if (modelFactoryClass == RulesModelFactory.class) {
-				// B-Rules DSL keywords are not recognized by the lexer and are added by an additional regex highlighting
-				highlighting = BLexerSyntaxHighlighting.computeBHighlighting(text)
-						               .overlay(RegexSyntaxHighlighting.computeHighlighting(RulesModelFactory.class, text), ExtendedCodeArea::combineCollections);
 			} else if (RegexSyntaxHighlighting.canHighlight(modelFactoryClass)) {
 				highlighting = RegexSyntaxHighlighting.computeHighlighting(modelFactoryClass, text);
 			}
 		}
 
+		if (overlay != null) {
+			if (highlighting != null) {
+				highlighting = highlighting.overlay(overlay, ExtendedCodeArea::combineCollections);
+			} else {
+				highlighting = overlay;
+			}
+		}
+
 		if (highlighting != null) {
-			return Optional.of(styleSpans.overlay(highlighting, ExtendedCodeArea::combineCollections));
+			return styleSpans.overlay(highlighting, ExtendedCodeArea::combineCollections);
 		} else {
-			// Do not highlight unknown languages.
-			return Optional.of(styleSpans);
+			// Do not highlight unknown languages
+			return styleSpans;
 		}
 	}
 }

@@ -146,7 +146,7 @@ public final class BLexerSyntaxHighlighting {
 
 				Set<String> style = syntaxClass == null ? Collections.emptySet() : Collections.singleton(syntaxClass);
 				spansBuilder.add(style, t.getText().length());
-			} while (!(t instanceof EOF));
+			} while (!(t instanceof EOF) && !Thread.currentThread().isInterrupted());
 		} catch (LexerException | IOException e) {
 			LOGGER.info("Failed to lex", e);
 		}
