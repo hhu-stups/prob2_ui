@@ -1,10 +1,30 @@
 package de.prob2.ui.internal;
 
+import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
+import com.google.common.base.Stopwatch;
 import com.google.inject.Inject;
+
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.codecompletion.CodeCompletionItem;
 import de.prob2.ui.codecompletion.ParentWithEditableText;
 import de.prob2.ui.layout.FontSize;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
@@ -20,6 +40,7 @@ import javafx.scene.control.MenuItem;
 import javafx.stage.Popup;
 import javafx.stage.Window;
 import javafx.util.Builder;
+
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.event.MouseOverTextEvent;
@@ -28,15 +49,6 @@ import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Predicate;
-import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 
 /**
  * CodeArea with error highlighting support.
@@ -47,6 +59,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	protected static final Map<ErrorItem.Type, String> ERROR_STYLE_CLASSES;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedCodeArea.class);
 	private static final int MAX_TEXT_LENGTH_FOR_STYLING = 100_000;
+	private static final int MAX_PAR_LENGTH_FOR_STYLING = 100_000;
 
 	static {
 		final Map<ErrorItem.Type, String> errorStyleClasses = new EnumMap<>(ErrorItem.Type.class);
@@ -371,7 +384,9 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	private void applyHighlighting(Optional<StyleSpans<Collection<String>>> highlighting) {
+		Stopwatch sw = Stopwatch.createStarted();
 		highlighting.ifPresent(styleSpans -> this.setStyleSpans(0, styleSpans));
+		LOGGER.trace("Applying highlighting took {}", sw.stop());
 	}
 
 	private Task<Optional<StyleSpans<Collection<String>>>> computeHighlightingAsync() {
@@ -391,8 +406,8 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		int length = this.getLength();
 		// first check if text is too long, then if there are too long paragraphs (otherwise long text with short pars is ok(?))
 		if (length >= MAX_TEXT_LENGTH_FOR_STYLING) {
-			int maxParLength = this.getParagraphs().stream().map(Paragraph::length).max(Integer::compare).orElse(0);
-			if (maxParLength >= MAX_TEXT_LENGTH_FOR_STYLING) {
+			int maxParLength = this.getParagraphs().stream().mapToInt(Paragraph::length).max().orElse(0);
+			if (maxParLength >= MAX_PAR_LENGTH_FOR_STYLING) {
 				if (this.showLongTextWarning) {
 					LOGGER.warn("Disabling styling in text area, paragraph/text is too long ({}/{})", maxParLength, length);
 					this.showLongTextWarning = false;
@@ -420,7 +435,10 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			return;
 		}
 
-		this.applyHighlighting(computeHighlighting(this.getText()));
+		Stopwatch sw = Stopwatch.createStarted();
+		Optional<StyleSpans<Collection<String>>> highlighting = this.computeHighlighting(this.getText());
+		LOGGER.trace("Computing highlighting took {}", sw.stop());
+		this.applyHighlighting(highlighting);
 	}
 
 	public void clearHistory() {

@@ -15,6 +15,7 @@ import java.nio.file.WatchService;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Stopwatch;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -324,9 +325,8 @@ public class BEditorView extends BorderPane {
 
 	private void updateIncludedMachines() {
 		this.updatingIncludedMachines = true;
-		Path prevSelected;
 		try {
-			prevSelected = this.machineChoice.getSelectionModel().getSelectedItem();
+			Path prevSelected = this.machineChoice.getSelectionModel().getSelectedItem();
 			final AbstractModel model = currentTrace.getModel();
 			if (model instanceof ClassicalBModel) {
 				machineChoice.getItems().setAll(((ClassicalBModel) model).getLoadedMachineFiles());
@@ -448,12 +448,14 @@ public class BEditorView extends BorderPane {
 				return;
 			}
 
+			Stopwatch sw = Stopwatch.createStarted();
 			this.setPath(path);
 			beditor.replaceText(text);
 			beditor.moveTo(0);
 			beditor.requestFollowCaret();
 			lastSavedText.set(beditor.getText());
 			beditor.setEditable(true);
+			LOGGER.debug("Setting editor text took {}", sw);
 			beditor.reloadHighlighting();
 		} finally {
 			beditor.setChangingText(false);
@@ -466,6 +468,7 @@ public class BEditorView extends BorderPane {
 			return;
 		}
 
+		Stopwatch sw = Stopwatch.createStarted();
 		String text;
 		try {
 			text = Files.readString(path, EDITOR_CHARSET);
@@ -482,6 +485,7 @@ public class BEditorView extends BorderPane {
 			alert.show();
 			return;
 		}
+		LOGGER.debug("Loading file '{}' took {}", path, sw.stop());
 		this.setEditorText(text, path);
 	}
 

@@ -13,7 +13,11 @@ import de.prob.scripting.ModelFactory;
 import de.prob2.ui.codecompletion.CodeCompletion;
 import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.consoles.b.codecompletion.BCodeCompletion;
-import de.prob2.ui.internal.*;
+import de.prob2.ui.internal.ExtendedCodeArea;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -21,6 +25,7 @@ import de.prob2.ui.project.machines.Machine;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
+
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
@@ -80,20 +85,27 @@ public class BEditor extends ExtendedCodeArea {
 		}
 
 		StyleSpans<Collection<String>> styleSpans = styleSpansOpt.get();
+		StyleSpans<Collection<String>> highlighting = null;
+
 		Machine machine = currentProject.getCurrentMachine();
 		if (machine == null) {
-			// Prompt text is a comment text
-			return Optional.of(styleSpans.overlay(StyleSpans.singleton(Collections.singleton("editor_comment"), text.length()), ExtendedCodeArea::combineCollections));
+			// Prompt text is a comment
+			highlighting = StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
+		} else {
+			Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
+			if (modelFactoryClass == ClassicalBFactory.class) {
+				highlighting = BLexerSyntaxHighlighting.computeBHighlighting(text);
+			} else if (modelFactoryClass == RulesModelFactory.class) {
+				// B-Rules DSL keywords are not recognized by the lexer and are added by an additional regex highlighting
+				highlighting = BLexerSyntaxHighlighting.computeBHighlighting(text)
+						               .overlay(RegexSyntaxHighlighting.computeHighlighting(RulesModelFactory.class, text), ExtendedCodeArea::combineCollections);
+			} else if (RegexSyntaxHighlighting.canHighlight(modelFactoryClass)) {
+				highlighting = RegexSyntaxHighlighting.computeHighlighting(modelFactoryClass, text);
+			}
 		}
-		Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
-		if (modelFactoryClass == ClassicalBFactory.class) {
-			return Optional.of(styleSpans.overlay(BLexerSyntaxHighlighting.computeBHighlighting(text), ExtendedCodeArea::combineCollections));
-		} else if (modelFactoryClass == RulesModelFactory.class) {
-			// B-Rules DSL keywords are not recognized by the lexer and are added by an additional regex highlighting
-			return Optional.of(styleSpans.overlay(BLexerSyntaxHighlighting.computeBHighlighting(text), ExtendedCodeArea::combineCollections)
-				                   .overlay(RegexSyntaxHighlighting.computeHighlighting(RulesModelFactory.class, text), ExtendedCodeArea::combineCollections));
-		} else if (RegexSyntaxHighlighting.canHighlight(modelFactoryClass)) {
-			return Optional.of(styleSpans.overlay(RegexSyntaxHighlighting.computeHighlighting(modelFactoryClass, text), ExtendedCodeArea::combineCollections));
+
+		if (highlighting != null) {
+			return Optional.of(styleSpans.overlay(highlighting, ExtendedCodeArea::combineCollections));
 		} else {
 			// Do not highlight unknown languages.
 			return Optional.of(styleSpans);
