@@ -168,43 +168,41 @@ public class VOManagerStage extends Stage {
 					this.setContextMenu(null);
 					this.setOnMouseClicked(null);
 				} else {
-					final EventHandler<MouseEvent> doubleClickHandler = e -> {
+					this.setOnMouseClicked(e -> {
 						if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && this.getTreeItem().getChildren().isEmpty()) {
 							checkItem(item);
 						}
-					};
+					});
+
+					MenuItem checkItem = new MenuItem();
+					checkItem.setOnAction(e -> checkItem(item));
+
+					MenuItem removeItem = new MenuItem();
+					removeItem.setOnAction(e -> removeItem(item));
 
 					if (item.getVo() != null) {
-						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.check"));
-						checkItem.setOnAction(e -> checkItem(item));
-
-						final MenuItem removeItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.vo.remove"));
-						removeItem.setOnAction(e -> removeItem(item));
+						checkItem.setText(i18n.translate("vomanager.table.requirements.contextMenu.vo.check"));
+						removeItem.setText(i18n.translate("vomanager.table.requirements.contextMenu.vo.remove"));
 
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
-						this.setOnMouseClicked(doubleClickHandler);
 					} else if (item.getRequirement() != null) {
-						final MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.check", item.getRequirement().getValidationObligations().size()));
-						checkItem.setOnAction(e -> checkItem(item));
-						checkItem.setDisable(item.getRequirement().getValidationObligations().isEmpty());
+						Requirement requirement = item.getRequirement();
 
-						final MenuItem removeItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.requirement.remove"));
-						removeItem.setOnAction(e -> removeItem(item));
+						checkItem.setText(i18n.translate("vomanager.table.requirements.contextMenu.requirement.check", requirement.getValidationObligations().size()));
+						checkItem.setDisable(requirement.getValidationObligations().isEmpty());
+						removeItem.setText(i18n.translate("vomanager.table.requirements.contextMenu.requirement.remove"));
 
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
-						this.setOnMouseClicked(doubleClickHandler);
 					} else if (item.getMachine() != null) {
 						Machine machine = item.getMachine();
 						long vosForMachineCount = currentProject.getRequirements().stream()
 							.flatMap(requirement -> requirement.getValidationObligation(machine).stream())
 							.count();
 
-						MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.machine.check", vosForMachineCount));
-						checkItem.setOnAction(e -> checkItem(item));
+						checkItem.setText(i18n.translate("vomanager.table.requirements.contextMenu.machine.check", vosForMachineCount));
 						checkItem.setDisable(vosForMachineCount == 0);
 
 						this.setContextMenu(new ContextMenu(checkItem));
-						this.setOnMouseClicked(doubleClickHandler);
 					} else {
 						throw new AssertionError("Unhandled VOManagerItem kind - not a VO, requirement, or machine?!");
 					}
