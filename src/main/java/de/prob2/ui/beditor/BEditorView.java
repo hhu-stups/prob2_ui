@@ -335,7 +335,7 @@ public class BEditorView extends BorderPane {
 				machineChoice.getItems().setAll(((RulesModel) model).getRulesProject().getBModels().stream()
 						                                .map(IModel::getMachineReferences)
 						                                .flatMap(refs -> refs.stream()
-								                                                 .map(ref -> Path.of(ref.getFile().getPath())))
+								                                                 .map(ref -> Path.of(ref.getPath())))
 						                                .distinct().toList());
 				// main machine is not included in list of referenced rmch
 				machineChoice.getItems().add(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
