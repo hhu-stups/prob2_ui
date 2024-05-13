@@ -80,9 +80,9 @@ public class VisBView extends BorderPane {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final FileChooserManager fileChooserManager;
 	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
-	private final FileChooserManager fileChooserManager;
 
 	@FXML
 	private MenuBar visbMenuBar;
@@ -132,9 +132,16 @@ public class VisBView extends BorderPane {
 	 * @param currentProject ProB2-UI currentProject
 	 */
 	@Inject
-	public VisBView(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
-									final CurrentTrace currentTrace, final I18n i18n, final FileChooserManager fileChooserManager,
-									final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController) {
+	public VisBView(
+		Injector injector,
+		I18n i18n,
+		StageManager stageManager,
+		CurrentProject currentProject,
+		CurrentTrace currentTrace,
+		FileChooserManager fileChooserManager,
+		Provider<DefaultPathDialog> defaultPathDialogProvider,
+		VisBController visBController
+	) {
 		super();
 		this.injector = injector;
 		this.i18n = i18n;
