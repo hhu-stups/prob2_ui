@@ -47,7 +47,7 @@
 							<Spacer/>
 							<Button fx:id="btAddRequirement" onAction="#addRequirement">
 								<graphic>
-									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 2}" />
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
 								</graphic>
 								<tooltip>
 									<Tooltip text="%vomanager.menu.requirements.add"/>
