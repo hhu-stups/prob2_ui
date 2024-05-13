@@ -33,6 +33,7 @@ import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -80,6 +81,7 @@ public class VisBView extends BorderPane {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
 	private final FileChooserManager fileChooserManager;
 	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
@@ -138,6 +140,7 @@ public class VisBView extends BorderPane {
 		StageManager stageManager,
 		CurrentProject currentProject,
 		CurrentTrace currentTrace,
+		CliTaskExecutor cliExecutor,
 		FileChooserManager fileChooserManager,
 		Provider<DefaultPathDialog> defaultPathDialogProvider,
 		VisBController visBController
@@ -148,6 +151,7 @@ public class VisBView extends BorderPane {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
 		this.fileChooserManager = fileChooserManager;
 		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.visBController = visBController;
@@ -313,17 +317,20 @@ public class VisBView extends BorderPane {
 		visBController.setVisBPath(null);
 		if(machine != null && stateSpace != null) {
 			final Path visBVisualisation = machine.getMachineProperties().getVisBVisualisation();
-			final Path visBPath;
 			if (visBVisualisation != null) {
+				final Path visBPath;
 				if (VisBController.NO_PATH.equals(visBVisualisation)) {
 					visBPath = VisBController.NO_PATH;
 				} else {
 					visBPath = currentProject.getLocation().resolve(visBVisualisation);
 				}
+				visBController.setVisBPath(visBPath);
 			} else {
-				visBPath = getPathFromDefinitions(stateSpace);
+				cliExecutor.execute(() -> {
+					Path visBPath = getPathFromDefinitions(stateSpace);
+					Platform.runLater(() -> visBController.setVisBPath(visBPath));
+				});
 			}
-			visBController.setVisBPath(visBPath);
 		}
 	}
 
