@@ -401,19 +401,26 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		}
 
 		this.executor.execute(() -> {
+			try {
+				// let the highlighting thread sleep for a bit, so we do not rapid fire updates when typing a lot
+				Thread.sleep(50);
+			} catch (InterruptedException ignored) {
+				return;
+			}
+
 			Stopwatch sw = Stopwatch.createStarted();
-			StyleSpans<Collection<String>> highlighting = this.computeHighlighting(text);
-			if (highlighting == null || Thread.currentThread().isInterrupted()) {
+			var spans = this.computeHighlighting(text);
+			if (spans == null || Thread.currentThread().isInterrupted()) {
 				return;
 			}
 			LOGGER.trace("Computing highlighting for text of length {} took {}", text.length(), sw.stop());
 
 			Platform.runLater(() -> {
 				Stopwatch sw_ = Stopwatch.createStarted();
-				this.setStyleSpans(0, highlighting);
-				LOGGER.trace("Applying {} highlighting style spans took {}", highlighting.length(), sw_.stop());
+				this.setStyleSpans(0, spans);
+				LOGGER.trace("Applying {} highlighting style spans took {}", spans.length(), sw_.stop());
 			});
-		}, true);
+		});
 	}
 
 	public void clearHistory() {

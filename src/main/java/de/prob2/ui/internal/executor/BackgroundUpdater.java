@@ -74,12 +74,13 @@ public final class BackgroundUpdater implements Executor {
 	public void execute(final Runnable command, final boolean mayInterruptIfRunning) {
 		synchronized (this.lock) {
 			this.cancel(mayInterruptIfRunning);
+			BooleanProperty running = this.running; // reduce lambda capturing range
 			this.lastFuture = this.executor.submit(() -> {
 				try {
-					Platform.runLater(() -> this.running.set(true));
+					Platform.runLater(() -> running.set(true));
 					command.run();
 				} finally {
-					Platform.runLater(() -> this.running.set(false));
+					Platform.runLater(() -> running.set(false));
 				}
 			}, null);
 			Futures.addCallback(this.lastFuture, THROW_EXCEPTIONS_CALLBACK, MoreExecutors.directExecutor());

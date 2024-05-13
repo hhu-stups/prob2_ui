@@ -456,7 +456,6 @@ public class BEditorView extends BorderPane {
 			lastSavedText.set(beditor.getText());
 			beditor.setEditable(true);
 			LOGGER.debug("Setting editor text took {}", sw.stop());
-			beditor.reloadHighlighting();
 		} finally {
 			beditor.setChangingText(false);
 		}
