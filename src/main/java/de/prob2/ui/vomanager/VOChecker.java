@@ -1,6 +1,5 @@
 package de.prob2.ui.vomanager;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -89,23 +88,23 @@ public class VOChecker {
 		return future;
 	}
 
-	private CompletableFuture<?> checkVOExpression(IValidationExpression expression) {
+	private CompletableFuture<?> checkVOExpression(IValidationExpression expression, ExecutionContext context) {
 		if (expression instanceof ValidationTaskExpression) {
-			return checkVT(((ValidationTaskExpression)expression).getTask());
+			return checkVT(((ValidationTaskExpression)expression).getTask(), context);
 		} else if (expression instanceof AndValidationExpression) {
-			return checkAndExpression((AndValidationExpression)expression);
+			return checkAndExpression((AndValidationExpression)expression, context);
 		} else if (expression instanceof OrValidationExpression) {
-			return checkOrExpression((OrValidationExpression)expression);
+			return checkOrExpression((OrValidationExpression)expression, context);
 		} else {
 			throw new RuntimeException("VO expression type is unknown: " + expression.getClass());
 		}
 	}
 
-	private CompletableFuture<?> checkAndExpression(AndValidationExpression expression) {
-		return checkVOExpression(expression.getLeft()).thenCompose(r -> {
+	private CompletableFuture<?> checkAndExpression(AndValidationExpression expression, ExecutionContext context) {
+		return checkVOExpression(expression.getLeft(), context).thenCompose(r -> {
 			final CompletableFuture<?> future;
 			if (expression.getLeft().getChecked() == Checked.SUCCESS) {
-				future = checkVOExpression(expression.getRight());
+				future = checkVOExpression(expression.getRight(), context);
 			} else {
 				future = CompletableFuture.completedFuture(r);
 			}
@@ -113,13 +112,13 @@ public class VOChecker {
 		});
 	}
 
-	private CompletableFuture<?> checkOrExpression(OrValidationExpression expression) {
-		return checkVOExpression(expression.getLeft()).thenCompose(r -> {
+	private CompletableFuture<?> checkOrExpression(OrValidationExpression expression, ExecutionContext context) {
+		return checkVOExpression(expression.getLeft(), context).thenCompose(r -> {
 			final CompletableFuture<?> future;
 			if (expression.getLeft().getChecked() == Checked.SUCCESS) {
 				future = CompletableFuture.completedFuture(r);
 			} else {
-				future = checkVOExpression(expression.getRight());
+				future = checkVOExpression(expression.getRight(), context);
 			}
 			return future;
 		});
@@ -151,11 +150,13 @@ public class VOChecker {
 		}
 
 		// Once the correct machine is loaded, check the VO.
-		return loadFuture.thenCompose(res -> checkVOExpression(validationObligation.getParsedExpression()));
+		return loadFuture.thenCompose(res -> {
+			ExecutionContext context = new ExecutionContext(currentProject.get(), machine, currentTrace.getStateSpace());
+			return checkVOExpression(validationObligation.getParsedExpression(), context);
+		});
 	}
 
-	private CompletableFuture<?> checkVT(IValidationTask validationTask) {
-		final ExecutionContext context = new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+	private CompletableFuture<?> checkVT(IValidationTask validationTask, ExecutionContext context) {
 		if (validationTask instanceof ValidationTaskNotFound) {
 			// Nothing to be done - it already shows an error status
 			return CompletableFuture.completedFuture(null);
