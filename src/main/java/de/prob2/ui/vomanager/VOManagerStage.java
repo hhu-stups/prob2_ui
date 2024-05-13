@@ -193,10 +193,20 @@ public class VOManagerStage extends Stage {
 
 						this.setContextMenu(new ContextMenu(checkItem, removeItem));
 						this.setOnMouseClicked(doubleClickHandler);
+					} else if (item.getMachine() != null) {
+						Machine machine = item.getMachine();
+						long vosForMachineCount = currentProject.getRequirements().stream()
+							.flatMap(requirement -> requirement.getValidationObligation(machine).stream())
+							.count();
+
+						MenuItem checkItem = new MenuItem(i18n.translate("vomanager.table.requirements.contextMenu.machine.check", vosForMachineCount));
+						checkItem.setOnAction(e -> checkItem(item));
+						checkItem.setDisable(vosForMachineCount == 0);
+
+						this.setContextMenu(new ContextMenu(checkItem));
+						this.setOnMouseClicked(doubleClickHandler);
 					} else {
-						// TODO Allow checking (but not removing) machines from VO manager tree
-						this.setContextMenu(null);
-						this.setOnMouseClicked(null);
+						throw new AssertionError("Unhandled VOManagerItem kind - not a VO, requirement, or machine?!");
 					}
 
 					// Gray out items belonging to machines that are not in the current machine's refinement chain.
@@ -308,8 +318,10 @@ public class VOManagerStage extends Stage {
 				future = voChecker.checkVO(item.getVo());
 			} else if (item.getRequirement() != null) {
 				future = voChecker.checkRequirement(item.getRequirement());
+			} else if (item.getMachine() != null) {
+				future = voChecker.checkMachine(item.getMachine());
 			} else {
-				future = CompletableFuture.completedFuture(null);
+				throw new AssertionError("Unhandled VOManagerItem kind - not a VO, requirement, or machine?!");
 			}
 		} catch (VOParseException exc) {
 			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");

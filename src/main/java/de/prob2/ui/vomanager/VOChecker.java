@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
@@ -52,6 +53,17 @@ public class VOChecker {
 		CompletableFuture<?> future = CompletableFuture.completedFuture(null);
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
 			future = future.thenCompose(res -> this.checkVO(vo));
+		}
+		return future;
+	}
+
+	public CompletableFuture<?> checkMachine(Machine machine) {
+		CompletableFuture<?> future = CompletableFuture.completedFuture(null);
+		for (Requirement requirement : currentProject.getRequirements()) {
+			Optional<ValidationObligation> vo = requirement.getValidationObligation(machine);
+			if (vo.isPresent()) {
+				future = future.thenCompose(res -> this.checkVO(vo.get()));
+			}
 		}
 		return future;
 	}
