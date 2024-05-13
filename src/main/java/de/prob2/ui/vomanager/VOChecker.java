@@ -162,7 +162,10 @@ public class VOChecker {
 			// TODO Make SimulationItemHandler return a correct CompletableFuture!
 			return CompletableFuture.completedFuture(null);
 		} else {
-			throw new AssertionError("Unhandled validation task type: " + validationTask.getClass());
+			// Don't know how to (automatically) check this task, so do nothing.
+			// For some tasks, such as proof obligations, there is nothing else we can do.
+			// TODO For manual tasks (e. g. visualization), ask the user to decide.
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 
