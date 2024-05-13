@@ -325,12 +325,14 @@ public class VOManagerStage extends Stage {
 				throw new AssertionError("Unhandled VOManagerItem kind - not a VO, requirement, or machine?!");
 			}
 		} catch (VOParseException exc) {
+			LOGGER.error("VO parse error", exc);
 			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");
 			alert.initOwner(this);
 			alert.show();
 			return;
 		}
 		future.exceptionally(exc -> {
+			LOGGER.error("Exception during VO checking", exc);
 			Platform.runLater(() -> {
 				Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.checking");
 				alert.initOwner(this);
@@ -493,12 +495,14 @@ public class VOManagerStage extends Stage {
 		try {
 			future = voChecker.checkProject();
 		} catch (VOParseException exc) {
+			LOGGER.error("VO parse error", exc);
 			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");
 			alert.initOwner(this);
 			alert.show();
 			return;
 		}
 		future.exceptionally(exc -> {
+			LOGGER.error("Exception during VO checking", exc);
 			Platform.runLater(() -> {
 				Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.checking");
 				alert.initOwner(this);
