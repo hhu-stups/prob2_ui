@@ -6,13 +6,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
-import de.prob2.ui.verifications.IResettable;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public final class LTLPatternItem implements IResettable {
+public final class LTLPatternItem {
 	// The pattern name is automatically parsed from the code.
 	// We store the parsed name in the project file
 	// so that we don't need to re-parse the pattern just to get its name
@@ -79,7 +78,6 @@ public final class LTLPatternItem implements IResettable {
 		return this.checkedProperty().get();
 	}
 
-	@Override
 	public void reset() {
 		this.setResultItem(null);
 	}
