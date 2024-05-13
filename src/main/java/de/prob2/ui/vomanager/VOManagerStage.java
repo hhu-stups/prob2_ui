@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -28,6 +29,7 @@ import de.prob2.ui.verifications.TreeCheckedCell;
 import de.prob2.ui.vomanager.feedback.VOFeedback;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
+import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ListProperty;
@@ -297,17 +299,29 @@ public class VOManagerStage extends Stage {
 		if (item == null) {
 			return;
 		}
+		CompletableFuture<?> future;
 		try {
 			if (item.getVo() != null) {
-				voChecker.checkVO(item.getVo());
+				future = voChecker.checkVO(item.getVo());
 			} else if (item.getRequirement() != null) {
-				voChecker.checkRequirement(item.getRequirement());
+				future = voChecker.checkRequirement(item.getRequirement());
+			} else {
+				future = CompletableFuture.completedFuture(null);
 			}
 		} catch (VOParseException exc) {
 			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");
 			alert.initOwner(this);
 			alert.show();
+			return;
 		}
+		future.exceptionally(exc -> {
+			Platform.runLater(() -> {
+				Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.checking");
+				alert.initOwner(this);
+				alert.show();
+			});
+			return null;
+		});
 	}
 
 	private void checkSingleTask(final IValidationTask task) {

@@ -37,10 +37,13 @@ public class VOChecker {
 		this.simulationItemHandler = simulationItemHandler;
 	}
 
-	public void checkRequirement(Requirement requirement) {
+	public CompletableFuture<?> checkRequirement(Requirement requirement) {
+		CompletableFuture<?> future = CompletableFuture.completedFuture(null);
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
-			this.checkVO(vo);
+			// TODO Load the matching machine for the VO first
+			future = future.thenCompose(res -> this.checkVO(vo));
 		}
+		return future;
 	}
 
 	private CompletableFuture<?> checkVOExpression(IValidationExpression expression) {
@@ -79,12 +82,12 @@ public class VOChecker {
 		});
 	}
 
-	public void checkVO(ValidationObligation validationObligation) {
+	public CompletableFuture<?> checkVO(ValidationObligation validationObligation) {
 		if (validationObligation.getParsedExpression() == null) {
 			final Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
 			validationObligation.parse(machine);
 		}
-		checkVOExpression(validationObligation.getParsedExpression());
+		return checkVOExpression(validationObligation.getParsedExpression());
 	}
 
 	private CompletableFuture<?> checkVT(IValidationTask validationTask) {
