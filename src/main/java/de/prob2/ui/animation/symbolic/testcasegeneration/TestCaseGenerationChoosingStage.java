@@ -4,6 +4,8 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -13,10 +15,11 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 
 public class TestCaseGenerationChoosingStage extends Stage {
 	@FXML
-	private ChoiceBox<TestCaseGenerationType> testChoice;
+	private ChoiceBox<ValidationTaskType<?>> testChoice;
 
 	@FXML
 	private VBox input;
@@ -51,17 +54,36 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	public void initialize() {
 		this.itemProperty().addListener((o, from, to) -> {
 			if (to != null) {
-				this.select(to);
-				if (this.getTestCaseGenerationType() == TestCaseGenerationType.MCDC) {
-					mcdcInputView.setItem((MCDCItem) to);
-				} else if (this.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS) {
-					operationCoverageInputView.setItem((OperationCoverageItem) to);
+				testChoice.getSelectionModel().select(to.getTaskType());
+				if (to instanceof MCDCItem mcdcItem) {
+					mcdcInputView.setItem(mcdcItem);
+				} else if (to instanceof OperationCoverageItem operationCoverageItem) {
+					operationCoverageInputView.setItem(operationCoverageItem);
+				} else {
+					throw new AssertionError("Unhandled test case generation type: " + item.getClass());
 				}
 			}
 		});
 		input.visibleProperty().bind(testChoice.getSelectionModel().selectedItemProperty().isNotNull());
-		testChoice.getItems().setAll(TestCaseGenerationType.values());
-		testChoice.setConverter(i18n.translateConverter());
+		testChoice.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(ValidationTaskType<?> object) {
+				if (object == null) {
+					return "";
+				} else if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_MCDC.equals(object)) {
+					return i18n.translate("animation.testcase.type.mcdc");
+				} else if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_OPERATION_COVERAGE.equals(object)) {
+					return i18n.translate("animation.testcase.type.coveredOperations");
+				} else {
+					return object.getKey();
+				}
+			}
+
+			@Override
+			public ValidationTaskType<?> fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to ValidationTaskType not supported");
+			}
+		});
 		testChoice.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (to == null) {
 				return;
@@ -85,7 +107,7 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	}
 
 	private boolean checkValid() {
-		if (this.getTestCaseGenerationType() == TestCaseGenerationType.COVERED_OPERATIONS && this.operationCoverageInputView.getOperations().isEmpty()) {
+		if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_OPERATION_COVERAGE.equals(testChoice.getValue()) && this.operationCoverageInputView.getOperations().isEmpty()) {
 			final Alert alert = stageManager.makeAlert(
 					Alert.AlertType.ERROR,
 					"animation.alerts.testcasegeneration.operations.header",
@@ -99,33 +121,25 @@ public class TestCaseGenerationChoosingStage extends Stage {
 	}
 
 	private TestCaseGenerationItem extractItem() {
-		final TestCaseGenerationType type = this.getTestCaseGenerationType();
-		return switch (type) {
-			case MCDC -> new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
-			case COVERED_OPERATIONS -> new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
-		};
-	}
-
-	public void changeType(final TestCaseGenerationType type) {
-		input.getChildren().removeAll(mcdcInputView, operationCoverageInputView);
-		switch (type) {
-			case MCDC:
-				input.getChildren().add(0, mcdcInputView);
-				break;
-			case COVERED_OPERATIONS:
-				input.getChildren().add(0, operationCoverageInputView);
-				break;
-			default:
-				throw new AssertionError("Unhandled type: " + type);
+		ValidationTaskType<?> type = testChoice.getValue();
+		if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_MCDC.equals(type)) {
+			return new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
+		} else if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_OPERATION_COVERAGE.equals(type)) {
+			return new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
+		} else {
+			throw new AssertionError("Unhandled test case generation type: " + item.getClass());
 		}
 	}
 
-	public TestCaseGenerationType getTestCaseGenerationType() {
-		return testChoice.getSelectionModel().getSelectedItem();
-	}
-
-	public void select(TestCaseGenerationItem item) {
-		testChoice.getSelectionModel().select(item.getType());
+	public void changeType(ValidationTaskType<?> type) {
+		input.getChildren().removeAll(mcdcInputView, operationCoverageInputView);
+		if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_MCDC.equals(type)) {
+			input.getChildren().add(0, mcdcInputView);
+		} else if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_OPERATION_COVERAGE.equals(type)) {
+			input.getChildren().add(0, operationCoverageInputView);
+		} else {
+			throw new AssertionError("Unhandled type: " + type);
+		}
 	}
 
 	@FXML

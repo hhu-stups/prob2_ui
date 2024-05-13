@@ -27,6 +27,7 @@ import de.prob2.ui.verifications.ExecutionContext;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -157,12 +158,12 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
-		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
+		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getTaskType(i18n)));
 	}
 
 	@Override
 	protected String configurationForItem(final TestCaseGenerationItem item) {
-		return item.getConfigurationDescription();
+		return item.getTaskDescription(i18n);
 	}
 
 	@Override

@@ -23,7 +23,6 @@ import de.prob2.ui.dynamic.plantuml.PlantUmlFormulaTask;
 import de.prob2.ui.dynamic.table.TableFormulaTask;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
@@ -48,7 +47,6 @@ import javafx.collections.ObservableList;
 @JsonPropertyOrder({
 	"validationTasks",
 	"ltlPatterns",
-	"testCases",
 	"simulations",
 	"visBVisualisation",
 	"historyChartItems",
@@ -56,7 +54,6 @@ import javafx.collections.ObservableList;
 public final class MachineProperties {
 	private final ReadOnlyListProperty<IValidationTask> validationTasks;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
-	private final ListProperty<TestCaseGenerationItem> testCases;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
@@ -71,7 +68,6 @@ public final class MachineProperties {
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
 
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
-		this.testCases = new SimpleListProperty<>(this, "testCases", FXCollections.observableArrayList());
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
@@ -256,14 +252,9 @@ public final class MachineProperties {
 		return this.getValidationTasksByClass(SymbolicAnimationItem.class);
 	}
 
-	@JsonGetter("testCases")
-	public ReadOnlyListProperty<TestCaseGenerationItem> getTestCases() {
-		return this.testCases;
-	}
-
-	@JsonSetter("testCases")
-	private void setTestCases(final List<TestCaseGenerationItem> testCases) {
-		this.getTestCases().setAll(testCases);
+	@JsonIgnore
+	public ObservableList<TestCaseGenerationItem> getTestCases() {
+		return this.getValidationTasksByClass(TestCaseGenerationItem.class);
 	}
 
 	@JsonGetter("simulations")
@@ -327,7 +318,6 @@ public final class MachineProperties {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
 		this.getValidationTasks().addListener(changedListener);
 		this.getLTLPatterns().addListener(changedListener);
-		this.getTestCases().addListener(changedListener);
 		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.getHistoryChartItems().addListener(changedListener);
@@ -337,7 +327,6 @@ public final class MachineProperties {
 		for (var vt : this.getValidationTasks()) {
 			vt.reset();
 		}
-		this.getTestCases().forEach(IExecutableItem::reset);
 		this.getLTLPatterns().forEach(LTLPatternItem::reset);
 		this.patternManager = new PatternManager();
 	}

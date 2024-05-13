@@ -2,6 +2,8 @@ package de.prob2.ui.verifications.type;
 
 import de.prob2.ui.animation.symbolic.CBCFindSequenceItem;
 import de.prob2.ui.animation.symbolic.FindValidStateItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCItem;
+import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.dynamic.dotty.DotFormulaTask;
 import de.prob2.ui.dynamic.plantuml.PlantUmlFormulaTask;
@@ -38,6 +40,8 @@ public final class BuiltinValidationTaskTypes {
 	public static final ValidationTaskType<SymbolicModelCheckingItem> SYMBOLIC_MODEL_CHECKING = register(new ValidationTaskType<>("SYMBOLIC_MODEL_CHECKING", SymbolicModelCheckingItem.class));
 	public static final ValidationTaskType<CBCFindSequenceItem> CBC_FIND_SEQUENCE = register(new ValidationTaskType<>("CBC_FIND_SEQUENCE", CBCFindSequenceItem.class));
 	public static final ValidationTaskType<FindValidStateItem> FIND_VALID_STATE = register(new ValidationTaskType<>("FIND_VALID_STATE", FindValidStateItem.class));
+	public static final ValidationTaskType<MCDCItem> TEST_CASE_GENERATION_MCDC = register(new ValidationTaskType<>("TEST_CASE_GENERATION_MCDC", MCDCItem.class));
+	public static final ValidationTaskType<OperationCoverageItem> TEST_CASE_GENERATION_OPERATION_COVERAGE = register(new ValidationTaskType<>("TEST_CASE_GENERATION_OPERATION_COVERAGE", OperationCoverageItem.class));
 	public static final ValidationTaskType<SimulationItem> SIMULATION = register(new ValidationTaskType<>("SIMULATION", SimulationItem.class));
 	public static final ValidationTaskType<ReplayTrace> REPLAY_TRACE = register(new ValidationTaskType<>("REPLAY_TRACE", ReplayTrace.class));
 	public static final ValidationTaskType<ModelCheckingItem> MODEL_CHECKING = register(new ValidationTaskType<>("MODEL_CHECKING", ModelCheckingItem.class));

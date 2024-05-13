@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorMCDCSettings;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 
 public final class MCDCItem extends TestCaseGenerationItem {
 	private final int level;
@@ -21,8 +24,13 @@ public final class MCDCItem extends TestCaseGenerationItem {
 	}
 
 	@Override
-	public TestCaseGenerationType getType() {
-		return TestCaseGenerationType.MCDC;
+	public ValidationTaskType<MCDCItem> getTaskType() {
+		return BuiltinValidationTaskTypes.TEST_CASE_GENERATION_MCDC;
+	}
+
+	@Override
+	public String getTaskType(I18n i18n) {
+		return i18n.translate("animation.testcase.type.mcdc");
 	}
 
 	public int getLevel() {

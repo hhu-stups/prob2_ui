@@ -1020,6 +1020,22 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 
+	private static void updateV50Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		ArrayNode testCases = checkArray(machine.remove("testCases"));
+		testCases.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String testCaseGenerationType = checkText(task.remove("type"));
+			String newTaskType = switch (testCaseGenerationType) {
+				case "MCDC" -> "TEST_CASE_GENERATION_MCDC";
+				case "COVERED_OPERATIONS" -> "TEST_CASE_GENERATION_OPERATION_COVERAGE";
+				default -> throw new JsonConversionException("Invalid test case generation type: " + testCaseGenerationType);
+			};
+			task.put("taskType", newTaskType);
+			validationTasks.add(task);
+		});
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -1193,6 +1209,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 49) {
 				updateV49Machine(machine);
+			}
+			if (oldVersion <= 50) {
+				updateV50Machine(machine);
 			}
 		});
 

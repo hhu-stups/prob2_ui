@@ -4,15 +4,15 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
 import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
 import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -25,12 +25,7 @@ import javafx.collections.ObservableList;
 	"maxDepth",
 	"selected",
 })
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
-@JsonSubTypes({
-	@JsonSubTypes.Type(value = MCDCItem.class, name = "MCDC"),
-	@JsonSubTypes.Type(value = OperationCoverageItem.class, name = "COVERED_OPERATIONS"),
-})
-public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
+public abstract class TestCaseGenerationItem extends AbstractCheckableItem implements IValidationTask {
 	private final int maxDepth;
 
 	@JsonIgnore
@@ -44,8 +39,16 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 		this.maxDepth = maxDepth;
 	}
 
-	@JsonIgnore
-	public abstract TestCaseGenerationType getType();
+	@JsonIgnore // TODO
+	@Override
+	public String getId() {
+		return null; // TODO
+	}
+
+	@Override
+	public String getTaskDescription(I18n i18n) {
+		return this.getConfigurationDescription();
+	}
 
 	public int getMaxDepth() {
 		return maxDepth;
@@ -75,7 +78,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	}
 
 	@JsonIgnore
-	public abstract String getConfigurationDescription();
+	protected abstract String getConfigurationDescription();
 
 	public String createdByForMetadata(int index) {
 		final Target target = this.getResult().getTestTraces().get(index).getTarget();
@@ -97,7 +100,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@Override
 	public boolean settingsEqual(Object other) {
 		return other instanceof TestCaseGenerationItem that
-			       && Objects.equals(this.getType(), that.getType())
+			       && Objects.equals(this.getTaskType(), that.getTaskType())
 			       && Objects.equals(this.getMaxDepth(), that.getMaxDepth());
 	}
 }
