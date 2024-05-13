@@ -1,10 +1,10 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -196,9 +196,9 @@ public class ReplayedTraceStatusAlert extends Alert {
 				transitionReplayPrecision != TransitionReplayPrecision.PRECISE
 					|| (transitionErrorMessages == null || !transitionErrorMessages.isEmpty())
 			) {
-				styleClasses = Collections.singletonList("FAULTY");
+				styleClasses = Set.of("FAULTY");
 			} else {
-				styleClasses = Collections.emptyList();
+				styleClasses = Set.of();
 			}
 
 			items.add(new ReplayedTraceRow(step, fileTransition, replayedTransition, precision, errorMessage, null, styleClasses));

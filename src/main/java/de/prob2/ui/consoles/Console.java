@@ -1,13 +1,12 @@
 package de.prob2.ui.consoles;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.codecompletion.CodeCompletionItem;
@@ -188,13 +187,13 @@ public abstract class Console extends StyleClassedTextArea {
 
 		boolean empty = this.getLength() == 0;
 		if (empty) {
-			this.insert(0, i18n.translate(this.header.get()) + "\n", Collections.singletonList("header"));
+			this.insert(0, i18n.translate(this.header.get()) + "\n", Set.of("header"));
 		}
 
 		assert this.getParagraphs().size() >= 2; // always at least header + prompt
 		int lastParagraph = this.getParagraphs().size() - 1;
 		int paragraphLength = this.getParagraphLength(lastParagraph);
-		this.replace(this.getAbsolutePosition(lastParagraph, 0), this.getAbsolutePosition(lastParagraph, paragraphLength), to, Collections.emptyList());
+		this.replace(this.getAbsolutePosition(lastParagraph, 0), this.getAbsolutePosition(lastParagraph, paragraphLength), to, Set.of());
 
 		if (empty || from == null) {
 			this.moveTo(lastParagraph, this.inputEnd.get(), SelectionPolicy.CLEAR);
@@ -408,7 +407,7 @@ public abstract class Console extends StyleClassedTextArea {
 	 * @param text text to insert
 	 */
 	public void addParagraph(String text) {
-		this.addParagraph(text, Collections.emptyList(), true);
+		this.addParagraph(text, Set.of(), true);
 	}
 
 	/**
@@ -470,7 +469,7 @@ public abstract class Console extends StyleClassedTextArea {
 					return;
 				}
 
-				this.addParagraph(result.toString(), result.getResultType() == ConsoleExecResultType.ERROR ? Arrays.asList("error", "output") : Collections.singletonList("output"), true);
+				this.addParagraph(result.toString(), result.getResultType() == ConsoleExecResultType.ERROR ? Set.of("error", "output") : Set.of("output"), true);
 			}
 		}
 

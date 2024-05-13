@@ -1,7 +1,7 @@
 package de.prob2.ui.beditor;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -54,7 +54,7 @@ public class BEditor extends ExtendedCodeArea {
 					}
 
 					int caret = BEditor.this.getCaretPosition();
-					BEditor.this.replace(caret - replacement.getOriginalText().length(), caret, replacement.getReplacement(), Collections.emptyList());
+					BEditor.this.replace(caret - replacement.getOriginalText().length(), caret, replacement.getReplacement(), Set.of());
 				}
 			},
 			text -> BCodeCompletion.doCompletion(currentTrace.getStateSpace(), text)
@@ -86,7 +86,7 @@ public class BEditor extends ExtendedCodeArea {
 		Machine machine = currentProject.getCurrentMachine();
 		if (machine == null) {
 			// Prompt text is a comment
-			highlighting = StyleSpans.singleton(Collections.singleton("editor_comment"), text.length());
+			highlighting = StyleSpans.singleton(Set.of("editor_comment"), text.length());
 		} else {
 			Class<? extends ModelFactory<?>> modelFactoryClass = machine.getModelFactoryClass();
 			if (modelFactoryClass == RulesModelFactory.class) {
@@ -104,14 +104,14 @@ public class BEditor extends ExtendedCodeArea {
 
 		if (overlay != null) {
 			if (highlighting != null) {
-				highlighting = highlighting.overlay(overlay, ExtendedCodeArea::combineCollections);
+				highlighting = highlighting.overlay(overlay, ExtendedCodeArea::combineStyleSpans);
 			} else {
 				highlighting = overlay;
 			}
 		}
 
 		if (highlighting != null) {
-			return styleSpans.overlay(highlighting, ExtendedCodeArea::combineCollections);
+			return styleSpans.overlay(highlighting, ExtendedCodeArea::combineStyleSpans);
 		} else {
 			// Do not highlight unknown languages
 			return styleSpans;

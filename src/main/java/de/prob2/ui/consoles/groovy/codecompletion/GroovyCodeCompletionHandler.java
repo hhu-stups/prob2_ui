@@ -1,8 +1,5 @@
 package de.prob2.ui.consoles.groovy.codecompletion;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Locale;
 import java.util.Map;
@@ -17,20 +14,18 @@ import de.prob2.ui.consoles.groovy.objects.GroovyObjectItem;
 
 final class GroovyCodeCompletionHandler {
 
-	private static final Map<String, String> GLOBAL_CLASSES = new HashMap<>() {
-		{
-			this.put("BigDecimal", "java.math.BigDecimal");
-			this.put("BigInteger", "java.math.BigInteger");
-		}
-	};
-	private static final Set<String> GLOBAL_PACKAGES = new HashSet<>(Arrays.asList(
+	private static final Map<String, String> GLOBAL_CLASSES = Map.of(
+			"BigDecimal", "java.math.BigDecimal",
+			"BigInteger", "java.math.BigInteger"
+	);
+	private static final Set<String> GLOBAL_PACKAGES = Set.of(
 			"java.lang",
 			"java.io",
 			"java.net",
 			"java.util",
 			"groovy.lang",
 			"groovy.util"
-	));
+	);
 
 	private final ScriptEngine engine;
 	private final String namespace;

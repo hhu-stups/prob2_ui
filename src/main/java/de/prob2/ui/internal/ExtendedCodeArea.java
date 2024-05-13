@@ -1,15 +1,13 @@
 package de.prob2.ui.internal;
 
 import java.time.Duration;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
@@ -56,18 +54,14 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeArea> {
 
-	protected static final Map<ErrorItem.Type, String> ERROR_STYLE_CLASSES;
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedCodeArea.class);
+	protected static final Map<ErrorItem.Type, String> ERROR_STYLE_CLASSES = Map.of(
+			ErrorItem.Type.WARNING, "warning",
+			ErrorItem.Type.ERROR, "error",
+			ErrorItem.Type.INTERNAL_ERROR, "error"
+	);
 	private static final int MAX_TEXT_LENGTH_FOR_STYLING = 100_000;
 	private static final int MAX_PAR_LENGTH_FOR_STYLING = 100_000;
-
-	static {
-		final Map<ErrorItem.Type, String> errorStyleClasses = new EnumMap<>(ErrorItem.Type.class);
-		errorStyleClasses.put(ErrorItem.Type.WARNING, "warning");
-		errorStyleClasses.put(ErrorItem.Type.ERROR, "error");
-		errorStyleClasses.put(ErrorItem.Type.INTERNAL_ERROR, "error");
-		ERROR_STYLE_CLASSES = Collections.unmodifiableMap(errorStyleClasses);
-	}
 
 	protected final FontSize fontSize;
 	protected final I18n i18n;
@@ -120,10 +114,17 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		initialize();
 	}
 
-	protected static <T> Collection<T> combineCollections(final Collection<? extends T> a, final Collection<? extends T> b) {
-		final Collection<T> ret = new ArrayList<>(a);
-		ret.addAll(b);
-		return ret;
+	protected static Collection<String> combineStyleSpans(final Collection<String> a, final Collection<String> b) {
+		// we want to save memory here!
+		if (b.isEmpty() || a.equals(b)) {
+			return a;
+		} else if (a.isEmpty()) {
+			return b;
+		} else {
+			HashSet<String> coll = new HashSet<>(a);
+			coll.addAll(b);
+			return coll;
+		}
 	}
 
 	private void initialize() {
@@ -316,10 +317,10 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 				if (endIndex > startIndex) {
 					highlighting = highlighting.overlay(
 						new StyleSpansBuilder<Collection<String>>()
-							.add(Collections.emptySet(), startIndex)
-							.add(Arrays.asList("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
+								.add(Set.of(), startIndex)
+								.add(Set.of("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
 							.create(),
-						ExtendedCodeArea::combineCollections
+							ExtendedCodeArea::combineStyleSpans
 					);
 				}
 			}
@@ -331,10 +332,10 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			if (endIndex > startIndex) {
 				highlighting = highlighting.overlay(
 					new StyleSpansBuilder<Collection<String>>()
-						.add(Collections.emptySet(), startIndex)
-						.add(Collections.singletonList("errorTable"), endIndex - startIndex)
+							.add(Set.of(), startIndex)
+							.add(Set.of("errorTable"), endIndex - startIndex)
 						.create(),
-					ExtendedCodeArea::combineCollections
+						ExtendedCodeArea::combineStyleSpans
 				);
 			}
 		}
@@ -358,10 +359,10 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			if (endIndex > startIndex) {
 				highlighting = highlighting.overlay(
 					new StyleSpansBuilder<Collection<String>>()
-						.add(Collections.emptySet(), startIndex)
-						.add(Collections.singletonList("searchResult"), endIndex - startIndex)
+							.add(Set.of(), startIndex)
+							.add(Set.of("searchResult"), endIndex - startIndex)
 						.create(),
-					ExtendedCodeArea::combineCollections
+						ExtendedCodeArea::combineStyleSpans
 				);
 			}
 		}
@@ -387,7 +388,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	protected StyleSpans<Collection<String>> computeHighlighting(String text) {
-		StyleSpans<Collection<String>> highlighting = StyleSpans.singleton(Collections.emptySet(), text.length());
+		StyleSpans<Collection<String>> highlighting = StyleSpans.singleton(Set.of(), text.length());
 		highlighting = addErrorHighlighting(highlighting);
 		highlighting = addSearchHighlighting(highlighting);
 		return highlighting;
@@ -396,7 +397,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	public void reloadHighlighting() {
 		String text = this.getText();
 		if (!this.checkTextLengthForStyling()) {
-			this.setStyleSpans(0, StyleSpans.singleton(new StyleSpan<>(Collections.emptySet(), text.length())));
+			this.setStyleSpans(0, StyleSpans.singleton(new StyleSpan<>(Set.of(), text.length())));
 			return;
 		}
 

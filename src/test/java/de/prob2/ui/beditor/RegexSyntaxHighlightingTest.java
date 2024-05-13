@@ -1,7 +1,7 @@
 package de.prob2.ui.beditor;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 import de.prob.model.brules.RulesModelFactory;
@@ -34,7 +34,7 @@ class RegexSyntaxHighlightingTest {
 	@Test
 	void ruleTest() {
 		var expected = new StyleSpansBuilder<Collection<String>>()
-			.add(Collections.singleton("editor_ctrlkeyword"), 6)
+				.add(Set.of("editor_ctrlkeyword"), 6)
 			.create();
 		var actual = RegexSyntaxHighlighting.computeHighlighting(RulesModelFactory.class, "RULEID");
 		assertThat(actual).isEqualTo(expected);

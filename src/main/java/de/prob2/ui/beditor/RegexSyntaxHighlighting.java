@@ -2,11 +2,11 @@ package de.prob2.ui.beditor;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +32,9 @@ import static java.util.regex.Pattern.compile;
 public final class RegexSyntaxHighlighting {
 
 	private static final Map<Class<? extends ModelFactory<?>>, List<TokenClass>> TOKEN_CLASSES;
-	private static final Collection<String> IGNORED_STYLE = Collections.singleton("editor_ignored");
+	private static final Collection<String> IGNORED_STYLE = Set.of("editor_ignored");
+	private static final Collection<String> IDENTIFIER = Set.of("editor_identifier");
+	private static final Collection<String> SPECIAL_IDENTIFIER = Set.of("editor_special_identifier");
 
 	static {
 		// unicode flags
@@ -138,19 +140,19 @@ public final class RegexSyntaxHighlighting {
 		List<Range> ranges = new ArrayList<>();
 		for (var tokenClass : tokenClasses) {
 			if (Thread.currentThread().isInterrupted()) {
-				return Collections.emptyList();
+				return List.of();
 			}
 
 			Matcher matcher = tokenClass.pattern().matcher(text);
 			while (matcher.find()) {
-				String adjustedSyntaxClass;
-				if ("editor_identifier".equals(tokenClass.syntaxClass()) && Utils.isProBSpecialDefinitionName(matcher.group())) {
+				Collection<String> tokenClassColl;
+				if (IDENTIFIER.equals(tokenClass.tokenClass()) && Utils.isProBSpecialDefinitionName(matcher.group())) {
 					// Recognize and highlight special identifiers (e.g. ANIMATION_FUNCTION, VISB_JSON_FILE)
-					adjustedSyntaxClass = "editor_special_identifier";
+					tokenClassColl = SPECIAL_IDENTIFIER;
 				} else {
-					adjustedSyntaxClass = tokenClass.syntaxClass();
+					tokenClassColl = tokenClass.tokenClass();
 				}
-				ranges.add(new Range(adjustedSyntaxClass, matcher.start(), matcher.end()));
+				ranges.add(new Range(tokenClassColl, matcher.start(), matcher.end()));
 			}
 		}
 
@@ -202,7 +204,7 @@ public final class RegexSyntaxHighlighting {
 
 			if (pos == range.start()) {
 				int length = range.end() - range.start();
-				spansBuilder.add(Collections.singleton(range.syntaxClass()), length);
+				spansBuilder.add(range.tokenClass(), length);
 				pos = range.end();
 			}
 			// else: pos > range.start()
@@ -217,7 +219,7 @@ public final class RegexSyntaxHighlighting {
 			return spansBuilder.create();
 		} catch (IllegalStateException ignored) {
 			// this exception is only thrown when there were no spans
-			return StyleSpans.singleton(Collections.emptySet(), text.length());
+			return StyleSpans.singleton(Set.of(), text.length());
 		}
 	}
 
@@ -228,16 +230,20 @@ public final class RegexSyntaxHighlighting {
 		return createSpansBuilder(rangesWithLongestMatch, text);
 	}
 
-	private record TokenClass(String syntaxClass, Pattern pattern) {
+	private record TokenClass(Collection<String> tokenClass, Pattern pattern) {
 		TokenClass {
-			Objects.requireNonNull(syntaxClass, "syntaxClass");
+			Objects.requireNonNull(tokenClass, "tokenClass");
 			Objects.requireNonNull(pattern, "pattern");
+		}
+
+		TokenClass(String tokenClass, Pattern pattern) {
+			this(Set.of(tokenClass), pattern);
 		}
 	}
 
-	private record Range(String syntaxClass, int start, int end) {
+	private record Range(Collection<String> tokenClass, int start, int end) {
 		Range {
-			Objects.requireNonNull(syntaxClass, "syntaxClass");
+			Objects.requireNonNull(tokenClass, "tokenClass");
 			if (start < 0 || start >= end) {
 				throw new IllegalArgumentException("0 <= start < end");
 			}

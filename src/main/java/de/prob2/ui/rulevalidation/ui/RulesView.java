@@ -423,7 +423,7 @@ public class RulesView extends AnchorPane{
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				if (row.getItem() instanceof AbstractOperation abstractOperation) {
-					showGraphExpression(controller.getPartialDependencyGraphExpression(Collections.singleton(abstractOperation)));
+					showGraphExpression(controller.getPartialDependencyGraphExpression(Set.of(abstractOperation)));
 				}
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
