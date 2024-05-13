@@ -208,17 +208,15 @@ public class VisBView extends BorderPane {
 			this.currentTrace.stateSpaceProperty().removeListener(stateSpaceListener);
 			visBController.setVisBPath(null);
 		});
-		//Load VisB file from machine, when window is opened and set listener on the current machine
 
-			this.currentProject.currentMachineProperty().addListener(machineListener);
-			this.visBController.visBVisualisationProperty().addListener(visBListener);
-			this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
+		// Load VisB file from machine, when window is opened and set listener on the current machine
+		this.currentProject.currentMachineProperty().addListener(machineListener);
+		this.visBController.visBVisualisationProperty().addListener(visBListener);
+		this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
 
+		machineListener.changed(null, null, currentProject.getCurrentMachine());
 
-			machineListener.changed(null, null, currentProject.getCurrentMachine());
-
-			stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
-
+		stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
