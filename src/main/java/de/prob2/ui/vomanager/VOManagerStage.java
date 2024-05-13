@@ -225,6 +225,9 @@ public class VOManagerStage extends Stage {
 			final TableRow<IValidationTask> row = new TableRow<>();
 
 			row.setOnMouseClicked(e -> {
+				if (row.isEmpty()) {
+					return;
+				}
 				if (e.getButton() == MouseButton.PRIMARY && e.getClickCount() == 2) {
 					checkSingleTask(row.getItem());
 				}
