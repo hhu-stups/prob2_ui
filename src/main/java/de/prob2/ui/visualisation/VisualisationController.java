@@ -87,23 +87,25 @@ public final class VisualisationController {
 			} else {
 				placeholderLabel.setText(i18n.translate("visualisation.view.placeholder.noAnimationFunction"));
 			}
-			
+
+			if (from == null || to == null || !from.getStateSpace().equals(to.getStateSpace())) {
+				this.currentStateVisualisationController.getMachineImages().clear();
+				this.previousStateVisualisationController.getMachineImages().clear();
+			}
+
 			updater.execute(() -> {
+				if (to != null && (from == null || !from.getStateSpace().equals(to.getStateSpace()))) {
+					GetImagesForMachineCommand cmd = new GetImagesForMachineCommand();
+					to.getStateSpace().execute(cmd);
+					Map<Integer, Image> machineImages = this.loadMachineImages(cmd.getImages());
+					Platform.runLater(() -> {
+						this.currentStateVisualisationController.getMachineImages().putAll(machineImages);
+						this.previousStateVisualisationController.getMachineImages().putAll(machineImages);
+					});
+				}
 				currentStateVisualisationController.visualiseState(to);
 				previousStateVisualisationController.visualiseState(to != null && to.canGoBack() ? to.back() : null);
 			});
-		});
-
-		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			this.currentStateVisualisationController.getMachineImages().clear();
-			this.previousStateVisualisationController.getMachineImages().clear();
-			if (to != null) {
-				final GetImagesForMachineCommand cmd = new GetImagesForMachineCommand();
-				to.execute(cmd);
-				final Map<Integer, Image> machineImages = this.loadMachineImages(cmd.getImages());
-				this.currentStateVisualisationController.getMachineImages().putAll(machineImages);
-				this.previousStateVisualisationController.getMachineImages().putAll(machineImages);
-			}
 		});
 	}
 
@@ -131,17 +133,19 @@ public final class VisualisationController {
 		});
 
 		if (!notFoundImages.isEmpty()) {
-			final Alert alert = this.stageManager.makeAlert(
-				Alert.AlertType.WARNING,
-				"visualisation.stateVisualisationView.alerts.imagesNotFound.header",
-				"visualisation.stateVisualisationView.alerts.imagesNotFound.content",
-				String.join("\n", notFoundImages),
-				machineDirectory,
-				projectDirectory,
-				proBHomePath
-			);
-			alert.initOwner(probLogoView.getScene().getWindow());
-			alert.show();
+			Platform.runLater(() -> {
+				final Alert alert = this.stageManager.makeAlert(
+					Alert.AlertType.WARNING,
+					"visualisation.stateVisualisationView.alerts.imagesNotFound.header",
+					"visualisation.stateVisualisationView.alerts.imagesNotFound.content",
+					String.join("\n", notFoundImages),
+					machineDirectory,
+					projectDirectory,
+					proBHomePath
+				);
+				alert.initOwner(probLogoView.getScene().getWindow());
+				alert.show();
+			});
 		}
 
 		return machineImages;
