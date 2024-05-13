@@ -41,7 +41,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableSet;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -58,7 +57,6 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -314,27 +312,19 @@ public class VOManagerStage extends Stage {
 			return;
 		}
 		CompletableFuture<?> future;
-		try {
-			if (item.getVo() != null) {
-				future = voChecker.checkVO(item.getVo());
-			} else if (item.getRequirement() != null) {
-				future = voChecker.checkRequirement(item.getRequirement());
-			} else if (item.getMachine() != null) {
-				future = voChecker.checkMachine(item.getMachine());
-			} else {
-				throw new AssertionError("Unhandled VOManagerItem kind - not a VO, requirement, or machine?!");
-			}
-		} catch (VOParseException exc) {
-			LOGGER.error("VO parse error", exc);
-			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");
-			alert.initOwner(this);
-			alert.show();
-			return;
+		if (item.getVo() != null) {
+			future = voChecker.checkVO(item.getVo());
+		} else if (item.getRequirement() != null) {
+			future = voChecker.checkRequirement(item.getRequirement());
+		} else if (item.getMachine() != null) {
+			future = voChecker.checkMachine(item.getMachine());
+		} else {
+			throw new AssertionError("Unhandled VOManagerItem kind - not a VO, requirement, or machine?!");
 		}
 		future.exceptionally(exc -> {
 			LOGGER.error("Exception during VO checking", exc);
 			Platform.runLater(() -> {
-				Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.checking");
+				Alert alert = stageManager.makeExceptionAlert(exc, exc instanceof VOParseException ? "vomanager.error.parsing" : "vomanager.error.checking");
 				alert.initOwner(this);
 				alert.show();
 			});
@@ -491,20 +481,10 @@ public class VOManagerStage extends Stage {
 
 	@FXML
 	private void checkProject() {
-		CompletableFuture<?> future;
-		try {
-			future = voChecker.checkProject();
-		} catch (VOParseException exc) {
-			LOGGER.error("VO parse error", exc);
-			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");
-			alert.initOwner(this);
-			alert.show();
-			return;
-		}
-		future.exceptionally(exc -> {
+		voChecker.checkProject().exceptionally(exc -> {
 			LOGGER.error("Exception during VO checking", exc);
 			Platform.runLater(() -> {
-				Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.checking");
+				Alert alert = stageManager.makeExceptionAlert(exc, exc instanceof VOParseException ? "vomanager.error.parsing" : "vomanager.error.checking");
 				alert.initOwner(this);
 				alert.show();
 			});

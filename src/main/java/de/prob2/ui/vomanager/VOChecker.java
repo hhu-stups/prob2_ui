@@ -128,11 +128,15 @@ public class VOChecker {
 	public CompletableFuture<?> checkVO(ValidationObligation validationObligation) {
 		Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
 		if (machine == null) {
-			throw new VOParseException("Machine not found in project: " + validationObligation.getMachine());
+			return CompletableFuture.failedFuture(new VOParseException("Machine not found in project: " + validationObligation.getMachine()));
 		}
 
 		if (validationObligation.getParsedExpression() == null) {
-			validationObligation.parse(machine);
+			try {
+				validationObligation.parse(machine);
+			} catch (VOParseException exc) {
+				return CompletableFuture.failedFuture(exc);
+			}
 		}
 
 		// Check that the correct machine is loaded in the animator,
