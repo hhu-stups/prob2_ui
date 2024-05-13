@@ -395,27 +395,25 @@ public class VisBView extends BorderPane {
 	 * @param runnable the code to run once the {@link WebView} has finished loading
 	 */
 	private void runWhenLoaded(final Runnable runnable) {
-		if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
+		if (webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)) {
 			// execute code once page fully loaded
 			// https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
-			webView.getEngine().getLoadWorker().stateProperty().addListener(
-				//Use new constructor instead of lambda expression to access change listener with keyword this
-					new ChangeListener<>() {
-						@Override
-						public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
-							switch (newValue) {
-								case SUCCEEDED:
-								case FAILED:
-								case CANCELLED:
-									webView.getEngine().getLoadWorker().stateProperty().removeListener(this);
-							}
-							if (newValue != Worker.State.SUCCEEDED) {
-								return;
-							}
-							runnable.run();
-						}
+			// Use new constructor instead of lambda expression to access change listener with keyword this
+			webView.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<>() {
+				@Override
+				public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
+					switch (newValue) {
+						case SUCCEEDED:
+						case FAILED:
+						case CANCELLED:
+							webView.getEngine().getLoadWorker().stateProperty().removeListener(this);
 					}
-			);
+					if (newValue != Worker.State.SUCCEEDED) {
+						return;
+					}
+					runnable.run();
+				}
+			});
 		} else {
 			runnable.run();
 		}
