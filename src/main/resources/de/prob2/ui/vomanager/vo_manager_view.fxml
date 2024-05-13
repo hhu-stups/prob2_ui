@@ -19,6 +19,7 @@
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
@@ -35,7 +36,11 @@
 							<padding>
 								<Insets left="5.0"/>
 							</padding>
-							<Label text="%vomanager.table.requirements.groupBy"/>
+							<Label text="%vomanager.table.requirements.groupBy">
+								<minWidth>
+									<Region fx:constant="USE_PREF_SIZE"/>
+								</minWidth>
+							</Label>
 							<ChoiceBox fx:id="cbViewSetting">
 								<items>
 									<FXCollections fx:factory="observableArrayList">
