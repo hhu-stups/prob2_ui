@@ -5,7 +5,9 @@ import java.util.concurrent.CompletableFuture;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -27,20 +29,28 @@ public class VOChecker {
 
 	private final CliTaskExecutor cliExecutor;
 
+	private final FxThreadExecutor fxExecutor;
+
 	private final SimulationItemHandler simulationItemHandler;
 
 	@Inject
-	public VOChecker(final CurrentProject currentProject, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final SimulationItemHandler simulationItemHandler) {
+	public VOChecker(
+		CurrentProject currentProject,
+		CurrentTrace currentTrace,
+		CliTaskExecutor cliExecutor,
+		FxThreadExecutor fxExecutor,
+		SimulationItemHandler simulationItemHandler
+	) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
 		this.simulationItemHandler = simulationItemHandler;
 	}
 
 	public CompletableFuture<?> checkRequirement(Requirement requirement) {
 		CompletableFuture<?> future = CompletableFuture.completedFuture(null);
 		for (final ValidationObligation vo : requirement.getValidationObligations()) {
-			// TODO Load the matching machine for the VO first
 			future = future.thenCompose(res -> this.checkVO(vo));
 		}
 		return future;
@@ -83,11 +93,28 @@ public class VOChecker {
 	}
 
 	public CompletableFuture<?> checkVO(ValidationObligation validationObligation) {
+		Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
+		if (machine == null) {
+			throw new VOParseException("Machine not found in project: " + validationObligation.getMachine());
+		}
+
 		if (validationObligation.getParsedExpression() == null) {
-			final Machine machine = currentProject.get().getMachine(validationObligation.getMachine());
 			validationObligation.parse(machine);
 		}
-		return checkVOExpression(validationObligation.getParsedExpression());
+
+		// Check that the correct machine is loaded in the animator,
+		// otherwise load that machine.
+		CompletableFuture<?> loadFuture;
+		if (currentProject.getCurrentMachine() != machine) {
+			// First wait for startAnimation to run on the JavaFX application thread,
+			// then wait for the future returned by that method.
+			loadFuture = fxExecutor.submit(() -> currentProject.startAnimation(machine)).thenCompose(future -> future);
+		} else {
+			loadFuture = CompletableFuture.completedFuture(null);
+		}
+
+		// Once the correct machine is loaded, check the VO.
+		return loadFuture.thenCompose(res -> checkVOExpression(validationObligation.getParsedExpression()));
 	}
 
 	private CompletableFuture<?> checkVT(IValidationTask validationTask) {
