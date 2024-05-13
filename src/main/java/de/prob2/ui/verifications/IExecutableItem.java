@@ -1,13 +1,12 @@
 package de.prob2.ui.verifications;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ReadOnlyObjectProperty;
+import de.prob2.ui.vomanager.IValidationTask;
 
-public interface IExecutableItem extends IResettable, IHasSettings {
+import javafx.beans.property.BooleanProperty;
+
+public interface IExecutableItem extends IValidationTask {
 	boolean selected();
 	BooleanProperty selectedProperty();
 	void setSelected(boolean selected);
-	ReadOnlyObjectProperty<Checked> checkedProperty();
-	Checked getChecked();
 	void execute(ExecutionContext context);
 }

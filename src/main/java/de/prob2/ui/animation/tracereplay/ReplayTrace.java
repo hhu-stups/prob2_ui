@@ -25,7 +25,6 @@ import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
@@ -40,7 +39,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"location",
 	"selected",
 })
-public final class ReplayTrace implements IExecutableItem, IValidationTask {
+public final class ReplayTrace implements IExecutableItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	@JsonIgnore

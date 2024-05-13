@@ -9,7 +9,6 @@ import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleListProperty;
@@ -20,7 +19,7 @@ import javafx.collections.ObservableList;
 	"id",
 	"selected",
 })
-public abstract class SymbolicCheckingFormulaItem extends AbstractCheckableItem implements IValidationTask {
+public abstract class SymbolicCheckingFormulaItem extends AbstractCheckableItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 

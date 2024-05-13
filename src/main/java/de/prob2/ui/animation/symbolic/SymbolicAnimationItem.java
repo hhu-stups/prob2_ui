@@ -8,7 +8,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -17,7 +16,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"id",
 	"selected",
 })
-public abstract class SymbolicAnimationItem extends AbstractCheckableItem implements IValidationTask {
+public abstract class SymbolicAnimationItem extends AbstractCheckableItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 

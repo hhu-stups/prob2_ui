@@ -149,10 +149,8 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		shouldExecuteColumn.setGraphic(selectAll);
 		configurationColumn.setCellValueFactory(features -> {
 			String configuration = configurationForItem(features.getValue());
-			if (features.getValue() instanceof IValidationTask task) {
-				if (task.getId() != null) {
-					configuration = "[" + task.getId() + "] " + configuration;
-				}
+			if (features.getValue().getId() != null) {
+				configuration = "[" + features.getValue().getId() + "] " + configuration;
 			}
 			return new SimpleStringProperty(configuration);
 		});
@@ -160,47 +158,16 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 
-	@SuppressWarnings("unchecked")
 	protected T addItem(T newItem) {
-		if (newItem instanceof IValidationTask vt) {
-			return (T) this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(vt);
-		} else {
-			final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
-			if (existingItem.isEmpty()) {
-				this.getItemsProperty(this.currentProject.getCurrentMachine()).add(newItem);
-				return newItem;
-			} else {
-				T t = existingItem.get();
-				t.reset();
-				return t;
-			}
-		}
+		return this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(newItem);
 	}
 
 	protected void removeItem(final T item) {
-		if (item instanceof IValidationTask vt) {
-			this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(vt);
-		} else {
-			this.getItemsProperty(this.currentProject.getCurrentMachine()).remove(item);
-		}
+		this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(item);
 	}
 
-	@SuppressWarnings("unchecked")
 	protected T replaceItem(final T oldItem, final T newItem) {
-		if (oldItem instanceof IValidationTask vtOld && newItem instanceof IValidationTask vtNew) {
-			return (T) this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(vtOld, vtNew);
-		} else {
-			final Optional<T> existingItem = itemsTable.getItems().stream().filter(newItem::settingsEqual).findAny();
-			if (existingItem.isEmpty()) {
-				ObservableList<T> items = this.getItemsProperty(this.currentProject.getCurrentMachine());
-				items.set(items.indexOf(oldItem), newItem);
-				return newItem;
-			} else {
-				T t = existingItem.get();
-				t.reset();
-				return t;
-			}
-		}
+		return this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(oldItem, newItem);
 	}
 
 	/**

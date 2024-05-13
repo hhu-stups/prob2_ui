@@ -22,7 +22,6 @@ import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -42,7 +41,7 @@ import javafx.collections.FXCollections;
 	"goal",
 	"selected",
 })
-public final class ModelCheckingItem implements IExecutableItem, IValidationTask {
+public final class ModelCheckingItem implements IExecutableItem {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 

@@ -19,7 +19,6 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -33,7 +32,7 @@ import javafx.collections.ObservableList;
 	"maxDepth",
 	"selected",
 })
-public abstract class TestCaseGenerationItem extends AbstractCheckableItem implements IValidationTask {
+public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,7 +22,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"expectedResult",
 	"selected",
 })
-public abstract class TemporalFormulaItem extends AbstractCheckableItem implements IValidationTask {
+public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String code;
