@@ -144,7 +144,7 @@ public class VisBView extends BorderPane {
 		this.fileChooserManager = fileChooserManager;
 		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.visBController = visBController;
-		this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
+		this.stageManager.loadFXML(this, "visb_view.fxml");
 	}
 
 	/**
