@@ -24,9 +24,6 @@
 	<top>
 		<VBox>
 		<HBox styleClass="border" alignment="CENTER_LEFT">
-			<padding>
-				<Insets topRightBottomLeft="5.0"/>
-			</padding>
 			<Button fx:id="loadVisualisationButton" onAction="#loadVisBFile">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
