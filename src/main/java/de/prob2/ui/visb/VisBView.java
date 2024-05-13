@@ -249,7 +249,9 @@ public class VisBView extends BorderPane {
 		});
 
 		Platform.runLater(() -> {
-
+			// WebView can only be constructed on the JavaFX application thread,
+			// but VisBView.initialize generally runs on a background thread during UI startup,
+			// so this part needs to be explicitly moved to the JavaFX application thread.
 			this.webView = new WebView();
 			this.zoomingPane.getChildren().add(webView);
 			LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
