@@ -23,6 +23,7 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+<?import de.prob2.ui.sharedviews.InterruptIfRunningButton?>
 <fx:root title="%vomanager.title" type="VOManagerStage" width="1000" height="600" minHeight="500" minWidth="800" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -49,6 +50,21 @@
 									</FXCollections>
 								</items>
 							</ChoiceBox>
+							<InterruptIfRunningButton>
+								<graphic>
+									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT"
+										bindableFontSize="${fontSize.fontSize * 2}"/>
+								</graphic>
+								<Button fx:id="checkProjectButton" onAction="#checkProject">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CHECK_CIRCLE_ALT"
+											bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+									<tooltip>
+										<Tooltip text="%vomanager.table.requirements.checkAll"/>
+									</tooltip>
+								</Button>
+							</InterruptIfRunningButton>
 							<Spacer/>
 							<Button fx:id="btAddRequirement" onAction="#addRequirement">
 								<graphic>

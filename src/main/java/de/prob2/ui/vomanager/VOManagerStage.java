@@ -85,6 +85,9 @@ public class VOManagerStage extends Stage {
 	private TreeTableColumn<VOManagerItem, Checked> requirementStatusColumn;
 
 	@FXML
+	private Button checkProjectButton;
+
+	@FXML
 	private Button btAddRequirement;
 
 	@FXML
@@ -363,6 +366,7 @@ public class VOManagerStage extends Stage {
 				tvRequirements.setRoot(null);
 			}
 
+			checkProjectButton.setDisable(to == null);
 			btAddRequirement.setDisable(to == null);
 		};
 		currentProject.addListener(projectChangeListener);
@@ -481,6 +485,27 @@ public class VOManagerStage extends Stage {
 				taFeedback.appendText(i18n.translate("vomanager.feedback.dependentRequirements", validationFeedback.getDependentRequirements().toString()));
 			});
 		}
+	}
+
+	@FXML
+	private void checkProject() {
+		CompletableFuture<?> future;
+		try {
+			future = voChecker.checkProject();
+		} catch (VOParseException exc) {
+			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");
+			alert.initOwner(this);
+			alert.show();
+			return;
+		}
+		future.exceptionally(exc -> {
+			Platform.runLater(() -> {
+				Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.checking");
+				alert.initOwner(this);
+				alert.show();
+			});
+			return null;
+		});
 	}
 
 	@FXML

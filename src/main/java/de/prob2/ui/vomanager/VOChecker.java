@@ -1,7 +1,9 @@
 package de.prob2.ui.vomanager;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -47,6 +49,25 @@ public class VOChecker {
 		this.cliExecutor = cliExecutor;
 		this.fxExecutor = fxExecutor;
 		this.simulationItemHandler = simulationItemHandler;
+	}
+
+	public CompletableFuture<?> checkProject() {
+		// Group VOs by machine to reduce switching between machines as much as possible.
+		var vosByMachine = currentProject.getRequirements().stream()
+			.flatMap(req -> req.getValidationObligations().stream())
+			.collect(Collectors.groupingBy(ValidationObligation::getMachine));
+
+		CompletableFuture<?> future = CompletableFuture.completedFuture(null);
+		// Iterate over the project's machine list instead of the grouped map to ensure a predictable order.
+		for (Machine machine : currentProject.getMachines()) {
+			if (!vosByMachine.containsKey(machine.getName())) {
+				continue;
+			}
+			for (ValidationObligation vo : vosByMachine.get(machine.getName())) {
+				future = future.thenCompose(res -> this.checkVO(vo));
+			}
+		}
+		return future;
 	}
 
 	public CompletableFuture<?> checkRequirement(Requirement requirement) {
