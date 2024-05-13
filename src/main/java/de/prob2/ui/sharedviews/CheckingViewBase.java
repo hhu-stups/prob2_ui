@@ -179,7 +179,9 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	 * @param item the item to describe
 	 * @return a string description of the item's configuration
 	 */
-	protected abstract String configurationForItem(final T item);
+	protected String configurationForItem(final T item) {
+		return item.getTaskDescription(i18n);
+	}
 
 	protected BooleanExpression disableItemBinding(final T item) {
 		return disablePropertyController.disableProperty();

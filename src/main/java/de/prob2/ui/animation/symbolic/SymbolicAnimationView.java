@@ -93,11 +93,6 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 	}
 	
 	@Override
-	protected String configurationForItem(final SymbolicAnimationItem item) {
-		return item.getTaskDescription(i18n);
-	}
-	
-	@Override
 	protected void executeItemSync(final SymbolicAnimationItem item, final ExecutionContext context) {
 		item.execute(context);
 		final Trace example = item.getExample();

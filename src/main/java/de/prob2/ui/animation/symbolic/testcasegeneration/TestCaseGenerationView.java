@@ -162,11 +162,6 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	}
 
 	@Override
-	protected String configurationForItem(final TestCaseGenerationItem item) {
-		return item.getTaskDescription(i18n);
-	}
-
-	@Override
 	protected void executeItemSync(final TestCaseGenerationItem item, final ExecutionContext context) {
 		item.execute(context);
 	}

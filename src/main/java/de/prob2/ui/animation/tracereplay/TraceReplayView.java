@@ -197,11 +197,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected String configurationForItem(final ReplayTrace item) {
-		return item.getName();
-	}
-
-	@Override
 	protected void executeItemSync(final ReplayTrace item, final ExecutionContext context) {
 		// FIXME Respect execution context
 		traceChecker.check(item);

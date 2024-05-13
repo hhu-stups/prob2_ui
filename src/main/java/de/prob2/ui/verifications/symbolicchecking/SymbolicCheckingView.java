@@ -117,11 +117,6 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 	}
 
 	@Override
-	protected String configurationForItem(final SymbolicCheckingFormulaItem item) {
-		return item.getTaskDescription(i18n);
-	}
-
-	@Override
 	protected void executeItemSync(final SymbolicCheckingFormulaItem item, final ExecutionContext context) {
 		item.execute(context);
 		List<Trace> counterExamples = item.getCounterExamples();

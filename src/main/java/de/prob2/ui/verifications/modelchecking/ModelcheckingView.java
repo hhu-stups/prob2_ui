@@ -256,11 +256,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		return container;
 	}
 
-	@Override
-	protected String configurationForItem(final ModelCheckingItem item) {
-		return item.getTaskDescription(i18n);
-	}
-
 	private void showModelCheckException(final Throwable t) {
 		if (t instanceof CancellationException) {
 			LOGGER.debug("Model checking interrupted by user (this is not an error)", t);
