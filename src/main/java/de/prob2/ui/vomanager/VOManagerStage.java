@@ -307,6 +307,15 @@ public class VOManagerStage extends Stage {
 		this.updateRelatedMachines(currentTrace.getModel());
 	}
 
+	private void showVOCheckError(Throwable exc) {
+		LOGGER.error("Exception during VO checking", exc);
+		Platform.runLater(() -> {
+			Alert alert = stageManager.makeExceptionAlert(exc, exc instanceof VOParseException ? "vomanager.error.parsing" : "vomanager.error.checking");
+			alert.initOwner(this);
+			alert.show();
+		});
+	}
+
 	private void checkItem(final VOManagerItem item) {
 		if (item == null) {
 			return;
@@ -322,12 +331,7 @@ public class VOManagerStage extends Stage {
 			throw new AssertionError("Unhandled VOManagerItem kind - not a VO, requirement, or machine?!");
 		}
 		future.exceptionally(exc -> {
-			LOGGER.error("Exception during VO checking", exc);
-			Platform.runLater(() -> {
-				Alert alert = stageManager.makeExceptionAlert(exc, exc instanceof VOParseException ? "vomanager.error.parsing" : "vomanager.error.checking");
-				alert.initOwner(this);
-				alert.show();
-			});
+			showVOCheckError(exc);
 			return null;
 		});
 	}
@@ -482,12 +486,7 @@ public class VOManagerStage extends Stage {
 	@FXML
 	private void checkProject() {
 		voChecker.checkProject().exceptionally(exc -> {
-			LOGGER.error("Exception during VO checking", exc);
-			Platform.runLater(() -> {
-				Alert alert = stageManager.makeExceptionAlert(exc, exc instanceof VOParseException ? "vomanager.error.parsing" : "vomanager.error.checking");
-				alert.initOwner(this);
-				alert.show();
-			});
+			showVOCheckError(exc);
 			return null;
 		});
 	}
