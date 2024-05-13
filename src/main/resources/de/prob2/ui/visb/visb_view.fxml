@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.animation.tracereplay.TraceReplayMenuButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.Spacer?>
@@ -25,45 +24,45 @@
 	<top>
 		<VBox>
 		<HBox styleClass="border" alignment="CENTER_LEFT">
-				<padding>
-					<Insets topRightBottomLeft="5.0"/>
-				</padding>
-				<Button fx:id="loadVisualisationButton" onAction="#loadVisBFile">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%visb.menu.file.open"/>
-					</tooltip>
-				</Button>
-				<Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%visb.menu.edit.reload"/>
-					</tooltip>
-				</Button>
-				<Button fx:id="showVisBItemsAndEventsButton" onAction="#showVisBItemsAndEvents">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="INFO"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%visb.buttons.showItemsAndEvents"/>
-					</tooltip>
-				</Button>
-				<Button fx:id="manageDefaultVisualisationButton" onAction="#manageDefaultVisualisation">
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG"
-									   bindableFontSize="${fontSize.fontSize + 4}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%visb.buttons.manageDefaultVisualisation"/>
-					</tooltip>
-				</Button>
+			<padding>
+				<Insets topRightBottomLeft="5.0"/>
+			</padding>
+			<Button fx:id="loadVisualisationButton" onAction="#loadVisBFile">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.file.open"/>
+				</tooltip>
+			</Button>
+			<Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.edit.reload"/>
+				</tooltip>
+			</Button>
+			<Button fx:id="showVisBItemsAndEventsButton" onAction="#showVisBItemsAndEvents">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="INFO"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.buttons.showItemsAndEvents"/>
+				</tooltip>
+			</Button>
+			<Button fx:id="manageDefaultVisualisationButton" onAction="#manageDefaultVisualisation">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.buttons.manageDefaultVisualisation"/>
+				</tooltip>
+			</Button>
 			<MenuButton fx:id="saveTraceButton">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
@@ -116,16 +115,16 @@
 		</VBox>
 	</top>
 	<center>
-			<StackPane fx:id="zoomingPane" VBox.vgrow="ALWAYS">
-				<VBox fx:id="placeholder" alignment="CENTER" StackPane.alignment="CENTER">
-					<padding>
-						<Insets topRightBottomLeft="4"/>
-					</padding>
-					<ImageView preserveRatio="true" fitWidth="200.0">
-						<Image url="@/de/prob2/ui/ProB_Logo.png"/>
-					</ImageView>
-					<Label text="%common.noModelLoaded" fx:id="placeholderLabel" textAlignment="CENTER"/>
-				</VBox>
-			</StackPane>
+		<StackPane fx:id="zoomingPane" VBox.vgrow="ALWAYS">
+			<VBox fx:id="placeholder" alignment="CENTER" StackPane.alignment="CENTER">
+				<padding>
+					<Insets topRightBottomLeft="4"/>
+				</padding>
+				<ImageView preserveRatio="true" fitWidth="200.0">
+					<Image url="@/de/prob2/ui/ProB_Logo.png"/>
+				</ImageView>
+				<Label text="%common.noModelLoaded" fx:id="placeholderLabel" textAlignment="CENTER"/>
+			</VBox>
+		</StackPane>
 	</center>
 </fx:root>
