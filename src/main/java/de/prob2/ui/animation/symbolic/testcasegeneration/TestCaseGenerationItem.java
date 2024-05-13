@@ -3,6 +3,7 @@ package de.prob2.ui.animation.symbolic.testcasegeneration;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.analysis.testcasegeneration.Target;
@@ -22,10 +23,14 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @JsonPropertyOrder({
+	"id",
 	"maxDepth",
 	"selected",
 })
 public abstract class TestCaseGenerationItem extends AbstractCheckableItem implements IValidationTask {
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private final String id;
+
 	private final int maxDepth;
 
 	@JsonIgnore
@@ -34,15 +39,15 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 	@JsonIgnore
 	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 
-	protected TestCaseGenerationItem(final int maxDepth) {
+	protected TestCaseGenerationItem(final String id, final int maxDepth) {
 		super();
+		this.id = id;
 		this.maxDepth = maxDepth;
 	}
 
-	@JsonIgnore // TODO
 	@Override
 	public String getId() {
-		return null; // TODO
+		return this.id;
 	}
 
 	@Override
@@ -101,6 +106,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 	public boolean settingsEqual(Object other) {
 		return other instanceof TestCaseGenerationItem that
 			       && Objects.equals(this.getTaskType(), that.getTaskType())
+			       && Objects.equals(this.getId(), that.getId())
 			       && Objects.equals(this.getMaxDepth(), that.getMaxDepth());
 	}
 }

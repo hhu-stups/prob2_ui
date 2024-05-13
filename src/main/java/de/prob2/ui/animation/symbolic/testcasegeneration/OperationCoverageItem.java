@@ -18,10 +18,11 @@ public final class OperationCoverageItem extends TestCaseGenerationItem {
 
 	@JsonCreator
 	public OperationCoverageItem(
+		@JsonProperty("id") final String id,
 		@JsonProperty("maxDepth") final int maxDepth,
 		@JsonProperty("operations") List<String> operations
 	) {
-		super(maxDepth);
+		super(id, maxDepth);
 
 		this.operations = new ArrayList<>(operations);
 	}

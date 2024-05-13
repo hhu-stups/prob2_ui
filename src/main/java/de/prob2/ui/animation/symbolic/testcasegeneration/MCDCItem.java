@@ -16,10 +16,11 @@ public final class MCDCItem extends TestCaseGenerationItem {
 
 	@JsonCreator
 	public MCDCItem(
+		@JsonProperty("id") final String id,
 		@JsonProperty("maxDepth") final int maxDepth,
 		@JsonProperty("level") final int level
 	) {
-		super(maxDepth);
+		super(id, maxDepth);
 		this.level = level;
 	}
 

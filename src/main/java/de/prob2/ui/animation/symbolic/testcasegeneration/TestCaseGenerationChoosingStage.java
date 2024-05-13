@@ -12,6 +12,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -29,6 +30,9 @@ public class TestCaseGenerationChoosingStage extends Stage {
 
 	@FXML
 	private OperationCoverageInputView operationCoverageInputView;
+
+	@FXML
+	private TextField idTextField;
 
 	private final StageManager stageManager;
 
@@ -55,6 +59,7 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		this.itemProperty().addListener((o, from, to) -> {
 			if (to != null) {
 				testChoice.getSelectionModel().select(to.getTaskType());
+				idTextField.setText(to.getId() == null ? "" : to.getId());
 				if (to instanceof MCDCItem mcdcItem) {
 					mcdcInputView.setItem(mcdcItem);
 				} else if (to instanceof OperationCoverageItem operationCoverageItem) {
@@ -122,10 +127,11 @@ public class TestCaseGenerationChoosingStage extends Stage {
 
 	private TestCaseGenerationItem extractItem() {
 		ValidationTaskType<?> type = testChoice.getValue();
+		String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_MCDC.equals(type)) {
-			return new MCDCItem(mcdcInputView.getDepth(), mcdcInputView.getLevel());
+			return new MCDCItem(id, mcdcInputView.getDepth(), mcdcInputView.getLevel());
 		} else if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_OPERATION_COVERAGE.equals(type)) {
-			return new OperationCoverageItem(operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
+			return new OperationCoverageItem(id, operationCoverageInputView.getDepth(), operationCoverageInputView.getOperations());
 		} else {
 			throw new AssertionError("Unhandled test case generation type: " + item.getClass());
 		}
