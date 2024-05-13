@@ -38,19 +38,21 @@ public final class RegexSyntaxHighlighting {
 		// unicode flags
 		int U = Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS | Pattern.CANON_EQ;
 
+		// IMPORTANT: put longer words first in RegEx alternatives!
+
 		//B-Rules DSL keywords Regex
 		var tokenClassesForRulesDSL = List.of(
 				new TokenClass("editor_keyword", compile("RULES_MACHINE|REFERENCES", U)),
-				new TokenClass("editor_ctrlkeyword", compile("RULE|DEPENDS_ON_RULE|DEPENDS_ON_COMPUTATION|ACTIVATION|REPLACES|ERROR_TYPES|CLASSIFICATION|RULEID|TAGS|BODY|RULE_FORALL|EXPECT|RULE_FAIL|ERROR_TYPE|COUNTEREXAMPLE|COMPUTATION|DEFINE|TYPE|DUMMY_VALUE|VALUE|FUNCTION|PRECONDITION|POSTCONDITION|FOR|IN|DO", U)),
+				new TokenClass("editor_ctrlkeyword", compile("RULE_FORALL|RULE_FAIL|RULEID|RULE|DEPENDS_ON_RULE|DEPENDS_ON_COMPUTATION|ACTIVATION|REPLACES|ERROR_TYPES|CLASSIFICATION|TAGS|BODY|EXPECT|ERROR_TYPE|COUNTEREXAMPLE|COMPUTATION|DEFINE|TYPE|DUMMY_VALUE|VALUE|FUNCTION|PRECONDITION|POSTCONDITION|FOR|IN|DO", U)),
 				new TokenClass("editor_special_identifier", compile("SUCCEEDED_RULE(?:_ERROR_TYPE)?|GET_RULE_COUNTEREXAMPLES|FAILED_RULE(?:_ERROR_TYPE|_ALL_ERROR_TYPES)?|NOT_CHECKED_RULE|DISABLED_RULE|STRING_FORMAT"))
 		);
 
 		//Event-B Regex
 		var tokenClassesForEventB = List.of(
 				new TokenClass("editor_keyword", compile("CONTEXT|EXTENDS|SETS|CONSTANTS|CONCRETE_CONSTANTS|AXIOMS|THEOREMS|MACHINE|REFINES|SEES|VARIABLES|ABSTRACT_VARIABLES|INVARIANT|VARIANT|EVENTS|EVENT|BEGIN|ANY|WHERE|WHEN|WITH|THEN|INITIALISATION|END", U)),
-				new TokenClass("editor_ctrlkeyword", compile("POW|POW1|card|union|inter|min|max|finite|partition|dom|ran|UNION|INTER|id|prj1|prj2|skip", U)),
+				new TokenClass("editor_ctrlkeyword", compile("POW1|POW|card|union|inter|min|max|finite|partition|dom|ran|UNION|INTER|id|prj1|prj2|skip", U)),
 				new TokenClass("editor_logical", compile("false|true|or|not|⊤|⊥|&|∧|∨|=>|⇒|<=>|⇔|!|#|¬|∃|∀", U)),
-				new TokenClass("editor_assignments", compile(":\\||::|:∈|:=", U)),
+				new TokenClass("editor_assignments", compile(":[|:∈=]", U)),
 				new TokenClass("editor_arithmetic", compile("/\\\\|\\\\/|∩|∪|\\{}|∅|\\\\|\\+->>|⤀|\\+->|⇸|\\+|-->>|↠|-->|→|-|>=|<=|≤|≥|/<<:|<<:|/<:|<:|⊄|⊂|⊈|⊆|/:|:|∉|∈|>\\+>|⤔|>->>|⤖|>->|↣|><|⊗|>|<\\+|⇷|<<->>|<<->|<->>|<->|↔|<<\\||⩤|<\\||◁|<|;|circ|◦|\\|>>|⩥|\\|>|▷|\\|\\||%|≠|/=|=", U)),
 				new TokenClass("editor_comment", compile("//[^\n\r]*|/\\*.*?\\*/", U | Pattern.DOTALL)),
 				new TokenClass("editor_identifier", compile("[_a-zA-Z][_a-zA-Z0-9]*", U))
@@ -59,7 +61,7 @@ public final class RegexSyntaxHighlighting {
 		//XTL Regex
 		var tokenClassesForXTL = List.of(
 				new TokenClass("editor_keyword", compile("start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(?:function_result|image|image_right_click_transition|image_click_transition)")),
-				new TokenClass("editor_types", compile("true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term|dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth|nth1|nth0|perm|perm2|permutation|same_length|add_error|print|write|sort")),
+				new TokenClass("editor_types", compile("true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term|dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth1|nth0|nth|perm2|perm|permutation|same_length|add_error|print|write|sort")),
 				new TokenClass("editor_string", compile("\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'")),
 				new TokenClass("editor_xtl_variable", compile("[_A-Z][_a-zA-Z0-9]*")),
 				new TokenClass("editor_xtl_functor", compile("[a-z][_a-zA-Z0-9]*")),
@@ -84,7 +86,7 @@ public final class RegexSyntaxHighlighting {
 				new TokenClass("editor_types", compile("!|\\?|->|\\[]|\\|~\\||\\|\\|\\||;|STOP|SKIP|CHAOS|/\\|\\[>|@")),
 				new TokenClass("editor_arithmetic", compile("agent|MAIN|channel|datatype|subtype|nametype|machine|Events")),
 				new TokenClass("editor_assignments", compile("assert|transparent|diamond|print|include")),
-				new TokenClass("editor_logical", compile("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|!=|>|<|<=|>=|=<|&&|\\|\\||Int|Bool")),
+				new TokenClass("editor_logical", compile("true|false|length|null|head|tail|concat|set|Set|Seq|elem|empty|card|member|union|diff|inter|Union|Inter|not|and|or|mod|\\*|\\+|/|==|!=|<=|>=|=<|>|<|&&|\\|\\||Int|Bool")),
 				new TokenClass("editor_unsupported", compile("external|extensions|productions|Proc")),
 				new TokenClass("editor_identifier", compile("[_a-zA-Z][_a-zA-Z0-9]*")),
 				new TokenClass("editor_comment", compile("--[^\n\r]*|\\{-.*?-}", Pattern.DOTALL))
