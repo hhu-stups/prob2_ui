@@ -9,7 +9,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -308,12 +310,16 @@ public class VOManagerStage extends Stage {
 	}
 
 	private void showVOCheckError(Throwable exc) {
-		LOGGER.error("Exception during VO checking", exc);
-		Platform.runLater(() -> {
-			Alert alert = stageManager.makeExceptionAlert(exc, exc instanceof VOParseException ? "vomanager.error.parsing" : "vomanager.error.checking");
-			alert.initOwner(this);
-			alert.show();
-		});
+		if (exc instanceof CancellationException || exc instanceof CompletionException && exc.getCause() instanceof CancellationException) {
+			LOGGER.debug("VO checking interrupted by user (this is not an error)", exc);
+		} else {
+			LOGGER.error("Exception during VO checking", exc);
+			Platform.runLater(() -> {
+				Alert alert = stageManager.makeExceptionAlert(exc, exc instanceof VOParseException ? "vomanager.error.parsing" : "vomanager.error.checking");
+				alert.initOwner(this);
+				alert.show();
+			});
+		}
 	}
 
 	private void checkItem(final VOManagerItem item) {
