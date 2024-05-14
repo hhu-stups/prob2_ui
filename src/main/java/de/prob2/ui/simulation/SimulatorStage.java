@@ -719,22 +719,20 @@ public class SimulatorStage extends Stage {
 
 	
 
-	//Generates activation diagrams
 	@FXML
 	private void generateDiagram(){
-		diagramGenerator.generateDiagram();
+		diagramGenerator.generateDiagram(false);
 	}
 
 	
-	//generates complex activation diagrams
 	@FXML
 	private void generateComplexDiagram(){
-		diagramGenerator.generateComplexDiagram();
+		diagramGenerator.generateComplexDiagram(false);
 	}
 
 	@FXML
 	private void generateLiveDiagram(){
-		diagramGenerator.generateLiveDiagram(false);
+		diagramGenerator.generateLiveDiagram(false,false);
 	}
 
 

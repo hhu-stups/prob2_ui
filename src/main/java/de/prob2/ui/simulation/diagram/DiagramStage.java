@@ -89,6 +89,7 @@ public class DiagramStage extends Stage {
 		loadGraph(new String(makeGraphString(),StandardCharsets.UTF_8));
 	}
 
+	//Calls dotengine to build SVG string to load in FXML 
     public byte[] makeGraphString(){
         byte[] svgdiagramm=null; 
         DotCall dotCall = new DotCall("dot")
@@ -104,7 +105,7 @@ public class DiagramStage extends Stage {
         return svgdiagramm;
     }
 
-
+	//loads diagram into FXML page
     public void loadGraph(String svgContent){
             diagramView.getEngine().loadContent("<center>" + svgContent + "</center>");
 		    diagramView.setVisible(true);

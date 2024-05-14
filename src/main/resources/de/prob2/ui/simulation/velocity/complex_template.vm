@@ -2,18 +2,18 @@ digraph {
 node [style="filled"]
 #foreach( $node in $nodes) 
     #if($node.getId() == "$initialise_machine_event")
-        "$node.getId()" [fillcolor= $node.getColour()][label= "[ init ]"][shape = "plaintext"]; 
+        "$node.getId()" [fillcolor= $node.getColour(), label= "[ init ]", shape = "plaintext"];
     #else
         #if($node.getId() == "User")
             "User"[fillcolor = $node.getColour(), label = "[User]", shape = "plaintext"];
         #else
             #if( $node.getClass().getSimpleName() =="DiagramNode")
-                "$node.getId()" [fillcolor= $node.getColour()][label= "$node.getLabel()"][shape= "$node.getStyle()"]; 
+                "$node.getId()" [fillcolor= $node.getColour(), label= "$node.getLabel()", shape= "$node.getStyle()"];
             #else
                 #if($node.getClass().getSimpleName()=="ComplexListener")
                     "$node.getId()" [fillcolor = "$node.getColour()", shape="record", label = "{ $node.getLabel() | $node.getPredicate() }"]
                 #else
-                    "$node.getId()" [fillcolor= "$node.getColour()"][shape= "record"][label= "{ $node.getLabel() | Priority: $node.getPriority() |$node.getActivationKind() }"];
+                    "$node.getId()" [fillcolor= "$node.getColour()", shape= "record", label= "{ $node.getLabel() | Priority: $node.getPriority() |$node.getActivationKind() }"];
                 #end
             #end
         #end
@@ -25,7 +25,7 @@ node [style="filled"]
         #if($id == "$initialise_machine_event")
             "$id" -> "$toactivate" [style= "$con.getColour()"];
         #else
-            "$id" -> "$toactivate" [label = "$con.getEdgeLabel().get($foreach.index)" ][style= "$con.getColour()"];
+            "$id" -> "$toactivate" [label = "$con.getEdgeLabel().get($foreach.index)", style= "$con.getColour()"];
         #end
     #end
 #end
