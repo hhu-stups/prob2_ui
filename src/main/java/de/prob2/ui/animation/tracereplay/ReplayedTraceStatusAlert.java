@@ -52,7 +52,8 @@ public class ReplayedTraceStatusAlert extends Alert {
 	private final TraceFileHandler traceFileHandler;
 	private final CliTaskExecutor cliExecutor;
 	private final I18n i18n;
-	private final ReplayTrace replayTrace;
+
+	private ReplayTrace replayTrace;
 
 	private ButtonType accept;
 
@@ -63,14 +64,13 @@ public class ReplayedTraceStatusAlert extends Alert {
 	@FXML
 	private Label keepOrDiscardQuestion;
 
-	public ReplayedTraceStatusAlert(Injector injector, ReplayTrace replayTrace) {
+	public ReplayedTraceStatusAlert(Injector injector) {
 		super(AlertType.NONE);
 		this.stageManager = injector.getInstance(StageManager.class);
 		this.currentTrace = injector.getInstance(CurrentTrace.class);
 		this.traceFileHandler = injector.getInstance(TraceFileHandler.class);
 		this.i18n = injector.getInstance(I18n.class);
 		this.cliExecutor = injector.getInstance(CliTaskExecutor.class);
-		this.replayTrace = Objects.requireNonNull(replayTrace, "replayTrace");
 
 		stageManager.loadFXML(this, "trace_replay_status_alert.fxml");
 	}
@@ -83,18 +83,21 @@ public class ReplayedTraceStatusAlert extends Alert {
 	private void initialize() {
 		this.accept = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.accept"), ButtonBar.ButtonData.OK_DONE);
 
-		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
-
 		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 
 		this.errorTable.dontSyncWithEditor();
 		this.errorTable.visibleProperty().bind(Bindings.createBooleanBinding(() -> !this.errorTable.getErrorItems().isEmpty(), this.errorTable.getErrorItems()));
 		this.errorTable.managedProperty().bind(this.errorTable.visibleProperty());
 
+		this.keepOrDiscardQuestion.setFont(new Font(16));
+	}
+
+	private void update() {
+		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
+
 		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
 		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
 
-		this.keepOrDiscardQuestion.setFont(new Font(16));
 		if (replayedTrace != null) {
 			String statusOfReplayedTrace = i18n.translate(
 					enumNameAdapter("animation.tracereplay.replayedStatus.replayStatus"),
@@ -135,6 +138,11 @@ public class ReplayedTraceStatusAlert extends Alert {
 		// Don't let this thread keep the JVM alive if for some reason it's still running when the UI exits.
 		thread.setDaemon(true);
 		thread.start();
+	}
+
+	public void initReplayTrace(ReplayTrace replayTrace) {
+		this.replayTrace = replayTrace;
+		this.update();
 	}
 
 	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws ExecutionException, InterruptedException, IOException {

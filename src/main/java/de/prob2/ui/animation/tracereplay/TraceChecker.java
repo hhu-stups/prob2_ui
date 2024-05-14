@@ -90,7 +90,8 @@ public class TraceChecker {
 
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
 		Platform.runLater(() -> {
-			ReplayedTraceStatusAlert alert = new ReplayedTraceStatusAlert(injector, replayTrace);
+			ReplayedTraceStatusAlert alert = new ReplayedTraceStatusAlert(injector);
+			alert.initReplayTrace(replayTrace);
 			alert.handleAcceptDiscard();
 		});
 	}
