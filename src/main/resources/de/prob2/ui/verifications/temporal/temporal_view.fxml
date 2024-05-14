@@ -36,22 +36,6 @@
 				</Button>
 			</InterruptIfRunningButton>
 			<Spacer/>
-			<Button fx:id="saveLTLButton" onAction="#saveLTL">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.buttons.save" />
-				</tooltip>
-			</Button>
-			<Button fx:id="loadLTLButton" onAction="#loadLTL">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.buttons.load" />
-				</tooltip>
-			</Button>
 			<MenuButton fx:id="addMenuButton">
 				<items>
 					<MenuItem fx:id="addFormulaButton" onAction="#askToAddItem"

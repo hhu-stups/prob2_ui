@@ -1,27 +1,16 @@
 package de.prob2.ui.verifications.temporal;
 
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.json.JacksonManager;
-import de.prob.json.JsonConversionException;
-import de.prob.json.JsonMetadata;
-import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -30,12 +19,9 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.temporal.ltl.LTLData;
-import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
-import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.value.ChangeListener;
@@ -43,7 +29,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
@@ -51,10 +36,6 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.FileChooser;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
@@ -81,21 +62,12 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		}
 	}
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(TemporalView.class);
-	
-	private static final String LTL_FILE_EXTENSION = "prob2ltl";
-	private static final String OLD_LTL_FILE_EXTENSION = "ltl";
-	
 	@FXML 
 	private MenuButton addMenuButton;
 	@FXML
 	private MenuItem addFormulaButton;
 	@FXML
 	private MenuItem addPatternButton;
-	@FXML
-	private Button saveLTLButton;
-	@FXML
-	private Button loadLTLButton;
 	@FXML
 	private HelpButton helpButton;
 	@FXML
@@ -113,46 +85,19 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private final I18n i18n;
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
-	private final VersionInfo versionInfo;
 	private final CurrentProject currentProject;
-	private final FileChooserManager fileChooserManager;
-	private final JacksonManager<LTLData> jacksonManager;
-				
+
 	@Inject
 	private TemporalView(final StageManager stageManager, final I18n i18n, final Injector injector,
-						 final CurrentTrace currentTrace, final VersionInfo versionInfo, final CurrentProject currentProject,
+						 final CurrentTrace currentTrace, final CurrentProject currentProject,
 						 final DisablePropertyController disablePropertyController,
-						 final CliTaskExecutor cliExecutor,
-						 final FileChooserManager fileChooserManager,
-						 final ObjectMapper objectMapper,
-						 final JacksonManager<LTLData> jacksonManager) {
+						 final CliTaskExecutor cliExecutor) {
 		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.injector = injector;
 		this.currentTrace = currentTrace;
-		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
-		this.fileChooserManager = fileChooserManager;
-		this.jacksonManager = jacksonManager;
-		jacksonManager.initContext(new JacksonManager.Context<>(objectMapper, LTLData.class, LTLData.FILE_TYPE, LTLData.CURRENT_FORMAT_VERSION) {
-			@Override
-			public boolean shouldAcceptOldMetadata() {
-				return true;
-			}
-
-			@Override
-			public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
-				if (oldVersion <= 0) {
-					for (final String fieldName : new String[] { "formulas", "patterns" }) {
-						if (!oldObject.has(fieldName)) {
-							throw new JsonConversionException("Not a valid LTL file - missing required field " + fieldName);
-						}
-					}
-				}
-				return oldObject;
-			}
-		});
 		stageManager.loadFXML(this, "temporal_view.fxml");
 	}
 
@@ -238,8 +183,6 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
 		addMenuButton.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
-		saveLTLButton.disableProperty().bind(emptyProperty.or(currentTrace.isNull().or(selectAll.selectedProperty().not())));
-		loadLTLButton.disableProperty().bind(currentTrace.isNull());
 
 		itemsTable.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
 	}
@@ -308,61 +251,5 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
 				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
 		}
-	}
-	
-	@FXML
-	private void saveLTL() {
-		Machine machine = currentProject.getCurrentMachine();
-		final FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("verifications.temporal.temporalView.fileChooser.saveLTL.title"));
-		fileChooser.setInitialFileName(machine.getName() + "." + LTL_FILE_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION));
-		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
-		if (path != null) {
-			List<LTLFormulaItem> formulas = machine.getMachineProperties()
-				.getValidationTasksByType(BuiltinValidationTaskTypes.LTL)
-				.stream()
-				.filter(LTLFormulaItem::selected)
-				.collect(Collectors.toList());
-			List<LTLPatternItem> patterns = machine.getMachineProperties().getLTLPatterns();
-			try {
-				final JsonMetadata metadata = LTLData.metadataBuilder()
-					.withProBCliVersion(versionInfo.getCliVersion().getShortVersionString())
-					.withModelName(machine.getName())
-					.build();
-				this.jacksonManager.writeToFile(path, new LTLData(formulas, patterns, metadata));
-			} catch (IOException e) {
-				final Alert alert = stageManager.makeExceptionAlert(e, "verifications.temporal.temporalView.saveLTL.error");
-				alert.initOwner(this.getScene().getWindow());
-				alert.showAndWait();
-			}
-		}
-	}
-
-	@FXML
-	private void loadLTL() {
-		Machine machine = currentProject.getCurrentMachine();
-		FileChooser fileChooser = new FileChooser();
-		fileChooser.setTitle(i18n.translate("verifications.temporal.temporalView.fileChooser.loadLTL.title"));
-		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.ltl", LTL_FILE_EXTENSION, OLD_LTL_FILE_EXTENSION));
-		Path ltlFile = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.LTL, stageManager.getCurrent());
-		if(ltlFile == null) {
-			return;
-		}
-		LTLData data;
-		try {
-			data = this.jacksonManager.readFromFile(ltlFile);
-		} catch (IOException e) {
-			LOGGER.error("Could not load LTL file: ", e);
-			return;
-		}
-		data.getFormulas().forEach(this::addItem);
-		data.getPatterns().stream()
-				.filter(pattern -> !machine.getMachineProperties().getLTLPatterns().contains(pattern))
-				.forEach(pattern -> {
-					machine.getMachineProperties().getLTLPatterns().add(pattern);
-					LTLPatternParser.addPattern(pattern, machine);
-				});
 	}
 }
