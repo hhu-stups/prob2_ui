@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.inject.Injector;
+import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.ReplayedTrace;
@@ -47,7 +47,6 @@ import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 public class ReplayedTraceStatusAlert extends Alert {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReplayedTraceStatusAlert.class);
 
-	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final TraceFileHandler traceFileHandler;
 	private final CliTaskExecutor cliExecutor;
@@ -64,13 +63,13 @@ public class ReplayedTraceStatusAlert extends Alert {
 	@FXML
 	private Label keepOrDiscardQuestion;
 
-	public ReplayedTraceStatusAlert(Injector injector) {
+	@Inject
+	public ReplayedTraceStatusAlert(StageManager stageManager, CurrentTrace currentTrace, TraceFileHandler traceFileHandler, CliTaskExecutor cliExecutor, I18n i18n) {
 		super(AlertType.NONE);
-		this.stageManager = injector.getInstance(StageManager.class);
-		this.currentTrace = injector.getInstance(CurrentTrace.class);
-		this.traceFileHandler = injector.getInstance(TraceFileHandler.class);
-		this.i18n = injector.getInstance(I18n.class);
-		this.cliExecutor = injector.getInstance(CliTaskExecutor.class);
+		this.currentTrace = currentTrace;
+		this.traceFileHandler = traceFileHandler;
+		this.cliExecutor = cliExecutor;
+		this.i18n = i18n;
 
 		stageManager.loadFXML(this, "trace_replay_status_alert.fxml");
 	}
