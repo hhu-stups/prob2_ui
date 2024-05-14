@@ -1,11 +1,13 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -21,10 +23,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.error.ErrorTableView;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
-import de.prob2.ui.internal.executor.CompletableExecutorService;
-import de.prob2.ui.internal.executor.CompletableThreadPoolExecutor;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -40,16 +39,19 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Font;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 
 public class ReplayedTraceStatusAlert extends Alert {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReplayedTraceStatusAlert.class);
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final TraceFileHandler traceFileHandler;
 	private final CliTaskExecutor cliExecutor;
 	private final I18n i18n;
-	private final CompletableExecutorService executor;
 	private final ReplayTrace replayTrace;
 
 	private ButtonType accept;
@@ -68,8 +70,6 @@ public class ReplayedTraceStatusAlert extends Alert {
 		this.traceFileHandler = injector.getInstance(TraceFileHandler.class);
 		this.i18n = injector.getInstance(I18n.class);
 		this.cliExecutor = injector.getInstance(CliTaskExecutor.class);
-		this.executor = CompletableThreadPoolExecutor.newSingleThreadedExecutor(r -> new Thread(r, "Trace replay status thread"));
-		injector.getInstance(StopActions.class).add(this.executor::shutdownNow);
 		this.replayTrace = Objects.requireNonNull(replayTrace, "replayTrace");
 
 		stageManager.loadFXML(this, "trace_replay_status_alert.fxml");
@@ -115,19 +115,29 @@ public class ReplayedTraceStatusAlert extends Alert {
 			this.traceTable.disableReplayedTransitionColumns();
 		}
 
-		executor.submit(this::buildRowsAsync).whenComplete((items, exc) -> {
-			if (exc != null) {
+		Thread thread = new Thread(() -> {
+			ObservableList<ReplayedTraceRow> items;
+			try {
+				items = this.buildRowsAsync();
+			} catch (InterruptedException exc) {
+				LOGGER.debug("Trace replay status thread was interrupted (this is not an error)", exc);
+				return;
+			} catch (ExecutionException | IOException exc) {
+				LOGGER.error("Exception while populating trace replay status table", exc);
 				Platform.runLater(() -> {
 					this.close();
 					traceFileHandler.showLoadError(replayTrace, exc);
 				});
-			} else if (items != null) {
-				Platform.runLater(() -> this.traceTable.setItems(items));
+				return;
 			}
-		});
+			Platform.runLater(() -> this.traceTable.setItems(items));
+		}, "Trace replay status thread");
+		// Don't let this thread keep the JVM alive if for some reason it's still running when the UI exits.
+		thread.setDaemon(true);
+		thread.start();
 	}
 
-	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws Exception {
+	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws ExecutionException, InterruptedException, IOException {
 		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
 		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
 
