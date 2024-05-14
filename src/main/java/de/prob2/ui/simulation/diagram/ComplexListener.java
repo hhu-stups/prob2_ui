@@ -16,10 +16,4 @@ public class ComplexListener extends DiagramNode {
     public void setPredicate(String predicate) {
         this.predicate = predicate;
     } 
-
-    
-
-    
-
-    
 }

@@ -11,7 +11,6 @@ public class DiagramNode {
         this.colour = colour;
         this.label = label;
         this.style = style;
-
     }
 
     public String getId() {
@@ -29,6 +28,4 @@ public class DiagramNode {
     public String getStyle() {
         return style;
     }
-
-    
 }

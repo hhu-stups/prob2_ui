@@ -59,7 +59,6 @@ public class DiagramGenerator {
 		this.realTimeSimulator.setDiagramGenerator(this);
     }
 
-
     //Initializes Velocity engine for diagram generation
 	private VelocityContext velocityInit(){
 		Properties props = new Properties();
@@ -70,7 +69,6 @@ public class DiagramGenerator {
 		return nodeContext;
 		
 	}
-
 	
 	public String generateDiagram(Boolean debug){
 		//Initialisation of Velocity engine
@@ -92,7 +90,6 @@ public class DiagramGenerator {
 		}
 		return nodesString;
 	}
-
 	
 	public String generateComplexDiagram(boolean debug){
 		//init velocity
@@ -140,8 +137,6 @@ public class DiagramGenerator {
 		}
 		return nodesString;
 	}
-
-	
 
 	//Method that collects all nodes for simple activation diagram
 	List<DiagramNode> collectNodes(boolean showCurrent){
@@ -292,8 +287,6 @@ public class DiagramGenerator {
 		return activating;
 	}
 
-
-
 	private void printSimulationDiagramm(String nodesString, boolean islive){
 		//Getting Activation data; Only used for console information
 		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
@@ -324,6 +317,4 @@ public class DiagramGenerator {
 	public DiagramStage getDiaStage() {
 		return diaStage;
 	}
-
-	
 }
