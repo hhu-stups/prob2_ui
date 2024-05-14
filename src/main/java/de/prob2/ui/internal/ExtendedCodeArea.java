@@ -417,11 +417,22 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			LOGGER.trace("Computing highlighting for text of length {} took {}", text.length(), sw.stop());
 
 			Platform.runLater(() -> {
-				Stopwatch sw_ = Stopwatch.createStarted();
-				this.setStyleSpans(0, spans);
-				LOGGER.trace("Applying {} highlighting style spans took {}", spans.length(), sw_.stop());
+				// sanity check: did the text length change?
+				if (this.getLength() == text.length()) {
+					Stopwatch sw_ = Stopwatch.createStarted();
+					try {
+						this.setStyleSpans(0, spans);
+						LOGGER.trace("Applying {} highlighting style spans took {}", spans.length(), sw_.stop());
+					} catch (Exception ignored) {
+						LOGGER.warn("Could not apply highlighting style spans");
+					}
+				}
 			});
 		});
+	}
+
+	public void cancelHighlighting() {
+		this.executor.cancel(true);
 	}
 
 	public void clearHistory() {

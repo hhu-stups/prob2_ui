@@ -449,6 +449,7 @@ public class BEditorView extends BorderPane {
 			}
 
 			Stopwatch sw = Stopwatch.createStarted();
+			beditor.cancelHighlighting();
 			this.setPath(path);
 			beditor.replaceText(text);
 			beditor.moveTo(0);
