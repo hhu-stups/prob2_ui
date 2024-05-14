@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.animation.tracereplay.ReplayedTraceTable?>
+<?import de.prob2.ui.error.ErrorTableView?>
 <?import javafx.scene.control.Alert?>
 <?import javafx.scene.control.DialogPane?>
-<?import javafx.scene.layout.VBox?>
-<?import de.prob2.ui.error.ErrorTableView?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.geometry.Insets?>
 <fx:root type="Alert" resizable="true" xmlns:fx="http://javafx.com/fxml/1">
 	<dialogPane>
 		<DialogPane>
+			<minHeight>
+				<Region fx:constant="USE_PREF_SIZE"/>
+			</minHeight>
 			<content>
 				<VBox stylesheets="@/prob.css">
 					<ReplayedTraceTable fx:id="traceTable" VBox.vgrow="ALWAYS" />
 					<ErrorTableView fx:id="errorTable" />
-					<Label fx:id="keepOrDiscardQuestion" VBox.vgrow="ALWAYS" style="-fx-padding: 10 0 0 0"/>
+					<Label fx:id="keepOrDiscardQuestion" VBox.vgrow="ALWAYS" style="-fx-font-size: 16;">
+						<padding>
+							<Insets top="10"/>
+						</padding>
+					</Label>
 				</VBox>
 			</content>
 		</DialogPane>

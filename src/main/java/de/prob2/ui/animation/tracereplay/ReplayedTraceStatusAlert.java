@@ -36,8 +36,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.layout.Region;
-import javafx.scene.text.Font;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,13 +80,9 @@ public class ReplayedTraceStatusAlert extends Alert {
 	private void initialize() {
 		this.accept = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.accept"), ButtonBar.ButtonData.OK_DONE);
 
-		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
-
 		this.errorTable.dontSyncWithEditor();
 		this.errorTable.visibleProperty().bind(Bindings.createBooleanBinding(() -> !this.errorTable.getErrorItems().isEmpty(), this.errorTable.getErrorItems()));
 		this.errorTable.managedProperty().bind(this.errorTable.visibleProperty());
-
-		this.keepOrDiscardQuestion.setFont(new Font(16));
 	}
 
 	private void update() {
