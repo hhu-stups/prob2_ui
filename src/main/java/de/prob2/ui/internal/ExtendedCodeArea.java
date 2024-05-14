@@ -422,7 +422,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 					Stopwatch sw_ = Stopwatch.createStarted();
 					try {
 						this.setStyleSpans(0, spans);
-						LOGGER.trace("Applying {} highlighting style spans took {}", spans.length(), sw_.stop());
+						LOGGER.trace("Applying {} highlighting style spans took {}", spans.getSpanCount(), sw_.stop());
 					} catch (Exception exc) {
 						LOGGER.warn("Could not apply highlighting style spans", exc);
 					}
