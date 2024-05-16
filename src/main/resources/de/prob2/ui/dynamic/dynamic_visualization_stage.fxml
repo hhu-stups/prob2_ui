@@ -2,27 +2,14 @@
 
 <?import de.prob2.ui.dynamic.DynamicVisualizationStage?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.control.TableView?>
-<?import javafx.scene.control.TextArea?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import de.prob2.ui.internal.ExtendedCodeArea?>
-<?import javafx.scene.control.TableColumn?>
-<?import javafx.scene.control.Tooltip?>
-<?import de.prob2.ui.dynamic.table.ExpressionTableView?>
-<?import de.prob2.ui.dynamic.dotty.DotView?>
-<?import de.prob2.ui.dynamic.plantuml.PlantUmlView?>
 <fx:root type="DynamicVisualizationStage" title="%dynamic.visualization.stage.title" minWidth="800" minHeight="600"
          width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
     <fx:define>
@@ -31,6 +18,28 @@
     <scene>
         <Scene stylesheets="@/prob.css">
             <BorderPane>
+                <top>
+                    <MenuBar fx:id="menuBar" BorderPane.alignment="CENTER">
+                        <Menu text="%menu.view">
+                            <MenuItem fx:id="reloadButton" text="%visb.menu.edit.reload" onAction="#reload"/>
+                            <SeparatorMenuItem/>
+                            <MenuItem fx:id="zoomResetMenuButton" text="%menu.view.items.zoomDefault" visible="false"
+                                      onAction="#defaultSize"/>
+                            <MenuItem fx:id="fakeZoomResetMenuButton" text="%menu.view.items.zoomDefault"
+                                      accelerator="Shortcut+'0'" onAction="#defaultSize"/>
+                            <MenuItem fx:id="zoomInMenuButton" text="%menu.view.items.zoomIn" visible="false"
+                                      onAction="#zoomIn"/>
+                            <MenuItem fx:id="fakeZoomInMenuButton" text="%menu.view.items.zoomIn"
+                                      accelerator="Shortcut+'+'" onAction="#zoomIn"/>
+                            <MenuItem fx:id="zoomOutMenuButton" text="%menu.view.items.zoomOut" visible="false"
+                                      onAction="#zoomOut"/>
+                            <MenuItem fx:id="fakeZoomOutMenuButton" text="%menu.view.items.zoomOut"
+                                      accelerator="Shortcut+'-'" onAction="#zoomOut"/>
+                            <SeparatorMenuItem/>
+                            <fx:include source="../sharedviews/close_window_menu_item.fxml"/>
+                        </Menu>
+                    </MenuBar>
+                </top>
                 <center>
                     <SplitPane dividerPositions="0.35">
                         <VBox>

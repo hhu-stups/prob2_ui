@@ -3,6 +3,7 @@ package de.prob2.ui.dynamic;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -17,6 +18,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -105,45 +107,40 @@ public class DynamicVisualizationStage extends Stage {
 	@FXML
 	private TextArea taErrors;
 
+	@FXML
+	private HelpButton helpButton;
+
+	private final StageManager stageManager;
+	private final I18n i18n;
+	private final CurrentProject currentProject;
+	private final CurrentTrace currentTrace;
+	private final ObservableList<ErrorItem> errors = FXCollections.observableArrayList();
+	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
+	private final AtomicBoolean needsUpdateAfterBusy;
+	private final BackgroundUpdater updater;
+
 	// Used to remember the last selected item even when the list might be cleared temporarily,
 	// e.g. when reloading the current machine.
 	private DynamicCommandItem lastItem;
 
-	private boolean needsUpdateAfterBusy;
-
-	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
-
-	private final StageManager stageManager;
-
-	private final CurrentTrace currentTrace;
-
-	private final CurrentProject currentProject;
-
-	private final I18n i18n;
-
-	private final BackgroundUpdater updater;
-
-	private final ObservableList<ErrorItem> errors = FXCollections.observableArrayList();
-
 	@Inject
-	public DynamicVisualizationStage(final Provider<DynamicPreferencesStage> preferencesStageProvider,
-	                                 final StageManager stageManager, final CurrentTrace currentTrace,
-	                                 final CurrentProject currentProject, final I18n i18n, final StopActions stopActions) {
-		this.preferencesStageProvider = preferencesStageProvider;
+	public DynamicVisualizationStage(StageManager stageManager, I18n i18n, CurrentProject currentProject, CurrentTrace currentTrace, Provider<DynamicPreferencesStage> preferencesStageProvider, StopActions stopActions) {
 		this.stageManager = stageManager;
-		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.i18n = i18n;
+		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
+		this.preferencesStageProvider = preferencesStageProvider;
 		this.updater = new BackgroundUpdater("Dynamic Visualization Updater");
 		stopActions.add(this.updater::shutdownNow);
-		this.needsUpdateAfterBusy = false;
-
+		this.needsUpdateAfterBusy = new AtomicBoolean();
 		stageManager.loadFXML(this, "dynamic_visualization_stage.fxml");
 	}
 
 	@FXML
 	private void initialize() {
 		this.refresh();
+
+		helpButton.setHelpContent("mainmenu.visualisations.graphVisualisation", null);
 
 		this.showingProperty().addListener((observable, from, to) -> {
 			this.interrupt();
@@ -154,9 +151,11 @@ public class DynamicVisualizationStage extends Stage {
 
 		lvChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			this.updatePlaceholderLabel();
-			if (to == null || currentTrace.get() == null || !this.isShowing()) {
+			tvFormula.itemsProperty().unbind();
+			if (to == null || currentProject.getCurrentMachine() == null || currentTrace.get() == null || !this.isShowing()) {
 				enterFormulaBox.setVisible(false);
 				tvFormula.setVisible(false);
+				tvFormula.setItems(FXCollections.observableArrayList());
 				addButton.setVisible(false);
 				removeButton.setVisible(false);
 				this.interrupt();
@@ -167,6 +166,11 @@ public class DynamicVisualizationStage extends Stage {
 			} else {
 				lbDescription.setText(to.getDescription());
 			}
+
+			// TODO
+			tvFormula.setItems(FXCollections.observableArrayList());
+			// tvFormula.setItems(currentProject.getCurrentMachine().getMachineProperties().getPlantUmlFormulaTasksByCommand(to.getCommand()));
+
 			boolean needFormula = to.getArity() > 0;
 			enterFormulaBox.setVisible(needFormula);
 			tvFormula.setVisible(needFormula);
@@ -188,20 +192,20 @@ public class DynamicVisualizationStage extends Stage {
 
 		currentTrace.addListener((observable, from, to) -> {
 			if (currentTrace.isAnimatorBusy()) {
-				this.needsUpdateAfterBusy = true;
+				this.needsUpdateAfterBusy.set(true);
 			} else {
 				refresh();
 			}
 		});
 		currentTrace.addStatesCalculatedListener(newOps -> {
 			if (currentTrace.isAnimatorBusy()) {
-				this.needsUpdateAfterBusy = true;
+				this.needsUpdateAfterBusy.set(true);
 			} else {
 				Platform.runLater(this::refresh);
 			}
 		});
 		currentTrace.animatorBusyProperty().addListener((o, from, to) -> {
-			if (!to && this.needsUpdateAfterBusy) {
+			if (!to && this.needsUpdateAfterBusy.compareAndSet(true, false)) {
 				Platform.runLater(this::refresh);
 			}
 		});
@@ -350,6 +354,27 @@ public class DynamicVisualizationStage extends Stage {
 	}
 
 	@FXML
+	private void reload() {
+		this.interrupt();
+		this.refresh();
+	}
+
+	@FXML
+	private void defaultSize() {
+		// TODO
+	}
+
+	@FXML
+	private void zoomIn() {
+		// TODO
+	}
+
+	@FXML
+	private void zoomOut() {
+		// TODO
+	}
+
+	@FXML
 	private void evaluateFormulaDirect() {
 		evaluateFormula(taFormula.getText());
 	}
@@ -428,12 +453,13 @@ public class DynamicVisualizationStage extends Stage {
 		this.errorsView.setVisible(false);
 		this.clearContent();
 		this.updatePlaceholderLabel();
-		taFormula.getErrors().clear();
+		this.taFormula.getErrors().clear();
 		this.errors.clear();
 	}
 
 	private void clearContent() {
 		// TODO
+		placeholderLabel.setVisible(true);
 	}
 
 	private void visualize(final DynamicCommandItem item, String formula) {
