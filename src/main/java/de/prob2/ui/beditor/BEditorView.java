@@ -459,6 +459,8 @@ public class BEditorView extends BorderPane {
 			LOGGER.debug("Setting editor text took {}", sw.stop());
 		} finally {
 			beditor.setChangingText(false);
+			// trigger a garbage collection whenever the text changes to remove old style information ASAP
+			System.gc();
 		}
 	}
 
