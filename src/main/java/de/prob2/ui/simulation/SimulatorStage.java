@@ -1,34 +1,20 @@
 package de.prob2.ui.simulation;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Path;
-import java.security.spec.EdDSAParameterSpec;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.swing.plaf.synth.SynthRadioButtonMenuItemUI;
-
-import org.apache.commons.math3.complex.Complex;
-import org.apache.velocity.*;
-import org.apache.velocity.app.Velocity;
-import org.apache.velocity.app.VelocityEngine;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.jangassen.MenuToolkit;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
@@ -54,11 +40,7 @@ import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
-import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
-import de.prob2.ui.simulation.diagram.ComplexNode;
-import de.prob2.ui.simulation.diagram.DiagramEdge;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
-import de.prob2.ui.simulation.diagram.DiagramNode;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.simulation.model.SimulationModel;
@@ -76,10 +58,7 @@ import de.prob2.ui.verifications.CheckedCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;

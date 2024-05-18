@@ -82,7 +82,6 @@ public class DiagramGenerator {
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
 
-
 		//Prints dot diagramm and Activation config into console as well as opening a pop-up with the Visualised Diagramm
 		//Debug allows to disable UI dependency for testing
 		if (!debug) {
@@ -95,14 +94,13 @@ public class DiagramGenerator {
 		//init velocity
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/complex_template.vm");
-		StringWriter sw = new StringWriter(); 
-
+		StringWriter sw = new StringWriter();
+		
 		//Nodes and edges are collected and put into velocity context
 		nodeContext.put("nodes", collectComplexNodes());
 		nodeContext.put("activations", collectEdges());
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
-
 
 		//Prints dot diagramm and Activation config into console as well as opening a pop-up with the Visualised Diagramm
 		//Debug allows to disable UI dependency for testing
@@ -159,8 +157,8 @@ public class DiagramGenerator {
 				String opColour = "yellow";
 				//change color if currently active
 				if (showCurrent && !realTimeSimulator.getConfigurationToActivation().get(opConfig.getId()).isEmpty()) {
-					opColour = "blue";
-					eventColour = "blue";
+					opColour = "aqua";
+					eventColour = "aqua";
 				}
 				if (!activation.getId().equals("$setup_constants")) {
 					diaNode.add(new DiagramNode(opConfig.getOpName()+"_event", eventColour, opConfig.getOpName(), "ellipse"));
@@ -170,7 +168,6 @@ public class DiagramGenerator {
 					diaNode.add(new DiagramNode(activation.getId(), opColour, activation.getId(),"diamond"));
 				}
 			}
-			System.out.println(activation.getClass().getName());
 		}
 		for(UIListenerConfiguration listener : listeners){
 			boolean listenerinit = true;
@@ -206,7 +203,7 @@ public class DiagramGenerator {
 							diaNode.add(new ComplexListener(opConfig.getOpName()+"_event", "white", opConfig.getOpName(), "ellipse", opConfig.getWithPredicate()));
 						}
 					}
-					if(!activation.getId().equals("$initialise_machine")&& !activation.getId().equals("$setup_constants")){
+					if(!activation.getId().equals("$initialise_machine") && !activation.getId().equals("$setup_constants")){
 						diaNode.add(new ComplexNode(activation.getId(),
 							"yellow",
 							opConfig.getId(), 
