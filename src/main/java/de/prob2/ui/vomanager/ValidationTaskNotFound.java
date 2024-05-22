@@ -3,6 +3,7 @@ package de.prob2.ui.vomanager;
 import java.util.Locale;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import de.prob2.ui.internal.I18n;
@@ -19,11 +20,15 @@ import javafx.beans.property.SimpleObjectProperty;
  */
 public final class ValidationTaskNotFound implements IValidationTask {
 	private final ReadOnlyObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.INVALID_TASK);
-	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 
 	public ValidationTaskNotFound(final String id) {
 		this.id = id;
+	}
+
+	@JsonCreator
+	public ValidationTaskNotFound() {
+		throw new UnsupportedOperationException("Validation task type INVALID cannot appear in a project file");
 	}
 
 	@Override
