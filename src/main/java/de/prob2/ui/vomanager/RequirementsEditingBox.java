@@ -255,7 +255,12 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private void applyRequirement(){
-		if (tfName.getText().trim().isEmpty() || taRequirement.getText().trim().isEmpty()) {
+		if (
+			tfName.getText().trim().isEmpty()
+			|| cbRequirementLinkMachineChoice.getValue() == null
+			|| cbRequirementChoice.getValue() == null
+			|| taRequirement.getText().trim().isEmpty()
+		) {
 			warnNotValid();
 			return;
 		}
