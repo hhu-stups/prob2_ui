@@ -32,15 +32,14 @@ public class Project implements HasMetadata {
 	@JsonIgnore
 	private Path location;
 
-	@JsonCreator
 	public Project(
-		@JsonProperty("name") final String name,
-		@JsonProperty("description") final String description,
-		@JsonProperty("machines") final List<Machine> machines,
-		@JsonProperty("requirements") final List<Requirement> requirements,
-		@JsonProperty("preferences") final List<Preference> preferences,
-		@JsonProperty("metadata") final JsonMetadata metadata,
-		@JsonProperty("location") final Path location
+		String name,
+		String description,
+		List<Machine> machines,
+		List<Requirement> requirements,
+		List<Preference> preferences,
+		JsonMetadata metadata,
+		Path location
 	) {
 		this.name = name;
 		this.description = description;
@@ -49,6 +48,18 @@ public class Project implements HasMetadata {
 		this.preferences = new ArrayList<>(preferences);
 		this.metadata = metadata;
 		this.location = location;
+	}
+
+	@JsonCreator
+	public Project(
+		@JsonProperty("name") String name,
+		@JsonProperty("description") String description,
+		@JsonProperty("machines") List<Machine> machines,
+		@JsonProperty("requirements") List<Requirement> requirements,
+		@JsonProperty("preferences") List<Preference> preferences,
+		@JsonProperty("metadata") JsonMetadata metadata
+	) {
+		this(name, description, machines, requirements, preferences, metadata, null);
 	}
 	
 	public static JsonMetadataBuilder metadataBuilder() {
