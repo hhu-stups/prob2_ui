@@ -29,8 +29,8 @@ public abstract class DynamicFormulaTask implements IValidationTask {
 
 	protected DynamicFormulaTask(final String id, final String commandType, final String formula) {
 		this.id = id;
-		this.commandType = commandType;
-		this.formula = formula;
+		this.commandType = Objects.requireNonNull(commandType, "commandType");
+		this.formula = Objects.requireNonNull(formula, "formula");
 		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
 	}
 

@@ -79,7 +79,7 @@ public final class ModelCheckingItem implements IExecutableItem {
 		@JsonProperty("options") final Set<ModelCheckingOptions.Options> options
 	) {
 		this.id = id;
-		this.searchStrategy = searchStrategy;
+		this.searchStrategy = Objects.requireNonNull(searchStrategy, "searchStrategy");
 		this.nodesLimit = nodesLimit;
 		this.timeLimit = timeLimit;
 		this.goal = goal;

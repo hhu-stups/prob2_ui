@@ -66,7 +66,7 @@ public final class ReplayTrace implements IExecutableItem {
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
 		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
 		this.animatedReplayedTrace = new SimpleObjectProperty<>(this, "animatedReplayedTrace", null);
-		this.location = location;
+		this.location = Objects.requireNonNull(location, "location");
 		this.absoluteLocation = absoluteLocation;
 		this.traceManager = traceManager;
 		this.selected = new SimpleBooleanProperty(this, "selected", true);

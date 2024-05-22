@@ -53,10 +53,10 @@ public class Requirement {
 		List<Requirement> previousVersions,
 		Requirement parent
 	) {
-		this.name = name;
-		this.introducedAt = introducedAt;
-		this.type = type;
-		this.text = text;
+		this.name = Objects.requireNonNull(name, "name");
+		this.introducedAt = Objects.requireNonNull(introducedAt, "introducedAt");
+		this.type = Objects.requireNonNull(type, "type");
+		this.text = Objects.requireNonNull(text, "text");
 		this.validationObligationsByMachine = groupVosByMachine(validationObligations);
 		// The collection returned by TreeMap.values() doesn't support equals/hashCode properly,
 		// so we have to copy it into a Set,
@@ -64,7 +64,7 @@ public class Requirement {
 		// Use LinkedHashSet to maintain the order from the map.
 		this.validationObligations = new LinkedHashSet<>(this.validationObligationsByMachine.values());
 		assert this.validationObligations.size() == this.validationObligationsByMachine.size();
-		this.previousVersions = previousVersions;
+		this.previousVersions = Objects.requireNonNull(previousVersions, "previousVersions");
 		this.parent = parent;
 	}
 

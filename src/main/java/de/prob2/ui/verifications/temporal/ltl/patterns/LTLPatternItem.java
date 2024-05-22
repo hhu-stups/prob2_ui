@@ -1,5 +1,7 @@
 package de.prob2.ui.verifications.temporal.ltl.patterns;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,9 +35,9 @@ public final class LTLPatternItem {
 	) {
 		super();
 
-		this.name = name;
-		this.description = description;
-		this.code = code;
+		this.name = Objects.requireNonNull(name, "name");
+		this.description = Objects.requireNonNull(description, "description");
+		this.code = Objects.requireNonNull(code, "code");
 
 		this.resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
 		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);

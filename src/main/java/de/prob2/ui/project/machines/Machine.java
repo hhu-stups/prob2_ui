@@ -56,8 +56,8 @@ public final class Machine {
 		@JsonProperty("location") final Path location,
 		@JsonProperty("lastUsedPreferenceName") final String lastUsedPreferenceName
 	) {
-		this.name = new SimpleStringProperty(this, "name", name);
-		this.description = new SimpleStringProperty(this, "description", description);
+		this.name = new SimpleStringProperty(this, "name", Objects.requireNonNull(name, "name"));
+		this.description = new SimpleStringProperty(this, "description", Objects.requireNonNull(description, "description"));
 		this.location = Objects.requireNonNull(location, "location");
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", lastUsedPreferenceName != null && !lastUsedPreferenceName.isEmpty() ? lastUsedPreferenceName : Preference.DEFAULT.getName());
 		// combining @JsonCreator and @JsonUnwrapped is not supported (yet)

@@ -37,8 +37,8 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 		super();
 
 		this.id = id;
-		this.code = code;
-		this.description = description;
+		this.code = Objects.requireNonNull(code, "code");
+		this.description = Objects.requireNonNull(description, "description");
 		this.stateLimit = stateLimit;
 		this.expectedResult = expectedResult;
 	}

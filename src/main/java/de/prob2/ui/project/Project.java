@@ -41,12 +41,12 @@ public class Project implements HasMetadata {
 		JsonMetadata metadata,
 		Path location
 	) {
-		this.name = name;
-		this.description = description;
+		this.name = Objects.requireNonNull(name, "name");
+		this.description = Objects.requireNonNull(description, "description");
 		this.machines = new ArrayList<>(machines);
 		this.requirements = new ArrayList<>(requirements);
 		this.preferences = new ArrayList<>(preferences);
-		this.metadata = metadata;
+		this.metadata = Objects.requireNonNull(metadata, "metadata");
 		this.location = location;
 	}
 
