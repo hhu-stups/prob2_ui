@@ -12,8 +12,8 @@ import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
-import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.PreferencesChangeState;
+import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
@@ -103,7 +103,9 @@ public class DynamicPreferencesStage extends Stage {
 		}
 		this.globalPreferences.get().putAll(changedPreferences);
 		this.preferences.getState().apply();
-		this.toRefresh.refresh();
+		if (this.toRefresh != null) {
+			this.toRefresh.refresh();
+		}
 		this.close();
 	}
 }
