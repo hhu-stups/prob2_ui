@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.dynamic.DynamicGraphView?>
 <?import de.prob2.ui.dynamic.DynamicTableView?>
 <?import de.prob2.ui.dynamic.DynamicVisualizationStage?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
@@ -144,8 +145,7 @@
                                 </center>
                             </BorderPane>
                             <DynamicTableView fx:id="tableView" visible="false"/>
-                            <!--<DotView fx:id="dotView" visible="false"/>
-                            <PlantUmlView fx:id="pumlView" visible="false"/>-->
+                            <DynamicGraphView fx:id="graphView" visible="false"/>
                         </StackPane>
                     </SplitPane>
                 </center>

@@ -1,6 +1,5 @@
 package de.prob2.ui.dynamic;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -98,16 +97,11 @@ public class DynamicTableView extends BorderPane implements Builder<DynamicTable
 		}
 
 		FileChooser fileChooser = new FileChooser();
-		fileChooser.getExtensionFilters().add(this.fileChooserManager.getCsvFilter());
+		fileChooser.getExtensionFilters().setAll(this.fileChooserManager.getCsvFilter());
 		fileChooser.setTitle(this.i18n.translate("common.fileChooser.saveAsCSV.title"));
-		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, null, this.getScene().getWindow());
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this.getScene().getWindow());
 		if (path == null || path.getFileName() == null || path.getParent() == null) {
 			return;
-		}
-
-		// we can only save as csv
-		if (!path.getFileName().endsWith(".csv")) {
-			path = path.resolveSibling(path.getFileName() + ".csv");
 		}
 
 		try {
@@ -118,9 +112,9 @@ public class DynamicTableView extends BorderPane implements Builder<DynamicTable
 					csvWriter.record(row);
 				}
 			}
-		} catch (IOException e) {
-			LOGGER.error("Saving as CSV failed", e);
-			final Alert alert = this.stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
+		} catch (Exception e) {
+			LOGGER.error("Failed to save table", e);
+			Alert alert = this.stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
 			alert.initOwner(this.getScene().getWindow());
 			alert.showAndWait();
 		}

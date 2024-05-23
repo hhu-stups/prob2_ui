@@ -210,8 +210,24 @@ public class FileChooserManager {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv");
 	}
 	
+	public FileChooser.ExtensionFilter getSvgFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
+	}
+
 	public FileChooser.ExtensionFilter getPngFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.png", "png");
+	}
+
+	public FileChooser.ExtensionFilter getPdfFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.pdf", "pdf");
+	}
+
+	public FileChooser.ExtensionFilter getDotFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.dot", "dot");
+	}
+
+	public FileChooser.ExtensionFilter getPumlFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.puml", "puml");
 	}
 
 	public Path showOpenFileChooser(final FileChooser fileChooser, final Kind kind, final Window window) {

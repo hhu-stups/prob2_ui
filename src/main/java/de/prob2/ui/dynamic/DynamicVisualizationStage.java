@@ -134,8 +134,9 @@ public class DynamicVisualizationStage extends Stage {
 	// sub-views
 	@FXML
 	private DynamicTableView tableView;
+	@FXML
+	private DynamicGraphView graphView;
 
-	private final StageManager stageManager;
 	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
@@ -151,7 +152,6 @@ public class DynamicVisualizationStage extends Stage {
 
 	@Inject
 	public DynamicVisualizationStage(StageManager stageManager, I18n i18n, CurrentProject currentProject, CurrentTrace currentTrace, Provider<NewEditDynamicFormulaStage> editFormulaStageProvider, Provider<DynamicPreferencesStage> preferencesStageProvider, StopActions stopActions) {
-		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -338,7 +338,11 @@ public class DynamicVisualizationStage extends Stage {
 		Platform.runLater(this::clearContent);
 		if (item instanceof TableVisualizationCommand vc) {
 			this.tableView.visualize(vc, formulas);
-		} else { // TODO: more sub-views
+		} else if (item instanceof DotVisualizationCommand vc) {
+			this.graphView.visualize(vc, formulas);
+		} else if (item instanceof PlantUmlVisualizationCommand vc) {
+			this.graphView.visualize(vc, formulas);
+		} else {
 			throw new AssertionError("unknown dynamic visualization command class: " + item.getClass().getSimpleName());
 		}
 	}
@@ -360,7 +364,7 @@ public class DynamicVisualizationStage extends Stage {
 		this.errors.clear();
 
 		this.tableView.clearContent();
-		// TODO: more sub-views
+		this.graphView.clearContent();
 	}
 
 	private void editFormulaWithDialog(DynamicFormulaTask oldTask) {
