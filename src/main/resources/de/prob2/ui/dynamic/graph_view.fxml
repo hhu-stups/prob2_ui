@@ -22,6 +22,33 @@
                     <Tooltip text="%common.buttons.saveAs"/>
                 </tooltip>
             </Button>
+            <Button fx:id="zoomResetButton" onAction="#defaultSize">
+                <graphic>
+                    <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH"
+                                   bindableFontSize="${fontSize.fontSize * 2}"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="%common.buttons.zoomDefault"/>
+                </tooltip>
+            </Button>
+            <Button fx:id="zoomInButton" onAction="#zoomIn">
+                <graphic>
+                    <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_PLUS"
+                                   bindableFontSize="${fontSize.fontSize * 2}"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="%common.buttons.zoomIn"/>
+                </tooltip>
+            </Button>
+            <Button fx:id="zoomOutButton" onAction="#zoomOut">
+                <graphic>
+                    <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_MINUS"
+                                   bindableFontSize="${fontSize.fontSize * 2}"/>
+                </graphic>
+                <tooltip>
+                    <Tooltip text="%common.buttons.zoomOut"/>
+                </tooltip>
+            </Button>
         </ToolBar>
     </top>
     <center>

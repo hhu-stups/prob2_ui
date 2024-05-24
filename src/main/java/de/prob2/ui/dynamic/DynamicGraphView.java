@@ -29,9 +29,11 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -49,6 +51,12 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 	private WebView webView;
 	@FXML
 	private Button saveButton;
+	@FXML
+	private Button zoomResetButton;
+	@FXML
+	private Button zoomInButton;
+	@FXML
+	private Button zoomOutButton;
 
 	private final StageManager stageManager;
 	private final I18n i18n;
@@ -78,7 +86,9 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 	@FXML
 	private void initialize() {
 		this.currentSvg.addListener((observable, from, to) -> this.loadGraph(to));
-		this.saveButton.disableProperty().bind(this.graphMode.isNull());
+		for (var button : new Button[] { this.saveButton, this.zoomResetButton, this.zoomInButton, this.zoomOutButton }) {
+			button.disableProperty().bind(this.graphMode.isNull());
+		}
 
 		this.webView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
 			Set<Node> scrollBars = this.webView.lookupAll(".scroll-bar");
@@ -87,7 +97,8 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 			}
 		});
 
-		// TODO: zoom
+		// TODO: find better icon for "reset zoom"
+		// TODO: add accelerator keybinds for zoom
 	}
 
 	@Override
@@ -173,12 +184,50 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 		}
 	}
 
+	@FXML
+	private void defaultSize() {
+		this.webView.setZoom(1);
+	}
+
+	@FXML
+	private void zoomIn() {
+		this.zoomByFactor(1.15);
+		this.adjustScroll();
+	}
+
+	@FXML
+	private void zoomOut() {
+		this.zoomByFactor(0.85);
+		this.adjustScroll();
+	}
+
+	private void zoomByFactor(double factor) {
+		this.webView.setZoom(this.webView.getZoom() * factor);
+	}
+
+	private void adjustScroll() {
+		Set<Node> nodes = this.webView.lookupAll(".scroll-bar");
+		double x = 0.0;
+		double y = 0.0;
+		for (final Node node : nodes) {
+			if (node instanceof ScrollBar sb) {
+				if (sb.getOrientation() == Orientation.VERTICAL) {
+					x = sb.getPrefHeight() / 2;
+				} else {
+					y = sb.getPrefWidth() / 2;
+				}
+			}
+		}
+		this.webView.getEngine().executeScript("window.scrollBy(" + x + "," + y + ")");
+	}
+
 	void clearContent() {
 		this.setVisible(false);
 		this.cachedDotCommand = null;
 		this.cachedDotEngine = null;
 		this.currentInput.set(null);
 		this.currentSvg.set(null);
+		this.defaultSize();
 	}
 
 	void visualize(DotVisualizationCommand command, List<IEvalElement> formulas) throws InterruptedException {
