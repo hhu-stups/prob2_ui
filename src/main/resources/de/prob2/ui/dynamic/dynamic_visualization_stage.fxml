@@ -23,6 +23,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.control.TreeItem?>
 <fx:root type="DynamicVisualizationStage" title="%dynamic.visualization.stage.title" minWidth="800" minHeight="600"
          width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
     <fx:define>
@@ -66,12 +68,9 @@
                 <center>
                     <SplitPane dividerPositions="0.35">
                         <VBox>
-                            <ListView fx:id="lvChoice" VBox.vgrow="ALWAYS">
-                                <placeholder>
-                                    <Label text="%common.noModelLoaded"/>
-                                </placeholder>
-                            </ListView>
-
+                            <TreeView fx:id="tvCommandItems" showRoot="false" VBox.vgrow="ALWAYS">
+                                <TreeItem fx:id="tvCommandItemsRoot" expanded="true"/>
+                            </TreeView>
                             <HBox alignment="CENTER" VBox.vgrow="NEVER">
                                 <Label fx:id="lbDescription" prefHeight="80.0" wrapText="true" VBox.vgrow="ALWAYS"/>
                             </HBox>
