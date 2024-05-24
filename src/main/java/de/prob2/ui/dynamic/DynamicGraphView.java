@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -13,8 +14,10 @@ import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.PlantUmlVisualizationCommand;
-import de.prob.exception.ProBError;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.plantuml.JavaLocator;
+import de.prob2.ui.dynamic.plantuml.PlantUmlCall;
+import de.prob2.ui.dynamic.plantuml.PlantUmlLocator;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -50,6 +53,8 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 	private final StageManager stageManager;
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
+	private final JavaLocator javaLocator;
+	private final PlantUmlLocator plantUmlLocator;
 	private final ObjectProperty<GraphMode> graphMode;
 	private final ObjectProperty<byte[]> currentInput;
 	private final StringProperty currentSvg;
@@ -58,10 +63,12 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 	private String cachedDotEngine;
 
 	@Inject
-	public DynamicGraphView(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager) {
+	public DynamicGraphView(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager, JavaLocator javaLocator, PlantUmlLocator plantUmlLocator) {
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
+		this.javaLocator = javaLocator;
+		this.plantUmlLocator = plantUmlLocator;
 		this.graphMode = new SimpleObjectProperty<>(this, "graphMode", null);
 		this.currentInput = new SimpleObjectProperty<>(this, "currentInput", null);
 		this.currentSvg = new SimpleStringProperty(this, "currentSvg", null);
@@ -90,7 +97,7 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 
 	@FXML
 	private void save() {
-		if (this.cachedDotCommand == null || this.cachedDotEngine == null || this.graphMode.get() == null || this.currentInput.get() == null || this.currentSvg.get() == null) {
+		if (this.graphMode.get() == null || this.currentInput.get() == null || this.currentSvg.get() == null) {
 			return;
 		}
 
@@ -107,7 +114,7 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 			}
 			case PUML -> {
 				inputFilter = this.fileChooserManager.getPumlFilter();
-				fileChooser.getExtensionFilters().setAll(inputFilter, svgFilter);
+				fileChooser.getExtensionFilters().setAll(inputFilter, svgFilter, pngFilter);
 			}
 			default -> throw new AssertionError();
 		}
@@ -142,13 +149,25 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 							Files.write(path, data);
 						}
 					}
-					case PUML -> throw new UnsupportedOperationException("puml saving not yet implemented");
+					case PUML -> {
+						String outputFormat;
+						if (pngFilter.equals(selectedFilter)) {
+							outputFormat = PlantUmlCall.PNG;
+						} else {
+							throw new AssertionError();
+						}
+
+						byte[] data = this.visualizePuml(this.javaLocator.getJavaExecutable(), this.plantUmlLocator.findPlantUmlJar().orElseThrow(), outputFormat, this.currentInput.get());
+						if (data != null) {
+							Files.write(path, data);
+						}
+					}
 					default -> throw new AssertionError();
 				}
 			}
 		} catch (Exception e) {
 			LOGGER.error("Failed to save graph", e);
-			Alert alert = this.stageManager.makeExceptionAlert(e, null);
+			Alert alert = this.stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path);
 			alert.initOwner(this.getScene().getWindow());
 			alert.showAndWait();
 		}
@@ -208,7 +227,46 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 	}
 
 	void visualize(PlantUmlVisualizationCommand command, List<IEvalElement> formulas) throws InterruptedException {
-		throw new UnsupportedOperationException("puml not supported yet"); // TODO
+		String javaExecutable = this.javaLocator.getJavaExecutable();
+		Optional<Path> optPlantUmlJar = this.plantUmlLocator.findPlantUmlJar();
+		if (optPlantUmlJar.isEmpty()) {
+			Platform.runLater(() -> {
+				Alert alert = this.stageManager.makeAlert(
+						Alert.AlertType.ERROR,
+						"plantuml.error.noPlantUml.header",
+						"plantuml.error.noPlantUml.message",
+						"https://plantuml.com/download",
+						this.plantUmlLocator.getDirectory()
+				);
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
+			});
+			return;
+		}
+		Path plantUmlJar = optPlantUmlJar.get();
+
+		byte[] pumlInput = command.visualizeAsPlantUmlToBytes(formulas);
+		if (Thread.currentThread().isInterrupted()) {
+			return;
+		}
+
+		String outputFormat = PlantUmlCall.SVG;
+		byte[] svgBytes = this.visualizePuml(javaExecutable, plantUmlJar, outputFormat, pumlInput);
+		if (svgBytes == null) {
+			return;
+		}
+
+		String svgString = new String(svgBytes, StandardCharsets.UTF_8);
+		if (!Thread.currentThread().isInterrupted()) {
+			Platform.runLater(() -> {
+				this.cachedDotCommand = null;
+				this.cachedDotEngine = null;
+				this.graphMode.set(GraphMode.PUML);
+				this.currentInput.set(pumlInput);
+				this.currentSvg.set(svgString);
+				this.setVisible(true);
+			});
+		}
 	}
 
 	private byte[] visualizeDot(String dotCommand, String dotEngine, String outputFormat, byte[] dotInput) throws InterruptedException {
@@ -218,10 +276,27 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 					.outputFormat(outputFormat)
 					.input(dotInput)
 					.call();
-		} catch (ProBError e) {
+		} catch (Exception e) {
 			LOGGER.error("could not visualize graph with dot (command={}, layoutEngine={}, outputFormat={})", dotCommand, dotEngine, outputFormat, e);
 			Platform.runLater(() -> {
 				Alert alert = this.stageManager.makeExceptionAlert(e, "dotty.error.dotVisualization.header", "dotty.error.dotVisualization.message", dotCommand, dotEngine, outputFormat);
+				alert.initOwner(this.getScene().getWindow());
+				alert.showAndWait();
+			});
+			return null;
+		}
+	}
+
+	private byte[] visualizePuml(String javaCommand, Path plantUmlJar, String outputFormat, byte[] pumlInput) throws InterruptedException {
+		try {
+			return new PlantUmlCall(javaCommand, plantUmlJar)
+					.outputFormat(outputFormat)
+					.input(pumlInput)
+					.call();
+		} catch (Exception e) {
+			LOGGER.error("could not visualize graph with plantuml (java={}, plantuml={}, outputFormat={})", javaCommand, plantUmlJar, outputFormat, e);
+			Platform.runLater(() -> {
+				Alert alert = this.stageManager.makeExceptionAlert(e, "plantuml.error.plantumlVisualization.header", "plantuml.error.plantumlVisualization.message", javaCommand, plantUmlJar, outputFormat);
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 			});
