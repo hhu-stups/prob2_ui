@@ -6,9 +6,6 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.chart.HistoryChartStage;
 import de.prob2.ui.dynamic.DynamicVisualizationStage;
-import de.prob2.ui.dynamic.dotty.DotView;
-import de.prob2.ui.dynamic.plantuml.PlantUmlView;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutView;
@@ -34,27 +31,6 @@ public class VisualisationMenu extends Menu {
 		stage.show();
 		stage.toFront();
 	}
-
-	@FXML
-	private void openGraphVisualisation() {
-		DotView dotView = injector.getInstance(DotView.class);
-		dotView.show();
-		dotView.toFront();
-	}
-
-	@FXML
-	private void openPlantUmlVisualisation() {
-		PlantUmlView pumlView = injector.getInstance(PlantUmlView.class);
-		pumlView.show();
-		pumlView.toFront();
-	}
-
-	@FXML
-	private void openTableVisualisation() {
-		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-		expressionTableView.show();
-		expressionTableView.toFront();
-	}
 	
 	@FXML
 	private void openMagicLayout() {
@@ -69,5 +45,4 @@ public class VisualisationMenu extends Menu {
 		chartStage.show();
 		chartStage.toFront();
 	}
-
 }

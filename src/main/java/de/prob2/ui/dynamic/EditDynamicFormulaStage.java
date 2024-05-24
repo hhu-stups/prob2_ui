@@ -2,6 +2,8 @@ package de.prob2.ui.dynamic;
 
 import java.util.Set;
 
+import com.google.inject.Inject;
+
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.I18n;
@@ -16,7 +18,13 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
-public abstract class EditDynamicFormulaStage<T extends DynamicFormulaTask> extends Stage {
+public class EditDynamicFormulaStage extends Stage {
+
+	@FunctionalInterface
+	public interface DynamicFormulaTaskFactory {
+		VisualizationFormulaTask createTask(String id, String formula);
+	}
+
 	@FXML
 	private Label formulaTitleLabel;
 	@FXML
@@ -32,11 +40,12 @@ public abstract class EditDynamicFormulaStage<T extends DynamicFormulaTask> exte
 
 	private final I18n i18n;
 	private final CurrentProject currentProject;
-	private String command;
-	private T result;
 
+	private DynamicFormulaTaskFactory factory;
+	private VisualizationFormulaTask result;
+
+	@Inject
 	public EditDynamicFormulaStage(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject) {
-		super();
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		stageManager.loadFXML(this, "edit_formula_stage.fxml");
@@ -73,29 +82,27 @@ public abstract class EditDynamicFormulaStage<T extends DynamicFormulaTask> exte
 		this.cancelButton.setOnAction(e -> this.close());
 	}
 
-	public void createNewItem(String command) {
+	public void createNewFormulaTask(DynamicFormulaTaskFactory factory) {
 		this.idField.clear();
 		this.formulaTextArea.clear();
-		this.command = command;
+		this.formulaTextArea.getErrors().clear();
+		this.factory = factory;
 	}
 
-	public void setInitialTask(T item, ObservableList<ErrorItem> errors) {
-		this.command = item.getCommandType();
+	public void setInitialFormulaTask(VisualizationFormulaTask item, ObservableList<ErrorItem> errors, DynamicFormulaTaskFactory factory) {
 		this.idField.setText(item.getId() != null ? item.getId() : "");
 		this.formulaTextArea.replaceText(item.getFormula());
-		// TODO: does this make sense?
 		this.formulaTextArea.getErrors().setAll(errors);
+		this.factory = factory;
 	}
-
-	protected abstract T createNewItem(String id, String command, String formula);
 
 	private void setResult() {
-		final String formula = formulaTextArea.getText().trim();
-		final String id = idField.getText().trim().isEmpty() ? null : idField.getText();
-		this.result = createNewItem(id, command, formula);
+		String id = idField.getText().trim().isEmpty() ? null : idField.getText();
+		String formula = formulaTextArea.getText().trim();
+		this.result = this.factory.createTask(id, formula);
 	}
 
-	public T getResult() {
+	public VisualizationFormulaTask getResult() {
 		return this.result;
 	}
 }

@@ -2,13 +2,17 @@ package de.prob2.ui.dynamic;
 
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
@@ -19,7 +23,8 @@ import javafx.beans.property.SimpleObjectProperty;
 	"commandType",
 	"formula",
 })
-public abstract class DynamicFormulaTask implements IValidationTask {
+public final class VisualizationFormulaTask implements IValidationTask {
+
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String commandType;
@@ -27,7 +32,12 @@ public abstract class DynamicFormulaTask implements IValidationTask {
 	@JsonIgnore
 	private final ObjectProperty<Checked> checked;
 
-	protected DynamicFormulaTask(final String id, final String commandType, final String formula) {
+	@JsonCreator
+	public VisualizationFormulaTask(
+			@JsonProperty("id") final String id,
+			@JsonProperty("commandType") final String commandType,
+			@JsonProperty("formula") final String formula
+	) {
 		this.id = id;
 		this.commandType = Objects.requireNonNull(commandType, "commandType");
 		this.formula = Objects.requireNonNull(formula, "formula");
@@ -37,6 +47,11 @@ public abstract class DynamicFormulaTask implements IValidationTask {
 	@Override
 	public String getId() {
 		return id;
+	}
+
+	@Override
+	public ValidationTaskType<VisualizationFormulaTask> getTaskType() {
+		return BuiltinValidationTaskTypes.VISUALIZATION_FORMULA;
 	}
 
 	@Override
@@ -78,7 +93,7 @@ public abstract class DynamicFormulaTask implements IValidationTask {
 
 	@Override
 	public boolean settingsEqual(Object other) {
-		return other instanceof DynamicFormulaTask that
+		return other instanceof VisualizationFormulaTask that
 			       && Objects.equals(this.getTaskType(), that.getTaskType())
 			       && Objects.equals(this.getId(), that.getId())
 			       && Objects.equals(this.getCommandType(), that.getCommandType())

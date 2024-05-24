@@ -10,7 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
-import de.prob2.ui.dynamic.dotty.DotFormulaTask;
+import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -35,7 +35,7 @@ class ValidationTaskTest {
 	void testTaskSerDeser() throws Exception {
 		List<IValidationTask> tasks = List.of(
 			new ModelCheckingItem(null, ModelCheckingSearchStrategy.MIXED_BF_DF, null, null, null, Set.of(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS)),
-			new DotFormulaTask(null, "do_some_dot_things", "1=1"),
+			new VisualizationFormulaTask(null, "do_some_dot_things", "1=1"),
 			new SimulationItem("xyz", Path.of("a/b/c"), SimulationType.MONTE_CARLO_SIMULATION, Map.of())
 		);
 

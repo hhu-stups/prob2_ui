@@ -13,7 +13,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
-import de.prob2.ui.dynamic.dotty.DotView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -198,7 +198,7 @@ public class VisBDebugStage extends Stage {
 				.map(VisBTableItem::getVisBItem)
 				.map(item -> String.format(Locale.ROOT, "\"%s_%s\" |-> %s", item.getId(), item.getAttribute(), item.getExpression()))
 				.collect(Collectors.joining(" |-> \n"));
-		DotView formulaStage = injector.getInstance(DotView.class);
+		DynamicVisualizationStage formulaStage = injector.getInstance(DynamicVisualizationStage.class);
 		formulaStage.show();
 		formulaStage.toFront();
 		formulaStage.visualizeProjection(projectionString);

@@ -23,8 +23,7 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.ExpandedFormula;
 import de.prob.exception.ProBError;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.dynamic.dotty.DotView;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -123,7 +122,7 @@ public class FullValueStage extends Stage {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				String visualizedFormula = statesView.getFormulaForVisualization(value.getValue());
-				DotView formulaStage = injector.getInstance(DotView.class);
+				DynamicVisualizationStage formulaStage = injector.getInstance(DynamicVisualizationStage.class);
 				formulaStage.show();
 				formulaStage.toFront();
 				if (value.getValue().getType().equals(ExpandedFormula.FormulaType.EXPRESSION)) {
@@ -166,7 +165,7 @@ public class FullValueStage extends Stage {
 				if (ExpandedFormula.FormulaType.PREDICATE == value.getValue().getFormula().expandStructureNonrecursive().getType()) {
 					visualizedFormula = String.format(Locale.ROOT, "bool(%s)", visualizedFormula);
 				}
-				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+				DynamicVisualizationStage expressionTableView = injector.getInstance(DynamicVisualizationStage.class);
 				expressionTableView.show();
 				expressionTableView.toFront();
 				expressionTableView.visualizeExpression(visualizedFormula);

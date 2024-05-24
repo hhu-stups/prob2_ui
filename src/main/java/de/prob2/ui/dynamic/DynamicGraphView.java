@@ -14,6 +14,7 @@ import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.PlantUmlVisualizationCommand;
+import de.prob.exception.ProBError;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.plantuml.JavaLocator;
 import de.prob2.ui.dynamic.plantuml.PlantUmlCall;
@@ -237,14 +238,14 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 		// Make sure dot and engine are set, else react with proper error message
 		if (dotCommand == null || dotCommand.isEmpty()) {
 			Platform.runLater(() -> {
-				Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.emptyDotPath.header", "dotty.error.emptyDotPath.message");
+				Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "dynamic.visualization.error.emptyDotPath.header", "dynamic.visualization.error.emptyDotPath.message");
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 			});
 			return;
 		} else if (dotEngine == null || dotEngine.isEmpty()) {
 			Platform.runLater(() -> {
-				Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "dotty.error.emptyDotEngine.header", "dotty.error.emptyDotEngine.message");
+				Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "dynamic.visualization.error.emptyDotEngine.header", "dynamic.visualization.error.emptyDotEngine.message");
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 			});
@@ -282,8 +283,8 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 			Platform.runLater(() -> {
 				Alert alert = this.stageManager.makeAlert(
 						Alert.AlertType.ERROR,
-						"plantuml.error.noPlantUml.header",
-						"plantuml.error.noPlantUml.message",
+						"dynamic.visualization.error.noPlantUml.header",
+						"dynamic.visualization.error.noPlantUml.message",
 						"https://plantuml.com/download",
 						this.plantUmlLocator.getDirectory()
 				);
@@ -325,10 +326,17 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 					.outputFormat(outputFormat)
 					.input(dotInput)
 					.call();
-		} catch (Exception e) {
+		} catch (ProBError e) {
 			LOGGER.error("could not visualize graph with dot (command={}, layoutEngine={}, outputFormat={})", dotCommand, dotEngine, outputFormat, e);
 			Platform.runLater(() -> {
-				Alert alert = this.stageManager.makeExceptionAlert(e, "dotty.error.dotVisualization.header", "dotty.error.dotVisualization.message", dotCommand, dotEngine, outputFormat);
+				Alert alert = this.stageManager.makeExceptionAlert(
+						e,
+						"dynamic.visualization.error.dotVisualization.header",
+						"dynamic.visualization.error.dotVisualization.message",
+						dotCommand,
+						dotEngine,
+						outputFormat
+				);
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 			});
@@ -342,10 +350,17 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 					.outputFormat(outputFormat)
 					.input(pumlInput)
 					.call();
-		} catch (Exception e) {
+		} catch (ProBError e) {
 			LOGGER.error("could not visualize graph with plantuml (java={}, plantuml={}, outputFormat={})", javaCommand, plantUmlJar, outputFormat, e);
 			Platform.runLater(() -> {
-				Alert alert = this.stageManager.makeExceptionAlert(e, "plantuml.error.plantumlVisualization.header", "plantuml.error.plantumlVisualization.message", javaCommand, plantUmlJar, outputFormat);
+				Alert alert = this.stageManager.makeExceptionAlert(
+						e,
+						"dynamic.visualization.error.plantumlVisualization.header",
+						"dynamic.visualization.error.plantumlVisualization.message",
+						javaCommand,
+						plantUmlJar,
+						outputFormat
+				);
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 			});

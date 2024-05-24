@@ -1,8 +1,19 @@
 package de.prob2.ui.rulevalidation.ui;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
@@ -10,29 +21,40 @@ import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResult;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.dynamic.dotty.DotView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableRow;
+import javafx.scene.control.TreeTableView;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.*;
 
 /**
  * @author Christoph Heinzen
@@ -439,7 +461,7 @@ public class RulesView extends AnchorPane{
 	}
 
 	private void showGraphExpression(String expression) {
-		DotView dotView = injector.getInstance(DotView.class);
+		DynamicVisualizationStage dotView = injector.getInstance(DynamicVisualizationStage.class);
 		dotView.show();
 		dotView.toFront();
 		dotView.visualizeFormulaAsGraph(expression);

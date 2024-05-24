@@ -23,19 +23,19 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.statusbar.StatusBar;
 
@@ -583,7 +583,7 @@ public final class OperationsView extends VBox {
 
 	@FXML
 	private void computeUnsatCore() {
-		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+		DynamicVisualizationStage expressionTableView = injector.getInstance(DynamicVisualizationStage.class);
 		expressionTableView.show();
 		expressionTableView.toFront();
 		expressionTableView.selectCommand(TableVisualizationCommand.UNSAT_CORE_PROPERTIES_NAME);

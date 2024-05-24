@@ -22,9 +22,6 @@ import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob2.ui.dynamic.dotty.DotFormulaTask;
-import de.prob2.ui.dynamic.plantuml.PlantUmlFormulaTask;
-import de.prob2.ui.dynamic.table.TableFormulaTask;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.I18n;
@@ -33,7 +30,6 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.MachineProperties;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
@@ -103,13 +99,13 @@ public class DynamicVisualizationStage extends Stage {
 	@FXML
 	private Button removeButton;
 	@FXML
-	private TableView<DynamicFormulaTask> tvFormula;
+	private TableView<VisualizationFormulaTask> tvFormula;
 	@FXML
-	private TableColumn<DynamicFormulaTask, Checked> statusColumn;
+	private TableColumn<VisualizationFormulaTask, Checked> statusColumn;
 	@FXML
-	private TableColumn<DynamicFormulaTask, String> idColumn;
+	private TableColumn<VisualizationFormulaTask, String> idColumn;
 	@FXML
-	private TableColumn<DynamicFormulaTask, String> formulaColumn;
+	private TableColumn<VisualizationFormulaTask, String> formulaColumn;
 	@FXML
 	private VBox enterFormulaBox;
 	@FXML
@@ -140,7 +136,7 @@ public class DynamicVisualizationStage extends Stage {
 	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
-	private final Provider<NewEditDynamicFormulaStage> editFormulaStageProvider;
+	private final Provider<EditDynamicFormulaStage> editFormulaStageProvider;
 	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 	private final AtomicBoolean needsUpdateAfterBusy;
 	private final BackgroundUpdater updater;
@@ -151,7 +147,7 @@ public class DynamicVisualizationStage extends Stage {
 	private DynamicCommandItem lastItem;
 
 	@Inject
-	public DynamicVisualizationStage(StageManager stageManager, I18n i18n, CurrentProject currentProject, CurrentTrace currentTrace, Provider<NewEditDynamicFormulaStage> editFormulaStageProvider, Provider<DynamicPreferencesStage> preferencesStageProvider, StopActions stopActions) {
+	public DynamicVisualizationStage(StageManager stageManager, I18n i18n, CurrentProject currentProject, CurrentTrace currentTrace, Provider<EditDynamicFormulaStage> editFormulaStageProvider, Provider<DynamicPreferencesStage> preferencesStageProvider, StopActions stopActions) {
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -194,7 +190,8 @@ public class DynamicVisualizationStage extends Stage {
 				this.lbDescription.setText(to.getDescription());
 			}
 
-			this.tvFormula.setItems(this.getFormulaTasks(to));
+			this.tvFormula.setItems(this.currentProject.getCurrentMachine().getMachineProperties()
+					.getVisualizationFormulaTasksByCommand(to.getCommand()));
 
 			boolean needFormula = to.getArity() > 0;
 			this.enterFormulaBox.setVisible(needFormula);
@@ -257,7 +254,7 @@ public class DynamicVisualizationStage extends Stage {
 		}, this.lvChoice.getSelectionModel().selectedItemProperty()));
 
 		this.tvFormula.setRowFactory(param -> {
-			final TableRow<DynamicFormulaTask> row = new TableRow<>();
+			final TableRow<VisualizationFormulaTask> row = new TableRow<>();
 
 			row.setOnMouseClicked(e -> {
 				if (e.getClickCount() == 2) {
@@ -273,7 +270,7 @@ public class DynamicVisualizationStage extends Stage {
 
 			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
 			dischargeItem.setOnAction(event -> {
-				DynamicFormulaTask item = row.getItem();
+				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
 					return;
 				}
@@ -282,7 +279,7 @@ public class DynamicVisualizationStage extends Stage {
 
 			MenuItem failItem = new MenuItem(this.i18n.translate("dynamic.formulaView.fail"));
 			failItem.setOnAction(event -> {
-				DynamicFormulaTask item = row.getItem();
+				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
 					return;
 				}
@@ -291,7 +288,7 @@ public class DynamicVisualizationStage extends Stage {
 
 			MenuItem unknownItem = new MenuItem(this.i18n.translate("dynamic.formulaView.unknown"));
 			unknownItem.setOnAction(event -> {
-				DynamicFormulaTask item = row.getItem();
+				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
 					return;
 				}
@@ -308,30 +305,8 @@ public class DynamicVisualizationStage extends Stage {
 		});
 	}
 
-	@SuppressWarnings("unchecked")
-	private ObservableList<DynamicFormulaTask> getFormulaTasks(DynamicCommandItem item) {
-		MachineProperties mp = currentProject.getCurrentMachine().getMachineProperties();
-		if (item instanceof TableVisualizationCommand) {
-			return (ObservableList<DynamicFormulaTask>) (ObservableList<?>) mp.getTableFormulaTasksByCommand(item.getCommand());
-		} else if (item instanceof DotVisualizationCommand) {
-			return (ObservableList<DynamicFormulaTask>) (ObservableList<?>) mp.getDotFormulaTasksByCommand(item.getCommand());
-		} else if (item instanceof PlantUmlVisualizationCommand) {
-			return (ObservableList<DynamicFormulaTask>) (ObservableList<?>) mp.getPlantUmlFormulaTasksByCommand(item.getCommand());
-		} else {
-			throw new AssertionError("unknown dynamic visualization command class: " + item.getClass().getSimpleName());
-		}
-	}
-
-	private DynamicFormulaTask createTaskOfType(DynamicCommandItem item, String id, String formula) {
-		if (item instanceof TableVisualizationCommand) {
-			return new TableFormulaTask(id, item.getCommand(), formula);
-		} else if (item instanceof DotVisualizationCommand) {
-			return new DotFormulaTask(id, item.getCommand(), formula);
-		} else if (item instanceof PlantUmlVisualizationCommand) {
-			return new PlantUmlFormulaTask(id, item.getCommand(), formula);
-		} else {
-			throw new AssertionError("unknown dynamic visualization command class: " + item.getClass().getSimpleName());
-		}
+	private VisualizationFormulaTask createTaskOfType(DynamicCommandItem item, String id, String formula) {
+		return new VisualizationFormulaTask(id, item.getCommand(), formula);
 	}
 
 	private void visualizeInternal(DynamicCommandItem item, List<IEvalElement> formulas) throws InterruptedException {
@@ -367,7 +342,7 @@ public class DynamicVisualizationStage extends Stage {
 		this.graphView.clearContent();
 	}
 
-	private void editFormulaWithDialog(DynamicFormulaTask oldTask) {
+	private void editFormulaWithDialog(VisualizationFormulaTask oldTask) {
 		if (oldTask == null) {
 			return;
 		}
@@ -377,14 +352,14 @@ public class DynamicVisualizationStage extends Stage {
 			return;
 		}
 
-		final NewEditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
+		final EditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
 		stage.initOwner(this);
 		stage.setInitialFormulaTask(oldTask, this.errors, (id, formula) -> this.createTaskOfType(item, id, formula));
 		stage.showAndWait();
 
-		DynamicFormulaTask newTask = stage.getResult();
+		VisualizationFormulaTask newTask = stage.getResult();
 		if (newTask != null) {
-			DynamicFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(oldTask, newTask);
+			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(oldTask, newTask);
 			this.evaluateFormula(added.getFormula());
 		}
 	}
@@ -396,15 +371,15 @@ public class DynamicVisualizationStage extends Stage {
 			return;
 		}
 
-		DynamicFormulaTask task = createTaskOfType(item, null, taFormula.getText());
+		VisualizationFormulaTask task = createTaskOfType(item, null, taFormula.getText());
 		if (task != null) {
-			DynamicFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
+			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
 			this.evaluateFormula(added.getFormula());
 		}
 	}
 
 	private void evaluateSelectedFormulaFromTable() {
-		DynamicFormulaTask item = tvFormula.getSelectionModel().getSelectedItem();
+		VisualizationFormulaTask item = tvFormula.getSelectionModel().getSelectedItem();
 		if (item != null) {
 			this.evaluateFormula(item.getFormula());
 		}
@@ -433,7 +408,7 @@ public class DynamicVisualizationStage extends Stage {
 		final DynamicPreferencesStage preferences = this.preferencesStageProvider.get();
 		preferences.initOwner(this);
 		preferences.initModality(Modality.WINDOW_MODAL);
-		// preferences.setToRefresh(this); // TODO: fix this
+		preferences.setToRefresh(this);
 		DynamicCommandItem currentItem = lvChoice.getSelectionModel().getSelectedItem();
 		if (currentItem == null) {
 			return;
@@ -524,14 +499,14 @@ public class DynamicVisualizationStage extends Stage {
 				LOGGER.info("Visualization interrupted", e);
 				Thread.currentThread().interrupt();
 			} catch (ProBError e) {
-				this.handleProBError(e);
+				this.handleProBError(e, item);
 			} catch (Exception e) {
 				if (e.getCause() instanceof ProBError) {
-					this.handleProBError((ProBError) e.getCause());
+					this.handleProBError((ProBError) e.getCause(), item);
 				} else if (e.getCause() instanceof BCompoundException) {
-					this.handleProBError(new ProBError((BCompoundException) e.getCause()));
+					this.handleProBError(new ProBError((BCompoundException) e.getCause()), item);
 				} else {
-					LOGGER.error("Visualization failed", e);
+					LOGGER.error("Visualization failed for {}", item, e);
 					Platform.runLater(() -> {
 						this.clearContent();
 						this.placeholderLabel.setVisible(false);
@@ -543,8 +518,8 @@ public class DynamicVisualizationStage extends Stage {
 		});
 	}
 
-	private void handleProBError(ProBError e) {
-		LOGGER.error("Visualization failed with ProBError", e);
+	private void handleProBError(ProBError e, DynamicCommandItem item) {
+		LOGGER.error("Visualization failed with ProBError for {}", item, e);
 		Platform.runLater(() -> {
 			this.clearContent();
 			this.placeholderLabel.setVisible(false);
@@ -557,7 +532,6 @@ public class DynamicVisualizationStage extends Stage {
 
 	public void selectCommand(String command, String formula) {
 		Objects.requireNonNull(command, "command");
-		// TODO: are command items uniquely identified by their command or by the tuple (type, command)?
 		final DynamicCommandItem choice = this.lvChoice.getItems().stream()
 				.filter(item -> item != null && command.equals(item.getCommand()))
 				.findAny()
@@ -578,10 +552,6 @@ public class DynamicVisualizationStage extends Stage {
 		this.visualize(choice, formula);
 	}
 
-	public void selectCommand(String command) {
-		this.selectCommand(command, null);
-	}
-
 	@FXML
 	private void handleAddFormula() {
 		DynamicCommandItem item = this.lvChoice.getSelectionModel().getSelectedItem();
@@ -589,23 +559,43 @@ public class DynamicVisualizationStage extends Stage {
 			return;
 		}
 
-		final NewEditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
+		final EditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
 		stage.initOwner(this);
 		stage.createNewFormulaTask((id, formula) -> this.createTaskOfType(item, id, formula));
 		stage.showAndWait();
 
-		DynamicFormulaTask task = stage.getResult();
+		VisualizationFormulaTask task = stage.getResult();
 		if (task != null) {
-			DynamicFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
+			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
 			this.evaluateFormula(added.getFormula());
 		}
 	}
 
 	@FXML
 	private void handleRemoveFormula() {
-		DynamicFormulaTask formulaTask = this.tvFormula.getSelectionModel().getSelectedItem();
+		VisualizationFormulaTask formulaTask = this.tvFormula.getSelectionModel().getSelectedItem();
 		if (formulaTask != null) {
 			this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(formulaTask);
 		}
+	}
+
+	public void selectCommand(String command) {
+		this.selectCommand(command, null);
+	}
+
+	public void visualizeFormulaAsTree(String formula) {
+		this.selectCommand(DotVisualizationCommand.FORMULA_TREE_NAME, formula);
+	}
+
+	public void visualizeFormulaAsGraph(String formula) {
+		this.selectCommand(DotVisualizationCommand.EXPRESSION_AS_GRAPH_NAME, formula);
+	}
+
+	public void visualizeProjection(String formula) {
+		this.selectCommand(DotVisualizationCommand.STATE_SPACE_PROJECTION_NAME, formula);
+	}
+
+	public void visualizeExpression(String expression) {
+		this.selectCommand(TableVisualizationCommand.EXPRESSION_AS_TABLE_NAME, expression);
 	}
 }

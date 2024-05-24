@@ -21,7 +21,7 @@ import de.prob.model.representation.Guard;
 import de.prob.model.representation.Machine;
 import de.prob.model.representation.ModelElementList;
 import de.prob.statespace.Transition;
-import de.prob2.ui.dynamic.dotty.DotView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -206,7 +206,7 @@ public final class ExecuteByPredicateStage extends Stage {
 	@FXML
 	public void visualizePredicate() {
 		try {
-			DotView formulaStage = injector.getInstance(DotView.class);
+			DynamicVisualizationStage formulaStage = injector.getInstance(DynamicVisualizationStage.class);
 			formulaStage.show();
 			formulaStage.visualizeFormulaAsTree(buildVisualizationPredicate());
 			this.close();

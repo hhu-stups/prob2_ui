@@ -27,8 +27,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
-import de.prob2.ui.dynamic.dotty.DotView;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -330,7 +329,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				String visualizedFormula = getFormulaForVisualization(row.getItem());
-				DotView formulaStage = injector.getInstance(DotView.class);
+				DynamicVisualizationStage formulaStage = injector.getInstance(DynamicVisualizationStage.class);
 				formulaStage.show();
 				formulaStage.toFront();
 				if (row.getItem().getType().equals(ExpandedFormula.FormulaType.EXPRESSION)) {
@@ -356,7 +355,7 @@ public final class StatesView extends StackPane {
 				if(FormulaType.PREDICATE == row.getItem().getFormula().expandStructureNonrecursive().getType()) {
 					visualizedFormula = String.format(Locale.ROOT, "bool(%s)", visualizedFormula);
 				}
-				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+				DynamicVisualizationStage expressionTableView = injector.getInstance(DynamicVisualizationStage.class);
 				expressionTableView.show();
 				expressionTableView.toFront();
 				expressionTableView.visualizeExpression(visualizedFormula);

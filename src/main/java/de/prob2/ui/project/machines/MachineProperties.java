@@ -17,10 +17,7 @@ import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.dynamic.DynamicFormulaTask;
-import de.prob2.ui.dynamic.dotty.DotFormulaTask;
-import de.prob2.ui.dynamic.plantuml.PlantUmlFormulaTask;
-import de.prob2.ui.dynamic.table.TableFormulaTask;
+import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -111,11 +108,10 @@ public final class MachineProperties {
 
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
-	public <T extends DynamicFormulaTask> ObservableList<T> getDynamicFormulaTasksByCommand(ValidationTaskType<T> taskType, String command) {
-		Objects.requireNonNull(taskType, "taskType");
+	public ObservableList<VisualizationFormulaTask> getVisualizationFormulaTasksByCommand(String command) {
 		Objects.requireNonNull(command, "command");
 		// casting shenanigans to make java's type inference happy
-		return (ObservableList<T>) (ObservableList<?>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()) && command.equals(((DynamicFormulaTask) vt).getCommandType()));
+		return (ObservableList<VisualizationFormulaTask>) (ObservableList<?>) this.getValidationTasksByPredicate(vt -> BuiltinValidationTaskTypes.VISUALIZATION_FORMULA.equals(vt.getTaskType()) && command.equals(((VisualizationFormulaTask) vt).getCommandType()));
 	}
 
 	@JsonIgnore
@@ -215,21 +211,6 @@ public final class MachineProperties {
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> modelCheckingStatusProperty() {
 		return new MachineCheckingStatusProperty(this.getModelCheckingTasks());
-	}
-
-	@JsonIgnore
-	public ObservableList<DotFormulaTask> getDotFormulaTasksByCommand(String command) {
-		return this.getDynamicFormulaTasksByCommand(BuiltinValidationTaskTypes.DOT_FORMULA, command);
-	}
-
-	@JsonIgnore
-	public ObservableList<PlantUmlFormulaTask> getPlantUmlFormulaTasksByCommand(String command) {
-		return this.getDynamicFormulaTasksByCommand(BuiltinValidationTaskTypes.PLANTUML_FORMULA, command);
-	}
-
-	@JsonIgnore
-	public ObservableList<TableFormulaTask> getTableFormulaTasksByCommand(String command) {
-		return this.getDynamicFormulaTasksByCommand(BuiltinValidationTaskTypes.TABLE_FORMULA, command);
 	}
 
 	@JsonIgnore

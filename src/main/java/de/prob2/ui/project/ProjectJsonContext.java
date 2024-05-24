@@ -1036,6 +1036,17 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 
+	private static void updateV51Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		validationTasks.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String taskType = checkText(task.get("taskType"));
+			if ("DOT_FORMULA".equals(taskType) || "PLANTUML_FORMULA".equals(taskType) || "TABLE_FORMULA".equals(taskType)) {
+				task.put("taskType", "VISUALIZATION_FORMULA");
+			}
+		});
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -1212,6 +1223,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 50) {
 				updateV50Machine(machine);
+			}
+			if (oldVersion <= 51) {
+				updateV51Machine(machine);
 			}
 		});
 

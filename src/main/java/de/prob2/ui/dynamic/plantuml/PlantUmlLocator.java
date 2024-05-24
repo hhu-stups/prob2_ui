@@ -68,7 +68,6 @@ public final class PlantUmlLocator {
 				return null;
 			}
 		} catch (Exception e) {
-			// TODO: exception handling
 			throw new RuntimeException(e);
 		}
 	}

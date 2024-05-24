@@ -43,8 +43,8 @@ public class DynamicPreferencesStage extends Stage {
 	private final StageManager stageManager;
 	private final GlobalPreferences globalPreferences;
 	private final CurrentTrace currentTrace;
-	
-	private DynamicFormulaStage<?, ?> toRefresh;
+
+	private DynamicVisualizationStage toRefresh;
 	
 	@Inject
 	private DynamicPreferencesStage(final StageManager stageManager, final GlobalPreferences globalPreferences, final CurrentTrace currentTrace) {
@@ -62,8 +62,8 @@ public class DynamicPreferencesStage extends Stage {
 		cancelButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		okButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 	}
-	
-	public void setToRefresh(final DynamicFormulaStage<?, ?> toRefresh) {
+
+	public void setToRefresh(final DynamicVisualizationStage toRefresh) {
 		this.toRefresh = toRefresh;
 	}
 	
