@@ -35,6 +35,8 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.input.KeyCharacterCombination;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -47,6 +49,10 @@ import org.slf4j.LoggerFactory;
 public class DynamicGraphView extends BorderPane implements Builder<DynamicGraphView> {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicGraphView.class);
+
+	private static final KeyCombination ZOOM_RESET = new KeyCharacterCombination("0", KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
+	private static final KeyCombination ZOOM_IN = new KeyCharacterCombination("+", KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
+	private static final KeyCombination ZOOM_OUT = new KeyCharacterCombination("-", KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);
 
 	@FXML
 	private WebView webView;
@@ -91,15 +97,24 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 			button.disableProperty().bind(this.graphMode.isNull());
 		}
 
+		// we use event listeners because normal buttons do not accept "accelerators"
+		// so we sadly do not have the keybinding in the tooltip
+		this.setOnKeyPressed(e -> {
+			if (ZOOM_RESET.match(e)) {
+				this.zoomResetButton.fire();
+			} else if (ZOOM_IN.match(e)) {
+				this.zoomInButton.fire();
+			} else if (ZOOM_OUT.match(e)) {
+				this.zoomOutButton.fire();
+			}
+		});
+
 		this.webView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
 			Set<Node> scrollBars = this.webView.lookupAll(".scroll-bar");
 			for (Node scrollBar : scrollBars) {
 				scrollBar.setStyle("-fx-opacity: 0.5;");
 			}
 		});
-
-		// TODO: find better icon for "reset zoom"
-		// TODO: add accelerator keybinds for zoom
 	}
 
 	@Override
