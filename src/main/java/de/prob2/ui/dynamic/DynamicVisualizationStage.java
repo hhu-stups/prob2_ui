@@ -167,6 +167,7 @@ public class DynamicVisualizationStage extends Stage {
 			this.updatePlaceholderLabel();
 			this.tvFormula.itemsProperty().unbind();
 			if (to == null || this.currentProject.getCurrentMachine() == null || this.currentTrace.get() == null || !this.isShowing()) {
+				this.lbDescription.setText("");
 				this.enterFormulaBox.setVisible(false);
 				this.tvFormula.setVisible(false);
 				this.tvFormula.setItems(FXCollections.observableArrayList());
@@ -175,8 +176,9 @@ public class DynamicVisualizationStage extends Stage {
 				this.interrupt();
 				return;
 			}
+
 			if (!to.isAvailable()) {
-				this.lbDescription.setText(String.join("\n", to.getDescription(), to.getAvailable()));
+				this.lbDescription.setText(String.join("\n\n", to.getDescription(), to.getAvailable()));
 			} else {
 				this.lbDescription.setText(to.getDescription());
 			}
