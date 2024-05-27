@@ -46,7 +46,7 @@ public class Project implements HasMetadata {
 		this.machines = new ArrayList<>(machines);
 		this.requirements = new ArrayList<>(requirements);
 		this.preferences = new ArrayList<>(preferences);
-		this.metadata = Objects.requireNonNull(metadata, "metadata");
+		this.metadata = metadata;
 		this.location = location;
 	}
 
