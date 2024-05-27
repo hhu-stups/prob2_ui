@@ -34,10 +34,6 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private ChoiceBox<ModelCheckingSearchStrategy> selectSearchStrategy;
 	@FXML
-	private CheckBox enablePOR;
-	@FXML
-	private CheckBox enablePGE;
-	@FXML
 	private CheckBox findDeadlocks;
 	@FXML
 	private CheckBox findInvViolations;
@@ -134,8 +130,6 @@ public class ModelcheckingStage extends Stage {
 
 	private Set<ModelCheckingOptions.Options> getOptions(boolean goal) {
 		ModelCheckingOptions options = new ModelCheckingOptions();
-		options = options.partialOrderReduction(enablePOR.isSelected());
-		options = options.partialGuardEvaluation(enablePGE.isSelected());
 		options = options.checkDeadlocks(findDeadlocks.isSelected());
 		options = options.checkInvariantViolations(findInvViolations.isSelected());
 		options = options.checkAssertions(findBAViolations.isSelected());
@@ -158,9 +152,6 @@ public class ModelcheckingStage extends Stage {
 		idTextField.setText(item.getId() == null ? "" : item.getId());
 
 		selectSearchStrategy.setValue(item.getSearchStrategy());
-
-		enablePOR.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.PARTIAL_ORDER_REDUCTION));
-		enablePGE.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.PARTIAL_GUARD_EVALUATION));
 
 		findDeadlocks.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.FIND_DEADLOCKS));
 		findInvViolations.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS));

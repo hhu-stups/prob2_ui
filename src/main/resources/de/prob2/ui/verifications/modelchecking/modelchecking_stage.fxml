@@ -5,13 +5,13 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
-<?import javafx.scene.control.TextField?>
 <fx:root type="Stage" fx:id="mcheckStage" resizable="false"
 		 title="%verifications.modelchecking.modelcheckingStage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
@@ -34,30 +34,6 @@
 							</HBox>
 						</VBox>
 					</AnchorPane>
-
-					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="%verifications.modelchecking.modelcheckingStage.optimizations" style="-fx-font-weight: bold;"/>
-						</HBox>
-					</VBox>
-					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="enablePOR" selected="true"
-									  text="%verifications.modelchecking.modelcheckingStage.options.enablePOR">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.enablePOR" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="enablePGE" selected="true"
-									  text="%verifications.modelchecking.modelcheckingStage.options.enablePGE">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.enablePGE" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-					</VBox>
 
 					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
