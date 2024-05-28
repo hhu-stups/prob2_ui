@@ -96,7 +96,6 @@ public class HelpSystem extends StackPane {
 
 		var webEngine = webView.getEngine();
 		webEngine.setUserStyleSheetLocation(this.getClass().getResource("help.css").toString());
-		webEngine.setJavaScriptEnabled(true);
 		webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal == Worker.State.SUCCEEDED) {
 				String url = webEngine.getLocation();
