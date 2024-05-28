@@ -257,17 +257,7 @@ public class MachinesTab extends Tab {
 			i++;
 		}
 		final Path relative = currentProject.getLocation().relativize(selected);
-		final Machine machine;
-		try {
-			machine = new Machine(nameInProject, "", relative);
-		} catch (IllegalArgumentException e) {
-			LOGGER.info("User tried to create a machine with an invalid extension", e);
-			final String extension = MoreFiles.getFileExtension(relative);
-			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "", "project.machines.machinesTab.alerts.invalidMachineExtension.content", extension);
-			alert.initOwner(this.getContent().getScene().getWindow());
-			alert.show();
-			return;
-		}
+		final Machine machine = new Machine(nameInProject, "", relative);
 
 		try {
 			final String extension = MoreFiles.getFileExtension(relative);
