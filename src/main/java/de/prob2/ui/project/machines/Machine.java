@@ -15,11 +15,9 @@ import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.verifications.Checked;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -85,16 +83,6 @@ public final class Machine {
 				this.setChanged(true);
 			}
 		}));
-	}
-
-	// these getters might be required for the UI (via reflection)
-	@JsonIgnore
-	public Checked getChecked() {
-		return null;
-	}
-
-	public ObjectProperty<Checked> checkedProperty() {
-		return null;
 	}
 
 	@JsonIgnore
