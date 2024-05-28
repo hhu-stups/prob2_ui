@@ -172,22 +172,6 @@ public final class Machine {
 	}
 
 	@Override
-	public boolean equals(Object other) {
-		if (other == this) {
-			return true;
-		} else if (!(other instanceof Machine otherMachine)) {
-			return false;
-		} else {
-			return this.getLocation().equals(otherMachine.getLocation());
-		}
-	}
-
-	@Override
-	public int hashCode() {
-		return this.getLocation().hashCode();
-	}
-
-	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("name", this.getName())

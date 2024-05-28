@@ -360,7 +360,7 @@ public class MachinesTab extends Tab {
 		}
 
 		final Path relative = currentProject.getLocation().relativize(selected);
-		if (currentProject.getMachines().contains(new Machine("", "", relative))) {
+		if (currentProject.getMachines().stream().anyMatch(m -> m.getLocation().equals(relative))) {
 			final Alert alert = stageManager.makeAlert(Alert.AlertType.ERROR, "project.machines.machinesTab.alerts.machineAlreadyExists.header",
 					"project.machines.machinesTab.alerts.machineAlreadyExists.content", relative);
 			alert.initOwner(this.getContent().getScene().getWindow());
