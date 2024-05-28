@@ -15,11 +15,6 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
-<!-- Do not remove the following imports as they are detected as unused accidentally -->
-<?import de.prob2.ui.verifications.temporal.TemporalFormulaType?>
-
-
 <fx:root type="TemporalView" fitToHeight="true" fitToWidth="true"
 		 stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
@@ -41,22 +36,6 @@
 				</Button>
 			</InterruptIfRunningButton>
 			<Spacer/>
-			<Button fx:id="saveLTLButton" onAction="#saveLTL">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.buttons.save" />
-				</tooltip>
-			</Button>
-			<Button fx:id="loadLTLButton" onAction="#loadLTL">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.buttons.load" />
-				</tooltip>
-			</Button>
 			<MenuButton fx:id="addMenuButton">
 				<items>
 					<MenuItem fx:id="addFormulaButton" onAction="#askToAddItem"

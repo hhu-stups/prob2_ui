@@ -31,20 +31,24 @@ public final class SimulationSaver {
 	private final VersionInfo versionInfo;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
-	private final JacksonManager<SimulationModelConfiguration> jsonManager;
+	private final JacksonManager<SimulationModelConfiguration> timedTraceJsonManager;
+	private final JacksonManager<SimulationModelConfiguration> simulationJsonManager;
 	private final CurrentProject currentProject;
 	private final I18n i18n;
 
 	@Inject
-	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final ObjectMapper objectMapper, final JacksonManager<SimulationModelConfiguration> jsonManager, final CurrentProject currentProject, final I18n i18n) {
+	public SimulationSaver(final VersionInfo versionInfo, final StageManager stageManager, final FileChooserManager fileChooserManager, final ObjectMapper objectMapper,
+						   final JacksonManager<SimulationModelConfiguration> timedTraceJsonManager, final JacksonManager<SimulationModelConfiguration> simulationJsonManager, final CurrentProject currentProject, final I18n i18n) {
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
-		this.jsonManager = jsonManager;
+		this.timedTraceJsonManager = timedTraceJsonManager;
+		this.simulationJsonManager = simulationJsonManager;
 
-		jsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationModelConfiguration.class, SimulationModelConfiguration.SimulationFileType.TIMED_TRACE.getName(), SimulationModelConfiguration.CURRENT_FORMAT_VERSION));
+		timedTraceJsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationModelConfiguration.class, SimulationModelConfiguration.SimulationFileType.TIMED_TRACE.getName(), SimulationModelConfiguration.CURRENT_FORMAT_VERSION));
+		simulationJsonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationModelConfiguration.class, SimulationModelConfiguration.SimulationFileType.SIMULATION.getName(), SimulationModelConfiguration.CURRENT_FORMAT_VERSION));
 	}
 
 	public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
@@ -68,7 +72,11 @@ public final class SimulationSaver {
 
 	private void saveConfiguration(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
 		SimulationModelConfiguration configuration = SimulationCreator.createConfiguration(trace, timestamps, true, jsonMetadata);
-		this.jsonManager.writeToFile(location, configuration);
+		this.timedTraceJsonManager.writeToFile(location, configuration);
+	}
+
+	public void saveConfiguration(SimulationModelConfiguration configuration, Path location) throws IOException {
+		this.simulationJsonManager.writeToFile(location, configuration);
 	}
 
 	public void saveConfigurations(SimulationItem item) {

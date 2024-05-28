@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -18,6 +17,7 @@ import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import com.google.inject.Injector;
 
+import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -28,12 +28,11 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.machines.MachineProperties;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
-import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
-import de.prob2.ui.verifications.temporal.TemporalFormulaType;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
+import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 
+import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 
 import org.junit.jupiter.api.AfterEach;
@@ -51,18 +50,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class ProjectDocumenterTest {
-
+	private static final Locale TEST_LOCALE = Locale.ENGLISH;
 	final List<Machine> machines = new ArrayList<>();
 	final Machine trafficLight = Mockito.mock(Machine.class);
 	final ReplayTrace trace = Mockito.mock(ReplayTrace.class);
-	final I18n i18n = Mockito.mock(I18n.class);
+	final I18n i18n = new I18n(TEST_LOCALE);
 	final Injector injector = Mockito.mock(Injector.class);
 	final CurrentProject currentProject = Mockito.mock(CurrentProject.class);
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
 	final ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
-	final TemporalFormulaItem ltlFormulaItem = new TemporalFormulaItem(TemporalFormulaType.LTL, "", "", "", -1, true);
-	final SymbolicCheckingFormulaItem symbolicCheckingFormulaItem = new SymbolicCheckingFormulaItem("", "", SymbolicCheckingType.SYMBOLIC_MODEL_CHECKING);
+	final LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "", -1, true);
+	final SymbolicModelCheckingItem symbolicCheckingFormulaItem = new SymbolicModelCheckingItem("", SymbolicModelcheckCommand.Algorithm.BMC);
 	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
 
 	@BeforeAll
@@ -71,11 +70,11 @@ class ProjectDocumenterTest {
 		Mockito.when(trafficLight.getLocation()).thenReturn(Paths.get("src/test/resources/machines/TrafficLight/TrafficLight.mch"));
 		MachineProperties machineProperties = Mockito.mock(MachineProperties.class);
 		Mockito.when(trafficLight.getMachineProperties()).thenReturn(machineProperties);
-		Mockito.when(machineProperties.getTraces()).thenReturn(FXCollections.observableArrayList(trace));
-		Mockito.when(machineProperties.getModelcheckingItems()).thenReturn(Collections.singletonList(modelCheckingItem));
-		Mockito.when(machineProperties.getTemporalFormulas()).thenReturn(Collections.singletonList(ltlFormulaItem));
-		Mockito.when(machineProperties.getLTLPatterns()).thenReturn(Collections.singletonList(ltlPatternItem));
-		Mockito.when(machineProperties.getSymbolicCheckingFormulas()).thenReturn(Collections.singletonList(symbolicCheckingFormulaItem));
+		Mockito.when(machineProperties.getTraces()).thenReturn(FXCollections.singletonObservableList(trace));
+		Mockito.when(machineProperties.getModelCheckingTasks()).thenReturn(FXCollections.singletonObservableList(modelCheckingItem));
+		Mockito.when(machineProperties.getTemporalFormulas()).thenReturn(FXCollections.singletonObservableList(ltlFormulaItem));
+		Mockito.when(machineProperties.getLTLPatterns()).thenReturn(new SimpleListProperty<>(FXCollections.singletonObservableList(ltlPatternItem)));
+		Mockito.when(machineProperties.getSymbolicCheckingFormulas()).thenReturn(FXCollections.singletonObservableList(symbolicCheckingFormulaItem));
 
 		Mockito.when(trace.getName()).thenReturn("TrafficLight_Cars");
 		TraceJsonFile jsonFile = Mockito.mock(TraceJsonFile.class);
@@ -88,7 +87,7 @@ class ProjectDocumenterTest {
 		Mockito.when(currentProject.get()).thenReturn(Mockito.mock(Project.class));
 		Mockito.when(currentProject.get().getPreference(ArgumentMatchers.any(String.class))).thenReturn(Preference.DEFAULT);
 
-		Mockito.when(injector.getInstance(Locale.class)).thenReturn(new Locale("en"));
+		Mockito.when(injector.getInstance(Locale.class)).thenReturn(TEST_LOCALE);
 	}
 
 	@BeforeEach

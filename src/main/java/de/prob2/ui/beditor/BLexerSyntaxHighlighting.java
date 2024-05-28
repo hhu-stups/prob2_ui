@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.PushbackReader;
 import java.io.StringReader;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -12,7 +11,213 @@ import java.util.Set;
 import de.be4.classicalb.core.parser.BLexer;
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.lexer.LexerException;
-import de.be4.classicalb.core.parser.node.*;
+import de.be4.classicalb.core.parser.node.EOF;
+import de.be4.classicalb.core.parser.node.TAbstractConstants;
+import de.be4.classicalb.core.parser.node.TAbstractVariables;
+import de.be4.classicalb.core.parser.node.TAny;
+import de.be4.classicalb.core.parser.node.TAssert;
+import de.be4.classicalb.core.parser.node.TAssertions;
+import de.be4.classicalb.core.parser.node.TAssign;
+import de.be4.classicalb.core.parser.node.TBe;
+import de.be4.classicalb.core.parser.node.TBegin;
+import de.be4.classicalb.core.parser.node.TBfalse;
+import de.be4.classicalb.core.parser.node.TBool;
+import de.be4.classicalb.core.parser.node.TBoolCast;
+import de.be4.classicalb.core.parser.node.TCard;
+import de.be4.classicalb.core.parser.node.TCase;
+import de.be4.classicalb.core.parser.node.TChoice;
+import de.be4.classicalb.core.parser.node.TClosure;
+import de.be4.classicalb.core.parser.node.TClosure1;
+import de.be4.classicalb.core.parser.node.TComment;
+import de.be4.classicalb.core.parser.node.TCommentBody;
+import de.be4.classicalb.core.parser.node.TCommentEnd;
+import de.be4.classicalb.core.parser.node.TConc;
+import de.be4.classicalb.core.parser.node.TConcatSequence;
+import de.be4.classicalb.core.parser.node.TConcreteConstants;
+import de.be4.classicalb.core.parser.node.TConcreteVariables;
+import de.be4.classicalb.core.parser.node.TConjunction;
+import de.be4.classicalb.core.parser.node.TConstants;
+import de.be4.classicalb.core.parser.node.TConstraints;
+import de.be4.classicalb.core.parser.node.TConvertIntCeiling;
+import de.be4.classicalb.core.parser.node.TConvertIntFloor;
+import de.be4.classicalb.core.parser.node.TConvertReal;
+import de.be4.classicalb.core.parser.node.TDefinitions;
+import de.be4.classicalb.core.parser.node.TDirectProduct;
+import de.be4.classicalb.core.parser.node.TDivision;
+import de.be4.classicalb.core.parser.node.TDo;
+import de.be4.classicalb.core.parser.node.TDom;
+import de.be4.classicalb.core.parser.node.TDomainRestriction;
+import de.be4.classicalb.core.parser.node.TDomainSubtraction;
+import de.be4.classicalb.core.parser.node.TDoubleColon;
+import de.be4.classicalb.core.parser.node.TDoubleEqual;
+import de.be4.classicalb.core.parser.node.TDoubleVerticalBar;
+import de.be4.classicalb.core.parser.node.TEither;
+import de.be4.classicalb.core.parser.node.TElementOf;
+import de.be4.classicalb.core.parser.node.TElse;
+import de.be4.classicalb.core.parser.node.TElsif;
+import de.be4.classicalb.core.parser.node.TEmptySet;
+import de.be4.classicalb.core.parser.node.TEnd;
+import de.be4.classicalb.core.parser.node.TEqual;
+import de.be4.classicalb.core.parser.node.TEquivalence;
+import de.be4.classicalb.core.parser.node.TExists;
+import de.be4.classicalb.core.parser.node.TExpressions;
+import de.be4.classicalb.core.parser.node.TExtends;
+import de.be4.classicalb.core.parser.node.TFalse;
+import de.be4.classicalb.core.parser.node.TFin;
+import de.be4.classicalb.core.parser.node.TFin1;
+import de.be4.classicalb.core.parser.node.TFinite;
+import de.be4.classicalb.core.parser.node.TFirst;
+import de.be4.classicalb.core.parser.node.TFloat;
+import de.be4.classicalb.core.parser.node.TFnc;
+import de.be4.classicalb.core.parser.node.TForAny;
+import de.be4.classicalb.core.parser.node.TFront;
+import de.be4.classicalb.core.parser.node.TGeneralizedInter;
+import de.be4.classicalb.core.parser.node.TGeneralizedUnion;
+import de.be4.classicalb.core.parser.node.TGreater;
+import de.be4.classicalb.core.parser.node.TGreaterEqual;
+import de.be4.classicalb.core.parser.node.THexLiteral;
+import de.be4.classicalb.core.parser.node.TId;
+import de.be4.classicalb.core.parser.node.TIdentifierLiteral;
+import de.be4.classicalb.core.parser.node.TIf;
+import de.be4.classicalb.core.parser.node.TImplementation;
+import de.be4.classicalb.core.parser.node.TImplies;
+import de.be4.classicalb.core.parser.node.TImports;
+import de.be4.classicalb.core.parser.node.TIn;
+import de.be4.classicalb.core.parser.node.TIncludes;
+import de.be4.classicalb.core.parser.node.TInclusion;
+import de.be4.classicalb.core.parser.node.TInitialisation;
+import de.be4.classicalb.core.parser.node.TInsertEndSequence;
+import de.be4.classicalb.core.parser.node.TInsertStartSequence;
+import de.be4.classicalb.core.parser.node.TInt;
+import de.be4.classicalb.core.parser.node.TInteger;
+import de.be4.classicalb.core.parser.node.TIntegerLiteral;
+import de.be4.classicalb.core.parser.node.TIntersection;
+import de.be4.classicalb.core.parser.node.TInterval;
+import de.be4.classicalb.core.parser.node.TInvariant;
+import de.be4.classicalb.core.parser.node.TIseq;
+import de.be4.classicalb.core.parser.node.TIseq1;
+import de.be4.classicalb.core.parser.node.TIterate;
+import de.be4.classicalb.core.parser.node.TKwFreetypes;
+import de.be4.classicalb.core.parser.node.TKwReferences;
+import de.be4.classicalb.core.parser.node.TLambda;
+import de.be4.classicalb.core.parser.node.TLast;
+import de.be4.classicalb.core.parser.node.TLess;
+import de.be4.classicalb.core.parser.node.TLessEqual;
+import de.be4.classicalb.core.parser.node.TLessGreater;
+import de.be4.classicalb.core.parser.node.TLet;
+import de.be4.classicalb.core.parser.node.TLineComment;
+import de.be4.classicalb.core.parser.node.TLocalOperations;
+import de.be4.classicalb.core.parser.node.TLogicalOr;
+import de.be4.classicalb.core.parser.node.TMachine;
+import de.be4.classicalb.core.parser.node.TMaplet;
+import de.be4.classicalb.core.parser.node.TMax;
+import de.be4.classicalb.core.parser.node.TMaxInt;
+import de.be4.classicalb.core.parser.node.TMin;
+import de.be4.classicalb.core.parser.node.TMinInt;
+import de.be4.classicalb.core.parser.node.TMinus;
+import de.be4.classicalb.core.parser.node.TMod;
+import de.be4.classicalb.core.parser.node.TModel;
+import de.be4.classicalb.core.parser.node.TMultilineStringContent;
+import de.be4.classicalb.core.parser.node.TMultilineStringEnd;
+import de.be4.classicalb.core.parser.node.TMultilineStringStart;
+import de.be4.classicalb.core.parser.node.TNat;
+import de.be4.classicalb.core.parser.node.TNat1;
+import de.be4.classicalb.core.parser.node.TNatural;
+import de.be4.classicalb.core.parser.node.TNatural1;
+import de.be4.classicalb.core.parser.node.TNonInclusion;
+import de.be4.classicalb.core.parser.node.TNot;
+import de.be4.classicalb.core.parser.node.TNotBelonging;
+import de.be4.classicalb.core.parser.node.TNotEqual;
+import de.be4.classicalb.core.parser.node.TOf;
+import de.be4.classicalb.core.parser.node.TOperations;
+import de.be4.classicalb.core.parser.node.TOr;
+import de.be4.classicalb.core.parser.node.TOutputParameters;
+import de.be4.classicalb.core.parser.node.TOverwriteRelation;
+import de.be4.classicalb.core.parser.node.TPartialBijection;
+import de.be4.classicalb.core.parser.node.TPartialFunction;
+import de.be4.classicalb.core.parser.node.TPartialInjection;
+import de.be4.classicalb.core.parser.node.TPartialSurjection;
+import de.be4.classicalb.core.parser.node.TPerm;
+import de.be4.classicalb.core.parser.node.TPi;
+import de.be4.classicalb.core.parser.node.TPlus;
+import de.be4.classicalb.core.parser.node.TPow;
+import de.be4.classicalb.core.parser.node.TPow1;
+import de.be4.classicalb.core.parser.node.TPowerOf;
+import de.be4.classicalb.core.parser.node.TPragmaDescription;
+import de.be4.classicalb.core.parser.node.TPragmaEnd;
+import de.be4.classicalb.core.parser.node.TPragmaFile;
+import de.be4.classicalb.core.parser.node.TPragmaFreeText;
+import de.be4.classicalb.core.parser.node.TPragmaGenerated;
+import de.be4.classicalb.core.parser.node.TPragmaIdOrString;
+import de.be4.classicalb.core.parser.node.TPragmaImportPackage;
+import de.be4.classicalb.core.parser.node.TPragmaLabel;
+import de.be4.classicalb.core.parser.node.TPragmaPackage;
+import de.be4.classicalb.core.parser.node.TPragmaSymbolic;
+import de.be4.classicalb.core.parser.node.TPre;
+import de.be4.classicalb.core.parser.node.TPred;
+import de.be4.classicalb.core.parser.node.TPredicates;
+import de.be4.classicalb.core.parser.node.TPrj1;
+import de.be4.classicalb.core.parser.node.TPrj2;
+import de.be4.classicalb.core.parser.node.TProduct;
+import de.be4.classicalb.core.parser.node.TPromotes;
+import de.be4.classicalb.core.parser.node.TProperties;
+import de.be4.classicalb.core.parser.node.TQuantifiedInter;
+import de.be4.classicalb.core.parser.node.TQuantifiedUnion;
+import de.be4.classicalb.core.parser.node.TRan;
+import de.be4.classicalb.core.parser.node.TRangeRestriction;
+import de.be4.classicalb.core.parser.node.TRangeSubtraction;
+import de.be4.classicalb.core.parser.node.TReal;
+import de.be4.classicalb.core.parser.node.TRealLiteral;
+import de.be4.classicalb.core.parser.node.TRec;
+import de.be4.classicalb.core.parser.node.TRefinement;
+import de.be4.classicalb.core.parser.node.TRefines;
+import de.be4.classicalb.core.parser.node.TRel;
+import de.be4.classicalb.core.parser.node.TRestrictHeadSequence;
+import de.be4.classicalb.core.parser.node.TRestrictTailSequence;
+import de.be4.classicalb.core.parser.node.TRev;
+import de.be4.classicalb.core.parser.node.TSees;
+import de.be4.classicalb.core.parser.node.TSelect;
+import de.be4.classicalb.core.parser.node.TSemicolon;
+import de.be4.classicalb.core.parser.node.TSeq;
+import de.be4.classicalb.core.parser.node.TSeq1;
+import de.be4.classicalb.core.parser.node.TSetRelation;
+import de.be4.classicalb.core.parser.node.TSetSubtraction;
+import de.be4.classicalb.core.parser.node.TSets;
+import de.be4.classicalb.core.parser.node.TShebang;
+import de.be4.classicalb.core.parser.node.TSigma;
+import de.be4.classicalb.core.parser.node.TSize;
+import de.be4.classicalb.core.parser.node.TSkip;
+import de.be4.classicalb.core.parser.node.TStar;
+import de.be4.classicalb.core.parser.node.TStrictInclusion;
+import de.be4.classicalb.core.parser.node.TStrictNonInclusion;
+import de.be4.classicalb.core.parser.node.TString;
+import de.be4.classicalb.core.parser.node.TStringLiteral;
+import de.be4.classicalb.core.parser.node.TStruct;
+import de.be4.classicalb.core.parser.node.TSucc;
+import de.be4.classicalb.core.parser.node.TSurjectionRelation;
+import de.be4.classicalb.core.parser.node.TSystem;
+import de.be4.classicalb.core.parser.node.TTail;
+import de.be4.classicalb.core.parser.node.TThen;
+import de.be4.classicalb.core.parser.node.TTilde;
+import de.be4.classicalb.core.parser.node.TTotalBijection;
+import de.be4.classicalb.core.parser.node.TTotalFunction;
+import de.be4.classicalb.core.parser.node.TTotalInjection;
+import de.be4.classicalb.core.parser.node.TTotalRelation;
+import de.be4.classicalb.core.parser.node.TTotalSurjection;
+import de.be4.classicalb.core.parser.node.TTotalSurjectionRelation;
+import de.be4.classicalb.core.parser.node.TTrue;
+import de.be4.classicalb.core.parser.node.TTruthPredicate;
+import de.be4.classicalb.core.parser.node.TUnion;
+import de.be4.classicalb.core.parser.node.TUnrecognisedPragma;
+import de.be4.classicalb.core.parser.node.TUses;
+import de.be4.classicalb.core.parser.node.TValue;
+import de.be4.classicalb.core.parser.node.TVar;
+import de.be4.classicalb.core.parser.node.TVariables;
+import de.be4.classicalb.core.parser.node.TVariant;
+import de.be4.classicalb.core.parser.node.TWhen;
+import de.be4.classicalb.core.parser.node.TWhere;
+import de.be4.classicalb.core.parser.node.TWhile;
+import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.util.Utils;
 
 import org.fxmisc.richtext.model.StyleSpans;
@@ -23,7 +228,8 @@ import org.slf4j.LoggerFactory;
 public final class BLexerSyntaxHighlighting {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BLexerSyntaxHighlighting.class);
 
-	private static final Map<Class<? extends Token>, String> syntaxClassesForB = new HashMap<>();
+	private static final Map<Class<? extends Token>, Collection<String>> TOKEN_CLASSES = new HashMap<>();
+	private static final Collection<String> SPECIAL_IDENTIFIER = Set.of("editor_special_identifier");
 
 	static {
 		addBTokens("editor_identifier", TIdentifierLiteral.class);
@@ -121,7 +327,7 @@ public final class BLexerSyntaxHighlighting {
 	@SafeVarargs
 	private static void addBTokens(final String syntaxclass, final Class<? extends Token>... tokens) {
 		for (final Class<? extends Token> c : tokens) {
-			syntaxClassesForB.put(c, syntaxclass);
+			TOKEN_CLASSES.put(c, Set.of(syntaxclass));
 		}
 	}
 
@@ -131,22 +337,21 @@ public final class BLexerSyntaxHighlighting {
 		parseOptions.setIgnoreCheckingValidCombinations(true);
 		parseOptions.setIgnoreUselessTokens(false); // the highlighter currently needs all tokens
 		lexer.setParseOptions(parseOptions);
-		StyleSpansBuilder<Collection<String>> spansBuilder = new StyleSpansBuilder<>();
+		var spansBuilder = new StyleSpansBuilder<Collection<String>>();
 		try {
 			Token t;
 			do {
 				t = lexer.next();
-				String syntaxClass;
+				Collection<String> tokenClass;
 				if (t instanceof TIdentifierLiteral && Utils.isProBSpecialDefinitionName(t.getText())) {
 					// Recognize and highlight special identifiers (e. g. ANIMATION_FUNCTION, VISB_JSON_FILE)
-					syntaxClass = "editor_special_identifier";
+					tokenClass = SPECIAL_IDENTIFIER;
 				} else {
-					syntaxClass = syntaxClassesForB.get(t.getClass());
+					tokenClass = TOKEN_CLASSES.get(t.getClass());
 				}
 
-				Set<String> style = syntaxClass == null ? Collections.emptySet() : Collections.singleton(syntaxClass);
-				spansBuilder.add(style, t.getText().length());
-			} while (!(t instanceof EOF));
+				spansBuilder.add(tokenClass == null ? Set.of() : tokenClass, t.getText().length());
+			} while (!(t instanceof EOF) && !Thread.currentThread().isInterrupted());
 		} catch (LexerException | IOException e) {
 			LOGGER.info("Failed to lex", e);
 		}
@@ -154,7 +359,7 @@ public final class BLexerSyntaxHighlighting {
 		try {
 			return spansBuilder.create();
 		} catch (IllegalStateException ignored) {
-			return StyleSpans.singleton(Collections.emptySet(), text.length());
+			return StyleSpans.singleton(Set.of(), text.length());
 		}
 	}
 }

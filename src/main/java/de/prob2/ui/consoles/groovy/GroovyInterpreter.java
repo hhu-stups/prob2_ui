@@ -1,6 +1,6 @@
 package de.prob2.ui.consoles.groovy;
 
-import java.util.Collection;
+import java.util.List;
 
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -82,7 +82,7 @@ public final class GroovyInterpreter implements Executable {
 		groovyObjectStage.close();
 	}
 
-	public Collection<? extends GroovyCCItem> getSuggestions(String text) {
+	public List<? extends GroovyCCItem> getSuggestions(String text) {
 		return codeCompletion.getSuggestions(text);
 	}
 }

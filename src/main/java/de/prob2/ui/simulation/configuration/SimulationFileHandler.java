@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -20,11 +21,14 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
 import de.prob.json.JsonMetadata;
+import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Transition;
 
 public class SimulationFileHandler {
 
 	public static final String TRACE_FILE_EXTENSION = "json";
+
+	public static final String SIMULATION_FILE_EXTENSION = "json";
 
 	private static final Gson METADATA_GSON = Converters.registerAll(new GsonBuilder())
 			.disableHtmlEscaping()
@@ -32,7 +36,10 @@ public class SimulationFileHandler {
 			.setPrettyPrinting()
 			.create();
 
-	public static ISimulationModelConfiguration constructConfiguration(Path inputFile) throws IOException, JsonSyntaxException {
+	public static ISimulationModelConfiguration constructConfiguration(Path inputFile, LoadedMachine loadedMachine) throws IOException, JsonSyntaxException {
+		if(inputFile.equals(Paths.get(""))) {
+			return DefaultSimulationCreator.createDefaultSimulation(loadedMachine);
+		}
 		if(!inputFile.toFile().isDirectory()) {
 			if(inputFile.toFile().getName().endsWith("json")) {
 				Gson gson = new Gson();
@@ -41,7 +48,7 @@ public class SimulationFileHandler {
 					simulationFile = gson.fromJson(reader, JsonObject.class);
 				}
 				Map<String, String> variables = buildVariables(simulationFile.get("variables"));
-				List<ActivationConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
+				List<DiagramConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
 				List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
 				final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
 				return new SimulationModelConfiguration(variables, activationConfigurations, uiListenerConfigurations, metadata);
@@ -61,11 +68,11 @@ public class SimulationFileHandler {
 		return new SimulationBlackBoxModelConfiguration(timedTraces);
 	}
 
-	private static List<ActivationConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
-		List<ActivationConfiguration> activationConfigurations = new ArrayList<>();
+	private static List<DiagramConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
+		List<DiagramConfiguration> activationConfigurations = new ArrayList<>();
 		JsonArray activationConfigurationsAsArray = jsonElement.getAsJsonArray();
 		for (JsonElement activationElement : activationConfigurationsAsArray) {
-			ActivationConfiguration activationConfiguration = buildActivationConfiguration(activationElement);
+			DiagramConfiguration activationConfiguration = buildActivationConfiguration(activationElement);
 			activationConfigurations.add(activationConfiguration);
 		}
 		return activationConfigurations;
@@ -134,7 +141,7 @@ public class SimulationFileHandler {
 	}
 
 
-	private static ActivationConfiguration buildActivationConfiguration(JsonElement activationElement) {
+	private static DiagramConfiguration buildActivationConfiguration(JsonElement activationElement) {
 		if(!activationElement.getAsJsonObject().has("execute")) {
 			return buildChoiceActivationConfiguration(activationElement);
 		} else {

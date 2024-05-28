@@ -291,7 +291,7 @@ public class TraceTestView extends Stage {
 		} else {
 			this.saveTrace();
 			final ReplayTrace r = replayTrace.get();
-			cliExecutor.submit(() -> {
+			cliExecutor.execute(() -> {
 				injector.getInstance(TraceChecker.class).check(r);
 				if (r.getAnimatedReplayedTrace() != null) {
 					if (index < r.getLoadedTrace().getTransitionList().size()) {
@@ -373,7 +373,7 @@ public class TraceTestView extends Stage {
 			}
 		}
 		this.saveTrace();
-		cliExecutor.submit(() -> injector.getInstance(TraceChecker.class).check(replayTrace.get()));
+		cliExecutor.execute(() -> injector.getInstance(TraceChecker.class).check(replayTrace.get()));
 		this.close();
 	}
 

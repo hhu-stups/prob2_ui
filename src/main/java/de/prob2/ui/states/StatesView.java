@@ -27,8 +27,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
-import de.prob2.ui.dynamic.dotty.DotView;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -107,6 +106,7 @@ public final class StatesView extends StackPane {
 	private final Map<BVisual2Formula, ExpandedFormula> formulaStructureCache;
 	private boolean structureFullyExpanded;
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCache;
+	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCacheUnlimited;
 	private final StateItem.FormulaEvaluator cachingEvaluator;
 	private final BooleanProperty fullValuePrettify;
 	private final BooleanProperty fullValueShowFullValue;
@@ -130,6 +130,7 @@ public final class StatesView extends StackPane {
 		this.formulaStructureCache = new HashMap<>();
 		this.structureFullyExpanded = false;
 		this.formulaValueCache = new HashMap<>();
+		this.formulaValueCacheUnlimited = new HashMap<>();
 		this.cachingEvaluator = new StateItem.FormulaEvaluator() {
 			@Override
 			public ExpandedFormula expand(final BVisual2Formula formula) {
@@ -139,6 +140,11 @@ public final class StatesView extends StackPane {
 			@Override
 			public BVisual2Value evaluate(final BVisual2Formula formula, final State state) {
 				return evaluateFormulaWithCaching(formula, state);
+			}
+
+			@Override
+			public BVisual2Value evaluateUnlimited(BVisual2Formula formula, State state) {
+				return evaluateFormulaUnlimitedWithCaching(formula, state);
 			}
 		};
 		this.fullValuePrettify = new SimpleBooleanProperty();
@@ -323,7 +329,7 @@ public final class StatesView extends StackPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				String visualizedFormula = getFormulaForVisualization(row.getItem());
-				DotView formulaStage = injector.getInstance(DotView.class);
+				DynamicVisualizationStage formulaStage = injector.getInstance(DynamicVisualizationStage.class);
 				formulaStage.show();
 				formulaStage.toFront();
 				if (row.getItem().getType().equals(ExpandedFormula.FormulaType.EXPRESSION)) {
@@ -349,7 +355,7 @@ public final class StatesView extends StackPane {
 				if(FormulaType.PREDICATE == row.getItem().getFormula().expandStructureNonrecursive().getType()) {
 					visualizedFormula = String.format(Locale.ROOT, "bool(%s)", visualizedFormula);
 				}
-				ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+				DynamicVisualizationStage expressionTableView = injector.getInstance(DynamicVisualizationStage.class);
 				expressionTableView.show();
 				expressionTableView.toFront();
 				expressionTableView.visualizeExpression(visualizedFormula);
@@ -408,6 +414,18 @@ public final class StatesView extends StackPane {
 		}
 
 		BVisual2Value newValue = formula.evaluate(state);
+		cacheByState.put(formula, newValue);
+		return newValue;
+	}
+
+	private BVisual2Value evaluateFormulaUnlimitedWithCaching(final BVisual2Formula formula, final State state) {
+		Map<BVisual2Formula, BVisual2Value> cacheByState = this.formulaValueCacheUnlimited.computeIfAbsent(state, s -> new HashMap<>());
+		BVisual2Value value = cacheByState.get(formula);
+		if (value != null) {
+			return value;
+		}
+
+		BVisual2Value newValue = formula.evaluateUnlimited(state);
 		cacheByState.put(formula, newValue);
 		return newValue;
 	}
@@ -656,6 +674,7 @@ public final class StatesView extends StackPane {
 			this.formulaStructureCache.clear();
 			this.structureFullyExpanded = false;
 			this.formulaValueCache.clear();
+			this.formulaValueCacheUnlimited.clear();
 			return;
 		}
 
@@ -664,6 +683,7 @@ public final class StatesView extends StackPane {
 			this.formulaStructureCache.clear();
 			this.structureFullyExpanded = false;
 			this.formulaValueCache.clear();
+			this.formulaValueCacheUnlimited.clear();
 		} else {
 			// Pre-cache the current and previous values of all visible formulas.
 			// The structures have already been cached when the formulas first became visible.

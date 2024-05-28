@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import javafx.beans.binding.Bindings;
@@ -29,17 +28,20 @@ public final class I18n {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(I18n.class);
 
-	private final Injector injector;
+	private final Locale locale;
 	private volatile ResourceBundle bundle;
 
+	// DO NOT CALL directly in the main application code - use dependency injection instead!
+	// This constructor is only public for use in tests.
 	@Inject
-	private I18n(Injector injector/*, UIState uiState*/) {
-		this.injector = injector;
+	public I18n(Locale locale/*, UIState uiState*/) {
+		this.locale = locale;
 
 		// this code allows changing the locale at runtime
 		/*uiState.localeOverrideProperty().addListener((observable, oldValue, newValue) -> {
 			if (oldValue != newValue) {
 				Locale.setDefault(newValue);
+				this.locale = newValue;
 				reset();
 			}
 		});*/
@@ -51,12 +53,8 @@ public final class I18n {
 
 	private synchronized void init() {
 		if (this.bundle == null) {
-			this.bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale());
+			this.bundle = ResourceBundle.getBundle("de.prob2.ui.prob2", locale);
 		}
-	}
-
-	private Locale locale() {
-		return injector.getInstance(Locale.class);
 	}
 
 	public synchronized ResourceBundle bundle() {
@@ -118,7 +116,7 @@ public final class I18n {
 
 		Object[] evaluatedArguments = evaluateArguments(arguments);
 		try {
-			MessageFormat mf = new MessageFormat(pattern, locale());
+			MessageFormat mf = new MessageFormat(pattern, locale);
 			return mf.format(evaluatedArguments);
 		} catch (Exception e) {
 			LOGGER.error("Error while formatting pattern '{}' for given key '{}'", pattern, key, e);
@@ -162,7 +160,7 @@ public final class I18n {
 		Objects.requireNonNull(pattern, "pattern");
 		Object[] evaluatedArguments = evaluateArguments(arguments);
 		try {
-			MessageFormat mf = new MessageFormat(pattern, locale());
+			MessageFormat mf = new MessageFormat(pattern, locale);
 			return mf.format(evaluatedArguments);
 		} catch (Exception e) {
 			LOGGER.error("Error while formatting given pattern '{}'", pattern, e);

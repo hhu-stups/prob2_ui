@@ -131,6 +131,11 @@ Integers
 -x                            unary minus
 Int                           set of integers
 
+Reals
+--------
+x / y                         real division
+Real                          set of reals
+
 Sequences
 ---------
 SubSeq(s,m,n)                 subsequence of s from component m to n
@@ -197,6 +202,7 @@ Corresponding B types to TLA+ data values (let type(e) be the type of the expres
 TLA+ data                               B Type
 --------------------------------------------------
 number e.g. 123                         INTEGER
+decimal number e.g. 123.4               REAL
 string e.g. "abc"                       STRING
 bool value e.g. TRUE                    BOOL
 set e.g. {e,f}                          POW(type(e)), type(e) = type(f)
@@ -208,6 +214,7 @@ model value                             ENUM
 
 Nat                                     POW(INTEGER)
 Int                                     POW(INTEGER)
+Real                                    POW(REAL)
 STRING                                  POW(STRING)
 BOOLEAN                                 POW(BOOL)
 SUBSET S                                POW(type(S)) 

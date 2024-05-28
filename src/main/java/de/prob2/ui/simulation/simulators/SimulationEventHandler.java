@@ -7,10 +7,11 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -30,11 +31,14 @@ public class SimulationEventHandler {
 
 	private final CurrentTrace currentTrace;
 
+	private final LinkedList<String> visitedChoiceIDs;
+
 
 	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace) {
 		this.simulator = simulator;
 		this.cache = new SimulatorCache();
 		this.currentTrace = currentTrace;
+		this.visitedChoiceIDs = new LinkedList<>();
 		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> cache.clear());
 	}
 
@@ -223,9 +227,14 @@ public class SimulationEventHandler {
 		}
 	}
 
-	public void handleOperationConfiguration(State state, ActivationConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
+	public void handleOperationConfiguration(State state, DiagramConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
 		if(activationConfiguration instanceof ActivationChoiceConfiguration) {
+			if(visitedChoiceIDs.contains(activationConfiguration.getId())) {
+				throw new RuntimeException("Cycle in activation diagram detected");
+			}
+			visitedChoiceIDs.push(activationConfiguration.getId());
 			chooseOperation(state, (ActivationChoiceConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
+			visitedChoiceIDs.pop();
 		} else if(activationConfiguration instanceof ActivationOperationConfiguration) {
 			activateOperation(state, (ActivationOperationConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
 		}
@@ -236,7 +245,7 @@ public class SimulationEventHandler {
 		double probabilityMinimum = 0.0;
 		double randomDouble = random.nextDouble();
 		for(String id : activationChoiceConfiguration.getActivations().keySet()) {
-			ActivationConfiguration activationConfiguration = simulator.getActivationConfigurationMap().get(id);
+			DiagramConfiguration activationConfiguration = simulator.getActivationConfigurationMap().get(id);
 			double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, simulator.getVariables(), activationChoiceConfiguration.getActivations().get(id), SimulationHelperFunctions.EvaluationMode.CLASSICAL_B));
 			if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
 				handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.animation.symbolic.SymbolicAnimationChoosingStage?>
-<?import de.prob2.ui.animation.symbolic.SymbolicAnimationType?>
 <?import de.prob2.ui.sharedviews.PredicateBuilderView?>
+<?import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes?>
 <?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
@@ -30,13 +30,17 @@
 						<ChoiceBox fx:id="cbChoice">
 							<items>
 								<FXCollections fx:factory="observableArrayList">
-									<SymbolicAnimationType fx:constant="SEQUENCE"/>
-									<SymbolicAnimationType fx:constant="FIND_VALID_STATE"/>
+									<BuiltinValidationTaskTypes fx:constant="CBC_FIND_SEQUENCE"/>
+									<BuiltinValidationTaskTypes fx:constant="FIND_VALID_STATE"/>
 								</FXCollections>
 							</items>
 						</ChoiceBox>
 					</HBox>
 					<VBox spacing="10.0" fx:id="formulaInput">
+						<HBox alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+							<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>
+							<TextField fx:id="idTextField" promptText="%common.optionalPlaceholder" HBox.hgrow="NEVER"/>
+						</HBox>
 						<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
 							<Button onAction="#ok" text="%common.buttons.ok" styleClass="button-blue"/>
 							<Button onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>

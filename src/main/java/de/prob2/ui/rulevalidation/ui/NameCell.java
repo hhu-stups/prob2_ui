@@ -4,13 +4,12 @@ import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.model.brules.RuleResult;
 import javafx.geometry.Pos;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeTableCell;
+import javafx.util.Duration;
 
 /**
- * Description of class
- *
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 14.12.17
  */
 public class NameCell extends TreeTableCell<Object, Object>{
@@ -23,15 +22,26 @@ public class NameCell extends TreeTableCell<Object, Object>{
 	protected void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
 		if (item == null || empty)
-			setText(null);
-		else if (item instanceof String)
-			setText((String)item);
-		else if (item instanceof RuleOperation && ((RuleOperation) item).getRuleIdString() != null)
-			setText(((RuleOperation)item).getName() + " [" + ((RuleOperation)item).getRuleIdString() + "]");
-		else if (item instanceof AbstractOperation)
-			setText(((AbstractOperation)item).getName());
-		else if (item instanceof RuleResult.CounterExample)
-			setText(((RuleResult.CounterExample)item).getErrorType() + "");
+			updateContent(null);
+		else if (item instanceof String string)
+			updateContent(string);
+		else if (item instanceof RuleOperation ruleOperation && ruleOperation.getRuleIdString() != null)
+			updateContent(ruleOperation.getName() + " [" + ruleOperation.getRuleIdString() + "]");
+		else if (item instanceof AbstractOperation abstractOperation)
+			updateContent(abstractOperation.getName());
+		else if (item instanceof RuleResult.CounterExample counterExample)
+			updateContent(counterExample.getErrorType() + "");
 		setGraphic(null);
+	}
+
+	private void updateContent(String content) {
+		setText(content);
+		if (content != null && !content.isEmpty()) {
+			Tooltip tooltip = new Tooltip(content);
+			tooltip.setShowDuration(Duration.INDEFINITE);
+			setTooltip(tooltip);
+		} else {
+			setTooltip(null);
+		}
 	}
 }

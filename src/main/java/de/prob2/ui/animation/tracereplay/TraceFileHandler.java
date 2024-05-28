@@ -159,7 +159,7 @@ public final class TraceFileHandler {
 		alert.showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
 				Machine currentMachine = currentProject.getCurrentMachine();
-				currentMachine.getMachineProperties().getTraces().remove(trace);
+				currentMachine.getMachineProperties().removeValidationTask(trace);
 			}
 		});
 	}
@@ -176,20 +176,13 @@ public final class TraceFileHandler {
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
 		ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
-		Optional<ReplayTrace> existingItem = machine.getMachineProperties().getTraces().stream().filter(replayTrace::settingsEqual).findAny();
-		if (existingItem.isEmpty()) {
-			machine.getMachineProperties().getTraces().add(replayTrace);
-			return replayTrace;
-		} else {
-			ReplayTrace t = existingItem.get();
-			t.reset();
-			return t;
-		}
+		return machine.getMachineProperties().addValidationTaskIfNotExist(replayTrace);
 	}
 
 	public void save(SimulationItem item, Machine machine) {
 		DirectoryChooser fileChooser = new DirectoryChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.savePaths.title"));
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showDirectoryChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path == null) {
 			return;
@@ -218,6 +211,7 @@ public final class TraceFileHandler {
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 
 		if (path == null) {
@@ -267,6 +261,7 @@ public final class TraceFileHandler {
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + TRACE_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			save(trace, path, "traceReplay");
@@ -280,6 +275,7 @@ public final class TraceFileHandler {
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".csv");
 		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {

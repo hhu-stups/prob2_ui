@@ -81,7 +81,7 @@ public class TraceChecker {
 			LOGGER.info("Trace check interrupted by user", exc);
 			replayTrace.setChecked(Checked.NOT_CHECKED);
 		} catch (RuntimeException exc) {
-			replayTrace.setChecked(Checked.PARSE_ERROR);
+			replayTrace.setChecked(Checked.INVALID_TASK);
 			throw exc;
 		} finally {
 			Platform.runLater(() -> replayTrace.setProgress(-1));
@@ -90,7 +90,8 @@ public class TraceChecker {
 
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
 		Platform.runLater(() -> {
-			ReplayedTraceStatusAlert alert = new ReplayedTraceStatusAlert(injector, replayTrace);
+			ReplayedTraceStatusAlert alert = injector.getInstance(ReplayedTraceStatusAlert.class);
+			alert.initReplayTrace(replayTrace);
 			alert.handleAcceptDiscard();
 		});
 	}

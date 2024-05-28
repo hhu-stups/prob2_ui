@@ -105,11 +105,7 @@ public class DescriptionView extends AnchorPane {
 		}
 	}
 
-	public static DescriptionView getTraceDescriptionView(ReplayTrace trace,
-																									 StageManager stageManager,
-																									 TraceFileHandler traceFileHandler,
-																									 I18n i18n,
-																												Runnable handleClose) {
+	public static DescriptionView getTraceDescriptionView(ReplayTrace trace, StageManager stageManager, TraceFileHandler traceFileHandler, I18n i18n, Runnable handleClose) {
 		final DescriptionView descriptionView = new DescriptionView(stageManager, i18n);
 
 		descriptionView.setName(trace.getName());

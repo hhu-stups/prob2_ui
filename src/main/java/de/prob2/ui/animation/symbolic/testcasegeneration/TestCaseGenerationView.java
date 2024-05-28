@@ -27,8 +27,8 @@ import de.prob2.ui.verifications.ExecutionContext;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Menu;
@@ -142,33 +142,23 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 	}
 
 	@Override
+	protected ObservableList<TestCaseGenerationItem> getItemsProperty(Machine machine) {
+		return machine.getMachineProperties().getTestCases();
+	}
+
+	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();
 		helpButton.setHelpContent("animation", "testCases");
 		setBindings();
 		itemsTable.setRowFactory(table -> new Row());
-		final ChangeListener<Machine> machineChangeListener = (observable, oldValue, newValue) -> {
-			items.unbind();
-			if (newValue != null) {
-				items.bind(newValue.getMachineProperties().testCasesProperty());
-			} else {
-				items.set(FXCollections.emptyObservableList());
-			}
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 	}
 
 	private void setBindings() {
 		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
-		typeColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue().getType()));
-	}
-
-	@Override
-	protected String configurationForItem(final TestCaseGenerationItem item) {
-		return item.getConfigurationDescription();
+		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getTaskType(i18n)));
 	}
 
 	@Override

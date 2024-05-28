@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.external;
 
-import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -42,7 +41,7 @@ public class ExternalSimulatorExecutor {
 		this.done = false;
 	}
 
-	public void reset() {
+	public synchronized void reset() {
 		this.done = false;
 	}
 
@@ -72,7 +71,6 @@ public class ExternalSimulatorExecutor {
 				}
 
 				State state = trace.getCurrentState();
-
 				String enabledOperations = state
 						.getTransitions().stream()
 						.map(Transition::getName)
@@ -101,6 +99,7 @@ public class ExternalSimulatorExecutor {
 			} catch(Exception e){
 				e.printStackTrace();
 			}
+
 			setDone(done);
 			return new ExternalSimulationStep(operation, predicate, delta, done);
 		});

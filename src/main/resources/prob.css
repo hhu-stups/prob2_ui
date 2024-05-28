@@ -155,23 +155,27 @@
 
 .table-view .color-picker,
 .list-view .color-picker,
+.tree-view .color-picker,
 .tree-table-view .color-picker {
 	-fx-color-rect-width: 0.6em;
 	-fx-color-rect-height: 0.6em;
 }
 .table-view .color-picker > .arrow-button,
 .list-view .color-picker > .arrow-button,
+.tree-view .color-picker > .arrow-button,
 .tree-table-view .color-picker > .arrow-button {
 	-fx-padding: 0.02em 0.5em 0.02em 0em;
 }
 .table-view .color-picker > .label,
 .list-view .color-picker > .label,
+.tree-view .color-picker > .label,
 .tree-table-view .color-picker > .label {
 	-fx-padding: 0.02em 0.5em 0.02em 0.5em;
 	-fx-font-size: 0.95em;
 }
 .table-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
 .list-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
+.tree-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
 .tree-table-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect {
 	-fx-stroke: -prob-grey;
 }
@@ -245,17 +249,20 @@
 
 .table-view .combo-box,
 .list-view .combo-box,
+.tree-view .combo-box,
 .tree-table-view .combo-box {
 	-fx-pref-height: 0;
 }
 .table-view .combo-box > .list-cell,
 .list-view .combo-box > .list-cell,
+.tree-view .combo-box > .list-cell,
 .tree-table-view .combo-box > .list-cell {
 	-fx-font-size: 0.95em;
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
 }
 .table-view .combo-box-base > *.arrow-button,
 .list-view .combo-box-base > *.arrow-button,
+.tree-view .combo-box-base > *.arrow-button,
 .tree-table-view .combo-box-base > *.arrow-button {
 	-fx-padding: 0.02em 0.5em 0.02em 0.25em;
 }
@@ -278,37 +285,45 @@
 
 
 /************************************************************************************
- * ListView																		  *
+ * ListView/TreeView																*
  ************************************************************************************/
-.list-view {
+.list-view,
+.tree-view {
 	-fx-focus-color: transparent;
 	-fx-faint-focus-color: transparent;
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.2em 0.0 0.2em 0.0;
 }
-.list-cell {
+.list-cell,
+.tree-cell {
 	-fx-cell-size: 1.5em;
 	-fx-padding: 0em 1em 0.05em 1em;
 }
-.list-cell:odd {
+.list-cell:odd,
+.tree-cell:odd {
 	-fx-background-color: -prob-grey-odd;
 }
-.list-cell:selected {
+.list-cell:selected,
+.tree-cell:selected {
 	-fx-background-color: -prob-aqua;
 	-fx-text-fill: white;
 }
-.list-cell:selected:hover {
+.list-cell:selected:hover,
+.tree-cell:selected:hover {
 	-fx-background-color: -prob-grey;
 	-fx-text-fill: white;
 }
-.list-cell:hover {
+.list-cell:hover,
+.tree-cell:hover {
 	-fx-background-color: -prob-grey-20;
 	-fx-text-fill: black;
 }
-.list-cell:empty:hover {
+.list-cell:empty:hover,
+.tree-cell:empty:hover {
 	-fx-background-color: white;
 }
-.popup .list-view {
+.popup .list-view,
+.popup .tree-view {
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.02em 0.02em 0.02em 0.2em;
 }
@@ -438,22 +453,26 @@
 
 .table-view .spinner,
 .list-view .spinner,
+.tree-view .spinner,
 .tree-table-view .spinner {
 	-fx-pref-height: 0;
 }
 .table-view .spinner > .text-field,
 .list-view .spinner > .text-field,
+.tree-view .spinner > .text-field,
 .tree-table-view .spinner > .text-field {
 	-fx-font-size: 0.95em;
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
 }
 .table-view .spinner .increment-arrow-button .increment-arrow,
 .list-view .spinner .increment-arrow-button .increment-arrow,
+.tree-view .spinner .increment-arrow-button .increment-arrow,
 .tree-table-view .spinner .increment-arrow-button .increment-arrow {
 	-fx-padding: 0.05em 0.25em 0.05em 0.25em;
 }
 .table-view .decrement-arrow-button .decrement-arrow,
 .list-view .decrement-arrow-button .decrement-arrow,
+.tree-view .decrement-arrow-button .decrement-arrow,
 .tree-table-view .spinner .decrement-arrow-button .decrement-arrow {
 	-fx-padding: 0.05em 0.25em 0.05em 0.25em;
 }
@@ -683,6 +702,7 @@
 
 .table-view .text-field,
 .list-view .text-field,
+.tree-view .text-field,
 .tree-table-view .text-field {
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
 	-fx-font-size: 0.95em;
@@ -999,7 +1019,7 @@
 
 .checked-icon.interrupted,
 .checked-icon.timeout,
-.checked-icon.parse-error {
+.checked-icon.invalid-task {
 	-fx-text-fill: orange;
 }
 
@@ -1113,6 +1133,8 @@
 
 .simulation-item {
 	-fx-cell-size: 6.8em;
+  	-fx-border-width: 2px 0px 0px 0px;
+  	-fx-border-color: black;
 }
 .simulation-item .id {
 	-fx-font-family: ARIAL;

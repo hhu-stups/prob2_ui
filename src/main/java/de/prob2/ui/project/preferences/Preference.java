@@ -2,6 +2,7 @@ package de.prob2.ui.project.preferences;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,8 +26,8 @@ public class Preference {
 		@JsonProperty("name") final String name,
 		@JsonProperty("preferences") final Map<String, String> preferences
 	) {
-		this.name = new SimpleStringProperty(this, "name", name);
-		this.preferences = preferences;
+		this.name = new SimpleStringProperty(this, "name", Objects.requireNonNull(name, "name"));
+		this.preferences = Objects.requireNonNull(preferences, "preferences");
 	}
 	
 	public BooleanProperty changedProperty() {

@@ -17,7 +17,6 @@ import java.util.Map;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 20.12.17
  */
 public class ExecutionCell extends TreeTableCell<Object, Object> {
@@ -37,14 +36,14 @@ public class ExecutionCell extends TreeTableCell<Object, Object> {
 	protected void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
 		TreeItem<Object> treeItem = getTableRow().getTreeItem();
-		if (treeItem instanceof OperationItem) {
-			executable = ((OperationItem) treeItem).isExecutable();
+		if (treeItem instanceof OperationItem operationItem) {
+			executable = operationItem.isExecutable();
 		}
 
-		if (item instanceof RuleResult) {
-			configureForRule((RuleResult) item);
+		if (item instanceof RuleResult ruleResult) {
+			configureForRule(ruleResult);
 		} else if (item instanceof Map.Entry) {
-			configureForComputation((Map.Entry<String, ComputationStatus>)item);
+			configureForComputation((Map.Entry<String, ComputationStatus>) item);
 		} else {
 			setGraphic(null);
 		}

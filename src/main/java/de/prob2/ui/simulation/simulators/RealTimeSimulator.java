@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -47,8 +48,13 @@ public class RealTimeSimulator extends Simulator {
 		scheduler.startSimulationStep();
 		// Read trace and pass it through chooseOperation to avoid race condition
 		Trace trace = currentTrace.get();
-		Trace newTrace = simulationStep(trace);
-		currentTrace.set(newTrace);
+		try {
+			Trace newTrace = simulationStep(trace);
+			currentTrace.set(newTrace);
+		} catch (Exception e) {
+			scheduler.endSimulationStep();
+			throw e;
+		}
 		scheduler.endSimulationStep();
 	}
 

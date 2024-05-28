@@ -4,7 +4,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.FunctionOperation;
-import de.prob.model.brules.output.RuleValidationReport;
 import de.prob.model.brules.RulesChecker;
 import de.prob.model.brules.output.RulesDependencyGraph;
 import de.prob.model.brules.RulesModel;
@@ -28,7 +27,6 @@ import java.util.Set;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 20.12.17
  */
 @Singleton
@@ -58,7 +56,6 @@ public class RulesController {
 					LOGGER.debug("No rules model in new trace!");
 					rulesView.clear();
 					model.clear();
-					//plugin.restoreOperationsView(true);
 				} else if (oldTrace == null || !newTrace.getModel().equals(oldTrace.getModel())) {
 					// the model changed -> rebuild view
 					LOGGER.debug("New rules model in new trace!");
@@ -67,7 +64,6 @@ public class RulesController {
 					rulesChecker.init();
 					initialize(rulesModel);
 					model.update(rulesChecker.getCurrentTrace());
-					//plugin.removeOperationsView();
 				} else {
 					// model didn't change -> update view
 					LOGGER.debug("Update rules view to new trace!");
@@ -121,26 +117,26 @@ public class RulesController {
 		execute(new Task<>() {
 			@Override
 			protected Void call() {
-			rulesChecker = new RulesChecker(currentTrace.get());
-			rulesChecker.init();
-			int totalNrOfOperations = rulesModel.getRulesProject().getOperationsMap().values().
-				stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
-			// determine all operations that can be executed in this state
-			Set<AbstractOperation> executableOperations = rulesChecker.getExecutableOperations();
-			while (!executableOperations.isEmpty()) {
-				for (AbstractOperation op : executableOperations) {
-					rulesChecker.executeOperation(op);
-					nrExecutedOperations++;
-					Platform.runLater(() -> {
-						ProgressBar progressBar = rulesView.progressBar;
-						progressBar.setProgress((double) nrExecutedOperations / totalNrOfOperations);
-						rulesView.progressOperation.setText(op.getName());
-						rulesView.progressLabel.setText(" (" + nrExecutedOperations + "/" + totalNrOfOperations + ")");
-					});
+				rulesChecker = new RulesChecker(currentTrace.get());
+				rulesChecker.init();
+				int totalNrOfOperations = rulesModel.getRulesProject().getOperationsMap().values().
+					stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
+				// determine all operations that can be executed in this state
+				Set<AbstractOperation> executableOperations = rulesChecker.getExecutableOperations();
+				while (!executableOperations.isEmpty()) {
+					for (AbstractOperation op : executableOperations) {
+						rulesChecker.executeOperation(op);
+						nrExecutedOperations++;
+						Platform.runLater(() -> {
+							ProgressBar progressBar = rulesView.progressBar;
+							progressBar.setProgress((double) nrExecutedOperations / totalNrOfOperations);
+							rulesView.progressOperation.setText(op.getName());
+							rulesView.progressLabel.setText(" (" + nrExecutedOperations + "/" + totalNrOfOperations + ")");
+						});
+					}
+					executableOperations = rulesChecker.getExecutableOperations();
 				}
-				executableOperations = rulesChecker.getExecutableOperations();
-			}
-			return null;
+				return null;
 			}
 		}, null);
 	}
@@ -157,10 +153,10 @@ public class RulesController {
 		});
 		task.setOnFailed(event -> {
 			if (operation != null) {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.singleRule", operation).showAndWait();
+				stageManager.makeExceptionAlert(task.getException(), "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.singleRule", operation).showAndWait();
 				LOGGER.debug("Task for execution of rule " + operation + " failed or cancelled!");
 			} else {
-				stageManager.makeAlert(Alert.AlertType.ERROR, "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.allRules").showAndWait();
+				stageManager.makeExceptionAlert(task.getException(),"rulevalidation.execute.error.header", "rulevalidation.execute.error.content.allRules").showAndWait();
 				LOGGER.debug("Task for execution of all rules failed or cancelled!");
 			}
 			currentTrace.set(currentTrace.get());

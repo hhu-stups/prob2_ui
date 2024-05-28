@@ -33,6 +33,7 @@ import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -80,9 +81,10 @@ public class VisBView extends BorderPane {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
+	private final FileChooserManager fileChooserManager;
 	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
-	private final FileChooserManager fileChooserManager;
 
 	@FXML
 	private MenuBar visbMenuBar;
@@ -132,19 +134,28 @@ public class VisBView extends BorderPane {
 	 * @param currentProject ProB2-UI currentProject
 	 */
 	@Inject
-	public VisBView(final Injector injector, final StageManager stageManager, final CurrentProject currentProject,
-									final CurrentTrace currentTrace, final I18n i18n, final FileChooserManager fileChooserManager,
-									final Provider<DefaultPathDialog> defaultPathDialogProvider, final VisBController visBController) {
+	public VisBView(
+		Injector injector,
+		I18n i18n,
+		StageManager stageManager,
+		CurrentProject currentProject,
+		CurrentTrace currentTrace,
+		CliTaskExecutor cliExecutor,
+		FileChooserManager fileChooserManager,
+		Provider<DefaultPathDialog> defaultPathDialogProvider,
+		VisBController visBController
+	) {
 		super();
 		this.injector = injector;
 		this.i18n = i18n;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
 		this.fileChooserManager = fileChooserManager;
 		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.visBController = visBController;
-		this.stageManager.loadFXML(this, "visb_plugin_stage.fxml");
+		this.stageManager.loadFXML(this, "visb_view.fxml");
 	}
 
 	/**
@@ -208,17 +219,15 @@ public class VisBView extends BorderPane {
 			this.currentTrace.stateSpaceProperty().removeListener(stateSpaceListener);
 			visBController.setVisBPath(null);
 		});
-		//Load VisB file from machine, when window is opened and set listener on the current machine
 
-			this.currentProject.currentMachineProperty().addListener(machineListener);
-			this.visBController.visBVisualisationProperty().addListener(visBListener);
-			this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
+		// Load VisB file from machine, when window is opened and set listener on the current machine
+		this.currentProject.currentMachineProperty().addListener(machineListener);
+		this.visBController.visBVisualisationProperty().addListener(visBListener);
+		this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
 
+		machineListener.changed(null, null, currentProject.getCurrentMachine());
 
-			machineListener.changed(null, null, currentProject.getCurrentMachine());
-
-			stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
-
+		stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
@@ -249,7 +258,9 @@ public class VisBView extends BorderPane {
 		});
 
 		Platform.runLater(() -> {
-
+			// WebView can only be constructed on the JavaFX application thread,
+			// but VisBView.initialize generally runs on a background thread during UI startup,
+			// so this part needs to be explicitly moved to the JavaFX application thread.
 			this.webView = new WebView();
 			this.zoomingPane.getChildren().add(webView);
 			LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
@@ -306,17 +317,20 @@ public class VisBView extends BorderPane {
 		visBController.setVisBPath(null);
 		if(machine != null && stateSpace != null) {
 			final Path visBVisualisation = machine.getMachineProperties().getVisBVisualisation();
-			final Path visBPath;
 			if (visBVisualisation != null) {
+				final Path visBPath;
 				if (VisBController.NO_PATH.equals(visBVisualisation)) {
 					visBPath = VisBController.NO_PATH;
 				} else {
 					visBPath = currentProject.getLocation().resolve(visBVisualisation);
 				}
+				visBController.setVisBPath(visBPath);
 			} else {
-				visBPath = getPathFromDefinitions(stateSpace);
+				cliExecutor.execute(() -> {
+					Path visBPath = getPathFromDefinitions(stateSpace);
+					Platform.runLater(() -> visBController.setVisBPath(visBPath));
+				});
 			}
-			visBController.setVisBPath(visBPath);
 		}
 	}
 
@@ -395,27 +409,25 @@ public class VisBView extends BorderPane {
 	 * @param runnable the code to run once the {@link WebView} has finished loading
 	 */
 	private void runWhenLoaded(final Runnable runnable) {
-		if(webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)){
+		if (webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)) {
 			// execute code once page fully loaded
 			// https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
-			webView.getEngine().getLoadWorker().stateProperty().addListener(
-				//Use new constructor instead of lambda expression to access change listener with keyword this
-					new ChangeListener<>() {
-						@Override
-						public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
-							switch (newValue) {
-								case SUCCEEDED:
-								case FAILED:
-								case CANCELLED:
-									webView.getEngine().getLoadWorker().stateProperty().removeListener(this);
-							}
-							if (newValue != Worker.State.SUCCEEDED) {
-								return;
-							}
-							runnable.run();
-						}
+			// Use new constructor instead of lambda expression to access change listener with keyword this
+			webView.getEngine().getLoadWorker().stateProperty().addListener(new ChangeListener<>() {
+				@Override
+				public void changed(ObservableValue<? extends Worker.State> observable, Worker.State oldValue, Worker.State newValue) {
+					switch (newValue) {
+						case SUCCEEDED:
+						case FAILED:
+						case CANCELLED:
+							webView.getEngine().getLoadWorker().stateProperty().removeListener(this);
 					}
-			);
+					if (newValue != Worker.State.SUCCEEDED) {
+						return;
+					}
+					runnable.run();
+				}
+			});
 		} else {
 			runnable.run();
 		}

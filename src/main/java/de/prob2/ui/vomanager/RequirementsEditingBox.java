@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.voparser.VOException;
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -87,8 +87,6 @@ public class RequirementsEditingBox extends VBox {
 
 	private final CurrentProject currentProject;
 
-	private final VOErrorHandler voErrorHandler;
-
 	private VOManagerStage voManagerStage;
 
 	private final ObservableList<String> linkedMachineNames;
@@ -96,11 +94,10 @@ public class RequirementsEditingBox extends VBox {
 	private final ObjectProperty<Requirement> oldRequirement;
 
 	@Inject
-	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject, final VOErrorHandler voErrorHandler) {
+	public RequirementsEditingBox(final StageManager stageManager, final CurrentProject currentProject) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
-		this.voErrorHandler = voErrorHandler;
 
 		this.linkedMachineNames = FXCollections.observableArrayList();
 		this.oldRequirement = new SimpleObjectProperty<>(this, "oldRequirement", null);
@@ -164,7 +161,7 @@ public class RequirementsEditingBox extends VBox {
 					if(machine == null){
 						return;
 					}
-					final List<String> vtIds = new ArrayList<>(machine.getMachineProperties().getValidationTasks().keySet());
+					final List<String> vtIds = new ArrayList<>(machine.getMachineProperties().getValidationTaskIds());
 					vtIds.sort(VT_ID_COMPARATOR);
 					cell.getItems().setAll(vtIds);
 				}
@@ -189,8 +186,10 @@ public class RequirementsEditingBox extends VBox {
 		final Machine machine = currentProject.get().getMachine(vo.getMachine());
 		try {
 			vo.parse(machine);
-		} catch (VOException exc) {
-			voErrorHandler.handleError(this.getScene().getWindow(), exc);
+		} catch (VOParseException exc) {
+			Alert alert = stageManager.makeExceptionAlert(exc, "vomanager.error.parsing");
+			alert.initOwner(this.getScene().getWindow());
+			alert.show();
 		}
 	}
 
@@ -256,7 +255,12 @@ public class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private void applyRequirement(){
-		if (tfName.getText().trim().isEmpty() || taRequirement.getText().trim().isEmpty()) {
+		if (
+			tfName.getText().trim().isEmpty()
+			|| cbRequirementLinkMachineChoice.getValue() == null
+			|| cbRequirementChoice.getValue() == null
+			|| taRequirement.getText().trim().isEmpty()
+		) {
 			warnNotValid();
 			return;
 		}

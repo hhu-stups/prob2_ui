@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
@@ -38,9 +37,7 @@ import de.prob2.ui.verifications.ExecutionContext;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -84,8 +81,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 			final MenuItem showStatusItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showStatus"));
 			showStatusItem.setOnAction(event -> {
-				ReplayedTraceStatusAlert alert = new ReplayedTraceStatusAlert(injector, this.getItem());
-				alert.show();
+				ReplayedTraceStatusAlert alert = injector.getInstance(ReplayedTraceStatusAlert.class);
+				alert.initReplayTrace(this.getItem());
+				alert.handleAcceptDiscard();
 			});
 
 			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
@@ -139,21 +137,15 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
+	protected ObservableList<ReplayTrace> getItemsProperty(Machine machine) {
+		return machine.getMachineProperties().getTraces();
+	}
+
+	@Override
 	@FXML
 	public void initialize() {
 		super.initialize();
 		helpButton.setHelpContent("animation", "Trace");
-
-		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
-			items.unbind();
-			if (to != null) {
-				items.bind(to.getMachineProperties().tracesProperty());
-			} else {
-				items.set(FXCollections.observableArrayList());
-			}
-		};
-		currentProject.currentMachineProperty().addListener(machineChangeListener);
-		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
 		statusProgressColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
@@ -173,23 +165,22 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 		stepsColumn.setCellValueFactory(features -> {
 			ReplayTrace trace = features.getValue();
-			TraceJsonFile traceFile = trace.getLoadedTrace();
-			if (traceFile == null) {
-				try {
-					traceFile = trace.load();
-				} catch (IOException ignore) {
-					// ignore errors, so the user does not get bombarded with errors on startup
+			return Bindings.createStringBinding(() -> {
+				TraceJsonFile traceFile = trace.getLoadedTrace();
+				if (traceFile == null) {
+					try {
+						traceFile = trace.load();
+					} catch (IOException ignore) {
+						// ignore errors, so the user does not get bombarded with errors on startup
+					}
 				}
-			}
 
-			String steps;
-			if (traceFile != null) {
-				steps = String.valueOf(traceFile.getTransitionList().size());
-			} else {
-				steps = i18n.translate("common.notAvailable");
-			}
-
-			return new SimpleStringProperty(steps);
+				if (traceFile != null) {
+					return String.valueOf(traceFile.getTransitionList().size());
+				} else {
+					return i18n.translate("common.notAvailable");
+				}
+			}, trace.loadedTraceProperty());
 		});
 
 		itemsTable.setRowFactory(table -> new Row());
@@ -204,11 +195,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
-	}
-
-	@Override
-	protected String configurationForItem(final ReplayTrace item) {
-		return item.getName();
 	}
 
 	@Override
@@ -275,8 +261,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (directory != null) {
 			try (Stream<Path> walk = Files.walk(directory)) {
 				paths = walk.filter(Files::isRegularFile)
-					        .filter(p -> MoreFiles.getFileExtension(p).equals(TraceFileHandler.TRACE_FILE_EXTENSION))
-					        .collect(Collectors.toList());
+						        .filter(p -> MoreFiles.getFileExtension(p).equals(TraceFileHandler.TRACE_FILE_EXTENSION))
+						        .toList();
 			} catch (IOException e) {
 				final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.alerts.traceDirectoryError.header", "animation.tracereplay.alerts.traceDirectoryError.error");
 				alert.initOwner(this.getScene().getWindow());
@@ -291,6 +277,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@Override
 	protected void removeItem(ReplayTrace item) {
 		super.removeItem(item);
-		traceFileHandler.deleteTraceFile(item);
+		this.traceFileHandler.deleteTraceFile(item);
 	}
 }

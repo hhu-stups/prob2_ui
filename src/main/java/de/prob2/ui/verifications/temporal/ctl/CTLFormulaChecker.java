@@ -26,7 +26,6 @@ import de.prob.statespace.StateSpace;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
-import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,7 +61,7 @@ public final class CTLFormulaChecker {
 		return CTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser));
 	}
 	
-	private static void handleFormulaResult(TemporalFormulaItem item, IModelCheckingResult result) {
+	private static void handleFormulaResult(CTLFormulaItem item, IModelCheckingResult result) {
 		assert !(result instanceof CTLError);
 
 		if (result instanceof CTLCounterExample) {
@@ -90,16 +89,16 @@ public final class CTLFormulaChecker {
 		}
 	}
 	
-	private static void handleFormulaParseErrors(TemporalFormulaItem item, List<ErrorItem> errorMarkers) {
+	private static void handleFormulaParseErrors(CTLFormulaItem item, List<ErrorItem> errorMarkers) {
 		item.setCounterExample(null);
 		String errorMessage = errorMarkers.stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
 		if(errorMessage.isEmpty()) {
 			errorMessage = "Parse Error in typed formula";
 		}
-		item.setResultItem(new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "common.result.message", errorMessage));
+		item.setResultItem(new TemporalCheckingResultItem(Checked.INVALID_TASK, errorMarkers, "common.result.message", errorMessage));
 	}
 	
-	public static void checkFormula(TemporalFormulaItem item, StateSpace stateSpace) {
+	public static void checkFormula(CTLFormulaItem item, StateSpace stateSpace) {
 		try {
 			final CTL formula = parseFormula(item.getCode(), stateSpace.getModel());
 			final CTLChecker checker = new CTLChecker(stateSpace, formula, null, item.getStateLimit());

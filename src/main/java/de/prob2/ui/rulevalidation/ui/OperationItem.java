@@ -4,6 +4,7 @@ import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.prob.model.brules.ComputationStatus;
 import de.prob.model.brules.RuleResult;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.rulevalidation.RulesDataModel;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TreeItem;
@@ -15,17 +16,19 @@ import java.util.Map;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 16.12.17
  */
 class OperationItem extends TreeItem<Object> {
+
+	private final I18n i18n;
 
 	private final RulesDataModel model;
 	private final String operation;
 	private boolean executable = true;
 
-	OperationItem(AbstractOperation operation, SimpleObjectProperty<Object> resultProperty, RulesDataModel model) {
+	OperationItem(I18n i18n, AbstractOperation operation, SimpleObjectProperty<Object> resultProperty, RulesDataModel model) {
 		super(operation);
+		this.i18n = i18n;
 		this.operation = operation.getName();
 		this.model = model;
 		resultProperty.addListener((observable, oldValue, newValue) -> {
@@ -33,18 +36,14 @@ class OperationItem extends TreeItem<Object> {
 			if (newValue instanceof RuleResult ruleResult) {
 				executable = true;
 				switch (ruleResult.getRuleState()) {
-					case FAIL:
-					case NOT_CHECKED:
-						createRuleChildren(ruleResult);
-						break;
-					case DISABLED:
-					case SUCCESS:
+					case FAIL, NOT_CHECKED -> createRuleChildren(ruleResult);
+					case DISABLED, SUCCESS -> {
 						OperationItem.this.getChildren().clear();
 						executable = false;
-						break;
+					}
 				}
-			} else if (newValue instanceof Map.Entry<?, ?> && operation instanceof ComputationOperation) {
-				createComputationChildren((Map.Entry<?, ?>)newValue, (ComputationOperation) operation);
+			} else if (newValue instanceof Map.Entry<?, ?> entry && operation instanceof ComputationOperation computationOperation) {
+				createComputationChildren(entry, computationOperation);
 			}
 		});
 	}
@@ -56,7 +55,7 @@ class OperationItem extends TreeItem<Object> {
 			List<String> notCheckedDependencies = model.getNotCheckedDependenciesOfComputation(op.getName());
 			// create children for unchecked dependencies
 			if (!notCheckedDependencies.isEmpty()) {
-				TreeItem<Object> notCheckedItem = new TreeItem<>("UNCHECKED DEPENDENCIES");
+				TreeItem<Object> notCheckedItem = new TreeItem<>(i18n.translate("rulevalidation.table.dependencies.unchecked"));
 				Collections.sort(notCheckedDependencies);
 				for (String notChecked : notCheckedDependencies) {
 					notCheckedItem.getChildren().add(new TreeItem<>(notChecked));
@@ -65,7 +64,7 @@ class OperationItem extends TreeItem<Object> {
 			}
 			// create children for failed dependencies
 			if (!failedDependencies.isEmpty()) {
-				TreeItem<Object> failedItem = new TreeItem<>("FAILED DEPENDENCIES");
+				TreeItem<Object> failedItem = new TreeItem<>(i18n.translate("rulevalidation.table.dependencies.failed"));
 				Collections.sort(failedDependencies);
 				for (String failed : failedDependencies) {
 					failedItem.getChildren().add(new TreeItem<>(failed));
@@ -83,18 +82,14 @@ class OperationItem extends TreeItem<Object> {
 		switch(result.getRuleState()) {
 			case FAIL:
 				// create child items to show why the rule failed
-				TreeItem<Object> violationItem = new TreeItem<>("VIOLATIONS");
 				result.getCounterExamples().sort(Comparator.comparingInt(RuleResult.CounterExample::getErrorType));
-				for (RuleResult.CounterExample example : result.getCounterExamples()) {
-					violationItem.getChildren().add(new TreeItem<>(example));
-				}
-				this.getChildren().add(violationItem);
+				addCounterExamples(result.getCounterExamples());
 				executable = false;
 				break;
 			case NOT_CHECKED:
 				// create child items for unchecked dependencies
 				if (!result.getNotCheckedDependencies().isEmpty()) {
-					TreeItem<Object> notCheckedItem = new TreeItem<>("UNCHECKED DEPENDENCIES");
+					TreeItem<Object> notCheckedItem = new TreeItem<>(i18n.translate("rulevalidation.table.dependencies.unchecked"));
 					Collections.sort(result.getNotCheckedDependencies());
 					for (String notChecked : result.getNotCheckedDependencies()) {
 						notCheckedItem.getChildren().add(new TreeItem<>(notChecked));
@@ -104,7 +99,7 @@ class OperationItem extends TreeItem<Object> {
 
 				// create child items for failed dependencies
 				if (!result.getFailedDependencies().isEmpty()) {
-					TreeItem<Object> failedItem = new TreeItem<>("FAILED DEPENDENCIES");
+					TreeItem<Object> failedItem = new TreeItem<>(i18n.translate("rulevalidation.table.dependencies.failed"));
 					Collections.sort(result.getFailedDependencies());
 					for (String failed : result.getFailedDependencies()) {
 						failedItem.getChildren().add(new TreeItem<>(failed));
@@ -120,9 +115,30 @@ class OperationItem extends TreeItem<Object> {
 		}
 	}
 
+	private void addCounterExamples(List<RuleResult.CounterExample> counterExamples) {
+		TreeItem<Object> violationItem = new TreeItem<>(i18n.translate("rulevalidation.table.violations"));
+		int size = counterExamples.size();
+		if (size > 10) {
+			TreeItem<Object> collapsedExamples = new TreeItem<>(i18n.translate("rulevalidation.table.violations.showAll") + " (" + size + ")");
+			// display the first ten violations and collapse the others
+			for (int i = 0; i < 10; i++) {
+				violationItem.getChildren().add(new TreeItem<>(counterExamples.get(i)));
+			}
+			for (int i = 10; i < size; i++) {
+				collapsedExamples.getChildren().add(new TreeItem<>(counterExamples.get(i)));
+			}
+			violationItem.getChildren().add(collapsedExamples);
+		} else {
+			for (RuleResult.CounterExample example : counterExamples) {
+				violationItem.getChildren().add(new TreeItem<>(example));
+			}
+		}
+		this.getChildren().add(violationItem);
+	}
+
 	private void addDisabledDependencies(List<String> disabledDependencies) {
 		if (!disabledDependencies.isEmpty()) {
-			TreeItem<Object> disabledItem = new TreeItem<>("DISABLED DEPENDENCIES");
+			TreeItem<Object> disabledItem = new TreeItem<>(i18n.translate("rulevalidation.table.dependencies.disabled"));
 			for (String disabled : disabledDependencies) {
 				disabledItem.getChildren().add(new TreeItem<>(disabled));
 			}

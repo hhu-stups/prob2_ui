@@ -36,7 +36,7 @@ public final class BackgroundUpdater implements Executor {
 		@Override
 		public void onFailure(final Throwable t) {
 			if (t instanceof CancellationException) {
-				LOGGER.debug("Background update thread cancelled (this is not an error)", t);
+				LOGGER.trace("Background update thread cancelled (this is not an error)", t);
 			} else {
 				final Thread thread = Thread.currentThread();
 				thread.getUncaughtExceptionHandler().uncaughtException(thread, t);
@@ -68,14 +68,19 @@ public final class BackgroundUpdater implements Executor {
 
 	@Override
 	public void execute(final Runnable command) {
+		this.execute(command, false);
+	}
+
+	public void execute(final Runnable command, final boolean mayInterruptIfRunning) {
 		synchronized (this.lock) {
-			this.cancel(false);
+			this.cancel(mayInterruptIfRunning);
+			BooleanProperty running = this.running; // reduce lambda capturing range
 			this.lastFuture = this.executor.submit(() -> {
 				try {
-					Platform.runLater(() -> this.running.set(true));
+					Platform.runLater(() -> running.set(true));
 					command.run();
 				} finally {
-					Platform.runLater(() -> this.running.set(false));
+					Platform.runLater(() -> running.set(false));
 				}
 			}, null);
 			Futures.addCallback(this.lastFuture, THROW_EXCEPTIONS_CALLBACK, MoreExecutors.directExecutor());

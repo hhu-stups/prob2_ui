@@ -81,7 +81,10 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	private void checkMinimum() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
 		double sum;
-		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.SUM || checkingType == SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MINIMUM || checkingType == SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MAXIMUM || checkingType == SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS) {
 			sum = simulationPropertyChecker.getEstimatedValues().stream()
 					.reduce(0.0, Double::sum);
 		} else {
@@ -103,7 +106,10 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	private void checkMaximum() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
 		double sum;
-		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.SUM || checkingType == SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MINIMUM || checkingType == SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MAXIMUM || checkingType == SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS) {
 			sum = simulationPropertyChecker.getEstimatedValues().stream()
 					.reduce(0.0, Double::sum);
 		} else {
@@ -125,7 +131,10 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	private void checkMean() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
 		double sum;
-		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.SUM || checkingType == SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MINIMUM || checkingType == SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MAXIMUM || checkingType == SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS) {
 			sum = simulationPropertyChecker.getEstimatedValues().stream()
 					.reduce(0.0, Double::sum);
 		} else {

@@ -3,12 +3,12 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import de.prob2.ui.dynamic.EditFormulaStage?>
+<?import de.prob2.ui.dynamic.EditDynamicFormulaStage?>
 
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import javafx.scene.Scene?>
-<fx:root type="EditFormulaStage" title=""
-		 xmlns:fx="http://javafx.com/fxml/1" resizable="true">
+<fx:root type="EditDynamicFormulaStage" title=""
+         xmlns:fx="http://javafx.com/fxml/1" resizable="true">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<VBox styleClass="dialog">

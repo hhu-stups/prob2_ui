@@ -10,6 +10,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 import de.prob.json.HasMetadata;
 import de.prob.json.JsonMetadata;
@@ -20,7 +21,7 @@ import de.prob2.ui.vomanager.Requirement;
 
 public class Project implements HasMetadata {
 	public static final String FILE_TYPE = "Project";
-	public static final int CURRENT_FORMAT_VERSION = 39;
+	public static final int CURRENT_FORMAT_VERSION = 52;
 	
 	private final String name;
 	private final String description;
@@ -31,23 +32,34 @@ public class Project implements HasMetadata {
 	@JsonIgnore
 	private Path location;
 
-	@JsonCreator
 	public Project(
-		@JsonProperty("name") final String name,
-		@JsonProperty("description") final String description,
-		@JsonProperty("machines") final List<Machine> machines,
-		@JsonProperty("requirements") final List<Requirement> requirements,
-		@JsonProperty("preferences") final List<Preference> preferences,
-		@JsonProperty("metadata") final JsonMetadata metadata,
-		@JsonProperty("location") final Path location
+		String name,
+		String description,
+		List<Machine> machines,
+		List<Requirement> requirements,
+		List<Preference> preferences,
+		JsonMetadata metadata,
+		Path location
 	) {
-		this.name = name;
-		this.description = description;
+		this.name = Objects.requireNonNull(name, "name");
+		this.description = Objects.requireNonNull(description, "description");
 		this.machines = new ArrayList<>(machines);
 		this.requirements = new ArrayList<>(requirements);
 		this.preferences = new ArrayList<>(preferences);
 		this.metadata = metadata;
 		this.location = location;
+	}
+
+	@JsonCreator
+	public Project(
+		@JsonProperty("name") String name,
+		@JsonProperty("description") String description,
+		@JsonProperty("machines") List<Machine> machines,
+		@JsonProperty("requirements") List<Requirement> requirements,
+		@JsonProperty("preferences") List<Preference> preferences,
+		@JsonProperty("metadata") JsonMetadata metadata
+	) {
+		this(name, description, machines, requirements, preferences, metadata, null);
 	}
 	
 	public static JsonMetadataBuilder metadataBuilder() {
@@ -135,7 +147,7 @@ public class Project implements HasMetadata {
 	
 	public void resetChanged() {
 		for (Machine machine : this.getMachines()) {
-			machine.changedProperty().set(false);
+			machine.resetChanged();
 		}
 		for (Preference pref : this.getPreferences()) {
 			pref.changedProperty().set(false);
@@ -163,5 +175,13 @@ public class Project implements HasMetadata {
 	@Override
 	public int hashCode() {
 		 return Objects.hash(name, description, machines, requirements, preferences, metadata, location);
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			       .add("name", this.getName())
+			       .add("location", this.getLocation())
+			       .toString();
 	}
 }

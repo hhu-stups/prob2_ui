@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.configuration;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -12,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 	"execute",
 	// For all other properties, the default order (i. e. field order in class) is used.
 })
-public class ActivationOperationConfiguration extends ActivationConfiguration {
+public class ActivationOperationConfiguration extends DiagramConfiguration {
 
 	public enum ActivationKind {
 		SINGLE("single"),
@@ -33,27 +34,27 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 
 	}
 
-	private final String execute;
+	private String execute;
 
-	private final String after;
+	private String after;
 
-	private final int priority;
+	private int priority;
 
-	private final String additionalGuards;
+	private String additionalGuards;
 
-	private final ActivationKind activationKind;
+	private ActivationKind activationKind;
 
-	private final Map<String, String> fixedVariables;
+	private Map<String, String> fixedVariables;
 
-	private final Object probabilisticVariables;
+	private Object probabilisticVariables;
 
-	private final List<String> activating;
+	private List<String> activating;
 
-	private final boolean activatingOnlyWhenExecuted;
+	private boolean activatingOnlyWhenExecuted;
 
-	private final Map<String, String> updating;
+	private Map<String, String> updating;
 
-	private final String withPredicate;
+	private String withPredicate;
 
 	public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
 			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
@@ -77,44 +78,108 @@ public class ActivationOperationConfiguration extends ActivationConfiguration {
 		return execute;
 	}
 
+	public void setOpName(String execute) {
+		this.execute = execute;
+	}
+
 	public String getAfter() {
 		return after;
+	}
+
+	public void setAfter(String after) {
+		this.after = after;
 	}
 
 	public int getPriority() {
 		return priority;
 	}
 
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+
 	public String getAdditionalGuards() {
 		return additionalGuards;
+	}
+
+	public void setAdditionalGuards(String additionalGuards) {
+		this.additionalGuards = additionalGuards;
+	}
+
+	@JsonIgnore
+	public String getAdditionalGuardsAsString() {
+		return additionalGuards == null ? "" : additionalGuards;
 	}
 
 	public ActivationKind getActivationKind() {
 		return activationKind;
 	}
 
+	public void setActivationKind(ActivationKind activationKind) {
+		this.activationKind = activationKind;
+	}
+
 	public Map<String, String> getFixedVariables() {
 		return fixedVariables;
+	}
+
+	public void setFixedVariables(Map<String, String> fixedVariables) {
+		this.fixedVariables = fixedVariables;
+	}
+
+	@JsonIgnore
+	public String getFixedVariablesAsString() {
+		return fixedVariables == null ? "" : fixedVariables.toString();
 	}
 
 	public Object getProbabilisticVariables() {
 		return probabilisticVariables;
 	}
 
+	public void setProbabilisticVariables(Object probabilisticVariables) {
+		this.probabilisticVariables = probabilisticVariables;
+	}
+
+	@JsonIgnore
+	public String getProbabilisticVariablesAsString() {
+		return probabilisticVariables == null ? "" : probabilisticVariables.toString();
+	}
+
 	public List<String> getActivating() {
 		return activating;
+	}
+
+	public void setActivating(List<String> activating) {
+		this.activating = activating;
+	}
+
+	@JsonIgnore
+	public String getActivatingAsString() {
+		return activating == null ? "" : activating.toString().substring(1, activating.toString().length() - 1);
 	}
 
 	public boolean isActivatingOnlyWhenExecuted() {
 		return activatingOnlyWhenExecuted;
 	}
 
+	public void setActivatingOnlyWhenExecuted(boolean activatingOnlyWhenExecuted) {
+		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted;
+	}
+
 	public Map<String, String> getUpdating() {
 		return updating;
 	}
 
+	public void setUpdating(Map<String, String> updating) {
+		this.updating = updating;
+	}
+
 	public String getWithPredicate() {
 		return withPredicate;
+	}
+
+	public void setWithPredicate(String withPredicate) {
+		this.withPredicate = withPredicate;
 	}
 
 	@Override

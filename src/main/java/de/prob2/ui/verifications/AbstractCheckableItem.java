@@ -1,7 +1,8 @@
 package de.prob2.ui.verifications;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSetter;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -15,50 +16,42 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	final ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
 	@JsonIgnore
 	final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
-	
+
 	protected AbstractCheckableItem() {
 		this.selected = new SimpleBooleanProperty(true);
-		
-		this.initListeners();
-	}
-	
-	private void initListeners() {
+
 		this.resultItemProperty().addListener((o, from, to) -> this.checked.set(to == null ? Checked.NOT_CHECKED : to.getChecked()));
 	}
 
 	@Override
-	public void reset() {
-		this.setResultItem(null);
-	}
-	
-	@Override
+	@JsonSetter("selected")
 	public void setSelected(boolean selected) {
 		this.selected.set(selected);
 	}
-	
-	@JsonProperty("selected")
+
 	@Override
+	@JsonGetter("selected")
 	public boolean selected() {
-		return selected.get();
+		return this.selected.get();
 	}
-	
+
 	@Override
 	public BooleanProperty selectedProperty() {
 		return selected;
 	}
-	
+
 	public void setResultItem(CheckingResultItem resultItem) {
 		this.resultItem.set(resultItem);
 	}
-	
+
 	public CheckingResultItem getResultItem() {
 		return resultItem.get();
 	}
-	
+
 	public ObjectProperty<CheckingResultItem> resultItemProperty() {
 		return resultItem;
 	}
-	
+
 	@Override
 	public ReadOnlyObjectProperty<Checked> checkedProperty() {
 		return this.checked;
@@ -67,5 +60,10 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	@Override
 	public Checked getChecked() {
 		return this.checkedProperty().get();
+	}
+
+	@Override
+	public void reset() {
+		this.setResultItem(null);
 	}
 }

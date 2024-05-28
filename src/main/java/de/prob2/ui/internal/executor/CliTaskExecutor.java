@@ -1,5 +1,6 @@
 package de.prob2.ui.internal.executor;
 
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Future;
@@ -12,8 +13,11 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StopActions;
 
+import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SetProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleSetProperty;
 import javafx.collections.FXCollections;
 
@@ -36,7 +40,8 @@ import javafx.collections.FXCollections;
  */
 @Singleton
 public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
-	private final SetProperty<Future<?>> currentTasks;
+	private final Set<Future<?>> currentTasks;
+	private final BooleanProperty running;
 
 	@Inject
 	private CliTaskExecutor(final DisablePropertyController disablePropertyController, final StopActions stopActions) {
@@ -46,7 +51,8 @@ public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 				r -> new Thread(r, "probcli command executor")
 		);
 
-		this.currentTasks = new SimpleSetProperty<>(this, "currentTasks", FXCollections.observableSet(new CopyOnWriteArraySet<>()));
+		this.currentTasks = new CopyOnWriteArraySet<>();
+		this.running = new SimpleBooleanProperty(this, "running", false);
 
 		disablePropertyController.addDisableExpression(this.runningProperty());
 		stopActions.add(this::shutdownNow);
@@ -55,9 +61,18 @@ public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 	@Override
 	protected <T> CompletableFutureTask<T> newTaskFor(final Callable<T> callable) {
 		final CompletableFutureTask<T> task = super.newTaskFor(callable);
-		task.whenComplete((r, t) -> this.currentTasks.remove(task));
+		task.whenComplete((r, t) -> {
+			this.currentTasks.remove(task);
+			this.updateRunning();
+		});
 		this.currentTasks.add(task);
+		this.updateRunning();
 		return task;
+	}
+
+	private void updateRunning() {
+		// Update the running property on the UI thread so that it's safe to use in bindings for UI objects.
+		Platform.runLater(() -> this.running.set(!this.currentTasks.isEmpty()));
 	}
 
 	/**
@@ -67,7 +82,7 @@ public final class CliTaskExecutor extends CompletableThreadPoolExecutor {
 	 * @return expression indicating whether any tasks are currently running
 	 */
 	public BooleanExpression runningProperty() {
-		return this.currentTasks.emptyProperty().not();
+		return this.running;
 	}
 
 	/**

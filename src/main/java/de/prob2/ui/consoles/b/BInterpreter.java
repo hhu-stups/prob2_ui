@@ -1,6 +1,6 @@
 package de.prob2.ui.consoles.b;
 
-import java.util.Collection;
+import java.util.List;
 
 import com.google.inject.Inject;
 
@@ -96,7 +96,7 @@ public class BInterpreter implements Executable {
 		return new ConsoleExecResult("", res.toString(), res instanceof EvalResult ? ConsoleExecResultType.PASSED : ConsoleExecResultType.ERROR);
 	}
 
-	public Collection<? extends BCCItem> getSuggestions(String text) {
+	public List<? extends BCCItem> getSuggestions(String text) {
 		return BCodeCompletion.doCompletion(this.currentTrace.getStateSpace(), text, false);
 	}
 }

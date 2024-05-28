@@ -39,8 +39,8 @@ public final class OrValidationExpression implements IValidationExpression {
 		final Checked leftRes = this.getLeft().getChecked();
 		// Short-circuiting: skip calculating right-hand result
 		// if the left-hand result is enough to determine the overall result.
-		if (leftRes == Checked.PARSE_ERROR) {
-			return Checked.PARSE_ERROR;
+		if (leftRes == Checked.INVALID_TASK) {
+			return Checked.INVALID_TASK;
 		} else if (leftRes == Checked.SUCCESS) {
 			return Checked.SUCCESS;
 		}

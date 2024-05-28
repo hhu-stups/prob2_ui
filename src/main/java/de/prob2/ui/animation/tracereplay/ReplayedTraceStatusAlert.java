@@ -1,15 +1,17 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.io.IOException;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.inject.Injector;
+import com.google.inject.Inject;
 
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.ReplayedTrace;
@@ -21,10 +23,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.error.ErrorTableView;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
-import de.prob2.ui.internal.executor.CompletableExecutorService;
-import de.prob2.ui.internal.executor.CompletableThreadPoolExecutor;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -36,38 +35,39 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
-import javafx.scene.layout.Region;
+import javafx.scene.control.Label;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 
 public class ReplayedTraceStatusAlert extends Alert {
+	private static final Logger LOGGER = LoggerFactory.getLogger(ReplayedTraceStatusAlert.class);
 
-	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
 	private final TraceFileHandler traceFileHandler;
 	private final CliTaskExecutor cliExecutor;
 	private final I18n i18n;
-	private final CompletableExecutorService executor;
-	private final ReplayTrace replayTrace;
+
+	private ReplayTrace replayTrace;
 
 	private ButtonType accept;
-	private ButtonType discard;
 
 	@FXML
 	private ReplayedTraceTable traceTable;
 	@FXML
 	private ErrorTableView errorTable;
+	@FXML
+	private Label keepOrDiscardQuestion;
 
-	public ReplayedTraceStatusAlert(Injector injector, ReplayTrace replayTrace) {
+	@Inject
+	public ReplayedTraceStatusAlert(StageManager stageManager, CurrentTrace currentTrace, TraceFileHandler traceFileHandler, CliTaskExecutor cliExecutor, I18n i18n) {
 		super(AlertType.NONE);
-		this.stageManager = injector.getInstance(StageManager.class);
-		this.currentTrace = injector.getInstance(CurrentTrace.class);
-		this.traceFileHandler = injector.getInstance(TraceFileHandler.class);
-		this.i18n = injector.getInstance(I18n.class);
-		this.cliExecutor = injector.getInstance(CliTaskExecutor.class);
-		this.executor = CompletableThreadPoolExecutor.newSingleThreadedExecutor(r -> new Thread(r, "Trace replay status thread"));
-		injector.getInstance(StopActions.class).add(this.executor::shutdownNow);
-		this.replayTrace = Objects.requireNonNull(replayTrace, "replayTrace");
+		this.currentTrace = currentTrace;
+		this.traceFileHandler = traceFileHandler;
+		this.cliExecutor = cliExecutor;
+		this.i18n = i18n;
 
 		stageManager.loadFXML(this, "trace_replay_status_alert.fxml");
 	}
@@ -79,47 +79,66 @@ public class ReplayedTraceStatusAlert extends Alert {
 	@FXML
 	private void initialize() {
 		this.accept = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.accept"), ButtonBar.ButtonData.OK_DONE);
-		this.discard = new ButtonType(this.i18n.translate("animation.tracereplay.replayedStatus.button.discard"), ButtonBar.ButtonData.CANCEL_CLOSE);
-
-		stageManager.register(this);
-
-		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
-		this.getButtonTypes().setAll(ButtonType.OK);
-
-		this.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 
 		this.errorTable.dontSyncWithEditor();
 		this.errorTable.visibleProperty().bind(Bindings.createBooleanBinding(() -> !this.errorTable.getErrorItems().isEmpty(), this.errorTable.getErrorItems()));
 		this.errorTable.managedProperty().bind(this.errorTable.visibleProperty());
+	}
+
+	private void update() {
+		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
 
 		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
 		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
 
 		if (replayedTrace != null) {
-			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithReplayStatus", replayedTrace.getReplayStatus()));
+			String statusOfReplayedTrace = i18n.translate(
+					enumNameAdapter("animation.tracereplay.replayedStatus.replayStatus"),
+					replayedTrace.getReplayStatus()
+			);
+			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithReplayStatus", statusOfReplayedTrace));
 			this.errorTable.getErrorItems().setAll(replayedTrace.getErrors());
+			this.keepOrDiscardQuestion.setText(i18n.translate("animation.tracereplay.replayedStatus.button.question", statusOfReplayedTrace));
+			this.getButtonTypes().setAll(this.accept, ButtonType.CANCEL);
 		} else {
 			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithoutReplayStatus"));
 			this.errorTable.getErrorItems().clear();
+			this.keepOrDiscardQuestion.setVisible(false);
+			this.getButtonTypes().setAll(ButtonType.OK);
 		}
 
 		if (replayedTrace == null || traceFromReplayed == null) {
 			this.traceTable.disableReplayedTransitionColumns();
 		}
 
-		executor.submit(this::buildRowsAsync).whenComplete((items, exc) -> {
-			if (exc != null) {
+		Thread thread = new Thread(() -> {
+			ObservableList<ReplayedTraceRow> items;
+			try {
+				items = this.buildRowsAsync();
+			} catch (InterruptedException exc) {
+				LOGGER.debug("Trace replay status thread was interrupted (this is not an error)", exc);
+				return;
+			} catch (ExecutionException | IOException exc) {
+				LOGGER.error("Exception while populating trace replay status table", exc);
 				Platform.runLater(() -> {
 					this.close();
 					traceFileHandler.showLoadError(replayTrace, exc);
 				});
-			} else if (items != null) {
-				Platform.runLater(() -> this.traceTable.setItems(items));
+				return;
 			}
-		});
+			Platform.runLater(() -> this.traceTable.setItems(items));
+		}, "Trace replay status thread");
+		// Don't let this thread keep the JVM alive if for some reason it's still running when the UI exits.
+		thread.setDaemon(true);
+		thread.start();
 	}
 
-	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws Exception {
+	public void initReplayTrace(ReplayTrace replayTrace) {
+		this.replayTrace = replayTrace;
+		this.update();
+	}
+
+	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws ExecutionException, InterruptedException, IOException {
 		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
 		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
 
@@ -179,16 +198,16 @@ public class ReplayedTraceStatusAlert extends Alert {
 			}
 
 			String precision = i18n.translate(enumNameAdapter("animation.tracereplay.replayedStatus.transitionReplayPrecision"), transitionReplayPrecision);
-			String errorMessage = transitionErrorMessages != null ? String.join("; ", transitionErrorMessages) : ""; // TODO: prettify
+			String errorMessage = transitionErrorMessages != null ? String.join("\n", transitionErrorMessages) : "";
 
 			Collection<String> styleClasses;
 			if (
 				transitionReplayPrecision != TransitionReplayPrecision.PRECISE
 					|| (transitionErrorMessages == null || !transitionErrorMessages.isEmpty())
 			) {
-				styleClasses = Collections.singletonList("FAULTY");
+				styleClasses = Set.of("FAULTY");
 			} else {
-				styleClasses = Collections.emptyList();
+				styleClasses = Set.of();
 			}
 
 			items.add(new ReplayedTraceRow(step, fileTransition, replayedTransition, precision, errorMessage, null, styleClasses));
@@ -198,7 +217,6 @@ public class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	public void handleAcceptDiscard() {
-		this.getButtonTypes().setAll(this.accept, this.discard);
 		ButtonType response = this.showAndWait().orElse(null);
 		if (response == this.accept) {
 			this.currentTrace.set(this.replayTrace.getAnimatedReplayedTrace());

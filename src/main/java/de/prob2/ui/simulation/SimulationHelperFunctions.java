@@ -8,6 +8,7 @@ import java.util.Map;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
+import de.prob.statespace.LoadedMachine;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -32,9 +33,9 @@ public class SimulationHelperFunctions {
 				model instanceof EventBModel? SimulationHelperFunctions.EvaluationMode.EVENT_B : null;
 	}
 
-	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, Path path) {
+	public static void initSimulator(StageManager stageManager, Window window, Simulator simulator, LoadedMachine loadedMachine, Path path) {
 		try {
-			simulator.initSimulator(SimulationFileHandler.constructConfiguration(path));
+			simulator.initSimulator(SimulationFileHandler.constructConfiguration(path, loadedMachine));
 		} catch (IOException e) {
 			LOGGER.debug("Tried to load simulation configuration file", e);
 			alert(stageManager, window, e, "simulation.error.header.fileNotFound","simulation.error.body.fileNotFound");
