@@ -65,7 +65,7 @@ public class EditDynamicFormulaStage extends Stage {
 			}
 		});
 		this.idField.textProperty().addListener((observable, from, to) -> {
-			Set<String> idList = this.currentProject.getCurrentMachine().getMachineProperties().getValidationTaskIds();
+			Set<String> idList = this.currentProject.getCurrentMachine().getValidationTaskIds();
 			if (idList.contains(to)) {
 				this.okButton.setDisable(true);
 				this.errorExplanationLabel.setText(i18n.translate("dynamic.editFormula.IdAlreadyExistsError", to));

@@ -143,7 +143,7 @@ public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationI
 
 	@Override
 	protected ObservableList<TestCaseGenerationItem> getItemsProperty(Machine machine) {
-		return machine.getMachineProperties().getTestCases();
+		return machine.getTestCases();
 	}
 
 	@Override

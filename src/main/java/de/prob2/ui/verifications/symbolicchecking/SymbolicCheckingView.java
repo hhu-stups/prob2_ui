@@ -101,7 +101,7 @@ public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormu
 
 	@Override
 	protected ObservableList<SymbolicCheckingFormulaItem> getItemsProperty(Machine machine) {
-		return machine.getMachineProperties().getSymbolicCheckingFormulas();
+		return machine.getSymbolicCheckingFormulas();
 	}
 
 	@Override

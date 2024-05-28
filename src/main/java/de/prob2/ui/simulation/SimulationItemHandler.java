@@ -68,7 +68,7 @@ public class SimulationItemHandler {
 		if(simulationModel.getPath().equals(Paths.get(""))) {
 			return FXCollections.observableArrayList();
 		}
-		return this.currentProject.getCurrentMachine().getMachineProperties().getSimulationTasksByModel(simulationModel);
+		return this.currentProject.getCurrentMachine().getSimulationTasksByModel(simulationModel);
 	}
 
 	public void reset(SimulationModel simulationModel) {
@@ -76,11 +76,11 @@ public class SimulationItemHandler {
 	}
 
 	public SimulationItem addItem(SimulationItem newItem) {
-		return this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(newItem);
+		return this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(newItem);
 	}
 
 	public void removeItem(SimulationItem item) {
-		this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(item);
+		this.currentProject.getCurrentMachine().removeValidationTask(item);
 	}
 
 	private Map<String, Object> extractAdditionalInformation(SimulationItem item) {
@@ -244,7 +244,7 @@ public class SimulationItemHandler {
 	}
 
 	public void handleMachine(SimulationModel simulationModel) {
-		List<SimulationItem> items = this.currentProject.getCurrentMachine().getMachineProperties().getSimulationTasksByModel(simulationModel);
+		List<SimulationItem> items = this.currentProject.getCurrentMachine().getSimulationTasksByModel(simulationModel);
 		Thread thread = new Thread(() -> {
 			for (SimulationItem item : items) {
 				this.checkItem(item);

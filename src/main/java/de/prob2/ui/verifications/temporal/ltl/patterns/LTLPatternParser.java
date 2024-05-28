@@ -52,12 +52,12 @@ public final class LTLPatternParser {
 	public static void addPattern(LTLPatternItem item, Machine machine) {
 		Pattern pattern = makePattern(item.getDescription(), item.getCode());
 		handlePatternResult(checkDefinition(pattern, machine), item);
-		machine.getMachineProperties().getPatternManager().getPatterns().add(pattern);
+		machine.getPatternManager().getPatterns().add(pattern);
 	}
 	
 	private static LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
 		LTLParseListener parseListener = initializeParseListener(pattern);
-		pattern.updateDefinitions(machine.getMachineProperties().getPatternManager());
+		pattern.updateDefinitions(machine.getPatternManager());
 		ParseTree ast = pattern.getAst();
 		List<String> patternNames = new ArrayList<>();
 		for(int i = 0; i < ast.getChildCount(); i++) {
@@ -103,7 +103,7 @@ public final class LTLPatternParser {
 	}
 	
 	public static void removePattern(LTLPatternItem item, Machine machine) {
-		PatternManager patternManager = machine.getMachineProperties().getPatternManager();
+		PatternManager patternManager = machine.getPatternManager();
 		Pattern pattern = patternManager.getUserPattern(item.getName());
 		if(pattern != null) {
 			patternManager.removePattern(pattern);
@@ -119,7 +119,7 @@ public final class LTLPatternParser {
 	}
 	
 	public static void parseMachine(Machine machine) {
-		machine.getMachineProperties().getLTLPatterns().forEach(item -> LTLPatternParser.addPattern(item, machine));
+		machine.getLTLPatterns().forEach(item -> LTLPatternParser.addPattern(item, machine));
 	}
 	
 }

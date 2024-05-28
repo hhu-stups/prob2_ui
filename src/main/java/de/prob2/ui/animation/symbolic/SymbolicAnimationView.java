@@ -79,7 +79,7 @@ public class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimationIte
 
 	@Override
 	protected ObservableList<SymbolicAnimationItem> getItemsProperty(Machine machine) {
-		return machine.getMachineProperties().getSymbolicAnimationFormulas();
+		return machine.getSymbolicAnimationFormulas();
 	}
 
 	@Override

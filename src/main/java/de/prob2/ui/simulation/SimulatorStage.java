@@ -137,7 +137,7 @@ public class SimulatorStage extends Stage {
 				{
 					copyMenu.getItems().clear();
 					SimulationModel sourceModel = cbSimulation.getSelectionModel().getSelectedItem();
-					for (SimulationModel targetModel : currentProject.getCurrentMachine().getMachineProperties().getSimulations()) {
+					for (SimulationModel targetModel : currentProject.getCurrentMachine().getSimulations()) {
 						if (sourceModel.equals(targetModel)) {
 							continue;
 						}
@@ -582,7 +582,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
+			currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -593,7 +593,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
+			currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -607,7 +607,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
+			currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -705,7 +705,7 @@ public class SimulatorStage extends Stage {
 	public void loadSimulationsFromMachine(Machine machine) {
 		cbSimulation.itemsProperty().unbind();
 		if (machine != null) {
-			cbSimulation.setItems(machine.getMachineProperties().getSimulations());
+			cbSimulation.setItems(machine.getSimulations());
 			if(cbSimulation.getItems().isEmpty()) {
 				cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
 			}
@@ -737,7 +737,7 @@ public class SimulatorStage extends Stage {
 		if (simulationModel == null) {
 			return;
 		}
-		currentProject.getCurrentMachine().getMachineProperties().getSimulations().remove(simulationModel);
+		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
 		if(cbSimulation.getItems().isEmpty()) {
 			cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
 		}
@@ -803,14 +803,14 @@ public class SimulatorStage extends Stage {
 			SimulationModel simulationModel = new SimulationModel(relativePath);
 			Machine currentMachine = currentProject.getCurrentMachine();
 			List<SimulationItem> simulationTasks = simulationItems.getItems();
-			simulationTasks.forEach(task -> currentMachine.getMachineProperties().addValidationTaskIfNotExist(task.withSimulationPath(relativePath)));
-			if(currentMachine.getMachineProperties().getSimulations().contains(simulationModel)) {
+			simulationTasks.forEach(task -> currentMachine.addValidationTaskIfNotExist(task.withSimulationPath(relativePath)));
+			if (currentMachine.getSimulations().contains(simulationModel)) {
 				cbSimulation.getSelectionModel().select(simulationModel);
 			} else {
 				if(previousPath.toString().isEmpty()) {
 					cbSimulation.getItems().remove(new SimulationModel(Paths.get("")));
 				}
-				currentMachine.getMachineProperties().getSimulations().add(simulationModel);
+				currentMachine.getSimulations().add(simulationModel);
 				cbSimulation.getSelectionModel().selectLast();
 			}
 		} catch (IOException ex) {

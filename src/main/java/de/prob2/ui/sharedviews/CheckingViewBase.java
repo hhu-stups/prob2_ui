@@ -159,15 +159,15 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	}
 
 	protected T addItem(T newItem) {
-		return this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(newItem);
+		return this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(newItem);
 	}
 
 	protected void removeItem(final T item) {
-		this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(item);
+		this.currentProject.getCurrentMachine().removeValidationTask(item);
 	}
 
 	protected T replaceItem(final T oldItem, final T newItem) {
-		return this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(oldItem, newItem);
+		return this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldItem, newItem);
 	}
 
 	/**

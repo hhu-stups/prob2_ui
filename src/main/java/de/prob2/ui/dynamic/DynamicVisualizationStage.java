@@ -183,8 +183,7 @@ public class DynamicVisualizationStage extends Stage {
 				this.lbDescription.setText(to.getDescription());
 			}
 
-			this.tvFormula.setItems(this.currentProject.getCurrentMachine().getMachineProperties()
-					.getVisualizationFormulaTasksByCommand(to.getCommand()));
+			this.tvFormula.setItems(this.currentProject.getCurrentMachine().getVisualizationFormulaTasksByCommand(to.getCommand()));
 
 			boolean needFormula = to.getArity() > 0;
 			this.enterFormulaBox.setVisible(needFormula);
@@ -365,7 +364,7 @@ public class DynamicVisualizationStage extends Stage {
 
 		VisualizationFormulaTask newTask = stage.getResult();
 		if (newTask != null) {
-			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(oldTask, newTask);
+			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldTask, newTask);
 			this.evaluateFormula(added.getFormula());
 		}
 	}
@@ -379,7 +378,7 @@ public class DynamicVisualizationStage extends Stage {
 
 		VisualizationFormulaTask task = createTaskOfType(item, null, taFormula.getText());
 		if (task != null) {
-			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
+			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(task);
 			this.evaluateFormula(added.getFormula());
 		}
 	}
@@ -598,7 +597,7 @@ public class DynamicVisualizationStage extends Stage {
 
 		VisualizationFormulaTask task = stage.getResult();
 		if (task != null) {
-			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(task);
+			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(task);
 			this.evaluateFormula(added.getFormula());
 		}
 	}
@@ -607,7 +606,7 @@ public class DynamicVisualizationStage extends Stage {
 	private void handleRemoveFormula() {
 		VisualizationFormulaTask formulaTask = this.tvFormula.getSelectionModel().getSelectedItem();
 		if (formulaTask != null) {
-			this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(formulaTask);
+			this.currentProject.getCurrentMachine().removeValidationTask(formulaTask);
 		}
 	}
 

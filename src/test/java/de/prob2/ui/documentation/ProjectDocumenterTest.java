@@ -25,7 +25,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.machines.MachineProperties;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
@@ -68,13 +67,11 @@ class ProjectDocumenterTest {
 	void setup() {
 		Mockito.when(trafficLight.getName()).thenReturn("TrafficLight");
 		Mockito.when(trafficLight.getLocation()).thenReturn(Paths.get("src/test/resources/machines/TrafficLight/TrafficLight.mch"));
-		MachineProperties machineProperties = Mockito.mock(MachineProperties.class);
-		Mockito.when(trafficLight.getMachineProperties()).thenReturn(machineProperties);
-		Mockito.when(machineProperties.getTraces()).thenReturn(FXCollections.singletonObservableList(trace));
-		Mockito.when(machineProperties.getModelCheckingTasks()).thenReturn(FXCollections.singletonObservableList(modelCheckingItem));
-		Mockito.when(machineProperties.getTemporalFormulas()).thenReturn(FXCollections.singletonObservableList(ltlFormulaItem));
-		Mockito.when(machineProperties.getLTLPatterns()).thenReturn(new SimpleListProperty<>(FXCollections.singletonObservableList(ltlPatternItem)));
-		Mockito.when(machineProperties.getSymbolicCheckingFormulas()).thenReturn(FXCollections.singletonObservableList(symbolicCheckingFormulaItem));
+		Mockito.when(trafficLight.getTraces()).thenReturn(FXCollections.singletonObservableList(trace));
+		Mockito.when(trafficLight.getModelCheckingTasks()).thenReturn(FXCollections.singletonObservableList(modelCheckingItem));
+		Mockito.when(trafficLight.getTemporalFormulas()).thenReturn(FXCollections.singletonObservableList(ltlFormulaItem));
+		Mockito.when(trafficLight.getLTLPatterns()).thenReturn(new SimpleListProperty<>(FXCollections.singletonObservableList(ltlPatternItem)));
+		Mockito.when(trafficLight.getSymbolicCheckingFormulas()).thenReturn(FXCollections.singletonObservableList(symbolicCheckingFormulaItem));
 
 		Mockito.when(trace.getName()).thenReturn("TrafficLight_Cars");
 		TraceJsonFile jsonFile = Mockito.mock(TraceJsonFile.class);

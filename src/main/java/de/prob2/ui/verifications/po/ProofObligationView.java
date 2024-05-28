@@ -16,7 +16,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.machines.MachineProperties;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckedCell;
 
@@ -114,7 +113,7 @@ public class ProofObligationView extends AnchorPane {
 
 		ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			if (to != null) {
-				this.savedProofObligations.set(to.getMachineProperties().getProofObligationTasks());
+				this.savedProofObligations.set(to.getProofObligationTasks());
 			} else {
 				this.savedProofObligations.set(FXCollections.emptyObservableList());
 			}
@@ -167,16 +166,16 @@ public class ProofObligationView extends AnchorPane {
 		dialog.showAndWait().ifPresent(idText -> {
 			String id = idText.trim().isEmpty() ? null : idText;
 			if (!Objects.equals(id, item.getId())) {
-				MachineProperties mp = currentProject.getCurrentMachine().getMachineProperties();
+				Machine machine = currentProject.getCurrentMachine();
 				if (id != null) {
 					// we are adding or changing an id
 					existingSavedPO.ifPresentOrElse(
-						savedPO -> mp.replaceValidationTaskIfNotExist(savedPO, item.withId(id)),
-						() -> mp.addValidationTaskIfNotExist(item.withId(id))
+						savedPO -> machine.replaceValidationTaskIfNotExist(savedPO, item.withId(id)),
+						() -> machine.addValidationTaskIfNotExist(item.withId(id))
 					);
 				} else {
 					// we are removing an id
-					existingSavedPO.ifPresent(mp::removeValidationTask);
+					existingSavedPO.ifPresent(machine::removeValidationTask);
 				}
 			}
 		});

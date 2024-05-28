@@ -103,7 +103,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 
 	@Override
 	protected ObservableList<TemporalFormulaItem> getItemsProperty(Machine machine) {
-		return machine.getMachineProperties().getTemporalFormulas();
+		return machine.getTemporalFormulas();
 	}
 
 	@Override
@@ -116,11 +116,11 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvPattern.itemsProperty().unbind();
 			if (from != null) {
-				from.getMachineProperties().clearPatternManager();
+				from.clearPatternManager();
 			}
 			if (to != null) {
-				tvPattern.itemsProperty().bind(to.getMachineProperties().getLTLPatterns());
-				managePatternTable(to.getMachineProperties().getLTLPatterns());
+				tvPattern.itemsProperty().bind(to.getLTLPatterns());
+				managePatternTable(to.getLTLPatterns());
 			} else {
 				tvPattern.setItems(FXCollections.emptyObservableList());
 			}
@@ -141,9 +141,9 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			removeItem.setOnAction(e -> {
 				Machine machine = currentProject.getCurrentMachine();
 				LTLPatternItem item = row.getItem();
-				machine.getMachineProperties().getLTLPatterns().remove(item);
+				machine.getLTLPatterns().remove(item);
 				LTLPatternParser.removePattern(item, machine);
-				managePatternTable(machine.getMachineProperties().getLTLPatterns());
+				managePatternTable(machine.getLTLPatterns());
 			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
@@ -210,10 +210,10 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			return;
 		}
 		final Machine machine = currentProject.getCurrentMachine();
-		if (machine.getMachineProperties().getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
+		if (machine.getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
 			LTLPatternParser.addPattern(newItem, machine);
-			machine.getMachineProperties().getLTLPatterns().add(newItem);
-			managePatternTable(machine.getMachineProperties().getLTLPatterns());
+			machine.getLTLPatterns().add(newItem);
+			managePatternTable(machine.getLTLPatterns());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
 				"verifications.abstractResultHandler.alerts.alreadyExists.header",
@@ -242,8 +242,8 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		}
 		final Machine machine = currentProject.getCurrentMachine();
 		LTLPatternParser.removePattern(oldItem, machine);
-		if(machine.getMachineProperties().getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(oldItem) && existing.settingsEqual(changedItem))) {
-			machine.getMachineProperties().getLTLPatterns().set(machine.getMachineProperties().getLTLPatterns().indexOf(oldItem), changedItem);
+		if(machine.getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(oldItem) && existing.settingsEqual(changedItem))) {
+			machine.getLTLPatterns().set(machine.getLTLPatterns().indexOf(oldItem), changedItem);
 			LTLPatternParser.addPattern(changedItem, machine);
 			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
 		} else {

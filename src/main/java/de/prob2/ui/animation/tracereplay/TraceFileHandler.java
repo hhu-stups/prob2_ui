@@ -158,8 +158,7 @@ public final class TraceFileHandler {
 		alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
 		alert.showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
-				Machine currentMachine = currentProject.getCurrentMachine();
-				currentMachine.getMachineProperties().removeValidationTask(trace);
+				currentProject.getCurrentMachine().removeValidationTask(trace);
 			}
 		});
 	}
@@ -176,7 +175,7 @@ public final class TraceFileHandler {
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
 		ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
-		return machine.getMachineProperties().addValidationTaskIfNotExist(replayTrace);
+		return machine.addValidationTaskIfNotExist(replayTrace);
 	}
 
 	public void save(SimulationItem item, Machine machine) {

@@ -244,7 +244,7 @@ public class ProjectManager {
 			project.resetChanged();
 			// Fill in ReplayTrace fields that Jackson cannot set.
 			for (final Machine machine : project.getMachines()) {
-				for (final ReplayTrace trace : machine.getMachineProperties().getTraces()) {
+				for (final ReplayTrace trace : machine.getTraces()) {
 					trace.initAfterLoad(path.resolveSibling(trace.getLocation()), traceManager);
 				}
 			}
@@ -360,7 +360,7 @@ public class ProjectManager {
 			case SIMB:
 				injector.getInstance(SimulatorStage.class).show();
 				injector.getInstance(SimulatorStage.class).toFront();
-				currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(currentProject.getLocation().relativize(selected)));
+				currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(currentProject.getLocation().relativize(selected)));
 				break;
 			case NONE:
 				break;

@@ -296,7 +296,7 @@ public class VOManagerStage extends Stage {
 
 		ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			if (to != null) {
-				currentMachineVTs.set(to.getMachineProperties().getValidationTasksWithId());
+				currentMachineVTs.set(to.getValidationTasksWithId());
 			} else {
 				currentMachineVTs.set(FXCollections.emptyObservableList());
 			}

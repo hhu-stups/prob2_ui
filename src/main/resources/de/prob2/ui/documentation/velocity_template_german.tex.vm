@@ -38,11 +38,11 @@ Die B-Maschine $util.latexSafe($machine.getName()) wird durch ihren Code enkodie
 $util.getMachineCode($machine,$project)
 \end{lstlisting}
 
-#if($modelchecking && !$machine.getMachineProperties().getModelCheckingTasks().isEmpty())
+#if($modelchecking && !$machine.getModelCheckingTasks().isEmpty())
 \subsection{Model Checking}
-	Die B-Maschine $util.latexSafe($machine.getName()) hat $util.getNumberSelectedTasks($machine.getMachineProperties().getModelCheckingTasks()) Modelchecking Tasks,
-	wovon $util.getNumberSuccessfulTasks($machine.getMachineProperties().getModelCheckingTasks()) erfolgreich geprüft wurden, $util.getNumberFailedTasks($machine.getMachineProperties().getModelCheckingTasks())
-	fehlgeschlagen sind und $util.getNumberNotCheckedTasks($machine.getMachineProperties().getModelCheckingTasks()) überhaupt nicht geprüft wurden.
+	Die B-Maschine $util.latexSafe($machine.getName()) hat $util.getNumberSelectedTasks($machine.getModelCheckingTasks()) Modelchecking Tasks,
+	wovon $util.getNumberSuccessfulTasks($machine.getModelCheckingTasks()) erfolgreich geprüft wurden, $util.getNumberFailedTasks($machine.getModelCheckingTasks())
+	fehlgeschlagen sind und $util.getNumberNotCheckedTasks($machine.getModelCheckingTasks()) überhaupt nicht geprüft wurden.
 
 	\begin{tablestyling}
 	\begin{longtable}{p{0.4\textwidth} P{0.4\textwidth}}
@@ -52,7 +52,7 @@ $util.getMachineCode($machine,$project)
 		\rowcolor{headerGray} \thead{Modelchecking Task} & \thead{Modelchecking Ergebnis}\\
 		\endhead
 		\midrule
-		#foreach($item in $machine.getMachineProperties().getModelCheckingTasks())
+		#foreach($item in $machine.getModelCheckingTasks())
 			#if($item.selected())
 				#if($item.getItems().isEmpty())
 			$util.modelcheckingToUIString($item,$i18n) & $i18n.translate("verifications.result.notChecked.header")\\
@@ -68,12 +68,12 @@ $util.getMachineCode($machine,$project)
 #end
 
 #if($ltl)
-#if(!$machine.getMachineProperties().getTemporalFormulas().isEmpty() || !$machine.getMachineProperties().getLTLPatterns().isEmpty() )
+#if(!$machine.getTemporalFormulas().isEmpty() || !$machine.getLTLPatterns().isEmpty() )
 \subsection{LTL/CTL Model Checking}
 #end
-#if(!$machine.getMachineProperties().getTemporalFormulas().isEmpty())
-	Die B-Maschine $util.latexSafe($machine.getName()) verfügt über $util.getNumberSelectedTasks($machine.getMachineProperties().getTemporalFormulas()) LTL/CTL-Formeln,
-	von denen $util.getNumberSuccessfulTasks($machine.getTemporalFormulas()) erfolgreich überprüft wurden, $util.getNumberFailedTasks($machine.getMachineProperties().getTemporalFormulas())
+#if(!$machine.getTemporalFormulas().isEmpty())
+	Die B-Maschine $util.latexSafe($machine.getName()) verfügt über $util.getNumberSelectedTasks($machine.getTemporalFormulas()) LTL/CTL-Formeln,
+	von denen $util.getNumberSuccessfulTasks($machine.getTemporalFormulas()) erfolgreich überprüft wurden, $util.getNumberFailedTasks($machine.getTemporalFormulas())
 	scheiterten und $util.getNumberNotCheckedTasks($machine.getTemporalFormulas()) wurden überhaupt nicht überprüft.
  	#* checks if descriptions exist so that extra column can be generated *#
 	#set($createDescriptionColumn = $util.ltlDescriptionColumnNecessary($machine.getTemporalFormulas()))
@@ -86,7 +86,7 @@ $util.getMachineCode($machine,$project)
 		\rowcolor{headerGray} \thead{LTL/CTL-Formel} &	#if($createDescriptionColumn) \thead{Beschreibung} &  #end \thead{Status}\\
 		\endhead
 		\midrule
-		#foreach($formula in $machine.getMachineProperties().getTemporalFormulas())
+		#foreach($formula in $machine.getTemporalFormulas())
 			#if($formula.selected())
 \begin{tabularlstlisting}[linewidth=0.5\textwidth ]
 $formula.getCode()
@@ -103,7 +103,7 @@ $formula.getCode()
 	\end{longtable}
 	\end{tablestyling}
 #end
-#if(!$machine.getMachineProperties().getLTLPatterns().isEmpty())
+#if(!$machine.getLTLPatterns().isEmpty())
 	\begin{tablestyling}
 	\begin{longtable}{p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
 	  	\toprule
@@ -113,7 +113,7 @@ $formula.getCode()
 		\endhead
 		\midrule
 		#*tabularlstlisting cannot be indented *#
-			#foreach($pattern in $machine.getMachineProperties().getLTLPatterns())
+			#foreach($pattern in $machine.getLTLPatterns())
 $pattern.getName() &
 \begin{tabularlstlisting}[linewidth=0.29\textwidth]
 $pattern.getCode()
@@ -131,13 +131,13 @@ $pattern.getCode()
 #end
 #end
 
-#if($symbolic && !$machine.getMachineProperties().getSymbolicCheckingFormulas().isEmpty())
+#if($symbolic && !$machine.getSymbolicCheckingFormulas().isEmpty())
 %SYMBOLIC
 \subsection{Symbolic Model Checking}
-Die B Maschine $util.latexSafe($machine.getName()) hat $util.getNumberSelectedTasks($machine.getMachineProperties().getSymbolicCheckingFormulas()) Symbolic Model Checking Formeln, von denen $util.getNumberSuccessfulTasks($machine.getSymbolicCheckingFormulas()) erfolgreich überprüft wurden.
-$util.getNumberFailedTasks($machine.getMachineProperties().getSymbolicCheckingFormulas()) sind fehlgeschlagen und $util.getNumberNotCheckedTasks($machine.getMachineProperties().getSymbolicCheckingFormulas()) wurden überhaupt nicht überprüft.
+Die B Maschine $util.latexSafe($machine.getName()) hat $util.getNumberSelectedTasks($machine.getSymbolicCheckingFormulas()) Symbolic Model Checking Formeln, von denen $util.getNumberSuccessfulTasks($machine.getSymbolicCheckingFormulas()) erfolgreich überprüft wurden.
+$util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgeschlagen und $util.getNumberNotCheckedTasks($machine.getSymbolicCheckingFormulas()) wurden überhaupt nicht überprüft.
 	#* checks if descriptions exist so that extra column can be generated *#
-	#set($createConfigurationColumn = $util.symbolicConfigurationColumnNecessary($machine.getMachineProperties().getSymbolicCheckingFormulas()))
+	#set($createConfigurationColumn = $util.symbolicConfigurationColumnNecessary($machine.getSymbolicCheckingFormulas()))
 
 	\begin{tablestyling}
 	\begin{longtable}{p{0.3\textwidth}#if($createConfigurationColumn) P{0.4\textwidth} #end p{0.25\textwidth}}
@@ -147,7 +147,7 @@ $util.getNumberFailedTasks($machine.getMachineProperties().getSymbolicCheckingFo
 	\rowcolor{headerGray} \thead{Symbolic Check} & #if($createConfigurationColumn) \thead{Konfiguration} &  #end \thead{Ergebnis}\\
 	\endhead
 	\midrule
-	#foreach($sitem in $machine.getMachineProperties().getSymbolicCheckingFormulas())
+	#foreach($sitem in $machine.getSymbolicCheckingFormulas())
 		#if($sitem.selected())
 			\seqsplit{$util.latexSafe($sitem.getTaskType($i18n))} & #if($createConfigurationColumn)  \seqsplit{$util.symbolicConfigString($sitem,$i18n)} & #end
 			#if($util.symbolicHasResult($sitem))
@@ -167,12 +167,12 @@ $util.getNumberFailedTasks($machine.getMachineProperties().getSymbolicCheckingFo
 	Ein Trace bezieht sich auf eine Folge von Zustandsübergängen, Operationen und Ereignissen, die während der Ausführung eines Systems auftreten.
 	Der Trace kann als Tabelle visualisiert werden, die die Operationen chronologisch auflistet, wobei die Spalte \glqq Schritt \grqq den Index der Reihenfolge
 	angibt und die Spalte \glqq Transition \grqq den Namen der Operation. Dies kann nützlich sein, um das Verhalten des Systems zu verstehen und mögliche Fehler oder Probleme zu identifizieren.
-	Traces sind Abfolgen von Operationen. Die B-Maschine $util.latexSafe($machine.getName()) verfügt über $machine.getMachineProperties().getTraces().size() Traces.
+	Traces sind Abfolgen von Operationen. Die B-Maschine $util.latexSafe($machine.getName()) verfügt über $machine.getTraces().size() Traces.
 	Neben der Tabelle wird mittels VisB eine Visualisierung jedes Traces erstellt. Die Visualisierung bietet eine interaktive und visuelle Darstellung des Verhaltens des Systems während den Transitionen.
 	#if($printHtmlCode)
 	Der HTML-Quellcode für diese Visualisierungsdateien ist im Anhang zu finden
 	#end
-	#foreach($trace in $machine.getMachineProperties().getTraces())
+	#foreach($trace in $machine.getTraces())
 	#call($trace.load())
 
 	\begin{tablestyling}
