@@ -285,16 +285,6 @@ public class MachinesTab extends Tab {
 					content = Collections.singletonList("DEFINITIONS");
 					break;*/
 
-				/*// Event-B
-				// TODO Creating Event-B files not working without errors (Is it useful to invest in translating?)
-				case "bum":
-					// (Missing bcm error atm)
-				case "buc":
-					// (Missing bcc error atm)
-				case "eventb":
-					// (No proper load event atm)
-					break;*/
-
 				// CSP
 				case "csp":
 				case "cspm":
@@ -336,13 +326,6 @@ public class MachinesTab extends Tab {
 						"\\end{document}"
 					);
 					break;
-
-				/*// Fuzz
-				case "fuzz":
-					// TODO Fix unexpected expression error (in mode top given)
-					// content = Arrays.asList("(GIVEN 0", "  )", "(SDEF 0", "  (SHEAD 0", "    )", "  (BODY 0", "    ))");
-					// ("No Schema" error atm)
-					break;*/
 
 				// Alloy
 				case "als":
