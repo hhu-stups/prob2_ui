@@ -39,7 +39,6 @@ public class ProjectDocumenter {
 	private final boolean ltl;
 	private final boolean symbolic;
 	private final boolean makePdf;
-	private final boolean printHtmlCode;
 	private final List<Machine> machines;
 	private final CurrentProject project;
 	private final Injector injector;
@@ -48,7 +47,7 @@ public class ProjectDocumenter {
 	@Inject
 	public ProjectDocumenter(CurrentProject project,
 							 I18n i18n, boolean modelchecking,
-							 boolean ltl, boolean symbolic, boolean makePdf, boolean printHtmlCode,
+							 boolean ltl, boolean symbolic, boolean makePdf,
 							 List<Machine> machines,
 							 Path dir,
 							 String filename,
@@ -59,7 +58,6 @@ public class ProjectDocumenter {
 		this.ltl = ltl;
 		this.symbolic = symbolic;
 		this.makePdf = makePdf;
-		this.printHtmlCode = printHtmlCode;
 		this.machines = machines;
 		this.directory = dir;
 		this.filename = filename;
@@ -128,7 +126,6 @@ public class ProjectDocumenter {
 		context.put("modelchecking", modelchecking);
 		context.put("ltl", ltl);
 		context.put("symbolic", symbolic);
-		context.put("printHtmlCode",printHtmlCode);
 		context.put("util", TemplateUtility.class);
 		context.put("Transition", Transition.class);
 		context.put("i18n", i18n);

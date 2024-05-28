@@ -65,8 +65,7 @@ public class SaveDocumentationStage extends Stage {
 	private CheckBox documentSymbolic;
 	@FXML
 	private CheckBox makePdf;
-	@FXML
-	private CheckBox printHtmlCode;
+
 	private final ObservableList<MachineDocumentationItem> machineDocumentationItems = FXCollections.observableArrayList();
 	private final Injector injector;
 	private final FileChooserManager fileChooserManager;
@@ -155,7 +154,6 @@ public class SaveDocumentationStage extends Stage {
 															 documentLTL.isSelected(),
 														     documentSymbolic.isSelected(),
 														     makePdf.isSelected(),
-															 printHtmlCode.isSelected(),
 														     checkedMachines, dir, filename.getText(),injector);
 		try {
 			documenter.documentVelocity();

@@ -162,9 +162,6 @@ $pattern.getCode()
 	Traces are orders of operations. The B Machine $util.latexSafe($machine.getName()) has $machine.getTraces().size() Traces.
 	In addition to the table, a visualization of every trace is generated via VisB. The visualization provides an interactive and visual
 	representation of the system's behavior during the trace transitions.
-	#if($printHtmlCode)
-		The HTML code for these visualization files is also included in the appendix.
-	#end
 #foreach($trace in $machine.getTraces())
 	#call($trace.load())
 	\begin{tablestyling}
@@ -191,22 +188,9 @@ $pattern.getCode()
 	}{
 	The HTML file for the Trace Visualization isn't available.
 	}
-	#if($printHtmlCode)
-		For the HTML Source Code \hyperref[lst:$trace.getName()]{[click here!]}  \\
-	#end
 	\end{center}
 #end
 #end
 #end ##END LOOP OVER ALL MACHINES
 
-#if(!$traceHtmlPaths.isEmpty() && $printHtmlCode) ## optional appendix which will print html source code of trace visualization
-\appendix
-	\section{Traces Visualization HTML Code}
-The visualizations are in the form of interactive HTML files. If the HTML Files are not available you can manually copy the following HTML source codesA .
-	#foreach($pathEntry in $traceHtmlPaths.entrySet())
-\begin{lstlisting}[label = lst:$pathEntry.key ,style = htmlAppendix, caption = $util.latexSafe($pathEntry.key) HTML Source Code]
-$util.getTraceHtmlCode($pathEntry.value,$documenter)
-\end{lstlisting}
-	#end
-#end
 \end{document}

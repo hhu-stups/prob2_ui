@@ -169,9 +169,6 @@ $util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgesc
 	angibt und die Spalte \glqq Transition \grqq den Namen der Operation. Dies kann nützlich sein, um das Verhalten des Systems zu verstehen und mögliche Fehler oder Probleme zu identifizieren.
 	Traces sind Abfolgen von Operationen. Die B-Maschine $util.latexSafe($machine.getName()) verfügt über $machine.getTraces().size() Traces.
 	Neben der Tabelle wird mittels VisB eine Visualisierung jedes Traces erstellt. Die Visualisierung bietet eine interaktive und visuelle Darstellung des Verhaltens des Systems während den Transitionen.
-	#if($printHtmlCode)
-	Der HTML-Quellcode für diese Visualisierungsdateien ist im Anhang zu finden
-	#end
 	#foreach($trace in $machine.getTraces())
 	#call($trace.load())
 
@@ -199,22 +196,9 @@ $util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgesc
 	}{
 	Die HTML Visualisierungsdatei ist nicht verfügbar.
 	}
-	#if($printHtmlCode)
-		Für den HTML Quellcode \hyperref[lst:$trace.getName()]{[klicke hier!]}  \\
-	#end
 	\end{center}
 	#end
 #end
 #end ##END LOOP OVER ALL MACHINES
 
-#if(!$traceHtmlPaths.isEmpty() && $printHtmlCode) ## optional appendix which will print html source code of trace visualization
-\appendix
-	\section{HTML Quellcode der Trace Visualisierungen}
-Die Visualisierungen sind in Form von interaktiven HTML-Dateien. Wenn die HTML-Dateien nicht verfügbar sind, kann man die folgenden HTML-Quellcodes manuell kopieren.
-	#foreach($pathEntry in $traceHtmlPaths.entrySet())
-\begin{lstlisting}[label = lst:$pathEntry.key ,style = htmlAppendix, caption = $util.latexSafe($pathEntry.key) HTML Quellcode]
-$util.getTraceHtmlCode($pathEntry.value,$documenter)
-\end{lstlisting}
-	#end
-#end
 \end{document}
