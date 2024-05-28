@@ -322,8 +322,8 @@ public class RailMLStage extends Stage {
 					railML2B.generateAnimationMachine();
 					final Machine animationMachine = new Machine(modelName + ANIMATION,
 						"Animation machine generated from " + fileName, outputPath.relativize(outputPath.resolve(modelName + ANIMATION_MCH)));
-					animationMachine.getMachineProperties().simulationsProperty()
-						.add(new SimulationModel(outputPath.relativize(outputPath.resolve("RailML3_SimB.json")), Collections.emptyList()));
+					animationMachine.getMachineProperties().getSimulations()
+						.add(new SimulationModel(outputPath.relativize(outputPath.resolve("RailML3_SimB.json"))));
 					currentProject.addMachine(animationMachine);
 				}
 
