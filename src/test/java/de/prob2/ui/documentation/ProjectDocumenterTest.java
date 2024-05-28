@@ -19,7 +19,7 @@ import com.google.inject.Injector;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.check.ModelCheckingSearchStrategy;
-import de.prob.check.tracereplay.json.storage.TraceJsonFile;
+import de.prob.check.tracereplay.json.TraceManager;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -30,9 +30,6 @@ import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
 import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
-
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -51,8 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ProjectDocumenterTest {
 	private static final Locale TEST_LOCALE = Locale.ENGLISH;
 	final List<Machine> machines = new ArrayList<>();
-	final Machine trafficLight = Mockito.mock(Machine.class);
-	final ReplayTrace trace = Mockito.mock(ReplayTrace.class);
+	final Machine trafficLight = new Machine("TrafficLight", "", Paths.get("src/test/resources/machines/TrafficLight/TrafficLight.mch"));
 	final I18n i18n = new I18n(TEST_LOCALE);
 	final Injector injector = Mockito.mock(Injector.class);
 	final CurrentProject currentProject = Mockito.mock(CurrentProject.class);
@@ -65,18 +61,14 @@ class ProjectDocumenterTest {
 
 	@BeforeAll
 	void setup() {
-		Mockito.when(trafficLight.getName()).thenReturn("TrafficLight");
-		Mockito.when(trafficLight.getLocation()).thenReturn(Paths.get("src/test/resources/machines/TrafficLight/TrafficLight.mch"));
-		Mockito.when(trafficLight.getTraces()).thenReturn(FXCollections.singletonObservableList(trace));
-		Mockito.when(trafficLight.getModelCheckingTasks()).thenReturn(FXCollections.singletonObservableList(modelCheckingItem));
-		Mockito.when(trafficLight.getTemporalFormulas()).thenReturn(FXCollections.singletonObservableList(ltlFormulaItem));
-		Mockito.when(trafficLight.getLTLPatterns()).thenReturn(new SimpleListProperty<>(FXCollections.singletonObservableList(ltlPatternItem)));
-		Mockito.when(trafficLight.getSymbolicCheckingFormulas()).thenReturn(FXCollections.singletonObservableList(symbolicCheckingFormulaItem));
+		Path traceLocation = Paths.get("src/test/resources/machines/TrafficLight/TrafficLight_Cars.prob2trace");
+		ReplayTrace trace = new ReplayTrace(null, traceLocation, traceLocation.toAbsolutePath(), Mockito.mock(TraceManager.class));
 
-		Mockito.when(trace.getName()).thenReturn("TrafficLight_Cars");
-		TraceJsonFile jsonFile = Mockito.mock(TraceJsonFile.class);
-		Mockito.when(trace.getLoadedTrace()).thenReturn(jsonFile);
-		Mockito.when(trace.getLoadedTrace().getTransitionList()).thenReturn(new ArrayList<>());
+		trafficLight.addValidationTask(trace);
+		trafficLight.addValidationTask(modelCheckingItem);
+		trafficLight.addValidationTask(ltlFormulaItem);
+		trafficLight.addValidationTask(symbolicCheckingFormulaItem);
+		trafficLight.getLTLPatterns().add(ltlPatternItem);
 
 		Mockito.when(currentProject.getName()).thenReturn("Projekt Name");
 		Mockito.when(currentProject.getLocation()).thenReturn(Paths.get(""));
