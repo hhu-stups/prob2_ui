@@ -1,6 +1,8 @@
 package de.prob2.ui;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
 import java.util.List;
@@ -190,8 +192,8 @@ public class MainController extends BorderPane {
 
 			case CUSTOM:
 				try {
-					url = new URL(perspective);
-				} catch (final MalformedURLException e) {
+					url = new URI(perspective).toURL();
+				} catch (URISyntaxException | MalformedURLException e) {
 					LOGGER.error("Custom perspective FXML URL is malformed", e);
 					url = null;
 				}
