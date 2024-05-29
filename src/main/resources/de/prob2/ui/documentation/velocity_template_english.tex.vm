@@ -150,7 +150,7 @@ $pattern.getCode()
 			#end
 		#end
 		\bottomrule \addlinespace
-		\rowcolor{white} \caption{Symbolic Formulars and Results} \\
+		\rowcolor{white} \caption{Symbolic Formulas and Results} \\
 		\end{longtable}
 		\end{tablestyling}
 #end

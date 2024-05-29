@@ -129,7 +129,7 @@ class ProjectDocumenterTest {
 		ProjectDocumenter velocityDocumenter = new ProjectDocumenter(currentProject, i18n, false, false, true, false, machines, outputPath, outputFilename, injector);
 		runDocumentationWithMockedSaveTraceHtml(velocityDocumenter);
 		assertTexFileContainsString("Symbolic Model Checking");
-		assertTexFileContainsString("Symbolic Formulars and Results");
+		assertTexFileContainsString("Symbolic Formulas and Results");
 	}
 
 	/* Can be tested locally for all OSes, but is disabled so Gitlab CI doesnt get bloated with
