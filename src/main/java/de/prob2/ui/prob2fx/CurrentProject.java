@@ -153,7 +153,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(null, null);
 	}
 
-	public CompletableFuture<Trace> startAnimation(Machine m, Preference p) {
+	public CompletableFuture<Trace> loadMachineWithoutConfirmation(Machine m, Preference p) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		if (stateSpace != null) {
 			stateSpace.sendInterrupt();
@@ -168,8 +168,8 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return loadFuture;
 	}
 
-	public CompletableFuture<Trace> startAnimation(Machine m) {
-		return this.startAnimation(m, this.get().getPreference(m.getLastUsedPreferenceName()));
+	public CompletableFuture<Trace> loadMachineWithoutConfirmation(Machine m) {
+		return this.loadMachineWithoutConfirmation(m, this.get().getPreference(m.getLastUsedPreferenceName()));
 	}
 
 	public CompletableFuture<Trace> reloadCurrentMachine() {
@@ -177,19 +177,19 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public CompletableFuture<Trace> reloadCurrentMachine(Preference preference) {
-		return this.reloadMachine(this.getCurrentMachine(), preference);
+		return this.loadMachineWithConfirmation(this.getCurrentMachine(), preference);
 	}
 
-	public CompletableFuture<Trace> reloadMachine(Machine machine) {
+	public CompletableFuture<Trace> loadMachineWithConfirmation(Machine machine) {
 		if (machine == null) {
 			throw new IllegalStateException("Cannot reload without machine");
 		} else if (!this.confirmMachineReplace()) {
 			return CompletableFuture.completedFuture(null);
 		}
-		return this.startAnimation(machine);
+		return this.loadMachineWithoutConfirmation(machine);
 	}
 
-	public CompletableFuture<Trace> reloadMachine(Machine machine, Preference preference) {
+	public CompletableFuture<Trace> loadMachineWithConfirmation(Machine machine, Preference preference) {
 		if (machine == null) {
 			throw new IllegalStateException("Cannot reload without machine");
 		} else if (preference == null) {
@@ -197,7 +197,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		} else if (!this.confirmMachineReplace()) {
 			return CompletableFuture.completedFuture(null);
 		}
-		return this.startAnimation(machine, preference);
+		return this.loadMachineWithoutConfirmation(machine, preference);
 	}
 
 	public void addMachine(Machine machine) {

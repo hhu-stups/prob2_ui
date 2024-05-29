@@ -143,9 +143,9 @@ public class VOChecker {
 		// otherwise load that machine.
 		CompletableFuture<Trace> loadFuture;
 		if (currentProject.getCurrentMachine() != machine) {
-			// First wait for startAnimation to run on the JavaFX application thread,
+			// First wait for loadMachineWithoutConfirmation to run on the JavaFX application thread,
 			// then wait for the future returned by that method.
-			loadFuture = fxExecutor.submit(() -> currentProject.startAnimation(machine)).thenCompose(future -> future);
+			loadFuture = fxExecutor.submit(() -> currentProject.loadMachineWithoutConfirmation(machine)).thenCompose(future -> future);
 		} else {
 			loadFuture = CompletableFuture.completedFuture(currentTrace.get());
 		}

@@ -139,7 +139,7 @@ public class ProjectDocumenter {
 		Path htmlDirectory = getHtmlDirectory(machine);
 		Files.createDirectories(directory.resolve(htmlDirectory));
 		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
-		StateSpace stateSpace = project.reloadMachine(machine).join().getStateSpace();
+		StateSpace stateSpace = project.loadMachineWithConfirmation(machine).join().getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
 		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getAnimatedReplayedTrace(), directory.resolve(htmlPath));
 		stateSpace.execute(cmd);
