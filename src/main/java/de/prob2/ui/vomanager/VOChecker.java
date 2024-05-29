@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.statespace.Trace;
 import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.executor.FxThreadExecutor;
@@ -140,18 +141,18 @@ public class VOChecker {
 
 		// Check that the correct machine is loaded in the animator,
 		// otherwise load that machine.
-		CompletableFuture<?> loadFuture;
+		CompletableFuture<Trace> loadFuture;
 		if (currentProject.getCurrentMachine() != machine) {
 			// First wait for startAnimation to run on the JavaFX application thread,
 			// then wait for the future returned by that method.
 			loadFuture = fxExecutor.submit(() -> currentProject.startAnimation(machine)).thenCompose(future -> future);
 		} else {
-			loadFuture = CompletableFuture.completedFuture(null);
+			loadFuture = CompletableFuture.completedFuture(currentTrace.get());
 		}
 
 		// Once the correct machine is loaded, check the VO.
-		return loadFuture.thenCompose(res -> {
-			ExecutionContext context = new ExecutionContext(currentProject.get(), machine, currentTrace.getStateSpace());
+		return loadFuture.thenCompose(trace -> {
+			ExecutionContext context = new ExecutionContext(currentProject.get(), machine, trace.getStateSpace());
 			return checkVOExpression(validationObligation.getParsedExpression(), context);
 		});
 	}

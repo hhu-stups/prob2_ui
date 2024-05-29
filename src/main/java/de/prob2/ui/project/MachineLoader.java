@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.ReusableAnimator;
 import de.prob.animator.command.GetVersionCommand;
 import de.prob.animator.domainobjects.ErrorItem;
@@ -259,12 +260,14 @@ public class MachineLoader {
 		}
 	}
 
-	public CompletableFuture<?> loadAsync(Machine machine, Map<String, String> pref) {
-		return this.cliExecutor.submit(() -> {
-			this.load(machine, pref);
-			return null;
-		}).whenComplete((r, e) -> {
+	public CompletableFuture<Trace> loadAsync(Machine machine, Map<String, String> pref) {
+		return this.cliExecutor.submit(() -> this.load(machine, pref)).whenComplete((r, e) -> {
 			if (e != null) {
+				if (e instanceof InterruptedException || e instanceof CommandInterruptedException) {
+					LOGGER.info("Loading of machine {} was interrupted", machine.getName(), e);
+					return;
+				}
+
 				LOGGER.error("Exception while loading machine {}", machine.getName());
 				if (e instanceof EventBFileNotFoundException exc) {
 					if(!exc.refreshProject()) {
@@ -314,7 +317,7 @@ public class MachineLoader {
 		});
 	}
 
-	private void loadInternal(final Machine machine, final Map<String, String> prefs) throws IOException {
+	private Trace loadInternal(final Machine machine, final Map<String, String> prefs) throws InterruptedException, IOException {
 		this.currentTrace.set(null);
 		setLoadingStatus(StatusBar.LoadingStatus.PARSING_FILE);
 		final Path path = currentProject.get().getAbsoluteMachinePath(machine);
@@ -322,31 +325,33 @@ public class MachineLoader {
 		final ModelFactory<?> modelFactory = injector.getInstance(machine.getModelFactoryClass());
 		final ExtractedModel<?> extract = modelFactory.extract(path.toString());
 		if (Thread.currentThread().isInterrupted()) {
-			return;
+			throw new InterruptedException("Machine loading was interrupted");
 		}
 
 		setLoadingStatus(StatusBar.LoadingStatus.STARTING_ANIMATOR);
 		final StateSpace stateSpace = this.createNewStateSpace();
 		if (Thread.currentThread().isInterrupted()) {
-			return;
+			throw new InterruptedException("Machine loading was interrupted");
 		}
 		try {
 			final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 			allPrefs.putAll(prefs);
 			stateSpace.changePreferences(allPrefs);
 			if (Thread.currentThread().isInterrupted()) {
-				return;
+				throw new InterruptedException("Machine loading was interrupted");
 			}
 			
 			setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
 			extract.loadIntoStateSpace(stateSpace);
 			if (Thread.currentThread().isInterrupted()) {
 				stateSpace.kill();
-				return;
+				throw new InterruptedException("Machine loading was interrupted");
 			}
 			
 			setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
-			this.currentTrace.set(new Trace(stateSpace));
+			Trace trace = new Trace(stateSpace);
+			this.currentTrace.set(trace);
+			return trace;
 		} catch (RuntimeException e) {
 			// Don't leave state space active if an exception was thrown before the current trace could be set.
 			stateSpace.kill();
@@ -354,7 +359,7 @@ public class MachineLoader {
 		}
 	}
 
-	private void load(Machine machine, Map<String, String> prefs) throws IOException {
+	private Trace load(Machine machine, Map<String, String> prefs) throws InterruptedException, IOException {
 		// NOTE: This method may be called from outside the JavaFX main thread,
 		// for example from loadAsync.
 		// This means that all JavaFX calls must be wrapped in
@@ -363,7 +368,7 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			try {
-				loadInternal(machine, prefs);
+				return loadInternal(machine, prefs);
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}

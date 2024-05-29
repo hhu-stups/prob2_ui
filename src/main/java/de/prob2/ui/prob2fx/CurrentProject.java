@@ -13,6 +13,7 @@ import com.google.inject.Singleton;
 
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -152,7 +153,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(null, null);
 	}
 
-	public CompletableFuture<?> startAnimation(Machine m, Preference p) {
+	public CompletableFuture<Trace> startAnimation(Machine m, Preference p) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		if (stateSpace != null) {
 			stateSpace.sendInterrupt();
@@ -160,26 +161,26 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		injector.getInstance(CliTaskExecutor.class).interruptAll();
 		injector.getInstance(BEditorView.class).getErrors().clear();
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
-		CompletableFuture<?> loadFuture = machineLoader.loadAsync(m, p.getPreferences());
+		CompletableFuture<Trace> loadFuture = machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);
 		m.resetStatus();
 		LTLPatternParser.parseMachine(m);
 		return loadFuture;
 	}
 
-	public CompletableFuture<?> startAnimation(Machine m) {
+	public CompletableFuture<Trace> startAnimation(Machine m) {
 		return this.startAnimation(m, this.get().getPreference(m.getLastUsedPreferenceName()));
 	}
 
-	public CompletableFuture<?> reloadCurrentMachine() {
+	public CompletableFuture<Trace> reloadCurrentMachine() {
 		return this.reloadCurrentMachine(this.getCurrentPreference());
 	}
 
-	public CompletableFuture<?> reloadCurrentMachine(Preference preference) {
+	public CompletableFuture<Trace> reloadCurrentMachine(Preference preference) {
 		return this.reloadMachine(this.getCurrentMachine(), preference);
 	}
 
-	public CompletableFuture<?> reloadMachine(Machine machine) {
+	public CompletableFuture<Trace> reloadMachine(Machine machine) {
 		if (machine == null) {
 			throw new IllegalStateException("Cannot reload without machine");
 		} else if (!this.confirmMachineReplace()) {
@@ -188,7 +189,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		return this.startAnimation(machine);
 	}
 
-	public CompletableFuture<?> reloadMachine(Machine machine, Preference preference) {
+	public CompletableFuture<Trace> reloadMachine(Machine machine, Preference preference) {
 		if (machine == null) {
 			throw new IllegalStateException("Cannot reload without machine");
 		} else if (preference == null) {

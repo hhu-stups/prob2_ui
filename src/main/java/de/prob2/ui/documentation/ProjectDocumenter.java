@@ -25,7 +25,6 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 
 import org.apache.velocity.VelocityContext;
@@ -142,10 +141,7 @@ public class ProjectDocumenter {
 		Path htmlDirectory = getHtmlDirectory(machine);
 		Files.createDirectories(directory.resolve(htmlDirectory));
 		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
-		/* reloadMachine works with completable futures. Project access before its finished Loading, can create null Exceptions.
-		* To solve this Problem, wait on the CompletableFuture. */
-		project.reloadMachine(machine).join();
-		final StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
+		StateSpace stateSpace = project.reloadMachine(machine).join().getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
 		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getAnimatedReplayedTrace(), directory.resolve(htmlPath));
 		stateSpace.execute(cmd);
