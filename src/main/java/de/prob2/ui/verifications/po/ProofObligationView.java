@@ -2,13 +2,17 @@ package de.prob2.ui.verifications.po;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.model.eventb.Context;
+import de.prob.model.eventb.EventBMachine;
 import de.prob.model.eventb.EventBModel;
+import de.prob.model.eventb.ProofObligation;
 import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -124,13 +128,22 @@ public class ProofObligationView extends AnchorPane {
 
 	private ObservableMap<String, ProofObligationItem> extractModelPOs(AbstractModel model) {
 		// TODO: Does not yet work with .eventb files
-		if (!(model instanceof EventBModel eventBModel) || eventBModel.getTopLevelMachine() == null) {
+		if (!(model instanceof EventBModel eventBModel)) {
 			return FXCollections.emptyObservableMap();
 		}
 
-		ObservableMap<String, ProofObligationItem> pos = FXCollections.observableHashMap();
-		eventBModel.getTopLevelMachine().getProofs().stream().map(ProofObligationItem::new).forEach(po -> pos.put(po.getName(), po));
-		return pos;
+		List<? extends ProofObligation> pos;
+		if (eventBModel.getMainComponent() instanceof EventBMachine machine) {
+			pos = machine.getProofs();
+		} else if (eventBModel.getMainComponent() instanceof Context context) {
+			pos = context.getProofs();
+		} else {
+			return FXCollections.emptyObservableMap();
+		}
+
+		ObservableMap<String, ProofObligationItem> poItems = FXCollections.observableHashMap();
+		pos.stream().map(ProofObligationItem::new).forEach(po -> poItems.put(po.getName(), po));
+		return poItems;
 	}
 
 	private ObservableList<ProofObligationItem> combinePOs() {
