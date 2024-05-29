@@ -45,13 +45,18 @@ public class ProjectDocumenter {
 	private final HashMap<String,String> tracesHtmlPaths;
 
 	@Inject
-	public ProjectDocumenter(CurrentProject project,
-							 I18n i18n, boolean modelchecking,
-							 boolean ltl, boolean symbolic, boolean makePdf,
-							 List<Machine> machines,
-							 Path dir,
-							 String filename,
-							 Injector injector){
+	public ProjectDocumenter(
+		CurrentProject project,
+		I18n i18n,
+		boolean modelchecking,
+		boolean ltl,
+		boolean symbolic,
+		boolean makePdf,
+		List<Machine> machines,
+		Path dir,
+		String filename,
+		Injector injector
+	) {
 		this.project = project;
 		this.i18n = i18n;
 		this.modelchecking = modelchecking;

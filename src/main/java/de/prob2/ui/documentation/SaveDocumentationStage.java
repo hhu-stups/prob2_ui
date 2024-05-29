@@ -149,12 +149,18 @@ public class SaveDocumentationStage extends Stage {
 																.filter(MachineDocumentationItem::getDocument)
 																.map(MachineDocumentationItem::getMachineItem)
 																.collect(Collectors.toList());
-		ProjectDocumenter documenter = new ProjectDocumenter(currentProject, i18n,
-															 documentModelchecking.isSelected(),
-															 documentLTL.isSelected(),
-														     documentSymbolic.isSelected(),
-														     makePdf.isSelected(),
-														     checkedMachines, dir, filename.getText(),injector);
+		ProjectDocumenter documenter = new ProjectDocumenter(
+			currentProject,
+			i18n,
+			documentModelchecking.isSelected(),
+			documentLTL.isSelected(),
+			documentSymbolic.isSelected(),
+			makePdf.isSelected(),
+			checkedMachines,
+			dir,
+			filename.getText(),
+			injector
+		);
 		try {
 			documenter.documentVelocity();
 		} catch (IOException | RuntimeException exc) {
