@@ -42,8 +42,6 @@ public class SaveDocumentationStage extends Stage {
 	@FXML
 	private TextField filename;
 	@FXML
-	private final CurrentProject currentProject;
-	@FXML
 	private TextField locationField;
 	@FXML
 	private Label errorExplanationLabel;
@@ -69,6 +67,7 @@ public class SaveDocumentationStage extends Stage {
 	private final ObservableList<MachineDocumentationItem> machineDocumentationItems = FXCollections.observableArrayList();
 	private final Injector injector;
 	private final FileChooserManager fileChooserManager;
+	private final CurrentProject currentProject;
 	private final I18n i18n;
 	private final StageManager stageManager;
 
