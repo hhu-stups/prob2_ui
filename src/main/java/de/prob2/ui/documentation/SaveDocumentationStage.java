@@ -6,10 +6,10 @@ import java.io.InputStreamReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
@@ -65,18 +65,19 @@ public class SaveDocumentationStage extends Stage {
 	private CheckBox makePdf;
 
 	private final ObservableList<MachineDocumentationItem> machineDocumentationItems = FXCollections.observableArrayList();
-	private final Injector injector;
+
 	private final FileChooserManager fileChooserManager;
 	private final CurrentProject currentProject;
+	private final Locale locale;
 	private final I18n i18n;
 	private final StageManager stageManager;
 
 	@Inject
-	private SaveDocumentationStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, final StageManager stageManager, I18n i18n, Injector injector) {
+	private SaveDocumentationStage(final FileChooserManager fileChooserManager, CurrentProject currentProject, final StageManager stageManager, Locale locale, I18n i18n) {
 		this.fileChooserManager = fileChooserManager;
 		this.currentProject = currentProject;
+		this.locale = locale;
 		this.i18n = i18n;
-		this.injector = injector;
 		this.initModality(Modality.APPLICATION_MODAL);
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "save_project_documentation_stage.fxml");
@@ -150,6 +151,7 @@ public class SaveDocumentationStage extends Stage {
 																.collect(Collectors.toList());
 		ProjectDocumenter documenter = new ProjectDocumenter(
 			currentProject,
+			locale,
 			i18n,
 			documentModelchecking.isSelected(),
 			documentLTL.isSelected(),
@@ -157,8 +159,7 @@ public class SaveDocumentationStage extends Stage {
 			makePdf.isSelected(),
 			checkedMachines,
 			dir,
-			filename.getText(),
-			injector
+			filename.getText()
 		);
 		try {
 			documenter.documentVelocity();

@@ -15,7 +15,6 @@ import java.util.Optional;
 import java.util.Properties;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.statespace.StateSpace;
@@ -32,6 +31,7 @@ import org.apache.velocity.app.Velocity;
 
 public class ProjectDocumenter {
 	private final String filename;
+	private final Locale locale;
 	private final I18n i18n;
 	private final Path directory;
 	private final boolean modelchecking;
@@ -40,12 +40,12 @@ public class ProjectDocumenter {
 	private final boolean makePdf;
 	private final List<Machine> machines;
 	private final CurrentProject project;
-	private final Injector injector;
 	private final HashMap<String,String> tracesHtmlPaths;
 
 	@Inject
 	public ProjectDocumenter(
 		CurrentProject project,
+		Locale locale,
 		I18n i18n,
 		boolean modelchecking,
 		boolean ltl,
@@ -53,10 +53,10 @@ public class ProjectDocumenter {
 		boolean makePdf,
 		List<Machine> machines,
 		Path dir,
-		String filename,
-		Injector injector
+		String filename
 	) {
 		this.project = project;
+		this.locale = locale;
 		this.i18n = i18n;
 		this.modelchecking = modelchecking;
 		this.ltl = ltl;
@@ -65,7 +65,6 @@ public class ProjectDocumenter {
 		this.machines = machines;
 		this.directory = dir;
 		this.filename = filename;
-		this.injector = injector;
 		tracesHtmlPaths = new HashMap<>();
 	}
 
@@ -108,8 +107,7 @@ public class ProjectDocumenter {
 
 	// future translations can be added here
 	private String getLanguageTemplate() {
-		String language = injector.getInstance(Locale.class).getLanguage();
-		return switch (language) {
+		return switch (locale.getLanguage()) {
 			case "de" -> "de/prob2/ui/documentation/velocity_template_german.tex.vm";
 			default -> "de/prob2/ui/documentation/velocity_template_english.tex.vm";
 		};
