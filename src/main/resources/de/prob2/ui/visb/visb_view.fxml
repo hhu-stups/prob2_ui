@@ -16,6 +16,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ProgressIndicator?>
 <fx:root type="VisBView" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" minHeight="160"
 		 minWidth="480">
 	<fx:define>
@@ -75,8 +76,10 @@
 				</items>
 			</MenuButton>
 			<Spacer/>
-				<Label fx:id="information" alignment="CENTER" BorderPane.alignment="CENTER"/>
-				<Spacer/>
+			<Label fx:id="information" alignment="CENTER" BorderPane.alignment="CENTER"/>
+			<Spacer/>
+			<ProgressIndicator fx:id="inProgress" visible="false" managed="false" maxHeight="20" maxWidth="20"/>
+			<Spacer/>
 			<Button fx:id="zoomInButton" onAction="#zoomIn">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_PLUS"

@@ -44,16 +44,12 @@ import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
+import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
+import javafx.scene.control.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
@@ -119,6 +115,8 @@ public class VisBView extends BorderPane {
 	private MenuItem exportCurrentStateItem;
 	@FXML
 	private Label information;
+	@FXML
+	private ProgressIndicator inProgress;
 	@FXML
 	private VBox placeholder;
 	@FXML
@@ -231,31 +229,8 @@ public class VisBView extends BorderPane {
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
 
-		exportHistoryItem.setOnAction(e -> {
-			Trace trace = currentTrace.get();
-			if (trace == null) {
-				return;
-			}
-			Path path = showHtmlExportFileChooser();
-			if (path == null) {
-				return;
-			}
-			ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace, path);
-			trace.getStateSpace().execute(cmd);
-		});
-
-		exportCurrentStateItem.setOnAction(e -> {
-			Trace trace = currentTrace.get();
-			if (trace == null) {
-				return;
-			}
-			Path path = showHtmlExportFileChooser();
-			if (path == null) {
-				return;
-			}
-			ExportVisBHtmlForStates cmd = new ExportVisBHtmlForStates(trace.getCurrentState(), path);
-			trace.getStateSpace().execute(cmd);
-		});
+		exportHistoryItem.setOnAction(e -> performHtmlExport(false));
+		exportCurrentStateItem.setOnAction(e -> performHtmlExport(true));
 
 		Platform.runLater(() -> {
 			// WebView can only be constructed on the JavaFX application thread,
@@ -445,12 +420,18 @@ public class VisBView extends BorderPane {
 		this.runWhenLoaded(() -> this.getJSWindow().call("resetMessages"));
 	}
 
+	void updateInfo(String text, boolean indicateProgress) {
+		information.setText(text);
+		inProgress.setManaged(indicateProgress);
+		inProgress.setVisible(indicateProgress);
+	}
+
 	/**
 	 * Setter for the info label.
 	 * @param text to be set
 	 */
 	void updateInfo(String text){
-		information.setText(text);
+		updateInfo(text, false);
 	}
 
 	/**
@@ -595,6 +576,32 @@ public class VisBView extends BorderPane {
 					throw new AssertionError("Unhandled action: " + action);
 			}
 		});
+	}
+
+	private void performHtmlExport(final boolean onlyCurrentState) {
+		Trace trace = currentTrace.get();
+		if (trace == null) {
+			return;
+		}
+		Path path = showHtmlExportFileChooser();
+		if (path == null) {
+			return;
+		}
+
+		Task<Void> task = new Task<>() {
+			@Override
+			protected Void call() {
+				trace.getStateSpace().execute(onlyCurrentState ?
+					new ExportVisBHtmlForStates(trace.getCurrentState(), path) : new ExportVisBForHistoryCommand(trace, path));
+				return null;
+			}
+		};
+		task.setOnRunning(r -> updateInfo(i18n.translate("visb.infobox.html.create"), true));
+		task.setOnSucceeded(s -> updateInfo(i18n.translate("visb.infobox.html.completed")));
+		// in fail case there is hopefully an exception with more information:
+		task.setOnFailed(f -> updateInfo(""));
+		// makes UI responsive, but we can't do anything with the model during export anyway...
+		cliExecutor.execute(task);
 	}
 
 	private Path showHtmlExportFileChooser() {
