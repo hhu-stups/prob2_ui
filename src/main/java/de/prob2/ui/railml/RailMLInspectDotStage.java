@@ -14,6 +14,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.*;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ListChangeListener;
@@ -39,7 +40,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static de.hhu.stups.railml2b.utils.FileUtils.replaceOldFile;
 import static de.prob.animator.domainobjects.DotVisualizationCommand.EXPRESSION_AS_GRAPH_NAME;
@@ -121,6 +121,8 @@ public class RailMLInspectDotStage extends Stage {
 	private Button saveButton;
 	@FXML
 	protected Button cancelButton;
+	@FXML
+	private Button btContinue;
 
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
@@ -192,10 +194,11 @@ public class RailMLInspectDotStage extends Stage {
 		decScalingButton.pressedProperty()
 			.addListener((o,f,t) -> scalingFactor -= visualisationStrategy.equals(ImportArguments.VisualisationStrategy.D4R) ? 0.001 : 0.1);
 
-		dotView.visibleProperty().bind(this.updater.runningProperty().not());
-		placeholderLabel.visibleProperty().bind(this.updater.runningProperty());
+		dotView.visibleProperty().bind(this.updater.runningProperty().not().and(currentDotContent.isNull()).not());
+		placeholderLabel.visibleProperty().bind(this.dotView.visibleProperty().not());
 		updater.runningProperty().addListener(o -> this.updatePlaceholderLabel());
 		cancelButton.disableProperty().bind(this.updater.runningProperty().not());
+		btContinue.disableProperty().bind(this.currentDotContent.isNull());
 
 		this.setOnShown(e -> stageManager.setMacMenuBar(stageManager.getCurrent(), this.menuBar));
 		this.setOnCloseRequest(e -> {
@@ -210,6 +213,7 @@ public class RailMLInspectDotStage extends Stage {
 		this.visualisationStrategy = arguments.visualisationStrategy();
 		this.trace = trace;
 		initializeOptionsForStrategy(visualisationStrategy);
+		clearGraph();
 	}
 
 	private void initializeOptionsForStrategy(ImportArguments.VisualisationStrategy strategy) {
@@ -434,6 +438,16 @@ public class RailMLInspectDotStage extends Stage {
 		});
 	}
 
+	private void clearGraph() {
+		Thread thread = Thread.currentThread();
+		Platform.runLater(() -> {
+			if (!thread.isInterrupted()) {
+				currentDotContent.set(null);
+				placeholderLabel.setText(i18n.translate("dynamic.placeholder.selectVisualization"));
+			}
+		});
+	}
+
 	@FXML
 	private void save() {
 		final FileChooser fileChooser = new FileChooser();
@@ -528,8 +542,7 @@ public class RailMLInspectDotStage extends Stage {
 		double x = 0.0;
 		double y = 0.0;
 		for (final Node node : nodes) {
-			if (node instanceof ScrollBar) {
-				ScrollBar sb = (ScrollBar) node;
+			if (node instanceof ScrollBar sb) {
 				if (sb.getOrientation() == Orientation.VERTICAL) {
 					x = sb.getPrefHeight() / 2;
 				} else {

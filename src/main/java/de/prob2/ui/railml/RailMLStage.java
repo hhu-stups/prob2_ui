@@ -281,14 +281,9 @@ public class RailMLStage extends Stage {
 				.visualisationStrategy(visualisationCheckbox.isSelected() ? visualisationStrategyChoiceBox.getValue() : null);
 		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 		if (importArguments.generateVisualisation()) {
-			try {
-				railMLInspectDotStage.visualizeCustomGraph();
-				railMLInspectDotStage.show();
-				railMLInspectDotStage.toFront();
-			} catch (InterruptedException e) {
-				throw new RuntimeException(e);
-			}
 			railMLInspectDotStage.initializeForArguments(importArguments, railML2B.getMachineLoader().getCurrentTrace());
+			railMLInspectDotStage.show();
+			railMLInspectDotStage.toFront();
 			if (importArguments.generateDataMachine() || importArguments.generateAnimationMachine() || importArguments.generateValidationMachine()) {
 				railMLInspectDotStage.setOnHidden(event -> createMachinesAndProject());
 			}
