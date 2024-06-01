@@ -9,6 +9,7 @@ import de.hhu.stups.railml2b.utils.SvgConverter;
 import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.*;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
@@ -128,7 +129,7 @@ public class RailMLInspectDotStage extends Stage {
 	private String modelName = null;
 	private Path output;
 	private ImportArguments.VisualisationStrategy visualisationStrategy = null;
-	private State state;
+	private Trace trace;
 
 	private double scalingFactor;
 	private String dot;
@@ -153,7 +154,7 @@ public class RailMLInspectDotStage extends Stage {
 		this.updater = new BackgroundUpdater("railml dot view updater");
 		stopActions.add(this.updater::shutdownNow);
 		this.i18n = i18n;
-		this.state = null;
+		this.trace = null;
 
 		this.scalingFactor = 0.1;
 		this.dot = null;
@@ -203,11 +204,11 @@ public class RailMLInspectDotStage extends Stage {
 		});
 	}
 
-	protected void initializeForArguments(final ImportArguments arguments, final State state) {
+	protected void initializeForArguments(final ImportArguments arguments, final Trace trace) {
 		this.modelName = arguments.modelName();
 		this.output = arguments.output();
 		this.visualisationStrategy = arguments.visualisationStrategy();
-		this.state = state;
+		this.trace = trace;
 		initializeOptionsForStrategy(visualisationStrategy);
 	}
 
@@ -273,7 +274,7 @@ public class RailMLInspectDotStage extends Stage {
 				dotEngineChoiceBox.getValue().toString().toLowerCase(),
 				curvedsplines.isSelected()
 		);
-		List<IEvalElement> customGraphFormula = Collections.singletonList(state.getStateSpace().getModel()
+		List<IEvalElement> customGraphFormula = Collections.singletonList(trace.getStateSpace().getModel()
 			.parseFormula(visualisationStrategy.getCustomGraphDefinition() + arguments, FormulaExpand.EXPAND));
 		this.visualizeCustomGraph(customGraphFormula);
 	}
@@ -282,10 +283,10 @@ public class RailMLInspectDotStage extends Stage {
 	 * Same method as in DotView.java, but only for "custom_graph".
 	 */
 	private void visualizeCustomGraph(final List<IEvalElement> formulas) throws InterruptedException {
-		DotVisualizationCommand customGraphItem = getByName(EXPRESSION_AS_GRAPH_NAME, state);
-		final String dotLocal = customGraphItem.getState().getStateSpace().getCurrentPreference("DOT");
+		DotVisualizationCommand customGraphItem = getByName(EXPRESSION_AS_GRAPH_NAME, trace);
+		final String dotLocal = customGraphItem.getTrace().getStateSpace().getCurrentPreference("DOT");
 		final String dotEngineLocal = customGraphItem.getPreferredDotLayoutEngine()
-				.orElseGet(() -> customGraphItem.getState().getStateSpace().getCurrentPreference("DOT_ENGINE"));
+				.orElseGet(() -> customGraphItem.getTrace().getStateSpace().getCurrentPreference("DOT_ENGINE"));
 		this.dot = dotLocal;
 		this.dotEngine = dotEngineLocal;
 
@@ -398,8 +399,8 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	private void interrupt() {
-		if (state != null && state.getStateSpace() != null)
-			state.getStateSpace().sendInterrupt();
+		if (trace != null && trace.getStateSpace() != null)
+			trace.getStateSpace().sendInterrupt();
 	}
 
 	@FXML
