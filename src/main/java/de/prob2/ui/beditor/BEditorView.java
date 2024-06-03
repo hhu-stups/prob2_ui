@@ -327,24 +327,7 @@ public class BEditorView extends BorderPane {
 		this.updatingIncludedMachines = true;
 		try {
 			Path prevSelected = this.machineChoice.getSelectionModel().getSelectedItem();
-			final AbstractModel model = currentTrace.getModel();
-			if (model instanceof ClassicalBModel) {
-				machineChoice.getItems().setAll(((ClassicalBModel) model).getLoadedMachineFiles());
-			} else if (model instanceof RulesModel) {
-				// references of main machine are not enough; referenced can reference other rmch again
-				machineChoice.getItems().setAll(((RulesModel) model).getRulesProject().getBModels().stream()
-						                                .map(IModel::getMachineReferences)
-						                                .flatMap(refs -> refs.stream()
-								                                                 .map(ref -> Path.of(ref.getPath())))
-						                                .distinct().toList());
-				// main machine is not included in list of referenced rmch
-				machineChoice.getItems().add(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
-			} else {
-				// TODO: We could extract the refinement hierarchy via model.getMachines() or model.calculateDependencies on the EventBModel.
-				// Here, we have the problem that the current project might not include all of them refined machines
-				// Still, could we assume that the machine is located in the same folder as the loaded machine? If yes, then it might still be possible to implement this feature
-				machineChoice.getItems().setAll(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
-			}
+			machineChoice.getItems().setAll(currentTrace.getModel().getAllFiles());
 
 			if (prevSelected != null && this.machineChoice.getItems().contains(prevSelected)) {
 				this.selectMachine(prevSelected);
