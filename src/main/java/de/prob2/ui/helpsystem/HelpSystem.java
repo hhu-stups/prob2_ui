@@ -13,9 +13,9 @@ import java.util.stream.Collectors;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -55,7 +55,7 @@ public class HelpSystem extends StackPane {
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
 
-	private final ProB2 proB2;
+	private final HostServices hostServices;
 	private final ResourceBundle helpPageTitles;
 	private final ResourceBundle helpPageResourcePaths;
 	private final Map<String, TreeItem<String>> itemsByKey;
@@ -63,8 +63,8 @@ public class HelpSystem extends StackPane {
 	private boolean updateTreeSelection;
 
 	@Inject
-	private HelpSystem(final StageManager stageManager, final ProB2 proB2) {
-		this.proB2 = proB2;
+	private HelpSystem(final StageManager stageManager, final HostServices hostServices) {
+		this.hostServices = hostServices;
 		this.updateTreeSelection = true;
 
 		this.helpPageTitles = ResourceBundle.getBundle("de.prob2.ui.helpsystem.help_page_titles");
@@ -92,7 +92,7 @@ public class HelpSystem extends StackPane {
 		this.helpPageTitles.keySet().forEach(this::findInTreeOrAdd);
 		sortTree(root, Comparator.comparing(item -> titleForPage(item.getValue())));
 
-		external.setOnAction(e -> proB2.getHostServices().showDocument("https://prob.hhu.de/w/"));
+		external.setOnAction(e -> hostServices.showDocument("https://prob.hhu.de/w/"));
 
 		var webEngine = webView.getEngine();
 		webEngine.setUserStyleSheetLocation(this.getClass().getResource("help.css").toString());
@@ -101,7 +101,7 @@ public class HelpSystem extends StackPane {
 				String url = webEngine.getLocation();
 				if (url.contains("http://") || url.contains("https://")) {
 					webView.getEngine().getHistory().go(-1);
-					proB2.getHostServices().showDocument(url);
+					hostServices.showDocument(url);
 				}
 				findMatchingTreeViewEntryToSelect(url);
 			}

@@ -24,6 +24,7 @@ import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.Builder;
@@ -85,6 +86,12 @@ public class ProB2Module extends AbstractModule {
 	}
 
 	@Provides
+	@Singleton
+	private static HostServices provideHostServices(ProB2 proB2) {
+		return proB2.getHostServices();
+	}
+
+	@Provides
 	public static ObjectMapper provideObjectMapper() {
 		return new ObjectMapper()
 			       .registerModule(new ParameterNamesModule())
@@ -93,7 +100,6 @@ public class ProB2Module extends AbstractModule {
 			       .registerModule(new GuavaModule())
 			       .registerModule(new ProB2UIJacksonModule());
 	}
-
 
 	@Provides
 	private static FXMLLoader provideLoader(final Injector injector, I18n i18n) {

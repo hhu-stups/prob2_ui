@@ -22,7 +22,9 @@ import de.prob2.ui.dynamic.plantuml.PlantUmlLocator;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.menu.OpenFile;
 
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -34,6 +36,7 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCombination;
@@ -70,6 +73,8 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 	private final FileChooserManager fileChooserManager;
 	private final JavaLocator javaLocator;
 	private final PlantUmlLocator plantUmlLocator;
+	private final OpenFile openFile;
+	private final HostServices hostServices;
 	private final ObjectProperty<GraphMode> graphMode;
 	private final ObjectProperty<byte[]> currentInput;
 	private final StringProperty currentSvg;
@@ -78,12 +83,14 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 	private String cachedDotEngine;
 
 	@Inject
-	public DynamicGraphView(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager, JavaLocator javaLocator, PlantUmlLocator plantUmlLocator) {
+	public DynamicGraphView(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager, JavaLocator javaLocator, PlantUmlLocator plantUmlLocator, OpenFile openFile, HostServices hostServices) {
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.javaLocator = javaLocator;
 		this.plantUmlLocator = plantUmlLocator;
+		this.openFile = openFile;
+		this.hostServices = hostServices;
 		this.graphMode = new SimpleObjectProperty<>(this, "graphMode", null);
 		this.currentInput = new SimpleObjectProperty<>(this, "currentInput", null);
 		this.currentSvg = new SimpleStringProperty(this, "currentSvg", null);
@@ -296,15 +303,30 @@ public class DynamicGraphView extends BorderPane implements Builder<DynamicGraph
 		Optional<Path> optPlantUmlJar = this.plantUmlLocator.findPlantUmlJar();
 		if (optPlantUmlJar.isEmpty()) {
 			Platform.runLater(() -> {
-				Alert alert = this.stageManager.makeAlert(
-						Alert.AlertType.ERROR,
-						"dynamic.visualization.error.noPlantUml.header",
-						"dynamic.visualization.error.noPlantUml.message",
-						"https://plantuml.com/download",
-						this.plantUmlLocator.getDirectory()
-				);
-				alert.initOwner(this.getScene().getWindow());
-				alert.showAndWait();
+				var dir = this.plantUmlLocator.getDirectory();
+				var url = "https://plantuml.com/download";
+				var openDir = new ButtonType(i18n.translate("dynamic.visualization.error.noPlantUml.button.openDir"));
+				var openWebsite = new ButtonType(i18n.translate("dynamic.visualization.error.noPlantUml.button.openWebsite"));
+
+				while (true) {
+					Alert alert = this.stageManager.makeAlert(
+							Alert.AlertType.ERROR,
+							"dynamic.visualization.error.noPlantUml.header",
+							"dynamic.visualization.error.noPlantUml.message",
+							dir
+					);
+					alert.getButtonTypes().addAll(openDir, openWebsite);
+					alert.initOwner(this.getScene().getWindow());
+
+					var result = alert.showAndWait().orElse(null);
+					if (result == openDir) {
+						this.openFile.open(dir);
+					} else if (result == openWebsite) {
+						this.hostServices.showDocument(url);
+					} else {
+						break;
+					}
+				}
 			});
 			return;
 		}
