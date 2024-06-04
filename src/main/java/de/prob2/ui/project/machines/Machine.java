@@ -1,7 +1,12 @@
 package de.prob2.ui.project.machines;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -51,6 +56,9 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @JsonPropertyOrder({
 	"name",
 	"description",
@@ -63,6 +71,7 @@ import javafx.collections.ObservableList;
 	"historyChartItems",
 })
 public final class Machine {
+	private static final Logger LOGGER = LoggerFactory.getLogger(Machine.class);
 
 	private final StringProperty name;
 	private final StringProperty description;
@@ -77,6 +86,8 @@ public final class Machine {
 
 	@JsonIgnore
 	private PatternManager patternManager = new PatternManager();
+	@JsonIgnore
+	private Map<Path, FileTime> sourceFileModifiedTimes;
 	@JsonIgnore
 	private final CachedEditorState cachedEditorState;
 	@JsonIgnore
@@ -104,6 +115,7 @@ public final class Machine {
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
 
+		this.sourceFileModifiedTimes = null;
 		this.cachedEditorState = new CachedEditorState();
 
 		this.initListeners();
@@ -395,12 +407,44 @@ public final class Machine {
 		this.changedProperty().set(changed);
 	}
 
+	public void resetAnimatorDependentState() {
+		this.getValidationTasks().forEach(IValidationTask::resetAnimatorDependentState);
+	}
+
 	public void resetStatus() {
 		for (var vt : this.getValidationTasks()) {
 			vt.reset();
 		}
 		this.getLTLPatterns().forEach(LTLPatternItem::reset);
 		this.patternManager = new PatternManager();
+	}
+
+	private static Map<Path, FileTime> readFileModifiedTimes(List<Path> files) throws IOException {
+		Map<Path, FileTime> modifiedTimes = new HashMap<>();
+		for (Path file : files) {
+			modifiedTimes.put(file, Files.getLastModifiedTime(file));
+		}
+		return modifiedTimes;
+	}
+
+	public void updateModifiedTimesAndResetIfChanged(List<Path> newSourceFiles) {
+		Map<Path, FileTime> newModifiedTimes;
+		try {
+			newModifiedTimes = readFileModifiedTimes(newSourceFiles);
+		} catch (IOException exc) {
+			LOGGER.warn("Failed to get last modified time for one of the source files - will assume that the model has changed", exc);
+			newModifiedTimes = null;
+		}
+
+		// Consider the model changed if no modified times have been saved yet,
+		// or the new modified times could not be read,
+		// or the set of source files changed,
+		// or if the saved and new modified times don't match for any of the files.
+		if (this.sourceFileModifiedTimes == null || !this.sourceFileModifiedTimes.equals(newModifiedTimes)) {
+			this.resetStatus();
+		}
+
+		this.sourceFileModifiedTimes = newModifiedTimes;
 	}
 
 	@Override

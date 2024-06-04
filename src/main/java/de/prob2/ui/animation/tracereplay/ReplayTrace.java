@@ -251,12 +251,17 @@ public final class ReplayTrace implements IExecutableItem {
 	}
 
 	@Override
-	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
+	public void resetAnimatorDependentState() {
 		this.setProgress(-1);
-		this.loadedTrace.set(null);
 		this.setReplayedTrace(null);
 		this.setAnimatedReplayedTrace(null);
+	}
+
+	@Override
+	public void reset() {
+		this.setChecked(Checked.NOT_CHECKED);
+		this.loadedTrace.set(null);
+		this.resetAnimatorDependentState();
 	}
 
 	@Override

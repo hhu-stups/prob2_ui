@@ -87,8 +87,12 @@ public final class VisualizationFormulaTask implements IValidationTask {
 	}
 
 	@Override
+	public void resetAnimatorDependentState() {}
+
+	@Override
 	public void reset() {
 		this.setChecked(Checked.NOT_CHECKED);
+		this.resetAnimatorDependentState();
 	}
 
 	@Override

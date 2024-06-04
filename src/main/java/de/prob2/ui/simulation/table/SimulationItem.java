@@ -218,11 +218,19 @@ public final class SimulationItem implements IValidationTask {
 	}
 
 	@Override
+	public void resetAnimatorDependentState() {
+		// The timestamps aren't directly dependent on the animator,
+		// but they only make sense in combination with the traces,
+		// so clear them both.
+		this.timestamps.clear();
+		this.traces.clear();
+	}
+
+	@Override
 	public void reset() {
 		this.setChecked(Checked.NOT_CHECKED);
 		this.simulationStats = null;
-		this.timestamps.clear();
-		this.traces.clear();
+		this.resetAnimatorDependentState();
 	}
 
 	@Override

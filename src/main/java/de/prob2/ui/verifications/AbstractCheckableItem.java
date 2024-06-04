@@ -65,5 +65,6 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	@Override
 	public void reset() {
 		this.setResultItem(null);
+		this.resetAnimatorDependentState();
 	}
 }

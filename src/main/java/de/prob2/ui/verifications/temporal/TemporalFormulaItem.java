@@ -86,8 +86,7 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void resetAnimatorDependentState() {
 		this.setCounterExample(null);
 	}
 

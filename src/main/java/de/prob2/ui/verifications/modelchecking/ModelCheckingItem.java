@@ -245,10 +245,19 @@ public final class ModelCheckingItem implements IExecutableItem {
 	}
 
 	@Override
+	public void resetAnimatorDependentState() {
+		// Clearing the steps list causes the listener to reset the checked status,
+		// but in this case we want to preserve the checked status.
+		Checked savedChecked = this.getChecked();
+		this.stepsProperty().clear();
+		this.checked.set(savedChecked);
+		this.currentStep.set(null);
+	}
+
+	@Override
 	public void reset() {
 		this.checked.set(Checked.NOT_CHECKED);
-		this.stepsProperty().clear();
-		this.currentStep.set(null);
+		this.resetAnimatorDependentState();
 	}
 
 	@Override

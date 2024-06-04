@@ -4,7 +4,6 @@ import java.util.Locale;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
@@ -62,7 +61,11 @@ public final class ValidationTaskNotFound implements IValidationTask {
 	}
 
 	@Override
+	public void resetAnimatorDependentState() {}
+
+	@Override
 	public void reset() {
+		this.resetAnimatorDependentState();
 	}
 
 	@Override

@@ -123,8 +123,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void resetAnimatorDependentState() {
 		this.setResult(null);
 		this.examples.clear();
 	}

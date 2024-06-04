@@ -41,8 +41,7 @@ public abstract class SymbolicAnimationItem extends AbstractCheckableItem {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
+	public void resetAnimatorDependentState() {
 		this.setExample(null);
 	}
 

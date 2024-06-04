@@ -27,6 +27,7 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.vomanager.Requirement;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
@@ -160,12 +161,22 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		}
 		injector.getInstance(CliTaskExecutor.class).interruptAll();
 		injector.getInstance(BEditorView.class).getErrors().clear();
+		Machine prevMachine = this.getCurrentMachine();
+		if (prevMachine != null) {
+			prevMachine.resetAnimatorDependentState();
+		}
+
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		CompletableFuture<Trace> loadFuture = machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);
-		m.resetStatus();
-		LTLPatternParser.parseMachine(m);
-		return loadFuture;
+		return loadFuture.thenApply(trace -> {
+			List<Path> allFiles = trace.getModel().getAllFiles();
+			Platform.runLater(() -> {
+				m.updateModifiedTimesAndResetIfChanged(allFiles);
+				LTLPatternParser.parseMachine(m);
+			});
+			return trace;
+		});
 	}
 
 	public CompletableFuture<Trace> loadMachineWithoutConfirmation(Machine m) {
