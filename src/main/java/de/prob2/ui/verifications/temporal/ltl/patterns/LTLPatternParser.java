@@ -117,9 +117,4 @@ public final class LTLPatternParser {
 		pattern.setCode(code);
 		return pattern;
 	}
-	
-	public static void parseMachine(Machine machine) {
-		machine.getLTLPatterns().forEach(item -> LTLPatternParser.addPattern(item, machine));
-	}
-	
 }

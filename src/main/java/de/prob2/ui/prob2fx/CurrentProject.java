@@ -24,7 +24,6 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.vomanager.Requirement;
 
 import javafx.application.Platform;
@@ -173,7 +172,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			List<Path> allFiles = trace.getModel().getAllFiles();
 			Platform.runLater(() -> {
 				m.updateModifiedTimesAndResetIfChanged(allFiles);
-				LTLPatternParser.parseMachine(m);
+				m.reinitPatternManager();
 			});
 			return trace;
 		});

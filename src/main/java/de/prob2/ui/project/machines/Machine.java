@@ -38,6 +38,7 @@ import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
+import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -85,7 +86,7 @@ public final class Machine {
 	private final ListProperty<String> historyChartItems;
 
 	@JsonIgnore
-	private PatternManager patternManager = new PatternManager();
+	private PatternManager patternManager;
 	@JsonIgnore
 	private Map<Path, FileTime> sourceFileModifiedTimes;
 	@JsonIgnore
@@ -115,6 +116,7 @@ public final class Machine {
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
 
+		this.patternManager = null;
 		this.sourceFileModifiedTimes = null;
 		this.cachedEditorState = new CachedEditorState();
 
@@ -384,8 +386,10 @@ public final class Machine {
 		return patternManager;
 	}
 
-	public void clearPatternManager() {
-		this.getPatternManager().getPatterns().clear();
+	public void reinitPatternManager() {
+		this.getLTLPatterns().forEach(LTLPatternItem::reset);
+		this.patternManager = new PatternManager();
+		this.getLTLPatterns().forEach(item -> LTLPatternParser.addPattern(item, this));
 	}
 
 	@JsonIgnore
@@ -415,8 +419,6 @@ public final class Machine {
 		for (var vt : this.getValidationTasks()) {
 			vt.reset();
 		}
-		this.getLTLPatterns().forEach(LTLPatternItem::reset);
-		this.patternManager = new PatternManager();
 	}
 
 	private static Map<Path, FileTime> readFileModifiedTimes(List<Path> files) throws IOException {

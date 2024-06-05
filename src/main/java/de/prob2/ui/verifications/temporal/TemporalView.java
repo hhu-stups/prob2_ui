@@ -115,9 +115,6 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		setBindings();
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvPattern.itemsProperty().unbind();
-			if (from != null) {
-				from.clearPatternManager();
-			}
 			if (to != null) {
 				tvPattern.itemsProperty().bind(to.getLTLPatterns());
 				managePatternTable(to.getLTLPatterns());
