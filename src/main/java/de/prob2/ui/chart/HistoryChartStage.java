@@ -315,7 +315,7 @@ public final class HistoryChartStage extends Stage {
 		if (machine == null) {
 			return;
 		}
-		machine.setHistoryChartItems(formulaCodeList);
+		machine.getHistoryChartItems().setAll(formulaCodeList);
 	}
 
 	private static void updateXAxisTicks(NumberAxis axis, double upperBound) {

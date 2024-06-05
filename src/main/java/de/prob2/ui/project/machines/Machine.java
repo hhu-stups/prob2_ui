@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.google.common.base.MoreObjects;
 import com.google.common.io.MoreFiles;
 
@@ -95,7 +95,17 @@ public final class Machine {
 	private final BooleanProperty changed = new SimpleBooleanProperty(false);
 
 	public Machine(final String name, final String description, final Path location) {
-		this(name, description, location, null);
+		this(
+			name,
+			description,
+			location,
+			null,
+			Collections.emptyList(),
+			Collections.emptyList(),
+			Collections.emptyList(),
+			null,
+			Collections.emptyList()
+		);
 	}
 
 	@JsonCreator
@@ -103,18 +113,23 @@ public final class Machine {
 		@JsonProperty("name") final String name,
 		@JsonProperty("description") final String description,
 		@JsonProperty("location") final Path location,
-		@JsonProperty("lastUsedPreferenceName") final String lastUsedPreferenceName
+		@JsonProperty("lastUsedPreferenceName") final String lastUsedPreferenceName,
+		@JsonProperty("validationTasks") final List<IValidationTask> validationTasks,
+		@JsonProperty("ltlPatterns") final List<LTLPatternItem> ltlPatterns,
+		@JsonProperty("simulations") final List<SimulationModel> simulations,
+		@JsonProperty("visBVisualisation") final Path visBVisualisation,
+		@JsonProperty("historyChartItems") final List<String> historyChartItems
 	) {
 		this.name = new SimpleStringProperty(this, "name", Objects.requireNonNull(name, "name"));
 		this.description = new SimpleStringProperty(this, "description", Objects.requireNonNull(description, "description"));
 		this.location = Objects.requireNonNull(location, "location");
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", lastUsedPreferenceName != null && !lastUsedPreferenceName.isEmpty() ? lastUsedPreferenceName : Preference.DEFAULT.getName());
 
-		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList());
-		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList());
-		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList());
-		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
-		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList());
+		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList(validationTasks));
+		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList(ltlPatterns));
+		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList(simulations));
+		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", visBVisualisation);
+		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList(historyChartItems));
 
 		this.patternManager = null;
 		this.sourceFileModifiedTimes = null;
@@ -184,11 +199,6 @@ public final class Machine {
 	@JsonGetter("validationTasks")
 	public ObservableList<IValidationTask> getValidationTasks() {
 		return this.validationTasks;
-	}
-
-	@JsonSetter("validationTasks")
-	private void setValidationTasks(List<IValidationTask> validationTasks) {
-		this.getValidationTasks().setAll(validationTasks);
 	}
 
 	@JsonIgnore
@@ -332,11 +342,6 @@ public final class Machine {
 		return this.ltlPatterns;
 	}
 
-	@JsonSetter("ltlPatterns")
-	private void setLTLPatterns(final List<LTLPatternItem> ltlPatterns) {
-		this.getLTLPatterns().setAll(ltlPatterns);
-	}
-
 	@JsonIgnore
 	public ObservableList<SymbolicAnimationItem> getSymbolicAnimationFormulas() {
 		return this.getValidationTasksByClass(SymbolicAnimationItem.class);
@@ -352,11 +357,6 @@ public final class Machine {
 		return this.simulations;
 	}
 
-	@JsonSetter("simulations")
-	private void setSimulations(List<SimulationModel> simulations) {
-		this.getSimulations().setAll(simulations);
-	}
-
 	public ObjectProperty<Path> visBVisualizationProperty() {
 		return visBVisualisation;
 	}
@@ -366,7 +366,6 @@ public final class Machine {
 		return visBVisualisation.get();
 	}
 
-	@JsonSetter("visBVisualisation")
 	public void setVisBVisualisation(Path visBVisualisation) {
 		this.visBVisualizationProperty().set(visBVisualisation);
 	}
@@ -374,11 +373,6 @@ public final class Machine {
 	@JsonGetter("historyChartItems")
 	public ReadOnlyListProperty<String> getHistoryChartItems() {
 		return this.historyChartItems;
-	}
-
-	@JsonSetter("historyChartItems")
-	public void setHistoryChartItems(List<String> historyChartItems) {
-		this.getHistoryChartItems().setAll(historyChartItems);
 	}
 
 	@JsonIgnore

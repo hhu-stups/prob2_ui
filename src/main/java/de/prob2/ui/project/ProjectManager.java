@@ -237,11 +237,6 @@ public class ProjectManager {
 			((ProjectJsonContext) this.jacksonManager.getContext()).setProjectLocation(path);
 			final Project project = this.jacksonManager.readFromFile(path);
 			project.setLocation(path.getParent());
-			// Because Jackson fills in some parts of the project using setters (especially in Machine),
-			// the project will be marked as changed immediately after loading,
-			// which makes the project savedness tracking behave incorrectly.
-			// To fix this, we forcibly mark the project as unchanged again after it is loaded.
-			project.resetChanged();
 			// Fill in ReplayTrace fields that Jackson cannot set.
 			for (final Machine machine : project.getMachines()) {
 				for (final ReplayTrace trace : machine.getTraces()) {
