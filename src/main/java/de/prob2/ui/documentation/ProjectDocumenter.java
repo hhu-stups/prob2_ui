@@ -8,7 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -40,7 +39,6 @@ public class ProjectDocumenter {
 	private final boolean makePdf;
 	private final List<Machine> machines;
 	private final CurrentProject project;
-	private final HashMap<String,String> tracesHtmlPaths;
 
 	@Inject
 	public ProjectDocumenter(
@@ -65,7 +63,6 @@ public class ProjectDocumenter {
 		this.machines = machines;
 		this.directory = dir;
 		this.filename = filename;
-		tracesHtmlPaths = new HashMap<>();
 	}
 
 	private static Process createPdf(String filename, Path directory) throws IOException {
@@ -131,7 +128,6 @@ public class ProjectDocumenter {
 		context.put("util", TemplateUtility.class);
 		context.put("Transition", Transition.class);
 		context.put("i18n", i18n);
-		context.put("traceHtmlPaths",tracesHtmlPaths);
 		return context;
 	}
 

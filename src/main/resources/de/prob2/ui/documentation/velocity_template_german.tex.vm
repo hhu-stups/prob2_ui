@@ -187,15 +187,9 @@ $util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgesc
 	\rowcolor{white} \caption{$util.latexSafe($trace.getName())} \\
 	\end{longtable}
 	\end{tablestyling}
-	#*each trace visualization is created and its path is saved in a hashmap with the name as the key.
-	  This is so that the result can be referenced accordingly in the appendix.*#
-	#call($traceHtmlPaths.put($trace.getName(), $documenter.saveTraceHtml($machine,$trace)))
+
 	\begin{center}
-	\IfFileExists{$traceHtmlPaths.get($trace.getName())}{
-		Für die HTML Trace Visualisierung von $util.latexSafe($trace.getName()) \href{run:$traceHtmlPaths.get($trace.getName())}{[klicke hier!]}\\
-	}{
-	Die HTML Visualisierungsdatei ist nicht verfügbar.
-	}
+	Für die HTML Trace Visualisierung von $util.latexSafe($trace.getName()) \href{run:$documenter.saveTraceHtml($machine,$trace)}{[klicke hier!]}
 	\end{center}
 	#end
 #end

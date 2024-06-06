@@ -179,15 +179,9 @@ $pattern.getCode()
 	\rowcolor{white} \caption{$util.latexSafe($trace.getName())} \\
 	\end{longtable}
 	\end{tablestyling}
-	#*each trace visualization is created and its path is saved in a hashmap with the name as the key.
-	  This is so that the result can be referenced accordingly in the appendix.*#
-	#call( $traceHtmlPaths.put($trace.getName(), $documenter.saveTraceHtml($machine,$trace)) )
+
 	\begin{center}
-	\IfFileExists{$traceHtmlPaths.get($trace.getName())}{
-		For the HTML Trace Visualization of $util.latexSafe($trace.getName()) \href{run:$traceHtmlPaths.get($trace.getName())}{[click here!]}\\
-	}{
-	The HTML file for the Trace Visualization isn't available.
-	}
+	For the HTML Trace Visualization of $util.latexSafe($trace.getName()) \href{run:$documenter.saveTraceHtml($machine,$trace)}{[click here!]}
 	\end{center}
 #end
 #end

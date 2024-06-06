@@ -64,10 +64,6 @@ public class TemplateUtility {
 		return MoreFiles.asCharSource(project.getLocation().resolve(elem.getLocation()), StandardCharsets.UTF_8).read();
 	}
 
-	public static String getTraceHtmlCode(String relativePath, ProjectDocumenter projectDocumenter) throws IOException {
-		return MoreFiles.asCharSource(projectDocumenter.getDirectory().resolve(relativePath), StandardCharsets.UTF_8).read();
-	}
-
 	public static boolean formulaHasResult(TemporalFormulaItem formula){return (formula.getResultItem() != null);}
 	public static boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
 	public static boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
