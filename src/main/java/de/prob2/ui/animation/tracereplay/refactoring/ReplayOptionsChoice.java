@@ -15,9 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class ReplayOptionsChoice extends TitledPane{
-
-
+public final class ReplayOptionsChoice extends TitledPane {
 	private final List<String> identifier;
 	private final StageManager stageManager;
 

@@ -13,7 +13,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-public class Preference {
+public final class Preference {
 	public static final Preference DEFAULT = new Preference("default", Collections.emptyMap());
 	
 	private final StringProperty name;

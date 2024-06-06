@@ -98,8 +98,7 @@ import org.controlsfx.glyphfont.Glyph;
 
 @FXMLInjected
 @Singleton
-public class SimulatorStage extends Stage {
-
+public final class SimulatorStage extends Stage {
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
 
 		private final SimulatorStage simulatorStage;

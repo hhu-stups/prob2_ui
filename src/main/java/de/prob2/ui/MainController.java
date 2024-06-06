@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class MainController extends BorderPane {
+public final class MainController extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
 	public static final String DEFAULT_PERSPECTIVE = "main.fxml";

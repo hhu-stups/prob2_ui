@@ -22,8 +22,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.text.Text;
 
 @FXMLInjected
-public class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
-
+public final class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
 	private final I18n i18n;
 
 	@FXML

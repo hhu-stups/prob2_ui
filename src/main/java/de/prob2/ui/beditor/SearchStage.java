@@ -30,8 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class SearchStage extends Stage {
-
+public final class SearchStage extends Stage {
 	private static final String STYLE_ERROR = "search-error";
 	private static final String STYLE_NO_RESULTS = "search-no-results";
 	private static final String STYLE_RESULTS = "search-has-results";

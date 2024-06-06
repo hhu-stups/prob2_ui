@@ -39,7 +39,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
-public class StatsView extends ScrollPane {
+public final class StatsView extends ScrollPane {
 	@FXML
 	private SimpleStatsView simpleStatsView;
 	@FXML

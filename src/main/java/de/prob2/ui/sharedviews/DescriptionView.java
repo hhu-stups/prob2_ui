@@ -16,7 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.AnchorPane;
 
-public class DescriptionView extends AnchorPane {
+public final class DescriptionView extends AnchorPane {
 	@FXML
 	private Label titelLabel;
 	@FXML

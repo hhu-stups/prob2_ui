@@ -36,8 +36,7 @@ import javafx.stage.Stage;
 import javafx.util.Callback;
 
 @Singleton
-public class VisBDebugStage extends Stage {
-
+public final class VisBDebugStage extends Stage {
 	private static final class VisBSelectionCell implements Callback<TableColumn.CellDataFeatures<VisBTableItem, CheckBox>, ObservableValue<CheckBox>> {
 
 		private final CheckBox selectAll;

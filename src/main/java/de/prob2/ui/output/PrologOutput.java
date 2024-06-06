@@ -10,7 +10,7 @@ import javafx.application.Platform;
 import org.fxmisc.richtext.InlineCssTextArea;
 
 @Singleton
-public class PrologOutput extends InlineCssTextArea {
+public final class PrologOutput extends InlineCssTextArea {
 	private final IConsoleOutputListener outputListener;
 
 	@Inject

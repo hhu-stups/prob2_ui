@@ -55,7 +55,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class ProjectManager {
+public final class ProjectManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
 

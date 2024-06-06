@@ -43,8 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @FXMLInjected
-public class DynamicTableView extends BorderPane implements Builder<DynamicTableView> {
-
+public final class DynamicTableView extends BorderPane implements Builder<DynamicTableView> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicTableView.class);
 	private static final double MINIMUM_TABLE_COLUMN_WIDTH = 160.0;
 	private static final String SOURCE_COLUMN_NAME = "Source";

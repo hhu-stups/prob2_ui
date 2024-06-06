@@ -52,7 +52,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class MachineLoader {
+public final class MachineLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachineLoader.class);
 
 	private final CurrentProject currentProject;

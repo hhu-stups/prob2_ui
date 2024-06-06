@@ -32,7 +32,7 @@ import javafx.scene.control.TableColumn;
 
 @FXMLInjected
 @Singleton
-public class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormulaItem> {
+public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckingFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));

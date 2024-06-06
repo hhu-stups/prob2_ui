@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * Everything that can be done in Java only and uses interaction with ProB2-UI should be in here, not in the other classes.
  */
 @Singleton
-public class VisBController {
+public final class VisBController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBController.class);
 
 	public static final Path NO_PATH = Paths.get("");

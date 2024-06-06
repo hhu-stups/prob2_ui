@@ -2,8 +2,7 @@ package de.prob2.ui.consoles.groovy.objects;
 
 import javafx.beans.property.SimpleStringProperty;
 
-public class GroovyClassItem {
-
+public final class GroovyClassItem {
 	private final SimpleStringProperty attribute;
 	private final SimpleStringProperty value;
 

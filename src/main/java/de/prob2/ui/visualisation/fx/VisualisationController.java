@@ -51,8 +51,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class VisualisationController {
-
+public final class VisualisationController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationController.class);
 
 	private final ChangeListener<Trace> currentTraceChangeListener;

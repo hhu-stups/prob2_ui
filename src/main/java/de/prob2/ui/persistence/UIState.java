@@ -24,8 +24,7 @@ import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
 @Singleton
-public class UIState {
-	
+public final class UIState {
 	private final ObjectProperty<Locale> localeOverride;
 	private PerspectiveKind perspectiveKind;
 	private String perspective;

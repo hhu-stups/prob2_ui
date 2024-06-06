@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
  */
 @Singleton
 @FXMLInjected
-public class VisBView extends BorderPane {
+public final class VisBView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBView.class);
 	private final Injector injector;
 	private final I18n i18n;

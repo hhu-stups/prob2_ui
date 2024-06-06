@@ -2,8 +2,7 @@ package de.prob2.ui.consoles.groovy.objects;
 
 import javafx.beans.property.SimpleStringProperty;
 
-public class CollectionDataItem {
-
+public final class CollectionDataItem {
 	private final SimpleStringProperty index;
 	private final SimpleStringProperty value;
 

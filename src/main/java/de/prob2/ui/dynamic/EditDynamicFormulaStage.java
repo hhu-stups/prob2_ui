@@ -18,8 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
-public class EditDynamicFormulaStage extends Stage {
-
+public final class EditDynamicFormulaStage extends Stage {
 	@FunctionalInterface
 	public interface DynamicFormulaTaskFactory {
 		VisualizationFormulaTask createTask(String id, String formula);

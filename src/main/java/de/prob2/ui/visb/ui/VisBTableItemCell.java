@@ -20,7 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.layout.VBox;
 
-public class VisBTableItemCell extends TableCell<VisBTableItem, String> {
+public final class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 	@FXML
 	private VBox itemBox;
 	@FXML

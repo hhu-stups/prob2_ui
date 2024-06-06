@@ -39,8 +39,7 @@ import javafx.stage.Stage;
 
 @FXMLInjected
 @Singleton
-public class SimulationTracesView extends Stage {
-
+public final class SimulationTracesView extends Stage {
 	public static class SimulationTraceItem implements Translatable {
 
 		private final SimulationItem parent;

@@ -62,8 +62,7 @@ import org.slf4j.LoggerFactory;
  */
 @FXMLInjected
 @Singleton
-public class RulesView extends AnchorPane{
-
+public final class RulesView extends AnchorPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RulesView.class);
 
 	@FXML

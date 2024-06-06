@@ -42,7 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 
-public class ReplayedTraceStatusAlert extends Alert {
+public final class ReplayedTraceStatusAlert extends Alert {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReplayedTraceStatusAlert.class);
 
 	private final CurrentTrace currentTrace;

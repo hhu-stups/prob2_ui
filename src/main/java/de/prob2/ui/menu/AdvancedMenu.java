@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class AdvancedMenu extends Menu {
+public final class AdvancedMenu extends Menu {
 	@FXML
 	private MenuItem refactorTraceItem;
 

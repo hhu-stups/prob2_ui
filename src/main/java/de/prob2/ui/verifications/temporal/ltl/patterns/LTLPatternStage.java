@@ -12,7 +12,7 @@ import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage
 
 import javafx.fxml.FXML;
 
-public class LTLPatternStage extends TemporalItemStage {
+public final class LTLPatternStage extends TemporalItemStage {
 	private final CurrentProject currentProject;
 
 	private LTLPatternItem result;

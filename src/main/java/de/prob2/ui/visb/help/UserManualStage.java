@@ -10,7 +10,7 @@ import javafx.scene.web.WebView;
 import javafx.stage.Stage;
 
 @Singleton
-public class UserManualStage extends Stage {
+public final class UserManualStage extends Stage {
 	@FXML
 	private WebView userManualWebView;
 

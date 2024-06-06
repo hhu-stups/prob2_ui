@@ -38,7 +38,7 @@ import javafx.scene.input.MouseButton;
 
 @FXMLInjected
 @Singleton
-public class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationItem> {
+public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGenerationItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.generate"));

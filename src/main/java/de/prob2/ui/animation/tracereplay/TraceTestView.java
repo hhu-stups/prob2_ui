@@ -63,8 +63,7 @@ import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
 
 @FXMLInjected
-public class TraceTestView extends Stage {
-
+public final class TraceTestView extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceTestView.class);
 
 	private class TracePositionHighlightCell<S, T> extends TableCell<S, T> {

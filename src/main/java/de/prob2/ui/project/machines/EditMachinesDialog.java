@@ -20,7 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 
-public class EditMachinesDialog extends Dialog<Machine> {
+public final class EditMachinesDialog extends Dialog<Machine> {
 	@FXML
 	private TextField nameField;
 	@FXML

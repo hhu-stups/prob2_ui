@@ -65,8 +65,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DynamicVisualizationStage extends Stage {
-
+public final class DynamicVisualizationStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicVisualizationStage.class);
 
 	// commands

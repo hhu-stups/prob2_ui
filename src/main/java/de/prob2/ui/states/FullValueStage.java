@@ -49,8 +49,7 @@ import org.fxmisc.richtext.StyleClassedTextArea;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class FullValueStage extends Stage {
-
+public final class FullValueStage extends Stage {
 	private static final Pattern PLAIN_LABEL_PATTERN = Pattern.compile("[\\w\\s]+");
 	private static final Logger LOGGER = LoggerFactory.getLogger(FullValueStage.class);
 

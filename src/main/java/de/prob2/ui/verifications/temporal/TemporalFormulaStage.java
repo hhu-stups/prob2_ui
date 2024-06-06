@@ -30,8 +30,7 @@ import javafx.scene.layout.HBox;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
-public class TemporalFormulaStage extends TemporalItemStage {
-
+public final class TemporalFormulaStage extends TemporalItemStage {
 	@FXML
 	private ChoiceBox<ValidationTaskType<?>> cbType;
 

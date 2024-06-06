@@ -13,7 +13,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 
-public class ListViewEvent extends ListCell<VisBEvent> {
+public final class ListViewEvent extends ListCell<VisBEvent> {
 	@FXML
 	private VBox eventBox;
 	@FXML

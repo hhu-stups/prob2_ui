@@ -27,8 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 @Singleton
-public class UIInteractionHandler {
-
+public final class UIInteractionHandler {
 	private final ObjectProperty<Transition> lastUserInteraction;
 
 	private final Scheduler scheduler;

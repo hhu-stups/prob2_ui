@@ -49,8 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @FXMLInjected
-public class DynamicGraphView extends BorderPane implements Builder<DynamicGraphView> {
-
+public final class DynamicGraphView extends BorderPane implements Builder<DynamicGraphView> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DynamicGraphView.class);
 
 	private static final KeyCombination ZOOM_RESET = new KeyCharacterCombination("0", KeyCombination.SHORTCUT_DOWN, KeyCombination.SHIFT_ANY);

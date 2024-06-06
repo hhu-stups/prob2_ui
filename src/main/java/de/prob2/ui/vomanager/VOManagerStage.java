@@ -68,7 +68,7 @@ import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
-public class VOManagerStage extends Stage {
+public final class VOManagerStage extends Stage {
 	public enum Mode {
 		NONE, REQUIREMENT
 	}

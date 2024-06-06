@@ -58,8 +58,7 @@ import org.slf4j.LoggerFactory;
  */
 @FXMLInjected
 @Singleton
-public class ProBPluginManager {
-
+public final class ProBPluginManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginManager.class);
 
 	private final ProBPluginHelper proBPluginHelper;

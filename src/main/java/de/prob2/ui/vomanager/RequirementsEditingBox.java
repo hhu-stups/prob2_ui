@@ -44,7 +44,7 @@ import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
-public class RequirementsEditingBox extends VBox {
+public final class RequirementsEditingBox extends VBox {
 	private static final Comparator<? super String> VT_ID_COMPARATOR = new AlphanumericComparator(Locale.ROOT);
 
 	@FXML
