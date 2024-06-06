@@ -562,7 +562,7 @@
 }
 
 .editor .editor_unsupported{
-    -fx-fill:#b58900; /* $yellow */
+	-fx-fill:#b58900; /* $yellow */
 	/* -fx-background-color: yellow; */
 }
 
@@ -1133,8 +1133,8 @@
 
 .simulation-item {
 	-fx-cell-size: 6.8em;
-  	-fx-border-width: 2px 0px 0px 0px;
-  	-fx-border-color: black;
+	-fx-border-width: 2px 0px 0px 0px;
+	-fx-border-color: black;
 }
 .simulation-item .id {
 	-fx-font-family: ARIAL;
