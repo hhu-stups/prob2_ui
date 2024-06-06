@@ -13,7 +13,7 @@ import javafx.beans.property.MapPropertyBase;
 import javafx.collections.FXCollections;
 
 @Singleton
-public class GlobalPreferences extends MapPropertyBase<String, String> {
+public final class GlobalPreferences extends MapPropertyBase<String, String> {
 	@Inject
 	private GlobalPreferences(final Config config) {
 		super(FXCollections.observableHashMap());

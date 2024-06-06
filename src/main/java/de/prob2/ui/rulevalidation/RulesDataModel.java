@@ -19,8 +19,7 @@ import java.util.*;
  * @since 20.12.17
  */
 @Singleton
-public class RulesDataModel {
-
+public final class RulesDataModel {
 	private static final IdentifierNotInitialised IDENTIFIER_NOT_INITIALISED = new IdentifierNotInitialised(new ArrayList<>());
 
 	private RulesModel model;

@@ -16,8 +16,7 @@ import de.prob2.ui.simulation.simulators.SimulationSaver;
 import java.io.IOException;
 
 @Singleton
-public class SimulationScenarioHandler {
-
+public final class SimulationScenarioHandler {
 	private final StageManager stageManager;
 
 	private final CurrentTrace currentTrace;

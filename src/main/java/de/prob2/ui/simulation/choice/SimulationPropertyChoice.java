@@ -23,8 +23,7 @@ import javafx.util.StringConverter;
 
 @Singleton
 @FXMLInjected
-public class SimulationPropertyChoice extends GridPane {
-
+public final class SimulationPropertyChoice extends GridPane {
 	public static class SimulationPropertyItem {
 
 		private final SimulationCheckingType checkingType;

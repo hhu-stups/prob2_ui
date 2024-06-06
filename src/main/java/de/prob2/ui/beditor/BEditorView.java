@@ -72,7 +72,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class BEditorView extends BorderPane {
+public final class BEditorView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorView.class);
 	private static final Charset EDITOR_CHARSET = StandardCharsets.UTF_8;
 

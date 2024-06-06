@@ -38,8 +38,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @Singleton
-public class SimulationItemHandler {
-
+public final class SimulationItemHandler {
 	private final CurrentProject currentProject;
 
 	private final CurrentTrace currentTrace;

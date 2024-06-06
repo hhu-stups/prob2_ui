@@ -61,8 +61,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.qos.logback.classic.ClassicConstants;
 
-public class ProB2 extends Application {
-
+public final class ProB2 extends Application {
 	public static final String BUG_REPORT_URL = "https://github.com/hhu-stups/prob-issues/issues/new/choose";
 
 	// This logger needs to be non-static,

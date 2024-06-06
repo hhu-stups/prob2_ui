@@ -17,8 +17,7 @@ import javafx.scene.layout.AnchorPane;
 
 @FXMLInjected
 @Singleton
-public class VerificationsView extends AnchorPane {
-	
+public final class VerificationsView extends AnchorPane {
 	@FXML
 	private TabPane tabPane;
 	

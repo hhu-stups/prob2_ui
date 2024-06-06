@@ -24,7 +24,7 @@ import java.util.List;
 
 @FXMLInjected
 @Singleton
-public class MainView extends StackPane {
+public final class MainView extends StackPane {
 
 	@FXML
 	private TabPane tabPane;

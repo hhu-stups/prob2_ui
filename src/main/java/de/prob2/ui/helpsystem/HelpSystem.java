@@ -30,8 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class HelpSystem extends StackPane {
-
+public final class HelpSystem extends StackPane {
 	private final class HelpCell extends TreeCell<String> {
 		private HelpCell() {
 			super();

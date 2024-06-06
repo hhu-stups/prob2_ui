@@ -39,7 +39,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
 @Singleton
-public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
+public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.temporal.temporalView.contextMenu.check"));

@@ -20,8 +20,7 @@ import javafx.scene.layout.VBox;
 
 @FXMLInjected
 @Singleton
-public class BConsoleView extends VBox {
-
+public final class BConsoleView extends VBox {
 	private final CurrentTrace currentTrace;
 	private final I18n i18n;
 

@@ -32,8 +32,7 @@ import org.fxmisc.wellbehaved.event.Nodes;
 
 @Singleton
 @FXMLInjected
-public class BEditor extends ExtendedCodeArea {
-
+public final class BEditor extends ExtendedCodeArea {
 	private final CurrentProject currentProject;
 	private final CodeCompletion<BCCItem> codeCompletion;
 

@@ -46,8 +46,7 @@ import javafx.scene.layout.AnchorPane;
 
 @FXMLInjected
 @Singleton
-public class ProofObligationView extends AnchorPane {
-
+public final class ProofObligationView extends AnchorPane {
 	private final StageManager stageManager;
 
 	private final CurrentProject currentProject;

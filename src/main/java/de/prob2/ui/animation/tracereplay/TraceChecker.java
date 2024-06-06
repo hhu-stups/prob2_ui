@@ -27,8 +27,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class TraceChecker {
-
+public final class TraceChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
 
 	private final CurrentTrace currentTrace;

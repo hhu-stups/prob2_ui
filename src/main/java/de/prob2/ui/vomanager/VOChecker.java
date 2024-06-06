@@ -25,7 +25,7 @@ import de.prob2.ui.vomanager.ast.OrValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
 @Singleton
-public class VOChecker {
+public final class VOChecker {
 	private final CurrentProject currentProject;
 
 	private final CurrentTrace currentTrace;

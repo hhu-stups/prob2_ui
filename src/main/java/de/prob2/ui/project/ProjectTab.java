@@ -23,8 +23,7 @@ import javafx.scene.text.Text;
 
 @FXMLInjected
 @Singleton
-public class ProjectTab extends Tab {
-
+public final class ProjectTab extends Tab {
 	@FXML
 	private Label projectNameLabel;
 	@FXML

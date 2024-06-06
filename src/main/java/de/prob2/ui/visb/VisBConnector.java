@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * The VisBConnector is used as a connection between the JavaFX Webview and the JavaScript Globals.
  */
 @Singleton
-public class VisBConnector {
+public final class VisBConnector {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBConnector.class);
 	private final Injector injector;
 

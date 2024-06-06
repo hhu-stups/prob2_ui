@@ -21,7 +21,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
-public class MachineTableView extends TableView<Machine> {
+public final class MachineTableView extends TableView<Machine> {
 	private final I18n i18n;
 
 	private static final class StatusIconCell extends TableCell<Machine, MachineCheckingStatus> {

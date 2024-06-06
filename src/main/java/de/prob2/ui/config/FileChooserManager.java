@@ -44,7 +44,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 @Singleton
-public class FileChooserManager {
+public final class FileChooserManager {
 	public enum Kind {
 		PROJECTS_AND_MACHINES, NEW_MACHINE, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, SIMULATION, HISTORY_CHART
 	}

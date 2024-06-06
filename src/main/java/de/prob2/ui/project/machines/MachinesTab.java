@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class MachinesTab extends Tab {
+public final class MachinesTab extends Tab {
 	private final class MachinesItem extends ListCell<Machine> {
 		@FXML private Label nameLabel;
 		@FXML private BindableGlyph statusIcon;

@@ -30,8 +30,7 @@ import java.util.Set;
  * @since 20.12.17
  */
 @Singleton
-public class RulesController {
-
+public final class RulesController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RulesController.class);
 
 	private final StageManager stageManager;

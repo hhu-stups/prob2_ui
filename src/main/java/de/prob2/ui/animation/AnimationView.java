@@ -12,8 +12,7 @@ import javafx.scene.layout.AnchorPane;
 
 @FXMLInjected
 @Singleton
-public class AnimationView extends AnchorPane {
-	
+public final class AnimationView extends AnchorPane {
 	@FXML
 	private TabPane tabPane;
 			

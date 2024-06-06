@@ -27,7 +27,7 @@ import javafx.scene.layout.HBox;
 
 @FXMLInjected
 @Singleton
-public class StatusBar extends HBox {
+public final class StatusBar extends HBox {
 	public enum LoadingStatus implements Translatable {
 		NOT_LOADING("common.noModelLoaded"),
 		PARSING_FILE("statusbar.loadStatus.parsingFile"),

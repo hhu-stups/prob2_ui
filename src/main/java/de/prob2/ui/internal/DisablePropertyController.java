@@ -13,7 +13,7 @@ import javafx.beans.property.SimpleBooleanProperty;
  * which is used to disable UI elements that would hang when used while probcli is busy.
  */
 @Singleton
-public class DisablePropertyController {
+public final class DisablePropertyController {
 	private final BooleanProperty disable;
 	private BooleanExpression disableExpression;
 

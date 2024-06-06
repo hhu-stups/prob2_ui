@@ -23,8 +23,7 @@ import javafx.scene.input.MouseButton;
 
 @FXMLInjected
 @Singleton
-public class PreferencesTab extends Tab {
-
+public final class PreferencesTab extends Tab {
 	@FXML
 	private ListView<Preference> preferencesListView;
 	@FXML
