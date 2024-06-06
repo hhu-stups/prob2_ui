@@ -75,6 +75,7 @@ application {
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
+	options.release = Integer.parseInt(java.sourceCompatibility.toString())
 }
 
 configurations {
