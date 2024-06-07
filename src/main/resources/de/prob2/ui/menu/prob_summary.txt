@@ -96,19 +96,19 @@ Relations:
  r~        inverse of relation
  r[S]      relational image
  r1<+r2    relational overriding (r2 overrides r1)
- r1><r2    direct product {x,(y,z) | x,y:r1 & x,z:r2}
- (r1;r2)     relational composition {x,y| x|->z:r1 & z|->y:r2}
- (r1||r2)    parallel product {((x,v),(y,w)) | x,y:r1 & v,w:r2}
- prj1(S,T)     projection function (usage prj1(Dom,Ran)(Pair))
- prj2(S,T)     projection function (usage prj2(Dom,Ran)(Pair))
-               prj1(Pair) or prj2(Pair) are also allowed
+ r1><r2    direct product (all pairs (x,(y,z)) with x,y:r1 and x,z:r2)
+ (r1;r2)   relational composition {x,y| x|->z:r1 & z|->y:r2}
+ (r1||r2)  parallel product (all pairs ((x,v),(y,w)) with x,y:r1 and v,w:r2)
+ prj1(S,T) projection function (usage prj1(Dom,Ran)(Pair))
+ prj2(S,T) projection function (usage prj2(Dom,Ran)(Pair))
+           prj1(Pair) and prj2(Pair) are also allowed
+ fnc(r)    translate relation A<->B into function A+->POW(B)
+ rel(r)    translate relation A<->POW(B) into relation A<->B
  closure1(r)   transitive closure
  closure(r)    reflexive & transitive closure
                (equal to id(TYPEOF_r) \/ closure1(r))
  iterate(r,n)  iteration of r with n>=0 
                (Note: iterate(r,0) = id(s) where s =TYPEOF_r)
- fnc(r)    translate relation A<->B into function A+->POW(B)
- rel(r)    translate relation A<->POW(B) into relation A<->B
 
 Functions:
 ----------
@@ -130,11 +130,11 @@ Sequences:
   []         empty sequence
   [E]        singleton sequence
   [E,F]      constructed sequence
-  seq(S)     set of sequences over Sequence
+  seq(S)     set of sequences over S
   seq1(S)    set of non-empty sequences over S
-  iseq(S)    set of injective sequences
-  iseq1(S)   set of non-empty injective sequences
-  perm(S)    set of bijective sequences (permutations)
+  iseq(S)    set of injective sequences over S
+  iseq1(S)   set of non-empty injective sequences over S
+  perm(S)    set of bijective sequences (permutations) over S
   size(s)    size of sequence
   s^t        concatenation
   E->s       prepend element
@@ -145,8 +145,8 @@ Sequences:
   front(s)   front of sequence (all but last element)
   tail(s)    tail of sequence (all but first element)
   conc(S)    concatenation of sequence of sequences
-  s/|\n     take first n elements of sequence
-  s\|/n     drop first n elements from sequence
+  s/|\n      take first n elements of sequence
+  s\|/n      drop first n elements from sequence
   
 Records:
 --------
@@ -166,12 +166,18 @@ Strings:
 --------
   "astring"     a specific (single-line) string value
   '''astring''' an alternate way of writing (multi-line) strings, no need to escape "
+  ```tstring``` template strings, where ${Expr} parts are evaluated and converted to string
   STRING        the set of all strings
-                Note: for the moment enumeration of strings is limited (if a variable
-                of type STRING is not given a value by the machine, then ProB assumes
-                STRING = { "STR1", "STR2" })
+                Note: for the moment enumeration of strings is limited
 Atelier-B does not support any operations on strings, apart from equality and disequality.
-However, the ProB external function library contains several operators on strings.
+In ProB, however, some of the sequence operators work also on strings:
+  size(s)     the length of a string s
+  rev(s)      the reverse of a string s
+  s ^ t       the concatenation of two strings
+  conc(ss)    the concatenation of a sequence of strings
+You can turn this support off using the STRING_AS_SEQUENCE preference.
+The library LibraryStrings.def in stdlib contains additional useful external functions
+(like TO_STRING, STRING_SPLIT, FORMAT_TO_STRING, INT_TO_HEX_STRING, ...).
 ProB also allows multi-line strings.
 As of version 1.7.0, ProB supports the following escape sequences within strings:
  \n   newline (ASCII character 13)
@@ -180,29 +186,23 @@ As of version 1.7.0, ProB supports the following escape sequences within strings
  \"   the double quote symbol "
  \'   the single quote symbol '
  \\   the backslash symbol
-
 Within single-line string literals, you do not need to escape '.
 Within multi-line string literals, you do not need to escape " and you can use
 tabs and newlines.
 ProB assumes that all B machines and strings use the UTF-8 encoding.
-The library LibraryStrings.def in stdlib contains additional useful external functions
-(like TO_STRING, STRING_SPLIT, FORMAT_TO_STRING, INT_TO_HEX_STRING, ...).
-Some of the sequence operators work also on strings:
-  size(s)     the length of a string s
-  rev(s)      the reverse a string s
-  s ^ t       the concatenation of two strings
-  conc(ss)    the concatenation of a sequence of strings
-You can turn this support off using the STRING_AS_SEQUENCE preference.
+
 
 Reals:
 ------
  REAL        set of reals
  FLOAT       set of floating point numbers
- i.f         real literal, where i and f are sequences of digits
+ i.f         real literal in decimal notation, where i and f are natural numbers
+ i.fEg       real literal in scientific notation, where i,f are natural numbers and g is an integer
  real(n)     convert an integer n into a real number
  floor(r)    convert a real r into an integer
  ceiling(r)  convert a real r into an integer
  
+One can also use a lowercase e for literals in scientific notation (e..g, 1.0e-10).
 Standard arithmetic operators can be applied to reals: +, - , *, /, SIGMA, PI.
 Exponentiation of a real with an integer is also allowed.
 The comparison predicates =, /=, <, >, <=, >= also all work.
@@ -213,6 +213,7 @@ thus does not hold.
 The library LibraryReals.def in stdlib contains additional useful external functions
 (like RSIN, RCOS, RLOG, RSQRT, RPOW, ...).
 You can turn off support for REALS using the preference ALLOW_REALS.
+The REAL_SOLVER preference how constraints are solved.
 
 
 Trees:
@@ -371,11 +372,11 @@ The following definitions allow providing a custom state graph (n can be empty o
                               the label to be used for the edges
   In both cases e can also be a record which defines default dot attributes like
   color, shape, style and description, e.g.:
-     CUSTOM_GRAPH_NODES == rec(color:"blue", shape:"rect", nodes:e);
-     CUSTOM_GRAPH_EDGES == rec(color:"red", style:"dotted", edges:e)
+     CUSTOM_GRAPH_NODES == rec(color:"blue", shape:"rect", style:"filled", nodes:e);
+     CUSTOM_GRAPH_EDGES == rec(color:"red", style:"dotted", dir:"none", penwidth:2, edges:e)
   You can now also use a single CUSTOM_GRAPH definition of a record with global graph attributes
-  (like rankdir or layout) and optionally with edges and nodes attributes (replacing
-   CUSTOM_GRAPH_EDGES and CUSTOM_GRAPH_NODES respectively), e.g.:
+   (like rankdir or layout) and optionally with edges and nodes attributes (replacing
+    CUSTOM_GRAPH_EDGES and CUSTOM_GRAPH_NODES respectively), e.g.:
     CUSTOM_GRAPH == rec(layout:"circo", nodes:mynodes, edges:myedges)
 These DEFINITIONS affect VisB:
   VISB_JSON_FILE == "PATH to .json"  a path to a default VisB JSON file for visualisation; 
@@ -434,6 +435,7 @@ Here is a definition of an inductive type IntList for lists of
 integers constructed using inil and icons:
 FREETYPES
   IntList = inil, icons(INTEGER*IntList)
+
   
 Differences with Atelier B
 --------------------------
@@ -467,11 +469,13 @@ Here are the main differences with Atelier B:
   - ProB allows to use <> for the empty sequence (but this use is deprecated)
   - ProB allows escape codes (\n, \', \", see above) and supports UTF-8 characters in strings,
     and ProB allows multi-line string literals written using three apostrophes ('''string''')
+    as well as template strings using three backquotes (e.g., ```1+2=${1+2}```)
   - ProB allows a she-bang line in machine files starting with #!
  (If you discover more differences, please let us know!)
   - ProB allows btrue and bfalse as predicates in B machines
   - ProB allows to use the Event-B relation operators <<->, <->>, <<->>
   - ProB allows set comprehensions with an extra expression like {x•x:1..10|x*x}.
+  - The FREETYPES section and the external libraries (LibraryStrings.def, ...) do not exist in Atelier-B
 
 See also our Wiki for documentation:
   http://www.stups.hhu.de/ProB/index.php5/Current_Limitations
