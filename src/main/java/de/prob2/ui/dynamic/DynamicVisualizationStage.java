@@ -471,7 +471,7 @@ public final class DynamicVisualizationStage extends Stage {
 		for (var commandItem : commandItems) {
 			String category = null;
 			for (var term : commandItem.getAdditionalInfo()) {
-				if (term.isTerm() && "group".equals(term.getFunctor()) && term.getArity() == 1) {
+				if (term.hasFunctor("group", 1)) {
 					category = term.getArgument(1).atomToString();
 				}
 			}
