@@ -111,18 +111,21 @@ public final class LTLFormulaItem extends TemporalFormulaItem {
 				throw new AssertionError("Unhandled start state type: " + this.getStartState());
 		}
 		
+		LTL formula;
 		try {
-			final LTL formula = LTLFormulaParser.parseFormula(getCode(), context.machine(), context.stateSpace().getModel());
-			final LTLChecker checker = new LTLChecker(context.stateSpace(), formula, null, getStateLimit(), startState);
-			final IModelCheckingResult result = checker.call();
-			if (result instanceof LTLError) {
-				handleFormulaParseErrors(((LTLError)result).getErrors());
-			} else {
-				handleFormulaResult(result);
-			}
+			formula = LTLFormulaParser.parseFormula(getCode(), context.machine(), context.stateSpace().getModel());
 		} catch (ProBError error) {
 			LOGGER.error("Could not parse LTL formula: ", error);
 			handleFormulaParseErrors(error.getErrors());
+			return;
+		}
+		
+		LTLChecker checker = new LTLChecker(context.stateSpace(), formula, null, getStateLimit(), startState);
+		IModelCheckingResult result = checker.call();
+		if (result instanceof LTLError) {
+			handleFormulaParseErrors(((LTLError)result).getErrors());
+		} else {
+			handleFormulaResult(result);
 		}
 	}
 }

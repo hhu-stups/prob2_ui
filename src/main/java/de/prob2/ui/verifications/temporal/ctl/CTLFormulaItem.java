@@ -111,18 +111,21 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 				throw new AssertionError("Unhandled start state type: " + this.getStartState());
 		}
 		
+		CTL formula;
 		try {
-			final CTL formula = CTLFormulaParser.parseFormula(getCode(), context.stateSpace().getModel());
-			final CTLChecker checker = new CTLChecker(context.stateSpace(), formula, null, getStateLimit(), startState);
-			final IModelCheckingResult result = checker.call();
-			if (result instanceof CTLError) {
-				handleFormulaParseErrors(((CTLError) result).getErrors());
-			} else {
-				handleFormulaResult(result);
-			}
+			formula = CTLFormulaParser.parseFormula(getCode(), context.stateSpace().getModel());
 		} catch (ProBError error) {
 			LOGGER.error("Could not parse LTL formula: ", error);
 			handleFormulaParseErrors(error.getErrors());
+			return;
+		}
+		
+		CTLChecker checker = new CTLChecker(context.stateSpace(), formula, null, getStateLimit(), startState);
+		IModelCheckingResult result = checker.call();
+		if (result instanceof CTLError) {
+			handleFormulaParseErrors(((CTLError) result).getErrors());
+		} else {
+			handleFormulaResult(result);
 		}
 	}
 }
