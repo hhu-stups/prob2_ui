@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.temporal.ltl.formula;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ClassicalBParser;
@@ -10,25 +9,13 @@ import de.be4.classicalb.core.parser.IDefinitions;
 import de.be4.ltl.core.parser.LtlParseException;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.LTL;
-import de.prob.check.CheckInterrupted;
-import de.prob.check.IModelCheckingResult;
-import de.prob.check.LTLChecker;
-import de.prob.check.LTLCounterExample;
-import de.prob.check.LTLError;
-import de.prob.check.LTLNotYetFinished;
-import de.prob.check.LTLOk;
 import de.prob.exception.ProBError;
 import de.prob.ltl.parser.LtlParser;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.parserbase.ProBParserBase;
-import de.prob.statespace.StateSpace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
-import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.LTLParseListener;
 
 import org.slf4j.Logger;
@@ -79,58 +66,5 @@ public final class LTLFormulaChecker {
 			bParser.setDefinitions(definitions);
 		}
 		return LTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser), machine.getPatternManager());
-	}
-	
-	private static void handleFormulaResult(LTLFormulaItem item, IModelCheckingResult result) {
-		assert !(result instanceof LTLError);
-		
-		if (result instanceof LTLCounterExample) {
-			item.setCounterExample(((LTLCounterExample)result).getTraceToLoopEntry());
-		} else {
-			item.setCounterExample(null);
-		}
-		
-		if (result instanceof LTLOk) {
-			if(item.getExpectedResult()) {
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.temporal.result.succeeded.message"));
-			} else {
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.temporal.result.counterExampleFound.message"));
-			}
-		} else if (result instanceof LTLCounterExample) {
-			if(item.getExpectedResult()) {
-				item.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.temporal.result.counterExampleFound.message"));
-			} else {
-				item.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.temporal.result.succeeded.example.message"));
-			}
-		} else if (result instanceof LTLNotYetFinished || result instanceof CheckInterrupted) {
-			item.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage()));
-		} else {
-			throw new AssertionError("Unhandled LTL checking result type: " + result.getClass());
-		}
-	}
-	
-	private static void handleFormulaParseErrors(LTLFormulaItem item, List<ErrorItem> errorMarkers) {
-		item.setCounterExample(null);
-		String errorMessage = errorMarkers.stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
-		if(errorMessage.isEmpty()) {
-			errorMessage = "Parse Error in typed formula";
-		}
-		item.setResultItem(new TemporalCheckingResultItem(Checked.INVALID_TASK, errorMarkers, "common.result.message", errorMessage));
-	}
-
-	public static void checkFormula(LTLFormulaItem item, Machine machine, StateSpace stateSpace) {
-		try {
-			final LTL formula = parseFormula(item.getCode(), machine, stateSpace.getModel());
-			final LTLChecker checker = new LTLChecker(stateSpace, formula, null, item.getStateLimit());
-			final IModelCheckingResult result = checker.call();
-			if (result instanceof LTLError) {
-				handleFormulaParseErrors(item, ((LTLError)result).getErrors());
-			} else {
-				handleFormulaResult(item, result);
-			}
-		} catch (ProBError error) {
-			LOGGER.error("Could not parse LTL formula: ", error);
-			handleFormulaParseErrors(item, error.getErrors());
-		}
 	}
 }
