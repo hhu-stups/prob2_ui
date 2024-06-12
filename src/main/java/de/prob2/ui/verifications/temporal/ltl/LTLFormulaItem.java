@@ -22,7 +22,7 @@ import de.prob2.ui.verifications.CheckingResultItem;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
-import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaChecker;
+import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaParser;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
@@ -93,7 +93,7 @@ public final class LTLFormulaItem extends TemporalFormulaItem {
 	@Override
 	public void execute(ExecutionContext context) {
 		try {
-			final LTL formula = LTLFormulaChecker.parseFormula(getCode(), context.machine(), context.stateSpace().getModel());
+			final LTL formula = LTLFormulaParser.parseFormula(getCode(), context.machine(), context.stateSpace().getModel());
 			final LTLChecker checker = new LTLChecker(context.stateSpace(), formula, null, getStateLimit());
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof LTLError) {

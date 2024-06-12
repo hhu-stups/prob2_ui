@@ -14,8 +14,8 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.parserbase.ProBParserBase;
 
-public final class CTLFormulaChecker {
-	private CTLFormulaChecker() {
+public final class CTLFormulaParser {
+	private CTLFormulaParser() {
 		throw new AssertionError("Utility class");
 	}
 	
@@ -39,6 +39,6 @@ public final class CTLFormulaChecker {
 			IDefinitions definitions = ((ClassicalBModel) model).getDefinitions();
 			bParser.setDefinitions(definitions);
 		}
-		return CTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser));
+		return CTLFormulaParser.parseFormula(code, new ClassicalBParser(bParser));
 	}
 }

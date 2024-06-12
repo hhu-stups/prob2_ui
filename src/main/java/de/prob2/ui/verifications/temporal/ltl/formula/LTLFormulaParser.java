@@ -21,11 +21,10 @@ import de.prob2.ui.verifications.temporal.ltl.LTLParseListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class LTLFormulaChecker {
+public final class LTLFormulaParser {
+	private static final Logger LOGGER = LoggerFactory.getLogger(LTLFormulaParser.class);
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(LTLFormulaChecker.class);
-	
-	private LTLFormulaChecker() {
+	private LTLFormulaParser() {
 		throw new AssertionError("Utility class");
 	}
 	
@@ -65,6 +64,6 @@ public final class LTLFormulaChecker {
 			IDefinitions definitions = ((ClassicalBModel) model).getDefinitions();
 			bParser.setDefinitions(definitions);
 		}
-		return LTLFormulaChecker.parseFormula(code, new ClassicalBParser(bParser), machine.getPatternManager());
+		return LTLFormulaParser.parseFormula(code, new ClassicalBParser(bParser), machine.getPatternManager());
 	}
 }

@@ -9,10 +9,10 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.temporal.ctl.CTLFormulaChecker;
+import de.prob2.ui.verifications.temporal.ctl.CTLFormulaParser;
 import de.prob2.ui.verifications.temporal.ctl.CTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
-import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaChecker;
+import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -143,7 +143,7 @@ public final class TemporalFormulaStage extends TemporalItemStage {
 		if (type == BuiltinValidationTaskTypes.LTL) {
 			LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
 			try {
-				LTLFormulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
+				LTLFormulaParser.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 			} catch (ProBError e) {
 				this.showErrors(e.getErrors());
 				return;
@@ -152,7 +152,7 @@ public final class TemporalFormulaStage extends TemporalItemStage {
 		} else if (type == BuiltinValidationTaskTypes.CTL) {
 			CTLFormulaItem item = new CTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
 			try {
-				CTLFormulaChecker.parseFormula(item.getCode(), currentTrace.getModel());
+				CTLFormulaParser.parseFormula(item.getCode(), currentTrace.getModel());
 			} catch (ProBError e) {
 				this.showErrors(e.getErrors());
 				return;

@@ -93,7 +93,7 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 	@Override
 	public void execute(ExecutionContext context) {
 		try {
-			final CTL formula = CTLFormulaChecker.parseFormula(getCode(), context.stateSpace().getModel());
+			final CTL formula = CTLFormulaParser.parseFormula(getCode(), context.stateSpace().getModel());
 			final CTLChecker checker = new CTLChecker(context.stateSpace(), formula, null, getStateLimit());
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof CTLError) {
