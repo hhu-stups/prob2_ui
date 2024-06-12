@@ -23,6 +23,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
@@ -51,6 +52,12 @@ public final class TemporalFormulaStage extends TemporalItemStage {
 
 	@FXML
 	private Spinner<Integer> stateLimit;
+
+	@FXML
+	private RadioButton startStateAllInitialStates;
+
+	@FXML
+	private RadioButton startStateCurrentState;
 
 	@FXML
 	private Button btShowBuiltins;
@@ -121,6 +128,19 @@ public final class TemporalFormulaStage extends TemporalItemStage {
 		} else {
 			this.chooseStateLimit.setSelected(false);
 		}
+
+		switch (item.getStartState()) {
+			case ALL_INITIAL_STATES:
+				this.startStateAllInitialStates.setSelected(true);
+				break;
+
+			case CURRENT_STATE:
+				this.startStateCurrentState.setSelected(true);
+				break;
+
+			default:
+				throw new AssertionError("Unhandled start state type: " + item.getStartState());
+		}
 	}
 
 	private int getStateLimit() {
@@ -134,6 +154,16 @@ public final class TemporalFormulaStage extends TemporalItemStage {
 		return -1;
 	}
 
+	private TemporalFormulaItem.StartState getStartState() {
+		if (this.startStateAllInitialStates.isSelected()) {
+			return TemporalFormulaItem.StartState.ALL_INITIAL_STATES;
+		} else if (this.startStateCurrentState.isSelected()) {
+			return TemporalFormulaItem.StartState.CURRENT_STATE;
+		} else {
+			throw new AssertionError("No start state selected?!");
+		}
+	}
+
 	@FXML
 	private void applyFormula() {
 		result = null;
@@ -141,7 +171,7 @@ public final class TemporalFormulaStage extends TemporalItemStage {
 		String code = taCode.getText();
 		ValidationTaskType<?> type = cbType.getValue();
 		if (type == BuiltinValidationTaskTypes.LTL) {
-			LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
+			LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), this.getStartState(), cbExpectedResult.getValue());
 			try {
 				LTLFormulaParser.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 			} catch (ProBError e) {
@@ -150,7 +180,7 @@ public final class TemporalFormulaStage extends TemporalItemStage {
 			}
 			result = item;
 		} else if (type == BuiltinValidationTaskTypes.CTL) {
-			CTLFormulaItem item = new CTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
+			CTLFormulaItem item = new CTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), this.getStartState(), cbExpectedResult.getValue());
 			try {
 				CTLFormulaParser.parseFormula(item.getCode(), currentTrace.getModel());
 			} catch (ProBError e) {

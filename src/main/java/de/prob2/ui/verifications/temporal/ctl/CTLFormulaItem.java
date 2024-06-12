@@ -17,6 +17,7 @@ import de.prob.check.CTLOk;
 import de.prob.check.CheckInterrupted;
 import de.prob.check.IModelCheckingResult;
 import de.prob.exception.ProBError;
+import de.prob.statespace.State;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
@@ -38,9 +39,10 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 		@JsonProperty("code") String code,
 		@JsonProperty("description") String description,
 		@JsonProperty("stateLimit") int stateLimit,
+		@JsonProperty("startState") StartState startState,
 		@JsonProperty("expectedResult") boolean expectedResult
 	) {
-		super(id, code, description, stateLimit, expectedResult);
+		super(id, code, description, stateLimit, startState, expectedResult);
 	}
 	
 	@Override
@@ -58,8 +60,6 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 		
 		if (result instanceof CTLCounterExample) {
 			this.setCounterExample(((CTLCounterExample) result).getTrace());
-		} else {
-			this.setCounterExample(null);
 		}
 		
 		if (result instanceof CTLOk) {
@@ -82,7 +82,6 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 	}
 	
 	private void handleFormulaParseErrors(List<ErrorItem> errorMarkers) {
-		this.setCounterExample(null);
 		String errorMessage = errorMarkers.stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
 		if(errorMessage.isEmpty()) {
 			errorMessage = "Parse Error in typed formula";
@@ -92,9 +91,29 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 	
 	@Override
 	public void execute(ExecutionContext context) {
+		this.setCounterExample(null);
+		
+		State startState;
+		switch (this.getStartState()) {
+			case ALL_INITIAL_STATES:
+				startState = null;
+				break;
+			
+			case CURRENT_STATE:
+				if (context.trace() == null) {
+					this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "verifications.temporal.result.noCurrentState.message"));
+					return;
+				}
+				startState = context.trace().getCurrentState();
+				break;
+			
+			default:
+				throw new AssertionError("Unhandled start state type: " + this.getStartState());
+		}
+		
 		try {
 			final CTL formula = CTLFormulaParser.parseFormula(getCode(), context.stateSpace().getModel());
-			final CTLChecker checker = new CTLChecker(context.stateSpace(), formula, null, getStateLimit());
+			final CTLChecker checker = new CTLChecker(context.stateSpace(), formula, null, getStateLimit(), startState);
 			final IModelCheckingResult result = checker.call();
 			if (result instanceof CTLError) {
 				handleFormulaParseErrors(((CTLError) result).getErrors());

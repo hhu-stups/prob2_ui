@@ -27,6 +27,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
+import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 
@@ -53,7 +54,7 @@ class ProjectDocumenterTest {
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
 	final ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
-	final LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "", -1, true);
+	final LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "", -1, TemporalFormulaItem.StartState.ALL_INITIAL_STATES, true);
 	final SymbolicModelCheckingItem symbolicCheckingFormulaItem = new SymbolicModelCheckingItem("", SymbolicModelcheckCommand.Algorithm.BMC);
 	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
 
