@@ -2,6 +2,7 @@ package de.prob2.ui.sharedviews;
 
 import java.util.Optional;
 
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -188,7 +189,8 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	}
 
 	protected ExecutionContext getCurrentExecutionContext() {
-		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+		Trace trace = currentTrace.get();
+		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), trace.getStateSpace(), trace);
 	}
 
 	protected abstract void executeItemSync(final T item, final ExecutionContext context);

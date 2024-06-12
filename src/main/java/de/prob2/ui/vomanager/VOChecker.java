@@ -152,7 +152,11 @@ public final class VOChecker {
 
 		// Once the correct machine is loaded, check the VO.
 		return loadFuture.thenCompose(trace -> {
-			ExecutionContext context = new ExecutionContext(currentProject.get(), machine, trace.getStateSpace());
+			// The ExecutionContext for VO expressions intentionally doesn't contain a trace,
+			// because the current trace is in an unpredictable state:
+			// if the correct machine was already loaded,
+			// the user may have manually animated the model or executed other validation tasks already.
+			ExecutionContext context = new ExecutionContext(currentProject.get(), machine, trace.getStateSpace(), null);
 			return checkVOExpression(validationObligation.getParsedExpression(), context);
 		});
 	}
