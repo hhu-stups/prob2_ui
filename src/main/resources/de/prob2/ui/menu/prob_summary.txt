@@ -479,42 +479,42 @@ Basically, ProB tries to be compatible with Atelier B and conforms to the semant
 of Abrial's B-Book and of Atelier B's reference manual
 (http://www.atelierb.eu/php/documents-en.php#manuel-reference).
 Here are the main differences with Atelier B:
-  - tuples without parentheses are not supported; write (a,b,c) instead of a,b,c
-  - relational composition has to be wrapped into parentheses; write (f;g)
-  - parallel product also has to be wrapped into parentheses; write (f||g)
-  - not all tree operators are supported
-  - the VALUES clause is only partially supported
-  - definitions have to be syntactically correct and be either an expression,
-    predicate or substitution;
-    the arguments to definitions have to be expressions;
-    definitions which are predicates or substitutions must be declared before first use
-  - definitions are local to a machine
-  - for ProB the order of fields in a record is not relevant (internally the fields are
-    sorted), Atelier-B reports a type error if the order of the name of the fields changes
-  - well-definedness: for disjunctions and implications ProB uses the L-system
-    of well-definedness (i.e., for P => Q, P should be well-defined and
-    if P is true then Q should also be well-defined)
-  - ProB allows WHILE loops and sequential composition in abstract machines
-  - ProB now allows the IF-THEN-ELSE and LET for expressions and predicates
-    (e.g., IF x<0 THEN -x ELSE x END or LET x BE x=f(y) IN x+x END)
-  - ProB's type inference is stronger than Atelier-B's, much less typing predicates
-    are required
-  - You can apply prj1 and prj2 without providing the type arguments, e.g., prj2(prj1(1|->2|->3))
-  - ProB accepts operations with parameters but without pre-conditions
-  - ProB allows identifiers consisting of a single character and identifiers in single backquotes (`id`)
-  - ProB allows to use <> for the empty sequence (but this use is deprecated)
-  - ProB allows escape codes (\n, \', \", see above) and supports UTF-8 characters in strings,
-    and ProB allows multi-line string literals written using three apostrophes ('''string''')
-    as well as template strings using three backquotes (e.g., ```1+2=${1+2}```)
-  - ProB allows a she-bang line in machine files starting with #!
-  - ProB allows btrue and bfalse as predicates in B machines
-  - ProB allows to use the Event-B relation operators <<->, <->>, <<->>
-  - ProB allows set comprehensions with an extra expression like {x•x:1..10|x*x}.
-  - The FREETYPES section and the external libraries (LibraryStrings.def, ...) do not exist in Atelier-B
+ - tuples without parentheses are not supported; write (a,b,c) instead of a,b,c
+ - relational composition has to be wrapped into parentheses; write (f;g)
+ - parallel product also has to be wrapped into parentheses; write (f||g)
+ - not all tree operators are supported
+ - the VALUES clause is only partially supported
+ - definitions have to be syntactically correct and be either an expression,
+   predicate or substitution;
+   the arguments to definitions have to be expressions;
+   definitions which are predicates or substitutions must be declared before first use
+ - definitions are local to a machine
+ - for ProB the order of fields in a record is not relevant (internally the fields are
+   sorted), Atelier-B reports a type error if the order of the name of the fields changes
+ - well-definedness: for disjunctions and implications ProB uses the L-system
+   of well-definedness (i.e., for P => Q, P should be well-defined and
+   if P is true then Q should also be well-defined)
+ - ProB allows WHILE loops and sequential composition in abstract machines
+ - ProB now allows the IF-THEN-ELSE and LET for expressions and predicates
+   (e.g., IF x<0 THEN -x ELSE x END or LET x BE x=f(y) IN x+x END)
+ - ProB's type inference is stronger than Atelier-B's, much less typing predicates
+   are required
+ - You can apply prj1 and prj2 without providing the type arguments, e.g., prj2(prj1(1|->2|->3))
+ - ProB accepts operations with parameters but without pre-conditions
+ - ProB allows identifiers consisting of a single character and identifiers in single backquotes (`id`)
+ - ProB allows to use <> for the empty sequence (but this use is deprecated)
+ - ProB allows escape codes (\n, \', \", see above) and supports UTF-8 characters in strings,
+   and ProB allows multi-line string literals written using three apostrophes ('''string''')
+   as well as template strings using three backquotes (e.g., ```1+2=${1+2}```)
+ - ProB allows a she-bang line in machine files starting with #!
+ - ProB allows btrue and bfalse as predicates in B machines
+ - ProB allows to use the Event-B relation operators <<->, <->>, <<->>
+ - ProB allows set comprehensions with an extra expression like {x•x:1..10|x*x}.
+ - The FREETYPES section and the external libraries (LibraryStrings.def, ...) do not exist in Atelier-B
 
 See also our Wiki for documentation:
-  http://www.stups.hhu.de/ProB/index.php5/Current_Limitations
-  http://www.stups.hhu.de/ProB/index.php5/Using_ProB_with_Atelier_B
+ http://www.stups.hhu.de/ProB/index.php5/Current_Limitations
+ http://www.stups.hhu.de/ProB/index.php5/Using_ProB_with_Atelier_B
 
 Also note that there are various differences between BToolkit and AtelierB/ProB:
  - AtelierB/ProB do not allow true as predicate;
