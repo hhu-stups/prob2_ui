@@ -112,8 +112,8 @@ public class ProjectDocumenter {
 
 	private static void initVelocityEngine() {
 		Properties p = new Properties();
-		p.setProperty("resource.loader", "class");
-		p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		p.setProperty("resource.loaders", "class");
+		p.setProperty("resource.loader.class.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		Velocity.init(p);
 	}
 
