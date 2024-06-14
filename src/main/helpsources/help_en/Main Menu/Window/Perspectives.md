@@ -106,8 +106,8 @@ As you can see, the default perspective consists of several components:
 	* VerificationsView
 	* ProjectView
 	* HistoryView
-    * VisualisationsView
-    * BConsole
+	* VisualisationsView
+	* BConsole
 * MenuController
 * StatusBar
 

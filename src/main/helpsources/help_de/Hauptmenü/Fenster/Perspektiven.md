@@ -106,8 +106,8 @@ Wie man sehen kann, besteht die voreingestellte Perspektive aus diversen Kompone
 	* VerificationsView
 	* ProjectView
 	* HistoryView
-    * VisualisationsView
-    * BConsole
+	* VisualisationsView
+	* BConsole
 * MenuController
 * StatusBar
 

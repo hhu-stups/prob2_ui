@@ -8,23 +8,22 @@
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1">
-    <fx:define>
-        <FontSize fx:id="fontSize"/>
-    </fx:define>
-    <top>
-        <ToolBar>
-            <Button fx:id="saveButton" onAction="#save">
-                <graphic>
-                    <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
-                                   bindableFontSize="${fontSize.fontSize * 2}"/>
-                </graphic>
-                <tooltip>
-                    <Tooltip text="%common.buttons.saveAs"/>
-                </tooltip>
-            </Button>
-        </ToolBar>
-    </top>
-    <center>
-        <TableView fx:id="tableView"/>
-    </center>
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+	<top>
+		<ToolBar>
+			<Button fx:id="saveButton" onAction="#save">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize * 2}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.buttons.saveAs"/>
+				</tooltip>
+			</Button>
+		</ToolBar>
+	</top>
+	<center>
+		<TableView fx:id="tableView"/>
+	</center>
 </fx:root>

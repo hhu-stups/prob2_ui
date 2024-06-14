@@ -9,8 +9,8 @@ By default, the main window is split into three vertical panes:
 
 * In the middle 
 	* the [State View](Main%20View/State%20View.md), containing the current state of the B machine, 
-    * the Visualisationview that offers fast access to two visualisation-options: the [State Visualisation](Main%20View/State%20Visualisation.md) and the [VisB-Plugin](Main%20View/VisB.md)
-    * the [Editor](Main%20View/Editor.md), to edit und save currently loaded machines,
+	* the Visualisationview that offers fast access to two visualisation-options: the [State Visualisation](Main%20View/State%20Visualisation.md) and the [VisB-Plugin](Main%20View/VisB.md)
+	* the [Editor](Main%20View/Editor.md), to edit und save currently loaded machines,
 	* the [B Console](Main%20View/B%20Console.md), a built-in console to evaluate B-formulas.
   
 

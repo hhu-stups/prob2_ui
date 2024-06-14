@@ -9,30 +9,24 @@
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-    <VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-          AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
-        <AnchorPane fx:id="topBar">
-            <HBox spacing="10.0" AnchorPane.leftAnchor="10.0"
-                  AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0"
-                  AnchorPane.bottomAnchor="10.0" alignment="CENTER">
+	<VBox AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="5.0">
+		<AnchorPane fx:id="topBar">
+			<HBox spacing="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.bottomAnchor="10.0" alignment="CENTER">
 				<ToggleButton fx:id="tagListButton" onAction="#handleTagButton">
 					<graphic>
 						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FILTER" bindableFontSize="${fontSize.fontSize + 2}" />
 					</graphic>
 				</ToggleButton>
-                <Button fx:id="filterButton"
-                              onAction="#handleFilterButton" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
-                    <graphic>
-                        <BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH"/>
-                    </graphic>
-                </Button>
-                <TextField fx:id="filterTextField" onAction="#handleFilterButton"
-                           promptText="%rulevalidation.view.filter" HBox.hgrow="ALWAYS" prefHeight="${filterButton.width}" />
+				<Button fx:id="filterButton" onAction="#handleFilterButton" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH"/>
+					</graphic>
+				</Button>
+				<TextField fx:id="filterTextField" onAction="#handleFilterButton" promptText="%rulevalidation.view.filter" HBox.hgrow="ALWAYS" prefHeight="${filterButton.width}" />
 				<Button fx:id="executeAllButton" text="%rulevalidation.view.executeAll" onAction="#executeAll" styleClass="button-blue"/>
-            </HBox>
-        </AnchorPane>
-		<StackPane VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0"
-				   AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+			</HBox>
+		</AnchorPane>
+		<StackPane VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
 			<TreeTableView fx:id="treeTableView" maxWidth="Infinity" showRoot="false">
 				<columnResizePolicy>
 					<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
@@ -73,60 +67,59 @@
 				</ScrollPane>
 			</Pane>
 		</StackPane>
-        <HBox VBox.vgrow="never" alignment="CENTER_LEFT">
-            <Separator HBox.hgrow="NEVER" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
-            <Label HBox.hgrow="NEVER" text="%rulevalidation.view.summary" style="-fx-text-fill:rgb(128,128,128);">
-                <padding>
-                    <Insets left="5" right="5"/>
-                </padding>
-            </Label>
-            <Separator HBox.hgrow="ALWAYS" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
-        </HBox>
-        <HBox VBox.vgrow="never" alignment="CENTER_LEFT" spacing="5">
-            <HBox HBox.hgrow="ALWAYS" spacing="10" alignment="CENTER_LEFT">
-                <HBox alignment="CENTER_LEFT" >
-                    <Label text="%rulevalidation.view.summary.rules"/>
+		<HBox VBox.vgrow="never" alignment="CENTER_LEFT">
+			<Separator HBox.hgrow="NEVER" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
+			<Label HBox.hgrow="NEVER" text="%rulevalidation.view.summary" style="-fx-text-fill:rgb(128,128,128);">
+				<padding>
+					<Insets left="5" right="5"/>
+				</padding>
+			</Label>
+			<Separator HBox.hgrow="ALWAYS" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
+		</HBox>
+		<HBox VBox.vgrow="never" alignment="CENTER_LEFT" spacing="5">
+			<HBox HBox.hgrow="ALWAYS" spacing="10" alignment="CENTER_LEFT">
+				<HBox alignment="CENTER_LEFT" >
+					<Label text="%rulevalidation.view.summary.rules"/>
 					<Label text=" "/>
-                    <Label fx:id="rulesLabel" text="-"/>
-                    <padding>
-                        <Insets left="5" right="5"/>
-                    </padding>
-                </HBox>
-                <HBox alignment="CENTER_LEFT" >
-                    <Label text="%rulevalidation.view.summary.notChecked"/>
+					<Label fx:id="rulesLabel" text="-"/>
+					<padding>
+						<Insets left="5" right="5"/>
+					</padding>
+				</HBox>
+				<HBox alignment="CENTER_LEFT" >
+					<Label text="%rulevalidation.view.summary.notChecked"/>
 					<Label text=" "/>
-                    <Label fx:id="notCheckedLabel" text="-"/>
-                    <padding>
-                        <Insets left="5" right="5"/>
-                    </padding>
-                </HBox>
-                <HBox alignment="CENTER_LEFT"  style="-fx-background-color: rgba(76, 175, 80, 0.15)">
-                    <Label text="%rulevalidation.view.summary.success"/>
+					<Label fx:id="notCheckedLabel" text="-"/>
+					<padding>
+						<Insets left="5" right="5"/>
+					</padding>
+				</HBox>
+				<HBox alignment="CENTER_LEFT"  style="-fx-background-color: rgba(76, 175, 80, 0.15)">
+					<Label text="%rulevalidation.view.summary.success"/>
 					<Label text=" "/>
-                    <Label fx:id="successLabel" text="-"/>
-                    <padding>
-                        <Insets left="5" right="5"/>
-                    </padding>
-                </HBox>
-                <HBox alignment="CENTER_LEFT" style="-fx-background-color: rgba(204, 47, 39, 0.15)">
-                    <Label text="%rulevalidation.view.summary.fail"/>
+					<Label fx:id="successLabel" text="-"/>
+					<padding>
+						<Insets left="5" right="5"/>
+					</padding>
+				</HBox>
+				<HBox alignment="CENTER_LEFT" style="-fx-background-color: rgba(204, 47, 39, 0.15)">
+					<Label text="%rulevalidation.view.summary.fail"/>
 					<Label text=" "/>
-                    <Label fx:id="failLabel" text="-"/>
-                    <padding>
-                        <Insets left="5" right="5"/>
-                    </padding>
-                </HBox>
-                <HBox alignment="CENTER_LEFT" style="-fx-background-color:lightgray">
-                    <Label text="%rulevalidation.view.summary.disabled"/>
+					<Label fx:id="failLabel" text="-"/>
+					<padding>
+						<Insets left="5" right="5"/>
+					</padding>
+				</HBox>
+				<HBox alignment="CENTER_LEFT" style="-fx-background-color:lightgray">
+					<Label text="%rulevalidation.view.summary.disabled"/>
 					<Label text=" "/>
-                    <Label fx:id="disabledLabel" text="-"/>
-                    <padding>
-                        <Insets left="5" right="5"/>
-                    </padding>
-                </HBox>
-            </HBox>
-			<Button fx:id="visualizeGraphButton"
-					onAction="#visualizeCompleteDependencyGraph" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
+					<Label fx:id="disabledLabel" text="-"/>
+					<padding>
+						<Insets left="5" right="5"/>
+					</padding>
+				</HBox>
+			</HBox>
+			<Button fx:id="visualizeGraphButton" onAction="#visualizeCompleteDependencyGraph" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="&#xf1e0;" />
 				</graphic>
@@ -139,9 +132,9 @@
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
 			</Button>
-            <padding>
-                <Insets topRightBottomLeft="10"/>
-            </padding>
-        </HBox>
-    </VBox>
+			<padding>
+				<Insets topRightBottomLeft="10"/>
+			</padding>
+		</HBox>
+	</VBox>
 </fx:root>
