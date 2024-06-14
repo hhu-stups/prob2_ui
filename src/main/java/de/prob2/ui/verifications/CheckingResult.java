@@ -21,17 +21,6 @@ public class CheckingResult {
 		return status;
 	}
 	
-	public String getHeaderBundleKey() {
-		return switch (this.getStatus()) {
-			case NOT_CHECKED -> "verifications.result.notChecked.header";
-			case SUCCESS -> "verifications.result.succeeded.header";
-			case FAIL -> "verifications.result.failed.header";
-			case TIMEOUT -> "common.result.timeout.header";
-			case INTERRUPTED -> "common.result.interrupted.header";
-			case INVALID_TASK -> "common.result.invalidTask.header";
-		};
-	}
-	
 	public String getMessageBundleKey() {
 		return messageBundleKey;
 	}
@@ -43,9 +32,9 @@ public class CheckingResult {
 	public void showAlert(final StageManager stageManager, final I18n i18n) {
 		Alert alert = stageManager.makeAlert(
 			this.getStatus().equals(CheckingStatus.SUCCESS) ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR,
-			this.getHeaderBundleKey(),
+			this.getStatus().getTranslationKey(),
 			this.getMessageBundleKey(), this.getMessageParams());
-		alert.setTitle(i18n.translate(this.getHeaderBundleKey()));
+		alert.setTitle(i18n.translate(this.getStatus()));
 		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
 		alert.showAndWait();
 	}

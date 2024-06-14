@@ -50,7 +50,7 @@ $util.getMachineCode($machine,$project)
 		#foreach($item in $machine.getModelCheckingTasks())
 			#if($item.selected())
 				#if($item.getItems().isEmpty())
-			$util.modelcheckingToUIString($item,$i18n) & $i18n.translate("verifications.result.notChecked.header")\\
+			$util.modelcheckingToUIString($item,$i18n) & $i18n.translate("checkingStatus.notChecked")\\
 				#else
 			$util.modelcheckingToUIString($item,$i18n) & #foreach($result in $item.getItems()) $i18n.translate($result.getMessage()) #end \\
 				#end
@@ -85,9 +85,9 @@ $util.getMachineCode($machine,$project)
 $formula.getCode()
 \end{tabularlstlisting} & #if($createDescriptionColumn) $formula.getDescription() & #end
 				#if($util.formulaHasResult($formula))
-					$i18n.translate($formula.getResult().getHeaderBundleKey())\\
+					$i18n.translate($formula.getResult().getStatus())\\
 				#else
-					$i18n.translate("verifications.result.notChecked.header") \\
+					$i18n.translate("checkingStatus.notChecked") \\
 				#end
 			#end
 		#end
@@ -112,9 +112,9 @@ $pattern.getName() &
 $pattern.getCode()
 \end{tabularlstlisting} &
 			#if($util.patternHasResult($pattern))
-				$i18n.translate($pattern.getResult().getHeaderBundleKey()) \\
+				$i18n.translate($pattern.getResult().getStatus()) \\
 			#else
-				$i18n.translate("verifications.result.notChecked.header")\\
+				$i18n.translate("checkingStatus.notChecked")\\
 			#end
 		#end
 		\bottomrule \addlinespace
@@ -143,9 +143,9 @@ $pattern.getCode()
 			#if($sitem.selected())
 				\seqsplit{$util.latexSafe($sitem.getTaskType($i18n))} & #if($createConfigurationColumn)  \seqsplit{$util.symbolicConfigString($sitem,$i18n)} & #end
 				#if($util.symbolicHasResult($sitem))
-					$i18n.translate($sitem.getResult().getHeaderBundleKey()) \\
+					$i18n.translate($sitem.getResult().getStatus()) \\
 				#else
-					$i18n.translate("verifications.result.notChecked.header") \\
+					$i18n.translate("checkingStatus.notChecked") \\
 				#end
 			#end
 		#end

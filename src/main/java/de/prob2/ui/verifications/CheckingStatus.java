@@ -1,25 +1,27 @@
 package de.prob2.ui.verifications;
 
-public enum CheckingStatus {
+import de.prob2.ui.internal.Translatable;
+
+public enum CheckingStatus implements Translatable {
 	/**
 	 * The task did not run yet.
 	 * This status indicates nothing about the task's result.
 	 */
-	NOT_CHECKED,
+	NOT_CHECKED("checkingStatus.notChecked"),
 	
 	/**
 	 * The task ran and completed with a definitely successful result.
 	 * Re-running the task will not change this status,
 	 * unless the model or the task itself changes.
 	 */
-	SUCCESS,
+	SUCCESS("checkingStatus.success"),
 	
 	/**
 	 * The task ran and completed with a definitely failed result.
 	 * Re-running the task will not change this status,
 	 * unless the model or the task itself changes.
 	 */
-	FAIL,
+	FAIL("checkingStatus.fail"),
 	
 	/**
 	 * The task ran,
@@ -31,7 +33,7 @@ public enum CheckingStatus {
 	 * so it may still fail if it continued running.
 	 * Re-running the task with a higher limit may yield a definitive result.
 	 */
-	TIMEOUT,
+	TIMEOUT("checkingStatus.timeout"),
 	
 	/**
 	 * The task ran,
@@ -41,15 +43,26 @@ public enum CheckingStatus {
 	 * so it may still fail if it continued running.
 	 * Re-running the task without interrupting it may yield a definitive result.
 	 */
-	INTERRUPTED,
+	INTERRUPTED("checkingStatus.interrupted"),
 	
 	/**
 	 * The task itself is invalid and cannot be run.
 	 * This is usually because of a parse error in a formula contained in the task.
 	 * Either the model or the task must be adjusted to make the task valid.
 	 */
-	INVALID_TASK,
+	INVALID_TASK("checkingStatus.invalidTask"),
 	;
+	
+	private final String translationKey;
+	
+	CheckingStatus(String translationKey) {
+		this.translationKey = translationKey;
+	}
+	
+	@Override
+	public String getTranslationKey() {
+		return this.translationKey;
+	}
 	
 	public CheckingStatus and(final CheckingStatus other) {
 		if (this == INVALID_TASK || this == FAIL) {
