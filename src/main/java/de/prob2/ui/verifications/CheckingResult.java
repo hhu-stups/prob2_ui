@@ -26,9 +26,9 @@ public class CheckingResult {
 			case NOT_CHECKED -> "verifications.result.notChecked.header";
 			case SUCCESS -> "verifications.result.succeeded.header";
 			case FAIL -> "verifications.result.failed.header";
-			case TIMEOUT -> "verifications.symbolicModelChecking.result.timeout";
+			case TIMEOUT -> "common.result.timeout.header";
 			case INTERRUPTED -> "common.result.interrupted.header";
-			case INVALID_TASK -> "common.result.couldNotParseFormula.header";
+			case INVALID_TASK -> "common.result.invalidTask.header";
 		};
 	}
 	
