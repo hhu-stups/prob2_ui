@@ -13,8 +13,8 @@ import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -70,26 +70,26 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("CBC find sequence interrupted by user", exc);
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResultItem(new CheckingResultItem(CheckingStatus.INTERRUPTED, "common.result.message", exc.getMessage()));
 			return;
 		}
 		
 		switch (cmd.getResult()) {
 			case PATH_FOUND:
-				this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found"));
 				this.setExample(cmd.getTrace());
 				break;
 			case NO_PATH_FOUND:
-				this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound"));
 				break;
 			case TIMEOUT:
-				this.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "animation.symbolic.resultHandler.sequence.result.timeout"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.TIMEOUT, "animation.symbolic.resultHandler.sequence.result.timeout"));
 				break;
 			case INTERRUPTED:
-				this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted"));
 				break;
 			case ERROR:
-				this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "animation.symbolic.resultHandler.sequence.result.error"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.INVALID_TASK, "animation.symbolic.resultHandler.sequence.result.error"));
 				break;
 			default:
 				throw new AssertionError("Unhandled CBC find sequence result: " + cmd.getResult());

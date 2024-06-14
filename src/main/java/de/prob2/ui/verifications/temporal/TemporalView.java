@@ -16,8 +16,8 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
@@ -75,7 +75,7 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	@FXML
 	private TableColumn<TemporalFormulaItem, String> formulaDescriptionColumn;
 	@FXML
-	private TableColumn<LTLPatternItem, Checked> patternStatusColumn;
+	private TableColumn<LTLPatternItem, CheckingStatus> patternStatusColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternColumn;
 	@FXML
@@ -174,8 +174,8 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 
 	private void setBindings() {
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		patternStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		patternStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 

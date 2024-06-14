@@ -22,7 +22,7 @@ import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -46,7 +46,7 @@ public final class SimulationItem implements IValidationTask {
 	private SimulationType type;
 	private Map<String, Object> information;
 	@JsonIgnore
-	private ObjectProperty<Checked> checked;
+	private ObjectProperty<CheckingStatus> status;
 	@JsonIgnore
 	private SimulationStats simulationStats;
 	@JsonIgnore
@@ -54,7 +54,7 @@ public final class SimulationItem implements IValidationTask {
 	@JsonIgnore
 	private ListProperty<List<Integer>> timestamps;
 	@JsonIgnore
-	private ListProperty<Checked> statuses;
+	private ListProperty<CheckingStatus> statuses;
 
 	public SimulationItem(String id, Path simulationPath, SimulationType type, Map<String, Object> information) {
 		this.id = id;
@@ -70,7 +70,7 @@ public final class SimulationItem implements IValidationTask {
 	}
 
 	private void initListeners() {
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 		this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
 		this.statuses = new SimpleListProperty<>(FXCollections.observableArrayList());
@@ -93,18 +93,18 @@ public final class SimulationItem implements IValidationTask {
 	}
 
 	@Override
-	public ObjectProperty<Checked> checkedProperty() {
-		return checked;
+	public ObjectProperty<CheckingStatus> statusProperty() {
+		return status;
 	}
 
 	@Override
-	public Checked getChecked() {
-		return checked.get();
+	public CheckingStatus getStatus() {
+		return status.get();
 	}
 
 	@JsonIgnore
-	public void setChecked(Checked checked) {
-		this.checked.set(checked);
+	public void setStatus(CheckingStatus status) {
+		this.status.set(status);
 	}
 
 	@JsonIgnore
@@ -173,17 +173,17 @@ public final class SimulationItem implements IValidationTask {
 		this.timestamps.setAll(timestamps);
 	}
 
-	public ListProperty<Checked> statusesProperty() {
+	public ListProperty<CheckingStatus> statusesProperty() {
 		return statuses;
 	}
 
 	@JsonIgnore
-	public List<Checked> getStatuses() {
+	public List<CheckingStatus> getStatuses() {
 		return statuses.get();
 	}
 
 	@JsonIgnore
-	public void setStatuses(List<Checked> statuses) {
+	public void setStatuses(List<CheckingStatus> statuses) {
 		this.statuses.setAll(statuses);
 	}
 
@@ -228,7 +228,7 @@ public final class SimulationItem implements IValidationTask {
 
 	@Override
 	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
+		this.setStatus(CheckingStatus.NOT_CHECKED);
 		this.simulationStats = null;
 		this.resetAnimatorDependentState();
 	}

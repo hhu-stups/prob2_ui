@@ -8,7 +8,7 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.verifications.type.ValidationTaskTypeResolver;
 
@@ -28,22 +28,22 @@ public interface IValidationTask {
 	@JsonIgnore
 	String getTaskDescription(I18n i18n);
 
-	ReadOnlyObjectProperty<Checked> checkedProperty();
+	ReadOnlyObjectProperty<CheckingStatus> statusProperty();
 
 	@JsonIgnore
-	Checked getChecked();
+	CheckingStatus getStatus();
 
 	/**
 	 * Reset the parts this task's checking state that depend on the current animator instance ({@link StateSpace}),
 	 * such as {@link Trace} and {@link State} objects.
-	 * Unlike {@link #reset()}, this method doesn't reset {@link #checkedProperty()}
+	 * Unlike {@link #reset()}, this method doesn't reset {@link #statusProperty()}
 	 * and preserves other task-specific state that is independent of the current animator.
 	 */
 	void resetAnimatorDependentState();
 
 	/**
 	 * Reset this task's entire checking state.
-	 * This sets {@link #checkedProperty()} to {@link Checked#NOT_CHECKED}
+	 * This sets {@link #statusProperty()} to {@link CheckingStatus#NOT_CHECKED}
 	 * and sets all other similar task-specific state to its initial values.
 	 * All state that is reset by {@link #resetAnimatorDependentState()} is also reset by this method.
 	 */
@@ -56,7 +56,7 @@ public interface IValidationTask {
 	 *
 	 * <ul>
 	 *     <li>two tasks which have different IDs but are otherwise the same should return false</li>
-	 *     <li>two tasks which have different "checked" status but are otherwise the same should return true</li>
+	 *     <li>two tasks which have different status but are otherwise the same should return true</li>
 	 * </ul>
 	 *
 	 * @param other other object

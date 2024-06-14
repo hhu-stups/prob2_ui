@@ -995,21 +995,21 @@
 	-fx-border-width: 0.5;
 }
 
-.checked-icon.not-checked {
+.checking-status-icon.not-checked {
 	-fx-text-fill: blue;
 }
 
-.checked-icon.success {
+.checking-status-icon.success {
 	-fx-text-fill: green;
 }
 
-.checked-icon.fail {
+.checking-status-icon.fail {
 	-fx-text-fill: red;
 }
 
-.checked-icon.interrupted,
-.checked-icon.timeout,
-.checked-icon.invalid-task {
+.checking-status-icon.interrupted,
+.checking-status-icon.timeout,
+.checking-status-icon.invalid-task {
 	-fx-text-fill: orange;
 }
 

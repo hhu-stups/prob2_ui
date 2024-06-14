@@ -16,8 +16,8 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectExpression;
@@ -69,7 +69,7 @@ public final class RequirementsEditingBox extends VBox {
 	private TableView<ValidationObligation> voTable;
 
 	@FXML
-	private TableColumn<ValidationObligation, Checked> voStatusColumn;
+	private TableColumn<ValidationObligation, CheckingStatus> voStatusColumn;
 
 	@FXML
 	private TableColumn<ValidationObligation, String> voMachineColumn;
@@ -114,8 +114,8 @@ public final class RequirementsEditingBox extends VBox {
 		voTableBox.visibleProperty().bind(oldRequirement.isNotNull());
 		removeVoButton.disableProperty().bind(voTable.getSelectionModel().selectedIndexProperty().isEqualTo(-1));
 
-		voStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		voStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		voStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		voStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 
 		voMachineColumn.setCellFactory(col -> new TableCell<>() {
 			@Override

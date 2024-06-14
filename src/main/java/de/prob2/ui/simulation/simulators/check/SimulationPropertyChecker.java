@@ -1,7 +1,12 @@
 package de.prob2.ui.simulation.simulators.check;
 
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.google.inject.Injector;
+
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -9,11 +14,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
-import de.prob2.ui.verifications.Checked;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import de.prob2.ui.verifications.CheckingStatus;
 
 public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
@@ -39,7 +40,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		this.estimatedValues = new ArrayList<>();
 	}
 
-	public Checked checkTrace(Trace trace, int time) {
+	public CheckingStatus checkTrace(Trace trace, int time) {
 		switch (type) {
 			case ALL_INVARIANTS:
 				return checkAllInvariants(trace);
@@ -63,10 +64,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			default:
 				break;
 		}
-		return Checked.SUCCESS;
+		return CheckingStatus.SUCCESS;
 	}
 
-	public Checked estimateValue(Trace trace) {
+	public CheckingStatus estimateValue(Trace trace) {
 		switch (type) {
 			case AVERAGE:
 				return estimateAverage(trace);
@@ -87,10 +88,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			default:
 				break;
 		}
-		return Checked.SUCCESS;
+		return CheckingStatus.SUCCESS;
 	}
 
-	public Checked checkAllInvariants(Trace trace) {
+	public CheckingStatus checkAllInvariants(Trace trace) {
 		boolean invariantOk = true;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
@@ -102,12 +103,12 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 		if(invariantOk) {
 			numberSuccess++;
-			return Checked.SUCCESS;
+			return CheckingStatus.SUCCESS;
 		}
-		return Checked.FAIL;
+		return CheckingStatus.FAIL;
 	}
 
-	public Checked checkPredicateInvariant(Trace trace) {
+	public CheckingStatus checkPredicateInvariant(Trace trace) {
 		boolean invariantOk = true;
 		String invariant = (String) this.getAdditionalInformation().get("PREDICATE");
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
@@ -124,12 +125,12 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 		if(invariantOk) {
 			numberSuccess++;
-			return Checked.SUCCESS;
+			return CheckingStatus.SUCCESS;
 		}
-		return Checked.FAIL;
+		return CheckingStatus.FAIL;
 	}
 
-	public Checked checkPredicateFinal(Trace trace) {
+	public CheckingStatus checkPredicateFinal(Trace trace) {
 		boolean predicateOk = true;
 		String finalPredicate = (String) this.getAdditionalInformation().get("PREDICATE");
 		int size = trace.getTransitionList().size();
@@ -144,12 +145,12 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 		if(predicateOk) {
 			numberSuccess++;
-			return Checked.SUCCESS;
+			return CheckingStatus.SUCCESS;
 		}
-		return Checked.FAIL;
+		return CheckingStatus.FAIL;
 	}
 
-	public Checked checkPredicateEventually(Trace trace) {
+	public CheckingStatus checkPredicateEventually(Trace trace) {
 		boolean predicateOk = false;
 		String predicate = (String) this.getAdditionalInformation().get("PREDICATE");
 		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
@@ -166,21 +167,21 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 		if(predicateOk) {
 			numberSuccess++;
-			return Checked.SUCCESS;
+			return CheckingStatus.SUCCESS;
 		}
-		return Checked.FAIL;
+		return CheckingStatus.FAIL;
 	}
 
-	public Checked checkTiming(int time) {
+	public CheckingStatus checkTiming(int time) {
 		int maximumTime = simulationCheckingSimulator.getTiming();
 		if(time - simulationCheckingSimulator.getStartAtTime() <= maximumTime) {
 			numberSuccess++;
-			return Checked.SUCCESS;
+			return CheckingStatus.SUCCESS;
 		}
-		return Checked.FAIL;
+		return CheckingStatus.FAIL;
 	}
 
-	public Checked estimateAverage(Trace trace) {
+	public CheckingStatus estimateAverage(Trace trace) {
 		double value = 0.0;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
@@ -206,10 +207,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(res);
-		return success ? Checked.SUCCESS : Checked.FAIL;
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 
-	public Checked estimateAverageWithMeanBetweenSteps(Trace trace) {
+	public CheckingStatus estimateAverageWithMeanBetweenSteps(Trace trace) {
 		double value = 0.0;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
@@ -237,10 +238,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(res);
-		return success ? Checked.SUCCESS : Checked.FAIL;
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 
-	public Checked estimateSum(Trace trace) {
+	public CheckingStatus estimateSum(Trace trace) {
 		double value = 0.0;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
@@ -264,10 +265,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(value);
-		return success ? Checked.SUCCESS : Checked.FAIL;
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 
-	public Checked estimateSumWithMeanBetweenSteps(Trace trace) {
+	public CheckingStatus estimateSumWithMeanBetweenSteps(Trace trace) {
 		double value = 0.0;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
@@ -293,10 +294,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(value);
-		return success ? Checked.SUCCESS : Checked.FAIL;
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 
-	public Checked estimateMinimum(Trace trace) {
+	public CheckingStatus estimateMinimum(Trace trace) {
 		double value = Double.MAX_VALUE;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
@@ -322,10 +323,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(res);
-		return success ? Checked.SUCCESS : Checked.FAIL;
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 
-	public Checked estimateMinimumWithMeanBetweenSteps(Trace trace) {
+	public CheckingStatus estimateMinimumWithMeanBetweenSteps(Trace trace) {
 		double value = Double.MAX_VALUE;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
@@ -353,10 +354,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(res);
-		return success ? Checked.SUCCESS : Checked.FAIL;
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 
-	public Checked estimateMaximum(Trace trace) {
+	public CheckingStatus estimateMaximum(Trace trace) {
 		double value = Double.MIN_VALUE;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
@@ -382,10 +383,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(res);
-		return success ? Checked.SUCCESS : Checked.FAIL;
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 
-	public Checked estimateMaximumWithMeanBetweenSteps(Trace trace) {
+	public CheckingStatus estimateMaximumWithMeanBetweenSteps(Trace trace) {
 		double value = Double.MIN_VALUE;
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
@@ -413,7 +414,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(res);
-		return success ? Checked.SUCCESS : Checked.FAIL;
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 
 	@Override
@@ -432,7 +433,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 	}
 
 	@Override
-	public List<Checked> getResultingStatus() {
+	public List<CheckingStatus> getResultingStatus() {
 		return simulationCheckingSimulator.getResultingStatus();
 	}
 

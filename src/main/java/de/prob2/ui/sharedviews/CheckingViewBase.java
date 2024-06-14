@@ -11,8 +11,8 @@ import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
@@ -93,7 +93,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	protected TableView<T> itemsTable;
 
 	@FXML
-	protected TableColumn<T, Checked> statusColumn;
+	protected TableColumn<T, CheckingStatus> statusColumn;
 
 	@FXML
 	protected TableColumn<T, CheckBox> shouldExecuteColumn;
@@ -144,8 +144,8 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		checkMachineButton.disableProperty().bind(this.emptyProperty.or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
 		checkMachineButton.setOnAction(e -> this.executeAllSelectedItems());
 
-		statusColumn.setCellFactory(col -> new CheckedCell<>());
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory<>(itemsTable, selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		configurationColumn.setCellValueFactory(features -> {
@@ -234,7 +234,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 			// The returned item might already be checked
 			// if there was already another item with the same configuration as newItem
 			// and that existing item was already checked previously.
-			if (toCheck.getChecked() == Checked.NOT_CHECKED) {
+			if (toCheck.getStatus() == CheckingStatus.NOT_CHECKED) {
 				this.executeItemIfEnabled(toCheck);
 			}
 			return toCheck;

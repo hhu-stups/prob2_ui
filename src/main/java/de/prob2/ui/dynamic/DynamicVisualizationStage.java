@@ -34,8 +34,8 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -84,7 +84,7 @@ public final class DynamicVisualizationStage extends Stage {
 	@FXML
 	private TableView<VisualizationFormulaTask> tvFormula;
 	@FXML
-	private TableColumn<VisualizationFormulaTask, Checked> statusColumn;
+	private TableColumn<VisualizationFormulaTask, CheckingStatus> statusColumn;
 	@FXML
 	private TableColumn<VisualizationFormulaTask, String> idColumn;
 	@FXML
@@ -230,8 +230,8 @@ public final class DynamicVisualizationStage extends Stage {
 		});
 
 		this.tvFormula.setEditable(true);
-		this.statusColumn.setCellFactory(col -> new CheckedCell<>());
-		this.statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		this.statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		this.statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		this.idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		this.formulaColumn.setCellValueFactory(new PropertyValueFactory<>("formula"));
 
@@ -265,7 +265,7 @@ public final class DynamicVisualizationStage extends Stage {
 				if (item == null) {
 					return;
 				}
-				item.setChecked(Checked.SUCCESS);
+				item.setStatus(CheckingStatus.SUCCESS);
 			});
 
 			MenuItem failItem = new MenuItem(this.i18n.translate("dynamic.formulaView.fail"));
@@ -274,7 +274,7 @@ public final class DynamicVisualizationStage extends Stage {
 				if (item == null) {
 					return;
 				}
-				item.setChecked(Checked.FAIL);
+				item.setStatus(CheckingStatus.FAIL);
 			});
 
 			MenuItem unknownItem = new MenuItem(this.i18n.translate("dynamic.formulaView.unknown"));
@@ -283,7 +283,7 @@ public final class DynamicVisualizationStage extends Stage {
 				if (item == null) {
 					return;
 				}
-				item.setChecked(Checked.NOT_CHECKED);
+				item.setStatus(CheckingStatus.NOT_CHECKED);
 			});
 
 			Menu statusMenu = new Menu(this.i18n.translate("dynamic.setStatus"), null, dischargeItem, failItem, unknownItem);

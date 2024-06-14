@@ -13,7 +13,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.cbc.CBCDeadlockFreedomCheckingItem;
 import de.prob2.ui.verifications.cbc.CBCInvariantPreservationCheckingItem;
@@ -76,19 +76,19 @@ public class TemplateUtility {
 	}
 	public static int getNumberSuccessfulTasks(List<? extends IExecutableItem> validationTasks){
 		long countSuccessful = validationTasks.stream()
-				.filter(task -> task.selected() && task.getChecked().equals(Checked.SUCCESS))
+				.filter(task -> task.selected() && task.getStatus().equals(CheckingStatus.SUCCESS))
 				.count();
 		return Math.toIntExact(countSuccessful);
 	}
 	public static int getNumberNotCheckedTasks(List<? extends IExecutableItem> validationTasks){
 		long countNotChecked = validationTasks.stream()
-				.filter(task -> task.selected() && task.getChecked().equals(Checked.NOT_CHECKED))
+				.filter(task -> task.selected() && task.getStatus().equals(CheckingStatus.NOT_CHECKED))
 				.count();
 		return Math.toIntExact(countNotChecked);
 	}
 	public static int getNumberFailedTasks(List<? extends IExecutableItem> validationTasks){
 		long countFailed= validationTasks.stream()
-				.filter(task -> task.selected() && (!task.getChecked().equals(Checked.NOT_CHECKED) && !task.getChecked().equals(Checked.SUCCESS)))
+				.filter(task -> task.selected() && (!task.getStatus().equals(CheckingStatus.NOT_CHECKED) && !task.getStatus().equals(CheckingStatus.SUCCESS)))
 				.count();
 		return Math.toIntExact(countFailed);
 	}

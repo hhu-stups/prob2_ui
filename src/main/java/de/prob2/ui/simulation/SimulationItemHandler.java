@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -27,8 +26,7 @@ import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.CheckingStatus;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -114,13 +112,13 @@ public final class SimulationItemHandler {
 		Platform.runLater(() -> {
 			switch (simulationPropertyChecker.getResult()) {
 				case SUCCESS:
-					item.setChecked(Checked.SUCCESS);
+					item.setStatus(CheckingStatus.SUCCESS);
 					break;
 				case FAIL:
-					item.setChecked(Checked.FAIL);
+					item.setStatus(CheckingStatus.FAIL);
 					break;
 				case NOT_FINISHED:
-					item.setChecked(Checked.NOT_CHECKED);
+					item.setStatus(CheckingStatus.NOT_CHECKED);
 					break;
 				default:
 					break;

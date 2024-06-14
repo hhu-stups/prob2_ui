@@ -31,7 +31,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
-import de.prob2.ui.verifications.CheckedIcon;
+import de.prob2.ui.verifications.CheckingStatusIcon;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.application.Platform;
@@ -150,10 +150,10 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		statusProgressColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
 
-			final CheckedIcon statusIcon = new CheckedIcon();
+			final CheckingStatusIcon statusIcon = new CheckingStatusIcon();
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
-			trace.checkedProperty().addListener((o, from, to) -> Platform.runLater(() -> statusIcon.setChecked(to)));
-			statusIcon.setChecked(trace.getChecked());
+			trace.statusProperty().addListener((o, from, to) -> Platform.runLater(() -> statusIcon.setStatus(to)));
+			statusIcon.setStatus(trace.getStatus());
 
 			final ProgressIndicator replayProgress = new ProgressBar();
 			replayProgress.progressProperty().bind(trace.progressProperty());

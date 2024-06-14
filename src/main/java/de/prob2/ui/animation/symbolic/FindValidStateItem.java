@@ -11,8 +11,8 @@ import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -68,23 +68,23 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Find valid state interrupted by user", exc);
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResultItem(new CheckingResultItem(CheckingStatus.INTERRUPTED, "common.result.message", exc.getMessage()));
 			return;
 		}
 		
 		switch (cmd.getResult()) {
 			case STATE_FOUND:
-				this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
 				this.setExample(cmd.getTrace(context.stateSpace()));
 				break;
 			case NO_STATE_FOUND:
-				this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
 				break;
 			case INTERRUPTED:
-				this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
 				break;
 			case ERROR:
-				this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "animation.symbolic.resultHandler.findValidState.result.error"));
+				this.setResultItem(new CheckingResultItem(CheckingStatus.INVALID_TASK, "animation.symbolic.resultHandler.findValidState.result.error"));
 				break;
 			default:
 				throw new AssertionError("Unhandled find valid state result: " + cmd.getResult());

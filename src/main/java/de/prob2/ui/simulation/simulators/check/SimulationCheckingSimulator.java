@@ -1,7 +1,16 @@
 package de.prob2.ui.simulation.simulators.check;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.inject.Injector;
+
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -14,18 +23,10 @@ import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
+
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class SimulationCheckingSimulator extends Simulator implements ISimulationPropertyChecker {
 
@@ -84,7 +85,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	private final List<Trace> resultingTraces;
 
-	private final List<Checked> resultingStatus;
+	private final List<CheckingStatus> resultingStatus;
 
 	private final int numberExecutions;
 
@@ -272,8 +273,8 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 				}
 				resultingTraces.add(newTrace);
 				resultingTimestamps.add(getTimestamps());
-				Checked checked = simulationPropertyChecker.checkTrace(newTrace, time.get());
-				resultingStatus.add(checked);
+				CheckingStatus status = simulationPropertyChecker.checkTrace(newTrace, time.get());
+				resultingStatus.add(status);
 				collectOperationStatistics(newTrace);
 				resetSimulator();
 			}
@@ -301,9 +302,9 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	}
 
 	@Override
-	public Checked checkTrace(Trace trace, int time) {
+	public CheckingStatus checkTrace(Trace trace, int time) {
 		// Monte Carlo Simulation does not apply any checks on a trace. But classes inheriting from SimulationMonteCarlo might apply some checks
-		return Checked.SUCCESS;
+		return CheckingStatus.SUCCESS;
 	}
 
 	private void collectOperationStatistics(Trace trace) {
@@ -381,7 +382,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		return resultingTimestamps;
 	}
 
-	public List<Checked> getResultingStatus() {
+	public List<CheckingStatus> getResultingStatus() {
 		return resultingStatus;
 	}
 

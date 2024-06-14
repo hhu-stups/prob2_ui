@@ -3,7 +3,7 @@ package de.prob2.ui.vomanager.ast;
 import java.util.stream.Stream;
 
 import de.prob.voparser.node.AIdentifierVo;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.vomanager.IValidationTask;
 
 public final class ValidationTaskExpression implements IValidationExpression {
@@ -42,8 +42,8 @@ public final class ValidationTaskExpression implements IValidationExpression {
 	}
 	
 	@Override
-	public Checked getChecked() {
-		return this.getTask().getChecked();
+	public CheckingStatus getStatus() {
+		return this.getTask().getStatus();
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import com.google.common.base.MoreObjects;
 
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -25,13 +25,13 @@ public final class ProofObligationItem implements IValidationTask {
 	@JsonIgnore
 	private final String description;
 	@JsonIgnore
-	private final ObjectProperty<Checked> checked;
+	private final ObjectProperty<CheckingStatus> status;
 
 	public ProofObligationItem(String id, String name, String description) {
 		this.id = id;
 		this.name = Objects.requireNonNull(name, "name");
 		this.description = Objects.requireNonNull(description, "description");
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.INVALID_TASK);
+		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.INVALID_TASK);
 	}
 
 	@JsonCreator
@@ -41,7 +41,7 @@ public final class ProofObligationItem implements IValidationTask {
 
 	public ProofObligationItem(ProofObligation proofObligation) {
 		this(null, proofObligation.getName(), Objects.requireNonNullElse(proofObligation.getDescription(), ""));
-		this.setChecked(proofObligation.isDischarged() ? Checked.SUCCESS : Checked.NOT_CHECKED);
+		this.setStatus(proofObligation.isDischarged() ? CheckingStatus.SUCCESS : CheckingStatus.NOT_CHECKED);
 	}
 
 	@Override
@@ -56,7 +56,7 @@ public final class ProofObligationItem implements IValidationTask {
 
 	public ProofObligationItem withId(final String id) {
 		final ProofObligationItem updatedPO = new ProofObligationItem(id, this.getName(), this.getDescription());
-		updatedPO.setChecked(this.getChecked());
+		updatedPO.setStatus(this.getStatus());
 		return updatedPO;
 	}
 
@@ -84,18 +84,18 @@ public final class ProofObligationItem implements IValidationTask {
 	}
 
 	@Override
-	public ObjectProperty<Checked> checkedProperty() {
-		return this.checked;
+	public ObjectProperty<CheckingStatus> statusProperty() {
+		return this.status;
 	}
 
 	@Override
-	public Checked getChecked() {
-		return this.checkedProperty().get();
+	public CheckingStatus getStatus() {
+		return this.statusProperty().get();
 	}
 
 	@JsonIgnore
-	public void setChecked(final Checked checked) {
-		this.checkedProperty().set(checked);
+	public void setStatus(final CheckingStatus status) {
+		this.statusProperty().set(status);
 	}
 
 	@Override
@@ -103,7 +103,7 @@ public final class ProofObligationItem implements IValidationTask {
 
 	@Override
 	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
+		this.setStatus(CheckingStatus.NOT_CHECKED);
 		this.resetAnimatorDependentState();
 	}
 

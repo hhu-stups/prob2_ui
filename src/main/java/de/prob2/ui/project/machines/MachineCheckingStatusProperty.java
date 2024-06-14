@@ -31,11 +31,11 @@ final class MachineCheckingStatusProperty extends ReadOnlyObjectPropertyBase<Mac
 			while (change.next()) {
 				change.getRemoved().forEach(item -> {
 					item.selectedProperty().removeListener(this.changedListenerWeak);
-					item.checkedProperty().removeListener(this.changedListenerWeak);
+					item.statusProperty().removeListener(this.changedListenerWeak);
 				});
 				change.getAddedSubList().forEach(item -> {
 					item.selectedProperty().addListener(this.changedListenerWeak);
-					item.checkedProperty().addListener(this.changedListenerWeak);
+					item.statusProperty().addListener(this.changedListenerWeak);
 				});
 			}
 			this.changedListenerWeak.invalidated(change.getList());
@@ -44,7 +44,7 @@ final class MachineCheckingStatusProperty extends ReadOnlyObjectPropertyBase<Mac
 		this.items.addListener(new WeakListChangeListener<>(this.listChangeListener));
 		items.forEach(item -> {
 			item.selectedProperty().addListener(this.changedListenerWeak);
-			item.checkedProperty().addListener(this.changedListenerWeak);
+			item.statusProperty().addListener(this.changedListenerWeak);
 		});
 	}
 

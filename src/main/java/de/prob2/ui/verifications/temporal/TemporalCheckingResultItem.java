@@ -3,16 +3,16 @@ package de.prob2.ui.verifications.temporal;
 import java.util.List;
 
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingStatus;
 
 public class TemporalCheckingResultItem extends CheckingResultItem {
 
 	private final List<ErrorItem> errorMarkers;
 	
-	public TemporalCheckingResultItem(Checked checked, List<ErrorItem> errorMarkers, String messageBundleKey,
+	public TemporalCheckingResultItem(CheckingStatus status, List<ErrorItem> errorMarkers, String messageBundleKey,
 									  Object... messageParams) {
-		super(checked, messageBundleKey, messageParams);
+		super(status, messageBundleKey, messageParams);
 		this.errorMarkers = errorMarkers;
 	}
 	

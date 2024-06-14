@@ -16,8 +16,8 @@ import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.Checked;
 import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.property.ListProperty;
@@ -111,13 +111,13 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 		}
 
 		if (res.isInterrupted()) {
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted"));
+			this.setResultItem(new CheckingResultItem(CheckingStatus.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted"));
 		} else if (traces.isEmpty()) {
-			this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
+			this.setResultItem(new CheckingResultItem(CheckingStatus.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
 		} else if (!res.getUncoveredTargets().isEmpty()) {
-			this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated"));
+			this.setResultItem(new CheckingResultItem(CheckingStatus.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated"));
 		} else {
-			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
+			this.setResultItem(new CheckingResultItem(CheckingStatus.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
 		}
 		this.getExamples().addAll(traces);
 	}

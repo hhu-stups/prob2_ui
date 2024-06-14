@@ -22,8 +22,8 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.stats.StatsView;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.application.Platform;
@@ -87,7 +87,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private TableView<ModelCheckingStep> stepsTable;
 
 	@FXML
-	private TableColumn<ModelCheckingStep, Checked> stepStatusColumn;
+	private TableColumn<ModelCheckingStep, CheckingStatus> stepStatusColumn;
 
 	@FXML
 	private TableColumn<ModelCheckingStep, String> stepMessageColumn;
@@ -177,8 +177,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			}
 		});
 
-		stepStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		stepStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		stepStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		stepStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		stepStatusColumn.setSortable(false);
 		stepMessageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
 		stepMessageColumn.setSortable(false);
@@ -267,7 +267,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	@Override
 	protected BooleanExpression disableItemBinding(final ModelCheckingItem item) {
 		return super.disableItemBinding(item).or(Bindings.createBooleanBinding(
-			() -> item.getSteps().stream().anyMatch(step -> step.getChecked() == Checked.SUCCESS),
+			() -> item.getSteps().stream().anyMatch(step -> step.getStatus() == CheckingStatus.SUCCESS),
 			item.stepsProperty()
 		));
 	}

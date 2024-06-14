@@ -18,7 +18,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 
 import javafx.application.Platform;
 
@@ -64,7 +64,7 @@ public final class TraceChecker {
 		replayTrace.setReplayedTrace(replayed);
 		Trace trace = replayed.getTrace(stateSpace);
 		replayTrace.setAnimatedReplayedTrace(trace);
-		replayTrace.setChecked(errors.isEmpty() ? Checked.SUCCESS : Checked.FAIL);
+		replayTrace.setStatus(errors.isEmpty() ? CheckingStatus.SUCCESS : CheckingStatus.FAIL);
 	}
 
 	public static void checkNoninteractive(ReplayTrace replayTrace, StateSpace stateSpace) {
@@ -78,9 +78,9 @@ public final class TraceChecker {
 			checkNoninteractiveInternal(replayTrace, stateSpace);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Trace check interrupted by user", exc);
-			replayTrace.setChecked(Checked.NOT_CHECKED);
+			replayTrace.setStatus(CheckingStatus.NOT_CHECKED);
 		} catch (RuntimeException exc) {
-			replayTrace.setChecked(Checked.INVALID_TASK);
+			replayTrace.setStatus(CheckingStatus.INVALID_TASK);
 			throw exc;
 		} finally {
 			Platform.runLater(() -> replayTrace.setProgress(-1));

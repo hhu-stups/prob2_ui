@@ -18,9 +18,9 @@ import de.prob2.ui.internal.Translatable;
 import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -48,7 +48,7 @@ public final class SimulationTracesView extends Stage {
 
 		private final List<Integer> timestamps;
 
-		private final Checked checked;
+		private final CheckingStatus status;
 
 		private final int traceLength;
 
@@ -56,11 +56,11 @@ public final class SimulationTracesView extends Stage {
 
 		private final int index;
 
-		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, Checked checked, int traceLength, double estimatedValue, int index) {
+		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, CheckingStatus status, int traceLength, double estimatedValue, int index) {
 			this.parent = parent;
 			this.trace = trace;
 			this.timestamps = timestamps;
-			this.checked = checked;
+			this.status = status;
 			this.traceLength = traceLength;
 			this.estimatedValue = estimatedValue;
 			this.index = index;
@@ -82,8 +82,8 @@ public final class SimulationTracesView extends Stage {
 			return index;
 		}
 
-		public Checked getChecked() {
-			return checked;
+		public CheckingStatus getStatus() {
+			return status;
 		}
 
 		// Used via PropertyValueFactory
@@ -109,7 +109,7 @@ public final class SimulationTracesView extends Stage {
 	@FXML
 	private TableView<SimulationTraceItem> traceTableView;
 	@FXML
-	private TableColumn<SimulationTraceItem, Checked> statusColumn;
+	private TableColumn<SimulationTraceItem, CheckingStatus> statusColumn;
 	@FXML
 	private TableColumn<SimulationTraceItem, String> traceColumn;
 	@FXML
@@ -144,7 +144,7 @@ public final class SimulationTracesView extends Stage {
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
-	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps, List<Checked> status, List<Double> estimatedValues) {
+	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps, List<CheckingStatus> status, List<Double> estimatedValues) {
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
 		if(!estimatedValues.isEmpty()) {
 			estimatedValueColumn.setVisible(true);
@@ -156,8 +156,8 @@ public final class SimulationTracesView extends Stage {
 	}
 
 	private void initTableColumns() {
-		statusColumn.setCellFactory(col -> new CheckedCell<>());
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		traceColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue()));
 		traceLengthColumn.setCellValueFactory(new PropertyValueFactory<>("traceLength"));
 		estimatedValueColumn.setCellValueFactory(new PropertyValueFactory<>("estimatedValue"));
@@ -215,7 +215,7 @@ public final class SimulationTracesView extends Stage {
 
 				int i = 1;
 				for (SimulationTraceItem traceItem : traceTableView.getItems()) {
-					csvWriter.record(traceItem.getChecked(), String.format("Trace %s", i), traceItem.getTraceLength(), traceItem.getEstimatedValue());
+					csvWriter.record(traceItem.getStatus(), String.format("Trace %s", i), traceItem.getTraceLength(), traceItem.getEstimatedValue());
 				}
 			}
 		}

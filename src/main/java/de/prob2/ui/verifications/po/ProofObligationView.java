@@ -20,8 +20,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -63,7 +63,7 @@ public final class ProofObligationView extends AnchorPane {
 	private TableView<ProofObligationItem> tvProofObligations;
 
 	@FXML
-	private TableColumn<ProofObligationItem, Checked> poStatusColumn;
+	private TableColumn<ProofObligationItem, CheckingStatus> poStatusColumn;
 	@FXML
 	private TableColumn<ProofObligationItem, String> poIdColumn;
 	@FXML
@@ -83,8 +83,8 @@ public final class ProofObligationView extends AnchorPane {
 
 	@FXML
 	public void initialize() {
-		poStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		poStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		poStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		poStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		poIdColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		poColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 

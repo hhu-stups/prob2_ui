@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
 
 import javafx.beans.property.ObjectProperty;
@@ -25,7 +25,7 @@ public final class LTLPatternItem {
 	@JsonIgnore
 	final ObjectProperty<TemporalCheckingResultItem> resultItem;
 	@JsonIgnore
-	final ObjectProperty<Checked> checked;
+	final ObjectProperty<CheckingStatus> status;
 
 	@JsonCreator
 	public LTLPatternItem(
@@ -40,8 +40,8 @@ public final class LTLPatternItem {
 		this.code = Objects.requireNonNull(code, "code");
 
 		this.resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
-		this.resultItemProperty().addListener((o, from, to) -> this.checked.set(to == null ? Checked.NOT_CHECKED : to.getChecked()));
+		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
+		this.resultItemProperty().addListener((o, from, to) -> this.status.set(to == null ? CheckingStatus.NOT_CHECKED : to.getStatus()));
 	}
 
 	public String getName() {
@@ -72,12 +72,12 @@ public final class LTLPatternItem {
 		this.resultItemProperty().set(resultItem);
 	}
 
-	public ReadOnlyObjectProperty<Checked> checkedProperty() {
-		return this.checked;
+	public ReadOnlyObjectProperty<CheckingStatus> statusProperty() {
+		return this.status;
 	}
 
-	public Checked getChecked() {
-		return this.checkedProperty().get();
+	public CheckingStatus getStatus() {
+		return this.statusProperty().get();
 	}
 
 	public void reset() {

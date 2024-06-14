@@ -7,7 +7,7 @@ import de.prob.voparser.node.AAndVo;
 import de.prob.voparser.node.AIdentifierVo;
 import de.prob.voparser.node.AOrVo;
 import de.prob.voparser.node.PVo;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 
 public interface IValidationExpression {
 	static IValidationExpression fromAst(final PVo ast) {
@@ -32,7 +32,7 @@ public interface IValidationExpression {
 		return this.getChildren().flatMap(IValidationExpression::getAllTasks);
 	}
 	
-	Checked getChecked();
+	CheckingStatus getStatus();
 
 	String toString();
 }

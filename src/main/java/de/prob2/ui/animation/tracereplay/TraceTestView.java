@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import de.prob2.ui.sharedviews.DescriptionView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,8 +27,9 @@ import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedIcon;
+import de.prob2.ui.sharedviews.DescriptionView;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusIcon;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
@@ -518,19 +518,19 @@ public final class TraceTestView extends Stage {
 		));
 		final TextField postconditionTextField = buildPostconditionTextField(postcondition);
 		final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
-		final CheckedIcon statusIcon = new CheckedIcon();
+		final CheckingStatusIcon statusIcon = new CheckingStatusIcon();
 		statusIcon.setPrefHeight(fontSize.getFontSize());
 		statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
 
 		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace() == null ? new ArrayList<>() : replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
 		if (transitionErrorMessages.size() <= index || isNewBox) {
-			statusIcon.setChecked(Checked.NOT_CHECKED);
+			statusIcon.setStatus(CheckingStatus.NOT_CHECKED);
 		} else {
 			// TODO There's currently no good way to tell which errors belong to which postcondition.
 			// For now, we display all postconditions as failed if there are any errors for the relevant transition.
-			Checked status = transitionErrorMessages.get(index).isEmpty() ? Checked.SUCCESS : Checked.FAIL;
-			replayTrace.get().checkedProperty().addListener((o, from, to) -> statusIcon.setChecked(status));
-			statusIcon.setChecked(status);
+			CheckingStatus status = transitionErrorMessages.get(index).isEmpty() ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
+			replayTrace.get().statusProperty().addListener((o, from, to) -> statusIcon.setStatus(status));
+			statusIcon.setStatus(status);
 		}
 
 		innerBox.getChildren().add(typeLabel);

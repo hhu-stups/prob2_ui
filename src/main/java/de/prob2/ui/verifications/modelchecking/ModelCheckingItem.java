@@ -17,7 +17,7 @@ import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
@@ -43,7 +43,7 @@ import javafx.collections.FXCollections;
 })
 public final class ModelCheckingItem implements IExecutableItem {
 	@JsonIgnore
-	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+	private final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
@@ -91,34 +91,34 @@ public final class ModelCheckingItem implements IExecutableItem {
 	private void initListeners() {
 		this.stepsProperty().addListener((o, from, to) -> {
 			if (to.isEmpty()) {
-				this.checked.set(Checked.NOT_CHECKED);
+				this.status.set(CheckingStatus.NOT_CHECKED);
 			} else {
 				final boolean failed = to.stream()
-					                       .map(ModelCheckingStep::getChecked)
-					                       .anyMatch(Checked.FAIL::equals);
+					                       .map(ModelCheckingStep::getStatus)
+					                       .anyMatch(CheckingStatus.FAIL::equals);
 				final boolean success = !failed && to.stream()
-					                                   .map(ModelCheckingStep::getChecked)
-					                                   .anyMatch(Checked.SUCCESS::equals);
+					                                   .map(ModelCheckingStep::getStatus)
+					                                   .anyMatch(CheckingStatus.SUCCESS::equals);
 
 				if (success) {
-					this.checked.set(Checked.SUCCESS);
+					this.status.set(CheckingStatus.SUCCESS);
 				} else if (failed) {
-					this.checked.set(Checked.FAIL);
+					this.status.set(CheckingStatus.FAIL);
 				} else {
-					this.checked.set(Checked.TIMEOUT);
+					this.status.set(CheckingStatus.TIMEOUT);
 				}
 			}
 		});
 	}
 
 	@Override
-	public ReadOnlyObjectProperty<Checked> checkedProperty() {
-		return this.checked;
+	public ReadOnlyObjectProperty<CheckingStatus> statusProperty() {
+		return this.status;
 	}
 
 	@Override
-	public Checked getChecked() {
-		return this.checkedProperty().get();
+	public CheckingStatus getStatus() {
+		return this.statusProperty().get();
 	}
 
 	@Override
@@ -246,17 +246,17 @@ public final class ModelCheckingItem implements IExecutableItem {
 
 	@Override
 	public void resetAnimatorDependentState() {
-		// Clearing the steps list causes the listener to reset the checked status,
-		// but in this case we want to preserve the checked status.
-		Checked savedChecked = this.getChecked();
+		// Clearing the steps list causes the listener to reset the status,
+		// but in this case we want to preserve the status.
+		CheckingStatus savedChecked = this.getStatus();
 		this.stepsProperty().clear();
-		this.checked.set(savedChecked);
+		this.status.set(savedChecked);
 		this.currentStep.set(null);
 	}
 
 	@Override
 	public void reset() {
-		this.checked.set(Checked.NOT_CHECKED);
+		this.status.set(CheckingStatus.NOT_CHECKED);
 		this.resetAnimatorDependentState();
 	}
 

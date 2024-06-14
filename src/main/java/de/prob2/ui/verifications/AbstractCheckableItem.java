@@ -15,12 +15,12 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	@JsonIgnore
 	final ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
 	@JsonIgnore
-	final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+	final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
 	protected AbstractCheckableItem() {
 		this.selected = new SimpleBooleanProperty(true);
 
-		this.resultItemProperty().addListener((o, from, to) -> this.checked.set(to == null ? Checked.NOT_CHECKED : to.getChecked()));
+		this.resultItemProperty().addListener((o, from, to) -> this.status.set(to == null ? CheckingStatus.NOT_CHECKED : to.getStatus()));
 	}
 
 	@Override
@@ -53,13 +53,13 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 	}
 
 	@Override
-	public ReadOnlyObjectProperty<Checked> checkedProperty() {
-		return this.checked;
+	public ReadOnlyObjectProperty<CheckingStatus> statusProperty() {
+		return this.status;
 	}
 
 	@Override
-	public Checked getChecked() {
-		return this.checkedProperty().get();
+	public CheckingStatus getStatus() {
+		return this.statusProperty().get();
 	}
 
 	@Override

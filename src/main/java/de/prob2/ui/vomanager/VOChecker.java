@@ -16,7 +16,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
@@ -104,7 +104,7 @@ public final class VOChecker {
 	private CompletableFuture<?> checkAndExpression(AndValidationExpression expression, ExecutionContext context) {
 		return checkVOExpression(expression.getLeft(), context).thenCompose(r -> {
 			final CompletableFuture<?> future;
-			if (expression.getLeft().getChecked() == Checked.SUCCESS) {
+			if (expression.getLeft().getStatus() == CheckingStatus.SUCCESS) {
 				future = checkVOExpression(expression.getRight(), context);
 			} else {
 				future = CompletableFuture.completedFuture(r);
@@ -116,7 +116,7 @@ public final class VOChecker {
 	private CompletableFuture<?> checkOrExpression(OrValidationExpression expression, ExecutionContext context) {
 		return checkVOExpression(expression.getLeft(), context).thenCompose(r -> {
 			final CompletableFuture<?> future;
-			if (expression.getLeft().getChecked() == Checked.SUCCESS) {
+			if (expression.getLeft().getStatus() == CheckingStatus.SUCCESS) {
 				future = CompletableFuture.completedFuture(r);
 			} else {
 				future = checkVOExpression(expression.getRight(), context);

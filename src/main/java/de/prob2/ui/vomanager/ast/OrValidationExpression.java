@@ -3,7 +3,7 @@ package de.prob2.ui.vomanager.ast;
 import java.util.stream.Stream;
 
 import de.prob.voparser.node.AOrVo;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 
 public final class OrValidationExpression implements IValidationExpression {
 	private final IValidationExpression left;
@@ -35,17 +35,17 @@ public final class OrValidationExpression implements IValidationExpression {
 	}
 	
 	@Override
-	public Checked getChecked() {
-		final Checked leftRes = this.getLeft().getChecked();
+	public CheckingStatus getStatus() {
+		CheckingStatus leftRes = this.getLeft().getStatus();
 		// Short-circuiting: skip calculating right-hand result
 		// if the left-hand result is enough to determine the overall result.
-		if (leftRes == Checked.INVALID_TASK) {
-			return Checked.INVALID_TASK;
-		} else if (leftRes == Checked.SUCCESS) {
-			return Checked.SUCCESS;
+		if (leftRes == CheckingStatus.INVALID_TASK) {
+			return CheckingStatus.INVALID_TASK;
+		} else if (leftRes == CheckingStatus.SUCCESS) {
+			return CheckingStatus.SUCCESS;
 		}
 		
-		final Checked rightRes = this.getRight().getChecked();
+		CheckingStatus rightRes = this.getRight().getStatus();
 		return leftRes.or(rightRes);
 	}
 

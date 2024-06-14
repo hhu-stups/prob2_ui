@@ -1,6 +1,6 @@
 package de.prob2.ui.verifications;
 
-public enum Checked {
+public enum CheckingStatus {
 	/**
 	 * The task did not run yet.
 	 * This status indicates nothing about the task's result.
@@ -9,14 +9,14 @@ public enum Checked {
 	
 	/**
 	 * The task ran and completed with a definitely successful result.
-	 * Re-running the task will not change this result,
+	 * Re-running the task will not change this status,
 	 * unless the model or the task itself changes.
 	 */
 	SUCCESS,
 	
 	/**
 	 * The task ran and completed with a definitely failed result.
-	 * Re-running the task will not change this result,
+	 * Re-running the task will not change this status,
 	 * unless the model or the task itself changes.
 	 */
 	FAIL,
@@ -26,7 +26,7 @@ public enum Checked {
 	 * but reached a user-defined limit before it could complete.
 	 * This is usually a time limit (timeout),
 	 * but can also be e. g. a state limit for explicit-state model checking.
-	 * This result indicates that the task has not failed <em>yet</em>,
+	 * This status indicates that the task has not failed <em>yet</em>,
 	 * but it also hasn't definitely succeeded,
 	 * so it may still fail if it continued running.
 	 * Re-running the task with a higher limit may yield a definitive result.
@@ -36,7 +36,7 @@ public enum Checked {
 	/**
 	 * The task ran,
 	 * but was interrupted by the user before it could complete.
-	 * This result indicates that the task has not failed <em>yet</em>,
+	 * This status indicates that the task has not failed <em>yet</em>,
 	 * but it also hasn't definitely succeeded,
 	 * so it may still fail if it continued running.
 	 * Re-running the task without interrupting it may yield a definitive result.
@@ -51,7 +51,7 @@ public enum Checked {
 	INVALID_TASK,
 	;
 	
-	public Checked and(final Checked other) {
+	public CheckingStatus and(final CheckingStatus other) {
 		if (this == INVALID_TASK || this == FAIL) {
 			return this;
 		} else if (other == INVALID_TASK || other == FAIL) {
@@ -65,9 +65,9 @@ public enum Checked {
 		}
 	}
 	
-	public Checked or(Checked other) {
+	public CheckingStatus or(CheckingStatus other) {
 		if (this == INVALID_TASK || other == INVALID_TASK) {
-			// Special case: always propagate "invalid task" results,
+			// Special case: always propagate "invalid task" statuses,
 			// even if the other operand is not an error,
 			// to make it obvious when a task is not configured correctly.
 			return INVALID_TASK;

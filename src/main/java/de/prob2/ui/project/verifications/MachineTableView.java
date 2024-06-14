@@ -51,7 +51,7 @@ public final class MachineTableView extends TableView<Machine> {
 				graphic.setVisible(true);
 				final String styleClass;
 				final FontAwesome.Glyph icon;
-				final MachineCheckingStatus.CheckingStatus status = item.getStatus();
+				final MachineCheckingStatus.Status status = item.getStatus();
 				icon = switch (status) {
 					case UNKNOWN -> {
 						styleClass = "unknown";
@@ -73,7 +73,7 @@ public final class MachineTableView extends TableView<Machine> {
 				};
 				graphic.getStyleClass().add(styleClass);
 				graphic.setIcon(icon);
-				this.setText(status == MachineCheckingStatus.CheckingStatus.NONE ? "" : i18n.format("({0,number,integer}/{1,number,integer})", item.getNumberSuccess(), item.getNumberTotal()));
+				this.setText(status == MachineCheckingStatus.Status.NONE ? "" : i18n.format("({0,number,integer}/{1,number,integer})", item.getNumberSuccess(), item.getNumberTotal()));
 			}
 		}
 	}

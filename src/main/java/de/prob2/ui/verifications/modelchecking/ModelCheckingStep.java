@@ -10,11 +10,11 @@ import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 
 public class ModelCheckingStep {
 	private final IModelCheckingResult result;
-	private final Checked checked;
+	private final CheckingStatus status;
 	private final long timeElapsed;
 	private final StateSpaceStats stats;
 	private final BigInteger memoryUsed;
@@ -24,11 +24,11 @@ public class ModelCheckingStep {
 	public ModelCheckingStep(final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final BigInteger memoryUsed, final StateSpace stateSpace) {
 		this.result = result;
 		if (result instanceof ModelCheckOk || result instanceof ModelCheckGoalFound) {
-			this.checked = Checked.SUCCESS;
+			this.status = CheckingStatus.SUCCESS;
 		} else if (result instanceof ITraceDescription) {
-			this.checked = Checked.FAIL;
+			this.status = CheckingStatus.FAIL;
 		} else {
-			this.checked = Checked.TIMEOUT;
+			this.status = CheckingStatus.TIMEOUT;
 		}
 		
 		this.timeElapsed = timeElapsed;
@@ -42,8 +42,8 @@ public class ModelCheckingStep {
 		return result;
 	}
 	
-	public Checked getChecked() {
-		return checked;
+	public CheckingStatus getStatus() {
+		return status;
 	}
 	
 	public String getMessage() {

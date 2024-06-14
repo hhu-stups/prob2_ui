@@ -55,12 +55,11 @@ import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDiagramItem;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -274,7 +273,7 @@ public final class SimulatorStage extends Stage {
 	private ListView<DiagramConfiguration> simulationDiagramItems;
 
 	@FXML
-	private TableColumn<SimulationItem, Checked> simulationStatusColumn;
+	private TableColumn<SimulationItem, CheckingStatus> simulationStatusColumn;
 
 	@FXML
 	private TableColumn<SimulationItem, String> simulationConfigurationColumn;
@@ -473,8 +472,8 @@ public final class SimulatorStage extends Stage {
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
-		simulationStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		simulationStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		simulationConfigurationColumn.setCellFactory(lv -> new SimulationTaskItem(stageManager, i18n));
 		simulationConfigurationColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
 

@@ -5,7 +5,7 @@ import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
 import de.prob2.ui.verifications.temporal.TemporalItemStage;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
@@ -40,7 +40,7 @@ public final class LTLPatternStage extends TemporalItemStage {
 		String code = this.taCode.getText();
 		LTLPatternItem item = LTLPatternParser.parsePattern(this.taDescription.getText(), code, this.currentProject.getCurrentMachine());
 		final TemporalCheckingResultItem resultItem = item.getResultItem();
-		if (resultItem.getChecked() == Checked.INVALID_TASK) {
+		if (resultItem.getStatus() == CheckingStatus.INVALID_TASK) {
 			showErrors(resultItem.getErrorMarkers());
 		} else {
 			this.result = item;

@@ -20,7 +20,7 @@ import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
@@ -43,7 +43,7 @@ public final class ReplayTrace implements IExecutableItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	@JsonIgnore
-	private final ObjectProperty<Checked> status;
+	private final ObjectProperty<CheckingStatus> status;
 	@JsonIgnore
 	private final DoubleProperty progress;
 	@JsonIgnore
@@ -61,7 +61,7 @@ public final class ReplayTrace implements IExecutableItem {
 
 	public ReplayTrace(String id, Path location, Path absoluteLocation, TraceManager traceManager) {
 		this.id = id;
-		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
+		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
 		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
@@ -102,17 +102,17 @@ public final class ReplayTrace implements IExecutableItem {
 	}
 
 	@Override
-	public ObjectProperty<Checked> checkedProperty() {
+	public ObjectProperty<CheckingStatus> statusProperty() {
 		return status;
 	}
 
 	@JsonIgnore
 	@Override
-	public Checked getChecked() {
+	public CheckingStatus getStatus() {
 		return this.status.get();
 	}
 
-	public void setChecked(Checked status) {
+	public void setStatus(CheckingStatus status) {
 		this.status.set(status);
 	}
 
@@ -259,7 +259,7 @@ public final class ReplayTrace implements IExecutableItem {
 
 	@Override
 	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
+		this.setStatus(CheckingStatus.NOT_CHECKED);
 		this.loadedTrace.set(null);
 		this.resetAnimatorDependentState();
 	}

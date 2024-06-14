@@ -7,23 +7,22 @@ import javafx.scene.control.Alert;
 import javafx.scene.layout.Region;
 
 public class CheckingResultItem {
-	
-	private final Checked checked;
+	private final CheckingStatus status;
 	private final String messageBundleKey;
 	private final Object[] messageParams;
 	
-	public CheckingResultItem(Checked checked, String messageBundleKey, Object... messageParams) {
-		this.checked = checked;
+	public CheckingResultItem(CheckingStatus status, String messageBundleKey, Object... messageParams) {
+		this.status = status;
 		this.messageBundleKey = messageBundleKey;
 		this.messageParams = messageParams;
 	}
 	
-	public Checked getChecked() {
-		return checked;
+	public CheckingStatus getStatus() {
+		return status;
 	}
 	
 	public String getHeaderBundleKey() {
-		return switch (this.getChecked()) {
+		return switch (this.getStatus()) {
 			case NOT_CHECKED -> "verifications.result.notChecked.header";
 			case SUCCESS -> "verifications.result.succeeded.header";
 			case FAIL -> "verifications.result.failed.header";
@@ -43,7 +42,7 @@ public class CheckingResultItem {
 	
 	public void showAlert(final StageManager stageManager, final I18n i18n) {
 		Alert alert = stageManager.makeAlert(
-			this.getChecked().equals(Checked.SUCCESS) ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR,
+			this.getStatus().equals(CheckingStatus.SUCCESS) ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR,
 			this.getHeaderBundleKey(),
 			this.getMessageBundleKey(), this.getMessageParams());
 		alert.setTitle(i18n.translate(this.getHeaderBundleKey()));
