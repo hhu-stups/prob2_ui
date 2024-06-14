@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.error.ErrorTableView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage?>
@@ -35,7 +36,7 @@
 					<Label text="%verifications.temporal.ltl.pattern.ltlPatternStage.description" VBox.vgrow="NEVER"/>
 					<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
 					<Label text="%verifications.temporal.ltl.pattern.ltlPatternStage.errors" VBox.vgrow="NEVER"/>
-					<TextArea fx:id="taErrors" editable="false" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
+					<ErrorTableView fx:id="errorsTable" VBox.vgrow="ALWAYS"/>
 					<HBox>
 						<Button fx:id="applyButton" styleClass="button-blue" text="%common.buttons.apply" onAction="#applyPattern"/>
 					</HBox>
