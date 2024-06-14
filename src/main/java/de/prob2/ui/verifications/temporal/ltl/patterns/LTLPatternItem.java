@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResult;
+import de.prob2.ui.verifications.ErrorsResult;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -23,7 +23,7 @@ public final class LTLPatternItem {
 	private final String code;
 
 	@JsonIgnore
-	final ObjectProperty<TemporalCheckingResult> result;
+	final ObjectProperty<ErrorsResult> result;
 	@JsonIgnore
 	final ObjectProperty<CheckingStatus> status;
 
@@ -60,15 +60,15 @@ public final class LTLPatternItem {
 		return this.getName().equals(other.getName());
 	}
 
-	public ObjectProperty<TemporalCheckingResult> resultProperty() {
+	public ObjectProperty<ErrorsResult> resultProperty() {
 		return this.result;
 	}
 
-	public TemporalCheckingResult getResult() {
+	public ErrorsResult getResult() {
 		return this.resultProperty().get();
 	}
 
-	public void setResult(final TemporalCheckingResult result) {
+	public void setResult(final ErrorsResult result) {
 		this.resultProperty().set(result);
 	}
 

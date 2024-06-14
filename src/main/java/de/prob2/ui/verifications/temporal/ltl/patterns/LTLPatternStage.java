@@ -6,7 +6,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResult;
+import de.prob2.ui.verifications.ErrorsResult;
 import de.prob2.ui.verifications.temporal.TemporalItemStage;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
 
@@ -39,7 +39,7 @@ public final class LTLPatternStage extends TemporalItemStage {
 		this.result = null;
 		String code = this.taCode.getText();
 		LTLPatternItem item = LTLPatternParser.parsePattern(this.taDescription.getText(), code, this.currentProject.getCurrentMachine());
-		TemporalCheckingResult res = item.getResult();
+		ErrorsResult res = item.getResult();
 		if (res.getStatus() == CheckingStatus.INVALID_TASK) {
 			showErrors(res.getErrorMarkers());
 		} else {

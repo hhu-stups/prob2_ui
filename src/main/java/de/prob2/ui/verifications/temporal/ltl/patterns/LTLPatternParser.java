@@ -14,7 +14,7 @@ import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResult;
+import de.prob2.ui.verifications.ErrorsResult;
 import de.prob2.ui.verifications.temporal.ltl.LTLParseListener;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -25,17 +25,17 @@ public final class LTLPatternParser {
 	}
 	
 	private static void handlePatternResult(LTLParseListener parseListener, LTLPatternItem item) {
-		TemporalCheckingResult result;
+		ErrorsResult result;
 		// Empty Patterns do not have parse errors which is a little bit confusing
 		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
-			result = new TemporalCheckingResult(CheckingStatus.SUCCESS, parseListener.getErrorMarkers(), "verifications.temporal.ltl.pattern.parsedSuccessfully");
+			result = new ErrorsResult(CheckingStatus.SUCCESS, parseListener.getErrorMarkers(), "verifications.temporal.ltl.pattern.parsedSuccessfully");
 		} else {
 			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {
-				result = new TemporalCheckingResult(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.empty");
+				result = new ErrorsResult(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.empty");
 			} else {
 				final String msg = parseListener.getErrorMarkers().stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
-				result = new TemporalCheckingResult(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.couldNotParsePattern", msg);
+				result = new ErrorsResult(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.couldNotParsePattern", msg);
 			}
 		}
 		item.setResult(result);

@@ -22,7 +22,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResult;
+import de.prob2.ui.verifications.ErrorsResult;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -87,7 +87,7 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 		if(errorMessage.isEmpty()) {
 			errorMessage = "Parse Error in typed formula";
 		}
-		this.setResult(new TemporalCheckingResult(CheckingStatus.INVALID_TASK, errorMarkers, "common.result.message", errorMessage));
+		this.setResult(new ErrorsResult(CheckingStatus.INVALID_TASK, errorMarkers, "common.result.message", errorMessage));
 	}
 	
 	@Override
