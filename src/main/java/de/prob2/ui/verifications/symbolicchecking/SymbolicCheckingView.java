@@ -38,7 +38,7 @@ public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckin
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
 
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			showMessage.setOnAction(e -> this.getItem().getResult().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
 
 			Menu showCounterExampleItem = new Menu(i18n.translate("verifications.symbolicchecking.view.contextMenu.showCounterExample"));
@@ -53,7 +53,7 @@ public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckin
 				}
 
 				if(to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showMessage.disableProperty().bind(to.resultProperty().isNull());
 					showCounterExampleItem.disableProperty().bind(to.counterExamplesProperty().emptyProperty());
 					to.counterExamplesProperty().addListener(updateCounterExamplesListener);
 					updateCounterExamplesListener.invalidated(null);

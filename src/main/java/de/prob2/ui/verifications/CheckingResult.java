@@ -6,12 +6,12 @@ import de.prob2.ui.internal.StageManager;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.Region;
 
-public class CheckingResultItem {
+public class CheckingResult {
 	private final CheckingStatus status;
 	private final String messageBundleKey;
 	private final Object[] messageParams;
 	
-	public CheckingResultItem(CheckingStatus status, String messageBundleKey, Object... messageParams) {
+	public CheckingResult(CheckingStatus status, String messageBundleKey, Object... messageParams) {
 		this.status = status;
 		this.messageBundleKey = messageBundleKey;
 		this.messageParams = messageParams;

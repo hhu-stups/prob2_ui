@@ -50,12 +50,12 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			contextMenu.getItems().add(showCounterExampleItem);
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			showMessage.setOnAction(e -> this.getItem().getResult().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
 			
 			this.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showMessage.disableProperty().bind(to.resultProperty().isNull());
 					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
 				}
 			});
@@ -147,11 +147,11 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showParsingMessage"));
-			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
+			showMessage.setOnAction(e -> row.getItem().getResult().showAlert(stageManager, i18n));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showMessage.disableProperty().bind(to.resultProperty().isNull());
 				}
 			});
 			row.contextMenuProperty().bind(

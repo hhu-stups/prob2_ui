@@ -14,7 +14,7 @@ import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
+import de.prob2.ui.verifications.temporal.TemporalCheckingResult;
 import de.prob2.ui.verifications.temporal.ltl.LTLParseListener;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -25,20 +25,20 @@ public final class LTLPatternParser {
 	}
 	
 	private static void handlePatternResult(LTLParseListener parseListener, LTLPatternItem item) {
-		TemporalCheckingResultItem resultItem;
+		TemporalCheckingResult result;
 		// Empty Patterns do not have parse errors which is a little bit confusing
 		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
-			resultItem = new TemporalCheckingResultItem(CheckingStatus.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully");
+			result = new TemporalCheckingResult(CheckingStatus.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully");
 		} else {
 			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {
-				resultItem = new TemporalCheckingResultItem(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.empty");
+				result = new TemporalCheckingResult(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.empty");
 			} else {
 				final String msg = parseListener.getErrorMarkers().stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
-				resultItem = new TemporalCheckingResultItem(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.couldNotParsePattern", msg);
+				result = new TemporalCheckingResult(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.couldNotParsePattern", msg);
 			}
 		}
-		item.setResultItem(resultItem);
+		item.setResult(result);
 	}
 	
 	public static LTLPatternItem parsePattern(final String description, final String code, final Machine machine) {

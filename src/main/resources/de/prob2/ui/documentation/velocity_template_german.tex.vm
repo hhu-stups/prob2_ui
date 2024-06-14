@@ -92,7 +92,7 @@ $util.getMachineCode($machine,$project)
 $formula.getCode()
 \end{tabularlstlisting} & #if($createDescriptionColumn) $formula.getDescription() & #end
 				#if($util.formulaHasResult($formula))
-				 $i18n.translate($formula.getResultItem().getHeaderBundleKey())\\
+				 $i18n.translate($formula.getResult().getHeaderBundleKey())\\
 				#else
 				 $i18n.translate("verifications.result.notChecked.header") \\
 				#end
@@ -119,7 +119,7 @@ $pattern.getName() &
 $pattern.getCode()
 \end{tabularlstlisting} &
 			 #if($util.patternHasResult($pattern))
-				$i18n.translate($pattern.getResultItem().getHeaderBundleKey()) \\
+				$i18n.translate($pattern.getResult().getHeaderBundleKey()) \\
 			#else
 				$i18n.translate("verifications.result.notChecked.header")\\
 			#end
@@ -151,7 +151,7 @@ $util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgesc
 		#if($sitem.selected())
 			\seqsplit{$util.latexSafe($sitem.getTaskType($i18n))} & #if($createConfigurationColumn)  \seqsplit{$util.symbolicConfigString($sitem,$i18n)} & #end
 			#if($util.symbolicHasResult($sitem))
-				$i18n.translate($sitem.getResultItem().getHeaderBundleKey()) \\
+				$i18n.translate($sitem.getResult().getHeaderBundleKey()) \\
 			#else
 				$i18n.translate("verifications.result.notChecked.header") \\
 			#end

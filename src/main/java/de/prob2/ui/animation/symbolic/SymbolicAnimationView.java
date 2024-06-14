@@ -35,7 +35,7 @@ public final class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimat
 			executeMenuItem.setText(i18n.translate("symbolic.view.contextMenu.check"));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("symbolic.view.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			showMessage.setOnAction(e -> this.getItem().getResult().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
 
 			MenuItem showStateItem = new MenuItem(i18n.translate("animation.symbolic.view.contextMenu.showFoundTrace"));
@@ -44,7 +44,7 @@ public final class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimat
 
 			this.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showMessage.disableProperty().bind(to.resultProperty().isNull());
 					showStateItem.disableProperty().bind(to.exampleProperty().isNull());
 				}
 			});

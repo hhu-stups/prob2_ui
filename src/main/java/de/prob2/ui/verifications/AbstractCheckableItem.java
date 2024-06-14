@@ -13,14 +13,14 @@ import javafx.beans.property.SimpleObjectProperty;
 public abstract class AbstractCheckableItem implements IExecutableItem {
 	private final BooleanProperty selected;
 	@JsonIgnore
-	final ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
+	final ObjectProperty<CheckingResult> result = new SimpleObjectProperty<>(this, "result", null);
 	@JsonIgnore
 	final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
 	protected AbstractCheckableItem() {
 		this.selected = new SimpleBooleanProperty(true);
 
-		this.resultItemProperty().addListener((o, from, to) -> this.status.set(to == null ? CheckingStatus.NOT_CHECKED : to.getStatus()));
+		this.resultProperty().addListener((o, from, to) -> this.status.set(to == null ? CheckingStatus.NOT_CHECKED : to.getStatus()));
 	}
 
 	@Override
@@ -40,16 +40,16 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		return selected;
 	}
 
-	public void setResultItem(CheckingResultItem resultItem) {
-		this.resultItem.set(resultItem);
+	public void setResult(CheckingResult result) {
+		this.result.set(result);
 	}
 
-	public CheckingResultItem getResultItem() {
-		return resultItem.get();
+	public CheckingResult getResult() {
+		return result.get();
 	}
 
-	public ObjectProperty<CheckingResultItem> resultItemProperty() {
-		return resultItem;
+	public ObjectProperty<CheckingResult> resultProperty() {
+		return result;
 	}
 
 	@Override
@@ -64,7 +64,7 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 
 	@Override
 	public void reset() {
-		this.setResultItem(null);
+		this.setResult(null);
 		this.resetAnimatorDependentState();
 	}
 }

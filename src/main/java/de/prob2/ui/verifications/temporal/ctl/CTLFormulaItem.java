@@ -19,10 +19,10 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
+import de.prob2.ui.verifications.temporal.TemporalCheckingResult;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -64,18 +64,18 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 		
 		if (result instanceof CTLOk) {
 			if (this.getExpectedResult()) {
-				this.setResultItem(new CheckingResultItem(CheckingStatus.SUCCESS, "verifications.temporal.result.succeeded.message"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.temporal.result.succeeded.message"));
 			} else {
-				this.setResultItem(new CheckingResultItem(CheckingStatus.FAIL, "verifications.temporal.result.counterExampleFound.message"));
+				this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.temporal.result.counterExampleFound.message"));
 			}
 		} else if (result instanceof CTLCounterExample) {
 			if (this.getExpectedResult()) {
-				this.setResultItem(new CheckingResultItem(CheckingStatus.FAIL, "verifications.temporal.result.counterExampleFound.message"));
+				this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.temporal.result.counterExampleFound.message"));
 			} else {
-				this.setResultItem(new CheckingResultItem(CheckingStatus.SUCCESS, "verifications.temporal.result.succeeded.example.message"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.temporal.result.succeeded.example.message"));
 			}
 		} else if (result instanceof CTLNotYetFinished || result instanceof CheckInterrupted || result instanceof CTLCouldNotDecide) {
-			this.setResultItem(new CheckingResultItem(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));
 		} else {
 			throw new AssertionError("Unhandled CTL checking result type: " + result.getClass());
 		}
@@ -86,7 +86,7 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 		if(errorMessage.isEmpty()) {
 			errorMessage = "Parse Error in typed formula";
 		}
-		this.setResultItem(new TemporalCheckingResultItem(CheckingStatus.INVALID_TASK, errorMarkers, "common.result.message", errorMessage));
+		this.setResult(new TemporalCheckingResult(CheckingStatus.INVALID_TASK, errorMarkers, "common.result.message", errorMessage));
 	}
 	
 	@Override
@@ -101,7 +101,7 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 			
 			case CURRENT_STATE:
 				if (context.trace() == null) {
-					this.setResultItem(new CheckingResultItem(CheckingStatus.INVALID_TASK, "verifications.temporal.result.noCurrentState.message"));
+					this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "verifications.temporal.result.noCurrentState.message"));
 					return;
 				}
 				startState = context.trace().getCurrentState();

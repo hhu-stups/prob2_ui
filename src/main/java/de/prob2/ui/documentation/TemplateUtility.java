@@ -64,9 +64,9 @@ public class TemplateUtility {
 		return MoreFiles.asCharSource(project.getLocation().resolve(elem.getLocation()), StandardCharsets.UTF_8).read();
 	}
 
-	public static boolean formulaHasResult(TemporalFormulaItem formula){return (formula.getResultItem() != null);}
-	public static boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
-	public static boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
+	public static boolean formulaHasResult(TemporalFormulaItem formula){return (formula.getResult() != null);}
+	public static boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResult() != null);}
+	public static boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResult() != null);}
 
 	public static int getNumberSelectedTasks(List<? extends IExecutableItem> validationTasks){
 		long selectedTasksCount = validationTasks.stream()

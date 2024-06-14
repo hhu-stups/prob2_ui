@@ -58,7 +58,7 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 			contextMenu.getItems().add(showDetails);
 
 			MenuItem showMessage = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showGenerationMessage"));
-			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			showMessage.setOnAction(e -> this.getItem().getResult().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
 
 			Menu showStateItem = new Menu(i18n.translate("animation.testcase.view.contextMenu.showFoundPaths"));
@@ -80,7 +80,7 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 				}
 				
 				if (to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showMessage.disableProperty().bind(to.resultProperty().isNull());
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					to.examplesProperty().addListener(updateExamplesListener);
 					updateExamplesListener.invalidated(null);
