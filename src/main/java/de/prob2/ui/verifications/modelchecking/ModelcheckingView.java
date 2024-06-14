@@ -108,7 +108,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private Label memoryUsage;
 
 	private final CurrentTrace currentTrace;
-	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final Provider<ModelcheckingStage> modelcheckingStageProvider;
 	private final I18n i18n;
@@ -127,7 +126,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	) {
 		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
 		this.currentTrace = currentTrace;
-		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.modelcheckingStageProvider = modelcheckingStageProvider;
 		this.i18n = i18n;
