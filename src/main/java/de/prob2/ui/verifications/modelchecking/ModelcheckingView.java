@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.CancellationException;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.check.StateSpaceStats;
@@ -110,7 +110,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final Injector injector;
+	private final Provider<ModelcheckingStage> modelcheckingStageProvider;
 	private final I18n i18n;
 	private final CliTaskExecutor cliExecutor;
 	private final StatsView statsView;
@@ -119,7 +119,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private ModelcheckingView(final CurrentTrace currentTrace,
 			final CurrentProject currentProject,
 			final DisablePropertyController disablePropertyController,
-			final StageManager stageManager, final Injector injector,
+			final StageManager stageManager,
+			final Provider<ModelcheckingStage> modelcheckingStageProvider,
 			final I18n i18n,
 			final CliTaskExecutor cliExecutor,
 			final StatsView statsView
@@ -128,7 +129,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.injector = injector;
+		this.modelcheckingStageProvider = modelcheckingStageProvider;
 		this.i18n = i18n;
 		this.cliExecutor = cliExecutor;
 		this.statsView = statsView;
@@ -247,7 +248,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		button.getStyleClass().add("button-blue");
 		button.setOnAction(actionEvent -> {
 			ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
-			injector.getInstance(CurrentTrace.class).set(step.getTrace());
+			currentTrace.set(step.getTrace());
 		});
 
 		button.managedProperty().bind(buttonBinding);
@@ -295,14 +296,14 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && (!(row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription)))){
 					ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
-					injector.getInstance(CurrentTrace.class).set(step.getTrace());
+					currentTrace.set(step.getTrace());
 				}
 			});
 
 			MenuItem showTraceItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
 			showTraceItem.setOnAction(e-> {
 				ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
-				injector.getInstance(CurrentTrace.class).set(step.getTrace());
+				currentTrace.set(step.getTrace());
 			});
 			showTraceItem.disableProperty().bind(Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription),
@@ -318,7 +319,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	@Override
 	protected Optional<ModelCheckingItem> showItemDialog(final ModelCheckingItem oldItem) {
-		ModelcheckingStage modelcheckingStage = injector.getInstance(ModelcheckingStage.class);
+		ModelcheckingStage modelcheckingStage = modelcheckingStageProvider.get();
 		if (oldItem != null) {
 			modelcheckingStage.setData(oldItem);
 		}
