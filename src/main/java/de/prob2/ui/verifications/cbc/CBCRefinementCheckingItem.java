@@ -53,13 +53,13 @@ public final class CBCRefinementCheckingItem extends SymbolicCheckingFormulaItem
 		ConstraintBasedRefinementCheckCommand.ResultType result = cmd.getResult();
 		String msg = cmd.getResultsString();
 		if (result == null) {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicchecking.resultHandler.refinementChecking.result.notARefinementMachine.message"));
+			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.cbc.refinementChecking.result.notARefinementMachine.message"));
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.NO_VIOLATION_FOUND) {
-			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicchecking.resultHandler.refinementChecking.result.noViolationFound", msg));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.cbc.refinementChecking.result.noViolationFound", msg));
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.VIOLATION_FOUND) {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicchecking.resultHandler.refinementChecking.result.violationFound", msg));
+			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.cbc.refinementChecking.result.violationFound", msg));
 		} else if (result == ConstraintBasedRefinementCheckCommand.ResultType.INTERRUPTED) {
-			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "verifications.symbolicchecking.resultHandler.refinementChecking.result.interrupted", msg));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "verifications.cbc.refinementChecking.result.interrupted", msg));
 		} else {
 			throw new AssertionError("Unhandled CBC refinement checking result: " + result);
 		}

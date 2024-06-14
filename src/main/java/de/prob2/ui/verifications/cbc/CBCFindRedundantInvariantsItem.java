@@ -54,9 +54,9 @@ public final class CBCFindRedundantInvariantsItem extends SymbolicCheckingFormul
 		
 		List<String> result = cmd.getRedundantInvariants();
 		if (result.isEmpty()) {
-			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound"));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.cbc.findRedundantInvariants.result.notFound"));
 		} else {
-			this.setResult(new CheckingResult(cmd.isTimeout() ? CheckingStatus.TIMEOUT : CheckingStatus.FAIL, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found", String.join("\n", result)));
+			this.setResult(new CheckingResult(cmd.isTimeout() ? CheckingStatus.TIMEOUT : CheckingStatus.FAIL, "verifications.cbc.findRedundantInvariants.result.found", String.join("\n", result)));
 		}
 	}
 }

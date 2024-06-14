@@ -111,13 +111,13 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 		}
 
 		if (res.isInterrupted()) {
-			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted"));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "animation.testcase.result.interrupted"));
 		} else if (traces.isEmpty()) {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
+			this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.testcase.result.notFound"));
 		} else if (!res.getUncoveredTargets().isEmpty()) {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated"));
+			this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.testcase.result.notAllGenerated"));
 		} else {
-			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "animation.testcase.result.found"));
 		}
 		this.getExamples().addAll(traces);
 	}

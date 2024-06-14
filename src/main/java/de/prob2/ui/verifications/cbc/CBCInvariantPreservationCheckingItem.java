@@ -82,9 +82,9 @@ public final class CBCInvariantPreservationCheckingItem extends SymbolicChecking
 		IModelCheckingResult result = new CBCInvariantChecker(context.stateSpace(), eventNames).call();
 		
 		if (result instanceof ModelCheckOk) {
-			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success"));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicModelChecking.result.success"));
 		} else if (result instanceof CBCInvariantViolationFound violation) {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample"));
+			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicModelChecking.result.counterExample"));
 			List<Trace> counterExamples = new ArrayList<>();
 			int size = violation.getCounterexamples().size();
 			for (int i = 0; i < size; i++) {

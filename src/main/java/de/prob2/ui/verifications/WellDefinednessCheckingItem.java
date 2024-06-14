@@ -48,9 +48,9 @@ public final class WellDefinednessCheckingItem extends SymbolicCheckingFormulaIt
 		}
 
 		if (cmd.getDischargedCount().equals(cmd.getTotalCount())) {
-			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", cmd.getTotalCount()));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.wellDefinednessChecking.result.allDischarged.message", cmd.getTotalCount()));
 		} else {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount())));
+			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.wellDefinednessChecking.result.undischarged.message", cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount())));
 		}
 	}
 }

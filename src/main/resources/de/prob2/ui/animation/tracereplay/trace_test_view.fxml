@@ -34,7 +34,7 @@
 						</placeholder>
 					</TableView>
 					<HBox spacing="10.0">
-						<Button fx:id="btRecord" text="%animation.trace.replay.test.postcondition.record" styleClass="button-blue" onAction="#recordPostconditions"/>
+						<Button fx:id="btRecord" text="%animation.tracereplay.test.postcondition.record" styleClass="button-blue" onAction="#recordPostconditions"/>
 						<Button fx:id="btApply" text="%common.buttons.apply" styleClass="button-blue" onAction="#applyTest"/>
 						<Button fx:id="btShowDescription" text="%animation.tracereplay.view.contextMenu.showDescription" styleClass="button-blue" onAction="#handleTraceDescription"/>
 						<Spacer/>

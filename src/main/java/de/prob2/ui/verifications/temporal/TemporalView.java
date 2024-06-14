@@ -213,8 +213,8 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			managePatternTable(machine.getLTLPatterns());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
+				"verifications.temporal.ltl.pattern.alreadyExists.header",
+				"verifications.temporal.ltl.pattern.alreadyExists.content").show();
 		}
 	}
 	
@@ -245,8 +245,8 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
+				"verifications.temporal.ltl.pattern.alreadyExists.header",
+				"verifications.temporal.ltl.pattern.alreadyExists.content").show();
 		}
 	}
 }

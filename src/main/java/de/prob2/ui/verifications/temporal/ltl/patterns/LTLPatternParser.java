@@ -28,7 +28,7 @@ public final class LTLPatternParser {
 		TemporalCheckingResult result;
 		// Empty Patterns do not have parse errors which is a little bit confusing
 		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
-			result = new TemporalCheckingResult(CheckingStatus.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully");
+			result = new TemporalCheckingResult(CheckingStatus.SUCCESS, parseListener.getErrorMarkers(), "verifications.temporal.ltl.pattern.parsedSuccessfully");
 		} else {
 			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {

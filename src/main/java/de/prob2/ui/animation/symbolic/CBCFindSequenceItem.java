@@ -53,7 +53,7 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 	
 	@Override
 	public String getTaskType(I18n i18n) {
-		return i18n.translate("animation.type.sequence");
+		return i18n.translate("animation.symbolic.type.sequence");
 	}
 	
 	@Override
@@ -76,20 +76,20 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 		
 		switch (cmd.getResult()) {
 			case PATH_FOUND:
-				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "animation.symbolic.resultHandler.sequence.result.found"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "animation.symbolic.sequence.result.found"));
 				this.setExample(cmd.getTrace());
 				break;
 			case NO_PATH_FOUND:
-				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.resultHandler.sequence.result.notFound"));
+				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.sequence.result.notFound"));
 				break;
 			case TIMEOUT:
-				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT, "animation.symbolic.resultHandler.sequence.result.timeout"));
+				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT, "animation.symbolic.sequence.result.timeout"));
 				break;
 			case INTERRUPTED:
-				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "animation.symbolic.resultHandler.sequence.result.interrupted"));
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "animation.symbolic.sequence.result.interrupted"));
 				break;
 			case ERROR:
-				this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "animation.symbolic.resultHandler.sequence.result.error"));
+				this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "animation.symbolic.sequence.result.error"));
 				break;
 			default:
 				throw new AssertionError("Unhandled CBC find sequence result: " + cmd.getResult());

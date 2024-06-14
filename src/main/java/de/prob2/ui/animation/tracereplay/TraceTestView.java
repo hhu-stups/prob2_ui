@@ -478,9 +478,9 @@ public final class TraceTestView extends Stage {
 	private MenuButton buildAddButton(VBox box, int index) {
 		final MenuButton btAddTest = new MenuButton("", new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
 		btAddTest.getStyleClass().add("icon-dark");
-		MenuItem addPredicate = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.predicate"));
-		MenuItem addOperationEnabled = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.enabled"));
-		MenuItem addOperationDisabled = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.disabled"));
+		MenuItem addPredicate = new MenuItem(i18n.translate("animation.tracereplay.test.postcondition.addItem.predicate"));
+		MenuItem addOperationEnabled = new MenuItem(i18n.translate("animation.tracereplay.test.postcondition.addItem.enabled"));
+		MenuItem addOperationDisabled = new MenuItem(i18n.translate("animation.tracereplay.test.postcondition.addItem.disabled"));
 
 		addPredicate.setOnAction(e1 -> {
 			PostconditionPredicate postcondition = new PostconditionPredicate();
@@ -513,7 +513,7 @@ public final class TraceTestView extends Stage {
 		innerBox.setSpacing(2);
 
 		final Label typeLabel = new Label(i18n.translate(
-				enumNameAdapter("animation.trace.replay.test.postcondition"),
+				enumNameAdapter("animation.tracereplay.test.postcondition"),
 				postcondition.getKind()
 		));
 		final TextField postconditionTextField = buildPostconditionTextField(postcondition);
@@ -537,7 +537,7 @@ public final class TraceTestView extends Stage {
 		innerBox.getChildren().add(postconditionTextField);
 
 		if(postcondition instanceof OperationExecutability) {
-			final Label withLabel = new Label(i18n.translate("animation.trace.replay.test.postcondition.with"));
+			final Label withLabel = new Label(i18n.translate("animation.tracereplay.test.postcondition.with"));
 			final TextField predicateTextField = buildOperationPredicateTextField(postcondition);
 			innerBox.getChildren().add(withLabel);
 			innerBox.getChildren().add(predicateTextField);

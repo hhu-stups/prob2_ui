@@ -51,7 +51,7 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 	
 	@Override
 	public String getTaskType(I18n i18n) {
-		return i18n.translate("animation.type.findValidState");
+		return i18n.translate("animation.symbolic.type.findValidState");
 	}
 	
 	@Override
@@ -74,17 +74,17 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 		
 		switch (cmd.getResult()) {
 			case STATE_FOUND:
-				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "animation.symbolic.resultHandler.findValidState.result.found"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "animation.symbolic.findValidState.result.found"));
 				this.setExample(cmd.getTrace(context.stateSpace()));
 				break;
 			case NO_STATE_FOUND:
-				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.resultHandler.findValidState.result.notFound"));
+				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.findValidState.result.notFound"));
 				break;
 			case INTERRUPTED:
-				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "animation.symbolic.resultHandler.findValidState.result.interrupted"));
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "animation.symbolic.findValidState.result.interrupted"));
 				break;
 			case ERROR:
-				this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "animation.symbolic.resultHandler.findValidState.result.error"));
+				this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "animation.symbolic.findValidState.result.error"));
 				break;
 			default:
 				throw new AssertionError("Unhandled find valid state result: " + cmd.getResult());
