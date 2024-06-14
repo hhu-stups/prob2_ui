@@ -13,7 +13,7 @@ import javafx.beans.property.SimpleObjectProperty;
 public abstract class AbstractCheckableItem implements ISelectableTask {
 	private final BooleanProperty selected;
 	@JsonIgnore
-	final ObjectProperty<CheckingResult> result = new SimpleObjectProperty<>(this, "result", null);
+	final ObjectProperty<ICheckingResult> result = new SimpleObjectProperty<>(this, "result", null);
 	@JsonIgnore
 	final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
@@ -40,15 +40,15 @@ public abstract class AbstractCheckableItem implements ISelectableTask {
 		return selected;
 	}
 
-	public void setResult(CheckingResult result) {
+	public void setResult(ICheckingResult result) {
 		this.result.set(result);
 	}
 
-	public CheckingResult getResult() {
+	public ICheckingResult getResult() {
 		return result.get();
 	}
 
-	public ObjectProperty<CheckingResult> resultProperty() {
+	public ObjectProperty<ICheckingResult> resultProperty() {
 		return result;
 	}
 
