@@ -228,7 +228,7 @@ public final class TraceFileHandler {
 			for (int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + (i + 1) + ".prob2trace");
 				save(traces.get(i), traceFilePath, item.createdByForMetadata(i));
-				Target target = item.getResult().getTestTraces().get(i).getTarget();
+				Target target = item.getGeneratorResult().getTestTraces().get(i).getTarget();
 				String description = "Test Case Generation Trace \nOperation: " + target.getOperation() + "\nGuard: " + target.getGuardString();
 				ReplayTrace trace = this.addTraceFile(machine, traceFilePath);
 				trace.saveModified(trace.load().changeDescription(description));

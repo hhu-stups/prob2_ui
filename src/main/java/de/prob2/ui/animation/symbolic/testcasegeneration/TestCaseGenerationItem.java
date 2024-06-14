@@ -39,7 +39,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	private final int maxDepth;
 
 	@JsonIgnore
-	private final ObjectProperty<TestCaseGeneratorResult> result = new SimpleObjectProperty<>(this, "result", null);
+	private final ObjectProperty<TestCaseGeneratorResult> generatorResult = new SimpleObjectProperty<>(this, "generatorResult", null);
 
 	@JsonIgnore
 	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
@@ -67,16 +67,16 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonIgnore
 	public abstract TestCaseGeneratorSettings getTestCaseGeneratorSettings();
 
-	public ObjectProperty<TestCaseGeneratorResult> resultProperty() {
-		return this.result;
+	public ObjectProperty<TestCaseGeneratorResult> generatorResultProperty() {
+		return this.generatorResult;
 	}
 
-	public TestCaseGeneratorResult getResult() {
-		return this.resultProperty().get();
+	public TestCaseGeneratorResult getGeneratorResult() {
+		return this.generatorResultProperty().get();
 	}
 
-	public void setResult(final TestCaseGeneratorResult result) {
-		this.resultProperty().set(result);
+	public void setGeneratorResult(TestCaseGeneratorResult generatorResult) {
+		this.generatorResultProperty().set(generatorResult);
 	}
 
 	public ListProperty<Trace> examplesProperty() {
@@ -91,7 +91,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	protected abstract String getConfigurationDescription();
 
 	public String createdByForMetadata(int index) {
-		final Target target = this.getResult().getTestTraces().get(index).getTarget();
+		final Target target = this.getGeneratorResult().getTestTraces().get(index).getTarget();
 		return "Test Case Generation: " + this.getConfigurationDescription() + "; OPERATION: " + target.getOperation() + ", GUARD: " + target.getGuardString();
 	}
 
@@ -101,7 +101,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 
 		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = new ConstraintBasedTestCaseGenerator(context.stateSpace(), this.getTestCaseGeneratorSettings(), new ArrayList<>());
 		TestCaseGeneratorResult res = cbTestCaseGenerator.generateTestCases();
-		this.setResult(res);
+		this.setGeneratorResult(res);
 
 		List<Trace> traces = new ArrayList<>();
 		for (TestTrace trace : res.getTestTraces()) {
@@ -124,7 +124,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 
 	@Override
 	public void resetAnimatorDependentState() {
-		this.setResult(null);
+		this.setGeneratorResult(null);
 		this.examples.clear();
 	}
 

@@ -45,11 +45,11 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 
 			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
-			showDetails.setOnAction(e -> showDetails(this.getItem().getResult()));
+			showDetails.setOnAction(e -> showDetails(this.getItem().getGeneratorResult()));
 			this.setOnMouseClicked(e -> {
 				if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY) {
-					if (this.getItem().getResult() != null && !this.getItem().getResult().getTestTraces().isEmpty()) {
-						showDetails(this.getItem().getResult());
+					if (this.getItem().getGeneratorResult() != null && !this.getItem().getGeneratorResult().getTestTraces().isEmpty()) {
+						showDetails(this.getItem().getGeneratorResult());
 					} else {
 						executeItem(this.getItem());
 					}
@@ -84,7 +84,7 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
 					to.examplesProperty().addListener(updateExamplesListener);
 					updateExamplesListener.invalidated(null);
-					showDetails.disableProperty().bind(to.resultProperty().isNull());
+					showDetails.disableProperty().bind(to.generatorResultProperty().isNull());
 					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
 			});
@@ -92,7 +92,7 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 		}
 		private void showDetails(TestCaseGeneratorResult result) {
 			TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
-			stage.setResult(this.getItem().getResult());
+			stage.setResult(this.getItem().getGeneratorResult());
 			stage.show();
 			stage.toFront();
 		}
