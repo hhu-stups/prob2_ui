@@ -315,6 +315,9 @@ public final class BEditorView extends BorderPane {
 			return;
 		}
 
+		// TODO Move this command off the UI thread!
+		// This can make the entire UI hang if the editor tries to update
+		// while probcli is busy with a long-running command.
 		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
 		cmd.setTranslationMode(this.cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
 		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
