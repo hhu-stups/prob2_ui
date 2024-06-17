@@ -141,7 +141,7 @@
 								</padding>
 								<InterruptIfRunningButton fx:id="btCancel">
 									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize + 4.0}" />
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}" />
 									</graphic>
 									<Button fx:id="btCheckMachine" disable="true" onAction="#checkMachine">
 										<graphic>
