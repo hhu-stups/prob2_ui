@@ -193,13 +193,13 @@
 					</AnchorPane>
 					<HBox fx:id="finishBox" alignment="CENTER_RIGHT" visible="false">
 						<HBox alignment="CENTER">
-							<CheckBox fx:id="closeAfterGeneration" text="Fenster nach Abschluss schließen"/>
+							<CheckBox fx:id="closeAfterGeneration" text="%railml.stage.closeAfterGeneration"/>
 						</HBox>
 						<ButtonBar fx:id="generateButtonBar" styleClass="dialog">
 							<buttons>
 								<Button text="%common.buttons.cancel" cancelButton="true"
 										onAction="#cancel" />
-								<Button fx:id="btGenerateAndFinish" text="Dateien erstellen"
+								<Button fx:id="btGenerateAndFinish" text="%railml.stage.generateAndFinish"
 										onAction="#generateAndFinish">
 									<graphic>
 										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
