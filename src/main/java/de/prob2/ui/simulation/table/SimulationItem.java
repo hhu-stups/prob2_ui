@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -22,7 +23,9 @@ import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -215,6 +218,13 @@ public final class SimulationItem implements IValidationTask {
 	public String createdByForMetadata() {
 		String createdBy = "Simulation: " + getTypeAsName() + "; " + getConfiguration();
 		return createdBy.replaceAll("\n", " ");
+	}
+
+	@Override
+	public CompletableFuture<?> execute(CheckingExecutors executors, ExecutionContext context) {
+		executors.simulationItemHandler().checkItem(this);
+		// TODO Make SimulationItemHandler.checkItem return a correct CompletableFuture!
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

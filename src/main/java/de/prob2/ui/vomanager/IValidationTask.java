@@ -1,5 +1,7 @@
 package de.prob2.ui.vomanager;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.fasterxml.jackson.databind.annotation.JsonTypeIdResolver;
@@ -8,7 +10,9 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.verifications.type.ValidationTaskTypeResolver;
 
@@ -32,6 +36,8 @@ public interface IValidationTask {
 
 	@JsonIgnore
 	CheckingStatus getStatus();
+
+	CompletableFuture<?> execute(CheckingExecutors executors, ExecutionContext context);
 
 	/**
 	 * Reset the parts this task's checking state that depend on the current animator instance ({@link StateSpace}),

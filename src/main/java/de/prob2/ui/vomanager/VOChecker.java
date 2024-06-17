@@ -9,16 +9,13 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 import de.prob.voparser.VOParseException;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.simulation.SimulationItemHandler;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.vomanager.ast.AndValidationExpression;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.OrValidationExpression;
@@ -27,28 +24,21 @@ import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 @Singleton
 public final class VOChecker {
 	private final CurrentProject currentProject;
-
 	private final CurrentTrace currentTrace;
-
-	private final CliTaskExecutor cliExecutor;
-
 	private final FxThreadExecutor fxExecutor;
-
-	private final SimulationItemHandler simulationItemHandler;
+	private final CheckingExecutors checkingExecutors;
 
 	@Inject
 	public VOChecker(
 		CurrentProject currentProject,
 		CurrentTrace currentTrace,
-		CliTaskExecutor cliExecutor,
 		FxThreadExecutor fxExecutor,
-		SimulationItemHandler simulationItemHandler
+		CheckingExecutors checkingExecutors
 	) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.cliExecutor = cliExecutor;
 		this.fxExecutor = fxExecutor;
-		this.simulationItemHandler = simulationItemHandler;
+		this.checkingExecutors = checkingExecutors;
 	}
 
 	public CompletableFuture<?> checkProject() {
@@ -91,7 +81,7 @@ public final class VOChecker {
 
 	private CompletableFuture<?> checkVOExpression(IValidationExpression expression, ExecutionContext context) {
 		if (expression instanceof ValidationTaskExpression) {
-			return checkVT(((ValidationTaskExpression)expression).getTask(), context);
+			return ((ValidationTaskExpression)expression).getTask().execute(checkingExecutors, context);
 		} else if (expression instanceof AndValidationExpression) {
 			return checkAndExpression((AndValidationExpression)expression, context);
 		} else if (expression instanceof OrValidationExpression) {
@@ -160,24 +150,4 @@ public final class VOChecker {
 			return checkVOExpression(validationObligation.getParsedExpression(), context);
 		});
 	}
-
-	private CompletableFuture<?> checkVT(IValidationTask validationTask, ExecutionContext context) {
-		if (validationTask instanceof ValidationTaskNotFound) {
-			// Nothing to be done - it already shows an error status
-			return CompletableFuture.completedFuture(null);
-		} else if (validationTask instanceof IExecutableItem) {
-			return cliExecutor.submit(() -> ((IExecutableItem)validationTask).execute(context));
-		} else if (validationTask instanceof SimulationItem) {
-			simulationItemHandler.checkItem((SimulationItem) validationTask);
-			// TODO Make SimulationItemHandler return a correct CompletableFuture!
-			return CompletableFuture.completedFuture(null);
-		} else {
-			// Don't know how to (automatically) check this task, so do nothing.
-			// For some tasks, such as proof obligations, there is nothing else we can do.
-			// TODO For manual tasks (e. g. visualization), ask the user to decide.
-			return CompletableFuture.completedFuture(null);
-		}
-	}
-
-
 }

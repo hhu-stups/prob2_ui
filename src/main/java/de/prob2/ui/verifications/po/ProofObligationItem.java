@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.po;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,7 +11,9 @@ import com.google.common.base.MoreObjects;
 
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -96,6 +99,13 @@ public final class ProofObligationItem implements IValidationTask {
 	@JsonIgnore
 	public void setStatus(final CheckingStatus status) {
 		this.statusProperty().set(status);
+	}
+
+	@Override
+	public CompletableFuture<?> execute(CheckingExecutors executors, ExecutionContext context) {
+		// Nothing to be done here - the proof status is loaded when the model is loaded
+		// and can only change by reloading the model.
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

@@ -2,11 +2,14 @@ package de.prob2.ui.vomanager;
 
 import java.util.Locale;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
@@ -58,6 +61,12 @@ public final class ValidationTaskNotFound implements IValidationTask {
 	@Override
 	public String getTaskDescription(final I18n i18n) {
 		return i18n.translate("vomanager.validationTaskNotFound.description");
+	}
+
+	@Override
+	public CompletableFuture<?> execute(CheckingExecutors executors, ExecutionContext context) {
+		// Nothing to be done - it already shows an error status.
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override

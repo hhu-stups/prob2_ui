@@ -1,6 +1,7 @@
 package de.prob2.ui.dynamic;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,7 +11,9 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -84,6 +87,12 @@ public final class VisualizationFormulaTask implements IValidationTask {
 
 	public void setStatus(final CheckingStatus status) {
 		this.statusProperty().set(status);
+	}
+
+	@Override
+	public CompletableFuture<?> execute(CheckingExecutors executors, ExecutionContext context) {
+		// TODO Do the visualization, then ask the user to decide if it is correct or not.
+		return CompletableFuture.completedFuture(null);
 	}
 
 	@Override
