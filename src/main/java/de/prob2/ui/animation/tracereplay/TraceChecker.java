@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.CommandInterruptedException;
@@ -16,7 +16,6 @@ import de.prob.check.tracereplay.TraceReplayStatus;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.verifications.CheckingStatus;
 
@@ -31,14 +30,14 @@ public final class TraceChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
 
 	private final CurrentTrace currentTrace;
-	private final Injector injector;
-	private final StageManager stageManager;
+	private final TraceFileHandler traceFileHandler;
+	private final Provider<ReplayedTraceStatusAlert> replayedAlertProvider;
 
 	@Inject
-	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
+	private TraceChecker(CurrentTrace currentTrace, TraceFileHandler traceFileHandler, Provider<ReplayedTraceStatusAlert> replayedAlertProvider) {
 		this.currentTrace = currentTrace;
-		this.injector = injector;
-		this.stageManager = stageManager;
+		this.traceFileHandler = traceFileHandler;
+		this.replayedAlertProvider = replayedAlertProvider;
 	}
 
 	public void check(ReplayTrace replayTrace) {
@@ -47,7 +46,7 @@ public final class TraceChecker {
 			checkNoninteractive(replayTrace, stateSpace);
 			setCurrentTraceAfterReplay(replayTrace);
 		} catch (RuntimeException exc) {
-			Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, exc));
+			Platform.runLater(() -> traceFileHandler.showLoadError(replayTrace, exc));
 		}
 	}
 
@@ -89,7 +88,7 @@ public final class TraceChecker {
 
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
 		Platform.runLater(() -> {
-			ReplayedTraceStatusAlert alert = injector.getInstance(ReplayedTraceStatusAlert.class);
+			ReplayedTraceStatusAlert alert = replayedAlertProvider.get();
 			alert.initReplayTrace(replayTrace);
 			alert.handleAcceptDiscard();
 		});
