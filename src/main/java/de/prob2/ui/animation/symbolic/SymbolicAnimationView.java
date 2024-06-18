@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.symbolic;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -13,11 +14,11 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.property.SimpleStringProperty;
@@ -66,9 +67,9 @@ public final class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimat
 	
 	@Inject
 	public SymbolicAnimationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
-	                             final CurrentProject currentProject, final CliTaskExecutor cliExecutor,
+	                             final CurrentProject currentProject, final CheckingExecutors checkingExecutors,
 	                             final DisablePropertyController disablePropertyController, final Provider<SymbolicAnimationChoosingStage> choosingStageProvider) {
-		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
+		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -93,12 +94,14 @@ public final class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimat
 	}
 	
 	@Override
-	protected void executeItemSync(final SymbolicAnimationItem item, final ExecutionContext context) {
-		item.execute(context);
-		final Trace example = item.getExample();
-		if (example != null) {
-			currentTrace.set(example);
-		}
+	protected CompletableFuture<?> executeItemImpl(SymbolicAnimationItem item, CheckingExecutors executors, ExecutionContext context) {
+		return super.executeItemImpl(item, executors, context).thenApply(res -> {
+			Trace example = item.getExample();
+			if (example != null) {
+				currentTrace.set(example);
+			}
+			return res;
+		});
 	}
 	
 	@Override

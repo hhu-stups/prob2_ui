@@ -1,16 +1,18 @@
 package de.prob2.ui.sharedviews;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
@@ -18,6 +20,7 @@ import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.vomanager.IValidationTask;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
@@ -26,6 +29,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
@@ -104,21 +108,30 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	@FXML
 	protected Button checkMachineButton;
 
+	private final StageManager stageManager;
 	private final I18n i18n;
 	protected final DisablePropertyController disablePropertyController;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-	private final CliTaskExecutor cliExecutor;
+	private final CheckingExecutors checkingExecutors;
 
 	protected final CheckBox selectAll;
 	protected BooleanBinding emptyProperty;
 
-	protected CheckingViewBase(final I18n i18n, final DisablePropertyController disablePropertyController, final CurrentTrace currentTrace, final CurrentProject currentProject, final CliTaskExecutor cliExecutor) {
+	protected CheckingViewBase(
+		StageManager stageManager,
+		I18n i18n,
+		DisablePropertyController disablePropertyController,
+		CurrentTrace currentTrace,
+		CurrentProject currentProject,
+		CheckingExecutors checkingExecutors
+	) {
+		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.disablePropertyController = disablePropertyController;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.cliExecutor = cliExecutor;
+		this.checkingExecutors = checkingExecutors;
 
 		this.selectAll = new CheckBox();
 	}
@@ -193,29 +206,81 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), trace.getStateSpace(), trace);
 	}
 
-	protected abstract void executeItemSync(final T item, final ExecutionContext context);
-
-	protected void executeItem(final T item) {
-		final ExecutionContext context = getCurrentExecutionContext();
-		cliExecutor.execute(() -> executeItemSync(item, context));
+	/**
+	 * Execute an item without any user interaction,
+	 * i. e. without showing any alerts or changing the current trace.
+	 * Can be overridden to perform additional actions whenever an item is executed from the view,
+	 * regardless of whether a single item or multiple items are executed.
+	 * This method is meant for overriding only and shouldn't be called directly outside of {@link CheckingViewBase}.
+	 * 
+	 * @param item the item to execute
+	 * @param executors the executors to use for executing the item
+	 * @param context the project/animator context in which to execute the item
+	 * @return a future that completes once the item has been executed
+	 */
+	protected CompletableFuture<?> executeItemNoninteractiveImpl(T item, CheckingExecutors executors, ExecutionContext context) {
+		return item.execute(executors, context);
 	}
 
-	protected void executeItemIfEnabled(final T item) {
+	/**
+	 * Execute a single item in response to a user action.
+	 * Can be overridden to perform additional actions when the user executes a specific item in the view,
+	 * e. g. to show an error alert on failure or update the current trace to the result of the check.
+	 * This method is meant for overriding only and shouldn't be called directly outside of {@link CheckingViewBase} -
+	 * other code should call {@link #executeItem(IExecutableItem)} instead.
+	 *
+	 * @param item the item to execute
+	 * @param executors the executors to use for executing the item
+	 * @param context the project/animator context in which to execute the item
+	 * @return a future that completes once the item has been executed
+	 */
+	protected CompletableFuture<?> executeItemImpl(T item, CheckingExecutors executors, ExecutionContext context) {
+		return executeItemNoninteractiveImpl(item, checkingExecutors, context);
+	}
+
+	private void handleCheckException(Throwable exc) {
+		Thread thread = Thread.currentThread();
+		Platform.runLater(() -> {
+			Alert alert = stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread);
+			alert.initOwner(this.getScene().getWindow());
+			alert.show();
+		});
+	}
+
+	/**
+	 * Execute a single item in response to a user action.
+	 * This method cannot be overridden directly -
+	 * subclasses can override {@link #executeItemImpl(IExecutableItem, CheckingExecutors, ExecutionContext)} instead.
+	 * 
+	 * @param item the item to execute
+	 */
+	protected final void executeItem(T item) {
+		final ExecutionContext context = getCurrentExecutionContext();
+		executeItemImpl(item, checkingExecutors, context).exceptionally(exc -> {
+			handleCheckException(exc);
+			return null;
+		});
+	}
+
+	protected final void executeItemIfEnabled(T item) {
 		if (!disableItemBinding(item).get()) {
 			executeItem(item);
 		}
 	}
 
-	protected void executeAllSelectedItems() {
+	protected final void executeAllSelectedItems() {
 		final ExecutionContext context = getCurrentExecutionContext();
-		cliExecutor.execute(() -> {
-			for (final T item : itemsTable.getItems()) {
-				if (!item.selected()) {
-					continue;
-				}
-
-				item.execute(context);
+		CompletableFuture<?> future = CompletableFuture.completedFuture(null);
+		for (T item : itemsTable.getItems()) {
+			if (!item.selected()) {
+				continue;
 			}
+
+			future = future.thenCompose(res -> executeItemNoninteractiveImpl(item, checkingExecutors, context));
+		}
+		future.exceptionally(exc -> {
+			handleCheckException(exc);
+			return null;
 		});
 	}
 

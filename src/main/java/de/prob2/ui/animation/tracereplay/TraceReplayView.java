@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
@@ -22,7 +23,6 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.RevealInExplorer;
@@ -31,6 +31,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatusIcon;
 import de.prob2.ui.verifications.ExecutionContext;
 
@@ -126,9 +127,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-	                        final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final TraceChecker traceChecker, final I18n i18n,
+	                        final CurrentTrace currentTrace, final CheckingExecutors checkingExecutors, final TraceChecker traceChecker, final I18n i18n,
 	                        final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
-		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
+		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -202,14 +203,14 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected void executeItemSync(final ReplayTrace item, final ExecutionContext context) {
-		try {
-			item.execute(context);
-		} catch (RuntimeException exc) {
-			Platform.runLater(() -> traceFileHandler.showLoadError(item, exc));
-			return;
-		}
-		traceChecker.setCurrentTraceAfterReplay(item);
+	protected CompletableFuture<?> executeItemImpl(ReplayTrace item, CheckingExecutors executors, ExecutionContext context) {
+		return super.executeItemImpl(item, executors, context).whenComplete((res, exc) -> {
+			if (exc == null) {
+				traceChecker.setCurrentTraceAfterReplay(item);
+			} else {
+				Platform.runLater(() -> traceFileHandler.showLoadError(item, exc));
+			}
+		});
 	}
 
 	@Override

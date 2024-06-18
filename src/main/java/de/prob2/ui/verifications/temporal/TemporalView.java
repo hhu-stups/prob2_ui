@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.temporal;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -11,11 +12,11 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
@@ -91,8 +92,8 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private TemporalView(final StageManager stageManager, final I18n i18n, final Injector injector,
 						 final CurrentTrace currentTrace, final CurrentProject currentProject,
 						 final DisablePropertyController disablePropertyController,
-						 final CliTaskExecutor cliExecutor) {
-		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
+						 final CheckingExecutors checkingExecutors) {
+		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.injector = injector;
@@ -190,11 +191,13 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	}
 	
 	@Override
-	protected void executeItemSync(final TemporalFormulaItem item, final ExecutionContext context) {
-		item.execute(context);
-		if (item.getCounterExample() != null) {
-			currentTrace.set(item.getCounterExample());
-		}
+	protected CompletableFuture<?> executeItemImpl(TemporalFormulaItem item, CheckingExecutors executors, ExecutionContext context) {
+		return super.executeItemImpl(item, executors, context).thenApply(res -> {
+			if (item.getCounterExample() != null) {
+				currentTrace.set(item.getCounterExample());
+			}
+			return res;
+		});
 	}
 	
 	@FXML

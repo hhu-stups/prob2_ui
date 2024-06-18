@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.modelchecking;
 import java.math.BigInteger;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -15,13 +16,13 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.SimpleStatsView;
 import de.prob2.ui.stats.StatsView;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
@@ -111,7 +112,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private final StageManager stageManager;
 	private final Provider<ModelcheckingStage> modelcheckingStageProvider;
 	private final I18n i18n;
-	private final CliTaskExecutor cliExecutor;
 	private final StatsView statsView;
 
 	@Inject
@@ -121,15 +121,14 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			final StageManager stageManager,
 			final Provider<ModelcheckingStage> modelcheckingStageProvider,
 			final I18n i18n,
-			final CliTaskExecutor cliExecutor,
+			final CheckingExecutors checkingExecutors,
 			final StatsView statsView
 	) {
-		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
+		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
 		this.modelcheckingStageProvider = modelcheckingStageProvider;
 		this.i18n = i18n;
-		this.cliExecutor = cliExecutor;
 		this.statsView = statsView;
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 	}
@@ -273,16 +272,23 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	}
 	
 	@Override
-	protected void executeItemSync(final ModelCheckingItem item, final ExecutionContext context) {
+	protected CompletableFuture<?> executeItemNoninteractiveImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
 		statsView.updateWhileModelChecking(item);
-		try {
-			final ModelCheckingStep r = Modelchecker.execute(item, context.stateSpace());
-			if (r.getResult() instanceof ITraceDescription) {
-				currentTrace.set(r.getTrace());
+		return super.executeItemNoninteractiveImpl(item, executors, context);
+	}
+
+	@Override
+	protected CompletableFuture<?> executeItemImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
+		statsView.updateWhileModelChecking(item);
+		return executors.cliExecutor().submit(() -> Modelchecker.execute(item, context.stateSpace())).whenComplete((r, exc) -> {
+			if (exc == null) {
+				if (r.getResult() instanceof ITraceDescription) {
+					currentTrace.set(r.getTrace());
+				}
+			} else {
+				showModelCheckException(exc);
 			}
-		} catch (RuntimeException e) {
-			showModelCheckException(e);
-		}
+		});
 	}
 
 	private void setContextMenus() {
@@ -323,25 +329,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		}
 		modelcheckingStage.showAndWait();
 		return Optional.ofNullable(modelcheckingStage.getResult());
-	}
-
-	@Override
-	protected void executeAllSelectedItems() {
-		final ExecutionContext context = this.getCurrentExecutionContext();
-		cliExecutor.execute(() -> {
-			for (ModelCheckingItem item : itemsTable.getItems()) {
-				if (!item.selected()) {
-					continue;
-				}
-
-				statsView.updateWhileModelChecking(item);
-				try {
-					item.execute(context);
-				} catch (RuntimeException exc) {
-					showModelCheckException(exc);
-				}
-			}
-		});
 	}
 
 	private void showStats(final long timeElapsed, final StateSpaceStats stats, final BigInteger memory) {

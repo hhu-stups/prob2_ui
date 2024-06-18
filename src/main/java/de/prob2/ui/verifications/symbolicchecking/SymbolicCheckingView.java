@@ -2,6 +2,7 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Provider;
@@ -14,11 +15,11 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.beans.InvalidationListener;
@@ -88,9 +89,9 @@ public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckin
 
 	@Inject
 	public SymbolicCheckingView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
-	                            final CurrentProject currentProject, final CliTaskExecutor cliExecutor,
+	                            final CurrentProject currentProject, final CheckingExecutors checkingExecutors,
 	                            final DisablePropertyController disablePropertyController, final Provider<SymbolicCheckingChoosingStage> choosingStageProvider) {
-		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
+		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -117,12 +118,14 @@ public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckin
 	}
 
 	@Override
-	protected void executeItemSync(final SymbolicCheckingFormulaItem item, final ExecutionContext context) {
-		item.execute(context);
-		List<Trace> counterExamples = item.getCounterExamples();
-		if (!counterExamples.isEmpty()) {
-			currentTrace.set(counterExamples.get(0));
-		}
+	protected CompletableFuture<?> executeItemImpl(SymbolicCheckingFormulaItem item, CheckingExecutors executors, ExecutionContext context) {
+		return super.executeItemImpl(item, executors, context).thenApply(res -> {
+			List<Trace> counterExamples = item.getCounterExamples();
+			if (!counterExamples.isEmpty()) {
+				currentTrace.set(counterExamples.get(0));
+			}
+			return res;
+		});
 	}
 
 	@Override

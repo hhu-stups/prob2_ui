@@ -17,12 +17,11 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.CheckingExecutors;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -131,8 +130,8 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 	@Inject
 	public TestCaseGenerationView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace,
 	                              final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-	                              final CliTaskExecutor cliExecutor, final Injector injector) {
-		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
+	                              final CheckingExecutors checkingExecutors, final Injector injector) {
+		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
@@ -159,11 +158,6 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 		final BooleanBinding partOfDisableBinding = Bindings.createBooleanBinding(() -> !(currentTrace.modelProperty().get() instanceof EventBModel) && !(currentTrace.modelProperty().get() instanceof ClassicalBModel), currentTrace.modelProperty());
 		addTestCaseButton.disableProperty().bind(partOfDisableBinding.or(disablePropertyController.disableProperty()));
 		typeColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getTaskType(i18n)));
-	}
-
-	@Override
-	protected void executeItemSync(final TestCaseGenerationItem item, final ExecutionContext context) {
-		item.execute(context);
 	}
 
 	@Override
