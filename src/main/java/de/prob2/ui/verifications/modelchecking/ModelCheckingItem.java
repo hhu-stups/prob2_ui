@@ -19,6 +19,7 @@ import de.prob.model.representation.AbstractModel;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.ICliTask;
 import de.prob2.ui.verifications.IExecutableItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -41,7 +42,7 @@ import javafx.collections.FXCollections;
 	"goal",
 	"selected",
 })
-public final class ModelCheckingItem implements IExecutableItem {
+public final class ModelCheckingItem implements ICliTask, IExecutableItem {
 	@JsonIgnore
 	private final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 

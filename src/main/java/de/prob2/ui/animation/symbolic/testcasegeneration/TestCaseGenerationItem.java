@@ -19,6 +19,7 @@ import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.ICliTask;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -32,7 +33,7 @@ import javafx.collections.ObservableList;
 	"maxDepth",
 	"selected",
 })
-public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
+public abstract class TestCaseGenerationItem extends AbstractCheckableItem implements ICliTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 

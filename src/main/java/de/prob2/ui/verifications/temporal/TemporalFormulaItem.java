@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.ICliTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -23,7 +24,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"expectedResult",
 	"selected",
 })
-public abstract class TemporalFormulaItem extends AbstractCheckableItem {
+public abstract class TemporalFormulaItem extends AbstractCheckableItem implements ICliTask {
 	public enum StartState {
 		ALL_INITIAL_STATES,
 		CURRENT_STATE,
