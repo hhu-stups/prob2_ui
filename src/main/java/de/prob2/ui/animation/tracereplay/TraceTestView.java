@@ -282,8 +282,8 @@ public final class TraceTestView extends Stage {
 	}
 
 	private void goToPositionInReplayTrace(final int index) {
+		Trace trace = currentTrace.get();
 		if (currentTraceIsReplayedTrace()) {
-			final Trace trace = currentTrace.get();
 			if (index < trace.getTransitionList().size()) {
 				currentTrace.set(trace.gotoPosition(index));
 			}
@@ -291,7 +291,13 @@ public final class TraceTestView extends Stage {
 			this.saveTrace();
 			final ReplayTrace r = replayTrace.get();
 			cliExecutor.execute(() -> {
-				injector.getInstance(TraceChecker.class).check(r);
+				TraceChecker traceChecker = injector.getInstance(TraceChecker.class);
+				try {
+					TraceChecker.checkNoninteractive(r, trace.getStateSpace());
+				} catch (RuntimeException exc) {
+					injector.getInstance(TraceFileHandler.class).showLoadError(r, exc);
+					return;
+				}
 				if (r.getAnimatedReplayedTrace() != null) {
 					if (index < r.getLoadedTrace().getTransitionList().size()) {
 						currentTrace.set(r.getAnimatedReplayedTrace().gotoPosition(index));
