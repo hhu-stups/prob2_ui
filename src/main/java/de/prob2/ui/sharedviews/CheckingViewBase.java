@@ -41,6 +41,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
 public abstract class CheckingViewBase<T extends ISelectableTask> extends ScrollPane {
 	protected class RowBase extends TableRow<T> {
@@ -92,6 +95,8 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 				                                .otherwise(this.contextMenu));
 		}
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(CheckingViewBase.class);
 
 	@FXML
 	protected TableView<T> itemsTable;
@@ -239,6 +244,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 	}
 
 	private void handleCheckException(Throwable exc) {
+		LOGGER.error("Unhandled exception during checking", exc);
 		Thread thread = Thread.currentThread();
 		Platform.runLater(() -> {
 			Alert alert = stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread);
