@@ -10,7 +10,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob.check.tracereplay.OperationDisabledness;
 import de.prob.check.tracereplay.OperationEnabledness;
@@ -218,7 +217,9 @@ public final class TraceTestView extends Stage {
 
 	private final CliTaskExecutor cliExecutor;
 
-	private final Injector injector;
+	private final TraceFileHandler traceFileHandler;
+
+	private final TraceChecker traceChecker;
 
 	private final SimpleObjectProperty<ReplayTrace> replayTrace;
 
@@ -229,14 +230,22 @@ public final class TraceTestView extends Stage {
 	private final List<VBox> transitionBoxes = new ArrayList<>();
 
 	@Inject
-	public TraceTestView(final StageManager stageManager, final FontSize fontSize,
-						 final I18n i18n, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final Injector injector) {
+	public TraceTestView(
+		StageManager stageManager,
+		FontSize fontSize,
+		I18n i18n,
+		CurrentTrace currentTrace,
+		CliTaskExecutor cliExecutor,
+		TraceFileHandler traceFileHandler,
+		TraceChecker traceChecker
+	) {
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
-		this.injector = injector;
+		this.traceFileHandler = traceFileHandler;
+		this.traceChecker = traceChecker;
 		this.replayTrace = new SimpleObjectProperty<>();
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}
@@ -291,11 +300,10 @@ public final class TraceTestView extends Stage {
 			this.saveTrace();
 			final ReplayTrace r = replayTrace.get();
 			cliExecutor.execute(() -> {
-				TraceChecker traceChecker = injector.getInstance(TraceChecker.class);
 				try {
 					TraceChecker.checkNoninteractive(r, trace.getStateSpace());
 				} catch (RuntimeException exc) {
-					injector.getInstance(TraceFileHandler.class).showLoadError(r, exc);
+					traceFileHandler.showLoadError(r, exc);
 					return;
 				}
 				if (r.getAnimatedReplayedTrace() != null) {
@@ -344,7 +352,7 @@ public final class TraceTestView extends Stage {
 		try {
 			traceJsonFile = replayTrace.load();
 		} catch (IOException e) {
-			injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, e);
+			traceFileHandler.showLoadError(replayTrace, e);
 			return;
 		}
 
@@ -378,7 +386,7 @@ public final class TraceTestView extends Stage {
 			}
 		}
 		this.saveTrace();
-		cliExecutor.execute(() -> injector.getInstance(TraceChecker.class).check(replayTrace.get()));
+		cliExecutor.execute(() -> traceChecker.check(replayTrace.get()));
 		this.close();
 	}
 
@@ -580,9 +588,8 @@ public final class TraceTestView extends Stage {
 			btShowDescription.setText(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
 			return;
 		}
-		TraceFileHandler fileHandler = injector.getInstance(TraceFileHandler.class);
 		final DescriptionView descriptionView = getTraceDescriptionView(this.replayTrace.get(), stageManager,
-				fileHandler, i18n, this::handleTraceDescription);
+				traceFileHandler, i18n, this::handleTraceDescription);
 		btShowDescription.setText(i18n.translate("animation.tracereplay.test.view.hidePathDescription"));
 		vBox.getChildren().add(1, descriptionView);
 	}
