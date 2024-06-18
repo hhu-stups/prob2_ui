@@ -25,7 +25,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.operations.OperationItem;
-import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -45,7 +44,6 @@ import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 public final class ReplayedTraceStatusAlert extends Alert {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ReplayedTraceStatusAlert.class);
 
-	private final CurrentTrace currentTrace;
 	private final TraceFileHandler traceFileHandler;
 	private final CliTaskExecutor cliExecutor;
 	private final I18n i18n;
@@ -62,9 +60,9 @@ public final class ReplayedTraceStatusAlert extends Alert {
 	private Label keepOrDiscardQuestion;
 
 	@Inject
-	public ReplayedTraceStatusAlert(StageManager stageManager, CurrentTrace currentTrace, TraceFileHandler traceFileHandler, CliTaskExecutor cliExecutor, I18n i18n) {
+	public ReplayedTraceStatusAlert(StageManager stageManager, TraceFileHandler traceFileHandler, CliTaskExecutor cliExecutor, I18n i18n) {
 		super(AlertType.NONE);
-		this.currentTrace = currentTrace;
+
 		this.traceFileHandler = traceFileHandler;
 		this.cliExecutor = cliExecutor;
 		this.i18n = i18n;
@@ -83,6 +81,10 @@ public final class ReplayedTraceStatusAlert extends Alert {
 		this.errorTable.dontSyncWithEditor();
 		this.errorTable.visibleProperty().bind(Bindings.createBooleanBinding(() -> !this.errorTable.getErrorItems().isEmpty(), this.errorTable.getErrorItems()));
 		this.errorTable.managedProperty().bind(this.errorTable.visibleProperty());
+	}
+
+	public ButtonType getAcceptButtonType() {
+		return this.accept;
 	}
 
 	private void update() {
@@ -214,12 +216,5 @@ public final class ReplayedTraceStatusAlert extends Alert {
 		}
 
 		return items;
-	}
-
-	public void handleAcceptDiscard() {
-		ButtonType response = this.showAndWait().orElse(null);
-		if (response == this.accept) {
-			this.currentTrace.set(this.replayTrace.getAnimatedReplayedTrace());
-		}
 	}
 }

@@ -90,7 +90,11 @@ public final class TraceChecker {
 		Platform.runLater(() -> {
 			ReplayedTraceStatusAlert alert = replayedAlertProvider.get();
 			alert.initReplayTrace(replayTrace);
-			alert.handleAcceptDiscard();
+			alert.showAndWait().ifPresent(buttonType -> {
+				if (buttonType.equals(alert.getAcceptButtonType())) {
+					currentTrace.set(replayTrace.getAnimatedReplayedTrace());
+				}
+			});
 		});
 	}
 

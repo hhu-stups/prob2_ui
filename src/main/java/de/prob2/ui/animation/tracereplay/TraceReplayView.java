@@ -83,7 +83,11 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			showStatusItem.setOnAction(event -> {
 				ReplayedTraceStatusAlert alert = injector.getInstance(ReplayedTraceStatusAlert.class);
 				alert.initReplayTrace(this.getItem());
-				alert.handleAcceptDiscard();
+				alert.showAndWait().ifPresent(buttonType -> {
+					if (buttonType.equals(alert.getAcceptButtonType())) {
+						currentTrace.set(this.getItem().getAnimatedReplayedTrace());
+					}
+				});
 			});
 
 			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
