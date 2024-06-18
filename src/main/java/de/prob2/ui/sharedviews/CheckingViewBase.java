@@ -1,7 +1,9 @@
 package de.prob2.ui.sharedviews;
 
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -244,6 +246,11 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 	}
 
 	private void handleCheckException(Throwable exc) {
+		if (exc instanceof CancellationException || exc instanceof CompletionException && exc.getCause() instanceof CancellationException) {
+			LOGGER.trace("Check was canceled (this is not an error)", exc);
+			return;
+		}
+
 		LOGGER.error("Unhandled exception during checking", exc);
 		Thread thread = Thread.currentThread();
 		Platform.runLater(() -> {
