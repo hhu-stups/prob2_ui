@@ -14,7 +14,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableTask;
 import de.prob2.ui.verifications.cbc.CBCDeadlockFreedomCheckingItem;
 import de.prob2.ui.verifications.cbc.CBCInvariantPreservationCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
@@ -68,25 +68,28 @@ public class TemplateUtility {
 	public static boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResult() != null);}
 	public static boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResult() != null);}
 
-	public static int getNumberSelectedTasks(List<? extends IExecutableItem> validationTasks){
+	public static int getNumberSelectedTasks(List<? extends ISelectableTask> validationTasks) {
 		long selectedTasksCount = validationTasks.stream()
-				.filter(IExecutableItem::selected)
+				.filter(ISelectableTask::selected)
 				.count();
 		return Math.toIntExact(selectedTasksCount);
 	}
-	public static int getNumberSuccessfulTasks(List<? extends IExecutableItem> validationTasks){
+
+	public static int getNumberSuccessfulTasks(List<? extends ISelectableTask> validationTasks) {
 		long countSuccessful = validationTasks.stream()
 				.filter(task -> task.selected() && task.getStatus().equals(CheckingStatus.SUCCESS))
 				.count();
 		return Math.toIntExact(countSuccessful);
 	}
-	public static int getNumberNotCheckedTasks(List<? extends IExecutableItem> validationTasks){
+
+	public static int getNumberNotCheckedTasks(List<? extends ISelectableTask> validationTasks) {
 		long countNotChecked = validationTasks.stream()
 				.filter(task -> task.selected() && task.getStatus().equals(CheckingStatus.NOT_CHECKED))
 				.count();
 		return Math.toIntExact(countNotChecked);
 	}
-	public static int getNumberFailedTasks(List<? extends IExecutableItem> validationTasks){
+
+	public static int getNumberFailedTasks(List<? extends ISelectableTask> validationTasks) {
 		long countFailed= validationTasks.stream()
 				.filter(task -> task.selected() && (!task.getStatus().equals(CheckingStatus.NOT_CHECKED) && !task.getStatus().equals(CheckingStatus.SUCCESS)))
 				.count();

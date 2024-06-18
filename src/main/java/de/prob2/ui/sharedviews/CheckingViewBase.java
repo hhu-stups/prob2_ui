@@ -16,7 +16,7 @@ import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableTask;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.vomanager.IValidationTask;
 
@@ -42,7 +42,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 
 @FXMLInjected
-public abstract class CheckingViewBase<T extends IExecutableItem> extends ScrollPane {
+public abstract class CheckingViewBase<T extends ISelectableTask> extends ScrollPane {
 	protected class RowBase extends TableRow<T> {
 		protected final ContextMenu contextMenu;
 		protected final MenuItem executeMenuItem;
@@ -227,7 +227,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	 * Can be overridden to perform additional actions when the user executes a specific item in the view,
 	 * e. g. to show an error alert on failure or update the current trace to the result of the check.
 	 * This method is meant for overriding only and shouldn't be called directly outside of {@link CheckingViewBase} -
-	 * other code should call {@link #executeItem(IExecutableItem)} instead.
+	 * other code should call {@link #executeItem(ISelectableTask)} instead.
 	 *
 	 * @param item the item to execute
 	 * @param executors the executors to use for executing the item
@@ -250,7 +250,7 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	/**
 	 * Execute a single item in response to a user action.
 	 * This method cannot be overridden directly -
-	 * subclasses can override {@link #executeItemImpl(IExecutableItem, CheckingExecutors, ExecutionContext)} instead.
+	 * subclasses can override {@link #executeItemImpl(ISelectableTask, CheckingExecutors, ExecutionContext)} instead.
 	 * 
 	 * @param item the item to execute
 	 */

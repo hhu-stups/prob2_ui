@@ -10,7 +10,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public abstract class AbstractCheckableItem implements IExecutableItem {
+public abstract class AbstractCheckableItem implements ISelectableTask {
 	private final BooleanProperty selected;
 	@JsonIgnore
 	final ObjectProperty<CheckingResult> result = new SimpleObjectProperty<>(this, "result", null);

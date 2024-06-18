@@ -3,7 +3,7 @@ package de.prob2.ui.project.machines;
 import java.util.List;
 
 import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableTask;
 
 public final class MachineCheckingStatus {
 	private final Status status;
@@ -22,10 +22,10 @@ public final class MachineCheckingStatus {
 		this.numberTotal = 0;
 	}
 
-	private static Status combineCheckingStatus(final List<? extends IExecutableItem> items) {
+	private static Status combineCheckingStatus(List<? extends ISelectableTask> items) {
 		boolean anyEnabled = false;
 		boolean anyUnknown = false;
-		for (IExecutableItem item : items) {
+		for (ISelectableTask item : items) {
 			if (!item.selected()) {
 				continue;
 			}
@@ -39,13 +39,13 @@ public final class MachineCheckingStatus {
 		return anyEnabled ? (anyUnknown ? Status.UNKNOWN : Status.SUCCESSFUL) : Status.NONE;
 	}
 
-	static MachineCheckingStatus combineMachineCheckingStatus(final List<? extends IExecutableItem> items) {
+	static MachineCheckingStatus combineMachineCheckingStatus(List<? extends ISelectableTask> items) {
 		Status status = combineCheckingStatus(items);
 		int numberSuccess = (int) items.stream()
 			                          .filter(item -> item.getStatus() == CheckingStatus.SUCCESS && item.selected())
 			                          .count();
 		int numberTotal = (int) items.stream()
-			                        .filter(IExecutableItem::selected)
+			                        .filter(ISelectableTask::selected)
 			                        .count();
 		return new MachineCheckingStatus(status, numberSuccess, numberTotal);
 	}
