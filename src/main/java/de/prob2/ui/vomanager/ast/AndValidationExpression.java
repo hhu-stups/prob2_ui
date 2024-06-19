@@ -3,6 +3,7 @@ package de.prob2.ui.vomanager.ast;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import de.prob.statespace.Trace;
 import de.prob.voparser.node.AAndVo;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -50,6 +51,12 @@ public final class AndValidationExpression implements IValidationExpression {
 		
 		CheckingStatus rightRes = this.getRight().getStatus();
 		return leftRes.and(rightRes);
+	}
+
+	@Override
+	public Trace getTrace() {
+		// TODO Ideally, this should be detected as a type error ahead of time
+		throw new UnsupportedOperationException("A conjunction expression does not produce a trace");
 	}
 
 	@Override

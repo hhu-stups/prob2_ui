@@ -3,10 +3,12 @@ package de.prob2.ui.vomanager.ast;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import de.prob.statespace.Trace;
 import de.prob.voparser.node.AIdentifierVo;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.vomanager.IValidationTask;
 
 public final class ValidationTaskExpression implements IValidationExpression {
@@ -47,6 +49,16 @@ public final class ValidationTaskExpression implements IValidationExpression {
 	@Override
 	public CheckingStatus getStatus() {
 		return this.getTask().getStatus();
+	}
+
+	@Override
+	public Trace getTrace() {
+		if (this.getTask() instanceof ITraceTask traceTask) {
+			return traceTask.getTrace();
+		} else {
+			// TODO Ideally, this should be detected as a type error ahead of time
+			throw new UnsupportedOperationException("This task type cannot produce a trace: " + this.getTask().getClass());
+		}
 	}
 
 	@Override

@@ -3,6 +3,7 @@ package de.prob2.ui.vomanager.ast;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import de.prob.statespace.Trace;
 import de.prob.voparser.node.AOrVo;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -50,6 +51,17 @@ public final class OrValidationExpression implements IValidationExpression {
 		
 		CheckingStatus rightRes = this.getRight().getStatus();
 		return leftRes.or(rightRes);
+	}
+
+	@Override
+	public Trace getTrace() {
+		if (this.getLeft().getStatus() == CheckingStatus.SUCCESS) {
+			return this.getLeft().getTrace();
+		} else if (this.getRight().getStatus() == CheckingStatus.SUCCESS) {
+			return this.getRight().getTrace();
+		} else {
+			return null;
+		}
 	}
 
 	@Override

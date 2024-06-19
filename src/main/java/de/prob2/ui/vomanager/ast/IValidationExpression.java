@@ -3,6 +3,7 @@ package de.prob2.ui.vomanager.ast;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import de.prob.statespace.Trace;
 import de.prob.voparser.VOParser;
 import de.prob.voparser.node.AAndVo;
 import de.prob.voparser.node.AIdentifierVo;
@@ -36,6 +37,8 @@ public interface IValidationExpression {
 	}
 	
 	CheckingStatus getStatus();
+	
+	Trace getTrace();
 	
 	CompletableFuture<?> check(CheckingExecutors executors, ExecutionContext context);
 }
