@@ -24,6 +24,7 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICliTask;
 import de.prob2.ui.verifications.ISelectableTask;
+import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
@@ -40,7 +41,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"location",
 	"selected",
 })
-public final class ReplayTrace implements ICliTask, ISelectableTask {
+public final class ReplayTrace implements ICliTask, ISelectableTask, ITraceTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	@JsonIgnore
@@ -168,6 +169,11 @@ public final class ReplayTrace implements ICliTask, ISelectableTask {
 
 	public void setAnimatedReplayedTrace(final Trace animatedReplayedTrace) {
 		this.animatedReplayedTraceProperty().set(animatedReplayedTrace);
+	}
+
+	@Override
+	public Trace getTrace() {
+		return this.getAnimatedReplayedTrace();
 	}
 
 	public Path getLocation() {

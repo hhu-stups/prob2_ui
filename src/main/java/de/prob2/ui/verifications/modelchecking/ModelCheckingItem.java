@@ -16,11 +16,13 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.model.representation.AbstractModel;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICliTask;
 import de.prob2.ui.verifications.ISelectableTask;
+import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
@@ -42,7 +44,7 @@ import javafx.collections.FXCollections;
 	"goal",
 	"selected",
 })
-public final class ModelCheckingItem implements ICliTask, ISelectableTask {
+public final class ModelCheckingItem implements ICliTask, ISelectableTask, ITraceTask {
 	@JsonIgnore
 	private final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
@@ -238,6 +240,11 @@ public final class ModelCheckingItem implements ICliTask, ISelectableTask {
 
 	public void setCurrentStep(final ModelCheckingStep currentStep) {
 		this.currentStepProperty().set(currentStep);
+	}
+
+	@Override
+	public Trace getTrace() {
+		return this.getSteps().isEmpty() ? null : this.getSteps().get(0).getTrace();
 	}
 
 	@Override

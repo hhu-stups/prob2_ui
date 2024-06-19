@@ -11,6 +11,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ICliTask;
+import de.prob2.ui.verifications.ITraceTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -24,7 +25,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"expectedResult",
 	"selected",
 })
-public abstract class TemporalFormulaItem extends AbstractCheckableItem implements ICliTask {
+public abstract class TemporalFormulaItem extends AbstractCheckableItem implements ICliTask, ITraceTask {
 	public enum StartState {
 		ALL_INITIAL_STATES,
 		CURRENT_STATE,
@@ -96,6 +97,11 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem implemen
 
 	public ObjectProperty<Trace> counterExampleProperty() {
 		return counterExample;
+	}
+
+	@Override
+	public Trace getTrace() {
+		return this.getCounterExample();
 	}
 
 	@Override

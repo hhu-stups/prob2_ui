@@ -26,6 +26,7 @@ import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.vomanager.IValidationTask;
@@ -42,7 +43,7 @@ import javafx.collections.FXCollections;
 	"type",
 	"information",
 })
-public final class SimulationItem implements IValidationTask {
+public final class SimulationItem implements ITraceTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private String id;
 	private final Path simulationPath;
@@ -160,6 +161,11 @@ public final class SimulationItem implements IValidationTask {
 	@JsonIgnore
 	public void setTraces(List<Trace> traces) {
 		this.traces.setAll(traces);
+	}
+
+	@Override
+	public Trace getTrace() {
+		return this.getTraces().isEmpty() ? null : this.getTraces().get(0);
 	}
 
 	public ListProperty<List<Integer>> timestampsProperty() {
