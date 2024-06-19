@@ -1,9 +1,12 @@
 package de.prob2.ui.vomanager.ast;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import de.prob.voparser.node.AIdentifierVo;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.vomanager.IValidationTask;
 
 public final class ValidationTaskExpression implements IValidationExpression {
@@ -49,5 +52,10 @@ public final class ValidationTaskExpression implements IValidationExpression {
 	@Override
 	public String toString(){
 		return task.toString();
+	}
+
+	@Override
+	public CompletableFuture<?> check(CheckingExecutors executors, ExecutionContext context) {
+		return this.getTask().execute(executors, context);
 	}
 }

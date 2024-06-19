@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager.ast;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import de.prob.voparser.VOParser;
@@ -7,7 +8,9 @@ import de.prob.voparser.node.AAndVo;
 import de.prob.voparser.node.AIdentifierVo;
 import de.prob.voparser.node.AOrVo;
 import de.prob.voparser.node.PVo;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
 
 public interface IValidationExpression {
 	static IValidationExpression fromAst(final PVo ast) {
@@ -33,4 +36,6 @@ public interface IValidationExpression {
 	}
 	
 	CheckingStatus getStatus();
+	
+	CompletableFuture<?> check(CheckingExecutors executors, ExecutionContext context);
 }

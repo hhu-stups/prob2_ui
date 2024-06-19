@@ -1,9 +1,12 @@
 package de.prob2.ui.vomanager.ast;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import de.prob.voparser.node.AOrVo;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
 
 public final class OrValidationExpression implements IValidationExpression {
 	private final IValidationExpression left;
@@ -52,5 +55,18 @@ public final class OrValidationExpression implements IValidationExpression {
 	@Override
 	public String toString(){
 		return left.toString() + " or " + right.toString();
+	}
+
+	@Override
+	public CompletableFuture<?> check(CheckingExecutors executors, ExecutionContext context) {
+		return this.getLeft().check(executors, context).thenCompose(r -> {
+			CompletableFuture<?> future;
+			if (this.getLeft().getStatus() == CheckingStatus.SUCCESS) {
+				future = CompletableFuture.completedFuture(r);
+			} else {
+				future = this.getRight().check(executors, context);
+			}
+			return future;
+		});
 	}
 }
