@@ -1,9 +1,7 @@
 package de.prob2.ui.vomanager;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -91,22 +89,10 @@ public final class ValidationObligation {
 		}
 	}
 
-	public void parse(final List<IValidationTask> validationTasksList) {
-		Map<String, IValidationTask> validationTasks = validationTasksList.stream()
-			                                                  .filter(vt -> vt.getId() != null)
-			                                                  .collect(Collectors.toMap(IValidationTask::getId, Function.identity()));
-
+	public void parse(Map<String, IValidationTask> tasksInScopeById) {
 		try {
 			final IValidationExpression parsed = IValidationExpression.parse(this.getExpression());
-			parsed.getAllTasks().forEach(taskExpr -> {
-				IValidationTask validationTask;
-				if (validationTasks.containsKey(taskExpr.getIdentifier())) {
-					validationTask = validationTasks.get(taskExpr.getIdentifier());
-				} else {
-					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
-				}
-				taskExpr.setTask(validationTask);
-			});
+			parsed.resolveTaskIds(tasksInScopeById);
 			this.setParsedExpression(parsed);
 		} catch (VOParseException e) {
 			this.setParsedExpression(null);
@@ -115,7 +101,7 @@ public final class ValidationObligation {
 	}
 
 	public void parse(final Machine machine) {
-		this.parse(machine.getValidationTasksWithId());
+		this.parse(machine.getValidationTasksById());
 	}
 
 	public ObjectProperty<CheckingStatus> statusProperty() {

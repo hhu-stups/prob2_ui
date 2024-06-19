@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager.ast;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -12,6 +13,7 @@ import de.prob.voparser.node.PVo;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.vomanager.IValidationTask;
 
 public interface IValidationExpression {
 	static IValidationExpression fromAst(final PVo ast) {
@@ -35,6 +37,8 @@ public interface IValidationExpression {
 	default Stream<ValidationTaskExpression> getAllTasks() {
 		return this.getChildren().flatMap(IValidationExpression::getAllTasks);
 	}
+	
+	void resolveTaskIds(Map<String, IValidationTask> tasksInScopeById);
 	
 	CheckingStatus getStatus();
 	

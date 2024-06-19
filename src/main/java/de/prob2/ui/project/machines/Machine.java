@@ -212,6 +212,13 @@ public final class Machine {
 	}
 
 	@JsonIgnore
+	public Map<String, IValidationTask> getValidationTasksById() {
+		return this.getValidationTasks().stream()
+			.filter(task -> task.getId() != null)
+			.collect(Collectors.toMap(IValidationTask::getId, task -> task));
+	}
+
+	@JsonIgnore
 	@SuppressWarnings("unchecked")
 	public <T extends IValidationTask> ObservableList<T> getValidationTasksByClass(Class<T> clazz) {
 		Objects.requireNonNull(clazz, "clazz");

@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager.ast;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -8,6 +9,7 @@ import de.prob.voparser.node.AOrVo;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.vomanager.IValidationTask;
 
 public final class OrValidationExpression implements IValidationExpression {
 	private final IValidationExpression left;
@@ -36,6 +38,12 @@ public final class OrValidationExpression implements IValidationExpression {
 	@Override
 	public Stream<? extends IValidationExpression> getChildren() {
 		return Stream.of(this.getLeft(), this.getRight());
+	}
+	
+	@Override
+	public void resolveTaskIds(Map<String, IValidationTask> tasksInScopeById) {
+		this.getLeft().resolveTaskIds(tasksInScopeById);
+		this.getRight().resolveTaskIds(tasksInScopeById);
 	}
 	
 	@Override

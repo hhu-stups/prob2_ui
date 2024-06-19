@@ -1,5 +1,6 @@
 package de.prob2.ui.vomanager.ast;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -10,6 +11,7 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.vomanager.IValidationTask;
+import de.prob2.ui.vomanager.ValidationTaskNotFound;
 
 public final class ValidationTaskExpression implements IValidationExpression {
 	private final String identifier;
@@ -44,6 +46,17 @@ public final class ValidationTaskExpression implements IValidationExpression {
 	
 	public void setTask(final IValidationTask task) {
 		this.task = task;
+	}
+	
+	@Override
+	public void resolveTaskIds(Map<String, IValidationTask> tasksInScopeById) {
+		IValidationTask validationTask;
+		if (tasksInScopeById.containsKey(this.getIdentifier())) {
+			validationTask = tasksInScopeById.get(this.getIdentifier());
+		} else {
+			validationTask = new ValidationTaskNotFound(this.getIdentifier());
+		}
+		this.setTask(validationTask);
 	}
 	
 	@Override
