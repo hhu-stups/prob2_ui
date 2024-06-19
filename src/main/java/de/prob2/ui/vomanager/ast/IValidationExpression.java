@@ -33,6 +33,4 @@ public interface IValidationExpression {
 	}
 	
 	CheckingStatus getStatus();
-
-	String toString();
 }
