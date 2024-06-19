@@ -72,6 +72,10 @@
 					<Label text="%verifications.temporal.formula.temporalFormulaStage.startState"/>
 					<RadioButton fx:id="startStateAllInitialStates" toggleGroup="$startStateGroup" text="%verifications.temporal.formula.temporalFormulaStage.startState.allInitialStates" selected="true"/>
 					<RadioButton fx:id="startStateCurrentState" toggleGroup="$startStateGroup" text="%verifications.temporal.formula.temporalFormulaStage.startState.currentState"/>
+					<HBox alignment="CENTER_LEFT" spacing="5.0">
+						<RadioButton fx:id="startStateFromExpression" toggleGroup="$startStateGroup" text="%verifications.temporal.formula.temporalFormulaStage.startState.fromExpression"/>
+						<TextField fx:id="startStateExpressionTextField" visible="${startStateFromExpression.selected}"/>
+					</HBox>
 					<HBox fx:id="expectedResultBox" alignment="CENTER_LEFT" spacing="5.0">
 						<Label text="%verifications.temporal.formula.temporalFormulaStage.expectedResult" HBox.hgrow="NEVER"/>
 						<ChoiceBox fx:id="cbExpectedResult" HBox.hgrow="NEVER">

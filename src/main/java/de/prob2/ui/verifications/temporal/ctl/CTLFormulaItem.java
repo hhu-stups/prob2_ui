@@ -40,9 +40,10 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 		@JsonProperty("description") String description,
 		@JsonProperty("stateLimit") int stateLimit,
 		@JsonProperty("startState") StartState startState,
+		@JsonProperty("startStateExpression") String startStateExpression,
 		@JsonProperty("expectedResult") boolean expectedResult
 	) {
-		super(id, code, description, stateLimit, startState, expectedResult);
+		super(id, code, description, stateLimit, startState, startStateExpression, expectedResult);
 	}
 	
 	@Override
@@ -90,27 +91,7 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 	}
 	
 	@Override
-	public void execute(ExecutionContext context) {
-		this.setCounterExample(null);
-		
-		State startState;
-		switch (this.getStartState()) {
-			case ALL_INITIAL_STATES:
-				startState = null;
-				break;
-			
-			case CURRENT_STATE:
-				if (context.trace() == null) {
-					this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "verifications.temporal.result.noCurrentState.message"));
-					return;
-				}
-				startState = context.trace().getCurrentState();
-				break;
-			
-			default:
-				throw new AssertionError("Unhandled start state type: " + this.getStartState());
-		}
-		
+	protected void execute(ExecutionContext context, State startState) {
 		CTL formula;
 		try {
 			formula = CTLFormulaParser.parseFormula(getCode(), context.stateSpace().getModel());
