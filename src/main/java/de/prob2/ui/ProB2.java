@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import ch.qos.logback.classic.ClassicConstants;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -58,8 +60,6 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.qos.logback.classic.ClassicConstants;
 
 public final class ProB2 extends Application {
 	public static final String BUG_REPORT_URL = "https://github.com/hhu-stups/prob-issues/issues/new/choose";
@@ -228,7 +228,7 @@ public final class ProB2 extends Application {
 			Platform.runLater(() -> {
 				try {
 					injector.getInstance(RealTimeSimulator.class).stop();
-					stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
+					stageManager.showUnhandledExceptionAlert(thread, exc, null);
 				} catch (Throwable t) {
 					logger.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
 				}

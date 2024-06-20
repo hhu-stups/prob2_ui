@@ -25,6 +25,7 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -377,6 +378,21 @@ public final class StageManager {
 			alert.setHeaderText(i18n.translate(headerBundleKey));
 		}
 		return alert;
+	}
+	
+	public void showUnhandledExceptionAlert(Thread thread, Throwable exc, Window owner) {
+		try {
+			Alert alert = makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread);
+			alert.initOwner(owner);
+			alert.show();
+		} catch (Throwable t) {
+			LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
+		}
+	}
+	
+	public void showUnhandledExceptionAlert(Throwable exc, Window owner) {
+		Thread thread = Thread.currentThread();
+		Platform.runLater(() -> showUnhandledExceptionAlert(thread, exc, owner));
 	}
 	
 	/**

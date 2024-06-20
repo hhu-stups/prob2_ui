@@ -22,7 +22,6 @@ import de.prob2.ui.verifications.ISelectableTask;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 import de.prob2.ui.vomanager.IValidationTask;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
@@ -31,7 +30,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
@@ -252,12 +250,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 		}
 
 		LOGGER.error("Unhandled exception during checking", exc);
-		Thread thread = Thread.currentThread();
-		Platform.runLater(() -> {
-			Alert alert = stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread);
-			alert.initOwner(this.getScene().getWindow());
-			alert.show();
-		});
+		stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
 	}
 
 	/**
