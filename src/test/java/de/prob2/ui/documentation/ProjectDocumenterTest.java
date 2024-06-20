@@ -54,7 +54,7 @@ class ProjectDocumenterTest {
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
 	final ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
-	final LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "", -1, TemporalFormulaItem.StartState.ALL_INITIAL_STATES, true);
+	final LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "", -1, TemporalFormulaItem.StartState.ALL_INITIAL_STATES, null, true);
 	final SymbolicModelCheckingItem symbolicCheckingFormulaItem = new SymbolicModelCheckingItem("", SymbolicModelcheckCommand.Algorithm.BMC);
 	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
 
