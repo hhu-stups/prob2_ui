@@ -13,6 +13,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Stopwatch;
@@ -20,13 +21,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.rules.IModel;
 import de.prob.animator.command.GetInternalRepresentationCommand;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.FormulaTranslationMode;
-import de.prob.model.brules.RulesModel;
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
 import de.prob.statespace.StateSpace;
@@ -35,6 +32,8 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TextAreaState;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -104,6 +103,8 @@ public final class BEditorView extends BorderPane {
 	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
+	private final FxThreadExecutor fxExecutor;
 	private final Injector injector;
 
 	private final ObjectProperty<Path> path;
@@ -116,11 +117,21 @@ public final class BEditorView extends BorderPane {
 	private boolean updatingIncludedMachines;
 
 	@Inject
-	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
+	private BEditorView(
+		StageManager stageManager,
+		I18n i18n,
+		CurrentProject currentProject,
+		CurrentTrace currentTrace,
+		CliTaskExecutor cliExecutor,
+		FxThreadExecutor fxExecutor,
+		Injector injector
+	) {
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
 		this.injector = injector;
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
@@ -228,7 +239,12 @@ public final class BEditorView extends BorderPane {
 			switchMachine(to);
 		});
 
-		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
+		cbUnicode.selectedProperty().addListener((observable, from, to) ->
+			showInternalRepresentation(currentTrace.getStateSpace(), path.get()).exceptionally(exc -> {
+				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+				return null;
+			})
+		);
 
 		helpButton.setHelpContent("mainView.editor", null);
 
@@ -273,16 +289,23 @@ public final class BEditorView extends BorderPane {
 
 		resetWatching();
 		registerFile(machinePath);
-		loadText(machinePath);
-		beditor.clearHistory();
+		loadText(machinePath).whenComplete((res, exc) -> {
+			if (exc == null) {
+				Platform.runLater(() -> {
+					beditor.clearHistory();
 
-		currentProject.getCurrentMachine().getCachedEditorState().setSelectedMachine(machinePath);
+					currentProject.getCurrentMachine().getCachedEditorState().setSelectedMachine(machinePath);
 
-		beditor.requestFocus();
-		TextAreaState textAreaState = currentProject.getCurrentMachine().getCachedEditorState().getTextAreaState(machinePath);
-		if (textAreaState != null) {
-			restoreState(textAreaState);
-		}
+					beditor.requestFocus();
+					TextAreaState textAreaState = currentProject.getCurrentMachine().getCachedEditorState().getTextAreaState(machinePath);
+					if (textAreaState != null) {
+						restoreState(textAreaState);
+					}
+				});
+			} else {
+				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+			}
+		});
 	}
 
 	private void restoreState(TextAreaState textAreaState) {
@@ -290,7 +313,7 @@ public final class BEditorView extends BorderPane {
 		beditor.requestFollowCaret();
 	}
 
-	private void loadText(Path machinePath) {
+	private CompletableFuture<Void> loadText(Path machinePath) {
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
 			final StateSpace stateSpace = currentTrace.getStateSpace();
 			cbUnicode.setVisible(true);
@@ -298,32 +321,37 @@ public final class BEditorView extends BorderPane {
 			if (stateSpace == null) {
 				setHint();
 				cbUnicode.setSelected(false);
+				return CompletableFuture.completedFuture(null);
 			} else {
 				cbUnicode.setSelected(true);
-				showInternalRepresentation(stateSpace, machinePath);
+				return showInternalRepresentation(stateSpace, machinePath);
 			}
 		} else {
 			cbUnicode.setVisible(false);
 			cbUnicode.setManaged(false);
 			cbUnicode.setSelected(false);
 			setText(machinePath);
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 
-	private void showInternalRepresentation(StateSpace stateSpace, Path machinePath) {
+	private CompletableFuture<Void> showInternalRepresentation(StateSpace stateSpace, Path machinePath) {
+		this.beditor.setEditable(false);
 		if (stateSpace == null) {
-			return;
+			this.setHint();
+			return CompletableFuture.completedFuture(null);
 		}
 
-		// TODO Move this command off the UI thread!
-		// This can make the entire UI hang if the editor tries to update
-		// while probcli is busy with a long-running command.
-		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
-		cmd.setTranslationMode(this.cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
-		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
-		stateSpace.execute(cmd);
-		this.setEditorText(cmd.getPrettyPrint(), machinePath);
-		this.beditor.setEditable(false);
+		return cliExecutor.submit(() -> {
+			GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
+			cmd.setTranslationMode(this.cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
+			cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
+			stateSpace.execute(cmd);
+			return cmd.getPrettyPrint();
+		}).thenApplyAsync(text -> {
+			this.setEditorText(text, machinePath);
+			return null;
+		}, fxExecutor);
 	}
 
 	private void updateIncludedMachines() {
@@ -380,7 +408,12 @@ public final class BEditorView extends BorderPane {
 
 					if (path.getFileName().equals(event.context())) {
 						// Only reload on events for the file itself, not for other files in the directory.
-						Platform.runLater(() -> loadText(path));
+						Platform.runLater(() ->
+							loadText(path).exceptionally(exc -> {
+								stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+								return null;
+							})
+						);
 						// if our file changed we do not care about other changes, let's just queue the reload and wait for the next change
 						break;
 					}
