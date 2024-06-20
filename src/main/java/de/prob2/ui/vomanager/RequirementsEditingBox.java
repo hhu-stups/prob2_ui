@@ -255,7 +255,6 @@ public final class RequirementsEditingBox extends VBox {
 		if (
 			tfName.getText().trim().isEmpty()
 			|| cbRequirementLinkMachineChoice.getValue() == null
-			|| taRequirement.getText().trim().isEmpty()
 		) {
 			warnNotValid();
 			return;
