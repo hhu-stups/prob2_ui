@@ -315,9 +315,15 @@ public final class RequirementsEditingBox extends VBox {
 
 	public void resetRequirementEditing() {
 		this.oldRequirement.set(null);
-		cbRequirementChoice.getSelectionModel().clearSelection();
+		cbRequirementChoice.getSelectionModel().selectFirst();
 		taRequirement.clear();
 		tfName.clear();
+		Machine currentMachine = currentProject.getCurrentMachine();
+		if (currentMachine != null) {
+			cbRequirementLinkMachineChoice.getSelectionModel().select(currentMachine.getName());
+		} else {
+			cbRequirementLinkMachineChoice.getSelectionModel().selectFirst();
+		}
 		voTable.getItems().clear();
 		voManagerStage.clearRequirementsSelection();
 	}
