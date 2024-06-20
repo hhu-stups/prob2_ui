@@ -23,6 +23,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.ObjectExpression;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -75,6 +76,9 @@ public final class RequirementsEditingBox extends VBox {
 	private TableColumn<ValidationObligation, String> voExpressionColumn;
 
 	@FXML
+	private Button applyButton;
+
+	@FXML
 	private Button historyButton;
 
 	@FXML
@@ -104,7 +108,24 @@ public final class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private void initialize() {
+		ChangeListener<String> nameListener = (o, from, to) -> {
+			tfName.getStyleClass().remove("text-field-error");
+			if (to == null || to.isEmpty()) {
+				tfName.getStyleClass().add("text-field-error");
+			}
+		};
+		tfName.textProperty().addListener(nameListener);
+		nameListener.changed(tfName.textProperty(), null, tfName.getText());
+
 		cbRequirementLinkMachineChoice.setItems(linkedMachineNames);
+		ChangeListener<String> linkMachineListener = (o, from, to) -> {
+			cbRequirementLinkMachineChoice.getStyleClass().remove("text-field-error");
+			if (to == null) {
+				cbRequirementLinkMachineChoice.getStyleClass().add("text-field-error");
+			}
+		};
+		cbRequirementLinkMachineChoice.valueProperty().addListener(linkMachineListener);
+		nameListener.changed(cbRequirementLinkMachineChoice.valueProperty(), null, cbRequirementLinkMachineChoice.getValue());
 
 		// When creating a new requirement,
 		// VOs can only be added after the requirement has been saved.
@@ -175,6 +196,9 @@ public final class RequirementsEditingBox extends VBox {
 			updateRequirementVos();
 		});
 
+		applyButton.disableProperty().bind(tfName.textProperty().isNull()
+			.or(Bindings.isEmpty(tfName.textProperty()))
+			.or(cbRequirementLinkMachineChoice.valueProperty().isNull()));
 		historyButton.disableProperty().bind(oldRequirement.isNull());
 		refineButton.disableProperty().bind(oldRequirement.isNull());
 	}
@@ -252,14 +276,6 @@ public final class RequirementsEditingBox extends VBox {
 
 	@FXML
 	private void applyRequirement(){
-		if (
-			tfName.getText().trim().isEmpty()
-			|| cbRequirementLinkMachineChoice.getValue() == null
-		) {
-			warnNotValid();
-			return;
-		}
-
 		boolean nameExists = nameExists();
 
 		//If another requirement has the name we have chosen we should not allow the change
@@ -331,10 +347,6 @@ public final class RequirementsEditingBox extends VBox {
 		cbRequirementLinkMachineChoice.getSelectionModel().select(requirement.getIntroducedAt());
 		taRequirement.setText(requirement.getText());
 		voTable.getItems().setAll(requirement.getValidationObligations());
-	}
-
-	private void warnNotValid() {
-		stageManager.makeAlert(Alert.AlertType.INFORMATION, "vomanager.warnings.requirement.notValid.header", "vomanager.warnings.requirement.notValid.content").show();
 	}
 
 	private void warnAlreadyExists() {

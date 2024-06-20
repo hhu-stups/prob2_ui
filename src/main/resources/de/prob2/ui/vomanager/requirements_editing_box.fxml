@@ -29,7 +29,7 @@
 		</padding>
 		<HBox alignment="CENTER_LEFT" spacing="5.0">
 			<Label text="%vomanager.edit.requirement.name"/>
-			<TextField fx:id="tfName" prefWidth="250.0" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+			<TextField fx:id="tfName" prefWidth="250.0"/>
 		</HBox>
 		<HBox alignment="CENTER_LEFT" spacing="5.0">
 			<Label text="%vomanager.edit.requirement.linkMachine"/>
