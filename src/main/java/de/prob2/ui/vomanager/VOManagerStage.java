@@ -510,7 +510,7 @@ public final class VOManagerStage extends Stage {
 			updatedVos.remove(item.getVo());
 			final List<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
 			predecessors.add(oldRequirement);
-			final Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getType(), oldRequirement.getText(), updatedVos, predecessors, oldRequirement.getParent());
+			Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getText(), updatedVos, predecessors, oldRequirement.getParent());
 			currentProject.replaceRequirement(oldRequirement, updatedRequirement);
 		} else if (item.getRequirement() != null) {
 			currentProject.removeRequirement(item.getRequirement());

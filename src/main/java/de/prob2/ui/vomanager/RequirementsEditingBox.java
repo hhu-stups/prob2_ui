@@ -54,9 +54,6 @@ public final class RequirementsEditingBox extends VBox {
 	private TextArea taRequirement;
 
 	@FXML
-	private ChoiceBox<RequirementType> cbRequirementChoice;
-
-	@FXML
 	private ChoiceBox<String> cbRequirementLinkMachineChoice;
 
 	@FXML
@@ -198,7 +195,7 @@ public final class RequirementsEditingBox extends VBox {
 		assert oldReq != null;
 		final List<Requirement> predecessors = new ArrayList<>(oldReq.getPreviousVersions());
 		predecessors.add(oldReq);
-		final Requirement newRequirement = new Requirement(oldReq.getName(), oldReq.getIntroducedAt(), oldReq.getType(), oldReq.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
+		Requirement newRequirement = new Requirement(oldReq.getName(), oldReq.getIntroducedAt(), oldReq.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
 		currentProject.replaceRequirement(oldReq, newRequirement);
 		oldRequirement.set(newRequirement);
 	}
@@ -258,7 +255,6 @@ public final class RequirementsEditingBox extends VBox {
 		if (
 			tfName.getText().trim().isEmpty()
 			|| cbRequirementLinkMachineChoice.getValue() == null
-			|| cbRequirementChoice.getValue() == null
 			|| taRequirement.getText().trim().isEmpty()
 		) {
 			warnNotValid();
@@ -280,7 +276,7 @@ public final class RequirementsEditingBox extends VBox {
 			predecessors = new ArrayList<>(oldRequirement.get().getPreviousVersions());
 			predecessors.add(oldRequirement.get());
 		}
-		final Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), cbRequirementChoice.getValue(), taRequirement.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
+		Requirement newRequirement = new Requirement(tfName.getText(), cbRequirementLinkMachineChoice.getValue(), taRequirement.getText(), new HashSet<>(voTable.getItems()), predecessors, null);
 
 		if (oldRequirement.get() == null) {
 			currentProject.addRequirement(newRequirement);
@@ -315,7 +311,6 @@ public final class RequirementsEditingBox extends VBox {
 
 	public void resetRequirementEditing() {
 		this.oldRequirement.set(null);
-		cbRequirementChoice.getSelectionModel().selectFirst();
 		taRequirement.clear();
 		tfName.clear();
 		Machine currentMachine = currentProject.getCurrentMachine();
@@ -335,7 +330,6 @@ public final class RequirementsEditingBox extends VBox {
 		this.oldRequirement.set(requirement);
 		tfName.setText(requirement.getName());
 		cbRequirementLinkMachineChoice.getSelectionModel().select(requirement.getIntroducedAt());
-		cbRequirementChoice.getSelectionModel().select(requirement.getType());
 		taRequirement.setText(requirement.getText());
 		voTable.getItems().setAll(requirement.getValidationObligations());
 	}
