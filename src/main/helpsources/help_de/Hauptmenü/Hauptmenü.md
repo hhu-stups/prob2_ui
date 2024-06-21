@@ -35,8 +35,7 @@ Dieses Untermenü erlaubt es die Schrift- und Buttongröße in dem ProB2 JavaFX 
 
 Das Visualisierungsmenü stellt verschiedene Formen der Visualisierung zur Verfügung.
 
-Es ist möglich, die Transitionen und den Zustand der Maschine als [Graph](Visualisierungen/Graphvisualisierung.md),
-als [Tabelle](Visualisierungen/Tabellenvisualisierung.md) oder mithilfe des [Magic Layout](Visualisierungen/Magic%20Layout.md) zu visualisieren.
+Es ist möglich, die Transitionen und den Zustand der Maschine als [Graph oder Tabelle](Visualisierungen/Graph-%20und%20Tabellenvisualisierung.md) oder mithilfe des [Magic Layout](Visualisierungen/Magic%20Layout.md) zu visualisieren.
 
 Des Weiteren bietet das [Zeitdiagramm](Visualisierungen/Zeitdiagramm.md) eine Darstellung bestimmter Werte anhand der eingegebenen Formeln.
 
