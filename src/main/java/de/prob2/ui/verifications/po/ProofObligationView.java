@@ -95,7 +95,9 @@ public final class ProofObligationView extends AnchorPane {
 
 			row.itemProperty().addListener((observable, from, to) -> {
 				if (to != null) {
-					row.setTooltip(new Tooltip(to.getDescription()));
+					Tooltip tooltip = new Tooltip();
+					tooltip.textProperty().bind(to.descriptionProperty());
+					row.setTooltip(tooltip);
 				} else {
 					row.setTooltip(null);
 				}

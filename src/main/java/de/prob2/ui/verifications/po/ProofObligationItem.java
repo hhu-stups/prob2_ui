@@ -20,30 +20,31 @@ import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 public final class ProofObligationItem implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String name;
+
 	@JsonIgnore
-	private final String description;
+	private final StringProperty description;
 	@JsonIgnore
 	private final ObjectProperty<CheckingStatus> status;
 
-	public ProofObligationItem(String id, String name, String description) {
+	@JsonCreator
+	public ProofObligationItem(@JsonProperty("id") String id, @JsonProperty("name") String name) {
 		this.id = id;
 		this.name = Objects.requireNonNull(name, "name");
-		this.description = Objects.requireNonNull(description, "description");
+
+		this.description = new SimpleStringProperty(this, "description", null);
 		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.INVALID_TASK);
 	}
 
-	@JsonCreator
-	public ProofObligationItem(@JsonProperty("id") String id, @JsonProperty("name") String name) {
-		this(id, name, "");
-	}
-
 	public ProofObligationItem(ProofObligation proofObligation) {
-		this(null, proofObligation.getName(), proofObligation.getDescription());
+		this(null, proofObligation.getName());
+		this.setDescription(proofObligation.getDescription());
 		this.setStatus(proofObligation.isDischarged() ? CheckingStatus.SUCCESS : CheckingStatus.NOT_CHECKED);
 	}
 
@@ -58,7 +59,8 @@ public final class ProofObligationItem implements IValidationTask {
 	}
 
 	public ProofObligationItem withId(final String id) {
-		final ProofObligationItem updatedPO = new ProofObligationItem(id, this.getName(), this.getDescription());
+		final ProofObligationItem updatedPO = new ProofObligationItem(id, this.getName());
+		updatedPO.setDescription(this.getDescription());
 		updatedPO.setStatus(this.getStatus());
 		return updatedPO;
 	}
@@ -70,20 +72,24 @@ public final class ProofObligationItem implements IValidationTask {
 
 	@Override
 	public String getTaskDescription(I18n i18n) {
-		if (this.getDescription().isEmpty()) {
-			return this.getName();
-		} else {
-			return this.getName() + " // " + getDescription();
-		}
+		return this.getName();
 	}
 
 	public String getName() {
 		return this.name;
 	}
 
+	public StringProperty descriptionProperty() {
+		return this.description;
+	}
+
 	@JsonIgnore
 	public String getDescription() {
-		return this.description;
+		return this.descriptionProperty().get();
+	}
+
+	public void setDescription(String description) {
+		this.descriptionProperty().set(description);
 	}
 
 	@Override
@@ -113,6 +119,7 @@ public final class ProofObligationItem implements IValidationTask {
 
 	@Override
 	public void reset() {
+		this.setDescription(null);
 		this.setStatus(CheckingStatus.NOT_CHECKED);
 		this.resetAnimatorDependentState();
 	}
@@ -130,7 +137,6 @@ public final class ProofObligationItem implements IValidationTask {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())
 			       .add("name", this.getName())
-			       .add("description", this.getDescription())
 			       .toString();
 	}
 }
