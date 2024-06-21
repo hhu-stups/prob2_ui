@@ -168,10 +168,6 @@ public final class ProofObligationView extends AnchorPane {
 	}
 
 	private void editItem(ProofObligationItem item) {
-		Optional<ProofObligationItem> existingSavedPO = this.savedProofObligations.stream()
-			                                                .filter(savedPO -> Objects.equals(savedPO.getName(), item.getName()))
-			                                                .findAny();
-
 		TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
 		stageManager.register(dialog);
 		dialog.setTitle(i18n.translate("verifications.po.poView.contextMenu.editId"));
@@ -181,6 +177,9 @@ public final class ProofObligationView extends AnchorPane {
 			String id = idText.trim().isEmpty() ? null : idText;
 			if (!Objects.equals(id, item.getId())) {
 				Machine machine = currentProject.getCurrentMachine();
+				Optional<ProofObligationItem> existingSavedPO = this.savedProofObligations.stream()
+					.filter(savedPO -> Objects.equals(savedPO.getName(), item.getName()))
+					.findAny();
 				if (id != null) {
 					// we are adding or changing an id
 					existingSavedPO.ifPresentOrElse(
