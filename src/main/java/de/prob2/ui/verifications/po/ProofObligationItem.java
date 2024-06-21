@@ -43,7 +43,7 @@ public final class ProofObligationItem implements IValidationTask {
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
-		this(null, proofObligation.getName(), Objects.requireNonNullElse(proofObligation.getDescription(), ""));
+		this(null, proofObligation.getName(), proofObligation.getDescription());
 		this.setStatus(proofObligation.isDischarged() ? CheckingStatus.SUCCESS : CheckingStatus.NOT_CHECKED);
 	}
 
