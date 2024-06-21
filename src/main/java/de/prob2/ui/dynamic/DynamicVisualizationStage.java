@@ -125,9 +125,8 @@ public final class DynamicVisualizationStage extends Stage {
 	private final BackgroundUpdater updater;
 	private final ObservableList<ErrorItem> errors = FXCollections.observableArrayList();
 
-	// Used to remember the last selected item even when the list might be cleared temporarily,
-	// e.g. when reloading the current machine.
-	private DynamicCommandItem lastItem;
+	private boolean ignoreCommandItemUpdates;
+	private boolean ignoreFormulaUpdates;
 
 	@Inject
 	public DynamicVisualizationStage(StageManager stageManager, I18n i18n, CurrentProject currentProject, CurrentTrace currentTrace, Provider<EditDynamicFormulaStage> editFormulaStageProvider, Provider<DynamicPreferencesStage> preferencesStageProvider, StopActions stopActions) {
@@ -156,50 +155,9 @@ public final class DynamicVisualizationStage extends Stage {
 		});
 
 		this.tvCommandItems.getSelectionModel().selectedItemProperty().addListener((observable, fromTreeItem, toTreeItem) -> {
-			DynamicCommandItem to;
-			if (toTreeItem != null && toTreeItem.getValue() instanceof CommandItem item) {
-				to = item.item;
-			} else {
-				to = null;
+			if (!this.ignoreCommandItemUpdates) {
+				this.refreshSelectedTreeItem(toTreeItem != null ? toTreeItem.getValue() : null);
 			}
-
-			this.updatePlaceholderLabel();
-			this.tvFormula.itemsProperty().unbind();
-			if (to == null || this.currentProject.getCurrentMachine() == null || this.currentTrace.get() == null || !this.isShowing()) {
-				this.lbDescription.setText("");
-				this.enterFormulaBox.setVisible(false);
-				this.tvFormula.setVisible(false);
-				this.tvFormula.setItems(FXCollections.observableArrayList());
-				this.addButton.setVisible(false);
-				this.removeButton.setVisible(false);
-				this.interrupt();
-				return;
-			}
-
-			if (!to.isAvailable()) {
-				this.lbDescription.setText(String.join("\n\n", to.getDescription(), to.getAvailable()));
-			} else {
-				this.lbDescription.setText(to.getDescription());
-			}
-
-			this.tvFormula.setItems(this.currentProject.getCurrentMachine().getVisualizationFormulaTasksByCommand(to.getCommand()));
-
-			boolean needFormula = to.getArity() > 0;
-			this.enterFormulaBox.setVisible(needFormula);
-			this.tvFormula.setVisible(needFormula);
-			this.addButton.setVisible(needFormula);
-			this.removeButton.setVisible(needFormula);
-			// Update the visualization automatically if possible.
-			// If the command selection changed and the new command requires a formula,
-			// clear the visualization and wait for the user to input one.
-			// We cannot blindly execute the last formula, as we do not what it was,
-			// and we do not know if it is applicable to this item and model
-			if (to.isAvailable() && !needFormula) {
-				this.visualize(to, null);
-			} else {
-				this.interrupt();
-			}
-			this.lastItem = to;
 		});
 		this.tvCommandItems.disableProperty().bind(this.updater.runningProperty().or(this.currentTrace.stateSpaceProperty().isNull()));
 
@@ -218,13 +176,13 @@ public final class DynamicVisualizationStage extends Stage {
 		this.taFormula.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
 				if (!e.isShiftDown()) {
-					evaluateFormulaDirect();
+					this.evaluateFormulaDirect();
 					e.consume();
 				} else {
 					this.taFormula.insertText(this.taFormula.getCaretPosition(), "\n");
 				}
 			} else if (e.getCode().equals(KeyCode.INSERT)) {
-				addFormulaDirect();
+				this.addFormulaDirect();
 				e.consume();
 			}
 		});
@@ -235,7 +193,11 @@ public final class DynamicVisualizationStage extends Stage {
 		this.idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
 		this.formulaColumn.setCellValueFactory(new PropertyValueFactory<>("formula"));
 
-		this.tvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> evaluateSelectedFormulaFromTable());
+		this.tvFormula.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if (!this.ignoreFormulaUpdates) {
+				this.evaluateFormula(to);
+			}
+		});
 
 		this.tvCommandItems.setCellFactory(tv -> new DynamicCommandItemCell());
 		this.cancelButton.disableProperty().bind(this.updater.runningProperty().not());
@@ -249,7 +211,7 @@ public final class DynamicVisualizationStage extends Stage {
 
 			row.setOnMouseClicked(e -> {
 				if (e.getClickCount() == 2) {
-					evaluateFormula(row.getItem().getFormula());
+					this.evaluateFormula(row.getItem());
 				}
 			});
 
@@ -257,7 +219,7 @@ public final class DynamicVisualizationStage extends Stage {
 			editFormula.setOnAction(event -> this.editFormulaWithDialog(row.getItem()));
 
 			MenuItem evaluateItem = new MenuItem(i18n.translate("dynamic.evaluateFormula"));
-			evaluateItem.setOnAction(event -> this.evaluateFormula(row.getItem().getFormula()));
+			evaluateItem.setOnAction(event -> this.evaluateFormula(row.getItem()));
 
 			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
 			dischargeItem.setOnAction(event -> {
@@ -299,7 +261,7 @@ public final class DynamicVisualizationStage extends Stage {
 	private DynamicCommandItem getSelectedCommandItem() {
 		TreeItem<DynamicTreeItem> selectedItem = this.tvCommandItems.getSelectionModel().getSelectedItem();
 		if (selectedItem != null && selectedItem.getValue() instanceof CommandItem item) {
-			return item.item;
+			return item.getItem();
 		} else {
 			return null;
 		}
@@ -364,7 +326,7 @@ public final class DynamicVisualizationStage extends Stage {
 		VisualizationFormulaTask newTask = stage.getResult();
 		if (newTask != null) {
 			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldTask, newTask);
-			this.evaluateFormula(added.getFormula());
+			this.evaluateFormula(added);
 		}
 	}
 
@@ -375,17 +337,10 @@ public final class DynamicVisualizationStage extends Stage {
 			return;
 		}
 
-		VisualizationFormulaTask task = createTaskOfType(item, null, taFormula.getText());
+		VisualizationFormulaTask task = this.createTaskOfType(item, null, this.taFormula.getText());
 		if (task != null) {
 			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(task);
-			this.evaluateFormula(added.getFormula());
-		}
-	}
-
-	private void evaluateSelectedFormulaFromTable() {
-		VisualizationFormulaTask item = tvFormula.getSelectionModel().getSelectedItem();
-		if (item != null) {
-			this.evaluateFormula(item.getFormula());
+			this.evaluateFormula(added);
 		}
 	}
 
@@ -397,13 +352,17 @@ public final class DynamicVisualizationStage extends Stage {
 
 	@FXML
 	private void evaluateFormulaDirect() {
-		evaluateFormula(taFormula.getText());
-	}
-
-	private void evaluateFormula(String formula) {
 		DynamicCommandItem item = this.getSelectedCommandItem();
 		if (item != null) {
-			this.visualize(item, formula);
+			this.tvFormula.getSelectionModel().clearSelection();
+			this.visualize(item, this.taFormula.getText());
+		}
+	}
+
+	private void evaluateFormula(VisualizationFormulaTask formula) {
+		DynamicCommandItem item = this.getSelectedCommandItem();
+		if (item != null && formula != null) {
+			this.visualize(item, formula.getFormula());
 		}
 	}
 
@@ -463,40 +422,137 @@ public final class DynamicVisualizationStage extends Stage {
 		this.updatePlaceholderLabel();
 
 		List<DynamicCommandItem> commandItems = this.getCommandsWithTrace(this.currentTrace.get());
-		TreeItem<DynamicTreeItem> lastSelected = null;
 
-		List<TreeItem<DynamicTreeItem>> withoutCategory = new ArrayList<>();
-		Map<String, TreeItem<DynamicTreeItem>> categoryRoots = new HashMap<>();
-		List<TreeItem<DynamicTreeItem>> result = new ArrayList<>();
-		for (var commandItem : commandItems) {
-			String category = null;
-			for (var term : commandItem.getAdditionalInfo()) {
-				if (term.hasFunctor("group", 1)) {
-					category = term.getArgument(1).atomToString();
-				}
-			}
-
-			var treeItem = new TreeItem<DynamicTreeItem>(new CommandItem(commandItem));
-			if (category != null) {
-				var root = categoryRoots.computeIfAbsent(category, k -> {
-					var categoryRoot = new TreeItem<DynamicTreeItem>(new Category(k));
-					categoryRoot.setExpanded(true);
-					result.add(categoryRoot);
-					return categoryRoot;
-				});
-				root.getChildren().add(treeItem);
+		DynamicTreeItem currentlySelected;
+		{
+			TreeItem<DynamicTreeItem> currentlySelectedTreeItem = this.tvCommandItems.getSelectionModel().getSelectedItem();
+			if (currentlySelectedTreeItem != null) {
+				currentlySelected = currentlySelectedTreeItem.getValue();
 			} else {
-				withoutCategory.add(treeItem);
-			}
-
-			if (commandItem.equals(this.lastItem)) {
-				lastSelected = treeItem;
+				currentlySelected = null;
 			}
 		}
-		result.addAll(withoutCategory);
-		this.tvCommandItemsRoot.getChildren().setAll(result);
 
-		this.tvCommandItems.getSelectionModel().select(lastSelected);
+		TreeItem<DynamicTreeItem> nextSelected = null;
+		List<TreeItem<DynamicTreeItem>> result = new ArrayList<>();
+		{
+			List<TreeItem<DynamicTreeItem>> withoutCategory = new ArrayList<>();
+			Map<String, TreeItem<DynamicTreeItem>> categoryRoots = new HashMap<>();
+			for (var commandItem : commandItems) {
+				String category = null;
+				for (var term : commandItem.getAdditionalInfo()) {
+					if (term.hasFunctor("group", 1)) {
+						category = term.getArgument(1).atomToString();
+					}
+				}
+
+				var treeItem = new TreeItem<DynamicTreeItem>(new CommandItem(commandItem));
+				if (category != null) {
+					var root = categoryRoots.computeIfAbsent(category, k -> {
+						var categoryRoot = new TreeItem<DynamicTreeItem>(new Category(k));
+						categoryRoot.setExpanded(true);
+						result.add(categoryRoot);
+						return categoryRoot;
+					});
+					root.getChildren().add(treeItem);
+					if (nextSelected == null && root.getValue().equals(currentlySelected)) {
+						nextSelected = treeItem;
+					}
+				} else {
+					withoutCategory.add(treeItem);
+				}
+
+				if (nextSelected == null && treeItem.getValue().equals(currentlySelected)) {
+					nextSelected = treeItem;
+				}
+			}
+			result.addAll(withoutCategory);
+		}
+
+		this.ignoreCommandItemUpdates = true;
+		try {
+			this.tvCommandItemsRoot.getChildren().setAll(result);
+		} finally {
+			this.ignoreCommandItemUpdates = false;
+		}
+
+		this.tvCommandItems.getSelectionModel().select(nextSelected);
+	}
+
+	private void refreshSelectedTreeItem(DynamicTreeItem toItem) {
+		DynamicCommandItem to = toItem instanceof CommandItem commandItem ? commandItem.getItem() : null;
+
+		this.updatePlaceholderLabel();
+
+		// clearSelection does not cause an update in the formula selection event handler
+		// re-selection is done later
+		VisualizationFormulaTask previouslySelectedFormula = this.tvFormula.getSelectionModel().getSelectedItem();
+		this.tvFormula.getSelectionModel().clearSelection();
+		this.tvFormula.itemsProperty().unbind();
+
+		if (to == null || this.currentProject.getCurrentMachine() == null || this.currentTrace.get() == null || !this.isShowing()) {
+			this.lbDescription.setText("");
+			this.enterFormulaBox.setVisible(false);
+			this.tvFormula.setVisible(false);
+			this.tvFormula.setItems(FXCollections.observableArrayList());
+			this.addButton.setVisible(false);
+			this.removeButton.setVisible(false);
+			this.interrupt();
+			return;
+		}
+
+		if (!to.isAvailable()) {
+			this.lbDescription.setText(String.join("\n\n", to.getDescription(), to.getAvailable()));
+		} else {
+			this.lbDescription.setText(to.getDescription());
+		}
+
+		boolean needFormula = to.getArity() > 0;
+		this.enterFormulaBox.setVisible(needFormula);
+		this.tvFormula.setVisible(needFormula);
+		this.addButton.setVisible(needFormula);
+		this.removeButton.setVisible(needFormula);
+
+		// this should not cause any formula selection updates
+		this.tvFormula.setItems(this.currentProject.getCurrentMachine().getVisualizationFormulaTasksByCommand(to.getCommand()));
+
+		String previousFormula = null;
+		boolean restoreVisualization = false;
+		if (to.isAvailable()) {
+			if (needFormula) {
+				if (previouslySelectedFormula != null && this.tvFormula.getItems().contains(previouslySelectedFormula)) {
+					this.ignoreFormulaUpdates = true;
+					try {
+						// we want to reselect the previous item if there were any,
+						// but we need to defer the visualization update, so do not react to the formula update event here
+						this.tvFormula.getSelectionModel().select(previouslySelectedFormula);
+					} finally {
+						this.ignoreFormulaUpdates = false;
+					}
+
+					previousFormula = previouslySelectedFormula.getFormula();
+				} else {
+					previousFormula = this.taFormula.getText();
+				}
+
+				if (previousFormula != null && !previousFormula.isEmpty()) {
+					// only show visualization when we have a valid formula
+					restoreVisualization = true;
+				}
+			} else {
+				// always show visualization when it does not require a formula
+				restoreVisualization = true;
+			}
+		}
+
+		// Update the visualization automatically if possible.
+		// If the command selection changed and the new command requires a formula,
+		// clear the visualization and wait for the user to input one.
+		if (restoreVisualization) {
+			this.visualize(to, previousFormula);
+		} else {
+			this.interrupt();
+		}
 	}
 
 	private void interrupt() {
@@ -579,6 +635,7 @@ public final class DynamicVisualizationStage extends Stage {
 
 		this.tvCommandItems.getSelectionModel().select(choiceTreeItem);
 		this.taFormula.replaceText(formula != null ? formula : "");
+		this.tvFormula.getSelectionModel().clearSelection();
 		this.visualize(choice, formula);
 	}
 
@@ -597,7 +654,7 @@ public final class DynamicVisualizationStage extends Stage {
 		VisualizationFormulaTask task = stage.getResult();
 		if (task != null) {
 			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(task);
-			this.evaluateFormula(added.getFormula());
+			this.evaluateFormula(added);
 		}
 	}
 
