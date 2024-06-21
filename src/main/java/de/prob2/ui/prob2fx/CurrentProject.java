@@ -173,6 +173,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			Platform.runLater(() -> {
 				m.updateModifiedTimesAndResetIfChanged(allFiles);
 				m.reinitPatternManager();
+				m.updateAllProofObligationsFromModel(trace.getModel());
 			});
 			return trace;
 		});

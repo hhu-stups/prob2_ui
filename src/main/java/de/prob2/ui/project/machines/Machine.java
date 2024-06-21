@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +25,11 @@ import com.google.common.base.MoreObjects;
 import com.google.common.io.MoreFiles;
 
 import de.prob.ltl.parser.pattern.PatternManager;
+import de.prob.model.eventb.Context;
+import de.prob.model.eventb.EventBMachine;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.eventb.ProofObligation;
+import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
@@ -85,8 +92,16 @@ public final class Machine {
 	private final ObjectProperty<Path> visBVisualisation;
 	private final ListProperty<String> historyChartItems;
 
+	private final ObservableList<ProofObligationItem> proofObligationTasks;
+
 	@JsonIgnore
 	private PatternManager patternManager;
+	// For internal use by updateAllProofObligations:
+	// stores the ProofObligation objects from the last model passed to updateAllProofObligationsFromModel.
+	@JsonIgnore
+	private List<? extends ProofObligation> lastModelProofObligations;
+	@JsonIgnore
+	private final ObservableList<ProofObligationItem> allProofObligations;
 	@JsonIgnore
 	private Map<Path, FileTime> sourceFileModifiedTimes;
 	@JsonIgnore
@@ -131,7 +146,12 @@ public final class Machine {
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", visBVisualisation);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList(historyChartItems));
 
+		// Keep this filtered list alive so that its listener (added in initListeners) keeps working.
+		this.proofObligationTasks = this.getProofObligationTasks();
+
 		this.patternManager = null;
+		this.lastModelProofObligations = Collections.emptyList();
+		this.allProofObligations = FXCollections.observableArrayList();
 		this.sourceFileModifiedTimes = null;
 		this.cachedEditorState = new CachedEditorState();
 
@@ -149,6 +169,8 @@ public final class Machine {
 		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
 		this.getHistoryChartItems().addListener(changedListener);
+
+		this.proofObligationTasks.addListener((InvalidationListener)o -> this.updateAllProofObligations());
 	}
 
 	@JsonIgnore
@@ -393,6 +415,57 @@ public final class Machine {
 		this.getLTLPatterns().forEach(item -> LTLPatternParser.addPattern(item, this));
 	}
 
+	public ObservableList<ProofObligationItem> getAllProofObligations() {
+		return this.allProofObligations;
+	}
+
+	private static List<? extends ProofObligation> getProofObligationsFromModel(AbstractModel model) {
+		// TODO: Does not yet work with .eventb files
+		if (!(model instanceof EventBModel eventBModel)) {
+			return Collections.emptyList();
+		} else if (eventBModel.getMainComponent() instanceof EventBMachine machine) {
+			return machine.getProofs();
+		} else if (eventBModel.getMainComponent() instanceof Context context) {
+			return context.getProofs();
+		} else {
+			return Collections.emptyList();
+		}
+	}
+
+	private void updateAllProofObligations() {
+		Map<String, ProofObligationItem> posWithIdByName = this.getProofObligationTasks().stream()
+			.collect(Collectors.toMap(ProofObligationItem::getName, po -> po));
+
+		// Update all existing PO tasks based on the PO information from the model.
+		// This also removes all PO tasks from posWithIdByName that have a corresponding PO in the model.
+		// After this loop has finished,
+		// posWithIdByName will only contain the PO tasks for POs that no longer exist in the model.
+		List<ProofObligationItem> updatedAllProofObligations = new ArrayList<>();
+		for (ProofObligation po : this.lastModelProofObligations) {
+			ProofObligationItem existingPoTask = posWithIdByName.remove(po.getName());
+			if (existingPoTask != null) {
+				assert existingPoTask.getId() != null;
+				existingPoTask.updateFrom(po);
+				updatedAllProofObligations.add(existingPoTask);
+			} else {
+				updatedAllProofObligations.add(new ProofObligationItem(po));
+			}
+		}
+
+		// Finally, add all PO tasks that correspond to POs that no longer exist in the model.
+		posWithIdByName.values().stream()
+			.sorted(Comparator.comparing(ProofObligationItem::getName))
+			.collect(Collectors.toCollection(() -> updatedAllProofObligations));
+
+		// Store the updated POs in the machine.
+		this.allProofObligations.setAll(updatedAllProofObligations);
+	}
+
+	public void updateAllProofObligationsFromModel(AbstractModel model) {
+		this.lastModelProofObligations = getProofObligationsFromModel(model);
+		this.updateAllProofObligations();
+	}
+
 	@JsonIgnore
 	public CachedEditorState getCachedEditorState() {
 		return cachedEditorState;
@@ -420,6 +493,9 @@ public final class Machine {
 		for (var vt : this.getValidationTasks()) {
 			vt.reset();
 		}
+
+		this.lastModelProofObligations.clear();
+		this.allProofObligations.clear();
 	}
 
 	private static Map<Path, FileTime> readFileModifiedTimes(List<Path> files) throws IOException {

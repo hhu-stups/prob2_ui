@@ -44,8 +44,7 @@ public final class ProofObligationItem implements IValidationTask {
 
 	public ProofObligationItem(ProofObligation proofObligation) {
 		this(null, proofObligation.getName());
-		this.setDescription(proofObligation.getDescription());
-		this.setStatus(proofObligation.isDischarged() ? CheckingStatus.SUCCESS : CheckingStatus.NOT_CHECKED);
+		this.updateFrom(proofObligation);
 	}
 
 	@Override
@@ -105,6 +104,15 @@ public final class ProofObligationItem implements IValidationTask {
 	@JsonIgnore
 	public void setStatus(final CheckingStatus status) {
 		this.statusProperty().set(status);
+	}
+
+	public void updateFrom(ProofObligation po) {
+		if (!this.getName().equals(po.getName())) {
+			throw new IllegalArgumentException("Attempted to update ProofObligationItem for PO " + this.getName() + " using different ProofObligation " + po.getName());
+		}
+
+		this.setDescription(po.getDescription());
+		this.setStatus(po.isDischarged() ? CheckingStatus.SUCCESS : CheckingStatus.NOT_CHECKED);
 	}
 
 	@Override
