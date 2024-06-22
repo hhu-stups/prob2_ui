@@ -48,10 +48,6 @@ public final class SearchStage extends Stage {
 	private CheckBox cbWordsOnly;
 	@FXML
 	private CheckBox cbRegex;
-	/*@FXML
-	private CheckBox cbDotAll;
-	@FXML
-	private CheckBox cbMultiline;*/
 	@FXML
 	private Label lblResults;
 	@FXML
@@ -93,9 +89,6 @@ public final class SearchStage extends Stage {
 	private void initialize() {
 		this.setAlwaysOnTop(true);
 
-		// this.cbDotAll.disableProperty().bind(this.cbRegex.selectedProperty().not());
-		// this.cbMultiline.disableProperty().bind(this.cbRegex.selectedProperty().not());
-
 		this.lblResults.getStyleClass().clear();
 
 		this.findButton.disableProperty().bind(this.tfSearch.textProperty().isEmpty());
@@ -123,8 +116,6 @@ public final class SearchStage extends Stage {
 
 		// regex options
 		boolean regex = this.cbRegex.isSelected();
-		boolean dotAll = false; // this.cbDotAll.isSelected();
-		boolean multiline = false; // this.cbMultiline.isSelected();
 
 		// unicode support always enabled
 		int flags = Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS | Pattern.CANON_EQ;
@@ -136,12 +127,6 @@ public final class SearchStage extends Stage {
 		}
 		if (wordsOnly) {
 			searchText = "\\b" + searchText + "\\b";
-		}
-		if (regex && dotAll) {
-			flags |= Pattern.DOTALL;
-		}
-		if (regex && multiline) {
-			flags |= Pattern.MULTILINE;
 		}
 
 		Pattern searchPattern;
