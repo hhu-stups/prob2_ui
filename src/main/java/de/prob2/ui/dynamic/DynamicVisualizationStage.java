@@ -177,9 +177,6 @@ public final class DynamicVisualizationStage extends Stage {
 				} else {
 					this.taFormula.insertText(this.taFormula.getCaretPosition(), "\n");
 				}
-			} else if (e.getCode().equals(KeyCode.INSERT)) {
-				this.addFormulaDirect();
-				e.consume();
 			}
 		});
 
