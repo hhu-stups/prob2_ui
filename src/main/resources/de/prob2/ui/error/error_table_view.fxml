@@ -3,7 +3,7 @@
 <?import de.prob2.ui.error.ErrorTableView?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TreeTableColumn?>
-<fx:root type="ErrorTableView" minHeight="160" prefHeight="160" showRoot="false" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="ErrorTableView" minHeight="80" prefHeight="160" showRoot="false" xmlns:fx="http://javafx.com/fxml/1">
 	<columns>
 		<TreeTableColumn fx:id="typeColumn" editable="false" minWidth="80" prefWidth="120" text="%error.errorTable.columns.type"/>
 		<TreeTableColumn fx:id="messageColumn" editable="false" minWidth="80" prefWidth="320" text="%error.errorTable.columns.message"/>

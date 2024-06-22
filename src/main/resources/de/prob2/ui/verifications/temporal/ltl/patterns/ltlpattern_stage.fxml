@@ -30,11 +30,11 @@
 					</HBox>
 					<VirtualizedScrollPane fx:id="virtualizedScrollPane">
 						<content>
-							<TemporalFormulaEditor fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+							<TemporalFormulaEditor fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="100.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 						</content>
 					</VirtualizedScrollPane>
 					<Label text="%verifications.temporal.ltl.pattern.ltlPatternStage.description" VBox.vgrow="NEVER"/>
-					<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
+					<TextArea fx:id="taDescription" styleClass="text-area-with-border" prefHeight="100" VBox.vgrow="ALWAYS"/>
 					<Label text="%verifications.temporal.ltl.pattern.ltlPatternStage.errors" VBox.vgrow="NEVER"/>
 					<ErrorTableView fx:id="errorsTable" VBox.vgrow="ALWAYS"/>
 					<HBox>

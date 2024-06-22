@@ -54,7 +54,7 @@
 					</HBox>
 					<VirtualizedScrollPane fx:id="virtualizedScrollPane">
 						<content>
-							<TemporalFormulaEditor fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="160.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
+							<TemporalFormulaEditor fx:id="taCode" styleClass="text-area-with-border" prefWidth="320.0" prefHeight="100.0" maxWidth="Infinity" maxHeight="Infinity" VBox.vgrow="ALWAYS"/>
 						</content>
 					</VirtualizedScrollPane>
 					<HBox alignment="CENTER_LEFT" spacing="5.0">
@@ -92,7 +92,7 @@
 						<TextField fx:id="idTextField" promptText="%common.optionalPlaceholder" HBox.hgrow="NEVER"/>
 					</HBox>
 					<Label text="%verifications.temporal.formula.temporalFormulaStage.description" VBox.vgrow="NEVER"/>
-					<TextArea fx:id="taDescription" styleClass="text-area-with-border" VBox.vgrow="ALWAYS"/>
+					<TextArea fx:id="taDescription" styleClass="text-area-with-border" prefHeight="100" VBox.vgrow="ALWAYS"/>
 					<Label text="%verifications.temporal.formula.temporalFormulaStage.errors" VBox.vgrow="NEVER"/>
 					<ErrorTableView fx:id="errorsTable" VBox.vgrow="ALWAYS"/>
 					<HBox spacing="10.0">
