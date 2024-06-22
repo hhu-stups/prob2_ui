@@ -15,7 +15,7 @@
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
-						<Label fx:id="formulaTitleLabel" text="%dynamic.button.addFormula" styleClass="title">
+						<Label text="%dynamic.editFormula" styleClass="title">
 							<VBox.margin>
 								<Insets left="10" right="10" />
 							</VBox.margin>

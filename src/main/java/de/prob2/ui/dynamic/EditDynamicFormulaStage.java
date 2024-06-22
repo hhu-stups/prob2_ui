@@ -20,8 +20,6 @@ import javafx.stage.Stage;
 
 public final class EditDynamicFormulaStage extends Stage {
 	@FXML
-	private Label formulaTitleLabel;
-	@FXML
 	private TextField idField;
 	@FXML
 	private ExtendedCodeArea formulaTextArea;
@@ -47,7 +45,6 @@ public final class EditDynamicFormulaStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		this.formulaTitleLabel.setText(this.i18n.translate("dynamic.editFormula"));
 		this.formulaTextArea.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
 				if (!e.isShiftDown()) {
