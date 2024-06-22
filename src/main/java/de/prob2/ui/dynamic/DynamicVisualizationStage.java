@@ -269,10 +269,6 @@ public final class DynamicVisualizationStage extends Stage {
 		}
 	}
 
-	private VisualizationFormulaTask createTaskOfType(DynamicCommandItem item, String id, String formula) {
-		return new VisualizationFormulaTask(id, item.getCommand(), formula);
-	}
-
 	private void visualizeInternal(DynamicCommandItem item, List<IEvalElement> formulas) throws InterruptedException {
 		Platform.runLater(this::clearContent);
 		if (item instanceof TableVisualizationCommand vc) {
@@ -322,7 +318,7 @@ public final class DynamicVisualizationStage extends Stage {
 
 		EditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
 		stage.initOwner(this);
-		stage.setInitialFormulaTask(oldTask, this.errors, (id, formula) -> this.createTaskOfType(item, id, formula));
+		stage.setInitialFormulaTask(oldTask, this.errors);
 		stage.showAndWait();
 
 		VisualizationFormulaTask newTask = stage.getResult();
@@ -339,11 +335,9 @@ public final class DynamicVisualizationStage extends Stage {
 			return;
 		}
 
-		VisualizationFormulaTask task = this.createTaskOfType(item, null, this.taFormula.getText());
-		if (task != null) {
-			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(task);
-			this.evaluateFormula(added);
-		}
+		VisualizationFormulaTask task = new VisualizationFormulaTask(null, item.getCommand(), this.taFormula.getText());
+		VisualizationFormulaTask added = this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(task);
+		this.evaluateFormula(added);
 	}
 
 	@FXML
