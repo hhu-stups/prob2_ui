@@ -92,8 +92,8 @@
 										</content>
 									</VirtualizedScrollPane>
 									<HBox alignment="CENTER" VBox.vgrow="NEVER" spacing="10.0">
-										<Button fx:id="addFormulaButton" styleClass="button-blue" text="%dynamic.button.addFormula" onAction="#addFormulaDirect"/>
 										<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%dynamic.evaluateFormula" onAction="#evaluateFormulaDirect"/>
+										<Button fx:id="addFormulaButton" styleClass="button-blue" text="%dynamic.saveFormula" onAction="#addFormulaDirect"/>
 									</HBox>
 								</VBox>
 							</VBox>
