@@ -10,21 +10,20 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.control.TreeItem?>
+<?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import javafx.scene.control.TreeView?>
-<?import javafx.scene.control.TreeItem?>
 <fx:root type="DynamicVisualizationStage" title="%dynamic.visualization.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -69,24 +68,6 @@
 							</TreeView>
 							<HBox alignment="CENTER" VBox.vgrow="NEVER">
 								<Label fx:id="lbDescription" prefHeight="80.0" wrapText="true" VBox.vgrow="ALWAYS"/>
-							</HBox>
-							<HBox alignment="CENTER_RIGHT" VBox.vgrow="NEVER">
-								<Button fx:id="addButton" visible="false" onAction="#handleAddFormula">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
-									</graphic>
-									<tooltip>
-										<Tooltip text="%dynamic.button.addFormula"/>
-									</tooltip>
-								</Button>
-								<Button fx:id="removeButton" visible="false" onAction="#handleRemoveFormula">
-									<graphic>
-										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
-									</graphic>
-									<tooltip>
-										<Tooltip text="%dynamic.button.removeFormula"/>
-									</tooltip>
-								</Button>
 							</HBox>
 
 							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0" fixedCellSize="${fontSize.fontSize * 1.5}">

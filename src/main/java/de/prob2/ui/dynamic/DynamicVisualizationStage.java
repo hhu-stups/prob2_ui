@@ -78,10 +78,6 @@ public final class DynamicVisualizationStage extends Stage {
 
 	// formulas
 	@FXML
-	private Button addButton;
-	@FXML
-	private Button removeButton;
-	@FXML
 	private TableView<VisualizationFormulaTask> tvFormula;
 	@FXML
 	private TableColumn<VisualizationFormulaTask, CheckingStatus> statusColumn;
@@ -250,10 +246,19 @@ public final class DynamicVisualizationStage extends Stage {
 
 			Menu statusMenu = new Menu(this.i18n.translate("dynamic.setStatus"), null, dischargeItem, failItem, unknownItem);
 
+			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
+			removeItem.setOnAction(event -> {
+				VisualizationFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				this.currentProject.getCurrentMachine().removeValidationTask(item);
+			});
+
 			row.contextMenuProperty().bind(
 					Bindings.when(row.emptyProperty())
 							.then((ContextMenu) null)
-							.otherwise(new ContextMenu(evaluateItem, editFormula, statusMenu)));
+							.otherwise(new ContextMenu(evaluateItem, editFormula, statusMenu, removeItem)));
 			return row;
 		});
 	}
@@ -495,8 +500,6 @@ public final class DynamicVisualizationStage extends Stage {
 			this.enterFormulaBox.setVisible(false);
 			this.tvFormula.setVisible(false);
 			this.tvFormula.setItems(FXCollections.observableArrayList());
-			this.addButton.setVisible(false);
-			this.removeButton.setVisible(false);
 			this.interrupt();
 			return;
 		}
@@ -510,8 +513,6 @@ public final class DynamicVisualizationStage extends Stage {
 		boolean needFormula = to.getArity() > 0;
 		this.enterFormulaBox.setVisible(needFormula);
 		this.tvFormula.setVisible(needFormula);
-		this.addButton.setVisible(needFormula);
-		this.removeButton.setVisible(needFormula);
 
 		// this should not cause any formula selection updates
 		this.tvFormula.setItems(this.currentProject.getCurrentMachine().getVisualizationFormulaTasksByCommand(to.getCommand()));
@@ -637,33 +638,6 @@ public final class DynamicVisualizationStage extends Stage {
 		this.taFormula.replaceText(formula != null ? formula : "");
 		this.tvFormula.getSelectionModel().clearSelection();
 		this.visualize(choice, formula);
-	}
-
-	@FXML
-	private void handleAddFormula() {
-		DynamicCommandItem item = this.getSelectedCommandItem();
-		if (item == null) {
-			return;
-		}
-
-		EditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
-		stage.initOwner(this);
-		stage.createNewFormulaTask((id, formula) -> this.createTaskOfType(item, id, formula));
-		stage.showAndWait();
-
-		VisualizationFormulaTask task = stage.getResult();
-		if (task != null) {
-			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(task);
-			this.evaluateFormula(added);
-		}
-	}
-
-	@FXML
-	private void handleRemoveFormula() {
-		VisualizationFormulaTask formulaTask = this.tvFormula.getSelectionModel().getSelectedItem();
-		if (formulaTask != null) {
-			this.currentProject.getCurrentMachine().removeValidationTask(formulaTask);
-		}
 	}
 
 	public void selectCommand(String command) {
