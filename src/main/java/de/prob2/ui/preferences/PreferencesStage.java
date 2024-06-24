@@ -222,7 +222,7 @@ public final class PreferencesStage extends Stage {
 			this.machineLoader.getActiveStateSpace().changePreferences(changed);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content");
+			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToApplyChanges.content");
 			alert.initOwner(this);
 			alert.show();
 		}

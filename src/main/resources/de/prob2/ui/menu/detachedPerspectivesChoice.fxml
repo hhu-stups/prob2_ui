@@ -6,14 +6,14 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import de.prob2.ui.sharedviews.Spacer?>
-<fx:root type="Stage" fx:id="detached" title="%menu.detatchView.stage.title" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root type="Stage" fx:id="detached" title="%menu.detachView.stage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene fill="TRANSPARENT">
 			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
 				<VBox spacing="10" AnchorPane.topAnchor="10.0"
 					AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="0.0"
 					AnchorPane.rightAnchor="0.0">
-					<Label text="%menu.detatchView.explanation">
+					<Label text="%menu.detachView.explanation">
 						<VBox.margin>
 							<Insets left="10" right="10" />
 						</VBox.margin>
@@ -45,7 +45,7 @@
 							</VBox.margin>
 							<Button fx:id="apply" onAction="#apply" text="%common.buttons.apply"/>
 							<Spacer/>
-							<Button fx:id="attachAll" onAction="#attachAllViews" text="%menu.detatchView.stage.attachAll"/>
+							<Button fx:id="attachAll" onAction="#attachAllViews" text="%menu.detachView.stage.attachAll"/>
 						</HBox>
 				</VBox>
 			</AnchorPane>
