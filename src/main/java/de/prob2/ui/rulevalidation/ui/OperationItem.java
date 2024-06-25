@@ -116,10 +116,10 @@ class OperationItem extends TreeItem<Object> {
 	}
 
 	private void addCounterExamples(List<RuleResult.CounterExample> counterExamples) {
-		TreeItem<Object> violationItem = new TreeItem<>(i18n.translate("rulevalidation.table.violations"));
 		int size = counterExamples.size();
+		TreeItem<Object> violationItem = new TreeItem<>(i18n.translate("rulevalidation.table.violations") + " (" + size + ")");
 		if (size > 10) {
-			TreeItem<Object> collapsedExamples = new TreeItem<>(i18n.translate("rulevalidation.table.violations.showAll") + " (" + size + ")");
+			TreeItem<Object> collapsedExamples = new TreeItem<>(i18n.translate("rulevalidation.table.violations.showAll") + " (" + (size - 10) + ")");
 			// display the first ten violations and collapse the others
 			for (int i = 0; i < 10; i++) {
 				violationItem.getChildren().add(new TreeItem<>(counterExamples.get(i)));
