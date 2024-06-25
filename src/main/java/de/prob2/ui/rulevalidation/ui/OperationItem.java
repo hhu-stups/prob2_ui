@@ -82,8 +82,12 @@ class OperationItem extends TreeItem<Object> {
 		switch(result.getRuleState()) {
 			case FAIL:
 				// create child items to show why the rule failed
-				result.getCounterExamples().sort(Comparator.comparingInt(RuleResult.CounterExample::getErrorType));
-				addCounterExamples(result.getCounterExamples());
+				if (result.getNumberOfViolations() == -1) {
+					this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.violations.infinitelyMany")));
+				} else {
+					result.getCounterExamples().sort(Comparator.comparingInt(RuleResult.CounterExample::getErrorType));
+					addCounterExamples(result.getCounterExamples());
+				}
 				executable = false;
 				break;
 			case NOT_CHECKED:
