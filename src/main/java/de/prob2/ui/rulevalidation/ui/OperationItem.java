@@ -39,7 +39,7 @@ class OperationItem extends TreeItem<Object> {
 					case FAIL, NOT_CHECKED -> createRuleChildren(ruleResult);
 					case SUCCESS -> {
 						OperationItem.this.getChildren().clear();
-						addSuccessMessages(ruleResult.getSuccessMessages());
+						addSuccessMessages(ruleResult);
 						executable = false;
 					}
 					case DISABLED -> {
@@ -87,12 +87,7 @@ class OperationItem extends TreeItem<Object> {
 		switch(result.getRuleState()) {
 			case FAIL:
 				// create child items to show why the rule failed
-				if (result.getNumberOfViolations() == -1) {
-					this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.violations.infinitelyMany")));
-				} else {
-					result.getCounterExamples().sort(Comparator.comparingInt(RuleResult.CounterExample::getErrorType));
-					addCounterExamples(result.getCounterExamples());
-				}
+				addCounterExamples(result);
 				executable = false;
 				break;
 			case NOT_CHECKED:
@@ -122,15 +117,25 @@ class OperationItem extends TreeItem<Object> {
 				addDisabledDependencies(disabledDependencies);
 				break;
 		}
-		addSuccessMessages(result.getSuccessMessages());
+		addSuccessMessages(result);
 	}
 
-	private void addCounterExamples(List<RuleResult.CounterExample> counterExamples) {
-		addMessages(counterExamples, i18n.translate("rulevalidation.table.violations"));
+	private void addCounterExamples(RuleResult result) {
+		if (result.getNumberOfViolations() == -1) {
+			this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.violations.infinitelyMany")));
+		} else {
+			result.getCounterExamples().sort(Comparator.comparingInt(RuleResult.CounterExample::getErrorType));
+			addMessages(result.getCounterExamples(), i18n.translate("rulevalidation.table.violations"));
+		}
 	}
 
-	private void addSuccessMessages(List<RuleResult.SuccessMessage> successMessages) {
-		addMessages(successMessages, i18n.translate("rulevalidation.table.successful"));
+	private void addSuccessMessages(RuleResult result) {
+		if (result.getNumberOfSuccesses() == -1) {
+			this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.successful.infinitelyMany")));
+		} else {
+			result.getSuccessMessages().sort(Comparator.comparingInt(RuleResult.SuccessMessage::getRuleBodyCount));
+			addMessages(result.getSuccessMessages(), i18n.translate("rulevalidation.table.successful"));
+		}
 	}
 
 	private <T> void addMessages(List<T> messages, String displayedParentName) {
