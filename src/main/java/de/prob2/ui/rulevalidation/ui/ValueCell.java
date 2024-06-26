@@ -36,12 +36,10 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		configureEmptyCell();
 		if (item instanceof RuleResult ruleResult)
 			configureForRuleResult(ruleResult);
-		else if (item instanceof RuleResult.CounterExample counterExample) {
-			updateContent(counterExample.getMessage());
-			MenuItem copyItem = new MenuItem(i18n.translate("rulevalidation.table.contextMenu.copyMessage"));
-			copyItem.setOnAction(e -> handleCopyName());
-			setContextMenu(new ContextMenu(copyItem));
-		}
+		else if (item instanceof RuleResult.CounterExample counterExample)
+			updateContentWithContextMenu(counterExample.getMessage());
+		else if (item instanceof RuleResult.SuccessMessage successMessage)
+			updateContentWithContextMenu(successMessage.getMessage());
 		else if (item instanceof Map.Entry<?,?> entry)
 			configureForComputationResult((ComputationStatus) entry.getValue());
 		else if (item instanceof IdentifierNotInitialised notInitialised)
@@ -112,6 +110,13 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		} else {
 			setTooltip(null);
 		}
+	}
+
+	private void updateContentWithContextMenu(String message) {
+		updateContent(message);
+		MenuItem copyItem = new MenuItem(i18n.translate("rulevalidation.table.contextMenu.copyMessage"));
+		copyItem.setOnAction(e -> handleCopyName());
+		setContextMenu(new ContextMenu(copyItem));
 	}
 
 	private void handleCopyName() {

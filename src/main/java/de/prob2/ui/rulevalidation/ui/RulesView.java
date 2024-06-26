@@ -185,7 +185,7 @@ public final class RulesView extends AnchorPane {
 
 		treeTableView.setRowFactory(view -> initTableRow());
 
-		tvNameColumn.setCellFactory(column -> new NameCell());
+		tvNameColumn.setCellFactory(column -> new NameCell(i18n));
 		tvNameColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
 
 		tvValueColumn.setCellFactory(column -> new ValueCell(i18n));
@@ -196,6 +196,8 @@ public final class RulesView extends AnchorPane {
 			} else if (item instanceof ComputationOperation compItem) {
 				return dataModel.getComputationValue(compItem.getName());
 			} else if (item instanceof RuleResult.CounterExample) {
+				return new ReadOnlyObjectWrapper<>(item);
+			} else if (item instanceof RuleResult.SuccessMessage) {
 				return new ReadOnlyObjectWrapper<>(item);
 			} else if (item instanceof String stringItem) {
 				if (dataModel.getRuleValueMap().containsKey(stringItem)) {

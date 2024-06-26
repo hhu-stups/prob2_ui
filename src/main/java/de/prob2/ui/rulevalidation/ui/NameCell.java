@@ -3,6 +3,7 @@ package de.prob2.ui.rulevalidation.ui;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
 import de.prob.model.brules.RuleResult;
+import de.prob2.ui.internal.I18n;
 import javafx.geometry.Pos;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeTableCell;
@@ -14,7 +15,10 @@ import javafx.util.Duration;
  */
 public class NameCell extends TreeTableCell<Object, Object>{
 
-	NameCell() {
+	private final I18n i18n;
+
+	NameCell(I18n i18n) {
+		this.i18n = i18n;
 		setAlignment(Pos.CENTER_LEFT);
 	}
 
@@ -30,14 +34,22 @@ public class NameCell extends TreeTableCell<Object, Object>{
 		else if (item instanceof AbstractOperation abstractOperation)
 			updateContent(abstractOperation.getName());
 		else if (item instanceof RuleResult.CounterExample counterExample)
-			updateContent(counterExample.getErrorType() + "");
+			updateContent(Integer.toString(counterExample.getErrorType()),
+				i18n.translate("rulevalidation.table.violations.errorType", counterExample.getErrorType()));
+		else if (item instanceof RuleResult.SuccessMessage successMessage)
+			updateContent(Integer.toString(successMessage.getRuleBodyCount()),
+				i18n.translate("rulevalidation.table.successful.ruleBody", successMessage.getRuleBodyCount()));
 		setGraphic(null);
 	}
 
 	private void updateContent(String content) {
+		this.updateContent(content, content);
+	}
+
+	private void updateContent(String content, String hover) {
 		setText(content);
-		if (content != null && !content.isEmpty()) {
-			Tooltip tooltip = new Tooltip(content);
+		if (hover != null && !hover.isEmpty()) {
+			Tooltip tooltip = new Tooltip(hover);
 			tooltip.setShowDuration(Duration.INDEFINITE);
 			setTooltip(tooltip);
 		} else {
