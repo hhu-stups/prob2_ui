@@ -124,7 +124,6 @@ class OperationItem extends TreeItem<Object> {
 		if (result.getNumberOfViolations() == -1) {
 			this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.violations.infinitelyMany")));
 		} else {
-			result.getCounterExamples().sort(Comparator.comparingInt(RuleResult.CounterExample::getErrorType));
 			addMessages(result.getCounterExamples(), i18n.translate("rulevalidation.table.violations"));
 		}
 	}
@@ -133,7 +132,6 @@ class OperationItem extends TreeItem<Object> {
 		if (result.getNumberOfSuccesses() == -1) {
 			this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.successful.infinitelyMany")));
 		} else {
-			result.getSuccessMessages().sort(Comparator.comparingInt(RuleResult.SuccessMessage::getRuleBodyCount));
 			addMessages(result.getSuccessMessages(), i18n.translate("rulevalidation.table.successful"));
 		}
 	}
