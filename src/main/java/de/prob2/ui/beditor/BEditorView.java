@@ -319,17 +319,15 @@ public final class BEditorView extends BorderPane {
 			cbUnicode.setVisible(true);
 			cbUnicode.setManaged(true);
 			if (stateSpace == null) {
-				setHint();
-				cbUnicode.setSelected(false);
+				this.machineChoice.getSelectionModel().clearSelection();
+				this.setWaitingForInternalRepresentationHint();
 				return CompletableFuture.completedFuture(null);
 			} else {
-				cbUnicode.setSelected(true);
 				return showInternalRepresentation(stateSpace, machinePath);
 			}
 		} else {
 			cbUnicode.setVisible(false);
 			cbUnicode.setManaged(false);
-			cbUnicode.setSelected(false);
 			setText(machinePath);
 			return CompletableFuture.completedFuture(null);
 		}
@@ -337,8 +335,9 @@ public final class BEditorView extends BorderPane {
 
 	private CompletableFuture<Void> showInternalRepresentation(StateSpace stateSpace, Path machinePath) {
 		this.beditor.setEditable(false);
-		if (stateSpace == null) {
-			this.setHint();
+		if (stateSpace == null || machinePath == null) {
+			this.machineChoice.getSelectionModel().clearSelection();
+			this.setWaitingForInternalRepresentationHint();
 			return CompletableFuture.completedFuture(null);
 		}
 
@@ -445,6 +444,11 @@ public final class BEditorView extends BorderPane {
 
 	private void setHint() {
 		this.setEditorText(i18n.translate("beditor.hint"), null);
+		beditor.setEditable(false);
+	}
+
+	private void setWaitingForInternalRepresentationHint() {
+		this.setEditorText(i18n.translate("beditor.hint.waitingForInternalRepresentation"), null);
 		beditor.setEditable(false);
 	}
 
