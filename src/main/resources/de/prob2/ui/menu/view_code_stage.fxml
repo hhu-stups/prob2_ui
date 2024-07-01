@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.beditor.InternalRepresentationCodeArea?>
 <?import de.prob2.ui.menu.ViewCodeStage?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
@@ -9,8 +10,6 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.Scene?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import de.prob2.ui.internal.ExtendedCodeArea?>
-
 <fx:root type="ViewCodeStage" minWidth="640" minHeight="480" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene>
@@ -18,7 +17,7 @@
 				<center>
 					<VirtualizedScrollPane fx:id="virtualizedScrollPane">
 						<content>
-							<ExtendedCodeArea fx:id="codeTextArea" editable="false" minWidth="320" minHeight="240"/>
+							<InternalRepresentationCodeArea fx:id="codeTextArea" editable="false" minWidth="320" minHeight="240"/>
 						</content>
 					</VirtualizedScrollPane>
 				</center>

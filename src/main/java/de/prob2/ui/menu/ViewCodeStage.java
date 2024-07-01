@@ -14,9 +14,10 @@ import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.CSPModel;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.beditor.InternalRepresentationCodeArea;
 import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -38,7 +39,7 @@ public final class ViewCodeStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ViewCodeStage.class);
 	
 	@FXML 
-	private ExtendedCodeArea codeTextArea;
+	private InternalRepresentationCodeArea codeTextArea;
 	
 	@FXML
 	private CheckBox cbUnicode;
@@ -49,17 +50,21 @@ public final class ViewCodeStage extends Stage {
 	private final StageManager stageManager;
 	
 	private final FileChooserManager fileChooserManager;
+
+	private final I18n i18n;
 	
 	private final CurrentTrace currentTrace;
 
 	private final CurrentProject currentProject;
 	
 	@Inject
-	private ViewCodeStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+	private ViewCodeStage(final StageManager stageManager, final FileChooserManager fileChooserManager, final I18n i18n,
+	                      final CurrentProject currentProject, final CurrentTrace currentTrace) {
 		super();
 		
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
+		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		
@@ -71,17 +76,17 @@ public final class ViewCodeStage extends Stage {
 		this.cbUnicode.selectedProperty().addListener((observable, from, to) -> updateCode(currentTrace.getStateSpace()));
 
 		this.currentProject.currentMachineProperty().addListener((o, from, to) -> {
-			if (to != null) {
-				this.setTitle(to.getName());
-			}
+			this.makeTitle(to);
 		});
-		Machine currentMachine = currentProject.getCurrentMachine();
-		if (currentMachine != null) {
-			this.setTitle(currentMachine.getName());
-		}
+		this.makeTitle(currentProject.getCurrentMachine());
 		
 		this.currentTrace.stateSpaceProperty().addListener((observable, from, to) -> this.updateCode(to));
 		this.updateCode(currentTrace.getStateSpace());
+	}
+
+	private void makeTitle(Machine machine) {
+		if (machine != null)
+			this.setTitle(machine.getName() + " (" + i18n.translate("menu.viewCodeStage.title") + ")");
 	}
 	
 	private void updateCode(StateSpace stateSpace) {

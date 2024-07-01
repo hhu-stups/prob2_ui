@@ -61,7 +61,7 @@ public class FileMenu extends Menu {
 	@FXML
 	private MenuItem extendedStaticAnalysisItem;
 	@FXML
-	private MenuItem viewFormattedCodeItem;
+	private MenuItem showInternalRepresentationItem;
 	@FXML
 	private Menu exportAsMenu;
 	@FXML
@@ -114,7 +114,7 @@ public class FileMenu extends Menu {
 		this.saveProjectItem.disableProperty().bind(currentProject.isNull());
 
 		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B));
-		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.isNull());
+		this.showInternalRepresentationItem.disableProperty().bind(currentTrace.isNull());
 		this.exportAsMenu.disableProperty().bind(currentTrace.isNull());
 		this.saveDocumentationItem.disableProperty().bind(currentProject.isNull());
 
@@ -184,7 +184,7 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	private void handleViewFormattedCode() {
+	private void handleShowInternal() {
 		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
 		stage.show();
 		stage.toFront();

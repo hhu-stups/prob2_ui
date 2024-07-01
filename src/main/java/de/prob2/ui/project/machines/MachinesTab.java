@@ -131,7 +131,9 @@ public final class MachinesTab extends Tab {
 
 		@FXML
 		private void handleShowInternal() {
-			injector.getInstance(ViewCodeStage.class).show();
+			final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
+			stage.show();
+			stage.toFront();
 		}
 
 		private void updatePreferences(final List<Preference> prefs) {
