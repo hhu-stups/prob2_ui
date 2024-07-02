@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -32,6 +33,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -212,15 +214,13 @@ public final class OperationsView extends VBox {
 	private final StageManager stageManager;
 	private final Config config;
 	private final CliTaskExecutor cliExecutor;
+	private final FxThreadExecutor fxExecutor;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final BackgroundUpdater updater;
 	private final AtomicBoolean needsUpdateAfterBusy;
 
 	@Inject
-	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-						   final Injector injector, final I18n i18n, final StatusBar statusBar,
-						   final DisablePropertyController disablePropertyController, final StopActions stopActions,
-						   final Config config, final CliTaskExecutor cliExecutor) {
+	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager, final Injector injector, final I18n i18n, final StatusBar statusBar, final DisablePropertyController disablePropertyController, final StopActions stopActions, final Config config, final CliTaskExecutor cliExecutor, FxThreadExecutor fxExecutor) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
@@ -232,6 +232,7 @@ public final class OperationsView extends VBox {
 		this.stageManager = stageManager;
 		this.config = config;
 		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
 		this.updater = new BackgroundUpdater("OperationsView Updater");
 		this.needsUpdateAfterBusy = new AtomicBoolean(false);
 		stopActions.add(this.updater::shutdownNow);
@@ -548,13 +549,20 @@ public final class OperationsView extends VBox {
 		} else {
 			throw new AssertionError("Unhandled random animation event source: " + event.getSource());
 		}
-		
-		cliExecutor.execute(() -> {
-			final Trace trace = currentTrace.get();
-			if (trace != null) {
-				currentTrace.set(trace.randomAnimation(operationCount));
-			}
-		});
+
+		Trace currentTrace = this.currentTrace.get();
+		if (currentTrace != null) {
+			this.cliExecutor.submit(() -> currentTrace.randomAnimation(operationCount)).whenCompleteAsync((res, exc) -> {
+				if (exc != null) {
+					if (!(exc instanceof CancellationException)) {
+						LOGGER.error("error while randomly animating", exc);
+						this.stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+					}
+				} else if (res != null) {
+					this.currentTrace.set(res);
+				}
+			}, this.fxExecutor);
+		}
 	}
 
 	private OperationsView.SortMode getSortMode() {
