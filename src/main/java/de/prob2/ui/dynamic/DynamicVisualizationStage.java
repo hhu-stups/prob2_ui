@@ -34,6 +34,7 @@ import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
@@ -121,6 +122,7 @@ public final class DynamicVisualizationStage extends Stage {
 	private final BackgroundUpdater updater;
 	private final ObservableList<ErrorItem> errors = FXCollections.observableArrayList();
 
+	private DynamicTreeItem lastSelected;
 	private boolean ignoreCommandItemUpdates;
 	private boolean ignoreFormulaUpdates;
 
@@ -282,8 +284,10 @@ public final class DynamicVisualizationStage extends Stage {
 		}
 	}
 
-	private List<DynamicCommandItem> getCommandsWithTrace(Trace trace) {
-		if (trace == null) {
+	private List<DynamicCommandItem> getCommands() {
+		Trace trace = this.currentTrace.get();
+		Machine machine = this.currentProject.getCurrentMachine();
+		if (trace == null || machine == null) {
 			return List.of();
 		}
 
@@ -417,8 +421,6 @@ public final class DynamicVisualizationStage extends Stage {
 	public void refresh() {
 		this.updatePlaceholderLabel();
 
-		List<DynamicCommandItem> commandItems = this.getCommandsWithTrace(this.currentTrace.get());
-
 		DynamicTreeItem currentlySelected;
 		{
 			TreeItem<DynamicTreeItem> currentlySelectedTreeItem = this.tvCommandItems.getSelectionModel().getSelectedItem();
@@ -428,6 +430,13 @@ public final class DynamicVisualizationStage extends Stage {
 				currentlySelected = null;
 			}
 		}
+		if (currentlySelected != null) {
+			this.lastSelected = currentlySelected;
+		} else if (this.lastSelected != null) {
+			currentlySelected = this.lastSelected;
+		}
+
+		List<DynamicCommandItem> commandItems = this.getCommands();
 
 		TreeItem<DynamicTreeItem> nextSelected = null;
 		List<TreeItem<DynamicTreeItem>> result = new ArrayList<>();
@@ -451,14 +460,14 @@ public final class DynamicVisualizationStage extends Stage {
 						return categoryRoot;
 					});
 					root.getChildren().add(treeItem);
-					if (nextSelected == null && root.getValue().equals(currentlySelected)) {
+					if (nextSelected == null && currentlySelected != null && root.getValue().equals(currentlySelected)) {
 						nextSelected = treeItem;
 					}
 				} else {
 					withoutCategory.add(treeItem);
 				}
 
-				if (nextSelected == null && treeItem.getValue().equals(currentlySelected)) {
+				if (nextSelected == null && currentlySelected != null && treeItem.getValue().equals(currentlySelected)) {
 					nextSelected = treeItem;
 				}
 			}
