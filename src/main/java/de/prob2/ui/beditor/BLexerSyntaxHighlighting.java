@@ -120,6 +120,9 @@ import de.be4.classicalb.core.parser.node.TModel;
 import de.be4.classicalb.core.parser.node.TMultilineStringContent;
 import de.be4.classicalb.core.parser.node.TMultilineStringEnd;
 import de.be4.classicalb.core.parser.node.TMultilineStringStart;
+import de.be4.classicalb.core.parser.node.TMultilineTemplateContent;
+import de.be4.classicalb.core.parser.node.TMultilineTemplateEnd;
+import de.be4.classicalb.core.parser.node.TMultilineTemplateStart;
 import de.be4.classicalb.core.parser.node.TNat;
 import de.be4.classicalb.core.parser.node.TNat1;
 import de.be4.classicalb.core.parser.node.TNatural;
@@ -294,7 +297,8 @@ public final class BLexerSyntaxHighlighting {
 			TPerm.class, TSeq.class, TSeq1.class, TIseq.class, TIseq1.class,
 			TInteger.class, TInt.class, TString.class, TReal.class, TFloat.class);
 		addBTokens("editor_string", TStringLiteral.class,
-			TMultilineStringStart.class, TMultilineStringContent.class, TMultilineStringEnd.class);
+			TMultilineStringStart.class, TMultilineStringContent.class, TMultilineStringEnd.class,
+			TMultilineTemplateStart.class, TMultilineTemplateContent.class, TMultilineTemplateEnd.class);
 		addBTokens("editor_unsupported", TUnrecognisedPragma.class);
 		addBTokens("editor_ctrlkeyword", TLet.class, TBe.class,
 			TVar.class, TIn.class, TAny.class, TWhile.class,
