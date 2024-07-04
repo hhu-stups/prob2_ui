@@ -339,7 +339,6 @@ public final class BLexerSyntaxHighlighting {
 		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
 		ParseOptions parseOptions = new ParseOptions();
 		parseOptions.setIgnoreCheckingValidCombinations(true);
-		parseOptions.setIgnoreUselessTokens(false); // the highlighter currently needs all tokens
 		lexer.setParseOptions(parseOptions);
 		var spansBuilder = new StyleSpansBuilder<Collection<String>>();
 		try {
