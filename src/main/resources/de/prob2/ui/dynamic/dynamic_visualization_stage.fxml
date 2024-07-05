@@ -31,38 +31,36 @@
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<BorderPane>
-				<top>
-					<ToolBar>
-						<Button fx:id="reloadButton" onAction="#reload">
-							<graphic>
-								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize * 2}"/>
-							</graphic>
-							<tooltip>
-								<Tooltip text="%dynamic.visualization.button.reload"/>
-							</tooltip>
-						</Button>
-						<Button fx:id="cancelButton" onAction="#cancel">
-							<graphic>
-								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
-							</graphic>
-							<tooltip>
-								<Tooltip text="%common.buttons.cancel"/>
-							</tooltip>
-						</Button>
-						<Button fx:id="editPreferencesButton" onAction="#editPreferences">
-							<graphic>
-								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="WRENCH" bindableFontSize="${fontSize.fontSize * 2}"/>
-							</graphic>
-							<tooltip>
-								<Tooltip text="%dynamic.editPreferences"/>
-							</tooltip>
-						</Button>
-						<HelpButton fx:id="helpButton"/>
-					</ToolBar>
-				</top>
 				<center>
 					<SplitPane dividerPositions="0.35">
 						<VBox>
+							<ToolBar>
+								<Button fx:id="reloadButton" onAction="#reload">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+									<tooltip>
+										<Tooltip text="%dynamic.visualization.button.reload"/>
+									</tooltip>
+								</Button>
+								<Button fx:id="cancelButton" onAction="#cancel">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+									<tooltip>
+										<Tooltip text="%common.buttons.cancel"/>
+									</tooltip>
+								</Button>
+								<Button fx:id="editPreferencesButton" onAction="#editPreferences">
+									<graphic>
+										<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="WRENCH" bindableFontSize="${fontSize.fontSize * 2}"/>
+									</graphic>
+									<tooltip>
+										<Tooltip text="%dynamic.editPreferences"/>
+									</tooltip>
+								</Button>
+								<HelpButton fx:id="helpButton"/>
+							</ToolBar>
 							<TreeView fx:id="tvCommandItems" showRoot="false" VBox.vgrow="ALWAYS">
 								<TreeItem fx:id="tvCommandItemsRoot" expanded="true"/>
 							</TreeView>
