@@ -494,6 +494,7 @@ public final class DynamicVisualizationStage extends Stage {
 		VisualizationFormulaTask previouslySelectedFormula = this.tvFormula.getSelectionModel().getSelectedItem();
 		this.tvFormula.getSelectionModel().clearSelection();
 		this.tvFormula.itemsProperty().unbind();
+		this.tvFormula.visibleProperty().unbind();
 
 		if (to == null || this.currentProject.getCurrentMachine() == null || this.currentTrace.get() == null || !this.isShowing()) {
 			this.lbDescription.setText("");
@@ -512,10 +513,11 @@ public final class DynamicVisualizationStage extends Stage {
 
 		boolean needFormula = to.getArity() > 0;
 		this.enterFormulaBox.setVisible(needFormula);
-		this.tvFormula.setVisible(needFormula);
 
+		var visualizationTasks = this.currentProject.getCurrentMachine().getVisualizationFormulaTasksByCommand(to.getCommand());
+		this.tvFormula.visibleProperty().bind(Bindings.isNotEmpty(visualizationTasks));
 		// this should not cause any formula selection updates
-		this.tvFormula.setItems(this.currentProject.getCurrentMachine().getVisualizationFormulaTasksByCommand(to.getCommand()));
+		this.tvFormula.setItems(visualizationTasks);
 
 		String previousFormula = null;
 		boolean restoreVisualization = false;
