@@ -292,8 +292,6 @@ public final class BEditorView extends BorderPane {
 		loadText(machinePath).whenComplete((res, exc) -> {
 			if (exc == null) {
 				Platform.runLater(() -> {
-					beditor.clearHistory();
-
 					currentProject.getCurrentMachine().getCachedEditorState().setSelectedMachine(machinePath);
 
 					beditor.requestFocus();
@@ -472,7 +470,11 @@ public final class BEditorView extends BorderPane {
 			}
 
 			Stopwatch sw = Stopwatch.createStarted();
+			// reset state
+			beditor.clearHistory();
+			beditor.setSearchResult(null);
 			beditor.cancelHighlighting();
+			// load new text
 			this.setPath(path);
 			beditor.replaceText(text);
 			beditor.moveTo(0);
