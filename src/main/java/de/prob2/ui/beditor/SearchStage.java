@@ -94,6 +94,8 @@ public final class SearchStage extends Stage {
 		this.findButton.disableProperty().bind(this.tfSearch.textProperty().isEmpty());
 
 		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> handleFind()));
+
+		this.setOnCloseRequest(e -> this.handleClose());
 	}
 
 	@FXML
