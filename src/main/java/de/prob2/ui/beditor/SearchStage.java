@@ -78,11 +78,12 @@ public final class SearchStage extends Stage {
 			));
 		}
 
-		if (this.isShowing()) {
-			this.requestFocus();
-		} else {
+		if (!this.isShowing()) {
 			this.show();
 		}
+
+		this.requestFocus();
+		this.tfSearch.requestFocus();
 	}
 
 	@FXML
