@@ -69,8 +69,6 @@ public final class CBCInvariantPreservationCheckingItem extends SymbolicChecking
 	
 	@Override
 	public void execute(ExecutionContext context) {
-		this.getCounterExamples().clear();
-		
 		ArrayList<String> eventNames;
 		if (getOperationName() == null) {
 			// Check all operations/events
@@ -91,7 +89,6 @@ public final class CBCInvariantPreservationCheckingItem extends SymbolicChecking
 				counterExamples.add(violation.getTrace(i, context.stateSpace()));
 			}
 			this.setResult(new TraceResult(CheckingStatus.FAIL, counterExamples, "verifications.symbolicModelChecking.result.counterExample"));
-			this.getCounterExamples().setAll(counterExamples);
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
 			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));
 		} else if (result instanceof CheckError) {

@@ -21,9 +21,11 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.ICheckingResult;
+import de.prob2.ui.verifications.TraceResult;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -46,25 +48,29 @@ public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckin
 			showCounterExampleItem.setDisable(true);
 			contextMenu.getItems().add(showCounterExampleItem);
 
-			this.itemProperty().addListener((observable, from, to) -> {
-				final InvalidationListener updateCounterExamplesListener = o -> showCounterExamples(to, showCounterExampleItem);
-
-				if (from != null) {
-					from.counterExamplesProperty().removeListener(updateCounterExamplesListener);
+			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
+				showMessage.setDisable(to == null);
+				showCounterExampleItem.getItems().clear();
+				if (to instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
+					showCounterExampleItem.setDisable(false);
+					showCounterExamples(traceResult.getTraces(), showCounterExampleItem);
+				} else {
+					showCounterExampleItem.setDisable(true);
 				}
+			};
 
-				if(to != null) {
-					showMessage.disableProperty().bind(to.resultProperty().isNull());
-					showCounterExampleItem.disableProperty().bind(to.counterExamplesProperty().emptyProperty());
-					to.counterExamplesProperty().addListener(updateCounterExamplesListener);
-					updateCounterExamplesListener.invalidated(null);
+			this.itemProperty().addListener((observable, from, to) -> {
+				if (from != null) {
+					from.resultProperty().removeListener(resultListener);
+				}
+				if (to != null) {
+					to.resultProperty().addListener(resultListener);
+					resultListener.changed(null, null, to.getResult());
 				}
 			});
 		}
 
-		private void showCounterExamples(SymbolicCheckingFormulaItem item, Menu counterExampleItem) {
-			counterExampleItem.getItems().clear();
-			List<Trace> counterExamples = item.getCounterExamples();
+		private void showCounterExamples(List<Trace> counterExamples, Menu counterExampleItem) {
 			for(int i = 0; i < counterExamples.size(); i++) {
 				MenuItem traceItem = new MenuItem(i18n.translate("verifications.symbolicchecking.view.contextMenu.showCounterExample.counterExample", i + 1));
 				final int index = i;
@@ -120,9 +126,8 @@ public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckin
 	@Override
 	protected CompletableFuture<?> executeItemImpl(SymbolicCheckingFormulaItem item, CheckingExecutors executors, ExecutionContext context) {
 		return super.executeItemImpl(item, executors, context).thenApply(res -> {
-			List<Trace> counterExamples = item.getCounterExamples();
-			if (!counterExamples.isEmpty()) {
-				currentTrace.set(counterExamples.get(0));
+			if (item.getResult() instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
+				currentTrace.set(traceResult.getTrace());
 			}
 			return res;
 		});

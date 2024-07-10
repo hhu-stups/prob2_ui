@@ -2,19 +2,12 @@ package de.prob2.ui.verifications.symbolicchecking;
 
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
-import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.ICliTask;
-
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 @JsonPropertyOrder({
 	"id",
@@ -24,9 +17,6 @@ public abstract class SymbolicCheckingFormulaItem extends AbstractCheckableItem 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 
-	@JsonIgnore
-	private final ListProperty<Trace> counterExamples = new SimpleListProperty<>(this, "counterExamples", FXCollections.observableArrayList());
-
 	protected SymbolicCheckingFormulaItem(String id) {
 		super();
 		this.id = id;
@@ -35,19 +25,6 @@ public abstract class SymbolicCheckingFormulaItem extends AbstractCheckableItem 
 	@Override
 	public String getId() {
 		return this.id;
-	}
-
-	public ObservableList<Trace> getCounterExamples() {
-		return counterExamples.get();
-	}
-
-	public ListProperty<Trace> counterExamplesProperty() {
-		return counterExamples;
-	}
-
-	@Override
-	public void resetAnimatorDependentState() {
-		this.counterExamples.clear();
 	}
 
 	@Override

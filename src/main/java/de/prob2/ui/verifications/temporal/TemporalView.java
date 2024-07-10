@@ -20,6 +20,8 @@ import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.ICheckingResult;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
@@ -46,7 +48,10 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			executeMenuItem.setText(i18n.translate("verifications.temporal.temporalView.contextMenu.check"));
 			
 			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showCounterExample"));
-			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
+			showCounterExampleItem.setOnAction(e -> {
+				TemporalFormulaItem task = itemsTable.getSelectionModel().getSelectedItem();
+				currentTrace.set(((TraceResult)task.getResult()).getTrace());
+			});
 			showCounterExampleItem.setDisable(true);
 			contextMenu.getItems().add(showCounterExampleItem);
 			
@@ -54,10 +59,18 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			showMessage.setOnAction(e -> this.getItem().getResult().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
 			
+			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
+				showMessage.setDisable(to == null);
+				showCounterExampleItem.setDisable(!(to instanceof TraceResult traceResult) || traceResult.getTraces().isEmpty());
+			};
+			
 			this.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					showMessage.disableProperty().bind(to.resultProperty().isNull());
-					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
+				if (from != null) {
+					from.resultProperty().removeListener(resultListener);
+				}
+				if (to != null) {
+					to.resultProperty().addListener(resultListener);
+					resultListener.changed(null, null, to.getResult());
 				}
 			});
 		}
@@ -193,8 +206,8 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	@Override
 	protected CompletableFuture<?> executeItemImpl(TemporalFormulaItem item, CheckingExecutors executors, ExecutionContext context) {
 		return super.executeItemImpl(item, executors, context).thenApply(res -> {
-			if (item.getCounterExample() != null) {
-				currentTrace.set(item.getCounterExample());
+			if (item.getResult() instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
+				currentTrace.set(traceResult.getTrace());
 			}
 			return res;
 		});

@@ -23,8 +23,6 @@ abstract class CBCAssertionCheckingItem extends SymbolicCheckingFormulaItem {
 	
 	@Override
 	public void execute(ExecutionContext context) {
-		this.getCounterExamples().clear();
-		
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(this.getAssertionCheckingType(), context.stateSpace());
 		try {
 			context.stateSpace().execute(cmd);
@@ -41,9 +39,7 @@ abstract class CBCAssertionCheckingItem extends SymbolicCheckingFormulaItem {
 				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.cbc.assertionChecking.result.noCounterExampleFound"));
 				break;
 			case COUNTER_EXAMPLE:
-				Trace trace = cmd.getTrace(context.stateSpace());
-				this.setResult(new TraceResult(CheckingStatus.FAIL, trace, "verifications.cbc.assertionChecking.result.counterExampleFound"));
-				this.getCounterExamples().add(trace);
+				this.setResult(new TraceResult(CheckingStatus.FAIL, cmd.getTrace(context.stateSpace()), "verifications.cbc.assertionChecking.result.counterExampleFound"));
 				break;
 			case INTERRUPTED:
 				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "verifications.cbc.assertionChecking.result.interrupted"));

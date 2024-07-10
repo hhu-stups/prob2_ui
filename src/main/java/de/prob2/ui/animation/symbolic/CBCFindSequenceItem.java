@@ -12,7 +12,6 @@ import com.google.common.base.MoreObjects;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.ConstraintBasedSequenceCheckCommand;
 import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -65,8 +64,6 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 	
 	@Override
 	public void execute(ExecutionContext context) {
-		this.setExample(null);
-		
 		ConstraintBasedSequenceCheckCommand cmd = new ConstraintBasedSequenceCheckCommand(context.stateSpace(), getOperationNames(), new ClassicalB("1=1"));
 		try {
 			context.stateSpace().execute(cmd);
@@ -78,9 +75,7 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 		
 		switch (cmd.getResult()) {
 			case PATH_FOUND:
-				Trace trace = cmd.getTrace();
-				this.setResult(new TraceResult(CheckingStatus.SUCCESS, trace, "animation.symbolic.sequence.result.found"));
-				this.setExample(trace);
+				this.setResult(new TraceResult(CheckingStatus.SUCCESS, cmd.getTrace(), "animation.symbolic.sequence.result.found"));
 				break;
 			case NO_PATH_FOUND:
 				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.sequence.result.notFound"));

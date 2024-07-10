@@ -8,7 +8,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.FormalismType;
-import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -20,8 +19,11 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.ICheckingResult;
+import de.prob2.ui.verifications.TraceResult;
 
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -40,13 +42,24 @@ public final class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimat
 			contextMenu.getItems().add(showMessage);
 
 			MenuItem showStateItem = new MenuItem(i18n.translate("animation.symbolic.view.contextMenu.showFoundTrace"));
-			showStateItem.setOnAction(e -> currentTrace.set(this.getItem().getExample()));
+			showStateItem.setOnAction(e -> {
+				SymbolicAnimationItem task = itemsTable.getSelectionModel().getSelectedItem();
+				currentTrace.set(((TraceResult)task.getResult()).getTrace());
+			});
 			contextMenu.getItems().add(showStateItem);
 
+			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
+				showMessage.setDisable(to == null);
+				showStateItem.setDisable(!(to instanceof TraceResult traceResult) || traceResult.getTraces().isEmpty());
+			};
+
 			this.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					showMessage.disableProperty().bind(to.resultProperty().isNull());
-					showStateItem.disableProperty().bind(to.exampleProperty().isNull());
+				if (from != null) {
+					from.resultProperty().removeListener(resultListener);
+				}
+				if (to != null) {
+					to.resultProperty().addListener(resultListener);
+					resultListener.changed(null, null, to.getResult());
 				}
 			});
 		}
@@ -96,9 +109,8 @@ public final class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimat
 	@Override
 	protected CompletableFuture<?> executeItemImpl(SymbolicAnimationItem item, CheckingExecutors executors, ExecutionContext context) {
 		return super.executeItemImpl(item, executors, context).thenApply(res -> {
-			Trace example = item.getExample();
-			if (example != null) {
-				currentTrace.set(example);
+			if (item.getResult() instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
+				currentTrace.set(traceResult.getTrace());
 			}
 			return res;
 		});

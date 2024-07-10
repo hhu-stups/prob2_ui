@@ -10,7 +10,6 @@ import com.google.common.base.MoreObjects;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.ClassicalB;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -63,8 +62,6 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 	
 	@Override
 	public void execute(ExecutionContext context) {
-		this.setExample(null);
-		
 		FindStateCommand cmd = new FindStateCommand(context.stateSpace(), new ClassicalB(getPredicate()), true);
 		try {
 			context.stateSpace().execute(cmd);
@@ -76,9 +73,7 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 		
 		switch (cmd.getResult()) {
 			case STATE_FOUND:
-				Trace trace = cmd.getTrace(context.stateSpace());
-				this.setResult(new TraceResult(CheckingStatus.SUCCESS, trace, "animation.symbolic.findValidState.result.found"));
-				this.setExample(trace);
+				this.setResult(new TraceResult(CheckingStatus.SUCCESS, cmd.getTrace(context.stateSpace()), "animation.symbolic.findValidState.result.found"));
 				break;
 			case NO_STATE_FOUND:
 				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.findValidState.result.notFound"));

@@ -69,7 +69,6 @@ public final class CTLFormulaItem extends TemporalFormulaItem {
 			}
 		} else if (result instanceof CTLCounterExample counterExample) {
 			Trace trace = counterExample.getTrace();
-			this.setCounterExample(trace);
 			if (this.getExpectedResult()) {
 				this.setResult(new TraceResult(CheckingStatus.FAIL, trace, "verifications.temporal.result.counterExampleFound.message"));
 			} else {

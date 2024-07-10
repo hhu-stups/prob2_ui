@@ -69,7 +69,6 @@ public final class LTLFormulaItem extends TemporalFormulaItem {
 			}
 		} else if (result instanceof LTLCounterExample counterExample) {
 			Trace trace = counterExample.getTraceToLoopEntry();
-			this.setCounterExample(trace);
 			if (this.getExpectedResult()) {
 				this.setResult(new TraceResult(CheckingStatus.FAIL, trace, "verifications.temporal.result.counterExampleFound.message"));
 			} else {

@@ -4,7 +4,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -17,11 +16,7 @@ import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
-
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleObjectProperty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,9 +49,6 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String startStateExpression;
 	private final boolean expectedResult;
-
-	@JsonIgnore
-	private final ObjectProperty<Trace> counterExample = new SimpleObjectProperty<>(this, "counterExample", null);
 
 	protected TemporalFormulaItem(String id, String code, String description, int stateLimit, StartState startState, String startStateExpression, boolean expectedResult) {
 		super();
@@ -114,24 +106,10 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 		}
 	}
 
-	public void setCounterExample(Trace counterExample) {
-		this.counterExample.set(counterExample);
-	}
-
-	public Trace getCounterExample() {
-		return counterExample.get();
-	}
-
-	public ObjectProperty<Trace> counterExampleProperty() {
-		return counterExample;
-	}
-
 	protected abstract void execute(ExecutionContext context, State startState);
 
 	@Override
 	public CompletableFuture<?> execute(CheckingExecutors executors, ExecutionContext context) {
-		this.setCounterExample(null);
-
 		CompletableFuture<?> future = switch (this.getStartState()) {
 			case ALL_INITIAL_STATES -> executors.cliExecutor().submit(() -> this.execute(context, null));
 			case CURRENT_STATE -> {
@@ -171,11 +149,6 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 				this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "common.result.message", exc.toString()));
 			}
 		});
-	}
-
-	@Override
-	public void resetAnimatorDependentState() {
-		this.setCounterExample(null);
 	}
 
 	@Override

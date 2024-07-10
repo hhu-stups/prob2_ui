@@ -22,11 +22,13 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.CheckingExecutors;
+import de.prob2.ui.verifications.ICheckingResult;
+import de.prob2.ui.verifications.TraceResult;
 
-import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -71,20 +73,27 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 			});
 			contextMenu.getItems().add(saveTraces);
 
-			this.itemProperty().addListener((observable, from, to) -> {
-				final InvalidationListener updateExamplesListener = o -> showExamples(to, showStateItem);
-				
-				if (from != null) {
-					from.examplesProperty().removeListener(updateExamplesListener);
+			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
+				showMessage.setDisable(to == null);
+				showStateItem.getItems().clear();
+				if (to instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
+					showStateItem.setDisable(false);
+					showExamples(traceResult.getTraces(), showStateItem);
+					saveTraces.setDisable(false);
+				} else {
+					showStateItem.setDisable(true);
+					saveTraces.setDisable(true);
 				}
-				
+			};
+
+			this.itemProperty().addListener((observable, from, to) -> {
+				if (from != null) {
+					from.resultProperty().removeListener(resultListener);
+				}
 				if (to != null) {
-					showMessage.disableProperty().bind(to.resultProperty().isNull());
-					showStateItem.disableProperty().bind(to.examplesProperty().emptyProperty());
-					to.examplesProperty().addListener(updateExamplesListener);
-					updateExamplesListener.invalidated(null);
+					to.resultProperty().addListener(resultListener);
+					resultListener.changed(null, null, to.getResult());
 					showDetails.disableProperty().bind(to.generatorResultProperty().isNull());
-					saveTraces.disableProperty().bind(to.examplesProperty().emptyProperty());
 				}
 			});
 
@@ -96,9 +105,7 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 			stage.toFront();
 		}
 
-		private void showExamples(TestCaseGenerationItem item, Menu exampleItem) {
-			exampleItem.getItems().clear();
-			List<Trace> examples = item.getExamples();
+		private void showExamples(List<Trace> examples, Menu exampleItem) {
 			for (int i = 0; i < examples.size(); i++) {
 				MenuItem traceItem = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showExample", i + 1));
 				final int index = i;

@@ -70,8 +70,6 @@ public final class CBCDeadlockFreedomCheckingItem extends SymbolicCheckingFormul
 	
 	@Override
 	public void execute(ExecutionContext context) {
-		this.getCounterExamples().clear();
-		
 		ClassicalB parsedPredicate;
 		try {
 			parsedPredicate = new ClassicalB(this.getPredicate());
@@ -85,9 +83,7 @@ public final class CBCDeadlockFreedomCheckingItem extends SymbolicCheckingFormul
 		if (result instanceof ModelCheckOk) {
 			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicModelChecking.result.success"));
 		} else if (result instanceof CBCDeadlockFound deadlock) {
-			Trace trace = deadlock.getTrace(context.stateSpace());
-			this.setResult(new TraceResult(CheckingStatus.FAIL, trace, "verifications.symbolicModelChecking.result.counterExample"));
-			this.getCounterExamples().setAll(trace);
+			this.setResult(new TraceResult(CheckingStatus.FAIL, deadlock.getTrace(context.stateSpace()), "verifications.symbolicModelChecking.result.counterExample"));
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
 			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));
 		} else if (result instanceof CheckError) {

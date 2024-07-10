@@ -19,15 +19,10 @@ import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICliTask;
-import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.verifications.TraceResult;
 
-import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 
 @JsonPropertyOrder({
 	"id",
@@ -42,9 +37,6 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 
 	@JsonIgnore
 	private final ObjectProperty<TestCaseGeneratorResult> generatorResult = new SimpleObjectProperty<>(this, "generatorResult", null);
-
-	@JsonIgnore
-	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 
 	protected TestCaseGenerationItem(final String id, final int maxDepth) {
 		super();
@@ -81,21 +73,11 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 		this.generatorResultProperty().set(generatorResult);
 	}
 
-	public ListProperty<Trace> examplesProperty() {
-		return examples;
-	}
-
-	public ObservableList<Trace> getExamples() {
-		return examples.get();
-	}
-
 	@JsonIgnore
 	public abstract String getConfigurationDescription();
 
 	@Override
 	public void execute(final ExecutionContext context) {
-		this.getExamples().clear();
-
 		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = new ConstraintBasedTestCaseGenerator(context.stateSpace(), this.getTestCaseGeneratorSettings(), new ArrayList<>());
 		TestCaseGeneratorResult res = cbTestCaseGenerator.generateTestCases();
 		this.setGeneratorResult(res);
@@ -116,13 +98,11 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 		} else {
 			this.setResult(new TraceResult(CheckingStatus.SUCCESS, traces, "animation.testcase.result.found"));
 		}
-		this.getExamples().addAll(traces);
 	}
 
 	@Override
 	public void resetAnimatorDependentState() {
 		this.setGeneratorResult(null);
-		this.examples.clear();
 	}
 
 	@Override
