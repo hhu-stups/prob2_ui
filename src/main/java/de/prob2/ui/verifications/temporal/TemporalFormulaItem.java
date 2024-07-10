@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 	"expectedResult",
 	"selected",
 })
-public abstract class TemporalFormulaItem extends AbstractCheckableItem implements ITraceTask {
+public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 	public enum StartState {
 		ALL_INITIAL_STATES,
 		CURRENT_STATE,
@@ -124,11 +124,6 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem implemen
 
 	public ObjectProperty<Trace> counterExampleProperty() {
 		return counterExample;
-	}
-
-	@Override
-	public Trace getTrace() {
-		return this.getCounterExample();
 	}
 
 	protected abstract void execute(ExecutionContext context, State startState);

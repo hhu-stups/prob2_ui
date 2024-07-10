@@ -4,13 +4,15 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import de.prob.statespace.Trace;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public abstract class AbstractCheckableItem implements ISelectableTask {
+public abstract class AbstractCheckableItem implements ISelectableTask, ITraceTask {
 	private final BooleanProperty selected;
 	@JsonIgnore
 	final ObjectProperty<ICheckingResult> result = new SimpleObjectProperty<>(this, "result", null);
@@ -60,6 +62,15 @@ public abstract class AbstractCheckableItem implements ISelectableTask {
 	@Override
 	public CheckingStatus getStatus() {
 		return this.statusProperty().get();
+	}
+
+	@Override
+	public Trace getTrace() {
+		if (this.getResult() instanceof TraceResult traceResult) {
+			return traceResult.getTrace();
+		} else {
+			return null;
+		}
 	}
 
 	@Override

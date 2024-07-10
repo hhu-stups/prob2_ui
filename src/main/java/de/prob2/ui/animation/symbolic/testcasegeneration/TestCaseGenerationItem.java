@@ -34,7 +34,7 @@ import javafx.collections.ObservableList;
 	"maxDepth",
 	"selected",
 })
-public abstract class TestCaseGenerationItem extends AbstractCheckableItem implements ICliTask, ITraceTask {
+public abstract class TestCaseGenerationItem extends AbstractCheckableItem implements ICliTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 
@@ -87,11 +87,6 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 
 	public ObservableList<Trace> getExamples() {
 		return examples.get();
-	}
-
-	@Override
-	public Trace getTrace() {
-		return this.getExamples().isEmpty() ? null : this.getExamples().get(0);
 	}
 
 	@JsonIgnore
