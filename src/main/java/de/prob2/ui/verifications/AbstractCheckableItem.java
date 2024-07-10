@@ -63,6 +63,13 @@ public abstract class AbstractCheckableItem implements ISelectableTask {
 	}
 
 	@Override
+	public void resetAnimatorDependentState() {
+		if (this.getResult() != null) {
+			this.setResult(this.getResult().withoutAnimatorDependentState());
+		}
+	}
+
+	@Override
 	public void reset() {
 		this.setResult(null);
 		this.resetAnimatorDependentState();

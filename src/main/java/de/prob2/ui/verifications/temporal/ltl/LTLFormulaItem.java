@@ -17,11 +17,13 @@ import de.prob.check.LTLNotYetFinished;
 import de.prob.check.LTLOk;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ErrorsResult;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaParser;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
@@ -59,21 +61,19 @@ public final class LTLFormulaItem extends TemporalFormulaItem {
 	private void handleFormulaResult(IModelCheckingResult result) {
 		assert !(result instanceof LTLError);
 		
-		if (result instanceof LTLCounterExample) {
-			this.setCounterExample(((LTLCounterExample)result).getTraceToLoopEntry());
-		}
-		
 		if (result instanceof LTLOk) {
 			if (this.getExpectedResult()) {
 				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.temporal.result.succeeded.message"));
 			} else {
 				this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.temporal.result.counterExampleFound.message"));
 			}
-		} else if (result instanceof LTLCounterExample) {
+		} else if (result instanceof LTLCounterExample counterExample) {
+			Trace trace = counterExample.getTraceToLoopEntry();
+			this.setCounterExample(trace);
 			if (this.getExpectedResult()) {
-				this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.temporal.result.counterExampleFound.message"));
+				this.setResult(new TraceResult(CheckingStatus.FAIL, trace, "verifications.temporal.result.counterExampleFound.message"));
 			} else {
-				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.temporal.result.succeeded.example.message"));
+				this.setResult(new TraceResult(CheckingStatus.SUCCESS, trace, "verifications.temporal.result.succeeded.example.message"));
 			}
 		} else if (result instanceof LTLNotYetFinished || result instanceof CheckInterrupted) {
 			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));

@@ -21,6 +21,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -84,12 +85,12 @@ public final class CBCInvariantPreservationCheckingItem extends SymbolicChecking
 		if (result instanceof ModelCheckOk) {
 			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicModelChecking.result.success"));
 		} else if (result instanceof CBCInvariantViolationFound violation) {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicModelChecking.result.counterExample"));
 			List<Trace> counterExamples = new ArrayList<>();
 			int size = violation.getCounterexamples().size();
 			for (int i = 0; i < size; i++) {
 				counterExamples.add(violation.getTrace(i, context.stateSpace()));
 			}
+			this.setResult(new TraceResult(CheckingStatus.FAIL, counterExamples, "verifications.symbolicModelChecking.result.counterExample"));
 			this.getCounterExamples().setAll(counterExamples);
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
 			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));

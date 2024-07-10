@@ -2,9 +2,11 @@ package de.prob2.ui.verifications.cbc;
 
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
+import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
 import org.slf4j.Logger;
@@ -39,8 +41,9 @@ abstract class CBCAssertionCheckingItem extends SymbolicCheckingFormulaItem {
 				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.cbc.assertionChecking.result.noCounterExampleFound"));
 				break;
 			case COUNTER_EXAMPLE:
-				this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.cbc.assertionChecking.result.counterExampleFound"));
-				this.getCounterExamples().add(cmd.getTrace(context.stateSpace()));
+				Trace trace = cmd.getTrace(context.stateSpace());
+				this.setResult(new TraceResult(CheckingStatus.FAIL, trace, "verifications.cbc.assertionChecking.result.counterExampleFound"));
+				this.getCounterExamples().add(trace);
 				break;
 			case INTERRUPTED:
 				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "verifications.cbc.assertionChecking.result.interrupted"));

@@ -10,10 +10,12 @@ import com.google.common.base.MoreObjects;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.FindStateCommand;
 import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
@@ -74,8 +76,9 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 		
 		switch (cmd.getResult()) {
 			case STATE_FOUND:
-				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "animation.symbolic.findValidState.result.found"));
-				this.setExample(cmd.getTrace(context.stateSpace()));
+				Trace trace = cmd.getTrace(context.stateSpace());
+				this.setResult(new TraceResult(CheckingStatus.SUCCESS, trace, "animation.symbolic.findValidState.result.found"));
+				this.setExample(trace);
 				break;
 			case NO_STATE_FOUND:
 				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.findValidState.result.notFound"));

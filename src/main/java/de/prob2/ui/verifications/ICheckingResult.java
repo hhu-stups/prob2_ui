@@ -11,6 +11,10 @@ public interface ICheckingResult {
 	String getMessageBundleKey();
 	Object[] getMessageParams();
 	
+	default ICheckingResult withoutAnimatorDependentState() {
+		return this;
+	}
+	
 	default void showAlert(final StageManager stageManager, final I18n i18n) {
 		Alert alert = stageManager.makeAlert(
 			this.getStatus().equals(CheckingStatus.SUCCESS) ? Alert.AlertType.INFORMATION : Alert.AlertType.ERROR,

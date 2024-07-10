@@ -16,10 +16,12 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.exception.ProBError;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -83,8 +85,9 @@ public final class CBCDeadlockFreedomCheckingItem extends SymbolicCheckingFormul
 		if (result instanceof ModelCheckOk) {
 			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicModelChecking.result.success"));
 		} else if (result instanceof CBCDeadlockFound deadlock) {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicModelChecking.result.counterExample"));
-			this.getCounterExamples().setAll(deadlock.getTrace(context.stateSpace()));
+			Trace trace = deadlock.getTrace(context.stateSpace());
+			this.setResult(new TraceResult(CheckingStatus.FAIL, trace, "verifications.symbolicModelChecking.result.counterExample"));
+			this.getCounterExamples().setAll(trace);
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
 			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));
 		} else if (result instanceof CheckError) {

@@ -20,6 +20,7 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICliTask;
 import de.prob2.ui.verifications.ITraceTask;
+import de.prob2.ui.verifications.TraceResult;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -116,9 +117,9 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 		} else if (traces.isEmpty()) {
 			this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.testcase.result.notFound"));
 		} else if (!res.getUncoveredTargets().isEmpty()) {
-			this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.testcase.result.notAllGenerated"));
+			this.setResult(new TraceResult(CheckingStatus.FAIL, traces, "animation.testcase.result.notAllGenerated"));
 		} else {
-			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "animation.testcase.result.found"));
+			this.setResult(new TraceResult(CheckingStatus.SUCCESS, traces, "animation.testcase.result.found"));
 		}
 		this.getExamples().addAll(traces);
 	}
