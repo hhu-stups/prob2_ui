@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.vomanager.IValidationTask;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.Requirement;
 import de.prob2.ui.vomanager.ValidationObligation;
 

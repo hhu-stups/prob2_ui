@@ -13,7 +13,7 @@ import de.prob.voparser.node.PVo;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.vomanager.IValidationTask;
+import de.prob2.ui.verifications.IValidationTask;
 
 public interface IValidationExpression {
 	static IValidationExpression fromAst(final PVo ast) {

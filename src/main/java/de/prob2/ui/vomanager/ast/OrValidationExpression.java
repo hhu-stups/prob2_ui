@@ -9,7 +9,7 @@ import de.prob.voparser.node.AOrVo;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.vomanager.IValidationTask;
+import de.prob2.ui.verifications.IValidationTask;
 
 public final class OrValidationExpression implements IValidationExpression {
 	private final IValidationExpression left;

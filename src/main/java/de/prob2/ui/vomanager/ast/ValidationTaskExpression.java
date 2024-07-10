@@ -10,7 +10,7 @@ import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ITraceTask;
-import de.prob2.ui.vomanager.IValidationTask;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.ValidationTaskNotFound;
 
 public final class ValidationTaskExpression implements IValidationExpression {

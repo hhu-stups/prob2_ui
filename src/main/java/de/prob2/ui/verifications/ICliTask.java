@@ -2,8 +2,6 @@ package de.prob2.ui.verifications;
 
 import java.util.concurrent.CompletableFuture;
 
-import de.prob2.ui.vomanager.IValidationTask;
-
 /**
  * Helper/mixin interface for simple {@link IValidationTask}s that run entirely on the CLI executor.
  * This is only an implementation helper -

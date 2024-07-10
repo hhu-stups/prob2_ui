@@ -28,6 +28,7 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.CheckingStatusTreeCell;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.feedback.VOFeedback;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 

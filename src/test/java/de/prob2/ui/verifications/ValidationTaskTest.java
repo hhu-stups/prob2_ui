@@ -15,7 +15,6 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

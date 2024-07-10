@@ -19,8 +19,8 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ISelectableTask;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;

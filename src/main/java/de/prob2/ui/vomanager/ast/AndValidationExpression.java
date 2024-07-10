@@ -9,7 +9,7 @@ import de.prob.voparser.node.AAndVo;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.vomanager.IValidationTask;
+import de.prob2.ui.verifications.IValidationTask;
 
 public final class AndValidationExpression implements IValidationExpression {
 	private final IValidationExpression left;

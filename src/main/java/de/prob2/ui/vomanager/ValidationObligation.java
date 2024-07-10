@@ -12,6 +12,7 @@ import com.google.common.base.MoreObjects;
 import de.prob.voparser.VOParseException;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 

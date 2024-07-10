@@ -40,6 +40,7 @@ import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
@@ -48,7 +49,6 @@ import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;

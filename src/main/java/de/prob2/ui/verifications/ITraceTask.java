@@ -3,7 +3,6 @@ package de.prob2.ui.verifications;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import de.prob.statespace.Trace;
-import de.prob2.ui.vomanager.IValidationTask;
 
 /**
  * An {@link IValidationTask} that may produce a {@link Trace} as a result.

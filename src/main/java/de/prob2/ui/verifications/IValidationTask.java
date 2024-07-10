@@ -1,4 +1,4 @@
-package de.prob2.ui.vomanager;
+package de.prob2.ui.verifications;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -10,9 +10,6 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.CheckingExecutors;
-import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.prob2.ui.verifications.type.ValidationTaskTypeResolver;
 

@@ -29,7 +29,6 @@ import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
