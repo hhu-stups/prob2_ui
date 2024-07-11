@@ -1,5 +1,10 @@
 package de.prob2.ui.verifications;
 
+import java.util.Collections;
+import java.util.List;
+
+import de.prob.statespace.Trace;
+
 public class CheckingResult implements ICheckingResult {
 	private final CheckingStatus status;
 	private final String messageBundleKey;

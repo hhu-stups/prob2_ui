@@ -66,11 +66,7 @@ public abstract class AbstractCheckableItem implements ISelectableTask, ITraceTa
 
 	@Override
 	public Trace getTrace() {
-		if (this.getResult() instanceof TraceResult traceResult) {
-			return traceResult.getTrace();
-		} else {
-			return null;
-		}
+		return this.getResult() != null ? this.getResult().getTrace() : null;
 	}
 
 	@Override

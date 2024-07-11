@@ -33,7 +33,6 @@ import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.TraceResult;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -206,7 +205,7 @@ public final class TraceFileHandler {
 	}
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
-		List<Trace> traces = ((TraceResult)item.getResult()).getTraces();
+		List<Trace> traces = item.getResult().getTraces();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION);

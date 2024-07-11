@@ -21,7 +21,6 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICheckingResult;
-import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
@@ -50,7 +49,7 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showCounterExample"));
 			showCounterExampleItem.setOnAction(e -> {
 				TemporalFormulaItem task = itemsTable.getSelectionModel().getSelectedItem();
-				currentTrace.set(((TraceResult)task.getResult()).getTrace());
+				currentTrace.set(task.getResult().getTrace());
 			});
 			showCounterExampleItem.setDisable(true);
 			contextMenu.getItems().add(showCounterExampleItem);
@@ -61,7 +60,7 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			
 			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
 				showMessage.setDisable(to == null);
-				showCounterExampleItem.setDisable(!(to instanceof TraceResult traceResult) || traceResult.getTraces().isEmpty());
+				showCounterExampleItem.setDisable(to == null || to.getTraces().isEmpty());
 			};
 			
 			this.itemProperty().addListener((observable, from, to) -> {
@@ -206,8 +205,8 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	@Override
 	protected CompletableFuture<?> executeItemImpl(TemporalFormulaItem item, CheckingExecutors executors, ExecutionContext context) {
 		return super.executeItemImpl(item, executors, context).thenApply(res -> {
-			if (item.getResult() instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
-				currentTrace.set(traceResult.getTrace());
+			if (item.getResult() != null && !item.getResult().getTraces().isEmpty()) {
+				currentTrace.set(item.getResult().getTrace());
 			}
 			return res;
 		});

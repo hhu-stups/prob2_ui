@@ -23,7 +23,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ICheckingResult;
-import de.prob2.ui.verifications.TraceResult;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -76,9 +75,9 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
 				showMessage.setDisable(to == null);
 				showStateItem.getItems().clear();
-				if (to instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
+				if (to != null && !to.getTraces().isEmpty()) {
 					showStateItem.setDisable(false);
-					showExamples(traceResult.getTraces(), showStateItem);
+					showExamples(to.getTraces(), showStateItem);
 					saveTraces.setDisable(false);
 				} else {
 					showStateItem.setDisable(true);

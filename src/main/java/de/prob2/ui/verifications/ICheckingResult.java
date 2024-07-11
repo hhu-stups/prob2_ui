@@ -1,5 +1,9 @@
 package de.prob2.ui.verifications;
 
+import java.util.Collections;
+import java.util.List;
+
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 
@@ -10,6 +14,14 @@ public interface ICheckingResult {
 	CheckingStatus getStatus();
 	String getMessageBundleKey();
 	Object[] getMessageParams();
+	
+	default List<Trace> getTraces() {
+		return Collections.emptyList();
+	}
+	
+	default Trace getTrace() {
+		return this.getTraces().isEmpty() ? null : this.getTraces().get(0);
+	}
 	
 	default ICheckingResult withoutAnimatorDependentState() {
 		return this;

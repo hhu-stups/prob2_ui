@@ -20,7 +20,6 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICheckingResult;
-import de.prob2.ui.verifications.TraceResult;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -44,13 +43,13 @@ public final class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimat
 			MenuItem showStateItem = new MenuItem(i18n.translate("animation.symbolic.view.contextMenu.showFoundTrace"));
 			showStateItem.setOnAction(e -> {
 				SymbolicAnimationItem task = itemsTable.getSelectionModel().getSelectedItem();
-				currentTrace.set(((TraceResult)task.getResult()).getTrace());
+				currentTrace.set(task.getResult().getTrace());
 			});
 			contextMenu.getItems().add(showStateItem);
 
 			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
 				showMessage.setDisable(to == null);
-				showStateItem.setDisable(!(to instanceof TraceResult traceResult) || traceResult.getTraces().isEmpty());
+				showStateItem.setDisable(to == null || to.getTraces().isEmpty());
 			};
 
 			this.itemProperty().addListener((observable, from, to) -> {
@@ -109,8 +108,8 @@ public final class SymbolicAnimationView extends CheckingViewBase<SymbolicAnimat
 	@Override
 	protected CompletableFuture<?> executeItemImpl(SymbolicAnimationItem item, CheckingExecutors executors, ExecutionContext context) {
 		return super.executeItemImpl(item, executors, context).thenApply(res -> {
-			if (item.getResult() instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
-				currentTrace.set(traceResult.getTrace());
+			if (item.getResult() != null && !item.getResult().getTraces().isEmpty()) {
+				currentTrace.set(item.getResult().getTrace());
 			}
 			return res;
 		});

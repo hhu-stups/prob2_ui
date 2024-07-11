@@ -18,12 +18,9 @@ public final class TraceResult extends CheckingResult {
 		this(status, Collections.singletonList(trace), messageBundleKey, messageParams);
 	}
 	
+	@Override
 	public List<Trace> getTraces() {
 		return Collections.unmodifiableList(this.traces);
-	}
-	
-	public Trace getTrace() {
-		return this.getTraces().isEmpty() ? null : this.getTraces().get(0);
 	}
 	
 	@Override

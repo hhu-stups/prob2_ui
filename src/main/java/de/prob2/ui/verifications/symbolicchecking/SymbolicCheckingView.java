@@ -22,7 +22,6 @@ import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICheckingResult;
-import de.prob2.ui.verifications.TraceResult;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
@@ -51,9 +50,9 @@ public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckin
 			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
 				showMessage.setDisable(to == null);
 				showCounterExampleItem.getItems().clear();
-				if (to instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
+				if (to != null && !to.getTraces().isEmpty()) {
 					showCounterExampleItem.setDisable(false);
-					showCounterExamples(traceResult.getTraces(), showCounterExampleItem);
+					showCounterExamples(to.getTraces(), showCounterExampleItem);
 				} else {
 					showCounterExampleItem.setDisable(true);
 				}
@@ -126,8 +125,8 @@ public final class SymbolicCheckingView extends CheckingViewBase<SymbolicCheckin
 	@Override
 	protected CompletableFuture<?> executeItemImpl(SymbolicCheckingFormulaItem item, CheckingExecutors executors, ExecutionContext context) {
 		return super.executeItemImpl(item, executors, context).thenApply(res -> {
-			if (item.getResult() instanceof TraceResult traceResult && !traceResult.getTraces().isEmpty()) {
-				currentTrace.set(traceResult.getTrace());
+			if (item.getResult() != null && !item.getResult().getTraces().isEmpty()) {
+				currentTrace.set(item.getResult().getTrace());
 			}
 			return res;
 		});
