@@ -66,9 +66,13 @@ public class ModelCheckingStep {
 		return stateSpace;
 	}
 	
+	public boolean hasTrace() {
+		return this.trace != null || this.getResult() instanceof ITraceDescription;
+	}
+	
 	public Trace getTrace() {
-		if (this.trace == null && this.getResult() instanceof ITraceDescription) {
-			this.trace = ((ITraceDescription)this.getResult()).getTrace(this.getStateSpace());
+		if (this.trace == null && this.getResult() instanceof ITraceDescription traceResult) {
+			this.trace = traceResult.getTrace(this.getStateSpace());
 		}
 		
 		return trace;

@@ -10,7 +10,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.check.StateSpaceStats;
-import de.prob.statespace.ITraceDescription;
+import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -188,7 +188,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 				if (newVal != null) {
 					TableRow<ModelCheckingStep> row = cell.getTableRow();
 					BooleanBinding buttonBinding = Bindings.createBooleanBinding(
-						() -> !row.isEmpty() && !(row.getItem() == null) && !(row.getItem().getStats() == null) && row.getItem().getResult() instanceof ITraceDescription,
+						() -> !row.isEmpty() && !(row.getItem() == null) && !(row.getItem().getStats() == null) && row.getItem().hasTrace(),
 						row.emptyProperty(), row.itemProperty());
 					Node box = buildMessageCell(newVal, buttonBinding);
 					cell.graphicProperty().bind(Bindings.when(cell.emptyProperty()).then((Node) null).otherwise(box));
@@ -282,8 +282,9 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		statsView.updateWhileModelChecking(item);
 		return executors.cliExecutor().submit(() -> Modelchecker.execute(item, context.stateSpace())).whenComplete((r, exc) -> {
 			if (exc == null) {
-				if (r.getResult() instanceof ITraceDescription) {
-					currentTrace.set(r.getTrace());
+				Trace trace = r.getTrace();
+				if (trace != null) {
+					currentTrace.set(trace);
 				}
 			} else {
 				showModelCheckException(exc);
@@ -298,7 +299,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			final TableRow<ModelCheckingStep> row = new TableRow<>();
 
 			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && (!(row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription)))){
+				if (event.getClickCount() == 2 && !(row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !row.getItem().hasTrace())) {
 					ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
 					currentTrace.set(step.getTrace());
 				}
@@ -310,7 +311,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 				currentTrace.set(step.getTrace());
 			});
 			showTraceItem.disableProperty().bind(Bindings.createBooleanBinding(
-					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !(row.getItem().getResult() instanceof ITraceDescription),
+					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !row.getItem().hasTrace(),
 					row.emptyProperty(), row.itemProperty()));
 
 			row.contextMenuProperty().bind(
