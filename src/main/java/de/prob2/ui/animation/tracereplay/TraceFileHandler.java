@@ -16,6 +16,8 @@ import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
 
 import de.prob.analysis.testcasegeneration.Target;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
+import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
@@ -205,7 +207,7 @@ public final class TraceFileHandler {
 	}
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
-		List<Trace> traces = item.getResult().getTraces();
+		TestCaseGeneratorResult result = ((TestCaseGenerationItem.Result)item.getResult()).getResult();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION);
@@ -223,12 +225,13 @@ public final class TraceFileHandler {
 				return;
 			}
 
-			int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
+			int numberGeneratedTraces = Math.min(result.getTestTraces().size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 			//Starts counting with 1 in the file name
 			for (int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + (i + 1) + ".prob2trace");
-				Target target = item.getGeneratorResult().getTestTraces().get(i).getTarget();
-				save(traces.get(i), traceFilePath, "Test Case Generation");
+				TestTrace testTrace = result.getTestTraces().get(i);
+				Target target = testTrace.getTarget();
+				save(testTrace.getTrace(), traceFilePath, "Test Case Generation");
 				String description = "Test Case Generation Trace\n" + item.getConfigurationDescription() + "\nOperation: " + target.getOperation() + "\nGuard: " + target.getGuardString();
 				ReplayTrace trace = this.addTraceFile(machine, traceFilePath);
 				trace.saveModified(trace.load().changeDescription(description));
@@ -238,7 +241,7 @@ public final class TraceFileHandler {
 			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
 			return;
 		}
-		if (traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
+		if (result.getTestTraces().size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION,
 				"animation.testcase.notAllTestCasesGenerated.header",
 				"animation.testcase.notAllTestCasesGenerated.content",

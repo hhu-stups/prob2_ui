@@ -45,11 +45,11 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 
 			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
 			showDetails.setDisable(true);
-			showDetails.setOnAction(e -> showDetails(this.getItem().getGeneratorResult()));
+			showDetails.setOnAction(e -> showDetails(((TestCaseGenerationItem.Result)this.getItem().getResult()).getResult()));
 			this.setOnMouseClicked(e -> {
 				if (e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY) {
-					if (this.getItem().getGeneratorResult() != null && !this.getItem().getGeneratorResult().getTestTraces().isEmpty()) {
-						showDetails(this.getItem().getGeneratorResult());
+					if (this.getItem().getResult() instanceof TestCaseGenerationItem.Result result) {
+						showDetails(result.getResult());
 					} else {
 						executeItem(this.getItem());
 					}
@@ -73,6 +73,7 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 			contextMenu.getItems().add(saveTraces);
 
 			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
+				showDetails.setDisable(!(to instanceof TestCaseGenerationItem.Result));
 				showMessage.setDisable(to == null);
 				showStateItem.getItems().clear();
 				if (to != null && !to.getTraces().isEmpty()) {
@@ -92,14 +93,13 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 				if (to != null) {
 					to.resultProperty().addListener(resultListener);
 					resultListener.changed(null, null, to.getResult());
-					showDetails.disableProperty().bind(to.generatorResultProperty().isNull());
 				}
 			});
 
 		}
 		private void showDetails(TestCaseGeneratorResult result) {
 			TraceInformationStage stage = injector.getInstance(TraceInformationStage.class);
-			stage.setResult(this.getItem().getGeneratorResult());
+			stage.setResult(result);
 			stage.show();
 			stage.toFront();
 		}
