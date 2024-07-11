@@ -13,7 +13,10 @@ import javafx.scene.layout.Region;
 public interface ICheckingResult {
 	CheckingStatus getStatus();
 	String getMessageBundleKey();
-	Object[] getMessageParams();
+	
+	default Object[] getMessageParams() {
+		return new Object[0];
+	}
 	
 	default List<Trace> getTraces() {
 		return Collections.emptyList();
