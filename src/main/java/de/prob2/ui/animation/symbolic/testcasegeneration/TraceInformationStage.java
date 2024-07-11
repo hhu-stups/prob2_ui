@@ -97,8 +97,6 @@ public final class TraceInformationStage extends Stage {
 	private TableColumn<TestTrace, String> numberGeneratedTraces;
 
 	@FXML
-	private TableColumn<TestTrace, String> numberUncoveredOps;
-	@FXML
 	private TableView<TestTrace> tvTraces;
 
 	@FXML
@@ -115,6 +113,9 @@ public final class TraceInformationStage extends Stage {
 
 	@FXML
 	private TableView<Target> tvUncovered;
+
+	@FXML
+	private TableColumn<Target, String> numberUncoveredOps;
 
 	@FXML
 	private TableColumn<Target, String> uncoveredOperation;
@@ -160,14 +161,11 @@ public final class TraceInformationStage extends Stage {
 		});
 		numberGeneratedTraces.setSortable(false);
 		numberUncoveredOps.setCellValueFactory(p -> {
-			TestTrace trace = p.getValue();
-			if (trace != null) {
-				Target target = trace.getTarget();
-				if (target != null) {
-					int index = tvUncovered.getItems().indexOf(target);
-					if (index >= 0) {
-						return new ReadOnlyObjectWrapper<>(Integer.toString(index + 1));
-					}
+			Target target = p.getValue();
+			if (target != null) {
+				int index = tvUncovered.getItems().indexOf(target);
+				if (index >= 0) {
+					return new ReadOnlyObjectWrapper<>(Integer.toString(index + 1));
 				}
 			}
 
