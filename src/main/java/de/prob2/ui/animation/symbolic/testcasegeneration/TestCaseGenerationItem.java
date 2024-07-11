@@ -9,7 +9,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
-import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
@@ -95,12 +94,7 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 	}
 
 	@JsonIgnore
-	protected abstract String getConfigurationDescription();
-
-	public String createdByForMetadata(int index) {
-		final Target target = this.getGeneratorResult().getTestTraces().get(index).getTarget();
-		return "Test Case Generation: " + this.getConfigurationDescription() + "; OPERATION: " + target.getOperation() + ", GUARD: " + target.getGuardString();
-	}
+	public abstract String getConfigurationDescription();
 
 	@Override
 	public void execute(final ExecutionContext context) {
