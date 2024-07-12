@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.StateError;
-import de.prob.statespace.Trace;
+import de.prob.statespace.State;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -86,24 +86,24 @@ public final class ErrorStatusStage extends Stage {
 			}
 		});
 		
-		this.currentTrace.addListener((o, from, to) -> this.update(to));
-		this.update(currentTrace.get());
+		this.currentTrace.currentStateProperty().addListener((o, from, to) -> this.update(to));
+		this.update(currentTrace.getCurrentState());
 	}
 	
-	private void update(final Trace to) {
+	private void update(State state) {
 		for (final Label label : new Label[] {this.invariantOkLabel, this.deadlockLabel, this.otherStateErrorsLabel}) {
 			label.getStyleClass().removeAll("error", "warning", "no-error");
 			label.setText(null);
 		}
 		
-		if (to == null) {
+		if (state == null) {
 			this.errorsList.getItems().clear();
 			this.placeholderLabel.setVisible(true);
 			this.errorsBox.setVisible(false);
 		} else {
-			if (!to.getCurrentState().isInitialised()) {
+			if (!state.isInitialised()) {
 				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantNotInitialised"));
-			} else if (to.getCurrentState().isInvariantOk()) {
+			} else if (state.isInvariantOk()) {
 				// TO DO: isInvariantOk is incorrect for ignored states (SCOPE predicate false)
 				this.invariantOkLabel.getStyleClass().add("no-error");
 				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantOk"));
@@ -112,7 +112,7 @@ public final class ErrorStatusStage extends Stage {
 				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantNotOk"));
 			}
 			
-			if (to.getCurrentState().getOutTransitions().isEmpty()) {
+			if (state.getOutTransitions().isEmpty()) {
 				// TO DO: this test is incorrect for ignored states (SCOPE predicate false) or if MAX_OPERATIONS==0
 				this.deadlockLabel.getStyleClass().add("warning");
 				this.deadlockLabel.setText(i18n.translate("statusbar.errorStatusStage.deadlocked"));
@@ -121,7 +121,7 @@ public final class ErrorStatusStage extends Stage {
 				this.deadlockLabel.setText(i18n.translate("statusbar.errorStatusStage.notDeadlocked"));
 			}
 			
-			if (to.getCurrentState().getStateErrors().isEmpty()) {
+			if (state.getStateErrors().isEmpty()) {
 				this.otherStateErrorsLabel.getStyleClass().add("no-error");
 				this.otherStateErrorsLabel.setText(i18n.translate("statusbar.errorStatusStage.noOtherStateErrors"));
 				this.otherStateErrorsPane.setVisible(false);
@@ -132,7 +132,7 @@ public final class ErrorStatusStage extends Stage {
 				this.otherStateErrorsPane.setVisible(true);
 				this.otherStateErrorsPane.setManaged(true);
 			}
-			this.errorsList.getItems().setAll(to.getCurrentState().getStateErrors());
+			this.errorsList.getItems().setAll(state.getStateErrors());
 			this.placeholderLabel.setVisible(false);
 			this.errorsBox.setVisible(true);
 		}
