@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
@@ -265,6 +266,11 @@ public final class MachineLoader {
 			if (e != null) {
 				if (e instanceof InterruptedException || e instanceof CommandInterruptedException) {
 					LOGGER.info("Loading of machine {} was interrupted", machine.getName(), e);
+					return;
+				}
+
+				if (e instanceof CancellationException) {
+					LOGGER.info("Loading of machine {} was cancelled", machine.getName(), e);
 					return;
 				}
 
