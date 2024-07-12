@@ -109,7 +109,9 @@ public final class StatusBar extends HBox {
 	private void update() {
 		statusLabel.getStyleClass().removeAll("no-error", "warning", "error");
 		infoIcon.setVisible(false);
-		if (this.updating.get()) {
+		if (this.getLoadingStatus() != StatusBar.LoadingStatus.NOT_LOADING) {
+			statusLabel.setText(i18n.translate(this.getLoadingStatus()));
+		} else if (this.updating.get()) {
 			statusLabel.setText(i18n.translate("statusbar.updatingViews"));
 		} else {
 			State state = this.currentTrace.getCurrentState();
@@ -127,7 +129,7 @@ public final class StatusBar extends HBox {
 					});
 				}
 			} else {
-				statusLabel.setText(i18n.translate(this.getLoadingStatus()));
+				statusLabel.setText(i18n.translate("common.noModelLoaded"));
 			}
 		}
 	}
