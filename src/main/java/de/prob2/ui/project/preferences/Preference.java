@@ -6,6 +6,7 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 public final class Preference {
 	public static final Preference DEFAULT = new Preference("default", Collections.emptyMap());
@@ -32,6 +33,9 @@ public final class Preference {
 	
 	@Override
 	public String toString() {
-		return this.getName();
+		return MoreObjects.toStringHelper(this)
+			.add("name", this.getName())
+			.add("preferences", this.getPreferences())
+			.toString();
 	}
 }
