@@ -42,7 +42,7 @@ public final class Modelchecker {
 		
 		final int stepIndex = item.getSteps().size();
 		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
-		item.getSteps().add(initialStep);
+		Platform.runLater(() -> item.getSteps().add(initialStep));
 		
 		final IModelCheckListener listener = new IModelCheckListener() {
 			@Override
