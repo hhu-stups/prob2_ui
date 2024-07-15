@@ -34,7 +34,6 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.Pos;
@@ -162,30 +161,13 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 				});
 			}
 		};
-		ListChangeListener<ModelCheckingItem> addStepListenerToNewItems = change -> {
-			while (change.next()) {
-				for (final ModelCheckingItem item : change.getRemoved()) {
-					item.currentStepProperty().removeListener(showCurrentStepListener);
-				}
-
-				for (final ModelCheckingItem item : change.getAddedSubList()) {
-					item.currentStepProperty().addListener(showCurrentStepListener);
-				}
-			}
-		};
-		itemsTable.itemsProperty().addListener((o, from, to) -> {
+		itemsTable.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (from != null) {
-				from.removeListener(addStepListenerToNewItems);
-				for (ModelCheckingItem item : from) {
-					item.currentStepProperty().removeListener(showCurrentStepListener);
-				}
+				from.currentStepProperty().removeListener(showCurrentStepListener);
 			}
 
 			if (to != null) {
-				to.addListener(addStepListenerToNewItems);
-				for (ModelCheckingItem item : to) {
-					item.currentStepProperty().addListener(showCurrentStepListener);
-				}
+				to.currentStepProperty().addListener(showCurrentStepListener);
 			}
 		});
 

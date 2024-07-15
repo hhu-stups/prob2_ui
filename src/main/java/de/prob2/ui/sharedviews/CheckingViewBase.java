@@ -305,6 +305,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 	protected Optional<T> askToAddItem() {
 		return this.showItemDialog(null).map(newItem -> {
 			final T toCheck = this.addItem(newItem);
+			this.itemsTable.getSelectionModel().select(toCheck);
 			// The returned item might already be checked
 			// if there was already another item with the same configuration as newItem
 			// and that existing item was already checked previously.
