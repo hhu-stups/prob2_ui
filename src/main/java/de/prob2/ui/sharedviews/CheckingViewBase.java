@@ -148,13 +148,14 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 		// we have to use ths wrapped binding because we directly set the contained list in "this.itemsTable.itemsProperty()"
 		this.emptyProperty = SafeBindings.wrappedBooleanBinding(l -> l == null || l.isEmpty(), this.itemsTable.itemsProperty());
 
+		itemsTable.setItems(null); // null list means "not loaded"/"no machine selected"
 		itemsTable.setRowFactory(table -> new RowBase());
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			itemsTable.itemsProperty().unbind(); // unbind for safety, this should never be bound though
 			if (to != null) {
 				itemsTable.setItems(this.getItemsProperty(to));
 			} else {
-				itemsTable.setItems(FXCollections.observableArrayList());
+				itemsTable.setItems(null);
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -277,12 +278,14 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 	protected final void executeAllSelectedItems() {
 		final ExecutionContext context = getCurrentExecutionContext();
 		CompletableFuture<?> future = CompletableFuture.completedFuture(null);
-		for (T item : itemsTable.getItems()) {
-			if (!item.selected()) {
-				continue;
-			}
+		if (itemsTable.getItems() != null) {
+			for (T item : itemsTable.getItems()) {
+				if (!item.selected()) {
+					continue;
+				}
 
-			future = future.thenCompose(res -> executeItemNoninteractiveImpl(item, checkingExecutors, context));
+				future = future.thenCompose(res -> executeItemNoninteractiveImpl(item, checkingExecutors, context));
+			}
 		}
 		future.exceptionally(exc -> {
 			handleCheckException(exc);
