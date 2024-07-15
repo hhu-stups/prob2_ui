@@ -81,7 +81,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 			if (preferencesNamesSet.contains(to)) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText(i18n.translate("project.preferences.preferencesDialog.errorLabel.preferenceAlreadyExists", to));
-			} else if ("default".equals(to)) {
+			} else if (Preference.DEFAULT.getName().equals(to)) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText(i18n.translate("project.preferences.preferencesDialog.errorLabel.nameCannotBeDefault"));
 			} else if (to.isEmpty()) {

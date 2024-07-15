@@ -164,7 +164,7 @@ public final class MachinesTab extends Tab {
 			} else {
 				this.machineProperty.set(item);
 				this.nameLabel.textProperty().bind(
-					Bindings.when(machineProperty.get().lastUsedPreferenceNameProperty().isEqualTo("default"))
+					Bindings.when(machineProperty.get().lastUsedPreferenceNameProperty().isEqualTo(Preference.DEFAULT.getName()))
 					.then(machineProperty.get().nameProperty())
 					.otherwise(Bindings.format("%s (%s)", machineProperty.get().nameProperty(), machineProperty.get().lastUsedPreferenceNameProperty()))
 				);
