@@ -23,10 +23,8 @@ public class ItemSelectedFactory<T extends ISelectableTask> implements Callback<
 			// Once the loop has finished, all items are either selected or deselected,
 			// and the selectAll state will automatically update back to what the user has selected.
 			final boolean selected = this.selectAll.isSelected();
-			if (tableView.getItems() != null) {
-				for (ISelectableTask it : tableView.getItems()) {
-					it.setSelected(selected);
-				}
+			for (ISelectableTask it : tableView.getItems()) {
+				it.setSelected(selected);
 			}
 		});
 	}
