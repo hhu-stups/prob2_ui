@@ -162,7 +162,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 				});
 			}
 		};
-		itemsTable.getItems().addListener((ListChangeListener<ModelCheckingItem>) change -> {
+		ListChangeListener<ModelCheckingItem> addStepListenerToNewItems = change -> {
 			while (change.next()) {
 				if (change.wasAdded()) {
 					for (final ModelCheckingItem item : change.getRemoved()) {
@@ -174,7 +174,24 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 					}
 				}
 			}
-		});
+		};
+		ChangeListener<ObservableList<ModelCheckingItem>> onItemListChange = (o, from, to) -> {
+			if (from != null) {
+				from.removeListener(addStepListenerToNewItems);
+				for (ModelCheckingItem item : from) {
+					item.currentStepProperty().removeListener(showCurrentStepListener);
+				}
+			}
+
+			if (to != null) {
+				to.addListener(addStepListenerToNewItems);
+				for (ModelCheckingItem item : to) {
+					item.currentStepProperty().addListener(showCurrentStepListener);
+				}
+			}
+		};
+		itemsTable.itemsProperty().addListener(onItemListChange);
+		onItemListChange.changed(null, null, itemsTable.getItems());
 
 		stepStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
 		stepStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
