@@ -27,8 +27,6 @@ import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.vomanager.Requirement;
 
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -46,7 +44,6 @@ import javafx.scene.control.ButtonType;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
-	private final BooleanProperty exists;
 	private final StringProperty name;
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
@@ -73,8 +70,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 			Paths.get(System.getProperty("user.home")));
-		this.exists = new SimpleBooleanProperty(this, "exists", false);
-		this.exists.bind(Bindings.isNotNull(this));
 		this.name = new SimpleStringProperty(this, "name", "");
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
@@ -303,22 +298,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(project);
 		this.setSaved(true);
 		this.setNewProject(newProject);
-	}
-
-	/**
-	 * @deprecated Use {@link #isNotNull()} instead.
-	 */
-	@Deprecated
-	public BooleanBinding existsProperty() {
-		return this.isNotNull();
-	}
-
-	/**
-	 * @deprecated Use a {@code != null} check instead.
-	 */
-	@Deprecated
-	public boolean exists() {
-		return this.get() != null;
 	}
 
 	public StringProperty nameProperty() {
