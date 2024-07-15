@@ -149,9 +149,6 @@ public class Project implements HasMetadata {
 		for (Machine machine : this.getMachines()) {
 			machine.setChanged(false);
 		}
-		for (Preference pref : this.getPreferences()) {
-			pref.changedProperty().set(false);
-		}
 	}
 	
 	@Override

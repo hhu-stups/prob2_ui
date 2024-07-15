@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -104,13 +106,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 						}
 					});
 				}
-				for (Preference pref : to.getPreferences()) {
-					pref.changedProperty().addListener((o1, from1, to1) -> {
-						if (to1) {
-							this.setSaved(false);
-						}
-					});
-				}
 			}
 		});
 
@@ -179,11 +174,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 	}
 
 	public CompletableFuture<Trace> reloadCurrentMachine() {
-		return this.reloadCurrentMachine(this.getCurrentPreference());
-	}
-
-	public CompletableFuture<Trace> reloadCurrentMachine(Preference preference) {
-		return this.loadMachineWithConfirmation(this.getCurrentMachine(), preference);
+		// Reload current machine using its last used preference name,
+		// not using the current Preference object,
+		// to ensure that any preference changes take effect after a reload.
+		return this.loadMachineWithConfirmation(this.getCurrentMachine());
 	}
 
 	public CompletableFuture<Trace> loadMachineWithConfirmation(Machine machine) {
@@ -264,6 +258,29 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			.forEach(machine -> machine.setLastUsedPreferenceName(Preference.DEFAULT.getName()));
 		List<Preference> preferencesList = this.getPreferences();
 		preferencesList.remove(preference);
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getRequirements(), preferencesList, this.getMetadata(), this.getLocation()));
+	}
+
+	public void replacePreference(Preference oldPreference, Preference newPreference) {
+		Objects.requireNonNull(oldPreference, "oldPreference");
+		Objects.requireNonNull(newPreference, "newPreference");
+
+		List<Preference> preferencesList = this.getPreferences();
+		int index = preferencesList.indexOf(oldPreference);
+		if (index == -1) {
+			throw new NoSuchElementException("Preference not found in project: " + oldPreference.getName());
+		}
+		preferencesList.set(index, newPreference);
+
+		if (!oldPreference.getName().equals(newPreference.getName())) {
+			// If the preference was renamed, update the lastUsedPreferenceName of machines that use the old name.
+			for (Machine machine : this.getMachines()) {
+				if (oldPreference.getName().equals(machine.getLastUsedPreferenceName())) {
+					machine.setLastUsedPreferenceName(newPreference.getName());
+				}
+			}
+		}
+
 		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getRequirements(), preferencesList, this.getMetadata(), this.getLocation()));
 	}
 

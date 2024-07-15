@@ -140,7 +140,7 @@ public final class MachinesTab extends Tab {
 			startAnimationWithPreferencesMenu.getItems().setAll(Stream.concat(Stream.of(Preference.DEFAULT), prefs.stream())
 				.map(preference -> {
 					final MenuItem menuItem = new MenuItem();
-					menuItem.textProperty().bind(preference.nameProperty());
+					menuItem.setText(preference.getName());
 					// Disable mnemonic parsing so preferences with underscores in their names are displayed properly.
 					menuItem.setMnemonicParsing(false);
 					menuItem.setOnAction(e -> {
