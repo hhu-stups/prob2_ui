@@ -28,7 +28,7 @@ abstract class CBCAssertionCheckingItem extends SymbolicCheckingFormulaItem {
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Symbolic checking interrupted by user", exc);
-			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 		}
 		
 		switch (cmd.getResult()) {
@@ -42,7 +42,7 @@ abstract class CBCAssertionCheckingItem extends SymbolicCheckingFormulaItem {
 				this.setResult(new TraceResult(CheckingStatus.FAIL, cmd.getTrace(context.stateSpace()), "verifications.cbc.assertionChecking.result.counterExampleFound"));
 				break;
 			case INTERRUPTED:
-				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "verifications.cbc.assertionChecking.result.interrupted"));
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 				break;
 			default:
 				throw new AssertionError("Unhandled CBC assertion checking result: " + cmd.getResult());

@@ -46,7 +46,7 @@ public final class CBCRefinementCheckingItem extends SymbolicCheckingFormulaItem
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("CBC refinement checking interrupted by user", exc);
-			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 			return;
 		}
 

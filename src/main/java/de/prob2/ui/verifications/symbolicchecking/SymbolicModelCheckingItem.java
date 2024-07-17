@@ -65,22 +65,22 @@ public final class SymbolicModelCheckingItem extends SymbolicCheckingFormulaItem
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Symbolic model checking interrupted by user", exc);
-			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 			return;
 		}
 		
 		switch (cmd.getResult()) {
 			case SUCCESSFUL:
-				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicModelChecking.result.success"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS));
 				break;
 			case COUNTER_EXAMPLE:
 				this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicModelChecking.result.counterExample"));
 				break;
 			case TIMEOUT:
-				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT, "verifications.symbolicModelChecking.result.timeout"));
+				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT));
 				break;
 			case INTERRUPTED:
-				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "verifications.symbolicModelChecking.result.interrupted"));
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 				break;
 			case LIMIT_REACHED:
 				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT, "verifications.symbolicModelChecking.result.limitReached"));

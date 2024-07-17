@@ -48,7 +48,7 @@ public final class CBCFindRedundantInvariantsItem extends SymbolicCheckingFormul
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("CBC find redundant invariants interrupted by user", exc);
-			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 			return;
 		}
 		

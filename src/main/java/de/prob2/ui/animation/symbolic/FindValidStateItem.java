@@ -67,7 +67,7 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Find valid state interrupted by user", exc);
-			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 			return;
 		}
 		
@@ -79,7 +79,7 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.findValidState.result.notFound"));
 				break;
 			case INTERRUPTED:
-				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "animation.symbolic.findValidState.result.interrupted"));
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 				break;
 			case ERROR:
 				this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "animation.symbolic.findValidState.result.error"));

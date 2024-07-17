@@ -69,7 +69,7 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("CBC find sequence interrupted by user", exc);
-			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 			return;
 		}
 		
@@ -81,10 +81,10 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.sequence.result.notFound"));
 				break;
 			case TIMEOUT:
-				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT, "animation.symbolic.sequence.result.timeout"));
+				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT));
 				break;
 			case INTERRUPTED:
-				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "animation.symbolic.sequence.result.interrupted"));
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 				break;
 			case ERROR:
 				this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "animation.symbolic.sequence.result.error"));

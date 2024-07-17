@@ -81,7 +81,7 @@ public final class CBCDeadlockFreedomCheckingItem extends SymbolicCheckingFormul
 		IModelCheckingResult result = new CBCDeadlockChecker(context.stateSpace(), parsedPredicate).call();
 		
 		if (result instanceof ModelCheckOk) {
-			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.symbolicModelChecking.result.success"));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS));
 		} else if (result instanceof CBCDeadlockFound deadlock) {
 			this.setResult(new TraceResult(CheckingStatus.FAIL, deadlock.getTrace(context.stateSpace()), "verifications.symbolicModelChecking.result.counterExample"));
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {

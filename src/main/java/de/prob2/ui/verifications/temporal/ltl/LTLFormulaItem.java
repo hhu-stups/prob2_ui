@@ -63,7 +63,7 @@ public final class LTLFormulaItem extends TemporalFormulaItem {
 		
 		if (result instanceof LTLOk) {
 			if (this.getExpectedResult()) {
-				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.temporal.result.succeeded.message"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS));
 			} else {
 				this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.temporal.result.counterExampleFound.message"));
 			}

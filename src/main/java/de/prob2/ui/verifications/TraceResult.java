@@ -14,8 +14,16 @@ public final class TraceResult extends CheckingResult {
 		this.traces = traces;
 	}
 	
+	public TraceResult(CheckingStatus status, List<Trace> traces) {
+		this(status, traces, status.getTranslationKey());
+	}
+	
 	public TraceResult(CheckingStatus status, Trace trace, String messageBundleKey, Object... messageParams) {
 		this(status, Collections.singletonList(trace), messageBundleKey, messageParams);
+	}
+	
+	public TraceResult(CheckingStatus status, Trace trace) {
+		this(status, trace, status.getTranslationKey());
 	}
 	
 	@Override
