@@ -71,7 +71,7 @@ public final class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	private static boolean isError(ReplayTrace replayTrace) {
-		return replayTrace.getReplayedTrace() != null && (!replayTrace.getReplayedTrace().getErrors().isEmpty() || replayTrace.getReplayedTrace().getReplayStatus() != TraceReplayStatus.PERFECT);
+		return replayTrace.getResult() instanceof ReplayTrace.Result traceResult && (!traceResult.getReplayed().getErrors().isEmpty() || traceResult.getReplayed().getReplayStatus() != TraceReplayStatus.PERFECT);
 	}
 
 	@FXML
@@ -90,10 +90,8 @@ public final class ReplayedTraceStatusAlert extends Alert {
 	private void update() {
 		this.setAlertType(isError(replayTrace) ? AlertType.ERROR : AlertType.INFORMATION);
 
-		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
-		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
-
-		if (replayedTrace != null) {
+		if (replayTrace.getResult() instanceof ReplayTrace.Result traceResult) {
+			ReplayedTrace replayedTrace = traceResult.getReplayed();
 			String statusOfReplayedTrace = i18n.translate(
 					enumNameAdapter("animation.tracereplay.replayedStatus.replayStatus"),
 					replayedTrace.getReplayStatus()
@@ -104,13 +102,10 @@ public final class ReplayedTraceStatusAlert extends Alert {
 			this.getButtonTypes().setAll(this.accept, ButtonType.CANCEL);
 		} else {
 			this.setHeaderText(i18n.translate("animation.tracereplay.replayedStatus.headerWithoutReplayStatus"));
+			this.traceTable.disableReplayedTransitionColumns();
 			this.errorTable.getErrorItems().clear();
 			this.keepOrDiscardQuestion.setVisible(false);
 			this.getButtonTypes().setAll(ButtonType.OK);
-		}
-
-		if (replayedTrace == null || traceFromReplayed == null) {
-			this.traceTable.disableReplayedTransitionColumns();
 		}
 
 		Thread thread = new Thread(() -> {
@@ -141,11 +136,9 @@ public final class ReplayedTraceStatusAlert extends Alert {
 	}
 
 	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws ExecutionException, InterruptedException, IOException {
-		ReplayedTrace replayedTrace = replayTrace.getReplayedTrace();
-		Trace traceFromReplayed = replayTrace.getAnimatedReplayedTrace();
-
 		CompletableFuture<Map<Transition, OperationItem>> future;
-		if (traceFromReplayed != null) {
+		if (replayTrace.getResult() instanceof ReplayTrace.Result traceResult) {
+			Trace traceFromReplayed = traceResult.getTrace();
 			// start cli instantly on another thread, while doing IO on this thread
 			future = cliExecutor.submit(() -> OperationItem.forTransitions(
 				traceFromReplayed.getStateSpace(),
@@ -163,9 +156,20 @@ public final class ReplayedTraceStatusAlert extends Alert {
 
 		for (int i = 0; i < transitionCount; i++) {
 			PersistentTransition fileTransitionObj = fileTrace.getTransitionList().get(i);
-			Transition replayedTransitionObj = traceFromReplayed != null && i < traceFromReplayed.size() ? traceFromReplayed.getTransitionList().get(i) : null;
-			TransitionReplayPrecision transitionReplayPrecision = replayedTrace != null && i < replayedTrace.getTransitionReplayPrecisions().size() ? replayedTrace.getTransitionReplayPrecisions().get(i) : TransitionReplayPrecision.FAILED;
-			List<String> transitionErrorMessages = replayedTrace != null && i < replayedTrace.getTransitionErrorMessages().size() ? replayedTrace.getTransitionErrorMessages().get(i) : null;
+			Transition replayedTransitionObj;
+			TransitionReplayPrecision transitionReplayPrecision;
+			List<String> transitionErrorMessages;
+			if (replayTrace.getResult() instanceof ReplayTrace.Result traceResult) {
+				ReplayedTrace replayedTrace = traceResult.getReplayed();
+				Trace traceFromReplayed = traceResult.getTrace();
+				replayedTransitionObj = i < traceFromReplayed.size() ? traceFromReplayed.getTransitionList().get(i) : null;
+				transitionReplayPrecision = i < replayedTrace.getTransitionReplayPrecisions().size() ? replayedTrace.getTransitionReplayPrecisions().get(i) : TransitionReplayPrecision.FAILED;
+				transitionErrorMessages = i < replayedTrace.getTransitionErrorMessages().size() ? replayedTrace.getTransitionErrorMessages().get(i) : null;
+			} else {
+				replayedTransitionObj = null;
+				transitionReplayPrecision = TransitionReplayPrecision.FAILED;
+				transitionErrorMessages = null;
+			}
 
 			int step = i + 1;
 			String fileTransition;

@@ -86,7 +86,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				alert.initReplayTrace(this.getItem());
 				alert.showAndWait().ifPresent(buttonType -> {
 					if (buttonType.equals(alert.getAcceptButtonType())) {
-						currentTrace.set(this.getItem().getAnimatedReplayedTrace());
+						currentTrace.set(this.getItem().getTrace());
 					}
 				});
 			});

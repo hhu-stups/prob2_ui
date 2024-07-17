@@ -286,8 +286,8 @@ public final class TraceTestView extends Stage {
 		final ReplayTrace replayed = replayTrace.get();
 		return trace != null
 			&& replayed != null
-			&& replayed.getAnimatedReplayedTrace() != null
-			&& safeListEquals(trace.getTransitionList(), replayed.getAnimatedReplayedTrace().getTransitionList());
+			&& replayed.getTrace() != null
+			&& safeListEquals(trace.getTransitionList(), replayed.getTrace().getTransitionList());
 	}
 
 	private void goToPositionInReplayTrace(final int index) {
@@ -306,9 +306,9 @@ public final class TraceTestView extends Stage {
 					traceFileHandler.showLoadError(r, exc);
 					return;
 				}
-				if (r.getAnimatedReplayedTrace() != null) {
+				if (r.getTrace() != null) {
 					if (index < r.getLoadedTrace().getTransitionList().size()) {
-						currentTrace.set(r.getAnimatedReplayedTrace().gotoPosition(index));
+						currentTrace.set(r.getTrace().gotoPosition(index));
 					}
 					traceTableView.refresh();
 				}
@@ -536,7 +536,7 @@ public final class TraceTestView extends Stage {
 		statusIcon.setPrefHeight(fontSize.getFontSize());
 		statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
 
-		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace() == null ? new ArrayList<>() : replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
+		List<List<String>> transitionErrorMessages = replayTrace.get().getResult() instanceof ReplayTrace.Result traceResult ? traceResult.getReplayed().getTransitionErrorMessages() : new ArrayList<>();
 		if (transitionErrorMessages.size() <= index || isNewBox) {
 			statusIcon.setStatus(CheckingStatus.NOT_CHECKED);
 		} else {
