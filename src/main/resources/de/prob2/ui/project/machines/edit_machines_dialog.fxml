@@ -26,7 +26,17 @@
 									<Label text="%project.machines.editMachinesDialog.label.name" />
 									<TextField fx:id="nameField" HBox.hgrow="always" />
 								</HBox>
-								<Label fx:id="errorExplanationLabel" textFill="#B77300">
+								<Label fx:id="nameErrorExplanationLabel" textFill="#B77300">
+									<VBox.margin>
+										<Insets top="5" />
+									</VBox.margin>
+								</Label>
+								<HBox spacing="20" alignment="center_left">
+									<Label text="%project.machines.editMachinesDialog.label.location" />
+									<TextField fx:id="locationField" HBox.hgrow="always" />
+									<Button fx:id="changeLocationButton" text="%common.buttons.editPathDots" HBox.hgrow="always" />
+								</HBox>
+								<Label fx:id="locationErrorExplanationLabel" textFill="#B77300">
 									<VBox.margin>
 										<Insets top="5" />
 									</VBox.margin>
