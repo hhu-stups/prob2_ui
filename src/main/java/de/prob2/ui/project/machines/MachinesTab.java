@@ -160,6 +160,7 @@ public final class MachinesTab extends Tab {
 				this.machineProperty.set(null);
 				this.nameLabel.textProperty().unbind();
 				this.nameLabel.setText(null);
+				this.locationLabel.textProperty().unbind();
 				this.locationLabel.setText(null);
 			} else {
 				this.machineProperty.set(item);
@@ -168,7 +169,7 @@ public final class MachinesTab extends Tab {
 					.then(machineProperty.get().nameProperty())
 					.otherwise(Bindings.format("%s (%s)", machineProperty.get().nameProperty(), machineProperty.get().lastUsedPreferenceNameProperty()))
 				);
-				this.locationLabel.setText(machineProperty.get().getLocation().toString());
+				this.locationLabel.textProperty().bind(machineProperty.get().locationProperty().asString());
 			}
 		}
 	}

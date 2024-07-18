@@ -41,6 +41,7 @@ import de.prob2.ui.simulation.simulators.Scheduler;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -240,9 +241,20 @@ public final class ProB2 extends Application {
 		sharedAnimatorPreloader.start();
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		currentProject.addListener((observable, from, to) -> this.updateTitle(primaryStage));
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
-		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
+		ChangeListener<Object> titleUpdater = (observable, from, to) -> this.updateTitle(primaryStage);
+		currentProject.addListener(titleUpdater);
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			titleUpdater.changed(observable, from, to);
+
+			// be conservative and listen to any changes in the current machine
+			if (from != null) {
+				from.changedProperty().removeListener(titleUpdater);
+			}
+			if (to != null) {
+				to.changedProperty().addListener(titleUpdater);
+			}
+		});
+		currentProject.savedProperty().addListener(titleUpdater);
 
 		Parent root = injector.getInstance(MainController.class);
 		return new Scene(root);

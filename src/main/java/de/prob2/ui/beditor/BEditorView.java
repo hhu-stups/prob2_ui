@@ -384,7 +384,7 @@ public final class BEditorView extends BorderPane {
 		WatchService watcher;
 		try {
 			watcher = directory.getFileSystem().newWatchService();
-			directory.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+			directory.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
 		} catch (IOException e) {
 			LOGGER.error("Could not register file: {}", path, e);
 			return;
@@ -476,6 +476,7 @@ public final class BEditorView extends BorderPane {
 			beditor.cancelHighlighting();
 			// load new text
 			this.setPath(path);
+			beditor.replaceText(""); // doing an extra step here to force a reload of the highlighting
 			beditor.replaceText(text);
 			beditor.moveTo(0);
 			beditor.requestFollowCaret();

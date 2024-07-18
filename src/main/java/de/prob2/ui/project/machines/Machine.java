@@ -83,7 +83,7 @@ public final class Machine {
 
 	private final StringProperty name;
 	private final StringProperty description;
-	private final Path location;
+	private final ObjectProperty<Path> location;
 	private final StringProperty lastUsedPreferenceName;
 
 	private final ReadOnlyListProperty<IValidationTask> validationTasks;
@@ -137,7 +137,7 @@ public final class Machine {
 	) {
 		this.name = new SimpleStringProperty(this, "name", Objects.requireNonNull(name, "name"));
 		this.description = new SimpleStringProperty(this, "description", Objects.requireNonNull(description, "description"));
-		this.location = Objects.requireNonNull(location, "location");
+		this.location = new SimpleObjectProperty<>(this, "location", Objects.requireNonNull(location, "location"));
 		this.lastUsedPreferenceName = new SimpleStringProperty(this, "lastUsedPreferenceName", lastUsedPreferenceName != null && !lastUsedPreferenceName.isEmpty() ? lastUsedPreferenceName : Preference.DEFAULT.getName());
 
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList(validationTasks));
@@ -162,6 +162,7 @@ public final class Machine {
 		final InvalidationListener changedListener = o -> this.setChanged(true);
 		this.nameProperty().addListener(changedListener);
 		this.descriptionProperty().addListener(changedListener);
+		this.locationProperty().addListener(changedListener);
 		this.lastUsedPreferenceNameProperty().addListener(changedListener);
 
 		this.getValidationTasks().addListener(changedListener);
@@ -214,8 +215,16 @@ public final class Machine {
 		this.descriptionProperty().set(description);
 	}
 
-	public Path getLocation() {
+	public ObjectProperty<Path> locationProperty() {
 		return this.location;
+	}
+
+	public Path getLocation() {
+		return this.locationProperty().get();
+	}
+
+	public void setLocation(Path location) {
+		this.locationProperty().set(location);
 	}
 
 	@JsonGetter("validationTasks")
