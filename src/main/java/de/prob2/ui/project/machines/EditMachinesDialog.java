@@ -136,7 +136,6 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 		okButton.disableProperty().bind(nameErrorExplanationLabel.textProperty().isNotEmpty().or(locationErrorExplanationLabel.textProperty().isNotEmpty()));
 
 		changeLocationButton.setOnAction(e -> {
-			// TODO:
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle(this.i18n.translate("common.fileChooser.rename.title"));
 
