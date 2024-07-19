@@ -154,7 +154,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			// i. e. a new checking step was started,
 			// select the newly started step so that the checking progress is visible.
 			if (from == null && to != null) {
-				final ModelCheckingItem item = (ModelCheckingItem)((ReadOnlyProperty<?>)o).getBean();
+				final ModelCheckingItem item = (ModelCheckingItem) ((ReadOnlyProperty<?>)o).getBean();
 				Platform.runLater(() -> {
 					itemsTable.getSelectionModel().select(item);
 					stepsTable.getSelectionModel().select(to);
@@ -198,7 +198,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			stepsTable.itemsProperty().unbind();
 			if (to != null) {
 				stepsTable.itemsProperty().bind(to.stepsProperty());
-				if(to.getSteps().isEmpty()) {
+				if (to.getSteps().isEmpty()) {
 					hideStats();
 				} else {
 					stepsTable.getSelectionModel().selectLast();
@@ -212,7 +212,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 		stepsTable.getSelectionModel().selectedItemProperty().addListener((observable, from, to) ->
 			Platform.runLater(() -> {
-				if(to != null && to.getStats() != null) {
+				if (to != null && to.getStats() != null) {
 					showStats(to.getTimeElapsed(), to.getStats(), to.getMemoryUsed());
 				} else {
 					hideStats();
@@ -268,23 +268,30 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	
 	@Override
 	protected CompletableFuture<?> executeItemNoninteractiveImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
-		statsView.updateWhileModelChecking(item);
+		if (item instanceof ProBModelCheckingItem)
+			statsView.updateWhileModelChecking(item);
 		return super.executeItemNoninteractiveImpl(item, executors, context);
 	}
 
 	@Override
 	protected CompletableFuture<?> executeItemImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
-		statsView.updateWhileModelChecking(item);
-		return executors.cliExecutor().submit(() -> Modelchecker.execute(item, context.stateSpace())).whenComplete((r, exc) -> {
-			if (exc == null) {
-				Trace trace = r.getTrace();
-				if (trace != null) {
-					currentTrace.set(trace);
+		if (item instanceof ProBModelCheckingItem proBItem) {
+			statsView.updateWhileModelChecking(item);
+			return executors.cliExecutor().submit(() -> Modelchecker.execute(proBItem, context.stateSpace())).whenComplete((r, exc) -> {
+				if (exc == null) {
+					Trace trace = r.getTrace();
+					if (trace != null) {
+						currentTrace.set(trace);
+					}
+				} else {
+					showModelCheckException(exc);
 				}
-			} else {
-				showModelCheckException(exc);
-			}
-		});
+			});
+		} else if (item instanceof TLCModelCheckingItem tlcItem) {
+			return executors.cliExecutor().submit(() -> tlcItem.execute(context));
+		} else {
+			return null;
+		}
 	}
 
 	private void setContextMenus() {
@@ -320,9 +327,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	@Override
 	protected Optional<ModelCheckingItem> showItemDialog(final ModelCheckingItem oldItem) {
 		ModelcheckingStage modelcheckingStage = modelcheckingStageProvider.get();
-		if (oldItem != null) {
-			modelcheckingStage.setData(oldItem);
-		}
+		modelcheckingStage.setData(oldItem);
 		modelcheckingStage.showAndWait();
 		return Optional.ofNullable(modelcheckingStage.getResult());
 	}

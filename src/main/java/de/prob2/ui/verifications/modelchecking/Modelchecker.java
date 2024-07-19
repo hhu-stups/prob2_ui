@@ -26,7 +26,7 @@ public final class Modelchecker {
 	 * @param item the model checking configuration to run
 	 * @return result of the model check
 	 */
-	public static ModelCheckingStep executeIfNeeded(final ModelCheckingItem item, final StateSpace stateSpace) {
+	public static ModelCheckingStep executeIfNeeded(final ProBModelCheckingItem item, final StateSpace stateSpace) {
 		if (item.getSteps().isEmpty()) {
 			return Modelchecker.execute(item, stateSpace);
 		} else {
@@ -34,7 +34,7 @@ public final class Modelchecker {
 		}
 	}
 
-	public static ModelCheckingStep execute(ModelCheckingItem item, StateSpace stateSpace) {
+	public static ModelCheckingStep execute(ProBModelCheckingItem item, StateSpace stateSpace) {
 		// The options must be calculated before adding the ModelCheckingStep,
 		// so that the recheckExisting/INSPECT_EXISTING_NODES option is set correctly,
 		// which depends on whether any steps were already added.
