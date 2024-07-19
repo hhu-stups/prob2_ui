@@ -13,7 +13,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.ProjectManager;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -49,23 +48,20 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 
 	private final I18n i18n;
 	private final CurrentProject currentProject;
-	private final ProjectManager projectManager;
 	private final FileChooserManager fileChooserManager;
 
 	private Machine machine;
 
 	@Inject
-	public EditMachinesDialog(StageManager stageManager, I18n i18n, CurrentProject currentProject, ProjectManager projectManager, FileChooserManager fileChooserManager, FileChooserManager fileChooserManager1) {
+	public EditMachinesDialog(StageManager stageManager, I18n i18n, CurrentProject currentProject, FileChooserManager fileChooserManager) {
 		this.i18n = i18n;
 		this.currentProject = currentProject;
-		this.projectManager = projectManager;
-		this.fileChooserManager = fileChooserManager1;
+		this.fileChooserManager = fileChooserManager;
 
 		this.setResultConverter(type -> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				boolean needsProjectSave = false;
 				boolean needsMachineReload = false;
 
 				Path absoluteOld = null;
@@ -76,7 +72,6 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 					absoluteNew = absoluteNew.toRealPath();
 					Path relativeNew = this.currentProject.getLocation().toRealPath().relativize(absoluteNew);
 					if (!relativeNew.equals(this.machine.getLocation())) {
-						needsProjectSave = true;
 						if (this.currentProject.getCurrentMachine() == this.machine) {
 							if (!this.currentProject.confirmMachineReplace()) {
 								return null;
@@ -111,14 +106,9 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 				this.machine.setName(nameField.getText());
 				this.machine.setDescription(descriptionTextArea.getText());
 
-				if (needsProjectSave) {
-					// we need to save the current project, else we might lose a renamed machine!
-					this.projectManager.saveCurrentProject();
-				}
 				if (needsMachineReload) {
-					// if we changed the path of the current machine we need to reload it so the editor works again
-					// we already asked for confirmation above
-					Platform.runLater(() -> this.currentProject.loadMachineWithoutConfirmation(this.machine));
+					// if we changed the path of the current machine, we need to reload it so the editor shows the correct file
+					Platform.runLater(() -> this.currentProject.loadMachineWithConfirmation(this.machine));
 				}
 
 				return this.machine;
