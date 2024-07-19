@@ -1,9 +1,6 @@
 package de.prob2.ui.project.machines;
 
-import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +24,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,7 +73,9 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 				try {
 					absoluteOld = this.getOldAbsolutePath();
 					absoluteNew = this.getNewAbsolutePath();
-					if (!absoluteOld.equals(absoluteNew)) {
+					absoluteNew = absoluteNew.toRealPath();
+					Path relativeNew = this.currentProject.getLocation().toRealPath().relativize(absoluteNew);
+					if (!relativeNew.equals(this.machine.getLocation())) {
 						needsProjectSave = true;
 						if (this.currentProject.getCurrentMachine() == this.machine) {
 							if (!this.currentProject.confirmMachineReplace()) {
@@ -87,9 +85,7 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 							needsMachineReload = true;
 						}
 
-						Path relativeNew = this.currentProject.getLocation().toRealPath().relativize(absoluteNew);
-						LOGGER.info("moving machine {} from {} to {}", machine.getName(), absoluteOld, absoluteNew);
-						Files.move(absoluteOld, absoluteNew);
+						LOGGER.info("changing location of machine {} from {} to {}", machine.getName(), absoluteOld, absoluteNew);
 						this.machine.setLocation(relativeNew);
 					}
 				} catch (Exception e) {
@@ -121,7 +117,8 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 				}
 				if (needsMachineReload) {
 					// if we changed the path of the current machine we need to reload it so the editor works again
-					Platform.runLater(this.currentProject::reloadCurrentMachine);
+					// we already asked for confirmation above
+					Platform.runLater(() -> this.currentProject.loadMachineWithConfirmation(this.machine));
 				}
 
 				return this.machine;
@@ -136,26 +133,12 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 		okButton.disableProperty().bind(nameErrorExplanationLabel.textProperty().isNotEmpty().or(locationErrorExplanationLabel.textProperty().isNotEmpty()));
 
 		changeLocationButton.setOnAction(e -> {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle(this.i18n.translate("common.fileChooser.rename.title"));
-
-			try {
-				Path absoluteNew = this.getNewAbsolutePath();
-				fileChooser.setInitialDirectory(absoluteNew.getParent().toFile());
-				fileChooser.setInitialFileName(absoluteNew.getFileName().toString());
-			} catch (Exception ignored) {
-				fileChooser.setInitialDirectory(this.currentProject.getLocation().toFile());
-				fileChooser.setInitialFileName(this.locationField.getText());
-			}
-
-			fileChooser.getExtensionFilters().setAll(
-					this.fileChooserManager.getAllExtensionsFilter()
-			);
-
-			File result = fileChooser.showSaveDialog(this.getOwner());
+			// TODO: change the initial directory to the parent directory of the old machine path
+			Path result = fileChooserManager.showOpenMachineChooser(this.getOwner());
 			if (result != null) {
 				try {
-					Path relative = this.currentProject.getLocation().toRealPath().relativize(result.toPath());
+					result = result.toRealPath();
+					Path relative = this.currentProject.getLocation().toRealPath().relativize(result.toRealPath());
 					this.locationField.setText(relative.toString());
 				} catch (Exception ex) {
 					LOGGER.warn("error checking new location for machine {}: {}", machine.getName(), result, ex);
@@ -190,10 +173,9 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 
 			Path newPath = null;
 			try {
-				Path oldPath = this.getOldAbsolutePath();
 				newPath = this.getNewAbsolutePath();
-				if (Files.exists(this.getNewAbsolutePath()) && !Files.isSameFile(oldPath, newPath)) {
-					locationErrorExplanationLabel.setText(i18n.translate("project.machines.editMachinesDialog.machineLocationExistsError", to));
+				if (!Files.isRegularFile(newPath)) {
+					locationErrorExplanationLabel.setText(i18n.translate("project.machines.editMachinesDialog.machineLocationDoesNotExistError", to));
 					return;
 				}
 			} catch (Exception e) {
@@ -212,12 +194,11 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 		return super.showAndWait();
 	}
 
-	private Path getOldAbsolutePath() throws IOException {
-		return this.currentProject.get().getAbsoluteMachinePath(this.machine).toRealPath();
+	private Path getOldAbsolutePath() {
+		return this.currentProject.get().getAbsoluteMachinePath(this.machine);
 	}
 
-	private Path getNewAbsolutePath() throws InvalidPathException {
-		Path path = Path.of(this.locationField.getText());
-		return this.currentProject.getLocation().resolve(path).normalize();
+	private Path getNewAbsolutePath() {
+		return this.currentProject.getLocation().resolve(this.locationField.getText());
 	}
 }
