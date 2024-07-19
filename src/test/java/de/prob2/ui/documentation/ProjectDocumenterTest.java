@@ -26,6 +26,7 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
@@ -53,7 +54,7 @@ class ProjectDocumenterTest {
 	final CurrentProject currentProject = Mockito.mock(CurrentProject.class);
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
-	final ModelCheckingItem modelCheckingItem = new ModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
+	final ModelCheckingItem proBModelCheckingItem = new ProBModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
 	final LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "", -1, TemporalFormulaItem.StartState.ALL_INITIAL_STATES, null, true);
 	final SymbolicModelCheckingItem symbolicCheckingFormulaItem = new SymbolicModelCheckingItem("", SymbolicModelcheckCommand.Algorithm.BMC);
 	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
@@ -64,7 +65,7 @@ class ProjectDocumenterTest {
 		ReplayTrace trace = new ReplayTrace(null, traceLocation, traceLocation.toAbsolutePath(), Mockito.mock(TraceManager.class));
 
 		trafficLight.addValidationTask(trace);
-		trafficLight.addValidationTask(modelCheckingItem);
+		trafficLight.addValidationTask(proBModelCheckingItem);
 		trafficLight.addValidationTask(ltlFormulaItem);
 		trafficLight.addValidationTask(symbolicCheckingFormulaItem);
 		trafficLight.getLTLPatterns().add(ltlPatternItem);
