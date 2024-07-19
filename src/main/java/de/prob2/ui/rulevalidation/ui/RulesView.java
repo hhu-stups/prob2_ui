@@ -239,7 +239,7 @@ public final class RulesView extends AnchorPane {
 
 	private void filterTagsAndSearch() {
 		String filterText = filterTextField.getText();
-		LOGGER.debug("Filter Operations for tags " + currentTags + " and search '" + filterText + "'");
+		LOGGER.debug("Filter Operations for tags {} and search '{}'", currentTags, filterText);
 		clearTable();
 		List<TreeItem<Object>> filteredRuleItems;
 		List<TreeItem<Object>> filteredComputationItems;
@@ -352,7 +352,7 @@ public final class RulesView extends AnchorPane {
 		}
 	}
 
-	public void clear(){
+	public void clear() {
 		LOGGER.debug("Clear RulesView!");
 
 		tvRootItem.getChildren().clear();
