@@ -118,7 +118,7 @@ public final class EditMachinesDialog extends Dialog<Machine> {
 				if (needsMachineReload) {
 					// if we changed the path of the current machine we need to reload it so the editor works again
 					// we already asked for confirmation above
-					Platform.runLater(() -> this.currentProject.loadMachineWithConfirmation(this.machine));
+					Platform.runLater(() -> this.currentProject.loadMachineWithoutConfirmation(this.machine));
 				}
 
 				return this.machine;
