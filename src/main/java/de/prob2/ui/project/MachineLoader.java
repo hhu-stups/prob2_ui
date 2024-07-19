@@ -1,13 +1,11 @@
 package de.prob2.ui.project;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 
@@ -30,6 +28,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.ErrorDisplayFilter;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.output.PrologOutput;
@@ -37,6 +36,7 @@ import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.EditMachinesDialog;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
 
@@ -47,8 +47,8 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-
 import javafx.scene.control.ButtonType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,6 +64,7 @@ public final class MachineLoader {
 	private final PrologOutput prologOutput;
 	private final StatusBar statusBar;
 	private final CliTaskExecutor cliExecutor;
+	private final I18n i18n;
 	private final Injector injector;
 
 	private final ReadOnlyBooleanWrapper loading;
@@ -82,6 +83,7 @@ public final class MachineLoader {
 		final PrologOutput prologOutput,
 		final StatusBar statusBar,
 		final CliTaskExecutor cliExecutor,
+		final I18n i18n,
 		final Injector injector
 	) {
 		this.currentProject = currentProject;
@@ -92,6 +94,7 @@ public final class MachineLoader {
 		this.prologOutput = prologOutput;
 		this.statusBar = statusBar;
 		this.cliExecutor = cliExecutor;
+		this.i18n = i18n;
 		this.injector = injector;
 
 		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
@@ -300,18 +303,23 @@ public final class MachineLoader {
 
 	private void showAlert(Throwable exception, Machine machine) {
 		Platform.runLater(() -> {
+			ButtonType edit = new ButtonType(i18n.translate("project.machineLoader.alerts.button.editMachine"));
 			List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(ButtonType.YES);
 			buttons.add(ButtonType.NO);
+			buttons.add(edit);
 			Alert alert =
 				stageManager.makeAlert(AlertType.ERROR, buttons,
 					"project.machineLoader.alerts.fileNotFound.header",
 					"project.machineLoader.alerts.fileNotFound.content",
 					exception.getLocalizedMessage(),
 					machine.getName());
-			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+			ButtonType result = alert.showAndWait().orElse(null);
+			if (ButtonType.YES.equals(result)) {
 				currentProject.removeMachine(machine);
+			} else if (edit.equals(result)) {
+				EditMachinesDialog editDialog = injector.getInstance(EditMachinesDialog.class);
+				editDialog.editAndShow(machine);
 			}
 		});
 	}
