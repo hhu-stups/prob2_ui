@@ -24,6 +24,14 @@
 									</tooltip>
 								</ChoiceBox>
 							</HBox>
+							<HBox fx:id="dfidDepthBox" HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT" spacing="5.0" visible="false">
+								<Label text="Initial depth"/>
+								<Spinner fx:id="dfidInitialDepth" editable="true">
+									<tooltip>
+										<Tooltip text="Initial depth" />
+									</tooltip>
+								</Spinner>
+							</HBox>
 						</HBox>
 					</VBox>
 				</AnchorPane>
