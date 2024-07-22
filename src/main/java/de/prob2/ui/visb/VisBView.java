@@ -49,7 +49,12 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -58,7 +63,6 @@ import javafx.scene.layout.VBox;
 import javafx.scene.web.WebErrorEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-import javafx.stage.WindowEvent;
 
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
@@ -207,13 +211,6 @@ public final class VisBView extends BorderPane {
 		};
 
 		ChangeListener<? super StateSpace> stateSpaceListener = (o, from, to) -> loadVisBFileFromMachine(currentProject.getCurrentMachine(), to);
-
-		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
-			this.currentProject.currentMachineProperty().removeListener(machineListener);
-			this.visBController.visBVisualisationProperty().removeListener(visBListener);
-			this.currentTrace.stateSpaceProperty().removeListener(stateSpaceListener);
-			visBController.setVisBPath(null);
-		});
 
 		// Load VisB file from machine, when window is opened and set listener on the current machine
 		this.currentProject.currentMachineProperty().addListener(machineListener);
