@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.TLCModelChecker;
 import de.prob.check.TLCModelCheckingOptions;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -15,13 +16,19 @@ import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import de.tlc4b.TLC4BCliOptions.TLCOption;
+import javafx.stage.DirectoryChooser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
 
 import static de.tlc4b.TLC4BCliOptions.TLCOption.*;
 
 @FXMLInjected
 public class TLCModelCheckingTab extends Tab {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TLCModelCheckingTab.class);
 
 	@FXML
 	private VBox errorMessageBox;
@@ -54,8 +61,20 @@ public class TLCModelCheckingTab extends Tab {
 	private CheckBox setupConstantsUsingProB;
 	@FXML
 	private Spinner<Integer> nrWorkers;
+	@FXML
+	private HBox saveLocationBox;
+	@FXML
+	private CheckBox saveGeneratedFiles;
+	@FXML
+	private TextField tfSaveLocation;
+	@FXML
+	private Button changeLocationButton;
+
+	private int oldNrWorkers = 1;
 
 	private final I18n i18n;
+
+	private final FileChooserManager fileChooserManager;
 
 	private final StageManager stageManager;
 
@@ -66,8 +85,10 @@ public class TLCModelCheckingTab extends Tab {
 	private ModelCheckingItem result;
 
 	@Inject
-	private TLCModelCheckingTab(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace) {
+	private TLCModelCheckingTab(final StageManager stageManager, final I18n i18n, final FileChooserManager fileChooserManager,
+	                            final CurrentProject currentProject, final CurrentTrace currentTrace) {
 		this.i18n = i18n;
+		this.fileChooserManager = fileChooserManager;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -88,8 +109,13 @@ public class TLCModelCheckingTab extends Tab {
 		this.selectSearchStrategy.getSelectionModel().selectedItemProperty().addListener((obs, from, to) -> {
 			if (to == ModelCheckingSearchStrategy.DEPTH_FIRST) {
 				this.dfidDepthBox.setVisible(true);
+				this.nrWorkers.setDisable(true);
+				this.oldNrWorkers = nrWorkers.getValue();
+				this.nrWorkers.getValueFactory().setValue(1);
 			} else {
 				this.dfidDepthBox.setVisible(false);
+				this.nrWorkers.getValueFactory().setValue(oldNrWorkers);
+				this.nrWorkers.setDisable(false);
 			}
 		});
 
@@ -105,6 +131,24 @@ public class TLCModelCheckingTab extends Tab {
 		});
 
 		this.tfAddLTL.visibleProperty().bind(addLTLFormula.selectedProperty());
+
+		this.saveLocationBox.visibleProperty().bind(saveGeneratedFiles.selectedProperty());
+		this.tfSaveLocation.setText(currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation()).getParent().resolve(currentProject.getCurrentMachine().getName()).toString());
+		this.changeLocationButton.setOnAction(e -> {
+			final DirectoryChooser chooser = new DirectoryChooser();
+			chooser.setInitialDirectory(currentProject.getLocation().toFile());
+			Path result = fileChooserManager.showDirectoryChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
+			if (result != null) {
+				try {
+					this.tfSaveLocation.setText(result.toRealPath().toString());
+				} catch (Exception ex) {
+					LOGGER.warn("error checking location for TLC4B output directory: {}", result);
+				}
+			}
+		});
+
+		// initialize with current preferences, e.g. WORKERS
+		this.setData(new TLCModelCheckingOptions(currentTrace.getStateSpace()).getOptions());
 	}
 
 	public static String getSearchStrategyNameKey(final ModelCheckingSearchStrategy searchStrategy) {
@@ -133,7 +177,8 @@ public class TLCModelCheckingTab extends Tab {
 			.checkLTLFormula(addLTLFormula.isSelected() ? tfAddLTL.getText() : null)
 			.setupConstantsUsingProB(setupConstantsUsingProB.isSelected())
 			.setNumberOfWorkers(nrWorkers.getValueFactory().getValue().toString())
-			// TODO: -dfid
+			.saveGeneratedFiles(saveGeneratedFiles.isSelected())
+			.outputDir(saveGeneratedFiles.isSelected() ? tfSaveLocation.getText() : null)
 			.getOptions();
 	}
 
@@ -155,23 +200,34 @@ public class TLCModelCheckingTab extends Tab {
 	}
 
 	public void setData(final TLCModelCheckingItem item) {
-		findDeadlocks.setSelected(!item.getOptions().containsKey(NODEAD));
-		findInvViolations.setSelected(!item.getOptions().containsKey(NOINV));
-		findBAViolations.setSelected(!item.getOptions().containsKey(NOASS));
-		checkWelldefinedness.setSelected(item.getOptions().containsKey(WDCHECK));
-		checkLTL.setSelected(!item.getOptions().containsKey(NOLTL));
-		checkGoal.setSelected(!item.getOptions().containsKey(NOGOAL));
-		String ltlFormula = item.getOptions().getOrDefault(LTLFORMULA, null);
+		setData(item.getOptions());
+		result = item;
+	}
+	
+	private void setData(final Map<TLCOption, String> options) {
+		if (options.containsKey(DFID)) {
+			selectSearchStrategy.getSelectionModel().select(ModelCheckingSearchStrategy.DEPTH_FIRST);
+			dfidInitialDepth.getValueFactory().setValue(Integer.parseInt(options.get(DFID)));
+		}
+		findDeadlocks.setSelected(!options.containsKey(NODEAD));
+		findInvViolations.setSelected(!options.containsKey(NOINV));
+		findBAViolations.setSelected(!options.containsKey(NOASS));
+		checkWelldefinedness.setSelected(options.containsKey(WDCHECK));
+		checkLTL.setSelected(!options.containsKey(NOLTL));
+		checkGoal.setSelected(!options.containsKey(NOGOAL));
+		String ltlFormula = options.getOrDefault(LTLFORMULA, null);
 		if (ltlFormula != null) {
 			addLTLFormula.setSelected(true);
 			tfAddLTL.setText(ltlFormula);
 		} else {
 			addLTLFormula.setSelected(false);
 		}
-		setupConstantsUsingProB.setSelected(item.getOptions().containsKey(CONSTANTSSETUP));
-		nrWorkers.getValueFactory().setValue(Integer.parseInt(item.getOptions().get(WORKERS)));
-		// TODO: -dfid
-		result = item;
+		setupConstantsUsingProB.setSelected(options.containsKey(CONSTANTSSETUP));
+		nrWorkers.getValueFactory().setValue(Integer.parseInt(options.get(WORKERS)));
+		saveGeneratedFiles.setSelected(!options.containsKey(TMP));
+		if (options.containsKey(OUTPUT)) {
+			tfSaveLocation.setText(options.get(OUTPUT));
+		}
 	}
 }
 

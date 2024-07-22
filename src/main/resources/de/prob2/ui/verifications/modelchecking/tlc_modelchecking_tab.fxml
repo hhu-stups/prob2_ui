@@ -125,6 +125,18 @@
 								</Spinner>
 							</HBox>
 						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="saveGeneratedFiles" text="Save generated files"/>
+							<HBox HBox.hgrow="always" fx:id="saveLocationBox">
+								<TextField fx:id="tfSaveLocation" HBox.hgrow="always">
+									<tooltip>
+										<Tooltip text="Location for generated files" />
+									</tooltip>
+								</TextField>
+								<Button fx:id="changeLocationButton" text="%common.buttons.editPathDots" HBox.hgrow="always"
+										style="-fx-background-color: white;"/>
+							</HBox>
+						</HBox>
 					</VBox>
 				</VBox>
 			</VBox>
