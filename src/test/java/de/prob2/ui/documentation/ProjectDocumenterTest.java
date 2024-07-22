@@ -54,7 +54,7 @@ class ProjectDocumenterTest {
 	final CurrentProject currentProject = Mockito.mock(CurrentProject.class);
 	private static final Path outputPath = Paths.get("src/test/resources/documentation/output/");
 	private final String outputFilename = "output";
-	final ModelCheckingItem proBModelCheckingItem = new ProBModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, "", new HashSet<>());
+	final ModelCheckingItem proBModelCheckingItem = new ProBModelCheckingItem("1", ModelCheckingSearchStrategy.RANDOM, 1, 1, new HashSet<>(), "");
 	final LTLFormulaItem ltlFormulaItem = new LTLFormulaItem("", "", "", -1, TemporalFormulaItem.StartState.ALL_INITIAL_STATES, null, true);
 	final SymbolicModelCheckingItem symbolicCheckingFormulaItem = new SymbolicModelCheckingItem("", SymbolicModelcheckCommand.Algorithm.BMC);
 	final LTLPatternItem ltlPatternItem = new LTLPatternItem("", "", "");
