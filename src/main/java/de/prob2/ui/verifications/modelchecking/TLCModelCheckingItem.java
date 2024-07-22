@@ -1,16 +1,31 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import com.fasterxml.jackson.annotation.*;
-import de.prob.check.*;
+import java.math.BigInteger;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
+import java.util.StringJoiner;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
+import de.prob.check.IModelCheckListener;
+import de.prob.check.IModelCheckingResult;
+import de.prob.check.ModelCheckingSearchStrategy;
+import de.prob.check.NotYetFinished;
+import de.prob.check.StateSpaceStats;
+import de.prob.check.TLCModelChecker;
+import de.prob.check.TLCModelCheckingOptions;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.*;
-import javafx.application.Platform;
-import de.prob.check.TLCModelChecker;
+import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 import de.tlc4b.TLC4BCliOptions.TLCOption;
 
-import java.math.BigInteger;
-import java.util.*;
+import javafx.application.Platform;
 
 @JsonPropertyOrder({
 	"id",
@@ -34,6 +49,16 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 		super(id);
 		this.searchStrategy = Objects.requireNonNull(searchStrategy);
 		this.options = Objects.requireNonNull(options, "options");
+	}
+
+	@Override
+	public ValidationTaskType<TLCModelCheckingItem> getTaskType() {
+		return BuiltinValidationTaskTypes.TLC_MODEL_CHECKING;
+	}
+
+	@Override
+	public String getTaskType(I18n i18n) {
+		return i18n.translate("verifications.modelchecking.type.tlc");
 	}
 
 	public Map<TLCOption, String> getOptions() {

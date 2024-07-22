@@ -14,7 +14,8 @@ import de.prob2.ui.verifications.cbc.CBCFindRedundantInvariantsItem;
 import de.prob2.ui.verifications.cbc.CBCInvariantPreservationCheckingItem;
 import de.prob2.ui.verifications.cbc.CBCRefinementCheckingItem;
 import de.prob2.ui.verifications.cbc.CBCStaticAssertionCheckingItem;
-import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
+import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
+import de.prob2.ui.verifications.modelchecking.TLCModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
 import de.prob2.ui.verifications.temporal.ctl.CTLFormulaItem;
@@ -42,7 +43,8 @@ public final class BuiltinValidationTaskTypes {
 	public static final ValidationTaskType<OperationCoverageItem> TEST_CASE_GENERATION_OPERATION_COVERAGE = register(new ValidationTaskType<>("TEST_CASE_GENERATION_OPERATION_COVERAGE", OperationCoverageItem.class));
 	public static final ValidationTaskType<SimulationItem> SIMULATION = register(new ValidationTaskType<>("SIMULATION", SimulationItem.class));
 	public static final ValidationTaskType<ReplayTrace> REPLAY_TRACE = register(new ValidationTaskType<>("REPLAY_TRACE", ReplayTrace.class));
-	public static final ValidationTaskType<ModelCheckingItem> MODEL_CHECKING = register(new ValidationTaskType<>("MODEL_CHECKING", ModelCheckingItem.class));
+	public static final ValidationTaskType<ProBModelCheckingItem> MODEL_CHECKING = register(new ValidationTaskType<>("MODEL_CHECKING", ProBModelCheckingItem.class));
+	public static final ValidationTaskType<TLCModelCheckingItem> TLC_MODEL_CHECKING = register(new ValidationTaskType<>("TLC_MODEL_CHECKING", TLCModelCheckingItem.class));
 	public static final ValidationTaskType<ProofObligationItem> PROOF_OBLIGATION = register(new ValidationTaskType<>("PROOF_OBLIGATION", ProofObligationItem.class));
 	public static final ValidationTaskType<VisualizationFormulaTask> VISUALIZATION_FORMULA = register(new ValidationTaskType<>("VISUALIZATION_FORMULA", VisualizationFormulaTask.class));
 
