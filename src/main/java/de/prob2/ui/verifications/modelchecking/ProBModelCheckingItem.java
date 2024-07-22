@@ -1,14 +1,12 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import java.time.Duration;
-import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -20,13 +18,6 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.ExecutionContext;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-
 @JsonPropertyOrder({
 	"id",
 	"searchStrategy",
@@ -37,9 +28,6 @@ import javafx.collections.FXCollections;
 	"selected",
 })
 public final class ProBModelCheckingItem extends ModelCheckingItem {
-
-	private final Set<ModelCheckingOptions.Options> options;
-
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final ModelCheckingSearchStrategy searchStrategy;
 
@@ -48,6 +36,8 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final Integer timeLimit;
+
+	private final Set<ModelCheckingOptions.Options> options;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String goal;
@@ -58,15 +48,15 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		@JsonProperty("searchStrategy") final ModelCheckingSearchStrategy searchStrategy,
 		@JsonProperty("nodesLimit") final Integer nodesLimit,
 		@JsonProperty("timeLimit") final Integer timeLimit,
-		@JsonProperty("goal") final String goal,
-		@JsonProperty("options") final Set<ModelCheckingOptions.Options> options
+		@JsonProperty("options") final Set<ModelCheckingOptions.Options> options,
+		@JsonProperty("goal") final String goal
 	) {
 		super(id);
 		this.searchStrategy = Objects.requireNonNull(searchStrategy);
 		this.nodesLimit = nodesLimit;
 		this.timeLimit = timeLimit;
-		this.goal = goal;
 		this.options = Objects.requireNonNull(options, "options");
+		this.goal = goal;
 	}
 
 	public String getGoal() {

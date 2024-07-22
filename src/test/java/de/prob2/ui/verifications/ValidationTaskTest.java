@@ -33,7 +33,7 @@ class ValidationTaskTest {
 	@Test
 	void testTaskSerDeser() throws Exception {
 		List<IValidationTask> tasks = List.of(
-			new ProBModelCheckingItem(null, ModelCheckingSearchStrategy.MIXED_BF_DF, null, null, null, Set.of(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS)),
+			new ProBModelCheckingItem(null, ModelCheckingSearchStrategy.MIXED_BF_DF, null, null, Set.of(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS), null),
 			new VisualizationFormulaTask(null, "do_some_dot_things", "1=1"),
 			new SimulationItem("xyz", Path.of("a/b/c"), SimulationType.MONTE_CARLO_SIMULATION, Map.of())
 		);

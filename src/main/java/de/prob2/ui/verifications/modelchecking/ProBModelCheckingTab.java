@@ -109,7 +109,7 @@ public class ProBModelCheckingTab extends Tab {
 		Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
 		Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;
 		String goal = findGoal.isSelected() ? tfFindGoal.getText() : null;
-		return new ProBModelCheckingItem(id, searchStrategy, nLimit, tLimit, goal, getOptions("GOAL".equals(goal)));
+		return new ProBModelCheckingItem(id, searchStrategy, nLimit, tLimit, getOptions("GOAL".equals(goal)), goal);
 	}
 
 	private Set<ModelCheckingOptions.Options> getOptions(boolean goal) {
