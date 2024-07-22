@@ -9,14 +9,13 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
-<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ProgressIndicator?>
 <fx:root type="VisBView" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" minHeight="160"
 		 minWidth="480">
 	<fx:define>
@@ -76,9 +75,10 @@
 				</items>
 			</MenuButton>
 			<Spacer/>
-			<Label fx:id="information" alignment="CENTER" BorderPane.alignment="CENTER"/>
-			<Spacer/>
-			<ProgressIndicator fx:id="inProgress" visible="false" managed="false" maxHeight="20" maxWidth="20"/>
+			<HBox fx:id="exportInProgress" spacing="5" visible="false" managed="false">
+				<Label text="%visb.infobox.html.exporting" alignment="CENTER"/>
+				<ProgressIndicator maxHeight="20" maxWidth="20"/>
+			</HBox>
 			<Spacer/>
 			<Button fx:id="zoomInButton" onAction="#zoomIn">
 				<graphic>

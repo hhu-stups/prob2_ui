@@ -64,7 +64,6 @@ public final class VisBController {
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
-	private final I18n i18n;
 
 	private final ObjectProperty<Path> visBPath;
 	private final ObjectProperty<VisBVisualisation> visBVisualisation;
@@ -82,7 +81,6 @@ public final class VisBController {
 		this.injector = injector;
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
-		this.i18n = i18n;
 		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.attributeValues = FXCollections.observableHashMap();
@@ -153,7 +151,6 @@ public final class VisBController {
 			this.attributeValues.putAll(getAttributesCmd.getValues());
 		} catch (ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
-			updateInfo("visb.infobox.visualisation.error");
 			visBView.clear();
 			return;
 		}
@@ -162,7 +159,6 @@ public final class VisBController {
 			visBView.resetMessages();
 		} catch (JSException e){
 			alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
-			updateInfo("visb.infobox.visualisation.error");
 		}
 	}
 
@@ -173,18 +169,6 @@ public final class VisBController {
 		Alert exceptionAlert = this.stageManager.makeExceptionAlert(ex, header, message, params);
 		exceptionAlert.initOwner(injector.getInstance(VisBView.class).getScene().getWindow());
 		exceptionAlert.showAndWait();
-	}
-
-	/**
-	 * This redirects the information to the {@link VisBView}.
-	 * @param key bundlekey for string
-	 */
-	private void updateInfo(String key){
-		injector.getInstance(VisBView.class).updateInfo(i18n.translate(key));
-	}
-
-	private void updateInfo(String key, Object... params){
-		injector.getInstance(VisBView.class).updateInfo(i18n.translate(key, params));
 	}
 
 	/**
@@ -206,7 +190,7 @@ public final class VisBController {
 			List<Transition> transitions = performClickCommand.getTransitions();
 
 			if (transitions.isEmpty()) {
-				updateInfo("visb.infobox.no.events.for.id", id);
+				LOGGER.debug("No events found for id: {}", id);
 			} else {
 				LOGGER.debug("Executing event for id: "+id + " and preds = " + event.getPredicates());
 				Trace trace = currentTrace.get().addTransitions(transitions);
@@ -217,11 +201,9 @@ public final class VisBController {
 					UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
 					uiInteraction.addUserInteraction(realTimeSimulator, transition);
 				}
-				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
 			}
 		} catch (ExecuteOperationException e) {
 			LOGGER.debug("Cannot execute event for id: {}", id, e);
-			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			if (e.getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
 				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
 				alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
@@ -229,7 +211,6 @@ public final class VisBController {
 			}
 		} catch (EvaluationException e) {
 			LOGGER.debug("Cannot execute event for id: {}", id, e);
-			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
 			Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
 			alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
 			alert.show();
@@ -248,7 +229,7 @@ public final class VisBController {
 				uiInteraction.addUserInteraction(realTimeSimulator, transition);
 			}
 		} else {
-			updateInfo("visb.infobox.events.not.initialise");
+			LOGGER.debug("Cannot perform non-deterministic initialization from VisB");
 		}
 	}
 
@@ -258,11 +239,6 @@ public final class VisBController {
 		}
 		this.visBVisualisation.set(null);
 		setupVisualisation(this.getVisBPath());
-		if (this.getVisBVisualisation() == null) {
-			updateInfo("visb.infobox.visualisation.error");
-			return;
-		}
-		LOGGER.debug("Visualisation has been reloaded.");
 	}
 
 	/**
@@ -328,11 +304,9 @@ public final class VisBController {
 			this.visBVisualisation.set(null);
 			LOGGER.warn("error while loading visb file", e);
 			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
-			updateInfo("visb.infobox.visualisation.error");
 			return;
 		}
 
-		updateInfo("visb.infobox.visualisation.initialise");
 		updateVisualisationIfPossible();
 	}
 
@@ -348,10 +322,10 @@ public final class VisBController {
 		} else {
 			showUpdateVisualisationNotPossible();
 		}
+		LOGGER.debug("Visualisation has been reloaded.");
 	}
 
 	private void showUpdateVisualisationNotPossible(){
-		updateInfo("visb.infobox.visualisation.updated");
 		injector.getInstance(VisBView.class).showModelNotInitialised();
 	}
 }

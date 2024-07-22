@@ -52,6 +52,7 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebErrorEvent;
@@ -114,9 +115,7 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private MenuItem exportCurrentStateItem;
 	@FXML
-	private Label information;
-	@FXML
-	private ProgressIndicator inProgress;
+	private HBox exportInProgress;
 	@FXML
 	private VBox placeholder;
 	@FXML
@@ -170,7 +169,6 @@ public final class VisBView extends BorderPane {
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			manageDefaultVisualisationButton.disableProperty().unbind();
 			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
-			information.setText("");
 			if (to == null) {
 				placeholderLabel.setText(i18n.translate("common.noModelLoaded"));
 			} else {
@@ -183,7 +181,6 @@ public final class VisBView extends BorderPane {
 				this.clear();
 			} else {
 				this.loadSvgFile(to);
-				updateInfo(i18n.translate("visb.infobox.visualisation.svg.loaded"));
 				this.runWhenLoaded(() -> {
 					final JSObject window = this.getJSWindow();
 
@@ -254,11 +251,9 @@ public final class VisBView extends BorderPane {
 			if (change.wasAdded()) {
 				try {
 					this.changeAttribute(change.getKey().getId(), change.getKey().getAttribute(), change.getValueAdded());
-					updateInfo(i18n.translate("visb.infobox.visualisation.updated"));
 				} catch (final JSException e) {
 					LOGGER.error("JavaScript error while updating VisB attributes", e);
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
-					updateInfo(i18n.translate("visb.infobox.visualisation.error"));
 				}
 			}
 		});
@@ -420,18 +415,9 @@ public final class VisBView extends BorderPane {
 		this.runWhenLoaded(() -> this.getJSWindow().call("resetMessages"));
 	}
 
-	void updateInfo(String text, boolean indicateProgress) {
-		information.setText(text);
-		inProgress.setManaged(indicateProgress);
-		inProgress.setVisible(indicateProgress);
-	}
-
-	/**
-	 * Setter for the info label.
-	 * @param text to be set
-	 */
-	void updateInfo(String text){
-		updateInfo(text, false);
+	private void showExportInProgress(boolean visible) {
+		exportInProgress.setManaged(visible);
+		exportInProgress.setVisible(visible);
 	}
 
 	/**
@@ -596,10 +582,9 @@ public final class VisBView extends BorderPane {
 				return null;
 			}
 		};
-		task.setOnRunning(r -> updateInfo(i18n.translate("visb.infobox.html.create"), true));
-		task.setOnSucceeded(s -> updateInfo(i18n.translate("visb.infobox.html.completed")));
-		// in fail case there is hopefully an exception with more information:
-		task.setOnFailed(f -> updateInfo(""));
+		task.setOnRunning(r -> showExportInProgress(true));
+		task.setOnSucceeded(s -> showExportInProgress(false));
+		task.setOnFailed(f -> showExportInProgress(false));
 		// makes UI responsive, but we can't do anything with the model during export anyway...
 		cliExecutor.execute(task);
 	}
