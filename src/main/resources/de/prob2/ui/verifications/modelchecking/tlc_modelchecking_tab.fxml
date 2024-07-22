@@ -33,7 +33,7 @@
 							 AnchorPane.bottomAnchor="0.0">
 					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="%verifications.modelchecking.modelcheckingStage.errors" style="-fx-font-weight: bold;"/>
+							<Label text="Search for Errors and Properties:" style="-fx-font-weight: bold;"/>
 						</HBox>
 					</VBox>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
@@ -77,28 +77,21 @@
 								</tooltip>
 							</CheckBox>
 						</HBox>
-					</VBox>
-					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="%verifications.modelchecking.modelcheckingStage.goals" style="-fx-font-weight: bold;"/>
-						</HBox>
-					</VBox>
-					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="checkGoal"
-									  text="Check GOAL">
-								<tooltip>
-									<Tooltip text="Check GOAL" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="addLTLFormula" text="Check LTL formula"/>
-							<TextField fx:id="tfAddLTL" text="LTL">
+							<CheckBox fx:id="addLTLFormula" text="Check custom LTL formula"/>
+							<TextField fx:id="tfAddLTL" promptText="LTL formula" HBox.hgrow="always">
 								<tooltip>
 									<Tooltip text="Add LTL formula" />
 								</tooltip>
 							</TextField>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="checkGoal"
+									  text="Search for GOAL">
+								<tooltip>
+									<Tooltip text="Search for GOAL" />
+								</tooltip>
+							</CheckBox>
 						</HBox>
 					</VBox>
 					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
@@ -115,12 +108,14 @@
 							</CheckBox>
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<Label text="Number of workers"/>
-							<Spinner fx:id="nrWorkers" editable="true">
-								<tooltip>
-									<Tooltip text="Number of workers" />
-								</tooltip>
-							</Spinner>
+							<Label text="Number of workers" style="-fx-text-fill: white;"/>
+							<HBox HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT">
+								<Spinner fx:id="nrWorkers" editable="true">
+									<tooltip>
+										<Tooltip text="Number of workers" />
+									</tooltip>
+								</Spinner>
+							</HBox>
 						</HBox>
 					</VBox>
 				</VBox>
@@ -130,7 +125,7 @@
 			<BindableGlyph styleClass="icon-dark" style="-fx-text-fill: red;" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 6}"/>
 			<VBox alignment="CENTER" spacing="10">
 				<Label style="-fx-text-fill: red; -fx-font-weight: bold;" text="TLC Model Checking not applicable:"/>
-				<Label fx:id="errorMessage" style="-fx-text-fill: red;"/>
+				<Label fx:id="errorMessage" style="-fx-text-fill: red;" wrapText="true" prefWidth="350" alignment="CENTER"/>
 			</VBox>
 		</VBox>
 	</StackPane>

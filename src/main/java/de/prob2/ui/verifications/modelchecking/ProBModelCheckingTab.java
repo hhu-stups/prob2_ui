@@ -79,7 +79,7 @@ public class ProBModelCheckingTab extends Tab {
 				nodesLimit.getValueFactory().setValue(Integer.parseInt(to));
 			} catch (NumberFormatException e) {
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.invalidInput");
-				alert.initOwner(this.getTabPane().getScene().getWindow());
+				alert.initOwner(stageManager.getCurrent());
 				alert.showAndWait();
 			}
 		});
@@ -88,7 +88,7 @@ public class ProBModelCheckingTab extends Tab {
 				timeLimit.getValueFactory().setValue(Integer.parseInt(to));
 			} catch (NumberFormatException e) {
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.invalidInput");
-				alert.initOwner(this.getTabPane().getScene().getWindow());
+				alert.initOwner(stageManager.getCurrent());
 				alert.showAndWait();
 			}
 		});

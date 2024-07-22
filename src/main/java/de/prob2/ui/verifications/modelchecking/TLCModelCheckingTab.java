@@ -80,18 +80,17 @@ public class TLCModelCheckingTab extends Tab {
 		this.selectSearchStrategy.setConverter(i18n.translateConverter(TranslatableAdapter.adapter(TLCModelCheckingTab::getSearchStrategyNameKey)));
 
 		this.nrWorkers.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1));
-		this.nrWorkers.getValueFactory().setValue(Integer.valueOf(currentTrace.getStateSpace().getCurrentPreference("TLC_WORKERS")));
 		this.nrWorkers.getEditor().textProperty().addListener((observable, from, to) -> {
 			try {
 				nrWorkers.getValueFactory().setValue(Integer.parseInt(to));
 			} catch (NumberFormatException e) {
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.invalidInput");
-				//alert.initOwner(this);
+				alert.initOwner(stageManager.getCurrent());
 				alert.showAndWait();
 			}
 		});
 
-		this.tfAddLTL.visibleProperty().bind(checkLTL.selectedProperty());
+		this.tfAddLTL.visibleProperty().bind(addLTLFormula.selectedProperty());
 	}
 
 	public static String getSearchStrategyNameKey(final ModelCheckingSearchStrategy searchStrategy) {
@@ -104,7 +103,6 @@ public class TLCModelCheckingTab extends Tab {
 
 	ModelCheckingItem startModelCheck(String id) {
 		ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
-		// provide/open/load TLA generated file for inspection (in UI), independently from MC
 		return new TLCModelCheckingItem(id, searchStrategy, getOptions());
 	}
 
