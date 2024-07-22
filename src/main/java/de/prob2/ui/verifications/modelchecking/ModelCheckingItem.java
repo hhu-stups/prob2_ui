@@ -1,17 +1,27 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import de.prob.statespace.Trace;
+
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.*;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ICliTask;
+import de.prob2.ui.verifications.ISelectableTask;
+import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import javafx.beans.property.*;
-import javafx.collections.FXCollections;
 
-import java.util.*;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleListProperty;
+import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 
 // TODO: adapt JSON handling
 public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, ITraceTask {
@@ -83,8 +93,6 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 		return i18n.translate("verifications.modelchecking.type");
 	}
 
-	public abstract String getTaskDescription(final I18n i18n);
-
 	@Override
 	@JsonProperty("selected")
 	public void setSelected(boolean selected) {
@@ -122,10 +130,6 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 		this.currentStepProperty().set(currentStep);
 	}
 
-	public abstract Trace getTrace();
-
-	public abstract void execute(final ExecutionContext context);
-
 	@Override
 	public void resetAnimatorDependentState() {
 		// Clearing the steps list causes the listener to reset the status,
@@ -140,16 +144,5 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 	public void reset() {
 		this.status.set(CheckingStatus.NOT_CHECKED);
 		this.resetAnimatorDependentState();
-	}
-
-	@Override
-	public boolean settingsEqual(Object obj) {
-		boolean equals = false;
-		if (obj instanceof ProBModelCheckingItem proBItem) {
-			equals = proBItem.settingsEqual(this);
-		} else if (obj instanceof TLCModelCheckingItem tlcItem) {
-			equals = tlcItem.settingsEqual(this);
-		}
-		return equals;
 	}
 }
