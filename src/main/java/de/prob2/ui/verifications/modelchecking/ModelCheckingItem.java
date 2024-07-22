@@ -6,13 +6,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ICliTask;
 import de.prob2.ui.verifications.ISelectableTask;
 import de.prob2.ui.verifications.ITraceTask;
-import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
-import de.prob2.ui.verifications.type.ValidationTaskType;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
@@ -23,7 +20,6 @@ import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 
-// TODO: adapt JSON handling
 public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, ITraceTask {
 	@JsonIgnore
 	private final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
@@ -81,16 +77,6 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 	@Override
 	public String getId() {
 		return this.id;
-	}
-
-	@Override
-	public ValidationTaskType<ModelCheckingItem> getTaskType() {
-		return BuiltinValidationTaskTypes.MODEL_CHECKING;
-	}
-
-	@Override
-	public String getTaskType(final I18n i18n) {
-		return i18n.translate("verifications.modelchecking.type");
 	}
 
 	@Override

@@ -17,6 +17,8 @@ import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 
 @JsonPropertyOrder({
 	"id",
@@ -57,6 +59,16 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		this.timeLimit = timeLimit;
 		this.options = Objects.requireNonNull(options, "options");
 		this.goal = goal;
+	}
+
+	@Override
+	public ValidationTaskType<ProBModelCheckingItem> getTaskType() {
+		return BuiltinValidationTaskTypes.MODEL_CHECKING;
+	}
+
+	@Override
+	public String getTaskType(I18n i18n) {
+		return i18n.translate("verifications.modelchecking.type.prob");
 	}
 
 	public String getGoal() {

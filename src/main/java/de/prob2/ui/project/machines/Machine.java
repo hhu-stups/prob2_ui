@@ -363,7 +363,7 @@ public final class Machine {
 
 	@JsonIgnore
 	public ObservableList<ModelCheckingItem> getModelCheckingTasks() {
-		return this.getValidationTasksByType(BuiltinValidationTaskTypes.MODEL_CHECKING);
+		return this.getValidationTasksByClass(ModelCheckingItem.class);
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> modelCheckingStatusProperty() {
