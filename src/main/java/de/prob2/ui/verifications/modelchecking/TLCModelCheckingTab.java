@@ -12,6 +12,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import de.tlc4b.TLC4BCliOptions.TLCOption;
 
@@ -28,6 +29,10 @@ public class TLCModelCheckingTab extends Tab {
 	private Label errorMessage;
 	@FXML
 	private ChoiceBox<ModelCheckingSearchStrategy> selectSearchStrategy;
+	@FXML
+	private HBox dfidDepthBox;
+	@FXML
+	private Spinner<Integer> dfidInitialDepth;
 	@FXML
 	private CheckBox findDeadlocks;
 	@FXML
@@ -79,6 +84,15 @@ public class TLCModelCheckingTab extends Tab {
 		this.selectSearchStrategy.setValue(ModelCheckingSearchStrategy.BREADTH_FIRST);
 		this.selectSearchStrategy.setConverter(i18n.translateConverter(TranslatableAdapter.adapter(TLCModelCheckingTab::getSearchStrategyNameKey)));
 
+		this.dfidInitialDepth.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1));
+		this.selectSearchStrategy.getSelectionModel().selectedItemProperty().addListener((obs, from, to) -> {
+			if (to == ModelCheckingSearchStrategy.DEPTH_FIRST) {
+				this.dfidDepthBox.setVisible(true);
+			} else {
+				this.dfidDepthBox.setVisible(false);
+			}
+		});
+
 		this.nrWorkers.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1));
 		this.nrWorkers.getEditor().textProperty().addListener((observable, from, to) -> {
 			try {
@@ -108,6 +122,8 @@ public class TLCModelCheckingTab extends Tab {
 
 	private Map<TLCOption, String> getOptions() {
 		return new TLCModelCheckingOptions(currentTrace.getStateSpace())
+			.useDepthFirstSearch(selectSearchStrategy.getSelectionModel().getSelectedItem() == ModelCheckingSearchStrategy.DEPTH_FIRST ?
+				String.valueOf(dfidInitialDepth.getValue()) : null)
 			.checkDeadlocks(findDeadlocks.isSelected())
 			.checkInvariantViolations(findInvViolations.isSelected())
 			.checkAssertions(findBAViolations.isSelected())

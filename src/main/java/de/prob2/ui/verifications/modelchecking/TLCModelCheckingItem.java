@@ -51,13 +51,16 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 
 		final String strategyKey = TLCModelCheckingTab.getSearchStrategyNameKey(this.getSearchStrategy());
 		if (strategyKey != null) {
-			s.add(i18n.translate(strategyKey));
+			String depth = this.options.containsKey(TLCOption.DFID) ? " (" + this.options.get(TLCOption.DFID) + ")" : "";
+			s.add(i18n.translate(strategyKey) + depth);
 		} else {
 			s.add(this.getSearchStrategy().toString());
 		}
 		Map<TLCOption, String> opts = this.getOptions();
 		for (TLCOption opt : opts.keySet()) {
-			s.add(opt.arg());//i18n.translate("verifications.modelchecking.description.option." + opt.getPrologName()));
+			if (opt == TLCOption.DFID)
+				continue; // already handled by search strategy
+			s.add(opt.arg());//i18n.translate("verifications.modelchecking.description.tlcOption." + opt.arg()));
 		}
 		return s.toString();
 	}
