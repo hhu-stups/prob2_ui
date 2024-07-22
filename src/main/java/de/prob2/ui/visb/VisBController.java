@@ -320,12 +320,8 @@ public final class VisBController {
 			//Updates visualisation, only if current state is initialised and visualisation items are not empty
 			applySVGChanges();
 		} else {
-			showUpdateVisualisationNotPossible();
+			injector.getInstance(VisBView.class).showModelNotInitialised();
 		}
 		LOGGER.debug("Visualisation has been reloaded.");
-	}
-
-	private void showUpdateVisualisationNotPossible(){
-		injector.getInstance(VisBView.class).showModelNotInitialised();
 	}
 }
