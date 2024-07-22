@@ -82,6 +82,9 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			s.add(this.getSearchStrategy().toString());
 		}
 		Map<TLCOption, String> opts = this.getOptions();
+		if (opts.containsKey(TLCOption.WORKERS)) {
+			s.add(opts.get(TLCOption.WORKERS) + " workers");
+		}
 		if (!opts.containsKey(TLCOption.NODEAD)) {
 			s.add(i18n.translate("verifications.modelchecking.description.option.find_deadlocks"));
 		}
@@ -95,12 +98,15 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			s.add(i18n.translate("verifications.modelchecking.description.option.find_goal"));
 		}
 		if (!opts.containsKey(TLCOption.NOLTL)) {
-			s.add("Check LTL assertions");//i18n.translate("verifications.modelchecking.description.option.find_goal"));
+			s.add(i18n.translate("verifications.modelchecking.description.tlcOption.noltl"));
 		}
 		for (TLCOption opt : opts.keySet()) {
-			if (opt == TLCOption.DFID)
-				continue; // already handled by search strategy
-			s.add(opt.arg());//i18n.translate("verifications.modelchecking.description.tlcOption." + opt.arg()));
+			if (opt == TLCOption.DFID || opt == TLCOption.NODEAD || opt == TLCOption.NOINV || opt == TLCOption.NOASS
+				|| opt == TLCOption.NOGOAL || opt == TLCOption.NOLTL || opt == TLCOption.WORKERS )
+				continue; // already handled
+			if (opt == TLCOption.MININT || opt == TLCOption.MAXINT || opt == TLCOption.TMP)
+				continue; // ignore for now
+			s.add(i18n.translate("verifications.modelchecking.description.tlcOption." + opt.arg()));
 		}
 		return s.toString();
 	}
