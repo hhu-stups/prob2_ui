@@ -57,6 +57,21 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			s.add(this.getSearchStrategy().toString());
 		}
 		Map<TLCOption, String> opts = this.getOptions();
+		if (!opts.containsKey(TLCOption.NODEAD)) {
+			s.add(i18n.translate("verifications.modelchecking.description.option.find_deadlocks"));
+		}
+		if (!opts.containsKey(TLCOption.NOINV)) {
+			s.add(i18n.translate("verifications.modelchecking.description.option.find_invariant_violations"));
+		}
+		if (!opts.containsKey(TLCOption.NOASS)) {
+			s.add(i18n.translate("verifications.modelchecking.description.option.find_assertion_violations"));
+		}
+		if (!opts.containsKey(TLCOption.NOGOAL)) {
+			s.add(i18n.translate("verifications.modelchecking.description.option.find_goal"));
+		}
+		if (!opts.containsKey(TLCOption.NOLTL)) {
+			s.add("Check LTL assertions");//i18n.translate("verifications.modelchecking.description.option.find_goal"));
+		}
 		for (TLCOption opt : opts.keySet()) {
 			if (opt == TLCOption.DFID)
 				continue; // already handled by search strategy
@@ -93,7 +108,12 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 				updateStats(jobId, timeElapsed, result, stats);
 			}
 		};
-		TLCModelChecker tlcModelChecker = new TLCModelChecker(context.project().getLocation().resolve(context.machine().getLocation()).toString(), context.trace().getStateSpace(), listener);
+		TLCModelChecker tlcModelChecker = new TLCModelChecker(
+			context.project().getLocation().resolve(context.machine().getLocation()).toString(),
+			context.trace().getStateSpace(),
+			listener,
+			// this.options already contains the options set by ProB preferences, which have not been overwritten!
+			new TLCModelCheckingOptions(context.stateSpace(), getOptions()));
 
 		try {
 			setCurrentStep(initialStep);
