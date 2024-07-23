@@ -20,7 +20,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.layout.VBox;
 
-public final class VisBTableItemCell extends TableCell<VisBTableItem, String> {
+public final class VisBTableItemCell extends TableCell<VisBTableItem, VisBItem> {
 	@FXML
 	private VBox itemBox;
 	@FXML
@@ -32,8 +32,6 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 	@FXML
 	private Label lbValue;
 
-	private VisBItem visBItem;
-
 	private final I18n i18n;
 
 	private final Injector injector;
@@ -43,7 +41,6 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
 
 	public VisBTableItemCell(final StageManager stageManager, final I18n i18n, final Injector injector, final Map<String, VisBEvent> eventsById, final ObservableMap<VisBItem.VisBItemKey, String> attributeValues) {
-		this.visBItem = null;
 		this.i18n = i18n;
 		this.injector = injector;
 		this.eventsById = eventsById;
@@ -57,8 +54,8 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 		this.setText("");
 		this.setGraphic(this.itemBox);
 		this.hoverProperty().addListener((observable, from, to) -> {
-			if(visBItem != null) {
-				String id = visBItem.getId();
+			if (!this.isEmpty()) {
+				String id = this.getItem().getId();
 				if(eventsById.containsKey(id)) {
 					for (VisBHover hover : eventsById.get(id).getHovers()) {
 						injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
@@ -69,18 +66,14 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 	}
 
 	@Override
-	protected void updateItem(final String visBItem, final boolean empty){
-		super.updateItem(visBItem, empty);
-		final VisBTableItem item = this.getTableRow().getItem();
-		if (item == null) {
-			return;
-		}
-		this.visBItem = item.getVisBItem();
-		if(this.visBItem != null) {
-			this.lbID.setText(this.visBItem.getId());
-			this.lbAttribute.setText(i18n.translate("visb.item.attribute", this.visBItem.getAttribute()));
-			this.lbExpression.setText(i18n.translate("visb.item.expression", this.visBItem.getExpression()));
-			final StringExpression valueBinding = Bindings.stringValueAt(this.attributeValues, this.visBItem.getKey());
+	protected void updateItem(VisBItem item, boolean empty){
+		super.updateItem(item, empty);
+
+		if (!empty) {
+			this.lbID.setText(item.getId());
+			this.lbAttribute.setText(i18n.translate("visb.item.attribute", item.getAttribute()));
+			this.lbExpression.setText(i18n.translate("visb.item.expression", item.getExpression()));
+			final StringExpression valueBinding = Bindings.stringValueAt(this.attributeValues, item.getKey());
 			this.lbValue.textProperty().bind(i18n.translateBinding("visb.item.value",
 					Bindings.when(valueBinding.isNull())
 							.then(i18n.translateBinding("visb.item.value.notInitialized"))
@@ -101,9 +94,5 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 		this.lbValue.setText("");
 		this.setGraphic(this.itemBox);
 		this.setText("");
-	}
-
-	public void setVisBItem(VisBItem visBItem) {
-		this.visBItem = visBItem;
 	}
 }

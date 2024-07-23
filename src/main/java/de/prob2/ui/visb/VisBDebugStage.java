@@ -23,7 +23,6 @@ import de.prob2.ui.visb.ui.VisBTableItemCell;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -91,7 +90,7 @@ public final class VisBDebugStage extends Stage {
 	private TableColumn<VisBTableItem, CheckBox> selectedColumn;
 
 	@FXML
-	private TableColumn<VisBTableItem, String> itemColumn;
+	private TableColumn<VisBTableItem, VisBItem> itemColumn;
 
 	@FXML
 	private ListView<VisBEvent> visBEvents;
@@ -131,7 +130,7 @@ public final class VisBDebugStage extends Stage {
 		this.selectedColumn.setGraphic(selectAll);
 
 		this.itemColumn.setCellFactory(param -> new VisBTableItemCell(stageManager, i18n, injector, eventsById, visBController.getAttributeValues()));
-		this.itemColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+		this.itemColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getVisBItem()));
 
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, i18n, injector));
 		this.currentTrace.addListener((observable, from, to) -> refresh());
