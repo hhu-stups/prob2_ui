@@ -19,18 +19,22 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.ui.ListViewEvent;
-import de.prob2.ui.visb.ui.VisBTableItemCell;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
@@ -68,6 +72,62 @@ public final class VisBDebugStage extends Stage {
 					this.selectAll.setSelected(param.getTableView().getItems().stream().anyMatch(VisBTableItem::isSelected))
 			);
 			return new SimpleObjectProperty<>(checkBox);
+		}
+	}
+
+	private final class VisBTableItemCell extends TableCell<VisBTableItem, VisBItem> {
+		@FXML
+		private VBox itemBox;
+		@FXML
+		private Label lbID;
+		@FXML
+		private Label lbExpression;
+		@FXML
+		private Label lbAttribute;
+		@FXML
+		private Label lbValue;
+
+		private VisBTableItemCell() {
+			stageManager.loadFXML(this, "visb_debug_item_cell.fxml");
+		}
+
+		@FXML
+		private void initialize() {
+			this.hoverProperty().addListener((observable, from, to) -> {
+				if (!this.isEmpty()) {
+					String id = this.getItem().getId();
+					if (eventsById.containsKey(id)) {
+						for (VisBHover hover : eventsById.get(id).getHovers()) {
+							injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+						}
+					}
+				}
+			});
+		}
+
+		@Override
+		protected void updateItem(VisBItem item, boolean empty) {
+			super.updateItem(item, empty);
+
+			this.setText("");
+			this.setGraphic(this.itemBox);
+			if (!empty) {
+				this.lbID.setText(item.getId());
+				this.lbAttribute.setText(i18n.translate("visb.item.attribute", item.getAttribute()));
+				this.lbExpression.setText(i18n.translate("visb.item.expression", item.getExpression()));
+				final StringExpression valueBinding = Bindings.stringValueAt(visBController.getAttributeValues(), item.getKey());
+				this.lbValue.textProperty().bind(i18n.translateBinding("visb.item.value",
+						Bindings.when(valueBinding.isNull())
+								.then(i18n.translateBinding("visb.item.value.notInitialized"))
+								.otherwise(i18n.translateBinding("common.quoted", valueBinding))
+				));
+			} else {
+				this.lbID.setText("");
+				this.lbAttribute.setText("");
+				this.lbExpression.setText("");
+				this.lbValue.textProperty().unbind();
+				this.lbValue.setText("");
+			}
 		}
 	}
 
@@ -129,7 +189,7 @@ public final class VisBDebugStage extends Stage {
 		this.selectedColumn.setCellValueFactory(new VisBSelectionCell(visBItems, selectAll));
 		this.selectedColumn.setGraphic(selectAll);
 
-		this.itemColumn.setCellFactory(param -> new VisBTableItemCell(stageManager, i18n, injector, eventsById, visBController.getAttributeValues()));
+		this.itemColumn.setCellFactory(param -> new VisBTableItemCell());
 		this.itemColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getVisBItem()));
 
 		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, i18n, injector));
