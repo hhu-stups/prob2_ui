@@ -15,7 +15,6 @@ import javax.imageio.ImageIO;
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.ExportVisBForHistoryCommand;
@@ -84,7 +83,6 @@ public final class VisBView extends BorderPane {
 	private final CurrentTrace currentTrace;
 	private final CliTaskExecutor cliExecutor;
 	private final FileChooserManager fileChooserManager;
-	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
 
 	@FXML
@@ -94,7 +92,13 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private Button reloadVisualisationButton;
 	@FXML
-	private Button manageDefaultVisualisationButton;
+	private MenuItem loadDefaultItem;
+	@FXML
+	private MenuItem loadFromDefinitionsItem;
+	@FXML
+	private MenuItem setCurrentAsDefaultItem;
+	@FXML
+	private MenuItem unsetDefaultItem;
 	@FXML
 	private Button openSimulationButton;
 	@FXML
@@ -143,7 +147,6 @@ public final class VisBView extends BorderPane {
 		CurrentTrace currentTrace,
 		CliTaskExecutor cliExecutor,
 		FileChooserManager fileChooserManager,
-		Provider<DefaultPathDialog> defaultPathDialogProvider,
 		VisBController visBController
 	) {
 		super();
@@ -154,7 +157,6 @@ public final class VisBView extends BorderPane {
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
 		this.fileChooserManager = fileChooserManager;
-		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.visBController = visBController;
 		this.stageManager.loadFXML(this, "visb_view.fxml");
 	}
@@ -171,12 +173,24 @@ public final class VisBView extends BorderPane {
 		this.saveTraceButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
-			manageDefaultVisualisationButton.disableProperty().unbind();
-			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.absoluteVisBPathProperty().isNull()));
+			loadDefaultItem.disableProperty().unbind();
+			loadFromDefinitionsItem.disableProperty().unbind();
+			setCurrentAsDefaultItem.disableProperty().unbind();
+			unsetDefaultItem.disableProperty().unbind();
 			if (to == null) {
 				placeholderLabel.setText(i18n.translate("common.noModelLoaded"));
+				loadDefaultItem.setDisable(true);
+				loadFromDefinitionsItem.setDisable(true);
+				setCurrentAsDefaultItem.setDisable(true);
+				unsetDefaultItem.setDisable(true);
 			} else {
 				placeholderLabel.setText(i18n.translate("visb.placeholder.text"));
+				loadDefaultItem.disableProperty().bind(to.visBVisualizationProperty().isNull()
+					.or(visBController.relativeVisBPathProperty().isEqualTo(to.visBVisualizationProperty())));
+				loadFromDefinitionsItem.disableProperty().bind(visBController.relativeVisBPathProperty().isEqualTo(VisBController.NO_PATH));
+				setCurrentAsDefaultItem.disableProperty().bind(visBController.relativeVisBPathProperty().isNull()
+					.or(visBController.relativeVisBPathProperty().isEqualTo(to.visBVisualizationProperty())));
+				unsetDefaultItem.disableProperty().bind(to.visBVisualizationProperty().isNull());
 			}
 		};
 
@@ -517,35 +531,23 @@ public final class VisBView extends BorderPane {
 	}
 
 	@FXML
-	public void manageDefaultVisualisation() {
-		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
-		defaultPathDialog.initOwner(this.getScene().getWindow());
+	private void loadDefault() {
+		this.loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+	}
 
-		final Path loadedPathRelative = visBController.getRelativeVisBPath();
-		final Machine currentMachine = currentProject.getCurrentMachine();
-		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getVisBVisualisation());
-		defaultPathDialog.showAndWait().ifPresent(action -> {
-			switch (action) {
-				case LOAD_DEFAULT:
-					this.loadVisBFileFromMachine(currentMachine, currentTrace.getStateSpace());
-					break;
+	@FXML
+	private void loadFromDefinitions() {
+		visBController.loadFromAbsolutePath(getPathFromDefinitions(currentTrace.getStateSpace()));
+	}
 
-				case LOAD_DEFINITIONS:
-					visBController.loadFromAbsolutePath(getPathFromDefinitions(currentTrace.getStateSpace()));
-					break;
+	@FXML
+	private void setCurrentAsDefault() {
+		currentProject.getCurrentMachine().setVisBVisualisation(visBController.getRelativeVisBPath());
+	}
 
-				case SET_CURRENT_AS_DEFAULT:
-					currentMachine.setVisBVisualisation(loadedPathRelative);
-					break;
-
-				case UNSET_DEFAULT:
-					currentMachine.setVisBVisualisation(null);
-					break;
-
-				default:
-					throw new AssertionError("Unhandled action: " + action);
-			}
-		});
+	@FXML
+	private void unsetDefault() {
+		currentProject.getCurrentMachine().setVisBVisualisation(null);
 	}
 
 	private void performHtmlExport(final boolean onlyCurrentState) {

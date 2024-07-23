@@ -51,15 +51,18 @@
 					<Tooltip text="%visb.buttons.showItemsAndEvents"/>
 				</tooltip>
 			</Button>
-			<Button fx:id="manageDefaultVisualisationButton" onAction="#manageDefaultVisualisation">
+			<MenuButton>
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG"
 								   bindableFontSize="${fontSize.fontSize + 4}"/>
 				</graphic>
-				<tooltip>
-					<Tooltip text="%visb.buttons.manageDefaultVisualisation"/>
-				</tooltip>
-			</Button>
+				<items>
+					<MenuItem fx:id="loadDefaultItem" text="%visb.settingsMenu.loadDefaultVisualisation" onAction="#loadDefault"/>
+					<MenuItem fx:id="loadFromDefinitionsItem" text="%visb.settingsMenu.loadVisualisationFromDefinitions" onAction="#loadFromDefinitions"/>
+					<MenuItem fx:id="setCurrentAsDefaultItem" text="%visb.settingsMenu.setCurrentVisualisationAsDefault" onAction="#setCurrentAsDefault"/>
+					<MenuItem fx:id="unsetDefaultItem" text="%visb.settingsMenu.unsetDefaultVisualisation" onAction="#unsetDefault"/>
+				</items>
+			</MenuButton>
 			<MenuButton fx:id="saveTraceButton">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
