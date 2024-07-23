@@ -296,7 +296,9 @@ public final class VisBView extends BorderPane {
 			} else {
 				cliExecutor.execute(() -> {
 					Path visBPath = getPathFromDefinitions(stateSpace);
-					Platform.runLater(() -> visBController.loadFromAbsolutePath(visBPath));
+					if (visBPath != null) {
+						Platform.runLater(() -> visBController.loadFromAbsolutePath(visBPath));
+					}
 				});
 			}
 		}
@@ -520,7 +522,10 @@ public final class VisBView extends BorderPane {
 
 	@FXML
 	private void loadFromDefinitions() {
-		visBController.loadFromAbsolutePath(getPathFromDefinitions(currentTrace.getStateSpace()));
+		Path path = getPathFromDefinitions(currentTrace.getStateSpace());
+		if (path != null) {
+			visBController.loadFromAbsolutePath(path);
+		}
 	}
 
 	@FXML

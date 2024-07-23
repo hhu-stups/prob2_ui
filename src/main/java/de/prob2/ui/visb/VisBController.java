@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 import com.google.inject.Inject;
@@ -150,27 +151,25 @@ public final class VisBController {
 	}
 
 	public void loadFromAbsolutePath(Path path) {
+		Objects.requireNonNull(path, "path");
 		// Reset the VisB paths to null to ensure that the listeners are always triggered,
 		// even when the old and new paths are equal.
 		// TODO Is this actually still necessary?
 		this.unload();
-		if (path != null) {
-			Path relativePath = relativizeVisBPath(currentProject.getLocation(), path);
-			this.absoluteVisBPath.set(path);
-			this.relativeVisBPath.set(relativePath);
-		}
+		Path relativePath = relativizeVisBPath(currentProject.getLocation(), path);
+		this.absoluteVisBPath.set(path);
+		this.relativeVisBPath.set(relativePath);
 	}
 
 	public void loadFromRelativePath(Path path) {
+		Objects.requireNonNull(path, "path");
 		// Reset the VisB paths to null to ensure that the listeners are always triggered,
 		// even when the old and new paths are equal.
 		// TODO Is this actually still necessary?
 		this.unload();
-		if (path != null) {
-			Path absolutePath = resolveVisBPath(currentProject.getLocation(), path);
-			this.absoluteVisBPath.set(absolutePath);
-			this.relativeVisBPath.set(path);
-		}
+		Path absolutePath = resolveVisBPath(currentProject.getLocation(), path);
+		this.absoluteVisBPath.set(absolutePath);
+		this.relativeVisBPath.set(path);
 	}
 
 	public ReadOnlyObjectProperty<VisBVisualisation> visBVisualisationProperty() {
