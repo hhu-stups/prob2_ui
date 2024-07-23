@@ -23,15 +23,12 @@ public final class ListViewEvent extends ListCell<VisBEvent> {
 	@FXML
 	private Label lbPredicates;
 
-	private VisBEvent visBEvent;
-
 	private final I18n i18n;
 
 	private final Injector injector;
 
 	public ListViewEvent(final StageManager stageManager, final I18n i18n, final Injector injector) {
 		stageManager.loadFXML(this,"list_view_event.fxml");
-		this.visBEvent = null;
 		this.i18n = i18n;
 		this.injector = injector;
 	}
@@ -42,8 +39,8 @@ public final class ListViewEvent extends ListCell<VisBEvent> {
 		this.setGraphic(this.eventBox);
 		this.getStyleClass().add("visb-item");
 		this.hoverProperty().addListener((observable, from, to) -> {
-			if(visBEvent != null) {
-				for (VisBHover hover : visBEvent.getHovers()) {
+			if (!this.isEmpty()) {
+				for (VisBHover hover : this.getItem().getHovers()) {
 					injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 				}
 			}
@@ -53,7 +50,7 @@ public final class ListViewEvent extends ListCell<VisBEvent> {
 	@Override
 	protected void updateItem(final VisBEvent visBEvent, final boolean empty){
 		super.updateItem(visBEvent, empty);
-		this.visBEvent = visBEvent;
+
 		if(visBEvent != null){
 			lbID.setText(visBEvent.getId());
 			lbEvent.setText(i18n.translate("visb.event.event", visBEvent.getEvent()));
