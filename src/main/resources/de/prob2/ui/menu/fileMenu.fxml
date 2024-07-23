@@ -22,6 +22,7 @@
 		<MenuItem fx:id="exportAsClassicalBUnicodeItem" text="%menu.file.items.exportEntireModelAs.classicalBUnicode" onAction="#handleExportClassicalB"/>
 		<MenuItem fx:id="exportAsRodinProject" text="%menu.file.items.exportEntireModelAs.rodinProject" onAction="#handleExportRodin"/>
 		<MenuItem fx:id="exportAsEventBProlog" text="%menu.file.items.exportEntireModelAs.proBEventBPackage" onAction="#handleExportEventBProlog"/>
+		<MenuItem fx:id="exportAsTLAModule" text="%menu.file.items.exportEntireModelAs.tlaModule" onAction="#handleExportTLA"/>
 	</Menu>
 	<MenuItem fx:id="saveDocumentationItem" text="%menu.file.items.createDocumentation" onAction="#saveDocumentation"/>
 	<SeparatorMenuItem/>
