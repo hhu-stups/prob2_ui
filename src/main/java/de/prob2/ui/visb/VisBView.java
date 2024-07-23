@@ -439,9 +439,6 @@ public final class VisBView extends BorderPane {
 	public void loadVisBFile(Path path){
 		clear();
 		visBController.loadFromAbsolutePath(path);
-		for (VisBItem.VisBItemKey key : visBController.getAttributeValues().keySet()) {
-			changeAttribute(key.getId(), key.getAttribute(), visBController.getAttributeValues().get(key));
-		}
 	}
 
 	/**
