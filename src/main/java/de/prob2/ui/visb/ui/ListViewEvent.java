@@ -35,8 +35,6 @@ public final class ListViewEvent extends ListCell<VisBEvent> {
 
 	@FXML
 	public void initialize(){
-		this.setText("");
-		this.setGraphic(this.eventBox);
 		this.getStyleClass().add("visb-item");
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if (!this.isEmpty()) {
@@ -51,18 +49,16 @@ public final class ListViewEvent extends ListCell<VisBEvent> {
 	protected void updateItem(final VisBEvent visBEvent, final boolean empty){
 		super.updateItem(visBEvent, empty);
 
+		this.setText("");
+		this.setGraphic(this.eventBox);
 		if(visBEvent != null){
 			lbID.setText(visBEvent.getId());
 			lbEvent.setText(i18n.translate("visb.event.event", visBEvent.getEvent()));
 			lbPredicates.setText(i18n.translate("visb.event.predicates", visBEvent.getPredicates().toString()));
-			this.setGraphic(this.eventBox);
-			this.setText("");
 		} else {
 			this.lbID.setText("");
 			this.lbEvent.setText("");
 			this.lbPredicates.setText("");
-			this.setGraphic(this.eventBox);
-			this.setText("");
 		}
 	}
 }
