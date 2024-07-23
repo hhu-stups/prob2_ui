@@ -1,9 +1,7 @@
 package de.prob2.ui.visb;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -94,6 +92,7 @@ public final class VisBDebugStage extends Stage {
 		private void initialize() {
 			this.hoverProperty().addListener((observable, from, to) -> {
 				if (!this.isEmpty()) {
+					var eventsById = visBController.getVisBVisualisation().getEventsById();
 					String id = this.getItem().getId();
 					if (eventsById.containsKey(id)) {
 						for (VisBHover hover : eventsById.get(id).getHovers()) {
@@ -199,8 +198,6 @@ public final class VisBDebugStage extends Stage {
 	@FXML
 	private ListView<VisBEvent> visBEvents;
 
-	private final Map<String, VisBEvent> eventsById;
-
 	private final CheckBox selectAll;
 
 	@Inject
@@ -222,7 +219,6 @@ public final class VisBDebugStage extends Stage {
 		this.visBView = visBView;
 		this.dynamicVisualizationStageProvider = dynamicVisualizationStageProvider;
 
-		this.eventsById = new HashMap<>();
 		this.selectAll = new CheckBox();
 		this.stageManager.loadFXML(this, "visb_debug_stage.fxml");
 	}
@@ -254,14 +250,12 @@ public final class VisBDebugStage extends Stage {
 			for (VisBItem item : visBVisualisation.getItems()) {
 				this.visBItems.getItems().add(new VisBTableItem(item));
 			}
-			this.eventsById.putAll(visBVisualisation.getEventsById());
 		}
 	}
 
 	public void clear(){
 		this.visBEvents.setItems(null);
 		this.visBItems.setItems(null);
-		this.eventsById.clear();
 	}
 
 	private void refresh() {
