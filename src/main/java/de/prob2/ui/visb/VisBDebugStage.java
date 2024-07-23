@@ -18,7 +18,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visb.ui.ListViewEvent;
 import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.beans.binding.Bindings;
@@ -30,6 +29,7 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -131,6 +131,49 @@ public final class VisBDebugStage extends Stage {
 		}
 	}
 
+	private final class VisBEventCell extends ListCell<VisBEvent> {
+		@FXML
+		private VBox eventBox;
+		@FXML
+		private Label lbID;
+		@FXML
+		private Label lbEvent;
+		@FXML
+		private Label lbPredicates;
+
+		private VisBEventCell() {
+			stageManager.loadFXML(this,"visb_debug_event_cell.fxml");
+		}
+
+		@FXML
+		private void initialize() {
+			this.hoverProperty().addListener((observable, from, to) -> {
+				if (!this.isEmpty()) {
+					for (VisBHover hover : this.getItem().getHovers()) {
+						injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+					}
+				}
+			});
+		}
+
+		@Override
+		protected void updateItem(VisBEvent visBEvent, boolean empty) {
+			super.updateItem(visBEvent, empty);
+
+			this.setText("");
+			this.setGraphic(this.eventBox);
+			if (visBEvent != null) {
+				this.lbID.setText(visBEvent.getId());
+				this.lbEvent.setText(i18n.translate("visb.event.event", visBEvent.getEvent()));
+				this.lbPredicates.setText(i18n.translate("visb.event.predicates", visBEvent.getPredicates().toString()));
+			} else {
+				this.lbID.setText("");
+				this.lbEvent.setText("");
+				this.lbPredicates.setText("");
+			}
+		}
+	}
+
 	private final StageManager stageManager;
 
 	private final CurrentTrace currentTrace;
@@ -192,7 +235,7 @@ public final class VisBDebugStage extends Stage {
 		this.itemColumn.setCellFactory(param -> new VisBTableItemCell());
 		this.itemColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getVisBItem()));
 
-		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, i18n, injector));
+		this.visBEvents.setCellFactory(lv -> new VisBEventCell());
 		this.currentTrace.addListener((observable, from, to) -> refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> refresh());
 		this.visBItems.getSelectionModel().selectedItemProperty().addListener(listener);
