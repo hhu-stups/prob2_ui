@@ -82,17 +82,13 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, VisBItem> 
 			this.setGraphic(this.itemBox);
 			this.setText("");
 		} else {
-			clear();
+			this.lbID.setText("");
+			this.lbAttribute.setText("");
+			this.lbExpression.setText("");
+			this.lbValue.textProperty().unbind();
+			this.lbValue.setText("");
+			this.setGraphic(this.itemBox);
+			this.setText("");
 		}
-	}
-
-	public void clear() {
-		this.lbID.setText("");
-		this.lbAttribute.setText("");
-		this.lbExpression.setText("");
-		this.lbValue.textProperty().unbind();
-		this.lbValue.setText("");
-		this.setGraphic(this.itemBox);
-		this.setText("");
 	}
 }
