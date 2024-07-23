@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.VisBEvent;
@@ -98,7 +99,7 @@ public final class VisBDebugStage extends Stage {
 					String id = this.getItem().getId();
 					if (eventsById.containsKey(id)) {
 						for (VisBHover hover : eventsById.get(id).getHovers()) {
-							injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+							visBView.changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 						}
 					}
 				}
@@ -150,7 +151,7 @@ public final class VisBDebugStage extends Stage {
 			this.hoverProperty().addListener((observable, from, to) -> {
 				if (!this.isEmpty()) {
 					for (VisBHover hover : this.getItem().getHovers()) {
-						injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+						visBView.changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 					}
 				}
 			});
@@ -184,7 +185,9 @@ public final class VisBDebugStage extends Stage {
 
 	private final VisBController visBController;
 
-	private final Injector injector;
+	private final VisBView visBView;
+
+	private final Provider<DynamicVisualizationStage> dynamicVisualizationStageProvider;
 
 	@FXML
 	private TableView<VisBTableItem> visBItems;
@@ -203,14 +206,24 @@ public final class VisBDebugStage extends Stage {
 	private final CheckBox selectAll;
 
 	@Inject
-	public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final I18n i18n, final VisBController visBController, final Injector injector) {
+	private VisBDebugStage(
+		StageManager stageManager,
+		CurrentTrace currentTrace,
+		CurrentProject currentProject,
+		I18n i18n,
+		VisBController visBController,
+		VisBView visBView,
+		Provider<DynamicVisualizationStage> dynamicVisualizationStageProvider
+	) {
 		super();
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.i18n = i18n;
 		this.visBController = visBController;
-		this.injector = injector;
+		this.visBView = visBView;
+		this.dynamicVisualizationStageProvider = dynamicVisualizationStageProvider;
+
 		this.eventsById = new HashMap<>();
 		this.selectAll = new CheckBox();
 		this.stageManager.loadFXML(this, "visb_debug_stage.fxml");
@@ -246,7 +259,7 @@ public final class VisBDebugStage extends Stage {
 		String id = item.getVisBItem().getId();
 		if(eventsById.containsKey(id)) {
 			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverLeaveVal());
+				visBView.changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverLeaveVal());
 			}
 		}
 	}
@@ -255,7 +268,7 @@ public final class VisBDebugStage extends Stage {
 		String id = item.getVisBItem().getId();
 		if(eventsById.containsKey(id)) {
 			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverEnterVal());
+				visBView.changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverEnterVal());
 			}
 		}
 	}
@@ -299,7 +312,7 @@ public final class VisBDebugStage extends Stage {
 				.map(VisBTableItem::getVisBItem)
 				.map(item -> String.format(Locale.ROOT, "\"%s_%s\" |-> %s", item.getId(), item.getAttribute(), item.getExpression()))
 				.collect(Collectors.joining(" |-> \n"));
-		DynamicVisualizationStage formulaStage = injector.getInstance(DynamicVisualizationStage.class);
+		DynamicVisualizationStage formulaStage = dynamicVisualizationStageProvider.get();
 		formulaStage.show();
 		formulaStage.toFront();
 		formulaStage.visualizeProjection(projectionString);
