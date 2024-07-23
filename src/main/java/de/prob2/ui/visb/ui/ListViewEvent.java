@@ -61,16 +61,11 @@ public final class ListViewEvent extends ListCell<VisBEvent> {
 			this.setGraphic(this.eventBox);
 			this.setText("");
 		} else {
-			clear();
+			this.lbID.setText("");
+			this.lbEvent.setText("");
+			this.lbPredicates.setText("");
+			this.setGraphic(this.eventBox);
+			this.setText("");
 		}
 	}
-
-	public void clear() {
-		this.lbID.setText("");
-		this.lbEvent.setText("");
-		this.lbPredicates.setText("");
-		this.setGraphic(this.eventBox);
-		this.setText("");
-	}
-
 }
