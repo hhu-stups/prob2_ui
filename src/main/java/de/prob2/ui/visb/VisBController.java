@@ -92,13 +92,6 @@ public final class VisBController {
 			}
 		});
 
-		this.absoluteVisBPath.addListener((o, from, to) -> {
-			if (to == null) {
-				this.visBVisualisation.set(null);
-			} else {
-				this.setupVisualisation(to);
-			}
-		});
 		currentTrace.addListener((o, from, to) -> {
 			if (this.getVisBVisualisation() != null) {
 				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
@@ -148,28 +141,23 @@ public final class VisBController {
 	public void unload() {
 		this.absoluteVisBPath.set(null);
 		this.relativeVisBPath.set(null);
+		this.visBVisualisation.set(null);
 	}
 
 	public void loadFromAbsolutePath(Path path) {
 		Objects.requireNonNull(path, "path");
-		// Reset the VisB paths to null to ensure that the listeners are always triggered,
-		// even when the old and new paths are equal.
-		// TODO Is this actually still necessary?
-		this.unload();
 		Path relativePath = relativizeVisBPath(currentProject.getLocation(), path);
 		this.absoluteVisBPath.set(path);
 		this.relativeVisBPath.set(relativePath);
+		this.reloadVisualisation();
 	}
 
 	public void loadFromRelativePath(Path path) {
 		Objects.requireNonNull(path, "path");
-		// Reset the VisB paths to null to ensure that the listeners are always triggered,
-		// even when the old and new paths are equal.
-		// TODO Is this actually still necessary?
-		this.unload();
 		Path absolutePath = resolveVisBPath(currentProject.getLocation(), path);
 		this.absoluteVisBPath.set(absolutePath);
 		this.relativeVisBPath.set(path);
+		this.reloadVisualisation();
 	}
 
 	public ReadOnlyObjectProperty<VisBVisualisation> visBVisualisationProperty() {
@@ -275,14 +263,6 @@ public final class VisBController {
 		}
 	}
 
-	void reloadVisualisation(){
-		if (this.getAbsoluteVisBPath() == null) {
-			return;
-		}
-		this.visBVisualisation.set(null);
-		setupVisualisation(this.getAbsoluteVisBPath());
-	}
-
 	/**
 	 * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
 	 * @param jsonPath path to the VisB JSON file
@@ -339,11 +319,20 @@ public final class VisBController {
 		return new VisBVisualisation(svgPath, svgContent, items, visBEvents, visBSVGObjects);
 	}
 
-	private void setupVisualisation(final Path visBPath){
+	void reloadVisualisation() {
+		// Remove the previous visualisation before loading a new one.
+		// This ensures that listeners on visBVisualisation are always called
+		// and prevents an old visualisation remaining visible after an error.
+		this.visBVisualisation.set(null);
+
+		Path visBPath = this.getAbsoluteVisBPath();
+		if (visBPath == null) {
+			return;
+		}
+
 		try {
 			this.visBVisualisation.set(constructVisualisationFromJSON(visBPath));
 		} catch (IOException | RuntimeException e) {
-			this.visBVisualisation.set(null);
 			LOGGER.warn("error while loading visb file", e);
 			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 			return;
