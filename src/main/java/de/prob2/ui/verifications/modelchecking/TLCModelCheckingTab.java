@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.TLCModelChecker;
 import de.prob.check.TLCModelCheckingOptions;
+import de.prob.scripting.ClassicalBFactory;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -182,15 +183,23 @@ public class TLCModelCheckingTab extends Tab {
 	}
 
 	boolean tlcCheck() {
-		Exception exception = TLCModelChecker.checkTLCApplicable(currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation()).toString(), 5);
-		if (exception != null) {
-			errorMessageBox.setVisible(true);
-			errorMessage.setText(exception.getMessage());
-			return false;
+		// TODO: support other languages by pretty printing internal representation (Event-B)?
+		//  (with current internal repr. not automatically possible)
+		if (currentProject.getCurrentMachine().getModelFactoryClass().isAssignableFrom(ClassicalBFactory.class)) {
+			Exception exception = TLCModelChecker.checkTLCApplicable(currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation()).toString(), 5);
+			if (exception != null) {
+				errorMessageBox.setVisible(true);
+				errorMessage.setText(exception.getMessage());
+				return false;
+			} else {
+				errorMessageBox.setVisible(false);
+				errorMessage.setText("");
+				return true;
+			}
 		} else {
-			errorMessageBox.setVisible(false);
-			errorMessage.setText("");
-			return true;
+			errorMessageBox.setVisible(true);
+			errorMessage.setText(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.onlyClassicalB"));
+			return false;
 		}
 	}
 
