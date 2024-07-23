@@ -51,8 +51,6 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, VisBItem> 
 
 	@FXML
 	public void initialize(){
-		this.setText("");
-		this.setGraphic(this.itemBox);
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if (!this.isEmpty()) {
 				String id = this.getItem().getId();
@@ -69,6 +67,8 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, VisBItem> 
 	protected void updateItem(VisBItem item, boolean empty){
 		super.updateItem(item, empty);
 
+		this.setText("");
+		this.setGraphic(this.itemBox);
 		if (!empty) {
 			this.lbID.setText(item.getId());
 			this.lbAttribute.setText(i18n.translate("visb.item.attribute", item.getAttribute()));
@@ -79,16 +79,12 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, VisBItem> 
 							.then(i18n.translateBinding("visb.item.value.notInitialized"))
 							.otherwise(i18n.translateBinding("common.quoted", valueBinding))
 			));
-			this.setGraphic(this.itemBox);
-			this.setText("");
 		} else {
 			this.lbID.setText("");
 			this.lbAttribute.setText("");
 			this.lbExpression.setText("");
 			this.lbValue.textProperty().unbind();
 			this.lbValue.setText("");
-			this.setGraphic(this.itemBox);
-			this.setText("");
 		}
 	}
 }
