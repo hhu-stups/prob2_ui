@@ -107,12 +107,6 @@ public final class VisBView extends BorderPane {
 	private WebView webView;
 
 	@FXML
-	private MenuItem image_export;
-
-	@FXML
-	private MenuItem helpMenu_userManual;
-
-	@FXML
 	private MenuButton saveTraceButton;
 	@FXML
 	private MenuItem saveTraceAndAddTestsItem;
@@ -126,9 +120,6 @@ public final class VisBView extends BorderPane {
 	private HBox exportInProgress;
 	@FXML
 	private VBox placeholder;
-	@FXML
-	private MenuItem helpButton;
-
 	@FXML
 	private Label placeholderLabel;
 
@@ -166,11 +157,7 @@ public final class VisBView extends BorderPane {
 	 */
 	@FXML
 	public void initialize(){
-		this.helpButton.setOnAction(e -> openHelpPage());
-		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
-		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
 		this.loadVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
-		this.image_export.setOnAction(e -> exportImage());
 		this.saveTraceButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
@@ -272,12 +259,17 @@ public final class VisBView extends BorderPane {
 	}
 
 	@FXML
-	public void openHelpPage() {
+	private void openHelpPage() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
 		helpSystem.openHelpForKeyAndAnchor("mainView.visB", null);
 		helpSystemStage.show();
 		helpSystemStage.toFront();
+	}
+
+	@FXML
+	private void openUserManual() {
+		injector.getInstance(UserManualStage.class).show();
 	}
 
 	private static Path getPathFromDefinitions(final StateSpace stateSpace) {
@@ -463,6 +455,7 @@ public final class VisBView extends BorderPane {
 		alert.showAndWait();
 	}
 
+	@FXML
 	private void exportImage() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));

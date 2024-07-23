@@ -68,7 +68,7 @@
 				<items>
 					<MenuItem fx:id="exportHistoryItem" text="%visb.contextMenu.exportHistory"/>
 					<MenuItem fx:id="exportCurrentStateItem" text="%visb.contextMenu.exportCurrentState"/>
-					<MenuItem fx:id="image_export" mnemonicParsing="false" text="%visb.menu.file.export" />
+					<MenuItem mnemonicParsing="false" text="%visb.menu.file.export" onAction="#exportImage"/>
 				</items>
 			</MenuButton>
 			<Spacer/>
@@ -104,8 +104,8 @@
 					<Tooltip text="%visb.menu.help"/>
 				</tooltip>
 				<items>
-					<MenuItem fx:id="helpButton" text="%visb.menu.help.helppages"/>
-					<MenuItem fx:id="helpMenu_userManual" text="%visb.menu.help.user.manual"/>
+					<MenuItem text="%visb.menu.help.helppages" onAction="#openHelpPage"/>
+					<MenuItem text="%visb.menu.help.user.manual" onAction="#openUserManual"/>
 				</items>
 			</MenuButton>
 			</HBox>
