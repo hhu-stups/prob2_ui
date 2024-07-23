@@ -31,8 +31,8 @@ import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
@@ -41,7 +41,6 @@ import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 import javafx.scene.control.Alert;
@@ -61,27 +60,25 @@ public final class VisBController {
 
 	public static final Path NO_PATH = Paths.get("");
 
+	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
 	private final StageManager stageManager;
 
-	private final ObjectProperty<Path> visBPath;
+	private final ObjectProperty<Path> absoluteVisBPath;
+	private final ObjectProperty<Path> relativeVisBPath;
 	private final ObjectProperty<VisBVisualisation> visBVisualisation;
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
 
-	/**
-	 * The VisBController constructor gets injected with ProB2-UI injector. In this method the final currentTraceListener is initialised as well. There is no further initialisation needed for this class.
-	 * @param injector used for interaction with ProB2-UI
-	 * @param stageManager currently not used
-	 * @param currentTrace used to add {@link ChangeListener} for interacting with trace
-	 * @param i18n used to access string resources
-	 */
 	@Inject
-	public VisBController(final Injector injector, final StageManager stageManager, final CurrentTrace currentTrace, final I18n i18n) {
+	public VisBController(Injector injector, StageManager stageManager, CurrentProject currentProject, CurrentTrace currentTrace) {
 		this.injector = injector;
 		this.stageManager = stageManager;
+		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
+
+		this.absoluteVisBPath = new SimpleObjectProperty<>(this, "absoluteVisBPath", null);
+		this.relativeVisBPath = new SimpleObjectProperty<>(this, "relativeVisBPath", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.attributeValues = FXCollections.observableHashMap();
 		initialize();
@@ -94,7 +91,7 @@ public final class VisBController {
 			}
 		});
 
-		this.visBPath.addListener((o, from, to) -> {
+		this.absoluteVisBPath.addListener((o, from, to) -> {
 			if (to == null) {
 				this.visBVisualisation.set(null);
 			} else {
@@ -111,22 +108,68 @@ public final class VisBController {
 		});
 	}
 
-	public ObjectProperty<Path> visBPathProperty() {
-		return this.visBPath;
+	public static Path resolveVisBPath(Path projectLocation, Path relativeVisBPath) {
+		if (NO_PATH.equals(relativeVisBPath)) {
+			return VisBController.NO_PATH;
+		} else if (relativeVisBPath.isAbsolute()) {
+			throw new IllegalArgumentException("Tried to resolve an already absolute VisB path: " + relativeVisBPath);
+		} else {
+			return projectLocation.resolve(relativeVisBPath);
+		}
 	}
 
-	public Path getVisBPath() {
-		return this.visBPathProperty().get();
+	public static Path relativizeVisBPath(Path projectLocation, Path absoluteVisBPath) {
+		if (NO_PATH.equals(absoluteVisBPath)) {
+			return VisBController.NO_PATH;
+		} else if (!absoluteVisBPath.isAbsolute()) {
+			throw new IllegalArgumentException("Tried to relativize an already relative VisB path: " + absoluteVisBPath);
+		} else {
+			return projectLocation.relativize(absoluteVisBPath);
+		}
 	}
 
-	public void setVisBPath(final Path visBPath) {
-		// Remark: The VisB path is reset to null, so that the listener for visBPath is triggered when the old visBPath is equal to the new one
-		// Otherwise the listener is not triggered and thus the new visualization is not updated.
-		// We had a similar issue on a ListProperty listener long time ago.
-		// This was caused by JavaFX not triggering the listener when the old object is equal to the new one
-		this.visBPathProperty().set(null);
-		if (visBPath != null) {
-			this.visBPathProperty().set(visBPath);
+	public ReadOnlyObjectProperty<Path> absoluteVisBPathProperty() {
+		return this.absoluteVisBPath;
+	}
+
+	public Path getAbsoluteVisBPath() {
+		return this.absoluteVisBPathProperty().get();
+	}
+
+	public ReadOnlyObjectProperty<Path> relativeVisBPathProperty() {
+		return this.relativeVisBPath;
+	}
+
+	public Path getRelativeVisBPath() {
+		return this.relativeVisBPathProperty().get();
+	}
+
+	public void unload() {
+		this.absoluteVisBPath.set(null);
+		this.relativeVisBPath.set(null);
+	}
+
+	public void loadFromAbsolutePath(Path path) {
+		// Reset the VisB paths to null to ensure that the listeners are always triggered,
+		// even when the old and new paths are equal.
+		// TODO Is this actually still necessary?
+		this.unload();
+		if (path != null) {
+			Path relativePath = relativizeVisBPath(currentProject.getLocation(), path);
+			this.absoluteVisBPath.set(path);
+			this.relativeVisBPath.set(relativePath);
+		}
+	}
+
+	public void loadFromRelativePath(Path path) {
+		// Reset the VisB paths to null to ensure that the listeners are always triggered,
+		// even when the old and new paths are equal.
+		// TODO Is this actually still necessary?
+		this.unload();
+		if (path != null) {
+			Path absolutePath = resolveVisBPath(currentProject.getLocation(), path);
+			this.absoluteVisBPath.set(absolutePath);
+			this.relativeVisBPath.set(path);
 		}
 	}
 
@@ -234,11 +277,11 @@ public final class VisBController {
 	}
 
 	void reloadVisualisation(){
-		if (this.getVisBPath() == null) {
+		if (this.getAbsoluteVisBPath() == null) {
 			return;
 		}
 		this.visBVisualisation.set(null);
-		setupVisualisation(this.getVisBPath());
+		setupVisualisation(this.getAbsoluteVisBPath());
 	}
 
 	/**

@@ -168,11 +168,11 @@ public final class VisBView extends BorderPane {
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
 		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
 		this.image_export.setOnAction(e -> exportImage());
-		this.saveTraceButton.disableProperty().bind(visBController.visBPathProperty().isNull());
+		this.saveTraceButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
 			manageDefaultVisualisationButton.disableProperty().unbind();
-			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
+			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.absoluteVisBPathProperty().isNull()));
 			if (to == null) {
 				placeholderLabel.setText(i18n.translate("common.noModelLoaded"));
 			} else {
@@ -221,7 +221,7 @@ public final class VisBView extends BorderPane {
 
 		stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
 
-		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
+		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
 		exportHistoryItem.setOnAction(e -> performHtmlExport(false));
 		exportCurrentStateItem.setOnAction(e -> performHtmlExport(true));
@@ -281,21 +281,15 @@ public final class VisBView extends BorderPane {
 	}
 
 	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
-		visBController.setVisBPath(null);
+		visBController.unload();
 		if(machine != null && stateSpace != null) {
 			final Path visBVisualisation = machine.getVisBVisualisation();
 			if (visBVisualisation != null) {
-				final Path visBPath;
-				if (VisBController.NO_PATH.equals(visBVisualisation)) {
-					visBPath = VisBController.NO_PATH;
-				} else {
-					visBPath = currentProject.getLocation().resolve(visBVisualisation);
-				}
-				visBController.setVisBPath(visBPath);
+				visBController.loadFromRelativePath(visBVisualisation);
 			} else {
 				cliExecutor.execute(() -> {
 					Path visBPath = getPathFromDefinitions(stateSpace);
-					Platform.runLater(() -> visBController.setVisBPath(visBPath));
+					Platform.runLater(() -> visBController.loadFromAbsolutePath(visBPath));
 				});
 			}
 		}
@@ -445,7 +439,7 @@ public final class VisBView extends BorderPane {
 		}
 		if(path != null) {
 			clear();
-			visBController.setVisBPath(path);
+			visBController.loadFromAbsolutePath(path);
 			for(VisBItem.VisBItemKey key : visBController.getAttributeValues().keySet()) {
 				changeAttribute(key.getId(), key.getAttribute(), visBController.getAttributeValues().get(key));
 			}
@@ -490,7 +484,7 @@ public final class VisBView extends BorderPane {
 
 	@FXML
 	public void closeVisualisation() {
-		visBController.setVisBPath(null);
+		visBController.unload();
 	}
 
 	@FXML
@@ -527,14 +521,7 @@ public final class VisBView extends BorderPane {
 		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
 		defaultPathDialog.initOwner(this.getScene().getWindow());
 
-		final Path loadedPathAbsolute = visBController.getVisBPath();
-		final Path loadedPathRelative;
-		if (VisBController.NO_PATH.equals(loadedPathAbsolute)) {
-			loadedPathRelative = VisBController.NO_PATH;
-		} else {
-			loadedPathRelative = currentProject.getLocation().relativize(loadedPathAbsolute);
-		}
-
+		final Path loadedPathRelative = visBController.getRelativeVisBPath();
 		final Machine currentMachine = currentProject.getCurrentMachine();
 		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getVisBVisualisation());
 		defaultPathDialog.showAndWait().ifPresent(action -> {
@@ -544,7 +531,7 @@ public final class VisBView extends BorderPane {
 					break;
 
 				case LOAD_DEFINITIONS:
-					visBController.setVisBPath(getPathFromDefinitions(currentTrace.getStateSpace()));
+					visBController.loadFromAbsolutePath(getPathFromDefinitions(currentTrace.getStateSpace()));
 					break;
 
 				case SET_CURRENT_AS_DEFAULT:
