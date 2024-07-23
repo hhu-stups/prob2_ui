@@ -35,7 +35,6 @@ public final class ListViewEvent extends ListCell<VisBEvent> {
 
 	@FXML
 	public void initialize(){
-		this.getStyleClass().add("visb-item");
 		this.hoverProperty().addListener((observable, from, to) -> {
 			if (!this.isEmpty()) {
 				for (VisBHover hover : this.getItem().getHovers()) {
