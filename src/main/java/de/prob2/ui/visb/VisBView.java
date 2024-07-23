@@ -422,27 +422,23 @@ public final class VisBView extends BorderPane {
 	 * On click function for the button and file menu item
 	 */
 	@FXML
-	public void loadVisBFile() {
-		loadVisBFile(null);
+	private void askLoadVisBFile() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
+		fileChooser.getExtensionFilters().addAll(
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
+		);
+		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		if (path != null) {
+			loadVisBFile(path);
+		}
 	}
 
 	public void loadVisBFile(Path path){
-		if (path == null) {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
-			fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation",
-					"json")
-			);
-			path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS,
-					stageManager.getCurrent());
-		}
-		if(path != null) {
-			clear();
-			visBController.loadFromAbsolutePath(path);
-			for(VisBItem.VisBItemKey key : visBController.getAttributeValues().keySet()) {
-				changeAttribute(key.getId(), key.getAttribute(), visBController.getAttributeValues().get(key));
-			}
+		clear();
+		visBController.loadFromAbsolutePath(path);
+		for (VisBItem.VisBItemKey key : visBController.getAttributeValues().keySet()) {
+			changeAttribute(key.getId(), key.getAttribute(), visBController.getAttributeValues().get(key));
 		}
 	}
 
