@@ -43,12 +43,13 @@ public final class VisBTableItemCell extends TableCell<VisBTableItem, String> {
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
 
 	public VisBTableItemCell(final StageManager stageManager, final I18n i18n, final Injector injector, final Map<String, VisBEvent> eventsById, final ObservableMap<VisBItem.VisBItemKey, String> attributeValues) {
-		stageManager.loadFXML(this,"list_view_item.fxml");
 		this.visBItem = null;
 		this.i18n = i18n;
 		this.injector = injector;
 		this.eventsById = eventsById;
 		this.attributeValues = attributeValues;
+
+		stageManager.loadFXML(this, "list_view_item.fxml");
 	}
 
 	@FXML
