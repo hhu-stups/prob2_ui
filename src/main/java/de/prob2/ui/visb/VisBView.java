@@ -169,6 +169,7 @@ public final class VisBView extends BorderPane {
 		this.helpButton.setOnAction(e -> openHelpPage());
 		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
 		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
+		this.loadVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		this.image_export.setOnAction(e -> exportImage());
 		this.saveTraceButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
@@ -434,13 +435,6 @@ public final class VisBView extends BorderPane {
 	}
 
 	public void loadVisBFile(Path path){
-		if(currentProject.getCurrentMachine() == null){
-			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
-			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
-			alert.initOwner(this.getScene().getWindow());
-			alert.showAndWait();
-			return;
-		}
 		if (path == null) {
 			FileChooser fileChooser = new FileChooser();
 			fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
