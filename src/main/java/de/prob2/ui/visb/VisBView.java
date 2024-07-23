@@ -349,12 +349,12 @@ public final class VisBView extends BorderPane {
 	}
 
 	private void treatJavascriptError(WebErrorEvent event) {
-		LOGGER.debug("JavaScript ERROR: " + event.getMessage());
+		LOGGER.debug("JavaScript ERROR: {}", event.getMessage());
 		alert(event.getException(), "visb.exception.header", "visb.stage.alert.webview.jsalert", event.getMessage());
 	}
 
 	private void showJavascriptAlert(String message) {
-		LOGGER.debug("JavaScript ALERT: " + message);
+		LOGGER.debug("JavaScript ALERT: {}", message);
 		final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
 		alert.initOwner(this.getScene().getWindow());
 		alert.showAndWait();

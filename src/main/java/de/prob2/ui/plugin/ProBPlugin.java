@@ -65,7 +65,7 @@ public abstract class ProBPlugin extends Plugin {
 				startPlugin();
 				started = true;
 			} catch (Exception ex) {
-				LOGGER.warn("Exception while starting the plug-in " + getName(), ex);
+				LOGGER.warn("Exception while starting the plug-in {}", getName(), ex);
 				getProBPluginHelper().getStageManager()
 						.makeExceptionAlert(ex, "plugin.alerts.couldNotStartPlugin.content", getName()).show();
 			}
@@ -79,7 +79,7 @@ public abstract class ProBPlugin extends Plugin {
 				stopPlugin();
 				started = false;
 			} catch (Exception ex) {
-				LOGGER.warn("Exception while stopping the plug-in " + getName(), ex);
+				LOGGER.warn("Exception while stopping the plug-in {}", getName(), ex);
 				getProBPluginHelper().getStageManager()
 						.makeExceptionAlert(ex, "plugin.alerts.couldNotStopPlugin.content", getName()).show();
 			}

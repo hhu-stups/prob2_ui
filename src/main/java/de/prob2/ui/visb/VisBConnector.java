@@ -31,8 +31,7 @@ public final class VisBConnector {
 	 */
 	public void click(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey){
 		// probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
-		LOGGER.debug("\nSVG Element with ID "+id+" was clicked at page position " + pageX + "," + pageY 
-			+ " with shift "+shiftKey + " cmd/meta " + metaKey); // 1=left, 2=middle, 3=right
+		LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with shift {} cmd/meta {}", id, pageX, pageY, shiftKey, metaKey); // 1=left, 2=middle, 3=right
 		try {
 			this.injector.getInstance(VisBController.class).executeEvent(id,pageX,pageY,shiftKey,metaKey);
 		} catch (Throwable t) {

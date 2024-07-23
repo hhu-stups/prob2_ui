@@ -223,7 +223,7 @@ public final class VisBController {
 			executeBeforeInitialisation();
 			return;
 		}
-		LOGGER.debug("Finding event for id: " + id);
+		LOGGER.debug("Finding event for id: {}", id);
 		VisBEvent event = this.getVisBVisualisation().getEventsById().get(id);
 
 		try {
@@ -235,9 +235,9 @@ public final class VisBController {
 			if (transitions.isEmpty()) {
 				LOGGER.debug("No events found for id: {}", id);
 			} else {
-				LOGGER.debug("Executing event for id: "+id + " and preds = " + event.getPredicates());
+				LOGGER.debug("Executing event for id: {} and preds = {}", id, event.getPredicates());
 				Trace trace = currentTrace.get().addTransitions(transitions);
-				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + event.getPredicates());
+				LOGGER.debug("Finished executed event for id: {} and preds = {}", id, event.getPredicates());
 				currentTrace.set(trace);
 				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 				for(Transition transition : transitions) {

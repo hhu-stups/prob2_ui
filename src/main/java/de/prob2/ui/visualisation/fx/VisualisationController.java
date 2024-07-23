@@ -324,8 +324,7 @@ public final class VisualisationController {
 							"visualisation.fx.controller.alerts.formulaListenerException.content",
 							String.join(" ", formulas));
 					alert.show();
-					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +
-							String.join(" ", formulas), e);
+					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"{}\"", String.join(" ", formulas), e);
 				}
 			}
 		}
