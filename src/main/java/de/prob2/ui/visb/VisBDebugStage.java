@@ -7,7 +7,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
@@ -24,7 +23,6 @@ import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -232,15 +230,6 @@ public final class VisBDebugStage extends Stage {
 	@FXML
 	public void initialize() {
 		visBController.visBVisualisationProperty().addListener((o, from, to) -> this.initialiseListViews(to));
-		
-		ChangeListener<VisBTableItem> listener = (observable, from, to) -> {
-			if(from != null) {
-				removeHighlighting(from);
-			}
-			if(to != null) {
-				applyHighlighting(to);
-			}
-		};
 
 		this.selectedColumn.setCellValueFactory(new VisBSelectionCell(visBItems, selectAll));
 		this.selectedColumn.setGraphic(selectAll);
@@ -251,26 +240,6 @@ public final class VisBDebugStage extends Stage {
 		this.visBEvents.setCellFactory(lv -> new VisBEventCell());
 		this.currentTrace.addListener((observable, from, to) -> refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> refresh());
-		this.visBItems.getSelectionModel().selectedItemProperty().addListener(listener);
-		this.setOnCloseRequest(e -> this.visBItems.getSelectionModel().clearSelection());
-	}
-
-	private void removeHighlighting(VisBTableItem item) {
-		String id = item.getVisBItem().getId();
-		if(eventsById.containsKey(id)) {
-			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				visBView.changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverLeaveVal());
-			}
-		}
-	}
-
-	private void applyHighlighting(VisBTableItem item) {
-		String id = item.getVisBItem().getId();
-		if(eventsById.containsKey(id)) {
-			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				visBView.changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverEnterVal());
-			}
-		}
 	}
 
 	/**
