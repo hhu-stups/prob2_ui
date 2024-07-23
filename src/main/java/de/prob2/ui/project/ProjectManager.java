@@ -1,12 +1,5 @@
 package de.prob2.ui.project;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Injector;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import de.prob2.ui.simulation.SimulatorStage;
-import de.prob2.ui.simulation.model.SimulationModel;
-import de.prob2.ui.visb.VisBView;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -19,9 +12,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.json.TraceManager;
@@ -29,6 +25,7 @@ import de.prob.json.InvalidJsonFormatException;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -37,6 +34,9 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.SimulatorStage;
+import de.prob2.ui.simulation.model.SimulationModel;
+import de.prob2.ui.visb.VisBController;
 
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
@@ -350,7 +350,7 @@ public final class ProjectManager {
 
 		switch(type) {
 			case VISB:
-				injector.getInstance(VisBView.class).loadVisBFile(selected);
+				injector.getInstance(VisBController.class).loadFromAbsolutePath(selected);
 				break;
 			case SIMB:
 				injector.getInstance(SimulatorStage.class).show();

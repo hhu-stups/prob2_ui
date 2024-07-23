@@ -432,13 +432,8 @@ public final class VisBView extends BorderPane {
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
-			loadVisBFile(path);
+			visBController.loadFromAbsolutePath(path);
 		}
-	}
-
-	public void loadVisBFile(Path path){
-		clear();
-		visBController.loadFromAbsolutePath(path);
 	}
 
 	/**
