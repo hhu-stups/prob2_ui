@@ -18,6 +18,7 @@ import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.check.TLCModelChecker;
 import de.prob.check.TLCModelCheckingOptions;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.ExecutionContext;
@@ -104,7 +105,7 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			if (opt == TLCOption.DFID || opt == TLCOption.NODEAD || opt == TLCOption.NOINV || opt == TLCOption.NOASS
 				|| opt == TLCOption.NOGOAL || opt == TLCOption.NOLTL || opt == TLCOption.WORKERS )
 				continue; // already handled
-			if (opt == TLCOption.MININT || opt == TLCOption.MAXINT || opt == TLCOption.TMP)
+			if (opt == TLCOption.MININT || opt == TLCOption.MAXINT || opt == TLCOption.TMP || opt == TLCOption.OUTPUT)
 				continue; // ignore for now
 			s.add(i18n.translate("verifications.modelchecking.description.tlcOption." + opt.arg()));
 		}
@@ -118,14 +119,16 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 
 	@Override
 	public void execute(final ExecutionContext context) {
+		StateSpace stateSpace = context.stateSpace();
+
 		final int stepIndex = getSteps().size();
-		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting TLC model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, context.stateSpace());
+		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting TLC model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
 		getSteps().add(initialStep);
 
 		IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, BigInteger.ZERO, context.stateSpace());
+				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, BigInteger.ZERO, stateSpace);
 				setCurrentStep(step);
 				Platform.runLater(() -> {
 					if (stepIndex < getSteps().size()) {
@@ -139,14 +142,13 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 				updateStats(jobId, timeElapsed, result, stats);
 			}
 		};
-		TLCModelChecker tlcModelChecker = new TLCModelChecker(
-			context.project().getLocation().resolve(context.machine().getLocation()).toString(),
-			context.trace().getStateSpace(),
-			listener,
-			// this.options already contains the options set by ProB preferences, which have not been overwritten!
-			new TLCModelCheckingOptions(context.stateSpace(), getOptions()));
 
 		try {
+			TLCModelChecker tlcModelChecker = new TLCModelChecker(
+					context.project().getLocation().resolve(context.machine().getLocation()).toString(),
+					stateSpace, listener,
+					// this.options already contains the options set by ProB preferences, which have not been overwritten!
+					new TLCModelCheckingOptions(stateSpace, getOptions()));
 			setCurrentStep(initialStep);
 			tlcModelChecker.call();
 		} finally {
