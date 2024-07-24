@@ -122,13 +122,13 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 		StateSpace stateSpace = context.stateSpace();
 
 		final int stepIndex = getSteps().size();
-		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting TLC model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, stateSpace);
+		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting TLC model check...", Integer.MAX_VALUE), 0, null, null, stateSpace);
 		getSteps().add(initialStep);
 
 		IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
-				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, BigInteger.ZERO, stateSpace);
+				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, null, stateSpace);
 				setCurrentStep(step);
 				Platform.runLater(() -> {
 					if (stepIndex < getSteps().size()) {

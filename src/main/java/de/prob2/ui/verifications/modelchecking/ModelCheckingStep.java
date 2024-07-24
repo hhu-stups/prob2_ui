@@ -33,7 +33,7 @@ public class ModelCheckingStep {
 		
 		this.timeElapsed = timeElapsed;
 		this.stats = stats;
-		this.memoryUsed = Objects.requireNonNull(memoryUsed, "memoryUsed");
+		this.memoryUsed = memoryUsed;
 		this.stateSpace = stateSpace;
 		this.trace = null;
 	}

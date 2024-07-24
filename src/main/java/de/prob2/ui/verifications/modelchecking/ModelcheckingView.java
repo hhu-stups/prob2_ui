@@ -342,9 +342,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			progressBar.setProgress(calculateProgress(stats));
 			simpleStatsView.setStats(stats);
 		}
-		if (memory != null) {
-			memoryUsage.setText(memory.divide(MIB_FACTOR) + " MiB");
-		}
+		memoryUsage.setText(memory != null ? memory.divide(MIB_FACTOR) + " MiB" : "-");
 		statsBox.setVisible(true);
 	}
 
