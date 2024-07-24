@@ -62,6 +62,10 @@ public class TLCModelCheckingTab extends Tab {
 	@FXML
 	private Spinner<Integer> nrWorkers;
 	@FXML
+	private CheckBox proofGuidedMC;
+	@FXML
+	private CheckBox useSymmetry;
+	@FXML
 	private HBox saveLocationBox;
 	@FXML
 	private CheckBox saveGeneratedFiles;
@@ -177,6 +181,8 @@ public class TLCModelCheckingTab extends Tab {
 			.checkLTLFormula(addLTLFormula.isSelected() ? tfAddLTL.getText() : null)
 			.setupConstantsUsingProB(setupConstantsUsingProB.isSelected())
 			.setNumberOfWorkers(nrWorkers.getValueFactory().getValue().toString())
+			.proofGuidedModelChecking(proofGuidedMC.isSelected())
+			.useSymmetry(useSymmetry.isSelected())
 			.saveGeneratedFiles(saveGeneratedFiles.isSelected())
 			.outputDir(saveGeneratedFiles.isSelected() ? tfSaveLocation.getText() : null)
 			.getOptions();
@@ -232,6 +238,8 @@ public class TLCModelCheckingTab extends Tab {
 		}
 		setupConstantsUsingProB.setSelected(options.containsKey(CONSTANTSSETUP));
 		nrWorkers.getValueFactory().setValue(Integer.parseInt(options.get(WORKERS)));
+		proofGuidedMC.setSelected(options.containsKey(PARINVEVAL));
+		useSymmetry.setSelected(options.containsKey(SYMMETRY));
 		saveGeneratedFiles.setSelected(!options.containsKey(TMP));
 		if (options.containsKey(OUTPUT)) {
 			tfSaveLocation.setText(options.get(OUTPUT));

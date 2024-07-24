@@ -77,8 +77,7 @@
 							</CheckBox>
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="checkLTL" selected="true"
-									  text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTL">
+							<CheckBox fx:id="checkLTL" text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTL">
 								<tooltip>
 									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTL" />
 								</tooltip>
@@ -123,6 +122,20 @@
 									</tooltip>
 								</Spinner>
 							</HBox>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="proofGuidedMC" text="%verifications.modelchecking.modelcheckingStage.tlcTab.proofGuidedMC">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.proofGuidedMC" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="useSymmetry" text="%verifications.modelchecking.modelcheckingStage.tlcTab.useSymmetry">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.useSymmetry" />
+								</tooltip>
+							</CheckBox>
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<CheckBox fx:id="saveGeneratedFiles" text="%verifications.modelchecking.modelcheckingStage.tlcTab.saveGenerated"/>
