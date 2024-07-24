@@ -62,6 +62,10 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 
 			this.itemProperty().addListener((o, from, to) -> {
+				if (to instanceof TLCModelCheckingItem) {
+					executeMenuItem.disableProperty().unbind();
+					executeMenuItem.setDisable(true);
+				}
 				executeMenuItem.textProperty().unbind();
 				if (to != null) {
 					executeMenuItem.textProperty().bind(Bindings.when(to.stepsProperty().emptyProperty())
