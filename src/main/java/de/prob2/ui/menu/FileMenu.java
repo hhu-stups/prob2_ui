@@ -36,7 +36,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
 
-import de.prob2.ui.project.machines.Machine;
+import de.tlc4b.exceptions.TLC4BException;
 import javafx.beans.InvalidationListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -132,9 +132,7 @@ public class FileMenu extends Menu {
 				// ProB 2's Event-B exporters currently only work with models loaded from a Rodin project, not from an .eventb package.
 				final boolean noEventBExport = !(model instanceof EventBModel) || model instanceof EventBPackageModel;
 				// TLA Export, TODO: check if possible for Event-B (via pretty printing classical B)
-				boolean noTLAExport = model.getLanguage() != Language.CLASSICAL_B ||
-						TLCModelChecker.checkTLCApplicable(
-								currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation()).toString(), 2) != null;
+				boolean noTLAExport = model.getLanguage() != Language.CLASSICAL_B;
 				this.exportAsClassicalBAsciiItem.setDisable(noClassicalBExport);
 				this.exportAsClassicalBUnicodeItem.setDisable(noClassicalBExport);
 				this.exportAsRodinProject.setDisable(noEventBExport);
@@ -274,7 +272,12 @@ public class FileMenu extends Menu {
 
 		if (outputDir != null) {
 			Path bMachine = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
-			TLCModelChecker.generateTLAWithoutTLC(bMachine.toString(), outputDir.toString());
+			try {
+				TLCModelChecker.generateTLAWithoutTLC(bMachine.toString(), outputDir.toString());
+			} catch (TLC4BException e) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "menu.file.items.exportEntireModelAs.tlaModule.exception.header",
+						"menu.file.items.exportEntireModelAs.tlaModule.exception.content", e.getMessage()).show();
+			}
 		}
 	}
 
