@@ -70,7 +70,7 @@ All activations are identified by their `id`.
 **Direct Activation.** A direct activation activates an event to be executed in the future. 
 It requires the fields `id`, and `execute` to be defined. 
 All other fields can be defined optionally.
-Thus, an activation is of the following form:
+Thus, a direct activation is of the following form:
 
 ```.json
 {
@@ -109,6 +109,7 @@ It requires the two fields `id`, and `chooseActivation`.
 are mapped to a probability. 
 It is possible to chain multiple probabilistic choices together, 
 but eventually, a direct activation must be reached.
+Thus, a probabilistic choice is of the following form:
 
 ~~~json
 {
@@ -149,17 +150,19 @@ Interactive elements in SimB are so called SimB listeners.
 A SimB listener consists of four fields `id`, `event`, `predicate`, and `activating`. 
 This means that the SimB listener associated with `id` listens on a manual/user interaction 
 on event with `predicate` after which activations in `activating` are triggered. 
-`predicate` is optional and defaults to `1=1`. 
-Manual/User interaction is recognized via VisB and ProB's Operations View.
+`predicate` is optional and defaults to `1=1`.
+Thus, a listener is of the following form:
 
 ~~~json
 {
-  "id":  ...
-  "event": ...
-  "predicate": ...
+  "id":  ...,
+  "event": ...,
+  "predicate": ...,
   "activating": [...]
 }
 ~~~
+
+Manual/User interaction is recognized via VisB and ProB's Operations View.
 
 **Example 2: SimB Activation Diagram with User Interaction.** In the following, we show parts of a SimB simulation from an automotive case study. 
 The SimB simulation contains a SimB listener which is linked to two activations. 
@@ -167,6 +170,7 @@ The case study models the car's lighting system controlled by pitman controller,
 The SimB listeners states that SimB listens on user interaction on the event `ENV_Pitman_DirectionBlinking`, 
 to trigger two SimB activations `blinking_on` and `blinking_off` afterward. 
 Practically, this means that a driver's input on the pitman for direction blinking activates the blinking cycle for the corresponding direction indicators.
+An example is shown below:
 
 ~~~json
 {
@@ -206,36 +210,39 @@ Practically, this means that a driver's input on the pitman for direction blinki
 
 ## Reinforcement Learning Agent in SimB
 
-Instead of loading a SimB simulation as a JSON file, one can also load a Reinforcement Learning agent implemented in Python (.py). 
+Instead of loading a SimB simulation as a JSON file, one can also load a Reinforcement Learning agent implemented in Python (`.py`). 
 For the simulation to work, one has to apply the following steps:
 
 1. Train a model of a Reinforcement Learning agent.
 
 2. Create a formal B model (including safety shield) for the RL agent.
 
-The operations represent the actions the RL agent can choose from. The formal model's state mainly represents the state of the environment. Safety shields are encoded by the operations' guards which are provided to the RL agent. Enabled operations are considered to be safe. Thus, the RL agent chooses the enabled operation/action with the highest predicted reward. The operations' substitutions model the desired behavior of the respective actions.
+The operations represent the actions the RL agent can choose from. The formal model's state mainly represents the state of the environment. 
+Safety shields are encoded by the operations' guards which are provided to the RL agent. Enabled operations are considered to be safe. 
+Thus, the RL agent chooses the enabled operation/action with the highest predicted reward. The operations' substitutions model the desired behavior of the respective actions.
 
-An example for the FASTER of a HighwayEnvironment is as follows:
+An example for the `FASTER` of a HighwayEnvironment is as follows:
 
 ~~~
 FASTER =
 PRE
-  ¬(∃v. (v ∈ PresentVehicles \ {EgoVehicle} ∧ VehiclesX(v) > 0.0 ∧ VehiclesX(v) < 45.0 ∧
-  VehiclesY(v) < 3.5 ∧ VehiclesY(v) > -3.5))
+  ¬(# v. (v : PresentVehicles \ {EgoVehicle} & VehiclesX(v) > 0.0 
+  	& VehiclesX(v) < 45.0 
+  	& VehiclesY(v) < 3.5 & VehiclesY(v) > -3.5))
 THEN
-  Crash :∈ BOOL ||
-  PresentVehicles :∈ P(Vehicles) ;
-  VehiclesX :∈ Vehicles → R ||
-  VehiclesY :∈ Vehicles → R ||
-  VehiclesVx :| (VehiclesVx ∈ PresentVehicles → R ∧
-  VehiclesVx(EgoVehicle) ≥ VehiclesVx’(EgoVehicle) - 0.05) ||
-  VehiclesVy :∈ Vehicles → R ||
-  VehiclesAx :| (VehiclesAx ∈ PresentVehicles → R ∧ VehiclesAx(EgoVehicle) ≥ -0.05) ||
-  VehiclesAy :∈ Vehicles → R ||
-  Reward :∈ R
+  Crash :: BOOL ||
+  PresentVehicles :: P(Vehicles) ;
+  VehiclesX :: Vehicles → R ||
+  VehiclesY :: Vehicles → R ||
+  VehiclesVx :| (VehiclesVx : PresentVehicles → R &
+  VehiclesVx(EgoVehicle) >= VehiclesVx’(EgoVehicle) - 0.05) ||
+  VehiclesVy :: Vehicles → R ||
+  VehiclesAx :| (VehiclesAx : PresentVehicles → R 
+  	& VehiclesAx(EgoVehicle) >= -0.05) ||
+  VehiclesAy :: Vehicles → R ||
+  Reward :: R
 END
 ~~~
-
 Lines 2-4 shows the operation's guard which is used as safety shield.
 
 Lines 6-15 shows the operation's substitution describing the desired behavior after executing FASTER.
@@ -260,35 +267,38 @@ Here, one can see that the numbers representing the actions in the RL agents are
 
 An example for a mapping to a variable in the formal B model is as follows:
 
-~~~python
+~~~
 def get_VehiclesX(obs):
-  return "{{EgoVehicle |-> {0}, Vehicles2 |-> {1}, Vehicles3 |-> {2},
-       Vehicles4 |-> {3},  Vehicles5 |-> {4}}}"
-      .format(obs[0][1]*200, obs[1][1]*200, obs[2][1]*200,
-              obs[3][1]*200, obs[4][1]*200) # Implemented manually
+  return "{{EgoVehicle |-> {0}, Vehicles2 |-> {1}, 
+           Vehicles3 |-> {2}, Vehicles4 |-> {3},
+           Vehicles5 |-> {4}}}"
+           .format(obs[0][1]*200, obs[1][1]*200, 
+               obs[2][1]*200, obs[3][1]*200, 
+               obs[4][1]*200) # Implemented manually
 ~~~
 Remark: While the getter for the variable is generated by B2Program, the function for the mapping is implemented manually.
 
 
 4. Implement necessary messages sent between the ProB animator and the RL agent. Simulation should be a while-loop which runs while the simulation has not finished.
 
-1st message: Sent from ProB Animator: List of enabled operations
-Meanwhile RL agent predicts enabled operation with highest reward
-2nd message: Sent from RL agent: Name of chosen action/operation
-3rd message: Sent from RL agent: Time until executing chosen action/operation
-4th message: Sent from RL agent: Succeeding B state as a predicate
-5th message: Sent from RL agent: Boolean flag describing whether simulation is finished
+- 1st message: Sent from ProB Animator: List of enabled operations; meanwhile RL agent predicts enabled operation with highest reward
+- 2nd message: Sent from RL agent: Name of chosen action/operation
+- 3rd message: Sent from RL agent: Time until executing chosen action/operation
+- 4th message: Sent from RL agent: Succeeding B state as a predicate
+- 5th message: Sent from RL agent: Boolean flag describing whether simulation is finished
 
-Example code (line 70 - 113; particularly 86 - 113): https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py
+Example code (line 70 - 113; particularly 86 - 113): 
+[https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py](https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py)
 
 
 ## Validation
 
 Via the plus-button, different kinds of simulations can be added,
 to validate probabilistic and timing properties of the machine:
-* Monte-Carlo-simulation
-* Hypothesis-test and
-* Estimation
+
+- Monte-Carlo Simulation 
+- Hypothesis testing
+- Estimation
 
 ![SimB](../../../screenshots/SimulationChoice.png)
 
@@ -479,7 +489,8 @@ To cite SimB as a tool, its timing or probabilistic simulation features, or SimB
 ~~~bibtex
 @InProceedings{simb,
 Author    = {Vu, Fabian and Leuschel, Michael and Mashkoor, Atif},
-Title     = {{Validation of Formal Models by Timed Probabilistic Simulation}},
+Title     = {{Validation of Formal Models by 
+             Timed Probabilistic Simulation}},
 Booktitle = {Proceedings ABZ},
 Year      = 2021,
 Series    = {LNCS},
@@ -494,7 +505,8 @@ To cite SimB's interactive simulation, please use:
 ~~~bibtex
 @InProceedings{simb,
 Author    = {Vu, Fabian and Leuschel, Michael},
-Title     = {{Validation of Formal Models by Interactive Simulation}},
+Title     = {{Validation of Formal Models by 
+              Interactive Simulation}},
 Booktitle = {Proceedings ABZ},
 Year      = 2023,
 Series    = {LNCS},
@@ -507,8 +519,10 @@ To cite SimB's functionalities to simulate a Reinforcement Learning Agent and En
 
 ~~~bibtex
 @InProceedings{validation_rl,
-author    = {Vu, Fabian and Dunkelau, Jannik and Leuschel, Michael},
-title     = {{Validation of Reinforcement Learning Agents and Safety Shields with ProB}},
+author    = {Vu, Fabian and Dunkelau, Jannik and 
+             Leuschel, Michael},
+title     = {{Validation of Reinforcement Learning Agents 
+              and Safety Shields with ProB}},
 booktitle = {{Proceedings NFM}},
 year      = 2024,
 pages     = {279--297}

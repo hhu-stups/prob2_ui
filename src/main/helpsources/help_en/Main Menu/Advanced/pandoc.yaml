@@ -4,6 +4,8 @@ metadata:
   css: styles.css
   toc: true
   toc-depth: 3
+  number-sections: true
   titlepage: true
   wrap: preserve
+  date: 2024-07-25
 highlight-style: tango
