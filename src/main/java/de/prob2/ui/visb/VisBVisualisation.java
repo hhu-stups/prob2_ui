@@ -1,4 +1,4 @@
-package de.prob2.ui.visb.visbobjects;
+package de.prob2.ui.visb;
 
 import java.nio.file.Path;
 import java.util.List;

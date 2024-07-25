@@ -37,7 +37,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.help.UserManualStage;
-import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
