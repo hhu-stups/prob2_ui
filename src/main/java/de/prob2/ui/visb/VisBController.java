@@ -93,7 +93,7 @@ public final class VisBController {
 		currentTrace.addListener((o, from, to) -> {
 			if (this.getVisBVisualisation() != null) {
 				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
-					this.visBVisualisation.set(null);
+					this.hideVisualisation();
 				}
 				this.updateVisualisationIfPossible();
 			}
@@ -136,10 +136,23 @@ public final class VisBController {
 		return this.relativeVisBPathProperty().get();
 	}
 
-	public void unload() {
+	/**
+	 * Hide the currently loaded visualisation, but remember its path (if any) so that the user can reload it.
+	 * This should be called after visualisation errors that can possibly be fixed by a reload.
+	 */
+	public void hideVisualisation() {
+		this.visBVisualisation.set(null);
+	}
+
+	/**
+	 * Close any currently loaded visualisation.
+	 * Unlike {@link #hideVisualisation()}, this also unsets the visualisation file path,
+	 * so the user cannot reload the visualisation unless they explicitly re-select it.
+	 */
+	public void closeVisualisation() {
+		this.hideVisualisation();
 		this.absoluteVisBPath.set(null);
 		this.relativeVisBPath.set(null);
-		this.visBVisualisation.set(null);
 	}
 
 	public void loadFromAbsolutePath(Path path) throws IOException {
@@ -305,10 +318,10 @@ public final class VisBController {
 	}
 
 	void reloadVisualisation() throws IOException {
-		// Remove the previous visualisation before loading a new one.
+		// Hide the previous visualisation before loading a new one.
 		// This ensures that listeners on visBVisualisation are always called
 		// and prevents an old visualisation remaining visible after an error.
-		this.visBVisualisation.set(null);
+		this.hideVisualisation();
 
 		Path visBPath = this.getAbsoluteVisBPath();
 		if (visBPath == null) {

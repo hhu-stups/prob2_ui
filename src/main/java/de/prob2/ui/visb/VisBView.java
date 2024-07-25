@@ -318,7 +318,7 @@ public final class VisBView extends BorderPane {
 	}
 
 	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
-		visBController.unload();
+		visBController.closeVisualisation();
 		if(machine != null && stateSpace != null) {
 			final Path visBVisualisation = machine.getVisBVisualisation();
 			if (visBVisualisation != null) {
@@ -528,7 +528,7 @@ public final class VisBView extends BorderPane {
 
 	@FXML
 	public void closeVisualisation() {
-		visBController.unload();
+		visBController.closeVisualisation();
 	}
 
 	@FXML
