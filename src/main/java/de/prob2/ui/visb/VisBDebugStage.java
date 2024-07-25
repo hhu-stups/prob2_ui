@@ -224,8 +224,6 @@ public final class VisBDebugStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		visBController.visBVisualisationProperty().addListener((o, from, to) -> this.initialiseListViews(to));
-
 		this.selectedColumn.setCellValueFactory(new VisBSelectionCell(visBItems, selectAll));
 		this.selectedColumn.setGraphic(selectAll);
 
@@ -233,6 +231,10 @@ public final class VisBDebugStage extends Stage {
 		this.itemColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getVisBItem()));
 
 		this.visBEvents.setCellFactory(lv -> new VisBEventCell());
+
+		visBController.visBVisualisationProperty().addListener((o, from, to) -> this.initialiseListViews(to));
+		this.initialiseListViews(visBController.getVisBVisualisation());
+
 		this.currentTrace.addListener((observable, from, to) -> refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> refresh());
 	}
