@@ -402,7 +402,7 @@ public final class VisBView extends BorderPane {
 	/**
 	 * This method clears our the WebView and the ListView and removes possible listeners, so that the VisBStage no longer interacts with anything.
 	 */
-	void clear(){
+	private void clear() {
 		LOGGER.debug("Clear the stage!");
 		this.webView.setVisible(false);
 		this.placeholder.setVisible(true);

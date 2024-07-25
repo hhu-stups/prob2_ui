@@ -189,7 +189,8 @@ public final class VisBController {
 			this.attributeValues.putAll(getAttributesCmd.getValues());
 		} catch (ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
-			visBView.clear();
+			// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
+			this.hideVisualisation();
 			return;
 		}
 
