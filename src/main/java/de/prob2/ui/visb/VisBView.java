@@ -406,7 +406,6 @@ public final class VisBView extends BorderPane {
 		LOGGER.debug("Clear the stage!");
 		this.webView.setVisible(false);
 		this.placeholder.setVisible(true);
-		injector.getInstance(VisBDebugStage.class).clear();
 	}
 
 	/**
