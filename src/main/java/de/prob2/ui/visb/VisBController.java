@@ -142,7 +142,7 @@ public final class VisBController {
 		this.visBVisualisation.set(null);
 	}
 
-	public void loadFromAbsolutePath(Path path) {
+	public void loadFromAbsolutePath(Path path) throws IOException {
 		Objects.requireNonNull(path, "path");
 		Path relativePath = relativizeVisBPath(currentProject.getLocation(), path);
 		this.absoluteVisBPath.set(path);
@@ -150,7 +150,7 @@ public final class VisBController {
 		this.reloadVisualisation();
 	}
 
-	public void loadFromRelativePath(Path path) {
+	public void loadFromRelativePath(Path path) throws IOException {
 		Objects.requireNonNull(path, "path");
 		Path absolutePath = resolveVisBPath(currentProject.getLocation(), path);
 		this.absoluteVisBPath.set(absolutePath);
@@ -304,7 +304,7 @@ public final class VisBController {
 		return new VisBVisualisation(svgPath, svgContent, itemsCmd.getItems(), eventsCmd.getEvents(), svgObjectsCmd.getSvgObjects());
 	}
 
-	void reloadVisualisation() {
+	void reloadVisualisation() throws IOException {
 		// Remove the previous visualisation before loading a new one.
 		// This ensures that listeners on visBVisualisation are always called
 		// and prevents an old visualisation remaining visible after an error.
@@ -315,13 +315,7 @@ public final class VisBController {
 			return;
 		}
 
-		try {
-			this.visBVisualisation.set(constructVisualisationFromJSON(currentTrace.getStateSpace(), visBPath));
-		} catch (IOException | RuntimeException e) {
-			LOGGER.warn("error while loading visb file", e);
-			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
-			return;
-		}
+		this.visBVisualisation.set(constructVisualisationFromJSON(currentTrace.getStateSpace(), visBPath));
 
 		updateVisualisationIfPossible();
 	}

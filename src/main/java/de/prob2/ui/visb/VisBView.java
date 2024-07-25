@@ -322,12 +322,22 @@ public final class VisBView extends BorderPane {
 		if(machine != null && stateSpace != null) {
 			final Path visBVisualisation = machine.getVisBVisualisation();
 			if (visBVisualisation != null) {
-				visBController.loadFromRelativePath(visBVisualisation);
+				try {
+					visBController.loadFromRelativePath(visBVisualisation);
+				} catch (IOException | RuntimeException exc) {
+					this.showVisualisationLoadError(exc);
+				}
 			} else {
 				cliExecutor.execute(() -> {
 					Path visBPath = getPathFromDefinitions(stateSpace);
 					if (visBPath != null) {
-						Platform.runLater(() -> visBController.loadFromAbsolutePath(visBPath));
+						Platform.runLater(() -> {
+							try {
+								visBController.loadFromAbsolutePath(visBPath);
+							} catch (IOException | RuntimeException exc) {
+								this.showVisualisationLoadError(exc);
+							}
+						});
 					}
 				});
 			}
@@ -462,7 +472,11 @@ public final class VisBView extends BorderPane {
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
-			visBController.loadFromAbsolutePath(path);
+			try {
+				visBController.loadFromAbsolutePath(path);
+			} catch (IOException | RuntimeException exc) {
+				this.showVisualisationLoadError(exc);
+			}
 		}
 	}
 
@@ -473,6 +487,11 @@ public final class VisBView extends BorderPane {
 		final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
 		alert.initOwner(this.getScene().getWindow());
 		alert.showAndWait();
+	}
+
+	private void showVisualisationLoadError(Throwable exc) {
+		LOGGER.error("Error while (re)loading VisB file", exc);
+		alert(exc, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 	}
 
 	@FXML
@@ -500,7 +519,11 @@ public final class VisBView extends BorderPane {
 
 	@FXML
 	public void reloadVisualisation() {
-		visBController.reloadVisualisation();
+		try {
+			visBController.reloadVisualisation();
+		} catch (IOException | RuntimeException exc) {
+			this.showVisualisationLoadError(exc);
+		}
 	}
 
 	@FXML
@@ -546,7 +569,11 @@ public final class VisBView extends BorderPane {
 	private void loadFromDefinitions() {
 		Path path = getPathFromDefinitions(currentTrace.getStateSpace());
 		if (path != null) {
-			visBController.loadFromAbsolutePath(path);
+			try {
+				visBController.loadFromAbsolutePath(path);
+			} catch (IOException | RuntimeException exc) {
+				this.showVisualisationLoadError(exc);
+			}
 		}
 	}
 
