@@ -36,28 +36,36 @@ SimB is accessible via the the menu in ProB2-UI:
 
 ![Open SimB Window via Advanced Menu Item](images/Open_Simulation_1.png)
 
-Once the SimB window is opened, there is a default simulation which always execute
-the first possible event after 100 ms in an endless loop.
+Once the SimB window is opened, SimB loads a simulation.
+This is either a simulation that is stored in the ProB2-UI project as the first one,
+or it is the default simulation.
+The default simulation is created when no simulations are stored for the machine in the project file.
+Furthermore, default simulation which always execute the first possible event after 100 ms in an endless loop.
 This is shown below.
 
-![SimB Window](images/SimB_Window.png)
+![SimB Window; the left-hand side shows an editor to modify the simulation; the right-hand side shows a table with validation tasks](images/SimB_Window.png)
 
-On the left-hand side, there is a editor to modify the default simulation.
+On the left-hand side, there is a editor to modify the simulation.
 On the right-hand side, there is a table to add validation tasks, applying techniques like
 `Monte Carlo Simulation`, `Hypothesis Testing`, and `Estimation`.
 This is discussed in this tutorial later in more detail.
 
 ## Start a Simulation
 
-As soon as a simulation is loaded, the machine can be simulated and animated
-and the resulting trace can be saved (including timestamps).
+As soon as a simulation is loaded, the machine can be simulated and animated.
 The simulation can then be started by clicking on the `Play Button`.
-In this case, the simulation runs as a real-time simulation.
+By clicking on the `Play Button`, the simulation runs as a real-time simulation.
 
 ![Start Simulation by Clicking on `Play Button`](images/Open_Simulation_5.png)
 
 With real-time simulation, the modeler can then manually check whether the model behaves as desired.
-Combining VisB and SimB, a simulation can be seen as an animated picture similar to a GIF picture. This gives the domain expert even a better understanding of the model. With SimB listeners, it is also possible to encode simulations that are triggered by manual/user actions.
+Combining VisB and SimB, a simulation can be seen as an animated picture similar to a GIF picture. 
+This allows to create a more realistic prototype and gives the domain expert even a better understanding of the model. 
+With SimB listeners, it is also possible to encode simulations that are triggered by manual/user actions at runtime.
+
+In this example, the default simulation would be started.
+One can also load another simulation which was created/saved before.
+
 
 ## Loading Simulation
 
@@ -68,17 +76,28 @@ There are three main options:
 - `Load SimB traces` to open a directory which contains timed traces
 - `Load External Simulation` to open an external simulation, e.g., a simulation of a reinforcement learning agent in its environment
 
-In the first steps, we focus on the standard option to load a SimB configuration only.
+In the following, we focus on the standard option to load a SimB configuration.
+The other options, i.e., `Load SimB traces` and `Load External Simulation` work in the same way.
 
 ![Open Simulation via `Open File` button and `Load SimB Configuration` button](images/Open_Simulation_2.png)
 
-A SimB simulation can be open via the `Open File` leading to a context menu with the three aforementioned option.
-Clicking on the `Load SimB Configuration` button opens a File Dialog.
+A SimB simulation can be opened via the `Open File`. 
+This leads to a context menu with the three aforementioned option.
+Clicking on the `Load SimB Configuration` button (as shown in the Figure) opens a File Dialog.
+Clicking on the `Load SimB traces` and `Load External Simulation` buttons also open a File dialog (not shown here).
 
 ![Choose SimB Simulation via File Dialog](images/Open_Simulation_3.png)
 
-Within the file dialog, the user can choose a SimB simulation which is then loaded into SimB.
-The user must then switch the current SimB simulation through the `ChoiceBox` on the top-left of the SimB window.
+Regarding the option to load a SimB configuration, 
+the user can choose a SimB simulation in a `JSON presentation` in the File Dialog (shown in the Figure).
+The SimB configuration is then loaded into SimB.
+
+For the option to load SimB traces, the user has to choose a directory which contains the timed traces in SimB.
+For the option to load an external simulation, the user has to choose an executable file.
+Currently, it supports the `.py` format for AI simulations, particularly, reinforcement learning agents in an environment.
+
+The user must then switch the current SimB simulation through the `ChoiceBox` on the top-left of the SimB window (shown in Figure).
+This option also works for loading a directory with a set of traces, and an external simulation similarly.
 
 ![Switch Current SimB Simulation via a `ChoiceBox` on Top-Left](images/Open_Simulation_4.png)
 
