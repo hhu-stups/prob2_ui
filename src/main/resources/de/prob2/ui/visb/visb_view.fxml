@@ -120,7 +120,8 @@
 				<ImageView preserveRatio="true" fitWidth="200.0">
 					<Image url="@/de/prob2/ui/ProB_Logo.png"/>
 				</ImageView>
-				<Label text="%common.noModelLoaded" fx:id="placeholderLabel" textAlignment="CENTER"/>
+				<Label text="%common.noModelLoaded" fx:id="placeholderLabel" textAlignment="CENTER" wrapText="true"/>
+				<Button fx:id="initButton" styleClass="button-blue" visible="false" onAction="#doInitialisation"/>
 			</VBox>
 		</StackPane>
 	</center>

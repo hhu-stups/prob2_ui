@@ -216,10 +216,6 @@ public final class VisBController {
 	 */
 	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
 		Trace trace = currentTrace.get();
-		if (!trace.getCurrentState().isInitialised()) {
-			executeBeforeInitialisation();
-			return;
-		}
 		LOGGER.debug("Finding event for id: {}", id);
 		VisBEvent event = this.getVisBVisualisation().getEventsById().get(id);
 
@@ -249,7 +245,7 @@ public final class VisBController {
 		}
 	}
 
-	private void executeBeforeInitialisation() {
+	void executeBeforeInitialisation() {
 		Trace trace = currentTrace.get();
 		Set<Transition> nextTransitions = trace.getNextTransitions();
 		if (nextTransitions.size() == 1) {
@@ -334,8 +330,6 @@ public final class VisBController {
 			LOGGER.debug("Reloading visualisation...");
 			//Updates visualisation, only if current state is initialised and visualisation items are not empty
 			applySVGChanges(currentState);
-		} else {
-			injector.getInstance(VisBView.class).showModelNotInitialised();
 		}
 		LOGGER.debug("Visualisation has been reloaded.");
 	}

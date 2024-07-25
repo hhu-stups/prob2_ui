@@ -150,6 +150,8 @@ public final class VisBView extends BorderPane {
 	private VBox placeholder;
 	@FXML
 	private Label placeholderLabel;
+	@FXML
+	private Button initButton;
 
 	/**
 	 * The public constructor of this class is injected with the ProB2-UI injector.
@@ -197,13 +199,11 @@ public final class VisBView extends BorderPane {
 			setCurrentAsDefaultItem.disableProperty().unbind();
 			unsetDefaultItem.disableProperty().unbind();
 			if (to == null) {
-				placeholderLabel.setText(i18n.translate("common.noModelLoaded"));
 				loadDefaultItem.setDisable(true);
 				loadFromDefinitionsItem.setDisable(true);
 				setCurrentAsDefaultItem.setDisable(true);
 				unsetDefaultItem.setDisable(true);
 			} else {
-				placeholderLabel.setText(i18n.translate("visb.placeholder.text"));
 				loadDefaultItem.disableProperty().bind(to.visBVisualizationProperty().isNull()
 					.or(visBController.relativeVisBPathProperty().isEqualTo(to.visBVisualizationProperty())));
 				loadFromDefinitionsItem.disableProperty().bind(visBController.relativeVisBPathProperty().isEqualTo(VisBController.NO_PATH));
@@ -214,9 +214,9 @@ public final class VisBView extends BorderPane {
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
-			if (to == null) {
-				this.clear();
-			} else {
+			this.updatePlaceholder(to, currentTrace.get());
+
+			if (to != null) {
 				this.loadSvgFile(to);
 				this.runWhenLoaded(() -> {
 					final JSObject window = this.getJSWindow();
@@ -244,14 +244,17 @@ public final class VisBView extends BorderPane {
 
 		ChangeListener<? super StateSpace> stateSpaceListener = (o, from, to) -> loadVisBFileFromMachine(currentProject.getCurrentMachine(), to);
 
+		ChangeListener<Trace> traceListener = (o, from, to) -> this.updatePlaceholder(visBController.getVisBVisualisation(), to);
+
 		// Load VisB file from machine, when window is opened and set listener on the current machine
 		this.currentProject.currentMachineProperty().addListener(machineListener);
 		this.visBController.visBVisualisationProperty().addListener(visBListener);
 		this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
+		this.currentTrace.addListener(traceListener);
 
 		machineListener.changed(null, null, currentProject.getCurrentMachine());
-
 		stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
+		traceListener.changed(null, null, currentTrace.get());
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
@@ -349,8 +352,6 @@ public final class VisBView extends BorderPane {
 	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
 	 */
 	private void initialiseWebView(String svgContent, String baseUrl) {
-		this.placeholder.setVisible(false);
-		this.webView.setVisible(true);
 		String htmlFile = generateHTMLFileWithSVG(svgContent, baseUrl);
 		this.webView.getEngine().loadContent(htmlFile);
 	}
@@ -399,13 +400,37 @@ public final class VisBView extends BorderPane {
 		return (JSObject)this.webView.getEngine().executeScript("window");
 	}
 
-	/**
-	 * This method clears our the WebView and the ListView and removes possible listeners, so that the VisBStage no longer interacts with anything.
-	 */
-	private void clear() {
-		LOGGER.debug("Clear the stage!");
-		this.webView.setVisible(false);
+	private void showPlaceholder(String placeholderLabelText) {
+		if (this.webView != null) {
+			// The web view might not be loaded yet...
+			// (see the Platform.runLater block in initialize)
+			this.webView.setVisible(false);
+		}
+
 		this.placeholder.setVisible(true);
+		this.placeholderLabel.setText(placeholderLabelText);
+		this.initButton.setVisible(false);
+	}
+
+	private void updatePlaceholder(VisBVisualisation visualisation, Trace trace) {
+		if (trace == null) {
+			this.showPlaceholder(i18n.translate("common.noModelLoaded"));
+		} else if (visualisation == null || this.webView == null) {
+			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
+		} else if (!trace.getCurrentState().isInitialised()) {
+			this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
+			
+			if (trace.getCurrentState().getOutTransitions().size() == 1) {
+				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.deterministic"));
+				this.initButton.setVisible(true);
+			} else {
+				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.nonDeterministic"));
+			}
+		} else {
+			this.placeholder.setVisible(false);
+			this.initButton.setVisible(false);
+			this.webView.setVisible(true);
+		}
 	}
 
 	/**
@@ -446,12 +471,13 @@ public final class VisBView extends BorderPane {
 		this.runWhenLoaded(() -> this.getJSWindow().call("changeAttribute", id, attribute, value));
 	}
 
-	public void showModelNotInitialised() {
-		this.runWhenLoaded(() -> this.getJSWindow().call("showModelNotInitialised"));
-	}
-
 	public void resetMessages() {
 		this.runWhenLoaded(() -> this.getJSWindow().call("resetMessages"));
+	}
+
+	@FXML
+	private void doInitialisation() {
+		visBController.executeBeforeInitialisation();
 	}
 
 	private void showExportInProgress(boolean visible) {

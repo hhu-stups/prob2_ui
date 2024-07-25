@@ -5,8 +5,6 @@
 	<!-- This is for zooming in and out and scaling the image to the right width and height -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<script>
-		let notInitialisedShown = false;
-
 		function runWhenLoaded(callback) {
 			// https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event#checking_whether_loading_is_already_complete
 			if (document.readyState === "loading") {
@@ -150,19 +148,9 @@
 			}
 		}
 
-		function showModelNotInitialised() {
-			// Remember if the "not initialised" message has already been shown,
-			// so that calling this function multiple times doesn't show multiple copies of the same message.
-			if (!notInitialisedShown) {
-				appendErrorMessage("Model not initialised").style.color = "blue";
-				notInitialisedShown = true;
-			}
-		}
-
 		function resetMessages() {
 			updateDebugMessages("");
 			getErrorMessagesNode().textContent = "";
-			notInitialisedShown = false;
 		}
 
 		// This marker variable is checked by VisBView to verify that the JavaScript code loaded correctly.
