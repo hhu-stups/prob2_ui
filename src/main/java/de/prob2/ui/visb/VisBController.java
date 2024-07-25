@@ -13,8 +13,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.ExecuteOperationException;
-import de.prob.animator.command.GetOperationByPredicateCommand;
 import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.GetVisBDefaultSVGCommand;
 import de.prob.animator.command.GetVisBSVGObjectsCommand;
@@ -23,7 +21,6 @@ import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.command.VisBPerformClickCommand;
-import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.exception.ProBError;
@@ -243,14 +240,7 @@ public final class VisBController {
 					uiInteraction.addUserInteraction(realTimeSimulator, transition);
 				}
 			}
-		} catch (ExecuteOperationException e) {
-			LOGGER.debug("Cannot execute event for id: {}", id, e);
-			if (e.getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
-				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
-				alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
-				alert.show();
-			}
-		} catch (EvaluationException e) {
+		} catch (ProBError e) {
 			LOGGER.debug("Cannot execute event for id: {}", id, e);
 			Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
 			alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
