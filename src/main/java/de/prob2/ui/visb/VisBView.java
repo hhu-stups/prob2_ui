@@ -229,8 +229,8 @@ public final class VisBView extends BorderPane {
 					Object loadedMarker = window.getMember("visBJavaScriptLoaded");
 					if (!"VisB JavaScript loaded".equals(loadedMarker)) {
 						LOGGER.error("VisB JavaScript failed to load (marker variable has incorrect value '{}')", loadedMarker);
-						this.clear();
 						stageManager.makeAlert(Alert.AlertType.ERROR, "", "visb.exception.javaScriptFailedToLoad").show();
+						visBController.hideVisualisation();
 						return;
 					}
 
