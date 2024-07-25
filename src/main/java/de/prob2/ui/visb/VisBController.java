@@ -26,7 +26,6 @@ import de.prob.animator.command.VisBPerformClickCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
-import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -275,20 +274,20 @@ public final class VisBController {
 		}
 
 		String jsonPathString = jsonPath.equals(NO_PATH) ? "" : jsonPath.toString();
-		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPathString);
-		
-		stateSpace.execute(loadCmd);
-		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPathString);
-		
-		stateSpace.execute(svgCmd);
+
+		var loadCmd = new LoadVisBCommand(jsonPathString);
+		var svgCmd = new ReadVisBSvgPathCommand(jsonPathString);
+		var itemsCmd = new ReadVisBItemsCommand();
+		var eventsCmd = new ReadVisBEventsHoversCommand();
+		var svgObjectsCmd = new GetVisBSVGObjectsCommand();
+		var defaultSVGCmd = new GetVisBDefaultSVGCommand();
+		stateSpace.execute(loadCmd, svgCmd, itemsCmd, eventsCmd, svgObjectsCmd, defaultSVGCmd);
+
 		String svgPathString = svgCmd.getSvgPath();
-		
 		final Path svgPath;
 		final String svgContent;
 		if (svgPathString.isEmpty()) {
 			svgPath = NO_PATH;
-			final GetVisBDefaultSVGCommand defaultSVGCmd = new GetVisBDefaultSVGCommand();
-			stateSpace.execute(defaultSVGCmd);
 			svgContent = defaultSVGCmd.getSVGFileContents();
 		} else {
 			if (jsonPath.equals(NO_PATH)) {
@@ -302,19 +301,7 @@ public final class VisBController {
 			svgContent = Files.readString(svgPath);
 		}
 		
-		ReadVisBItemsCommand readVisBItemsCommand = new ReadVisBItemsCommand();
-		stateSpace.execute(readVisBItemsCommand);
-		List<VisBItem> items = readVisBItemsCommand.getItems();
-		
-		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
-		stateSpace.execute(readEventsCmd);
-		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
-		
-		GetVisBSVGObjectsCommand command = new GetVisBSVGObjectsCommand();
-		stateSpace.execute(command);
-		List<VisBSVGObject> visBSVGObjects = command.getSvgObjects();
-		
-		return new VisBVisualisation(svgPath, svgContent, items, visBEvents, visBSVGObjects);
+		return new VisBVisualisation(svgPath, svgContent, itemsCmd.getItems(), eventsCmd.getEvents(), svgObjectsCmd.getSvgObjects());
 	}
 
 	void reloadVisualisation() {
