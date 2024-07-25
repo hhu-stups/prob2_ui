@@ -1,0 +1,12 @@
+code {
+    font-size: 0.65em;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	overflow: auto;
+}
+pre {
+    font-size: 0.65em;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow: auto;
+}
