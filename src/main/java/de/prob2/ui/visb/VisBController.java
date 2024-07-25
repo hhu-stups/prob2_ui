@@ -202,7 +202,7 @@ public final class VisBController {
 	}
 
 	/**
-	 * This method is used by the {@link VisBConnector} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
+	 * This method is used by the {@link VisBView} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
 	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {

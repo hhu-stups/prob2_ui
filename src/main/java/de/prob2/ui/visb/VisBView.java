@@ -70,11 +70,38 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
+ * This class holds the main user interface and interacts with the {@link VisBController} class.
  */
 @Singleton
 @FXMLInjected
 public final class VisBView extends BorderPane {
+	/**
+	 * Contains Java methods that are meant to be called from the VisB JavaScript code running inside the {@link #webView}.
+	 * This class should only be used inside {@link VisBView}, but needs to be {@code public} so that it can be called from JavaScript.
+	 */
+	public final class VisBConnector {
+		/**
+		 * Whenever a svg item, that has an event in the JSON / VisB file is clicked, this method redirects the click towards the {@link VisBController}
+		 * @param id of the svg item, that is clicked
+		 */
+		public void click(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+			// probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
+			LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with shift {} cmd/meta {}", id, pageX, pageY, shiftKey, metaKey); // 1=left, 2=middle, 3=right
+			try {
+				visBController.executeEvent(id, pageX, pageY, shiftKey, metaKey);
+			} catch (Throwable t) {
+				// It seems that Java exceptions are completely ignored if they are thrown back to JavaScript,
+				// so log them manually here.
+				LOGGER.error("Uncaught exception in VisBConnector.click called by JavaScript", t);
+				Platform.runLater(() -> {
+					Alert alert = stageManager.makeExceptionAlert(t, "visb.exception.header", "visb.exception.clickEvent");
+					alert.initOwner(getScene().getWindow());
+					alert.showAndWait();
+				});
+			}
+		}
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBView.class);
 	private final Injector injector;
 	private final I18n i18n;
@@ -84,6 +111,8 @@ public final class VisBView extends BorderPane {
 	private final CliTaskExecutor cliExecutor;
 	private final FileChooserManager fileChooserManager;
 	private final VisBController visBController;
+
+	private final VisBConnector visBConnector;
 
 	@FXML
 	private MenuBar visbMenuBar;
@@ -149,6 +178,9 @@ public final class VisBView extends BorderPane {
 		this.cliExecutor = cliExecutor;
 		this.fileChooserManager = fileChooserManager;
 		this.visBController = visBController;
+
+		this.visBConnector = new VisBConnector();
+
 		this.stageManager.loadFXML(this, "visb_view.fxml");
 	}
 
@@ -203,7 +235,6 @@ public final class VisBView extends BorderPane {
 						return;
 					}
 
-					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
 					updateDynamicSVGObjects(to);
 					for (final VisBEvent event : to.getEvents()) {
 						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
