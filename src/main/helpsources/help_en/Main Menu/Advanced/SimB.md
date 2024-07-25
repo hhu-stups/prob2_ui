@@ -1,3 +1,5 @@
+<!-- \newpage -->
+
 ![SimB](../../../screenshots/SimB.png)
 
 
@@ -6,7 +8,7 @@
 SimB is a simulator built on top of ProB. 
 It is available in the latest SNAPSHOT version in the new JavaFX based user interface [ProB2-UI](https://github.com/hhu-stups/prob2_ui). 
 The modeler can write SimB annotations for a formal model to simulate it. 
-Examples are available at https://github.com/favu100/SimB-examples. 
+Examples are available at [https://github.com/favu100/SimB-examples](https://github.com/favu100/SimB-examples). 
 
 Furthermore, it is then possible to validate probabilistic and timing properties with 
 statistical validation techniques such as hypothesis testing and estimation.
@@ -14,7 +16,7 @@ statistical validation techniques such as hypothesis testing and estimation.
 SimB also contains a feature called interactive simulation. 
 This feature allows user interaction to trigger a simulation. 
 For interactive simulation, a modeler has to encode SimB listeners on events, triggering a SimB simulation. 
-Interactive Simulation examples are available at https://github.com/favu100/SimB-examples/tree/main/Interactive_Examples.
+Interactive Simulation examples are available at [https://github.com/favu100/SimB-examples/tree/main/Interactive_Examples](https://github.com/favu100/SimB-examples/tree/main/Interactive_Examples).
 
 
 More recently, SimB is extended by a new feature which makes it possible to load an Reinforcement learning Agent. 
@@ -22,50 +24,7 @@ Technically, each step of the RL agent is converted into a SimB activation.
 In order to simulate a RL agent in SimB, one must (1) create a formal B model for the RL agent, and 
 (2) create a mapping between the state in the RL agent and the formal model, and 
 (3) provide information to the formal B model again. 
-Reinforcement Learning examples are available at: https://github.com/hhu-stups/reinforcement-learning-b-models
-
-To cite SimB as a tool, its timing or probabilistic simulation features, or SimBs statistical validation techniques, please use:
-
-~~~bibtex
-@InProceedings{simb,
-Author    = {Vu, Fabian and Leuschel, Michael and Mashkoor, Atif},
-Title        = {{Validation of Formal Models by Timed Probabilistic Simulation}},
-Booktitle    = {Proceedings ABZ},
-Year        = 2021,
-Series    = {LNCS},
-Volume     = {12709},
-Pages = {81--96}
-}
-~~~
-
-
-To cite SimB's interactive simulation, please use:
-
-~~~bibtex
-@InProceedings{simb,
-Author    = {Vu, Fabian and Leuschel, Michael},
-Title        = {{Validation of Formal Models by Interactive Simulation}},
-Booktitle    = {Proceedings ABZ},
-Year        = 2023,
-Series = {LNCS},
-Volume = {14010},
-Pages = {59--69}
-}
-~~~
-
-To cite SimB's functionalities to simulate a Reinforcement Learning Agent and Environment, or an environment, please use:
-
-~~~bibtex
-@InProceedings{validation_rl,
-author="Vu, Fabian
-and Dunkelau, Jannik
-and Leuschel, Michael",
-title="Validation of Reinforcement Learning Agents and Safety Shields with ProB",
-booktitle="Proceedings NFM",
-year="2024",
-pages="279--297",}
-~~~
-
+Reinforcement Learning examples are available at: [https://github.com/hhu-stups/reinforcement-learning-b-models](https://github.com/hhu-stups/reinforcement-learning-b-models)
 
 
 # First Steps
@@ -93,8 +52,8 @@ The general structure of a SimB activation diagram is as follows:
 
 ~~~json
 {
-"activations": [...]
-"listeners": [...]
+  "activations": [...],
+  "listeners": [...]
 }
 ~~~
 activations stores SimB activations, while listeners stores SimB listeners. activations must be encoded, listeners is optional and defaults to the empty list.
@@ -108,26 +67,24 @@ There are two types of activations:
 `direct activation` and `probabilistic choice`. 
 All activations are identified by their `id`.
 
-#### Direct Activation
-
-A direct activation activates an event to be executed in the future. 
+**Direct Activation.** A direct activation activates an event to be executed in the future. 
 It requires the fields `id`, and `execute` to be defined. 
 All other fields can be defined optionally.
 Thus, an activation is of the following form:
 
-~~~json
+```.json
 {
-   "id":  ...
-   "execute": ...
-   "after": ...
-   "activating": ...
-   "activationKind": ...
-   "additionalGuards": ...
-   "fixedVariables": ....
-   "probabilisticVariables": ....
+   "id":  ...,
+   "execute": ...,
+   "after": ...,
+   "activating": ...,
+   "activationKind": ...,
+   "additionalGuards": ...,
+   "fixedVariables": ...,
+   "probabilisticVariables": ...,
    "priority": ...
 }
-~~~
+```
 
 The explanation of each field is as follows:
 
@@ -146,9 +103,7 @@ The explanation of each field is as follows:
 - `uniform` means that a transition is selected from all alternatives uniformly.
 - `priority` stores the priority for scheduling execute. Lower number means greater priority.
 
-#### Probabilistic Choice
-
-A probabilistic choice selects an event to be executed in the future. 
+*Probabilistic Choice.* A probabilistic choice selects an event to be executed in the future. 
 It requires the two fields `id`, and `chooseActivation`. 
 `chooseActivation` is a `Map` storing `Key-Value` pairs where `activations` (identified by their `id`) 
 are mapped to a probability. 
@@ -157,27 +112,33 @@ but eventually, a direct activation must be reached.
 
 ~~~json
 {
-"id":  ...
-"chooseActivation": ...
+  "id":  ...,
+  "chooseActivation": ...
 }
 ~~~
 
-#### Example 1: SimB Activation Diagram with Direct Activations and Probabilistic Choice
-
-In the following, an example for a SimB file controlling a Traffic Lights for cars and pedestrians (with timing and probabilistic behavior) is shown:
+**Example 1: SimB Activation Diagram with Direct Activations and Probabilistic Choice.** In the following, an example for a SimB file controlling a Traffic Lights for cars and pedestrians (with timing and probabilistic behavior) is shown:
 
 ~~~json
 {
-"activations": [
-  {"id":"$initialise_machine", "execute":"$initialise_machine", "activating":"choose"},
-  {"id":"choose", "chooseActivation":{"cars_ry": "0.8", "peds_g": "0.2"}},
-  {"id":"cars_ry", "execute":"cars_ry", "after":5000, "activating":"cars_g"},
-  {"id":"cars_g", "execute":"cars_g", "after":500, "activating":"cars_y"},
-  {"id":"cars_y", "execute":"cars_y", "after":5000, "activating":"cars_r"},
-  {"id":"cars_r", "execute":"cars_r", "after":500, "activating":"choose"},
-  {"id":"peds_g", "execute":"peds_g", "after":5000, "activating":"peds_r"},
-  {"id":"peds_r", "execute":"peds_r", "after":5000, "activating":"choose"}
-]
+  "activations": [
+    {"id":"$initialise_machine", "execute":"$initialise_machine", 
+    	"activating":"choose"},
+	{"id":"choose", "chooseActivation":
+  	    {"cars_ry": "0.8", "peds_g": "0.2"}},
+    {"id":"cars_ry", "execute":"cars_ry", "after":5000, 
+	    "activating":"cars_g"},
+	{"id":"cars_g", "execute":"cars_g", "after":500, 
+	    "activating":"cars_y"},
+    {"id":"cars_y", "execute":"cars_y", "after":5000, 
+	    "activating":"cars_r"},
+    {"id":"cars_r", "execute":"cars_r", "after":500, 
+	    "activating":"choose"},
+    {"id":"peds_g", "execute":"peds_g", "after":5000, 
+	   "activating":"peds_r"},
+    {"id":"peds_r", "execute":"peds_r", "after":5000, 
+	    "activating":"choose"}
+  ]
 }
 ~~~
 
@@ -200,9 +161,7 @@ Manual/User interaction is recognized via VisB and ProB's Operations View.
 }
 ~~~
 
-#### Example 2: SimB Activation Diagram with User Interaction
-
-In the following, we show parts of a SimB simulation from an automotive case study. 
+**Example 2: SimB Activation Diagram with User Interaction.** In the following, we show parts of a SimB simulation from an automotive case study. 
 The SimB simulation contains a SimB listener which is linked to two activations. 
 The case study models the car's lighting system controlled by pitman controller, the key ignition, and the warning lights button.
 The SimB listeners states that SimB listens on user interaction on the event `ENV_Pitman_DirectionBlinking`, 
@@ -338,7 +297,7 @@ to validate probabilistic and timing properties of the machine:
 Using a SimB file, the modeler can play a single simulation on the underlying model in real-time. The modeler can then manually check whether the model behaves as desired. Combining VisB and SimB, a simulation can be seen as an animated picture similar to a GIF picture. This gives the domain expert even a better understanding of the model. With SimB listeners, it is also possible to encode simulations that are triggered by manual/user actions.
 A Traffic Light example (based on the SimB file shown in Using_SimB ) simulating the first 21 seconds is shown below.
 
-#### Timed Trace Replay
+### Timed Trace Replay
 
 Based on a single simulation, the modeler can generate a timed trace which is also stored in the SimB format. Afterwards, it can be used to replay a scenario. similar to real-time simulation.
 
@@ -469,9 +428,7 @@ The input parameters are:
 
 
 
-#### Hypothesis Testing
-
-`Hypothesis Testing` expects the same parameters as `Monte Carlo Simulation`: 
+**Hypothesis Testing.** `Hypothesis Testing` expects the same parameters as `Monte Carlo Simulation`: 
 `Max Steps before Simulation`, `Number of Simulations`, `Starting Condition` and `Ending Condition`.
 
 The additional input parameters for Hypothesis Testing are:
@@ -489,9 +446,7 @@ The additional input parameters for Hypothesis Testing are:
 - `Probability` (in the hypothesis)
 - `Significance Level`
 
-#### Estimation
-
-`Estimation` expects the same parameters as `Monte Carlo Simulation`: `Number of Simulations`, `Starting Condition` and `Ending Condition`.
+**Estimation.** `Estimation` expects the same parameters as `Monte Carlo Simulation`: `Number of Simulations`, `Starting Condition` and `Ending Condition`.
 
 The additional input parameters for Estimation are:
 
@@ -509,8 +464,55 @@ The additional input parameters for Estimation are:
   - `Maximum Estimator` returns the maximum estimated value from all simulated runs.
 - `Desired Value`
 - `Epsilon`
-- 
+
+
 For an estimated value `e`, a desired value `d`, and an epsilon `eps`, it checks for each simulation whether `e` is within `[d - eps, d + eps]`.
 
 
 ## Editor for SimB Activation Diagram
+
+
+## Citing SimB
+
+To cite SimB as a tool, its timing or probabilistic simulation features, or SimBs statistical validation techniques, please use:
+
+~~~bibtex
+@InProceedings{simb,
+Author    = {Vu, Fabian and Leuschel, Michael and Mashkoor, Atif},
+Title     = {{Validation of Formal Models by Timed Probabilistic Simulation}},
+Booktitle = {Proceedings ABZ},
+Year      = 2021,
+Series    = {LNCS},
+Volume    = {12709},
+Pages     = {81--96}
+}
+~~~
+
+
+To cite SimB's interactive simulation, please use:
+
+~~~bibtex
+@InProceedings{simb,
+Author    = {Vu, Fabian and Leuschel, Michael},
+Title     = {{Validation of Formal Models by Interactive Simulation}},
+Booktitle = {Proceedings ABZ},
+Year      = 2023,
+Series    = {LNCS},
+Volume    = {14010},
+Pages     = {59--69}
+}
+~~~
+
+To cite SimB's functionalities to simulate a Reinforcement Learning Agent and Environment, or an environment, please use:
+
+~~~bibtex
+@InProceedings{validation_rl,
+author    = {Vu, Fabian and Dunkelau, Jannik and Leuschel, Michael},
+title     = {{Validation of Reinforcement Learning Agents and Safety Shields with ProB}},
+booktitle = {{Proceedings NFM}},
+year      = 2024,
+pages     = {279--297}
+}
+~~~
+
+
