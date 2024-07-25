@@ -120,12 +120,13 @@ element in the SimB activation.
 
 ![SimB Window with Editor including menu items to add new elements](images/SimB_Editor.png)
 
+![SimB Window with menu items to save modified simulation](images/SimB_Saving.png)
+
 Again, one can add new elements into the activation diagram.
 Therefore, one has to click onto the plus button which shows a context menu.
 The context menu consists of `MenuButtons` to add elements into the activation diagram: 
-`direct activations`, `probabilistic choices`, and `UI listeners`.
+*direct activations*, *probabilistic choices*, and *UI listeners*.
 Detailed explanation about those elements will be given later in this tutorial.
-
 
 There are two buttons to save the modified SimB activation diagram:
 `Save` and `Save as...` which both implement the well-known behavior from other applications.
@@ -135,26 +136,30 @@ Furthermore, there are more options to save SimB configurations.
 Note that this option does not save a timed trace.
 `Save Timed Trace` can be used to save the currently simulated trace as a timed trace in SimB's format.
 `Save User Interactions` can be used for simulations which have interactive elements.
-This option can be used to save a SimB activation diagram which adds `UI listeners` that are applied
+This option can be used to save a SimB activation diagram which adds *UI listeners* that are applied
 by the user in ProB2-UI.
 These user interactions are either applied through the ProB animator or through VisB.
-
-![SimB Window with menu items to save modified simulation](images/SimB_Saving.png)
 
 
 # Simulation with SimB
 
-SimB can be used in the following forms:
+SimB can load simulations in the following forms:
 
 - SimB activation diagram in  `.json` format (standard use case)
 - Directory with a set of timed traces
 - External simulation as any executable
 
 
+In the following, we will describe how these simulations are created.
+
 
 ## SimB Activation Diagram
 
-A SimB file consists of SimB activations and SimB listeners to simulate the model. SimB activations encode an activation diagram with probabilistic and timing elements for automatic simulation. To enable interactive simulation, it is also necessary to encode interactive elements aka. SimB listeners which trigger other SimB activations. Within these elements, the modeler can user B expressions which are evaluated on the current state.
+A SimB JSON file encodes an activation diagram, and consists of SimB activations and SimB listeners to simulate the model. 
+SimB activations encode an activation diagram with probabilistic and timing elements for automatic simulation. 
+To enable interactive simulation, it is also necessary to encode interactive elements aka. 
+SimB listeners which trigger other SimB activations. 
+Within these elements, the modeler can user B expressions which are evaluated on the current state. 
 The general structure of a SimB activation diagram is as follows:
 
 ~~~json
@@ -163,21 +168,24 @@ The general structure of a SimB activation diagram is as follows:
   "listeners": [...]
 }
 ~~~
+
 - `activations` stores SimB activations
 - `listeners` (optional; defaults to empty list) stores SimB listeners
 
+
 ### Probabilistic and Timing Elements
 
-The SimB file always contains an activations field storing a list of probabilistic and timing elements to control the simulation. 
+A SimB activation diagram in JSON always contains an `activations` 
+field storing a list of probabilistic and timing elements to control the simulation. 
 Probabilistic values are always evaluated to ensure that the sum of all possibilities is always 1. 
 Otherwise an error will be thrown at runtime. 
-There are two types of activations: `direct activation` and `probabilistic choice`. 
+There are two types of activations: *direct activation* and *probabilistic choice*. 
 All activations are identified by their `id`.
 
-**Direct Activation.** A direct activation activates an event to be executed in the future. 
+**Direct Activation.** A *direct activation* activates an event to be executed in the future. 
 It requires the fields `id`, and `execute` to be defined. 
 All other fields can be defined optionally.
-Thus, a direct activation is of the following form:
+Thus, a *direct activation* is of the following form:
 
 ```.json
 {
@@ -198,8 +206,8 @@ The explanation of each field is as follows:
 - `execute` identifies the activated event by its name. 
 - `after` defines the scheduled time (in ms) when activating an event. By default, it is set to 0 ms, e.g., when this field is not defined explicitly.
 - `activating` stores events that will be activated when executing the event defined by execute. Missing definition leads to the behavior that no other events are activated. The modeler can either write a `String` (to activate a single event) or a list of `Strings` (to activate multiple events)
-- `activationKind` stores the kind of activation for execute. Possible options are `multi`, `single`, `single:min`, and `single:max`. The default value is multi
-  - `multi` means that the activation will be queued for execution.
+- `activationKind` stores the kind of activation for execute:
+  - `multi` (default) means that the activation will be queued for execution.
   - `single` means that the activation will only be queued if there are no queued activations with the same id
   - `single:min` means that the activation will only be queued if (1) there are no queued activations for the same id or (2) there is a queued activation with the same id whose value for the scheduled time is greater. In the case of (2), the already queued activation will be discarded.
   - `single:max` means that the activation will only be queued if (1) there are no queued activations for the same id or (2) there is a queued activation with the same id whose value for the scheduled time is lower. In the case of (2), the already queued activation will be discarded.
@@ -210,13 +218,14 @@ The explanation of each field is as follows:
 - `uniform` means that a transition is selected from all alternatives uniformly.
 - `priority` stores the priority for scheduling execute. Lower number means greater priority.
 
-**Probabilistic Choice.** A probabilistic choice selects an event to be executed in the future. 
+**Probabilistic Choice.** A *probabilistic choice* selects an event to be executed in the future. 
 It requires the two fields `id`, and `chooseActivation`. 
 `chooseActivation` is a `Map` storing `Key-Value` pairs where `activations` (identified by their `id`) 
 are mapped to a probability. 
-It is possible to chain multiple probabilistic choices together, 
-but eventually, a direct activation must be reached.
-Thus, a probabilistic choice is of the following form:
+It is possible to chain multiple *probabilistic choices* together, 
+but eventually, a *direct activation* must be reached.
+The sum of the probabilities must evaluate to 1 here.
+Thus, a *probabilistic choice* is of the following form:
 
 ~~~json
 {
@@ -225,7 +234,8 @@ Thus, a probabilistic choice is of the following form:
 }
 ~~~
 
-**Example 1: SimB Activation Diagram with Direct Activations and Probabilistic Choice.** In the following, an example for a SimB file controlling a Traffic Lights for cars and pedestrians (with timing and probabilistic behavior) is shown:
+**Example 1: SimB Activation Diagram with Direct Activations and Probabilistic Choice.** In the following, an example for a SimB file controlling traffic lights for cars and pedestrians (with timing and probabilistic behavior) is shown.
+`choose` is an *probabilistic choice*. `$initialise_machine`, `cars_ry`, `cars_g`, `cars_y`, `cars_r`, `peds_g`, `peds_r` are *direct activations*.
 
 ~~~json
 {
