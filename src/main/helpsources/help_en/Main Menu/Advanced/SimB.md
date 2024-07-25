@@ -105,18 +105,39 @@ This option also works for loading a directory with a set of traces, and an exte
 
 ## Creating and Modifying a Simulation
 
-The default simulation contains the corresponding diagram which can be modified in the SimB editor on the left-hand side.
-Here, one can remove existing elements in the default diagram by clicking on the minus button
-for the selected element.
+In the following, we focus on the option to create and modify a SimB configuration.
+The SimB configration has to match the format which encodes a SimB activation diagram.
+Simulations given by a set of traces are usually created by saving traces after a Monte Carlo simulation.
+External simulations are usually implemented in a specific format which is later explained in this tutorial as well.
+
+A SimB configuration can be simply created within a standard editor.
+Another possibility is to use the SimB editor within the SimB window.
+On the left-hand side of the SimB window, there is at least the default simulation which contains the corresponding diagram.
+Otherwise, one can also load an existing SimB configuration and modify it in the SimB editor.
+
+Here, one can remove existing elements in the diagram by clicking on the minus button after selecting an
+element in the SimB activation.
 
 ![SimB Window with Editor including menu items to add new elements](images/SimB_Editor.png)
 
-Furthermore, it is also possible to add new elements into the activation diagram.
+Again, one can add new elements into the activation diagram.
 Therefore, one has to click onto the plus button which shows a context menu.
 The context menu consists of `MenuButtons` to add elements into the activation diagram: 
 `direct activations`, `probabilistic choices`, and `UI listeners`.
 Detailed explanation about those elements will be given later in this tutorial.
 
+
+There are two buttons to save the modified SimB activation diagram:
+`Save` and `Save as...` which both implement the well-known behavior from other applications.
+
+Furthermore, there are more options to save SimB configurations.
+`Save Trace` can be clicked to save the currently animated trace in the format of ProB2-UI.
+Note that this option does not save a timed trace.
+`Save Timed Trace` can be used to save the currently simulated trace as a timed trace in SimB's format.
+`Save User Interactions` can be used for simulations which have interactive elements.
+This option can be used to save a SimB activation diagram which adds `UI listeners` that are applied
+by the user in ProB2-UI.
+These user interactions are either applied through the ProB animator or through VisB.
 
 ![SimB Window with menu items to save modified simulation](images/SimB_Saving.png)
 
