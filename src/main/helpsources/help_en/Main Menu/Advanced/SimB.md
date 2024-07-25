@@ -1,7 +1,5 @@
 <!-- \newpage -->
 
-![SimB](../../../screenshots/SimB.png)
-
 
 # General Information
 
@@ -29,7 +27,16 @@ Reinforcement Learning examples are available at: [https://github.com/hhu-stups/
 
 # First Steps
 
+To use SimB, make sure that ProB2-UI is installed.
+
 ## Open a Simulation
+
+SimB is accessible via the `Advanced` menu item in ProB2-UI.
+
+![Open SimB Window via Advanced Menu Item](images/Open_Simulation_1.png)
+
+Once the SimB window is opened, there is a default simulation which always execute
+the first possible event after 100 ms in an endless loop.
 
 ## Creating a Simulation
 
@@ -40,9 +47,6 @@ SimB can be used in the following forms:
 - SimB activation diagram in  `.json` format (standard use case)
 - External simulation as any executable
 - Directory with a set of timed traces
-
-As soon as a simulation is loaded, the machine can be simulated and animated 
-and the resulting trace can be saved (including timestamps).
 
 
 ## SimB Activation Diagram
@@ -56,15 +60,15 @@ The general structure of a SimB activation diagram is as follows:
   "listeners": [...]
 }
 ~~~
-activations stores SimB activations, while listeners stores SimB listeners. activations must be encoded, listeners is optional and defaults to the empty list.
+- `activations` stores SimB activations
+- `listeners` (optional; defaults to empty list) stores SimB listeners
 
 ### Probabilistic and Timing Elements
 
 The SimB file always contains an activations field storing a list of probabilistic and timing elements to control the simulation. 
 Probabilistic values are always evaluated to ensure that the sum of all possibilities is always 1. 
 Otherwise an error will be thrown at runtime. 
-There are two types of activations: 
-`direct activation` and `probabilistic choice`. 
+There are two types of activations: `direct activation` and `probabilistic choice`. 
 All activations are identified by their `id`.
 
 **Direct Activation.** A direct activation activates an event to be executed in the future. 
@@ -90,20 +94,20 @@ The explanation of each field is as follows:
 
 - `execute` identifies the activated event by its name. 
 - `after` defines the scheduled time (in ms) when activating an event. By default, it is set to 0 ms, e.g., when this field is not defined explicitly.
-- `activating` stores events that will be activated when executing the event defined by execute. Missing definition leads to the behavior that no other events are activated. The modeler can either write a String (to activate a single event) or a list of Strings (to activate multiple events)
-- `activationKind` stores the kind of activation for execute. Possible options are multi, single, single:min, and single:max. The default value is multi
-- `multi` means that the activation will be queued for execution.
-- `single` means that the activation will only be queued if there are no queued activations with the same id
-- `single:min` means that the activation will only be queued if (1) there are no queued activations for the same id or (2) there is a queued activation with the same id whose value for the scheduled time is greater. In the case of (2), the already queued activation will be discarded.
-- `single:max` means that the activation will only be queued if (1) there are no queued activations for the same id or (2) there is a queued activation with the same id whose value for the scheduled time is lower. In the case of (2), the already queued activation will be discarded.
-- `additionalGuards` stores optional guards when executing the event stored in execute
+- `activating` stores events that will be activated when executing the event defined by execute. Missing definition leads to the behavior that no other events are activated. The modeler can either write a `String` (to activate a single event) or a list of `Strings` (to activate multiple events)
+- `activationKind` stores the kind of activation for execute. Possible options are `multi`, `single`, `single:min`, and `single:max`. The default value is multi
+  - `multi` means that the activation will be queued for execution.
+  - `single` means that the activation will only be queued if there are no queued activations with the same id
+  - `single:min` means that the activation will only be queued if (1) there are no queued activations for the same id or (2) there is a queued activation with the same id whose value for the scheduled time is greater. In the case of (2), the already queued activation will be discarded.
+  - `single:max` means that the activation will only be queued if (1) there are no queued activations for the same id or (2) there is a queued activation with the same id whose value for the scheduled time is lower. In the case of (2), the already queued activation will be discarded.
+- `additionalGuards` stores optional guards when executing the event stored in execute.
 - `fixedVariables` stores a Map. Here, a variable (parameter, or non-deterministic assigned variable) is assigned to its value.
 - `probabilisticVariables` stores either a Map or a String. Concerning the Map, a variable (parameter, or non-deterministic assigned variable) is assigned to another Map defining the probabilistic choice of its value. The second Map stores Key-Value pairs where values are mapped to the probability. The modeler can also assign probabilisticVariables to first or uniform.
 - `first` means that the first transition is chosen for execution.
 - `uniform` means that a transition is selected from all alternatives uniformly.
 - `priority` stores the priority for scheduling execute. Lower number means greater priority.
 
-*Probabilistic Choice.* A probabilistic choice selects an event to be executed in the future. 
+**Probabilistic Choice.** A probabilistic choice selects an event to be executed in the future. 
 It requires the two fields `id`, and `chooseActivation`. 
 `chooseActivation` is a `Map` storing `Key-Value` pairs where `activations` (identified by their `id`) 
 are mapped to a probability. 
@@ -201,14 +205,41 @@ An example is shown below:
 }
 ~~~
 
+### Loading Simulation
 
-### Default Simulation
+In order to load, a simulation, one has to click on the `Open File` button.
+There are three main options:
+
+- `Load SimB Configuration` to open a SimB activation diagram in JSON format
+- `Load SimB traces` to open a directory which contains timed traces
+- `Load External Simulation` to open an external simulation, e.g., a simulation of a reinforcement learning agent in its environment
+
+In the first steps, we focus on the standard option to load a SimB configuration only.
+
+![Open Simulation via `Open File` button and `Load SimB Configuration` button](images/Open_Simulation_2.png)
+
+A SimB simulation can be open via the `Open File` leading to a context menu with the three aforementioned option.
+Clicking on the `Load SimB Configuration` button opens a File Dialog.
+
+![Choose SimB Simulation via File Dialog](images/Open_Simulation_3.png)
+
+Within the file dialog, the user can choose a SimB simulation which is then loaded into SimB.
+The user must then switch the current SimB simulation through the `ChoiceBox` on the top-left of the SimB window.
+The simulation can then be started by clicking on the `Play Button`.
+In this case, the simulation runs as a real-time simulation.
+
+![Switch Current SimB Simulation via a `ChoiceBox` on Top-Left](images/Open_Simulation_4.png)
+
+![Start Simulation by Clicking on `Play Button`](images/Open_Simulation_5.png)
+
+As soon as a simulation is loaded, the machine can be simulated and animated
+and the resulting trace can be saved (including timestamps).
 
 ## Loading Directory with Timed Traces
 
 ## External Simulation
 
-## Reinforcement Learning Agent in SimB
+### Reinforcement Learning Agent in SimB
 
 Instead of loading a SimB simulation as a JSON file, one can also load a Reinforcement Learning agent implemented in Python (`.py`). 
 For the simulation to work, one has to apply the following steps:
@@ -482,7 +513,7 @@ For an estimated value `e`, a desired value `d`, and an epsilon `eps`, it checks
 ## Editor for SimB Activation Diagram
 
 
-## Citing SimB
+# Citing SimB
 
 To cite SimB as a tool, its timing or probabilistic simulation features, or SimBs statistical validation techniques, please use:
 
