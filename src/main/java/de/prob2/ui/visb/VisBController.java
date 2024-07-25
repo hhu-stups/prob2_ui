@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -29,6 +28,7 @@ import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.exception.ProBError;
+import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -172,12 +172,12 @@ public final class VisBController {
 		return this.attributeValues;
 	}
 
-	private void applySVGChanges() {
+	private void applySVGChanges(State state) {
 		VisBView visBView = injector.getInstance(VisBView.class);
 
 		try {
-			final GetVisBAttributeValuesCommand getAttributesCmd = new GetVisBAttributeValuesCommand(currentTrace.getCurrentState());
-			currentTrace.getStateSpace().execute(getAttributesCmd);
+			final GetVisBAttributeValuesCommand getAttributesCmd = new GetVisBAttributeValuesCommand(state);
+			state.getStateSpace().execute(getAttributesCmd);
 			this.attributeValues.putAll(getAttributesCmd.getValues());
 		} catch (ProBError e){
 			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
@@ -206,7 +206,8 @@ public final class VisBController {
 	 * @param id of the svg item that was clicked
 	 */
 	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
-		if(!currentTrace.getCurrentState().isInitialised()){
+		Trace trace = currentTrace.get();
+		if (!trace.getCurrentState().isInitialised()) {
 			executeBeforeInitialisation();
 			return;
 		}
@@ -214,18 +215,17 @@ public final class VisBController {
 		VisBEvent event = this.getVisBVisualisation().getEventsById().get(id);
 
 		try {
-			StateSpace stateSpace = currentTrace.getStateSpace();
-			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(stateSpace, id, Collections.emptyList(), currentTrace.getCurrentState().getId());
-			stateSpace.execute(performClickCommand);
+			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
+			trace.getStateSpace().execute(performClickCommand);
 			List<Transition> transitions = performClickCommand.getTransitions();
 
 			if (transitions.isEmpty()) {
 				LOGGER.debug("No events found for id: {}", id);
 			} else {
 				LOGGER.debug("Executing event for id: {} and preds = {}", id, event.getPredicates());
-				Trace trace = currentTrace.get().addTransitions(transitions);
+				Trace newTrace = trace.addTransitions(transitions);
 				LOGGER.debug("Finished executed event for id: {} and preds = {}", id, event.getPredicates());
-				currentTrace.set(trace);
+				currentTrace.set(newTrace);
 				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 				for(Transition transition : transitions) {
 					UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
@@ -248,16 +248,14 @@ public final class VisBController {
 	}
 
 	private void executeBeforeInitialisation() {
-		Set<Transition> nextTransitions = currentTrace.get().getNextTransitions();
-		if(currentTrace.get().getNextTransitions().size() == 1) {
-			String transitionName = nextTransitions.stream().map(Transition::getName).toList().get(0);
-			Trace trace = currentTrace.get().execute(transitionName, new ArrayList<>());
-			currentTrace.set(trace);
+		Trace trace = currentTrace.get();
+		Set<Transition> nextTransitions = trace.getNextTransitions();
+		if (nextTransitions.size() == 1) {
+			Transition transition = nextTransitions.iterator().next();
+			currentTrace.set(trace.add(transition));
 			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-			for(Transition transition : nextTransitions) {
-				UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-				uiInteraction.addUserInteraction(realTimeSimulator, transition);
-			}
+			UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
+			uiInteraction.addUserInteraction(realTimeSimulator, transition);
 		} else {
 			LOGGER.debug("Cannot perform non-deterministic initialization from VisB");
 		}
@@ -265,10 +263,11 @@ public final class VisBController {
 
 	/**
 	 * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
+	 * @param stateSpace the ProB animator instance using which to load the VisB file
 	 * @param jsonPath path to the VisB JSON file
 	 * @return VisBVisualisation object
 	 */
-	private VisBVisualisation constructVisualisationFromJSON(Path jsonPath) throws IOException {
+	private static VisBVisualisation constructVisualisationFromJSON(StateSpace stateSpace, Path jsonPath) throws IOException {
 		if (!jsonPath.equals(NO_PATH)) {
 			jsonPath = jsonPath.toRealPath();
 			if (!Files.isRegularFile(jsonPath)) {
@@ -279,10 +278,10 @@ public final class VisBController {
 		String jsonPathString = jsonPath.equals(NO_PATH) ? "" : jsonPath.toString();
 		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPathString);
 		
-		currentTrace.getStateSpace().execute(loadCmd);
+		stateSpace.execute(loadCmd);
 		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPathString);
 		
-		currentTrace.getStateSpace().execute(svgCmd);
+		stateSpace.execute(svgCmd);
 		String svgPathString = svgCmd.getSvgPath();
 		
 		final Path svgPath;
@@ -290,7 +289,7 @@ public final class VisBController {
 		if (svgPathString.isEmpty()) {
 			svgPath = NO_PATH;
 			final GetVisBDefaultSVGCommand defaultSVGCmd = new GetVisBDefaultSVGCommand();
-			currentTrace.getStateSpace().execute(defaultSVGCmd);
+			stateSpace.execute(defaultSVGCmd);
 			svgContent = defaultSVGCmd.getSVGFileContents();
 		} else {
 			if (jsonPath.equals(NO_PATH)) {
@@ -305,15 +304,15 @@ public final class VisBController {
 		}
 		
 		ReadVisBItemsCommand readVisBItemsCommand = new ReadVisBItemsCommand();
-		currentTrace.getStateSpace().execute(readVisBItemsCommand);
+		stateSpace.execute(readVisBItemsCommand);
 		List<VisBItem> items = readVisBItemsCommand.getItems();
 		
 		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
-		currentTrace.getStateSpace().execute(readEventsCmd);
+		stateSpace.execute(readEventsCmd);
 		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
 		
 		GetVisBSVGObjectsCommand command = new GetVisBSVGObjectsCommand();
-		currentTrace.getStateSpace().execute(command);
+		stateSpace.execute(command);
 		List<VisBSVGObject> visBSVGObjects = command.getSvgObjects();
 		
 		return new VisBVisualisation(svgPath, svgContent, items, visBEvents, visBSVGObjects);
@@ -331,7 +330,7 @@ public final class VisBController {
 		}
 
 		try {
-			this.visBVisualisation.set(constructVisualisationFromJSON(visBPath));
+			this.visBVisualisation.set(constructVisualisationFromJSON(currentTrace.getStateSpace(), visBPath));
 		} catch (IOException | RuntimeException e) {
 			LOGGER.warn("error while loading visb file", e);
 			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
@@ -346,10 +345,11 @@ public final class VisBController {
 	 */
 	private void updateVisualisationIfPossible(){
 		LOGGER.debug("Trying to reload visualisation.");
-		if(this.currentTrace.getCurrentState() != null && this.currentTrace.getCurrentState().isInitialised()){
+		State currentState = this.currentTrace.getCurrentState();
+		if (currentState != null && currentState.isInitialised()) {
 			LOGGER.debug("Reloading visualisation...");
 			//Updates visualisation, only if current state is initialised and visualisation items are not empty
-			applySVGChanges();
+			applySVGChanges(currentState);
 		} else {
 			injector.getInstance(VisBView.class).showModelNotInitialised();
 		}
