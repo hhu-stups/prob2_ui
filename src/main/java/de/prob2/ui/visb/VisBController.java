@@ -84,6 +84,8 @@ public final class VisBController {
 		this.visBVisualisation.addListener((o, from, to) -> {
 			if (to == null) {
 				this.attributeValues.clear();
+			} else {
+				this.updateVisualisation(currentTrace.getCurrentState());
 			}
 		});
 
@@ -320,6 +322,5 @@ public final class VisBController {
 		}
 
 		this.visBVisualisation.set(constructVisualisationFromJSON(currentTrace.getStateSpace(), visBPath));
-		this.updateVisualisation(currentTrace.getCurrentState());
 	}
 }
