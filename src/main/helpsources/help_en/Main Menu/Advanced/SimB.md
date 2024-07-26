@@ -340,20 +340,38 @@ Regarding statistical validation with hypothesis testing and estimation, all tim
 
 ## External Simulation
 
+The third option is to load an external simulation which is an executable file.
+This replaces the JSON file for the SimB simulation.
+Yet, SimB supports an external simulation as a Python file (`.py`).
+The external simulation controls the execution of the formal model, while the formal model can be used as a safety shield.
+
+Therefore, a communication between the external simulation and ProB, i.e., the formal model must be established.
+Before executing an operation, the following messages must be sent:
+
+- 1st message: Sent from ProB Animator: List of enabled operations
+- 2nd message: Sent from External Simulation: Name of chosen action/operation
+- 3rd message: Sent from External Simulation: Time until executing chosen action/operation
+- 4th message: Sent from External Simulation: Succeeding B state as a predicate
+- 5th message: Sent from External Simulation: Boolean flag describing whether simulation is finished
+
+
+
 ### Reinforcement Learning Agent in SimB
 
-Instead of loading a SimB simulation as a JSON file, one can also load a Reinforcement Learning agent implemented in Python (`.py`). 
-For the simulation to work, one has to apply the following steps:
+In the following, we show how this works for a simulation of a reinforcement learning agent implemented in Python using OpenAI Gym.
+Examples can be found here: [https://github.com/hhu-stups/reinforcement-learning-b-models](https://github.com/hhu-stups/reinforcement-learning-b-models).
+For a simulation to work in ProB and SimB, one has to apply the following steps:
 
 1. Train a model of a Reinforcement Learning agent.
-
 2. Create a formal B model (including safety shield) for the RL agent.
 
 The operations represent the actions the RL agent can choose from. The formal model's state mainly represents the state of the environment. 
 Safety shields are encoded by the operations' guards which are provided to the RL agent. Enabled operations are considered to be safe. 
 Thus, the RL agent chooses the enabled operation/action with the highest predicted reward. The operations' substitutions model the desired behavior of the respective actions.
 
-An example for the `FASTER` of a HighwayEnvironment is as follows:
+An example for the `FASTER` of a HighwayEnvironment is shown below.
+Lines 2-4 shows the operation's guard which is used as safety shield.
+Lines 6-15 shows the operation's substitution describing the desired behavior after executing FASTER.
 
 ~~~
 FASTER =
@@ -375,9 +393,6 @@ THEN
   Reward :: R
 END
 ~~~
-Lines 2-4 shows the operation's guard which is used as safety shield.
-
-Lines 6-15 shows the operation's substitution describing the desired behavior after executing FASTER.
 
 
 3. Implement the mapping between the RL agent in Python and the formal B model. This includes the mapping of actions to operations, and the mapping of information from the RL agent, particularly the environment and observation, to the variables.
@@ -404,19 +419,10 @@ def get_VehiclesX(obs):
            Vehicles5 |-> {4}}}"
            .format(obs[0][1]*200, obs[1][1]*200, 
                obs[2][1]*200, obs[3][1]*200, 
-               obs[4][1]*200) # Implemented manually
+               obs[4][1]*200)
 ~~~
 
-4. Implement necessary messages sent between the ProB animator and the RL agent. Simulation should be a while-loop which runs while the simulation has not finished.
-
-  - 1st message: Sent from ProB Animator: List of enabled operations; meanwhile RL agent predicts enabled operation with highest reward
-  - 2nd message: Sent from RL agent: Name of chosen action/operation
-  - 3rd message: Sent from RL agent: Time until executing chosen action/operation
-  - 4th message: Sent from RL agent: Succeeding B state as a predicate
-  - 5th message: Sent from RL agent: Boolean flag describing whether simulation is finished
-
-Example code (line 70 - 113; particularly 86 - 113): 
-[https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py](https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py)
+4. Implement necessary messages sent between the ProB animator and the RL agent. The list of enabled operations is used by the RL agent to predict the enabled operation with the highest reward. Simulation should be a while-loop which runs while the simulation has not finished. Example code (line 70 - 113; particularly 86 - 113): [https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py](https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py)
 
 
 # Statistical Validation
