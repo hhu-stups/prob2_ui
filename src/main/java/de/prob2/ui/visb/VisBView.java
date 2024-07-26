@@ -222,29 +222,7 @@ public final class VisBView extends BorderPane {
 			if (to == null) {
 				visBController.getAttributeValues().clear();
 			} else {
-				this.loadSvgFile(to);
-				this.runWhenLoaded(() -> {
-					final JSObject window = this.getJSWindow();
-
-					// WebView doesn't have a proper API for detecting e. g. JavaScript syntax errors,
-					// so as a workaround our JavaScript code sets a marker variable that we can check here.
-					// If the marker variable doesn't have the expected value,
-					// assume that the JavaScript code didn't load properly,
-					// and disable VisB to avoid exceptions from code that tries to call the (nonexistant) JavaScript functions.
-					Object loadedMarker = window.getMember("visBJavaScriptLoaded");
-					if (!"VisB JavaScript loaded".equals(loadedMarker)) {
-						LOGGER.error("VisB JavaScript failed to load (marker variable has incorrect value '{}')", loadedMarker);
-						stageManager.makeAlert(Alert.AlertType.ERROR, "", "visb.exception.javaScriptFailedToLoad").show();
-						visBController.hideVisualisation();
-						return;
-					}
-
-					updateDynamicSVGObjects(to);
-					for (final VisBEvent event : to.getEvents()) {
-						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
-					}
-					this.updateVisualisation(currentTrace.getCurrentState());
-				});
+				this.loadVisualisationIntoWebView(to);
 			}
 		};
 
@@ -360,15 +338,6 @@ public final class VisBView extends BorderPane {
 	}
 
 	/**
-	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
-	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
-	 */
-	private void initialiseWebView(String svgContent, String baseUrl) {
-		String htmlFile = generateHTMLFileWithSVG(svgContent, baseUrl);
-		this.webView.getEngine().loadContent(htmlFile);
-	}
-
-	/**
 	 * This creates additional SVG objects as specified in the VisB JSON file (under svg_objects)
 	 * or by VISB_SVG_OBJECTS DEFINITIONS in a B machine
 	 */
@@ -385,7 +354,7 @@ public final class VisBView extends BorderPane {
 		}
 	}
 
-	private void loadSvgFile(final VisBVisualisation visBVisualisation) {
+	private void loadVisualisationIntoWebView(VisBVisualisation visBVisualisation) {
 		final Path path = visBVisualisation.getSvgPath();
 		final String baseUrl;
 		if (path.equals(VisBController.NO_PATH)) {
@@ -393,7 +362,31 @@ public final class VisBView extends BorderPane {
 		} else {
 			baseUrl = path.getParent().toUri().toString();
 		}
-		this.initialiseWebView(visBVisualisation.getSvgContent(), baseUrl);
+		String htmlFile = generateHTMLFileWithSVG(visBVisualisation.getSvgContent(), baseUrl);
+		this.webView.getEngine().loadContent(htmlFile);
+
+		this.runWhenLoaded(() -> {
+			JSObject window = this.getJSWindow();
+
+			// WebView doesn't have a proper API for detecting e. g. JavaScript syntax errors,
+			// so as a workaround our JavaScript code sets a marker variable that we can check here.
+			// If the marker variable doesn't have the expected value,
+			// assume that the JavaScript code didn't load properly,
+			// and disable VisB to avoid exceptions from code that tries to call the (nonexistant) JavaScript functions.
+			Object loadedMarker = window.getMember("visBJavaScriptLoaded");
+			if (!"VisB JavaScript loaded".equals(loadedMarker)) {
+				LOGGER.error("VisB JavaScript failed to load (marker variable has incorrect value '{}')", loadedMarker);
+				stageManager.makeAlert(Alert.AlertType.ERROR, "", "visb.exception.javaScriptFailedToLoad").show();
+				visBController.hideVisualisation();
+				return;
+			}
+
+			updateDynamicSVGObjects(visBVisualisation);
+			for (VisBEvent event : visBVisualisation.getEvents()) {
+				window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
+			}
+			this.updateVisualisation(currentTrace.getCurrentState());
+		});
 	}
 
 	private void treatJavascriptError(WebErrorEvent event) {
