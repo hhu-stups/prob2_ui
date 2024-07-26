@@ -19,11 +19,14 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ExportVisBHtmlForStates;
+import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.animator.domainobjects.VisBSVGObject;
+import de.prob.exception.ProBError;
+import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
@@ -240,7 +243,7 @@ public final class VisBView extends BorderPane {
 					for (final VisBEvent event : to.getEvents()) {
 						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 					}
-					visBController.updateVisualisation(currentTrace.getCurrentState());
+					this.updateVisualisation(currentTrace.getCurrentState());
 				});
 			}
 		};
@@ -255,7 +258,7 @@ public final class VisBView extends BorderPane {
 
 			this.updatePlaceholder(visBController.getVisBVisualisation(), to);
 			if (visBController.getVisBVisualisation() != null) {
-				visBController.updateVisualisation(to != null ? to.getCurrentState() : null);
+				this.updateVisualisation(to != null ? to.getCurrentState() : null);
 			}
 		};
 
@@ -440,6 +443,33 @@ public final class VisBView extends BorderPane {
 			this.initButton.setVisible(false);
 			this.webView.setVisible(true);
 		}
+	}
+
+	private void updateVisualisation(State state) {
+		if (state == null || !state.isInitialised()) {
+			return;
+		}
+
+		LOGGER.debug("Reloading VisB visualisation...");
+
+		try {
+			var getAttributesCmd = new GetVisBAttributeValuesCommand(state);
+			state.getStateSpace().execute(getAttributesCmd);
+			visBController.getAttributeValues().putAll(getAttributesCmd.getValues());
+		} catch (ProBError e) {
+			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
+			// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
+			visBController.hideVisualisation();
+			return;
+		}
+
+		try {
+			this.resetMessages();
+		} catch (JSException e) {
+			alert(e, "visb.exception.header", "visb.controller.alert.visualisation.file");
+		}
+
+		LOGGER.debug("VisB visualisation reloaded");
 	}
 
 	/**

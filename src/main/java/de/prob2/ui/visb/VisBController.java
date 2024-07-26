@@ -13,7 +13,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.GetVisBDefaultSVGCommand;
 import de.prob.animator.command.GetVisBSVGObjectsCommand;
 import de.prob.animator.command.LoadVisBCommand;
@@ -23,12 +22,9 @@ import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.command.VisBPerformClickCommand;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
-import de.prob.exception.ProBError;
-import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
@@ -39,9 +35,6 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
-import javafx.scene.control.Alert;
-
-import netscape.javascript.JSException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +52,6 @@ public final class VisBController {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
-	private final StageManager stageManager;
 
 	private final ObjectProperty<Path> absoluteVisBPath;
 	private final ObjectProperty<Path> relativeVisBPath;
@@ -67,9 +59,8 @@ public final class VisBController {
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
 
 	@Inject
-	public VisBController(Injector injector, StageManager stageManager, CurrentProject currentProject, CurrentTrace currentTrace) {
+	public VisBController(Injector injector, CurrentProject currentProject, CurrentTrace currentTrace) {
 		this.injector = injector;
-		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 
@@ -160,43 +151,6 @@ public final class VisBController {
 
 	public ObservableMap<VisBItem.VisBItemKey, String> getAttributeValues() {
 		return this.attributeValues;
-	}
-
-	void updateVisualisation(State state) {
-		if (state == null || !state.isInitialised()) {
-			return;
-		}
-
-		LOGGER.debug("Reloading VisB visualisation...");
-		VisBView visBView = injector.getInstance(VisBView.class);
-
-		try {
-			final GetVisBAttributeValuesCommand getAttributesCmd = new GetVisBAttributeValuesCommand(state);
-			state.getStateSpace().execute(getAttributesCmd);
-			this.attributeValues.putAll(getAttributesCmd.getValues());
-		} catch (ProBError e){
-			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
-			// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
-			this.hideVisualisation();
-			return;
-		}
-
-		try {
-			visBView.resetMessages();
-		} catch (JSException e){
-			alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
-		}
-
-		LOGGER.debug("VisB visualisation reloaded");
-	}
-
-	/**
-	 * This method throws an ProB2-UI ExceptionAlert
-	 */
-	private void alert(Throwable ex, String header, String message, Object... params){
-		Alert exceptionAlert = this.stageManager.makeExceptionAlert(ex, header, message, params);
-		exceptionAlert.initOwner(injector.getInstance(VisBView.class).getScene().getWindow());
-		exceptionAlert.showAndWait();
 	}
 
 	/**
