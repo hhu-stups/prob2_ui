@@ -427,20 +427,23 @@ def get_VehiclesX(obs):
 
 # Statistical Validation
 
-Via the plus-button, different kinds of simulations can be added,
-to validate probabilistic and timing properties of the machine:
+By clicking on the *plus button* on the right-hand side, i.e., above the validation task table,
+one can add different kinds of statistical validation tasks.
+The corresponding Figure is shown below.
 
-- Monte-Carlo Simulation 
+![SimB Window; Cursor is above plus button to add statistical validation task](images/Add_Validation_Task.png)
+
+Those validation tasks include the following techniques:
+
+- Monte Carlo Simulation
 - Hypothesis Testing
 - Estimation
 
-
-
 ## Monte Carlo Simulation
 
-For validation, one can run Monte Carlo simulation to generate a certain number of simulations. 
-Here, all simulations are played without real time. 
-However, it is possible for the user, to replay the generated scenarios with real-time afterwards.
+Monte Carlo simulation is used to simulate a certain number of executions as (timed) traces.
+The generated scenarios can then be re-played in real-time afterward.
+
 
 The input parameters are:
 
@@ -450,6 +453,11 @@ The input parameters are:
 - `Ending Condition` defines condition to simulate until after taking `Starting Condition` into account (defines the last transition of the simulation). It is either defined by a `Number of Steps`, `Ending Time` or `Ending Predicate`
 - `Check` defines the check to apply for the simulation. `Monte Carlo Simulation` means that there are no checks to be applied, while the other options are `Hypothesis Testing` and `Estimation`
 
+
+The corresponding figure for the validation task window with Monte Carlo Simulation choice
+is shown below.
+
+![SimB Validation Task Window with Monte Carlo Simulation](images/Monte_Carlo.png){ width=36% }
 
 
 ## Hypothesis Testing 
@@ -472,6 +480,12 @@ The additional input parameters for Hypothesis Testing are:
 - `Probability` (in the hypothesis)
 - `Significance Level`
 
+The corresponding figure for the validation task window with Hypothesis testing choice
+is shown below.
+
+![SimB Validation Task Window with Hypothesis Testing](images/Hypothesis_Testing.png){ width=36% }
+
+
 ## Estimation 
 
 `Estimation` expects the same parameters as `Monte Carlo Simulation`: `Number of Simulations`, `Starting Condition` and `Ending Condition`.
@@ -485,7 +499,9 @@ The additional input parameters for Estimation are:
   - `Predicate Eventually` can be used to provide a predicate to be checked whether it is eventually true.
   - `Timing` can be used to check the time.
   - `Average` can be used to check the average value of an expression.
+  - `Average (Mean between steps)` can be used to check the average value of an expression, computing mean values between two steps.
   - `Cumulative Sum` can be used to check the cumulative sum of an expression.
+  - `Cumulative Sum (Mean between steps)` can be used to check the cumulative sum of an expression, computing mean values between two steps.
   - `Minimum` can be used to check the minimum of an expression.
   - `Maximum` can be used to check the maximum of an expression.
 - `Estimator`
@@ -497,6 +513,12 @@ The additional input parameters for Estimation are:
 
 
 For an estimated value `e`, a desired value `d`, and an epsilon `eps`, it checks for each simulation whether `e` is within `[d - eps, d + eps]`.
+
+The corresponding figure for the validation task window with Estimation choice
+is shown below.
+
+![SimB Validation Task Window with Estimation](images/Estimation.png){ width=36% }
+
 
 
 # Citing SimB
