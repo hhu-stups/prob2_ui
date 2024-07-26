@@ -225,29 +225,22 @@ public final class VisBController {
 		LOGGER.debug("Finding event for id: {}", id);
 		VisBEvent event = this.getVisBVisualisation().getEventsById().get(id);
 
-		try {
-			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
-			trace.getStateSpace().execute(performClickCommand);
-			List<Transition> transitions = performClickCommand.getTransitions();
+		VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
+		trace.getStateSpace().execute(performClickCommand);
+		List<Transition> transitions = performClickCommand.getTransitions();
 
-			if (transitions.isEmpty()) {
-				LOGGER.debug("No events found for id: {}", id);
-			} else {
-				LOGGER.debug("Executing event for id: {} and preds = {}", id, event.getPredicates());
-				Trace newTrace = trace.addTransitions(transitions);
-				LOGGER.debug("Finished executed event for id: {} and preds = {}", id, event.getPredicates());
-				currentTrace.set(newTrace);
-				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-				for(Transition transition : transitions) {
-					UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-					uiInteraction.addUserInteraction(realTimeSimulator, transition);
-				}
+		if (transitions.isEmpty()) {
+			LOGGER.debug("No events found for id: {}", id);
+		} else {
+			LOGGER.debug("Executing event for id: {} and preds = {}", id, event.getPredicates());
+			Trace newTrace = trace.addTransitions(transitions);
+			LOGGER.debug("Finished executed event for id: {} and preds = {}", id, event.getPredicates());
+			currentTrace.set(newTrace);
+			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
+			for(Transition transition : transitions) {
+				UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
+				uiInteraction.addUserInteraction(realTimeSimulator, transition);
 			}
-		} catch (ProBError e) {
-			LOGGER.debug("Cannot execute event for id: {}", id, e);
-			Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
-			alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
-			alert.show();
 		}
 	}
 
