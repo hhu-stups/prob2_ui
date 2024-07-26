@@ -92,7 +92,7 @@ public final class VisBController {
 				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
 					this.hideVisualisation();
 				}
-				this.updateVisualisationIfPossible();
+				this.updateVisualisation(to != null ? to.getCurrentState() : null);
 			}
 		});
 	}
@@ -180,7 +180,12 @@ public final class VisBController {
 		return this.attributeValues;
 	}
 
-	private void applySVGChanges(State state) {
+	private void updateVisualisation(State state) {
+		if (state == null || !state.isInitialised()) {
+			return;
+		}
+
+		LOGGER.debug("Reloading VisB visualisation...");
 		VisBView visBView = injector.getInstance(VisBView.class);
 
 		try {
@@ -199,6 +204,8 @@ public final class VisBController {
 		} catch (JSException e){
 			alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
 		}
+
+		LOGGER.debug("VisB visualisation reloaded");
 	}
 
 	/**
@@ -316,21 +323,6 @@ public final class VisBController {
 		}
 
 		this.visBVisualisation.set(constructVisualisationFromJSON(currentTrace.getStateSpace(), visBPath));
-
-		updateVisualisationIfPossible();
-	}
-
-	/**
-	 * As the name says, it updates the visualisation, if it is possible.
-	 */
-	private void updateVisualisationIfPossible(){
-		LOGGER.debug("Trying to reload visualisation.");
-		State currentState = this.currentTrace.getCurrentState();
-		if (currentState != null && currentState.isInitialised()) {
-			LOGGER.debug("Reloading visualisation...");
-			//Updates visualisation, only if current state is initialised and visualisation items are not empty
-			applySVGChanges(currentState);
-		}
-		LOGGER.debug("Visualisation has been reloaded.");
+		this.updateVisualisation(currentTrace.getCurrentState());
 	}
 }
