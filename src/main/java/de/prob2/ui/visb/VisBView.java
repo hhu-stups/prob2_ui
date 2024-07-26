@@ -216,7 +216,9 @@ public final class VisBView extends BorderPane {
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
 			this.updatePlaceholder(to, currentTrace.get());
 
-			if (to != null) {
+			if (to == null) {
+				visBController.getAttributeValues().clear();
+			} else {
 				this.loadSvgFile(to);
 				this.runWhenLoaded(() -> {
 					final JSObject window = this.getJSWindow();
@@ -238,6 +240,7 @@ public final class VisBView extends BorderPane {
 					for (final VisBEvent event : to.getEvents()) {
 						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 					}
+					visBController.updateVisualisation(currentTrace.getCurrentState());
 				});
 			}
 		};
@@ -251,6 +254,9 @@ public final class VisBView extends BorderPane {
 			}
 
 			this.updatePlaceholder(visBController.getVisBVisualisation(), to);
+			if (visBController.getVisBVisualisation() != null) {
+				visBController.updateVisualisation(to != null ? to.getCurrentState() : null);
+			}
 		};
 
 		// Load VisB file from machine, when window is opened and set listener on the current machine

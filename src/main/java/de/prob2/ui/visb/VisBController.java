@@ -77,23 +77,6 @@ public final class VisBController {
 		this.relativeVisBPath = new SimpleObjectProperty<>(this, "relativeVisBPath", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.attributeValues = FXCollections.observableHashMap();
-		initialize();
-	}
-
-	private void initialize() {
-		this.visBVisualisation.addListener((o, from, to) -> {
-			if (to == null) {
-				this.attributeValues.clear();
-			} else {
-				this.updateVisualisation(currentTrace.getCurrentState());
-			}
-		});
-
-		currentTrace.addListener((o, from, to) -> {
-			if (this.getVisBVisualisation() != null) {
-				this.updateVisualisation(to != null ? to.getCurrentState() : null);
-			}
-		});
 	}
 
 	public static Path resolveVisBPath(Path projectLocation, Path relativeVisBPath) {
@@ -179,7 +162,7 @@ public final class VisBController {
 		return this.attributeValues;
 	}
 
-	private void updateVisualisation(State state) {
+	void updateVisualisation(State state) {
 		if (state == null || !state.isInitialised()) {
 			return;
 		}
