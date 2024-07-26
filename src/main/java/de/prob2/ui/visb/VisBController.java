@@ -89,9 +89,6 @@ public final class VisBController {
 
 		currentTrace.addListener((o, from, to) -> {
 			if (this.getVisBVisualisation() != null) {
-				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
-					this.hideVisualisation();
-				}
 				this.updateVisualisation(to != null ? to.getCurrentState() : null);
 			}
 		});

@@ -242,18 +242,23 @@ public final class VisBView extends BorderPane {
 			}
 		};
 
-		ChangeListener<? super StateSpace> stateSpaceListener = (o, from, to) -> loadVisBFileFromMachine(currentProject.getCurrentMachine(), to);
+		ChangeListener<Trace> traceListener = (o, from, to) -> {
+			if (from == null || to == null || !from.getStateSpace().equals(to.getStateSpace())) {
+				visBController.closeVisualisation();
+				if (to != null) {
+					loadVisBFileFromMachine(currentProject.getCurrentMachine(), to.getStateSpace());
+				}
+			}
 
-		ChangeListener<Trace> traceListener = (o, from, to) -> this.updatePlaceholder(visBController.getVisBVisualisation(), to);
+			this.updatePlaceholder(visBController.getVisBVisualisation(), to);
+		};
 
 		// Load VisB file from machine, when window is opened and set listener on the current machine
 		this.currentProject.currentMachineProperty().addListener(machineListener);
 		this.visBController.visBVisualisationProperty().addListener(visBListener);
-		this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
 		this.currentTrace.addListener(traceListener);
 
 		machineListener.changed(null, null, currentProject.getCurrentMachine());
-		stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
 		traceListener.changed(null, null, currentTrace.get());
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
@@ -271,7 +276,8 @@ public final class VisBView extends BorderPane {
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
 			this.webView.getEngine().setOnError(this::treatJavascriptError);
 			visBListener.changed(null, null, visBController.getVisBVisualisation());
-			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+			Trace trace = currentTrace.get();
+			traceListener.changed(null, trace, trace);
 
 			// Uncomment to make WebView console errors, warnings, etc. visible in the log.
 			// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
@@ -321,29 +327,26 @@ public final class VisBView extends BorderPane {
 	}
 
 	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
-		visBController.closeVisualisation();
-		if(machine != null && stateSpace != null) {
-			final Path visBVisualisation = machine.getVisBVisualisation();
-			if (visBVisualisation != null) {
-				try {
-					visBController.loadFromRelativePath(visBVisualisation);
-				} catch (IOException | RuntimeException exc) {
-					this.showVisualisationLoadError(exc);
-				}
-			} else {
-				cliExecutor.execute(() -> {
-					Path visBPath = getPathFromDefinitions(stateSpace);
-					if (visBPath != null) {
-						Platform.runLater(() -> {
-							try {
-								visBController.loadFromAbsolutePath(visBPath);
-							} catch (IOException | RuntimeException exc) {
-								this.showVisualisationLoadError(exc);
-							}
-						});
-					}
-				});
+		Path visBVisualisation = machine.getVisBVisualisation();
+		if (visBVisualisation != null) {
+			try {
+				visBController.loadFromRelativePath(visBVisualisation);
+			} catch (IOException | RuntimeException exc) {
+				this.showVisualisationLoadError(exc);
 			}
+		} else {
+			cliExecutor.execute(() -> {
+				Path visBPath = getPathFromDefinitions(stateSpace);
+				if (visBPath != null) {
+					Platform.runLater(() -> {
+						try {
+							visBController.loadFromAbsolutePath(visBPath);
+						} catch (IOException | RuntimeException exc) {
+							this.showVisualisationLoadError(exc);
+						}
+					});
+				}
+			});
 		}
 	}
 
