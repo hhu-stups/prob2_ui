@@ -464,7 +464,7 @@ The additional input parameters for Hypothesis Testing are:
   - `Predicate as Invariant` can be used to provide a predicate to be checked whether it is always true.
   - `Final Predicate` can be used to provide a predicate to be checked in the final state of a simulation.
   - `Predicate Eventually` can be used to provide a predicate to be checked whether it is eventually true.
-- `Timing` can be used to check the time.
+  - `Timing` can be used to check the time.
 - `Hypothesis Check`
   - `Left-tailed` hypothesis test
   - `Right-tailed` hypothesis test
@@ -485,7 +485,9 @@ The additional input parameters for Estimation are:
   - `Predicate Eventually` can be used to provide a predicate to be checked whether it is eventually true.
   - `Timing` can be used to check the time.
   - `Average` can be used to check the average value of an expression.
-  - `Sum` can be used to check the sum of an expression.
+  - `Cumulative Sum` can be used to check the cumulative sum of an expression.
+  - `Minimum` can be used to check the minimum of an expression.
+  - `Maximum` can be used to check the maximum of an expression.
 - `Estimator`
   - `Minimum Estimator` returns the minimum estimated value from all simulated runs.
   - `Mean Estimator` returns the mean estimated value from all simulated runs.
