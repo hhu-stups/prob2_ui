@@ -4,6 +4,7 @@ import com.google.inject.Inject;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.TLCModelChecker;
 import de.prob.check.TLCModelCheckingOptions;
+import de.prob.scripting.ClassicalBFactory;
 import de.prob.statespace.Language;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
@@ -191,7 +192,7 @@ public class TLCModelCheckingTab extends Tab {
 	boolean tlcCheck() {
 		// TODO: support other languages by pretty printing internal representation (Event-B)?
 		//  (with current internal repr. not automatically possible)
-		if (currentTrace.getModel().getLanguage() == Language.CLASSICAL_B) {
+		if (currentProject.getCurrentMachine().getModelFactoryClass() == ClassicalBFactory.class) {
 			Exception exception = TLCModelChecker.checkTLCApplicable(currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation()).toString(), 5);
 			if (exception != null) {
 				errorMessageBox.setVisible(true);

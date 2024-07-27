@@ -21,8 +21,8 @@ import de.prob.model.eventb.translate.ModelToXML;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.scripting.Api;
+import de.prob.scripting.ClassicalBFactory;
 import de.prob.statespace.FormalismType;
-import de.prob.statespace.Language;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.documentation.SaveDocumentationStage;
@@ -131,13 +131,17 @@ public class FileMenu extends Menu {
 				final boolean noClassicalBExport = model instanceof XTLModel;
 				// ProB 2's Event-B exporters currently only work with models loaded from a Rodin project, not from an .eventb package.
 				final boolean noEventBExport = !(model instanceof EventBModel) || model instanceof EventBPackageModel;
-				// TLA Export, TODO: check if possible for Event-B (via pretty printing classical B)
-				boolean noTLAExport = model.getLanguage() != Language.CLASSICAL_B;
+
 				this.exportAsClassicalBAsciiItem.setDisable(noClassicalBExport);
 				this.exportAsClassicalBUnicodeItem.setDisable(noClassicalBExport);
 				this.exportAsRodinProject.setDisable(noEventBExport);
 				this.exportAsEventBProlog.setDisable(noEventBExport);
-				this.exportAsTLAModule.setDisable(noTLAExport);
+			}
+		});
+		currentProject.currentMachineProperty().addListener((o, from, to) ->  {
+			if (to != null) {
+				// TLA Export, TODO: check if possible for Event-B (via pretty printing classical B)
+				this.exportAsTLAModule.setDisable(to.getModelFactoryClass() != ClassicalBFactory.class);
 			}
 		});
 
