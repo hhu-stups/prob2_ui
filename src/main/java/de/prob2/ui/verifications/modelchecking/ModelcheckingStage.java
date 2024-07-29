@@ -4,9 +4,12 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -26,13 +29,10 @@ public class ModelcheckingStage extends Stage {
 	@FXML
 	private TextField idTextField;
 
-	private final CurrentTrace currentTrace;
-	
 	private ModelCheckingItem result;
 
 	@Inject
-	private ModelcheckingStage(final StageManager stageManager, final CurrentTrace currentTrace) {
-		this.currentTrace = currentTrace;
+	private ModelcheckingStage(StageManager stageManager) {
 		this.result = null;
 		stageManager.loadFXML(this, "modelchecking_stage.fxml");
 	}
@@ -42,7 +42,6 @@ public class ModelcheckingStage extends Stage {
 		this.initModality(Modality.APPLICATION_MODAL);
 
 		this.modelCheckerTabs.getSelectionModel().selectedItemProperty().addListener((obs, from, to) -> tlcCheck(to));
-		this.currentTrace.addListener((obs, from, to) -> tlcCheck(modelCheckerTabs.getSelectionModel().getSelectedItem()));
 	}
 
 	private void tlcCheck(Tab tab) {
