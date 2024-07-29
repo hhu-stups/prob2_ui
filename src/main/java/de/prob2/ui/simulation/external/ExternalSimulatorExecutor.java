@@ -72,7 +72,7 @@ public class ExternalSimulatorExecutor {
 
 				State state = trace.getCurrentState();
 				String enabledOperations = state
-						.getTransitions().stream()
+						.getOutTransitions().stream()
 						.map(Transition::getName)
 						.collect(Collectors.joining(","));
 
