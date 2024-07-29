@@ -450,9 +450,9 @@ public final class VisBView extends BorderPane {
 			state.getStateSpace().execute(getAttributesCmd);
 			visBController.getAttributeValues().putAll(getAttributesCmd.getValues());
 		} catch (ProBError e) {
-			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 			// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
 			visBController.hideVisualisation();
+			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
 			return;
 		}
 
