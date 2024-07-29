@@ -48,7 +48,6 @@ import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
-import de.prob2.ui.verifications.type.ValidationTaskType;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.BooleanProperty;
@@ -258,13 +257,6 @@ public final class Machine {
 
 	@JsonIgnore
 	@SuppressWarnings("unchecked")
-	public <T extends IValidationTask> ObservableList<T> getValidationTasksByType(ValidationTaskType<T> taskType) {
-		Objects.requireNonNull(taskType, "taskType");
-		return (ObservableList<T>) this.getValidationTasksByPredicate(vt -> taskType.equals(vt.getTaskType()));
-	}
-
-	@JsonIgnore
-	@SuppressWarnings("unchecked")
 	public ObservableList<VisualizationFormulaTask> getVisualizationFormulaTasksByCommand(String command) {
 		Objects.requireNonNull(command, "command");
 		// casting shenanigans to make java's type inference happy
@@ -354,7 +346,7 @@ public final class Machine {
 
 	@JsonIgnore
 	public ObservableList<ReplayTrace> getTraces() {
-		return this.getValidationTasksByType(BuiltinValidationTaskTypes.REPLAY_TRACE);
+		return this.getValidationTasksByClass(ReplayTrace.class);
 	}
 
 	public ReadOnlyObjectProperty<MachineCheckingStatus> traceStatusProperty() {
@@ -372,7 +364,7 @@ public final class Machine {
 
 	@JsonIgnore
 	public ObservableList<ProofObligationItem> getProofObligationTasks() {
-		return this.getValidationTasksByType(BuiltinValidationTaskTypes.PROOF_OBLIGATION);
+		return this.getValidationTasksByClass(ProofObligationItem.class);
 	}
 
 	@JsonGetter("ltlPatterns")
