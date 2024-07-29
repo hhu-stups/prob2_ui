@@ -543,7 +543,7 @@ public final class VisBView extends BorderPane {
 	private void alert(Throwable ex, String header, String body, Object... params){
 		final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
 		alert.initOwner(this.getScene().getWindow());
-		alert.showAndWait();
+		alert.show();
 	}
 
 	private void showVisualisationLoadError(Throwable exc) {
