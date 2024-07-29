@@ -153,7 +153,8 @@ public class TLCModelCheckingTab extends Tab {
 		});
 
 		// initialize with current preferences, e.g. WORKERS
-		this.setData(new TLCModelCheckingOptions(currentTrace.getStateSpace()).getOptions());
+		// FIXME This runs a ProB command on the UI thread to get the current preference values. This should be made lazy and/or moved to the CliTaskExecutor to avoid blocking the UI thread.
+		this.setData(TLCModelCheckingOptions.fromPreferences(currentTrace.getStateSpace()).getOptions());
 	}
 
 	public static String getSearchStrategyNameKey(final ModelCheckingSearchStrategy searchStrategy) {
@@ -170,7 +171,8 @@ public class TLCModelCheckingTab extends Tab {
 	}
 
 	private Map<TLCOption, String> getOptions() {
-		return new TLCModelCheckingOptions(currentTrace.getStateSpace())
+		// FIXME This runs a ProB command on the UI thread to get the current preference values. This should be changed to use the existing options from setData as defaults, instead of calculating them again from the ProB preferences.
+		return TLCModelCheckingOptions.fromPreferences(currentTrace.getStateSpace())
 			.useDepthFirstSearch(selectSearchStrategy.getSelectionModel().getSelectedItem() == ModelCheckingSearchStrategy.DEPTH_FIRST ?
 				String.valueOf(dfidInitialDepth.getValue()) : null)
 			.checkDeadlocks(findDeadlocks.isSelected())

@@ -147,8 +147,7 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			TLCModelChecker tlcModelChecker = new TLCModelChecker(
 					context.project().getLocation().resolve(context.machine().getLocation()).toString(),
 					stateSpace, listener,
-					// this.options already contains the options set by ProB preferences, which have not been overwritten!
-					new TLCModelCheckingOptions(stateSpace, getOptions()));
+					new TLCModelCheckingOptions(getOptions()));
 			setCurrentStep(initialStep);
 			tlcModelChecker.call();
 		} finally {
