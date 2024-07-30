@@ -123,7 +123,7 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 
 		final int stepIndex = getSteps().size();
 		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting TLC model check...", Integer.MAX_VALUE), 0, null, null, stateSpace);
-		getSteps().add(initialStep);
+		Platform.runLater(() -> getSteps().add(initialStep));
 
 		IModelCheckListener listener = new IModelCheckListener() {
 			@Override
