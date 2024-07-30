@@ -32,13 +32,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @FXMLInjected
 public class TLCModelCheckingTab extends Tab {
-	private static final Logger LOGGER = LoggerFactory.getLogger(TLCModelCheckingTab.class);
-
 	@FXML
 	private VBox errorMessageBox;
 	@FXML
