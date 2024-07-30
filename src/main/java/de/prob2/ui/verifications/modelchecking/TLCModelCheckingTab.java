@@ -144,11 +144,7 @@ public class TLCModelCheckingTab extends Tab {
 			chooser.setInitialDirectory(currentProject.getLocation().toFile());
 			Path result = fileChooserManager.showDirectoryChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
 			if (result != null) {
-				try {
-					this.tfSaveLocation.setText(result.toRealPath().toString());
-				} catch (Exception ex) {
-					LOGGER.warn("error checking location for TLC4B output directory: {}", result);
-				}
+				this.tfSaveLocation.setText(result.toString());
 			}
 		});
 
