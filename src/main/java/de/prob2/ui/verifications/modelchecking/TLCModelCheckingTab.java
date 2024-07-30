@@ -1,11 +1,14 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.nio.file.Path;
+import java.util.Map;
+
 import com.google.inject.Inject;
+
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.TLCModelChecker;
 import de.prob.check.TLCModelCheckingOptions;
 import de.prob.scripting.ClassicalBFactory;
-import de.prob.statespace.Language;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -13,19 +16,24 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.tlc4b.TLC4BOption;
+
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import de.tlc4b.TLC4BCliOptions.TLCOption;
 import javafx.stage.DirectoryChooser;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.nio.file.Path;
-import java.util.Map;
-
-import static de.tlc4b.TLC4BCliOptions.TLCOption.*;
 
 @FXMLInjected
 public class TLCModelCheckingTab extends Tab {
@@ -166,7 +174,7 @@ public class TLCModelCheckingTab extends Tab {
 		return new TLCModelCheckingItem(id, searchStrategy, getOptions());
 	}
 
-	private Map<TLCOption, String> getOptions() {
+	private Map<TLC4BOption, String> getOptions() {
 		// FIXME This runs a ProB command on the UI thread to get the current preference values. This should be changed to use the existing options from setData as defaults, instead of calculating them again from the ProB preferences.
 		return TLCModelCheckingOptions.fromPreferences(currentTrace.getStateSpace())
 			.useDepthFirstSearch(selectSearchStrategy.getSelectionModel().getSelectedItem() == ModelCheckingSearchStrategy.DEPTH_FIRST ?
@@ -217,31 +225,31 @@ public class TLCModelCheckingTab extends Tab {
 		result = item;
 	}
 	
-	private void setData(final Map<TLCOption, String> options) {
-		if (options.containsKey(DFID)) {
+	private void setData(final Map<TLC4BOption, String> options) {
+		if (options.containsKey(TLC4BOption.DFID)) {
 			selectSearchStrategy.getSelectionModel().select(ModelCheckingSearchStrategy.DEPTH_FIRST);
-			dfidInitialDepth.getValueFactory().setValue(Integer.parseInt(options.get(DFID)));
+			dfidInitialDepth.getValueFactory().setValue(Integer.parseInt(options.get(TLC4BOption.DFID)));
 		}
-		findDeadlocks.setSelected(!options.containsKey(NODEAD));
-		findInvViolations.setSelected(!options.containsKey(NOINV));
-		findBAViolations.setSelected(!options.containsKey(NOASS));
-		checkWelldefinedness.setSelected(options.containsKey(WDCHECK));
-		checkLTL.setSelected(!options.containsKey(NOLTL));
-		checkGoal.setSelected(!options.containsKey(NOGOAL));
-		String ltlFormula = options.getOrDefault(LTLFORMULA, null);
+		findDeadlocks.setSelected(!options.containsKey(TLC4BOption.NODEAD));
+		findInvViolations.setSelected(!options.containsKey(TLC4BOption.NOINV));
+		findBAViolations.setSelected(!options.containsKey(TLC4BOption.NOASS));
+		checkWelldefinedness.setSelected(options.containsKey(TLC4BOption.WDCHECK));
+		checkLTL.setSelected(!options.containsKey(TLC4BOption.NOLTL));
+		checkGoal.setSelected(!options.containsKey(TLC4BOption.NOGOAL));
+		String ltlFormula = options.getOrDefault(TLC4BOption.LTLFORMULA, null);
 		if (ltlFormula != null) {
 			addLTLFormula.setSelected(true);
 			tfAddLTL.setText(ltlFormula);
 		} else {
 			addLTLFormula.setSelected(false);
 		}
-		setupConstantsUsingProB.setSelected(options.containsKey(CONSTANTSSETUP));
-		nrWorkers.getValueFactory().setValue(Integer.parseInt(options.get(WORKERS)));
-		proofGuidedMC.setSelected(options.containsKey(PARINVEVAL));
-		useSymmetry.setSelected(options.containsKey(SYMMETRY));
-		saveGeneratedFiles.setSelected(!options.containsKey(TMP));
-		if (options.containsKey(OUTPUT)) {
-			tfSaveLocation.setText(options.get(OUTPUT));
+		setupConstantsUsingProB.setSelected(options.containsKey(TLC4BOption.CONSTANTSSETUP));
+		nrWorkers.getValueFactory().setValue(Integer.parseInt(options.get(TLC4BOption.WORKERS)));
+		proofGuidedMC.setSelected(options.containsKey(TLC4BOption.PARINVEVAL));
+		useSymmetry.setSelected(options.containsKey(TLC4BOption.SYMMETRY));
+		saveGeneratedFiles.setSelected(!options.containsKey(TLC4BOption.TMP));
+		if (options.containsKey(TLC4BOption.OUTPUT)) {
+			tfSaveLocation.setText(options.get(TLC4BOption.OUTPUT));
 		}
 	}
 }

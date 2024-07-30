@@ -1,6 +1,5 @@
 package de.prob2.ui.verifications.modelchecking;
 
-import java.math.BigInteger;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +23,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import de.tlc4b.TLC4BCliOptions.TLCOption;
+import de.tlc4b.TLC4BOption;
 
 import javafx.application.Platform;
 
@@ -39,13 +38,13 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final ModelCheckingSearchStrategy searchStrategy;
 
-	private final Map<TLCOption, String> options;
+	private final Map<TLC4BOption, String> options;
 
 	@JsonCreator
 	public TLCModelCheckingItem(
 		@JsonProperty("id") final String id,
 		@JsonProperty("searchStrategy") final ModelCheckingSearchStrategy searchStrategy,
-		@JsonProperty("options") final Map<TLCOption, String> options
+		@JsonProperty("options") final Map<TLC4BOption, String> options
 	) {
 		super(id);
 		this.searchStrategy = Objects.requireNonNull(searchStrategy);
@@ -62,7 +61,7 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 		return i18n.translate("verifications.modelchecking.type.tlc");
 	}
 
-	public Map<TLCOption, String> getOptions() {
+	public Map<TLC4BOption, String> getOptions() {
 		return this.options;
 	}
 
@@ -77,36 +76,38 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 
 		final String strategyKey = TLCModelCheckingTab.getSearchStrategyNameKey(this.getSearchStrategy());
 		if (strategyKey != null) {
-			String depth = this.options.containsKey(TLCOption.DFID) ? " (" + this.options.get(TLCOption.DFID) + ")" : "";
+			String depth = this.options.containsKey(TLC4BOption.DFID) ? " (" + this.options.get(TLC4BOption.DFID) + ")" : "";
 			s.add(i18n.translate(strategyKey) + depth);
 		} else {
 			s.add(this.getSearchStrategy().toString());
 		}
-		Map<TLCOption, String> opts = this.getOptions();
-		if (opts.containsKey(TLCOption.WORKERS)) {
-			s.add(opts.get(TLCOption.WORKERS) + " workers");
+		Map<TLC4BOption, String> opts = this.getOptions();
+		if (opts.containsKey(TLC4BOption.WORKERS)) {
+			s.add(opts.get(TLC4BOption.WORKERS) + " workers");
 		}
-		if (!opts.containsKey(TLCOption.NODEAD)) {
+		if (!opts.containsKey(TLC4BOption.NODEAD)) {
 			s.add(i18n.translate("verifications.modelchecking.description.option.find_deadlocks"));
 		}
-		if (!opts.containsKey(TLCOption.NOINV)) {
+		if (!opts.containsKey(TLC4BOption.NOINV)) {
 			s.add(i18n.translate("verifications.modelchecking.description.option.find_invariant_violations"));
 		}
-		if (!opts.containsKey(TLCOption.NOASS)) {
+		if (!opts.containsKey(TLC4BOption.NOASS)) {
 			s.add(i18n.translate("verifications.modelchecking.description.option.find_assertion_violations"));
 		}
-		if (!opts.containsKey(TLCOption.NOGOAL)) {
+		if (!opts.containsKey(TLC4BOption.NOGOAL)) {
 			s.add(i18n.translate("verifications.modelchecking.description.option.find_goal"));
 		}
-		if (!opts.containsKey(TLCOption.NOLTL)) {
+		if (!opts.containsKey(TLC4BOption.NOLTL)) {
 			s.add(i18n.translate("verifications.modelchecking.description.tlcOption.noltl"));
 		}
-		for (TLCOption opt : opts.keySet()) {
-			if (opt == TLCOption.DFID || opt == TLCOption.NODEAD || opt == TLCOption.NOINV || opt == TLCOption.NOASS
-				|| opt == TLCOption.NOGOAL || opt == TLCOption.NOLTL || opt == TLCOption.WORKERS )
+		for (TLC4BOption opt : opts.keySet()) {
+			if (opt == TLC4BOption.DFID || opt == TLC4BOption.NODEAD || opt == TLC4BOption.NOINV || opt == TLC4BOption.NOASS
+				|| opt == TLC4BOption.NOGOAL || opt == TLC4BOption.NOLTL || opt == TLC4BOption.WORKERS ) {
 				continue; // already handled
-			if (opt == TLCOption.MININT || opt == TLCOption.MAXINT || opt == TLCOption.TMP || opt == TLCOption.OUTPUT)
+			}
+			if (opt == TLC4BOption.MININT || opt == TLC4BOption.MAXINT || opt == TLC4BOption.TMP || opt == TLC4BOption.OUTPUT) {
 				continue; // ignore for now
+			}
 			s.add(i18n.translate("verifications.modelchecking.description.tlcOption." + opt.arg()));
 		}
 		return s.toString();
