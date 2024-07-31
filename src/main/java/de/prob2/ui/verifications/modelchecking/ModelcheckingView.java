@@ -291,10 +291,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 					showModelCheckException(exc);
 				}
 			});
-		} else if (item instanceof TLCModelCheckingItem tlcItem) {
-			return executors.cliExecutor().submit(() -> tlcItem.execute(context));
 		} else {
-			return null;
+			return super.executeItemImpl(item, executors, context);
 		}
 	}
 
