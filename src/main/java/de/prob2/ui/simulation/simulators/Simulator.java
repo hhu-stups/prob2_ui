@@ -175,6 +175,10 @@ public abstract class Simulator {
 	private ActivationOperationConfiguration createDynamicActivation(String id, String op, String time, int priority, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
 										 Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
 										 Map<String, String> updating, String withPredicate) {
+		if(id == null || op == null) {
+			throw new RuntimeException("Provided operation is null. There is an error when sending the operation to be executed from the external simulation.");
+		}
+
 		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, activatingOnlyWhenExecuted, updating, withPredicate);
 		if(!activationConfigurationsSorted.contains(activationConfig)) {
 			this.activationConfigurationsSorted.add(activationConfig);
