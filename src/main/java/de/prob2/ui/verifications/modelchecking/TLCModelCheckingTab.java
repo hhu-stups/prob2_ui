@@ -2,20 +2,27 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import com.google.inject.Inject;
 
 import de.prob.check.ModelCheckingSearchStrategy;
-import de.prob.check.TLCModelChecker;
 import de.prob.check.TLCModelCheckingOptions;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.tlc4b.TLC4B;
 import de.tlc4b.TLC4BOption;
 
 import javafx.fxml.FXML;
@@ -32,8 +39,13 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
 public class TLCModelCheckingTab extends Tab {
+	private static final Logger LOGGER = LoggerFactory.getLogger(TLCModelCheckingTab.class);
+
 	@FXML
 	private VBox errorMessageBox;
 	@FXML
@@ -90,17 +102,23 @@ public class TLCModelCheckingTab extends Tab {
 
 	private final CurrentTrace currentTrace;
 
+	private final ExecutorService checkTlcApplicableExecutor;
+
 	private ModelCheckingItem result;
 
 	@Inject
 	private TLCModelCheckingTab(final StageManager stageManager, final I18n i18n, final FileChooserManager fileChooserManager,
-	                            final CurrentProject currentProject, final CurrentTrace currentTrace) {
+			final CurrentProject currentProject, final CurrentTrace currentTrace, final StopActions stopActions) {
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+
+		this.checkTlcApplicableExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "TLC4B applicability checker"));
+		stopActions.add(this.checkTlcApplicableExecutor::shutdownNow);
 		this.result = null;
+
 		stageManager.loadFXML(this, "tlc_modelchecking_tab.fxml");
 	}
 
@@ -190,20 +208,32 @@ public class TLCModelCheckingTab extends Tab {
 			.getOptions();
 	}
 
+	// TODO Make this method non-blocking
 	boolean tlcCheck() {
 		// TODO: support other languages by pretty printing internal representation (Event-B)?
 		//  (with current internal repr. not automatically possible)
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == ClassicalBFactory.class) {
-			Exception exception = TLCModelChecker.checkTLCApplicable(currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation()).toString(), 5);
-			if (exception != null) {
+			Path machinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
+			Future<?> future = checkTlcApplicableExecutor.submit(() -> {
+				TLC4B.checkTLC4BIsApplicable(machinePath.toString());
+				return null;
+			});
+
+			try {
+				future.get(5, TimeUnit.SECONDS);
+			} catch (ExecutionException exc) {
+				LOGGER.warn("TLC4B is not applicable to this machine", exc);
 				errorMessageBox.setVisible(true);
-				errorMessage.setText(exception.getMessage());
+				errorMessage.setText(exc.getMessage());
 				return false;
-			} else {
-				errorMessageBox.setVisible(false);
-				errorMessage.setText("");
-				return true;
+			} catch (InterruptedException | TimeoutException exc) {
+				LOGGER.info("TLC4B applicability check timed out - assuming that TLC4B is applicable", exc);
+				// Intentionally fall through to successful path below.
 			}
+
+			errorMessageBox.setVisible(false);
+			errorMessage.setText("");
+			return true;
 		} else {
 			errorMessageBox.setVisible(true);
 			errorMessage.setText(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.onlyClassicalB"));
