@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.math.BigInteger;
 import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
@@ -11,14 +12,22 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import de.prob.animator.command.GetStatisticsCommand;
+import de.prob.check.ConsistencyChecker;
+import de.prob.check.IModelCheckListener;
+import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
+import de.prob.check.NotYetFinished;
+import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
+
+import javafx.application.Platform;
 
 @JsonPropertyOrder({
 	"id",
@@ -143,7 +152,43 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 
 	@Override
 	public void execute(final ExecutionContext context) {
-		Modelchecker.execute(this, context.stateSpace());
+		// The options must be calculated before adding the ModelCheckingStep,
+		// so that the recheckExisting/INSPECT_EXISTING_NODES option is set correctly,
+		// which depends on whether any steps were already added.
+		ModelCheckingOptions fullOptions = this.getFullOptions(context.stateSpace().getModel());
+
+		int stepIndex = getSteps().size();
+		ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, context.stateSpace());
+		Platform.runLater(() -> this.getSteps().add(initialStep));
+		
+		IModelCheckListener listener = new IModelCheckListener() {
+			@Override
+			public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
+				// Command must be executed outside of Platform.runLater to avoid blocking the UI thread!
+				var cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
+				context.stateSpace().execute(cmd);
+				ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, cmd.getResult(), context.stateSpace());
+				setCurrentStep(step);
+				Platform.runLater(() -> {
+					if (stepIndex < getSteps().size()) {
+						getSteps().set(stepIndex, step);
+					}
+				});
+			}
+
+			@Override
+			public void isFinished(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
+				this.updateStats(jobId, timeElapsed, result, stats);
+			}
+		};
+		ConsistencyChecker checker = new ConsistencyChecker(context.stateSpace(), fullOptions, listener);
+		
+		try {
+			this.setCurrentStep(initialStep);
+			checker.call();
+		} finally {
+			this.setCurrentStep(null);
+		}
 	}
 
 	@Override

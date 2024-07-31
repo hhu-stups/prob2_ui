@@ -125,9 +125,7 @@ public final class StatsView extends ScrollPane {
 	private void update(final StateSpace stateSpace) {
 		if (stateSpace != null) {
 			// Don't attempt to update any stats while probcli is busy (i. e. can't execute commands for a while).
-			// During model checking, simple stats are still updated,
-			// because probcli automatically returns them after every model checking step
-			// and Modelchecker reports these stats to StatsView.
+			// During model checking, simple stats are still updated - see the updateWhileModelChecking method.
 			if (!stateSpace.isBusy()) {
 				final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
 				stateSpace.execute(stateSpaceStatsCmd);
