@@ -309,39 +309,44 @@ public abstract class Simulator {
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, parameterNames, parameterPredicate);
 				timestamps.add(time.get());
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
-				if(config instanceof SimulationExternalConfiguration) {
-
-					if(!externalSimulatorExecutor.isDone()) {
-						FutureTask<ExternalSimulationStep> stepFuture = externalSimulatorExecutor.execute(newTrace);
-
-						ExternalSimulationStep step = null;
-						try {
-							step = stepFuture.get();
-						} catch (Exception e) {
-							e.printStackTrace();
-						}
-
-						if (step == null) {
-							return trace;
-						}
-
-						ActivationOperationConfiguration newActivation = createDynamicActivation(step.getOp(), step.getOp(), step.getDelta(), 0,
-								null, ActivationOperationConfiguration.ActivationKind.SINGLE, null, null, null,
-								true, null, step.getPredicate());
-						simulationEventHandler.activateOperation(newTrace.getCurrentState(), newActivation, new ArrayList<>(), "1=1");
-						externalSimulatorExecutor.setDone(step.isDone());
-					}
-				}
+				processExternalConfiguration(newTrace);
 			} else if("skip".equals(activation.getOperation())) {
 				updateStartingInformation(newTrace);
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
+				processExternalConfiguration(newTrace);
 			} else if(!activationConfig.isActivatingOnlyWhenExecuted()) {
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
+				processExternalConfiguration(newTrace);
 			}
 		}
 		return newTrace;
+	}
+
+	private void processExternalConfiguration(Trace newTrace) {
+		if(config instanceof SimulationExternalConfiguration) {
+
+			if(!externalSimulatorExecutor.isDone()) {
+				FutureTask<ExternalSimulationStep> stepFuture = externalSimulatorExecutor.execute(newTrace);
+
+				ExternalSimulationStep step = null;
+				try {
+					step = stepFuture.get();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+				if (step == null) {
+					return;
+				}
+
+				ActivationOperationConfiguration newActivation = createDynamicActivation(step.getOp(), step.getOp(), step.getDelta(), 0,
+						null, ActivationOperationConfiguration.ActivationKind.SINGLE, null, null, null,
+						true, null, step.getPredicate());
+				simulationEventHandler.activateOperation(newTrace.getCurrentState(), newActivation, new ArrayList<>(), "1=1");
+			}
+		}
 	}
 
 	public void updateStartingInformation(Trace trace) {
@@ -353,10 +358,7 @@ public abstract class Simulator {
 	}
 
 	public boolean endingConditionReached(Trace trace) {
-		if(externalSimulatorExecutor == null) {
-			return noActivationQueued;
-		}
-		return externalSimulatorExecutor.isDone();
+		return noActivationQueued;
 	}
 
 	public ISimulationModelConfiguration getConfig() {
