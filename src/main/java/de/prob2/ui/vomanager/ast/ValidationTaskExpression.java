@@ -81,6 +81,12 @@ public final class ValidationTaskExpression implements IValidationExpression {
 
 	@Override
 	public CompletableFuture<?> check(CheckingExecutors executors, ExecutionContext context) {
-		return this.getTask().execute(executors, context);
+		if (this.getTask().getStatus() == CheckingStatus.NOT_CHECKED || this.getTask().getStatus() == CheckingStatus.INTERRUPTED) {
+			// Task hasn't been executed yet or was interrupted, so the result will be available after executing it.
+			return this.getTask().execute(executors, context);
+		} else {
+			// Task has already been checked, so the result is available immediately.
+			return CompletableFuture.completedFuture(null);
+		}
 	}
 }
