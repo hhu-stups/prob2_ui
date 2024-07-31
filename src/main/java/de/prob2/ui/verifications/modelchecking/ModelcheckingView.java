@@ -262,15 +262,16 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	
 	@Override
 	protected CompletableFuture<?> executeItemNoninteractiveImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
-		if (item instanceof ProBModelCheckingItem)
-			statsView.updateWhileModelChecking(item);
+		if (item instanceof ProBModelCheckingItem proBItem) {
+			statsView.updateWhileModelChecking(proBItem);
+		}
 		return super.executeItemNoninteractiveImpl(item, executors, context);
 	}
 
 	@Override
 	protected CompletableFuture<?> executeItemImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
 		if (item instanceof ProBModelCheckingItem proBItem) {
-			statsView.updateWhileModelChecking(item);
+			statsView.updateWhileModelChecking(proBItem);
 			return executors.cliExecutor().submit(() -> Modelchecker.execute(proBItem, context.stateSpace())).thenApply(res -> {
 				Trace trace = res.getTrace();
 				if (trace != null) {

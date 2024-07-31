@@ -18,8 +18,8 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.SimpleStatsView;
-import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingStep;
+import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -150,7 +150,7 @@ public final class StatsView extends ScrollPane {
 		Platform.runLater(() -> simpleStatsView.setStats(result));
 	}
 
-	public void updateWhileModelChecking(final ModelCheckingItem item) {
+	public void updateWhileModelChecking(ProBModelCheckingItem item) {
 		item.currentStepProperty().addListener(new ChangeListener<>() {
 			@Override
 			public void changed(final ObservableValue<? extends ModelCheckingStep> o, final ModelCheckingStep from, final ModelCheckingStep to) {
