@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
 import java.util.Optional;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
@@ -253,15 +252,6 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		return container;
 	}
 
-	private void showModelCheckException(final Throwable t) {
-		if (t instanceof CancellationException) {
-			LOGGER.debug("Model checking interrupted by user (this is not an error)", t);
-		} else {
-			LOGGER.error("Exception while running model check job", t);
-			Platform.runLater(() -> stageManager.makeExceptionAlert(t, "verifications.modelchecking.modelchecker.alerts.exceptionWhileRunningJob.content").show());
-		}
-	}
-	
 	@Override
 	protected BooleanExpression disableItemBinding(final ModelCheckingItem item) {
 		return super.disableItemBinding(item).or(Bindings.createBooleanBinding(
@@ -281,15 +271,12 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	protected CompletableFuture<?> executeItemImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
 		if (item instanceof ProBModelCheckingItem proBItem) {
 			statsView.updateWhileModelChecking(item);
-			return executors.cliExecutor().submit(() -> Modelchecker.execute(proBItem, context.stateSpace())).whenComplete((r, exc) -> {
-				if (exc == null) {
-					Trace trace = r.getTrace();
-					if (trace != null) {
-						currentTrace.set(trace);
-					}
-				} else {
-					showModelCheckException(exc);
+			return executors.cliExecutor().submit(() -> Modelchecker.execute(proBItem, context.stateSpace())).thenApply(res -> {
+				Trace trace = res.getTrace();
+				if (trace != null) {
+					currentTrace.set(trace);
 				}
+				return res;
 			});
 		} else {
 			return super.executeItemImpl(item, executors, context);
