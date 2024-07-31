@@ -284,6 +284,7 @@ public abstract class Simulator {
 	}
 
 	public Trace executeActivatedOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
+
 		String id = activationConfig.getId();
 		List<String> activationConfiguration = activationConfig.getActivating();
 
@@ -328,6 +329,7 @@ public abstract class Simulator {
 								null, ActivationOperationConfiguration.ActivationKind.SINGLE, null, null, null,
 								true, null, step.getPredicate());
 						simulationEventHandler.activateOperation(newTrace.getCurrentState(), newActivation, new ArrayList<>(), "1=1");
+						externalSimulatorExecutor.setDone(step.isDone());
 					}
 				}
 			} else if("skip".equals(activation.getOperation())) {

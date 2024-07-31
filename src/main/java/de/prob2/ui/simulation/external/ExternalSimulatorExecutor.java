@@ -100,7 +100,6 @@ public class ExternalSimulatorExecutor {
 				e.printStackTrace();
 			}
 
-			setDone(done);
 			return new ExternalSimulationStep(operation, predicate, delta, done);
 		});
 		threadService.execute(task);
