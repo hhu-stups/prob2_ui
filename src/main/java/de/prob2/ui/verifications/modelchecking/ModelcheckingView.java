@@ -272,8 +272,9 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	protected CompletableFuture<?> executeItemImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
 		if (item instanceof ProBModelCheckingItem proBItem) {
 			statsView.updateWhileModelChecking(proBItem);
-			return executors.cliExecutor().submit(() -> Modelchecker.execute(proBItem, context.stateSpace())).thenApply(res -> {
-				Trace trace = res.getTrace();
+			return super.executeItemImpl(item, executors, context).thenApply(res -> {
+				ModelCheckingStep lastStep = item.getSteps().get(item.getSteps().size() - 1);
+				Trace trace = lastStep.getTrace();
 				if (trace != null) {
 					currentTrace.set(trace);
 				}

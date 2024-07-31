@@ -143,7 +143,7 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 
 	@Override
 	public void execute(final ExecutionContext context) {
-		Modelchecker.executeIfNeeded(this, context.stateSpace());
+		Modelchecker.execute(this, context.stateSpace());
 	}
 
 	@Override

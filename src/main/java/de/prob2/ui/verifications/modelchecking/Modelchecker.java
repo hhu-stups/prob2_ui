@@ -18,22 +18,6 @@ public final class Modelchecker {
 		throw new AssertionError("Utility class");
 	}
 
-	/**
-	 * Execute model checking using the given configuration.
-	 * If a result (success or error) has already been found using the configuration,
-	 * return that result directly instead of restarting the check.
-	 * 
-	 * @param item the model checking configuration to run
-	 * @return result of the model check
-	 */
-	public static ModelCheckingStep executeIfNeeded(final ProBModelCheckingItem item, final StateSpace stateSpace) {
-		if (item.getSteps().isEmpty()) {
-			return Modelchecker.execute(item, stateSpace);
-		} else {
-			return item.getSteps().get(0);
-		}
-	}
-
 	public static ModelCheckingStep execute(ProBModelCheckingItem item, StateSpace stateSpace) {
 		// The options must be calculated before adding the ModelCheckingStep,
 		// so that the recheckExisting/INSPECT_EXISTING_NODES option is set correctly,
