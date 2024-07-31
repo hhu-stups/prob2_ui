@@ -118,6 +118,7 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		return timeLimit;
 	}
 
+	@Override
 	public String getTaskDescription(final I18n i18n) {
 		final StringJoiner s = new StringJoiner(", ");
 		final String strategyKey = ProBModelCheckingTab.getSearchStrategyNameKey(this.getSearchStrategy());

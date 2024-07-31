@@ -41,6 +41,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		this.estimatedValues = new ArrayList<>();
 	}
 
+	@Override
 	public CheckingStatus checkTrace(Trace trace, int time) {
 		switch (type) {
 			case ALL_INVARIANTS:
@@ -476,6 +477,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		return simulationCheckingSimulator.calculateExtendedStats();
 	}
 
+	@Override
 	public void calculateStatistics(long time) {
 		simulationCheckingSimulator.calculateStatistics(time);
 	}

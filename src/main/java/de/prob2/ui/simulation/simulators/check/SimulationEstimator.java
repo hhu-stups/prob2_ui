@@ -226,6 +226,7 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		return simulationPropertyChecker.calculateExtendedStats();
 	}
 
+	@Override
 	public void calculateStatistics(long time) {
 		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();

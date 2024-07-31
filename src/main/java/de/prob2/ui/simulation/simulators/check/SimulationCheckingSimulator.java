@@ -294,6 +294,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		simulationPropertyChecker.calculateStatistics(wallTime);
 	}
 
+	@Override
 	public void check() {
 		if(this.resultingTraces.size() == numberExecutions) {
 			this.result = MonteCarloCheckResult.SUCCESS;
@@ -355,6 +356,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		this.stats = new SimulationStats(this.numberExecutions, this.numberExecutions, 1.0, new ArrayList<>(), wallTime, traceLengths, calculateExtendedStats());
 	}
 
+	@Override
 	public SimulationExtendedStats calculateExtendedStats() {
 		Map<String, Integer> executionsResult = new HashMap<>();
 		Map<String, Integer> enablingsResult = new HashMap<>();
@@ -371,22 +373,27 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		return new SimulationExtendedStats(executionsResult, enablingsResult, percentageResult);
 	}
 
+	@Override
 	public Map<String, List<Integer>> getOperationExecutions() {
 		return operationExecutions;
 	}
 
+	@Override
 	public List<Trace> getResultingTraces() {
 		return resultingTraces;
 	}
 
+	@Override
 	public List<List<Integer>> getResultingTimestamps() {
 		return resultingTimestamps;
 	}
 
+	@Override
 	public List<CheckingStatus> getResultingStatus() {
 		return resultingStatus;
 	}
 
+	@Override
 	public SimulationStats getStats() {
 		return stats;
 	}
@@ -396,6 +403,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		this.stats = stats;
 	}
 
+	@Override
 	public MonteCarloCheckResult getResult() {
 		return result;
 	}
