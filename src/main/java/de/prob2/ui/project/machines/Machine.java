@@ -527,6 +527,24 @@ public final class Machine {
 		this.sourceFileModifiedTimes = newModifiedTimes;
 	}
 
+	/**
+	 * Returns a new machine with the given name, description and location.
+	 * All other properties and connected items are copied.
+	 */
+	public Machine withNameDescriptionAndLocation(String name, String description, Path location) {
+		return new Machine(
+				name,
+				description,
+				location,
+				this.getLastUsedPreferenceName(),
+				this.getValidationTasks(),
+				this.getLTLPatterns(),
+				this.getSimulations(),
+				this.getVisBVisualisation(),
+				this.getHistoryChartItems()
+		);
+	}
+
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)

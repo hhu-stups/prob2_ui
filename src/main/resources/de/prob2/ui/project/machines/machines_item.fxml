@@ -23,6 +23,7 @@
 				<SeparatorMenuItem />
 				<MenuItem text="%project.machines.machinesItem.contextMenu.items.editMachineConfiguration" onAction="#handleEditConfiguration"/>
 				<MenuItem text="%project.machines.machinesItem.contextMenu.items.removeMachine" onAction="#handleRemove"/>
+				<MenuItem text="%project.machines.machinesItem.contextMenu.items.cloneMachine" onAction="#handleClone"/>
 			</items>
 		</ContextMenu>
 	</fx:define>

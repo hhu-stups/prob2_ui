@@ -9,9 +9,12 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.base.Strings;
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -31,6 +34,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.preferences.Preference;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
@@ -116,6 +120,47 @@ public final class MachinesTab extends Tab {
 				if (buttonType.equals(ButtonType.OK)) {
 					currentProject.removeMachine(this.machineProperty.get());
 				}
+			});
+		}
+
+		@FXML
+		private void handleClone() {
+			Machine machine = this.machineProperty.get();
+			Path location = MachinesTab.this.currentProject.get().getAbsoluteMachinePath(machine);
+
+			Path clonedLocation = location;
+			do {
+				clonedLocation = nextFreePath(clonedLocation);
+			} while (Files.exists(clonedLocation));
+
+			List<Machine> machinesList = MachinesTab.this.currentProject.getMachines();
+			Set<String> machineNamesSet = machinesList.stream().map(Machine::getName).collect(Collectors.toSet());
+			String clonedName = machine.getName();
+			do {
+				clonedName = nextNumberedName(clonedName);
+			} while (machineNamesSet.contains(clonedName));
+
+			String clonedDescription;
+			if (Strings.isNullOrEmpty(machine.getDescription())) {
+				clonedDescription = "(cloned)";
+			} else {
+				clonedDescription = machine.getDescription() + " (cloned)";
+			}
+
+			try {
+				Files.copy(location, clonedLocation);
+			} catch (IOException e) {
+				LOGGER.error("could not clone machine file {}", location, e);
+				return;
+			}
+
+			Path relative = MachinesTab.this.currentProject.getLocation().relativize(clonedLocation);
+			Machine cloned = machine.withNameDescriptionAndLocation(clonedName, clonedDescription, relative);
+
+			currentProject.addMachine(cloned);
+			Platform.runLater(() -> {
+				MachinesTab.this.machinesList.getSelectionModel().select(cloned);
+				MachinesTab.this.machinesList.scrollTo(cloned);
 			});
 		}
 
@@ -370,16 +415,15 @@ public final class MachinesTab extends Tab {
 			alert.showAndWait();
 			return;
 		}
-		final Set<String> machineNamesSet = currentProject.getMachines().stream()
+
+		final Set<String> machineNames = currentProject.getMachines().stream()
 			.map(Machine::getName)
 			.collect(Collectors.toSet());
-		String[] n = relative.getFileName().toString().split("\\.");
-		String name = n[0];
-		int i = 1;
-		while (machineNamesSet.contains(name)) {
-			name = String.format(Locale.ROOT, "%s (%d)", n[0], i);
-			i++;
+		String name = MoreFiles.getNameWithoutExtension(relative);
+		while (machineNames.contains(name)) {
+			name = nextNumberedName(name);
 		}
+
 		final Machine machine = new Machine(name, "", relative);
 		currentProject.addMachine(machine);
 		// we already asked the user for confirmation
@@ -416,5 +460,30 @@ public final class MachinesTab extends Tab {
 			Collections.swap(machines, i, j);
 			currentProject.changeMachineOrder(machines);
 		}
+	}
+
+	private static Path nextFreePath(Path path) {
+		String fileName = MoreFiles.getNameWithoutExtension(path);
+		String extension = MoreFiles.getFileExtension(path);
+		return path.resolveSibling(nextNumberedName(fileName) + "." + extension);
+	}
+
+	private static String nextNumberedName(String name) {
+		Pattern numberedName = Pattern.compile("(.*) \\((\\d+)\\)", Pattern.DOTALL);
+		Matcher m = numberedName.matcher(name);
+		if (m.matches()) {
+			String prefix = m.group(1);
+			String number = m.group(2);
+
+			try {
+				int i = Integer.parseInt(number);
+				int next = Math.addExact(i, 1);
+				return prefix + " (" + next + ")";
+			} catch (NumberFormatException | ArithmeticException ignored) {
+				// number too big, fallthrough to next return
+			}
+		}
+
+		return name + " (1)";
 	}
 }
