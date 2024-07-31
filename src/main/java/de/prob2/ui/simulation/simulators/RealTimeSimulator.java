@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
@@ -25,8 +26,8 @@ public final class RealTimeSimulator extends Simulator {
 	private final ChangeListener<Transition> uiListener;
 
 	@Inject
-	public RealTimeSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
-		super(currentTrace);
+	public RealTimeSimulator(final CurrentTrace currentTrace, final CurrentProject currentProject, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
+		super(currentTrace, currentProject);
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;

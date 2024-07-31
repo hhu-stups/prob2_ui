@@ -10,6 +10,7 @@ import com.google.inject.Injector;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -75,8 +76,8 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		this.epsilon = epsilon;
 	}
 
-	public void initialize(final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationPropertyChecker(this, injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+	public void initialize(final CurrentTrace currentTrace, final CurrentProject currentProject, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		this.simulationPropertyChecker = new SimulationPropertyChecker(this, injector, currentTrace, currentProject, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	private void checkMinimum() {

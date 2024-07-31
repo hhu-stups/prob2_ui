@@ -16,6 +16,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationError;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
@@ -109,8 +110,8 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	private MonteCarloCheckResult result;
 
-	public SimulationCheckingSimulator(final Injector injector, final CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
-		super(currentTrace);
+	public SimulationCheckingSimulator(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
+		super(currentTrace, currentProject);
 		this.injector = injector;
 		this.operationExecutions = new HashMap<>();
 		this.operationEnablings = new HashMap<>();

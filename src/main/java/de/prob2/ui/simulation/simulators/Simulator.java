@@ -4,6 +4,7 @@ import de.prob.animator.command.GetPreferenceCommand;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -24,6 +25,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -52,6 +54,8 @@ public abstract class Simulator {
 
 	protected final CurrentTrace currentTrace;
 
+	protected final CurrentProject currentProject;
+
 	protected final SimulationEventHandler simulationEventHandler;
 
 	protected final ChangeListener<? super Trace> traceListener;
@@ -66,10 +70,11 @@ public abstract class Simulator {
 
 	protected ExternalSimulatorExecutor externalSimulatorExecutor;
 
-	public Simulator(final CurrentTrace currentTrace) {
+	public Simulator(final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		super();
 		this.currentTrace = currentTrace;
-		this.simulationEventHandler = new SimulationEventHandler(this, currentTrace);
+		this.currentProject = currentProject;
+		this.simulationEventHandler = new SimulationEventHandler(this, currentTrace, currentProject);
 		this.time = new SimpleIntegerProperty(0);
 		this.stepCounter = 0;
 		this.delay = 0;
@@ -86,6 +91,18 @@ public abstract class Simulator {
 				setPreferences(to);
 			}
 		};
+
+		this.currentProject.addListener((observable, from, to) -> {
+			if((from == null && to != null) || !Objects.equals(from, to)) {
+				resetSimulator();
+			}
+		});
+
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if((from == null && to != null) || !Objects.equals(from, to)) {
+				resetSimulator();
+			}
+		});
 	}
 
 
@@ -132,6 +149,10 @@ public abstract class Simulator {
 							operationToActivations.get(opName).add(activationConfiguration.getId());
 						});
 				activationConfigurationsSorted.forEach(config -> configurationToActivation.put(config.getId(), new ArrayList<>()));
+				if(this.externalSimulatorExecutor != null) {
+					this.externalSimulatorExecutor.close();
+					this.externalSimulatorExecutor = null;
+				}
 				currentTrace.removeListener(traceListener);
 			} else if(config instanceof SimulationExternalConfiguration) {
 				if(this.externalSimulatorExecutor == null) {
@@ -326,7 +347,10 @@ public abstract class Simulator {
 	}
 
 	public boolean endingConditionReached(Trace trace) {
-		return noActivationQueued;
+		if(externalSimulatorExecutor == null) {
+			return noActivationQueued;
+		}
+		return externalSimulatorExecutor.isDone();
 	}
 
 	public ISimulationModelConfiguration getConfig() {

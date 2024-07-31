@@ -10,6 +10,7 @@ import com.google.inject.Injector;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
@@ -30,10 +31,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	private final List<Double> estimatedValues;
 
-	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, Injector injector, CurrentTrace currentTrace, int numberExecutions, int maxStepsBeforeProperty,
+	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, Injector injector, CurrentTrace currentTrace, CurrentProject currentProject, int numberExecutions, int maxStepsBeforeProperty,
 									 SimulationCheckingType type, Map<String, Object> additionalInformation) {
 		this.hypothesisCheckerOrEstimator = hypothesisCheckerOrEstimator;
-		this.simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, numberExecutions, maxStepsBeforeProperty, additionalInformation);
+		this.simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, currentProject, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
 		this.numberSuccess = 0;
