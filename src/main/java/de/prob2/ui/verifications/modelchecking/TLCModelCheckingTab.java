@@ -2,15 +2,10 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.nio.file.Path;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.google.inject.Inject;
 
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.TLCModelCheckingOptions;
 import de.prob.scripting.ClassicalBFactory;
@@ -18,13 +13,16 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.tlc4b.TLC4B;
 import de.tlc4b.TLC4BOption;
 
+import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyStringProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -102,21 +100,22 @@ public class TLCModelCheckingTab extends Tab {
 
 	private final CurrentTrace currentTrace;
 
-	private final ExecutorService checkTlcApplicableExecutor;
+	private boolean checkedTlcApplicable;
+	private final StringProperty tlcApplicableError;
 
 	private ModelCheckingItem result;
 
 	@Inject
 	private TLCModelCheckingTab(final StageManager stageManager, final I18n i18n, final FileChooserManager fileChooserManager,
-			final CurrentProject currentProject, final CurrentTrace currentTrace, final StopActions stopActions) {
+			final CurrentProject currentProject, final CurrentTrace currentTrace) {
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 
-		this.checkTlcApplicableExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, "TLC4B applicability checker"));
-		stopActions.add(this.checkTlcApplicableExecutor::shutdownNow);
+		this.checkedTlcApplicable = false;
+		this.tlcApplicableError = new SimpleStringProperty(this, "tlcApplicableError", null);
 		this.result = null;
 
 		stageManager.loadFXML(this, "tlc_modelchecking_tab.fxml");
@@ -169,6 +168,9 @@ public class TLCModelCheckingTab extends Tab {
 			}
 		});
 
+		errorMessageBox.visibleProperty().bind(this.tlcApplicableErrorProperty().isNotNull());
+		errorMessage.textProperty().bind(this.tlcApplicableErrorProperty());
+
 		// initialize with current preferences, e.g. WORKERS
 		// FIXME This runs a ProB command on the UI thread to get the current preference values. This should be made lazy and/or moved to the CliTaskExecutor to avoid blocking the UI thread.
 		this.setData(TLCModelCheckingOptions.fromPreferences(currentTrace.getStateSpace()).getOptions());
@@ -208,36 +210,41 @@ public class TLCModelCheckingTab extends Tab {
 			.getOptions();
 	}
 
-	// TODO Make this method non-blocking
-	boolean tlcCheck() {
+	public ReadOnlyStringProperty tlcApplicableErrorProperty() {
+		return this.tlcApplicableError;
+	}
+
+	public String getTlcApplicableError() {
+		return this.tlcApplicableErrorProperty().get();
+	}
+
+	void checkTlcApplicable() {
+		if (this.checkedTlcApplicable) {
+			return;
+		}
+
+		this.checkedTlcApplicable = true;
+
 		// TODO: support other languages by pretty printing internal representation (Event-B)?
 		//  (with current internal repr. not automatically possible)
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == ClassicalBFactory.class) {
 			Path machinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
-			Future<?> future = checkTlcApplicableExecutor.submit(() -> {
-				TLC4B.checkTLC4BIsApplicable(machinePath.toString());
-				return null;
-			});
+			Thread thread = new Thread(() -> {
+				try {
+					TLC4B.checkTLC4BIsApplicable(machinePath.toString());
+				} catch (BCompoundException | RuntimeException exc) {
+					LOGGER.warn("TLC4B is not applicable to this machine", exc);
+					Platform.runLater(() -> this.tlcApplicableError.set(exc.getMessage()));
+					return;
+				}
 
-			try {
-				future.get(5, TimeUnit.SECONDS);
-			} catch (ExecutionException exc) {
-				LOGGER.warn("TLC4B is not applicable to this machine", exc);
-				errorMessageBox.setVisible(true);
-				errorMessage.setText(exc.getMessage());
-				return false;
-			} catch (InterruptedException | TimeoutException exc) {
-				LOGGER.info("TLC4B applicability check timed out - assuming that TLC4B is applicable", exc);
-				// Intentionally fall through to successful path below.
-			}
-
-			errorMessageBox.setVisible(false);
-			errorMessage.setText("");
-			return true;
+				Platform.runLater(() -> this.tlcApplicableError.set(null));
+			}, "TLC4B applicability checker");
+			// Don't let this thread keep the JVM alive if it's still running when the UI exits.
+			thread.setDaemon(true);
+			thread.start();
 		} else {
-			errorMessageBox.setVisible(true);
-			errorMessage.setText(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.onlyClassicalB"));
-			return false;
+			this.tlcApplicableError.set(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.onlyClassicalB"));
 		}
 	}
 
@@ -251,6 +258,8 @@ public class TLCModelCheckingTab extends Tab {
 	}
 	
 	private void setData(final Map<TLC4BOption, String> options) {
+		checkedTlcApplicable = false;
+		tlcApplicableError.set(null);
 		if (options.containsKey(TLC4BOption.DFID)) {
 			selectSearchStrategy.getSelectionModel().select(ModelCheckingSearchStrategy.DEPTH_FIRST);
 			dfidInitialDepth.getValueFactory().setValue(Integer.parseInt(options.get(TLC4BOption.DFID)));

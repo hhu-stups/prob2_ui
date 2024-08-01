@@ -7,7 +7,6 @@ import de.prob2.ui.internal.StageManager;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
@@ -41,11 +40,11 @@ public class ModelcheckingStage extends Stage {
 	private void initialize() {
 		this.initModality(Modality.APPLICATION_MODAL);
 
-		this.modelCheckerTabs.getSelectionModel().selectedItemProperty().addListener((obs, from, to) -> tlcCheck(to));
-	}
-
-	private void tlcCheck(Tab tab) {
-		btStartModelCheck.setDisable(tab.equals(tlcTab) && !tlcTab.tlcCheck());
+		btStartModelCheck.disableProperty().bind(
+			this.modelCheckerTabs.getSelectionModel().selectedItemProperty().isEqualTo(tlcTab)
+			.and(tlcTab.tlcApplicableErrorProperty().isNotNull())
+		);
+		this.modelCheckerTabs.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> tlcTab.checkTlcApplicable());
 	}
 
 	@FXML
