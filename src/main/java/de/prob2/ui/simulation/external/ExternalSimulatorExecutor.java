@@ -5,11 +5,15 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.simulators.Simulator;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.file.Path;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,9 +22,11 @@ import java.util.stream.Collectors;
 
 public class ExternalSimulatorExecutor {
 
-	private final Simulator simulator;
+	private ServerSocket serverSocket;
 
-	private final ProcessBuilder pb;
+	private Socket clientSocket;
+
+	private final Simulator simulator;
 
 	private final Path pythonFile;
 
@@ -37,7 +43,6 @@ public class ExternalSimulatorExecutor {
 	public ExternalSimulatorExecutor(Simulator simulator, Path pythonFile) {
 		this.simulator = simulator;
 		this.pythonFile = pythonFile;
-		this.pb = new ProcessBuilder("python3", pythonFile.getFileName().toString()).directory(pythonFile.getParent().toFile());
 		this.done = false;
 	}
 
@@ -46,11 +51,22 @@ public class ExternalSimulatorExecutor {
 	}
 
 	public void start() {
-		pb.redirectErrorStream(true);
 		try {
+			this.serverSocket = new ServerSocket(0);
+			int simBPort = serverSocket.getLocalPort();
+			if(clientSocket != null) {
+				clientSocket.close();
+			}
+			FutureTask<Void> task = new FutureTask<>(() -> {
+				clientSocket = serverSocket.accept();
+				this.reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				this.writer = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+				return null;
+			});
+
+			threadService.execute(task);
+			ProcessBuilder pb = new ProcessBuilder("python3", pythonFile.getFileName().toString(), String.valueOf(simBPort)).directory(pythonFile.getParent().toFile());
 			this.process = pb.start();
-			this.reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-			this.writer = new BufferedWriter(new OutputStreamWriter(process.getOutputStream()));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -58,49 +74,29 @@ public class ExternalSimulatorExecutor {
 
 	public FutureTask<ExternalSimulationStep> execute(Trace trace) {
 		FutureTask<ExternalSimulationStep> task = new FutureTask<>(() -> {
-			String operation = "";
-			String delta = "";
-			String predicate = "";
-			boolean done = false;
+			ExternalSimulationStep step = null;
 			try {
 				if(simulator.endingConditionReached(trace)) {
 					sendFinish();
 					return null;
-				} else {
-					sendContinue();
 				}
 
 				State state = trace.getCurrentState();
-				String enabledOperations = state
+				String enabledOperations = String.join(",", state
 						.getOutTransitions().stream()
 						.map(Transition::getName)
-						.collect(Collectors.joining(","));
+						.collect(Collectors.toSet()));
+				sendContinue(enabledOperations);
 
-				writer.write(enabledOperations);
-				writer.newLine();
-				writer.flush();
-
-				int j = 0;
-
-				while (j <= 3) {
-					String line = reader.readLine();
-					if (j == 0) {
-						operation = line;
-					} else if (j == 1) {
-						delta = line;
-					} else if (j == 2) {
-						predicate = line;
-					} else if (j == 3) {
-						done = Boolean.parseBoolean(line);
-					}
-					j++;
-				}
-
+				String line = reader.readLine();
+				Gson gson = new Gson();
+				step = gson.fromJson(line, ExternalSimulationStep.class);
 			} catch(Exception e){
 				e.printStackTrace();
 			}
-
-			return new ExternalSimulationStep(operation, predicate, delta, done);
+			assert step != null;
+			setDone(step.isDone());
+			return step;
 		});
 		threadService.execute(task);
 		return task;
@@ -108,9 +104,13 @@ public class ExternalSimulatorExecutor {
 
 	public void close() {
 		try {
-			reader.close();
-			writer.close();
+			if(clientSocket != null && !clientSocket.isClosed()) {
+				writer.close();
+				reader.close();
+				clientSocket.close();
+			}
 			process.getOutputStream().close();
+			serverSocket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -129,19 +129,24 @@ public class ExternalSimulatorExecutor {
 			return;
 		}
 		setDone(true);
+
+		Gson gson = new Gson();
+		String jsonData = gson.toJson(new ExternalSimulationRequest(1, ""));
+
 		try {
-			writer.write(String.valueOf(1));
-			writer.newLine();
+			writer.write(jsonData);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void sendContinue() {
+	public void sendContinue(String enabledOperations) {
+		Gson gson = new Gson();
+		String jsonData = gson.toJson(new ExternalSimulationRequest(0, enabledOperations));
+
 		try {
-			writer.write(String.valueOf(0));
-			writer.newLine();
+			writer.write(jsonData);
 			writer.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -151,4 +156,5 @@ public class ExternalSimulatorExecutor {
 	public Path getPythonFile() {
 		return pythonFile;
 	}
+
 }

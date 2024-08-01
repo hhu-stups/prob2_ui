@@ -5,13 +5,13 @@ import java.util.StringJoiner;
 
 public class ExternalSimulationStep {
 
-	private final String op;
+	private String op;
 
-	private final String predicate;
+	private String predicate;
 
-	private final String delta;
+	private String delta;
 
-	private final boolean done;
+	private boolean done;
 
 	public ExternalSimulationStep(String op, String predicate, String delta, boolean done) {
 		this.op = op;
@@ -24,16 +24,32 @@ public class ExternalSimulationStep {
 		return op;
 	}
 
+	public void setOp(String op) {
+		this.op = op;
+	}
+
 	public String getPredicate() {
 		return predicate;
+	}
+
+	public void setPredicate(String predicate) {
+		this.predicate = predicate;
 	}
 
 	public String getDelta() {
 		return delta;
 	}
 
+	public void setDelta(String delta) {
+		this.delta = delta;
+	}
+
 	public boolean isDone() {
 		return done;
+	}
+
+	public void setDone(boolean done) {
+		this.done = done;
 	}
 
 	@Override
