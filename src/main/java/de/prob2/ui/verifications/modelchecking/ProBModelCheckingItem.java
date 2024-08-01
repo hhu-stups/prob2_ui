@@ -6,6 +6,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -23,6 +24,7 @@ import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -91,9 +93,7 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 	public ModelCheckingOptions getFullOptions(final AbstractModel model) {
 		ModelCheckingOptions fullOptions = new ModelCheckingOptions(this.getOptions())
 			                                   .searchStrategy(this.getSearchStrategy())
-			                                   // Start checking from the beginning if this item hasn't been checked yet,
-			                                   // otherwise continue checking from the last error.
-			                                   .recheckExisting(this.getSteps().isEmpty());
+			                                   .recheckExisting(true);
 		if (this.getGoal() != null) {
 			fullOptions = fullOptions.customGoal(model.parseFormula(this.getGoal()));
 		}
@@ -151,16 +151,22 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		return this.getSteps().isEmpty() ? null : this.getSteps().get(0).getTrace();
 	}
 
-	@Override
-	public void execute(final ExecutionContext context) {
-		// The options must be calculated before adding the ModelCheckingStep,
-		// so that the recheckExisting/INSPECT_EXISTING_NODES option is set correctly,
-		// which depends on whether any steps were already added.
-		ModelCheckingOptions fullOptions = this.getFullOptions(context.stateSpace().getModel());
-
-		int stepIndex = getSteps().size();
+	private void executeWithOptions(ExecutionContext context, ModelCheckingOptions fullOptions) {
 		ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, context.stateSpace());
-		Platform.runLater(() -> this.getSteps().add(initialStep));
+
+		int stepIndex;
+		if (fullOptions.getPrologOptions().contains(ModelCheckingOptions.Options.INSPECT_EXISTING_NODES)) {
+			// User chose to restart model checking - clear all previous steps.
+			stepIndex = 0;
+			Platform.runLater(() -> {
+				this.getSteps().clear();
+				this.getSteps().add(initialStep);
+			});
+		} else {
+			// User chose to continue a previously stopped check - append a new step.
+			stepIndex = getSteps().size();
+			Platform.runLater(() -> this.getSteps().add(initialStep));
+		}
 		
 		IModelCheckListener listener = new IModelCheckListener() {
 			@Override
@@ -190,6 +196,19 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		} finally {
 			this.setCurrentStep(null);
 		}
+	}
+
+	@Override
+	public void execute(ExecutionContext context) {
+		this.executeWithOptions(context, this.getFullOptions(context.stateSpace().getModel()));
+	}
+
+	public void continueModelChecking(ExecutionContext context) {
+		this.executeWithOptions(context, this.getFullOptions(context.stateSpace().getModel()).recheckExisting(false));
+	}
+
+	public CompletableFuture<?> continueModelChecking(CheckingExecutors executors, ExecutionContext context) {
+		return executors.cliExecutor().submit(() -> this.continueModelChecking(context));
 	}
 
 	@Override

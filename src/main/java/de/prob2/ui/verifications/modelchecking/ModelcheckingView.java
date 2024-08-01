@@ -30,7 +30,9 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ReadOnlyProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -60,19 +62,18 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
 
+			MenuItem continueModelCheckingItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors"));
+			continueModelCheckingItem.setOnAction(e -> continueModelChecking((ProBModelCheckingItem)this.getItem()));
+			// Add "Continue Model Checking" directly after "Start/Restart Model Checking"
+			int executeIndex = contextMenu.getItems().indexOf(executeMenuItem);
+			assert executeIndex >= 0;
+			contextMenu.getItems().add(executeIndex + 1, continueModelCheckingItem);
+
 			this.itemProperty().addListener((o, from, to) -> {
-				if (to instanceof TLCModelCheckingItem) {
-					executeMenuItem.disableProperty().unbind();
-					executeMenuItem.setDisable(true);
-				}
 				executeMenuItem.textProperty().unbind();
-				if (to != null) {
-					executeMenuItem.textProperty().bind(Bindings.when(to.stepsProperty().emptyProperty())
-						.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
-						.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors")));
-				} else {
-					executeMenuItem.setText(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"));
-				}
+				executeMenuItem.textProperty().bind(executeTextBinding(to));
+				continueModelCheckingItem.disableProperty().unbind();
+				continueModelCheckingItem.disableProperty().bind(continueModelCheckingDisableBinding(to));
 			});
 		}
 	}
@@ -96,6 +97,15 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private TableColumn<ModelCheckingStep, String> stepMessageColumn;
 
 	@FXML
+	private HBox executeButtonsBox;
+
+	@FXML
+	private Button executeButton;
+
+	@FXML
+	private Button continueCheckingButton;
+
+	@FXML
 	private VBox statsBox;
 
 	@FXML
@@ -114,6 +124,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private final StageManager stageManager;
 	private final Provider<ModelcheckingStage> modelcheckingStageProvider;
 	private final I18n i18n;
+	private final CheckingExecutors checkingExecutors;
 	private final StatsView statsView;
 
 	@Inject
@@ -131,6 +142,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		this.stageManager = stageManager;
 		this.modelcheckingStageProvider = modelcheckingStageProvider;
 		this.i18n = i18n;
+		this.checkingExecutors = checkingExecutors;
 		this.statsView = statsView;
 		stageManager.loadFXML(this, "modelchecking_view.fxml");
 	}
@@ -198,6 +210,12 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		stepsTable.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
 
 		itemsTable.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			executeButtonsBox.setVisible(to != null);
+			executeButton.textProperty().unbind();
+			executeButton.textProperty().bind(executeTextBinding(to));
+			continueCheckingButton.disableProperty().unbind();
+			continueCheckingButton.disableProperty().bind(continueModelCheckingDisableBinding(to));
+
 			stepsTable.itemsProperty().unbind();
 			if (to != null) {
 				stepsTable.itemsProperty().bind(to.stepsProperty());
@@ -252,12 +270,27 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		return container;
 	}
 
-	@Override
-	protected BooleanExpression disableItemBinding(final ModelCheckingItem item) {
-		return super.disableItemBinding(item).or(Bindings.createBooleanBinding(
-			() -> item.getSteps().stream().anyMatch(step -> step.getStatus() == CheckingStatus.SUCCESS),
-			item.stepsProperty()
-		));
+	private StringExpression executeTextBinding(ModelCheckingItem item) {
+		if (item != null) {
+			return Bindings.when(item.stepsProperty().emptyProperty())
+				.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
+				.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.recheck"));
+		} else {
+			return i18n.translateBinding("verifications.modelchecking.modelcheckingView.contextMenu.check");
+		}
+	}
+
+	private BooleanExpression continueModelCheckingDisableBinding(ModelCheckingItem item) {
+		if (item instanceof ProBModelCheckingItem proBItem) {
+			// Enable "Continue Model Checking" only if the item has already been executed at least once, but hasn't completely finished yet.
+			// TODO Continuing should also be disabled if another ModelCheckingItem has been executed after this one stopped, because ProB tracks the checking progress globally and cannot tell apart the different ModelCheckingItems.
+			return this.disableItemBinding(proBItem).or(Bindings.createBooleanBinding(
+				() -> proBItem.getSteps().isEmpty() || proBItem.getSteps().stream().anyMatch(step -> step.getStatus() == CheckingStatus.SUCCESS),
+				proBItem.stepsProperty()
+			));
+		} else {
+			return new SimpleBooleanProperty(true);
+		}
 	}
 	
 	@Override
@@ -282,6 +315,38 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			});
 		} else {
 			return super.executeItemImpl(item, executors, context);
+		}
+	}
+
+	@FXML
+	private void executeSelected() {
+		ModelCheckingItem item = itemsTable.getSelectionModel().getSelectedItem();
+		if (item != null) {
+			this.executeItem(item);
+		}
+	}
+
+	private void continueModelChecking(ProBModelCheckingItem item) {
+		statsView.updateWhileModelChecking(item);
+		ExecutionContext context = getCurrentExecutionContext();
+		item.continueModelChecking(checkingExecutors, context).whenComplete((res, exc) -> {
+			if (exc == null) {
+				ModelCheckingStep lastStep = item.getSteps().get(item.getSteps().size() - 1);
+				Trace trace = lastStep.getTrace();
+				if (trace != null) {
+					currentTrace.set(trace);
+				}
+			} else {
+				handleCheckException(exc);
+			}
+		});
+	}
+
+	@FXML
+	private void continueCheckingSelected() {
+		ModelCheckingItem item = itemsTable.getSelectionModel().getSelectedItem();
+		if (item instanceof ProBModelCheckingItem proBItem) {
+			this.continueModelChecking(proBItem);
 		}
 	}
 

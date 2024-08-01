@@ -244,7 +244,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 		return executeItemNoninteractiveImpl(item, checkingExecutors, context);
 	}
 
-	private void handleCheckException(Throwable exc) {
+	protected void handleCheckException(Throwable exc) {
 		if (exc instanceof CancellationException || exc instanceof CompletionException && exc.getCause() instanceof CancellationException) {
 			LOGGER.trace("Check was canceled (this is not an error)", exc);
 			return;
