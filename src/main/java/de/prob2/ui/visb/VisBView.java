@@ -21,10 +21,7 @@ import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ExportVisBHtmlForStates;
 import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
-import de.prob.animator.domainobjects.VisBEvent;
-import de.prob.animator.domainobjects.VisBHover;
-import de.prob.animator.domainobjects.VisBItem;
-import de.prob.animator.domainobjects.VisBSVGObject;
+import de.prob.animator.domainobjects.*;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -658,7 +655,8 @@ public final class VisBView extends BorderPane {
 			@Override
 			protected Void call() {
 				trace.getStateSpace().execute(onlyCurrentState ?
-					new ExportVisBHtmlForStates(trace.getCurrentState(), path) : new ExportVisBForHistoryCommand(trace, path));
+					new ExportVisBHtmlForStates(trace.getCurrentState(), VisBExportOptions.DEFAULT.withShowVariables(true), path)
+						: new ExportVisBForHistoryCommand(trace, path));
 				return null;
 			}
 		};
