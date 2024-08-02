@@ -54,6 +54,7 @@ public class ExternalSimulatorExecutor {
 		try {
 			this.serverSocket = new ServerSocket(0);
 			int simBPort = serverSocket.getLocalPort();
+			System.out.println("SimB Port: " + simBPort);
 			if(clientSocket != null) {
 				clientSocket.close();
 			}
