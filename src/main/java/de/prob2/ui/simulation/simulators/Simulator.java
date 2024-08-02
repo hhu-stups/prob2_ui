@@ -326,16 +326,8 @@ public abstract class Simulator {
 
 	private void processExternalConfiguration(Trace newTrace) {
 		if(config instanceof SimulationExternalConfiguration) {
-
 			if(!externalSimulatorExecutor.isDone()) {
-				FutureTask<ExternalSimulationStep> stepFuture = externalSimulatorExecutor.execute(newTrace);
-
-				ExternalSimulationStep step = null;
-				try {
-					step = stepFuture.get();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				ExternalSimulationStep step = externalSimulatorExecutor.execute(newTrace);
 
 				if (step == null) {
 					return;
