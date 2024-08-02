@@ -61,6 +61,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -165,6 +166,8 @@ public final class VisBView extends BorderPane {
 	private HBox exportInProgress;
 	@FXML
 	private VBox placeholder;
+	@FXML
+	private ProgressIndicator loadingProgress;
 	@FXML
 	private Label placeholderLabel;
 	@FXML
@@ -460,6 +463,7 @@ public final class VisBView extends BorderPane {
 
 		this.placeholder.setVisible(true);
 		this.placeholderLabel.setText(placeholderLabelText);
+		this.loadingProgress.setVisible(false);
 		this.initButton.setVisible(false);
 	}
 
@@ -468,6 +472,7 @@ public final class VisBView extends BorderPane {
 			this.showPlaceholder(i18n.translate("common.noModelLoaded"));
 		} else if (status == VisBView.LoadingStatus.LOADING) {
 			this.showPlaceholder(i18n.translate("visb.placeholder.loadingVisualisation"));
+			this.loadingProgress.setVisible(true);
 		} else if (status == VisBView.LoadingStatus.NONE_LOADED) {
 			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
 		} else if (!trace.getCurrentState().isInitialised()) {

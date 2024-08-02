@@ -9,6 +9,7 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
 <?import javafx.scene.control.Tooltip?>
@@ -121,7 +122,28 @@
 					<Image url="@/de/prob2/ui/ProB_Logo.png"/>
 				</ImageView>
 				<Label text="%common.noModelLoaded" fx:id="placeholderLabel" textAlignment="CENTER" wrapText="true"/>
-				<Button fx:id="initButton" styleClass="button-blue" visible="false" onAction="#doInitialisation"/>
+				<StackPane>
+					<!--
+					Warning: This is a load-bearing progress bar. Do not remove.
+					For some reason, JavaFX doesn't reliably redraw the placeholder view after its contents change,
+					at least not until something else triggers a redraw - like this progress bar animation.
+
+					Without this progress bar, this bug usually happens after a VisB visualisation has finished loading:
+					the placeholderLabel should change to "Model not yet initialised" and the initButton should become visible,
+					but this doesn't happen and the text stays as "Loading visualisation..."
+					until the user does something that triggers a redraw
+					(e. g. hovering over the VisB TitledPane header bar).
+
+					I have no idea why this is happening.
+					I checked that all of the relevant listeners are getting called
+					and that they are running on the UI thread.
+					This *feels* like a JavaFX bug, but it's hard to say for sure.
+
+					Last tested with JavaFX 22.0.1, Java 21.0.2, macOS 14.5, and a MacBook Pro 2021 (M1 Pro processor).
+					-->
+					<ProgressBar fx:id="loadingProgress" visible="false"/>
+					<Button fx:id="initButton" styleClass="button-blue" visible="false" onAction="#doInitialisation"/>
+				</StackPane>
 			</VBox>
 		</StackPane>
 	</center>
