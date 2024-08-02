@@ -45,8 +45,8 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.help.UserManualStage;
 
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
@@ -109,6 +109,12 @@ public final class VisBView extends BorderPane {
 		}
 	}
 	
+	private enum LoadingStatus {
+		NONE_LOADED,
+		LOADING,
+		LOADED,
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBView.class);
 	private final Injector injector;
 	private final I18n i18n;
@@ -122,7 +128,7 @@ public final class VisBView extends BorderPane {
 
 	private final VisBConnector visBConnector;
 
-	private final BooleanProperty visualisationLoaded;
+	private final ObjectProperty<VisBView.LoadingStatus> loadingStatus;
 
 	@FXML
 	private MenuBar visbMenuBar;
@@ -195,7 +201,7 @@ public final class VisBView extends BorderPane {
 
 		this.visBConnector = new VisBConnector();
 
-		this.visualisationLoaded = new SimpleBooleanProperty(this, "visualisationLoaded", false);
+		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", VisBView.LoadingStatus.NONE_LOADED);
 
 		this.stageManager.loadFXML(this, "visb_view.fxml");
 	}
@@ -229,9 +235,9 @@ public final class VisBView extends BorderPane {
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
-			visualisationLoaded.set(false);
+			loadingStatus.set(to == null ? VisBView.LoadingStatus.NONE_LOADED : VisBView.LoadingStatus.LOADING);
 			visBController.getAttributeValues().clear();
-			this.updateView(to, currentTrace.get());
+			this.updateView(loadingStatus.get(), currentTrace.get());
 
 			if (to != null) {
 				this.loadVisualisationIntoWebView(to);
@@ -246,14 +252,14 @@ public final class VisBView extends BorderPane {
 				}
 			}
 
-			this.updateView(visBController.getVisBVisualisation(), to);
+			this.updateView(loadingStatus.get(), to);
 		};
 
 		// Load VisB file from machine, when window is opened and set listener on the current machine
 		this.currentProject.currentMachineProperty().addListener(machineListener);
 		this.visBController.visBVisualisationProperty().addListener(visBListener);
 		this.currentTrace.addListener(traceListener);
-		this.visualisationLoaded.addListener((o, from, to) -> this.updateView(visBController.getVisBVisualisation(), currentTrace.get()));
+		this.loadingStatus.addListener((o, from, to) -> this.updateView(to, currentTrace.get()));
 
 		machineListener.changed(null, null, currentProject.getCurrentMachine());
 		traceListener.changed(null, null, currentTrace.get());
@@ -324,8 +330,10 @@ public final class VisBView extends BorderPane {
 	}
 
 	private void loadFromDefinitions(StateSpace stateSpace) {
+		loadingStatus.set(VisBView.LoadingStatus.LOADING);
 		cliExecutor.submit(() -> getPathFromDefinitions(stateSpace)).thenComposeAsync(path -> {
 			if (path == null) {
+				loadingStatus.set(VisBView.LoadingStatus.NONE_LOADED);
 				return CompletableFuture.completedFuture(null);
 			} else {
 				return visBController.loadFromAbsolutePath(path);
@@ -337,6 +345,7 @@ public final class VisBView extends BorderPane {
 	}
 
 	public void loadFromAbsolutePath(Path path) {
+		loadingStatus.set(VisBView.LoadingStatus.LOADING);
 		try {
 			visBController.loadFromAbsolutePath(path).exceptionally(exc -> {
 				Platform.runLater(() -> this.showVisualisationLoadError(exc));
@@ -348,6 +357,7 @@ public final class VisBView extends BorderPane {
 	}
 
 	public void loadFromRelativePath(Path path) {
+		loadingStatus.set(VisBView.LoadingStatus.LOADING);
 		try {
 			visBController.loadFromRelativePath(path).exceptionally(exc -> {
 				Platform.runLater(() -> this.showVisualisationLoadError(exc));
@@ -385,8 +395,6 @@ public final class VisBView extends BorderPane {
 	}
 
 	private void loadVisualisationIntoWebView(VisBVisualisation visBVisualisation) {
-		visualisationLoaded.set(false);
-
 		final Path path = visBVisualisation.getSvgPath();
 		final String baseUrl;
 		if (path.equals(VisBController.NO_PATH)) {
@@ -394,7 +402,9 @@ public final class VisBView extends BorderPane {
 		} else {
 			baseUrl = path.getParent().toUri().toString();
 		}
+		LOGGER.trace("Generating VisB HTML code...");
 		String htmlFile = generateHTMLFileWithSVG(visBVisualisation.getSvgContent(), baseUrl);
+		LOGGER.debug("Loading generated VisB HTML code into WebView...");
 		this.webView.getEngine().loadContent(htmlFile);
 
 		this.runWhenHtmlLoaded(() -> {
@@ -413,12 +423,15 @@ public final class VisBView extends BorderPane {
 				return;
 			}
 
+			LOGGER.trace("Setting up VisB dynamic SVG objects...");
 			updateDynamicSVGObjects(visBVisualisation);
+			LOGGER.trace("Setting up VisB click events...");
 			for (VisBEvent event : visBVisualisation.getEvents()) {
 				window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 			}
 
-			visualisationLoaded.set(true);
+			LOGGER.debug("VisB visualisation is fully loaded");
+			loadingStatus.set(VisBView.LoadingStatus.LOADED);
 		});
 	}
 
@@ -450,13 +463,13 @@ public final class VisBView extends BorderPane {
 		this.initButton.setVisible(false);
 	}
 
-	private void updateView(VisBVisualisation visualisation, Trace trace) {
+	private void updateView(VisBView.LoadingStatus status, Trace trace) {
 		if (trace == null) {
 			this.showPlaceholder(i18n.translate("common.noModelLoaded"));
-		} else if (visualisation == null) {
-			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
-		} else if (!visualisationLoaded.get()) {
+		} else if (status == VisBView.LoadingStatus.LOADING) {
 			this.showPlaceholder(i18n.translate("visb.placeholder.loadingVisualisation"));
+		} else if (status == VisBView.LoadingStatus.NONE_LOADED) {
+			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
 		} else if (!trace.getCurrentState().isInitialised()) {
 			this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
 			
@@ -538,13 +551,13 @@ public final class VisBView extends BorderPane {
 	 * @param runnable the code to run once the visualisation has finished loading
 	 */
 	private void runWhenVisualisationLoaded(Runnable runnable) {
-		if (visualisationLoaded.get()) {
+		if (loadingStatus.get() == VisBView.LoadingStatus.LOADED) {
 			runnable.run();
 		} else {
-			visualisationLoaded.addListener(new ChangeListener<>() {
+			loadingStatus.addListener(new ChangeListener<>() {
 				@Override
-				public void changed(ObservableValue<? extends Boolean> observable, Boolean from, Boolean to) {
-					if (to) {
+				public void changed(ObservableValue<? extends VisBView.LoadingStatus> observable, VisBView.LoadingStatus from, VisBView.LoadingStatus to) {
+					if (to == VisBView.LoadingStatus.LOADED) {
 						observable.removeListener(this);
 						runnable.run();
 					}
@@ -598,6 +611,7 @@ public final class VisBView extends BorderPane {
 
 	private void showVisualisationLoadError(Throwable exc) {
 		LOGGER.error("Error while (re)loading VisB file", exc);
+		loadingStatus.set(VisBView.LoadingStatus.NONE_LOADED);
 		alert(exc, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
 	}
 
@@ -627,6 +641,7 @@ public final class VisBView extends BorderPane {
 	@FXML
 	public void reloadVisualisation() {
 		try {
+			loadingStatus.set(VisBView.LoadingStatus.LOADING);
 			visBController.reloadVisualisation().exceptionally(exc -> {
 				Platform.runLater(() -> this.showVisualisationLoadError(exc));
 				return null;
