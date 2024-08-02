@@ -39,6 +39,8 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.help.UserManualStage;
 
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
@@ -113,6 +115,8 @@ public final class VisBView extends BorderPane {
 
 	private final VisBConnector visBConnector;
 
+	private final BooleanProperty visualisationLoaded;
+
 	@FXML
 	private MenuBar visbMenuBar;
 	@FXML
@@ -182,6 +186,8 @@ public final class VisBView extends BorderPane {
 
 		this.visBConnector = new VisBConnector();
 
+		this.visualisationLoaded = new SimpleBooleanProperty(this, "visualisationLoaded", false);
+
 		this.stageManager.loadFXML(this, "visb_view.fxml");
 	}
 
@@ -214,11 +220,11 @@ public final class VisBView extends BorderPane {
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
-			this.updatePlaceholder(to, currentTrace.get());
+			visualisationLoaded.set(false);
+			visBController.getAttributeValues().clear();
+			this.updateView(to, currentTrace.get());
 
-			if (to == null) {
-				visBController.getAttributeValues().clear();
-			} else {
+			if (to != null) {
 				this.loadVisualisationIntoWebView(to);
 			}
 		};
@@ -231,16 +237,14 @@ public final class VisBView extends BorderPane {
 				}
 			}
 
-			this.updatePlaceholder(visBController.getVisBVisualisation(), to);
-			if (visBController.getVisBVisualisation() != null) {
-				this.updateVisualisation(to != null ? to.getCurrentState() : null);
-			}
+			this.updateView(visBController.getVisBVisualisation(), to);
 		};
 
 		// Load VisB file from machine, when window is opened and set listener on the current machine
 		this.currentProject.currentMachineProperty().addListener(machineListener);
 		this.visBController.visBVisualisationProperty().addListener(visBListener);
 		this.currentTrace.addListener(traceListener);
+		this.visualisationLoaded.addListener((o, from, to) -> this.updateView(visBController.getVisBVisualisation(), currentTrace.get()));
 
 		machineListener.changed(null, null, currentProject.getCurrentMachine());
 		traceListener.changed(null, null, currentTrace.get());
@@ -352,6 +356,8 @@ public final class VisBView extends BorderPane {
 	}
 
 	private void loadVisualisationIntoWebView(VisBVisualisation visBVisualisation) {
+		visualisationLoaded.set(false);
+
 		final Path path = visBVisualisation.getSvgPath();
 		final String baseUrl;
 		if (path.equals(VisBController.NO_PATH)) {
@@ -362,7 +368,7 @@ public final class VisBView extends BorderPane {
 		String htmlFile = generateHTMLFileWithSVG(visBVisualisation.getSvgContent(), baseUrl);
 		this.webView.getEngine().loadContent(htmlFile);
 
-		this.runWhenLoaded(() -> {
+		this.runWhenHtmlLoaded(() -> {
 			JSObject window = this.getJSWindow();
 
 			// WebView doesn't have a proper API for detecting e. g. JavaScript syntax errors,
@@ -382,7 +388,8 @@ public final class VisBView extends BorderPane {
 			for (VisBEvent event : visBVisualisation.getEvents()) {
 				window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
 			}
-			this.updateVisualisation(currentTrace.getCurrentState());
+
+			visualisationLoaded.set(true);
 		});
 	}
 
@@ -414,11 +421,13 @@ public final class VisBView extends BorderPane {
 		this.initButton.setVisible(false);
 	}
 
-	private void updatePlaceholder(VisBVisualisation visualisation, Trace trace) {
+	private void updateView(VisBVisualisation visualisation, Trace trace) {
 		if (trace == null) {
 			this.showPlaceholder(i18n.translate("common.noModelLoaded"));
-		} else if (visualisation == null || this.webView == null) {
+		} else if (visualisation == null) {
 			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
+		} else if (!visualisationLoaded.get()) {
+			this.showPlaceholder(i18n.translate("visb.placeholder.loadingVisualisation"));
 		} else if (!trace.getCurrentState().isInitialised()) {
 			this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
 			
@@ -432,14 +441,11 @@ public final class VisBView extends BorderPane {
 			this.placeholder.setVisible(false);
 			this.initButton.setVisible(false);
 			this.webView.setVisible(true);
+			this.updateVisualisation(trace.getCurrentState());
 		}
 	}
 
 	private void updateVisualisation(State state) {
-		if (state == null || !state.isInitialised()) {
-			return;
-		}
-
 		LOGGER.debug("Reloading VisB visualisation...");
 
 		try {
@@ -463,15 +469,14 @@ public final class VisBView extends BorderPane {
 	}
 
 	/**
-	 * Run the given {@link Runnable} once the {@link WebView} has finished loading.
-	 * If the {@link WebView} is already fully loaded,
-	 * the {@link Runnable} is executed immediately.
-	 * If the {@link WebView} fails to load,
-	 * the {@link Runnable} is never executed.
+	 * Run the given {@link Runnable} once the {@link WebView} has successfully finished loading.
+	 * You should use {@link #runWhenVisualisationLoaded(Runnable)} instead in most cases,
+	 * which also waits for other initialisation code to finish
+	 * (e. g. creation of dynamic SVG objects).
 	 *
 	 * @param runnable the code to run once the {@link WebView} has finished loading
 	 */
-	private void runWhenLoaded(final Runnable runnable) {
+	private void runWhenHtmlLoaded(final Runnable runnable) {
 		if (webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)) {
 			// execute code once page fully loaded
 			// https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
@@ -496,12 +501,35 @@ public final class VisBView extends BorderPane {
 		}
 	}
 
+	/**
+	 * Run the given {@link Runnable} once the visualisation has been loaded successfully.
+	 * If the visualisation is already fully loaded, the {@link Runnable} is executed immediately.
+	 * If the visualisation fails to load, the {@link Runnable} is never executed.
+	 *
+	 * @param runnable the code to run once the visualisation has finished loading
+	 */
+	private void runWhenVisualisationLoaded(Runnable runnable) {
+		if (visualisationLoaded.get()) {
+			runnable.run();
+		} else {
+			visualisationLoaded.addListener(new ChangeListener<>() {
+				@Override
+				public void changed(ObservableValue<? extends Boolean> observable, Boolean from, Boolean to) {
+					if (to) {
+						observable.removeListener(this);
+						runnable.run();
+					}
+				}
+			});
+		}
+	}
+
 	public void changeAttribute(final String id, final String attribute, final String value) {
-		this.runWhenLoaded(() -> this.getJSWindow().call("changeAttribute", id, attribute, value));
+		this.runWhenVisualisationLoaded(() -> this.getJSWindow().call("changeAttribute", id, attribute, value));
 	}
 
 	public void resetMessages() {
-		this.runWhenLoaded(() -> this.getJSWindow().call("resetMessages"));
+		this.runWhenVisualisationLoaded(() -> this.getJSWindow().call("resetMessages"));
 	}
 
 	@FXML
