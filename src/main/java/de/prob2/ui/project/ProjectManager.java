@@ -36,7 +36,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.model.SimulationModel;
-import de.prob2.ui.visb.VisBController;
+import de.prob2.ui.visb.VisBView;
 
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
@@ -350,7 +350,7 @@ public final class ProjectManager {
 
 		switch(type) {
 			case VISB:
-				injector.getInstance(VisBController.class).loadFromAbsolutePath(selected);
+				injector.getInstance(VisBView.class).loadFromAbsolutePath(selected);
 				break;
 			case SIMB:
 				injector.getInstance(SimulatorStage.class).show();

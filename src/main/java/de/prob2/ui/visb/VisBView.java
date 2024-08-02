@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.imageio.ImageIO;
 
@@ -21,7 +22,11 @@ import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ExportVisBHtmlForStates;
 import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
-import de.prob.animator.domainobjects.*;
+import de.prob.animator.domainobjects.VisBEvent;
+import de.prob.animator.domainobjects.VisBExportOptions;
+import de.prob.animator.domainobjects.VisBHover;
+import de.prob.animator.domainobjects.VisBItem;
+import de.prob.animator.domainobjects.VisBSVGObject;
 import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
@@ -33,6 +38,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -110,6 +116,7 @@ public final class VisBView extends BorderPane {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final CliTaskExecutor cliExecutor;
+	private final FxThreadExecutor fxExecutor;
 	private final FileChooserManager fileChooserManager;
 	private final VisBController visBController;
 
@@ -171,6 +178,7 @@ public final class VisBView extends BorderPane {
 		CurrentProject currentProject,
 		CurrentTrace currentTrace,
 		CliTaskExecutor cliExecutor,
+		FxThreadExecutor fxExecutor,
 		FileChooserManager fileChooserManager,
 		VisBController visBController
 	) {
@@ -181,6 +189,7 @@ public final class VisBView extends BorderPane {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
 		this.fileChooserManager = fileChooserManager;
 		this.visBController = visBController;
 
@@ -314,27 +323,47 @@ public final class VisBView extends BorderPane {
 		}
 	}
 
+	private void loadFromDefinitions(StateSpace stateSpace) {
+		cliExecutor.submit(() -> getPathFromDefinitions(stateSpace)).thenComposeAsync(path -> {
+			if (path == null) {
+				return CompletableFuture.completedFuture(null);
+			} else {
+				return visBController.loadFromAbsolutePath(path);
+			}
+		}, fxExecutor).exceptionally(exc -> {
+			Platform.runLater(() -> this.showVisualisationLoadError(exc));
+			return null;
+		});
+	}
+
+	public void loadFromAbsolutePath(Path path) {
+		try {
+			visBController.loadFromAbsolutePath(path).exceptionally(exc -> {
+				Platform.runLater(() -> this.showVisualisationLoadError(exc));
+				return null;
+			});
+		} catch (RuntimeException exc) {
+			this.showVisualisationLoadError(exc);
+		}
+	}
+
+	public void loadFromRelativePath(Path path) {
+		try {
+			visBController.loadFromRelativePath(path).exceptionally(exc -> {
+				Platform.runLater(() -> this.showVisualisationLoadError(exc));
+				return null;
+			});
+		} catch (RuntimeException exc) {
+			this.showVisualisationLoadError(exc);
+		}
+	}
+
 	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
 		Path visBVisualisation = machine.getVisBVisualisation();
 		if (visBVisualisation != null) {
-			try {
-				visBController.loadFromRelativePath(visBVisualisation);
-			} catch (IOException | RuntimeException exc) {
-				this.showVisualisationLoadError(exc);
-			}
+			this.loadFromRelativePath(visBVisualisation);
 		} else {
-			cliExecutor.execute(() -> {
-				Path visBPath = getPathFromDefinitions(stateSpace);
-				if (visBPath != null) {
-					Platform.runLater(() -> {
-						try {
-							visBController.loadFromAbsolutePath(visBPath);
-						} catch (IOException | RuntimeException exc) {
-							this.showVisualisationLoadError(exc);
-						}
-					});
-				}
-			});
+			this.loadFromDefinitions(stateSpace);
 		}
 	}
 
@@ -554,11 +583,7 @@ public final class VisBView extends BorderPane {
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
-			try {
-				visBController.loadFromAbsolutePath(path);
-			} catch (IOException | RuntimeException exc) {
-				this.showVisualisationLoadError(exc);
-			}
+			this.loadFromAbsolutePath(path);
 		}
 	}
 
@@ -602,8 +627,11 @@ public final class VisBView extends BorderPane {
 	@FXML
 	public void reloadVisualisation() {
 		try {
-			visBController.reloadVisualisation();
-		} catch (IOException | RuntimeException exc) {
+			visBController.reloadVisualisation().exceptionally(exc -> {
+				Platform.runLater(() -> this.showVisualisationLoadError(exc));
+				return null;
+			});
+		} catch (RuntimeException exc) {
 			this.showVisualisationLoadError(exc);
 		}
 	}
@@ -649,14 +677,7 @@ public final class VisBView extends BorderPane {
 
 	@FXML
 	private void loadFromDefinitions() {
-		Path path = getPathFromDefinitions(currentTrace.getStateSpace());
-		if (path != null) {
-			try {
-				visBController.loadFromAbsolutePath(path);
-			} catch (IOException | RuntimeException exc) {
-				this.showVisualisationLoadError(exc);
-			}
-		}
+		this.loadFromDefinitions(currentTrace.getStateSpace());
 	}
 
 	@FXML

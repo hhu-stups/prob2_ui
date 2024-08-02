@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -25,6 +26,8 @@ import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
@@ -51,6 +54,8 @@ public final class VisBController {
 
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
+	private final FxThreadExecutor fxExecutor;
 	private final Injector injector;
 
 	private final ObjectProperty<Path> absoluteVisBPath;
@@ -59,10 +64,12 @@ public final class VisBController {
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
 
 	@Inject
-	public VisBController(Injector injector, CurrentProject currentProject, CurrentTrace currentTrace) {
+	public VisBController(Injector injector, CurrentProject currentProject, CurrentTrace currentTrace, CliTaskExecutor cliExecutor, FxThreadExecutor fxExecutor) {
 		this.injector = injector;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
 
 		this.absoluteVisBPath = new SimpleObjectProperty<>(this, "absoluteVisBPath", null);
 		this.relativeVisBPath = new SimpleObjectProperty<>(this, "relativeVisBPath", null);
@@ -125,20 +132,20 @@ public final class VisBController {
 		this.relativeVisBPath.set(null);
 	}
 
-	public void loadFromAbsolutePath(Path path) throws IOException {
+	public CompletableFuture<VisBVisualisation> loadFromAbsolutePath(Path path) {
 		Objects.requireNonNull(path, "path");
 		Path relativePath = relativizeVisBPath(currentProject.getLocation(), path);
 		this.absoluteVisBPath.set(path);
 		this.relativeVisBPath.set(relativePath);
-		this.reloadVisualisation();
+		return this.reloadVisualisation();
 	}
 
-	public void loadFromRelativePath(Path path) throws IOException {
+	public CompletableFuture<VisBVisualisation> loadFromRelativePath(Path path) {
 		Objects.requireNonNull(path, "path");
 		Path absolutePath = resolveVisBPath(currentProject.getLocation(), path);
 		this.absoluteVisBPath.set(absolutePath);
 		this.relativeVisBPath.set(path);
-		this.reloadVisualisation();
+		return this.reloadVisualisation();
 	}
 
 	public ReadOnlyObjectProperty<VisBVisualisation> visBVisualisationProperty() {
@@ -240,7 +247,7 @@ public final class VisBController {
 		return new VisBVisualisation(svgPath, svgContent, itemsCmd.getItems(), eventsCmd.getEvents(), svgObjectsCmd.getSvgObjects());
 	}
 
-	void reloadVisualisation() throws IOException {
+	CompletableFuture<VisBVisualisation> reloadVisualisation() {
 		// Hide the previous visualisation before loading a new one.
 		// This ensures that listeners on visBVisualisation are always called
 		// and prevents an old visualisation remaining visible after an error.
@@ -248,9 +255,13 @@ public final class VisBController {
 
 		Path visBPath = this.getAbsoluteVisBPath();
 		if (visBPath == null) {
-			return;
+			return CompletableFuture.completedFuture(null);
 		}
 
-		this.visBVisualisation.set(constructVisualisationFromJSON(currentTrace.getStateSpace(), visBPath));
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		return cliExecutor.submit(() -> constructVisualisationFromJSON(stateSpace, visBPath)).thenApplyAsync(vis -> {
+			this.visBVisualisation.set(vis);
+			return vis;
+		}, fxExecutor);
 	}
 }
