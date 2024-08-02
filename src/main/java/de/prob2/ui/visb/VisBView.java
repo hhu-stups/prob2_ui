@@ -387,7 +387,7 @@ public final class VisBView extends BorderPane {
 	}
 
 	private void treatJavascriptError(WebErrorEvent event) {
-		LOGGER.debug("JavaScript ERROR: {}", event.getMessage());
+		LOGGER.info("JavaScript error: {}", event.getMessage(), event.getException());
 		alert(event.getException(), "visb.exception.header", "visb.stage.alert.webview.jsalert", event.getMessage());
 	}
 
