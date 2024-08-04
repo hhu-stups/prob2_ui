@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.simulators;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +60,9 @@ public class SimulatorCache {
 				transitionCache.put(stateID, new HashMap<>());
 			}
 			if(!transitionCache.get(stateID).containsKey(opName)) {
+				if("skip".equals(opName)) {
+					return new ArrayList<>();
+				}
 				transitionCache.get(stateID).put(opName, new HashMap<>());
 			}
 			transitionCache.get(stateID).get(opName).put(predicate, bState.findTransitions(opName, Collections.singletonList(predicate), maxTransitions));
