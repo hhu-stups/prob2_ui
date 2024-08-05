@@ -35,6 +35,8 @@ public class ExternalSimulatorExecutor {
 
 	private BufferedReader reader;
 
+	private BufferedReader errorReader;
+
 	private BufferedWriter writer;
 
 	private final ExecutorService threadService = Executors.newFixedThreadPool(1);
@@ -68,9 +70,27 @@ public class ExternalSimulatorExecutor {
 			threadService.execute(startTask);
 			ProcessBuilder pb = new ProcessBuilder("python3", pythonFile.getFileName().toString(), String.valueOf(simBPort)).directory(pythonFile.getParent().toFile());
 			this.process = pb.start();
+			this.errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+			processErrorMessages();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void processErrorMessages() {
+		StringBuilder stringBuilder = new StringBuilder();
+		try {
+			String line;
+			while ((line = errorReader.readLine()) != null) {
+				stringBuilder.append(line);
+				stringBuilder.append("\n");
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		String message = stringBuilder.toString();
+		this.close();
+		throw new ExternalSimulationRuntimeException("Error in External Simulation: " + message);
 	}
 
 	public ExternalSimulationStep execute(Trace trace) {
@@ -81,6 +101,7 @@ public class ExternalSimulatorExecutor {
 		}
 		ExternalSimulationStep step = null;
 		try {
+			processErrorMessages();
 			if(simulator.endingConditionReached(trace)) {
 				sendFinish();
 				return null;
