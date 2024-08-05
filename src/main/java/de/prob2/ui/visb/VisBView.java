@@ -45,7 +45,9 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.help.UserManualStage;
 
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -138,6 +140,7 @@ public final class VisBView extends BorderPane {
 	private final VisBConnector visBConnector;
 
 	private final ObjectProperty<VisBView.LoadingStatus> loadingStatus;
+	private final BooleanProperty updatingVisualisation;
 
 	@FXML
 	private MenuBar visbMenuBar;
@@ -215,6 +218,7 @@ public final class VisBView extends BorderPane {
 		this.visBConnector = new VisBConnector();
 
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", VisBView.LoadingStatus.NONE_LOADED);
+		this.updatingVisualisation = new SimpleBooleanProperty(this, "updatingVisualisation", false);
 
 		this.stageManager.loadFXML(this, "visb_view.fxml");
 	}
@@ -277,13 +281,8 @@ public final class VisBView extends BorderPane {
 		machineListener.changed(null, null, currentProject.getCurrentMachine());
 		traceListener.changed(null, null, currentTrace.get());
 
-		visBController.executingEventProperty().addListener((o, from, to) -> {
-			if (to) {
-				showInProgress(i18n.translate("visb.inProgress.executingEvent"));
-			} else {
-				hideInProgress();
-			}
-		});
+		visBController.executingEventProperty().addListener(o -> this.updateInProgress());
+		updatingVisualisation.addListener(o -> this.updateInProgress());
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
@@ -514,24 +513,30 @@ public final class VisBView extends BorderPane {
 	private void updateVisualisation(State state) {
 		LOGGER.debug("Reloading VisB visualisation...");
 
-		try {
+		updatingVisualisation.set(true);
+		cliExecutor.submit(() -> {
 			var getAttributesCmd = new GetVisBAttributeValuesCommand(state);
 			state.getStateSpace().execute(getAttributesCmd);
-			visBController.getAttributeValues().putAll(getAttributesCmd.getValues());
-		} catch (ProBError e) {
-			// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
-			visBController.hideVisualisation();
-			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
-			return;
-		}
+			return getAttributesCmd.getValues();
+		}).whenCompleteAsync((res, exc) -> {
+			if (exc == null) {
+				LOGGER.trace("Applying VisB attribute values...");
+				visBController.getAttributeValues().putAll(res);
+				LOGGER.trace("Done applying VisB attribute values");
 
-		try {
-			this.resetMessages();
-		} catch (JSException e) {
-			alert(e, "visb.exception.header", "visb.controller.alert.visualisation.file");
-		}
+				try {
+					this.resetMessages();
+				} catch (JSException e) {
+					alert(e, "visb.exception.header", "visb.controller.alert.visualisation.file");
+				}
+			} else {
+				// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
+				visBController.hideVisualisation();
+				alert(exc, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
+			}
 
-		LOGGER.debug("VisB visualisation reloaded");
+			LOGGER.debug("VisB visualisation reloaded");
+		}, fxExecutor).whenCompleteAsync((res, exc) -> updatingVisualisation.set(false), fxExecutor);
 	}
 
 	/**
@@ -633,6 +638,16 @@ public final class VisBView extends BorderPane {
 	private void hideInProgress() {
 		inProgressBox.setManaged(false);
 		inProgressBox.setVisible(false);
+	}
+
+	private void updateInProgress() {
+		if (visBController.isExecutingEvent()) {
+			showInProgress(i18n.translate("visb.inProgress.executingEvent"));
+		} else if (updatingVisualisation.get()) {
+			showInProgress(i18n.translate("visb.inProgress.updatingVisualisation"));
+		} else {
+			hideInProgress();
+		}
 	}
 
 	/**
