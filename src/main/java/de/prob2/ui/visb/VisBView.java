@@ -96,7 +96,15 @@ public final class VisBView extends BorderPane {
 			// probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
 			LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with shift {} cmd/meta {}", id, pageX, pageY, shiftKey, metaKey); // 1=left, 2=middle, 3=right
 			try {
-				visBController.executeEvent(id, pageX, pageY, shiftKey, metaKey);
+				if (visBController.isExecutingEvent()) {
+					LOGGER.debug("Ignoring click because another event is currently being executed");
+					return;
+				}
+
+				visBController.executeEvent(id, pageX, pageY, shiftKey, metaKey).exceptionally(exc -> {
+					stageManager.showUnhandledExceptionAlert(exc, getScene().getWindow());
+					return null;
+				});
 			} catch (Throwable t) {
 				// It seems that Java exceptions are completely ignored if they are thrown back to JavaScript,
 				// so log them manually here.

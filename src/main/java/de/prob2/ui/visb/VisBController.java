@@ -32,8 +32,12 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
@@ -61,6 +65,7 @@ public final class VisBController {
 	private final ObjectProperty<Path> relativeVisBPath;
 	private final ObjectProperty<VisBVisualisation> visBVisualisation;
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
+	private final BooleanProperty executingEvent;
 
 	@Inject
 	public VisBController(Injector injector, CurrentProject currentProject, CurrentTrace currentTrace, CliTaskExecutor cliExecutor, FxThreadExecutor fxExecutor) {
@@ -74,6 +79,7 @@ public final class VisBController {
 		this.relativeVisBPath = new SimpleObjectProperty<>(this, "relativeVisBPath", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.attributeValues = FXCollections.observableHashMap();
+		this.executingEvent = new SimpleBooleanProperty(this, "executingEvent", false);
 	}
 
 	public static Path resolveVisBPath(Path projectLocation, Path relativeVisBPath) {
@@ -159,31 +165,48 @@ public final class VisBController {
 		return this.attributeValues;
 	}
 
+	public ReadOnlyBooleanProperty executingEventProperty() {
+		return this.executingEvent;
+	}
+
+	public boolean isExecutingEvent() {
+		return this.executingEventProperty().get();
+	}
+
 	/**
 	 * This method is used by the {@link VisBView} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
-	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+	public CompletableFuture<Trace> executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+		if (this.isExecutingEvent()) {
+			throw new IllegalStateException("Cannot execute an event while another event is already being executed");
+		}
+
 		Trace trace = currentTrace.get();
 		LOGGER.debug("Finding event for id: {}", id);
 
-		VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
-		trace.getStateSpace().execute(performClickCommand);
-		List<Transition> transitions = performClickCommand.getTransitions();
+		this.executingEvent.set(true);
+		return cliExecutor.submit(() -> {
+			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
+			trace.getStateSpace().execute(performClickCommand);
+			List<Transition> transitions = performClickCommand.getTransitions();
 
-		if (transitions.isEmpty()) {
-			LOGGER.debug("No events found for id: {}", id);
-		} else {
-			LOGGER.debug("Executing event for id: {}", id);
-			Trace newTrace = trace.addTransitions(transitions);
-			LOGGER.debug("Finished executed event for id: {}", id);
-			currentTrace.set(newTrace);
-			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-			for(Transition transition : transitions) {
-				UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-				uiInteraction.addUserInteraction(realTimeSimulator, transition);
+			if (transitions.isEmpty()) {
+				LOGGER.debug("No events found for id: {}", id);
+				return null;
+			} else {
+				LOGGER.debug("Executing event for id: {}", id);
+				Trace newTrace = trace.addTransitions(transitions);
+				LOGGER.debug("Finished executed event for id: {}", id);
+				currentTrace.set(newTrace);
+				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
+				for (Transition transition : transitions) {
+					UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
+					uiInteraction.addUserInteraction(realTimeSimulator, transition);
+				}
+				return newTrace;
 			}
-		}
+		}).whenCompleteAsync((res, exc) -> this.executingEvent.set(false), fxExecutor);
 	}
 
 	CompletableFuture<Trace> executeBeforeInitialisation() {
