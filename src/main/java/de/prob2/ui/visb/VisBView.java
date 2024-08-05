@@ -596,7 +596,15 @@ public final class VisBView extends BorderPane {
 
 	@FXML
 	private void doInitialisation() {
-		visBController.executeBeforeInitialisation();
+		initButton.setVisible(false);
+		loadingProgress.setVisible(true);
+		visBController.executeBeforeInitialisation().whenComplete((res, exc) -> {
+			if (exc != null) {
+				LOGGER.error("Exception while executing initialisation from VisB view", exc);
+				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+			}
+			loadingProgress.setVisible(false);
+		});
 	}
 
 	private void showExportInProgress(boolean visible) {

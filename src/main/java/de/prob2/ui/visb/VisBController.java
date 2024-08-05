@@ -188,18 +188,22 @@ public final class VisBController {
 		}
 	}
 
-	void executeBeforeInitialisation() {
+	CompletableFuture<Trace> executeBeforeInitialisation() {
 		Trace trace = currentTrace.get();
 		Set<Transition> nextTransitions = trace.getNextTransitions();
-		if (nextTransitions.size() == 1) {
+		if (nextTransitions.size() != 1) {
+			throw new IllegalStateException("Cannot perform non-deterministic initialization from VisB");
+		}
+
+		return cliExecutor.submit(() -> {
 			Transition transition = nextTransitions.iterator().next();
-			currentTrace.set(trace.add(transition));
+			Trace newTrace = trace.add(transition);
+			currentTrace.set(newTrace);
 			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 			UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
 			uiInteraction.addUserInteraction(realTimeSimulator, transition);
-		} else {
-			LOGGER.debug("Cannot perform non-deterministic initialization from VisB");
-		}
+			return newTrace;
+		});
 	}
 
 	/**
