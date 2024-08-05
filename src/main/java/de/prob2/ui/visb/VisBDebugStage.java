@@ -95,7 +95,7 @@ public final class VisBDebugStage extends Stage {
 					String id = this.getItem().getId();
 					if (eventsById.containsKey(id)) {
 						for (VisBHover hover : eventsById.get(id).getHovers()) {
-							visBView.changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+							visBView.changeAttributeIfLoaded(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 						}
 					}
 				}
@@ -147,7 +147,7 @@ public final class VisBDebugStage extends Stage {
 			this.hoverProperty().addListener((observable, from, to) -> {
 				if (!this.isEmpty()) {
 					for (VisBHover hover : this.getItem().getHovers()) {
-						visBView.changeAttribute(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+						visBView.changeAttributeIfLoaded(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
 					}
 				}
 			});

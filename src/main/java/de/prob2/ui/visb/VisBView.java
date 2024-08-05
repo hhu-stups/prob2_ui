@@ -485,6 +485,7 @@ public final class VisBView extends BorderPane {
 				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.nonDeterministic"));
 			}
 		} else {
+			assert status == VisBView.LoadingStatus.LOADED;
 			this.placeholder.setVisible(false);
 			this.initButton.setVisible(false);
 			this.webView.setVisible(true);
@@ -572,11 +573,25 @@ public final class VisBView extends BorderPane {
 	}
 
 	public void changeAttribute(final String id, final String attribute, final String value) {
-		this.runWhenVisualisationLoaded(() -> this.getJSWindow().call("changeAttribute", id, attribute, value));
+		if (loadingStatus.get() != VisBView.LoadingStatus.LOADED) {
+			throw new IllegalStateException("Tried to call changeAttribute before VisB visualisation has been fully loaded");
+		}
+
+		this.getJSWindow().call("changeAttribute", id, attribute, value);
+	}
+
+	public void changeAttributeIfLoaded(String id, String attribute, String value) {
+		if (loadingStatus.get() == VisBView.LoadingStatus.LOADED) {
+			this.changeAttribute(id, attribute, value);
+		}
 	}
 
 	public void resetMessages() {
-		this.runWhenVisualisationLoaded(() -> this.getJSWindow().call("resetMessages"));
+		if (loadingStatus.get() != VisBView.LoadingStatus.LOADED) {
+			throw new IllegalStateException("Tried to call resetMessages before VisB visualisation has been fully loaded");
+		}
+
+		this.getJSWindow().call("resetMessages");
 	}
 
 	@FXML
