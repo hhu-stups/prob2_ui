@@ -27,13 +27,13 @@ import de.prob.animator.domainobjects.VisBExportOptions;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.animator.domainobjects.VisBSVGObject;
-import de.prob.exception.ProBError;
 import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.helpsystem.HelpSystemStage;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -134,6 +134,7 @@ public final class VisBView extends BorderPane {
 	private final CurrentTrace currentTrace;
 	private final CliTaskExecutor cliExecutor;
 	private final FxThreadExecutor fxExecutor;
+	private final DisablePropertyController disablePropertyController;
 	private final FileChooserManager fileChooserManager;
 	private final VisBController visBController;
 
@@ -201,6 +202,7 @@ public final class VisBView extends BorderPane {
 		CurrentTrace currentTrace,
 		CliTaskExecutor cliExecutor,
 		FxThreadExecutor fxExecutor,
+		DisablePropertyController disablePropertyController,
 		FileChooserManager fileChooserManager,
 		VisBController visBController
 	) {
@@ -212,6 +214,7 @@ public final class VisBView extends BorderPane {
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
 		this.fxExecutor = fxExecutor;
+		this.disablePropertyController = disablePropertyController;
 		this.fileChooserManager = fileChooserManager;
 		this.visBController = visBController;
 
@@ -283,6 +286,8 @@ public final class VisBView extends BorderPane {
 
 		visBController.executingEventProperty().addListener(o -> this.updateInProgress());
 		updatingVisualisation.addListener(o -> this.updateInProgress());
+
+		initButton.disableProperty().bind(disablePropertyController.disableProperty());
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
@@ -503,9 +508,6 @@ public final class VisBView extends BorderPane {
 			}
 		} else {
 			assert status == VisBView.LoadingStatus.LOADED;
-			this.placeholder.setVisible(false);
-			this.initButton.setVisible(false);
-			this.webView.setVisible(true);
 			this.updateVisualisation(trace.getCurrentState());
 		}
 	}
@@ -529,6 +531,10 @@ public final class VisBView extends BorderPane {
 				} catch (JSException e) {
 					alert(e, "visb.exception.header", "visb.controller.alert.visualisation.file");
 				}
+
+				this.placeholder.setVisible(false);
+				this.initButton.setVisible(false);
+				this.webView.setVisible(true);
 			} else {
 				// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
 				visBController.hideVisualisation();
@@ -619,13 +625,11 @@ public final class VisBView extends BorderPane {
 
 	@FXML
 	private void doInitialisation() {
-		initButton.setDisable(true);
 		visBController.executeBeforeInitialisation().whenComplete((res, exc) -> {
 			if (exc != null) {
 				LOGGER.error("Exception while executing initialisation from VisB view", exc);
 				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
 			}
-			initButton.setDisable(false);
 		});
 	}
 
