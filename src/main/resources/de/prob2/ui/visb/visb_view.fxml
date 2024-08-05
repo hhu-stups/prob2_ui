@@ -73,8 +73,8 @@
 				</items>
 			</MenuButton>
 			<Spacer/>
-			<HBox fx:id="inProgressBox" spacing="5" visible="false" managed="false">
-				<Label fx:id="inProgressLabel" alignment="CENTER"/>
+			<HBox fx:id="inProgressBox" spacing="5" alignment="CENTER" visible="false" managed="false">
+				<Label fx:id="inProgressLabel"/>
 				<ProgressIndicator maxHeight="20" maxWidth="20"/>
 			</HBox>
 			<Spacer/>
