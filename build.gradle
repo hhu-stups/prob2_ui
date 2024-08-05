@@ -142,7 +142,7 @@ dependencies {
 }
 
 final osArch = System.getProperty("os.arch")
-final javafxVersion = "22.0.1"
+final javafxVersion = "22.0.2"
 
 final javafxModules = [
 	"javafx.base",

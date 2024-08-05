@@ -139,7 +139,7 @@
 					and that they are running on the UI thread.
 					This *feels* like a JavaFX bug, but it's hard to say for sure.
 
-					Last tested with JavaFX 22.0.1, Java 21.0.2, macOS 14.5, and a MacBook Pro 2021 (M1 Pro processor).
+					Last tested with JavaFX 22.0.2, Java 21.0.4, macOS 14.6, and a MacBook Pro 2021 (M1 Pro processor).
 					-->
 					<ProgressBar fx:id="loadingProgress" visible="false"/>
 					<Button fx:id="initButton" styleClass="button-blue" visible="false" onAction="#doInitialisation"/>
