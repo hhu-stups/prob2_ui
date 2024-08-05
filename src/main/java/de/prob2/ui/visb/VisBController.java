@@ -21,7 +21,6 @@ import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.command.VisBPerformClickCommand;
-import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -167,7 +166,6 @@ public final class VisBController {
 	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
 		Trace trace = currentTrace.get();
 		LOGGER.debug("Finding event for id: {}", id);
-		VisBEvent event = this.getVisBVisualisation().getEventsById().get(id);
 
 		VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
 		trace.getStateSpace().execute(performClickCommand);
@@ -176,9 +174,9 @@ public final class VisBController {
 		if (transitions.isEmpty()) {
 			LOGGER.debug("No events found for id: {}", id);
 		} else {
-			LOGGER.debug("Executing event for id: {} and preds = {}", id, event.getPredicates());
+			LOGGER.debug("Executing event for id: {}", id);
 			Trace newTrace = trace.addTransitions(transitions);
-			LOGGER.debug("Finished executed event for id: {} and preds = {}", id, event.getPredicates());
+			LOGGER.debug("Finished executed event for id: {}", id);
 			currentTrace.set(newTrace);
 			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
 			for(Transition transition : transitions) {
