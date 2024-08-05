@@ -171,7 +171,9 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private MenuItem exportCurrentStateItem;
 	@FXML
-	private HBox exportInProgress;
+	private HBox inProgressBox;
+	@FXML
+	private Label inProgressLabel;
 	@FXML
 	private VBox placeholder;
 	@FXML
@@ -274,6 +276,14 @@ public final class VisBView extends BorderPane {
 
 		machineListener.changed(null, null, currentProject.getCurrentMachine());
 		traceListener.changed(null, null, currentTrace.get());
+
+		visBController.executingEventProperty().addListener((o, from, to) -> {
+			if (to) {
+				showInProgress(i18n.translate("visb.inProgress.executingEvent"));
+			} else {
+				hideInProgress();
+			}
+		});
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
@@ -604,20 +614,25 @@ public final class VisBView extends BorderPane {
 
 	@FXML
 	private void doInitialisation() {
-		initButton.setVisible(false);
-		loadingProgress.setVisible(true);
+		initButton.setDisable(true);
 		visBController.executeBeforeInitialisation().whenComplete((res, exc) -> {
 			if (exc != null) {
 				LOGGER.error("Exception while executing initialisation from VisB view", exc);
 				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
 			}
-			loadingProgress.setVisible(false);
+			initButton.setDisable(false);
 		});
 	}
 
-	private void showExportInProgress(boolean visible) {
-		exportInProgress.setManaged(visible);
-		exportInProgress.setVisible(visible);
+	private void showInProgress(String text) {
+		inProgressLabel.setText(text);
+		inProgressBox.setManaged(true);
+		inProgressBox.setVisible(true);
+	}
+
+	private void hideInProgress() {
+		inProgressBox.setManaged(false);
+		inProgressBox.setVisible(false);
 	}
 
 	/**
@@ -760,9 +775,9 @@ public final class VisBView extends BorderPane {
 				return null;
 			}
 		};
-		task.setOnRunning(r -> showExportInProgress(true));
-		task.setOnSucceeded(s -> showExportInProgress(false));
-		task.setOnFailed(f -> showExportInProgress(false));
+		task.setOnRunning(r -> showInProgress(i18n.translate("visb.inProgress.htmlExport")));
+		task.setOnSucceeded(s -> hideInProgress());
+		task.setOnFailed(f -> hideInProgress());
 		// makes UI responsive, but we can't do anything with the model during export anyway...
 		cliExecutor.execute(task);
 	}

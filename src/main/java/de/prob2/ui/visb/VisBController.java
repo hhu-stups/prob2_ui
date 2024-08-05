@@ -210,12 +210,17 @@ public final class VisBController {
 	}
 
 	CompletableFuture<Trace> executeBeforeInitialisation() {
+		if (this.isExecutingEvent()) {
+			throw new IllegalStateException("Cannot perform initialisation while another event is already being executed");
+		}
+
 		Trace trace = currentTrace.get();
 		Set<Transition> nextTransitions = trace.getNextTransitions();
 		if (nextTransitions.size() != 1) {
 			throw new IllegalStateException("Cannot perform non-deterministic initialization from VisB");
 		}
 
+		this.executingEvent.set(true);
 		return cliExecutor.submit(() -> {
 			Transition transition = nextTransitions.iterator().next();
 			Trace newTrace = trace.add(transition);
@@ -224,7 +229,7 @@ public final class VisBController {
 			UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
 			uiInteraction.addUserInteraction(realTimeSimulator, transition);
 			return newTrace;
-		});
+		}).whenCompleteAsync((res, exc) -> this.executingEvent.set(false), fxExecutor);
 	}
 
 	/**
