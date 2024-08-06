@@ -237,11 +237,22 @@ public final class StageManager {
 			final String stageId = getPersistenceID(stage);
 			if (stageId != null) {
 				BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
-				if (box != null && !Screen.getScreensForRectangle(box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()).isEmpty()) {
-					stage.setX(box.getMinX());
-					stage.setY(box.getMinY());
-					stage.setWidth(box.getWidth());
-					stage.setHeight(box.getHeight());
+				if (box != null) {
+					if (!Screen.getScreensForRectangle(box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()).isEmpty()) {
+						LOGGER.trace(
+							"Restoring saved position/size for stage with ID \"{}\": x={}, y={}, width={}, height={}",
+							stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
+						);
+						stage.setX(box.getMinX());
+						stage.setY(box.getMinY());
+						stage.setWidth(box.getWidth());
+						stage.setHeight(box.getHeight());
+					} else {
+						LOGGER.trace(
+							"Not restoring saved position/size for stage with ID \"{}\" because it's offscreen: x={}, y={}, width={}, height={}",
+							stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
+						);
+					}
 				}
 				uiState.getStages().put(stageId, new WeakReference<>(stage));
 				uiState.getSavedVisibleStages().add(stageId);
@@ -251,7 +262,12 @@ public final class StageManager {
 			String stageId = getPersistenceID(stage);
 			if (stageId != null) {
 				uiState.getSavedVisibleStages().remove(stageId);
-				uiState.getSavedStageBoxes().put(stageId, new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()));
+				BoundingBox box = new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
+				LOGGER.trace(
+					"Saving position/size for stage with ID \"{}\": x={}, y={}, width={}, height={}",
+					stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
+				);
+				uiState.getSavedStageBoxes().put(stageId, box);
 			}
 		});
 

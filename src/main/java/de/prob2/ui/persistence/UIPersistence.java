@@ -10,7 +10,6 @@ import com.google.inject.Singleton;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.menu.DetachViewStageController;
 
-import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
 import org.slf4j.Logger;
@@ -31,8 +30,8 @@ public final class UIPersistence {
 		this.injector = injector;
 	}
 	
-	private void restoreStage(final String id, BoundingBox box) {
-		LOGGER.info("Restoring stage with ID {} and bounding box {}", id, box);
+	private void restoreStage(String id) {
+		LOGGER.info("Restoring stage with ID {}", id);
 		if (id == null) {
 			LOGGER.warn("Stage identifier is null, cannot restore window");
 			return;
@@ -80,7 +79,7 @@ public final class UIPersistence {
 		// This ensures that old, no longer existing stage IDs are removed from the set.
 		uiState.getSavedVisibleStages().clear();
 		for (final String id : visibleStages) {
-			this.restoreStage(id, uiState.getSavedStageBoxes().get(id));
+			this.restoreStage(id);
 		}
 
 		detachViewStageController.doDetaching();
