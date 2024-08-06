@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -128,29 +127,45 @@ public final class MachinesTab extends Tab {
 			Machine machine = this.machineProperty.get();
 			Path location = MachinesTab.this.currentProject.get().getAbsoluteMachinePath(machine);
 
-			Path clonedLocation = location;
-			do {
-				clonedLocation = nextFreePath(clonedLocation);
-			} while (Files.exists(clonedLocation));
+			Path clonedLocation = MachinesTab.this.fileChooserManager.showSaveMachineChooser(this.getScene().getWindow());
+			if (clonedLocation == null) {
+				return;
+			}
 
-			List<Machine> machinesList = MachinesTab.this.currentProject.getMachines();
-			Set<String> machineNamesSet = machinesList.stream().map(Machine::getName).collect(Collectors.toSet());
-			String clonedName = machine.getName();
-			do {
+			// we cannot clone to the same file
+			try {
+				if (Files.isSameFile(location, clonedLocation)) {
+					LOGGER.warn("cannot clone machine file {} to the same file", location);
+					Alert alert = MachinesTab.this.stageManager.makeAlert(Alert.AlertType.ERROR, null, "project.machines.machinesTab.alerts.couldNotCloneMachine.content");
+					alert.initOwner(this.getScene().getWindow());
+					alert.show();
+					return;
+				}
+			} catch (IOException ignored) {
+			}
+
+			Set<String> machineNames = MachinesTab.this.currentProject.getMachines().stream()
+					.map(Machine::getName)
+					.collect(Collectors.toSet());
+			String clonedName = MoreFiles.getNameWithoutExtension(clonedLocation);
+			while (machineNames.contains(clonedName)) {
 				clonedName = nextNumberedName(clonedName);
-			} while (machineNamesSet.contains(clonedName));
+			}
 
 			String clonedDescription;
 			if (Strings.isNullOrEmpty(machine.getDescription())) {
-				clonedDescription = "(cloned)";
+				clonedDescription = "(cloned from " + machine.getName() + ")";
 			} else {
-				clonedDescription = machine.getDescription() + " (cloned)";
+				clonedDescription = machine.getDescription() + "\n(cloned from " + machine.getName() + ")";
 			}
 
 			try {
 				Files.copy(location, clonedLocation);
 			} catch (IOException e) {
-				LOGGER.error("could not clone machine file {}", location, e);
+				LOGGER.error("could not clone machine file {} to {}", location, clonedLocation, e);
+				Alert alert = MachinesTab.this.stageManager.makeExceptionAlert(e, "project.machines.machinesTab.alerts.couldNotCloneMachine.content");
+				alert.initOwner(this.getScene().getWindow());
+				alert.show();
 				return;
 			}
 
@@ -293,17 +308,16 @@ public final class MachinesTab extends Tab {
 		if (selected == null) {
 			return;
 		}
-		final String[] split = selected.getFileName().toString().split("\\.");
-		final String machineName = split[0];
-		final Set<String> machineNamesSet = currentProject.getMachines().stream()
+
+		final String machineName = MoreFiles.getNameWithoutExtension(selected);
+		final Set<String> machineNames = currentProject.getMachines().stream()
 			.map(Machine::getName)
 			.collect(Collectors.toSet());
-		int i = 1;
 		String nameInProject = machineName;
-		while (machineNamesSet.contains(nameInProject)) {
-			nameInProject = String.format(Locale.ROOT, "%s (%d)", machineName, i);
-			i++;
+		while (machineNames.contains(nameInProject)) {
+			nameInProject = nextNumberedName(nameInProject);
 		}
+
 		final Path relative = currentProject.getLocation().relativize(selected);
 		final Machine machine = new Machine(nameInProject, "", relative);
 
