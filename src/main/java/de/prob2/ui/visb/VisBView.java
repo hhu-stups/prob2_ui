@@ -165,9 +165,15 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private MenuItem exportCurrentStateItem;
 	@FXML
+	private MenuItem exportImageItem;
+	@FXML
 	private HBox inProgressBox;
 	@FXML
 	private Label inProgressLabel;
+	@FXML
+	private Button zoomInButton;
+	@FXML
+	private Button zoomOutButton;
 	@FXML
 	private VBox placeholder;
 	@FXML
@@ -295,6 +301,11 @@ public final class VisBView extends BorderPane {
 			this.webView = new WebView();
 			this.webView.visibleProperty().bind(this.placeholder.visibleProperty().not());
 			this.mainPane.getChildren().add(webView);
+			// Enable WebView-related actions only when the WebView is visible.
+			exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
+			zoomInButton.disableProperty().bind(this.placeholder.visibleProperty());
+			zoomOutButton.disableProperty().bind(this.placeholder.visibleProperty());
+
 			LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
 			this.webView.getEngine().setOnError(this::treatJavascriptError);

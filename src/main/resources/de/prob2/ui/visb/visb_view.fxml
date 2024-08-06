@@ -69,7 +69,8 @@
 				<items>
 					<MenuItem fx:id="exportHistoryItem" text="%visb.contextMenu.exportHistory"/>
 					<MenuItem fx:id="exportCurrentStateItem" text="%visb.contextMenu.exportCurrentState"/>
-					<MenuItem mnemonicParsing="false" text="%visb.menu.file.export" onAction="#exportImage"/>
+					<!-- The export image menu item is disabled until the WebView is created. -->
+					<MenuItem fx:id="exportImageItem" mnemonicParsing="false" text="%visb.menu.file.export" disable="true" onAction="#exportImage"/>
 				</items>
 			</MenuButton>
 			<Spacer/>
@@ -78,7 +79,8 @@
 				<ProgressIndicator maxHeight="20" maxWidth="20"/>
 			</HBox>
 			<Spacer/>
-			<Button fx:id="zoomInButton" onAction="#zoomIn">
+			<!-- The zoom buttons are disabled until the WebView is created. -->
+			<Button fx:id="zoomInButton" disable="true" onAction="#zoomIn">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_PLUS"
 								   bindableFontSize="${fontSize.fontSize * 1.5}"/>
@@ -87,7 +89,7 @@
 					<Tooltip text="%visb.menu.view.zoom.in"/>
 				</tooltip>
 			</Button>
-			<Button fx:id="zoomOutButton" onAction="#zoomOut">
+			<Button fx:id="zoomOutButton" disable="true" onAction="#zoomOut">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_MINUS"
 								   bindableFontSize="${fontSize.fontSize * 1.5}"/>
