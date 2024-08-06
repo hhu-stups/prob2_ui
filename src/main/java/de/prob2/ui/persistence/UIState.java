@@ -23,8 +23,13 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class UIState {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UIState.class);
+
 	private final ObjectProperty<Locale> localeOverride;
 	private PerspectiveKind perspectiveKind;
 	private String perspective;
@@ -122,10 +127,12 @@ public final class UIState {
 		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {
 			final Stage stage = entry.getValue().get();
 			if (stage != null) {
-				this.getSavedStageBoxes().put(
-					entry.getKey(),
-					new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight())
+				BoundingBox box = new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
+				LOGGER.trace(
+					"Saving position/size for stage with ID \"{}\": x={}, y={}, width={}, height={}",
+					entry.getKey(), box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
 				);
+				this.getSavedStageBoxes().put(entry.getKey(), box);
 			}
 		}
 	}
