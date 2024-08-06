@@ -264,6 +264,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		try {
 			startTrace.getStateSpace().startTransaction();
 			wallTime = System.currentTimeMillis();
+			injector.getInstance(SimulatorStage.class).updateSimulationStatistics(0, numberExecutions);
 			for (int i = 0; i < numberExecutions; i++) {
 				initForBlackBoxValidationIfNecessary(isBlackBox, i);
 				currentNumberStepsBeforeChecking = (int) (Math.random() * maxStepsBeforeProperty);
