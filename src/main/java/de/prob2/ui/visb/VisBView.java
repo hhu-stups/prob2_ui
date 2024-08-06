@@ -282,6 +282,7 @@ public final class VisBView extends BorderPane {
 		this.loadingStatus.addListener((o, from, to) -> this.updateView(to, currentTrace.get()));
 
 		machineListener.changed(null, null, currentProject.getCurrentMachine());
+		visBListener.changed(null, null, visBController.getVisBVisualisation());
 		traceListener.changed(null, null, currentTrace.get());
 
 		visBController.executingEventProperty().addListener(o -> this.updateInProgress());
@@ -293,31 +294,6 @@ public final class VisBView extends BorderPane {
 
 		exportHistoryItem.setOnAction(e -> performHtmlExport(false));
 		exportCurrentStateItem.setOnAction(e -> performHtmlExport(true));
-
-		Platform.runLater(() -> {
-			// WebView can only be constructed on the JavaFX application thread,
-			// but VisBView.initialize generally runs on a background thread during UI startup,
-			// so this part needs to be explicitly moved to the JavaFX application thread.
-			this.webView = new WebView();
-			this.webView.visibleProperty().bind(this.placeholder.visibleProperty().not());
-			this.mainPane.getChildren().add(webView);
-			// Enable WebView-related actions only when the WebView is visible.
-			exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
-			zoomInButton.disableProperty().bind(this.placeholder.visibleProperty());
-			zoomOutButton.disableProperty().bind(this.placeholder.visibleProperty());
-
-			LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
-			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-			this.webView.getEngine().setOnError(this::treatJavascriptError);
-			visBListener.changed(null, null, visBController.getVisBVisualisation());
-			Trace trace = currentTrace.get();
-			traceListener.changed(null, trace, trace);
-
-			// Uncomment to make WebView console errors, warnings, etc. visible in the log.
-			// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
-			// (see the corresponding commented out line in build.gradle).
-			// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
-		});
 
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
 			if (change.wasAdded()) {
@@ -425,6 +401,37 @@ public final class VisBView extends BorderPane {
 		}
 	}
 
+	/**
+	 * Create and initialize the {@link #webView} if it hasn't already been done.
+	 * This is done lazily when the first VisB visualisation is loaded to improve overall startup time,
+	 * because creating a {@link WebView} for the first time can be a bit slow:
+	 * 600 ms on a fast system (Apple M1 Pro processor) and sometimes noticeably longer on older/slower systems.
+	 */
+	private void ensureWebViewCreated() {
+		if (this.webView != null) {
+			return;
+		}
+
+		LOGGER.debug("Creating VisB WebView...");
+		this.webView = new WebView();
+		LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
+
+		this.webView.visibleProperty().bind(this.placeholder.visibleProperty().not());
+		this.mainPane.getChildren().add(webView);
+		// Enable WebView-related actions only when the WebView is visible.
+		exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
+		zoomInButton.disableProperty().bind(this.placeholder.visibleProperty());
+		zoomOutButton.disableProperty().bind(this.placeholder.visibleProperty());
+
+		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
+		this.webView.getEngine().setOnError(this::treatJavascriptError);
+
+		// Uncomment to make WebView console errors, warnings, etc. visible in the log.
+		// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
+		// (see the corresponding commented out line in build.gradle).
+		// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
+	}
+
 	private void loadVisualisationIntoWebView(VisBVisualisation visBVisualisation) {
 		final Path path = visBVisualisation.getSvgPath();
 		final String baseUrl;
@@ -435,6 +442,7 @@ public final class VisBView extends BorderPane {
 		}
 		LOGGER.trace("Generating VisB HTML code...");
 		String htmlFile = generateHTMLFileWithSVG(visBVisualisation.getSvgContent(), baseUrl);
+		this.ensureWebViewCreated();
 		LOGGER.debug("Loading generated VisB HTML code into WebView...");
 		this.webView.getEngine().loadContent(htmlFile);
 
