@@ -128,7 +128,9 @@ public final class StageManager {
 	public void loadFXML(final Object controller, final URL fxmlUrl) {
 		Objects.requireNonNull(controller, "controller");
 		Objects.requireNonNull(fxmlUrl, "fxmlUrl");
-		
+
+		LOGGER.trace("Begin loading FXML from {} with controller {}", fxmlUrl, controller.getClass());
+
 		final FXMLLoader loader = loaderProvider.get();
 		loader.setLocation(fxmlUrl);
 		loader.setRoot(controller);
@@ -146,6 +148,8 @@ public final class StageManager {
 		if (rootNode != null) {
 			fontSize.applyTo(rootNode);
 		}
+
+		LOGGER.trace("End loading FXML from {} with controller {}", fxmlUrl, controller);
 	}
 
 	/**
