@@ -60,7 +60,6 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
@@ -144,8 +143,6 @@ public final class VisBView extends BorderPane {
 	private final BooleanProperty updatingVisualisation;
 
 	@FXML
-	private MenuBar visbMenuBar;
-	@FXML
 	private Button loadVisualisationButton;
 	@FXML
 	private Button reloadVisualisationButton;
@@ -157,8 +154,6 @@ public final class VisBView extends BorderPane {
 	private MenuItem setCurrentAsDefaultItem;
 	@FXML
 	private MenuItem unsetDefaultItem;
-	@FXML
-	private Button openSimulationButton;
 	@FXML
 	private StackPane zoomingPane;
 
