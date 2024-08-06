@@ -191,6 +191,9 @@ public final class BEditorView extends BorderPane {
 				if (toShow == null) {
 					toShow = currentProject.get().getAbsoluteMachinePath(to);
 				}
+
+				// clearing selection so that later the "confirm replace"-dialog is not shown again
+				machineChoice.getSelectionModel().clearSelection();
 				machineChoice.getItems().setAll(toShow);
 				machineChoice.getSelectionModel().selectFirst();
 			}
