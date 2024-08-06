@@ -113,15 +113,18 @@ public final class UIState {
 	}
 	
 	public void stageWasShown(String stageId) {
+		LOGGER.trace("Stage with ID \"{}\" was shown", stageId);
 		this.savedVisibleStages.add(stageId);
 	}
 	
 	public void stageWasHidden(String stageId) {
+		LOGGER.trace("Stage with ID \"{}\" was hidden", stageId);
 		this.savedVisibleStages.remove(stageId);
 	}
 	
 	public void stageWasFocused(String stageId) {
 		if (this.savedVisibleStages.remove(stageId)) {
+			LOGGER.trace("Stage with ID \"{}\" was focused", stageId);
 			this.savedVisibleStages.add(stageId);
 		}
 	}
