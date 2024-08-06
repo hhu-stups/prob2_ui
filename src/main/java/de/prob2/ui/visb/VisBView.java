@@ -177,7 +177,7 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private Button initButton;
 	@FXML
-	private StackPane zoomingPane;
+	private StackPane mainPane;
 
 	private WebView webView;
 
@@ -293,7 +293,7 @@ public final class VisBView extends BorderPane {
 			// but VisBView.initialize generally runs on a background thread during UI startup,
 			// so this part needs to be explicitly moved to the JavaFX application thread.
 			this.webView = new WebView();
-			this.zoomingPane.getChildren().add(webView);
+			this.mainPane.getChildren().add(webView);
 			LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
 			this.webView.getEngine().setOnError(this::treatJavascriptError);

@@ -113,7 +113,7 @@
 		</VBox>
 	</top>
 	<center>
-		<StackPane fx:id="zoomingPane" VBox.vgrow="ALWAYS">
+		<StackPane fx:id="mainPane" VBox.vgrow="ALWAYS">
 			<VBox fx:id="placeholder" alignment="CENTER" StackPane.alignment="CENTER">
 				<padding>
 					<Insets topRightBottomLeft="4"/>
