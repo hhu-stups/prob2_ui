@@ -28,6 +28,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -236,9 +237,8 @@ public final class ProB2 extends Application {
 			});
 		});
 
-		final Thread sharedAnimatorPreloader = new Thread(() -> injector.getInstance(MachineLoader.class).startSharedAnimator(), "Shared Animator Preloader");
-		this.stopActions.add(sharedAnimatorPreloader::interrupt);
-		sharedAnimatorPreloader.start();
+		CliTaskExecutor cliExecutor = injector.getInstance(CliTaskExecutor.class);
+		cliExecutor.execute(() -> injector.getInstance(MachineLoader.class).startSharedAnimator());
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
 		ChangeListener<Object> titleUpdater = (observable, from, to) -> this.updateTitle(primaryStage);
