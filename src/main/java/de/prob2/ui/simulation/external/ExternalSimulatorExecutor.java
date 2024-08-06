@@ -6,6 +6,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.simulators.Simulator;
 
 import com.google.gson.Gson;
+import javafx.application.Platform;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -40,6 +41,8 @@ public class ExternalSimulatorExecutor {
 	private BufferedWriter writer;
 
 	private final ExecutorService threadService = Executors.newFixedThreadPool(1);
+
+	private final ExecutorService errorThreadService = Executors.newFixedThreadPool(1);
 
 	private boolean done;
 
@@ -78,19 +81,26 @@ public class ExternalSimulatorExecutor {
 	}
 
 	private void processErrorMessages() {
-		StringBuilder stringBuilder = new StringBuilder();
-		try {
-			String line;
-			while ((line = errorReader.readLine()) != null) {
-				stringBuilder.append(line);
-				stringBuilder.append("\n");
+		FutureTask<Void> task = new FutureTask<>(() -> {
+			StringBuilder stringBuilder = new StringBuilder();
+			try {
+				String line;
+				while ((line = errorReader.readLine()) != null) {
+					stringBuilder.append(line);
+					stringBuilder.append("\n");
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		String message = stringBuilder.toString();
-		this.close();
-		throw new ExternalSimulationRuntimeException("Error in External Simulation: " + message);
+			String message = stringBuilder.toString();
+			if(!message.isEmpty()) {
+				Platform.runLater(() -> {
+					throw new ExternalSimulationRuntimeException("Error in External Simulation: " + message);
+				});
+			}
+			return null;
+		});
+		errorThreadService.execute(task);
 	}
 
 	public ExternalSimulationStep execute(Trace trace) {
