@@ -38,6 +38,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -49,8 +50,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.util.Duration;
 
 import org.controlsfx.glyphfont.FontAwesome;
 import org.slf4j.Logger;
@@ -89,7 +92,14 @@ public final class MachinesTab extends Tab {
 			this.updatePreferences(currentProject.getPreferences());
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
 			statusIcon.visibleProperty().bind(machineProperty.isNotNull());
-			this.contextMenuProperty().bind(Bindings.when(machineProperty.isNull()).then((ContextMenu)null).otherwise(contextMenu));
+			this.contextMenuProperty().bind(Bindings.when(machineProperty.isNull()).then((ContextMenu) null).otherwise(contextMenu));
+
+			ObservableValue<String> description = this.machineProperty.flatMap(Machine::descriptionProperty);
+			BooleanBinding emptyDescription = Bindings.createBooleanBinding(() -> Strings.isNullOrEmpty(description.getValue()), description);
+			Tooltip tt = new Tooltip();
+			tt.textProperty().bind(description);
+			tt.setShowDelay(Duration.millis(200));
+			this.tooltipProperty().bind(Bindings.when(emptyDescription).then((Tooltip) null).otherwise(tt));
 
 			final BooleanBinding machineIsCurrent = machineProperty.isEqualTo(currentProject.currentMachineProperty());
 			showInternalItem.disableProperty().bind(machineIsCurrent.not().or(currentTrace.isNull()));
