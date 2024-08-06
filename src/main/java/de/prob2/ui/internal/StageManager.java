@@ -22,7 +22,6 @@ import de.jangassen.MenuToolkit;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
 
 import javafx.application.Platform;
@@ -57,7 +56,6 @@ import org.slf4j.LoggerFactory;
  * the UI persistence and Mac menu bar handling.
  * 
  * @see FileChooserManager
- * @see UIPersistence
  */
 @Singleton
 public final class StageManager {

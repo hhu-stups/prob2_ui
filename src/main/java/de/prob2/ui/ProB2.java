@@ -5,9 +5,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 import ch.qos.logback.classic.ClassicConstants;
 
@@ -29,7 +31,7 @@ import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
-import de.prob2.ui.persistence.UIPersistence;
+import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
@@ -260,6 +262,75 @@ public final class ProB2 extends Application {
 		return new Scene(root);
 	}
 
+	private void restoreDetachedView(String viewClassName) {
+		logger.info("Restoring detached view with class {}", viewClassName);
+
+		Class<?> clazz;
+		try {
+			clazz = Class.forName(viewClassName);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Class not found, cannot restore detached view", e);
+			return;
+		}
+
+		try {
+			injector.getInstance(MainController.class).detachView(clazz);
+		} catch (RuntimeException exc) {
+			logger.warn("Failed to restore detached view", exc);
+		}
+	}
+
+	private void restoreStage(String id) {
+		logger.info("Restoring stage with ID {}", id);
+
+		Class<?> clazz;
+		try {
+			clazz = Class.forName(id);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Class not found, cannot restore window", e);
+			return;
+		}
+
+		if (ProB2.class.equals(clazz)) {
+			// The main stage has already been shown.
+			return;
+		}
+
+		Class<? extends Stage> stageClazz;
+		try {
+			stageClazz = clazz.asSubclass(Stage.class);
+		} catch (ClassCastException e) {
+			logger.warn("Class is not a subclass of javafx.stage.Stage, cannot restore window", e);
+			return;
+		}
+
+		try {
+			Stage stage = injector.getInstance(stageClazz);
+			stage.show();
+		} catch (RuntimeException e) {
+			logger.warn("Failed to restore window", e);
+		}
+	}
+
+	public void restoreStages() {
+		UIState uiState = injector.getInstance(UIState.class);
+		Set<String> visibleStages = new HashSet<>(uiState.getSavedVisibleStages());
+		// Clear the set of visible stages and let it get re-populated as the stages are shown.
+		// This ensures that old, no longer existing stage IDs are removed from the set.
+		uiState.getSavedVisibleStages().clear();
+		for (String id : visibleStages) {
+			if (id == null) {
+				logger.warn("Stage identifier is null, cannot restore window");
+			} else if (id.startsWith(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX)) {
+				// Remove the prefix before the name of the detached class
+				String viewClassName = id.substring(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX.length());
+				this.restoreDetachedView(viewClassName);
+			} else {
+				this.restoreStage(id);
+			}
+		}
+	}
+
 	private void postStart(final Stage primaryStage, final Scene mainScene) {
 		primaryStage.hide();
 		primaryStage.setScene(mainScene);
@@ -278,9 +349,7 @@ public final class ProB2 extends Application {
 		primaryStage.toFront();
 
 		//Persistent stages are moved to front
-
-		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
-		uiPersistence.open();
+		this.restoreStages();
 
 		this.openFilesFromCommandLine(stageManager, currentProject);
 
