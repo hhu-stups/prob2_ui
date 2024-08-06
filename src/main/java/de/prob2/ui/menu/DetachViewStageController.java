@@ -38,7 +38,7 @@ import java.util.Set;
 public final class DetachViewStageController extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);
 	
-	public static final String PERSISTENCE_ID_PREFIX = DetachViewStageController.class.getName() + " DETACHED ";
+	public static final String PERSISTENCE_ID_PREFIX = "de.prob2.ui.menu.DetachViewStageController DETACHED ";
 	
 	@FXML private Button apply;
 	@FXML private Button attachAll;
