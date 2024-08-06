@@ -153,10 +153,7 @@ public final class MainController extends BorderPane {
 
 	private void addContextMenu(TitledPane tp) {
 		final MenuItem detachItem = new MenuItem(i18n.translate("common.contextMenu.detach"));
-		detachItem.setOnAction(event -> {
-			detacher.selectForDetach(tp.getContent().getClass().getName());
-			detacher.doDetaching();
-		});
+		detachItem.setOnAction(event -> detacher.detachView(tp.getContent().getClass()));
 		ContextMenu menu = new ContextMenu(detachItem);
 		// We want to show the detaching context menu only when right-clicking on the title bar,
 		// not the actual content of the TitledPane,

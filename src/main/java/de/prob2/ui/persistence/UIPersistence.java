@@ -40,7 +40,21 @@ public final class UIPersistence {
 		if (id.startsWith(DetachViewStageController.PERSISTENCE_ID_PREFIX)) {
 			// Remove the prefix before the name of the detached class
 			final String toDetach = id.substring(DetachViewStageController.PERSISTENCE_ID_PREFIX.length());
-			detachViewStageController.selectForDetach(toDetach);
+
+			Class<?> clazz;
+			try {
+				clazz = Class.forName(toDetach);
+			} catch (ClassNotFoundException e) {
+				LOGGER.warn("Class not found, cannot restore detached view", e);
+				return;
+			}
+
+			try {
+				detachViewStageController.detachView(clazz);
+			} catch (RuntimeException exc) {
+				LOGGER.warn("Failed to restore detached view", exc);
+			}
+
 			return;
 		}
 		
@@ -81,7 +95,5 @@ public final class UIPersistence {
 		for (final String id : visibleStages) {
 			this.restoreStage(id);
 		}
-
-		detachViewStageController.doDetaching();
 	}
 }

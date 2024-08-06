@@ -45,7 +45,7 @@
 							</VBox.margin>
 							<Button fx:id="apply" onAction="#apply" text="%common.buttons.apply"/>
 							<Spacer/>
-							<Button fx:id="attachAll" onAction="#attachAllViews" text="%menu.detachView.stage.attachAll"/>
+							<Button fx:id="attachAll" onAction="#doAttachAll" text="%menu.detachView.stage.attachAll"/>
 						</HBox>
 				</VBox>
 			</AnchorPane>

@@ -34,20 +34,6 @@ final class DetachedViewStage extends Stage {
 		this.setHeight(this.getMinHeight());
 		this.setX((Screen.getPrimary().getVisualBounds().getWidth()-this.getWidth())/2);
 		this.setY((Screen.getPrimary().getVisualBounds().getHeight()-this.getHeight())/2);
-		
-		this.showingProperty().addListener((o, from, to) -> {
-			if (!to) {
-				this.getSourceAccordion().setVisible(true);
-				this.getSourceAccordion().setMaxWidth(Double.POSITIVE_INFINITY);
-				this.getSourceAccordion().setMaxHeight(Double.POSITIVE_INFINITY);
-				if (this.getSourceAccordion().getExpandedPane() != null) {
-					this.getSourceAccordion().getExpandedPane().setExpanded(false);
-				}
-				this.getSourceAccordion().setExpandedPane(this.getSourceTitledPane());
-				this.getSourceTitledPane().setContent(this.getDetachedView());
-				this.getSourceAccordion().getPanes().add(this.getSourceTitledPane());
-			}
-		});
 	}
 	
 	Node getDetachedView() {
@@ -62,4 +48,15 @@ final class DetachedViewStage extends Stage {
 		return this.sourceAccordion;
 	}
 	
+	void reattachView() {
+		this.getSourceAccordion().setVisible(true);
+		this.getSourceAccordion().setMaxWidth(Double.POSITIVE_INFINITY);
+		this.getSourceAccordion().setMaxHeight(Double.POSITIVE_INFINITY);
+		if (this.getSourceAccordion().getExpandedPane() != null) {
+			this.getSourceAccordion().getExpandedPane().setExpanded(false);
+		}
+		this.getSourceAccordion().setExpandedPane(this.getSourceTitledPane());
+		this.getSourceTitledPane().setContent(this.getDetachedView());
+		this.getSourceAccordion().getPanes().add(this.getSourceTitledPane());
+	}
 }
