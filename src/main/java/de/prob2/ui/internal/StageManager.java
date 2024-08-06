@@ -62,7 +62,7 @@ import org.slf4j.LoggerFactory;
 @Singleton
 public final class StageManager {
 	private enum PropertiesKey {
-		PERSISTENCE_ID, USE_GLOBAL_MAC_MENU_BAR
+		USE_GLOBAL_MAC_MENU_BAR
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
@@ -213,29 +213,22 @@ public final class StageManager {
 	 * {@link Stage#setScene(Scene) set}.
 	 *
 	 * @param stage the stage to register
-	 * @param persistenceID a string identifying the stage for UI persistence,
+	 * @param stageId a string identifying the stage for UI persistence,
 	 * or {@code null} if the stage should not be persisted
 	 */
-	public void register(final Stage stage, final String persistenceID) {
+	public void register(final Stage stage, final String stageId) {
 		this.registered.put(stage, null);
-		setPersistenceID(stage, persistenceID);
 		stage.getProperties().putIfAbsent(PropertiesKey.USE_GLOBAL_MAC_MENU_BAR, true);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
 
-		stage.focusedProperty().addListener(e -> {
-			final String stageId = getPersistenceID(stage);
-			if (stageId != null) {
-				uiState.moveStageToEnd(stageId);
-			}
-		});
+		if (stageId != null) {
+			stage.focusedProperty().addListener(e -> uiState.moveStageToEnd(stageId));
 
-		// Use the onShowing/onHiding event handlers instead of a listener on the showing property
-		// because the event handlers are called earlier than the listeners.
-		// This avoids the windows visibly jumping around when their position is being restored.
-		stage.setOnShowing(event -> {
-			final String stageId = getPersistenceID(stage);
-			if (stageId != null) {
+			// Use the onShowing/onHiding event handlers instead of a listener on the showing property
+			// because the event handlers are called earlier than the listeners.
+			// This avoids the windows visibly jumping around when their position is being restored.
+			stage.setOnShowing(event -> {
 				BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
 				if (box != null) {
 					if (!Screen.getScreensForRectangle(box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()).isEmpty()) {
@@ -256,11 +249,8 @@ public final class StageManager {
 				}
 				uiState.getStages().put(stageId, new WeakReference<>(stage));
 				uiState.getSavedVisibleStages().add(stageId);
-			}
-		});
-		stage.setOnHiding(event -> {
-			String stageId = getPersistenceID(stage);
-			if (stageId != null) {
+			});
+			stage.setOnHiding(event -> {
 				uiState.getSavedVisibleStages().remove(stageId);
 				BoundingBox box = new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
 				LOGGER.trace(
@@ -268,8 +258,8 @@ public final class StageManager {
 					stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
 				);
 				uiState.getSavedStageBoxes().put(stageId, box);
-			}
-		});
+			});
+		}
 
 		stage.focusedProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -456,35 +446,6 @@ public final class StageManager {
 	 */
 	public Set<Stage> getRegistered() {
 		return Collections.unmodifiableSet(this.registered.keySet());
-	}
-
-	/**
-	 * Get the persistence ID of the given stage.
-	 * 
-	 * @param stage the stage for which to get the persistence ID
-	 * @return the stage's persistence ID, or {@code null} if none
-	 */
-	public static String getPersistenceID(final Stage stage) {
-		Objects.requireNonNull(stage);
-
-		return (String) stage.getProperties().get(PropertiesKey.PERSISTENCE_ID);
-	}
-
-	/**
-	 * Set the given stage's persistence ID.
-	 * 
-	 * @param stage the stage for which to set the persistence ID
-	 * @param persistenceID the persistence ID to set, or {@code null} to
-	 * remove it
-	 */
-	public static void setPersistenceID(final Stage stage, final String persistenceID) {
-		Objects.requireNonNull(stage);
-
-		if (persistenceID == null) {
-			stage.getProperties().remove(PropertiesKey.PERSISTENCE_ID);
-		} else {
-			stage.getProperties().put(PropertiesKey.PERSISTENCE_ID, persistenceID);
-		}
 	}
 
 	/**
