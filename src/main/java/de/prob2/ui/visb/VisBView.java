@@ -155,11 +155,6 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private MenuItem unsetDefaultItem;
 	@FXML
-	private StackPane zoomingPane;
-
-	private WebView webView;
-
-	@FXML
 	private MenuButton saveTraceButton;
 	@FXML
 	private MenuItem saveTraceAndAddTestsItem;
@@ -181,6 +176,10 @@ public final class VisBView extends BorderPane {
 	private Label placeholderLabel;
 	@FXML
 	private Button initButton;
+	@FXML
+	private StackPane zoomingPane;
+
+	private WebView webView;
 
 	/**
 	 * The public constructor of this class is injected with the ProB2-UI injector.
