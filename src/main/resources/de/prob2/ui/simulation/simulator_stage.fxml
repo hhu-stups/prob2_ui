@@ -25,6 +25,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
+<?import javafx.scene.control.ProgressBar?>
 <fx:root title="Simulator" type="SimulatorStage" width="1200" height="500" minHeight="500" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -161,7 +162,10 @@
 										<Tooltip text="%simulation.tooltips.addSimulation" />
 									</tooltip>
 								</Button>
-								<Label fx:id="lbSimulationStats" text=""/>
+								<HBox alignment="CENTER_LEFT" spacing="5.0">
+									<ProgressBar fx:id="progressBar" visible="false" prefHeight="20.0" progress="0.0"/>
+									<Label fx:id="lbSimulationStats"/>
+								</HBox>
 							</HBox>
 							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
 								<TableView fx:id="simulationItems">
