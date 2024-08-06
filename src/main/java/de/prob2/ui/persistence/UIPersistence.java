@@ -30,33 +30,26 @@ public final class UIPersistence {
 		this.injector = injector;
 	}
 	
+	private void restoreDetachedView(String viewClassName) {
+		LOGGER.info("Restoring detached view with class {}", viewClassName);
+		
+		Class<?> clazz;
+		try {
+			clazz = Class.forName(viewClassName);
+		} catch (ClassNotFoundException e) {
+			LOGGER.warn("Class not found, cannot restore detached view", e);
+			return;
+		}
+		
+		try {
+			mainController.detachView(clazz);
+		} catch (RuntimeException exc) {
+			LOGGER.warn("Failed to restore detached view", exc);
+		}
+	}
+	
 	private void restoreStage(String id) {
 		LOGGER.info("Restoring stage with ID {}", id);
-		if (id == null) {
-			LOGGER.warn("Stage identifier is null, cannot restore window");
-			return;
-		}
-
-		if (id.startsWith(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX)) {
-			// Remove the prefix before the name of the detached class
-			final String toDetach = id.substring(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX.length());
-
-			Class<?> clazz;
-			try {
-				clazz = Class.forName(toDetach);
-			} catch (ClassNotFoundException e) {
-				LOGGER.warn("Class not found, cannot restore detached view", e);
-				return;
-			}
-
-			try {
-				mainController.detachView(clazz);
-			} catch (RuntimeException exc) {
-				LOGGER.warn("Failed to restore detached view", exc);
-			}
-
-			return;
-		}
 		
 		Class<?> clazz;
 		try {
@@ -93,7 +86,15 @@ public final class UIPersistence {
 		// This ensures that old, no longer existing stage IDs are removed from the set.
 		uiState.getSavedVisibleStages().clear();
 		for (final String id : visibleStages) {
-			this.restoreStage(id);
+			if (id == null) {
+				LOGGER.warn("Stage identifier is null, cannot restore window");
+			} else if (id.startsWith(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX)) {
+				// Remove the prefix before the name of the detached class
+				String viewClassName = id.substring(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX.length());
+				this.restoreDetachedView(viewClassName);
+			} else {
+				this.restoreStage(id);
+			}
 		}
 	}
 }
