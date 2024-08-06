@@ -52,6 +52,7 @@ import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
+import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDiagramItem;
@@ -292,6 +293,9 @@ public final class SimulatorStage extends Stage {
 
 	@FXML
 	private MenuItem advancedItem;
+
+	@FXML
+	private Label lbSimulationStats;
 
 	private final StageManager stageManager;
 
@@ -864,4 +868,13 @@ public final class SimulatorStage extends Stage {
 			injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
 		}
 	}
+
+	public void updateSimulationStatistics(int numberExecuted, int numberTotal) {
+		Platform.runLater(() -> lbSimulationStats.setText(String.format("%s/%s", numberExecuted, numberTotal)));
+	}
+
+	public void resetSimulationStatistics() {
+		Platform.runLater(() -> lbSimulationStats.setText(""));
+	}
+
 }

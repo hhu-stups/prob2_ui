@@ -277,6 +277,11 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 				CheckingStatus status = simulationPropertyChecker.checkTrace(newTrace, time.get());
 				resultingStatus.add(status);
 				collectOperationStatistics(newTrace);
+				if(i == numberExecutions - 1) {
+					injector.getInstance(SimulatorStage.class).resetSimulationStatistics();
+				} else {
+					injector.getInstance(SimulatorStage.class).updateSimulationStatistics(i + 1, numberExecutions);
+				}
 				resetSimulator();
 			}
 			simulationPropertyChecker.check();

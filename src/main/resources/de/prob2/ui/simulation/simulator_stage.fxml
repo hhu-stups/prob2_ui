@@ -161,6 +161,7 @@
 										<Tooltip text="%simulation.tooltips.addSimulation" />
 									</tooltip>
 								</Button>
+								<Label fx:id="lbSimulationStats" text=""/>
 							</HBox>
 							<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE" VBox.vgrow="ALWAYS">
 								<TableView fx:id="simulationItems">
