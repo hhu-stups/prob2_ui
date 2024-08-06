@@ -5,11 +5,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 
 import ch.qos.logback.classic.ClassicConstants;
 
@@ -310,7 +308,7 @@ public final class ProB2 extends Application {
 
 	public void restoreStages(Stage primaryStage) {
 		UIState uiState = injector.getInstance(UIState.class);
-		Set<String> visibleStages = new HashSet<>(uiState.getSavedVisibleStages());
+		var visibleStages = new ArrayList<>(uiState.getSavedVisibleStages());
 		// Clear the set of visible stages and let it get re-populated as the stages are shown.
 		// This ensures that old, no longer existing stage IDs are removed from the set.
 		uiState.resetVisibleStages();
