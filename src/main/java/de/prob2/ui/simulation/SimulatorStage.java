@@ -82,6 +82,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -296,6 +297,9 @@ public final class SimulatorStage extends Stage {
 
 	@FXML
 	private Label lbSimulationStats;
+
+	@FXML
+	private ProgressBar progressBar;
 
 	private final StageManager stageManager;
 
@@ -870,11 +874,19 @@ public final class SimulatorStage extends Stage {
 	}
 
 	public void updateSimulationStatistics(int numberExecuted, int numberTotal) {
-		Platform.runLater(() -> lbSimulationStats.setText(String.format("%s/%s", numberExecuted, numberTotal)));
+		Platform.runLater(() -> {
+			progressBar.setVisible(true);
+			progressBar.setProgress((double) numberExecuted / (double) numberTotal);
+			lbSimulationStats.setText(String.format("%s/%s", numberExecuted, numberTotal));
+		});
 	}
 
 	public void resetSimulationStatistics() {
-		Platform.runLater(() -> lbSimulationStats.setText(""));
+		Platform.runLater(() -> {
+			progressBar.setVisible(false);
+			progressBar.setProgress(0);
+			lbSimulationStats.setText("");
+		});
 	}
 
 }
