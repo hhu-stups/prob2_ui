@@ -119,8 +119,9 @@ public final class UIState {
 	}
 	
 	public void moveStageToEnd(String id) {
-		savedVisibleStages.remove(id);
-		savedVisibleStages.add(id);
+		if (savedVisibleStages.remove(id)) {
+			savedVisibleStages.add(id);
+		}
 	}
 	
 	public void updateSavedStageBoxes() {
