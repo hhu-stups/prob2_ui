@@ -2,7 +2,6 @@ package de.prob2.ui.internal;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -223,7 +222,7 @@ public final class StageManager {
 		if (stageId != null) {
 			stage.focusedProperty().addListener((o, from, to) -> {
 				if (to) {
-					uiState.moveStageToEnd(stageId);
+					uiState.stageWasFocused(stageId);
 				}
 			});
 
@@ -249,17 +248,12 @@ public final class StageManager {
 						);
 					}
 				}
-				uiState.getStages().put(stageId, new WeakReference<>(stage));
-				uiState.getSavedVisibleStages().add(stageId);
+				uiState.addStage(stage, stageId);
+				uiState.stageWasShown(stageId);
 			});
 			stage.setOnHiding(event -> {
-				uiState.getSavedVisibleStages().remove(stageId);
-				BoundingBox box = new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
-				LOGGER.trace(
-					"Saving position/size for stage with ID \"{}\": x={}, y={}, width={}, height={}",
-					stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
-				);
-				uiState.getSavedStageBoxes().put(stageId, box);
+				uiState.stageWasHidden(stageId);
+				uiState.saveStageBox(stage, stageId);
 			});
 		}
 

@@ -313,7 +313,7 @@ public final class ProB2 extends Application {
 		Set<String> visibleStages = new HashSet<>(uiState.getSavedVisibleStages());
 		// Clear the set of visible stages and let it get re-populated as the stages are shown.
 		// This ensures that old, no longer existing stage IDs are removed from the set.
-		uiState.getSavedVisibleStages().clear();
+		uiState.resetVisibleStages();
 		for (String id : visibleStages) {
 			if (id == null) {
 				logger.warn("Stage identifier is null, cannot restore window");

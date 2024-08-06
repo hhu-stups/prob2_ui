@@ -1,7 +1,9 @@
 package de.prob2.ui.persistence;
 
 import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -57,11 +59,11 @@ public final class UIState {
 				}
 				
 				if (configData.visibleStages != null) {
-					getSavedVisibleStages().addAll(configData.visibleStages);
+					savedVisibleStages.addAll(configData.visibleStages);
 				}
 				
 				if (configData.stageBoxes != null) {
-					getSavedStageBoxes().putAll(configData.stageBoxes);
+					savedStageBoxes.putAll(configData.stageBoxes);
 				}
 			}
 			
@@ -107,33 +109,53 @@ public final class UIState {
 	}
 	
 	public Set<String> getSavedVisibleStages() {
-		return this.savedVisibleStages;
+		return Collections.unmodifiableSet(this.savedVisibleStages);
+	}
+	
+	public void stageWasShown(String stageId) {
+		this.savedVisibleStages.add(stageId);
+	}
+	
+	public void stageWasHidden(String stageId) {
+		this.savedVisibleStages.remove(stageId);
+	}
+	
+	public void stageWasFocused(String stageId) {
+		if (this.savedVisibleStages.remove(stageId)) {
+			this.savedVisibleStages.add(stageId);
+		}
+	}
+	
+	public void resetVisibleStages() {
+		this.savedVisibleStages.clear();
 	}
 	
 	public Map<String, BoundingBox> getSavedStageBoxes() {
-		return this.savedStageBoxes;
+		return Collections.unmodifiableMap(this.savedStageBoxes);
+	}
+	
+	public void saveStageBox(Stage stage, String stageId) {
+		BoundingBox box = new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
+		LOGGER.trace(
+			"Saving position/size for stage with ID \"{}\": x={}, y={}, width={}, height={}",
+			stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
+		);
+		this.savedStageBoxes.put(stageId, box);
 	}
 	
 	public Map<String, Reference<Stage>> getStages() {
-		return this.stages;
+		return Collections.unmodifiableMap(this.stages);
 	}
 	
-	public void moveStageToEnd(String id) {
-		if (savedVisibleStages.remove(id)) {
-			savedVisibleStages.add(id);
-		}
+	public void addStage(Stage stage, String stageId) {
+		this.stages.put(stageId, new WeakReference<>(stage));
 	}
 	
 	public void updateSavedStageBoxes() {
 		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {
 			final Stage stage = entry.getValue().get();
 			if (stage != null) {
-				BoundingBox box = new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
-				LOGGER.trace(
-					"Saving position/size for stage with ID \"{}\": x={}, y={}, width={}, height={}",
-					entry.getKey(), box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
-				);
-				this.getSavedStageBoxes().put(entry.getKey(), box);
+				this.saveStageBox(stage, entry.getKey());
 			}
 		}
 	}
