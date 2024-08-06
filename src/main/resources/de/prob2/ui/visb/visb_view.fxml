@@ -113,8 +113,8 @@
 		</VBox>
 	</top>
 	<center>
-		<StackPane fx:id="mainPane" VBox.vgrow="ALWAYS">
-			<VBox fx:id="placeholder" alignment="CENTER" StackPane.alignment="CENTER">
+		<StackPane fx:id="mainPane">
+			<VBox fx:id="placeholder" alignment="CENTER">
 				<padding>
 					<Insets topRightBottomLeft="4"/>
 				</padding>
