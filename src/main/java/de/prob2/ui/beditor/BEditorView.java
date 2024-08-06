@@ -114,7 +114,7 @@ public final class BEditorView extends BorderPane {
 
 	private Thread watchThread;
 	private boolean saving;
-	private boolean updatingIncludedMachines;
+	private boolean ignoreMachineChoiceSelectionChange;
 
 	@Inject
 	private BEditorView(
@@ -233,9 +233,22 @@ public final class BEditorView extends BorderPane {
 		currentProject.addListener((observable, from, to) -> resetWatching());
 
 		machineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if (this.updatingIncludedMachines || to == null) {
+			if (this.ignoreMachineChoiceSelectionChange || to == null) {
 				return;
 			}
+
+			if (from != null && !this.currentProject.confirmMachineReplace()) {
+				Platform.runLater(() -> {
+					this.ignoreMachineChoiceSelectionChange = true;
+					try {
+						this.machineChoice.getSelectionModel().select(from);
+					} finally {
+						this.ignoreMachineChoiceSelectionChange = false;
+					}
+				});
+				return;
+			}
+
 			switchMachine(to);
 		});
 
@@ -352,7 +365,7 @@ public final class BEditorView extends BorderPane {
 	}
 
 	private void updateIncludedMachines() {
-		this.updatingIncludedMachines = true;
+		this.ignoreMachineChoiceSelectionChange = true;
 		try {
 			Path prevSelected = this.machineChoice.getSelectionModel().getSelectedItem();
 			machineChoice.getItems().setAll(currentTrace.getModel().getAllFiles());
@@ -362,7 +375,7 @@ public final class BEditorView extends BorderPane {
 				return;
 			}
 		} finally {
-			this.updatingIncludedMachines = false;
+			this.ignoreMachineChoiceSelectionChange = false;
 		}
 
 		Path cachedSelected = currentProject.getCurrentMachine().getCachedEditorState().getSelectedMachine();
