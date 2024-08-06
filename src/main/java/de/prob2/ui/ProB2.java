@@ -450,6 +450,7 @@ public final class ProB2 extends Application {
 	}
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
+		UIState uiState = injector.getInstance(UIState.class);
 		if (!currentProject.isSaved()) {
 			ButtonType save = new ButtonType(i18n.translate("common.buttons.save"), ButtonBar.ButtonData.YES);
 			ButtonType doNotSave = new ButtonType(i18n.translate("common.buttons.doNotSave"), ButtonBar.ButtonData.NO);
@@ -465,14 +466,20 @@ public final class ProB2 extends Application {
 				event.consume();
 			} else if (result.get().equals(save)) {
 				injector.getInstance(ProjectManager.class).saveCurrentProject();
+				uiState.prepareForExit();
 				Platform.exit();
 			} else if (result.get().equals(doNotSave)) {
+				uiState.prepareForExit();
 				Platform.exit();
 			} else {
 				throw new AssertionError("Unhandled button: " + result);
 			}
 		} else {
+			// FIXME Is this supposed to be only in this branch?
+			// Would this perhaps be better placed in a StopActions callback?
 			injector.getInstance(Scheduler.class).stopTimer();
+
+			uiState.prepareForExit();
 			Platform.exit();
 		}
 	}

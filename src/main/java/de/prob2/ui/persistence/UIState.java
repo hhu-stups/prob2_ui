@@ -19,6 +19,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.PerspectiveKind;
+import de.prob2.ui.internal.StopActions;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -35,15 +36,17 @@ public final class UIState {
 	private final ObjectProperty<Locale> localeOverride;
 	private PerspectiveKind perspectiveKind;
 	private String perspective;
+	private boolean exiting;
 	private final Set<String> savedVisibleStages;
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
 	
 	@Inject
-	public UIState(final Config config) {
+	public UIState(Config config, StopActions stopActions) {
 		this.localeOverride = new SimpleObjectProperty<>(this, "localeOverride", null);
 		this.perspectiveKind = PerspectiveKind.PRESET;
 		this.perspective = MainController.DEFAULT_PERSPECTIVE;
+		this.exiting = false;
 		this.savedVisibleStages = new LinkedHashSet<>();
 		this.savedStageBoxes = new LinkedHashMap<>();
 		this.stages = new LinkedHashMap<>();
@@ -78,6 +81,8 @@ public final class UIState {
 				configData.stageBoxes = new HashMap<>(getSavedStageBoxes());
 			}
 		});
+		
+		stopActions.add(this::prepareForExit);
 	}
 	
 	public ObjectProperty<Locale> localeOverrideProperty() {
@@ -108,21 +113,44 @@ public final class UIState {
 		this.perspective = perspective;
 	}
 	
+	/**
+	 * Ignore all stage show/hide/focus events from this point on.
+	 * Called when the UI is preparing to exit,
+	 * because the exiting process often closes stages in an unpredictable order
+	 * or changes the focus even though the user hasn't actively switched windows.
+	 */
+	public void prepareForExit() {
+		LOGGER.trace("Preparing to exit - ignoring all stage show/hide/focus events from now on");
+		this.exiting = true;
+	}
+	
 	public Set<String> getSavedVisibleStages() {
 		return Collections.unmodifiableSet(this.savedVisibleStages);
 	}
 	
 	public void stageWasShown(String stageId) {
+		if (this.exiting) {
+			return;
+		}
+		
 		LOGGER.trace("Stage with ID \"{}\" was shown", stageId);
 		this.savedVisibleStages.add(stageId);
 	}
 	
 	public void stageWasHidden(String stageId) {
+		if (this.exiting) {
+			return;
+		}
+		
 		LOGGER.trace("Stage with ID \"{}\" was hidden", stageId);
 		this.savedVisibleStages.remove(stageId);
 	}
 	
 	public void stageWasFocused(String stageId) {
+		if (this.exiting) {
+			return;
+		}
+		
 		if (this.savedVisibleStages.remove(stageId)) {
 			LOGGER.trace("Stage with ID \"{}\" was focused", stageId);
 			this.savedVisibleStages.add(stageId);
