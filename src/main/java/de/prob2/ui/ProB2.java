@@ -66,6 +66,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class ProB2 extends Application {
+	public static final String MAIN_STAGE_PERSISTENCE_ID = ProB2.class.getName();
 	public static final String BUG_REPORT_URL = "https://github.com/hhu-stups/prob-issues/issues/new/choose";
 
 	// This logger needs to be non-static,
@@ -291,11 +292,6 @@ public final class ProB2 extends Application {
 			return;
 		}
 
-		if (ProB2.class.equals(clazz)) {
-			// The main stage has already been shown.
-			return;
-		}
-
 		Class<? extends Stage> stageClazz;
 		try {
 			stageClazz = clazz.asSubclass(Stage.class);
@@ -312,7 +308,7 @@ public final class ProB2 extends Application {
 		}
 	}
 
-	public void restoreStages() {
+	public void restoreStages(Stage primaryStage) {
 		UIState uiState = injector.getInstance(UIState.class);
 		Set<String> visibleStages = new HashSet<>(uiState.getSavedVisibleStages());
 		// Clear the set of visible stages and let it get re-populated as the stages are shown.
@@ -325,6 +321,9 @@ public final class ProB2 extends Application {
 				// Remove the prefix before the name of the detached class
 				String viewClassName = id.substring(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX.length());
 				this.restoreDetachedView(viewClassName);
+			} else if (MAIN_STAGE_PERSISTENCE_ID.equals(id)) {
+				logger.info("Restoring main stage");
+				primaryStage.show();
 			} else {
 				this.restoreStage(id);
 			}
@@ -341,15 +340,12 @@ public final class ProB2 extends Application {
 
 		final StageManager stageManager = injector.getInstance(StageManager.class);
 		final CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		stageManager.registerMainStage(primaryStage, this.getClass().getName());
+		stageManager.registerMainStage(primaryStage, MAIN_STAGE_PERSISTENCE_ID);
 
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
+		this.restoreStages(primaryStage);
+		// Ensure that the main window is always shown, even if it wasn't listed in the saved visible stages.
 		primaryStage.show();
-
-		primaryStage.toFront();
-
-		//Persistent stages are moved to front
-		this.restoreStages();
 
 		this.openFilesFromCommandLine(stageManager, currentProject);
 
