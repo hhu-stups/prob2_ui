@@ -293,6 +293,7 @@ public final class VisBView extends BorderPane {
 			// but VisBView.initialize generally runs on a background thread during UI startup,
 			// so this part needs to be explicitly moved to the JavaFX application thread.
 			this.webView = new WebView();
+			this.webView.visibleProperty().bind(this.placeholder.visibleProperty().not());
 			this.mainPane.getChildren().add(webView);
 			LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
 			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
@@ -471,12 +472,6 @@ public final class VisBView extends BorderPane {
 	}
 
 	private void showPlaceholder(String placeholderLabelText) {
-		if (this.webView != null) {
-			// The web view might not be loaded yet...
-			// (see the Platform.runLater block in initialize)
-			this.webView.setVisible(false);
-		}
-
 		this.placeholder.setVisible(true);
 		this.placeholderLabel.setText(placeholderLabelText);
 		this.loadingProgress.setVisible(false);
@@ -528,7 +523,6 @@ public final class VisBView extends BorderPane {
 
 				this.placeholder.setVisible(false);
 				this.initButton.setVisible(false);
-				this.webView.setVisible(true);
 			} else {
 				// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
 				visBController.hideVisualisation();
