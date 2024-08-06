@@ -1,13 +1,9 @@
 package de.prob2.ui.menu;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
 
 import de.prob2.ui.MainController;
 import de.prob2.ui.animation.AnimationView;
@@ -21,24 +17,12 @@ import de.prob2.ui.verifications.VerificationsView;
 import de.prob2.ui.visualisation.VisualisationsView;
 
 import javafx.fxml.FXML;
-import javafx.scene.Node;
-import javafx.scene.control.Accordion;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TitledPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-@Singleton
 public final class DetachViewStageController extends Stage {
-	private static final Logger LOGGER = LoggerFactory.getLogger(DetachViewStageController.class);
-	
-	public static final String PERSISTENCE_ID_PREFIX = "de.prob2.ui.menu.DetachViewStageController DETACHED ";
-	
 	@FXML private Button apply;
 	@FXML private Button attachAll;
 	@FXML private CheckBox detachOperations;
@@ -50,19 +34,16 @@ public final class DetachViewStageController extends Stage {
 	@FXML private CheckBox detachConsole;
 	@FXML private CheckBox detachVisualisations;
 
-	private final Injector injector;
-	private final StageManager stageManager;
+	private final MainController mainController;
 	
 	private final Map<Class<?>, CheckBox> checkBoxMap;
-	private final Map<Class<?>, DetachedViewStage> wrapperStages;
 	
 	@Inject
-	private DetachViewStageController(Injector injector, StageManager stageManager) {
-		this.injector = injector;
-		this.stageManager = stageManager;
+	private DetachViewStageController(StageManager stageManager, MainController mainController) {
+		this.mainController = mainController;
 		
 		checkBoxMap = new HashMap<>();
-		wrapperStages = new HashMap<>();
+		
 		stageManager.loadFXML(this, "detachedPerspectivesChoice.fxml", null);
 		this.initModality(Modality.APPLICATION_MODAL);
 	}
@@ -82,7 +63,9 @@ public final class DetachViewStageController extends Stage {
 			checkBox.selectedProperty().addListener((obs, oldVal, newVal) -> apply.setDisable(false));
 		}
 		this.setOnShowing(e -> {
-			attachAll.setDisable(wrapperStages.isEmpty());
+			var detachedViews = mainController.getDetachedViews();
+			checkBoxMap.forEach((clazz, checkBox) -> checkBox.setSelected(detachedViews.contains(clazz)));
+			attachAll.setDisable(detachedViews.isEmpty());
 			apply.setDisable(true);
 		});
 	}
@@ -91,9 +74,9 @@ public final class DetachViewStageController extends Stage {
 	private void apply() {
 		checkBoxMap.forEach((clazz, checkBox) -> {
 			if (checkBox.isSelected()) {
-				this.detachView(clazz);
+				mainController.detachView(clazz);
 			} else {
-				this.attachView(clazz);
+				mainController.attachView(clazz);
 			}
 		});
 		this.hide();
@@ -101,74 +84,7 @@ public final class DetachViewStageController extends Stage {
 
 	@FXML
 	private void doAttachAll() {
-		this.attachAllViews();
+		mainController.attachAllViews();
 		this.hide();
-	}
-
-	private void transferToNewWindow(TitledPane tp, Accordion accordion) {
-		Node node = tp.getContent();
-		// Remove the detached view from the TitledPane.
-		// A dummy node is used instead of null to prevent NullPointerExceptions from internal JavaFX code (mostly related to TitledPane/Accordion animations).
-		tp.setContent(new Label("View is detached\n(this label should be invisible)"));
-		DetachedViewStage stage = new DetachedViewStage(stageManager, node, tp, accordion);
-		node.setVisible(true);
-		wrapperStages.put(node.getClass(), stage);
-		stage.setOnCloseRequest(e -> attachView(node.getClass()));
-		stage.show();
-		stage.toFront();
-	}
-
-	public void detachView(Class<?> clazz) {
-		if (wrapperStages.containsKey(clazz)) {
-			// View is already detached - nothing to be done.
-			return;
-		}
-
-		LOGGER.debug("Detaching view: {}", clazz);
-		CheckBox checkBox = checkBoxMap.get(clazz);
-		if (checkBox == null) {
-			throw new NoSuchElementException("Not a detachable view: " + clazz);
-		}
-		checkBox.setSelected(true);
-
-		for (Accordion accordion : injector.getInstance(MainController.class).getAccordions()) {
-			for (Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
-				TitledPane tp = it.next();
-				if (tp.getContent().getClass().equals(clazz)) {
-					it.remove();
-					if (accordion.getPanes().isEmpty()) {
-						accordion.setVisible(false);
-						accordion.setMaxWidth(0);
-						accordion.setMaxHeight(0);
-					}
-					transferToNewWindow(tp, accordion);
-					return;
-				}
-			}
-		}
-
-		throw new NoSuchElementException("View not found in any accordion: " + clazz);
-	}
-
-	public void attachView(Class<?> clazz) {
-		DetachedViewStage stage = wrapperStages.remove(clazz);
-		if (stage == null) {
-			// View isn't detached - nothing to be done.
-			return;
-		}
-		
-		LOGGER.debug("Attaching view: {}", clazz);
-		CheckBox checkBox = checkBoxMap.get(clazz);
-		if (checkBox == null) {
-			throw new NoSuchElementException("Not a detachable view: " + clazz);
-		}
-		checkBox.setSelected(false);
-		stage.reattachView();
-	}
-
-	public void attachAllViews() {
-		LOGGER.debug("Attaching all views");
-		checkBoxMap.values().forEach(checkBox -> checkBox.setSelected(false));
-		wrapperStages.values().forEach(DetachedViewStage::reattachView);
 	}
 }

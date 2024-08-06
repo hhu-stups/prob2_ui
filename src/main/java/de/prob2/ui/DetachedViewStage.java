@@ -1,4 +1,4 @@
-package de.prob2.ui.menu;
+package de.prob2.ui;
 
 import de.prob2.ui.internal.StageManager;
 
@@ -23,7 +23,7 @@ final class DetachedViewStage extends Stage {
 		this.sourceAccordion = sourceAccordion;
 		
 		this.setScene(new Scene(new StackPane(detachedView)));
-		final String persistenceID = DetachViewStageController.PERSISTENCE_ID_PREFIX + this.getDetachedView().getClass().getName();
+		String persistenceID = MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX + this.getDetachedView().getClass().getName();
 		this.setMinWidth(detachedView.minWidth(-1));
 		this.setMinHeight(detachedView.minHeight(-1));
 		stageManager.register(this, persistenceID);

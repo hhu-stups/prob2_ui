@@ -7,8 +7,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.MainController;
 import de.prob2.ui.ProB2;
-import de.prob2.ui.menu.DetachViewStageController;
 
 import javafx.stage.Stage;
 
@@ -20,13 +20,13 @@ public final class UIPersistence {
 	private static final Logger LOGGER = LoggerFactory.getLogger(UIPersistence.class);
 	
 	private final UIState uiState;
-	private final DetachViewStageController detachViewStageController;
+	private final MainController mainController;
 	private final Injector injector;
 	
 	@Inject
-	private UIPersistence(UIState uiState, DetachViewStageController detachViewStageController, Injector injector) {
+	private UIPersistence(UIState uiState, MainController mainController, Injector injector) {
 		this.uiState = uiState;
-		this.detachViewStageController = detachViewStageController;
+		this.mainController = mainController;
 		this.injector = injector;
 	}
 	
@@ -37,9 +37,9 @@ public final class UIPersistence {
 			return;
 		}
 
-		if (id.startsWith(DetachViewStageController.PERSISTENCE_ID_PREFIX)) {
+		if (id.startsWith(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX)) {
 			// Remove the prefix before the name of the detached class
-			final String toDetach = id.substring(DetachViewStageController.PERSISTENCE_ID_PREFIX.length());
+			final String toDetach = id.substring(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX.length());
 
 			Class<?> clazz;
 			try {
@@ -50,7 +50,7 @@ public final class UIPersistence {
 			}
 
 			try {
-				detachViewStageController.detachView(clazz);
+				mainController.detachView(clazz);
 			} catch (RuntimeException exc) {
 				LOGGER.warn("Failed to restore detached view", exc);
 			}
