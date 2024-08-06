@@ -230,29 +230,30 @@ public final class StageManager {
 			}
 		});
 
-		stage.showingProperty().addListener((observable, from, to) -> {
+		// Use the onShowing/onHiding event handlers instead of a listener on the showing property
+		// because the event handlers are called earlier than the listeners.
+		// This avoids the windows visibly jumping around when their position is being restored.
+		stage.setOnShowing(event -> {
 			final String stageId = getPersistenceID(stage);
 			if (stageId != null) {
-				if (to) {
-					final BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
-					if (box != null && !Screen.getScreensForRectangle(box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()).isEmpty()) {
-						stage.setX(box.getMinX());
-						stage.setY(box.getMinY());
-						stage.setWidth(box.getWidth());
-						stage.setHeight(box.getHeight());
-					}
-					uiState.getStages().put(stageId, new WeakReference<>(stage));
-					uiState.getSavedVisibleStages().add(stageId);
-				} else {
-					uiState.getSavedVisibleStages().remove(stageId);
-					uiState.getSavedStageBoxes().put(stageId,
-							new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()));
+				BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
+				if (box != null && !Screen.getScreensForRectangle(box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()).isEmpty()) {
+					stage.setX(box.getMinX());
+					stage.setY(box.getMinY());
+					stage.setWidth(box.getWidth());
+					stage.setHeight(box.getHeight());
 				}
+				uiState.getStages().put(stageId, new WeakReference<>(stage));
+				uiState.getSavedVisibleStages().add(stageId);
 			}
 		});
-		// Workaround for JavaFX bug JDK-8224260 (https://bugs.openjdk.java.net/browse/JDK-8224260):
-		// Add a second ChangeListener that does nothing.
-		stage.showingProperty().addListener((o, from, to) -> {});
+		stage.setOnHiding(event -> {
+			String stageId = getPersistenceID(stage);
+			if (stageId != null) {
+				uiState.getSavedVisibleStages().remove(stageId);
+				uiState.getSavedStageBoxes().put(stageId, new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()));
+			}
+		});
 
 		stage.focusedProperty().addListener((observable, from, to) -> {
 			if (to) {
