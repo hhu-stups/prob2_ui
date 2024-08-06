@@ -278,5 +278,6 @@ public final class MainController extends BorderPane {
 	public void attachAllViews() {
 		LOGGER.debug("Attaching all views");
 		detachedViewStages.values().forEach(DetachedViewStage::reattachView);
+		detachedViewStages.clear();
 	}
 }

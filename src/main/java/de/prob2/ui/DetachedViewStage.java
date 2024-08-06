@@ -49,6 +49,7 @@ final class DetachedViewStage extends Stage {
 	}
 	
 	void reattachView() {
+		this.hide();
 		this.getSourceAccordion().setVisible(true);
 		this.getSourceAccordion().setMaxWidth(Double.POSITIVE_INFINITY);
 		this.getSourceAccordion().setMaxHeight(Double.POSITIVE_INFINITY);
