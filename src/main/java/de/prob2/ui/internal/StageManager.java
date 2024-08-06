@@ -223,7 +223,11 @@ public final class StageManager {
 		stage.getIcons().add(ICON);
 
 		if (stageId != null) {
-			stage.focusedProperty().addListener(e -> uiState.moveStageToEnd(stageId));
+			stage.focusedProperty().addListener((o, from, to) -> {
+				if (to) {
+					uiState.moveStageToEnd(stageId);
+				}
+			});
 
 			// Use the onShowing/onHiding event handlers instead of a listener on the showing property
 			// because the event handlers are called earlier than the listeners.
