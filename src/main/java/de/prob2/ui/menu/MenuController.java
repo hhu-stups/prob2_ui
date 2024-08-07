@@ -67,9 +67,9 @@ public final class MenuController extends MenuBar {
 			// Create Mac-style application menu
 			MenuItem quit = menuToolkit.createQuitMenuItem(i18n.translate("common.prob2"));
 			quit.setOnAction(event -> {
-				for (Stage stage : stageManager.getRegistered()) {
-					stage.fireEvent(new WindowEvent(stage, WindowEvent.WINDOW_CLOSE_REQUEST));
-				}
+				// Close the main stage to make ProB 2 UI exit.
+				Stage mainStage = stageManager.getMainStage();
+				mainStage.fireEvent(new WindowEvent(mainStage, WindowEvent.WINDOW_CLOSE_REQUEST));
 			});
 			final Menu applicationMenu = new Menu(i18n.translate("common.prob2"), null,
 					aboutItem, new SeparatorMenuItem(), preferencesItem,
