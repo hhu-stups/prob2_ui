@@ -61,7 +61,7 @@ def exports = [
 def opens = []
 
 // Uncomment when getting WebView console messages with com.sun.javafx.webkit.WebConsoleListener
-// (see the corresponding commented out code in de.prob2.ui.visb.VisBView).
+// (see the corresponding commented out code in StageManager.initWebView).
 //exports += ["javafx.web/com.sun.javafx.webkit"]
 
 application {

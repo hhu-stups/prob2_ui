@@ -68,7 +68,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebErrorEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 
@@ -415,6 +414,7 @@ public final class VisBView extends BorderPane {
 		LOGGER.debug("Creating VisB WebView...");
 		this.webView = new WebView();
 		LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
+		stageManager.initWebView(this.webView);
 
 		this.webView.visibleProperty().bind(this.placeholder.visibleProperty().not());
 		this.mainPane.getChildren().add(webView);
@@ -422,14 +422,6 @@ public final class VisBView extends BorderPane {
 		exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
 		zoomInButton.disableProperty().bind(this.placeholder.visibleProperty());
 		zoomOutButton.disableProperty().bind(this.placeholder.visibleProperty());
-
-		this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-		this.webView.getEngine().setOnError(this::treatJavascriptError);
-
-		// Uncomment to make WebView console errors, warnings, etc. visible in the log.
-		// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
-		// (see the corresponding commented out line in build.gradle).
-		// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
 	}
 
 	private void loadVisualisationIntoWebView(VisBVisualisation visBVisualisation) {
@@ -472,18 +464,6 @@ public final class VisBView extends BorderPane {
 			LOGGER.debug("VisB visualisation is fully loaded");
 			loadingStatus.set(VisBView.LoadingStatus.LOADED);
 		});
-	}
-
-	private void treatJavascriptError(WebErrorEvent event) {
-		LOGGER.info("JavaScript error: {}", event.getMessage(), event.getException());
-		alert(event.getException(), "visb.exception.header", "visb.stage.alert.webview.jsalert", event.getMessage());
-	}
-
-	private void showJavascriptAlert(String message) {
-		LOGGER.debug("JavaScript ALERT: {}", message);
-		final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
-		alert.initOwner(this.getScene().getWindow());
-		alert.showAndWait();
 	}
 
 	private JSObject getJSWindow() {

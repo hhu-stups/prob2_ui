@@ -115,6 +115,7 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 			}
 		});
 
+		stageManager.initWebView(this.webView);
 		this.webView.getChildrenUnmodifiable().addListener((ListChangeListener<Node>) c -> {
 			Set<Node> scrollBars = this.webView.lookupAll(".scroll-bar");
 			for (Node scrollBar : scrollBars) {

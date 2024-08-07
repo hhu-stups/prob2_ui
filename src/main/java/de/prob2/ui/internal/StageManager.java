@@ -41,6 +41,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.web.WebView;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -400,6 +401,24 @@ public final class StageManager {
 	public void showUnhandledExceptionAlert(Throwable exc, Window owner) {
 		Thread thread = Thread.currentThread();
 		Platform.runLater(() -> showUnhandledExceptionAlert(thread, exc, owner));
+	}
+	
+	public void initWebView(WebView webView) {
+		webView.getEngine().setOnError(event -> {
+			LOGGER.error("Unhandled WebView error: {}", event.getMessage(), event.getException());
+			Alert alert = this.makeExceptionAlert(event.getException(), "common.alerts.webViewError.header", "common.alerts.webViewError.content", event.getMessage());
+			alert.show();
+		});
+		webView.getEngine().setOnAlert(event -> {
+			LOGGER.info("WebView alert: {}", event.getData());
+			Alert alert = this.makeAlert(Alert.AlertType.INFORMATION, "common.alerts.webViewAlert.header", "common.literal", event.getData());
+			alert.show();
+		});
+		
+		// Uncomment to make WebView console errors, warnings, etc. visible in the log.
+		// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
+		// (see the corresponding commented out line in build.gradle).
+		// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
 	}
 	
 	/**

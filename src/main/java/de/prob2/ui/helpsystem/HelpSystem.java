@@ -54,6 +54,7 @@ public final class HelpSystem extends StackPane {
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
 
+	private final StageManager stageManager;
 	private final HostServices hostServices;
 	private final ResourceBundle helpPageTitles;
 	private final ResourceBundle helpPageResourcePaths;
@@ -63,6 +64,7 @@ public final class HelpSystem extends StackPane {
 
 	@Inject
 	private HelpSystem(final StageManager stageManager, final HostServices hostServices) {
+		this.stageManager = stageManager;
 		this.hostServices = hostServices;
 		this.updateTreeSelection = true;
 
@@ -93,6 +95,7 @@ public final class HelpSystem extends StackPane {
 
 		external.setOnAction(e -> hostServices.showDocument("https://prob.hhu.de/w/"));
 
+		stageManager.initWebView(webView);
 		var webEngine = webView.getEngine();
 		webEngine.setUserStyleSheetLocation(this.getClass().getResource("help.css").toString());
 		webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {

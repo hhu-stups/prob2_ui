@@ -11,17 +11,23 @@ import javafx.stage.Stage;
 
 @Singleton
 public final class UserManualStage extends Stage {
+	private final StageManager stageManager;
+
 	@FXML
 	private WebView userManualWebView;
 
 	@Inject
 	public UserManualStage(final StageManager stageManager) {
 		super();
+
+		this.stageManager = stageManager;
+
 		stageManager.loadFXML(this, "user_manual_stage.fxml");
 	}
 
 	@FXML
-	public void initialize(){
+	public void initialize() {
+		stageManager.initWebView(this.userManualWebView);
 		this.userManualWebView.getEngine().load(this.getClass().getResource("user_manual.html").toExternalForm());
 	}
 }
