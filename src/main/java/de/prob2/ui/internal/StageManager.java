@@ -1,8 +1,10 @@
 package de.prob2.ui.internal;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
@@ -13,6 +15,8 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -79,6 +83,7 @@ public final class StageManager {
 	private final Map<Stage, Void> registered;
 	private MenuBar globalMacMenuBar;
 	private Stage mainStage;
+	private File webViewUserDataTempDir;
 
 	@Inject
 	private StageManager(
@@ -87,7 +92,8 @@ public final class StageManager {
 		Provider<ExceptionAlert> exceptionAlertProvider,
 		@Nullable MenuToolkit menuToolkit,
 		UIState uiState,
-		I18n i18n
+		I18n i18n,
+		StopActions stopActions
 	) {
 		this.loaderProvider = loaderProvider;
 		this.fontSize = fontSize;
@@ -99,6 +105,19 @@ public final class StageManager {
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
 		this.globalMacMenuBar = null;
+		this.mainStage = null;
+		this.webViewUserDataTempDir = null;
+
+		stopActions.add(() -> {
+			if (this.webViewUserDataTempDir != null) {
+				LOGGER.trace("Deleting temporary directory for WebView user data: {}", this.webViewUserDataTempDir);
+				try {
+					MoreFiles.deleteRecursively(this.webViewUserDataTempDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
+				} catch (IOException | RuntimeException exc) {
+					LOGGER.warn("Failed to delete temporary directory for WebView user data - ignoring", exc);
+				}
+			}
+		});
 	}
 
 	private static Node getRootNode(Object fxmlRoot) {
@@ -419,6 +438,22 @@ public final class StageManager {
 		// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
 		// (see the corresponding commented out line in build.gradle).
 		// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
+		
+		// Use a unique temporary directory as the user data directory for WebViews.
+		// This allows running multiple instances of ProB 2 UI at once without errors
+		// (the WebEngine takes a process-based lock on the user data directory,
+		// meaning that two processes cannot use the same user data directory).
+		// None of our WebViews need to save any permanent state,
+		// so we can safely use a temporary directory and delete it on exit.
+		if (this.webViewUserDataTempDir == null) {
+			try {
+				this.webViewUserDataTempDir = Files.createTempDirectory("prob2-ui-webview").toFile();
+				LOGGER.trace("Created temporary directory for WebView user data: {}", this.webViewUserDataTempDir);
+			} catch (IOException | RuntimeException exc) {
+				LOGGER.warn("Failed to create temporary directory for WebView user data - falling back to the JavaFX default", exc);
+			}
+		}
+		webView.getEngine().setUserDataDirectory(this.webViewUserDataTempDir);
 	}
 	
 	/**
