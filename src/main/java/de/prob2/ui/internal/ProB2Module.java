@@ -10,7 +10,6 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
@@ -105,7 +104,7 @@ public class ProB2Module extends AbstractModule {
 	private static FXMLLoader provideLoader(final Injector injector, I18n i18n) {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setBuilderFactory(type -> {
-			if (injector.getExistingBinding(Key.get(type)) != null || type.isAnnotationPresent(FXMLInjected.class)) {
+			if (type.isAnnotationPresent(FXMLInjected.class)) {
 				// this allows FXML to configure instances, remember to implement Builder and return "this" in the build method.
 				if (Builder.class.isAssignableFrom(type)) {
 					return (Builder<?>) injector.getInstance(type);
