@@ -221,6 +221,15 @@ public final class MainController extends BorderPane {
 		return Collections.unmodifiableList(accordions);
 	}
 
+	public Accordion getAccordionById(String id) {
+		for (Accordion acc : this.getAccordions()) {
+			if (acc != null && id.equals(acc.getId())) {
+				return acc;
+			}
+		}
+		return null;
+	}
+
 	public Set<Class<?>> getDetachedViews() {
 		return this.detachedViewStages.keySet();
 	}

@@ -91,4 +91,32 @@ public final class MenuController extends MenuBar {
 			});
 		}
 	}
+
+	private Menu findMenuInSubMenus(String id, Menu menuToSearchIn) {
+		for (MenuItem item : menuToSearchIn.getItems()) {
+			if (item instanceof Menu subMenu) {
+				if (id.equals(subMenu.getId())) {
+					return subMenu;
+				}
+				Menu ret = findMenuInSubMenus(id, subMenu);
+				if (ret != null) {
+					return ret;
+				}
+			}
+		}
+		return null;
+	}
+
+	public Menu getMenuById(String id) {
+		for (Menu menu : this.getMenus()) {
+			if (id.equals(menu.getId())) {
+				return menu;
+			}
+			Menu subMenu = findMenuInSubMenus(id, menu);
+			if (subMenu != null) {
+				return subMenu;
+			}
+		}
+		return null;
+	}
 }

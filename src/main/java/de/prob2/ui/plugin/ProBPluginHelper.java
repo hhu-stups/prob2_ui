@@ -6,6 +6,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.MainController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
@@ -72,7 +73,8 @@ public final class ProBPluginHelper {
 	}
 
 	public void addMenuItem(MenuEnum menu, MenuItem... items) {
-		Menu menuToAddItems = menu.searchMenu(injector);
+		MenuController menuController = injector.getInstance(MenuController.class);
+		Menu menuToAddItems = menuController.getMenuById(menu.id());
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().addAll(items);
 		} else {
@@ -81,7 +83,8 @@ public final class ProBPluginHelper {
 	}
 
 	public void addMenuItem(MenuEnum menu, int position, MenuItem... items) {
-		Menu menuToAddItems = menu.searchMenu(injector);
+		MenuController menuController = injector.getInstance(MenuController.class);
+		Menu menuToAddItems = menuController.getMenuById(menu.id());
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().addAll(position, Arrays.asList(items));
 		} else {
@@ -90,7 +93,8 @@ public final class ProBPluginHelper {
 	}
 
 	public void removeMenuItem(MenuEnum menu, MenuItem... items) {
-		Menu menuToAddItems = menu.searchMenu(injector);
+		MenuController menuController = injector.getInstance(MenuController.class);
+		Menu menuToAddItems = menuController.getMenuById(menu.id());
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().removeAll(items);
 		} else {
@@ -99,7 +103,8 @@ public final class ProBPluginHelper {
 	}
 
 	public void addPane(AccordionEnum accordion, TitledPane pane) {
-		Accordion acc = accordion.getAccordion(injector);
+		MainController mainController = injector.getInstance(MainController.class);
+		Accordion acc = mainController.getAccordionById(accordion.id());
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) {
 			acc.getPanes().add(pane);
@@ -107,13 +112,15 @@ public final class ProBPluginHelper {
 	}
 
 	public void addPane(AccordionEnum accordion, int position, TitledPane pane) {
-		Accordion acc = accordion.getAccordion(injector);
+		MainController mainController = injector.getInstance(MainController.class);
+		Accordion acc = mainController.getAccordionById(accordion.id());
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) acc.getPanes().add(position,pane);
 	}
 
 	public void removePane(AccordionEnum accordion, TitledPane pane) {
-		Accordion acc = accordion.getAccordion(injector);
+		MainController mainController = injector.getInstance(MainController.class);
+		Accordion acc = mainController.getAccordionById(accordion.id());
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) acc.getPanes().remove(pane);
 	}
