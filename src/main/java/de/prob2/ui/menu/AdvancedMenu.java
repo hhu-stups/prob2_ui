@@ -10,7 +10,6 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.plugin.PluginMenuStage;
-import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulatorStage;
@@ -43,7 +42,6 @@ public final class AdvancedMenu extends Menu {
 	private MenuItem detachVisualisationItem;
 
 	private final StageManager stageManager;
-	private final ProBPluginManager proBPluginManager;
 	private final VisualisationController visualisationController;
 	private final Injector injector;
 	private static final Logger LOGGER = LoggerFactory.getLogger(AdvancedMenu.class);
@@ -52,14 +50,12 @@ public final class AdvancedMenu extends Menu {
 	@Inject
 	public AdvancedMenu(
 		StageManager stageManager,
-		ProBPluginManager proBPluginManager,
 		VisualisationController visualisationController,
 		CurrentProject currentProject,
 		CurrentTrace currentTrace,
 		Injector injector
 	) {
 		this.stageManager = stageManager;
-		this.proBPluginManager = proBPluginManager;
 		this.injector = injector;
 		stageManager.loadFXML(this, "advancedMenu.fxml");
 		this.visualisationController = visualisationController;
@@ -82,15 +78,6 @@ public final class AdvancedMenu extends Menu {
 		final Stage prologOutputStage = injector.getInstance(PrologOutputStage.class);
 		prologOutputStage.show();
 		prologOutputStage.toFront();
-	}
-
-	@FXML
-	private void addPlugin() {
-		proBPluginManager.addPlugin();}
-
-	@FXML
-	private void reloadPlugins() {
-		proBPluginManager.reloadPlugins();
 	}
 
 	@FXML
