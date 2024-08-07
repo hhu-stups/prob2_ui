@@ -2,8 +2,6 @@ package de.prob2.ui.plugin;
 
 import java.util.Arrays;
 
-import javax.annotation.Nonnull;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -52,28 +50,28 @@ public final class ProBPluginHelper {
 		return stageManager;
 	}
 
-	public void addTab(@Nonnull final Tab tab) {
+	public void addTab(Tab tab) {
 		TabPane tabPane = injector.getInstance(MainView.class).getTabPane();
 		tabPane.getTabs().add(tab);
 		tabPane.getSelectionModel().select(tab);
 	}
 
-	public void removeTab(@Nonnull final Tab tab) {
+	public void removeTab(Tab tab) {
 		TabPane tabPane = injector.getInstance(MainView.class).getTabPane();
 		tabPane.getTabs().remove(tab);
 	}
 
-	public void addMenu(@Nonnull final Menu menu) {
+	public void addMenu(Menu menu) {
 		MenuController menuController = injector.getInstance(MenuController.class);
 		menuController.getMenus().add(menu);
 	}
 
-	public void removeMenu(@Nonnull final Menu menu) {
+	public void removeMenu(Menu menu) {
 		MenuController menuController = injector.getInstance(MenuController.class);
 		menuController.getMenus().remove(menu);
 	}
 
-	public void addMenuItem(@Nonnull final MenuEnum menu, @Nonnull final MenuItem... items) {
+	public void addMenuItem(MenuEnum menu, MenuItem... items) {
 		Menu menuToAddItems = menu.searchMenu(injector);
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().addAll(items);
@@ -82,9 +80,7 @@ public final class ProBPluginHelper {
 		}
 	}
 
-	public void addMenuItem(@Nonnull final MenuEnum menu,
-							final int position,
-							@Nonnull final MenuItem... items) {
+	public void addMenuItem(MenuEnum menu, int position, MenuItem... items) {
 		Menu menuToAddItems = menu.searchMenu(injector);
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().addAll(position, Arrays.asList(items));
@@ -93,8 +89,7 @@ public final class ProBPluginHelper {
 		}
 	}
 
-	public void removeMenuItem(@Nonnull final MenuEnum menu,
-							   @Nonnull final MenuItem... items) {
+	public void removeMenuItem(MenuEnum menu, MenuItem... items) {
 		Menu menuToAddItems = menu.searchMenu(injector);
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().removeAll(items);
@@ -103,7 +98,7 @@ public final class ProBPluginHelper {
 		}
 	}
 
-	public void addPane(@Nonnull final AccordionEnum accordion, @Nonnull final TitledPane pane) {
+	public void addPane(AccordionEnum accordion, TitledPane pane) {
 		Accordion acc = accordion.getAccordion(injector);
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) {
@@ -111,13 +106,13 @@ public final class ProBPluginHelper {
 		}
 	}
 
-	public void addPane(@Nonnull final AccordionEnum accordion, final int position, @Nonnull final TitledPane pane) {
+	public void addPane(AccordionEnum accordion, int position, TitledPane pane) {
 		Accordion acc = accordion.getAccordion(injector);
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) acc.getPanes().add(position,pane);
 	}
 
-	public void removePane(@Nonnull final AccordionEnum accordion, @Nonnull final TitledPane pane) {
+	public void removePane(AccordionEnum accordion, TitledPane pane) {
 		Accordion acc = accordion.getAccordion(injector);
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) acc.getPanes().remove(pane);
