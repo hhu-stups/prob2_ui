@@ -245,7 +245,7 @@ public final class MainController extends BorderPane {
 		}
 
 		LOGGER.debug("Detaching view: {}", clazz);
-		for (Accordion accordion : injector.getInstance(MainController.class).getAccordions()) {
+		for (Accordion accordion : this.getAccordions()) {
 			for (Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
 				TitledPane tp = it.next();
 				if (tp.getContent().getClass().equals(clazz)) {
