@@ -1,13 +1,19 @@
 package de.prob2.ui.vomanager.ast;
 
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import de.prob.statespace.Trace;
 import de.prob.voparser.VOParser;
 import de.prob.voparser.node.AAndVo;
 import de.prob.voparser.node.AIdentifierVo;
 import de.prob.voparser.node.AOrVo;
 import de.prob.voparser.node.PVo;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingExecutors;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.IValidationTask;
 
 public interface IValidationExpression {
 	static IValidationExpression fromAst(final PVo ast) {
@@ -32,7 +38,11 @@ public interface IValidationExpression {
 		return this.getChildren().flatMap(IValidationExpression::getAllTasks);
 	}
 	
-	Checked getChecked();
-
-	String toString();
+	void resolveTaskIds(Map<String, IValidationTask> tasksInScopeById);
+	
+	CheckingStatus getStatus();
+	
+	Trace getTrace();
+	
+	CompletableFuture<?> check(CheckingExecutors executors, ExecutionContext context);
 }

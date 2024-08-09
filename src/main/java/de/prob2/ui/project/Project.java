@@ -21,7 +21,7 @@ import de.prob2.ui.vomanager.Requirement;
 
 public class Project implements HasMetadata {
 	public static final String FILE_TYPE = "Project";
-	public static final int CURRENT_FORMAT_VERSION = 52;
+	public static final int CURRENT_FORMAT_VERSION = 54;
 	
 	private final String name;
 	private final String description;
@@ -147,10 +147,7 @@ public class Project implements HasMetadata {
 	
 	public void resetChanged() {
 		for (Machine machine : this.getMachines()) {
-			machine.resetChanged();
-		}
-		for (Preference pref : this.getPreferences()) {
-			pref.changedProperty().set(false);
+			machine.setChanged(false);
 		}
 	}
 	

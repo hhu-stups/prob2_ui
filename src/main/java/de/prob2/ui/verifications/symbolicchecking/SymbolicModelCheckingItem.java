@@ -10,8 +10,8 @@ import com.google.common.base.MoreObjects;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -65,25 +65,25 @@ public final class SymbolicModelCheckingItem extends SymbolicCheckingFormulaItem
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Symbolic model checking interrupted by user", exc);
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 			return;
 		}
 		
 		switch (cmd.getResult()) {
 			case SUCCESSFUL:
-				this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS));
 				break;
 			case COUNTER_EXAMPLE:
-				this.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample"));
+				this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.symbolicModelChecking.result.counterExample"));
 				break;
 			case TIMEOUT:
-				this.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.timeout"));
+				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT));
 				break;
 			case INTERRUPTED:
-				this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.interrupted"));
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 				break;
 			case LIMIT_REACHED:
-				this.setResultItem(new CheckingResultItem(Checked.TIMEOUT, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.limitReached"));
+				this.setResult(new CheckingResult(CheckingStatus.TIMEOUT, "verifications.symbolicModelChecking.result.limitReached"));
 				break;
 			default:
 				throw new AssertionError("Unhandled symbolic model checking result: " + cmd.getResult());

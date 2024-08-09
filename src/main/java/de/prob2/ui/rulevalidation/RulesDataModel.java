@@ -19,8 +19,7 @@ import java.util.*;
  * @since 20.12.17
  */
 @Singleton
-public class RulesDataModel {
-
+public final class RulesDataModel {
 	private static final IdentifierNotInitialised IDENTIFIER_NOT_INITIALISED = new IdentifierNotInitialised(new ArrayList<>());
 
 	private RulesModel model;
@@ -128,7 +127,7 @@ public class RulesDataModel {
 	}
 
 	private void updateRuleResults(State currentState) {
-		RuleResults ruleResults = new RuleResults(model.getRulesProject(), currentState, -1);
+		RuleResults ruleResults = new RuleResults(model.getRulesProject(), currentState, -1, -1);
 		int notCheckableCounter = 0;
 		for (String ruleStr : ruleValueMap.keySet()) {
 			RuleResult result = ruleResults.getRuleResultMap().get(ruleStr);

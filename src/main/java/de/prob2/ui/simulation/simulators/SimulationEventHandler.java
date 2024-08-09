@@ -4,6 +4,7 @@ package de.prob2.ui.simulation.simulators;
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
@@ -15,6 +16,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 
 
@@ -31,15 +33,30 @@ public class SimulationEventHandler {
 
 	private final CurrentTrace currentTrace;
 
+	private final CurrentProject currentProject;
+
 	private final LinkedList<String> visitedChoiceIDs;
 
 
-	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace) {
+	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace, final CurrentProject currentProject) {
 		this.simulator = simulator;
 		this.cache = new SimulatorCache();
 		this.currentTrace = currentTrace;
+		this.currentProject = currentProject;
 		this.visitedChoiceIDs = new LinkedList<>();
 		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> cache.clear());
+
+		this.currentProject.addListener((observable, from, to) -> {
+			if((from == null && to != null) || !Objects.equals(from, to)) {
+				cache.clear();
+			}
+		});
+
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			if((from == null && to != null) || !Objects.equals(from, to)) {
+				cache.clear();
+			}
+		});
 	}
 
 	public String chooseVariableValues(State currentState, Map<String, String> values) {

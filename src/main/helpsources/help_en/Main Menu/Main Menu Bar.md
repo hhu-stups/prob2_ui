@@ -28,8 +28,7 @@ This submenu allows you to adjust and reset the size of the layout in the ProB2 
 
 The Visualisation submenu provides different forms of visualisation.
 
-You can visualize the transition and states of the machine as a [graph](Visualisations/Graph%20Visualisation.md),
-a [table](Visualisations/Table%20Visualisation.md) or by using the [Magic Layout](Visualisations/Magic%20Layout.md), a tool for interactive and customizable state visualisation.
+You can visualize the transition and states of the machine as a [graph or table](Visualisations/Graph%20and%20Table%20Visualisation.md) or by using the [Magic Layout](Visualisations/Magic%20Layout.md), a tool for interactive and customizable state visualisation.
 
 Furthermore, the [history chart](Visualisations/History%20Chart.md) shows a chart of the chosen formulas.
 

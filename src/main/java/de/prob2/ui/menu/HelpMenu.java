@@ -16,6 +16,7 @@ import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
+import javafx.application.HostServices;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -31,12 +32,14 @@ public class HelpMenu extends Menu {
 	
 	private final Injector injector;
 	private final StageManager stageManager;
+	private final HostServices hostServices;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HelpMenu.class);
 
 	@Inject
-	private HelpMenu(final StageManager stageManager, final Injector injector) {
+	private HelpMenu(final StageManager stageManager, final Injector injector, HostServices hostServices) {
 		this.stageManager = stageManager;
 		this.injector = injector;
+		this.hostServices = hostServices;
 		stageManager.loadFXML(this, "helpMenu.fxml");
 	}
 
@@ -56,7 +59,7 @@ public class HelpMenu extends Menu {
 
 	@FXML
 	private void handleReportBug() {
-		injector.getInstance(ProB2.class).getHostServices().showDocument(ProB2.BUG_REPORT_URL);
+		hostServices.showDocument(ProB2.BUG_REPORT_URL);
 	}
 
 	@FXML

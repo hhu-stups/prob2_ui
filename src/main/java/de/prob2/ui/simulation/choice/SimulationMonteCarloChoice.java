@@ -18,8 +18,7 @@ import javafx.scene.layout.GridPane;
 
 @FXMLInjected
 @Singleton
-public class SimulationMonteCarloChoice extends GridPane {
-
+public final class SimulationMonteCarloChoice extends GridPane {
 	@FXML
 	private Label lbSimulations;
 

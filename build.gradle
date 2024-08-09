@@ -51,7 +51,6 @@ repositories {
 
 java {
 	sourceCompatibility = JavaVersion.VERSION_17
-	targetCompatibility = JavaVersion.VERSION_17
 }
 
 // Module export/open declarations for Java 9+
@@ -62,7 +61,7 @@ def exports = [
 def opens = []
 
 // Uncomment when getting WebView console messages with com.sun.javafx.webkit.WebConsoleListener
-// (see the corresponding commented out code in de.prob2.ui.visb.VisBView).
+// (see the corresponding commented out code in StageManager.initWebView).
 //exports += ["javafx.web/com.sun.javafx.webkit"]
 
 application {
@@ -76,6 +75,7 @@ application {
 
 tasks.withType(JavaCompile) {
 	options.encoding = "UTF-8"
+	options.release = Integer.parseInt(java.sourceCompatibility.toString())
 }
 
 configurations {
@@ -115,10 +115,10 @@ configurations.all {
 dependencies {
 	implementation group: "ch.qos.logback", name: "logback-classic", version: "1.4.14"
 	implementation group: "com.fatboyindustrial.gson-javatime-serialisers", name: "gson-javatime-serialisers", version: "1.1.2"
-	implementation group: "com.google.code.gson", name: "gson", version: "2.10.1"
-	implementation group: "com.google.guava", name: "guava", version: "33.1.0-jre"
+	implementation group: "com.google.code.gson", name: "gson", version: "2.11.0"
+	implementation group: "com.google.guava", name: "guava", version: "33.2.1-jre"
 	implementation group: "io.github.java-diff-utils", name: "java-diff-utils", version: "4.12"
-	implementation group: "commons-cli", name: "commons-cli", version: "1.7.0"
+	implementation group: "commons-cli", name: "commons-cli", version: "1.8.0"
 	implementation group: "de.jangassen", name: "nsmenufx", version: "3.1.0"
 	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.13.2-SNAPSHOT"))
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel"
@@ -127,24 +127,24 @@ dependencies {
 	// cannot update to 1.2.2 as this breaks nsmenufx due to a transitive dependency on jna
 	implementation group: "net.harawata", name: "appdirs", version: "1.2.1"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "11.2.1"
-	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.2"
-	implementation group: "org.pf4j", name: "pf4j", version: "3.11.0"
+	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.3"
+	implementation group: "org.pf4j", name: "pf4j", version: "3.12.0"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.3'
 
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava'
 
-	testImplementation platform('org.junit:junit-bom:5.10.2')
+	testImplementation platform('org.junit:junit-bom:5.10.3')
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
 	testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
-	testImplementation group: 'org.assertj', name : 'assertj-core', version: '3.25.3'
-	testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.11.0'
+	testImplementation group: 'org.assertj', name : 'assertj-core', version: '3.26.3'
+	testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.12.0'
 	testImplementation group: 'org.xmlunit', name: 'xmlunit-assertj3', version: '2.9.1'
 }
 
 final osArch = System.getProperty("os.arch")
-final javafxVersion = "22.0.1"
+final javafxVersion = "22.0.2"
 
 final javafxModules = [
 	"javafx.base",

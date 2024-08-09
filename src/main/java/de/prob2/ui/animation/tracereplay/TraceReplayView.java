@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import com.google.common.io.MoreFiles;
@@ -22,7 +23,6 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.RevealInExplorer;
@@ -31,7 +31,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
-import de.prob2.ui.verifications.CheckedIcon;
+import de.prob2.ui.verifications.CheckingExecutors;
+import de.prob2.ui.verifications.CheckingStatusIcon;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.application.Platform;
@@ -83,7 +84,11 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			showStatusItem.setOnAction(event -> {
 				ReplayedTraceStatusAlert alert = injector.getInstance(ReplayedTraceStatusAlert.class);
 				alert.initReplayTrace(this.getItem());
-				alert.handleAcceptDiscard();
+				alert.showAndWait().ifPresent(buttonType -> {
+					if (buttonType.equals(alert.getAcceptButtonType())) {
+						currentTrace.set(this.getItem().getTrace());
+					}
+				});
 			});
 
 			final MenuItem showDescriptionItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
@@ -122,9 +127,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-	                        final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final TraceChecker traceChecker, final I18n i18n,
+	                        final CurrentTrace currentTrace, final CheckingExecutors checkingExecutors, final TraceChecker traceChecker, final I18n i18n,
 	                        final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
-		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
+		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
@@ -138,7 +143,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Override
 	protected ObservableList<ReplayTrace> getItemsProperty(Machine machine) {
-		return machine.getMachineProperties().getTraces();
+		return machine.getTraces();
 	}
 
 	@Override
@@ -150,10 +155,10 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		statusProgressColumn.setCellValueFactory(features -> {
 			final ReplayTrace trace = features.getValue();
 
-			final CheckedIcon statusIcon = new CheckedIcon();
+			final CheckingStatusIcon statusIcon = new CheckingStatusIcon();
 			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
-			trace.checkedProperty().addListener((o, from, to) -> Platform.runLater(() -> statusIcon.setChecked(to)));
-			statusIcon.setChecked(trace.getChecked());
+			trace.statusProperty().addListener((o, from, to) -> Platform.runLater(() -> statusIcon.setStatus(to)));
+			statusIcon.setStatus(trace.getStatus());
 
 			final ProgressIndicator replayProgress = new ProgressBar();
 			replayProgress.progressProperty().bind(trace.progressProperty());
@@ -198,9 +203,17 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
-	protected void executeItemSync(final ReplayTrace item, final ExecutionContext context) {
-		// FIXME Respect execution context
-		traceChecker.check(item);
+	protected CompletableFuture<?> executeItemImpl(ReplayTrace item, CheckingExecutors executors, ExecutionContext context) {
+		// we use handle so that downstream handlers do not get to see the exception
+		return super.executeItemImpl(item, executors, context).handle((res, exc) -> {
+			if (exc == null) {
+				traceChecker.setCurrentTraceAfterReplay(item);
+			} else {
+				Platform.runLater(() -> traceFileHandler.showLoadError(item, exc));
+			}
+
+			return null;
+		});
 	}
 
 	@Override

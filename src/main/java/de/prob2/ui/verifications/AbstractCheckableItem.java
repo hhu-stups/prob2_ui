@@ -4,23 +4,25 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonSetter;
 
+import de.prob.statespace.Trace;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public abstract class AbstractCheckableItem implements IExecutableItem {
+public abstract class AbstractCheckableItem implements ISelectableTask, ITraceTask {
 	private final BooleanProperty selected;
 	@JsonIgnore
-	final ObjectProperty<CheckingResultItem> resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
+	final ObjectProperty<ICheckingResult> result = new SimpleObjectProperty<>(this, "result", null);
 	@JsonIgnore
-	final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+	final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
 	protected AbstractCheckableItem() {
 		this.selected = new SimpleBooleanProperty(true);
 
-		this.resultItemProperty().addListener((o, from, to) -> this.checked.set(to == null ? Checked.NOT_CHECKED : to.getChecked()));
+		this.resultProperty().addListener((o, from, to) -> this.status.set(to == null ? CheckingStatus.NOT_CHECKED : to.getStatus()));
 	}
 
 	@Override
@@ -40,30 +42,43 @@ public abstract class AbstractCheckableItem implements IExecutableItem {
 		return selected;
 	}
 
-	public void setResultItem(CheckingResultItem resultItem) {
-		this.resultItem.set(resultItem);
+	public void setResult(ICheckingResult result) {
+		this.result.set(result);
 	}
 
-	public CheckingResultItem getResultItem() {
-		return resultItem.get();
+	public ICheckingResult getResult() {
+		return result.get();
 	}
 
-	public ObjectProperty<CheckingResultItem> resultItemProperty() {
-		return resultItem;
-	}
-
-	@Override
-	public ReadOnlyObjectProperty<Checked> checkedProperty() {
-		return this.checked;
+	public ObjectProperty<ICheckingResult> resultProperty() {
+		return result;
 	}
 
 	@Override
-	public Checked getChecked() {
-		return this.checkedProperty().get();
+	public ReadOnlyObjectProperty<CheckingStatus> statusProperty() {
+		return this.status;
+	}
+
+	@Override
+	public CheckingStatus getStatus() {
+		return this.statusProperty().get();
+	}
+
+	@Override
+	public Trace getTrace() {
+		return this.getResult() != null ? this.getResult().getTrace() : null;
+	}
+
+	@Override
+	public void resetAnimatorDependentState() {
+		if (this.getResult() != null) {
+			this.setResult(this.getResult().withoutAnimatorDependentState());
+		}
 	}
 
 	@Override
 	public void reset() {
-		this.setResultItem(null);
+		this.setResult(null);
+		this.resetAnimatorDependentState();
 	}
 }

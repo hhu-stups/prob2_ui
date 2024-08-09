@@ -16,10 +16,12 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.exception.ProBError;
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -68,27 +70,24 @@ public final class CBCDeadlockFreedomCheckingItem extends SymbolicCheckingFormul
 	
 	@Override
 	public void execute(ExecutionContext context) {
-		this.getCounterExamples().clear();
-		
 		ClassicalB parsedPredicate;
 		try {
 			parsedPredicate = new ClassicalB(this.getPredicate());
 		} catch (ProBError exc) {
 			LOGGER.error("Failed to parse additional predicate for CBC deadlock checking", exc);
-			this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "common.result.message", exc.getMessage()));
 			return;
 		}
 		IModelCheckingResult result = new CBCDeadlockChecker(context.stateSpace(), parsedPredicate).call();
 		
 		if (result instanceof ModelCheckOk) {
-			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success"));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS));
 		} else if (result instanceof CBCDeadlockFound deadlock) {
-			this.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample"));
-			this.getCounterExamples().setAll(deadlock.getTrace(context.stateSpace()));
+			this.setResult(new TraceResult(CheckingStatus.FAIL, deadlock.getTrace(context.stateSpace()), "verifications.symbolicModelChecking.result.counterExample"));
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));
 		} else if (result instanceof CheckError) {
-			this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "common.result.message", result.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "common.result.message", result.getMessage()));
 		} else {
 			throw new AssertionError("Unhandled CBC deadlock checking result type: " + result.getClass());
 		}

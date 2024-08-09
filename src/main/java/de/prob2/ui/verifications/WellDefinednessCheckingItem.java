@@ -43,14 +43,14 @@ public final class WellDefinednessCheckingItem extends SymbolicCheckingFormulaIt
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Well-definedness checking interrupted by user", exc);
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 			return;
 		}
 
 		if (cmd.getDischargedCount().equals(cmd.getTotalCount())) {
-			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.allDischarged.message", cmd.getTotalCount()));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.wellDefinednessChecking.result.allDischarged.message", cmd.getTotalCount()));
 		} else {
-			this.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.wellDefinednessChecking.result.undischarged.message", cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount())));
+			this.setResult(new CheckingResult(CheckingStatus.FAIL, "verifications.wellDefinednessChecking.result.undischarged.message", cmd.getDischargedCount(), cmd.getTotalCount(), cmd.getTotalCount().subtract(cmd.getDischargedCount())));
 		}
 	}
 }

@@ -4,13 +4,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.IConsoleOutputListener;
+import de.prob2.ui.internal.FXMLInjected;
 
 import javafx.application.Platform;
 
 import org.fxmisc.richtext.InlineCssTextArea;
 
+@FXMLInjected
 @Singleton
-public class PrologOutput extends InlineCssTextArea {
+public final class PrologOutput extends InlineCssTextArea {
 	private final IConsoleOutputListener outputListener;
 
 	@Inject

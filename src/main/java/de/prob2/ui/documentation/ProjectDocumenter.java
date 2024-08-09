@@ -8,14 +8,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.statespace.StateSpace;
@@ -25,7 +23,6 @@ import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 
 import org.apache.velocity.VelocityContext;
@@ -33,38 +30,39 @@ import org.apache.velocity.app.Velocity;
 
 public class ProjectDocumenter {
 	private final String filename;
+	private final Locale locale;
 	private final I18n i18n;
 	private final Path directory;
 	private final boolean modelchecking;
 	private final boolean ltl;
 	private final boolean symbolic;
 	private final boolean makePdf;
-	private final boolean printHtmlCode;
 	private final List<Machine> machines;
 	private final CurrentProject project;
-	private final Injector injector;
-	private final HashMap<String,String> tracesHtmlPaths;
 
 	@Inject
-	public ProjectDocumenter(CurrentProject project,
-							 I18n i18n, boolean modelchecking,
-							 boolean ltl, boolean symbolic, boolean makePdf, boolean printHtmlCode,
-							 List<Machine> machines,
-							 Path dir,
-							 String filename,
-							 Injector injector){
+	public ProjectDocumenter(
+		CurrentProject project,
+		Locale locale,
+		I18n i18n,
+		boolean modelchecking,
+		boolean ltl,
+		boolean symbolic,
+		boolean makePdf,
+		List<Machine> machines,
+		Path dir,
+		String filename
+	) {
 		this.project = project;
+		this.locale = locale;
 		this.i18n = i18n;
 		this.modelchecking = modelchecking;
 		this.ltl = ltl;
 		this.symbolic = symbolic;
 		this.makePdf = makePdf;
-		this.printHtmlCode = printHtmlCode;
 		this.machines = machines;
 		this.directory = dir;
 		this.filename = filename;
-		this.injector = injector;
-		tracesHtmlPaths = new HashMap<>();
 	}
 
 	private static Process createPdf(String filename, Path directory) throws IOException {
@@ -106,8 +104,7 @@ public class ProjectDocumenter {
 
 	// future translations can be added here
 	private String getLanguageTemplate() {
-		String language = injector.getInstance(Locale.class).getLanguage();
-		return switch (language) {
+		return switch (locale.getLanguage()) {
 			case "de" -> "de/prob2/ui/documentation/velocity_template_german.tex.vm";
 			default -> "de/prob2/ui/documentation/velocity_template_english.tex.vm";
 		};
@@ -115,8 +112,8 @@ public class ProjectDocumenter {
 
 	private static void initVelocityEngine() {
 		Properties p = new Properties();
-		p.setProperty("resource.loader", "class");
-		p.setProperty("class.resource.loader.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
+		p.setProperty("resource.loaders", "class");
+		p.setProperty("resource.loader.class.class", "org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader");
 		Velocity.init(p);
 	}
 
@@ -128,11 +125,9 @@ public class ProjectDocumenter {
 		context.put("modelchecking", modelchecking);
 		context.put("ltl", ltl);
 		context.put("symbolic", symbolic);
-		context.put("printHtmlCode",printHtmlCode);
 		context.put("util", TemplateUtility.class);
 		context.put("Transition", Transition.class);
 		context.put("i18n", i18n);
-		context.put("traceHtmlPaths",tracesHtmlPaths);
 		return context;
 	}
 
@@ -140,12 +135,9 @@ public class ProjectDocumenter {
 		Path htmlDirectory = getHtmlDirectory(machine);
 		Files.createDirectories(directory.resolve(htmlDirectory));
 		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
-		/* reloadMachine works with completable futures. Project access before its finished Loading, can create null Exceptions.
-		* To solve this Problem, wait on the CompletableFuture. */
-		project.reloadMachine(machine).join();
-		final StateSpace stateSpace = injector.getInstance(CurrentTrace.class).getStateSpace();
+		StateSpace stateSpace = project.loadMachineWithConfirmation(machine).join().getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
-		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getAnimatedReplayedTrace(), directory.resolve(htmlPath));
+		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getTrace(), directory.resolve(htmlPath));
 		stateSpace.execute(cmd);
 		return htmlPath.toString();
 	}

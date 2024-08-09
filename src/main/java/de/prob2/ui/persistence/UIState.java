@@ -1,7 +1,9 @@
 package de.prob2.ui.persistence;
 
 import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -17,27 +19,34 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.internal.PerspectiveKind;
+import de.prob2.ui.internal.StopActions;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.BoundingBox;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
-public class UIState {
-	
+public final class UIState {
+	private static final Logger LOGGER = LoggerFactory.getLogger(UIState.class);
+
 	private final ObjectProperty<Locale> localeOverride;
 	private PerspectiveKind perspectiveKind;
 	private String perspective;
+	private boolean exiting;
 	private final Set<String> savedVisibleStages;
 	private final Map<String, BoundingBox> savedStageBoxes;
 	private final Map<String, Reference<Stage>> stages;
 	
 	@Inject
-	public UIState(final Config config) {
+	public UIState(Config config, StopActions stopActions) {
 		this.localeOverride = new SimpleObjectProperty<>(this, "localeOverride", null);
 		this.perspectiveKind = PerspectiveKind.PRESET;
 		this.perspective = MainController.DEFAULT_PERSPECTIVE;
+		this.exiting = false;
 		this.savedVisibleStages = new LinkedHashSet<>();
 		this.savedStageBoxes = new LinkedHashMap<>();
 		this.stages = new LinkedHashMap<>();
@@ -53,11 +62,11 @@ public class UIState {
 				}
 				
 				if (configData.visibleStages != null) {
-					getSavedVisibleStages().addAll(configData.visibleStages);
+					savedVisibleStages.addAll(configData.visibleStages);
 				}
 				
 				if (configData.stageBoxes != null) {
-					getSavedStageBoxes().putAll(configData.stageBoxes);
+					savedStageBoxes.putAll(configData.stageBoxes);
 				}
 			}
 			
@@ -72,6 +81,8 @@ public class UIState {
 				configData.stageBoxes = new HashMap<>(getSavedStageBoxes());
 			}
 		});
+		
+		stopActions.add(this::prepareForExit);
 	}
 	
 	public ObjectProperty<Locale> localeOverrideProperty() {
@@ -102,31 +113,80 @@ public class UIState {
 		this.perspective = perspective;
 	}
 	
+	/**
+	 * Ignore all stage show/hide/focus events from this point on.
+	 * Called when the UI is preparing to exit,
+	 * because the exiting process often closes stages in an unpredictable order
+	 * or changes the focus even though the user hasn't actively switched windows.
+	 */
+	public void prepareForExit() {
+		LOGGER.trace("Preparing to exit - ignoring all stage show/hide/focus events from now on");
+		this.exiting = true;
+	}
+	
 	public Set<String> getSavedVisibleStages() {
-		return this.savedVisibleStages;
+		return Collections.unmodifiableSet(this.savedVisibleStages);
+	}
+	
+	public void stageWasShown(String stageId) {
+		if (this.exiting) {
+			return;
+		}
+		
+		LOGGER.trace("Stage with ID \"{}\" was shown", stageId);
+		this.savedVisibleStages.add(stageId);
+	}
+	
+	public void stageWasHidden(String stageId) {
+		if (this.exiting) {
+			return;
+		}
+		
+		LOGGER.trace("Stage with ID \"{}\" was hidden", stageId);
+		this.savedVisibleStages.remove(stageId);
+	}
+	
+	public void stageWasFocused(String stageId) {
+		if (this.exiting) {
+			return;
+		}
+		
+		if (this.savedVisibleStages.remove(stageId)) {
+			LOGGER.trace("Stage with ID \"{}\" was focused", stageId);
+			this.savedVisibleStages.add(stageId);
+		}
+	}
+	
+	public void resetVisibleStages() {
+		this.savedVisibleStages.clear();
 	}
 	
 	public Map<String, BoundingBox> getSavedStageBoxes() {
-		return this.savedStageBoxes;
+		return Collections.unmodifiableMap(this.savedStageBoxes);
+	}
+	
+	public void saveStageBox(Stage stage, String stageId) {
+		BoundingBox box = new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight());
+		LOGGER.trace(
+			"Saving position/size for stage with ID \"{}\": x={}, y={}, width={}, height={}",
+			stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
+		);
+		this.savedStageBoxes.put(stageId, box);
 	}
 	
 	public Map<String, Reference<Stage>> getStages() {
-		return this.stages;
+		return Collections.unmodifiableMap(this.stages);
 	}
 	
-	public void moveStageToEnd(String id) {
-		savedVisibleStages.remove(id);
-		savedVisibleStages.add(id);
+	public void addStage(Stage stage, String stageId) {
+		this.stages.put(stageId, new WeakReference<>(stage));
 	}
 	
 	public void updateSavedStageBoxes() {
 		for (final Map.Entry<String, Reference<Stage>> entry : this.getStages().entrySet()) {
 			final Stage stage = entry.getValue().get();
 			if (stage != null) {
-				this.getSavedStageBoxes().put(
-					entry.getKey(),
-					new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight())
-				);
+				this.saveStageBox(stage, entry.getKey());
 			}
 		}
 	}

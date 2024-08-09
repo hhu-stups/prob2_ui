@@ -44,6 +44,7 @@ public final class ConfigData extends BasicConfigData implements HasMetadata {
 	public String currentVisualisationTab;
 	public List<String> expandedTitledPanes;
 	public String defaultProjectLocation;
+	public boolean autoReloadMachine;
 	public double[] horizontalDividerPositions;
 	public double[] verticalDividerPositions;
 	public List<Double> statesViewColumnsWidth;

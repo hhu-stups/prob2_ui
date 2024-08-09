@@ -19,8 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration> {
-
+public final class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration> {
 	@FXML
 	private VBox itemBox;
 

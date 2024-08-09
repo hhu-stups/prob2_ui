@@ -50,7 +50,7 @@ public class RequirementRefineDialog extends Stage {
 	@FXML
 	private void refine(){
 		final Set<ValidationObligation> refinedVos = checkBox.isSelected() ? oldReq.getValidationObligations() : Collections.emptySet();
-		Requirement newReq = new Requirement(oldReq.getName()+"_refined", targetMenu.getValue(), oldReq.getType(), oldRequirement.getText(), refinedVos, Collections.emptyList(), oldReq);
+		Requirement newReq = new Requirement(oldReq.getName()+"_refined", targetMenu.getValue(), oldRequirement.getText(), refinedVos, Collections.emptyList(), oldReq);
 
 		currentProject.addRequirement(newReq);
 

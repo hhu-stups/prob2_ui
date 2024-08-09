@@ -37,7 +37,12 @@ class OperationItem extends TreeItem<Object> {
 				executable = true;
 				switch (ruleResult.getRuleState()) {
 					case FAIL, NOT_CHECKED -> createRuleChildren(ruleResult);
-					case DISABLED, SUCCESS -> {
+					case SUCCESS -> {
+						OperationItem.this.getChildren().clear();
+						addSuccessMessages(ruleResult);
+						executable = false;
+					}
+					case DISABLED -> {
 						OperationItem.this.getChildren().clear();
 						executable = false;
 					}
@@ -82,8 +87,7 @@ class OperationItem extends TreeItem<Object> {
 		switch(result.getRuleState()) {
 			case FAIL:
 				// create child items to show why the rule failed
-				result.getCounterExamples().sort(Comparator.comparingInt(RuleResult.CounterExample::getErrorType));
-				addCounterExamples(result.getCounterExamples());
+				addCounterExamples(result);
 				executable = false;
 				break;
 			case NOT_CHECKED:
@@ -113,27 +117,47 @@ class OperationItem extends TreeItem<Object> {
 				addDisabledDependencies(disabledDependencies);
 				break;
 		}
+		addSuccessMessages(result);
 	}
 
-	private void addCounterExamples(List<RuleResult.CounterExample> counterExamples) {
-		TreeItem<Object> violationItem = new TreeItem<>(i18n.translate("rulevalidation.table.violations"));
-		int size = counterExamples.size();
+	private void addCounterExamples(RuleResult result) {
+		if (result.getNumberOfViolations() == -1) {
+			this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.violations.infinitelyMany")));
+		} else {
+			addMessages(result.getCounterExamples(), i18n.translate("rulevalidation.table.violations"));
+		}
+	}
+
+	private void addSuccessMessages(RuleResult result) {
+		if (result.getNumberOfSuccesses() == -1) {
+			this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.successful.infinitelyMany")));
+		} else {
+			addMessages(result.getSuccessMessages(), i18n.translate("rulevalidation.table.successful"));
+		}
+	}
+
+	private <T> void addMessages(List<T> messages, String displayedParentName) {
+		int size = messages.size();
+		if (size == 0) {
+			return;
+		}
+		TreeItem<Object> messageItem = new TreeItem<>(displayedParentName + " (" + size + ")");
 		if (size > 10) {
-			TreeItem<Object> collapsedExamples = new TreeItem<>(i18n.translate("rulevalidation.table.violations.showAll") + " (" + size + ")");
-			// display the first ten violations and collapse the others
+			TreeItem<Object> collapsedMessages = new TreeItem<>(i18n.translate("rulevalidation.table.violations.showAll") + " (" + (size - 10) + ")");
+			// display the first ten messages and collapse the others
 			for (int i = 0; i < 10; i++) {
-				violationItem.getChildren().add(new TreeItem<>(counterExamples.get(i)));
+				messageItem.getChildren().add(new TreeItem<>(messages.get(i)));
 			}
 			for (int i = 10; i < size; i++) {
-				collapsedExamples.getChildren().add(new TreeItem<>(counterExamples.get(i)));
+				collapsedMessages.getChildren().add(new TreeItem<>(messages.get(i)));
 			}
-			violationItem.getChildren().add(collapsedExamples);
+			messageItem.getChildren().add(collapsedMessages);
 		} else {
-			for (RuleResult.CounterExample example : counterExamples) {
-				violationItem.getChildren().add(new TreeItem<>(example));
+			for (T message : messages) {
+				messageItem.getChildren().add(new TreeItem<>(message));
 			}
 		}
-		this.getChildren().add(violationItem);
+		this.getChildren().add(messageItem);
 	}
 
 	private void addDisabledDependencies(List<String> disabledDependencies) {

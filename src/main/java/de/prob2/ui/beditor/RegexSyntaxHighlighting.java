@@ -45,7 +45,7 @@ public final class RegexSyntaxHighlighting {
 		//B-Rules DSL keywords Regex
 		var tokenClassesForRulesDSL = List.of(
 				new TokenClass("editor_keyword", compile("RULES_MACHINE|REFERENCES", U)),
-				new TokenClass("editor_ctrlkeyword", compile("RULE_FORALL|RULE_FAIL|RULEID|RULE|DEPENDS_ON_RULE|DEPENDS_ON_COMPUTATION|ACTIVATION|REPLACES|ERROR_TYPES|CLASSIFICATION|TAGS|BODY|EXPECT|ERROR_TYPE|COUNTEREXAMPLE|COMPUTATION|DEFINE|TYPE|DUMMY_VALUE|VALUE|FUNCTION|PRECONDITION|POSTCONDITION|FOR|IN|DO", U)),
+				new TokenClass("editor_ctrlkeyword", compile("RULE_FORALL|RULE_FAIL|RULEID|RULE|DEPENDS_ON_RULE|DEPENDS_ON_COMPUTATION|ACTIVATION|REPLACES|ERROR_TYPES|CLASSIFICATION|TAGS|BODY|EXPECT|ERROR_TYPE|ON_SUCCESS|COUNTEREXAMPLE|COMPUTATION|DEFINE|TYPE|DUMMY_VALUE|VALUE|FUNCTION|PRECONDITION|POSTCONDITION|FOR", U)),
 				new TokenClass("editor_special_identifier", compile("SUCCEEDED_RULE(?:_ERROR_TYPE)?|GET_RULE_COUNTEREXAMPLES|FAILED_RULE(?:_ERROR_TYPE|_ALL_ERROR_TYPES)?|NOT_CHECKED_RULE|DISABLED_RULE|STRING_FORMAT"))
 		);
 
@@ -64,7 +64,7 @@ public final class RegexSyntaxHighlighting {
 		var tokenClassesForXTL = List.of(
 				new TokenClass("editor_keyword", compile("start|trans|prop|heuristic_function_result|heuristic_function_active|prob_pragma_string|animation_(?:function_result|image|image_right_click_transition|image_click_transition)")),
 				new TokenClass("editor_types", compile("true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term|dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth1|nth0|nth|perm2|perm|permutation|same_length|add_error|print|write|sort")),
-				new TokenClass("editor_string", compile("\"(?:[^\"\\\\]|\\\\.)*\"|'(?:[^'\\\\]|\\\\.)*'")),
+				new TokenClass("editor_string", compile("\"(?:[^\"\n\r\\\\]|\\\\.)*\"|'(?:[^'\n\r\\\\]|\\\\.)*'")),
 				new TokenClass("editor_xtl_variable", compile("[_A-Z][_a-zA-Z0-9]*")),
 				new TokenClass("editor_xtl_functor", compile("[a-z][_a-zA-Z0-9]*")),
 				new TokenClass("editor_assignments", compile(":-|!|-->|;|\\.")),

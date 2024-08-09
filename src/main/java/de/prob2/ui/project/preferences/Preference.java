@@ -5,59 +5,37 @@ import java.util.Map;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-
-public class Preference {
+public final class Preference {
 	public static final Preference DEFAULT = new Preference("default", Collections.emptyMap());
 	
-	private final StringProperty name;
-	private Map<String, String> preferences;
-	@JsonIgnore
-	private final BooleanProperty changed = new SimpleBooleanProperty(false);
+	private final String name;
+	private final Map<String, String> preferences;
 
 	@JsonCreator
 	public Preference(
 		@JsonProperty("name") final String name,
 		@JsonProperty("preferences") final Map<String, String> preferences
 	) {
-		this.name = new SimpleStringProperty(this, "name", Objects.requireNonNull(name, "name"));
+		this.name = Objects.requireNonNull(name, "name");
 		this.preferences = Objects.requireNonNull(preferences, "preferences");
 	}
 	
-	public BooleanProperty changedProperty() {
-		return changed;
-	}
-	
-	public StringProperty nameProperty() {
+	public String getName() {
 		return this.name;
 	}
 	
-	public String getName() {
-		return this.nameProperty().get();
-	}
-	
-	public void setName(String name) {
-		this.nameProperty().set(name);
-		this.changed.set(true);
-	}
-	
 	public Map<String, String> getPreferences() {
-		return preferences;
-	}
-	
-	public void setPreferences(Map<String, String> preferences) {
-		this.preferences = preferences;
-		this.changed.set(true);
+		return Collections.unmodifiableMap(this.preferences);
 	}
 	
 	@Override
 	public String toString() {
-		return this.getName();
+		return MoreObjects.toStringHelper(this)
+			.add("name", this.getName())
+			.add("preferences", this.getPreferences())
+			.toString();
 	}
 }

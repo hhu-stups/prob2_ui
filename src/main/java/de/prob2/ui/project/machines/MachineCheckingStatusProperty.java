@@ -1,6 +1,6 @@
 package de.prob2.ui.project.machines;
 
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableTask;
 
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
@@ -11,7 +11,7 @@ import javafx.collections.ObservableList;
 import javafx.collections.WeakListChangeListener;
 
 final class MachineCheckingStatusProperty extends ReadOnlyObjectPropertyBase<MachineCheckingStatus> {
-	private final ObservableList<? extends IExecutableItem> items;
+	private final ObservableList<? extends ISelectableTask> items;
 
 	// The listeners must be stored as instance fields and not local variables,
 	// because they will be added as weak listeners and not automatically kept alive.
@@ -20,9 +20,9 @@ final class MachineCheckingStatusProperty extends ReadOnlyObjectPropertyBase<Mac
 	private final InvalidationListener changedListener;
 	private final WeakInvalidationListener changedListenerWeak;
 	@SuppressWarnings("FieldCanBeLocal")
-	private final ListChangeListener<IExecutableItem> listChangeListener;
+	private final ListChangeListener<ISelectableTask> listChangeListener;
 
-	MachineCheckingStatusProperty(ObservableList<? extends IExecutableItem> items) {
+	MachineCheckingStatusProperty(ObservableList<? extends ISelectableTask> items) {
 		this.items = items;
 
 		this.changedListener = o -> Platform.runLater(this::fireValueChangedEvent);
@@ -31,11 +31,11 @@ final class MachineCheckingStatusProperty extends ReadOnlyObjectPropertyBase<Mac
 			while (change.next()) {
 				change.getRemoved().forEach(item -> {
 					item.selectedProperty().removeListener(this.changedListenerWeak);
-					item.checkedProperty().removeListener(this.changedListenerWeak);
+					item.statusProperty().removeListener(this.changedListenerWeak);
 				});
 				change.getAddedSubList().forEach(item -> {
 					item.selectedProperty().addListener(this.changedListenerWeak);
-					item.checkedProperty().addListener(this.changedListenerWeak);
+					item.statusProperty().addListener(this.changedListenerWeak);
 				});
 			}
 			this.changedListenerWeak.invalidated(change.getList());
@@ -44,7 +44,7 @@ final class MachineCheckingStatusProperty extends ReadOnlyObjectPropertyBase<Mac
 		this.items.addListener(new WeakListChangeListener<>(this.listChangeListener));
 		items.forEach(item -> {
 			item.selectedProperty().addListener(this.changedListenerWeak);
-			item.checkedProperty().addListener(this.changedListenerWeak);
+			item.statusProperty().addListener(this.changedListenerWeak);
 		});
 	}
 

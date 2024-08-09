@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.CommandInterruptedException;
@@ -16,9 +16,9 @@ import de.prob.check.tracereplay.TraceReplayStatus;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
-import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
 
 import javafx.application.Platform;
 
@@ -27,19 +27,18 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class TraceChecker {
-
+public final class TraceChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
 
 	private final CurrentTrace currentTrace;
-	private final Injector injector;
-	private final StageManager stageManager;
+	private final TraceFileHandler traceFileHandler;
+	private final Provider<ReplayedTraceStatusAlert> replayedAlertProvider;
 
 	@Inject
-	private TraceChecker(final CurrentTrace currentTrace, final Injector injector, final StageManager stageManager) {
+	private TraceChecker(CurrentTrace currentTrace, TraceFileHandler traceFileHandler, Provider<ReplayedTraceStatusAlert> replayedAlertProvider) {
 		this.currentTrace = currentTrace;
-		this.injector = injector;
-		this.stageManager = stageManager;
+		this.traceFileHandler = traceFileHandler;
+		this.replayedAlertProvider = replayedAlertProvider;
 	}
 
 	public void check(ReplayTrace replayTrace) {
@@ -48,7 +47,7 @@ public class TraceChecker {
 			checkNoninteractive(replayTrace, stateSpace);
 			setCurrentTraceAfterReplay(replayTrace);
 		} catch (RuntimeException exc) {
-			Platform.runLater(() -> injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, exc));
+			Platform.runLater(() -> traceFileHandler.showLoadError(replayTrace, exc));
 		}
 	}
 
@@ -62,10 +61,8 @@ public class TraceChecker {
 			errors.add(error);
 		}
 		replayed = replayed.withErrors(errors);
-		replayTrace.setReplayedTrace(replayed);
 		Trace trace = replayed.getTrace(stateSpace);
-		replayTrace.setAnimatedReplayedTrace(trace);
-		replayTrace.setChecked(errors.isEmpty() ? Checked.SUCCESS : Checked.FAIL);
+		replayTrace.setResult(new ReplayTrace.Result(replayed, trace));
 	}
 
 	public static void checkNoninteractive(ReplayTrace replayTrace, StateSpace stateSpace) {
@@ -79,9 +76,9 @@ public class TraceChecker {
 			checkNoninteractiveInternal(replayTrace, stateSpace);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Trace check interrupted by user", exc);
-			replayTrace.setChecked(Checked.NOT_CHECKED);
+			replayTrace.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 		} catch (RuntimeException exc) {
-			replayTrace.setChecked(Checked.INVALID_TASK);
+			replayTrace.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "common.result.message", exc.toString()));
 			throw exc;
 		} finally {
 			Platform.runLater(() -> replayTrace.setProgress(-1));
@@ -90,18 +87,23 @@ public class TraceChecker {
 
 	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
 		Platform.runLater(() -> {
-			ReplayedTraceStatusAlert alert = injector.getInstance(ReplayedTraceStatusAlert.class);
+			ReplayedTraceStatusAlert alert = replayedAlertProvider.get();
 			alert.initReplayTrace(replayTrace);
-			alert.handleAcceptDiscard();
+			alert.showAndWait().ifPresent(buttonType -> {
+				if (buttonType.equals(alert.getAcceptButtonType())) {
+					currentTrace.set(replayTrace.getTrace());
+				}
+			});
 		});
 	}
 
 	public void setCurrentTraceAfterReplay(final ReplayTrace replayTrace) {
 		// set the current trace if no error has occurred. Otherwise leave the decision to the user
-		if (!replayTrace.getReplayedTrace().getErrors().isEmpty()) {
+		var traceResult = (ReplayTrace.Result)replayTrace.getResult();
+		if (!traceResult.getReplayed().getErrors().isEmpty()) {
 			showTraceReplayCompleteFailed(replayTrace);
 		} else {
-			currentTrace.set(replayTrace.getAnimatedReplayedTrace());
+			currentTrace.set(traceResult.getTrace());
 		}
 	}
 }

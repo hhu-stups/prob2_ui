@@ -8,8 +8,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.GetRedundantInvariantsCommand;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
@@ -48,15 +48,15 @@ public final class CBCFindRedundantInvariantsItem extends SymbolicCheckingFormul
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("CBC find redundant invariants interrupted by user", exc);
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 			return;
 		}
 		
 		List<String> result = cmd.getRedundantInvariants();
 		if (result.isEmpty()) {
-			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.notFound"));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.cbc.findRedundantInvariants.result.notFound"));
 		} else {
-			this.setResultItem(new CheckingResultItem(cmd.isTimeout() ? Checked.TIMEOUT : Checked.FAIL, "verifications.symbolicchecking.resultHandler.findRedundantInvariants.result.found", String.join("\n", result)));
+			this.setResult(new CheckingResult(cmd.isTimeout() ? CheckingStatus.TIMEOUT : CheckingStatus.FAIL, "verifications.cbc.findRedundantInvariants.result.found", String.join("\n", result)));
 		}
 	}
 }

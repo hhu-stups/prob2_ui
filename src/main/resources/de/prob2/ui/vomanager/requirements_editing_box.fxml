@@ -3,8 +3,6 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.vomanager.RequirementsEditingBox?>
-<?import de.prob2.ui.vomanager.RequirementType?>
-<?import javafx.collections.FXCollections?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
@@ -30,19 +28,8 @@
 			<Insets topRightBottomLeft="10.0"/>
 		</padding>
 		<HBox alignment="CENTER_LEFT" spacing="5.0">
-			<Label text="Requirement Type:"/>
-			<ChoiceBox fx:id="cbRequirementChoice">
-				<items>
-					<FXCollections fx:factory="observableArrayList">
-						<RequirementType fx:value="FUNCTIONAL"/>
-						<RequirementType fx:value="NON_FUNCTIONAL"/>
-					</FXCollections>
-				</items>
-			</ChoiceBox>
-		</HBox>
-		<HBox alignment="CENTER_LEFT" spacing="5.0">
 			<Label text="%vomanager.edit.requirement.name"/>
-			<TextField fx:id="tfName" prefWidth="250.0" style="-fx-control-inner-background: #f8f8f8; -fx-border-color: -prob-aqua; -fx-border-width: 2;"/>
+			<TextField fx:id="tfName" prefWidth="250.0"/>
 		</HBox>
 		<HBox alignment="CENTER_LEFT" spacing="5.0">
 			<Label text="%vomanager.edit.requirement.linkMachine"/>

@@ -1,19 +1,19 @@
 package de.prob2.ui.project;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.ReusableAnimator;
 import de.prob.animator.command.GetVersionCommand;
 import de.prob.animator.domainobjects.ErrorItem;
@@ -28,6 +28,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.ErrorDisplayFilter;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.output.PrologOutput;
@@ -35,6 +36,7 @@ import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.machines.EditMachinesDialog;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.statusbar.StatusBar;
 
@@ -45,13 +47,13 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
-
 import javafx.scene.control.ButtonType;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class MachineLoader {
+public final class MachineLoader {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MachineLoader.class);
 
 	private final CurrentProject currentProject;
@@ -62,6 +64,7 @@ public class MachineLoader {
 	private final PrologOutput prologOutput;
 	private final StatusBar statusBar;
 	private final CliTaskExecutor cliExecutor;
+	private final I18n i18n;
 	private final Injector injector;
 
 	private final ReadOnlyBooleanWrapper loading;
@@ -80,6 +83,7 @@ public class MachineLoader {
 		final PrologOutput prologOutput,
 		final StatusBar statusBar,
 		final CliTaskExecutor cliExecutor,
+		final I18n i18n,
 		final Injector injector
 	) {
 		this.currentProject = currentProject;
@@ -90,6 +94,7 @@ public class MachineLoader {
 		this.prologOutput = prologOutput;
 		this.statusBar = statusBar;
 		this.cliExecutor = cliExecutor;
+		this.i18n = i18n;
 		this.injector = injector;
 
 		this.loading = new ReadOnlyBooleanWrapper(this, "loading", false);
@@ -259,12 +264,19 @@ public class MachineLoader {
 		}
 	}
 
-	public CompletableFuture<?> loadAsync(Machine machine, Map<String, String> pref) {
-		return this.cliExecutor.submit(() -> {
-			this.load(machine, pref);
-			return null;
-		}).whenComplete((r, e) -> {
+	public CompletableFuture<Trace> loadAsync(Machine machine, Map<String, String> pref) {
+		return this.cliExecutor.submit(() -> this.load(machine, pref)).whenComplete((r, e) -> {
 			if (e != null) {
+				if (e instanceof InterruptedException || e instanceof CommandInterruptedException) {
+					LOGGER.info("Loading of machine {} was interrupted", machine.getName(), e);
+					return;
+				}
+
+				if (e instanceof CancellationException) {
+					LOGGER.info("Loading of machine {} was cancelled", machine.getName(), e);
+					return;
+				}
+
 				LOGGER.error("Exception while loading machine {}", machine.getName());
 				if (e instanceof EventBFileNotFoundException exc) {
 					if(!exc.refreshProject()) {
@@ -291,18 +303,23 @@ public class MachineLoader {
 
 	private void showAlert(Throwable exception, Machine machine) {
 		Platform.runLater(() -> {
+			ButtonType edit = new ButtonType(i18n.translate("project.machineLoader.alerts.button.editMachine"));
 			List<ButtonType> buttons = new ArrayList<>();
 			buttons.add(ButtonType.YES);
 			buttons.add(ButtonType.NO);
+			buttons.add(edit);
 			Alert alert =
 				stageManager.makeAlert(AlertType.ERROR, buttons,
 					"project.machineLoader.alerts.fileNotFound.header",
 					"project.machineLoader.alerts.fileNotFound.content",
 					exception.getLocalizedMessage(),
 					machine.getName());
-			Optional<ButtonType> result = alert.showAndWait();
-			if (result.isPresent() && result.get().equals(ButtonType.YES)) {
+			ButtonType result = alert.showAndWait().orElse(null);
+			if (ButtonType.YES.equals(result)) {
 				currentProject.removeMachine(machine);
+			} else if (edit.equals(result)) {
+				EditMachinesDialog editDialog = injector.getInstance(EditMachinesDialog.class);
+				editDialog.editAndShow(machine);
 			}
 		});
 	}
@@ -314,7 +331,7 @@ public class MachineLoader {
 		});
 	}
 
-	private void loadInternal(final Machine machine, final Map<String, String> prefs) throws IOException {
+	private Trace loadInternal(final Machine machine, final Map<String, String> prefs) throws InterruptedException, IOException {
 		this.currentTrace.set(null);
 		setLoadingStatus(StatusBar.LoadingStatus.PARSING_FILE);
 		final Path path = currentProject.get().getAbsoluteMachinePath(machine);
@@ -322,31 +339,33 @@ public class MachineLoader {
 		final ModelFactory<?> modelFactory = injector.getInstance(machine.getModelFactoryClass());
 		final ExtractedModel<?> extract = modelFactory.extract(path.toString());
 		if (Thread.currentThread().isInterrupted()) {
-			return;
+			throw new InterruptedException("Machine loading was interrupted");
 		}
 
 		setLoadingStatus(StatusBar.LoadingStatus.STARTING_ANIMATOR);
 		final StateSpace stateSpace = this.createNewStateSpace();
 		if (Thread.currentThread().isInterrupted()) {
-			return;
+			throw new InterruptedException("Machine loading was interrupted");
 		}
 		try {
 			final Map<String, String> allPrefs = new HashMap<>(this.globalPreferences);
 			allPrefs.putAll(prefs);
 			stateSpace.changePreferences(allPrefs);
 			if (Thread.currentThread().isInterrupted()) {
-				return;
+				throw new InterruptedException("Machine loading was interrupted");
 			}
 			
 			setLoadingStatus(StatusBar.LoadingStatus.LOADING_MODEL);
 			extract.loadIntoStateSpace(stateSpace);
 			if (Thread.currentThread().isInterrupted()) {
 				stateSpace.kill();
-				return;
+				throw new InterruptedException("Machine loading was interrupted");
 			}
 			
 			setLoadingStatus(StatusBar.LoadingStatus.SETTING_CURRENT_MODEL);
-			this.currentTrace.set(new Trace(stateSpace));
+			Trace trace = new Trace(stateSpace);
+			this.currentTrace.set(trace);
+			return trace;
 		} catch (RuntimeException e) {
 			// Don't leave state space active if an exception was thrown before the current trace could be set.
 			stateSpace.kill();
@@ -354,7 +373,7 @@ public class MachineLoader {
 		}
 	}
 
-	private void load(Machine machine, Map<String, String> prefs) throws IOException {
+	private Trace load(Machine machine, Map<String, String> prefs) throws InterruptedException, IOException {
 		// NOTE: This method may be called from outside the JavaFX main thread,
 		// for example from loadAsync.
 		// This means that all JavaFX calls must be wrapped in
@@ -363,7 +382,7 @@ public class MachineLoader {
 		// Prevent multiple threads from loading a file at the same time
 		synchronized (this.openLock) {
 			try {
-				loadInternal(machine, prefs);
+				return loadInternal(machine, prefs);
 			} finally {
 				setLoadingStatus(StatusBar.LoadingStatus.NOT_LOADING);
 			}

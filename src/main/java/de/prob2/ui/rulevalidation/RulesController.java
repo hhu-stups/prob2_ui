@@ -30,8 +30,7 @@ import java.util.Set;
  * @since 20.12.17
  */
 @Singleton
-public class RulesController {
-
+public final class RulesController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RulesController.class);
 
 	private final StageManager stageManager;
@@ -65,7 +64,7 @@ public class RulesController {
 					initialize(rulesModel);
 					model.update(rulesChecker.getCurrentTrace());
 				} else {
-					// model didn't change -> update view
+					// model didn't change -> update view with same collapsed items
 					LOGGER.debug("Update rules view to new trace!");
 					model.update(newTrace);
 				}
@@ -143,7 +142,7 @@ public class RulesController {
 
 	private void execute(Task<Void> task, String operation) {
 		task.setOnSucceeded(event -> {
-			LOGGER.debug("Task for execution of rule " + operation + " succeeded!");
+			LOGGER.debug("Task for execution of rule {} succeeded!", operation);
 			int before = currentTrace.get().size();
 			// don't count setup_constants and initialization
 			if (operation != null && nrExecutedOperations == 0) before += 2;
@@ -154,7 +153,7 @@ public class RulesController {
 		task.setOnFailed(event -> {
 			if (operation != null) {
 				stageManager.makeExceptionAlert(task.getException(), "rulevalidation.execute.error.header", "rulevalidation.execute.error.content.singleRule", operation).showAndWait();
-				LOGGER.debug("Task for execution of rule " + operation + " failed or cancelled!");
+				LOGGER.debug("Task for execution of rule {} failed or cancelled!", operation);
 			} else {
 				stageManager.makeExceptionAlert(task.getException(),"rulevalidation.execute.error.header", "rulevalidation.execute.error.content.allRules").showAndWait();
 				LOGGER.debug("Task for execution of all rules failed or cancelled!");

@@ -1,10 +1,17 @@
 package de.prob2.ui;
 
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -19,14 +26,12 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.DetachViewStageController;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 
-import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.collections.ObservableList;
@@ -34,6 +39,7 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
@@ -44,10 +50,11 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class MainController extends BorderPane {
+public final class MainController extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(MainController.class);
 
 	public static final String DEFAULT_PERSPECTIVE = "main.fxml";
+	public static final String DETACHED_VIEW_PERSISTENCE_ID_PREFIX = "de.prob2.ui.menu.DetachViewStageController DETACHED ";
 
 	@FXML private TitledPane historyTP;
 	@FXML private HistoryView historyView;
@@ -67,7 +74,8 @@ public class MainController extends BorderPane {
 	private final UIState uiState;
 	private final I18n i18n;
 	private final Config config;
-	private DetachViewStageController detacher;
+
+	private final Map<Class<?>, DetachedViewStage> detachedViewStages;
 
 	@Inject
 	public MainController(Injector injector, StageManager stageManager, UIState uiState, I18n i18n, Config config) {
@@ -76,15 +84,16 @@ public class MainController extends BorderPane {
 		this.uiState = uiState;
 		this.i18n = i18n;
 		this.config = config;
+
+		this.detachedViewStages = new HashMap<>();
+
 		this.reloadMainView();
 	}
 
 	@FXML
 	private void initialize() {
-		Platform.runLater(() -> {
-			this.detacher = injector.getInstance(DetachViewStageController.class);
-			this.getAccordions().forEach(e -> e.getPanes().forEach(this::addContextMenu));
-		});
+		this.getAccordions().forEach(e -> e.getPanes().forEach(this::addContextMenu));
+
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();
 		final ObservableIntegerValue currentHistoryValue = historyView.getCurrentHistoryPositionProperty();
 		this.historyTP.textProperty()
@@ -151,10 +160,7 @@ public class MainController extends BorderPane {
 
 	private void addContextMenu(TitledPane tp) {
 		final MenuItem detachItem = new MenuItem(i18n.translate("common.contextMenu.detach"));
-		detachItem.setOnAction(event -> {
-			detacher.selectForDetach(tp.getContent().getClass().getName());
-			detacher.doDetaching();
-		});
+		detachItem.setOnAction(event -> this.detachView(tp.getContent().getClass()));
 		ContextMenu menu = new ContextMenu(detachItem);
 		// We want to show the detaching context menu only when right-clicking on the title bar,
 		// not the actual content of the TitledPane,
@@ -190,8 +196,8 @@ public class MainController extends BorderPane {
 
 			case CUSTOM:
 				try {
-					url = new URL(perspective);
-				} catch (final MalformedURLException e) {
+					url = new URI(perspective).toURL();
+				} catch (URISyntaxException | MalformedURLException e) {
 					LOGGER.error("Custom perspective FXML URL is malformed", e);
 					url = null;
 				}
@@ -213,5 +219,74 @@ public class MainController extends BorderPane {
 
 	public List<Accordion> getAccordions() {
 		return Collections.unmodifiableList(accordions);
+	}
+
+	public Accordion getAccordionById(String id) {
+		for (Accordion acc : this.getAccordions()) {
+			if (acc != null && id.equals(acc.getId())) {
+				return acc;
+			}
+		}
+		return null;
+	}
+
+	public Set<Class<?>> getDetachedViews() {
+		return this.detachedViewStages.keySet();
+	}
+
+	private void transferToNewWindow(TitledPane tp, Accordion accordion) {
+		Node node = tp.getContent();
+		// Remove the detached view from the TitledPane.
+		// A dummy node is used instead of null to prevent NullPointerExceptions from internal JavaFX code (mostly related to TitledPane/Accordion animations).
+		tp.setContent(new Label("View is detached\n(this label should be invisible)"));
+		DetachedViewStage stage = new DetachedViewStage(stageManager, node, tp, accordion);
+		node.setVisible(true);
+		detachedViewStages.put(node.getClass(), stage);
+		stage.setOnCloseRequest(e -> attachView(node.getClass()));
+		stage.show();
+		stage.toFront();
+	}
+
+	public void detachView(Class<?> clazz) {
+		if (detachedViewStages.containsKey(clazz)) {
+			// View is already detached - nothing to be done.
+			return;
+		}
+
+		LOGGER.debug("Detaching view: {}", clazz);
+		for (Accordion accordion : this.getAccordions()) {
+			for (Iterator<TitledPane> it = accordion.getPanes().iterator(); it.hasNext();) {
+				TitledPane tp = it.next();
+				if (tp.getContent().getClass().equals(clazz)) {
+					it.remove();
+					if (accordion.getPanes().isEmpty()) {
+						accordion.setVisible(false);
+						accordion.setMaxWidth(0);
+						accordion.setMaxHeight(0);
+					}
+					transferToNewWindow(tp, accordion);
+					return;
+				}
+			}
+		}
+
+		throw new NoSuchElementException("View not found in any accordion: " + clazz);
+	}
+
+	public void attachView(Class<?> clazz) {
+		DetachedViewStage stage = detachedViewStages.remove(clazz);
+		if (stage == null) {
+			// View isn't detached - nothing to be done.
+			return;
+		}
+		
+		LOGGER.debug("Attaching view: {}", clazz);
+		stage.reattachView();
+	}
+
+	public void attachAllViews() {
+		LOGGER.debug("Attaching all views");
+		detachedViewStages.values().forEach(DetachedViewStage::reattachView);
+		detachedViewStages.clear();
 	}
 }

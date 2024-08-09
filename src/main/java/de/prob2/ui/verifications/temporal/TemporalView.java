@@ -1,6 +1,7 @@
 package de.prob2.ui.verifications.temporal;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -11,14 +12,15 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingExecutors;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.ICheckingResult;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternStage;
@@ -39,24 +41,35 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 @FXMLInjected
 @Singleton
-public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
+public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private final class Row extends RowBase {
 		private Row() {
 			executeMenuItem.setText(i18n.translate("verifications.temporal.temporalView.contextMenu.check"));
 			
 			MenuItem showCounterExampleItem = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showCounterExample"));
-			showCounterExampleItem.setOnAction(e -> currentTrace.set(itemsTable.getSelectionModel().getSelectedItem().getCounterExample()));
+			showCounterExampleItem.setOnAction(e -> {
+				TemporalFormulaItem task = itemsTable.getSelectionModel().getSelectedItem();
+				currentTrace.set(task.getResult().getTrace());
+			});
 			showCounterExampleItem.setDisable(true);
 			contextMenu.getItems().add(showCounterExampleItem);
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showCheckingMessage"));
-			showMessage.setOnAction(e -> this.getItem().getResultItem().showAlert(stageManager, i18n));
+			showMessage.setOnAction(e -> this.getItem().getResult().showAlert(stageManager, i18n));
 			contextMenu.getItems().add(showMessage);
 			
+			ChangeListener<ICheckingResult> resultListener = (o, from, to) -> {
+				showMessage.setDisable(to == null);
+				showCounterExampleItem.setDisable(to == null || to.getTraces().isEmpty());
+			};
+			
 			this.itemProperty().addListener((observable, from, to) -> {
-				if(to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
-					showCounterExampleItem.disableProperty().bind(to.counterExampleProperty().isNull());
+				if (from != null) {
+					from.resultProperty().removeListener(resultListener);
+				}
+				if (to != null) {
+					to.resultProperty().addListener(resultListener);
+					resultListener.changed(null, null, to.getResult());
 				}
 			});
 		}
@@ -75,7 +88,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	@FXML
 	private TableColumn<TemporalFormulaItem, String> formulaDescriptionColumn;
 	@FXML
-	private TableColumn<LTLPatternItem, Checked> patternStatusColumn;
+	private TableColumn<LTLPatternItem, CheckingStatus> patternStatusColumn;
 	@FXML
 	private TableColumn<LTLPatternItem, String> patternColumn;
 	@FXML
@@ -91,8 +104,8 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	private TemporalView(final StageManager stageManager, final I18n i18n, final Injector injector,
 						 final CurrentTrace currentTrace, final CurrentProject currentProject,
 						 final DisablePropertyController disablePropertyController,
-						 final CliTaskExecutor cliExecutor) {
-		super(i18n, disablePropertyController, currentTrace, currentProject, cliExecutor);
+						 final CheckingExecutors checkingExecutors) {
+		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.injector = injector;
@@ -103,7 +116,7 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 
 	@Override
 	protected ObservableList<TemporalFormulaItem> getItemsProperty(Machine machine) {
-		return machine.getMachineProperties().getTemporalFormulas();
+		return machine.getTemporalFormulas();
 	}
 
 	@Override
@@ -115,12 +128,9 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		setBindings();
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			tvPattern.itemsProperty().unbind();
-			if (from != null) {
-				from.getMachineProperties().clearPatternManager();
-			}
 			if (to != null) {
-				tvPattern.itemsProperty().bind(to.getMachineProperties().getLTLPatterns());
-				managePatternTable(to.getMachineProperties().getLTLPatterns());
+				tvPattern.itemsProperty().bind(to.getLTLPatterns());
+				managePatternTable(to.getLTLPatterns());
 			} else {
 				tvPattern.setItems(FXCollections.emptyObservableList());
 			}
@@ -141,20 +151,20 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			removeItem.setOnAction(e -> {
 				Machine machine = currentProject.getCurrentMachine();
 				LTLPatternItem item = row.getItem();
-				machine.getMachineProperties().getLTLPatterns().remove(item);
+				machine.getLTLPatterns().remove(item);
 				LTLPatternParser.removePattern(item, machine);
-				managePatternTable(machine.getMachineProperties().getLTLPatterns());
+				managePatternTable(machine.getLTLPatterns());
 			});
 
 			MenuItem openEditor = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			openEditor.setOnAction(e -> showCurrentItemDialog(row.getItem()));
 			
 			MenuItem showMessage = new MenuItem(i18n.translate("verifications.temporal.temporalView.contextMenu.showParsingMessage"));
-			showMessage.setOnAction(e -> row.getItem().getResultItem().showAlert(stageManager, i18n));
+			showMessage.setOnAction(e -> row.getItem().getResult().showAlert(stageManager, i18n));
 			
 			row.itemProperty().addListener((observable, from, to) -> {
 				if(to != null) {
-					showMessage.disableProperty().bind(to.resultItemProperty().isNull());
+					showMessage.disableProperty().bind(to.resultProperty().isNull());
 				}
 			});
 			row.contextMenuProperty().bind(
@@ -177,8 +187,8 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 
 	private void setBindings() {
 		formulaDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
-		patternStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		patternStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		patternStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		patternColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		patternDescriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
 
@@ -193,11 +203,13 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	}
 	
 	@Override
-	protected void executeItemSync(final TemporalFormulaItem item, final ExecutionContext context) {
-		item.execute(context);
-		if (item.getCounterExample() != null) {
-			currentTrace.set(item.getCounterExample());
-		}
+	protected CompletableFuture<?> executeItemImpl(TemporalFormulaItem item, CheckingExecutors executors, ExecutionContext context) {
+		return super.executeItemImpl(item, executors, context).thenApply(res -> {
+			if (item.getResult() != null && !item.getResult().getTraces().isEmpty()) {
+				currentTrace.set(item.getResult().getTrace());
+			}
+			return res;
+		});
 	}
 	
 	@FXML
@@ -210,14 +222,14 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 			return;
 		}
 		final Machine machine = currentProject.getCurrentMachine();
-		if (machine.getMachineProperties().getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
+		if (machine.getLTLPatterns().stream().noneMatch(newItem::settingsEqual)) {
 			LTLPatternParser.addPattern(newItem, machine);
-			machine.getMachineProperties().getLTLPatterns().add(newItem);
-			managePatternTable(machine.getMachineProperties().getLTLPatterns());
+			machine.getLTLPatterns().add(newItem);
+			managePatternTable(machine.getLTLPatterns());
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
+				"verifications.temporal.ltl.pattern.alreadyExists.header",
+				"verifications.temporal.ltl.pattern.alreadyExists.content").show();
 		}
 	}
 	
@@ -242,14 +254,14 @@ public class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 		}
 		final Machine machine = currentProject.getCurrentMachine();
 		LTLPatternParser.removePattern(oldItem, machine);
-		if(machine.getMachineProperties().getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(oldItem) && existing.settingsEqual(changedItem))) {
-			machine.getMachineProperties().getLTLPatterns().set(machine.getMachineProperties().getLTLPatterns().indexOf(oldItem), changedItem);
+		if(machine.getLTLPatterns().stream().noneMatch(existing -> !existing.settingsEqual(oldItem) && existing.settingsEqual(changedItem))) {
+			machine.getLTLPatterns().set(machine.getLTLPatterns().indexOf(oldItem), changedItem);
 			LTLPatternParser.addPattern(changedItem, machine);
 			currentProject.setSaved(false); // FIXME Does this really need to be set manually?
 		} else {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION, 
-				"verifications.abstractResultHandler.alerts.alreadyExists.header",
-				"verifications.abstractResultHandler.alerts.alreadyExists.content.pattern").show();
+				"verifications.temporal.ltl.pattern.alreadyExists.header",
+				"verifications.temporal.ltl.pattern.alreadyExists.content").show();
 		}
 	}
 }

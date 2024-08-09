@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -58,8 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 @FXMLInjected
 @Singleton
-public class ProBPluginManager {
-
+public final class ProBPluginManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginManager.class);
 
 	private final ProBPluginHelper proBPluginHelper;
@@ -314,7 +311,7 @@ public class ProBPluginManager {
 		return true;
 	}
 
-	private Path showFileChooser(@Nonnull final Stage stage) {
+	private Path showFileChooser(Stage stage) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("plugin.fileChooser.addPlugin.title"));
 		fileChooser.getExtensionFilters()

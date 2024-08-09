@@ -17,8 +17,7 @@ import javafx.scene.layout.StackPane;
 
 @FXMLInjected
 @Singleton
-public class VisualisationsView extends StackPane {
-
+public final class VisualisationsView extends StackPane {
 	@FXML
 	private TabPane tabPane;
 

@@ -1,6 +1,7 @@
 package de.prob2.ui.dynamic;
 
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -10,10 +11,12 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingExecutors;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -30,7 +33,7 @@ public final class VisualizationFormulaTask implements IValidationTask {
 	private final String commandType;
 	private final String formula;
 	@JsonIgnore
-	private final ObjectProperty<Checked> checked;
+	private final ObjectProperty<CheckingStatus> status;
 
 	@JsonCreator
 	public VisualizationFormulaTask(
@@ -41,7 +44,7 @@ public final class VisualizationFormulaTask implements IValidationTask {
 		this.id = id;
 		this.commandType = Objects.requireNonNull(commandType, "commandType");
 		this.formula = Objects.requireNonNull(formula, "formula");
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 	}
 
 	@Override
@@ -73,22 +76,32 @@ public final class VisualizationFormulaTask implements IValidationTask {
 	}
 
 	@Override
-	public ObjectProperty<Checked> checkedProperty() {
-		return this.checked;
+	public ObjectProperty<CheckingStatus> statusProperty() {
+		return this.status;
 	}
 
 	@Override
-	public Checked getChecked() {
-		return this.checkedProperty().get();
+	public CheckingStatus getStatus() {
+		return this.statusProperty().get();
 	}
 
-	public void setChecked(final Checked checked) {
-		this.checkedProperty().set(checked);
+	public void setStatus(final CheckingStatus status) {
+		this.statusProperty().set(status);
 	}
+
+	@Override
+	public CompletableFuture<?> execute(CheckingExecutors executors, ExecutionContext context) {
+		// TODO Do the visualization, then ask the user to decide if it is correct or not.
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public void resetAnimatorDependentState() {}
 
 	@Override
 	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
+		this.setStatus(CheckingStatus.NOT_CHECKED);
+		this.resetAnimatorDependentState();
 	}
 
 	@Override

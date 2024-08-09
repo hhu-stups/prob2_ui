@@ -115,8 +115,8 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		if (BuiltinValidationTaskTypes.TEST_CASE_GENERATION_OPERATION_COVERAGE.equals(testChoice.getValue()) && this.operationCoverageInputView.getOperations().isEmpty()) {
 			final Alert alert = stageManager.makeAlert(
 					Alert.AlertType.ERROR,
-					"animation.alerts.testcasegeneration.operations.header",
-					"animation.alerts.testcasegeneration.operations.content"
+					"animation.testcase.choice.noOperationsSelected.header",
+					"animation.testcase.choice.noOperationsSelected.content"
 			);
 			alert.initOwner(this.getScene().getWindow());
 			alert.showAndWait();

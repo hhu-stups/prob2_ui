@@ -2,9 +2,11 @@ package de.prob2.ui.verifications.cbc;
 
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob.statespace.Trace;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 
 import org.slf4j.Logger;
@@ -21,29 +23,26 @@ abstract class CBCAssertionCheckingItem extends SymbolicCheckingFormulaItem {
 	
 	@Override
 	public void execute(ExecutionContext context) {
-		this.getCounterExamples().clear();
-		
 		ConstraintBasedAssertionCheckCommand cmd = new ConstraintBasedAssertionCheckCommand(this.getAssertionCheckingType(), context.stateSpace());
 		try {
 			context.stateSpace().execute(cmd);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Symbolic checking interrupted by user", exc);
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", exc.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 		}
 		
 		switch (cmd.getResult()) {
 			case NO_COUNTER_EXAMPLE_EXISTS:
-				this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleExists"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.cbc.assertionChecking.result.noCounterExampleExists"));
 				break;
 			case NO_COUNTER_EXAMPLE_FOUND:
-				this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.assertionChecking.result.noCounterExampleFound"));
+				this.setResult(new CheckingResult(CheckingStatus.SUCCESS, "verifications.cbc.assertionChecking.result.noCounterExampleFound"));
 				break;
 			case COUNTER_EXAMPLE:
-				this.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.assertionChecking.result.counterExampleFound"));
-				this.getCounterExamples().add(cmd.getTrace(context.stateSpace()));
+				this.setResult(new TraceResult(CheckingStatus.FAIL, cmd.getTrace(context.stateSpace()), "verifications.cbc.assertionChecking.result.counterExampleFound"));
 				break;
 			case INTERRUPTED:
-				this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "verifications.symbolicchecking.resultHandler.assertionChecking.result.interrupted"));
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
 				break;
 			default:
 				throw new AssertionError("Unhandled CBC assertion checking result: " + cmd.getResult());

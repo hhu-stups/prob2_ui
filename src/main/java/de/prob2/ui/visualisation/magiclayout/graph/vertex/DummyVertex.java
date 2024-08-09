@@ -3,8 +3,7 @@ package de.prob2.ui.visualisation.magiclayout.graph.vertex;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 
-public class DummyVertex extends Vertex {
-
+public final class DummyVertex extends Vertex {
 	final Circle circle = new Circle(5);
 
 	public DummyVertex() {

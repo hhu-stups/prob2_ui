@@ -16,12 +16,13 @@
 	<MenuItem fx:id="reloadMachineItem" text="%menu.file.items.reloadMachine" accelerator="Shortcut+R" onAction="#handleReloadMachine" />
 	<SeparatorMenuItem />
 	<MenuItem fx:id="extendedStaticAnalysisItem" text="%menu.file.items.extendedStaticAnalysis" onAction="#handleExtendedStaticAnalysis"/>
-	<MenuItem fx:id="viewFormattedCodeItem" text="%menu.file.items.viewFormattedCode" onAction="#handleViewFormattedCode"/>
+	<MenuItem fx:id="showInternalRepresentationItem" text="%menu.file.items.showInternalRepresentation" onAction="#handleShowInternal"/>
 	<Menu fx:id="exportAsMenu" text="%menu.file.items.exportEntireModelAs">
 		<MenuItem fx:id="exportAsClassicalBAsciiItem" text="%menu.file.items.exportEntireModelAs.classicalBAscii" onAction="#handleExportClassicalB"/>
 		<MenuItem fx:id="exportAsClassicalBUnicodeItem" text="%menu.file.items.exportEntireModelAs.classicalBUnicode" onAction="#handleExportClassicalB"/>
 		<MenuItem fx:id="exportAsRodinProject" text="%menu.file.items.exportEntireModelAs.rodinProject" onAction="#handleExportRodin"/>
 		<MenuItem fx:id="exportAsEventBProlog" text="%menu.file.items.exportEntireModelAs.proBEventBPackage" onAction="#handleExportEventBProlog"/>
+		<MenuItem fx:id="exportAsTLAModule" text="%menu.file.items.exportEntireModelAs.tlaModule" onAction="#handleExportTLA"/>
 	</Menu>
 	<MenuItem fx:id="saveDocumentationItem" text="%menu.file.items.createDocumentation" onAction="#saveDocumentation"/>
 	<SeparatorMenuItem/>

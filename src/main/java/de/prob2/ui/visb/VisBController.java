@@ -4,18 +4,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.animator.command.ExecuteOperationException;
-import de.prob.animator.command.GetOperationByPredicateCommand;
-import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.GetVisBDefaultSVGCommand;
 import de.prob.animator.command.GetVisBSVGObjectsCommand;
 import de.prob.animator.command.LoadVisBCommand;
@@ -23,30 +21,26 @@ import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.command.VisBPerformClickCommand;
-import de.prob.animator.domainobjects.EvaluationException;
-import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBItem;
-import de.prob.animator.domainobjects.VisBSVGObject;
-import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
-import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
+import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
-import javafx.scene.control.Alert;
-
-import netscape.javascript.JSException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,80 +50,107 @@ import org.slf4j.LoggerFactory;
  * Everything that can be done in Java only and uses interaction with ProB2-UI should be in here, not in the other classes.
  */
 @Singleton
-public class VisBController {
+public final class VisBController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBController.class);
 
 	public static final Path NO_PATH = Paths.get("");
 
+	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
+	private final FxThreadExecutor fxExecutor;
 	private final Injector injector;
-	private final StageManager stageManager;
-	private final I18n i18n;
 
-	private final ObjectProperty<Path> visBPath;
+	private final ObjectProperty<Path> absoluteVisBPath;
+	private final ObjectProperty<Path> relativeVisBPath;
 	private final ObjectProperty<VisBVisualisation> visBVisualisation;
 	private final ObservableMap<VisBItem.VisBItemKey, String> attributeValues;
+	private final BooleanProperty executingEvent;
 
-	/**
-	 * The VisBController constructor gets injected with ProB2-UI injector. In this method the final currentTraceListener is initialised as well. There is no further initialisation needed for this class.
-	 * @param injector used for interaction with ProB2-UI
-	 * @param stageManager currently not used
-	 * @param currentTrace used to add {@link ChangeListener} for interacting with trace
-	 * @param i18n used to access string resources
-	 */
 	@Inject
-	public VisBController(final Injector injector, final StageManager stageManager, final CurrentTrace currentTrace, final I18n i18n) {
+	public VisBController(Injector injector, CurrentProject currentProject, CurrentTrace currentTrace, CliTaskExecutor cliExecutor, FxThreadExecutor fxExecutor) {
 		this.injector = injector;
-		this.stageManager = stageManager;
+		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.i18n = i18n;
-		this.visBPath = new SimpleObjectProperty<>(this, "visBPath", null);
+		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
+
+		this.absoluteVisBPath = new SimpleObjectProperty<>(this, "absoluteVisBPath", null);
+		this.relativeVisBPath = new SimpleObjectProperty<>(this, "relativeVisBPath", null);
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", null);
 		this.attributeValues = FXCollections.observableHashMap();
-		initialize();
+		this.executingEvent = new SimpleBooleanProperty(this, "executingEvent", false);
 	}
 
-	private void initialize() {
-		this.visBVisualisation.addListener((o, from, to) -> {
-			if (to == null) {
-				this.attributeValues.clear();
-			}
-		});
-
-		this.visBPath.addListener((o, from, to) -> {
-			if (to == null) {
-				this.visBVisualisation.set(null);
-			} else {
-				this.setupVisualisation(to);
-			}
-		});
-		currentTrace.addListener((o, from, to) -> {
-			if (this.getVisBVisualisation() != null) {
-				if (from != null && (to == null || !from.getStateSpace().equals(to.getStateSpace()))) {
-					this.visBVisualisation.set(null);
-				}
-				this.updateVisualisationIfPossible();
-			}
-		});
-	}
-
-	public ObjectProperty<Path> visBPathProperty() {
-		return this.visBPath;
-	}
-
-	public Path getVisBPath() {
-		return this.visBPathProperty().get();
-	}
-
-	public void setVisBPath(final Path visBPath) {
-		// Remark: The VisB path is reset to null, so that the listener for visBPath is triggered when the old visBPath is equal to the new one
-		// Otherwise the listener is not triggered and thus the new visualization is not updated.
-		// We had a similar issue on a ListProperty listener long time ago.
-		// This was caused by JavaFX not triggering the listener when the old object is equal to the new one
-		this.visBPathProperty().set(null);
-		if (visBPath != null) {
-			this.visBPathProperty().set(visBPath);
+	public static Path resolveVisBPath(Path projectLocation, Path relativeVisBPath) {
+		if (NO_PATH.equals(relativeVisBPath)) {
+			return VisBController.NO_PATH;
+		} else if (relativeVisBPath.isAbsolute()) {
+			throw new IllegalArgumentException("Tried to resolve an already absolute VisB path: " + relativeVisBPath);
+		} else {
+			return projectLocation.resolve(relativeVisBPath);
 		}
+	}
+
+	public static Path relativizeVisBPath(Path projectLocation, Path absoluteVisBPath) {
+		if (NO_PATH.equals(absoluteVisBPath)) {
+			return VisBController.NO_PATH;
+		} else if (!absoluteVisBPath.isAbsolute()) {
+			throw new IllegalArgumentException("Tried to relativize an already relative VisB path: " + absoluteVisBPath);
+		} else {
+			return projectLocation.relativize(absoluteVisBPath);
+		}
+	}
+
+	public ReadOnlyObjectProperty<Path> absoluteVisBPathProperty() {
+		return this.absoluteVisBPath;
+	}
+
+	public Path getAbsoluteVisBPath() {
+		return this.absoluteVisBPathProperty().get();
+	}
+
+	public ReadOnlyObjectProperty<Path> relativeVisBPathProperty() {
+		return this.relativeVisBPath;
+	}
+
+	public Path getRelativeVisBPath() {
+		return this.relativeVisBPathProperty().get();
+	}
+
+	/**
+	 * Hide the currently loaded visualisation, but remember its path (if any) so that the user can reload it.
+	 * This should be called after visualisation errors that can possibly be fixed by a reload.
+	 */
+	public void hideVisualisation() {
+		this.visBVisualisation.set(null);
+	}
+
+	/**
+	 * Close any currently loaded visualisation.
+	 * Unlike {@link #hideVisualisation()}, this also unsets the visualisation file path,
+	 * so the user cannot reload the visualisation unless they explicitly re-select it.
+	 */
+	public void closeVisualisation() {
+		this.hideVisualisation();
+		this.absoluteVisBPath.set(null);
+		this.relativeVisBPath.set(null);
+	}
+
+	public CompletableFuture<VisBVisualisation> loadFromAbsolutePath(Path path) {
+		Objects.requireNonNull(path, "path");
+		Path relativePath = relativizeVisBPath(currentProject.getLocation(), path);
+		this.absoluteVisBPath.set(path);
+		this.relativeVisBPath.set(relativePath);
+		return this.reloadVisualisation();
+	}
+
+	public CompletableFuture<VisBVisualisation> loadFromRelativePath(Path path) {
+		Objects.requireNonNull(path, "path");
+		Path absolutePath = resolveVisBPath(currentProject.getLocation(), path);
+		this.absoluteVisBPath.set(absolutePath);
+		this.relativeVisBPath.set(path);
+		return this.reloadVisualisation();
 	}
 
 	public ReadOnlyObjectProperty<VisBVisualisation> visBVisualisationProperty() {
@@ -144,133 +165,80 @@ public class VisBController {
 		return this.attributeValues;
 	}
 
-	private void applySVGChanges() {
-		VisBView visBView = injector.getInstance(VisBView.class);
+	public ReadOnlyBooleanProperty executingEventProperty() {
+		return this.executingEvent;
+	}
 
-		try {
-			final GetVisBAttributeValuesCommand getAttributesCmd = new GetVisBAttributeValuesCommand(currentTrace.getCurrentState());
-			currentTrace.getStateSpace().execute(getAttributesCmd);
-			this.attributeValues.putAll(getAttributesCmd.getValues());
-		} catch (ProBError e){
-			alert(e, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
-			updateInfo("visb.infobox.visualisation.error");
-			visBView.clear();
-			return;
-		}
-
-		try {
-			visBView.resetMessages();
-		} catch (JSException e){
-			alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
-			updateInfo("visb.infobox.visualisation.error");
-		}
+	public boolean isExecutingEvent() {
+		return this.executingEventProperty().get();
 	}
 
 	/**
-	 * This method throws an ProB2-UI ExceptionAlert
-	 */
-	private void alert(Throwable ex, String header, String message, Object... params){
-		Alert exceptionAlert = this.stageManager.makeExceptionAlert(ex, header, message, params);
-		exceptionAlert.initOwner(injector.getInstance(VisBView.class).getScene().getWindow());
-		exceptionAlert.showAndWait();
-	}
-
-	/**
-	 * This redirects the information to the {@link VisBView}.
-	 * @param key bundlekey for string
-	 */
-	private void updateInfo(String key){
-		injector.getInstance(VisBView.class).updateInfo(i18n.translate(key));
-	}
-
-	private void updateInfo(String key, Object... params){
-		injector.getInstance(VisBView.class).updateInfo(i18n.translate(key, params));
-	}
-
-	/**
-	 * This method is used by the {@link VisBConnector} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
+	 * This method is used by the {@link VisBView} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
-	public void executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
-		if(!currentTrace.getCurrentState().isInitialised()){
-			executeBeforeInitialisation();
-			return;
+	public CompletableFuture<Trace> executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+		if (this.isExecutingEvent()) {
+			throw new IllegalStateException("Cannot execute an event while another event is already being executed");
 		}
-		LOGGER.debug("Finding event for id: " + id);
-		VisBEvent event = this.getVisBVisualisation().getEventsById().get(id);
 
-		try {
-			StateSpace stateSpace = currentTrace.getStateSpace();
-			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(stateSpace, id, Collections.emptyList(), currentTrace.getCurrentState().getId());
-			stateSpace.execute(performClickCommand);
+		Trace trace = currentTrace.get();
+		LOGGER.debug("Finding event for id: {}", id);
+
+		this.executingEvent.set(true);
+		return cliExecutor.submit(() -> {
+			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
+			trace.getStateSpace().execute(performClickCommand);
 			List<Transition> transitions = performClickCommand.getTransitions();
 
 			if (transitions.isEmpty()) {
-				updateInfo("visb.infobox.no.events.for.id", id);
+				LOGGER.debug("No events found for id: {}", id);
+				return null;
 			} else {
-				LOGGER.debug("Executing event for id: "+id + " and preds = " + event.getPredicates());
-				Trace trace = currentTrace.get().addTransitions(transitions);
-				LOGGER.debug("Finished executed event for id: "+id + " and preds = " + event.getPredicates());
-				currentTrace.set(trace);
+				LOGGER.debug("Executing event for id: {}", id);
+				Trace newTrace = trace.addTransitions(transitions);
+				LOGGER.debug("Finished executed event for id: {}", id);
+				currentTrace.set(newTrace);
 				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-				for(Transition transition : transitions) {
+				for (Transition transition : transitions) {
 					UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
 					uiInteraction.addUserInteraction(realTimeSimulator, transition);
 				}
-				updateInfo("visb.infobox.execute.event", event.getEvent(), id);
+				return newTrace;
 			}
-		} catch (ExecuteOperationException e) {
-			LOGGER.debug("Cannot execute event for id: {}", id, e);
-			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
-			if (e.getErrors().stream().anyMatch(err -> err.getType() == GetOperationByPredicateCommand.GetOperationErrorType.PARSE_ERROR)) {
-				Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", String.join("\n", e.getErrorMessages()));
-				alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
-				alert.show();
-			}
-		} catch (EvaluationException e) {
-			LOGGER.debug("Cannot execute event for id: {}", id, e);
-			updateInfo("visb.infobox.cannot.execute.event", event.getEvent(), id);
-			Alert alert = this.stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.parse", e.getLocalizedMessage());
-			alert.initOwner(this.injector.getInstance(VisBView.class).getScene().getWindow());
-			alert.show();
-		}
+		}).whenCompleteAsync((res, exc) -> this.executingEvent.set(false), fxExecutor);
 	}
 
-	private void executeBeforeInitialisation() {
-		Set<Transition> nextTransitions = currentTrace.get().getNextTransitions();
-		if(currentTrace.get().getNextTransitions().size() == 1) {
-			String transitionName = nextTransitions.stream().map(Transition::getName).toList().get(0);
-			Trace trace = currentTrace.get().execute(transitionName, new ArrayList<>());
-			currentTrace.set(trace);
+	CompletableFuture<Trace> executeBeforeInitialisation() {
+		if (this.isExecutingEvent()) {
+			throw new IllegalStateException("Cannot perform initialisation while another event is already being executed");
+		}
+
+		Trace trace = currentTrace.get();
+		Set<Transition> nextTransitions = trace.getNextTransitions();
+		if (nextTransitions.size() != 1) {
+			throw new IllegalStateException("Cannot perform non-deterministic initialization from VisB");
+		}
+
+		this.executingEvent.set(true);
+		return cliExecutor.submit(() -> {
+			Transition transition = nextTransitions.iterator().next();
+			Trace newTrace = trace.add(transition);
+			currentTrace.set(newTrace);
 			RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-			for(Transition transition : nextTransitions) {
-				UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-				uiInteraction.addUserInteraction(realTimeSimulator, transition);
-			}
-		} else {
-			updateInfo("visb.infobox.events.not.initialise");
-		}
-	}
-
-	void reloadVisualisation(){
-		if (this.getVisBPath() == null) {
-			return;
-		}
-		this.visBVisualisation.set(null);
-		setupVisualisation(this.getVisBPath());
-		if (this.getVisBVisualisation() == null) {
-			updateInfo("visb.infobox.visualisation.error");
-			return;
-		}
-		LOGGER.debug("Visualisation has been reloaded.");
+			UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
+			uiInteraction.addUserInteraction(realTimeSimulator, transition);
+			return newTrace;
+		}).whenCompleteAsync((res, exc) -> this.executingEvent.set(false), fxExecutor);
 	}
 
 	/**
 	 * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
+	 * @param stateSpace the ProB animator instance using which to load the VisB file
 	 * @param jsonPath path to the VisB JSON file
 	 * @return VisBVisualisation object
 	 */
-	private VisBVisualisation constructVisualisationFromJSON(Path jsonPath) throws IOException {
+	private static VisBVisualisation constructVisualisationFromJSON(StateSpace stateSpace, Path jsonPath) throws IOException {
 		if (!jsonPath.equals(NO_PATH)) {
 			jsonPath = jsonPath.toRealPath();
 			if (!Files.isRegularFile(jsonPath)) {
@@ -279,20 +247,20 @@ public class VisBController {
 		}
 
 		String jsonPathString = jsonPath.equals(NO_PATH) ? "" : jsonPath.toString();
-		LoadVisBCommand loadCmd = new LoadVisBCommand(jsonPathString);
-		
-		currentTrace.getStateSpace().execute(loadCmd);
-		ReadVisBSvgPathCommand svgCmd = new ReadVisBSvgPathCommand(jsonPathString);
-		
-		currentTrace.getStateSpace().execute(svgCmd);
+
+		var loadCmd = new LoadVisBCommand(jsonPathString);
+		var svgCmd = new ReadVisBSvgPathCommand(jsonPathString);
+		var itemsCmd = new ReadVisBItemsCommand();
+		var eventsCmd = new ReadVisBEventsHoversCommand();
+		var svgObjectsCmd = new GetVisBSVGObjectsCommand();
+		var defaultSVGCmd = new GetVisBDefaultSVGCommand();
+		stateSpace.execute(loadCmd, svgCmd, itemsCmd, eventsCmd, svgObjectsCmd, defaultSVGCmd);
+
 		String svgPathString = svgCmd.getSvgPath();
-		
 		final Path svgPath;
 		final String svgContent;
 		if (svgPathString.isEmpty()) {
 			svgPath = NO_PATH;
-			final GetVisBDefaultSVGCommand defaultSVGCmd = new GetVisBDefaultSVGCommand();
-			currentTrace.getStateSpace().execute(defaultSVGCmd);
 			svgContent = defaultSVGCmd.getSVGFileContents();
 		} else {
 			if (jsonPath.equals(NO_PATH)) {
@@ -306,52 +274,24 @@ public class VisBController {
 			svgContent = Files.readString(svgPath);
 		}
 		
-		ReadVisBItemsCommand readVisBItemsCommand = new ReadVisBItemsCommand();
-		currentTrace.getStateSpace().execute(readVisBItemsCommand);
-		List<VisBItem> items = readVisBItemsCommand.getItems();
-		
-		ReadVisBEventsHoversCommand readEventsCmd = new ReadVisBEventsHoversCommand();
-		currentTrace.getStateSpace().execute(readEventsCmd);
-		List<VisBEvent> visBEvents = readEventsCmd.getEvents();
-		
-		GetVisBSVGObjectsCommand command = new GetVisBSVGObjectsCommand();
-		currentTrace.getStateSpace().execute(command);
-		List<VisBSVGObject> visBSVGObjects = command.getSvgObjects();
-		
-		return new VisBVisualisation(svgPath, svgContent, items, visBEvents, visBSVGObjects);
+		return new VisBVisualisation(svgPath, svgContent, itemsCmd.getItems(), eventsCmd.getEvents(), svgObjectsCmd.getSvgObjects());
 	}
 
-	private void setupVisualisation(final Path visBPath){
-		try {
-			this.visBVisualisation.set(constructVisualisationFromJSON(visBPath));
-		} catch (IOException | RuntimeException e) {
-			this.visBVisualisation.set(null);
-			LOGGER.warn("error while loading visb file", e);
-			alert(e, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
-			updateInfo("visb.infobox.visualisation.error");
-			return;
+	CompletableFuture<VisBVisualisation> reloadVisualisation() {
+		// Hide the previous visualisation before loading a new one.
+		// This ensures that listeners on visBVisualisation are always called
+		// and prevents an old visualisation remaining visible after an error.
+		this.hideVisualisation();
+
+		Path visBPath = this.getAbsoluteVisBPath();
+		if (visBPath == null) {
+			return CompletableFuture.completedFuture(null);
 		}
 
-		updateInfo("visb.infobox.visualisation.initialise");
-		updateVisualisationIfPossible();
-	}
-
-	/**
-	 * As the name says, it updates the visualisation, if it is possible.
-	 */
-	private void updateVisualisationIfPossible(){
-		LOGGER.debug("Trying to reload visualisation.");
-		if(this.currentTrace.getCurrentState() != null && this.currentTrace.getCurrentState().isInitialised()){
-			LOGGER.debug("Reloading visualisation...");
-			//Updates visualisation, only if current state is initialised and visualisation items are not empty
-			applySVGChanges();
-		} else {
-			showUpdateVisualisationNotPossible();
-		}
-	}
-
-	private void showUpdateVisualisationNotPossible(){
-		updateInfo("visb.infobox.visualisation.updated");
-		injector.getInstance(VisBView.class).showModelNotInitialised();
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		return cliExecutor.submit(() -> constructVisualisationFromJSON(stateSpace, visBPath)).thenApplyAsync(vis -> {
+			this.visBVisualisation.set(vis);
+			return vis;
+		}, fxExecutor);
 	}
 }

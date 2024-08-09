@@ -2,7 +2,6 @@
 
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.verifications.po.ProofObligationView?>
-<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -10,20 +9,18 @@
 <fx:root type="ProofObligationView"
 	stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
-		<FontSize fx:id="fontSize" />
+		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<children>
-		<VBox AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-			<TableView fx:id="tvProofObligations" minHeight="80.0" VBox.vgrow="ALWAYS">
-				<columnResizePolicy>
-					<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-				</columnResizePolicy>
-				<columns>
-					<TableColumn fx:id="poStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status" />
-					<TableColumn fx:id="poIdColumn" minWidth="80.0" maxWidth="150.0" text="%verifications.common.columns.id" />
-					<TableColumn fx:id="poColumn" minWidth="80.0" text="%verifications.po.poView.name" />
-				</columns>
-			</TableView>
-		</VBox>
-	</children>
+	<VBox AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+		<TableView fx:id="tvProofObligations" minHeight="80.0" VBox.vgrow="ALWAYS">
+			<columnResizePolicy>
+				<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+			</columnResizePolicy>
+			<columns>
+				<TableColumn fx:id="poStatusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+				<TableColumn fx:id="poIdColumn" minWidth="80.0" maxWidth="150.0" text="%verifications.common.columns.id"/>
+				<TableColumn fx:id="poColumn" minWidth="80.0" text="%verifications.po.poView.name"/>
+			</columns>
+		</TableView>
+	</VBox>
 </fx:root>

@@ -1,13 +1,11 @@
 package de.prob2.ui.visb;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.VisBEvent;
@@ -18,26 +16,26 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visb.ui.ListViewEvent;
-import de.prob2.ui.visb.ui.VisBTableItemCell;
-import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.StringExpression;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 @Singleton
-public class VisBDebugStage extends Stage {
-
+public final class VisBDebugStage extends Stage {
 	private static final class VisBSelectionCell implements Callback<TableColumn.CellDataFeatures<VisBTableItem, CheckBox>, ObservableValue<CheckBox>> {
 
 		private final CheckBox selectAll;
@@ -73,6 +71,106 @@ public class VisBDebugStage extends Stage {
 		}
 	}
 
+	private final class VisBTableItemCell extends TableCell<VisBTableItem, VisBItem> {
+		@FXML
+		private VBox itemBox;
+		@FXML
+		private Label lbID;
+		@FXML
+		private Label lbExpression;
+		@FXML
+		private Label lbAttribute;
+		@FXML
+		private Label lbValue;
+
+		private VisBTableItemCell() {
+			stageManager.loadFXML(this, "visb_debug_item_cell.fxml");
+		}
+
+		@FXML
+		private void initialize() {
+			this.hoverProperty().addListener((observable, from, to) -> {
+				if (!this.isEmpty()) {
+					var eventsById = visBController.getVisBVisualisation().getEventsById();
+					String id = this.getItem().getId();
+					if (eventsById.containsKey(id)) {
+						for (VisBHover hover : eventsById.get(id).getHovers()) {
+							visBView.changeAttributeIfLoaded(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+						}
+					}
+				}
+			});
+		}
+
+		@Override
+		protected void updateItem(VisBItem item, boolean empty) {
+			super.updateItem(item, empty);
+
+			this.setText("");
+			this.setGraphic(this.itemBox);
+			if (!empty) {
+				this.lbID.setText(item.getId());
+				this.lbAttribute.setText(i18n.translate("visb.item.attribute", item.getAttribute()));
+				this.lbExpression.setText(i18n.translate("visb.item.expression", item.getExpression()));
+				final StringExpression valueBinding = Bindings.stringValueAt(visBController.getAttributeValues(), item.getKey());
+				this.lbValue.textProperty().bind(i18n.translateBinding("visb.item.value",
+						Bindings.when(valueBinding.isNull())
+								.then(i18n.translateBinding("visb.item.value.notInitialized"))
+								.otherwise(i18n.translateBinding("common.quoted", valueBinding))
+				));
+			} else {
+				this.lbID.setText("");
+				this.lbAttribute.setText("");
+				this.lbExpression.setText("");
+				this.lbValue.textProperty().unbind();
+				this.lbValue.setText("");
+			}
+		}
+	}
+
+	private final class VisBEventCell extends ListCell<VisBEvent> {
+		@FXML
+		private VBox eventBox;
+		@FXML
+		private Label lbID;
+		@FXML
+		private Label lbEvent;
+		@FXML
+		private Label lbPredicates;
+
+		private VisBEventCell() {
+			stageManager.loadFXML(this,"visb_debug_event_cell.fxml");
+		}
+
+		@FXML
+		private void initialize() {
+			this.hoverProperty().addListener((observable, from, to) -> {
+				if (!this.isEmpty()) {
+					for (VisBHover hover : this.getItem().getHovers()) {
+						visBView.changeAttributeIfLoaded(hover.getHoverID(), hover.getHoverAttr(), to ? hover.getHoverEnterVal() : hover.getHoverLeaveVal());
+					}
+				}
+			});
+		}
+
+		@Override
+		protected void updateItem(VisBEvent visBEvent, boolean empty) {
+			super.updateItem(visBEvent, empty);
+
+			this.setText("");
+			this.setGraphic(this.eventBox);
+			if (visBEvent != null) {
+				this.lbID.setText(visBEvent.getId());
+				this.lbEvent.setText(i18n.translate("visb.event.event", visBEvent.getEvent()));
+				this.lbPredicates.setText(i18n.translate("visb.event.predicates", visBEvent.getPredicates().toString()));
+			} else {
+				this.lbID.setText("");
+				this.lbEvent.setText("");
+				this.lbPredicates.setText("");
+			}
+		}
+	}
+
 	private final StageManager stageManager;
 
 	private final CurrentTrace currentTrace;
@@ -83,7 +181,9 @@ public class VisBDebugStage extends Stage {
 
 	private final VisBController visBController;
 
-	private final Injector injector;
+	private final VisBView visBView;
+
+	private final Provider<DynamicVisualizationStage> dynamicVisualizationStageProvider;
 
 	@FXML
 	private TableView<VisBTableItem> visBItems;
@@ -92,71 +192,51 @@ public class VisBDebugStage extends Stage {
 	private TableColumn<VisBTableItem, CheckBox> selectedColumn;
 
 	@FXML
-	private TableColumn<VisBTableItem, String> itemColumn;
+	private TableColumn<VisBTableItem, VisBItem> itemColumn;
 
 	@FXML
 	private ListView<VisBEvent> visBEvents;
 
-	private final Map<String, VisBEvent> eventsById;
-
 	private final CheckBox selectAll;
 
 	@Inject
-	public VisBDebugStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject, final I18n i18n, final VisBController visBController, final Injector injector) {
+	private VisBDebugStage(
+		StageManager stageManager,
+		CurrentTrace currentTrace,
+		CurrentProject currentProject,
+		I18n i18n,
+		VisBController visBController,
+		VisBView visBView,
+		Provider<DynamicVisualizationStage> dynamicVisualizationStageProvider
+	) {
 		super();
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.i18n = i18n;
 		this.visBController = visBController;
-		this.injector = injector;
-		this.eventsById = new HashMap<>();
+		this.visBView = visBView;
+		this.dynamicVisualizationStageProvider = dynamicVisualizationStageProvider;
+
 		this.selectAll = new CheckBox();
 		this.stageManager.loadFXML(this, "visb_debug_stage.fxml");
 	}
 
 	@FXML
 	public void initialize() {
-		visBController.visBVisualisationProperty().addListener((o, from, to) -> this.initialiseListViews(to));
-		
-		ChangeListener<VisBTableItem> listener = (observable, from, to) -> {
-			if(from != null) {
-				removeHighlighting(from);
-			}
-			if(to != null) {
-				applyHighlighting(to);
-			}
-		};
-
 		this.selectedColumn.setCellValueFactory(new VisBSelectionCell(visBItems, selectAll));
 		this.selectedColumn.setGraphic(selectAll);
 
-		this.itemColumn.setCellFactory(param -> new VisBTableItemCell(stageManager, i18n, injector, eventsById, visBController.getAttributeValues()));
-		this.itemColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+		this.itemColumn.setCellFactory(param -> new VisBTableItemCell());
+		this.itemColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getVisBItem()));
 
-		this.visBEvents.setCellFactory(lv -> new ListViewEvent(stageManager, i18n, injector));
+		this.visBEvents.setCellFactory(lv -> new VisBEventCell());
+
+		visBController.visBVisualisationProperty().addListener((o, from, to) -> this.initialiseListViews(to));
+		this.initialiseListViews(visBController.getVisBVisualisation());
+
 		this.currentTrace.addListener((observable, from, to) -> refresh());
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> refresh());
-		this.visBItems.getSelectionModel().selectedItemProperty().addListener(listener);
-		this.setOnCloseRequest(e -> this.visBItems.getSelectionModel().clearSelection());
-	}
-
-	private void removeHighlighting(VisBTableItem item) {
-		String id = item.getVisBItem().getId();
-		if(eventsById.containsKey(id)) {
-			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverLeaveVal());
-			}
-		}
-	}
-
-	private void applyHighlighting(VisBTableItem item) {
-		String id = item.getVisBItem().getId();
-		if(eventsById.containsKey(id)) {
-			for (VisBHover hover : eventsById.get(id).getHovers()) {
-				injector.getInstance(VisBView.class).changeAttribute(hover.getHoverID(), hover.getHoverAttr(), hover.getHoverEnterVal());
-			}
-		}
 	}
 
 	/**
@@ -171,14 +251,12 @@ public class VisBDebugStage extends Stage {
 			for (VisBItem item : visBVisualisation.getItems()) {
 				this.visBItems.getItems().add(new VisBTableItem(item));
 			}
-			this.eventsById.putAll(visBVisualisation.getEventsById());
 		}
 	}
 
 	public void clear(){
 		this.visBEvents.setItems(null);
 		this.visBItems.setItems(null);
-		this.eventsById.clear();
 	}
 
 	private void refresh() {
@@ -198,7 +276,7 @@ public class VisBDebugStage extends Stage {
 				.map(VisBTableItem::getVisBItem)
 				.map(item -> String.format(Locale.ROOT, "\"%s_%s\" |-> %s", item.getId(), item.getAttribute(), item.getExpression()))
 				.collect(Collectors.joining(" |-> \n"));
-		DynamicVisualizationStage formulaStage = injector.getInstance(DynamicVisualizationStage.class);
+		DynamicVisualizationStage formulaStage = dynamicVisualizationStageProvider.get();
 		formulaStage.show();
 		formulaStage.toFront();
 		formulaStage.visualizeProjection(projectionString);

@@ -39,8 +39,7 @@ import javafx.scene.transform.Transform;
 import javafx.stage.Stage;
 
 @Singleton
-public class MagicLayoutView extends Stage {
-
+public final class MagicLayoutView extends Stage {
 	@FXML
 	private MenuBar menuBar;
 	@FXML

@@ -1,3 +1,5 @@
 body {
-	font-family: FontAwesome;
+	/*  These properties are set in the pandoc CSS defaults and break rendering on certain systems. */
+	text-rendering: auto !important;
+	font-kerning: auto !important;
 }

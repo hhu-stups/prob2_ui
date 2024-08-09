@@ -17,8 +17,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Map;
 
-public class SimulationTaskItem extends TableCell<SimulationItem, String> {
-
+public final class SimulationTaskItem extends TableCell<SimulationItem, String> {
 	@FXML
 	private VBox itemBox;
 

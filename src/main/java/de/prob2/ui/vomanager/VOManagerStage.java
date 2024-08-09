@@ -25,9 +25,10 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
-import de.prob2.ui.verifications.TreeCheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
+import de.prob2.ui.verifications.CheckingStatusTreeCell;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.feedback.VOFeedback;
 import de.prob2.ui.vomanager.feedback.VOValidationFeedback;
 
@@ -68,7 +69,7 @@ import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
-public class VOManagerStage extends Stage {
+public final class VOManagerStage extends Stage {
 	public enum Mode {
 		NONE, REQUIREMENT
 	}
@@ -82,7 +83,7 @@ public class VOManagerStage extends Stage {
 	private TreeTableColumn<VOManagerItem, String> requirementNameColumn;
 
 	@FXML
-	private TreeTableColumn<VOManagerItem, Checked> requirementStatusColumn;
+	private TreeTableColumn<VOManagerItem, CheckingStatus> requirementStatusColumn;
 
 	@FXML
 	private Button checkProjectButton;
@@ -106,7 +107,7 @@ public class VOManagerStage extends Stage {
 	private TableView<IValidationTask> vtTable;
 
 	@FXML
-	private TableColumn<IValidationTask, Checked> vtStatusColumn;
+	private TableColumn<IValidationTask, CheckingStatus> vtStatusColumn;
 
 	@FXML
 	private TableColumn<IValidationTask, String> vtIdColumn;
@@ -158,8 +159,8 @@ public class VOManagerStage extends Stage {
 	private void initializeTables() {
 		requirementNameColumn.setCellValueFactory(features -> new SimpleStringProperty(features.getValue().getValue().getDisplayText()));
 		requirementNameColumn.setComparator(new AlphanumericComparator(Locale.ROOT)::compare);
-		requirementStatusColumn.setCellFactory(col -> new TreeCheckedCell<>());
-		requirementStatusColumn.setCellValueFactory(features -> features.getValue().getValue().checkedProperty());
+		requirementStatusColumn.setCellFactory(col -> new CheckingStatusTreeCell<>());
+		requirementStatusColumn.setCellValueFactory(features -> features.getValue().getValue().statusProperty());
 
 		tvRequirements.setRowFactory(table -> new TreeTableRow<>() {
 			@Override
@@ -255,8 +256,8 @@ public class VOManagerStage extends Stage {
 			return row;
 		});
 
-		vtStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		vtStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		vtStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		vtIdColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getId()));
 		vtTypeColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskType(i18n)));
 		vtConfigurationColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskDescription(i18n)));
@@ -266,11 +267,11 @@ public class VOManagerStage extends Stage {
 			while (c.next()) {
 				for (IValidationTask removed : c.getRemoved()) {
 					vtTable.getItems().remove(removed);
-					removed.checkedProperty().removeListener(validationFeedbackListener);
+					removed.statusProperty().removeListener(validationFeedbackListener);
 				}
 				for (IValidationTask added : c.getAddedSubList()) {
 					vtTable.getItems().add(added);
-					added.checkedProperty().addListener(validationFeedbackListener);
+					added.statusProperty().addListener(validationFeedbackListener);
 				}
 				if (c.wasPermutated() || c.wasAdded()) {
 					vtTable.sort();
@@ -296,7 +297,7 @@ public class VOManagerStage extends Stage {
 
 		ChangeListener<Machine> machineChangeListener = (o, from, to) -> {
 			if (to != null) {
-				currentMachineVTs.set(to.getMachineProperties().getValidationTasksWithId());
+				currentMachineVTs.set(to.getValidationTasksWithId());
 			} else {
 				currentMachineVTs.set(FXCollections.emptyObservableList());
 			}
@@ -469,7 +470,7 @@ public class VOManagerStage extends Stage {
 			boolean checked = true;
 			for (Requirement requirement : currentProject.getRequirements()) {
 				final Optional<ValidationObligation> vo = requirement.getValidationObligation(currentMachine);
-				if (vo.isPresent() && vo.get().getChecked() == Checked.NOT_CHECKED) {
+				if (vo.isPresent() && vo.get().getStatus() == CheckingStatus.NOT_CHECKED) {
 					taFeedback.appendText(i18n.translate("vomanager.feedback.notChecked", currentMachine.getName()));
 					checked = false;
 					break;
@@ -510,7 +511,7 @@ public class VOManagerStage extends Stage {
 			updatedVos.remove(item.getVo());
 			final List<Requirement> predecessors = new ArrayList<>(oldRequirement.getPreviousVersions());
 			predecessors.add(oldRequirement);
-			final Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getType(), oldRequirement.getText(), updatedVos, predecessors, oldRequirement.getParent());
+			Requirement updatedRequirement = new Requirement(oldRequirement.getName(), oldRequirement.getIntroducedAt(), oldRequirement.getText(), updatedVos, predecessors, oldRequirement.getParent());
 			currentProject.replaceRequirement(oldRequirement, updatedRequirement);
 		} else if (item.getRequirement() != null) {
 			currentProject.removeRequirement(item.getRequirement());

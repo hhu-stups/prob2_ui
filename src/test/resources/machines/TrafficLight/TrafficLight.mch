@@ -5,10 +5,10 @@ SETS colors = {red, redyellow, yellow, green}
 VARIABLES tl_cars, tl_peds
 
 INVARIANT tl_cars : colors &
-	  tl_peds : {red, green} &
-	  (tl_peds = red or
-	  tl_cars = red)
-              
+	tl_peds : {red, green} &
+	(tl_peds = red or
+	tl_cars = red)
+
 INITIALISATION  tl_cars := red; tl_peds := red
 	
 OPERATIONS
@@ -42,5 +42,5 @@ peds_g =
 	SELECT tl_peds = red & tl_cars = red THEN
 		tl_peds := green
 	END
-      
+
 END

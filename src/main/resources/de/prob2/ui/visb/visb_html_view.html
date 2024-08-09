@@ -5,8 +5,6 @@
 	<!-- This is for zooming in and out and scaling the image to the right width and height -->
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<script>
-		let notInitialisedShown = false;
-
 		function runWhenLoaded(callback) {
 			// https://developer.mozilla.org/en-US/docs/Web/API/Document/DOMContentLoaded_event#checking_whether_loading_is_already_complete
 			if (document.readyState === "loading") {
@@ -52,7 +50,7 @@
 		function getOrCreateSvgElement(id, object) {
 			const foundElement = document.getElementById(id);
 			if (foundElement === null) {
-			    // console.log("Create SVG id " + id);
+				// console.log("Create SVG id " + id);
 				const createdElement = document.createElementNS("http://www.w3.org/2000/svg", object);
 				createdElement.setAttribute("id", id);
 				createdElement.setAttribute("__created_by_VisB__", "true");
@@ -97,7 +95,7 @@
 		}
 
 		function changeAttribute(id, attribute, value){
-		    // console.log("changeAttribute: " + id + "." + attribute + " = "+value);
+			// console.log("changeAttribute: " + id + "." + attribute + " = "+value);
 			runWhenLoaded(function(){
 				const obj = checkSvgId(id, "attribute " + attribute);
 				if (obj == null) {
@@ -150,19 +148,9 @@
 			}
 		}
 
-		function showModelNotInitialised() {
-			// Remember if the "not initialised" message has already been shown,
-			// so that calling this function multiple times doesn't show multiple copies of the same message.
-			if (!notInitialisedShown) {
-				appendErrorMessage("Model not initialised").style.color = "blue";
-				notInitialisedShown = true;
-			}
-		}
-
 		function resetMessages() {
 			updateDebugMessages("");
 			getErrorMessagesNode().textContent = "";
-			notInitialisedShown = false;
 		}
 
 		// This marker variable is checked by VisBView to verify that the JavaScript code loaded correctly.

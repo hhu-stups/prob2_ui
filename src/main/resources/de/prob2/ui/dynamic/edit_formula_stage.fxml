@@ -7,8 +7,7 @@
 
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import javafx.scene.Scene?>
-<fx:root type="EditDynamicFormulaStage" title=""
-         xmlns:fx="http://javafx.com/fxml/1" resizable="true">
+<fx:root type="EditDynamicFormulaStage" title="" xmlns:fx="http://javafx.com/fxml/1" resizable="true">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<VBox styleClass="dialog">
@@ -16,7 +15,7 @@
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
-						<Label fx:id="formulaTitleLabel" text="%dynamic.button.addFormula" styleClass="title">
+						<Label text="%dynamic.editFormula" styleClass="title">
 							<VBox.margin>
 								<Insets left="10" right="10" />
 							</VBox.margin>

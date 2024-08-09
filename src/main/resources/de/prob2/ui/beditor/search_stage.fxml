@@ -3,15 +3,14 @@
 <?import de.prob2.ui.beditor.SearchStage?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Tooltip?>
-
 <fx:root type="SearchStage" title="%beditor.searchStage.title" minWidth="400" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
 		<Scene stylesheets="@/prob.css">
@@ -38,16 +37,6 @@
 								<Tooltip text="%beditor.searchStage.regex.tooltip"/>
 							</tooltip>
 						</CheckBox>
-						<!--<CheckBox fx:id="cbDotAll" text="%beditor.searchStage.dotAll">
-							<tooltip>
-								<Tooltip text="%beditor.searchStage.dotAll.tooltip"/>
-							</tooltip>
-						</CheckBox>
-						<CheckBox fx:id="cbMultiline" text="%beditor.searchStage.multiline">
-							<tooltip>
-								<Tooltip text="%beditor.searchStage.multiline.tooltip"/>
-							</tooltip>
-						</CheckBox>-->
 						<Label fx:id="lblResults"/>
 					</VBox>
 				</center>

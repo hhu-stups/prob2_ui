@@ -6,8 +6,8 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ErrorsResult;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -23,9 +23,9 @@ public final class LTLPatternItem {
 	private final String code;
 
 	@JsonIgnore
-	final ObjectProperty<TemporalCheckingResultItem> resultItem;
+	final ObjectProperty<ErrorsResult> result;
 	@JsonIgnore
-	final ObjectProperty<Checked> checked;
+	final ObjectProperty<CheckingStatus> status;
 
 	@JsonCreator
 	public LTLPatternItem(
@@ -39,9 +39,9 @@ public final class LTLPatternItem {
 		this.description = Objects.requireNonNull(description, "description");
 		this.code = Objects.requireNonNull(code, "code");
 
-		this.resultItem = new SimpleObjectProperty<>(this, "resultItem", null);
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
-		this.resultItemProperty().addListener((o, from, to) -> this.checked.set(to == null ? Checked.NOT_CHECKED : to.getChecked()));
+		this.result = new SimpleObjectProperty<>(this, "result", null);
+		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
+		this.resultProperty().addListener((o, from, to) -> this.status.set(to == null ? CheckingStatus.NOT_CHECKED : to.getStatus()));
 	}
 
 	public String getName() {
@@ -60,27 +60,27 @@ public final class LTLPatternItem {
 		return this.getName().equals(other.getName());
 	}
 
-	public ObjectProperty<TemporalCheckingResultItem> resultItemProperty() {
-		return this.resultItem;
+	public ObjectProperty<ErrorsResult> resultProperty() {
+		return this.result;
 	}
 
-	public TemporalCheckingResultItem getResultItem() {
-		return this.resultItemProperty().get();
+	public ErrorsResult getResult() {
+		return this.resultProperty().get();
 	}
 
-	public void setResultItem(final TemporalCheckingResultItem resultItem) {
-		this.resultItemProperty().set(resultItem);
+	public void setResult(final ErrorsResult result) {
+		this.resultProperty().set(result);
 	}
 
-	public ReadOnlyObjectProperty<Checked> checkedProperty() {
-		return this.checked;
+	public ReadOnlyObjectProperty<CheckingStatus> statusProperty() {
+		return this.status;
 	}
 
-	public Checked getChecked() {
-		return this.checkedProperty().get();
+	public CheckingStatus getStatus() {
+		return this.statusProperty().get();
 	}
 
 	public void reset() {
-		this.setResultItem(null);
+		this.setResult(null);
 	}
 }

@@ -16,7 +16,7 @@ import javafx.stage.Stage;
 
 @FXMLInjected
 @Singleton
-public class VisualisationMenu extends Menu {
+public final class VisualisationMenu extends Menu {
 	private final Injector injector;
 
 	@Inject

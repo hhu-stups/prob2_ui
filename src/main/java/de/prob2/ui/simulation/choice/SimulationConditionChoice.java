@@ -10,10 +10,8 @@ import com.google.inject.Singleton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.SimulationMode;
 import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 
-import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
@@ -25,8 +23,7 @@ import javafx.util.StringConverter;
 
 @FXMLInjected
 @Singleton
-public class SimulationConditionChoice extends GridPane {
-
+public final class SimulationConditionChoice extends GridPane {
 	public static class SimulationStartingItem {
 
 		private final SimulationCheckingSimulator.StartingType startingType;

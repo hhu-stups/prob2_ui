@@ -26,7 +26,9 @@ stages:
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
     # LaTeX is needed by the documentation generator tests.
-    - apt-get install --assume-yes git pandoc texlive-latex-extra texlive-bibtex-extra texlive-science texlive-lang-german
+    # texlive-latex-extra is needed for the makecell and seqsplit packages,
+    # otherwise texlive-latex-recommended would be enough.
+    - apt-get install --assume-yes git pandoc texlive-latex-extra texlive-lang-german
 
 test:jdk-17-linux:
   extends: .test-linux

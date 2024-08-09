@@ -5,6 +5,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -20,17 +22,18 @@ import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.AbstractCheckableItem;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ICheckingResult;
+import de.prob2.ui.verifications.ICliTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
@@ -39,37 +42,60 @@ import javafx.beans.property.SimpleObjectProperty;
 	"location",
 	"selected",
 })
-public final class ReplayTrace implements IExecutableItem {
+public final class ReplayTrace extends AbstractCheckableItem implements ICliTask {
+	public static final class Result implements ICheckingResult {
+		private final ReplayedTrace replayed;
+		private final Trace trace;
+
+		public Result(ReplayedTrace replayed, Trace trace) {
+			this.replayed = Objects.requireNonNull(replayed, "replayed");
+			this.trace = Objects.requireNonNull(trace, "trace");
+		}
+
+		public ReplayedTrace getReplayed() {
+			return this.replayed;
+		}
+
+		@Override
+		public CheckingStatus getStatus() {
+			return this.getReplayed().getErrors().isEmpty() ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
+		}
+
+		@Override
+		public String getMessageBundleKey() {
+			return this.getStatus().getTranslationKey();
+		}
+
+		@Override
+		public List<Trace> getTraces() {
+			return Collections.singletonList(this.trace);
+		}
+
+		@Override
+		public ICheckingResult withoutAnimatorDependentState() {
+			return new CheckingResult(this.getStatus(), this.getMessageBundleKey(), this.getMessageParams());
+		}
+	}
+
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
-	@JsonIgnore
-	private final ObjectProperty<Checked> status;
 	@JsonIgnore
 	private final DoubleProperty progress;
 	@JsonIgnore
 	private final ObjectProperty<TraceJsonFile> loadedTrace;
-	@JsonIgnore
-	private final ObjectProperty<ReplayedTrace> replayedTrace;
-	@JsonIgnore
-	private final ObjectProperty<Trace> animatedReplayedTrace;
 	private final Path location; // relative to project location
 	@JsonIgnore
 	private Path absoluteLocation;
 	@JsonIgnore
 	private TraceManager traceManager;
-	private final BooleanProperty selected;
 
 	public ReplayTrace(String id, Path location, Path absoluteLocation, TraceManager traceManager) {
 		this.id = id;
-		this.status = new SimpleObjectProperty<>(this, "status", Checked.NOT_CHECKED);
 		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
-		this.replayedTrace = new SimpleObjectProperty<>(this, "replayedTrace", null);
-		this.animatedReplayedTrace = new SimpleObjectProperty<>(this, "animatedReplayedTrace", null);
 		this.location = Objects.requireNonNull(location, "location");
 		this.absoluteLocation = absoluteLocation;
 		this.traceManager = traceManager;
-		this.selected = new SimpleBooleanProperty(this, "selected", true);
 	}
 
 	@JsonCreator
@@ -101,21 +127,6 @@ public final class ReplayTrace implements IExecutableItem {
 		return new ReplayTrace(id, this.location, this.absoluteLocation, this.traceManager);
 	}
 
-	@Override
-	public ObjectProperty<Checked> checkedProperty() {
-		return status;
-	}
-
-	@JsonIgnore
-	@Override
-	public Checked getChecked() {
-		return this.status.get();
-	}
-
-	public void setChecked(Checked status) {
-		this.status.set(status);
-	}
-
 	public ReadOnlyObjectProperty<TraceJsonFile> loadedTraceProperty() {
 		return this.loadedTrace;
 	}
@@ -145,52 +156,12 @@ public final class ReplayTrace implements IExecutableItem {
 		this.progressProperty().set(progress);
 	}
 
-	public ObjectProperty<ReplayedTrace> replayedTraceProperty() {
-		return this.replayedTrace;
-	}
-
-	public ReplayedTrace getReplayedTrace() {
-		return this.replayedTraceProperty().get();
-	}
-
-	public void setReplayedTrace(final ReplayedTrace replayedTrace) {
-		this.replayedTraceProperty().set(replayedTrace);
-	}
-
-	public ObjectProperty<Trace> animatedReplayedTraceProperty() {
-		return this.animatedReplayedTrace;
-	}
-
-	public Trace getAnimatedReplayedTrace() {
-		return this.animatedReplayedTraceProperty().get();
-	}
-
-	public void setAnimatedReplayedTrace(final Trace animatedReplayedTrace) {
-		this.animatedReplayedTraceProperty().set(animatedReplayedTrace);
-	}
-
 	public Path getLocation() {
 		return this.location;
 	}
 
 	public Path getAbsoluteLocation() {
 		return this.absoluteLocation;
-	}
-
-	@Override
-	public void setSelected(boolean selected) {
-		this.selected.set(selected);
-	}
-
-	@JsonProperty("selected")
-	@Override
-	public boolean selected() {
-		return selected.get();
-	}
-
-	@Override
-	public BooleanProperty selectedProperty() {
-		return selected;
 	}
 
 	@JsonIgnore
@@ -230,19 +201,8 @@ public final class ReplayTrace implements IExecutableItem {
 	 * @throws IOException if the trace couldn't be written for any reason
 	 */
 	public void saveModified(final TraceJsonFile newTrace) throws IOException {
-		final Path tempLocation = Paths.get(this.getAbsoluteLocation() + ".tmp");
-		try {
-			this.traceManager.save(tempLocation, newTrace);
-			Files.move(tempLocation, this.getAbsoluteLocation(), StandardCopyOption.REPLACE_EXISTING);
-			this.loadedTrace.set(newTrace);
-		} catch (IOException | RuntimeException exc) {
-			try {
-				Files.deleteIfExists(tempLocation);
-			} catch (IOException | RuntimeException innerExc) {
-				exc.addSuppressed(innerExc);
-			}
-			throw exc;
-		}
+		this.traceManager.save(this.getAbsoluteLocation(), newTrace);
+		this.loadedTrace.set(newTrace);
 	}
 
 	@Override
@@ -251,12 +211,16 @@ public final class ReplayTrace implements IExecutableItem {
 	}
 
 	@Override
-	public void reset() {
-		this.setChecked(Checked.NOT_CHECKED);
+	public void resetAnimatorDependentState() {
+		super.resetAnimatorDependentState();
 		this.setProgress(-1);
+	}
+
+	@Override
+	public void reset() {
+		super.reset();
 		this.loadedTrace.set(null);
-		this.setReplayedTrace(null);
-		this.setAnimatedReplayedTrace(null);
+		this.resetAnimatorDependentState();
 	}
 
 	@Override

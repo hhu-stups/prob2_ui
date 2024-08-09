@@ -23,8 +23,7 @@ import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
 
 @FXMLInjected
-public class TemporalFormulaEditor extends ExtendedCodeArea {
-
+public final class TemporalFormulaEditor extends ExtendedCodeArea {
 	private final CodeCompletion<BCCItem> codeCompletion;
 
 	@Inject

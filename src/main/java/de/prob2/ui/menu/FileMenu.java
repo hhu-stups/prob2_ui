@@ -10,15 +10,18 @@ import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.command.GetInternalRepresentationCommand;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.FormulaTranslationMode;
+import de.prob.check.TLCModelChecker;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.eventb.EventBPackageModel;
 import de.prob.model.eventb.translate.ModelToXML;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.scripting.Api;
+import de.prob.scripting.ClassicalBFactory;
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
@@ -33,6 +36,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
 
+import de.tlc4b.exceptions.TLC4BException;
 import javafx.beans.InvalidationListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -61,7 +65,7 @@ public class FileMenu extends Menu {
 	@FXML
 	private MenuItem extendedStaticAnalysisItem;
 	@FXML
-	private MenuItem viewFormattedCodeItem;
+	private MenuItem showInternalRepresentationItem;
 	@FXML
 	private Menu exportAsMenu;
 	@FXML
@@ -72,6 +76,8 @@ public class FileMenu extends Menu {
 	private MenuItem exportAsRodinProject;
 	@FXML
 	private MenuItem exportAsEventBProlog;
+	@FXML
+	private MenuItem exportAsTLAModule;
 	@FXML
 	private MenuItem saveDocumentationItem;
 	@FXML
@@ -114,7 +120,7 @@ public class FileMenu extends Menu {
 		this.saveProjectItem.disableProperty().bind(currentProject.isNull());
 
 		this.extendedStaticAnalysisItem.disableProperty().bind(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B));
-		this.viewFormattedCodeItem.disableProperty().bind(currentTrace.isNull());
+		this.showInternalRepresentationItem.disableProperty().bind(currentTrace.isNull());
 		this.exportAsMenu.disableProperty().bind(currentTrace.isNull());
 		this.saveDocumentationItem.disableProperty().bind(currentProject.isNull());
 
@@ -125,10 +131,17 @@ public class FileMenu extends Menu {
 				final boolean noClassicalBExport = model instanceof XTLModel;
 				// ProB 2's Event-B exporters currently only work with models loaded from a Rodin project, not from an .eventb package.
 				final boolean noEventBExport = !(model instanceof EventBModel) || model instanceof EventBPackageModel;
+
 				this.exportAsClassicalBAsciiItem.setDisable(noClassicalBExport);
 				this.exportAsClassicalBUnicodeItem.setDisable(noClassicalBExport);
 				this.exportAsRodinProject.setDisable(noEventBExport);
 				this.exportAsEventBProlog.setDisable(noEventBExport);
+			}
+		});
+		currentProject.currentMachineProperty().addListener((o, from, to) ->  {
+			if (to != null) {
+				// TLA Export, TODO: check if possible for Event-B (via pretty printing classical B)
+				this.exportAsTLAModule.setDisable(to.getModelFactoryClass() != ClassicalBFactory.class);
 			}
 		});
 
@@ -188,7 +201,7 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	private void handleViewFormattedCode() {
+	private void handleShowInternal() {
 		final ViewCodeStage stage = injector.getInstance(ViewCodeStage.class);
 		stage.show();
 		stage.toFront();
@@ -256,6 +269,23 @@ public class FileMenu extends Menu {
 		} catch (IOException e) {
 			LOGGER.error("Failed to save Event-B package", e);
 			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path).show();
+		}
+	}
+
+	@FXML
+	private void handleExportTLA() throws IOException, BCompoundException {
+		final DirectoryChooser chooser = new DirectoryChooser();
+		chooser.setInitialDirectory(currentProject.getLocation().toFile());
+		final Path outputDir = fileChooserManager.showDirectoryChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
+
+		if (outputDir != null) {
+			Path bMachine = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
+			try {
+				TLCModelChecker.generateTLAWithoutTLC(bMachine.toString(), outputDir.toString());
+			} catch (TLC4BException e) {
+				stageManager.makeAlert(Alert.AlertType.ERROR, "menu.file.items.exportEntireModelAs.tlaModule.exception.header",
+						"menu.file.items.exportEntireModelAs.tlaModule.exception.content", e.getMessage()).show();
+			}
 		}
 	}
 

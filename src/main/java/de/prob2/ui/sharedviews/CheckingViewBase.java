@@ -1,21 +1,26 @@
 package de.prob2.ui.sharedviews;
 
 import java.util.Optional;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
+import de.prob.statespace.Trace;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingExecutors;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.ISelectableTask;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.ItemSelectedFactory;
-import de.prob2.ui.vomanager.IValidationTask;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -36,8 +41,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
-public abstract class CheckingViewBase<T extends IExecutableItem> extends ScrollPane {
+public abstract class CheckingViewBase<T extends ISelectableTask> extends ScrollPane {
 	protected class RowBase extends TableRow<T> {
 		protected final ContextMenu contextMenu;
 		protected final MenuItem executeMenuItem;
@@ -88,11 +96,13 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		}
 	}
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(CheckingViewBase.class);
+
 	@FXML
 	protected TableView<T> itemsTable;
 
 	@FXML
-	protected TableColumn<T, Checked> statusColumn;
+	protected TableColumn<T, CheckingStatus> statusColumn;
 
 	@FXML
 	protected TableColumn<T, CheckBox> shouldExecuteColumn;
@@ -103,21 +113,30 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	@FXML
 	protected Button checkMachineButton;
 
+	private final StageManager stageManager;
 	private final I18n i18n;
 	protected final DisablePropertyController disablePropertyController;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
-	private final CliTaskExecutor cliExecutor;
+	private final CheckingExecutors checkingExecutors;
 
 	protected final CheckBox selectAll;
 	protected BooleanBinding emptyProperty;
 
-	protected CheckingViewBase(final I18n i18n, final DisablePropertyController disablePropertyController, final CurrentTrace currentTrace, final CurrentProject currentProject, final CliTaskExecutor cliExecutor) {
+	protected CheckingViewBase(
+		StageManager stageManager,
+		I18n i18n,
+		DisablePropertyController disablePropertyController,
+		CurrentTrace currentTrace,
+		CurrentProject currentProject,
+		CheckingExecutors checkingExecutors
+	) {
+		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.disablePropertyController = disablePropertyController;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
-		this.cliExecutor = cliExecutor;
+		this.checkingExecutors = checkingExecutors;
 
 		this.selectAll = new CheckBox();
 	}
@@ -129,13 +148,14 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		// we have to use ths wrapped binding because we directly set the contained list in "this.itemsTable.itemsProperty()"
 		this.emptyProperty = SafeBindings.wrappedBooleanBinding(l -> l == null || l.isEmpty(), this.itemsTable.itemsProperty());
 
+		itemsTable.setItems(FXCollections.emptyObservableList());
 		itemsTable.setRowFactory(table -> new RowBase());
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			itemsTable.itemsProperty().unbind(); // unbind for safety, this should never be bound though
 			if (to != null) {
 				itemsTable.setItems(this.getItemsProperty(to));
 			} else {
-				itemsTable.setItems(FXCollections.observableArrayList());
+				itemsTable.setItems(FXCollections.emptyObservableList());
 			}
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
@@ -143,8 +163,8 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 		checkMachineButton.disableProperty().bind(this.emptyProperty.or(selectAll.selectedProperty().not().or(disablePropertyController.disableProperty())));
 		checkMachineButton.setOnAction(e -> this.executeAllSelectedItems());
 
-		statusColumn.setCellFactory(col -> new CheckedCell<>());
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		shouldExecuteColumn.setCellValueFactory(new ItemSelectedFactory<>(itemsTable, selectAll));
 		shouldExecuteColumn.setGraphic(selectAll);
 		configurationColumn.setCellValueFactory(features -> {
@@ -159,15 +179,15 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	}
 
 	protected T addItem(T newItem) {
-		return this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(newItem);
+		return this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(newItem);
 	}
 
 	protected void removeItem(final T item) {
-		this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(item);
+		this.currentProject.getCurrentMachine().removeValidationTask(item);
 	}
 
 	protected T replaceItem(final T oldItem, final T newItem) {
-		return this.currentProject.getCurrentMachine().getMachineProperties().replaceValidationTaskIfNotExist(oldItem, newItem);
+		return this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldItem, newItem);
 	}
 
 	/**
@@ -184,36 +204,90 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	}
 
 	protected BooleanExpression disableItemBinding(final T item) {
-		return disablePropertyController.disableProperty();
+		return this.currentTrace.isNull().or(this.disablePropertyController.disableProperty());
 	}
 
 	protected ExecutionContext getCurrentExecutionContext() {
-		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+		Trace trace = currentTrace.get();
+		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), trace.getStateSpace(), trace);
 	}
 
-	protected abstract void executeItemSync(final T item, final ExecutionContext context);
+	/**
+	 * Execute an item without any user interaction,
+	 * i. e. without showing any alerts or changing the current trace.
+	 * Can be overridden to perform additional actions whenever an item is executed from the view,
+	 * regardless of whether a single item or multiple items are executed.
+	 * This method is meant for overriding only and shouldn't be called directly outside of {@link CheckingViewBase}.
+	 * 
+	 * @param item the item to execute
+	 * @param executors the executors to use for executing the item
+	 * @param context the project/animator context in which to execute the item
+	 * @return a future that completes once the item has been executed
+	 */
+	protected CompletableFuture<?> executeItemNoninteractiveImpl(T item, CheckingExecutors executors, ExecutionContext context) {
+		return item.execute(executors, context);
+	}
 
-	protected void executeItem(final T item) {
+	/**
+	 * Execute a single item in response to a user action.
+	 * Can be overridden to perform additional actions when the user executes a specific item in the view,
+	 * e. g. to show an error alert on failure or update the current trace to the result of the check.
+	 * This method is meant for overriding only and shouldn't be called directly outside of {@link CheckingViewBase} -
+	 * other code should call {@link #executeItem(ISelectableTask)} instead.
+	 *
+	 * @param item the item to execute
+	 * @param executors the executors to use for executing the item
+	 * @param context the project/animator context in which to execute the item
+	 * @return a future that completes once the item has been executed
+	 */
+	protected CompletableFuture<?> executeItemImpl(T item, CheckingExecutors executors, ExecutionContext context) {
+		return executeItemNoninteractiveImpl(item, checkingExecutors, context);
+	}
+
+	protected void handleCheckException(Throwable exc) {
+		if (exc instanceof CancellationException || exc instanceof CompletionException && exc.getCause() instanceof CancellationException) {
+			LOGGER.trace("Check was canceled (this is not an error)", exc);
+			return;
+		}
+
+		LOGGER.error("Unhandled exception during checking", exc);
+		stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+	}
+
+	/**
+	 * Execute a single item in response to a user action.
+	 * This method cannot be overridden directly -
+	 * subclasses can override {@link #executeItemImpl(ISelectableTask, CheckingExecutors, ExecutionContext)} instead.
+	 * 
+	 * @param item the item to execute
+	 */
+	protected final void executeItem(T item) {
 		final ExecutionContext context = getCurrentExecutionContext();
-		cliExecutor.execute(() -> executeItemSync(item, context));
+		executeItemImpl(item, checkingExecutors, context).exceptionally(exc -> {
+			handleCheckException(exc);
+			return null;
+		});
 	}
 
-	protected void executeItemIfEnabled(final T item) {
+	protected final void executeItemIfEnabled(T item) {
 		if (!disableItemBinding(item).get()) {
 			executeItem(item);
 		}
 	}
 
-	protected void executeAllSelectedItems() {
+	protected final void executeAllSelectedItems() {
 		final ExecutionContext context = getCurrentExecutionContext();
-		cliExecutor.execute(() -> {
-			for (final T item : itemsTable.getItems()) {
-				if (!item.selected()) {
-					continue;
-				}
-
-				item.execute(context);
+		CompletableFuture<?> future = CompletableFuture.completedFuture(null);
+		for (T item : itemsTable.getItems()) {
+			if (!item.selected()) {
+				continue;
 			}
+
+			future = future.thenCompose(res -> executeItemNoninteractiveImpl(item, checkingExecutors, context));
+		}
+		future.exceptionally(exc -> {
+			handleCheckException(exc);
+			return null;
 		});
 	}
 
@@ -229,10 +303,11 @@ public abstract class CheckingViewBase<T extends IExecutableItem> extends Scroll
 	protected Optional<T> askToAddItem() {
 		return this.showItemDialog(null).map(newItem -> {
 			final T toCheck = this.addItem(newItem);
+			this.itemsTable.getSelectionModel().select(toCheck);
 			// The returned item might already be checked
 			// if there was already another item with the same configuration as newItem
 			// and that existing item was already checked previously.
-			if (toCheck.getChecked() == Checked.NOT_CHECKED) {
+			if (toCheck.getStatus() == CheckingStatus.NOT_CHECKED) {
 				this.executeItemIfEnabled(toCheck);
 			}
 			return toCheck;

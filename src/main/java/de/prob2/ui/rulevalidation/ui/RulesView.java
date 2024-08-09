@@ -62,8 +62,7 @@ import org.slf4j.LoggerFactory;
  */
 @FXMLInjected
 @Singleton
-public class RulesView extends AnchorPane{
-
+public final class RulesView extends AnchorPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(RulesView.class);
 
 	@FXML
@@ -186,7 +185,7 @@ public class RulesView extends AnchorPane{
 
 		treeTableView.setRowFactory(view -> initTableRow());
 
-		tvNameColumn.setCellFactory(column -> new NameCell());
+		tvNameColumn.setCellFactory(column -> new NameCell(i18n));
 		tvNameColumn.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue().getValue()));
 
 		tvValueColumn.setCellFactory(column -> new ValueCell(i18n));
@@ -197,6 +196,8 @@ public class RulesView extends AnchorPane{
 			} else if (item instanceof ComputationOperation compItem) {
 				return dataModel.getComputationValue(compItem.getName());
 			} else if (item instanceof RuleResult.CounterExample) {
+				return new ReadOnlyObjectWrapper<>(item);
+			} else if (item instanceof RuleResult.SuccessMessage) {
 				return new ReadOnlyObjectWrapper<>(item);
 			} else if (item instanceof String stringItem) {
 				if (dataModel.getRuleValueMap().containsKey(stringItem)) {
@@ -238,7 +239,7 @@ public class RulesView extends AnchorPane{
 
 	private void filterTagsAndSearch() {
 		String filterText = filterTextField.getText();
-		LOGGER.debug("Filter Operations for tags " + currentTags + " and search '" + filterText + "'");
+		LOGGER.debug("Filter Operations for tags {} and search '{}'", currentTags, filterText);
 		clearTable();
 		List<TreeItem<Object>> filteredRuleItems;
 		List<TreeItem<Object>> filteredComputationItems;
@@ -351,7 +352,7 @@ public class RulesView extends AnchorPane{
 		}
 	}
 
-	public void clear(){
+	public void clear() {
 		LOGGER.debug("Clear RulesView!");
 
 		tvRootItem.getChildren().clear();

@@ -16,8 +16,7 @@ import javafx.util.Callback;
 import java.util.List;
 import java.util.Optional;
 
-public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
-
+public final class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 	private final ParentWithEditableText<? super T> parent;
 	private final Callback<String, List<? extends T>> codeCompletionProvider;
 	private final ChangeListener<Optional<Point2D>> caretBoundsChangeListener;

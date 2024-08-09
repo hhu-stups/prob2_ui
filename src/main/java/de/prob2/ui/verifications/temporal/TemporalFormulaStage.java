@@ -1,21 +1,26 @@
 package de.prob2.ui.verifications.temporal;
 
+import java.util.Collections;
+
 import com.google.inject.Inject;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.ProBError;
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.temporal.ctl.CTLFormulaChecker;
+import de.prob2.ui.verifications.temporal.ctl.CTLFormulaParser;
 import de.prob2.ui.verifications.temporal.ctl.CTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
-import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaChecker;
+import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
+import de.prob2.ui.vomanager.ast.IValidationExpression;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -23,6 +28,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
@@ -30,8 +36,7 @@ import javafx.scene.layout.HBox;
 import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
-public class TemporalFormulaStage extends TemporalItemStage {
-
+public final class TemporalFormulaStage extends TemporalItemStage {
 	@FXML
 	private ChoiceBox<ValidationTaskType<?>> cbType;
 
@@ -52,6 +57,18 @@ public class TemporalFormulaStage extends TemporalItemStage {
 
 	@FXML
 	private Spinner<Integer> stateLimit;
+
+	@FXML
+	private RadioButton startStateAllInitialStates;
+
+	@FXML
+	private RadioButton startStateCurrentState;
+
+	@FXML
+	private RadioButton startStateFromExpression;
+
+	@FXML
+	private TextField startStateExpressionTextField;
 
 	@FXML
 	private Button btShowBuiltins;
@@ -122,6 +139,26 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		} else {
 			this.chooseStateLimit.setSelected(false);
 		}
+
+		switch (item.getStartState()) {
+			case ALL_INITIAL_STATES:
+				this.startStateAllInitialStates.setSelected(true);
+				this.startStateExpressionTextField.setText("");
+				break;
+
+			case CURRENT_STATE:
+				this.startStateCurrentState.setSelected(true);
+				this.startStateExpressionTextField.setText("");
+				break;
+
+			case FROM_EXPRESSION:
+				this.startStateFromExpression.setSelected(true);
+				this.startStateExpressionTextField.setText(item.getStartStateExpression());
+				break;
+
+			default:
+				throw new AssertionError("Unhandled start state type: " + item.getStartState());
+		}
 	}
 
 	private int getStateLimit() {
@@ -135,25 +172,53 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		return -1;
 	}
 
+	private TemporalFormulaItem.StartState getStartState() {
+		if (this.startStateAllInitialStates.isSelected()) {
+			return TemporalFormulaItem.StartState.ALL_INITIAL_STATES;
+		} else if (this.startStateCurrentState.isSelected()) {
+			return TemporalFormulaItem.StartState.CURRENT_STATE;
+		} else if (this.startStateFromExpression.isSelected()) {
+			return TemporalFormulaItem.StartState.FROM_EXPRESSION;
+		} else {
+			throw new AssertionError("No start state selected?!");
+		}
+	}
+
 	@FXML
 	private void applyFormula() {
 		result = null;
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		String code = taCode.getText();
+		TemporalFormulaItem.StartState startState = this.getStartState();
+
+		String startStateExpression;
+		if (startState == TemporalFormulaItem.StartState.FROM_EXPRESSION) {
+			startStateExpression = startStateExpressionTextField.getText();
+			try {
+				IValidationExpression.parse(startStateExpression);
+			} catch (VOParseException exc) {
+				ErrorItem errorItem = new ErrorItem(exc.getMessage(), ErrorItem.Type.ERROR, Collections.emptyList());
+				this.showErrors(Collections.singletonList(errorItem));
+				return;
+			}
+		} else {
+			startStateExpression = null;
+		}
+
 		ValidationTaskType<?> type = cbType.getValue();
 		if (type == BuiltinValidationTaskTypes.LTL) {
-			LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
+			LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), startState, startStateExpression, cbExpectedResult.getValue());
 			try {
-				LTLFormulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
+				LTLFormulaParser.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 			} catch (ProBError e) {
 				this.showErrors(e.getErrors());
 				return;
 			}
 			result = item;
 		} else if (type == BuiltinValidationTaskTypes.CTL) {
-			CTLFormulaItem item = new CTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), cbExpectedResult.getValue());
+			CTLFormulaItem item = new CTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), startState, startStateExpression, cbExpectedResult.getValue());
 			try {
-				CTLFormulaChecker.parseFormula(item.getCode(), currentTrace.getModel());
+				CTLFormulaParser.parseFormula(item.getCode(), currentTrace.getModel());
 			} catch (ProBError e) {
 				this.showErrors(e.getErrors());
 				return;

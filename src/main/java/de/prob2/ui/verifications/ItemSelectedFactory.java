@@ -7,7 +7,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Callback;
 
-public class ItemSelectedFactory<T extends IExecutableItem> implements Callback<TableColumn.CellDataFeatures<T, CheckBox>, ObservableValue<CheckBox>> {
+public class ItemSelectedFactory<T extends ISelectableTask> implements Callback<TableColumn.CellDataFeatures<T, CheckBox>, ObservableValue<CheckBox>> {
 	private final CheckBox selectAll;
 	
 	public ItemSelectedFactory(final TableView<T> tableView, final CheckBox selectAll) {
@@ -23,7 +23,7 @@ public class ItemSelectedFactory<T extends IExecutableItem> implements Callback<
 			// Once the loop has finished, all items are either selected or deselected,
 			// and the selectAll state will automatically update back to what the user has selected.
 			final boolean selected = this.selectAll.isSelected();
-			for (IExecutableItem it : tableView.getItems()) {
+			for (ISelectableTask it : tableView.getItems()) {
 				it.setSelected(selected);
 			}
 		});
@@ -31,11 +31,11 @@ public class ItemSelectedFactory<T extends IExecutableItem> implements Callback<
 	
 	@Override
 	public ObservableValue<CheckBox> call(TableColumn.CellDataFeatures<T, CheckBox> param) {
-		IExecutableItem item = param.getValue();
+		ISelectableTask item = param.getValue();
 		CheckBox checkBox = new CheckBox();
 		checkBox.selectedProperty().bindBidirectional(item.selectedProperty());
 		item.selectedProperty().addListener(o ->
-			this.selectAll.setSelected(param.getTableView().getItems().stream().anyMatch(IExecutableItem::selected))
+			this.selectAll.setSelected(param.getTableView().getItems().stream().anyMatch(ISelectableTask::selected))
 		);
 		return new SimpleObjectProperty<>(checkBox);
 	}

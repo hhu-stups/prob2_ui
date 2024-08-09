@@ -4,12 +4,14 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.StateError;
-import de.prob.statespace.Trace;
+import de.prob.statespace.State;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -58,13 +60,15 @@ public final class ErrorStatusStage extends Stage {
 	
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
 	
 	@Inject
-	private ErrorStatusStage(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
+	private ErrorStatusStage(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, CliTaskExecutor cliExecutor) {
 		super();
 		
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
 		
 		stageManager.loadFXML(this, "error_status_stage.fxml", this.getClass().getName());
 	}
@@ -86,55 +90,71 @@ public final class ErrorStatusStage extends Stage {
 			}
 		});
 		
-		this.currentTrace.addListener((o, from, to) -> this.update(to));
-		this.update(currentTrace.get());
+		this.currentTrace.currentStateProperty().addListener((o, from, to) -> this.update(to));
+		this.update(currentTrace.getCurrentState());
 	}
 	
-	private void update(final Trace to) {
+	private void showPlaceholder(String placeholderText) {
+		this.errorsList.getItems().clear();
+		this.placeholderLabel.setVisible(true);
+		this.placeholderLabel.setText(placeholderText);
+		this.errorsBox.setVisible(false);
+	}
+	
+	private void showStateStatus(State state) {
+		assert state.isExplored();
+		if (!state.isInitialised()) {
+			this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantNotInitialised"));
+		} else if (state.isInvariantOk()) {
+			// TO DO: isInvariantOk is incorrect for ignored states (SCOPE predicate false)
+			this.invariantOkLabel.getStyleClass().add("no-error");
+			this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantOk"));
+		} else {
+			this.invariantOkLabel.getStyleClass().add("error");
+			this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantNotOk"));
+		}
+		
+		if (state.getOutTransitions().isEmpty()) {
+			// TO DO: this test is incorrect for ignored states (SCOPE predicate false) or if MAX_OPERATIONS==0
+			this.deadlockLabel.getStyleClass().add("warning");
+			this.deadlockLabel.setText(i18n.translate("statusbar.errorStatusStage.deadlocked"));
+		} else {
+			this.deadlockLabel.getStyleClass().add("no-error");
+			this.deadlockLabel.setText(i18n.translate("statusbar.errorStatusStage.notDeadlocked"));
+		}
+		
+		if (state.getStateErrors().isEmpty()) {
+			this.otherStateErrorsLabel.getStyleClass().add("no-error");
+			this.otherStateErrorsLabel.setText(i18n.translate("statusbar.errorStatusStage.noOtherStateErrors"));
+			this.otherStateErrorsPane.setVisible(false);
+			this.otherStateErrorsPane.setManaged(false);
+		} else {
+			this.otherStateErrorsLabel.getStyleClass().add("error");
+			this.otherStateErrorsLabel.setText(i18n.translate("statusbar.errorStatusStage.otherStateErrors"));
+			this.otherStateErrorsPane.setVisible(true);
+			this.otherStateErrorsPane.setManaged(true);
+		}
+		this.errorsList.getItems().setAll(state.getStateErrors());
+		this.placeholderLabel.setVisible(false);
+		this.errorsBox.setVisible(true);
+	}
+	
+	private void update(State state) {
 		for (final Label label : new Label[] {this.invariantOkLabel, this.deadlockLabel, this.otherStateErrorsLabel}) {
 			label.getStyleClass().removeAll("error", "warning", "no-error");
 			label.setText(null);
 		}
 		
-		if (to == null) {
-			this.errorsList.getItems().clear();
-			this.placeholderLabel.setVisible(true);
-			this.errorsBox.setVisible(false);
+		if (state == null) {
+			this.showPlaceholder(i18n.translate("common.noModelLoaded"));
+		} else if (state.isExplored()) {
+			this.showStateStatus(state);
 		} else {
-			if (!to.getCurrentState().isInitialised()) {
-				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantNotInitialised"));
-			} else if (to.getCurrentState().isInvariantOk()) {
-				// TO DO: isInvariantOk is incorrect for ignored states (SCOPE predicate false)
-				this.invariantOkLabel.getStyleClass().add("no-error");
-				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantOk"));
-			} else {
-				this.invariantOkLabel.getStyleClass().add("error");
-				this.invariantOkLabel.setText(i18n.translate("statusbar.errorStatusStage.invariantNotOk"));
-			}
-			
-			if (to.getCurrentState().getOutTransitions().isEmpty()) {
-				// TO DO: this test is incorrect for ignored states (SCOPE predicate false) or if MAX_OPERATIONS==0
-				this.deadlockLabel.getStyleClass().add("warning");
-				this.deadlockLabel.setText(i18n.translate("statusbar.errorStatusStage.deadlocked"));
-			} else {
-				this.deadlockLabel.getStyleClass().add("no-error");
-				this.deadlockLabel.setText(i18n.translate("statusbar.errorStatusStage.notDeadlocked"));
-			}
-			
-			if (to.getCurrentState().getStateErrors().isEmpty()) {
-				this.otherStateErrorsLabel.getStyleClass().add("no-error");
-				this.otherStateErrorsLabel.setText(i18n.translate("statusbar.errorStatusStage.noOtherStateErrors"));
-				this.otherStateErrorsPane.setVisible(false);
-				this.otherStateErrorsPane.setManaged(false);
-			} else {
-				this.otherStateErrorsLabel.getStyleClass().add("error");
-				this.otherStateErrorsLabel.setText(i18n.translate("statusbar.errorStatusStage.otherStateErrors"));
-				this.otherStateErrorsPane.setVisible(true);
-				this.otherStateErrorsPane.setManaged(true);
-			}
-			this.errorsList.getItems().setAll(to.getCurrentState().getStateErrors());
-			this.placeholderLabel.setVisible(false);
-			this.errorsBox.setVisible(true);
+			this.showPlaceholder(i18n.translate("common.loading"));
+			cliExecutor.execute(() -> {
+				state.exploreIfNeeded();
+				Platform.runLater(() -> this.showStateStatus(state));
+			});
 		}
 	}
 }

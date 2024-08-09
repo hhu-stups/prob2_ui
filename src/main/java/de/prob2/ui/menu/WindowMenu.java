@@ -108,7 +108,7 @@ public class WindowMenu extends Menu {
 	}
 
 	private void switchToPerspective(final PerspectiveKind kind, final String perspective) {
-		injector.getInstance(DetachViewStageController.class).attachAllViews();
+		injector.getInstance(MainController.class).attachAllViews();
 		PerspectiveKind prevKind = this.uiState.getPerspectiveKind();
 		String prevPerspective = this.uiState.getPerspective();
 

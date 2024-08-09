@@ -1,6 +1,7 @@
 package de.prob2.ui.animation.symbolic.testcasegeneration;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,40 +10,82 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
-import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorSettings;
 import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
+import de.prob2.ui.verifications.ICheckingResult;
+import de.prob2.ui.verifications.ICliTask;
 
 @JsonPropertyOrder({
 	"id",
 	"maxDepth",
 	"selected",
 })
-public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
+public abstract class TestCaseGenerationItem extends AbstractCheckableItem implements ICliTask {
+	public static final class Result implements ICheckingResult {
+		private final TestCaseGeneratorResult result;
+		private final List<Trace> traces;
+
+		public Result(TestCaseGeneratorResult result) {
+			this.result = Objects.requireNonNull(result, "result");
+
+			this.traces = new ArrayList<>();
+			for (TestTrace testTrace : result.getTestTraces()) {
+				if (testTrace.getTrace() != null) {
+					this.traces.add(testTrace.getTrace());
+				}
+			}
+		}
+
+		@Override
+		public CheckingStatus getStatus() {
+			if (this.getResult().isInterrupted()) {
+				return CheckingStatus.INTERRUPTED;
+			} else if (this.getResult().getTestTraces().isEmpty() || !this.getResult().getUncoveredTargets().isEmpty()) {
+				return CheckingStatus.FAIL;
+			} else {
+				return CheckingStatus.SUCCESS;
+			}
+		}
+
+		@Override
+		public String getMessageBundleKey() {
+			if (this.getResult().isInterrupted()) {
+				return "animation.testcase.result.interrupted";
+			} else if (this.getResult().getTestTraces().isEmpty()) {
+				return "animation.testcase.result.notFound";
+			} else if (!this.getResult().getUncoveredTargets().isEmpty()) {
+				return "animation.testcase.result.notAllGenerated";
+			} else {
+				return "animation.testcase.result.found";
+			}
+		}
+
+		@Override
+		public List<Trace> getTraces() {
+			return Collections.unmodifiableList(this.traces);
+		}
+
+		public TestCaseGeneratorResult getResult() {
+			return this.result;
+		}
+
+		@Override
+		public ICheckingResult withoutAnimatorDependentState() {
+			return new CheckingResult(this.getStatus(), this.getMessageBundleKey(), this.getMessageParams());
+		}
+	}
+
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 
 	private final int maxDepth;
-
-	@JsonIgnore
-	private final ObjectProperty<TestCaseGeneratorResult> result = new SimpleObjectProperty<>(this, "result", null);
-
-	@JsonIgnore
-	private final ListProperty<Trace> examples = new SimpleListProperty<>(this, "examples", FXCollections.observableArrayList());
 
 	protected TestCaseGenerationItem(final String id, final int maxDepth) {
 		super();
@@ -67,66 +110,14 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem {
 	@JsonIgnore
 	public abstract TestCaseGeneratorSettings getTestCaseGeneratorSettings();
 
-	public ObjectProperty<TestCaseGeneratorResult> resultProperty() {
-		return this.result;
-	}
-
-	public TestCaseGeneratorResult getResult() {
-		return this.resultProperty().get();
-	}
-
-	public void setResult(final TestCaseGeneratorResult result) {
-		this.resultProperty().set(result);
-	}
-
-	public ListProperty<Trace> examplesProperty() {
-		return examples;
-	}
-
-	public ObservableList<Trace> getExamples() {
-		return examples.get();
-	}
-
 	@JsonIgnore
-	protected abstract String getConfigurationDescription();
-
-	public String createdByForMetadata(int index) {
-		final Target target = this.getResult().getTestTraces().get(index).getTarget();
-		return "Test Case Generation: " + this.getConfigurationDescription() + "; OPERATION: " + target.getOperation() + ", GUARD: " + target.getGuardString();
-	}
+	public abstract String getConfigurationDescription();
 
 	@Override
 	public void execute(final ExecutionContext context) {
-		this.getExamples().clear();
-
 		ConstraintBasedTestCaseGenerator cbTestCaseGenerator = new ConstraintBasedTestCaseGenerator(context.stateSpace(), this.getTestCaseGeneratorSettings(), new ArrayList<>());
 		TestCaseGeneratorResult res = cbTestCaseGenerator.generateTestCases();
-		this.setResult(res);
-
-		List<Trace> traces = new ArrayList<>();
-		for (TestTrace trace : res.getTestTraces()) {
-			if (trace.getTrace() != null) {
-				traces.add(trace.getTrace());
-			}
-		}
-
-		if (res.isInterrupted()) {
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "animation.resultHandler.testcasegeneration.result.interrupted"));
-		} else if (traces.isEmpty()) {
-			this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notFound"));
-		} else if (!res.getUncoveredTargets().isEmpty()) {
-			this.setResultItem(new CheckingResultItem(Checked.FAIL, "animation.resultHandler.testcasegeneration.result.notAllGenerated"));
-		} else {
-			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "animation.resultHandler.testcasegeneration.result.found"));
-		}
-		this.getExamples().addAll(traces);
-	}
-
-	@Override
-	public void reset() {
-		super.reset();
-		this.setResult(null);
-		this.examples.clear();
+		this.setResult(new TestCaseGenerationItem.Result(res));
 	}
 
 	@Override

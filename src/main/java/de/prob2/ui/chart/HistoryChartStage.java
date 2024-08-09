@@ -315,7 +315,7 @@ public final class HistoryChartStage extends Stage {
 		if (machine == null) {
 			return;
 		}
-		machine.getMachineProperties().setHistoryChartItems(formulaCodeList);
+		machine.getHistoryChartItems().setAll(formulaCodeList);
 	}
 
 	private static void updateXAxisTicks(NumberAxis axis, double upperBound) {
@@ -410,8 +410,8 @@ public final class HistoryChartStage extends Stage {
 		if (machine == null) {
 			return;
 		}
-		if (!machine.getMachineProperties().getHistoryChartItems().isEmpty()) {
-			machine.getMachineProperties().getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s)));
+		if (!machine.getHistoryChartItems().isEmpty()) {
+			machine.getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s)));
 		}
 	}
 

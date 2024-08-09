@@ -24,8 +24,7 @@ import org.fxmisc.wellbehaved.event.Nodes;
 
 @FXMLInjected
 @Singleton
-public class GroovyConsole extends Console {
-
+public final class GroovyConsole extends Console {
 	private final GroovyInterpreter groovyInterpreter;
 	private final CodeCompletion<GroovyCCItem> codeCompletion;
 

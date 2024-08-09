@@ -1,9 +1,7 @@
 package de.prob2.ui.vomanager;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -13,7 +11,8 @@ import com.google.common.base.MoreObjects;
 
 import de.prob.voparser.VOParseException;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
@@ -36,7 +35,7 @@ public final class ValidationObligation {
 	private IValidationExpression parsedExpression;
 
 	@JsonIgnore
-	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+	private final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
 	@JsonIgnore
 	private final ObservableList<IValidationTask> tasks = FXCollections.observableArrayList();
@@ -55,26 +54,26 @@ public final class ValidationObligation {
 		this.expression = expression;
 		this.parent = parent;
 
-		final InvalidationListener checkedListener = o -> {
+		InvalidationListener statusListener = o -> {
 			if (this.parsedExpression == null) {
-				this.checked.set(Checked.INVALID_TASK);
+				this.status.set(CheckingStatus.INVALID_TASK);
 			} else {
-				this.checked.set(this.parsedExpression.getChecked());
+				this.status.set(this.parsedExpression.getStatus());
 			}
 		};
 		this.getTasks().addListener((ListChangeListener<IValidationTask>) o -> {
 			while (o.next()) {
 				if (o.wasRemoved()) {
 					for (final IValidationTask task : o.getRemoved()) {
-						task.checkedProperty().removeListener(checkedListener);
+						task.statusProperty().removeListener(statusListener);
 					}
 				}
 				if (o.wasAdded()) {
 					for (final IValidationTask task : o.getAddedSubList()) {
-						task.checkedProperty().addListener(checkedListener);
+						task.statusProperty().addListener(statusListener);
 					}
 				}
-				checkedListener.invalidated(null);
+				statusListener.invalidated(null);
 			}
 		});
 	}
@@ -82,7 +81,7 @@ public final class ValidationObligation {
 	public void setParsedExpression(final IValidationExpression expression) {
 		this.parsedExpression = expression;
 		if (expression == null) {
-			this.checked.set(Checked.INVALID_TASK);
+			this.status.set(CheckingStatus.INVALID_TASK);
 			this.getTasks().clear();
 		} else {
 			this.getTasks().setAll(expression.getAllTasks()
@@ -91,22 +90,10 @@ public final class ValidationObligation {
 		}
 	}
 
-	public void parse(final List<IValidationTask> validationTasksList) {
-		Map<String, IValidationTask> validationTasks = validationTasksList.stream()
-			                                                  .filter(vt -> vt.getId() != null)
-			                                                  .collect(Collectors.toMap(IValidationTask::getId, Function.identity()));
-
+	public void parse(Map<String, IValidationTask> tasksInScopeById) {
 		try {
 			final IValidationExpression parsed = IValidationExpression.parse(this.getExpression());
-			parsed.getAllTasks().forEach(taskExpr -> {
-				IValidationTask validationTask;
-				if (validationTasks.containsKey(taskExpr.getIdentifier())) {
-					validationTask = validationTasks.get(taskExpr.getIdentifier());
-				} else {
-					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
-				}
-				taskExpr.setTask(validationTask);
-			});
+			parsed.resolveTaskIds(tasksInScopeById);
 			this.setParsedExpression(parsed);
 		} catch (VOParseException e) {
 			this.setParsedExpression(null);
@@ -115,15 +102,15 @@ public final class ValidationObligation {
 	}
 
 	public void parse(final Machine machine) {
-		this.parse(machine.getMachineProperties().getValidationTasksWithId());
+		this.parse(machine.getValidationTasksById());
 	}
 
-	public ObjectProperty<Checked> checkedProperty() {
-		return checked;
+	public ObjectProperty<CheckingStatus> statusProperty() {
+		return status;
 	}
 
-	public Checked getChecked() {
-		return checked.get();
+	public CheckingStatus getStatus() {
+		return status.get();
 	}
 
 	public ObservableList<IValidationTask> getTasks() {

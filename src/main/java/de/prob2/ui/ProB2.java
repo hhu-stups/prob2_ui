@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 
+import ch.qos.logback.classic.ClassicConstants;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Key;
@@ -26,7 +28,8 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.persistence.UIPersistence;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
@@ -39,6 +42,7 @@ import de.prob2.ui.simulation.simulators.Scheduler;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
 import javafx.event.Event;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -59,10 +63,8 @@ import org.apache.commons.cli.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.qos.logback.classic.ClassicConstants;
-
-public class ProB2 extends Application {
-
+public final class ProB2 extends Application {
+	public static final String MAIN_STAGE_PERSISTENCE_ID = ProB2.class.getName();
 	public static final String BUG_REPORT_URL = "https://github.com/hhu-stups/prob-issues/issues/new/choose";
 
 	// This logger needs to be non-static,
@@ -166,7 +168,7 @@ public class ProB2 extends Application {
 								"common.alerts.noPreference.content", runtimeOptions.getPreference(), currentProject.getName())
 						.show();
 			} else {
-				currentProject.reloadMachine(foundMachine, foundPreference);
+				currentProject.loadMachineWithConfirmation(foundMachine, foundPreference);
 			}
 		}
 	}
@@ -229,24 +231,101 @@ public class ProB2 extends Application {
 			Platform.runLater(() -> {
 				try {
 					injector.getInstance(RealTimeSimulator.class).stop();
-					stageManager.makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread).show();
+					stageManager.showUnhandledExceptionAlert(thread, exc, null);
 				} catch (Throwable t) {
 					logger.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
 				}
 			});
 		});
 
-		final Thread sharedAnimatorPreloader = new Thread(() -> injector.getInstance(MachineLoader.class).startSharedAnimator(), "Shared Animator Preloader");
-		this.stopActions.add(sharedAnimatorPreloader::interrupt);
-		sharedAnimatorPreloader.start();
+		CliTaskExecutor cliExecutor = injector.getInstance(CliTaskExecutor.class);
+		cliExecutor.execute(() -> injector.getInstance(MachineLoader.class).startSharedAnimator());
 
 		CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		currentProject.addListener((observable, from, to) -> this.updateTitle(primaryStage));
-		currentProject.currentMachineProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
-		currentProject.savedProperty().addListener((observable, from, to) -> this.updateTitle(primaryStage));
+		ChangeListener<Object> titleUpdater = (observable, from, to) -> this.updateTitle(primaryStage);
+		currentProject.addListener(titleUpdater);
+		currentProject.currentMachineProperty().addListener((observable, from, to) -> {
+			titleUpdater.changed(observable, from, to);
+
+			// be conservative and listen to any changes in the current machine
+			if (from != null) {
+				from.changedProperty().removeListener(titleUpdater);
+			}
+			if (to != null) {
+				to.changedProperty().addListener(titleUpdater);
+			}
+		});
+		currentProject.savedProperty().addListener(titleUpdater);
 
 		Parent root = injector.getInstance(MainController.class);
 		return new Scene(root);
+	}
+
+	private void restoreDetachedView(String viewClassName) {
+		logger.info("Restoring detached view with class {}", viewClassName);
+
+		Class<?> clazz;
+		try {
+			clazz = Class.forName(viewClassName);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Class not found, cannot restore detached view", e);
+			return;
+		}
+
+		try {
+			injector.getInstance(MainController.class).detachView(clazz);
+		} catch (RuntimeException exc) {
+			logger.warn("Failed to restore detached view", exc);
+		}
+	}
+
+	private void restoreStage(String id) {
+		logger.info("Restoring stage with ID {}", id);
+
+		Class<?> clazz;
+		try {
+			clazz = Class.forName(id);
+		} catch (ClassNotFoundException e) {
+			logger.warn("Class not found, cannot restore window", e);
+			return;
+		}
+
+		Class<? extends Stage> stageClazz;
+		try {
+			stageClazz = clazz.asSubclass(Stage.class);
+		} catch (ClassCastException e) {
+			logger.warn("Class is not a subclass of javafx.stage.Stage, cannot restore window", e);
+			return;
+		}
+
+		try {
+			Stage stage = injector.getInstance(stageClazz);
+			stage.show();
+		} catch (RuntimeException e) {
+			logger.warn("Failed to restore window", e);
+		}
+	}
+
+	public void restoreStages(Stage primaryStage) {
+		UIState uiState = injector.getInstance(UIState.class);
+		var visibleStages = new ArrayList<>(uiState.getSavedVisibleStages());
+		// Clear the set of visible stages and let it get re-populated as the stages are shown.
+		// This ensures that old, no longer existing stage IDs are removed from the set.
+		uiState.resetVisibleStages();
+		for (String id : visibleStages) {
+			if (id == null) {
+				logger.warn("Stage identifier is null, cannot restore window");
+			} else if (id.startsWith(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX)) {
+				// Remove the prefix before the name of the detached class
+				String viewClassName = id.substring(MainController.DETACHED_VIEW_PERSISTENCE_ID_PREFIX.length());
+				this.restoreDetachedView(viewClassName);
+			} else if (MAIN_STAGE_PERSISTENCE_ID.equals(id)) {
+				logger.info("Restoring main stage");
+				primaryStage.show();
+			} else {
+				this.restoreStage(id);
+			}
+		}
 	}
 
 	private void postStart(final Stage primaryStage, final Scene mainScene) {
@@ -259,17 +338,12 @@ public class ProB2 extends Application {
 
 		final StageManager stageManager = injector.getInstance(StageManager.class);
 		final CurrentProject currentProject = injector.getInstance(CurrentProject.class);
-		stageManager.registerMainStage(primaryStage, this.getClass().getName());
+		stageManager.registerMainStage(primaryStage, MAIN_STAGE_PERSISTENCE_ID);
 
 		primaryStage.setOnCloseRequest(event -> handleCloseRequest(event, currentProject, stageManager));
+		this.restoreStages(primaryStage);
+		// Ensure that the main window is always shown, even if it wasn't listed in the saved visible stages.
 		primaryStage.show();
-
-		primaryStage.toFront();
-
-		//Persistent stages are moved to front
-
-		UIPersistence uiPersistence = injector.getInstance(UIPersistence.class);
-		uiPersistence.open();
 
 		this.openFilesFromCommandLine(stageManager, currentProject);
 
@@ -374,6 +448,7 @@ public class ProB2 extends Application {
 	}
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
+		UIState uiState = injector.getInstance(UIState.class);
 		if (!currentProject.isSaved()) {
 			ButtonType save = new ButtonType(i18n.translate("common.buttons.save"), ButtonBar.ButtonData.YES);
 			ButtonType doNotSave = new ButtonType(i18n.translate("common.buttons.doNotSave"), ButtonBar.ButtonData.NO);
@@ -389,14 +464,20 @@ public class ProB2 extends Application {
 				event.consume();
 			} else if (result.get().equals(save)) {
 				injector.getInstance(ProjectManager.class).saveCurrentProject();
+				uiState.prepareForExit();
 				Platform.exit();
 			} else if (result.get().equals(doNotSave)) {
+				uiState.prepareForExit();
 				Platform.exit();
 			} else {
 				throw new AssertionError("Unhandled button: " + result);
 			}
 		} else {
+			// FIXME Is this supposed to be only in this branch?
+			// Would this perhaps be better placed in a StopActions callback?
 			injector.getInstance(Scheduler.class).stopTimer();
+
+			uiState.prepareForExit();
 			Platform.exit();
 		}
 	}

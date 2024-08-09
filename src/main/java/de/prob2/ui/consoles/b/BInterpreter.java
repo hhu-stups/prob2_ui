@@ -10,6 +10,7 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
@@ -72,7 +73,7 @@ public class BInterpreter implements Executable {
 		if (":clear".equals(source)) {
 			return new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR);
 		}
-		if (source.replace(" ", "").isEmpty()) {
+		if (source.trim().isEmpty()) {
 			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
 		}
 		Trace trace = currentTrace.get();
@@ -82,14 +83,21 @@ public class BInterpreter implements Executable {
 		final IEvalElement formula;
 		try {
 			formula = trace.getModel().parseFormula(source, FormulaExpand.EXPAND);
-		} catch (EvaluationException e) {
+
+			// force parsing of the string representation because the eventb implementation is lazy
+			// this also helps with error messages because eventb formulas swallow parse errors
+			// when trying to print them as a prolog term
+			if (formula instanceof IBEvalElement bFormula) {
+				bFormula.getAst();
+			}
+		} catch (Exception e) {
 			LOGGER.info("Failed to parse B console user input", e);
 			return new ConsoleExecResult("", formatParseException(source, e), ConsoleExecResultType.ERROR);
 		}
 		final AbstractEvalResult res;
 		try {
 			res = trace.evalCurrent(formula);
-		} catch (EvaluationException | ProBError e) {
+		} catch (Exception e) {
 			LOGGER.info("B evaluation failed", e);
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}

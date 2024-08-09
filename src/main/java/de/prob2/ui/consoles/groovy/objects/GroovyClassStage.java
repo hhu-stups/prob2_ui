@@ -14,8 +14,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 
-
-public class GroovyClassStage extends Stage {
+public final class GroovyClassStage extends Stage {
 	private final ObservableList<GroovyClassPropertyItem> methods = FXCollections.observableArrayList();
 	private final ObservableList<GroovyClassPropertyItem> fields = FXCollections.observableArrayList();
 	private final ObservableList<GroovyClassItem> attributes = FXCollections.observableArrayList();

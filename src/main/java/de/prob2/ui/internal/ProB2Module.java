@@ -1,11 +1,18 @@
 package de.prob2.ui.internal;
 
+import java.util.Locale;
+import java.util.ResourceBundle;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
-import com.google.inject.*;
+import com.google.inject.AbstractModule;
+import com.google.inject.Injector;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
+
 import de.jangassen.MenuToolkit;
 import de.prob.MainModule;
 import de.prob2.ui.ProB2;
@@ -14,14 +21,13 @@ import de.prob2.ui.menu.OpenFile;
 import de.prob2.ui.menu.RevealInExplorer;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
+
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.Builder;
 import javafx.util.BuilderFactory;
-
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 public class ProB2Module extends AbstractModule {
 
@@ -79,6 +85,12 @@ public class ProB2Module extends AbstractModule {
 	}
 
 	@Provides
+	@Singleton
+	private static HostServices provideHostServices(ProB2 proB2) {
+		return proB2.getHostServices();
+	}
+
+	@Provides
 	public static ObjectMapper provideObjectMapper() {
 		return new ObjectMapper()
 			       .registerModule(new ParameterNamesModule())
@@ -88,12 +100,11 @@ public class ProB2Module extends AbstractModule {
 			       .registerModule(new ProB2UIJacksonModule());
 	}
 
-
 	@Provides
 	private static FXMLLoader provideLoader(final Injector injector, I18n i18n) {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setBuilderFactory(type -> {
-			if (injector.getExistingBinding(Key.get(type)) != null || type.isAnnotationPresent(FXMLInjected.class)) {
+			if (type.isAnnotationPresent(FXMLInjected.class)) {
 				// this allows FXML to configure instances, remember to implement Builder and return "this" in the build method.
 				if (Builder.class.isAssignableFrom(type)) {
 					return (Builder<?>) injector.getInstance(type);

@@ -2,6 +2,7 @@ package de.prob2.ui.visualisation.fx.loader;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -93,7 +94,7 @@ public class VisualisationLoader {
 
 	private Visualisation loadVisualisationJar(Path selectedVisualization) {
 		try (JarFile selectedVisualizationJar = new JarFile(selectedVisualization.toFile())) {
-			URL[] urls = {new URL("jar:file:" + selectedVisualizationJar.getName() +"!/")};
+			URL[] urls = {new URI("jar:file:" + selectedVisualizationJar.getName() +"!/").toURL()};
 			URLClassLoader classloader = URLClassLoader.newInstance(urls, this.getClass().getClassLoader());
 			visualisationClassloader = classloader;
 			Class<?> visualizationClass = null;

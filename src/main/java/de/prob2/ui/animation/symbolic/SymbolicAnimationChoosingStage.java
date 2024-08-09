@@ -66,9 +66,9 @@ public class SymbolicAnimationChoosingStage extends Stage {
 				if (object == null) {
 					return "";
 				} else if (BuiltinValidationTaskTypes.CBC_FIND_SEQUENCE.equals(object)) {
-					return i18n.translate("animation.type.sequence");
+					return i18n.translate("animation.symbolic.type.sequence");
 				} else if (BuiltinValidationTaskTypes.FIND_VALID_STATE.equals(object)) {
-					return i18n.translate("animation.type.findValidState");
+					return i18n.translate("animation.symbolic.type.findValidState");
 				} else {
 					return object.getKey();
 				}

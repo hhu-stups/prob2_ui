@@ -52,15 +52,15 @@ import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
+import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDiagramItem;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
@@ -82,6 +82,7 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
@@ -98,8 +99,7 @@ import org.controlsfx.glyphfont.Glyph;
 
 @FXMLInjected
 @Singleton
-public class SimulatorStage extends Stage {
-
+public final class SimulatorStage extends Stage {
 	private final class SimulationItemRow extends TableRow<SimulationItem> {
 
 		private final SimulatorStage simulatorStage;
@@ -137,7 +137,7 @@ public class SimulatorStage extends Stage {
 				{
 					copyMenu.getItems().clear();
 					SimulationModel sourceModel = cbSimulation.getSelectionModel().getSelectedItem();
-					for (SimulationModel targetModel : currentProject.getCurrentMachine().getMachineProperties().getSimulations()) {
+					for (SimulationModel targetModel : currentProject.getCurrentMachine().getSimulations()) {
 						if (sourceModel.equals(targetModel)) {
 							continue;
 						}
@@ -275,7 +275,7 @@ public class SimulatorStage extends Stage {
 	private ListView<DiagramConfiguration> simulationDiagramItems;
 
 	@FXML
-	private TableColumn<SimulationItem, Checked> simulationStatusColumn;
+	private TableColumn<SimulationItem, CheckingStatus> simulationStatusColumn;
 
 	@FXML
 	private TableColumn<SimulationItem, String> simulationConfigurationColumn;
@@ -294,6 +294,12 @@ public class SimulatorStage extends Stage {
 
 	@FXML
 	private MenuItem advancedItem;
+
+	@FXML
+	private Label lbSimulationStats;
+
+	@FXML
+	private ProgressBar progressBar;
 
 	private final StageManager stageManager;
 
@@ -474,8 +480,8 @@ public class SimulatorStage extends Stage {
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
-		simulationStatusColumn.setCellFactory(col -> new CheckedCell<>());
-		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
+		simulationStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		simulationConfigurationColumn.setCellFactory(lv -> new SimulationTaskItem(stageManager, i18n));
 		simulationConfigurationColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
 
@@ -582,7 +588,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
+			currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -593,7 +599,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
+			currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -607,7 +613,7 @@ public class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getMachineProperties().getSimulations().add(new SimulationModel(resolvedPath));
+			currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
 		}
 	}
 
@@ -675,7 +681,7 @@ public class SimulatorStage extends Stage {
 					time = realTimeSimulator.timeProperty().get();
 					firstStart.set(0, false);
 				} else if (!realTimeSimulator.endingConditionReached(currentTrace.get())) {
-					if (currentTrace.getCurrentState().isInitialised() && time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
+					if (currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised() && time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
 						time += 100;
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 						Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.time.second", seconds.doubleValue())));
@@ -705,7 +711,7 @@ public class SimulatorStage extends Stage {
 	public void loadSimulationsFromMachine(Machine machine) {
 		cbSimulation.itemsProperty().unbind();
 		if (machine != null) {
-			cbSimulation.setItems(machine.getMachineProperties().getSimulations());
+			cbSimulation.setItems(machine.getSimulations());
 			if(cbSimulation.getItems().isEmpty()) {
 				cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
 			}
@@ -737,7 +743,7 @@ public class SimulatorStage extends Stage {
 		if (simulationModel == null) {
 			return;
 		}
-		currentProject.getCurrentMachine().getMachineProperties().getSimulations().remove(simulationModel);
+		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
 		if(cbSimulation.getItems().isEmpty()) {
 			cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
 		}
@@ -803,14 +809,14 @@ public class SimulatorStage extends Stage {
 			SimulationModel simulationModel = new SimulationModel(relativePath);
 			Machine currentMachine = currentProject.getCurrentMachine();
 			List<SimulationItem> simulationTasks = simulationItems.getItems();
-			simulationTasks.forEach(task -> currentMachine.getMachineProperties().addValidationTaskIfNotExist(task.withSimulationPath(relativePath)));
-			if(currentMachine.getMachineProperties().getSimulations().contains(simulationModel)) {
+			simulationTasks.forEach(task -> currentMachine.addValidationTaskIfNotExist(task.withSimulationPath(relativePath)));
+			if (currentMachine.getSimulations().contains(simulationModel)) {
 				cbSimulation.getSelectionModel().select(simulationModel);
 			} else {
 				if(previousPath.toString().isEmpty()) {
 					cbSimulation.getItems().remove(new SimulationModel(Paths.get("")));
 				}
-				currentMachine.getMachineProperties().getSimulations().add(simulationModel);
+				currentMachine.getSimulations().add(simulationModel);
 				cbSimulation.getSelectionModel().selectLast();
 			}
 		} catch (IOException ex) {
@@ -866,4 +872,21 @@ public class SimulatorStage extends Stage {
 			injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
 		}
 	}
+
+	public void updateSimulationStatistics(int numberExecuted, int numberTotal) {
+		Platform.runLater(() -> {
+			progressBar.setVisible(true);
+			progressBar.setProgress((double) numberExecuted / (double) numberTotal);
+			lbSimulationStats.setText(String.format("%s/%s", numberExecuted, numberTotal));
+		});
+	}
+
+	public void resetSimulationStatistics() {
+		Platform.runLater(() -> {
+			progressBar.setVisible(false);
+			progressBar.setProgress(0);
+			lbSimulationStats.setText("");
+		});
+	}
+
 }

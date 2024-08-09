@@ -23,8 +23,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 @Singleton
-public class SimulationChoosingStage extends Stage {
-
+public final class SimulationChoosingStage extends Stage {
 	@FXML
 	private Button btCheck;
 

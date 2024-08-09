@@ -9,7 +9,6 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.project.machines.Machine;
 
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -23,8 +22,7 @@ import javafx.scene.input.MouseButton;
 
 @FXMLInjected
 @Singleton
-public class PreferencesTab extends Tab {
-
+public final class PreferencesTab extends Tab {
 	@FXML
 	private ListView<Preference> preferencesListView;
 	@FXML
@@ -83,20 +81,11 @@ public class PreferencesTab extends Tab {
 		editMenuItem.setOnAction(event -> {
 			PreferencesDialog prefDialog = injector.getInstance(PreferencesDialog.class);
 			prefDialog.initOwner(this.getTabPane().getScene().getWindow());
-			Preference pref = cell.getItem();
-			final String oldName = pref.getName();
-			prefDialog.setPreference(pref);
-			prefDialog.showAndWait().ifPresent(result -> {
-				if (!oldName.equals(pref.getName())) {
-					// If preference was renamed, update lastUsedPreferenceName of machines that use the old name.
-					for (final Machine machine : currentProject.getMachines()) {
-						if (oldName.equals(machine.getLastUsedPreferenceName())) {
-							machine.setLastUsedPreferenceName(pref.getName());
-						}
-					}
-				}
-				preferencesListView.refresh();
-				showPreferenceView(pref);
+			Preference oldPref = cell.getItem();
+			prefDialog.setPreference(oldPref);
+			prefDialog.showAndWait().ifPresent(newPref -> {
+				currentProject.replacePreference(oldPref, newPref);
+				showPreferenceView(newPref);
 			});
 		});
 		editMenuItem.disableProperty().bind(cell.emptyProperty());

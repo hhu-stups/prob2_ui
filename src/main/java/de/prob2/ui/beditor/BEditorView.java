@@ -13,6 +13,7 @@ import java.nio.file.WatchEvent;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Stopwatch;
@@ -20,21 +21,22 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.be4.classicalb.core.parser.rules.IModel;
 import de.prob.animator.command.GetInternalRepresentationCommand;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.FormulaTranslationMode;
-import de.prob.model.brules.RulesModel;
-import de.prob.model.classicalb.ClassicalBModel;
-import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TextAreaState;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.MainView;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -72,7 +74,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class BEditorView extends BorderPane {
+public final class BEditorView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(BEditorView.class);
 	private static final Charset EDITOR_CHARSET = StandardCharsets.UTF_8;
 
@@ -104,30 +106,61 @@ public class BEditorView extends BorderPane {
 	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
+	private final FxThreadExecutor fxExecutor;
 	private final Injector injector;
 
 	private final ObjectProperty<Path> path;
 	private final StringProperty lastSavedText;
+	private final StringProperty lastLoadedText;
+	private final BooleanProperty autoReloadMachine;
 	private final BooleanProperty saved;
+	private final BooleanProperty fileContentChanged;
 	private final ObservableList<ErrorItem> errors;
 
 	private Thread watchThread;
 	private boolean saving;
-	private boolean updatingIncludedMachines;
+	private boolean ignoreMachineChoiceSelectionChange;
 
 	@Inject
-	private BEditorView(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject, final CurrentTrace currentTrace, final Injector injector) {
+	private BEditorView(
+		StageManager stageManager,
+		I18n i18n,
+		CurrentProject currentProject,
+		CurrentTrace currentTrace,
+		CliTaskExecutor cliExecutor,
+		FxThreadExecutor fxExecutor,
+		Config config,
+		Injector injector
+	) {
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
 		this.injector = injector;
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
-		this.saved = new SimpleBooleanProperty(this, "saved", true);
+		this.lastLoadedText = new SimpleStringProperty(this, "lastLoadedText", null);
+		this.autoReloadMachine = new SimpleBooleanProperty(this, "autoReloadMachine", true);
+		this.saved = new SimpleBooleanProperty(this, "saved");
+		this.fileContentChanged = new SimpleBooleanProperty(this, "fileContentChanged", false);
 		this.errors = FXCollections.observableArrayList();
 		this.watchThread = null;
 		stageManager.loadFXML(this, "beditorView.fxml");
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				autoReloadMachine.set(configData.autoReloadMachine);
+			}
+
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.autoReloadMachine = autoReloadMachine.get();
+			}
+		});
 	}
 
 	@FXML
@@ -152,8 +185,10 @@ public class BEditorView extends BorderPane {
 		searchButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(
 			Bindings.when(saved)
-				.then("")
-				.otherwise(i18n.translate("beditor.unsavedWarning"))
+				.then(Bindings.when(fileContentChanged)
+						.then(i18n.translate("beditor.warnings.fileContentChanged"))
+						.otherwise(""))
+				.otherwise(i18n.translate("beditor.warnings.unsaved"))
 		);
 		Platform.runLater(this::setHint);
 
@@ -180,6 +215,9 @@ public class BEditorView extends BorderPane {
 				if (toShow == null) {
 					toShow = currentProject.get().getAbsoluteMachinePath(to);
 				}
+
+				// clearing selection so that later the "confirm replace"-dialog is not shown again
+				machineChoice.getSelectionModel().clearSelection();
 				machineChoice.getItems().setAll(toShow);
 				machineChoice.getSelectionModel().selectFirst();
 			}
@@ -222,13 +260,31 @@ public class BEditorView extends BorderPane {
 		currentProject.addListener((observable, from, to) -> resetWatching());
 
 		machineChoice.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			if (this.updatingIncludedMachines || to == null) {
+			if (this.ignoreMachineChoiceSelectionChange || to == null) {
 				return;
 			}
+
+			if (from != null && !this.currentProject.confirmMachineReplace()) {
+				Platform.runLater(() -> {
+					this.ignoreMachineChoiceSelectionChange = true;
+					try {
+						this.machineChoice.getSelectionModel().select(from);
+					} finally {
+						this.ignoreMachineChoiceSelectionChange = false;
+					}
+				});
+				return;
+			}
+
 			switchMachine(to);
 		});
 
-		cbUnicode.selectedProperty().addListener((observable, from, to) -> showInternalRepresentation(currentTrace.getStateSpace(), path.get()));
+		cbUnicode.selectedProperty().addListener((observable, from, to) ->
+			showInternalRepresentation(currentTrace.getStateSpace(), path.get()).exceptionally(exc -> {
+				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+				return null;
+			})
+		);
 
 		helpButton.setHelpContent("mainView.editor", null);
 
@@ -273,16 +329,21 @@ public class BEditorView extends BorderPane {
 
 		resetWatching();
 		registerFile(machinePath);
-		loadText(machinePath);
-		beditor.clearHistory();
+		loadText(machinePath).whenComplete((res, exc) -> {
+			if (exc == null) {
+				Platform.runLater(() -> {
+					currentProject.getCurrentMachine().getCachedEditorState().setSelectedMachine(machinePath);
 
-		currentProject.getCurrentMachine().getCachedEditorState().setSelectedMachine(machinePath);
-
-		beditor.requestFocus();
-		TextAreaState textAreaState = currentProject.getCurrentMachine().getCachedEditorState().getTextAreaState(machinePath);
-		if (textAreaState != null) {
-			restoreState(textAreaState);
-		}
+					beditor.requestFocus();
+					TextAreaState textAreaState = currentProject.getCurrentMachine().getCachedEditorState().getTextAreaState(machinePath);
+					if (textAreaState != null) {
+						restoreState(textAreaState);
+					}
+				});
+			} else {
+				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+			}
+		});
 	}
 
 	private void restoreState(TextAreaState textAreaState) {
@@ -290,68 +351,58 @@ public class BEditorView extends BorderPane {
 		beditor.requestFollowCaret();
 	}
 
-	private void loadText(Path machinePath) {
+	private CompletableFuture<Void> loadText(Path machinePath) {
 		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
 			final StateSpace stateSpace = currentTrace.getStateSpace();
 			cbUnicode.setVisible(true);
 			cbUnicode.setManaged(true);
 			if (stateSpace == null) {
-				setHint();
-				cbUnicode.setSelected(false);
+				this.machineChoice.getSelectionModel().clearSelection();
+				this.setWaitingForInternalRepresentationHint();
+				return CompletableFuture.completedFuture(null);
 			} else {
-				cbUnicode.setSelected(true);
-				showInternalRepresentation(stateSpace, machinePath);
+				return showInternalRepresentation(stateSpace, machinePath);
 			}
 		} else {
 			cbUnicode.setVisible(false);
 			cbUnicode.setManaged(false);
-			cbUnicode.setSelected(false);
 			setText(machinePath);
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 
-	private void showInternalRepresentation(StateSpace stateSpace, Path machinePath) {
-		if (stateSpace == null) {
-			return;
+	private CompletableFuture<Void> showInternalRepresentation(StateSpace stateSpace, Path machinePath) {
+		this.beditor.setEditable(false);
+		if (stateSpace == null || machinePath == null) {
+			this.machineChoice.getSelectionModel().clearSelection();
+			this.setWaitingForInternalRepresentationHint();
+			return CompletableFuture.completedFuture(null);
 		}
 
-		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
-		cmd.setTranslationMode(this.cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
-		cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
-		stateSpace.execute(cmd);
-		this.setEditorText(cmd.getPrettyPrint(), machinePath);
-		this.beditor.setEditable(false);
+		return cliExecutor.submit(() -> {
+			GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
+			cmd.setTranslationMode(this.cbUnicode.isSelected() ? FormulaTranslationMode.UNICODE : FormulaTranslationMode.ASCII);
+			cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
+			stateSpace.execute(cmd);
+			return cmd.getPrettyPrint();
+		}).thenApplyAsync(text -> {
+			this.setEditorText(text, machinePath);
+			return null;
+		}, fxExecutor);
 	}
 
 	private void updateIncludedMachines() {
-		this.updatingIncludedMachines = true;
+		this.ignoreMachineChoiceSelectionChange = true;
 		try {
 			Path prevSelected = this.machineChoice.getSelectionModel().getSelectedItem();
-			final AbstractModel model = currentTrace.getModel();
-			if (model instanceof ClassicalBModel) {
-				machineChoice.getItems().setAll(((ClassicalBModel) model).getLoadedMachineFiles());
-			} else if (model instanceof RulesModel) {
-				// references of main machine are not enough; referenced can reference other rmch again
-				machineChoice.getItems().setAll(((RulesModel) model).getRulesProject().getBModels().stream()
-						                                .map(IModel::getMachineReferences)
-						                                .flatMap(refs -> refs.stream()
-								                                                 .map(ref -> Path.of(ref.getPath())))
-						                                .distinct().toList());
-				// main machine is not included in list of referenced rmch
-				machineChoice.getItems().add(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
-			} else {
-				// TODO: We could extract the refinement hierarchy via model.getMachines() or model.calculateDependencies on the EventBModel.
-				// Here, we have the problem that the current project might not include all of them refined machines
-				// Still, could we assume that the machine is located in the same folder as the loaded machine? If yes, then it might still be possible to implement this feature
-				machineChoice.getItems().setAll(currentProject.get().getAbsoluteMachinePath(currentProject.getCurrentMachine()));
-			}
+			machineChoice.getItems().setAll(currentTrace.getModel().getAllFiles());
 
 			if (prevSelected != null && this.machineChoice.getItems().contains(prevSelected)) {
 				this.selectMachine(prevSelected);
 				return;
 			}
 		} finally {
-			this.updatingIncludedMachines = false;
+			this.ignoreMachineChoiceSelectionChange = false;
 		}
 
 		Path cachedSelected = currentProject.getCurrentMachine().getCachedEditorState().getSelectedMachine();
@@ -373,7 +424,7 @@ public class BEditorView extends BorderPane {
 		WatchService watcher;
 		try {
 			watcher = directory.getFileSystem().newWatchService();
-			directory.register(watcher, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_DELETE, StandardWatchEventKinds.ENTRY_MODIFY);
+			directory.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
 		} catch (IOException e) {
 			LOGGER.error("Could not register file: {}", path, e);
 			return;
@@ -394,7 +445,13 @@ public class BEditorView extends BorderPane {
 
 					if (path.getFileName().equals(event.context())) {
 						// Only reload on events for the file itself, not for other files in the directory.
-						Platform.runLater(() -> loadText(path));
+						Platform.runLater(() -> {
+							loadText(path).exceptionally(exc -> {
+								stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+								return null;
+							});
+							this.updateFileContentChanged();
+						});
 						// if our file changed we do not care about other changes, let's just queue the reload and wait for the next change
 						break;
 					}
@@ -406,6 +463,19 @@ public class BEditorView extends BorderPane {
 		}, "BEditor File Change Watcher for " + path.getFileName());
 		this.watchThread.setDaemon(true);
 		this.watchThread.start();
+	}
+
+	private void updateFileContentChanged() {
+		boolean newFileContentChanged;
+		if (this.getPath() != null) {
+			String lastLoaded = Objects.requireNonNullElse(this.lastLoadedText.get(), "");
+			String editor = Objects.requireNonNullElse(this.beditor.getText(), "");
+			newFileContentChanged = !lastLoaded.equals(editor);
+		} else {
+			// do not show file content changed warning when there is no file open right now
+			newFileContentChanged = false;
+		}
+		this.fileContentChanged.set(newFileContentChanged);
 	}
 
 	public ObjectProperty<Path> pathProperty() {
@@ -420,12 +490,21 @@ public class BEditorView extends BorderPane {
 		this.pathProperty().set(path);
 	}
 
+	public BooleanProperty autoReloadMachineProperty() {
+		return this.autoReloadMachine;
+	}
+
 	public ReadOnlyBooleanProperty savedProperty() {
 		return saved;
 	}
 
 	private void setHint() {
 		this.setEditorText(i18n.translate("beditor.hint"), null);
+		beditor.setEditable(false);
+	}
+
+	private void setWaitingForInternalRepresentationHint() {
+		this.setEditorText(i18n.translate("beditor.hint.waitingForInternalRepresentation"), null);
 		beditor.setEditable(false);
 	}
 
@@ -449,8 +528,13 @@ public class BEditorView extends BorderPane {
 			}
 
 			Stopwatch sw = Stopwatch.createStarted();
+			// reset state
+			beditor.clearHistory();
+			beditor.setSearchResult(null);
 			beditor.cancelHighlighting();
+			// load new text
 			this.setPath(path);
+			beditor.replaceText(""); // doing an extra step here to force a reload of the highlighting
 			beditor.replaceText(text);
 			beditor.moveTo(0);
 			beditor.requestFollowCaret();
@@ -513,10 +597,19 @@ public class BEditorView extends BorderPane {
 			lastSavedText.set(beditor.getText());
 			registerFile(this.getPath());
 
-			currentProject.reloadCurrentMachine();
+			if (autoReloadMachine.get()) {
+				currentProject.reloadCurrentMachine();
+			} else {
+				this.updateFileContentChanged();
+			}
 		} finally {
 			this.saving = false;
 		}
+	}
+
+	public void updateLoadedText() {
+		lastLoadedText.set(beditor.getText());
+		fileContentChanged.set(false);
 	}
 
 	private void resetWatching() {

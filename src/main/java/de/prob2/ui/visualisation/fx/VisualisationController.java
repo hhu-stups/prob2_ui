@@ -51,8 +51,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class VisualisationController {
-
+public final class VisualisationController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisualisationController.class);
 
 	private final ChangeListener<Trace> currentTraceChangeListener;
@@ -325,8 +324,7 @@ public class VisualisationController {
 							"visualisation.fx.controller.alerts.formulaListenerException.content",
 							String.join(" ", formulas));
 					alert.show();
-					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"" +
-							String.join(" ", formulas), e);
+					LOGGER.warn("Exception while calling the formula listener for the formulas:\n\"{}\"", String.join(" ", formulas), e);
 				}
 			}
 		}

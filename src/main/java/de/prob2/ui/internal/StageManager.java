@@ -1,9 +1,10 @@
 package de.prob2.ui.internal;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.lang.ref.WeakReference;
 import java.net.URL;
+import java.nio.file.Files;
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
@@ -14,6 +15,8 @@ import java.util.WeakHashMap;
 
 import javax.annotation.Nullable;
 
+import com.google.common.io.MoreFiles;
+import com.google.common.io.RecursiveDeleteOption;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -22,9 +25,9 @@ import de.jangassen.MenuToolkit;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.layout.FontSize;
-import de.prob2.ui.persistence.UIPersistence;
 import de.prob2.ui.persistence.UIState;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -42,6 +45,7 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Region;
+import javafx.scene.web.WebView;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -56,12 +60,11 @@ import org.slf4j.LoggerFactory;
  * the UI persistence and Mac menu bar handling.
  * 
  * @see FileChooserManager
- * @see UIPersistence
  */
 @Singleton
 public final class StageManager {
 	private enum PropertiesKey {
-		PERSISTENCE_ID, USE_GLOBAL_MAC_MENU_BAR
+		USE_GLOBAL_MAC_MENU_BAR
 	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(StageManager.class);
@@ -80,6 +83,7 @@ public final class StageManager {
 	private final Map<Stage, Void> registered;
 	private MenuBar globalMacMenuBar;
 	private Stage mainStage;
+	private File webViewUserDataTempDir;
 
 	@Inject
 	private StageManager(
@@ -88,7 +92,8 @@ public final class StageManager {
 		Provider<ExceptionAlert> exceptionAlertProvider,
 		@Nullable MenuToolkit menuToolkit,
 		UIState uiState,
-		I18n i18n
+		I18n i18n,
+		StopActions stopActions
 	) {
 		this.loaderProvider = loaderProvider;
 		this.fontSize = fontSize;
@@ -100,6 +105,19 @@ public final class StageManager {
 		this.current = new SimpleObjectProperty<>(this, "current");
 		this.registered = new WeakHashMap<>();
 		this.globalMacMenuBar = null;
+		this.mainStage = null;
+		this.webViewUserDataTempDir = null;
+
+		stopActions.add(() -> {
+			if (this.webViewUserDataTempDir != null) {
+				LOGGER.trace("Deleting temporary directory for WebView user data: {}", this.webViewUserDataTempDir);
+				try {
+					MoreFiles.deleteRecursively(this.webViewUserDataTempDir.toPath(), RecursiveDeleteOption.ALLOW_INSECURE);
+				} catch (IOException | RuntimeException exc) {
+					LOGGER.warn("Failed to delete temporary directory for WebView user data - ignoring", exc);
+				}
+			}
+		});
 	}
 
 	private static Node getRootNode(Object fxmlRoot) {
@@ -127,7 +145,9 @@ public final class StageManager {
 	public void loadFXML(final Object controller, final URL fxmlUrl) {
 		Objects.requireNonNull(controller, "controller");
 		Objects.requireNonNull(fxmlUrl, "fxmlUrl");
-		
+
+		LOGGER.trace("Begin loading FXML from {} with controller {}", fxmlUrl, controller.getClass());
+
 		final FXMLLoader loader = loaderProvider.get();
 		loader.setLocation(fxmlUrl);
 		loader.setRoot(controller);
@@ -145,6 +165,8 @@ public final class StageManager {
 		if (rootNode != null) {
 			fontSize.applyTo(rootNode);
 		}
+
+		LOGGER.trace("End loading FXML from {} with controller {}", fxmlUrl, controller);
 	}
 
 	/**
@@ -208,46 +230,52 @@ public final class StageManager {
 	 * {@link Stage#setScene(Scene) set}.
 	 *
 	 * @param stage the stage to register
-	 * @param persistenceID a string identifying the stage for UI persistence,
+	 * @param stageId a string identifying the stage for UI persistence,
 	 * or {@code null} if the stage should not be persisted
 	 */
-	public void register(final Stage stage, final String persistenceID) {
+	public void register(final Stage stage, final String stageId) {
 		this.registered.put(stage, null);
-		setPersistenceID(stage, persistenceID);
 		stage.getProperties().putIfAbsent(PropertiesKey.USE_GLOBAL_MAC_MENU_BAR, true);
 		stage.getScene().getStylesheets().add(STYLESHEET);
 		stage.getIcons().add(ICON);
 
-		stage.focusedProperty().addListener(e -> {
-			final String stageId = getPersistenceID(stage);
-			if (stageId != null) {
-				uiState.moveStageToEnd(stageId);
-			}
-		});
-
-		stage.showingProperty().addListener((observable, from, to) -> {
-			final String stageId = getPersistenceID(stage);
-			if (stageId != null) {
+		if (stageId != null) {
+			stage.focusedProperty().addListener((o, from, to) -> {
 				if (to) {
-					final BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
-					if (box != null && !Screen.getScreensForRectangle(box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()).isEmpty()) {
+					uiState.stageWasFocused(stageId);
+				}
+			});
+
+			// Use the onShowing/onHiding event handlers instead of a listener on the showing property
+			// because the event handlers are called earlier than the listeners.
+			// This avoids the windows visibly jumping around when their position is being restored.
+			stage.setOnShowing(event -> {
+				BoundingBox box = uiState.getSavedStageBoxes().get(stageId);
+				if (box != null) {
+					if (!Screen.getScreensForRectangle(box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()).isEmpty()) {
+						LOGGER.trace(
+							"Restoring saved position/size for stage with ID \"{}\": x={}, y={}, width={}, height={}",
+							stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
+						);
 						stage.setX(box.getMinX());
 						stage.setY(box.getMinY());
 						stage.setWidth(box.getWidth());
 						stage.setHeight(box.getHeight());
+					} else {
+						LOGGER.trace(
+							"Not restoring saved position/size for stage with ID \"{}\" because it's offscreen: x={}, y={}, width={}, height={}",
+							stageId, box.getMinX(), box.getMinY(), box.getWidth(), box.getHeight()
+						);
 					}
-					uiState.getStages().put(stageId, new WeakReference<>(stage));
-					uiState.getSavedVisibleStages().add(stageId);
-				} else {
-					uiState.getSavedVisibleStages().remove(stageId);
-					uiState.getSavedStageBoxes().put(stageId,
-							new BoundingBox(stage.getX(), stage.getY(), stage.getWidth(), stage.getHeight()));
 				}
-			}
-		});
-		// Workaround for JavaFX bug JDK-8224260 (https://bugs.openjdk.java.net/browse/JDK-8224260):
-		// Add a second ChangeListener that does nothing.
-		stage.showingProperty().addListener((o, from, to) -> {});
+				uiState.addStage(stage, stageId);
+				uiState.stageWasShown(stageId);
+			});
+			stage.setOnHiding(event -> {
+				uiState.stageWasHidden(stageId);
+				uiState.saveStageBox(stage, stageId);
+			});
+		}
 
 		stage.focusedProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -379,6 +407,55 @@ public final class StageManager {
 		return alert;
 	}
 	
+	public void showUnhandledExceptionAlert(Thread thread, Throwable exc, Window owner) {
+		try {
+			Alert alert = makeExceptionAlert(exc, "common.alerts.internalException.header", "common.alerts.internalException.content", thread);
+			alert.initOwner(owner);
+			alert.show();
+		} catch (Throwable t) {
+			LOGGER.error("An exception was thrown while handling an uncaught exception, something is really wrong!", t);
+		}
+	}
+	
+	public void showUnhandledExceptionAlert(Throwable exc, Window owner) {
+		Thread thread = Thread.currentThread();
+		Platform.runLater(() -> showUnhandledExceptionAlert(thread, exc, owner));
+	}
+	
+	public void initWebView(WebView webView) {
+		webView.getEngine().setOnError(event -> {
+			LOGGER.error("Unhandled WebView error: {}", event.getMessage(), event.getException());
+			Alert alert = this.makeExceptionAlert(event.getException(), "common.alerts.webViewError.header", "common.alerts.webViewError.content", event.getMessage());
+			alert.show();
+		});
+		webView.getEngine().setOnAlert(event -> {
+			LOGGER.info("WebView alert: {}", event.getData());
+			Alert alert = this.makeAlert(Alert.AlertType.INFORMATION, "common.alerts.webViewAlert.header", "common.literal", event.getData());
+			alert.show();
+		});
+		
+		// Uncomment to make WebView console errors, warnings, etc. visible in the log.
+		// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
+		// (see the corresponding commented out line in build.gradle).
+		// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
+		
+		// Use a unique temporary directory as the user data directory for WebViews.
+		// This allows running multiple instances of ProB 2 UI at once without errors
+		// (the WebEngine takes a process-based lock on the user data directory,
+		// meaning that two processes cannot use the same user data directory).
+		// None of our WebViews need to save any permanent state,
+		// so we can safely use a temporary directory and delete it on exit.
+		if (this.webViewUserDataTempDir == null) {
+			try {
+				this.webViewUserDataTempDir = Files.createTempDirectory("prob2-ui-webview").toFile();
+				LOGGER.trace("Created temporary directory for WebView user data: {}", this.webViewUserDataTempDir);
+			} catch (IOException | RuntimeException exc) {
+				LOGGER.warn("Failed to create temporary directory for WebView user data - falling back to the JavaFX default", exc);
+			}
+		}
+		webView.getEngine().setUserDataDirectory(this.webViewUserDataTempDir);
+	}
+	
 	/**
 	 * A read-only property containing the currently focused stage. If a non-JavaFX
 	 * window or an unregistered stage is in focus, the property's value is
@@ -419,35 +496,6 @@ public final class StageManager {
 	 */
 	public Set<Stage> getRegistered() {
 		return Collections.unmodifiableSet(this.registered.keySet());
-	}
-
-	/**
-	 * Get the persistence ID of the given stage.
-	 * 
-	 * @param stage the stage for which to get the persistence ID
-	 * @return the stage's persistence ID, or {@code null} if none
-	 */
-	public static String getPersistenceID(final Stage stage) {
-		Objects.requireNonNull(stage);
-
-		return (String) stage.getProperties().get(PropertiesKey.PERSISTENCE_ID);
-	}
-
-	/**
-	 * Set the given stage's persistence ID.
-	 * 
-	 * @param stage the stage for which to set the persistence ID
-	 * @param persistenceID the persistence ID to set, or {@code null} to
-	 * remove it
-	 */
-	public static void setPersistenceID(final Stage stage, final String persistenceID) {
-		Objects.requireNonNull(stage);
-
-		if (persistenceID == null) {
-			stage.getProperties().remove(PropertiesKey.PERSISTENCE_ID);
-		} else {
-			stage.getProperties().put(PropertiesKey.PERSISTENCE_ID, persistenceID);
-		}
 	}
 
 	/**

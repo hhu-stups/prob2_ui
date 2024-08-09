@@ -18,9 +18,10 @@ import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
@@ -68,8 +69,6 @@ public final class CBCInvariantPreservationCheckingItem extends SymbolicChecking
 	
 	@Override
 	public void execute(ExecutionContext context) {
-		this.getCounterExamples().clear();
-		
 		ArrayList<String> eventNames;
 		if (getOperationName() == null) {
 			// Check all operations/events
@@ -82,19 +81,18 @@ public final class CBCInvariantPreservationCheckingItem extends SymbolicChecking
 		IModelCheckingResult result = new CBCInvariantChecker(context.stateSpace(), eventNames).call();
 		
 		if (result instanceof ModelCheckOk) {
-			this.setResultItem(new CheckingResultItem(Checked.SUCCESS, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.success"));
+			this.setResult(new CheckingResult(CheckingStatus.SUCCESS));
 		} else if (result instanceof CBCInvariantViolationFound violation) {
-			this.setResultItem(new CheckingResultItem(Checked.FAIL, "verifications.symbolicchecking.resultHandler.symbolicChecking.result.counterExample"));
 			List<Trace> counterExamples = new ArrayList<>();
 			int size = violation.getCounterexamples().size();
 			for (int i = 0; i < size; i++) {
 				counterExamples.add(violation.getTrace(i, context.stateSpace()));
 			}
-			this.getCounterExamples().setAll(counterExamples);
+			this.setResult(new TraceResult(CheckingStatus.FAIL, counterExamples, "verifications.symbolicModelChecking.result.counterExample"));
 		} else if (result instanceof NotYetFinished || result instanceof CheckInterrupted) {
-			this.setResultItem(new CheckingResultItem(Checked.INTERRUPTED, "common.result.message", result.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED, "common.result.message", result.getMessage()));
 		} else if (result instanceof CheckError) {
-			this.setResultItem(new CheckingResultItem(Checked.INVALID_TASK, "common.result.message", result.getMessage()));
+			this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "common.result.message", result.getMessage()));
 		} else {
 			throw new AssertionError("Unhandled CBC invariant checking result type: " + result.getClass());
 		}

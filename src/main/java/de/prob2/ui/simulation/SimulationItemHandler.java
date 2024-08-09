@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -27,8 +26,7 @@ import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.CheckingStatus;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -38,8 +36,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 @Singleton
-public class SimulationItemHandler {
-
+public final class SimulationItemHandler {
 	private final CurrentProject currentProject;
 
 	private final CurrentTrace currentTrace;
@@ -68,7 +65,7 @@ public class SimulationItemHandler {
 		if(simulationModel.getPath().equals(Paths.get(""))) {
 			return FXCollections.observableArrayList();
 		}
-		return this.currentProject.getCurrentMachine().getMachineProperties().getSimulationTasksByModel(simulationModel);
+		return this.currentProject.getCurrentMachine().getSimulationTasksByModel(simulationModel);
 	}
 
 	public void reset(SimulationModel simulationModel) {
@@ -76,11 +73,11 @@ public class SimulationItemHandler {
 	}
 
 	public SimulationItem addItem(SimulationItem newItem) {
-		return this.currentProject.getCurrentMachine().getMachineProperties().addValidationTaskIfNotExist(newItem);
+		return this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(newItem);
 	}
 
 	public void removeItem(SimulationItem item) {
-		this.currentProject.getCurrentMachine().getMachineProperties().removeValidationTask(item);
+		this.currentProject.getCurrentMachine().removeValidationTask(item);
 	}
 
 	private Map<String, Object> extractAdditionalInformation(SimulationItem item) {
@@ -115,13 +112,13 @@ public class SimulationItemHandler {
 		Platform.runLater(() -> {
 			switch (simulationPropertyChecker.getResult()) {
 				case SUCCESS:
-					item.setChecked(Checked.SUCCESS);
+					item.setStatus(CheckingStatus.SUCCESS);
 					break;
 				case FAIL:
-					item.setChecked(Checked.FAIL);
+					item.setStatus(CheckingStatus.FAIL);
 					break;
 				case NOT_FINISHED:
-					item.setChecked(Checked.NOT_CHECKED);
+					item.setStatus(CheckingStatus.NOT_CHECKED);
 					break;
 				default:
 					break;
@@ -143,7 +140,7 @@ public class SimulationItemHandler {
 		int executions = (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
+		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, currentProject, executions, maxStepsBeforeProperty, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, currentTrace.getStateSpace().getLoadedMachine(), path);
 		runAndCheck(item, simulationCheckingSimulator);
 	}
@@ -179,7 +176,7 @@ public class SimulationItemHandler {
 	}
 
 	private void initializeHypothesisChecker(SimulationHypothesisChecker simulationHypothesisChecker, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		simulationHypothesisChecker.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		simulationHypothesisChecker.initialize(currentTrace, currentProject, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), currentTrace.getStateSpace().getLoadedMachine(), path);
 	}
 
@@ -218,7 +215,7 @@ public class SimulationItemHandler {
 	}
 
 	private void initializeEstimator(SimulationEstimator simulationEstimator, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		simulationEstimator.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		simulationEstimator.initialize(currentTrace, currentProject, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), currentTrace.getStateSpace().getLoadedMachine(), path);
 	}
 
@@ -244,7 +241,7 @@ public class SimulationItemHandler {
 	}
 
 	public void handleMachine(SimulationModel simulationModel) {
-		List<SimulationItem> items = this.currentProject.getCurrentMachine().getMachineProperties().getSimulationTasksByModel(simulationModel);
+		List<SimulationItem> items = this.currentProject.getCurrentMachine().getSimulationTasksByModel(simulationModel);
 		Thread thread = new Thread(() -> {
 			for (SimulationItem item : items) {
 				this.checkItem(item);

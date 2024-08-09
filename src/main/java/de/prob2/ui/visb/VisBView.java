@@ -9,41 +9,50 @@ import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import javax.imageio.ImageIO;
 
 import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
-import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ExportVisBHtmlForStates;
+import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
 import de.prob.animator.domainobjects.VisBEvent;
+import de.prob.animator.domainobjects.VisBExportOptions;
 import de.prob.animator.domainobjects.VisBHover;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.animator.domainobjects.VisBSVGObject;
+import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.helpsystem.HelpSystemStage;
+import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.help.UserManualStage;
-import de.prob2.ui.visb.visbobjects.VisBVisualisation;
 
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.MapChangeListener;
+import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -51,17 +60,16 @@ import javafx.scene.SnapshotParameters;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.web.WebErrorEvent;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-import javafx.stage.WindowEvent;
 
 import netscape.javascript.JSException;
 import netscape.javascript.JSObject;
@@ -70,11 +78,52 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class holds the main user interface and interacts with the {@link VisBController} and {@link VisBConnector} classes.
+ * This class holds the main user interface and interacts with the {@link VisBController} class.
  */
 @Singleton
 @FXMLInjected
-public class VisBView extends BorderPane {
+public final class VisBView extends BorderPane {
+	/**
+	 * Contains Java methods that are meant to be called from the VisB JavaScript code running inside the {@link #webView}.
+	 * This class should only be used inside {@link VisBView}, but needs to be {@code public} so that it can be called from JavaScript.
+	 */
+	public final class VisBConnector {
+		/**
+		 * Whenever a svg item, that has an event in the JSON / VisB file is clicked, this method redirects the click towards the {@link VisBController}
+		 * @param id of the svg item, that is clicked
+		 */
+		public void click(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+			// probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
+			LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with shift {} cmd/meta {}", id, pageX, pageY, shiftKey, metaKey); // 1=left, 2=middle, 3=right
+			try {
+				if (visBController.isExecutingEvent()) {
+					LOGGER.debug("Ignoring click because another event is currently being executed");
+					return;
+				}
+
+				visBController.executeEvent(id, pageX, pageY, shiftKey, metaKey).exceptionally(exc -> {
+					stageManager.showUnhandledExceptionAlert(exc, getScene().getWindow());
+					return null;
+				});
+			} catch (Throwable t) {
+				// It seems that Java exceptions are completely ignored if they are thrown back to JavaScript,
+				// so log them manually here.
+				LOGGER.error("Uncaught exception in VisBConnector.click called by JavaScript", t);
+				Platform.runLater(() -> {
+					Alert alert = stageManager.makeExceptionAlert(t, "visb.exception.header", "visb.exception.clickEvent");
+					alert.initOwner(getScene().getWindow());
+					alert.showAndWait();
+				});
+			}
+		}
+	}
+	
+	private enum LoadingStatus {
+		NONE_LOADED,
+		LOADING,
+		LOADED,
+	}
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBView.class);
 	private final Injector injector;
 	private final I18n i18n;
@@ -82,31 +131,28 @@ public class VisBView extends BorderPane {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final CliTaskExecutor cliExecutor;
+	private final FxThreadExecutor fxExecutor;
+	private final DisablePropertyController disablePropertyController;
 	private final FileChooserManager fileChooserManager;
-	private final Provider<DefaultPathDialog> defaultPathDialogProvider;
 	private final VisBController visBController;
 
-	@FXML
-	private MenuBar visbMenuBar;
+	private final VisBConnector visBConnector;
+
+	private final ObjectProperty<VisBView.LoadingStatus> loadingStatus;
+	private final BooleanProperty updatingVisualisation;
+
 	@FXML
 	private Button loadVisualisationButton;
 	@FXML
 	private Button reloadVisualisationButton;
 	@FXML
-	private Button manageDefaultVisualisationButton;
+	private MenuItem loadDefaultItem;
 	@FXML
-	private Button openSimulationButton;
+	private MenuItem loadFromDefinitionsItem;
 	@FXML
-	private StackPane zoomingPane;
-
-	private WebView webView;
-
+	private MenuItem setCurrentAsDefaultItem;
 	@FXML
-	private MenuItem image_export;
-
-	@FXML
-	private MenuItem helpMenu_userManual;
-
+	private MenuItem unsetDefaultItem;
 	@FXML
 	private MenuButton saveTraceButton;
 	@FXML
@@ -118,14 +164,27 @@ public class VisBView extends BorderPane {
 	@FXML
 	private MenuItem exportCurrentStateItem;
 	@FXML
-	private Label information;
+	private MenuItem exportImageItem;
+	@FXML
+	private HBox inProgressBox;
+	@FXML
+	private Label inProgressLabel;
+	@FXML
+	private Button zoomInButton;
+	@FXML
+	private Button zoomOutButton;
 	@FXML
 	private VBox placeholder;
 	@FXML
-	private MenuItem helpButton;
-
+	private ProgressIndicator loadingProgress;
 	@FXML
 	private Label placeholderLabel;
+	@FXML
+	private Button initButton;
+	@FXML
+	private StackPane mainPane;
+
+	private WebView webView;
 
 	/**
 	 * The public constructor of this class is injected with the ProB2-UI injector.
@@ -141,8 +200,9 @@ public class VisBView extends BorderPane {
 		CurrentProject currentProject,
 		CurrentTrace currentTrace,
 		CliTaskExecutor cliExecutor,
+		FxThreadExecutor fxExecutor,
+		DisablePropertyController disablePropertyController,
 		FileChooserManager fileChooserManager,
-		Provider<DefaultPathDialog> defaultPathDialogProvider,
 		VisBController visBController
 	) {
 		super();
@@ -152,9 +212,16 @@ public class VisBView extends BorderPane {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
+		this.disablePropertyController = disablePropertyController;
 		this.fileChooserManager = fileChooserManager;
-		this.defaultPathDialogProvider = defaultPathDialogProvider;
 		this.visBController = visBController;
+
+		this.visBConnector = new VisBConnector();
+
+		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", VisBView.LoadingStatus.NONE_LOADED);
+		this.updatingVisualisation = new SimpleBooleanProperty(this, "updatingVisualisation", false);
+
 		this.stageManager.loadFXML(this, "visb_view.fxml");
 	}
 
@@ -163,139 +230,94 @@ public class VisBView extends BorderPane {
 	 */
 	@FXML
 	public void initialize(){
-		this.helpButton.setOnAction(e -> openHelpPage());
-		this.helpMenu_userManual.setOnAction(e -> injector.getInstance(UserManualStage.class).show());
-		this.loadVisualisationButton.setOnAction(e -> loadVisBFile());
-		this.image_export.setOnAction(e -> exportImage());
-		this.saveTraceButton.disableProperty().bind(visBController.visBPathProperty().isNull());
+		this.loadVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
+		this.saveTraceButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
 		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
-			manageDefaultVisualisationButton.disableProperty().unbind();
-			manageDefaultVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(visBController.visBPathProperty().isNull()));
-			information.setText("");
+			loadDefaultItem.disableProperty().unbind();
+			loadFromDefinitionsItem.disableProperty().unbind();
+			setCurrentAsDefaultItem.disableProperty().unbind();
+			unsetDefaultItem.disableProperty().unbind();
 			if (to == null) {
-				placeholderLabel.setText(i18n.translate("common.noModelLoaded"));
+				loadDefaultItem.setDisable(true);
+				loadFromDefinitionsItem.setDisable(true);
+				setCurrentAsDefaultItem.setDisable(true);
+				unsetDefaultItem.setDisable(true);
 			} else {
-				placeholderLabel.setText(i18n.translate("visb.placeholder.text"));
+				loadDefaultItem.disableProperty().bind(to.visBVisualizationProperty().isNull()
+					.or(visBController.relativeVisBPathProperty().isEqualTo(to.visBVisualizationProperty())));
+				loadFromDefinitionsItem.disableProperty().bind(visBController.relativeVisBPathProperty().isEqualTo(VisBController.NO_PATH));
+				setCurrentAsDefaultItem.disableProperty().bind(visBController.relativeVisBPathProperty().isNull()
+					.or(visBController.relativeVisBPathProperty().isEqualTo(to.visBVisualizationProperty())));
+				unsetDefaultItem.disableProperty().bind(to.visBVisualizationProperty().isNull());
 			}
 		};
 
 		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
-			if (to == null) {
-				this.clear();
-			} else {
-				this.loadSvgFile(to);
-				updateInfo(i18n.translate("visb.infobox.visualisation.svg.loaded"));
-				this.runWhenLoaded(() -> {
-					final JSObject window = this.getJSWindow();
+			loadingStatus.set(to == null ? VisBView.LoadingStatus.NONE_LOADED : VisBView.LoadingStatus.LOADING);
+			visBController.getAttributeValues().clear();
+			this.updateView(loadingStatus.get(), currentTrace.get());
 
-					// WebView doesn't have a proper API for detecting e. g. JavaScript syntax errors,
-					// so as a workaround our JavaScript code sets a marker variable that we can check here.
-					// If the marker variable doesn't have the expected value,
-					// assume that the JavaScript code didn't load properly,
-					// and disable VisB to avoid exceptions from code that tries to call the (nonexistant) JavaScript functions.
-					Object loadedMarker = window.getMember("visBJavaScriptLoaded");
-					if (!"VisB JavaScript loaded".equals(loadedMarker)) {
-						LOGGER.error("VisB JavaScript failed to load (marker variable has incorrect value '{}')", loadedMarker);
-						this.clear();
-						stageManager.makeAlert(Alert.AlertType.ERROR, "", "visb.exception.javaScriptFailedToLoad").show();
-						return;
-					}
-
-					final VisBConnector visBConnector = injector.getInstance(VisBConnector.class);
-					updateDynamicSVGObjects(to);
-					for (final VisBEvent event : to.getEvents()) {
-						window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
-					}
-				});
+			if (to != null) {
+				this.loadVisualisationIntoWebView(to);
 			}
 		};
 
-		ChangeListener<? super StateSpace> stateSpaceListener = (o, from, to) -> loadVisBFileFromMachine(currentProject.getCurrentMachine(), to);
+		ChangeListener<Trace> traceListener = (o, from, to) -> {
+			if (from == null || to == null || !from.getStateSpace().equals(to.getStateSpace())) {
+				visBController.closeVisualisation();
+				if (to != null) {
+					loadVisBFileFromMachine(currentProject.getCurrentMachine(), to.getStateSpace());
+				}
+			}
 
-		this.addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, event -> {
-			this.currentProject.currentMachineProperty().removeListener(machineListener);
-			this.visBController.visBVisualisationProperty().removeListener(visBListener);
-			this.currentTrace.stateSpaceProperty().removeListener(stateSpaceListener);
-			visBController.setVisBPath(null);
-		});
+			this.updateView(loadingStatus.get(), to);
+		};
 
 		// Load VisB file from machine, when window is opened and set listener on the current machine
 		this.currentProject.currentMachineProperty().addListener(machineListener);
 		this.visBController.visBVisualisationProperty().addListener(visBListener);
-		this.currentTrace.stateSpaceProperty().addListener(stateSpaceListener);
+		this.currentTrace.addListener(traceListener);
+		this.loadingStatus.addListener((o, from, to) -> this.updateView(to, currentTrace.get()));
 
 		machineListener.changed(null, null, currentProject.getCurrentMachine());
+		visBListener.changed(null, null, visBController.getVisBVisualisation());
+		traceListener.changed(null, null, currentTrace.get());
 
-		stateSpaceListener.changed(null, null, currentTrace.getStateSpace());
+		visBController.executingEventProperty().addListener(o -> this.updateInProgress());
+		updatingVisualisation.addListener(o -> this.updateInProgress());
 
-		this.reloadVisualisationButton.disableProperty().bind(visBController.visBPathProperty().isNull());
+		initButton.disableProperty().bind(disablePropertyController.disableProperty());
 
-		exportHistoryItem.setOnAction(e -> {
-			Trace trace = currentTrace.get();
-			if (trace == null) {
-				return;
-			}
-			Path path = showHtmlExportFileChooser();
-			if (path == null) {
-				return;
-			}
-			ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace, path);
-			trace.getStateSpace().execute(cmd);
-		});
+		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
-		exportCurrentStateItem.setOnAction(e -> {
-			Trace trace = currentTrace.get();
-			if (trace == null) {
-				return;
-			}
-			Path path = showHtmlExportFileChooser();
-			if (path == null) {
-				return;
-			}
-			ExportVisBHtmlForStates cmd = new ExportVisBHtmlForStates(trace.getCurrentState(), path);
-			trace.getStateSpace().execute(cmd);
-		});
-
-		Platform.runLater(() -> {
-			// WebView can only be constructed on the JavaFX application thread,
-			// but VisBView.initialize generally runs on a background thread during UI startup,
-			// so this part needs to be explicitly moved to the JavaFX application thread.
-			this.webView = new WebView();
-			this.zoomingPane.getChildren().add(webView);
-			LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
-			this.webView.getEngine().setOnAlert(event -> showJavascriptAlert(event.getData()));
-			this.webView.getEngine().setOnError(this::treatJavascriptError);
-			visBListener.changed(null, null, visBController.getVisBVisualisation());
-			loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
-
-			// Uncomment to make WebView console errors, warnings, etc. visible in the log.
-			// This uses a private undocumented API and requires adding an export for the package javafx.web/com.sun.javafx.webkit
-			// (see the corresponding commented out line in build.gradle).
-			// com.sun.javafx.webkit.WebConsoleListener.setDefaultListener((wv, message, lineNumber, sourceId) -> LOGGER.info("WebView console: {}:{}: {}", sourceId, lineNumber, message));
-		});
+		exportHistoryItem.setOnAction(e -> performHtmlExport(false));
+		exportCurrentStateItem.setOnAction(e -> performHtmlExport(true));
 
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
 			if (change.wasAdded()) {
 				try {
 					this.changeAttribute(change.getKey().getId(), change.getKey().getAttribute(), change.getValueAdded());
-					updateInfo(i18n.translate("visb.infobox.visualisation.updated"));
 				} catch (final JSException e) {
 					LOGGER.error("JavaScript error while updating VisB attributes", e);
 					alert(e, "visb.exception.header","visb.controller.alert.visualisation.file");
-					updateInfo(i18n.translate("visb.infobox.visualisation.error"));
 				}
 			}
 		});
 	}
 
 	@FXML
-	public void openHelpPage() {
+	private void openHelpPage() {
 		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
 		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
 		helpSystem.openHelpForKeyAndAnchor("mainView.visB", null);
 		helpSystemStage.show();
 		helpSystemStage.toFront();
+	}
+
+	@FXML
+	private void openUserManual() {
+		injector.getInstance(UserManualStage.class).show();
 	}
 
 	private static Path getPathFromDefinitions(final StateSpace stateSpace) {
@@ -313,36 +335,52 @@ public class VisBView extends BorderPane {
 		}
 	}
 
-	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
-		visBController.setVisBPath(null);
-		if(machine != null && stateSpace != null) {
-			final Path visBVisualisation = machine.getMachineProperties().getVisBVisualisation();
-			if (visBVisualisation != null) {
-				final Path visBPath;
-				if (VisBController.NO_PATH.equals(visBVisualisation)) {
-					visBPath = VisBController.NO_PATH;
-				} else {
-					visBPath = currentProject.getLocation().resolve(visBVisualisation);
-				}
-				visBController.setVisBPath(visBPath);
+	private void loadFromDefinitions(StateSpace stateSpace) {
+		loadingStatus.set(VisBView.LoadingStatus.LOADING);
+		cliExecutor.submit(() -> getPathFromDefinitions(stateSpace)).thenComposeAsync(path -> {
+			if (path == null) {
+				loadingStatus.set(VisBView.LoadingStatus.NONE_LOADED);
+				return CompletableFuture.completedFuture(null);
 			} else {
-				cliExecutor.execute(() -> {
-					Path visBPath = getPathFromDefinitions(stateSpace);
-					Platform.runLater(() -> visBController.setVisBPath(visBPath));
-				});
+				return visBController.loadFromAbsolutePath(path);
 			}
+		}, fxExecutor).exceptionally(exc -> {
+			Platform.runLater(() -> this.showVisualisationLoadError(exc));
+			return null;
+		});
+	}
+
+	public void loadFromAbsolutePath(Path path) {
+		loadingStatus.set(VisBView.LoadingStatus.LOADING);
+		try {
+			visBController.loadFromAbsolutePath(path).exceptionally(exc -> {
+				Platform.runLater(() -> this.showVisualisationLoadError(exc));
+				return null;
+			});
+		} catch (RuntimeException exc) {
+			this.showVisualisationLoadError(exc);
 		}
 	}
 
-	/**
-	 * After loading the svgFile and preparing it in the {@link VisBController} the WebView is initialised.
-	 * @param svgContent the image/ svg, that should to be loaded into the context of the WebView
-	 */
-	private void initialiseWebView(String svgContent, String baseUrl) {
-		this.placeholder.setVisible(false);
-		this.webView.setVisible(true);
-		String htmlFile = generateHTMLFileWithSVG(svgContent, baseUrl);
-		this.webView.getEngine().loadContent(htmlFile);
+	public void loadFromRelativePath(Path path) {
+		loadingStatus.set(VisBView.LoadingStatus.LOADING);
+		try {
+			visBController.loadFromRelativePath(path).exceptionally(exc -> {
+				Platform.runLater(() -> this.showVisualisationLoadError(exc));
+				return null;
+			});
+		} catch (RuntimeException exc) {
+			this.showVisualisationLoadError(exc);
+		}
+	}
+
+	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
+		Path visBVisualisation = machine.getVisBVisualisation();
+		if (visBVisualisation != null) {
+			this.loadFromRelativePath(visBVisualisation);
+		} else {
+			this.loadFromDefinitions(stateSpace);
+		}
 	}
 
 	/**
@@ -362,7 +400,31 @@ public class VisBView extends BorderPane {
 		}
 	}
 
-	private void loadSvgFile(final VisBVisualisation visBVisualisation) {
+	/**
+	 * Create and initialize the {@link #webView} if it hasn't already been done.
+	 * This is done lazily when the first VisB visualisation is loaded to improve overall startup time,
+	 * because creating a {@link WebView} for the first time can be a bit slow:
+	 * 600 ms on a fast system (Apple M1 Pro processor) and sometimes noticeably longer on older/slower systems.
+	 */
+	private void ensureWebViewCreated() {
+		if (this.webView != null) {
+			return;
+		}
+
+		LOGGER.debug("Creating VisB WebView...");
+		this.webView = new WebView();
+		LOGGER.debug("JavaFX WebView user agent: {}", this.webView.getEngine().getUserAgent());
+		stageManager.initWebView(this.webView);
+
+		this.webView.visibleProperty().bind(this.placeholder.visibleProperty().not());
+		this.mainPane.getChildren().add(webView);
+		// Enable WebView-related actions only when the WebView is visible.
+		exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
+		zoomInButton.disableProperty().bind(this.placeholder.visibleProperty());
+		zoomOutButton.disableProperty().bind(this.placeholder.visibleProperty());
+	}
+
+	private void loadVisualisationIntoWebView(VisBVisualisation visBVisualisation) {
 		final Path path = visBVisualisation.getSvgPath();
 		final String baseUrl;
 		if (path.equals(VisBController.NO_PATH)) {
@@ -370,45 +432,115 @@ public class VisBView extends BorderPane {
 		} else {
 			baseUrl = path.getParent().toUri().toString();
 		}
-		this.initialiseWebView(visBVisualisation.getSvgContent(), baseUrl);
-	}
+		LOGGER.trace("Generating VisB HTML code...");
+		String htmlFile = generateHTMLFileWithSVG(visBVisualisation.getSvgContent(), baseUrl);
+		this.ensureWebViewCreated();
+		LOGGER.debug("Loading generated VisB HTML code into WebView...");
+		this.webView.getEngine().loadContent(htmlFile);
 
-	private void treatJavascriptError(WebErrorEvent event) {
-		LOGGER.debug("JavaScript ERROR: " + event.getMessage());
-		alert(event.getException(), "visb.exception.header", "visb.stage.alert.webview.jsalert", event.getMessage());
-	}
+		this.runWhenHtmlLoaded(() -> {
+			JSObject window = this.getJSWindow();
 
-	private void showJavascriptAlert(String message) {
-		LOGGER.debug("JavaScript ALERT: " + message);
-		final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.exception.header", "visb.stage.alert.webview.jsalert", message);
-		alert.initOwner(this.getScene().getWindow());
-		alert.showAndWait();
+			// WebView doesn't have a proper API for detecting e. g. JavaScript syntax errors,
+			// so as a workaround our JavaScript code sets a marker variable that we can check here.
+			// If the marker variable doesn't have the expected value,
+			// assume that the JavaScript code didn't load properly,
+			// and disable VisB to avoid exceptions from code that tries to call the (nonexistant) JavaScript functions.
+			Object loadedMarker = window.getMember("visBJavaScriptLoaded");
+			if (!"VisB JavaScript loaded".equals(loadedMarker)) {
+				LOGGER.error("VisB JavaScript failed to load (marker variable has incorrect value '{}')", loadedMarker);
+				stageManager.makeAlert(Alert.AlertType.ERROR, "", "visb.exception.javaScriptFailedToLoad").show();
+				visBController.hideVisualisation();
+				return;
+			}
+
+			LOGGER.trace("Setting up VisB dynamic SVG objects...");
+			updateDynamicSVGObjects(visBVisualisation);
+			LOGGER.trace("Setting up VisB click events...");
+			for (VisBEvent event : visBVisualisation.getEvents()) {
+				window.call("addClickEvent", visBConnector, event.getId(), event.getEvent(), event.getHovers().toArray(new VisBHover[0]));
+			}
+
+			LOGGER.debug("VisB visualisation is fully loaded");
+			loadingStatus.set(VisBView.LoadingStatus.LOADED);
+		});
 	}
 
 	private JSObject getJSWindow() {
 		return (JSObject)this.webView.getEngine().executeScript("window");
 	}
 
-	/**
-	 * This method clears our the WebView and the ListView and removes possible listeners, so that the VisBStage no longer interacts with anything.
-	 */
-	void clear(){
-		LOGGER.debug("Clear the stage!");
-		this.webView.setVisible(false);
+	private void showPlaceholder(String placeholderLabelText) {
 		this.placeholder.setVisible(true);
-		injector.getInstance(VisBDebugStage.class).clear();
+		this.placeholderLabel.setText(placeholderLabelText);
+		this.loadingProgress.setVisible(false);
+		this.initButton.setVisible(false);
+	}
+
+	private void updateView(VisBView.LoadingStatus status, Trace trace) {
+		if (trace == null) {
+			this.showPlaceholder(i18n.translate("common.noModelLoaded"));
+		} else if (status == VisBView.LoadingStatus.LOADING) {
+			this.showPlaceholder(i18n.translate("visb.placeholder.loadingVisualisation"));
+			this.loadingProgress.setVisible(true);
+		} else if (status == VisBView.LoadingStatus.NONE_LOADED) {
+			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
+		} else if (!trace.getCurrentState().isInitialised()) {
+			this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
+			
+			if (trace.getCurrentState().getOutTransitions().size() == 1) {
+				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.deterministic"));
+				this.initButton.setVisible(true);
+			} else {
+				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.nonDeterministic"));
+			}
+		} else {
+			assert status == VisBView.LoadingStatus.LOADED;
+			this.updateVisualisation(trace.getCurrentState());
+		}
+	}
+
+	private void updateVisualisation(State state) {
+		LOGGER.debug("Reloading VisB visualisation...");
+
+		updatingVisualisation.set(true);
+		cliExecutor.submit(() -> {
+			var getAttributesCmd = new GetVisBAttributeValuesCommand(state);
+			state.getStateSpace().execute(getAttributesCmd);
+			return getAttributesCmd.getValues();
+		}).whenCompleteAsync((res, exc) -> {
+			if (exc == null) {
+				LOGGER.trace("Applying VisB attribute values...");
+				visBController.getAttributeValues().putAll(res);
+				LOGGER.trace("Done applying VisB attribute values");
+
+				try {
+					this.resetMessages();
+				} catch (JSException e) {
+					alert(e, "visb.exception.header", "visb.controller.alert.visualisation.file");
+				}
+
+				this.placeholder.setVisible(false);
+				this.initButton.setVisible(false);
+			} else {
+				// TODO Perhaps the visualisation should only be hidden temporarily and shown again after the next state change?
+				visBController.hideVisualisation();
+				alert(exc, "visb.controller.alert.eval.formulas.header", "visb.exception.visb.file.error.header");
+			}
+
+			LOGGER.debug("VisB visualisation reloaded");
+		}, fxExecutor).whenCompleteAsync((res, exc) -> updatingVisualisation.set(false), fxExecutor);
 	}
 
 	/**
-	 * Run the given {@link Runnable} once the {@link WebView} has finished loading.
-	 * If the {@link WebView} is already fully loaded,
-	 * the {@link Runnable} is executed immediately.
-	 * If the {@link WebView} fails to load,
-	 * the {@link Runnable} is never executed.
+	 * Run the given {@link Runnable} once the {@link WebView} has successfully finished loading.
+	 * You should use {@link #runWhenVisualisationLoaded(Runnable)} instead in most cases,
+	 * which also waits for other initialisation code to finish
+	 * (e. g. creation of dynamic SVG objects).
 	 *
 	 * @param runnable the code to run once the {@link WebView} has finished loading
 	 */
-	private void runWhenLoaded(final Runnable runnable) {
+	private void runWhenHtmlLoaded(final Runnable runnable) {
 		if (webView.getEngine().getLoadWorker().getState().equals(Worker.State.RUNNING)) {
 			// execute code once page fully loaded
 			// https://stackoverflow.com/questions/12540044/execute-a-task-after-the-webview-is-fully-loaded
@@ -433,58 +565,95 @@ public class VisBView extends BorderPane {
 		}
 	}
 
-	public void changeAttribute(final String id, final String attribute, final String value) {
-		this.runWhenLoaded(() -> this.getJSWindow().call("changeAttribute", id, attribute, value));
+	/**
+	 * Run the given {@link Runnable} once the visualisation has been loaded successfully.
+	 * If the visualisation is already fully loaded, the {@link Runnable} is executed immediately.
+	 * If the visualisation fails to load, the {@link Runnable} is never executed.
+	 *
+	 * @param runnable the code to run once the visualisation has finished loading
+	 */
+	private void runWhenVisualisationLoaded(Runnable runnable) {
+		if (loadingStatus.get() == VisBView.LoadingStatus.LOADED) {
+			runnable.run();
+		} else {
+			loadingStatus.addListener(new ChangeListener<>() {
+				@Override
+				public void changed(ObservableValue<? extends VisBView.LoadingStatus> observable, VisBView.LoadingStatus from, VisBView.LoadingStatus to) {
+					if (to == VisBView.LoadingStatus.LOADED) {
+						observable.removeListener(this);
+						runnable.run();
+					}
+				}
+			});
+		}
 	}
 
-	public void showModelNotInitialised() {
-		this.runWhenLoaded(() -> this.getJSWindow().call("showModelNotInitialised"));
+	public void changeAttribute(final String id, final String attribute, final String value) {
+		if (loadingStatus.get() != VisBView.LoadingStatus.LOADED) {
+			throw new IllegalStateException("Tried to call changeAttribute before VisB visualisation has been fully loaded");
+		}
+
+		this.getJSWindow().call("changeAttribute", id, attribute, value);
+	}
+
+	public void changeAttributeIfLoaded(String id, String attribute, String value) {
+		if (loadingStatus.get() == VisBView.LoadingStatus.LOADED) {
+			this.changeAttribute(id, attribute, value);
+		}
 	}
 
 	public void resetMessages() {
-		this.runWhenLoaded(() -> this.getJSWindow().call("resetMessages"));
+		if (loadingStatus.get() != VisBView.LoadingStatus.LOADED) {
+			throw new IllegalStateException("Tried to call resetMessages before VisB visualisation has been fully loaded");
+		}
+
+		this.getJSWindow().call("resetMessages");
 	}
 
-	/**
-	 * Setter for the info label.
-	 * @param text to be set
-	 */
-	void updateInfo(String text){
-		information.setText(text);
+	@FXML
+	private void doInitialisation() {
+		visBController.executeBeforeInitialisation().whenComplete((res, exc) -> {
+			if (exc != null) {
+				LOGGER.error("Exception while executing initialisation from VisB view", exc);
+				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+			}
+		});
+	}
+
+	private void showInProgress(String text) {
+		inProgressLabel.setText(text);
+		inProgressBox.setManaged(true);
+		inProgressBox.setVisible(true);
+	}
+
+	private void hideInProgress() {
+		inProgressBox.setManaged(false);
+		inProgressBox.setVisible(false);
+	}
+
+	private void updateInProgress() {
+		if (visBController.isExecutingEvent()) {
+			showInProgress(i18n.translate("visb.inProgress.executingEvent"));
+		} else if (updatingVisualisation.get()) {
+			showInProgress(i18n.translate("visb.inProgress.updatingVisualisation"));
+		} else {
+			hideInProgress();
+		}
 	}
 
 	/**
 	 * On click function for the button and file menu item
 	 */
 	@FXML
-	public void loadVisBFile() {
-		loadVisBFile(null);
-	}
-
-	public void loadVisBFile(Path path){
-		if(currentProject.getCurrentMachine() == null){
-			LOGGER.debug("Tried to start visualisation when no machine was loaded.");
-			final Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "visb.stage.alert.load.machine.header", "visb.exception.no.machine");
-			alert.initOwner(this.getScene().getWindow());
-			alert.showAndWait();
-			return;
-		}
-		if (path == null) {
-			FileChooser fileChooser = new FileChooser();
-			fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
-			fileChooser.getExtensionFilters().addAll(
-				fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation",
-					"json")
-			);
-			path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS,
-					stageManager.getCurrent());
-		}
-		if(path != null) {
-			clear();
-			visBController.setVisBPath(path);
-			for(VisBItem.VisBItemKey key : visBController.getAttributeValues().keySet()) {
-				changeAttribute(key.getId(), key.getAttribute(), visBController.getAttributeValues().get(key));
-			}
+	private void askLoadVisBFile() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
+		fileChooser.getExtensionFilters().addAll(
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
+		);
+		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		if (path != null) {
+			this.loadFromAbsolutePath(path);
 		}
 	}
 
@@ -494,9 +663,16 @@ public class VisBView extends BorderPane {
 	private void alert(Throwable ex, String header, String body, Object... params){
 		final Alert alert = this.stageManager.makeExceptionAlert(ex, header, body, params);
 		alert.initOwner(this.getScene().getWindow());
-		alert.showAndWait();
+		alert.show();
 	}
 
+	private void showVisualisationLoadError(Throwable exc) {
+		LOGGER.error("Error while (re)loading VisB file", exc);
+		loadingStatus.set(VisBView.LoadingStatus.NONE_LOADED);
+		alert(exc, "visb.exception.visb.file.error.header", "visb.exception.visb.file.error");
+	}
+
+	@FXML
 	private void exportImage() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));
@@ -521,12 +697,20 @@ public class VisBView extends BorderPane {
 
 	@FXML
 	public void reloadVisualisation() {
-		visBController.reloadVisualisation();
+		try {
+			loadingStatus.set(VisBView.LoadingStatus.LOADING);
+			visBController.reloadVisualisation().exceptionally(exc -> {
+				Platform.runLater(() -> this.showVisualisationLoadError(exc));
+				return null;
+			});
+		} catch (RuntimeException exc) {
+			this.showVisualisationLoadError(exc);
+		}
 	}
 
 	@FXML
 	public void closeVisualisation() {
-		visBController.setVisBPath(null);
+		visBController.closeVisualisation();
 	}
 
 	@FXML
@@ -559,42 +743,49 @@ public class VisBView extends BorderPane {
 	}
 
 	@FXML
-	public void manageDefaultVisualisation() {
-		final DefaultPathDialog defaultPathDialog = defaultPathDialogProvider.get();
-		defaultPathDialog.initOwner(this.getScene().getWindow());
+	private void loadDefault() {
+		this.loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
+	}
 
-		final Path loadedPathAbsolute = visBController.getVisBPath();
-		final Path loadedPathRelative;
-		if (VisBController.NO_PATH.equals(loadedPathAbsolute)) {
-			loadedPathRelative = VisBController.NO_PATH;
-		} else {
-			loadedPathRelative = currentProject.getLocation().relativize(loadedPathAbsolute);
+	@FXML
+	private void loadFromDefinitions() {
+		this.loadFromDefinitions(currentTrace.getStateSpace());
+	}
+
+	@FXML
+	private void setCurrentAsDefault() {
+		currentProject.getCurrentMachine().setVisBVisualisation(visBController.getRelativeVisBPath());
+	}
+
+	@FXML
+	private void unsetDefault() {
+		currentProject.getCurrentMachine().setVisBVisualisation(null);
+	}
+
+	private void performHtmlExport(final boolean onlyCurrentState) {
+		Trace trace = currentTrace.get();
+		if (trace == null) {
+			return;
+		}
+		Path path = showHtmlExportFileChooser();
+		if (path == null) {
+			return;
 		}
 
-		final Machine currentMachine = currentProject.getCurrentMachine();
-		defaultPathDialog.initPaths(loadedPathRelative, currentMachine.getMachineProperties().getVisBVisualisation());
-		defaultPathDialog.showAndWait().ifPresent(action -> {
-			switch (action) {
-				case LOAD_DEFAULT:
-					this.loadVisBFileFromMachine(currentMachine, currentTrace.getStateSpace());
-					break;
-
-				case LOAD_DEFINITIONS:
-					visBController.setVisBPath(getPathFromDefinitions(currentTrace.getStateSpace()));
-					break;
-
-				case SET_CURRENT_AS_DEFAULT:
-					currentMachine.getMachineProperties().setVisBVisualisation(loadedPathRelative);
-					break;
-
-				case UNSET_DEFAULT:
-					currentMachine.getMachineProperties().setVisBVisualisation(null);
-					break;
-
-				default:
-					throw new AssertionError("Unhandled action: " + action);
+		Task<Void> task = new Task<>() {
+			@Override
+			protected Void call() {
+				trace.getStateSpace().execute(onlyCurrentState ?
+					new ExportVisBHtmlForStates(trace.getCurrentState(), VisBExportOptions.DEFAULT.withShowVariables(true), path)
+						: new ExportVisBForHistoryCommand(trace, path));
+				return null;
 			}
-		});
+		};
+		task.setOnRunning(r -> showInProgress(i18n.translate("visb.inProgress.htmlExport")));
+		task.setOnSucceeded(s -> hideInProgress());
+		task.setOnFailed(f -> hideInProgress());
+		// makes UI responsive, but we can't do anything with the model during export anyway...
+		cliExecutor.execute(task);
 	}
 
 	private Path showHtmlExportFileChooser() {

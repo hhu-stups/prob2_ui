@@ -68,6 +68,11 @@ public final class Config {
 					}
 				}
 
+				// Version 4 just adds auto reload machine option
+				if (oldVersion <= 3) {
+					oldObject.put("autoReloadMachine", "true");
+				}
+
 				// Version 5 just adds the RAILML option
 
 				return oldObject;

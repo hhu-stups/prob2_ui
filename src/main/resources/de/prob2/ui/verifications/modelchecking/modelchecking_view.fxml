@@ -74,6 +74,13 @@
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingSteps" />
 			</placeholder>
 		</TableView>
+		<HBox fx:id="executeButtonsBox" spacing="5" alignment="CENTER" visible="false">
+			<padding>
+				<Insets topRightBottomLeft="5"/>
+			</padding>
+			<Button fx:id="executeButton" text="%verifications.modelchecking.modelcheckingView.contextMenu.check" styleClass="button-blue" onAction="#executeSelected"/>
+			<Button fx:id="continueCheckingButton" text="%verifications.modelchecking.modelcheckingView.contextMenu.searchForNewErrors" styleClass="button-blue" onAction="#continueCheckingSelected"/>
+		</HBox>
 		<VBox fx:id="statsBox" spacing="5.0" visible="false">
 			<padding>
 				<Insets topRightBottomLeft="10.0" />

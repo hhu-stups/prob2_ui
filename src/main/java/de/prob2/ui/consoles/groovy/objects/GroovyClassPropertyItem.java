@@ -20,7 +20,7 @@ import groovy.lang.MetaMethod;
 import groovy.lang.MetaProperty;
 import groovy.lang.PropertyValue;
 
-public class GroovyClassPropertyItem extends GroovyAbstractItem {
+public final class GroovyClassPropertyItem extends GroovyAbstractItem {
 	private static final Logger LOGGER = LoggerFactory.getLogger(GroovyClassPropertyItem.class);
 
 	private final StringProperty params;

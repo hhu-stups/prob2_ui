@@ -18,15 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
-public class EditDynamicFormulaStage extends Stage {
-
-	@FunctionalInterface
-	public interface DynamicFormulaTaskFactory {
-		VisualizationFormulaTask createTask(String id, String formula);
-	}
-
-	@FXML
-	private Label formulaTitleLabel;
+public final class EditDynamicFormulaStage extends Stage {
 	@FXML
 	private TextField idField;
 	@FXML
@@ -41,7 +33,7 @@ public class EditDynamicFormulaStage extends Stage {
 	private final I18n i18n;
 	private final CurrentProject currentProject;
 
-	private DynamicFormulaTaskFactory factory;
+	private String commandType;
 	private VisualizationFormulaTask result;
 
 	@Inject
@@ -53,7 +45,6 @@ public class EditDynamicFormulaStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		this.formulaTitleLabel.setText(this.i18n.translate("dynamic.editFormula"));
 		this.formulaTextArea.setOnKeyPressed(e -> {
 			if (e.getCode().equals(KeyCode.ENTER)) {
 				if (!e.isShiftDown()) {
@@ -65,7 +56,7 @@ public class EditDynamicFormulaStage extends Stage {
 			}
 		});
 		this.idField.textProperty().addListener((observable, from, to) -> {
-			Set<String> idList = this.currentProject.getCurrentMachine().getMachineProperties().getValidationTaskIds();
+			Set<String> idList = this.currentProject.getCurrentMachine().getValidationTaskIds();
 			if (idList.contains(to)) {
 				this.okButton.setDisable(true);
 				this.errorExplanationLabel.setText(i18n.translate("dynamic.editFormula.IdAlreadyExistsError", to));
@@ -82,24 +73,24 @@ public class EditDynamicFormulaStage extends Stage {
 		this.cancelButton.setOnAction(e -> this.close());
 	}
 
-	public void createNewFormulaTask(DynamicFormulaTaskFactory factory) {
+	public void createNewFormulaTask(String commandType) {
 		this.idField.clear();
 		this.formulaTextArea.clear();
 		this.formulaTextArea.getErrors().clear();
-		this.factory = factory;
+		this.commandType = commandType;
 	}
 
-	public void setInitialFormulaTask(VisualizationFormulaTask item, ObservableList<ErrorItem> errors, DynamicFormulaTaskFactory factory) {
+	public void setInitialFormulaTask(VisualizationFormulaTask item, ObservableList<ErrorItem> errors) {
 		this.idField.setText(item.getId() != null ? item.getId() : "");
 		this.formulaTextArea.replaceText(item.getFormula());
 		this.formulaTextArea.getErrors().setAll(errors);
-		this.factory = factory;
+		this.commandType = item.getCommandType();
 	}
 
 	private void setResult() {
 		String id = idField.getText().trim().isEmpty() ? null : idField.getText();
 		String formula = formulaTextArea.getText().trim();
-		this.result = this.factory.createTask(id, formula);
+		this.result = new VisualizationFormulaTask(id, this.commandType, formula);
 	}
 
 	public VisualizationFormulaTask getResult() {
