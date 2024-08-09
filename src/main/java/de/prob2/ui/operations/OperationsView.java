@@ -414,6 +414,8 @@ public final class OperationsView extends VBox {
 			} else {
 				text = i18n.translate("operations.operationsView.warningLabel.maxOperationsReached");
 			}
+		} else if (trace.getCurrentState().isTimeoutOccurred()) {
+			text = i18n.translate("operations.operationsView.warningLabel.timeoutOccurred");
 		} else if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
 			text = i18n.translate("operations.operationsView.warningLabel.noSetupConstantsOrInit");
 		} else {
