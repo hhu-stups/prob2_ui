@@ -68,7 +68,7 @@ public final class Config {
 					}
 				}
 
-				// Version 4 just adds the RAILML option
+				// Version 5 just adds the RAILML option
 
 				return oldObject;
 			}
