@@ -204,7 +204,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 	}
 
 	protected BooleanExpression disableItemBinding(final T item) {
-		return disablePropertyController.disableProperty();
+		return this.currentTrace.isNull().or(this.disablePropertyController.disableProperty());
 	}
 
 	protected ExecutionContext getCurrentExecutionContext() {
