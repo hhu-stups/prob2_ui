@@ -27,6 +27,9 @@ import de.prob.animator.domainobjects.FormulaTranslationMode;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
 import de.prob.statespace.StateSpace;
+import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -109,7 +112,10 @@ public final class BEditorView extends BorderPane {
 
 	private final ObjectProperty<Path> path;
 	private final StringProperty lastSavedText;
+	private final StringProperty lastLoadedText;
+	private final BooleanProperty autoReloadMachine;
 	private final BooleanProperty saved;
+	private final BooleanProperty fileContentChanged;
 	private final ObservableList<ErrorItem> errors;
 
 	private Thread watchThread;
@@ -124,6 +130,7 @@ public final class BEditorView extends BorderPane {
 		CurrentTrace currentTrace,
 		CliTaskExecutor cliExecutor,
 		FxThreadExecutor fxExecutor,
+		Config config,
 		Injector injector
 	) {
 		this.stageManager = stageManager;
@@ -135,10 +142,25 @@ public final class BEditorView extends BorderPane {
 		this.injector = injector;
 		this.path = new SimpleObjectProperty<>(this, "path", null);
 		this.lastSavedText = new SimpleStringProperty(this, "lastSavedText", null);
-		this.saved = new SimpleBooleanProperty(this, "saved", true);
+		this.lastLoadedText = new SimpleStringProperty(this, "lastLoadedText", null);
+		this.autoReloadMachine = new SimpleBooleanProperty(this, "autoReloadMachine", true);
+		this.saved = new SimpleBooleanProperty(this, "saved");
+		this.fileContentChanged = new SimpleBooleanProperty(this, "fileContentChanged", false);
 		this.errors = FXCollections.observableArrayList();
 		this.watchThread = null;
 		stageManager.loadFXML(this, "beditorView.fxml");
+
+		config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				autoReloadMachine.set(configData.autoReloadMachine);
+			}
+
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.autoReloadMachine = autoReloadMachine.get();
+			}
+		});
 	}
 
 	@FXML
@@ -163,8 +185,10 @@ public final class BEditorView extends BorderPane {
 		searchButton.disableProperty().bind(this.pathProperty().isNull());
 		warningLabel.textProperty().bind(
 			Bindings.when(saved)
-				.then("")
-				.otherwise(i18n.translate("beditor.unsavedWarning"))
+				.then(Bindings.when(fileContentChanged)
+						.then(i18n.translate("beditor.warnings.fileContentChanged"))
+						.otherwise(""))
+				.otherwise(i18n.translate("beditor.warnings.unsaved"))
 		);
 		Platform.runLater(this::setHint);
 
@@ -421,12 +445,13 @@ public final class BEditorView extends BorderPane {
 
 					if (path.getFileName().equals(event.context())) {
 						// Only reload on events for the file itself, not for other files in the directory.
-						Platform.runLater(() ->
+						Platform.runLater(() -> {
 							loadText(path).exceptionally(exc -> {
 								stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
 								return null;
-							})
-						);
+							});
+							this.updateFileContentChanged();
+						});
 						// if our file changed we do not care about other changes, let's just queue the reload and wait for the next change
 						break;
 					}
@@ -440,6 +465,19 @@ public final class BEditorView extends BorderPane {
 		this.watchThread.start();
 	}
 
+	private void updateFileContentChanged() {
+		boolean newFileContentChanged;
+		if (this.getPath() != null) {
+			String lastLoaded = Objects.requireNonNullElse(this.lastLoadedText.get(), "");
+			String editor = Objects.requireNonNullElse(this.beditor.getText(), "");
+			newFileContentChanged = !lastLoaded.equals(editor);
+		} else {
+			// do not show file content changed warning when there is no file open right now
+			newFileContentChanged = false;
+		}
+		this.fileContentChanged.set(newFileContentChanged);
+	}
+
 	public ObjectProperty<Path> pathProperty() {
 		return this.path;
 	}
@@ -450,6 +488,10 @@ public final class BEditorView extends BorderPane {
 
 	public void setPath(final Path path) {
 		this.pathProperty().set(path);
+	}
+
+	public BooleanProperty autoReloadMachineProperty() {
+		return this.autoReloadMachine;
 	}
 
 	public ReadOnlyBooleanProperty savedProperty() {
@@ -555,10 +597,19 @@ public final class BEditorView extends BorderPane {
 			lastSavedText.set(beditor.getText());
 			registerFile(this.getPath());
 
-			currentProject.reloadCurrentMachine();
+			if (autoReloadMachine.get()) {
+				currentProject.reloadCurrentMachine();
+			} else {
+				this.updateFileContentChanged();
+			}
 		} finally {
 			this.saving = false;
 		}
+	}
+
+	public void updateLoadedText() {
+		lastLoadedText.set(beditor.getText());
+		fileContentChanged.set(false);
 	}
 
 	private void resetWatching() {

@@ -149,7 +149,10 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 			stateSpace.sendInterrupt();
 		}
 		injector.getInstance(CliTaskExecutor.class).interruptAll();
-		injector.getInstance(BEditorView.class).getErrors().clear();
+		BEditorView bEditorView = injector.getInstance(BEditorView.class);
+		bEditorView.getErrors().clear();
+		bEditorView.updateLoadedText();
+
 		Machine prevMachine = this.getCurrentMachine();
 		if (prevMachine != null) {
 			prevMachine.resetAnimatorDependentState();
