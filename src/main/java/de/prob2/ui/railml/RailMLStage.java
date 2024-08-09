@@ -317,14 +317,14 @@ public class RailMLStage extends Stage {
 					railML2B.generateAnimationMachine();
 					final Machine animationMachine = new Machine(modelName + ANIMATION,
 						"Animation machine generated from " + fileName, outputPath.relativize(outputPath.resolve(modelName + ANIMATION_MCH)));
-					animationMachine.getMachineProperties().getSimulations()
+					animationMachine.getSimulations()
 						.add(new SimulationModel(outputPath.relativize(outputPath.resolve("RailML3_SimB.json"))));
 					currentProject.addMachine(animationMachine);
 				}
 
 				List<Machine> createdMachines = currentProject.getMachines();
 				if (!createdMachines.isEmpty()) {
-					currentProject.startAnimation(createdMachines.get(createdMachines.size() - 1));
+					currentProject.loadMachineWithConfirmation(createdMachines.get(createdMachines.size() - 1));
 				}
 			} catch (RailML2BIOException e) {
 				// TODO: exception handling
