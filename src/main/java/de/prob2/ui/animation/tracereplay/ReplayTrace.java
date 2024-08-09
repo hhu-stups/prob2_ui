@@ -201,19 +201,8 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	 * @throws IOException if the trace couldn't be written for any reason
 	 */
 	public void saveModified(final TraceJsonFile newTrace) throws IOException {
-		final Path tempLocation = Paths.get(this.getAbsoluteLocation() + ".tmp");
-		try {
-			this.traceManager.save(tempLocation, newTrace);
-			Files.move(tempLocation, this.getAbsoluteLocation(), StandardCopyOption.REPLACE_EXISTING);
-			this.loadedTrace.set(newTrace);
-		} catch (IOException | RuntimeException exc) {
-			try {
-				Files.deleteIfExists(tempLocation);
-			} catch (IOException | RuntimeException innerExc) {
-				exc.addSuppressed(innerExc);
-			}
-			throw exc;
-		}
+		this.traceManager.save(this.getAbsoluteLocation(), newTrace);
+		this.loadedTrace.set(newTrace);
 	}
 
 	@Override
