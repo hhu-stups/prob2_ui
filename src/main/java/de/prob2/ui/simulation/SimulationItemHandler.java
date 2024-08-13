@@ -137,7 +137,7 @@ public final class SimulationItemHandler {
 	}
 
 	private void handleMonteCarloSimulation(SimulationItem item) {
-		int executions = (int) item.getField("EXECUTIONS");
+		int executions = item.getField("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) simulationModelConfiguration).getTimedTraces().size() : (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
 		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, currentProject, executions, maxStepsBeforeProperty, additionalInformation);

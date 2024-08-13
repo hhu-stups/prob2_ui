@@ -159,7 +159,7 @@ public final class SimulationChoosingStage extends Stage {
 
 		if (simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationConditionChoice.checkProperty()) {
 			SimulationType simulationType = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
-			information.putAll(simulationPropertyChoice.extractInformation());
+			information.putAll(simulationPropertyChoice.extractInformation(simulationType));
 			switch (simulationType) {
 				case MONTE_CARLO_SIMULATION:
 					break;
