@@ -189,7 +189,7 @@ public final class SimulationChoosingStage extends Stage {
 		}
 		simulationPropertyChoice.updateCheck(type);
 
-		if (simulationConditionChoice.checkProperty() || mode == SimulationMode.Mode.BLACK_BOX) {
+		if (simulationConditionChoice.checkProperty()) {
 			inputBox.getChildren().add(0, simulationPropertyChoice);
 		}
 
