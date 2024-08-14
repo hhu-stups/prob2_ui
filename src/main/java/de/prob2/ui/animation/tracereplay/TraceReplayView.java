@@ -5,10 +5,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
+import com.google.common.base.Strings;
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -38,6 +40,8 @@ import de.prob2.ui.verifications.ExecutionContext;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -53,6 +57,7 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
+import javafx.util.Duration;
 
 import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
 
@@ -61,11 +66,24 @@ import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
 public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final class Row extends RowBase {
 		private Row() {
-			itemProperty().addListener((o, from, to) -> {
-				if (to != null) {
-					setTooltip(new Tooltip(this.getItem().getLocation().toString()));
+			// tooltip with path and description
+			ObservableValue<Path> location = this.itemProperty().map(ReplayTrace::getLocation);
+			ObservableValue<String> description = this.itemProperty()
+					.flatMap(ReplayTrace::loadedTraceProperty)
+					.map(TraceJsonFile::getDescription);
+			StringBinding tooltipText = Bindings.createStringBinding(() -> {
+				String s = Objects.toString(location.getValue());
+				String d = description.getValue();
+				if (!Strings.isNullOrEmpty(d)) {
+					s += "\n" + d;
 				}
-			});
+
+				return s;
+			}, location, description);
+			Tooltip tt = new Tooltip();
+			tt.textProperty().bind(tooltipText);
+			tt.setShowDelay(Duration.millis(200));
+			this.tooltipProperty().bind(Bindings.when(tooltipText.isEmpty()).then((Tooltip) null).otherwise(tt));
 
 			executeMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.replayTrace"));
 			editMenuItem.setText(i18n.translate("animation.tracereplay.view.contextMenu.editId"));

@@ -166,7 +166,7 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 
 	@JsonIgnore
 	public String getName() {
-		return MoreFiles.getNameWithoutExtension(location.getFileName());
+		return MoreFiles.getNameWithoutExtension(this.location);
 	}
 
 	@Override
