@@ -109,7 +109,10 @@ public final class SimulationChoosingStage extends Stage {
 			}
 
 			this.close();
-			this.simulationItemHandler.checkItem(lastItem);
+
+			if(!isModifying) {
+				this.simulationItemHandler.checkItem(lastItem);
+			}
 		});
 	}
 
