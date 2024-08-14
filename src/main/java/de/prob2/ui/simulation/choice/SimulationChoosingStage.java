@@ -25,7 +25,7 @@ import javafx.stage.Stage;
 @Singleton
 public final class SimulationChoosingStage extends Stage {
 	@FXML
-	private Button btCheck;
+	private Button btApply;
 
 	@FXML
 	private SimulationMonteCarloChoice simulationMonteCarloChoice;
@@ -91,7 +91,7 @@ public final class SimulationChoosingStage extends Stage {
 	}
 
 	private void setCheckListeners() {
-		btCheck.setOnAction(e -> {
+		btApply.setOnAction(e -> {
 			lastItem = null;
 			boolean validChoice = checkSelection();
 			if (!validChoice) {
