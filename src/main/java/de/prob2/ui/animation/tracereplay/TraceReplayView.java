@@ -72,7 +72,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 					.flatMap(ReplayTrace::loadedTraceProperty)
 					.map(TraceJsonFile::getDescription);
 			StringBinding tooltipText = Bindings.createStringBinding(() -> {
-				String s = Objects.toString(location.getValue());
+				String s = Objects.toString(location.getValue(), "");
 				String d = description.getValue();
 				if (!Strings.isNullOrEmpty(d)) {
 					s += "\n" + d;
