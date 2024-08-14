@@ -52,7 +52,6 @@ import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
-import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDiagramItem;
@@ -143,7 +142,11 @@ public final class SimulatorStage extends Stage {
 						}
 
 						MenuItem menuItem = new MenuItem(targetModel.getPath().toString());
-						menuItem.setOnAction(e -> simulationItemHandler.addItem(item.withSimulationPath(targetModel.getPath())));
+						menuItem.setOnAction(e -> {
+							ISimulationModelConfiguration config = realTimeSimulator.getConfig();
+							int size = item.getInformation().get("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) config).getTimedTraces().size() : (int) item.getInformation().get("EXECUTIONS");
+							simulationItemHandler.addItem(item.withSimulationPath(size, targetModel.getPath()));
+						});
 						copyMenu.getItems().add(menuItem);
 					}
 					copyMenu.setDisable(copyMenu.getItems().isEmpty());
@@ -809,7 +812,11 @@ public final class SimulatorStage extends Stage {
 			SimulationModel simulationModel = new SimulationModel(relativePath);
 			Machine currentMachine = currentProject.getCurrentMachine();
 			List<SimulationItem> simulationTasks = simulationItems.getItems();
-			simulationTasks.forEach(task -> currentMachine.addValidationTaskIfNotExist(task.withSimulationPath(relativePath)));
+			ISimulationModelConfiguration config = realTimeSimulator.getConfig();
+			simulationTasks.forEach(task -> {
+				int size = task.getInformation().get("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) config).getTimedTraces().size() : (int) task.getInformation().get("EXECUTIONS");
+				currentMachine.addValidationTaskIfNotExist(task.withSimulationPath(size, relativePath));
+			});
 			if (currentMachine.getSimulations().contains(simulationModel)) {
 				cbSimulation.getSelectionModel().select(simulationModel);
 			} else {

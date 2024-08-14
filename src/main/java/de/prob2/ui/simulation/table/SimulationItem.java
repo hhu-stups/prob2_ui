@@ -268,8 +268,14 @@ public final class SimulationItem implements ITraceTask {
 			       .toString();
 	}
 
-	public SimulationItem withSimulationPath(Path simulationPath) {
-		return new SimulationItem(this.getId(), simulationPath, this.getType(), new HashMap<>(this.getInformation()));
+	public SimulationItem withSimulationPath(int executions, Path simulationPath) {
+		Map<String, Object> information = new HashMap<>(this.getInformation());
+		// This could be the case if a SimB validation task is copied from a directory
+		// of timed traces to a SimB simulation or to an external simulation
+		if(!information.containsKey("EXECUTIONS")) {
+			information.put("EXECUTIONS", executions);
+		}
+		return new SimulationItem(this.getId(), simulationPath, this.getType(), information);
 	}
 
 	public static final class SimulationCheckingInformation {
