@@ -70,7 +70,8 @@
 					<MenuItem fx:id="exportHistoryItem" text="%visb.contextMenu.exportHistory"/>
 					<MenuItem fx:id="exportCurrentStateItem" text="%visb.contextMenu.exportCurrentState"/>
 					<!-- The export image menu item is disabled until the WebView is created. -->
-					<MenuItem fx:id="exportImageItem" mnemonicParsing="false" text="%visb.menu.file.export" disable="true" onAction="#exportImage"/>
+					<MenuItem fx:id="exportImageItem" mnemonicParsing="false" text="%visb.menu.file.export.png" disable="true" onAction="#exportImage"/>
+					<MenuItem fx:id="exportSvgItem" mnemonicParsing="false" text="%visb.menu.file.export.svg" disable="true" onAction="#exportSvg"/>
 				</items>
 			</MenuButton>
 			<Spacer/>

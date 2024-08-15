@@ -7,7 +7,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
@@ -165,6 +167,8 @@ public final class VisBView extends BorderPane {
 	private MenuItem exportCurrentStateItem;
 	@FXML
 	private MenuItem exportImageItem;
+	@FXML
+	private MenuItem exportSvgItem;
 	@FXML
 	private HBox inProgressBox;
 	@FXML
@@ -420,6 +424,7 @@ public final class VisBView extends BorderPane {
 		this.mainPane.getChildren().add(webView);
 		// Enable WebView-related actions only when the WebView is visible.
 		exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
+		exportSvgItem.disableProperty().bind(this.placeholder.visibleProperty());
 		zoomInButton.disableProperty().bind(this.placeholder.visibleProperty());
 		zoomOutButton.disableProperty().bind(this.placeholder.visibleProperty());
 	}
@@ -691,7 +696,27 @@ public final class VisBView extends BorderPane {
 			} catch (IOException e) {
 				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
 			}
+		}
+	}
 
+	@FXML
+	private void exportSvg() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getSvgFilter());
+		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		exportSvgWithPath(path);
+	}
+
+	public void exportSvgWithPath(Path path) {
+		if (path != null) {
+			try {
+				String svgContent = (String) webView.getEngine().executeScript(
+						"new XMLSerializer().serializeToString(document.getElementById('visb_html_svg_content'))");
+				Files.writeString(path, svgContent, StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (Exception e) {
+				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
+			}
 		}
 	}
 
