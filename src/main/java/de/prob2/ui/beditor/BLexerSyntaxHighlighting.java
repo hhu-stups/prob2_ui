@@ -220,6 +220,7 @@ import de.be4.classicalb.core.parser.node.TVariant;
 import de.be4.classicalb.core.parser.node.TWhen;
 import de.be4.classicalb.core.parser.node.TWhere;
 import de.be4.classicalb.core.parser.node.TWhile;
+import de.be4.classicalb.core.parser.node.TWitnessKw;
 import de.be4.classicalb.core.parser.node.Token;
 import de.be4.classicalb.core.parser.util.Utils;
 
@@ -301,7 +302,7 @@ public final class BLexerSyntaxHighlighting {
 			TMultilineTemplateStart.class, TMultilineTemplateContent.class, TMultilineTemplateEnd.class);
 		addBTokens("editor_unsupported", TUnrecognisedPragma.class);
 		addBTokens("editor_ctrlkeyword", TLet.class, TBe.class,
-			TVar.class, TIn.class, TAny.class, TWhile.class,
+			TVar.class, TIn.class, TAny.class, TWhile.class, TWitnessKw.class,
 			TDo.class, TVariant.class, TElsif.class, TIf.class, TThen.class, TElse.class, TEither.class,
 			TCase.class, TSelect.class, TAssert.class, TWhen.class, TPre.class, TBegin.class,
 			TChoice.class, TOr.class,
