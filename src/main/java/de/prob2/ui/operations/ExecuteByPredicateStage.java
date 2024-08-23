@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -220,18 +221,18 @@ public final class ExecuteByPredicateStage extends Stage {
 
 	private String buildInnerPredicate() {
 		StringBuilder predicate = new StringBuilder();
-		predicate.append("(");
 
 		String opName = this.getItem().getName();
-		final AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();
+		AbstractElement mainComponent = currentTrace.getStateSpace().getMainComponent();
 		switch (opName) {
 			case Transition.SETUP_CONSTANTS_NAME:
-				// FIXME Doesn't work for properties/axioms outside the main machine
-				// FIXME getAxioms doesn't work for .eventb files, only Rodin projects
-				ModelElementList<? extends Axiom> properties = ((ConstantsComponent)mainComponent).getAxioms();
-				if(!properties.isEmpty()) {
-					predicate.append(properties.stream().map(prop -> "(" + prop.toString() + ")").collect(Collectors.joining(" & ")));
-					predicate.append(" & ");
+				if (mainComponent instanceof ConstantsComponent cc) {
+					// FIXME: Doesn't work for properties/axioms outside the main machine
+					// FIXME: getAxioms doesn't work for .eventb files, only Rodin projects
+					ModelElementList<? extends Axiom> properties = cc.getAxioms();
+					if (!properties.isEmpty()) {
+						predicate.append(properties.stream().map(prop -> "(" + prop.toString() + ")").collect(Collectors.joining(" & ")));
+					}
 				}
 				break;
 			case Transition.INITIALISE_MACHINE_NAME:
@@ -239,27 +240,37 @@ public final class ExecuteByPredicateStage extends Stage {
 				break;
 			default:
 				// TODO: Implement visualization with before/after predicate
-				BEvent operation = ((Machine)mainComponent).getEvent(opName);
-				// FIXME getChildrenOfType doesn't work for .eventb files, only Rodin projects
-				ModelElementList<Guard> guards = operation.getChildrenOfType(Guard.class);
-				if(!guards.isEmpty()) {
-					predicate.append(guards.stream().map(guard -> "(" + guard.toString() + ")").collect(Collectors.joining(" & ")));
-					predicate.append(" & ");
+				if (mainComponent instanceof Machine m) {
+					BEvent operation = m.getEvent(opName);
+					if (operation != null) {
+						// FIXME: getChildrenOfType doesn't work for .eventb files, only Rodin projects
+						// TODO: does this handle ANY blocks correctly?
+						ModelElementList<Guard> guards = operation.getChildrenOfType(Guard.class);
+						if (!guards.isEmpty()) {
+							predicate.append(guards.stream().map(guard -> "(" + guard.toString() + ")").collect(Collectors.joining(" & ")));
+						}
+					}
 				}
 				break;
 		}
-		predicate.append(lastFailedPredicate);
-		predicate.append(")");
+		if (!Strings.isNullOrEmpty(lastFailedPredicate) && !"1=1".equals(lastFailedPredicate)) {
+			if (!predicate.isEmpty()) {
+				predicate.append(" & ");
+			}
+			predicate.append(lastFailedPredicate);
+		}
+
 		return predicate.toString();
 	}
 
 	private String buildFreeVariables() {
-		String opName = this.getItem().getName();
 		StringBuilder freeVariables = new StringBuilder();
+
+		String opName = this.getItem().getName();
 		switch (opName) {
 			case Transition.SETUP_CONSTANTS_NAME:
 				final Set<String> constantNames = this.getItem().getConstants().keySet();
-				if(!constantNames.isEmpty()) {
+				if (!constantNames.isEmpty()) {
 					freeVariables.append("#");
 					freeVariables.append(String.join(", ", constantNames));
 					freeVariables.append(".");
@@ -270,19 +281,30 @@ public final class ExecuteByPredicateStage extends Stage {
 				break;
 			default:
 				// TODO: Implement visualization with before/after predicate -> also add some variables
+				// TODO: does this handle ANY blocks correctly?
 				List<String> parameterNames = this.getItem().getParameterNames();
-				if(!parameterNames.isEmpty()) {
+				if (!parameterNames.isEmpty()) {
 					freeVariables.append("#");
 					freeVariables.append(String.join(", ", parameterNames));
 					freeVariables.append(".");
 				}
 				break;
 		}
+
 		return freeVariables.toString();
 	}
 
 	private String buildVisualizationPredicate() {
-		return buildFreeVariables() + buildInnerPredicate();
-	}
+		String quantifier = buildFreeVariables();
+		String inner = buildInnerPredicate();
+		if (inner.isEmpty()) {
+			inner = "1=1";
+		}
 
+		if (quantifier.isEmpty()) {
+			return inner;
+		} else {
+			return quantifier + "(" + inner + ")";
+		}
+	}
 }
