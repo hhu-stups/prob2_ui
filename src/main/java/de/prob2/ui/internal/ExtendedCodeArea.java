@@ -313,16 +313,14 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	protected StyleSpans<Collection<String>> addErrorHighlighting(StyleSpans<Collection<String>> highlighting) {
 		for (ErrorItem error : this.getErrors()) {
 			for (ErrorItem.Location location : error.getLocations()) {
-				if (error.getType() == null) {
-					continue;
-				}
-
 				int startIndex = this.errorLocationAbsoluteStart(location);
 				int endIndex = this.errorLocationAbsoluteEnd(location);
 				if (endIndex > startIndex) {
-					String errorStyleClass = ERROR_STYLE_CLASSES.get(error.getType());
-					if (errorStyleClass == null) {
+					String errorStyleClass;
+					if (error.getType() == null) {
 						errorStyleClass = "message";
+					} else {
+						errorStyleClass = ERROR_STYLE_CLASSES.getOrDefault(error.getType(), "message");
 					}
 
 					highlighting = highlighting.overlay(
