@@ -56,6 +56,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedCodeArea.class);
 	protected static final Map<ErrorItem.Type, String> ERROR_STYLE_CLASSES = Map.of(
+			ErrorItem.Type.MESSAGE, "message",
 			ErrorItem.Type.WARNING, "warning",
 			ErrorItem.Type.ERROR, "error",
 			ErrorItem.Type.INTERNAL_ERROR, "error"
@@ -312,13 +313,22 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	protected StyleSpans<Collection<String>> addErrorHighlighting(StyleSpans<Collection<String>> highlighting) {
 		for (ErrorItem error : this.getErrors()) {
 			for (ErrorItem.Location location : error.getLocations()) {
+				if (error.getType() == null) {
+					continue;
+				}
+
 				int startIndex = this.errorLocationAbsoluteStart(location);
 				int endIndex = this.errorLocationAbsoluteEnd(location);
 				if (endIndex > startIndex) {
+					String errorStyleClass = ERROR_STYLE_CLASSES.get(error.getType());
+					if (errorStyleClass == null) {
+						errorStyleClass = "message";
+					}
+
 					highlighting = highlighting.overlay(
 						new StyleSpansBuilder<Collection<String>>()
 								.add(Set.of(), startIndex)
-								.add(Set.of("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
+								.add(Set.of("problem", errorStyleClass), endIndex - startIndex)
 							.create(),
 							ExtendedCodeArea::combineStyleSpans
 					);

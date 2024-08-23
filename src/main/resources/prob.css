@@ -585,6 +585,10 @@
 	-rtfx-underline-dash-array: 3px;
 }
 
+.editor .problem.message {
+	-rtfx-underline-color: gray;
+}
+
 .editor .problem.warning {
 	-rtfx-underline-color: gold;
 }
