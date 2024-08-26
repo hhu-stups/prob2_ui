@@ -712,8 +712,8 @@ public final class VisBView extends BorderPane {
 		if (path != null) {
 			try {
 				String svgContent = (String) webView.getEngine().executeScript(
-						"new XMLSerializer().serializeToString(document.getElementById('visb_html_svg_content'))");
-				Files.writeString(path, svgContent, StandardOpenOption.TRUNCATE_EXISTING);
+						"new XMLSerializer().serializeToString(document.getElementById('visb_html_svg_content').firstElementChild)");
+				Files.writeString(path, svgContent, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
 			} catch (Exception e) {
 				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
 			}
