@@ -315,12 +315,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 				int startIndex = this.errorLocationAbsoluteStart(location);
 				int endIndex = this.errorLocationAbsoluteEnd(location);
 				if (endIndex > startIndex) {
-					String errorStyleClass;
-					if (error.getType() == null) {
-						errorStyleClass = "message";
-					} else {
-						errorStyleClass = ERROR_STYLE_CLASSES.getOrDefault(error.getType(), "message");
-					}
+					String errorStyleClass = ERROR_STYLE_CLASSES.getOrDefault(error.getType(), "message");
 
 					highlighting = highlighting.overlay(
 						new StyleSpansBuilder<Collection<String>>()
