@@ -18,6 +18,7 @@ import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -105,7 +106,7 @@ public final class ValidationObligation {
 		this.parse(machine.getValidationTasksById());
 	}
 
-	public ObjectProperty<CheckingStatus> statusProperty() {
+	public ReadOnlyObjectProperty<CheckingStatus> statusProperty() {
 		return status;
 	}
 
