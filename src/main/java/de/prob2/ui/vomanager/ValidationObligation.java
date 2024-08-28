@@ -92,9 +92,7 @@ public final class ValidationObligation {
 
 	public void parse(Map<String, IValidationTask> tasksInScopeById) {
 		try {
-			final IValidationExpression parsed = IValidationExpression.parse(this.getExpression());
-			parsed.resolveTaskIds(tasksInScopeById);
-			this.setParsedExpression(parsed);
+			this.setParsedExpression(IValidationExpression.fromString(this.getExpression(), tasksInScopeById));
 		} catch (VOParseException e) {
 			this.setParsedExpression(null);
 			throw e;

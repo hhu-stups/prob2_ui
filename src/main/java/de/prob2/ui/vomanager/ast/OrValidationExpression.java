@@ -20,10 +20,10 @@ public final class OrValidationExpression implements IValidationExpression {
 		this.right = right;
 	}
 	
-	public static OrValidationExpression fromAst(final AOrVo ast) {
+	public static OrValidationExpression fromAst(AOrVo ast, Map<String, IValidationTask> tasksInScopeById) {
 		return new OrValidationExpression(
-			IValidationExpression.fromAst(ast.getLeft()),
-			IValidationExpression.fromAst(ast.getRight())
+			IValidationExpression.fromAst(ast.getLeft(), tasksInScopeById),
+			IValidationExpression.fromAst(ast.getRight(), tasksInScopeById)
 		);
 	}
 	
@@ -38,12 +38,6 @@ public final class OrValidationExpression implements IValidationExpression {
 	@Override
 	public Stream<? extends IValidationExpression> getChildren() {
 		return Stream.of(this.getLeft(), this.getRight());
-	}
-	
-	@Override
-	public void resolveTaskIds(Map<String, IValidationTask> tasksInScopeById) {
-		this.getLeft().resolveTaskIds(tasksInScopeById);
-		this.getRight().resolveTaskIds(tasksInScopeById);
 	}
 	
 	@Override

@@ -20,10 +20,10 @@ public final class AndValidationExpression implements IValidationExpression {
 		this.right = right;
 	}
 	
-	public static AndValidationExpression fromAst(final AAndVo ast) {
+	public static AndValidationExpression fromAst(AAndVo ast, Map<String, IValidationTask> tasksInScopeById) {
 		return new AndValidationExpression(
-			IValidationExpression.fromAst(ast.getLeft()),
-			IValidationExpression.fromAst(ast.getRight())
+			IValidationExpression.fromAst(ast.getLeft(), tasksInScopeById),
+			IValidationExpression.fromAst(ast.getRight(), tasksInScopeById)
 		);
 	}
 	
@@ -38,12 +38,6 @@ public final class AndValidationExpression implements IValidationExpression {
 	@Override
 	public Stream<? extends IValidationExpression> getChildren() {
 		return Stream.of(this.getLeft(), this.getRight());
-	}
-	
-	@Override
-	public void resolveTaskIds(Map<String, IValidationTask> tasksInScopeById) {
-		this.getLeft().resolveTaskIds(tasksInScopeById);
-		this.getRight().resolveTaskIds(tasksInScopeById);
 	}
 	
 	@Override

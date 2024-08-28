@@ -123,13 +123,12 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 			case FROM_EXPRESSION -> {
 				IValidationExpression expr;
 				try {
-					expr = IValidationExpression.parse(this.getStartStateExpression());
+					expr = IValidationExpression.fromString(this.getStartStateExpression(), context.machine().getValidationTasksById());
 				} catch (VOParseException exc) {
 					LOGGER.error("Parse error in temporal checking start state validation expression", exc);
 					this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "common.result.validationExpressionParseError", exc.getMessage()));
 					yield CompletableFuture.completedFuture(null);
 				}
-				expr.resolveTaskIds(context.machine().getValidationTasksById());
 
 				yield expr.check(executors, context).thenCompose(res -> {
 					Trace trace = expr.getTrace();

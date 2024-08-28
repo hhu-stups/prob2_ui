@@ -16,20 +16,20 @@ import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.IValidationTask;
 
 public interface IValidationExpression {
-	static IValidationExpression fromAst(final PVo ast) {
+	static IValidationExpression fromAst(PVo ast, Map<String, IValidationTask> tasksInScopeById) {
 		if (ast instanceof AIdentifierVo) {
-			return ValidationTaskExpression.fromAst((AIdentifierVo)ast);
+			return ValidationTaskExpression.fromAst((AIdentifierVo)ast, tasksInScopeById);
 		} else if (ast instanceof AAndVo) {
-			return AndValidationExpression.fromAst((AAndVo)ast);
+			return AndValidationExpression.fromAst((AAndVo)ast, tasksInScopeById);
 		} else if (ast instanceof AOrVo) {
-			return OrValidationExpression.fromAst((AOrVo)ast);
+			return OrValidationExpression.fromAst((AOrVo)ast, tasksInScopeById);
 		} else {
 			throw new IllegalArgumentException("Unhandled VO expression type: " + ast.getClass());
 		}
 	}
 	
-	static IValidationExpression parse(final String expression) {
-		return fromAst(VOParser.parse(expression).getPVo());
+	static IValidationExpression fromString(String expression, Map<String, IValidationTask> tasksInScopeById) {
+		return IValidationExpression.fromAst(VOParser.parse(expression).getPVo(), tasksInScopeById);
 	}
 	
 	Stream<? extends IValidationExpression> getChildren();
@@ -37,8 +37,6 @@ public interface IValidationExpression {
 	default Stream<ValidationTaskExpression> getAllTasks() {
 		return this.getChildren().flatMap(IValidationExpression::getAllTasks);
 	}
-	
-	void resolveTaskIds(Map<String, IValidationTask> tasksInScopeById);
 	
 	CheckingStatus getStatus();
 	
