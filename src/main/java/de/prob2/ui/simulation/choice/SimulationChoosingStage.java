@@ -58,11 +58,7 @@ public final class SimulationChoosingStage extends Stage {
 
 	private SimulationModel simulation;
 
-	private SimulationItem lastItem;
-
-	private boolean isModifying;
-
-	private SimulationItem modifyingItem;
+	private SimulationItem result;
 
 	@Inject
 	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode) {
@@ -70,8 +66,6 @@ public final class SimulationChoosingStage extends Stage {
 		this.stageManager = stageManager;
 		this.simulationItemHandler = simulationItemHandler;
 		this.simulationMode = simulationMode;
-		this.isModifying = false;
-		this.modifyingItem = null;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "simulation_choice.fxml");
 	}
@@ -92,27 +86,14 @@ public final class SimulationChoosingStage extends Stage {
 
 	private void setCheckListeners() {
 		btApply.setOnAction(e -> {
-			lastItem = null;
+			result = null;
 			boolean validChoice = checkSelection();
 			if (!validChoice) {
 				showInvalidSelection();
 				return;
 			}
-			final SimulationItem newItem = this.extractItem(simulation);
-			if(isModifying) {
-				modifyingItem.reset();
-				modifyingItem.setSimulationType(newItem.getType());
-				modifyingItem.setInformation(newItem.getInformation());
-				lastItem = modifyingItem;
-			} else {
-				lastItem = this.simulationItemHandler.addItem(newItem);
-			}
-
+			result = this.extractItem(simulation);
 			this.close();
-
-			if(!isModifying) {
-				this.simulationItemHandler.checkItem(lastItem);
-			}
 		});
 	}
 
@@ -232,19 +213,8 @@ public final class SimulationChoosingStage extends Stage {
 		simulationHypothesisChoice.reset();
 	}
 
-	public SimulationItem getLastItem() {
-		return lastItem;
-	}
-
-	public boolean isModifying() {
-		return isModifying;
-	}
-
-	public void setModifying(boolean modifying, SimulationItem item) {
-		isModifying = modifying;
-		if(modifying) {
-			this.modifyingItem = item;
-		}
+	public SimulationItem getResult() {
+		return result;
 	}
 
 	public void setSimulation(SimulationModel simulation) {

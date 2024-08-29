@@ -646,17 +646,21 @@ public final class SimulatorStage extends Stage {
 	public void addSimulation() {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
-		choosingStage.setModifying(false, null);
 		choosingStage.showAndWait();
+		SimulationItem toCheck = this.simulationItemHandler.addItem(choosingStage.getResult());
 		simulationItems.refresh();
+		simulationItemHandler.checkItem(toCheck);
 	}
 
 	public void editSimulation(SimulationItem item) {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
 		choosingStage.setData(item);
-		choosingStage.setModifying(true, item);
 		choosingStage.showAndWait();
+		SimulationItem editedItem = choosingStage.getResult();
+		item.reset();
+		item.setSimulationType(editedItem.getType());
+		item.setInformation(editedItem.getInformation());
 		simulationItems.refresh();
 	}
 
