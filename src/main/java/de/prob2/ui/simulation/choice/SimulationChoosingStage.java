@@ -14,7 +14,6 @@ import de.prob2.ui.simulation.table.SimulationItem;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -22,9 +21,6 @@ import javafx.stage.Stage;
 
 @Singleton
 public final class SimulationChoosingStage extends Stage {
-	@FXML
-	private Button btApply;
-
 	@FXML
 	private SimulationMonteCarloChoice simulationMonteCarloChoice;
 
@@ -67,7 +63,6 @@ public final class SimulationChoosingStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		setCheckListeners();
 		simulationConditionChoice.simulationChoice().getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateGUI());
 		simulationConditionChoice.simulationChoice().setConverter(i18n.translateConverter());
 		simulationPropertyChoice.setChoosingStage(this);
@@ -79,17 +74,16 @@ public final class SimulationChoosingStage extends Stage {
 		this.sizeToScene();
 	}
 
-	private void setCheckListeners() {
-		btApply.setOnAction(e -> {
-			result = null;
-			boolean validChoice = checkSelection();
-			if (!validChoice) {
-				showInvalidSelection();
-				return;
-			}
-			result = this.extractItem(simulation);
-			this.close();
-		});
+	@FXML
+	private void apply() {
+		result = null;
+		boolean validChoice = checkSelection();
+		if (!validChoice) {
+			showInvalidSelection();
+			return;
+		}
+		result = this.extractItem(simulation);
+		this.close();
 	}
 
 	private boolean checkSelection() {
