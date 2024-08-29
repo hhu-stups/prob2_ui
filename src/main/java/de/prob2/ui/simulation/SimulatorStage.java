@@ -178,8 +178,7 @@ public final class SimulatorStage extends Stage {
 				menuItems.add(showStatistics);
 
 				MenuItem saveTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTraces"));
-				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
-					Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
+				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
 				saveTraces.setOnAction(e -> {
 					if (currentTrace.get() != null) {
 						traceFileHandler.save(item, currentProject.getCurrentMachine());
@@ -188,8 +187,7 @@ public final class SimulatorStage extends Stage {
 				menuItems.add(saveTraces);
 
 				MenuItem saveTimedTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTimedTraces"));
-				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
-					Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
+				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
 				saveTimedTraces.setOnAction(e -> {
 					SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
 					simulationSaver.saveConfigurations(item);
