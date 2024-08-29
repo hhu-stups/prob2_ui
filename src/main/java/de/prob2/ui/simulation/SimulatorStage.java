@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
@@ -732,13 +732,13 @@ public final class SimulatorStage extends Stage {
 	public void loadSimulationIntoSimulator(SimulationModel simulation) {
 		configurationPath.set(simulation == null ? null :
 				simulation.getPath().equals(Paths.get("")) ? simulation.getPath() : currentProject.getLocation().resolve(simulation.getPath()));
-		LoadedMachine loadedMachine = currentTrace.getStateSpace() == null ? null : currentTrace.getStateSpace().getLoadedMachine();
-		if (simulation != null && loadedMachine != null) {
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		if (simulation != null && stateSpace != null) {
 			simulationItemHandler.setPath(configurationPath.get());
 			lbTime.setText("");
 			this.time = 0;
 			simulationItemHandler.reset(simulation);
-			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, loadedMachine, configurationPath.get());
+			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, stateSpace.getLoadedMachine(), configurationPath.get());
 			simulationItemHandler.setSimulationModelConfiguration(realTimeSimulator.getConfig());
 			loadSimulationItems();
 		}
