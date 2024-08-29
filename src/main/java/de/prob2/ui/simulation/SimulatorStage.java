@@ -188,10 +188,7 @@ public final class SimulatorStage extends Stage {
 
 				MenuItem saveTimedTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTimedTraces"));
 				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
-				saveTimedTraces.setOnAction(e -> {
-					SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
-					simulationSaver.saveConfigurations(item);
-				});
+				saveTimedTraces.setOnAction(e -> simulationSaver.saveConfigurations(item));
 				menuItems.add(saveTimedTraces);
 
 				contextMenu.getItems().addAll(menuItems);
@@ -796,7 +793,7 @@ public final class SimulatorStage extends Stage {
 			savedProperty.set(true);
 			simulationSaver.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
 		} catch (IOException ex) {
-			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+			stageManager.makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
 	}
 
@@ -832,7 +829,7 @@ public final class SimulatorStage extends Stage {
 				cbSimulation.getSelectionModel().selectLast();
 			}
 		} catch (IOException ex) {
-			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+			stageManager.makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
 	}
 
@@ -872,7 +869,7 @@ public final class SimulatorStage extends Stage {
 		try {
 			injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
 		} catch (IOException exception) {
-			injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.error").showAndWait();
+			stageManager.makeExceptionAlert(exception, "simulation.save.error").showAndWait();
 		}
 	}
 
@@ -881,7 +878,7 @@ public final class SimulatorStage extends Stage {
 		try {
 			injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
 		} catch (IOException exception) {
-			injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
+			stageManager.makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
 		}
 	}
 
