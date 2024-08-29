@@ -126,7 +126,7 @@ public final class SimulatorStage extends Stage {
 				editItem.setOnAction(e -> editSimulation(this.getItem()));
 
 				MenuItem removeItem = new MenuItem(i18n.translate("simulation.contextMenu.remove"));
-				removeItem.setOnAction(e -> simulationItemHandler.removeItem(this.getItem()));
+				removeItem.setOnAction(e -> currentProject.getCurrentMachine().removeValidationTask(this.getItem()));
 
 				menuItems.add(checkItem);
 				menuItems.add(editItem);
@@ -145,7 +145,7 @@ public final class SimulatorStage extends Stage {
 						menuItem.setOnAction(e -> {
 							ISimulationModelConfiguration config = realTimeSimulator.getConfig();
 							int size = item.getInformation().get("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) config).getTimedTraces().size() : (int) item.getInformation().get("EXECUTIONS");
-							simulationItemHandler.addItem(item.withSimulationPath(size, targetModel.getPath()));
+							currentProject.getCurrentMachine().addValidationTaskIfNotExist(item.withSimulationPath(size, targetModel.getPath()));
 						});
 						copyMenu.getItems().add(menuItem);
 					}
@@ -647,7 +647,7 @@ public final class SimulatorStage extends Stage {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
 		choosingStage.showAndWait();
-		SimulationItem toCheck = this.simulationItemHandler.addItem(choosingStage.getResult());
+		SimulationItem toCheck = currentProject.getCurrentMachine().addValidationTaskIfNotExist(choosingStage.getResult());
 		simulationItems.refresh();
 		simulationItemHandler.checkItem(toCheck);
 	}

@@ -72,14 +72,6 @@ public final class SimulationItemHandler {
 		this.getSimulationItems(simulationModel).forEach(SimulationItem::reset);
 	}
 
-	public SimulationItem addItem(SimulationItem newItem) {
-		return this.currentProject.getCurrentMachine().addValidationTaskIfNotExist(newItem);
-	}
-
-	public void removeItem(SimulationItem item) {
-		this.currentProject.getCurrentMachine().removeValidationTask(item);
-	}
-
 	private Map<String, Object> extractAdditionalInformation(SimulationItem item) {
 		Map<String, Object> additionalInformation = new HashMap<>();
 
