@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.choice;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,7 +8,6 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.SimulationMode;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -52,8 +50,6 @@ public final class SimulationChoosingStage extends Stage {
 
 	private final StageManager stageManager;
 
-	private final SimulationItemHandler simulationItemHandler;
-
 	private final SimulationMode simulationMode;
 
 	private SimulationModel simulation;
@@ -61,10 +57,9 @@ public final class SimulationChoosingStage extends Stage {
 	private SimulationItem result;
 
 	@Inject
-	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode) {
+	private SimulationChoosingStage(I18n i18n, StageManager stageManager, SimulationMode simulationMode) {
 		this.i18n = i18n;
 		this.stageManager = stageManager;
-		this.simulationItemHandler = simulationItemHandler;
 		this.simulationMode = simulationMode;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "simulation_choice.fxml");
@@ -189,10 +184,6 @@ public final class SimulationChoosingStage extends Stage {
 	@FXML
 	public void cancel() {
 		this.close();
-	}
-
-	public void setPath(Path path) {
-		simulationItemHandler.setPath(path);
 	}
 
 	public void setData(SimulationItem item) {

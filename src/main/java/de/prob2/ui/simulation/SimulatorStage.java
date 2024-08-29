@@ -734,7 +734,7 @@ public final class SimulatorStage extends Stage {
 				simulation.getPath().equals(Paths.get("")) ? simulation.getPath() : currentProject.getLocation().resolve(simulation.getPath()));
 		LoadedMachine loadedMachine = currentTrace.getStateSpace() == null ? null : currentTrace.getStateSpace().getLoadedMachine();
 		if (simulation != null && loadedMachine != null) {
-			injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
+			simulationItemHandler.setPath(configurationPath.get());
 			lbTime.setText("");
 			this.time = 0;
 			simulationItemHandler.reset(simulation);
