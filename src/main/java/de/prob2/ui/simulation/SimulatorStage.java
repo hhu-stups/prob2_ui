@@ -652,15 +652,13 @@ public final class SimulatorStage extends Stage {
 		simulationItemHandler.checkItem(toCheck);
 	}
 
-	public void editSimulation(SimulationItem item) {
+	public void editSimulation(SimulationItem oldItem) {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
-		choosingStage.setData(item);
+		choosingStage.setData(oldItem);
 		choosingStage.showAndWait();
-		SimulationItem editedItem = choosingStage.getResult();
-		item.reset();
-		item.setSimulationType(editedItem.getType());
-		item.setInformation(editedItem.getInformation());
+		SimulationItem newItem = choosingStage.getResult();
+		currentProject.getCurrentMachine().replaceValidationTask(oldItem, newItem);
 		simulationItems.refresh();
 	}
 

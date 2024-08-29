@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.table;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -44,10 +45,11 @@ import javafx.collections.FXCollections;
 })
 public final class SimulationItem implements ITraceTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String id;
+	private final String id;
 	private final Path simulationPath;
-	private SimulationType type;
-	private Map<String, Object> information;
+	private final SimulationType type;
+	private final Map<String, Object> information;
+
 	@JsonIgnore
 	private ObjectProperty<CheckingStatus> status;
 	@JsonIgnore
@@ -124,7 +126,7 @@ public final class SimulationItem implements ITraceTask {
 	}
 
 	public Map<String, Object> getInformation() {
-		return information;
+		return Collections.unmodifiableMap(information);
 	}
 
 	public boolean containsField(String key) {
@@ -203,21 +205,6 @@ public final class SimulationItem implements ITraceTask {
 	@JsonIgnore
 	public void setSimulationStats(SimulationStats simulationStats) {
 		this.simulationStats = simulationStats;
-	}
-
-	@JsonIgnore
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	@JsonIgnore
-	public void setSimulationType(SimulationType type) {
-		this.type = type;
-	}
-
-	@JsonIgnore
-	public void setInformation(Map<String, Object> information) {
-		this.information = information;
 	}
 
 	public String createdByForMetadata() {
