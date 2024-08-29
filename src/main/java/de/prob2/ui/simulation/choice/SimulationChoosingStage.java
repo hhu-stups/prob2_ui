@@ -183,6 +183,7 @@ public final class SimulationChoosingStage extends Stage {
 
 	@FXML
 	public void cancel() {
+		this.result = null;
 		this.close();
 	}
 

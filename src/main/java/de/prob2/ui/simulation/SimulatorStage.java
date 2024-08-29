@@ -647,9 +647,12 @@ public final class SimulatorStage extends Stage {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
 		choosingStage.showAndWait();
-		SimulationItem toCheck = currentProject.getCurrentMachine().addValidationTaskIfNotExist(choosingStage.getResult());
-		simulationItems.refresh();
-		simulationItemHandler.checkItem(toCheck);
+		SimulationItem newItem = choosingStage.getResult();
+		if (newItem != null) {
+			SimulationItem toCheck = currentProject.getCurrentMachine().addValidationTaskIfNotExist(newItem);
+			simulationItems.refresh();
+			simulationItemHandler.checkItem(toCheck);
+		}
 	}
 
 	public void editSimulation(SimulationItem oldItem) {
@@ -658,8 +661,10 @@ public final class SimulatorStage extends Stage {
 		choosingStage.setData(oldItem);
 		choosingStage.showAndWait();
 		SimulationItem newItem = choosingStage.getResult();
-		currentProject.getCurrentMachine().replaceValidationTask(oldItem, newItem);
-		simulationItems.refresh();
+		if (newItem != null) {
+			currentProject.getCurrentMachine().replaceValidationTask(oldItem, newItem);
+			simulationItems.refresh();
+		}
 	}
 
 	private void startTimer(RealTimeSimulator realTimeSimulator) {
