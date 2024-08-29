@@ -51,35 +51,32 @@ public final class SimulationItem implements ITraceTask {
 	private final Map<String, Object> information;
 
 	@JsonIgnore
-	private ObjectProperty<CheckingStatus> status;
+	private final ObjectProperty<CheckingStatus> status;
 	@JsonIgnore
 	private SimulationStats simulationStats;
 	@JsonIgnore
-	private ListProperty<Trace> traces;
+	private final ListProperty<Trace> traces;
 	@JsonIgnore
-	private ListProperty<List<Integer>> timestamps;
+	private final ListProperty<List<Integer>> timestamps;
 	@JsonIgnore
-	private ListProperty<CheckingStatus> statuses;
+	private final ListProperty<CheckingStatus> statuses;
 
 	public SimulationItem(String id, Path simulationPath, SimulationType type, Map<String, Object> information) {
 		this.id = id;
 		this.simulationPath = Objects.requireNonNull(simulationPath, "simulationPath");
 		this.type = Objects.requireNonNull(type, "type");
 		this.information = Objects.requireNonNull(information, "information");
-		initListeners();
+
+		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
+		this.simulationStats = null;
+		this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
+		this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
+		this.statuses = new SimpleListProperty<>(FXCollections.observableArrayList());
 	}
 
 	@JsonCreator
 	private SimulationItem(@JsonProperty("id") String id, @JsonProperty("simulationPath") Path simulationPath, @JsonProperty("type") SimulationType type, @JsonProperty("information") SimulationCheckingInformation information) {
 		this(id, simulationPath, type, information.getInformation());
-	}
-
-	private void initListeners() {
-		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
-		this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.statuses = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.simulationStats = null;
 	}
 
 	@Override
