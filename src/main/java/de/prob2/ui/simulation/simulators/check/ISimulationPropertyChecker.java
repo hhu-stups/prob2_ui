@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.prob.statespace.Trace;
+import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.CheckingStatus;
 
 public interface ISimulationPropertyChecker {
@@ -21,4 +22,14 @@ public interface ISimulationPropertyChecker {
 	CheckingStatus checkTrace(Trace trace, int time);
 	void calculateStatistics(long time);
 	Map<String, List<Integer>> getOperationExecutions();
+
+	default SimulationItem.Result getSimulationResult() {
+		return new SimulationItem.Result(
+			this.getResult(),
+			this.getResultingTraces(),
+			this.getResultingTimestamps(),
+			this.getResultingStatus(),
+			this.getStats()
+		);
+	}
 }

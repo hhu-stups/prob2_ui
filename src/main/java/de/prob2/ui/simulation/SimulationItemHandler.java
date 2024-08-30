@@ -95,21 +95,10 @@ public final class SimulationItemHandler {
 		return additionalInformation;
 	}
 
-	private static void setResult(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
-		// TODO The creation of the SimulationItem.Result could be moved into ISimulationPropertyChecker or its implementations
-		Platform.runLater(() -> item.setResult(new SimulationItem.Result(
-			simulationPropertyChecker.getResult(),
-			simulationPropertyChecker.getResultingTraces(),
-			simulationPropertyChecker.getResultingTimestamps(),
-			simulationPropertyChecker.getResultingStatus(),
-			simulationPropertyChecker.getStats()
-		)));
-	}
-
 	private void runAndCheck(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
 		Thread thread = new Thread(() -> {
 			simulationPropertyChecker.run();
-			setResult(item, simulationPropertyChecker);
+			Platform.runLater(() -> item.setResult(simulationPropertyChecker.getSimulationResult()));
 			currentJobThreads.remove(Thread.currentThread());
 		});
 		currentJobThreads.add(thread);
