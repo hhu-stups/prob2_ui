@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -41,26 +42,12 @@ import javafx.stage.Stage;
 public final class SimulationTracesView extends Stage {
 	public static final class SimulationTraceItem {
 		private final SimulationItem parent;
-
-		private final Trace trace;
-
-		private final List<Integer> timestamps;
-
-		private final CheckingStatus status;
-
-		private final int traceLength;
-
-		private final double estimatedValue;
-
+		private final SimulationItem.Result result;
 		private final int index;
 
-		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, CheckingStatus status, int traceLength, double estimatedValue, int index) {
-			this.parent = parent;
-			this.trace = trace;
-			this.timestamps = timestamps;
-			this.status = status;
-			this.traceLength = traceLength;
-			this.estimatedValue = estimatedValue;
+		public SimulationTraceItem(SimulationItem parent, SimulationItem.Result result, int index) {
+			this.parent = Objects.requireNonNull(parent, "parent");
+			this.result = Objects.requireNonNull(result, "result");
 			this.index = index;
 		}
 
@@ -69,28 +56,33 @@ public final class SimulationTracesView extends Stage {
 		}
 
 		public Trace getTrace() {
-			return trace;
+			return this.result.getTrace();
 		}
 
 		public List<Integer> getTimestamps() {
-			return timestamps;
+			return this.result.getTimestamps().get(this.getIndex());
 		}
 
 		public int getIndex() {
 			return index;
 		}
 
+		public int getDisplayedIndex() {
+			return this.getIndex() + 1;
+		}
+
 		public CheckingStatus getStatus() {
-			return status;
+			return this.result.getStatus();
 		}
 
 		// Used via PropertyValueFactory
 		public int getTraceLength() {
-			return traceLength;
+			return this.getTrace().size();
 		}
 
 		public double getEstimatedValue() {
-			return estimatedValue;
+			var estimatedValues = this.result.getStats().getEstimatedValues();
+			return estimatedValues.isEmpty() ? 0 : estimatedValues.get(index);
 		}
 	}
 
@@ -132,13 +124,14 @@ public final class SimulationTracesView extends Stage {
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
-	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps, List<CheckingStatus> status, List<Double> estimatedValues) {
+	public void setFromItem(SimulationItem item) {
+		SimulationItem.Result result = (SimulationItem.Result)item.getResult();
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
-		if(!estimatedValues.isEmpty()) {
+		if (!result.getStats().getEstimatedValues().isEmpty()) {
 			estimatedValueColumn.setVisible(true);
 		}
-		for (int i = 0; i < traces.size(); i++) {
-			items.add(new SimulationTraceItem(item, traces.get(i), timestamps.get(i), status.get(i), traces.get(i).size(), estimatedValues.isEmpty() ? 0 : estimatedValues.get(i), i+1));
+		for (int i = 0; i < result.getTraces().size(); i++) {
+			items.add(new SimulationTraceItem(item, result, i));
 		}
 		traceTableView.setItems(items);
 	}
@@ -146,7 +139,7 @@ public final class SimulationTracesView extends Stage {
 	private void initTableColumns() {
 		statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		traceColumn.setCellValueFactory(features -> i18n.translateBinding("simulation.traces.view.name", features.getValue().getIndex()));
+		traceColumn.setCellValueFactory(features -> i18n.translateBinding("simulation.traces.view.name", features.getValue().getDisplayedIndex()));
 		traceLengthColumn.setCellValueFactory(new PropertyValueFactory<>("traceLength"));
 		estimatedValueColumn.setCellValueFactory(new PropertyValueFactory<>("estimatedValue"));
 	}
