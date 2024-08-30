@@ -14,7 +14,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.Translatable;
 import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.table.SimulationItem;
@@ -40,8 +39,7 @@ import javafx.stage.Stage;
 @FXMLInjected
 @Singleton
 public final class SimulationTracesView extends Stage {
-	public static class SimulationTraceItem implements Translatable {
-
+	public static final class SimulationTraceItem {
 		private final SimulationItem parent;
 
 		private final Trace trace;
@@ -93,16 +91,6 @@ public final class SimulationTracesView extends Stage {
 
 		public double getEstimatedValue() {
 			return estimatedValue;
-		}
-
-		@Override
-		public String getTranslationKey() {
-			return "simulation.traces.view.name";
-		}
-
-		@Override
-		public Object[] getTranslationArguments() {
-			return new Object[]{index};
 		}
 	}
 
@@ -158,7 +146,7 @@ public final class SimulationTracesView extends Stage {
 	private void initTableColumns() {
 		statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
 		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		traceColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue()));
+		traceColumn.setCellValueFactory(features -> i18n.translateBinding("simulation.traces.view.name", features.getValue().getIndex()));
 		traceLengthColumn.setCellValueFactory(new PropertyValueFactory<>("traceLength"));
 		estimatedValueColumn.setCellValueFactory(new PropertyValueFactory<>("estimatedValue"));
 	}
