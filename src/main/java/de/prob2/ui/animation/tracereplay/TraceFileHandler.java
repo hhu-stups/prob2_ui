@@ -195,7 +195,7 @@ public final class TraceFileHandler {
 			}
 
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
-			for (Trace trace : item.getTraces()) {
+			for (Trace trace : item.getResult().getTraces()) {
 				final Path traceFilePath = path.resolve("Trace_" + numberGeneratedTraces + ".prob2trace");
 				save(trace, traceFilePath, item.createdByForMetadata());
 				this.addTraceFile(machine, traceFilePath);

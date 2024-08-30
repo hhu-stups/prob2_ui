@@ -26,7 +26,6 @@ import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.CheckingStatus;
 
 import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
@@ -96,26 +95,15 @@ public final class SimulationItemHandler {
 		return additionalInformation;
 	}
 
-	private void setResult(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
-		item.setTraces(simulationPropertyChecker.getResultingTraces());
-		item.setTimestamps(simulationPropertyChecker.getResultingTimestamps());
-		item.setStatuses(simulationPropertyChecker.getResultingStatus());
-		item.setSimulationStats(simulationPropertyChecker.getStats());
-		Platform.runLater(() -> {
-			switch (simulationPropertyChecker.getResult()) {
-				case SUCCESS:
-					item.setStatus(CheckingStatus.SUCCESS);
-					break;
-				case FAIL:
-					item.setStatus(CheckingStatus.FAIL);
-					break;
-				case NOT_FINISHED:
-					item.setStatus(CheckingStatus.NOT_CHECKED);
-					break;
-				default:
-					break;
-			}
-		});
+	private static void setResult(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
+		// TODO The creation of the SimulationItem.Result could be moved into ISimulationPropertyChecker or its implementations
+		Platform.runLater(() -> item.setResult(new SimulationItem.Result(
+			simulationPropertyChecker.getResult(),
+			simulationPropertyChecker.getResultingTraces(),
+			simulationPropertyChecker.getResultingTimestamps(),
+			simulationPropertyChecker.getResultingStatus(),
+			simulationPropertyChecker.getStats()
+		)));
 	}
 
 	private void runAndCheck(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {

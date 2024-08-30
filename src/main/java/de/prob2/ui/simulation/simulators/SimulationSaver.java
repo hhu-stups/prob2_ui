@@ -80,8 +80,9 @@ public final class SimulationSaver {
 	}
 
 	public void saveConfigurations(SimulationItem item) {
-		List<Trace> traces = item.getTraces();
-		List<List<Integer>> timestamps = item.getTimestamps();
+		SimulationItem.Result result = (SimulationItem.Result)item.getResult();
+		List<Trace> traces = result.getTraces();
+		List<List<Integer>> timestamps = result.getTimestamps();
 
 		final DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveTimedPaths.title"));

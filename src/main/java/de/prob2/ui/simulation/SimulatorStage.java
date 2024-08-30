@@ -153,32 +153,51 @@ public final class SimulatorStage extends Stage {
 				}
 				menuItems.add(copyMenu);
 
+				BooleanExpression itemHasNoSimulationResult = Bindings.createBooleanBinding(
+					() -> !(item.getResult() instanceof SimulationItem.Result simulationResult) || simulationResult.getTraces().isEmpty(),
+					item.resultProperty()
+				);
+				// For whatever reason, this does not work properly with map -
+				// the initial state will be incorrect and the context menu options will be enabled from the start,
+				// even though they should be disabled until the items have been executed.
+				//var itemHasNoSimulationResult = item.resultProperty().map(res -> {
+				//	return !(res instanceof SimulationItem.Result simulationResult) || simulationResult.getTraces().isEmpty();
+				//});
+
 				MenuItem showTraces = new MenuItem(i18n.translate("simulation.contextMenu.showTraces"));
-				showTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
+				showTraces.disableProperty().bind(itemHasNoSimulationResult);
 				showTraces.setOnAction(e -> {
-					if (item.getTraces().size() == 1) {
-						currentTrace.set(item.getTraces().get(0));
+					if (!(item.getResult() instanceof SimulationItem.Result simulationResult)) {
+						return;
+					}
+
+					if (simulationResult.getTraces().size() == 1) {
+						currentTrace.set(simulationResult.getTraces().get(0));
 					} else {
 						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
 						SimulationScenarioHandler simulationScenarioHandler = injector.getInstance(SimulationScenarioHandler.class);
 						simulationScenarioHandler.setSimulatorStage(simulatorStage);
-						tracesView.setItems(item, item.getTraces(), item.getTimestamps(), item.getStatuses(), item.getSimulationStats().getEstimatedValues());
+						tracesView.setItems(item, simulationResult.getTraces(), simulationResult.getTimestamps(), simulationResult.getStatuses(), simulationResult.getStats().getEstimatedValues());
 						tracesView.show();
 					}
 				});
 				menuItems.add(showTraces);
 
 				MenuItem showStatistics = new MenuItem(i18n.translate("simulation.contextMenu.showStatistics"));
-				showStatistics.disableProperty().bind(item.tracesProperty().emptyProperty());
+				showStatistics.disableProperty().bind(itemHasNoSimulationResult);
 				showStatistics.setOnAction(e -> {
+					if (!(item.getResult() instanceof SimulationItem.Result simulationResult)) {
+						return;
+					}
+
 					SimulationStatsView statsView = injector.getInstance(SimulationStatsView.class);
-					statsView.setStats(item.getSimulationStats());
+					statsView.setStats(simulationResult.getStats());
 					statsView.show();
 				});
 				menuItems.add(showStatistics);
 
 				MenuItem saveTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTraces"));
-				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
+				saveTraces.disableProperty().bind(itemHasNoSimulationResult);
 				saveTraces.setOnAction(e -> {
 					if (currentTrace.get() != null) {
 						traceFileHandler.save(item, currentProject.getCurrentMachine());
@@ -187,7 +206,7 @@ public final class SimulatorStage extends Stage {
 				menuItems.add(saveTraces);
 
 				MenuItem saveTimedTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTimedTraces"));
-				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
+				saveTimedTraces.disableProperty().bind(itemHasNoSimulationResult);
 				saveTimedTraces.setOnAction(e -> simulationSaver.saveConfigurations(item));
 				menuItems.add(saveTimedTraces);
 
