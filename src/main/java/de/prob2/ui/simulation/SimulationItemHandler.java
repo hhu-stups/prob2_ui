@@ -2,7 +2,6 @@ package de.prob2.ui.simulation;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,9 +10,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
@@ -28,9 +27,6 @@ import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
 
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
@@ -42,22 +38,21 @@ public final class SimulationItemHandler {
 
 	private final StageManager stageManager;
 
+	private final CliTaskExecutor cliExecutor;
+
 	private final Injector injector;
 
 	private Path path;
 
-	private final ListProperty<Thread> currentJobThreads;
-
 	private ISimulationModelConfiguration simulationModelConfiguration;
 
 	@Inject
-	private SimulationItemHandler(final CurrentProject currentProject, final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector, final DisablePropertyController disablePropertyController) {
+	private SimulationItemHandler(CurrentProject currentProject, CurrentTrace currentTrace, StageManager stageManager, CliTaskExecutor cliExecutor, Injector injector) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
+		this.cliExecutor = cliExecutor;
 		this.injector = injector;
-		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
-		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
 	public ObservableList<SimulationItem> getSimulationItems(SimulationModel simulationModel) {
@@ -96,13 +91,10 @@ public final class SimulationItemHandler {
 	}
 
 	private void runAndCheck(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
-		Thread thread = new Thread(() -> {
+		cliExecutor.execute(() -> {
 			simulationPropertyChecker.run();
 			Platform.runLater(() -> item.setResult(simulationPropertyChecker.getSimulationResult()));
-			currentJobThreads.remove(Thread.currentThread());
 		});
-		currentJobThreads.add(thread);
-		thread.start();
 	}
 
 	private void handleMonteCarloSimulation(SimulationItem item) {
@@ -211,35 +203,14 @@ public final class SimulationItemHandler {
 
 	public void handleMachine(SimulationModel simulationModel) {
 		List<SimulationItem> items = this.currentProject.getCurrentMachine().getSimulationTasksByModel(simulationModel);
-		Thread thread = new Thread(() -> {
+		cliExecutor.execute(() -> {
 			for (SimulationItem item : items) {
 				this.checkItem(item);
 				if (Thread.currentThread().isInterrupted()) {
 					break;
 				}
 			}
-			currentJobThreads.remove(Thread.currentThread());
-		}, "Simulation Thread");
-		currentJobThreads.add(thread);
-		thread.start();
-	}
-
-	public void interrupt() {
-		List<Thread> removedThreads = new ArrayList<>();
-		for (Thread thread : currentJobThreads) {
-			thread.interrupt();
-			removedThreads.add(thread);
-		}
-		currentTrace.getStateSpace().sendInterrupt();
-		currentJobThreads.removeAll(removedThreads);
-	}
-
-	public BooleanExpression runningProperty() {
-		return currentJobThreads.emptyProperty().not();
-	}
-
-	public boolean isRunning() {
-		return this.runningProperty().get();
+		});
 	}
 
 	public void setPath(Path path) {

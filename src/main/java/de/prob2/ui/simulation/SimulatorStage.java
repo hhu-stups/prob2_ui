@@ -35,7 +35,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -119,7 +118,7 @@ public final class SimulatorStage extends Stage {
 				List<MenuItem> menuItems = FXCollections.observableArrayList();
 
 				MenuItem checkItem = new MenuItem(i18n.translate("simulation.contextMenu.check"));
-				checkItem.disableProperty().bind(configurationPath.isNull().or(simulationItemHandler.runningProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
+				checkItem.disableProperty().bind(configurationPath.isNull().or(disablePropertyController.disableProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
 				checkItem.setOnAction(e -> simulationItemHandler.checkItem(this.getItem()));
 
 				MenuItem editItem = new MenuItem(i18n.translate("simulation.contextMenu.edit"));
@@ -253,9 +252,6 @@ public final class SimulatorStage extends Stage {
 	private Button btCheckMachine;
 
 	@FXML
-	private InterruptIfRunningButton btCancel;
-
-	@FXML
 	private HelpButton helpButton;
 
 	@FXML
@@ -338,6 +334,8 @@ public final class SimulatorStage extends Stage {
 
 	private final TraceFileHandler traceFileHandler;
 
+	private final DisablePropertyController disablePropertyController;
+
 	private final ObjectProperty<Path> configurationPath;
 
 	private final BooleanProperty savedProperty;
@@ -361,6 +359,7 @@ public final class SimulatorStage extends Stage {
 		final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
 		final I18n i18n, final FileChooserManager fileChooserManager,
 		final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
+		final DisablePropertyController disablePropertyController,
 		final StopActions stopActions
 	) {
 		super();
@@ -377,6 +376,7 @@ public final class SimulatorStage extends Stage {
 		this.fileChooserManager = fileChooserManager;
 		this.simulationSaver = simulationSaver;
 		this.traceFileHandler = traceFileHandler;
+		this.disablePropertyController = disablePropertyController;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
 		this.savedProperty = new SimpleBooleanProperty(this, "savedProperty", true);
 		this.time = 0;
@@ -413,12 +413,7 @@ public final class SimulatorStage extends Stage {
 		final BooleanProperty noSimulations = new SimpleBooleanProperty();
 		noSimulations.bind(SafeBindings.wrappedBooleanBinding(List::isEmpty, simulationItems.itemsProperty()));
 
-		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(simulationItemHandler.runningProperty().or(noSimulations.or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
-		btCancel.runningProperty().bind(simulationItemHandler.runningProperty());
-		btCancel.getInterruptButton().setOnAction(e -> {
-			simulationItemHandler.interrupt();
-			currentTrace.getStateSpace().sendInterrupt();
-		});
+		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(noSimulations.or(disablePropertyController.disableProperty()))));
 		this.titleProperty().bind(
 			Bindings.when(configurationPath.isNull())
 				.then(i18n.translateBinding("simulation.stage.title"))
@@ -452,7 +447,7 @@ public final class SimulatorStage extends Stage {
 			uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
 		});
 
-		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
+		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 
 		BooleanExpression disableSaveTraceProperty = currentProject.currentMachineProperty().isNull().or(currentTrace.isNull());
 		saveTraceMenuItem.disableProperty().bind(disableSaveTraceProperty);
@@ -511,7 +506,7 @@ public final class SimulatorStage extends Stage {
 			SimulationItem item = simulationItems.getSelectionModel().getSelectedItem();
 			if (
 				e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null &&
-				configurationPath.get() != null && !simulationItemHandler.runningProperty().get() && lastSimulator.get() != null &&
+				configurationPath.get() != null && !disablePropertyController.disableProperty().get() && lastSimulator.get() != null &&
 				!lastSimulator.get().isRunning()
 			) {
 				simulationItemHandler.checkItem(item);
