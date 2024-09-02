@@ -2,6 +2,7 @@ package de.prob2.ui.stats;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -69,11 +70,16 @@ public final class StatsView extends ScrollPane {
 	private final CurrentTrace currentTrace;
 	private final FontSize fontSize;
 
+	private final AtomicBoolean needsUpdateAfterBusy;
+
 	@Inject
 	public StatsView(final I18n i18n, final StageManager stageManager, final CurrentTrace currentTrace, final FontSize fontSize) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
+
+		this.needsUpdateAfterBusy = new AtomicBoolean(false);
+
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
@@ -87,9 +93,14 @@ public final class StatsView extends ScrollPane {
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
 
-		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.update(to));
-		this.currentTrace.addStatesCalculatedListener(newTransitions -> this.update(this.currentTrace.getStateSpace()));
-		this.update(currentTrace.getStateSpace());
+		this.currentTrace.animatorBusyProperty().addListener((o, from, to) -> {
+			if (!to && this.needsUpdateAfterBusy.getAndSet(false)) {
+				this.update(this.currentTrace.getStateSpace());
+			}
+		});
+		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.updateWhenNotBusy(to));
+		this.currentTrace.addStatesCalculatedListener(newTransitions -> this.updateWhenNotBusy(this.currentTrace.getStateSpace()));
+		this.updateWhenNotBusy(currentTrace.getStateSpace());
 
 		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
 
@@ -141,6 +152,14 @@ public final class StatsView extends ScrollPane {
 			}
 		} else {
 			updateSimpleStats(null);
+		}
+	}
+
+	private void updateWhenNotBusy(StateSpace stateSpace) {
+		if (stateSpace != null && stateSpace.isBusy()) {
+			this.needsUpdateAfterBusy.set(true);
+		} else {
+			this.update(stateSpace);
 		}
 	}
 
