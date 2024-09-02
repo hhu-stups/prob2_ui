@@ -3,6 +3,7 @@ package de.prob2.ui.project.machines;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -142,6 +143,9 @@ public final class Machine {
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList(validationTasks));
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList(ltlPatterns));
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList(simulations));
+		// In previous versions, the default simulation was sometimes saved into the project file - remove it if it exists.
+		// TODO This should probably be moved into the old JSON format conversion code when we bump the project format version the next time
+		this.simulations.removeIf(simulationModel -> Paths.get("").equals(simulationModel.getPath()));
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", visBVisualisation);
 		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList(historyChartItems));
 

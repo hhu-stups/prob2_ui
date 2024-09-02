@@ -58,6 +58,7 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
@@ -349,6 +350,7 @@ public final class SimulatorStage extends Stage {
 
 	private final ObjectProperty<RealTimeSimulator> lastSimulator;
 
+	private final InvalidationListener simulationModelsListener;
 	private ChangeListener<Number> timeListener;
 
 	@Inject
@@ -381,6 +383,27 @@ public final class SimulatorStage extends Stage {
 		this.time = 0;
 		this.timer = new Timer(true);
 		stopActions.add(this::cancelTimer);
+
+		this.simulationModelsListener = o -> {
+			Machine machine = currentProject.getCurrentMachine();
+			// Show the simulation models saved for the machine, or the default simulation if none are saved.
+			if (machine.getSimulations().isEmpty()) {
+				cbSimulation.getItems().setAll(new SimulationModel(Paths.get("")));
+			} else {
+				cbSimulation.getItems().setAll(machine.getSimulations());
+			}
+
+			// If the last selected simulation disappears, select a different one if possible.
+			// Note: it's important to check the selected index and not the selected item!
+			// When items are removed from the list,
+			// the selection model can get into a state where the selected index is -1,
+			// but the selected item is not null and still points to the last selected item.
+			// This may be a bug in JavaFX (last checked with JavaFX 22.0.2).
+			if (cbSimulation.getSelectionModel().getSelectedIndex() == -1 && !cbSimulation.getItems().isEmpty()) {
+				cbSimulation.getSelectionModel().selectFirst();
+			}
+		};
+
 		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
 	}
 
@@ -424,6 +447,9 @@ public final class SimulatorStage extends Stage {
 				))
 		);
 
+		// The items list is set once here and then always updated in-place.
+		// setItems should never be called again after this.
+		cbSimulation.setItems(FXCollections.observableArrayList());
 		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			checkIfSimulationShouldBeSaved();
 			configurationPath.set(null);
@@ -481,7 +507,7 @@ public final class SimulatorStage extends Stage {
 			configurationPath.set(null);
 			simulationDiagramItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
-			loadSimulationsFromMachine(to);
+			loadSimulationsFromMachine(from, to);
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
@@ -721,17 +747,16 @@ public final class SimulatorStage extends Stage {
 		simulationItemHandler.handleMachine(cbSimulation.getSelectionModel().getSelectedItem());
 	}
 
-	public void loadSimulationsFromMachine(Machine machine) {
-		cbSimulation.itemsProperty().unbind();
+	private void loadSimulationsFromMachine(Machine prevMachine, Machine machine) {
+		if (prevMachine != null) {
+			prevMachine.getSimulations().removeListener(this.simulationModelsListener);
+		}
+		cbSimulation.getItems().clear();
 		if (machine != null) {
-			cbSimulation.setItems(machine.getSimulations());
-			if(cbSimulation.getItems().isEmpty()) {
-				cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
-			}
+			machine.getSimulations().addListener(this.simulationModelsListener);
+			this.simulationModelsListener.invalidated(null);
 			cbSimulation.getSelectionModel().clearSelection();
 			cbSimulation.getSelectionModel().select(0);
-		} else {
-			cbSimulation.setItems(FXCollections.observableArrayList());
 		}
 	}
 
@@ -757,11 +782,6 @@ public final class SimulatorStage extends Stage {
 			return;
 		}
 		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
-		if(cbSimulation.getItems().isEmpty()) {
-			cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
-		}
-		cbSimulation.getSelectionModel().clearSelection();
-		cbSimulation.getSelectionModel().select(0);
 	}
 
 	private SimulationModelConfiguration buildSimulationModel() {
@@ -830,9 +850,6 @@ public final class SimulatorStage extends Stage {
 			if (currentMachine.getSimulations().contains(simulationModel)) {
 				cbSimulation.getSelectionModel().select(simulationModel);
 			} else {
-				if(previousPath.toString().isEmpty()) {
-					cbSimulation.getItems().remove(new SimulationModel(Paths.get("")));
-				}
 				currentMachine.getSimulations().add(simulationModel);
 				cbSimulation.getSelectionModel().selectLast();
 			}
