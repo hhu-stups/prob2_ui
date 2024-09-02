@@ -90,7 +90,6 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
@@ -477,8 +476,6 @@ public final class SimulatorStage extends Stage {
 			resetSimulator();
 		});
 
-		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadSimulationsFromMachine(currentProject.getCurrentMachine()));
-
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			checkIfSimulationShouldBeSaved();
 			configurationPath.set(null);
@@ -486,9 +483,6 @@ public final class SimulatorStage extends Stage {
 			simulationItems.itemsProperty().unbind();
 			loadSimulationsFromMachine(to);
 		};
-
-		currentProject.addListener((observable, from, to) -> machineChangeListener.changed(null, null, null));
-
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
