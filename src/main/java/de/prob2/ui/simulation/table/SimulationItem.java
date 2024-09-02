@@ -77,11 +77,6 @@ public final class SimulationItem extends AbstractCheckableItem {
 		}
 
 		@Override
-		public String getMessageBundleKey() {
-			return this.getStatus().getTranslationKey();
-		}
-
-		@Override
 		public List<Trace> getTraces() {
 			return Collections.unmodifiableList(this.traces);
 		}
@@ -98,12 +93,8 @@ public final class SimulationItem extends AbstractCheckableItem {
 			return this.stats;
 		}
 
-		@Override
-		public ICheckingResult withoutAnimatorDependentState() {
-			// TODO We could use a custom result type so that the stats are kept
-			// (everything else is animator-dependent and must be discarded here)
-			return new CheckingResult(this.getStatus(), this.getMessageBundleKey(), this.getMessageParams());
-		}
+		// TODO We could implement withoutAnimatorDependentState using a custom result type so that the stats are kept
+		// (everything else is animator-dependent and must be discarded)
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)

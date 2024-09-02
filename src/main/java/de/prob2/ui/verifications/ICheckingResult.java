@@ -10,9 +10,13 @@ import de.prob2.ui.internal.StageManager;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.Region;
 
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface ICheckingResult {
 	CheckingStatus getStatus();
-	String getMessageBundleKey();
+	
+	default String getMessageBundleKey() {
+		return this.getStatus().getTranslationKey();
+	}
 	
 	default Object[] getMessageParams() {
 		return new Object[0];
@@ -27,7 +31,7 @@ public interface ICheckingResult {
 	}
 	
 	default ICheckingResult withoutAnimatorDependentState() {
-		return this;
+		return new CheckingResult(this.getStatus(), this.getMessageBundleKey(), this.getMessageParams());
 	}
 	
 	default void showAlert(final StageManager stageManager, final I18n i18n) {

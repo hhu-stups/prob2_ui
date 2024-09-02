@@ -62,18 +62,8 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 		}
 
 		@Override
-		public String getMessageBundleKey() {
-			return this.getStatus().getTranslationKey();
-		}
-
-		@Override
 		public List<Trace> getTraces() {
 			return Collections.singletonList(this.trace);
-		}
-
-		@Override
-		public ICheckingResult withoutAnimatorDependentState() {
-			return new CheckingResult(this.getStatus(), this.getMessageBundleKey(), this.getMessageParams());
 		}
 	}
 

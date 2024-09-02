@@ -75,11 +75,6 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 		public TestCaseGeneratorResult getResult() {
 			return this.result;
 		}
-
-		@Override
-		public ICheckingResult withoutAnimatorDependentState() {
-			return new CheckingResult(this.getStatus(), this.getMessageBundleKey(), this.getMessageParams());
-		}
 	}
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)

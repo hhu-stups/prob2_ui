@@ -29,4 +29,9 @@ public class CheckingResult implements ICheckingResult {
 	public Object[] getMessageParams() {
 		return messageParams;
 	}
+	
+	@Override
+	public ICheckingResult withoutAnimatorDependentState() {
+		return this;
+	}
 }
