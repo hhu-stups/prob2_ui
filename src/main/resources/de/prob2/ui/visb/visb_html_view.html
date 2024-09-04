@@ -80,7 +80,11 @@
 		
 		function changeElementAttribute(element, attribute, value) {
 			if (attribute === "text") {
-				element.textContent = value;
+				if (element.tagName === 'foreignObject') {
+					element.innerHTML = value;
+				} else {
+					element.textContent = value;
+				}
 			} else if (attribute === "class" && value !== "") {
 				if(value[0] === "+") {
 					element.classList.add(value.substr(1));
