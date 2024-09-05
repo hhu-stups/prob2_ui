@@ -306,10 +306,12 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		if (item instanceof ProBModelCheckingItem proBItem) {
 			statsView.updateWhileModelChecking(proBItem);
 			return super.executeItemImpl(item, executors, context).thenApply(res -> {
-				ModelCheckingStep lastStep = item.getSteps().get(item.getSteps().size() - 1);
-				Trace trace = lastStep.getTrace();
-				if (trace != null) {
-					currentTrace.set(trace);
+				if (!item.getSteps().isEmpty()) {
+					ModelCheckingStep lastStep = item.getSteps().get(item.getSteps().size() - 1);
+					Trace trace = lastStep.getTrace();
+					if (trace != null) {
+						currentTrace.set(trace);
+					}
 				}
 				return res;
 			});
