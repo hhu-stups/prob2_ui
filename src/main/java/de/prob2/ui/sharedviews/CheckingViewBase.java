@@ -102,10 +102,10 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 	protected TableView<T> itemsTable;
 
 	@FXML
-	protected TableColumn<T, CheckingStatus> statusColumn;
+	protected TableColumn<T, CheckBox> shouldExecuteColumn;
 
 	@FXML
-	protected TableColumn<T, CheckBox> shouldExecuteColumn;
+	protected TableColumn<T, CheckingStatus> statusColumn;
 
 	@FXML
 	protected TableColumn<T, String> configurationColumn;
