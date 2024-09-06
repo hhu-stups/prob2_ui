@@ -999,7 +999,8 @@
 	-fx-border-width: 0.5;
 }
 
-.checking-status-icon.not-checked {
+.checking-status-icon.not-checked,
+.checking-status-icon.in-progress {
 	-fx-text-fill: blue;
 }
 

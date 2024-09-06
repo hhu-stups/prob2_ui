@@ -1,10 +1,7 @@
 package de.prob2.ui.animation.tracereplay;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -23,7 +20,6 @@ import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICheckingResult;
@@ -31,10 +27,8 @@ import de.prob2.ui.verifications.ICliTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
-import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
 @JsonPropertyOrder({
@@ -70,8 +64,6 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	@JsonIgnore
-	private final DoubleProperty progress;
-	@JsonIgnore
 	private final ObjectProperty<TraceJsonFile> loadedTrace;
 	private final Path location; // relative to project location
 	@JsonIgnore
@@ -81,7 +73,6 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 
 	public ReplayTrace(String id, Path location, Path absoluteLocation, TraceManager traceManager) {
 		this.id = id;
-		this.progress = new SimpleDoubleProperty(this, "progress", -1);
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
 		this.location = Objects.requireNonNull(location, "location");
 		this.absoluteLocation = absoluteLocation;
@@ -132,18 +123,6 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	 */
 	public TraceJsonFile getLoadedTrace() {
 		return this.loadedTraceProperty().get();
-	}
-
-	public DoubleProperty progressProperty() {
-		return this.progress;
-	}
-
-	public double getProgress() {
-		return this.progressProperty().get();
-	}
-
-	public void setProgress(final double progress) {
-		this.progressProperty().set(progress);
 	}
 
 	public Path getLocation() {
@@ -198,12 +177,6 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	@Override
 	public void execute(final ExecutionContext context) {
 		TraceChecker.checkNoninteractive(this, context.stateSpace());
-	}
-
-	@Override
-	public void resetAnimatorDependentState() {
-		super.resetAnimatorDependentState();
-		this.setProgress(-1);
 	}
 
 	@Override

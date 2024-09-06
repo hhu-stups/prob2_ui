@@ -62,14 +62,7 @@
 				<columns>
 					<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;"
 								 minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
-					<!--
-						statusColumn is an invisible dummy to make CheckingViewBase happy.
-						TraceReplayView uses statusProgressColumn instead,
-						which can also contain a progress bar.
-					-->
-					<TableColumn fx:id="statusColumn" visible="false"/>
-					<TableColumn fx:id="statusProgressColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}"
-								 maxWidth="${fontSize.fontSize * 6}" text="%animation.tracereplay.view.columns.status"/>
+					<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
 					<TableColumn fx:id="configurationColumn" text="%animation.tracereplay.view.columns.name"/>
 					<TableColumn fx:id="stepsColumn" minWidth="${fontSize.fontSize * 5}"
 								 maxWidth="${fontSize.fontSize * 5}" text="%animation.tracereplay.view.columns.steps"/>

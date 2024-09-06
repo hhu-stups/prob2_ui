@@ -68,11 +68,7 @@ public final class TraceChecker {
 	public static void checkNoninteractive(ReplayTrace replayTrace, StateSpace stateSpace) {
 		try {
 			replayTrace.reset();
-			// ReplayTraceFileCommand doesn't support progress updates yet,
-			// so set an indeterminate status for now.
-			// We cannot use -1, because it is already used to say that no replay is currently running
-			// (this is special-cased in TraceReplayView).
-			Platform.runLater(() -> replayTrace.setProgress(-2));
+			replayTrace.setResult(new CheckingResult(CheckingStatus.IN_PROGRESS));
 			checkNoninteractiveInternal(replayTrace, stateSpace);
 		} catch (CommandInterruptedException exc) {
 			LOGGER.info("Trace check interrupted by user", exc);
@@ -80,8 +76,6 @@ public final class TraceChecker {
 		} catch (RuntimeException exc) {
 			replayTrace.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "common.result.message", exc.toString()));
 			throw exc;
-		} finally {
-			Platform.runLater(() -> replayTrace.setProgress(-1));
 		}
 	}
 

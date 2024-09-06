@@ -25,7 +25,6 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.menu.RevealInExplorer;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -34,7 +33,6 @@ import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
 import de.prob2.ui.verifications.CheckingExecutors;
-import de.prob2.ui.verifications.CheckingStatusIcon;
 import de.prob2.ui.verifications.ExecutionContext;
 
 import javafx.application.Platform;
@@ -44,12 +42,9 @@ import javafx.beans.binding.StringBinding;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressBar;
-import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TableColumn;
@@ -132,8 +127,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final TraceFileHandler traceFileHandler;
 
 	@FXML
-	private TableColumn<ReplayTrace, Node> statusProgressColumn;
-	@FXML
 	private TableColumn<ReplayTrace, String> stepsColumn;
 	@FXML
 	private MenuButton loadTraceButton;
@@ -169,22 +162,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	public void initialize() {
 		super.initialize();
 		helpButton.setHelpContent("animation", "Trace");
-
-		statusProgressColumn.setCellValueFactory(features -> {
-			final ReplayTrace trace = features.getValue();
-
-			final CheckingStatusIcon statusIcon = new CheckingStatusIcon();
-			statusIcon.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
-			trace.statusProperty().addListener((o, from, to) -> Platform.runLater(() -> statusIcon.setStatus(to)));
-			statusIcon.setStatus(trace.getStatus());
-
-			final ProgressIndicator replayProgress = new ProgressBar();
-			replayProgress.progressProperty().bind(trace.progressProperty());
-
-			return Bindings.when(trace.progressProperty().isEqualTo(-1))
-				       .<Node>then(statusIcon)
-				       .otherwise(replayProgress);
-		});
 
 		stepsColumn.setCellValueFactory(features -> {
 			ReplayTrace trace = features.getValue();
