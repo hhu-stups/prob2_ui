@@ -56,7 +56,7 @@
 			<columns>
 				<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}" />
 				<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}" maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status" />
-				<TableColumn fx:id="configurationColumn" text="%verifications.common.columns.description" />
+				<TableColumn fx:id="configurationColumn" text="%common.columns.configuration"/>
 			</columns>
 			<placeholder>
 				<Label text="%verifications.modelchecking.modelcheckingView.noModelcheckingTasks" />
