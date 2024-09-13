@@ -59,12 +59,7 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -164,7 +159,15 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private MenuItem exportHistoryItem;
 	@FXML
+	private MenuItem exportHistoryWithSourceItem;
+	@FXML
+	private MenuItem exportHistoryCustomItem;
+	@FXML
 	private MenuItem exportCurrentStateItem;
+	@FXML
+	private MenuItem exportCurrentStateWithSourceItem;
+	@FXML
+	private MenuItem exportCurrentStateCustomItem;
 	@FXML
 	private MenuItem exportImageItem;
 	@FXML
@@ -295,8 +298,12 @@ public final class VisBView extends BorderPane {
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
-		exportHistoryItem.setOnAction(e -> performHtmlExport(false));
-		exportCurrentStateItem.setOnAction(e -> performHtmlExport(true));
+		exportHistoryItem.setOnAction(e -> performHtmlExport(false, VisBExportOptions.DEFAULT_HISTORY));
+		exportHistoryWithSourceItem.setOnAction(e -> performHtmlExport(false, VisBExportOptions.DEFAULT_HISTORY.withShowSource(true)));
+		exportHistoryCustomItem.setOnAction(e -> performCustomisableHTMLExport(false));
+		exportCurrentStateItem.setOnAction(e -> performHtmlExport(true, VisBExportOptions.DEFAULT_STATES));
+		exportCurrentStateWithSourceItem.setOnAction(e -> performHtmlExport(true, VisBExportOptions.DEFAULT_STATES.withShowSource(true)));
+		exportCurrentStateCustomItem.setOnAction(e -> performCustomisableHTMLExport(true));
 
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
 			if (change.wasAdded()) {
@@ -787,7 +794,7 @@ public final class VisBView extends BorderPane {
 		currentProject.getCurrentMachine().setVisBVisualisation(null);
 	}
 
-	private void performHtmlExport(final boolean onlyCurrentState) {
+	void performHtmlExport(final boolean onlyCurrentState, final VisBExportOptions options) {
 		Trace trace = currentTrace.get();
 		if (trace == null) {
 			return;
@@ -801,8 +808,8 @@ public final class VisBView extends BorderPane {
 			@Override
 			protected Void call() {
 				trace.getStateSpace().execute(onlyCurrentState ?
-					new ExportVisBHtmlForStates(trace.getCurrentState(), VisBExportOptions.DEFAULT.withShowVariables(true), path)
-						: new ExportVisBForHistoryCommand(trace, path));
+					new ExportVisBHtmlForStates(trace.getCurrentState(), options, path)
+						: new ExportVisBForHistoryCommand(trace, options, path));
 				return null;
 			}
 		};
@@ -820,6 +827,12 @@ public final class VisBView extends BorderPane {
 		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 
 		return fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this.getScene().getWindow());
+	}
+
+	private void performCustomisableHTMLExport(boolean onlyCurrentState) {
+		VisBHTMLConfigDialog dialog = injector.getInstance(VisBHTMLConfigDialog.class);
+		dialog.initialiseForOptions(onlyCurrentState);
+		dialog.showAndWait();
 	}
 }
 

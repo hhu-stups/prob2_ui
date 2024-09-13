@@ -7,6 +7,7 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
@@ -67,8 +68,16 @@
 					<Tooltip text="%common.buttons.saveTrace"/>
 				</tooltip>
 				<items>
-					<MenuItem fx:id="exportHistoryItem" text="%visb.contextMenu.exportHistory"/>
-					<MenuItem fx:id="exportCurrentStateItem" text="%visb.contextMenu.exportCurrentState"/>
+					<Menu fx:id="exportHistoryMenu" text="%visb.menu.file.export.html.history">
+						<MenuItem fx:id="exportHistoryItem" text="%visb.menu.file.export.html.default"/>
+						<MenuItem fx:id="exportHistoryWithSourceItem" text="%visb.menu.file.export.html.withSource"/>
+						<MenuItem fx:id="exportHistoryCustomItem" text="%visb.menu.file.export.html.customConfiguration"/>
+					</Menu>
+					<Menu fx:id="exportCurrentStateMenu" text="%visb.menu.file.export.html.currentState">
+						<MenuItem fx:id="exportCurrentStateItem" text="%visb.menu.file.export.html.default"/>
+						<MenuItem fx:id="exportCurrentStateWithSourceItem" text="%visb.menu.file.export.html.withSource"/>
+						<MenuItem fx:id="exportCurrentStateCustomItem" text="%visb.menu.file.export.html.customConfiguration"/>
+					</Menu>
 					<!-- The export image menu item is disabled until the WebView is created. -->
 					<MenuItem fx:id="exportImageItem" mnemonicParsing="false" text="%visb.menu.file.export.png" disable="true" onAction="#exportImage"/>
 					<MenuItem fx:id="exportSvgItem" mnemonicParsing="false" text="%visb.menu.file.export.svg" disable="true" onAction="#exportSvg"/>
