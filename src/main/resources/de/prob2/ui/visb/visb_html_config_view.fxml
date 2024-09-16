@@ -17,6 +17,7 @@
 					<VBox spacing="10.0">
 						<!-- in the order of the sections in the export: -->
 						<CheckBox fx:id="showHeader" text="%visb.menu.file.export.html.customConfiguration.dialog.showHeader"/>
+						<CheckBox fx:id="showSvgDownloads" text="%visb.menu.file.export.html.customConfiguration.dialog.showSvgDownloads"/>
 						<CheckBox fx:id="showVariables" text="%visb.menu.file.export.html.customConfiguration.dialog.showVariables"/>
 						<CheckBox fx:id="showConstants" text="%visb.menu.file.export.html.customConfiguration.dialog.showConstants"/>
 						<CheckBox fx:id="showSets" text="%visb.menu.file.export.html.customConfiguration.dialog.showSets"/>

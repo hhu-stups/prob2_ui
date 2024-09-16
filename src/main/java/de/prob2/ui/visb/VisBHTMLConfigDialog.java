@@ -27,6 +27,8 @@ public final class VisBHTMLConfigDialog extends Stage {
 	@FXML
 	private CheckBox showSource;
 	@FXML
+	private CheckBox showSvgDownloads;
+	@FXML
 	private CheckBox showVariables;
 	@FXML
 	private CheckBox showVersionInfo;
@@ -50,8 +52,8 @@ public final class VisBHTMLConfigDialog extends Stage {
 		initModality(Modality.APPLICATION_MODAL);
 		initialiseForOptions(false);
 		btCreateExport.setOnAction(e -> {
-			visBView.performHtmlExport(this.onlyCurrentState, getOptionsFromSelection());
 			this.close();
+			visBView.performHtmlExport(this.onlyCurrentState, getOptionsFromSelection());
 		});
 	}
 
@@ -64,6 +66,7 @@ public final class VisBHTMLConfigDialog extends Stage {
 		this.showHeader.setSelected(options.isShowHeader());
 		this.showSets.setSelected(options.isShowSets());
 		this.showSource.setSelected(options.isShowSource());
+		this.showSvgDownloads.setSelected(options.isShowSvgDownloads());
 		this.showVariables.setSelected(options.isShowVariables());
 		this.showVersionInfo.setSelected(options.isShowVersionInfo());
 		this.onlyCurrentState = onlyCurrentState;
@@ -76,6 +79,7 @@ public final class VisBHTMLConfigDialog extends Stage {
 				.withShowHeader(showHeader.isSelected())
 				.withShowSets(showSets.isSelected())
 				.withShowSource(showSource.isSelected())
+				.withShowSvgDownloads(showSvgDownloads.isSelected())
 				.withShowVariables(showVariables.isSelected())
 				.withShowVersionInfo(showVersionInfo.isSelected());
 	}
