@@ -825,6 +825,7 @@ public final class VisBView extends BorderPane {
 		FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
 		fileChooser.getExtensionFilters().setAll(htmlFilter);
 		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
 
 		return fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this.getScene().getWindow());
 	}
