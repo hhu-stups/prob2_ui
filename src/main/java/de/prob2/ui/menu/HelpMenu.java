@@ -93,7 +93,7 @@ public class HelpMenu extends Menu {
 			syntaxStage.setText(Files.readString(syntaxFilesDir.resolve(filename)));
 		} catch (IOException | UncheckedIOException e) {
 			LOGGER.error("Could not read syntax help file: {}", filename, e);
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", filename).show();
+			stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotOpenFile.content", filename).show();
 			return;
 		}
 		syntaxStage.show();
