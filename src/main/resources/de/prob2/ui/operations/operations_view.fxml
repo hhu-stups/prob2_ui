@@ -21,75 +21,74 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.CheckMenuItem?>
+<?import javafx.scene.control.ToolBar?>
 <fx:root type="OperationsView" minHeight="200.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
-	<VBox>
-		<HBox alignment="CENTER_LEFT">
-			<padding>
-				<Insets left="5.0"/>
-			</padding>
-			<fx:include source="../sharedviews/navigation_buttons.fxml"/>
-			<Spacer/>
+	<ToolBar>
+		<padding>
+			<Insets left="5.0" right="5.0"/>
+		</padding>
+		<fx:include source="../sharedviews/navigation_buttons.fxml"/>
+		<Spacer/>
 
-			<MenuButton fx:id="customizeViewButton">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG" bindableFontSize="${fontSize.fontSize + 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%operations.operationsView.tooltips.customizeView" />
-				</tooltip>
+		<MenuButton fx:id="customizeViewButton">
+			<graphic>
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG" bindableFontSize="${fontSize.fontSize + 2}" />
+			</graphic>
+			<tooltip>
+				<Tooltip text="%operations.operationsView.tooltips.customizeView" />
+			</tooltip>
+			<items>
+				<Menu fx:id="sortMenuItem" text="%operations.operationsView.menu.sort">
+					<CheckMenuItem fx:id="sortModeAToZ" text="A - Z" onAction="#setSortModeAToZ"/>
+					<CheckMenuItem fx:id="sortModeZToA" text="Z - A" onAction="#setSortModeZToA"/>
+					<CheckMenuItem fx:id="sortModeModelOrder" text="%operations.operationsView.menu.sortModelOrder" onAction="#setSortModeToModelOrder"/>
+				</Menu>
+				<MenuItem fx:id="disabledOpsMenuItem" text="%operations.operationsView.menu.hideDisabled" onAction="#handleDisabledOpsMenuItem"/>
+				<MenuItem fx:id="unambiguousMenuItem" text="%operations.operationsView.menu.showUnambiguous" onAction="#handleUnambiguousMenuItem"/>
+			</items>
+		</MenuButton>
+
+		<InterruptIfRunningButton>
+			<graphic>
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="STOP" bindableFontSize="${fontSize.fontSize + 2}"/>
+			</graphic>
+			<MenuButton fx:id="randomButton">
 				<items>
-					<Menu fx:id="sortMenuItem" text="%operations.operationsView.menu.sort">
-						<CheckMenuItem fx:id="sortModeAToZ" text="A - Z" onAction="#setSortModeAToZ"/>
-						<CheckMenuItem fx:id="sortModeZToA" text="Z - A" onAction="#setSortModeZToA"/>
-						<CheckMenuItem fx:id="sortModeModelOrder" text="%operations.operationsView.menu.sortModelOrder" onAction="#setSortModeToModelOrder"/>
-					</Menu>
-					<MenuItem fx:id="disabledOpsMenuItem" text="%operations.operationsView.menu.hideDisabled" onAction="#handleDisabledOpsMenuItem"/>
-					<MenuItem fx:id="unambiguousMenuItem" text="%operations.operationsView.menu.showUnambiguous" onAction="#handleUnambiguousMenuItem"/>
+					<MenuItem fx:id="oneRandomEvent" onAction="#random" text="%operations.operationsView.random.one" />
+					<MenuItem fx:id="fiveRandomEvents" onAction="#random" text="%operations.operationsView.random.five" />
+					<MenuItem fx:id="tenRandomEvents" onAction="#random" text="%operations.operationsView.random.ten" />
+					<CustomMenuItem fx:id="someRandomEvents">
+						<content>
+							<AnchorPane>
+								<TextField fx:id="randomText" onAction="#random"
+									promptText="%operations.operationsView.random.some.prompt" />
+							</AnchorPane>
+						</content>
+					</CustomMenuItem>
 				</items>
-			</MenuButton>
-
-			<InterruptIfRunningButton>
 				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="STOP" bindableFontSize="${fontSize.fontSize + 2}"/>
-				</graphic>
-				<MenuButton fx:id="randomButton">
-					<items>
-						<MenuItem fx:id="oneRandomEvent" onAction="#random" text="%operations.operationsView.random.one" />
-						<MenuItem fx:id="fiveRandomEvents" onAction="#random" text="%operations.operationsView.random.five" />
-						<MenuItem fx:id="tenRandomEvents" onAction="#random" text="%operations.operationsView.random.ten" />
-						<CustomMenuItem fx:id="someRandomEvents">
-							<content>
-								<AnchorPane>
-									<TextField fx:id="randomText" onAction="#random"
-										promptText="%operations.operationsView.random.some.prompt" />
-								</AnchorPane>
-							</content>
-						</CustomMenuItem>
-					</items>
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RANDOM" bindableFontSize="${fontSize.fontSize + 2}" />
-					</graphic>
-					<tooltip>
-						<Tooltip text="%operations.operationsView.tooltips.random" />
-					</tooltip>
-				</MenuButton>
-			</InterruptIfRunningButton>
-
-			<ToggleButton fx:id="searchToggle" onAction="#clearSearchbarWhenHidden">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize + 2}" />
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RANDOM" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
 				<tooltip>
-					<Tooltip text="%operations.operationsView.tooltips.searchbar"/>
+					<Tooltip text="%operations.operationsView.tooltips.random" />
 				</tooltip>
-			</ToggleButton>
+			</MenuButton>
+		</InterruptIfRunningButton>
 
-			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
-		</HBox>
-	</VBox>
+		<ToggleButton fx:id="searchToggle" onAction="#clearSearchbarWhenHidden">
+			<graphic>
+				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize + 2}" />
+			</graphic>
+			<tooltip>
+				<Tooltip text="%operations.operationsView.tooltips.searchbar"/>
+			</tooltip>
+		</ToggleButton>
+
+		<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
+	</ToolBar>
 
 	<AnchorPane>
 		<VBox fx:id="searchBox" AnchorPane.topAnchor="5.0"
