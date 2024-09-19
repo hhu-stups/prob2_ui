@@ -7,7 +7,6 @@ import de.prob.animator.IConsoleOutputListener;
 import de.prob2.ui.internal.FXMLInjected;
 
 import javafx.application.Platform;
-import javafx.fxml.FXML;
 
 import org.fxmisc.richtext.InlineCssTextArea;
 
@@ -26,10 +25,6 @@ public final class PrologOutput extends InlineCssTextArea {
 			this.appendText(messageAndStyle[0]);
 			this.setStyle(Math.max(this.getLength()-messageAndStyle[0].length(), 0), this.getLength(), messageAndStyle[1]);
 		});
-	}
-
-	@FXML
-	private void initialize() {
 		this.setPrefWidth(Double.MAX_VALUE);
 		this.setWrapText(true);
 		this.setEditable(false);
