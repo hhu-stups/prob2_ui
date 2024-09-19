@@ -439,6 +439,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 
 	public void clearHistory() {
 		this.getUndoManager().forgetHistory();
+		this.getUndoManager().mark();
 	}
 
 	public ObservableList<ErrorItem> getErrors() {
