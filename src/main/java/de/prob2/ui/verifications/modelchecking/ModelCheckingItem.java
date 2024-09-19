@@ -46,14 +46,19 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 			if (to.isEmpty()) {
 				this.status.set(CheckingStatus.NOT_CHECKED);
 			} else {
-				final boolean failed = to.stream()
+				boolean inProgress = to.stream()
+					.map(ModelCheckingStep::getStatus)
+					.anyMatch(CheckingStatus.IN_PROGRESS::equals);
+				final boolean failed = !inProgress && to.stream()
 					                       .map(ModelCheckingStep::getStatus)
 					                       .anyMatch(CheckingStatus.FAIL::equals);
 				final boolean success = !failed && to.stream()
 					                                   .map(ModelCheckingStep::getStatus)
 					                                   .anyMatch(CheckingStatus.SUCCESS::equals);
 
-				if (success) {
+				if (inProgress) {
+					this.status.set(CheckingStatus.IN_PROGRESS);
+				} else if (success) {
 					this.status.set(CheckingStatus.SUCCESS);
 				} else if (failed) {
 					this.status.set(CheckingStatus.FAIL);

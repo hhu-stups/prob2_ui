@@ -1,11 +1,11 @@
 package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
-import java.util.Objects;
 
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckGoalFound;
 import de.prob.check.ModelCheckOk;
+import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.statespace.ITraceDescription;
 import de.prob.statespace.StateSpace;
@@ -23,7 +23,9 @@ public class ModelCheckingStep {
 	
 	public ModelCheckingStep(final IModelCheckingResult result, final long timeElapsed, final StateSpaceStats stats, final BigInteger memoryUsed, final StateSpace stateSpace) {
 		this.result = result;
-		if (result instanceof ModelCheckOk || result instanceof ModelCheckGoalFound) {
+		if (result instanceof NotYetFinished) {
+			this.status = CheckingStatus.IN_PROGRESS;
+		} else if (result instanceof ModelCheckOk || result instanceof ModelCheckGoalFound) {
 			this.status = CheckingStatus.SUCCESS;
 		} else if (result instanceof ITraceDescription) {
 			this.status = CheckingStatus.FAIL;
