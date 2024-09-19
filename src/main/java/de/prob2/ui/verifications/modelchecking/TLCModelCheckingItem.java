@@ -132,7 +132,6 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			@Override
 			public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
 				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, null, stateSpace);
-				setRunningStep(step);
 				Platform.runLater(() -> getSteps().set(0, step));
 			}
 
@@ -142,16 +141,11 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			}
 		};
 
-		try {
-			TLCModelChecker tlcModelChecker = new TLCModelChecker(
-					context.project().getLocation().resolve(context.machine().getLocation()).toString(),
-					stateSpace, listener,
-					new TLCModelCheckingOptions(getOptions()));
-			setRunningStep(initialStep);
-			tlcModelChecker.call();
-		} finally {
-			setRunningStep(null);
-		}
+		TLCModelChecker tlcModelChecker = new TLCModelChecker(
+			context.project().getLocation().resolve(context.machine().getLocation()).toString(),
+			stateSpace, listener,
+			new TLCModelCheckingOptions(getOptions()));
+		tlcModelChecker.call();
 	}
 
 	@Override

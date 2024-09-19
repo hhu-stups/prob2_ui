@@ -19,13 +19,14 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.SimpleStatsView;
+import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingStep;
 import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.beans.property.ReadOnlyObjectProperty;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -168,16 +169,23 @@ public final class StatsView extends ScrollPane {
 	}
 
 	public void updateWhileModelChecking(ProBModelCheckingItem item) {
-		item.runningStepProperty().addListener(new ChangeListener<>() {
+		item.stepsProperty().addListener(new InvalidationListener() {
 			@Override
-			public void changed(final ObservableValue<? extends ModelCheckingStep> o, final ModelCheckingStep from, final ModelCheckingStep to) {
-				if (to == null) {
+			public void invalidated(Observable o) {
+				if (item.getSteps().isEmpty()) {
+					// Item was reset - if for some reason this listener is still active, remove it now.
+					o.removeListener(this);
+					return;
+				}
+
+				ModelCheckingStep lastStep = item.getSteps().get(item.getSteps().size() - 1);
+				if (lastStep.getStatus() != CheckingStatus.IN_PROGRESS) {
 					// Model check has finished - stop updating stats based on this task.
 					o.removeListener(this);
 				} else {
 					// While the model check is running, probcli is blocked, so StatsView cannot update itself normally.
 					// Instead, update it based on the stats returned by the model checker.
-					final StateSpaceStats stats = to.getStats();
+					StateSpaceStats stats = lastStep.getStats();
 					if (stats != null) {
 						updateSimpleStats(stats);
 					}

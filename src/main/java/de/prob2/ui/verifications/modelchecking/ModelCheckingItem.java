@@ -32,9 +32,6 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 	@JsonIgnore
 	private final ListProperty<ModelCheckingStep> steps = new SimpleListProperty<>(this, "steps", FXCollections.observableArrayList());
 
-	@JsonIgnore
-	private final ObjectProperty<ModelCheckingStep> runningStep = new SimpleObjectProperty<>(this, "runningStep", null);
-
 	public ModelCheckingItem(final String id) {
 		this.id = id;
 		this.selected = new SimpleBooleanProperty(true);
@@ -109,18 +106,6 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 		return steps.get();
 	}
 
-	public ObjectProperty<ModelCheckingStep> runningStepProperty() {
-		return this.runningStep;
-	}
-
-	public ModelCheckingStep getRunningStep() {
-		return this.runningStepProperty().get();
-	}
-
-	public void setRunningStep(final ModelCheckingStep runningStep) {
-		this.runningStepProperty().set(runningStep);
-	}
-
 	@Override
 	public void resetAnimatorDependentState() {
 		// Clearing the steps list causes the listener to reset the status,
@@ -128,7 +113,6 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 		CheckingStatus savedChecked = this.getStatus();
 		this.stepsProperty().clear();
 		this.status.set(savedChecked);
-		this.runningStep.set(null);
 	}
 
 	@Override
