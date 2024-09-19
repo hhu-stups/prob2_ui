@@ -841,8 +841,8 @@
 }
 
 .label.warning {
-	-fx-text-fill: -prob-orange;
-	-fx-font-weight: bold;
+	-fx-text-fill: -prob-orange !important;
+	-fx-font-weight: bold !important;
 }
 
 /* ===================== DIALOG ====================== */
