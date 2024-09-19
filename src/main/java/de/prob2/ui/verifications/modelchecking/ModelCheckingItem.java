@@ -33,7 +33,7 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 	private final ListProperty<ModelCheckingStep> steps = new SimpleListProperty<>(this, "steps", FXCollections.observableArrayList());
 
 	@JsonIgnore
-	private final ObjectProperty<ModelCheckingStep> currentStep = new SimpleObjectProperty<>(this, "currentStep", null);
+	private final ObjectProperty<ModelCheckingStep> runningStep = new SimpleObjectProperty<>(this, "runningStep", null);
 
 	public ModelCheckingItem(final String id) {
 		this.id = id;
@@ -104,16 +104,16 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 		return steps.get();
 	}
 
-	public ObjectProperty<ModelCheckingStep> currentStepProperty() {
-		return this.currentStep;
+	public ObjectProperty<ModelCheckingStep> runningStepProperty() {
+		return this.runningStep;
 	}
 
-	public ModelCheckingStep getCurrentStep() {
-		return this.currentStepProperty().get();
+	public ModelCheckingStep getRunningStep() {
+		return this.runningStepProperty().get();
 	}
 
-	public void setCurrentStep(final ModelCheckingStep currentStep) {
-		this.currentStepProperty().set(currentStep);
+	public void setRunningStep(final ModelCheckingStep runningStep) {
+		this.runningStepProperty().set(runningStep);
 	}
 
 	@Override
@@ -123,7 +123,7 @@ public abstract class ModelCheckingItem implements ICliTask, ISelectableTask, IT
 		CheckingStatus savedChecked = this.getStatus();
 		this.stepsProperty().clear();
 		this.status.set(savedChecked);
-		this.currentStep.set(null);
+		this.runningStep.set(null);
 	}
 
 	@Override

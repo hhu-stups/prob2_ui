@@ -164,8 +164,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
 
-		final ChangeListener<ModelCheckingStep> showCurrentStepListener = (o, from, to) -> {
-			// When currentStep changes from null to non-null,
+		final ChangeListener<ModelCheckingStep> showRunningStepListener = (o, from, to) -> {
+			// When runningStep changes from null to non-null,
 			// i. e. a new checking step was started,
 			// select the newly started step so that the checking progress is visible.
 			if (from == null && to != null) {
@@ -178,11 +178,11 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		};
 		itemsTable.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (from != null) {
-				from.currentStepProperty().removeListener(showCurrentStepListener);
+				from.runningStepProperty().removeListener(showRunningStepListener);
 			}
 
 			if (to != null) {
-				to.currentStepProperty().addListener(showCurrentStepListener);
+				to.runningStepProperty().addListener(showRunningStepListener);
 			}
 		});
 

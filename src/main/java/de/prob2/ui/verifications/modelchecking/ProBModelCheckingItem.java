@@ -175,7 +175,7 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 				var cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
 				context.stateSpace().execute(cmd);
 				ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, cmd.getResult(), context.stateSpace());
-				setCurrentStep(step);
+				setRunningStep(step);
 				Platform.runLater(() -> {
 					if (stepIndex < getSteps().size()) {
 						getSteps().set(stepIndex, step);
@@ -191,10 +191,10 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		ConsistencyChecker checker = new ConsistencyChecker(context.stateSpace(), fullOptions, listener);
 		
 		try {
-			this.setCurrentStep(initialStep);
+			this.setRunningStep(initialStep);
 			checker.call();
 		} finally {
-			this.setCurrentStep(null);
+			this.setRunningStep(null);
 		}
 	}
 
