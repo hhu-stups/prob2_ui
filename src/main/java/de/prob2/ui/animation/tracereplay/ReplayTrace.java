@@ -8,7 +8,6 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
@@ -61,8 +60,6 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 		}
 	}
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final String id;
 	@JsonIgnore
 	private final ObjectProperty<TraceJsonFile> loadedTrace;
 	private final Path location; // relative to project location
@@ -72,7 +69,8 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	private TraceManager traceManager;
 
 	public ReplayTrace(String id, Path location, Path absoluteLocation, TraceManager traceManager) {
-		this.id = id;
+		super(id);
+
 		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
 		this.location = Objects.requireNonNull(location, "location");
 		this.absoluteLocation = absoluteLocation;
@@ -92,11 +90,6 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	public void initAfterLoad(final Path absoluteLocation, final TraceManager traceManager) {
 		this.absoluteLocation = absoluteLocation;
 		this.traceManager = traceManager;
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
 	}
 
 	@Override
@@ -187,10 +180,9 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 
 	@Override
 	public boolean settingsEqual(Object other) {
-		return other instanceof ReplayTrace that
-			       && Objects.equals(this.getTaskType(), that.getTaskType())
-			       && Objects.equals(this.getId(), that.getId())
-			       && Objects.equals(this.getLocation(), that.getLocation());
+		return super.settingsEqual(other)
+			&& other instanceof ReplayTrace that
+			&& Objects.equals(this.getLocation(), that.getLocation());
 	}
 
 	@Override

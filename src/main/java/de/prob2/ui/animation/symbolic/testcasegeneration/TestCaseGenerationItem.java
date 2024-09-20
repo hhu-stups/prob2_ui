@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import de.prob.analysis.testcasegeneration.ConstraintBasedTestCaseGenerator;
@@ -16,7 +15,6 @@ import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.AbstractCheckableItem;
-import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICheckingResult;
@@ -77,20 +75,12 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 		}
 	}
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final String id;
-
 	private final int maxDepth;
 
 	protected TestCaseGenerationItem(final String id, final int maxDepth) {
-		super();
-		this.id = id;
-		this.maxDepth = maxDepth;
-	}
+		super(id);
 
-	@Override
-	public String getId() {
-		return this.id;
+		this.maxDepth = maxDepth;
 	}
 
 	@Override
@@ -117,9 +107,8 @@ public abstract class TestCaseGenerationItem extends AbstractCheckableItem imple
 
 	@Override
 	public boolean settingsEqual(Object other) {
-		return other instanceof TestCaseGenerationItem that
-			       && Objects.equals(this.getTaskType(), that.getTaskType())
-			       && Objects.equals(this.getId(), that.getId())
-			       && Objects.equals(this.getMaxDepth(), that.getMaxDepth());
+		return super.settingsEqual(other)
+			&& other instanceof TestCaseGenerationItem that
+			&& Objects.equals(this.getMaxDepth(), that.getMaxDepth());
 	}
 }

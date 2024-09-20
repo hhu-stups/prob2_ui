@@ -5,8 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-
 import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -72,15 +70,7 @@ public abstract class ModelCheckingItem extends AbstractCheckableItem implements
 		}
 	}
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final String id;
-
 	public ModelCheckingItem(final String id) {
-		this.id = id;
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
+		super(id);
 	}
 }

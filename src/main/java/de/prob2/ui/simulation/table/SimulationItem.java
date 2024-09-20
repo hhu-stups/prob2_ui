@@ -12,7 +12,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
@@ -27,7 +26,6 @@ import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.CheckingExecutors;
-import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ICheckingResult;
@@ -97,14 +95,13 @@ public final class SimulationItem extends AbstractCheckableItem {
 		// (everything else is animator-dependent and must be discarded)
 	}
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final String id;
 	private final Path simulationPath;
 	private final SimulationType type;
 	private final Map<String, Object> information;
 
 	public SimulationItem(String id, Path simulationPath, SimulationType type, Map<String, Object> information) {
-		this.id = id;
+		super(id);
+
 		this.simulationPath = Objects.requireNonNull(simulationPath, "simulationPath");
 		this.type = Objects.requireNonNull(type, "type");
 		this.information = Objects.requireNonNull(information, "information");
@@ -113,11 +110,6 @@ public final class SimulationItem extends AbstractCheckableItem {
 	@JsonCreator
 	private SimulationItem(@JsonProperty("id") String id, @JsonProperty("simulationPath") Path simulationPath, @JsonProperty("type") SimulationType type, @JsonProperty("information") SimulationCheckingInformation information) {
 		this(id, simulationPath, type, information.getInformation());
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
 	}
 
 	@Override
@@ -197,12 +189,11 @@ public final class SimulationItem extends AbstractCheckableItem {
 
 	@Override
 	public boolean settingsEqual(Object other) {
-		return other instanceof SimulationItem that
-			       && Objects.equals(this.getTaskType(), that.getTaskType())
-			       && Objects.equals(this.getId(), that.getId())
-			       && Objects.equals(this.getSimulationPath(), that.getSimulationPath())
-			       && Objects.equals(this.getType(), that.getType())
-			       && Objects.equals(this.getInformation(), that.getInformation());
+		return super.settingsEqual(other)
+			&& other instanceof SimulationItem that
+			&& Objects.equals(this.getSimulationPath(), that.getSimulationPath())
+			&& Objects.equals(this.getType(), that.getType())
+			&& Objects.equals(this.getInformation(), that.getInformation());
 	}
 
 	@Override
