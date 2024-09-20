@@ -68,11 +68,16 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 
 			this.editMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			this.editMenuItem.setOnAction(e -> {
+				Machine currentMachine = currentProject.getCurrentMachine();
 				final T oldItem = this.getItem();
 				showItemDialog(oldItem).ifPresent(newItem -> {
-					final T itemToExecute = replaceItem(oldItem, newItem);
-					// FIXME Do we always want to re-execute the item after editing?
-					executeItemIfEnabled(itemToExecute);
+					if (currentProject.getCurrentMachine() == currentMachine) {
+						final T itemToExecute = replaceItem(oldItem, newItem);
+						// FIXME Do we always want to re-execute the item after editing?
+						executeItemIfEnabled(itemToExecute);
+					} else {
+						LOGGER.warn("The machine has changed, discarding task changes");
+					}
 				});
 			});
 			this.contextMenu.getItems().add(this.editMenuItem);

@@ -320,6 +320,7 @@ public final class DynamicVisualizationStage extends Stage {
 			return;
 		}
 
+		Machine machine = currentProject.getCurrentMachine();
 		EditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
 		stage.initOwner(this);
 		stage.setInitialFormulaTask(oldTask, this.errors);
@@ -327,8 +328,12 @@ public final class DynamicVisualizationStage extends Stage {
 
 		VisualizationFormulaTask newTask = stage.getResult();
 		if (newTask != null) {
-			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldTask, newTask);
-			this.evaluateFormula(added);
+			if (this.currentProject.getCurrentMachine() == machine) {
+				VisualizationFormulaTask added = this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldTask, newTask);
+				this.evaluateFormula(added);
+			} else {
+				LOGGER.warn("The machine has changed, discarding task changes");
+			}
 		}
 	}
 

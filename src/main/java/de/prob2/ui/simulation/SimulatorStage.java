@@ -94,6 +94,8 @@ import javafx.stage.Stage;
 
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
@@ -214,6 +216,8 @@ public final class SimulatorStage extends Stage {
 			}
 		}
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorStage.class);
 
 	@FXML
 	private MenuBar menuBar;
@@ -685,14 +689,19 @@ public final class SimulatorStage extends Stage {
 	}
 
 	public void editSimulation(SimulationItem oldItem) {
+		Machine machine = this.currentProject.getCurrentMachine();
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
 		choosingStage.setData(oldItem);
 		choosingStage.showAndWait();
 		SimulationItem newItem = choosingStage.getResult();
 		if (newItem != null) {
-			currentProject.getCurrentMachine().replaceValidationTask(oldItem, newItem);
-			simulationItems.refresh();
+			if (this.currentProject.getCurrentMachine() == machine) {
+				this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldItem, newItem);
+				this.simulationItems.refresh();
+			} else {
+				LOGGER.warn("The machine has changed, discarding task changes");
+			}
 		}
 	}
 

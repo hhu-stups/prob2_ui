@@ -16,7 +16,6 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -30,9 +29,15 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.AnchorPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @FXMLInjected
 @Singleton
 public final class ProofObligationView extends AnchorPane {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(ProofObligationView.class);
+
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final I18n i18n;
@@ -96,6 +101,7 @@ public final class ProofObligationView extends AnchorPane {
 	}
 
 	private void editItem(ProofObligationItem item) {
+		Machine machine = this.currentProject.getCurrentMachine();
 		TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
 		stageManager.register(dialog);
 		dialog.setTitle(i18n.translate("verifications.po.poView.contextMenu.editId"));
@@ -104,19 +110,22 @@ public final class ProofObligationView extends AnchorPane {
 		dialog.showAndWait().ifPresent(idText -> {
 			String id = idText.trim().isEmpty() ? null : idText;
 			if (!Objects.equals(id, item.getId())) {
-				Machine machine = currentProject.getCurrentMachine();
-				Optional<ProofObligationItem> existingSavedPO = machine.getProofObligationTasks().stream()
-					.filter(savedPO -> Objects.equals(savedPO.getName(), item.getName()))
-					.findAny();
-				if (id != null) {
-					// we are adding or changing an id
-					existingSavedPO.ifPresentOrElse(
-						savedPO -> machine.replaceValidationTaskIfNotExist(savedPO, item.withId(id)),
-						() -> machine.addValidationTaskIfNotExist(item.withId(id))
-					);
+				if (this.currentProject.getCurrentMachine() == machine) {
+					Optional<ProofObligationItem> existingSavedPO = machine.getProofObligationTasks().stream()
+							.filter(savedPO -> Objects.equals(savedPO.getName(), item.getName()))
+							.findAny();
+					if (id != null) {
+						// we are adding or changing an id
+						existingSavedPO.ifPresentOrElse(
+								savedPO -> machine.replaceValidationTaskIfNotExist(savedPO, item.withId(id)),
+								() -> machine.addValidationTaskIfNotExist(item.withId(id))
+						);
+					} else {
+						// we are removing an id
+						existingSavedPO.ifPresent(machine::removeValidationTask);
+					}
 				} else {
-					// we are removing an id
-					existingSavedPO.ifPresent(machine::removeValidationTask);
+					LOGGER.warn("The machine has changed, discarding task changes");
 				}
 			}
 		});
