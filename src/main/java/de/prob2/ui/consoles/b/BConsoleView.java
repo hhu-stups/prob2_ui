@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.CSPModel;
+import de.prob.model.representation.TLAModel;
 import de.prob.model.representation.XTLModel;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
@@ -56,6 +57,9 @@ public final class BConsoleView extends VBox {
 				} else if (model instanceof CSPModel) {
 					lang = "consoles.b.toolbar.language.csp";
 					prompt = "consoles.b.prompt.csp";
+				} else if (model instanceof TLAModel) {
+					lang = "consoles.b.toolbar.language.tla";
+					prompt = "consoles.b.prompt.tla";
 				} else if (model instanceof XTLModel) {
 					lang = "consoles.b.toolbar.language.xtl";
 					prompt = "consoles.b.prompt.xtl";
