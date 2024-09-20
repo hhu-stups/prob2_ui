@@ -28,31 +28,39 @@ public abstract class ModelCheckingItem extends AbstractCheckableItem implements
 			return Collections.unmodifiableList(this.steps);
 		}
 
+		/**
+		 * Get the last {@link ModelCheckingStep} that was executed.
+		 * Note that the status of the last step is not always the same as the status of the overall result - see {@link #getDecidingStep()}.
+		 * 
+		 * @return the last executed step
+		 */
 		public ModelCheckingStep getLastStep() {
 			return this.getSteps().get(this.getSteps().size() - 1);
+		}
+		
+		/**
+		 * Get the {@link ModelCheckingStep} that determines the overall status of this result.
+		 * This is often the same as {@link #getLastStep()}, but not always.
+		 * In particular, if any of the steps failed, the deciding step is the first failed step,
+		 * even if a later step was successful.
+		 * 
+		 * @return the step that determines this result's status
+		 */
+		public ModelCheckingStep getDecidingStep() {
+			ModelCheckingStep lastStep = this.getLastStep();
+			if (lastStep.getStatus() == CheckingStatus.IN_PROGRESS) {
+				return lastStep;
+			}
+
+			return this.getSteps().stream()
+				.filter(step -> step.getStatus() == CheckingStatus.FAIL || step.getStatus() == CheckingStatus.INVALID_TASK)
+				.findFirst()
+				.orElse(lastStep);
 		}
 
 		@Override
 		public CheckingStatus getStatus() {
-			boolean inProgress = this.getSteps().stream()
-				.map(ModelCheckingStep::getStatus)
-				.anyMatch(CheckingStatus.IN_PROGRESS::equals);
-			boolean failed = !inProgress && this.getSteps().stream()
-				.map(ModelCheckingStep::getStatus)
-				.anyMatch(CheckingStatus.FAIL::equals);
-			boolean success = !failed && this.getSteps().stream()
-				.map(ModelCheckingStep::getStatus)
-				.anyMatch(CheckingStatus.SUCCESS::equals);
-
-			if (inProgress) {
-				return CheckingStatus.IN_PROGRESS;
-			} else if (success) {
-				return CheckingStatus.SUCCESS;
-			} else if (failed) {
-				return CheckingStatus.FAIL;
-			} else {
-				return CheckingStatus.TIMEOUT;
-			}
+			return this.getDecidingStep().getStatus();
 		}
 
 		@Override
