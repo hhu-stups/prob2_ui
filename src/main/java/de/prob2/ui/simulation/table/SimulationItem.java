@@ -196,12 +196,6 @@ public final class SimulationItem extends AbstractCheckableItem {
 	}
 
 	@Override
-	public void reset() {
-		super.reset();
-		this.resetAnimatorDependentState();
-	}
-
-	@Override
 	public boolean settingsEqual(Object other) {
 		return other instanceof SimulationItem that
 			       && Objects.equals(this.getTaskType(), that.getTaskType())

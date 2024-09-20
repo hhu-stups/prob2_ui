@@ -183,7 +183,6 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	public void reset() {
 		super.reset();
 		this.loadedTrace.set(null);
-		this.resetAnimatorDependentState();
 	}
 
 	@Override
