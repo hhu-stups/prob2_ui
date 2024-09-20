@@ -26,6 +26,16 @@ public interface ICheckingResult {
 		return Collections.emptyList();
 	}
 	
+	/**
+	 * Get the trace from this result, if any.
+	 * If this result contains multiple traces, only the first one is returned
+	 * (use {@link #getTraces()} to access the other traces).
+	 * If this result doesn't contain a trace, {@code null} is returned.
+	 * Note that this says nothing about the result status -
+	 * depending on the task type, a trace may be a successful or a failed result.
+	 *
+	 * @return the first trace from this result, or {@code null} if there is none
+	 */
 	default Trace getTrace() {
 		return this.getTraces().isEmpty() ? null : this.getTraces().get(0);
 	}

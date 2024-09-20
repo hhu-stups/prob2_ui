@@ -12,7 +12,7 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public abstract class AbstractCheckableItem implements ISelectableTask, ITraceTask {
+public abstract class AbstractCheckableItem implements ISelectableTask {
 	private final BooleanProperty selected;
 	@JsonIgnore
 	final ObjectProperty<ICheckingResult> result = new SimpleObjectProperty<>(this, "result", null);
@@ -64,7 +64,7 @@ public abstract class AbstractCheckableItem implements ISelectableTask, ITraceTa
 		return this.statusProperty().get();
 	}
 
-	@Override
+	@JsonIgnore
 	public Trace getTrace() {
 		return this.getResult() != null ? this.getResult().getTrace() : null;
 	}

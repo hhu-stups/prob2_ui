@@ -7,10 +7,10 @@ import java.util.stream.Stream;
 
 import de.prob.statespace.Trace;
 import de.prob.voparser.node.AIdentifierVo;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.ITraceTask;
 import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.ValidationTaskNotFound;
 
@@ -53,7 +53,8 @@ public final class ValidationTaskExpression implements IValidationExpression {
 
 	@Override
 	public Trace getTrace() {
-		if (this.getTask() instanceof ITraceTask traceTask) {
+		// TODO Once all task results are separated from the tasks themselves, this code should no longer depend on AbstractCheckableItem specifically.
+		if (this.getTask() instanceof AbstractCheckableItem traceTask) {
 			return traceTask.getTrace();
 		} else {
 			// TODO Ideally, this should be detected as a type error ahead of time
