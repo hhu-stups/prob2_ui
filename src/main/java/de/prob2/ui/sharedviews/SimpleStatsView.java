@@ -47,7 +47,7 @@ public final class SimpleStatsView extends VBox {
 					processedStatesDescription += " (" + percentProcessedNodes + "%)";
 				}
 				processedStates.setText(processedStatesDescription);
-				totalTransitions.setText(Integer.toString(to.getNrTotalTransitions()));
+				totalTransitions.setText(i18n.format("{0,number,integer}", to.getNrTotalTransitions()));
 			}
 		});
 	}
