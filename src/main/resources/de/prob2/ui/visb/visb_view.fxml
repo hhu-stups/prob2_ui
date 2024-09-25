@@ -19,14 +19,17 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<fx:root type="VisBView" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" minHeight="160"
-		 minWidth="480">
+<?import javafx.scene.control.ToolBar?>
+
+<fx:root type="VisBView" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
 	<top>
-		<VBox>
-		<HBox styleClass="border" alignment="CENTER_LEFT">
+		<ToolBar styleClass="border">
+			<padding>
+				<Insets left="5.0" right="5.0"/>
+			</padding>
 			<Button fx:id="loadVisualisationButton" onAction="#askLoadVisBFile">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
@@ -121,8 +124,7 @@
 					<MenuItem text="%visb.menu.help.user.manual" onAction="#openUserManual"/>
 				</items>
 			</MenuButton>
-			</HBox>
-		</VBox>
+		</ToolBar>
 	</top>
 	<center>
 		<StackPane fx:id="mainPane">
