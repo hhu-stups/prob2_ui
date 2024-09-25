@@ -17,11 +17,12 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 @FXMLInjected
 @Singleton
-public final class BConsoleView extends VBox {
+public final class BConsoleView extends BorderPane {
 	private final CurrentTrace currentTrace;
 	private final I18n i18n;
 
