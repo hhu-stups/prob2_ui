@@ -13,6 +13,8 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
+import de.prob.model.representation.AbstractModel;
+import de.prob.model.representation.TLAModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
@@ -31,10 +33,13 @@ public class BInterpreter implements Executable {
 	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;
 
+	private boolean bMode;
+
 	@Inject
 	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace) {
 		this.machineLoader = machineLoader;
 		this.currentTrace = currentTrace;
+		this.bMode = false;
 	}
 
 	private static ErrorItem getParseErrorFromException(final Exception e) {
@@ -70,19 +75,25 @@ public class BInterpreter implements Executable {
 
 	@Override
 	public ConsoleExecResult exec(String source) {
-		if (":clear".equals(source)) {
+		if (source == null || source.isBlank()) {
+			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
+		} else if (":clear".equals(source)) {
 			return new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR);
 		}
-		if (source.trim().isEmpty()) {
-			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
-		}
-		Trace trace = currentTrace.get();
+
+		Trace trace = this.currentTrace.get();
 		if (trace == null) {
 			trace = this.getDefaultTrace();
 		}
-		final IEvalElement formula;
+
+		IEvalElement formula;
 		try {
-			formula = trace.getModel().parseFormula(source, FormulaExpand.EXPAND);
+			AbstractModel model = trace.getModel();
+			if (model instanceof TLAModel tlaModel && this.bMode) {
+				formula = tlaModel.parseFormulaAsClassicalB(source, FormulaExpand.EXPAND);
+			} else {
+				formula = model.parseFormula(source, FormulaExpand.EXPAND);
+			}
 
 			// force parsing of the string representation because the eventb implementation is lazy
 			// this also helps with error messages because eventb formulas swallow parse errors
@@ -94,17 +105,28 @@ public class BInterpreter implements Executable {
 			LOGGER.info("Failed to parse B console user input", e);
 			return new ConsoleExecResult("", formatParseException(source, e), ConsoleExecResultType.ERROR);
 		}
-		final AbstractEvalResult res;
+
+		AbstractEvalResult res;
 		try {
 			res = trace.evalCurrent(formula);
 		} catch (Exception e) {
 			LOGGER.info("B evaluation failed", e);
 			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
 		}
+
 		return new ConsoleExecResult("", res.toString(), res instanceof EvalResult ? ConsoleExecResultType.PASSED : ConsoleExecResultType.ERROR);
 	}
 
 	public List<? extends BCCItem> getSuggestions(String text) {
+		// TODO: we need to use the currently selected language instead of the global model language
 		return BCodeCompletion.doCompletion(this.currentTrace.getStateSpace(), text, false);
+	}
+
+	public boolean isBMode() {
+		return this.bMode;
+	}
+
+	public void setBMode(boolean bMode) {
+		this.bMode = bMode;
 	}
 }

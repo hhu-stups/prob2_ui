@@ -79,7 +79,7 @@ public final class BCodeCompletion {
 				allowUnicodeConversions = true;
 				allowLatex = true;
 			} else if (!inEditor && (m instanceof AlloyModel || m instanceof XTLModel || m instanceof ZModel)) {
-				// the console is in Classical B mode
+				// TODO: check if the console is in Classical B mode?
 				allowUnicodeConversions = true;
 				allowLatex = true;
 			}

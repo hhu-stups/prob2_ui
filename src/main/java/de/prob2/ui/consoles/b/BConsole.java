@@ -82,4 +82,9 @@ public final class BConsole extends Console {
 	private void triggerCodeCompletion() {
 		this.getPositionInInput().ifPresent(pos -> this.codeCompletion.trigger());
 	}
+
+	@Override
+	public BInterpreter getInterpreter() {
+		return (BInterpreter) super.getInterpreter();
+	}
 }

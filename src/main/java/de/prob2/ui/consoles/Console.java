@@ -668,6 +668,10 @@ public abstract class Console extends StyleClassedTextArea {
 		return textBeforeCaret;
 	}
 
+	public Executable getInterpreter() {
+		return this.interpreter;
+	}
+
 	protected abstract class AbstractParentWithEditableText<T extends CodeCompletionItem> implements ParentWithEditableText<T> {
 
 		@Override
