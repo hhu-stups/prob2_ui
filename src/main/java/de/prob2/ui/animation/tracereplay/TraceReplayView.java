@@ -89,7 +89,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
 			addTestsItem.setOnAction(event -> {
 				TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
-				traceTestView.loadReplayTrace(this.getItem());
+				traceTestView.loadReplayTrace(currentProject.get(), currentProject.getCurrentMachine(), this.getItem());
 				traceTestView.show();
 			});
 

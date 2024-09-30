@@ -31,24 +31,12 @@ public final class TraceChecker {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceChecker.class);
 
 	private final CurrentTrace currentTrace;
-	private final TraceFileHandler traceFileHandler;
 	private final Provider<ReplayedTraceStatusAlert> replayedAlertProvider;
 
 	@Inject
-	private TraceChecker(CurrentTrace currentTrace, TraceFileHandler traceFileHandler, Provider<ReplayedTraceStatusAlert> replayedAlertProvider) {
+	private TraceChecker(CurrentTrace currentTrace, Provider<ReplayedTraceStatusAlert> replayedAlertProvider) {
 		this.currentTrace = currentTrace;
-		this.traceFileHandler = traceFileHandler;
 		this.replayedAlertProvider = replayedAlertProvider;
-	}
-
-	public void check(ReplayTrace replayTrace) {
-		StateSpace stateSpace = currentTrace.getStateSpace();
-		try {
-			checkNoninteractive(replayTrace, stateSpace);
-			setCurrentTraceAfterReplay(replayTrace);
-		} catch (RuntimeException exc) {
-			Platform.runLater(() -> traceFileHandler.showLoadError(replayTrace, exc));
-		}
 	}
 
 	private static void checkNoninteractiveInternal(ReplayTrace replayTrace, StateSpace stateSpace) {
