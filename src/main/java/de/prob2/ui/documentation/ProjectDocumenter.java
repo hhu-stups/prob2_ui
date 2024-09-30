@@ -20,10 +20,10 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -136,7 +136,7 @@ public class ProjectDocumenter {
 		Files.createDirectories(directory.resolve(htmlDirectory));
 		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
 		StateSpace stateSpace = currentProject.loadMachineWithConfirmation(machine).join().getStateSpace();
-		TraceChecker.checkNoninteractive(trace, stateSpace);
+		trace.execute(new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, null));
 		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getTrace(), directory.resolve(htmlPath));
 		stateSpace.execute(cmd);
 		return htmlPath.toString();
