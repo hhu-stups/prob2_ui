@@ -119,7 +119,7 @@ public class ProjectDocumenter {
 
 	private VelocityContext getVelocityContext() {
 		VelocityContext context = new VelocityContext();
-		context.put("project",project);
+		context.put("project", project.get());
 		context.put("documenter",this);
 		context.put("machines", machines);
 		context.put("modelchecking", modelchecking);
