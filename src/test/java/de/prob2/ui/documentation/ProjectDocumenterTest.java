@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -24,7 +25,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
@@ -70,11 +70,18 @@ class ProjectDocumenterTest {
 		trafficLight.addValidationTask(symbolicCheckingFormulaItem);
 		trafficLight.getLTLPatterns().add(ltlPatternItem);
 
-		Mockito.when(currentProject.getName()).thenReturn("Projekt Name");
+		Project project = new Project(
+			"Projekt Name",
+			"",
+			Collections.singletonList(trafficLight),
+			Collections.emptyList(),
+			Collections.emptyList(),
+			Project.metadataBuilder().build()
+		);
+		Mockito.when(currentProject.getName()).thenReturn(project.getName());
 		Mockito.when(currentProject.getLocation()).thenReturn(Paths.get(""));
-		Mockito.when(currentProject.getDescription()).thenReturn("");
-		Mockito.when(currentProject.get()).thenReturn(Mockito.mock(Project.class));
-		Mockito.when(currentProject.get().getPreference(ArgumentMatchers.any(String.class))).thenReturn(Preference.DEFAULT);
+		Mockito.when(currentProject.getDescription()).thenReturn(project.getDescription());
+		Mockito.when(currentProject.get()).thenReturn(project);
 	}
 
 	@BeforeEach
