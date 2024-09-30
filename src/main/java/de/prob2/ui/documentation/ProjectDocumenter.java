@@ -38,11 +38,11 @@ public class ProjectDocumenter {
 	private final boolean symbolic;
 	private final boolean makePdf;
 	private final List<Machine> machines;
-	private final CurrentProject project;
+	private final CurrentProject currentProject;
 
 	@Inject
 	public ProjectDocumenter(
-		CurrentProject project,
+		CurrentProject currentProject,
 		Locale locale,
 		I18n i18n,
 		boolean modelchecking,
@@ -53,7 +53,7 @@ public class ProjectDocumenter {
 		Path dir,
 		String filename
 	) {
-		this.project = project;
+		this.currentProject = currentProject;
 		this.locale = locale;
 		this.i18n = i18n;
 		this.modelchecking = modelchecking;
@@ -119,7 +119,7 @@ public class ProjectDocumenter {
 
 	private VelocityContext getVelocityContext() {
 		VelocityContext context = new VelocityContext();
-		context.put("project", project.get());
+		context.put("project", currentProject.get());
 		context.put("documenter",this);
 		context.put("machines", machines);
 		context.put("modelchecking", modelchecking);
@@ -135,7 +135,7 @@ public class ProjectDocumenter {
 		Path htmlDirectory = getHtmlDirectory(machine);
 		Files.createDirectories(directory.resolve(htmlDirectory));
 		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
-		StateSpace stateSpace = project.loadMachineWithConfirmation(machine).join().getStateSpace();
+		StateSpace stateSpace = currentProject.loadMachineWithConfirmation(machine).join().getStateSpace();
 		TraceChecker.checkNoninteractive(trace, stateSpace);
 		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getTrace(), directory.resolve(htmlPath));
 		stateSpace.execute(cmd);
