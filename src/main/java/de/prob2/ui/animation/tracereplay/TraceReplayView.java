@@ -120,7 +120,6 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
-	private final TraceChecker traceChecker;
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final Injector injector;
@@ -138,13 +137,12 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 	@Inject
 	private TraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final DisablePropertyController disablePropertyController,
-	                        final CurrentTrace currentTrace, final CheckingExecutors checkingExecutors, final TraceChecker traceChecker, final I18n i18n,
+	                        final CurrentTrace currentTrace, final CheckingExecutors checkingExecutors, final I18n i18n,
 	                        final FileChooserManager fileChooserManager, final Injector injector, final TraceFileHandler traceFileHandler) {
 		super(stageManager, i18n, disablePropertyController, currentTrace, currentProject, checkingExecutors);
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.traceChecker = traceChecker;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.injector = injector;
@@ -200,7 +198,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@Override
 	protected CompletableFuture<?> executeItemImpl(ReplayTrace item, CheckingExecutors executors, ExecutionContext context) {
 		return super.executeItemImpl(item, executors, context).thenCompose(res ->
-			traceChecker.askKeepReplayedTrace(item)
+			traceFileHandler.askKeepReplayedTrace(item)
 		).thenApply(trace -> {
 			trace.ifPresent(currentTrace::set);
 			return null;

@@ -223,8 +223,6 @@ public final class TraceTestView extends Stage {
 
 	private final TraceFileHandler traceFileHandler;
 
-	private final TraceChecker traceChecker;
-
 	private Project project;
 
 	private Machine machine;
@@ -244,8 +242,7 @@ public final class TraceTestView extends Stage {
 		I18n i18n,
 		CurrentTrace currentTrace,
 		CheckingExecutors checkingExecutors,
-		TraceFileHandler traceFileHandler,
-		TraceChecker traceChecker
+		TraceFileHandler traceFileHandler
 	) {
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
@@ -253,7 +250,6 @@ public final class TraceTestView extends Stage {
 		this.currentTrace = currentTrace;
 		this.checkingExecutors = checkingExecutors;
 		this.traceFileHandler = traceFileHandler;
-		this.traceChecker = traceChecker;
 		this.replayTrace = new SimpleObjectProperty<>();
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}
@@ -400,7 +396,7 @@ public final class TraceTestView extends Stage {
 		this.saveTrace();
 		ReplayTrace r = replayTrace.get();
 		r.execute(checkingExecutors, buildExecutionContext()).thenCompose(res ->
-			traceChecker.askKeepReplayedTrace(r)
+			traceFileHandler.askKeepReplayedTrace(r)
 		).thenApply(trace -> {
 			trace.ifPresent(currentTrace::set);
 			return null;
