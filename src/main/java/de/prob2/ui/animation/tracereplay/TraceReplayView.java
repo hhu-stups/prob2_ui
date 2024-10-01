@@ -200,8 +200,11 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@Override
 	protected CompletableFuture<?> executeItemImpl(ReplayTrace item, CheckingExecutors executors, ExecutionContext context) {
 		return super.executeItemImpl(item, executors, context).thenCompose(res ->
-			traceChecker.setCurrentTraceAfterReplay(item)
-		).exceptionally(exc -> {
+			traceChecker.askKeepReplayedTrace(item)
+		).thenApply(trace -> {
+			trace.ifPresent(currentTrace::set);
+			return null;
+		}).exceptionally(exc -> {
 			Platform.runLater(() -> traceFileHandler.showLoadError(item, exc));
 			// Do not pass on the exception - otherwise the default exception handling in CheckingViewBase will display the same exception again.
 			return null;

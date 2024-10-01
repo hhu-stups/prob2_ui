@@ -400,8 +400,11 @@ public final class TraceTestView extends Stage {
 		this.saveTrace();
 		ReplayTrace r = replayTrace.get();
 		r.execute(checkingExecutors, buildExecutionContext()).thenCompose(res ->
-			traceChecker.setCurrentTraceAfterReplay(r)
-		).exceptionally(exc -> {
+			traceChecker.askKeepReplayedTrace(r)
+		).thenApply(trace -> {
+			trace.ifPresent(currentTrace::set);
+			return null;
+		}).exceptionally(exc -> {
 			Platform.runLater(() -> traceFileHandler.showLoadError(r, exc));
 			return null;
 		});
