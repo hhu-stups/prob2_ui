@@ -1,5 +1,7 @@
 package de.prob2.ui.animation.tracereplay;
 
+import java.util.concurrent.CompletableFuture;
+
 import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
@@ -21,7 +23,8 @@ public final class TraceChecker {
 		this.replayedAlertProvider = replayedAlertProvider;
 	}
 
-	private void showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
+	private CompletableFuture<?> showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
+		CompletableFuture<?> future = new CompletableFuture<>();
 		Platform.runLater(() -> {
 			ReplayedTraceStatusAlert alert = replayedAlertProvider.get();
 			alert.initReplayTrace(replayTrace);
@@ -30,16 +33,19 @@ public final class TraceChecker {
 					currentTrace.set(replayTrace.getTrace());
 				}
 			});
+			future.complete(null);
 		});
+		return future;
 	}
 
-	public void setCurrentTraceAfterReplay(final ReplayTrace replayTrace) {
+	public CompletableFuture<?> setCurrentTraceAfterReplay(final ReplayTrace replayTrace) {
 		// set the current trace if no error has occurred. Otherwise leave the decision to the user
 		var traceResult = (ReplayTrace.Result)replayTrace.getResult();
 		if (!traceResult.getReplayed().getErrors().isEmpty()) {
-			showTraceReplayCompleteFailed(replayTrace);
+			return showTraceReplayCompleteFailed(replayTrace);
 		} else {
 			currentTrace.set(traceResult.getTrace());
+			return CompletableFuture.completedFuture(null);
 		}
 	}
 }

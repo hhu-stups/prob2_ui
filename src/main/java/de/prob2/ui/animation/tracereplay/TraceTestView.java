@@ -399,12 +399,11 @@ public final class TraceTestView extends Stage {
 		}
 		this.saveTrace();
 		ReplayTrace r = replayTrace.get();
-		r.execute(checkingExecutors, buildExecutionContext()).whenComplete((res, exc) -> {
-			if (exc == null) {
-				traceChecker.setCurrentTraceAfterReplay(r);
-			} else {
-				Platform.runLater(() -> traceFileHandler.showLoadError(r, exc));
-			}
+		r.execute(checkingExecutors, buildExecutionContext()).thenCompose(res ->
+			traceChecker.setCurrentTraceAfterReplay(r)
+		).exceptionally(exc -> {
+			Platform.runLater(() -> traceFileHandler.showLoadError(r, exc));
+			return null;
 		});
 		this.close();
 	}
