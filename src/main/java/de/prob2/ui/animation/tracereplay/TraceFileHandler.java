@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -32,7 +33,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
@@ -44,6 +44,8 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -317,13 +319,15 @@ public final class TraceFileHandler {
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
-			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
-				csvWriter.header("Position", "Transition");
-
+			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+				.setHeader("Position", "Transition")
+				.build();
+			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				int i = 1;
 				for (Transition transition : trace.getTransitionList()) {
 					String name = OperationItem.forTransitionFast(trace.getStateSpace(), transition).toPrettyString(true);
-					csvWriter.record(i++, name);
+					csvPrinter.printRecord(i, name);
+					i++;
 				}
 			}
 		}

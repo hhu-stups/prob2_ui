@@ -1,7 +1,7 @@
 package de.prob2.ui.simulation;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +15,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -36,6 +35,9 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 
 @FXMLInjected
 @Singleton
@@ -191,12 +193,13 @@ public final class SimulationTracesView extends Stage {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
-			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
-				csvWriter.header("Status", "Trace", "Trace Length", "Estimated Value");
-
+			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+				.setHeader("Status", "Trace", "Trace Length", "Estimated Value")
+				.build();
+			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				int i = 1;
 				for (SimulationTraceItem traceItem : traceTableView.getItems()) {
-					csvWriter.record(traceItem.getStatus(), String.format("Trace %s", i), traceItem.getTraceLength(), traceItem.getEstimatedValue());
+					csvPrinter.printRecord(traceItem.getStatus(), String.format("Trace %s", i), traceItem.getTraceLength(), traceItem.getEstimatedValue());
 				}
 			}
 		}

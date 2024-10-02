@@ -1,7 +1,7 @@
 package de.prob2.ui.chart;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
@@ -58,6 +57,8 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -272,10 +273,10 @@ public final class HistoryChartStage extends Stage {
 				return;
 			}
 
-			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
+			try (CSVPrinter csvPrinter = CSVFormat.DEFAULT.print(path, StandardCharsets.UTF_8)) {
 				for (XYChart.Series<Number, Number> series : chart.getData()) {
 					for (XYChart.Data<Number, Number> entry : series.getData()) {
-						csvWriter.record(entry.getXValue(), entry.getYValue());
+						csvPrinter.printRecord(entry.getXValue(), entry.getYValue());
 					}
 				}
 			} catch (IOException ex) {

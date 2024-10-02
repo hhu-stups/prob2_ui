@@ -1,5 +1,6 @@
 package de.prob2.ui.dynamic;
 
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -18,7 +19,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
@@ -39,6 +39,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.util.Builder;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -105,10 +107,12 @@ public final class DynamicTableView extends BorderPane implements Builder<Dynami
 
 		try {
 			Files.createDirectories(path.getParent());
-			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
-				csvWriter.header(this.currentTable.get().getHeader());
+			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+				.setHeader(this.currentTable.get().getHeader().toArray(new String[0]))
+				.build();
+			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				for (List<String> row : this.currentTable.get().getRows()) {
-					csvWriter.record(row);
+					csvPrinter.printRecord(row);
 				}
 			}
 		} catch (Exception e) {
