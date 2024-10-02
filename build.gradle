@@ -138,7 +138,6 @@ dependencies {
 	testImplementation platform('org.junit:junit-bom:5.10.3')
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
 	testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
-	testImplementation group: 'org.assertj', name : 'assertj-core', version: '3.26.3'
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.12.0'
 }
 

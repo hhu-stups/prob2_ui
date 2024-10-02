@@ -10,7 +10,8 @@ import de.prob.model.brules.RulesModelFactory;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RegexSyntaxHighlightingTest {
 
@@ -19,8 +20,8 @@ class RegexSyntaxHighlightingTest {
 		var pattern = Pattern.compile("a|ab");
 		var input = "ab";
 		var matcher = pattern.matcher(input);
-		assertThat(matcher.find()).isTrue();
-		assertThat(matcher.group()).isEqualTo("a");
+		assertTrue(matcher.find());
+		assertEquals("a", matcher.group());
 	}
 
 	@Test
@@ -28,8 +29,8 @@ class RegexSyntaxHighlightingTest {
 		var pattern = Pattern.compile("ab|a");
 		var input = "ab";
 		var matcher = pattern.matcher(input);
-		assertThat(matcher.find()).isTrue();
-		assertThat(matcher.group()).isEqualTo("ab");
+		assertTrue(matcher.find());
+		assertEquals("ab", matcher.group());
 	}
 
 	@Test
@@ -38,7 +39,7 @@ class RegexSyntaxHighlightingTest {
 				.add(Set.of("editor_ctrlkeyword"), 6)
 			.create();
 		var actual = RegexSyntaxHighlighting.computeHighlighting(RulesModelFactory.class, "RULEID");
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -47,7 +48,7 @@ class RegexSyntaxHighlightingTest {
 				.add(Set.of("editor_ignored"), 6)
 				.create();
 		var actual = RegexSyntaxHighlighting.computeHighlighting(RulesModelFactory.class, "STRING");
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -56,7 +57,7 @@ class RegexSyntaxHighlightingTest {
 				.add(Set.of("editor_ignored"), 2)
 				.create();
 		var actual = RegexSyntaxHighlighting.computeHighlighting(RulesModelFactory.class, "IN");
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -73,7 +74,7 @@ class RegexSyntaxHighlightingTest {
 			c.addAll(b);
 			return c;
 		});
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -90,6 +91,6 @@ class RegexSyntaxHighlightingTest {
 			c.addAll(b);
 			return c;
 		});
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 }
