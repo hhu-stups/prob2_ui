@@ -98,6 +98,14 @@ configurations {
 		}
 	}
 
+	javafxMacArm {
+		attributes {
+			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.MACOS))
+			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.ARM64))
+		}
+	}
+
 	javafxLinux {
 		attributes {
 			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
@@ -157,7 +165,7 @@ final javafxModules = [
 javafx {
 	version = javafxVersion
 	modules = javafxModules
-	configurations += ["javafxWin", "javafxMac", "javafxLinux"]
+	configurations += ["javafxWin", "javafxMac", "javafxMacArm", "javafxLinux"]
 }
 
 final generatedResourcesDir = layout.buildDirectory.dir("generated-src/main/resources").get().asFile
@@ -276,6 +284,7 @@ task multiPlatformShadowJar(type: ShadowJar) {
 		project.configurations.runtimeClasspath,
 		project.configurations.javafxWin,
 		project.configurations.javafxMac,
+		project.configurations.javafxMacArm,
 		project.configurations.javafxLinux,
 	]
 }
