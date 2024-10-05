@@ -21,6 +21,7 @@ import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.command.VisBPerformClickCommand;
+import de.prob.animator.domainobjects.VisBClickMetaInfos;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -187,7 +188,8 @@ public final class VisBController {
 
 		this.executingEvent.set(true);
 		return cliExecutor.submit(() -> {
-			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
+			VisBClickMetaInfos metaInfos = VisBClickMetaInfos.DEFAULT.withMetaKey(metaKey).withPageX(pageX).withPageY(pageY).withShiftKey(shiftKey);
+			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, metaInfos, trace.getCurrentState().getId());
 			trace.getStateSpace().execute(performClickCommand);
 			List<Transition> transitions = performClickCommand.getTransitions();
 
