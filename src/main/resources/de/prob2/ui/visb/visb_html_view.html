@@ -110,18 +110,20 @@
 			});
 		}
 
+		// all entries of visb_vars are added to the meta info of each click as jsVars: STRING +-> STRING.
+		let visb_vars = {};
 		function addClickEvent(visBConnector, id, eventName, hovers) {
 			const obj = checkSvgId(id, "VisB Event " + eventName);
 			if (obj !== null) {
-				obj.onclick = function(event) {
-					visBConnector.click(this.id,event.pageX,event.pageY,event.shiftKey,event.metaKey);
-					// we could pass event.altKey, event.ctrlKey, event.metaKey, event.shiftKey, event.timeStamp
+				obj.addEventListener('click', (event) => {
+					visBConnector.click(obj.id,event.pageX,event.pageY,event.altKey,event.ctrlKey,event.metaKey,event.shiftKey,
+							JSON.stringify(visb_vars));
+					// we could pass event.timeStamp
 					// event.which: 1=left mouse button, 2, 3
 					// event.clientX,event.clientY, screenX, screenY : less useful probably
-				};
-				
+				});
 				// attach mouseover/mouseout event handlers to put event into visb_debug_messages text field
-				
+
 				// Convert Java VisBHover objects into JavaScript objects.
 				// For some reason, trying to use the original VisBHover objects
 				// inside onmouseover/onmouseout sometimes causes errors.
@@ -134,7 +136,7 @@
 						leaveVal: hover.getHoverLeaveVal(),
 					});
 				}
-				
+
 				obj.onmouseover = function(ev) {
 					for (const hover of hoversJS) {
 						changeAttribute(hover.id, hover.attr, hover.enterVal);

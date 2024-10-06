@@ -10,12 +10,15 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.imageio.ImageIO;
 
 import com.google.common.io.CharStreams;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -24,6 +27,7 @@ import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ExportVisBHtmlForStates;
 import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
+import de.prob.animator.domainobjects.VisBClickMetaInfos;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBExportOptions;
 import de.prob.animator.domainobjects.VisBHover;
@@ -89,16 +93,27 @@ public final class VisBView extends BorderPane {
 		 * Whenever a svg item, that has an event in the JSON / VisB file is clicked, this method redirects the click towards the {@link VisBController}
 		 * @param id of the svg item, that is clicked
 		 */
-		public void click(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+		public void click(String id, int pageX, int pageY, boolean altKey, boolean ctrlKey, boolean metaKey,
+		                  boolean shiftKey, String jsVars) {
 			// probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
-			LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with shift {} cmd/meta {}", id, pageX, pageY, shiftKey, metaKey); // 1=left, 2=middle, 3=right
+			JsonObject visbVarsJson = new Gson().fromJson(jsVars, JsonObject.class);
+			Map<String,String> jsVarsMap = new HashMap<>();
+			for (String key : visbVarsJson.keySet()) {
+				try {
+					jsVarsMap.put(key, visbVarsJson.get(key).getAsString());
+				} catch (UnsupportedOperationException e) {
+					jsVarsMap.put(key, visbVarsJson.get(key).toString());
+				}
+			}
+			LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with alt {} ctrl {} cmd/meta {} shift {} and JS vars {}",
+					id, pageX, pageY, altKey, ctrlKey, metaKey, shiftKey, jsVarsMap); // 1=left, 2=middle, 3=right
 			try {
 				if (visBController.isExecutingEvent()) {
 					LOGGER.debug("Ignoring click because another event is currently being executed");
 					return;
 				}
-
-				visBController.executeEvent(id, pageX, pageY, shiftKey, metaKey).exceptionally(exc -> {
+				VisBClickMetaInfos metaInfos = new VisBClickMetaInfos(altKey,ctrlKey,metaKey,pageX,pageY,shiftKey,jsVarsMap);
+				visBController.executeEvent(id, metaInfos).exceptionally(exc -> {
 					stageManager.showUnhandledExceptionAlert(exc, getScene().getWindow());
 					return null;
 				});
