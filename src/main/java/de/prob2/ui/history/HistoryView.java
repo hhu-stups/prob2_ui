@@ -24,14 +24,14 @@ import javafx.scene.Cursor;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.BorderPane;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 @FXMLInjected
 @Singleton
-public final class HistoryView extends VBox {
+public final class HistoryView extends BorderPane {
 	private final class TransitionRow extends TableRow<HistoryItem> {
 		private TransitionRow() {
 			super();
