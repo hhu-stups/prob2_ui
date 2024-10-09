@@ -55,7 +55,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -192,11 +191,11 @@ public final class HistoryChartStage extends Stage {
 				}
 			}
 			this.updateCharts();
-			this.updateFormulaCodeList();
+			this.updateFormulaCodeList(this.currentProject.getCurrentMachine());
 		});
 
-		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadFormulas(currentProject.getCurrentMachine()));
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> loadFormulas(to));
+		this.loadFormulas(this.currentProject.getCurrentMachine());
 
 		this.removeButton.disableProperty()
 				.bind(Bindings.isEmpty(this.formulaList.getSelectionModel().getSelectedIndices()));
@@ -298,24 +297,30 @@ public final class HistoryChartStage extends Stage {
 
 	@FXML
 	private void handleAdd() {
+		// TODO: add to machine.getHistoryChartItems() directly
 		this.formulaList.getItems().add(new ClassicalB("0"));
 		this.formulaList.edit(this.formulaList.getItems().size() - 1);
-		updateFormulaCodeList();
 	}
 
 	@FXML
 	private void handleRemove() {
+		// TODO: remove from machine.getHistoryChartItems() directly
 		this.formulaList.getItems().remove(this.formulaList.getSelectionModel().getSelectedIndex());
-		updateFormulaCodeList();
 	}
 
-	private void updateFormulaCodeList() {
-		ArrayList<String> formulaCodeList = new ArrayList<>();
-		this.formulaList.getItems().forEach(b -> formulaCodeList.add(b.getCode()));
-		Machine machine = this.currentProject.currentMachineProperty().get();
+	private void loadFormulas(Machine machine) {
+		if (machine == null) {
+			this.formulaList.getItems().clear();
+		} else {
+			this.formulaList.getItems().setAll(machine.getHistoryChartItems().stream().map(ClassicalB::new).toList());
+		}
+	}
+
+	private void updateFormulaCodeList(Machine machine) {
 		if (machine == null) {
 			return;
 		}
+		List<String> formulaCodeList = this.formulaList.getItems().stream().map(ClassicalB::getCode).toList();
 		machine.getHistoryChartItems().setAll(formulaCodeList);
 	}
 
@@ -403,16 +408,6 @@ public final class HistoryChartStage extends Stage {
 			if (this.separateChartsCheckBox.isSelected()) {
 				this.chartsPane.getChildren().add(i, separateChart);
 			}
-		}
-	}
-
-	private void loadFormulas(Machine machine) {
-		this.formulaList.getItems().clear();
-		if (machine == null) {
-			return;
-		}
-		if (!machine.getHistoryChartItems().isEmpty()) {
-			machine.getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s)));
 		}
 	}
 
