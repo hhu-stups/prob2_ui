@@ -65,6 +65,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 import org.controlsfx.glyphfont.FontAwesome;
@@ -75,7 +76,7 @@ import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
-public final class OperationsView extends VBox {
+public final class OperationsView extends BorderPane {
 	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
