@@ -61,7 +61,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.StackPane;
+import javafx.scene.layout.BorderPane;
 
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
@@ -70,7 +70,7 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public final class StatesView extends StackPane {
+public final class StatesView extends BorderPane {
 
 	private static final List<String> TOP_LEVEL_PREDICATES = Arrays.asList("inv", "axioms");
 
