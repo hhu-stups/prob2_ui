@@ -10,47 +10,61 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.MenuButton?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.geometry.Insets?>
+
 <fx:root type="MachinesTab" text="%project.machines.machinesTab.title" closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<VBox stylesheets="@/prob.css">
-		<HBox styleClass="border" VBox.vgrow="NEVER">
-			<Spacer/>
-			<MenuButton contentDisplay="GRAPHIC_ONLY">
-				<items>
-					<MenuItem text="%project.machines.machinesTab.buttons.add.createNewMachine" onAction="#createMachine"/>
-					<MenuItem text="%project.machines.machinesTab.buttons.add.addExistingMachine" onAction="#addMachine"/>
-				</items>
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
-				</graphic>
-			</MenuButton>
-			<Button fx:id="moveUpBtn" disable="true" onAction="#moveUp">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="ARROW_UP" bindableFontSize="${fontSize.fontSize * 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.moveUp" />
-				</tooltip>
-			</Button>
-			<Button fx:id="moveDownBtn" disable="true" onAction="#moveDown">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="ARROW_DOWN" bindableFontSize="${fontSize.fontSize * 2}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.moveDown" />
-				</tooltip>
-			</Button>
-			<HelpButton fx:id="helpButton" />
-		</HBox>
-		<ListView fx:id="machinesList" styleClass="no-border" prefHeight="200.0" VBox.vgrow="ALWAYS">
-			<placeholder>
-				<Label text="%project.machines.machinesTab.noMachines" />
-			</placeholder>
-		</ListView>
-	</VBox>
+	<BorderPane stylesheets="@/prob.css">
+		<top>
+			<ToolBar styleClass="border">
+				<padding>
+					<Insets left="5.0" right="5.0"/>
+				</padding>
+				<Spacer/>
+				<MenuButton contentDisplay="GRAPHIC_ONLY">
+					<items>
+						<MenuItem text="%project.machines.machinesTab.buttons.add.createNewMachine"
+								  onAction="#createMachine"/>
+						<MenuItem text="%project.machines.machinesTab.buttons.add.addExistingMachine"
+								  onAction="#addMachine"/>
+					</items>
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE"
+									   bindableFontSize="${fontSize.fontSize * 2}"/>
+					</graphic>
+				</MenuButton>
+				<Button fx:id="moveUpBtn" disable="true" onAction="#moveUp">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="ARROW_UP"
+									   bindableFontSize="${fontSize.fontSize * 2}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%common.moveUp"/>
+					</tooltip>
+				</Button>
+				<Button fx:id="moveDownBtn" disable="true" onAction="#moveDown">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="ARROW_DOWN"
+									   bindableFontSize="${fontSize.fontSize * 2}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%common.moveDown"/>
+					</tooltip>
+				</Button>
+				<HelpButton fx:id="helpButton"/>
+			</ToolBar>
+		</top>
+		<center>
+			<ListView fx:id="machinesList" styleClass="no-border" prefHeight="200.0">
+				<placeholder>
+					<Label text="%project.machines.machinesTab.noMachines"/>
+				</placeholder>
+			</ListView>
+		</center>
+	</BorderPane>
 </fx:root>
