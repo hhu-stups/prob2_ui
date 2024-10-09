@@ -1237,12 +1237,6 @@
 }
 
 
-.visb-location {
-	-fx-font-family: ARIAL;
-	-fx-font-style: italic;
-	-fx-font-size: 0.9em;
-}
-
 /* ==================== TRACE DIFF ======================== */
 .trace-diff-cell {
 	-fx-text-fill: black;
