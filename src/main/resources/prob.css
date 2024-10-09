@@ -297,7 +297,6 @@
 .list-cell,
 .tree-cell {
 	-fx-cell-size: 1.5em;
-	-fx-padding: 0em 1em 0.05em 1em;
 }
 .list-cell:odd,
 .tree-cell:odd {
@@ -777,7 +776,6 @@
 .table-view .table-cell,
 .tree-table-view .tree-table-cell {
 	-fx-border-color: transparent;
-	-fx-padding: 0em 0.25em 0.05em 0.25em;
 }
 .table-row-cell:disabled {
 	-fx-text-fill: -prob-lightgrey;
