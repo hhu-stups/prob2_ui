@@ -34,18 +34,18 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @FXMLInjected
-public abstract class CheckingViewBase<T extends ISelectableTask> extends ScrollPane {
+public abstract class CheckingViewBase<T extends ISelectableTask> extends BorderPane {
 	protected class RowBase extends TableRow<T> {
 		protected final ContextMenu contextMenu;
 		protected final MenuItem executeMenuItem;
