@@ -27,14 +27,14 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public final class ProofObligationView extends AnchorPane {
+public final class ProofObligationView extends BorderPane {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProofObligationView.class);
 
