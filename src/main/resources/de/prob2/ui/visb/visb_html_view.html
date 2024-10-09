@@ -80,7 +80,7 @@
 		
 		function changeElementAttribute(element, attribute, value) {
 			if (attribute === "text") {
-				if (element.tagName === 'foreignObject') {
+				if (element.closest('foreignObject')) {
 					element.innerHTML = value;
 				} else {
 					element.textContent = value;
