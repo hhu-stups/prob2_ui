@@ -21,6 +21,7 @@
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
+	<!-- this split pane is used to dynamically add the description text field -->
 	<SplitPane fx:id="splitPane" orientation="VERTICAL">
 		<VBox>
 			<HBox styleClass="border" alignment="CENTER">
