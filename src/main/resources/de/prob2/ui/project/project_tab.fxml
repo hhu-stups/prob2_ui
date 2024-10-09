@@ -8,15 +8,18 @@
 <?import javafx.scene.control.TextArea?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
+
 <fx:root type="ProjectTab" text="%project.projectTab.title" closable="false" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox stylesheets="@/prob.css">
-		<HBox styleClass="border" alignment="CENTER">
+	<BorderPane stylesheets="@/prob.css">
+		<top>
+			<HBox styleClass="border" alignment="CENTER">
 			<padding>
-				<Insets left="5.0"/>
+				<Insets left="5.0" right="5.0"/>
 			</padding>
 			<StackPane HBox.hgrow="ALWAYS">
 				<Label fx:id="projectNameLabel" styleClass="title" maxWidth="Infinity"/>
@@ -24,23 +27,27 @@
 			</StackPane>
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 		</HBox>
-		<StackPane fx:id="projectDescriptionPane" VBox.vgrow="ALWAYS">
-			<ScrollPane hbarPolicy="NEVER">
-				<padding>
-					<Insets topRightBottomLeft="5.0"/>
-				</padding>
-				<Text fx:id="projectDescriptionText"/>
-			</ScrollPane>
-			<TextArea fx:id="projectDescriptionTextArea" managed="false" visible="false"/>
-		</StackPane>
-		<Label fx:id="locationLabel" styleClass="project-location">
+		</top>
+		<center>
+			<StackPane fx:id="projectDescriptionPane" VBox.vgrow="ALWAYS">
+				<ScrollPane hbarPolicy="NEVER">
+					<padding>
+						<Insets topRightBottomLeft="5.0"/>
+					</padding>
+					<Text fx:id="projectDescriptionText"/>
+				</ScrollPane>
+				<TextArea fx:id="projectDescriptionTextArea" managed="false" visible="false"/>
+			</StackPane>
+		</center>
+		<bottom>
+			<Label fx:id="locationLabel" styleClass="project-location">
 			<tooltip>
 				<Tooltip text="${locationLabel.text}"/>
 			</tooltip>
 			<padding>
 				<Insets bottom="4" top="2" left="4" right="4" />
 			</padding>
-		</Label>
-	</VBox>
+			</Label>
+		</bottom>
+	</BorderPane>
 </fx:root>
-
