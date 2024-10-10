@@ -33,6 +33,7 @@ import de.prob.model.eventb.ProofObligation;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
+import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
@@ -466,11 +467,6 @@ public final class Machine {
 		this.allProofObligations.setAll(updatedAllProofObligations);
 	}
 
-	public void updateAllProofObligationsFromModel(AbstractModel model) {
-		this.lastModelProofObligations = getProofObligationsFromModel(model);
-		this.updateAllProofObligations();
-	}
-
 	@JsonIgnore
 	public CachedEditorState getCachedEditorState() {
 		return cachedEditorState;
@@ -494,13 +490,26 @@ public final class Machine {
 		this.getValidationTasks().forEach(IValidationTask::resetAnimatorDependentState);
 	}
 
-	public void resetStatus() {
+	public void updateAfterLoad(Trace trace) {
+		List<Path> allFiles = trace.getModel().getAllFiles();
+		this.reinitPatternManager();
+		this.updateModifiedTimesAndResetIfChanged(allFiles);
+		this.updateAllProofObligationsFromModel(trace.getModel());
+	}
+
+	private void resetStatus() {
 		for (var vt : this.getValidationTasks()) {
 			vt.reset();
 		}
 
-		this.lastModelProofObligations.clear();
+		// these will be set again in "updateAllProofObligationsFromModel"
+		this.lastModelProofObligations = Collections.emptyList();
 		this.allProofObligations.clear();
+	}
+
+	private void updateAllProofObligationsFromModel(AbstractModel model) {
+		this.lastModelProofObligations = getProofObligationsFromModel(model);
+		this.updateAllProofObligations();
 	}
 
 	private static Map<Path, FileTime> readFileModifiedTimes(List<Path> files) throws IOException {
@@ -511,7 +520,7 @@ public final class Machine {
 		return modifiedTimes;
 	}
 
-	public void updateModifiedTimesAndResetIfChanged(List<Path> newSourceFiles) {
+	private void updateModifiedTimesAndResetIfChanged(List<Path> newSourceFiles) {
 		Map<Path, FileTime> newModifiedTimes;
 		try {
 			newModifiedTimes = readFileModifiedTimes(newSourceFiles);
