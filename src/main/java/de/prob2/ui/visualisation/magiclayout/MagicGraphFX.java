@@ -142,11 +142,11 @@ public class MagicGraphFX implements MagicGraphI {
 						vertex.setType(toVertexType(node.getShape()));
 					});
 				} catch (TranslationException e) {
-			   // This happens for symbolic values, translation is also attempted in translateMap
-			   System.out.println("Could not translate value (probably symbolic) of node " + node.getName() + " for setting style in Magic Layout");
-				//	stageManager.makeExceptionAlert(e, "",
-				//			"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content", node.getName(),
-				//			node.getExpression()).showAndWait();
+					// This happens for symbolic values, translation is also attempted in translateMap
+					System.out.println("Could not translate value (probably symbolic) of node " + node.getName() + " for setting style in Magic Layout");
+					//stageManager.makeExceptionAlert(e, "",
+					//		"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content", node.getName(),
+					//		node.getExpression()).showAndWait();
 				}
 			}
 		});
@@ -167,11 +167,11 @@ public class MagicGraphFX implements MagicGraphI {
 						modelToStyle.getEdges().forEach(edge -> edge.setStyle(style));
 					}
 				} catch (TranslationException e) {
-			   // This happens for symbolic values, translation is also attempted in translateMap
-			   System.out.println("Could not translate value (probably symbolic) of edge " + magicEdge.getName() + " for setting style in Magic Layout");
-				//	stageManager.makeExceptionAlert(e, "",
-				//			"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content",
-				//			magicEdge.getName(), magicEdge.getExpression()).showAndWait();
+					// This happens for symbolic values, translation is also attempted in translateMap
+					System.out.println("Could not translate value (probably symbolic) of edge " + magicEdge.getName() + " for setting style in Magic Layout");
+					//stageManager.makeExceptionAlert(e, "",
+					//		"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content",
+					//		magicEdge.getName(), magicEdge.getExpression()).showAndWait();
 				}
 			}
 		});
@@ -221,9 +221,9 @@ public class MagicGraphFX implements MagicGraphI {
 					translatedMap.put(eval.toString(), Translator.translate(result.toString()));
 				}
 			} catch (TranslationException e) {
-			   // This happens for symbolic values
-			   System.out.println("Could not translate value (probably symbolic) of " + eval.toString() + " for Magic Layout");
-			   System.out.println("Value: " + result.toString());
+				// This happens for symbolic values
+				System.out.println("Could not translate value (probably symbolic) of " + eval.toString() + " for Magic Layout");
+				System.out.println("Value: " + result.toString());
 				//stageManager.makeExceptionAlert(e, "",
 				//		"visualisation.magicLayout.magicGraphFX.alerts.couldNotTranslate.content", result.toString(),
 				//		eval.toString()).showAndWait();
