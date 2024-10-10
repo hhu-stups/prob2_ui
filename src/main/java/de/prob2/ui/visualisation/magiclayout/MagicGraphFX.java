@@ -27,7 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MagicGraphFX implements MagicGraphI {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MagicGraphFX.class);
 
 	private final StageManager stageManager;
 
@@ -143,7 +147,7 @@ public class MagicGraphFX implements MagicGraphI {
 					});
 				} catch (TranslationException e) {
 					// This happens for symbolic values, translation is also attempted in translateMap
-					System.out.println("Could not translate value (probably symbolic) of node " + node.getName() + " for setting style in Magic Layout");
+					LOGGER.warn("Could not translate value (probably symbolic) of node {} for setting style in Magic Layout", node.getName(), e);
 					//stageManager.makeExceptionAlert(e, "",
 					//		"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content", node.getName(),
 					//		node.getExpression()).showAndWait();
@@ -168,7 +172,7 @@ public class MagicGraphFX implements MagicGraphI {
 					}
 				} catch (TranslationException e) {
 					// This happens for symbolic values, translation is also attempted in translateMap
-					System.out.println("Could not translate value (probably symbolic) of edge " + magicEdge.getName() + " for setting style in Magic Layout");
+					LOGGER.warn("Could not translate value (probably symbolic) of edge {} for setting style in Magic Layout", magicEdge.getName(), e);
 					//stageManager.makeExceptionAlert(e, "",
 					//		"visualisation.magicLayout.magicGraphFX.alerts.couldNotSetStyle.content",
 					//		magicEdge.getName(), magicEdge.getExpression()).showAndWait();
@@ -222,8 +226,7 @@ public class MagicGraphFX implements MagicGraphI {
 				}
 			} catch (TranslationException e) {
 				// This happens for symbolic values
-				System.out.println("Could not translate value (probably symbolic) of " + eval.toString() + " for Magic Layout");
-				System.out.println("Value: " + result.toString());
+				LOGGER.warn("Could not translate value (probably symbolic) of {} for Magic Layout: {}", eval, result);
 				//stageManager.makeExceptionAlert(e, "",
 				//		"visualisation.magicLayout.magicGraphFX.alerts.couldNotTranslate.content", result.toString(),
 				//		eval.toString()).showAndWait();
