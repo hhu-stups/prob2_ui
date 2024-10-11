@@ -68,7 +68,7 @@
 								<Label fx:id="lbDescription" prefHeight="80.0" wrapText="true" VBox.vgrow="ALWAYS"/>
 							</HBox>
 
-							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0" fixedCellSize="${fontSize.fontSize * 1.5}">
+							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0">
 								<columnResizePolicy>
 									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 								</columnResizePolicy>
