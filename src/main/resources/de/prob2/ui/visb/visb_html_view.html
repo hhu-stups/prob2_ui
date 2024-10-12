@@ -111,7 +111,7 @@
 		}
 
 		// all entries of visb_vars are added to the meta info of each click as jsVars: STRING +-> STRING.
-		let visb_vars = {};
+		// visb_vars is declared in the VisB SVG
 		function addClickEvent(visBConnector, id, eventName, hovers) {
 			const obj = checkSvgId(id, "VisB Event " + eventName);
 			if (obj !== null) {
