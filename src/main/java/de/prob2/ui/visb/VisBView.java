@@ -443,6 +443,7 @@ public final class VisBView extends BorderPane {
 		stageManager.initWebView(this.webView);
 
 		this.webView.visibleProperty().bind(this.placeholder.visibleProperty().not());
+		this.webView.setOnZoom(z -> webView.setZoom(webView.getZoom() * z.getZoomFactor()));
 		this.mainPane.getChildren().add(webView);
 		// Enable WebView-related actions only when the WebView is visible.
 		exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
