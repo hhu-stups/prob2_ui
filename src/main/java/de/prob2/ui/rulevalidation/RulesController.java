@@ -52,7 +52,7 @@ public final class RulesController {
 		traceListener = (observable, oldTrace, newTrace) -> {
 			if (rulesView != null) {
 				if (newTrace == null || !(newTrace.getModel() instanceof RulesModel)) {
-					LOGGER.debug("No rules model in new trace!");
+					LOGGER.trace("No rules model in new trace!");
 					rulesView.clear();
 					model.clear();
 				} else if (oldTrace == null || !newTrace.getModel().equals(oldTrace.getModel())) {
