@@ -182,7 +182,6 @@ public final class DynamicVisualizationStage extends Stage {
 			}
 		});
 
-		this.tvFormula.setEditable(true);
 		this.statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
 		this.statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		this.idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));

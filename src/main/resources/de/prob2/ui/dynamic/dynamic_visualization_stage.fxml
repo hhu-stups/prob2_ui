@@ -74,7 +74,7 @@
 								</columnResizePolicy>
 								<columns>
 									<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TableColumn fx:id="idColumn" minWidth="80.0" maxWidth="150.0" text="ID"/>
+									<TableColumn fx:id="idColumn" minWidth="80.0" maxWidth="150.0" text="%verifications.common.columns.id"/>
 									<TableColumn fx:id="formulaColumn" minWidth="80.0" text="%common.columns.formula"/>
 								</columns>
 							</TableView>

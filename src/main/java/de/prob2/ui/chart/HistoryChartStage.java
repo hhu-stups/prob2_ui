@@ -25,6 +25,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
@@ -43,12 +45,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.WritableImage;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
@@ -138,7 +144,13 @@ public final class HistoryChartStage extends Stage {
 	@FXML
 	private LineChart<Number, Number> singleChart;
 	@FXML
-	private ListView<ClassicalB> formulaList;
+	private TableView<ChartFormulaTask> tvFormula;
+	@FXML
+	private TableColumn<ChartFormulaTask, CheckingStatus> statusColumn;
+	@FXML
+	private TableColumn<ChartFormulaTask, String> idColumn;
+	@FXML
+	private TableColumn<ChartFormulaTask, String> formulaColumn;
 	@FXML
 	private Button addButton;
 	@FXML
@@ -159,6 +171,11 @@ public final class HistoryChartStage extends Stage {
 	private final I18n i18n;
 
 	private final ObservableList<LineChart<Number, Number>> separateCharts;
+	/**
+	 * This field exists to stop the bindings on it from being garbage collected.
+	 * And to have an identity reference to the observable - needed for unbinding!
+	 */
+	private ObservableList<ChartFormulaTask> currentFormulaTasks;
 
 	@Inject
 	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
@@ -179,26 +196,72 @@ public final class HistoryChartStage extends Stage {
 	@FXML
 	private void initialize() {
 		helpButton.setHelpContent("mainmenu.visualisations.historyChart", null);
-		this.formulaList.setCellFactory(view -> new ClassicalBListCell());
-		this.formulaList.getItems().addListener((ListChangeListener<ClassicalB>) change -> {
-			while (change.next()) {
-				if (change.wasRemoved()) {
-					this.removeCharts(change.getFrom(), change.getFrom() + change.getRemovedSize());
-				}
 
-				if (change.wasAdded()) {
-					this.addCharts(change.getFrom(), change.getTo(), change.getList());
+		this.tvFormula.getItems().addListener(this::onFormulaListChange);
+		this.statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		this.statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		this.idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+		this.formulaColumn.setCellValueFactory(new PropertyValueFactory<>("formula"));
+		this.tvFormula.setRowFactory(tv -> {
+			TableRow<ChartFormulaTask> row = new TableRow<>();
+
+			// == edit ==
+			MenuItem editItem = new MenuItem(i18n.translate("dynamic.editFormula"));
+			// TODO: show pre-filled edit dialog
+			// editItem.setOnAction(event -> this.editFormulaWithDialog(row.getItem()));
+			// ============
+
+			// == change status ==
+			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
+			dischargeItem.setOnAction(event -> {
+				ChartFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
 				}
-			}
-			this.updateCharts();
-			this.updateFormulaCodeList(this.currentProject.getCurrentMachine());
+				item.setStatus(CheckingStatus.SUCCESS);
+			});
+			MenuItem failItem = new MenuItem(this.i18n.translate("dynamic.formulaView.fail"));
+			failItem.setOnAction(event -> {
+				ChartFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				item.setStatus(CheckingStatus.FAIL);
+			});
+			MenuItem unknownItem = new MenuItem(this.i18n.translate("dynamic.formulaView.unknown"));
+			unknownItem.setOnAction(event -> {
+				ChartFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				item.setStatus(CheckingStatus.NOT_CHECKED);
+			});
+			Menu statusMenu = new Menu(this.i18n.translate("dynamic.setStatus"), null, dischargeItem, failItem, unknownItem);
+			// ==============
+
+			// == remove ==
+			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
+			removeItem.setOnAction(event -> {
+				ChartFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				this.currentProject.getCurrentMachine().removeValidationTask(item);
+			});
+			// =====================
+
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(editItem, statusMenu, removeItem)));
+			return row;
 		});
 
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> loadFormulas(to));
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> this.loadFormulas(to));
 		this.loadFormulas(this.currentProject.getCurrentMachine());
 
 		this.removeButton.disableProperty()
-				.bind(Bindings.isEmpty(this.formulaList.getSelectionModel().getSelectedIndices()));
+				.bind(Bindings.isNull(this.tvFormula.getSelectionModel().selectedItemProperty()));
 
 		this.separateChartsCheckBox.selectedProperty().addListener((observable, from, to) -> {
 			this.chartsPane.getChildren().clear();
@@ -239,6 +302,29 @@ public final class HistoryChartStage extends Stage {
 		});
 		this.updateCharts();
 		addChartMenu(singleChart);
+	}
+
+	private void loadFormulas(Machine machine) {
+		if (this.currentFormulaTasks != null) {
+			Bindings.unbindContent(this.tvFormula.getItems(), this.currentFormulaTasks);
+			this.currentFormulaTasks = null;
+		}
+		if (machine != null) {
+			this.currentFormulaTasks = machine.getChartFormulaTasks();
+			Bindings.bindContent(this.tvFormula.getItems(), this.currentFormulaTasks);
+		}
+	}
+
+	private void onFormulaListChange(ListChangeListener.Change<? extends ChartFormulaTask> change) {
+		while (change.next()) {
+			if (change.wasRemoved()) {
+				this.removeCharts(change.getFrom(), change.getFrom() + change.getRemovedSize());
+			}
+			if (change.wasAdded()) {
+				this.addCharts(change.getFrom(), change.getTo(), change.getList());
+			}
+		}
+		this.updateCharts();
 	}
 
 	private void addChartMenu(LineChart<Number, Number> chart) {
@@ -297,31 +383,22 @@ public final class HistoryChartStage extends Stage {
 
 	@FXML
 	private void handleAdd() {
-		// TODO: add to machine.getHistoryChartItems() directly
-		this.formulaList.getItems().add(new ClassicalB("0"));
-		this.formulaList.edit(this.formulaList.getItems().size() - 1);
+		// TODO: show empty edit dialog
+		Machine machine = this.currentProject.getCurrentMachine();
+		if (machine != null) {
+			machine.addValidationTaskIfNotExist(new ChartFormulaTask(null, "0"));
+		}
 	}
 
 	@FXML
 	private void handleRemove() {
-		// TODO: remove from machine.getHistoryChartItems() directly
-		this.formulaList.getItems().remove(this.formulaList.getSelectionModel().getSelectedIndex());
-	}
-
-	private void loadFormulas(Machine machine) {
-		if (machine == null) {
-			this.formulaList.getItems().clear();
-		} else {
-			this.formulaList.getItems().setAll(machine.getHistoryChartItems().stream().map(ClassicalB::new).toList());
+		Machine machine = this.currentProject.getCurrentMachine();
+		if (machine != null) {
+			ChartFormulaTask item = this.tvFormula.getSelectionModel().getSelectedItem();
+			if (item != null) {
+				machine.removeValidationTask(item);
+			}
 		}
-	}
-
-	private void updateFormulaCodeList(Machine machine) {
-		if (machine == null) {
-			return;
-		}
-		List<String> formulaCodeList = this.formulaList.getItems().stream().map(ClassicalB::getCode).toList();
-		machine.getHistoryChartItems().setAll(formulaCodeList);
 	}
 
 	private static void updateXAxisTicks(NumberAxis axis, double upperBound) {
@@ -350,13 +427,13 @@ public final class HistoryChartStage extends Stage {
 		}
 	}
 
-	private void addCharts(final int start, final int end, final List<? extends ClassicalB> charts) {
+	private void addCharts(final int start, final int end, final List<? extends ChartFormulaTask> charts) {
 		for (int i = start; i < end; i++) {
-			final XYChart.Series<Number, Number> seriesSingle = new XYChart.Series<>(charts.get(i).getCode(),
+			final XYChart.Series<Number, Number> seriesSingle = new XYChart.Series<>(charts.get(i).getFormula(),
 					FXCollections.observableArrayList());
 			this.singleChart.getData().add(i, seriesSingle);
 
-			final XYChart.Series<Number, Number> seriesSeparate = new XYChart.Series<>(charts.get(i).getCode(),
+			final XYChart.Series<Number, Number> seriesSeparate = new XYChart.Series<>(charts.get(i).getFormula(),
 					FXCollections.observableArrayList());
 			final NumberAxis separateXAxis = new NumberAxis();
 			separateXAxis.getStyleClass().add("time-axis");
@@ -447,7 +524,9 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void tryEvalFormulas(final List<List<XYChart.Data<Number, Number>>> newDatas, final int xPos, final TraceElement element, final boolean showErrors) {
-		final List<AbstractEvalResult> results = element.getCurrentState().eval(this.formulaList.getItems());
+		// TODO: cache this
+		List<ClassicalB> formulas = this.tvFormula.getItems().stream().map(ChartFormulaTask::getFormula).map(ClassicalB::new).toList();
+		List<AbstractEvalResult> results = element.getCurrentState().eval(formulas);
 		for (int i = 0; i < results.size(); i++) {
 			final AbstractEvalResult result = results.get(i);
 			if (result instanceof IdentifierNotInitialised) {

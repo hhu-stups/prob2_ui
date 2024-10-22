@@ -37,6 +37,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.chart.ChartFormulaTask;
 import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
@@ -91,7 +92,6 @@ public final class Machine {
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
-	private final ListProperty<String> historyChartItems;
 
 	private final ObservableList<ProofObligationItem> proofObligationTasks;
 
@@ -119,8 +119,7 @@ public final class Machine {
 			Collections.emptyList(),
 			Collections.emptyList(),
 			Collections.emptyList(),
-			null,
-			Collections.emptyList()
+			null
 		);
 	}
 
@@ -133,8 +132,7 @@ public final class Machine {
 		@JsonProperty("validationTasks") final List<IValidationTask> validationTasks,
 		@JsonProperty("ltlPatterns") final List<LTLPatternItem> ltlPatterns,
 		@JsonProperty("simulations") final List<SimulationModel> simulations,
-		@JsonProperty("visBVisualisation") final Path visBVisualisation,
-		@JsonProperty("historyChartItems") final List<String> historyChartItems
+		@JsonProperty("visBVisualisation") final Path visBVisualisation
 	) {
 		this.name = new SimpleStringProperty(this, "name", Objects.requireNonNull(name, "name"));
 		this.description = new SimpleStringProperty(this, "description", Objects.requireNonNull(description, "description"));
@@ -148,7 +146,6 @@ public final class Machine {
 		// TODO This should probably be moved into the old JSON format conversion code when we bump the project format version the next time
 		this.simulations.removeIf(simulationModel -> Paths.get("").equals(simulationModel.getPath()));
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", visBVisualisation);
-		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList(historyChartItems));
 
 		// Keep this filtered list alive so that its listener (added in initListeners) keeps working.
 		this.proofObligationTasks = this.getProofObligationTasks();
@@ -173,7 +170,6 @@ public final class Machine {
 		this.getLTLPatterns().addListener(changedListener);
 		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
-		this.getHistoryChartItems().addListener(changedListener);
 
 		this.proofObligationTasks.addListener((InvalidationListener)o -> this.updateAllProofObligations());
 	}
@@ -387,6 +383,11 @@ public final class Machine {
 		return this.getValidationTasksByClass(TestCaseGenerationItem.class);
 	}
 
+	@JsonIgnore
+	public ObservableList<ChartFormulaTask> getChartFormulaTasks() {
+		return this.getValidationTasksByClass(ChartFormulaTask.class);
+	}
+
 	@JsonGetter("simulations")
 	public ReadOnlyListProperty<SimulationModel> getSimulations() {
 		return this.simulations;
@@ -403,11 +404,6 @@ public final class Machine {
 
 	public void setVisBVisualisation(Path visBVisualisation) {
 		this.visBVisualizationProperty().set(visBVisualisation);
-	}
-
-	@JsonGetter("historyChartItems")
-	public ReadOnlyListProperty<String> getHistoryChartItems() {
-		return this.historyChartItems;
 	}
 
 	@JsonIgnore
@@ -553,8 +549,7 @@ public final class Machine {
 				this.getValidationTasks(),
 				this.getLTLPatterns(),
 				this.getSimulations(),
-				this.getVisBVisualisation(),
-				this.getHistoryChartItems()
+				this.getVisBVisualisation()
 		);
 	}
 
