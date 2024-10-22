@@ -537,8 +537,8 @@ public final class OperationsView extends BorderPane {
 			} catch (NumberFormatException e) {
 				LOGGER.error("Invalid input for executing random number of events",e);
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-					"operations.operationsView.alerts.invalidNumberOfOparations.header",
-					"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput);
+						"operations.operationsView.alerts.invalidNumberOfOperations.header",
+						"operations.operationsView.alerts.invalidNumberOfOperations.content", randomInput);
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 				return;
