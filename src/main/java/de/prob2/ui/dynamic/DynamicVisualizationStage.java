@@ -19,7 +19,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.PlantUmlVisualizationCommand;
@@ -120,7 +119,6 @@ public final class DynamicVisualizationStage extends Stage {
 	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 	private final AtomicBoolean needsUpdateAfterBusy;
 	private final BackgroundUpdater updater;
-	private final ObservableList<ErrorItem> errors = FXCollections.observableArrayList();
 
 	private DynamicTreeItem lastSelected;
 	private boolean ignoreCommandItemUpdates;
@@ -212,7 +210,7 @@ public final class DynamicVisualizationStage extends Stage {
 			MenuItem editFormula = new MenuItem(i18n.translate("common.editFormula"));
 			editFormula.setOnAction(event -> this.editFormulaWithDialog(row.getItem()));
 
-			MenuItem evaluateItem = new MenuItem(i18n.translate("dynamic.evaluateFormula"));
+			MenuItem evaluateItem = new MenuItem(i18n.translate("common.evaluateFormula"));
 			evaluateItem.setOnAction(event -> this.evaluateFormula(row.getItem()));
 
 			MenuItem dischargeItem = new MenuItem(i18n.translate("common.formula.discharge"));
@@ -303,7 +301,6 @@ public final class DynamicVisualizationStage extends Stage {
 		this.placeholderLabel.setVisible(true);
 		this.errorsView.setVisible(false);
 		this.taErrors.clear();
-		this.errors.clear();
 
 		this.tableView.clearContent();
 		this.graphView.clearContent();
@@ -322,7 +319,7 @@ public final class DynamicVisualizationStage extends Stage {
 		Machine machine = currentProject.getCurrentMachine();
 		EditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
 		stage.initOwner(this);
-		stage.setInitialFormulaTask(oldTask, this.errors);
+		stage.setInitialFormulaTask(oldTask);
 		stage.showAndWait();
 
 		VisualizationFormulaTask newTask = stage.getResult();
@@ -614,7 +611,6 @@ public final class DynamicVisualizationStage extends Stage {
 		Platform.runLater(() -> {
 			this.clearContent();
 			this.placeholderLabel.setVisible(false);
-			this.errors.setAll(e.getErrors());
 			this.taFormula.getErrors().setAll(e.getErrors());
 			this.taErrors.setText(e.getMessage());
 			this.errorsView.setVisible(true);

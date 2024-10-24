@@ -14,7 +14,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.IValidationTask;
+import de.prob2.ui.verifications.IFormulaTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
 
@@ -25,7 +25,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"id",
 	"formula",
 })
-public final class ChartFormulaTask implements IValidationTask {
+public final class ChartFormulaTask implements IFormulaTask {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
@@ -63,6 +63,7 @@ public final class ChartFormulaTask implements IValidationTask {
 		return this.getFormula();
 	}
 
+	@Override
 	public String getFormula() {
 		return this.formula;
 	}

@@ -13,9 +13,7 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
@@ -30,8 +28,6 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -45,7 +41,6 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
@@ -54,10 +49,8 @@ import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
@@ -70,72 +63,6 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class HistoryChartStage extends Stage {
-
-	private static final class ClassicalBListCell extends ListCell<ClassicalB> {
-		private final StringProperty code;
-
-		private ClassicalBListCell() {
-			super();
-
-			this.code = new SimpleStringProperty(this, "code", null);
-			this.textProperty().bind(this.code);
-		}
-
-		@Override
-		protected void updateItem(final ClassicalB item, final boolean empty) {
-			super.updateItem(item, empty);
-
-			this.code.set(item == null || empty ? null : item.getCode());
-		}
-
-		@Override
-		public void startEdit() {
-			super.startEdit();
-
-			if (!this.isEditing()) {
-				return;
-			}
-
-			final TextField textField = new TextField(this.getText());
-			textField.setOnAction(event -> {
-				textField.getStyleClass().remove("text-field-error");
-				final ClassicalB formula;
-				try {
-					formula = new ClassicalB(textField.getText());
-				} catch (EvaluationException e) {
-					LOGGER.debug("Could not parse user-entered formula", e);
-					textField.getStyleClass().add("text-field-error");
-					return;
-				}
-				this.commitEdit(formula);
-			});
-			textField.setOnKeyPressed(event -> {
-				if (KeyCode.ESCAPE.equals(event.getCode())) {
-					this.cancelEdit();
-				}
-			});
-			textField.textProperty().addListener(observable -> textField.getStyleClass().remove("text-field-error"));
-
-			this.textProperty().unbind();
-			this.setText(null);
-			this.setGraphic(textField);
-			textField.requestFocus();
-		}
-
-		@Override
-		public void commitEdit(final ClassicalB newValue) {
-			super.commitEdit(newValue);
-			this.textProperty().bind(this.code);
-			this.setGraphic(null);
-		}
-
-		@Override
-		public void cancelEdit() {
-			super.cancelEdit();
-			this.textProperty().bind(this.code);
-			this.setGraphic(null);
-		}
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HistoryChartStage.class);
 
@@ -395,8 +322,6 @@ public final class HistoryChartStage extends Stage {
 		stage.initOwner(this);
 		if (oldTask != null) {
 			stage.setInitialFormulaTask(oldTask);
-		} else {
-			stage.createNewFormulaTask();
 		}
 		stage.showAndWait();
 
@@ -555,7 +480,10 @@ public final class HistoryChartStage extends Stage {
 
 	private void tryEvalFormulas(final List<List<XYChart.Data<Number, Number>>> newDatas, final int xPos, final TraceElement element, final boolean showErrors) {
 		// TODO: cache this
-		List<ClassicalB> formulas = this.tvFormula.getItems().stream().map(ChartFormulaTask::getFormula).map(ClassicalB::new).toList();
+		var formulas = this.tvFormula.getItems().stream()
+				                            .map(ChartFormulaTask::getFormula)
+				                            .map(this.currentTrace.getModel()::parseFormula)
+				                            .toList();
 		List<AbstractEvalResult> results = element.getCurrentState().eval(formulas);
 		for (int i = 0; i < results.size(); i++) {
 			final AbstractEvalResult result = results.get(i);
