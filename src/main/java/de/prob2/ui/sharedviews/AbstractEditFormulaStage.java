@@ -56,7 +56,7 @@ public abstract class AbstractEditFormulaStage<T extends IFormulaTask> extends S
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		stageManager.loadFXML(this, "edit_formula_stage.fxml");
+		stageManager.loadFXML(this, "/de/prob2/ui/sharedviews/edit_formula_stage.fxml");
 	}
 
 	@FXML
