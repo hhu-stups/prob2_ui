@@ -209,13 +209,13 @@ public final class DynamicVisualizationStage extends Stage {
 				}
 			});
 
-			MenuItem editFormula = new MenuItem(i18n.translate("dynamic.editFormula"));
+			MenuItem editFormula = new MenuItem(i18n.translate("common.editFormula"));
 			editFormula.setOnAction(event -> this.editFormulaWithDialog(row.getItem()));
 
 			MenuItem evaluateItem = new MenuItem(i18n.translate("dynamic.evaluateFormula"));
 			evaluateItem.setOnAction(event -> this.evaluateFormula(row.getItem()));
 
-			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
+			MenuItem dischargeItem = new MenuItem(i18n.translate("common.formula.discharge"));
 			dischargeItem.setOnAction(event -> {
 				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
@@ -224,7 +224,7 @@ public final class DynamicVisualizationStage extends Stage {
 				item.setStatus(CheckingStatus.SUCCESS);
 			});
 
-			MenuItem failItem = new MenuItem(this.i18n.translate("dynamic.formulaView.fail"));
+			MenuItem failItem = new MenuItem(this.i18n.translate("common.formula.fail"));
 			failItem.setOnAction(event -> {
 				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
@@ -233,7 +233,7 @@ public final class DynamicVisualizationStage extends Stage {
 				item.setStatus(CheckingStatus.FAIL);
 			});
 
-			MenuItem unknownItem = new MenuItem(this.i18n.translate("dynamic.formulaView.unknown"));
+			MenuItem unknownItem = new MenuItem(this.i18n.translate("common.formula.unknown"));
 			unknownItem.setOnAction(event -> {
 				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
@@ -242,7 +242,7 @@ public final class DynamicVisualizationStage extends Stage {
 				item.setStatus(CheckingStatus.NOT_CHECKED);
 			});
 
-			Menu statusMenu = new Menu(this.i18n.translate("dynamic.setStatus"), null, dischargeItem, failItem, unknownItem);
+			Menu statusMenu = new Menu(this.i18n.translate("common.formula.setStatus"), null, dischargeItem, failItem, unknownItem);
 
 			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
 			removeItem.setOnAction(event -> {

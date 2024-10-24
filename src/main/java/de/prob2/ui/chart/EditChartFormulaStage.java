@@ -1,10 +1,11 @@
-package de.prob2.ui.dynamic;
+package de.prob2.ui.chart;
 
 import java.util.Set;
 
 import com.google.inject.Inject;
 
 import de.prob.animator.domainobjects.ErrorItem;
+import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -18,7 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.stage.Stage;
 
-public final class EditDynamicFormulaStage extends Stage {
+public final class EditChartFormulaStage extends Stage {
 	@FXML
 	private TextField idField;
 	@FXML
@@ -33,14 +34,13 @@ public final class EditDynamicFormulaStage extends Stage {
 	private final I18n i18n;
 	private final CurrentProject currentProject;
 
-	private String commandType;
-	private VisualizationFormulaTask result;
+	private ChartFormulaTask result;
 
 	@Inject
-	public EditDynamicFormulaStage(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject) {
+	public EditChartFormulaStage(final StageManager stageManager, final I18n i18n, final CurrentProject currentProject) {
 		this.i18n = i18n;
 		this.currentProject = currentProject;
-		stageManager.loadFXML(this, "edit_formula_stage.fxml");
+		stageManager.loadFXML(this, "edit_chart_formula_stage.fxml");
 	}
 
 	@FXML
@@ -73,27 +73,25 @@ public final class EditDynamicFormulaStage extends Stage {
 		this.cancelButton.setOnAction(e -> this.close());
 	}
 
-	public void createNewFormulaTask(String commandType) {
+	public void createNewFormulaTask() {
 		this.idField.clear();
 		this.formulaTextArea.clear();
 		this.formulaTextArea.getErrors().clear();
-		this.commandType = commandType;
 	}
 
-	public void setInitialFormulaTask(VisualizationFormulaTask item, ObservableList<ErrorItem> errors) {
+	public void setInitialFormulaTask(ChartFormulaTask item) {
 		this.idField.setText(item.getId() != null ? item.getId() : "");
 		this.formulaTextArea.replaceText(item.getFormula());
-		this.formulaTextArea.getErrors().setAll(errors);
-		this.commandType = item.getCommandType();
+		this.formulaTextArea.getErrors().clear();
 	}
 
 	private void setResult() {
 		String id = idField.getText().trim().isEmpty() ? null : idField.getText();
 		String formula = formulaTextArea.getText().trim();
-		this.result = new VisualizationFormulaTask(id, this.commandType, formula);
+		this.result = new ChartFormulaTask(id, formula);
 	}
 
-	public VisualizationFormulaTask getResult() {
+	public ChartFormulaTask getResult() {
 		return this.result;
 	}
 }

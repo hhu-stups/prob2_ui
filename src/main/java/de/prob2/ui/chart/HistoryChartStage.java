@@ -9,6 +9,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
@@ -69,6 +70,7 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class HistoryChartStage extends Stage {
+
 	private static final class ClassicalBListCell extends ListCell<ClassicalB> {
 		private final StringProperty code;
 
@@ -169,6 +171,7 @@ public final class HistoryChartStage extends Stage {
 	private final CurrentProject currentProject;
 	private final FileChooserManager fileChooserManager;
 	private final I18n i18n;
+	private final Provider<EditChartFormulaStage> editChartFormulaStageProvider;
 
 	private final ObservableList<LineChart<Number, Number>> separateCharts;
 	/**
@@ -179,7 +182,8 @@ public final class HistoryChartStage extends Stage {
 
 	@Inject
 	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-	                          final FileChooserManager fileChooserManager, final I18n i18n) {
+	                          final FileChooserManager fileChooserManager, final I18n i18n,
+	                          final Provider<EditChartFormulaStage> editChartFormulaStageProvider) {
 		super();
 
 		this.stageManager = stageManager;
@@ -187,6 +191,7 @@ public final class HistoryChartStage extends Stage {
 		this.currentProject = currentProject;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
+		this.editChartFormulaStageProvider = editChartFormulaStageProvider;
 
 		this.separateCharts = FXCollections.observableArrayList();
 
@@ -206,13 +211,12 @@ public final class HistoryChartStage extends Stage {
 			TableRow<ChartFormulaTask> row = new TableRow<>();
 
 			// == edit ==
-			MenuItem editItem = new MenuItem(i18n.translate("dynamic.editFormula"));
-			// TODO: show pre-filled edit dialog
-			// editItem.setOnAction(event -> this.editFormulaWithDialog(row.getItem()));
+			MenuItem editItem = new MenuItem(i18n.translate("common.editFormula"));
+			editItem.setOnAction(event -> this.editFormulaWithDialog(row.getItem()));
 			// ============
 
 			// == change status ==
-			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
+			MenuItem dischargeItem = new MenuItem(i18n.translate("common.formula.discharge"));
 			dischargeItem.setOnAction(event -> {
 				ChartFormulaTask item = row.getItem();
 				if (item == null) {
@@ -220,7 +224,7 @@ public final class HistoryChartStage extends Stage {
 				}
 				item.setStatus(CheckingStatus.SUCCESS);
 			});
-			MenuItem failItem = new MenuItem(this.i18n.translate("dynamic.formulaView.fail"));
+			MenuItem failItem = new MenuItem(this.i18n.translate("common.formula.fail"));
 			failItem.setOnAction(event -> {
 				ChartFormulaTask item = row.getItem();
 				if (item == null) {
@@ -228,7 +232,7 @@ public final class HistoryChartStage extends Stage {
 				}
 				item.setStatus(CheckingStatus.FAIL);
 			});
-			MenuItem unknownItem = new MenuItem(this.i18n.translate("dynamic.formulaView.unknown"));
+			MenuItem unknownItem = new MenuItem(this.i18n.translate("common.formula.unknown"));
 			unknownItem.setOnAction(event -> {
 				ChartFormulaTask item = row.getItem();
 				if (item == null) {
@@ -381,13 +385,39 @@ public final class HistoryChartStage extends Stage {
 		});
 	}
 
+	private void editFormulaWithDialog(ChartFormulaTask oldTask) {
+		Machine machine = this.currentProject.getCurrentMachine();
+		if (machine == null) {
+			return;
+		}
+
+		EditChartFormulaStage stage = this.editChartFormulaStageProvider.get();
+		stage.initOwner(this);
+		if (oldTask != null) {
+			stage.setInitialFormulaTask(oldTask);
+		} else {
+			stage.createNewFormulaTask();
+		}
+		stage.showAndWait();
+
+		ChartFormulaTask newTask = stage.getResult();
+		if (newTask != null) {
+			Machine newMachine = this.currentProject.getCurrentMachine();
+			if (newMachine == machine) {
+				if (oldTask != null) {
+					newMachine.replaceValidationTaskIfNotExist(oldTask, newTask);
+				} else {
+					newMachine.addValidationTaskIfNotExist(newTask);
+				}
+			} else {
+				LOGGER.warn("The machine has changed, discarding task changes");
+			}
+		}
+	}
+
 	@FXML
 	private void handleAdd() {
-		// TODO: show empty edit dialog
-		Machine machine = this.currentProject.getCurrentMachine();
-		if (machine != null) {
-			machine.addValidationTaskIfNotExist(new ChartFormulaTask(null, "0"));
-		}
+		this.editFormulaWithDialog(null);
 	}
 
 	@FXML
