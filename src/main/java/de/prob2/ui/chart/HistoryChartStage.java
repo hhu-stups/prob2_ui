@@ -167,7 +167,7 @@ public final class HistoryChartStage extends Stage {
 				}
 				item.setStatus(CheckingStatus.NOT_CHECKED);
 			});
-			Menu statusMenu = new Menu(this.i18n.translate("dynamic.setStatus"), null, dischargeItem, failItem, unknownItem);
+			Menu statusMenu = new Menu(this.i18n.translate("common.formula.setStatus"), null, dischargeItem, failItem, unknownItem);
 			// ==============
 
 			// == remove ==

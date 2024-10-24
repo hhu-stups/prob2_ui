@@ -400,7 +400,7 @@ public final class DynamicVisualizationStage extends Stage {
 			if (selectedItem == null) {
 				text = this.i18n.translate("dynamic.placeholder.selectVisualization");
 			} else if (selectedItem.getArity() > 0) {
-				text = this.i18n.translate("dynamic.enterFormula.placeholder");
+				text = this.i18n.translate("common.enterFormula.placeholder");
 			} else {
 				// The placeholder label shouldn't be seen by the user in this case,
 				// because the visualization content should be visible,
