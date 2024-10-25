@@ -41,7 +41,7 @@ test:jdk-17-linux:
 
 test:jdk-21-linux:
   extends: .test-linux
-  image: eclipse-temurin:21
+  image: eclipse-temurin:21-jammy
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
 
