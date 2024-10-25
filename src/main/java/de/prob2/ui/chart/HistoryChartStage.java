@@ -127,7 +127,7 @@ public final class HistoryChartStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		helpButton.setHelpContent("mainmenu.visualisations.historyChart", null);
+		this.helpButton.setHelpContent("mainmenu.visualisations.historyChart", null);
 
 		this.tvFormula.getItems().addListener(this::onFormulaListChange);
 		this.statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
@@ -191,8 +191,10 @@ public final class HistoryChartStage extends Stage {
 		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> this.loadFormulas(to));
 		this.loadFormulas(this.currentProject.getCurrentMachine());
 
-		this.removeButton.disableProperty()
-				.bind(Bindings.isNull(this.tvFormula.getSelectionModel().selectedItemProperty()));
+		this.addButton.disableProperty().bind(this.currentProject.currentMachineProperty().isNull());
+		this.removeButton.disableProperty().bind(
+				Bindings.isNull(this.tvFormula.getSelectionModel().selectedItemProperty())
+		);
 
 		this.separateChartsCheckBox.selectedProperty().addListener((observable, from, to) -> {
 			this.chartsPane.getChildren().clear();
