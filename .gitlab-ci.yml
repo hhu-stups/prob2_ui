@@ -32,7 +32,7 @@ stages:
 
 test:jdk-17-linux:
   extends: .test-linux
-  image: eclipse-temurin:17
+  image: eclipse-temurin:17-jammy
   before_script:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
