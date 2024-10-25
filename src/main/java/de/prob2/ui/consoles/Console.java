@@ -447,15 +447,18 @@ public abstract class Console extends StyleClassedTextArea {
 		boolean activateLineContinuation = command != null && command.endsWith("\\") && !command.endsWith("\\\\");
 		this.lineContinuation.set(activateLineContinuation);
 
-		// TODO: maybe cut off trailing backslash?
 		historyAndSearchHandler.enter(command);
 
 		if (command != null && !command.isEmpty()) {
 			if (!commandBuffer.isEmpty()) {
 				commandBuffer.append('\n');
 			}
-
-			commandBuffer.append(command);
+            if (command.endsWith("\\") && !command.endsWith("\\\\")) {
+		        //  cut off trailing backslash
+			    commandBuffer.append(command.substring(0, command.length() - 1));
+            } else {
+			    commandBuffer.append(command);
+			}
 		}
 
 		if (!activateLineContinuation) {
