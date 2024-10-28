@@ -142,10 +142,10 @@ public abstract class Console extends StyleClassedTextArea {
 
 		this.caretPos = Bindings.createObjectBinding(
 			() -> this.caretBoundsProperty().getValue()
-				      .map(bounds -> new Point2D(
-					      (bounds.getMinX() + bounds.getMaxX()) / 2.0,
-					      bounds.getMaxY()
-				      )),
+				.map(bounds -> new Point2D(
+					(bounds.getMinX() + bounds.getMaxX()) / 2.0,
+					bounds.getMaxY()
+				)),
 			this.caretBoundsProperty()
 		);
 		this.textBeforeCaret = Bindings.createObjectBinding(() -> {
@@ -455,10 +455,10 @@ public abstract class Console extends StyleClassedTextArea {
 				commandBuffer.append('\n');
 			}
 			if (activateLineContinuation) {
-		        //  cut off trailing backslash
+				// cut off trailing backslash
 				commandBuffer.append(command, 0, command.length() - 1);
-            } else {
-			    commandBuffer.append(command);
+			} else {
+				commandBuffer.append(command);
 			}
 		}
 
