@@ -453,9 +453,9 @@ public abstract class Console extends StyleClassedTextArea {
 			if (!commandBuffer.isEmpty()) {
 				commandBuffer.append('\n');
 			}
-            if (command.endsWith("\\") && !command.endsWith("\\\\")) {
+			if (activateLineContinuation) {
 		        //  cut off trailing backslash
-			    commandBuffer.append(command.substring(0, command.length() - 1));
+				commandBuffer.append(command, 0, command.length() - 1);
             } else {
 			    commandBuffer.append(command);
 			}
