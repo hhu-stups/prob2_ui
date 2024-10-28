@@ -332,7 +332,8 @@ public abstract class Console extends StyleClassedTextArea {
 
 				break;
 			} else {
-				this.onEnterSingleLineText(text.substring(idx, eol));
+				// add backslash to allow for line continuation
+				this.onEnterSingleLineText(text.substring(idx, eol) + '\\');
 				this.handleEnter();
 				idx = eol + 1;
 			}
