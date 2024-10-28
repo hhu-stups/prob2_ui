@@ -78,6 +78,7 @@ public abstract class Console extends StyleClassedTextArea {
 
 	private final ConsoleHistoryAndSearchHandler historyAndSearchHandler;
 	private final StringBuilder commandBuffer;
+	private int inputParagraphCount;
 	private CachedMessage lastMessage;
 
 	protected Console(I18n i18n, Executable interpreter, String header, String prompt) {
@@ -327,13 +328,15 @@ public abstract class Console extends StyleClassedTextArea {
 			eol = text.indexOf('\n', idx);
 			if (eol < 0) {
 				if (idx == 0 || idx < text.length()) {
-					this.onEnterSingleLineText(text.substring(idx));
+					String line = text.substring(idx);
+					this.onEnterSingleLineText(line);
 				}
 
 				break;
 			} else {
-				// add backslash to allow for line continuation
-				this.onEnterSingleLineText(text.substring(idx, eol) + '\\');
+				// add backslash if required to allow for line continuation
+				String line = text.substring(idx, eol) + '\\';
+				this.onEnterSingleLineText(line);
 				this.handleEnter();
 				idx = eol + 1;
 			}
@@ -396,8 +399,30 @@ public abstract class Console extends StyleClassedTextArea {
 		this.lastMessage = null;
 		this.historyAndSearchHandler.setSearchActive(false);
 		this.lineContinuation.set(false);
+		this.commandBuffer.setLength(0);
 		this.clear();
 		this.input.set("");
+		this.inputParagraphCount = 1;
+		this.update();
+		this.moveCaretToInputEndIfRequired();
+	}
+
+	private void resetInputAndRemoveLineContinuation() {
+		this.lineContinuation.set(false);
+		this.commandBuffer.setLength(0);
+		this.input.set("");
+
+		if (this.inputParagraphCount > 1) {
+			int paragraphCount = this.getParagraphs().size();
+			this.replace(
+					this.getAbsolutePosition(paragraphCount - this.inputParagraphCount, 0),
+					this.getAbsolutePosition(paragraphCount - 1, 0),
+					"",
+					Set.of()
+			);
+		}
+		this.inputParagraphCount = 1;
+
 		this.update();
 		this.moveCaretToInputEndIfRequired();
 	}
@@ -448,8 +473,6 @@ public abstract class Console extends StyleClassedTextArea {
 		boolean activateLineContinuation = command != null && command.endsWith("\\") && !command.endsWith("\\\\");
 		this.lineContinuation.set(activateLineContinuation);
 
-		historyAndSearchHandler.enter(command);
-
 		if (command != null && !command.isEmpty()) {
 			if (!commandBuffer.isEmpty()) {
 				commandBuffer.append('\n');
@@ -466,6 +489,9 @@ public abstract class Console extends StyleClassedTextArea {
 			String realCommand = commandBuffer.toString();
 			commandBuffer.setLength(0);
 
+			this.historyAndSearchHandler.enter(realCommand);
+			this.inputParagraphCount = 1;
+
 			if (!realCommand.isEmpty()) {
 				ConsoleExecResult result = interpreter.exec(realCommand);
 				if (result.getResultType() == ConsoleExecResultType.CLEAR) {
@@ -475,6 +501,8 @@ public abstract class Console extends StyleClassedTextArea {
 
 				this.addParagraph(result.toString(), result.getResultType() == ConsoleExecResultType.ERROR ? Set.of("error", "output") : Set.of("output"), true);
 			}
+		} else {
+			this.inputParagraphCount++;
 		}
 
 		this.moveCaretToInputEndIfRequired();
@@ -615,7 +643,7 @@ public abstract class Console extends StyleClassedTextArea {
 
 		String prefix = this.getInput().substring(0, Math.max(0, Math.min(this.getInput().length(), start)));
 		String suffix = this.getInput().substring(Math.max(0, Math.min(this.getInput().length(), end)));
-		this.setInput(prefix + text + suffix);
+		this.input.set(prefix + text + suffix);
 		this.moveCaretToPosInInput(prefix.length() + text.length());
 	}
 
@@ -644,7 +672,7 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public ReadOnlyStringProperty inputProperty() {
-		return input;
+		return this.input;
 	}
 
 	public String getInput() {
@@ -652,8 +680,8 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public void setInput(String input) {
-		this.input.set(input);
-		this.moveToInputEnd();
+		this.resetInputAndRemoveLineContinuation();
+		this.onEnterText(input);
 	}
 
 	public int getInputStart() {
@@ -665,11 +693,11 @@ public abstract class Console extends StyleClassedTextArea {
 	}
 
 	public ObservableValue<Optional<Point2D>> caretPosProperty() {
-		return caretPos;
+		return this.caretPos;
 	}
 
 	public ObservableValue<Optional<String>> textBeforeCaretProperty() {
-		return textBeforeCaret;
+		return this.textBeforeCaret;
 	}
 
 	public Executable getInterpreter() {
