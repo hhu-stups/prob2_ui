@@ -19,6 +19,7 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -47,6 +48,7 @@ public abstract class AbstractEditFormulaStage<T extends IFormulaTask> extends S
 	private final I18n i18n;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final Machine initialMachine;
 
 	private String existingId;
 	private T result;
@@ -56,6 +58,7 @@ public abstract class AbstractEditFormulaStage<T extends IFormulaTask> extends S
 		this.i18n = i18n;
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.initialMachine = this.currentProject.getCurrentMachine();
 		stageManager.loadFXML(this, "/de/prob2/ui/sharedviews/edit_formula_stage.fxml");
 	}
 
@@ -72,27 +75,32 @@ public abstract class AbstractEditFormulaStage<T extends IFormulaTask> extends S
 			}
 		});
 		this.formulaTextArea.textProperty().addListener((observable, oldValue, newValue) -> this.checkFormula());
-
 		BooleanBinding hasBlankFormula = Bindings.createBooleanBinding(() -> this.formulaTextArea.getText().isBlank(), this.formulaTextArea.textProperty());
+
 		BooleanProperty hasDuplicateId = new SimpleBooleanProperty(false);
-		this.idField.textProperty().addListener((observable, from, to) -> {
-			String id = to.trim();
+		ChangeListener<Object> checkForDuplicateId = (observable, from, to) -> {
+			String id = this.idField.getText().trim();
 			if (!id.isEmpty() && !id.equals(this.existingId)) {
 				Machine machine = this.currentProject.getCurrentMachine();
-				if (machine != null) {
+				if (machine != null && machine == this.initialMachine) {
 					Set<String> ids = machine.getValidationTaskIds();
 					hasDuplicateId.set(ids.contains(id));
 					return;
 				}
 			}
 			hasDuplicateId.set(false);
-		});
+		};
+		this.idField.textProperty().addListener(checkForDuplicateId);
+
 		this.errorExplanationLabel.textProperty().bind(
 				Bindings.when(hasDuplicateId)
 						.then(this.i18n.translateBinding("common.editFormula.idAlreadyExistsError", this.idField.textProperty().map(String::trim)))
 						.otherwise("")
 		);
-		this.okButton.disableProperty().bind(hasBlankFormula.or(hasDuplicateId));
+		this.okButton.disableProperty().bind(hasBlankFormula
+				                                     .or(hasDuplicateId)
+				                                     .or(this.currentProject.currentMachineProperty().isNull())
+				                                     .or(this.currentProject.currentMachineProperty().isNotEqualTo(this.initialMachine)));
 		this.okButton.setOnAction(e -> {
 			this.setResult();
 			this.close();
@@ -100,26 +108,21 @@ public abstract class AbstractEditFormulaStage<T extends IFormulaTask> extends S
 		this.cancelButton.setOnAction(e -> this.close());
 	}
 
-	public void reset() {
-		this.result = null;
-		this.existingId = null;
-		this.idField.clear();
-		this.formulaTextArea.clear();
-	}
-
 	public void setInitialFormulaTask(T item) {
-		this.result = null;
 		String id = item.getId();
 		if (id != null && id.isBlank()) {
 			id = null;
 		}
 		this.existingId = id;
-		this.idField.setText(id != null ? item.getId() : "");
-		this.formulaTextArea.replaceText(item.getFormula());
+		this.idField.setText(id != null ? id : "");
+		this.formulaTextArea.replaceText(item.getFormula().trim());
 	}
 
 	private void setResult() {
-		String id = this.idField.getText().isBlank() ? null : this.idField.getText();
+		String id = this.idField.getText();
+		if (id != null && id.isBlank()) {
+			id = null;
+		}
 		String formula = this.formulaTextArea.getText().trim();
 		this.result = this.createFormulaTask(id, formula);
 	}
@@ -131,8 +134,15 @@ public abstract class AbstractEditFormulaStage<T extends IFormulaTask> extends S
 	}
 
 	private void checkFormula() {
+		Machine machine = this.currentProject.getCurrentMachine();
+		if (machine == null || machine != this.initialMachine) {
+			this.formulaTextArea.getErrors().clear();
+			return;
+		}
+
 		try {
 			this.currentTrace.getModel().parseFormula(this.formulaTextArea.getText());
+			this.formulaTextArea.getErrors().clear();
 		} catch (RuntimeException e) {
 			this.handleError(e);
 			LOGGER.debug("Could not parse user-entered formula", e);

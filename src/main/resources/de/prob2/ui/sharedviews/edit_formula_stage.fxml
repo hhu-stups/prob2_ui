@@ -7,7 +7,7 @@
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import javafx.scene.Scene?>
 
-<fx:root type="AbstractEditFormulaStage" title="" xmlns:fx="http://javafx.com/fxml/1" resizable="true">
+<fx:root type="AbstractEditFormulaStage" title="%common.editFormula" xmlns:fx="http://javafx.com/fxml/1" resizable="true">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<VBox styleClass="dialog">

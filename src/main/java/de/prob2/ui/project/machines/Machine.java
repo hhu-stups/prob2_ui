@@ -280,7 +280,13 @@ public final class Machine {
 	}
 
 	public void addValidationTask(IValidationTask validationTask) {
-		this.getValidationTasks().add(Objects.requireNonNull(validationTask, "validationTask"));
+		Objects.requireNonNull(validationTask, "validationTask");
+		String id = validationTask.getId();
+		if (id != null && this.getValidationTasks().stream().anyMatch(t -> id.equals(t.getId()))) {
+			throw new IllegalArgumentException("a validation task with the id '" + id + "' already exists");
+		}
+
+		this.getValidationTasks().add(validationTask);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -307,6 +313,11 @@ public final class Machine {
 		int index = this.getValidationTasks().indexOf(oldValidationTask);
 		if (index < 0) {
 			throw new IllegalArgumentException("oldValidationTask not found");
+		}
+
+		String id = newValidationTask.getId();
+		if (id != null && this.getValidationTasks().stream().anyMatch(t -> !oldValidationTask.equals(t) && id.equals(t.getId()))) {
+			throw new IllegalArgumentException("a validation task with the id '" + id + "' already exists");
 		}
 
 		this.getValidationTasks().set(index, newValidationTask);
