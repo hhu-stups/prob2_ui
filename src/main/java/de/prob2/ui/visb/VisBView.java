@@ -7,13 +7,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.imageio.ImageIO;
 
 import com.google.common.io.CharStreams;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -22,6 +27,7 @@ import de.prob.animator.command.ExportVisBForHistoryCommand;
 import de.prob.animator.command.ExportVisBHtmlForStates;
 import de.prob.animator.command.GetVisBAttributeValuesCommand;
 import de.prob.animator.command.ReadVisBPathFromDefinitionsCommand;
+import de.prob.animator.domainobjects.VisBClickMetaInfos;
 import de.prob.animator.domainobjects.VisBEvent;
 import de.prob.animator.domainobjects.VisBExportOptions;
 import de.prob.animator.domainobjects.VisBHover;
@@ -57,12 +63,7 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.MenuButton;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.*;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -92,16 +93,27 @@ public final class VisBView extends BorderPane {
 		 * Whenever a svg item, that has an event in the JSON / VisB file is clicked, this method redirects the click towards the {@link VisBController}
 		 * @param id of the svg item, that is clicked
 		 */
-		public void click(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+		public void click(String id, int pageX, int pageY, boolean altKey, boolean ctrlKey, boolean metaKey,
+		                  boolean shiftKey, String jsVars) {
 			// probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
-			LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with shift {} cmd/meta {}", id, pageX, pageY, shiftKey, metaKey); // 1=left, 2=middle, 3=right
+			JsonObject visbVarsJson = new Gson().fromJson(jsVars, JsonObject.class);
+			Map<String,String> jsVarsMap = new HashMap<>();
+			for (String key : visbVarsJson.keySet()) {
+				try {
+					jsVarsMap.put(key, visbVarsJson.get(key).getAsString());
+				} catch (UnsupportedOperationException e) {
+					jsVarsMap.put(key, visbVarsJson.get(key).toString());
+				}
+			}
+			LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with alt {} ctrl {} cmd/meta {} shift {} and JS vars {}",
+					id, pageX, pageY, altKey, ctrlKey, metaKey, shiftKey, jsVarsMap); // 1=left, 2=middle, 3=right
 			try {
 				if (visBController.isExecutingEvent()) {
 					LOGGER.debug("Ignoring click because another event is currently being executed");
 					return;
 				}
-
-				visBController.executeEvent(id, pageX, pageY, shiftKey, metaKey).exceptionally(exc -> {
+				VisBClickMetaInfos metaInfos = new VisBClickMetaInfos(altKey,ctrlKey,metaKey,pageX,pageY,shiftKey,jsVarsMap);
+				visBController.executeEvent(id, metaInfos).exceptionally(exc -> {
 					stageManager.showUnhandledExceptionAlert(exc, getScene().getWindow());
 					return null;
 				});
@@ -162,9 +174,19 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private MenuItem exportHistoryItem;
 	@FXML
+	private MenuItem exportHistoryWithSourceItem;
+	@FXML
+	private MenuItem exportHistoryCustomItem;
+	@FXML
 	private MenuItem exportCurrentStateItem;
 	@FXML
+	private MenuItem exportCurrentStateWithSourceItem;
+	@FXML
+	private MenuItem exportCurrentStateCustomItem;
+	@FXML
 	private MenuItem exportImageItem;
+	@FXML
+	private MenuItem exportSvgItem;
 	@FXML
 	private HBox inProgressBox;
 	@FXML
@@ -291,8 +313,12 @@ public final class VisBView extends BorderPane {
 
 		this.reloadVisualisationButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
-		exportHistoryItem.setOnAction(e -> performHtmlExport(false));
-		exportCurrentStateItem.setOnAction(e -> performHtmlExport(true));
+		exportHistoryItem.setOnAction(e -> performHtmlExport(false, VisBExportOptions.DEFAULT_HISTORY));
+		exportHistoryWithSourceItem.setOnAction(e -> performHtmlExport(false, VisBExportOptions.DEFAULT_HISTORY.withShowSource(true)));
+		exportHistoryCustomItem.setOnAction(e -> performCustomisableHTMLExport(false));
+		exportCurrentStateItem.setOnAction(e -> performHtmlExport(true, VisBExportOptions.DEFAULT_STATES));
+		exportCurrentStateWithSourceItem.setOnAction(e -> performHtmlExport(true, VisBExportOptions.DEFAULT_STATES.withShowSource(true)));
+		exportCurrentStateCustomItem.setOnAction(e -> performCustomisableHTMLExport(true));
 
 		this.visBController.getAttributeValues().addListener((MapChangeListener<VisBItem.VisBItemKey, String>)change -> {
 			if (change.wasAdded()) {
@@ -417,9 +443,11 @@ public final class VisBView extends BorderPane {
 		stageManager.initWebView(this.webView);
 
 		this.webView.visibleProperty().bind(this.placeholder.visibleProperty().not());
+		this.webView.setOnZoom(z -> webView.setZoom(webView.getZoom() * z.getZoomFactor()));
 		this.mainPane.getChildren().add(webView);
 		// Enable WebView-related actions only when the WebView is visible.
 		exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
+		exportSvgItem.disableProperty().bind(this.placeholder.visibleProperty());
 		zoomInButton.disableProperty().bind(this.placeholder.visibleProperty());
 		zoomOutButton.disableProperty().bind(this.placeholder.visibleProperty());
 	}
@@ -691,7 +719,27 @@ public final class VisBView extends BorderPane {
 			} catch (IOException e) {
 				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
 			}
+		}
+	}
 
+	@FXML
+	private void exportSvg() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getSvgFilter());
+		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
+		exportSvgWithPath(path);
+	}
+
+	public void exportSvgWithPath(Path path) {
+		if (path != null) {
+			try {
+				String svgContent = (String) webView.getEngine().executeScript(
+						"new XMLSerializer().serializeToString(document.getElementById('visb_html_svg_content').firstElementChild)");
+				Files.writeString(path, svgContent, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+			} catch (Exception e) {
+				alert(e, "visb.stage.image.export.error.title","visb.stage.image.export.error");
+			}
 		}
 	}
 
@@ -762,7 +810,7 @@ public final class VisBView extends BorderPane {
 		currentProject.getCurrentMachine().setVisBVisualisation(null);
 	}
 
-	private void performHtmlExport(final boolean onlyCurrentState) {
+	void performHtmlExport(final boolean onlyCurrentState, final VisBExportOptions options) {
 		Trace trace = currentTrace.get();
 		if (trace == null) {
 			return;
@@ -776,8 +824,8 @@ public final class VisBView extends BorderPane {
 			@Override
 			protected Void call() {
 				trace.getStateSpace().execute(onlyCurrentState ?
-					new ExportVisBHtmlForStates(trace.getCurrentState(), VisBExportOptions.DEFAULT.withShowVariables(true), path)
-						: new ExportVisBForHistoryCommand(trace, path));
+					new ExportVisBHtmlForStates(trace.getCurrentState(), options, path)
+						: new ExportVisBForHistoryCommand(trace, options, path));
 				return null;
 			}
 		};
@@ -793,8 +841,15 @@ public final class VisBView extends BorderPane {
 		FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
 		fileChooser.getExtensionFilters().setAll(htmlFilter);
 		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
 
 		return fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this.getScene().getWindow());
+	}
+
+	private void performCustomisableHTMLExport(boolean onlyCurrentState) {
+		VisBHTMLConfigDialog dialog = injector.getInstance(VisBHTMLConfigDialog.class);
+		dialog.initialiseForOptions(onlyCurrentState);
+		dialog.showAndWait();
 	}
 }
 

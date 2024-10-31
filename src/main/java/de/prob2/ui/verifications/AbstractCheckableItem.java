@@ -1,8 +1,13 @@
 package de.prob2.ui.verifications;
 
+import java.util.Objects;
+
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.annotation.JsonSetter;
+import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Trace;
 
@@ -12,17 +17,30 @@ import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-public abstract class AbstractCheckableItem implements ISelectableTask, ITraceTask {
+@JsonPropertyOrder({
+	"id",
+	"selected",
+})
+public abstract class AbstractCheckableItem implements ISelectableTask {
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private final String id;
 	private final BooleanProperty selected;
+
 	@JsonIgnore
 	final ObjectProperty<ICheckingResult> result = new SimpleObjectProperty<>(this, "result", null);
 	@JsonIgnore
 	final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
-	protected AbstractCheckableItem() {
+	protected AbstractCheckableItem(String id) {
+		this.id = id; // may be null for tasks that have no ID!
 		this.selected = new SimpleBooleanProperty(true);
 
 		this.resultProperty().addListener((o, from, to) -> this.status.set(to == null ? CheckingStatus.NOT_CHECKED : to.getStatus()));
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	@Override
@@ -64,7 +82,7 @@ public abstract class AbstractCheckableItem implements ISelectableTask, ITraceTa
 		return this.statusProperty().get();
 	}
 
-	@Override
+	@JsonIgnore
 	public Trace getTrace() {
 		return this.getResult() != null ? this.getResult().getTrace() : null;
 	}
@@ -80,5 +98,19 @@ public abstract class AbstractCheckableItem implements ISelectableTask, ITraceTa
 	public void reset() {
 		this.setResult(null);
 		this.resetAnimatorDependentState();
+	}
+
+	@Override
+	public boolean settingsEqual(Object other) {
+		return other instanceof AbstractCheckableItem o
+			&& this.getTaskType().equals(o.getTaskType())
+			&& Objects.equals(this.getId(), o.getId());
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("id", this.getId())
+			.toString();
 	}
 }

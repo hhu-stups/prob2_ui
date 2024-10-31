@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.choice;
 
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -9,14 +8,12 @@ import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.SimulationItemHandler;
 import de.prob2.ui.simulation.SimulationMode;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.table.SimulationItem;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
@@ -24,9 +21,6 @@ import javafx.stage.Stage;
 
 @Singleton
 public final class SimulationChoosingStage extends Stage {
-	@FXML
-	private Button btCheck;
-
 	@FXML
 	private SimulationMonteCarloChoice simulationMonteCarloChoice;
 
@@ -52,33 +46,23 @@ public final class SimulationChoosingStage extends Stage {
 
 	private final StageManager stageManager;
 
-	private final SimulationItemHandler simulationItemHandler;
-
 	private final SimulationMode simulationMode;
 
 	private SimulationModel simulation;
 
-	private SimulationItem lastItem;
-
-	private boolean isModifying;
-
-	private SimulationItem modifyingItem;
+	private SimulationItem result;
 
 	@Inject
-	public SimulationChoosingStage(final I18n i18n, final StageManager stageManager, final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode) {
+	private SimulationChoosingStage(I18n i18n, StageManager stageManager, SimulationMode simulationMode) {
 		this.i18n = i18n;
 		this.stageManager = stageManager;
-		this.simulationItemHandler = simulationItemHandler;
 		this.simulationMode = simulationMode;
-		this.isModifying = false;
-		this.modifyingItem = null;
 		this.initModality(Modality.APPLICATION_MODAL);
 		stageManager.loadFXML(this, "simulation_choice.fxml");
 	}
 
 	@FXML
 	private void initialize() {
-		setCheckListeners();
 		simulationConditionChoice.simulationChoice().getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> updateGUI());
 		simulationConditionChoice.simulationChoice().setConverter(i18n.translateConverter());
 		simulationPropertyChoice.setChoosingStage(this);
@@ -90,27 +74,16 @@ public final class SimulationChoosingStage extends Stage {
 		this.sizeToScene();
 	}
 
-	private void setCheckListeners() {
-		btCheck.setOnAction(e -> {
-			lastItem = null;
-			boolean validChoice = checkSelection();
-			if (!validChoice) {
-				showInvalidSelection();
-				return;
-			}
-			final SimulationItem newItem = this.extractItem(simulation);
-			if(isModifying) {
-				modifyingItem.reset();
-				modifyingItem.setSimulationType(newItem.getType());
-				modifyingItem.setInformation(newItem.getInformation());
-				lastItem = modifyingItem;
-			} else {
-				lastItem = this.simulationItemHandler.addItem(newItem);
-			}
-
-			this.close();
-			this.simulationItemHandler.checkItem(lastItem);
-		});
+	@FXML
+	private void apply() {
+		result = null;
+		boolean validChoice = checkSelection();
+		if (!validChoice) {
+			showInvalidSelection();
+			return;
+		}
+		result = this.extractItem(simulation);
+		this.close();
 	}
 
 	private boolean checkSelection() {
@@ -159,7 +132,7 @@ public final class SimulationChoosingStage extends Stage {
 
 		if (simulationMode.getMode() == SimulationMode.Mode.BLACK_BOX || simulationConditionChoice.checkProperty()) {
 			SimulationType simulationType = simulationConditionChoice.simulationChoice().getSelectionModel().getSelectedItem();
-			information.putAll(simulationPropertyChoice.extractInformation());
+			information.putAll(simulationPropertyChoice.extractInformation(simulationType));
 			switch (simulationType) {
 				case MONTE_CARLO_SIMULATION:
 					break;
@@ -189,7 +162,7 @@ public final class SimulationChoosingStage extends Stage {
 		}
 		simulationPropertyChoice.updateCheck(type);
 
-		if (simulationConditionChoice.checkProperty() || mode == SimulationMode.Mode.BLACK_BOX) {
+		if (simulationConditionChoice.checkProperty()) {
 			inputBox.getChildren().add(0, simulationPropertyChoice);
 		}
 
@@ -204,11 +177,8 @@ public final class SimulationChoosingStage extends Stage {
 
 	@FXML
 	public void cancel() {
+		this.result = null;
 		this.close();
-	}
-
-	public void setPath(Path path) {
-		simulationItemHandler.setPath(path);
 	}
 
 	public void setData(SimulationItem item) {
@@ -229,19 +199,8 @@ public final class SimulationChoosingStage extends Stage {
 		simulationHypothesisChoice.reset();
 	}
 
-	public SimulationItem getLastItem() {
-		return lastItem;
-	}
-
-	public boolean isModifying() {
-		return isModifying;
-	}
-
-	public void setModifying(boolean modifying, SimulationItem item) {
-		isModifying = modifying;
-		if(modifying) {
-			this.modifyingItem = item;
-		}
+	public SimulationItem getResult() {
+		return result;
 	}
 
 	public void setSimulation(SimulationModel simulation) {

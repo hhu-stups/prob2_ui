@@ -18,6 +18,7 @@ import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -54,13 +55,7 @@ public final class ValidationObligation {
 		this.expression = expression;
 		this.parent = parent;
 
-		InvalidationListener statusListener = o -> {
-			if (this.parsedExpression == null) {
-				this.status.set(CheckingStatus.INVALID_TASK);
-			} else {
-				this.status.set(this.parsedExpression.getStatus());
-			}
-		};
+		InvalidationListener statusListener = o -> this.updateStatus();
 		this.getTasks().addListener((ListChangeListener<IValidationTask>) o -> {
 			while (o.next()) {
 				if (o.wasRemoved()) {
@@ -78,23 +73,29 @@ public final class ValidationObligation {
 		});
 	}
 
+	private void updateStatus() {
+		if (this.parsedExpression == null) {
+			this.status.set(CheckingStatus.INVALID_TASK);
+		} else {
+			this.status.set(this.parsedExpression.getStatus());
+		}
+	}
+
 	public void setParsedExpression(final IValidationExpression expression) {
 		this.parsedExpression = expression;
 		if (expression == null) {
-			this.status.set(CheckingStatus.INVALID_TASK);
 			this.getTasks().clear();
 		} else {
 			this.getTasks().setAll(expression.getAllTasks()
 				                       .map(ValidationTaskExpression::getTask)
 				                       .collect(Collectors.toList()));
 		}
+		this.updateStatus();
 	}
 
 	public void parse(Map<String, IValidationTask> tasksInScopeById) {
 		try {
-			final IValidationExpression parsed = IValidationExpression.parse(this.getExpression());
-			parsed.resolveTaskIds(tasksInScopeById);
-			this.setParsedExpression(parsed);
+			this.setParsedExpression(IValidationExpression.fromString(this.getExpression(), tasksInScopeById));
 		} catch (VOParseException e) {
 			this.setParsedExpression(null);
 			throw e;
@@ -105,7 +106,7 @@ public final class ValidationObligation {
 		this.parse(machine.getValidationTasksById());
 	}
 
-	public ObjectProperty<CheckingStatus> statusProperty() {
+	public ReadOnlyObjectProperty<CheckingStatus> statusProperty() {
 		return status;
 	}
 

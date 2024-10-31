@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.ExecutionException;
@@ -22,6 +23,9 @@ import javafx.application.Platform;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -42,6 +46,8 @@ import javafx.beans.property.SimpleBooleanProperty;
  */
 @Singleton
 public final class CliTaskExecutor implements CompletableExecutorService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(CliTaskExecutor.class);
+
 	private final Set<Future<?>> currentTasks;
 	private final BooleanProperty running;
 	private final CompletableExecutorService internalExecutor;
@@ -109,8 +115,13 @@ public final class CliTaskExecutor implements CompletableExecutorService {
 		// Otherwise it won't be tracked in currentTasks and the running property won't be updated,
 		// making it impossible for the user to interrupt the Runnable.
 		this.submit(command).exceptionally(exc -> {
-			Thread thread = Thread.currentThread();
-			thread.getUncaughtExceptionHandler().uncaughtException(thread, exc);
+			if (exc instanceof CancellationException) {
+				LOGGER.info("Ignoring CancellationException from Future-less task");
+			} else {
+				LOGGER.error("Exception thrown by Future-less task - will report as uncaught exception", exc);
+				Thread thread = Thread.currentThread();
+				thread.getUncaughtExceptionHandler().uncaughtException(thread, exc);
+			}
 			return null;
 		});
 	}

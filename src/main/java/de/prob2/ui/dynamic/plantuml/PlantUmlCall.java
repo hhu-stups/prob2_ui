@@ -13,7 +13,12 @@ import java.util.concurrent.RunnableFuture;
 
 import de.prob.exception.ProBError;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class PlantUmlCall {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PlantUmlCall.class);
 
 	public static final String PNG = "png";
 	public static final String SVG = "svg";
@@ -80,7 +85,7 @@ public final class PlantUmlCall {
 				try (OutputStream os = p.getOutputStream()) {
 					os.write(this.input);
 				} catch (Throwable t) {
-					throw new RuntimeException("could not write plantuml input", t);
+					LOGGER.warn("could not write input stream of plantuml call", t);
 				}
 			});
 			stdinWriter.setDaemon(true);
@@ -89,8 +94,8 @@ public final class PlantUmlCall {
 			Thread stdoutReader = new Thread(() -> {
 				try (InputStream is = p.getInputStream()) {
 					is.transferTo(outputStream);
-				} catch (IOException e) {
-					throw new RuntimeException("could not read plantuml output", e);
+				} catch (Throwable t) {
+					LOGGER.warn("could not read output stream of plantuml call", t);
 				}
 			});
 			stdoutReader.setDaemon(true);
@@ -99,8 +104,8 @@ public final class PlantUmlCall {
 			Thread stderrReader = new Thread(() -> {
 				try (BufferedReader r = p.errorReader()) {
 					r.transferTo(errorStream);
-				} catch (IOException e) {
-					throw new RuntimeException("could not read plantuml errors", e);
+				} catch (Throwable t) {
+					LOGGER.warn("could not read error stream of plantuml call", t);
 				}
 			});
 			stderrReader.setDaemon(true);

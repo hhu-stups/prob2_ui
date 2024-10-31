@@ -43,7 +43,7 @@
 													</tooltip>
 												</Button>
 											</HBox>
-											<TableView fx:id="visBItems" fixedCellSize="70" styleClass="list-view" VBox.vgrow="ALWAYS">
+											<TableView fx:id="visBItems" styleClass="list-view" VBox.vgrow="ALWAYS">
 												<columnResizePolicy>
 													<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 												</columnResizePolicy>
@@ -61,7 +61,7 @@
 								</TitledPane>
 								<TitledPane animated="false" text="%visb.events">
 									<ScrollPane fitToWidth="TRUE" fitToHeight="TRUE">
-										<ListView fx:id="visBEvents" fixedCellSize="50" styleClass="list-view"/>
+										<ListView fx:id="visBEvents" styleClass="list-view"/>
 									</ScrollPane>
 								</TitledPane>
 							</panes>

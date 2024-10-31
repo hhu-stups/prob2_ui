@@ -78,7 +78,7 @@ public final class RegexSyntaxHighlighting {
 				new TokenClass("editor_types", compile("Next|Init|Spec|Inv")),
 				new TokenClass("editor_comment", compile("\\\\\\*[^\n\r]*|\\(\\*.*?\\*\\)", Pattern.DOTALL)),
 				new TokenClass("editor_arithmetic", compile("\\+|=|-|\\*|\\^|/|\\.\\.|\\\\o|\\\\circ|\\\\div|\\\\leq|\\\\geq|%|<|>|Int|Nat|Real")),
-				new TokenClass("editor_logical", compile("<=>|=>|<<|>>|!|#|/=|~|<>|->|~\\\\|\"|\\[]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\")),
+				new TokenClass("editor_logical", compile("<=>|=>|<<|>>|!|#|/=|~|<>|\\|?->|~\\\\|\"|\\[]|TRUE|FALSE|SubSeq|Append|Len|Seq|Head|Tail|Cardinality|IsFiniteSet|/\\\\|\\\\/|\\\\land|\\\\lor|\\\\lnot|\\\\neg|\\\\equiv|\\\\E|\\\\A|\\\\in|\\\\notin|\\\\cap|\\\\intersect|\\\\cup|\\\\subseteq|\\\\subset|\\\\times|\\\\union|\\.|\\\\")),
 				new TokenClass("editor_identifier", compile("[_a-zA-Z][_a-zA-Z0-9]*"))
 		);
 

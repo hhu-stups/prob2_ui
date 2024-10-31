@@ -34,18 +34,18 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @FXMLInjected
-public abstract class CheckingViewBase<T extends ISelectableTask> extends ScrollPane {
+public abstract class CheckingViewBase<T extends ISelectableTask> extends BorderPane {
 	protected class RowBase extends TableRow<T> {
 		protected final ContextMenu contextMenu;
 		protected final MenuItem executeMenuItem;
@@ -68,11 +68,16 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 
 			this.editMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.edit"));
 			this.editMenuItem.setOnAction(e -> {
+				Machine currentMachine = currentProject.getCurrentMachine();
 				final T oldItem = this.getItem();
 				showItemDialog(oldItem).ifPresent(newItem -> {
-					final T itemToExecute = replaceItem(oldItem, newItem);
-					// FIXME Do we always want to re-execute the item after editing?
-					executeItemIfEnabled(itemToExecute);
+					if (currentProject.getCurrentMachine() == currentMachine) {
+						final T itemToExecute = replaceItem(oldItem, newItem);
+						// FIXME Do we always want to re-execute the item after editing?
+						executeItemIfEnabled(itemToExecute);
+					} else {
+						LOGGER.warn("The machine has changed, discarding task changes");
+					}
 				});
 			});
 			this.contextMenu.getItems().add(this.editMenuItem);
@@ -102,10 +107,10 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Scroll
 	protected TableView<T> itemsTable;
 
 	@FXML
-	protected TableColumn<T, CheckingStatus> statusColumn;
+	protected TableColumn<T, CheckBox> shouldExecuteColumn;
 
 	@FXML
-	protected TableColumn<T, CheckBox> shouldExecuteColumn;
+	protected TableColumn<T, CheckingStatus> statusColumn;
 
 	@FXML
 	protected TableColumn<T, String> configurationColumn;

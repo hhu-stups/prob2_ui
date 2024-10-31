@@ -20,10 +20,10 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.animation.tracereplay.TraceChecker;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.ExecutionContext;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
@@ -38,11 +38,11 @@ public class ProjectDocumenter {
 	private final boolean symbolic;
 	private final boolean makePdf;
 	private final List<Machine> machines;
-	private final CurrentProject project;
+	private final CurrentProject currentProject;
 
 	@Inject
 	public ProjectDocumenter(
-		CurrentProject project,
+		CurrentProject currentProject,
 		Locale locale,
 		I18n i18n,
 		boolean modelchecking,
@@ -53,7 +53,7 @@ public class ProjectDocumenter {
 		Path dir,
 		String filename
 	) {
-		this.project = project;
+		this.currentProject = currentProject;
 		this.locale = locale;
 		this.i18n = i18n;
 		this.modelchecking = modelchecking;
@@ -119,7 +119,7 @@ public class ProjectDocumenter {
 
 	private VelocityContext getVelocityContext() {
 		VelocityContext context = new VelocityContext();
-		context.put("project",project);
+		context.put("project", currentProject.get());
 		context.put("documenter",this);
 		context.put("machines", machines);
 		context.put("modelchecking", modelchecking);
@@ -135,8 +135,8 @@ public class ProjectDocumenter {
 		Path htmlDirectory = getHtmlDirectory(machine);
 		Files.createDirectories(directory.resolve(htmlDirectory));
 		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
-		StateSpace stateSpace = project.loadMachineWithConfirmation(machine).join().getStateSpace();
-		TraceChecker.checkNoninteractive(trace, stateSpace);
+		StateSpace stateSpace = currentProject.loadMachineWithConfirmation(machine).join().getStateSpace();
+		trace.execute(new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, null));
 		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getTrace(), directory.resolve(htmlPath));
 		stateSpace.execute(cmd);
 		return htmlPath.toString();

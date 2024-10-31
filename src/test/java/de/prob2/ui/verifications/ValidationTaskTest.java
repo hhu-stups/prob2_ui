@@ -19,7 +19,8 @@ import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ValidationTaskTest {
 
@@ -41,6 +42,9 @@ class ValidationTaskTest {
 		String json = mapper.writerFor(new TypeReference<List<IValidationTask>>() {}).withDefaultPrettyPrinter().writeValueAsString(tasks);
 		List<IValidationTask> tasks2 = mapper.readValue(json, new TypeReference<>() {});
 
-		assertThat(tasks2).usingRecursiveFieldByFieldElementComparator().isEqualTo(tasks);
+		assertEquals(tasks.size(), tasks2.size());
+		for (int i = 0; i < tasks.size(); i++) {
+			assertTrue(tasks.get(i).settingsEqual(tasks2.get(i)));
+		}
 	}
 }

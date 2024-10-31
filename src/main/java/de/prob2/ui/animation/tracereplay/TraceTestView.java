@@ -22,14 +22,18 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Project;
+import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.DescriptionView;
+import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusIcon;
+import de.prob2.ui.verifications.ExecutionContext;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -215,11 +219,13 @@ public final class TraceTestView extends Stage {
 
 	private final CurrentTrace currentTrace;
 
-	private final CliTaskExecutor cliExecutor;
+	private final CheckingExecutors checkingExecutors;
 
 	private final TraceFileHandler traceFileHandler;
 
-	private final TraceChecker traceChecker;
+	private Project project;
+
+	private Machine machine;
 
 	private final SimpleObjectProperty<ReplayTrace> replayTrace;
 
@@ -235,17 +241,15 @@ public final class TraceTestView extends Stage {
 		FontSize fontSize,
 		I18n i18n,
 		CurrentTrace currentTrace,
-		CliTaskExecutor cliExecutor,
-		TraceFileHandler traceFileHandler,
-		TraceChecker traceChecker
+		CheckingExecutors checkingExecutors,
+		TraceFileHandler traceFileHandler
 	) {
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
-		this.cliExecutor = cliExecutor;
+		this.checkingExecutors = checkingExecutors;
 		this.traceFileHandler = traceFileHandler;
-		this.traceChecker = traceChecker;
 		this.replayTrace = new SimpleObjectProperty<>();
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}
@@ -281,6 +285,10 @@ public final class TraceTestView extends Stage {
 		});
 	}
 
+	private ExecutionContext buildExecutionContext() {
+		return new ExecutionContext(this.project, this.machine, currentTrace.getStateSpace(), null);
+	}
+
 	private boolean currentTraceIsReplayedTrace() {
 		final Trace trace = currentTrace.get();
 		final ReplayTrace replayed = replayTrace.get();
@@ -299,18 +307,16 @@ public final class TraceTestView extends Stage {
 		} else {
 			this.saveTrace();
 			final ReplayTrace r = replayTrace.get();
-			cliExecutor.execute(() -> {
-				try {
-					TraceChecker.checkNoninteractive(r, trace.getStateSpace());
-				} catch (RuntimeException exc) {
-					traceFileHandler.showLoadError(r, exc);
-					return;
-				}
-				if (r.getTrace() != null) {
-					if (index < r.getLoadedTrace().getTransitionList().size()) {
-						currentTrace.set(r.getTrace().gotoPosition(index));
+			r.execute(checkingExecutors, buildExecutionContext()).whenComplete((res, exc) -> {
+				if (exc == null) {
+					if (r.getTrace() != null) {
+						if (index < r.getLoadedTrace().getTransitionList().size()) {
+							currentTrace.set(r.getTrace().gotoPosition(index));
+						}
+						traceTableView.refresh();
 					}
-					traceTableView.refresh();
+				} else {
+					traceFileHandler.showLoadError(r, exc);
 				}
 			});
 		}
@@ -342,8 +348,10 @@ public final class TraceTestView extends Stage {
 		}
 	}
 
-	public void loadReplayTrace(ReplayTrace replayTrace) {
+	public void loadReplayTrace(Project project, Machine machine, ReplayTrace replayTrace) {
 		this.postconditions.clear();
+		this.project = project;
+		this.machine = machine;
 		this.replayTrace.set(replayTrace);
 		traceTableView.getItems().clear();
 		transitionBoxes.clear();
@@ -386,7 +394,16 @@ public final class TraceTestView extends Stage {
 			}
 		}
 		this.saveTrace();
-		cliExecutor.execute(() -> traceChecker.check(replayTrace.get()));
+		ReplayTrace r = replayTrace.get();
+		r.execute(checkingExecutors, buildExecutionContext()).thenCompose(res ->
+			traceFileHandler.askKeepReplayedTrace(r)
+		).thenApply(trace -> {
+			trace.ifPresent(currentTrace::set);
+			return null;
+		}).exceptionally(exc -> {
+			Platform.runLater(() -> traceFileHandler.showLoadError(r, exc));
+			return null;
+		});
 		this.close();
 	}
 

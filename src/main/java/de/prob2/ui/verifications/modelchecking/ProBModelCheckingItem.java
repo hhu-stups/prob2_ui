@@ -2,6 +2,8 @@ package de.prob2.ui.verifications.modelchecking;
 
 import java.math.BigInteger;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
@@ -22,7 +24,6 @@ import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.NotYetFinished;
 import de.prob.check.StateSpaceStats;
 import de.prob.model.representation.AbstractModel;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
@@ -146,27 +147,20 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		return s.toString();
 	}
 
-	@Override
-	public Trace getTrace() {
-		return this.getSteps().isEmpty() ? null : this.getSteps().get(0).getTrace();
-	}
-
 	private void executeWithOptions(ExecutionContext context, ModelCheckingOptions fullOptions) {
 		ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting model check...", Integer.MAX_VALUE), 0, null, BigInteger.ZERO, context.stateSpace());
 
-		int stepIndex;
+		List<ModelCheckingStep> steps;
 		if (fullOptions.getPrologOptions().contains(ModelCheckingOptions.Options.INSPECT_EXISTING_NODES)) {
-			// User chose to restart model checking - clear all previous steps.
-			stepIndex = 0;
-			Platform.runLater(() -> {
-				this.getSteps().clear();
-				this.getSteps().add(initialStep);
-			});
+			// User chose to restart model checking - forget all previous steps.
+			steps = new ArrayList<>();
 		} else {
-			// User chose to continue a previously stopped check - append a new step.
-			stepIndex = getSteps().size();
-			Platform.runLater(() -> this.getSteps().add(initialStep));
+			// User chose to continue a previously stopped check - keep the existing steps.
+			steps = new ArrayList<>(((ModelCheckingItem.Result)this.getResult()).getSteps());
 		}
+		int stepIndex = steps.size();
+		steps.add(initialStep);
+		Platform.runLater(() -> this.setResult(new ModelCheckingItem.Result(steps)));
 		
 		IModelCheckListener listener = new IModelCheckListener() {
 			@Override
@@ -175,12 +169,8 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 				var cmd = new GetStatisticsCommand(GetStatisticsCommand.StatisticsOption.MEMORY_USED);
 				context.stateSpace().execute(cmd);
 				ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, cmd.getResult(), context.stateSpace());
-				setCurrentStep(step);
-				Platform.runLater(() -> {
-					if (stepIndex < getSteps().size()) {
-						getSteps().set(stepIndex, step);
-					}
-				});
+				steps.set(stepIndex, step);
+				Platform.runLater(() -> setResult(new ModelCheckingItem.Result(steps)));
 			}
 
 			@Override
@@ -189,13 +179,7 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 			}
 		};
 		ConsistencyChecker checker = new ConsistencyChecker(context.stateSpace(), fullOptions, listener);
-		
-		try {
-			this.setCurrentStep(initialStep);
-			checker.call();
-		} finally {
-			this.setCurrentStep(null);
-		}
+		checker.call();
 	}
 
 	@Override

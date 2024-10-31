@@ -17,14 +17,13 @@ public final class PrologOutput extends InlineCssTextArea {
 
 	@Inject
 	public PrologOutput() {
-		this.outputListener = line -> Platform.runLater(() -> {
-			// Remove trailing ANSI escape for resetting formatting, if any.
-			// handleOutput already resets the formatting for each new line.
-			final String lineToFormat = line.replaceAll("\\u001b\\[0m$", "") + "\n";
-			String[] messageAndStyle = handleOutput(lineToFormat);
-			this.appendText(messageAndStyle[0]);
-			this.setStyle(Math.max(this.getLength()-messageAndStyle[0].length(), 0), this.getLength(), messageAndStyle[1]);
-		});
+		this.outputListener = line -> {
+			if (Platform.isFxApplicationThread()) {
+				this.addTextLine(line);
+			} else {
+				Platform.runLater(() -> this.addTextLine(line));
+			}
+		};
 		this.setPrefWidth(Double.MAX_VALUE);
 		this.setWrapText(true);
 		this.setEditable(false);
@@ -32,6 +31,15 @@ public final class PrologOutput extends InlineCssTextArea {
 
 	public IConsoleOutputListener getOutputListener() {
 		return this.outputListener;
+	}
+
+	private void addTextLine(String line) {
+		// Remove trailing ANSI escape for resetting formatting, if any.
+		// handleOutput already resets the formatting for each new line.
+		final String lineToFormat = line.replaceAll("\\u001b\\[0m$", "") + "\n";
+		String[] messageAndStyle = handleOutput(lineToFormat);
+		this.appendText(messageAndStyle[0]);
+		this.setStyle(Math.max(this.getLength() - messageAndStyle[0].length(), 0), this.getLength(), messageAndStyle[1]);
 	}
 
 	private static String[] handleOutput(String s) {
@@ -45,7 +53,7 @@ public final class PrologOutput extends InlineCssTextArea {
 		String backgroundColor = "white";
 
 		String message = s;
-		while(!message.isEmpty() && message.charAt(0) == 27) {
+		while (!message.isEmpty() && message.charAt(0) == 27) {
 			// ANSI escape code found. Warning: If ANSI escape code is not ending with m some parts of messages might be lost!
 			// Warning: If codes are not set at beginning of message, e.g. for changing attributes midmessage, chaos might ensue ;)
 			int indexOfANSIEscapeCodeEnd = message.indexOf('m');

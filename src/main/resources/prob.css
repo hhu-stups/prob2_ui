@@ -19,14 +19,14 @@
 }
 
 /************************************************************************************
- * Accordion																		  *
+ * Accordion                                                                        *
  ************************************************************************************/
 .accordion {
 	-fx-background-color: -prob-grey;
 }
 
 /************************************************************************************
- * Buttons & Icons																  *
+ * Buttons & Icons                                                                  *
  ************************************************************************************/
 .button, .toggle-button, .menu-button {
 	-fx-background-color: transparent;
@@ -99,7 +99,7 @@
 }
 
 /************************************************************************************
- * CheckBox																		  *
+ * CheckBox                                                                         *
  ************************************************************************************/
 .check-box {
 	-fx-background-color: transparent;
@@ -126,7 +126,7 @@
 }
 
 /************************************************************************************
- * ChoiceBox																		  *
+ * ChoiceBox                                                                        *
  ************************************************************************************/
 .choice-box {
 	-fx-background-color: transparent;
@@ -140,7 +140,7 @@
 }
 
 /************************************************************************************
- * ColorPicker																	  *
+ * ColorPicker                                                                      *
  ************************************************************************************/
 .color-picker {
 	-fx-background-color: transparent;
@@ -209,9 +209,9 @@
 	-fx-background-color: -prob-grey;
 	-fx-padding: 0.08em;
 }
- 
+
 /************************************************************************************
- * ComboBox																		  *
+ * ComboBox                                                                         *
  ************************************************************************************/
 .combo-box {
 	-fx-background-radius: 5.0;
@@ -268,7 +268,7 @@
 }
 
 /************************************************************************************
- * DialogPane																	  *
+ * DialogPane                                                                       *
  ************************************************************************************/
 .dialog-pane .button {
 	-fx-background-color: transparent;
@@ -285,7 +285,7 @@
 
 
 /************************************************************************************
- * ListView/TreeView																*
+ * ListView/TreeView                                                                *
  ************************************************************************************/
 .list-view,
 .tree-view {
@@ -297,7 +297,6 @@
 .list-cell,
 .tree-cell {
 	-fx-cell-size: 1.5em;
-	-fx-padding: 0em 1em 0.05em 1em;
 }
 .list-cell:odd,
 .tree-cell:odd {
@@ -329,7 +328,7 @@
 }
 
 /************************************************************************************
- * Menu, ContextMenu, MenuBar													  *
+ * Menu, ContextMenu, MenuBar                                                       *
  ************************************************************************************/
 .context-menu {
 	-fx-background-color: rgba(85, 85, 96, 0.95); /* increased opacity to 95, was prob-grey-75 */
@@ -381,7 +380,7 @@
 }
 
 /************************************************************************************
- * ScrollBar, ScrollPane															  *
+ * ScrollBar, ScrollPane                                                            *
  ************************************************************************************/
 .scroll-bar {
 	-fx-background-color: transparent;
@@ -421,7 +420,7 @@
 }
 
 /************************************************************************************
- * Spinner																		  *
+ * Spinner                                                                          *
  ************************************************************************************/
 .spinner .increment-arrow-button {
 	-fx-background-color: -prob-grey-75, white;
@@ -468,7 +467,7 @@
 }
 
 /************************************************************************************
- * SplitView																		  *
+ * SplitView                                                                        *
  ************************************************************************************/
 .split-pane {
 	-fx-padding: 0.0;
@@ -487,7 +486,7 @@
 }
 
 /************************************************************************************
- * StyledTextArea/Consoles														  *
+ * StyledTextArea/Consoles                                                          *
  ************************************************************************************/
 
 .console {
@@ -507,7 +506,7 @@
 }
 
 /************************************************************************************
- * BEditor																			*
+ * BEditor                                                                          *
  ************************************************************************************/
 
 .code-area.editor {
@@ -585,6 +584,10 @@
 	-rtfx-underline-dash-array: 3px;
 }
 
+.editor .problem.message {
+	-rtfx-underline-color: gray;
+}
+
 .editor .problem.warning {
 	-rtfx-underline-color: gold;
 }
@@ -606,9 +609,9 @@
 }
 
 /************************************************************************************
- * TabPane																		  *
+ * TabPane                                                                          *
  ************************************************************************************/
- 
+
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
 	-fx-text-fill: -prob-white;
 }
@@ -643,7 +646,7 @@
 }
 
 /************************************************************************************
- * TextArea																		  *
+ * TextArea                                                                         *
  ************************************************************************************/
 .text-area {
 	-fx-background-color: -prob-grey-20;
@@ -677,7 +680,7 @@
 }
 
 /************************************************************************************
- * TextField																		  *
+ * TextField                                                                        *
  ************************************************************************************/
 .text-field {
 	-fx-background-color: white;
@@ -699,7 +702,7 @@
 }
 
 /************************************************************************************
- * Titled Pane																	  *
+ * Titled Pane                                                                      *
  ************************************************************************************/
 .titled-pane {
 	-fx-text-fill: -prob-white;
@@ -724,7 +727,7 @@
 }
 
 /************************************************************************************
- * TableView, TreeTableView														  *
+ * TableView, TreeTableView                                                         *
  ************************************************************************************/
 .table-view {
 	-fx-padding: -1.0;
@@ -773,7 +776,6 @@
 .table-view .table-cell,
 .tree-table-view .tree-table-cell {
 	-fx-border-color: transparent;
-	-fx-padding: 0em 0.25em 0.05em 0.25em;
 }
 .table-row-cell:disabled {
 	-fx-text-fill: -prob-lightgrey;
@@ -792,7 +794,18 @@
 }
 
 /************************************************************************************
- * WebView																		  *
+ * ToolBar                                                                          *
+ ************************************************************************************/
+
+.tool-bar-overflow-button .context-menu {
+	-fx-background-color: -prob-lightgrey;
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 1px;
+	-fx-border-radius: 5px;
+}
+
+/************************************************************************************
+ * WebView                                                                          *
  ************************************************************************************/
 .web-view .scroll-bar,
 .web-view .scroll-bar > .track {
@@ -801,7 +814,7 @@
 
 
 /************************************************************************************
- * Specific Styles																  *
+ * Specific Styles                                                                  *
  ************************************************************************************/
 .left, .left .label {
 	-fx-alignment: center-left;
@@ -826,8 +839,8 @@
 }
 
 .label.warning {
-	-fx-text-fill: -prob-orange;
-	-fx-font-weight: bold;
+	-fx-text-fill: -prob-orange !important;
+	-fx-font-weight: bold !important;
 }
 
 /* ===================== DIALOG ====================== */
@@ -896,7 +909,7 @@
 
 .trace-information-row.replayable .table-cell {
 	-fx-font-family: ARIAL;
-	-fx-fill: white;	
+	-fx-fill: white;
 	-fx-text-fill: -prob-aqua;
 }
 
@@ -906,7 +919,7 @@
 
 .trace-information-row.not-replayable .table-cell {
 	-fx-font-family: ARIAL;
-	-fx-fill: white;	
+	-fx-fill: white;
 	-fx-text-fill: -prob-orange;
 }
 
@@ -995,7 +1008,8 @@
 	-fx-border-width: 0.5;
 }
 
-.checking-status-icon.not-checked {
+.checking-status-icon.not-checked,
+.checking-status-icon.in-progress {
 	-fx-text-fill: blue;
 }
 
@@ -1152,7 +1166,7 @@
 }
 
 .tree-table-cell.true {
- -fx-background-color: rgba(76, 175, 80, 0.15) ; /* was #A4D8B4 palegreen */
+	-fx-background-color: rgba(76, 175, 80, 0.15) ; /* was #A4D8B4 palegreen */
 }
 
 
@@ -1220,12 +1234,6 @@
 	-fx-alignment: CENTER;
 }
 
-
-.visb-location {
-	-fx-font-family: ARIAL;
-	-fx-font-style: italic;
-	-fx-font-size: 0.9em;
-}
 
 /* ==================== TRACE DIFF ======================== */
 .trace-diff-cell {

@@ -10,9 +10,13 @@ import de.prob2.ui.internal.StageManager;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.Region;
 
+@SuppressWarnings("InterfaceMayBeAnnotatedFunctional")
 public interface ICheckingResult {
 	CheckingStatus getStatus();
-	String getMessageBundleKey();
+	
+	default String getMessageBundleKey() {
+		return this.getStatus().getTranslationKey();
+	}
 	
 	default Object[] getMessageParams() {
 		return new Object[0];
@@ -22,12 +26,22 @@ public interface ICheckingResult {
 		return Collections.emptyList();
 	}
 	
+	/**
+	 * Get the trace from this result, if any.
+	 * If this result contains multiple traces, only the first one is returned
+	 * (use {@link #getTraces()} to access the other traces).
+	 * If this result doesn't contain a trace, {@code null} is returned.
+	 * Note that this says nothing about the result status -
+	 * depending on the task type, a trace may be a successful or a failed result.
+	 *
+	 * @return the first trace from this result, or {@code null} if there is none
+	 */
 	default Trace getTrace() {
 		return this.getTraces().isEmpty() ? null : this.getTraces().get(0);
 	}
 	
 	default ICheckingResult withoutAnimatorDependentState() {
-		return this;
+		return new CheckingResult(this.getStatus(), this.getMessageBundleKey(), this.getMessageParams());
 	}
 	
 	default void showAlert(final StageManager stageManager, final I18n i18n) {

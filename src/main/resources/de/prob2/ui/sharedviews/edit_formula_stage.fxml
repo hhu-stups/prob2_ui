@@ -3,11 +3,11 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-<?import de.prob2.ui.dynamic.EditDynamicFormulaStage?>
-
+<?import de.prob2.ui.sharedviews.AbstractEditFormulaStage?>
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import javafx.scene.Scene?>
-<fx:root type="EditDynamicFormulaStage" title="" xmlns:fx="http://javafx.com/fxml/1" resizable="true">
+
+<fx:root type="AbstractEditFormulaStage" title="%common.editFormula" xmlns:fx="http://javafx.com/fxml/1" resizable="true">
 	<scene>
 		<Scene stylesheets="@/prob.css">
 			<VBox styleClass="dialog">
@@ -15,7 +15,7 @@
 					<padding>
 						<Insets topRightBottomLeft="10.0"/>
 					</padding>
-						<Label text="%dynamic.editFormula" styleClass="title">
+						<Label text="%common.editFormula" styleClass="title">
 							<VBox.margin>
 								<Insets left="10" right="10" />
 							</VBox.margin>
@@ -34,7 +34,7 @@
 									</VBox.margin>
 								</Label>
 								<VBox spacing="20" alignment="center_left">
-									<Label text="%verifications.temporal.formula.temporalFormulaStage.formula" />
+									<Label text="%common.formula" />
 									<ExtendedCodeArea fx:id="formulaTextArea" styleClass="text-area-with-border"/>
 									<VBox.margin>
 										<Insets top="20" />
@@ -43,8 +43,8 @@
 							</VBox>
 						</AnchorPane>
 					<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
-						<Button  fx:id="okButton" text="%common.buttons.ok" styleClass="button-blue"/>
-						<Button  fx:id="cancelButton" text="%common.buttons.cancel" styleClass="button-blue"/>
+						<Button fx:id="okButton" text="%common.buttons.ok" styleClass="button-blue"/>
+						<Button fx:id="cancelButton" text="%common.buttons.cancel" styleClass="button-blue"/>
 					</HBox>
 				</VBox>
 			</VBox>

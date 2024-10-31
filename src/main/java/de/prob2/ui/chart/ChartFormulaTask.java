@@ -1,4 +1,4 @@
-package de.prob2.ui.dynamic;
+package de.prob2.ui.chart;
 
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -23,26 +23,22 @@ import javafx.beans.property.SimpleObjectProperty;
 
 @JsonPropertyOrder({
 	"id",
-	"commandType",
 	"formula",
 })
-public final class VisualizationFormulaTask implements IFormulaTask {
+public final class ChartFormulaTask implements IFormulaTask {
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
-	private final String commandType;
 	private final String formula;
 	@JsonIgnore
 	private final ObjectProperty<CheckingStatus> status;
 
 	@JsonCreator
-	public VisualizationFormulaTask(
+	public ChartFormulaTask(
 			@JsonProperty("id") final String id,
-			@JsonProperty("commandType") final String commandType,
 			@JsonProperty("formula") final String formula
 	) {
 		this.id = id;
-		this.commandType = Objects.requireNonNull(commandType, "commandType");
 		this.formula = Objects.requireNonNull(formula, "formula");
 		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 	}
@@ -53,13 +49,13 @@ public final class VisualizationFormulaTask implements IFormulaTask {
 	}
 
 	@Override
-	public ValidationTaskType<VisualizationFormulaTask> getTaskType() {
-		return BuiltinValidationTaskTypes.VISUALIZATION_FORMULA;
+	public ValidationTaskType<ChartFormulaTask> getTaskType() {
+		return BuiltinValidationTaskTypes.CHART_FORMULA;
 	}
 
 	@Override
 	public String getTaskType(final I18n i18n) {
-		return this.getCommandType();
+		return i18n.translate("chart.historyChart.task.name");
 	}
 
 	@Override
@@ -67,13 +63,9 @@ public final class VisualizationFormulaTask implements IFormulaTask {
 		return this.getFormula();
 	}
 
-	public String getCommandType() {
-		return commandType;
-	}
-
 	@Override
 	public String getFormula() {
-		return formula;
+		return this.formula;
 	}
 
 	@Override
@@ -107,10 +99,9 @@ public final class VisualizationFormulaTask implements IFormulaTask {
 
 	@Override
 	public boolean settingsEqual(Object other) {
-		return other instanceof VisualizationFormulaTask that
+		return other instanceof ChartFormulaTask that
 			       && Objects.equals(this.getTaskType(), that.getTaskType())
 			       && Objects.equals(this.getId(), that.getId())
-			       && Objects.equals(this.getCommandType(), that.getCommandType())
 			       && Objects.equals(this.getFormula(), that.getFormula());
 	}
 
@@ -118,7 +109,6 @@ public final class VisualizationFormulaTask implements IFormulaTask {
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())
-			       .add("commandType", this.getCommandType())
 			       .add("formula", this.getFormula())
 			       .toString();
 	}

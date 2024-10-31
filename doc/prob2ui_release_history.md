@@ -4,9 +4,12 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.2.2 (not released yet)
 
+* Added B type information for code completion (if available)
+* Customisable VisB HTML export and SVG export of the current VisB image
 * Added TLC model checking for classical B machines with TLC4B and export of generated TLA+ files
 * Improved support for rule validations with rules machines (.rmch)
 * Added search to editor
+* Added language selection dropdown to interactive console
 
 ## Version 1.2.1 (2023-08-15)
 

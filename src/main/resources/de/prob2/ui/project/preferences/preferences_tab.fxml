@@ -4,32 +4,46 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.project.preferences.PreferencesTab?>
+<?import de.prob2.ui.sharedviews.Spacer?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.SplitPane?>
-<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
+
 <fx:root type="PreferencesTab" text="%project.preferences.preferencesTab.title" closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<VBox stylesheets="@/prob.css">
-		<HBox styleClass="border" alignment="CENTER_RIGHT">
-			<Button onAction="#addPreference">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}" />
-				</graphic>
-			</Button>
-			<HelpButton fx:id="helpButton"/>
-		</HBox>
-		<SplitPane fx:id="splitPane" VBox.vgrow="ALWAYS">
-			<ListView fx:id="preferencesListView" styleClass="no-border" prefHeight="200.0">
-				<placeholder>
-					<Label text="%project.preferences.preferencesTab.noPreferences" />
-				</placeholder>
-			</ListView>
-		</SplitPane>
-	</VBox>
+	<BorderPane stylesheets="@/prob.css">
+		<top>
+			<ToolBar styleClass="border">
+				<padding>
+					<Insets top="5.0" left="5.0"/>
+				</padding>
+				<Spacer/>
+				<Button onAction="#addPreference">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE"
+									   bindableFontSize="${fontSize.fontSize * 2}"/>
+					</graphic>
+				</Button>
+				<HelpButton fx:id="helpButton"/>
+			</ToolBar>
+		</top>
+		<center>
+			<!-- this split pane is used to dynamically add the preference view -->
+			<SplitPane fx:id="splitPane" VBox.vgrow="ALWAYS">
+				<ListView fx:id="preferencesListView" styleClass="no-border" prefHeight="200.0">
+					<placeholder>
+						<Label text="%project.preferences.preferencesTab.noPreferences" />
+					</placeholder>
+				</ListView>
+			</SplitPane>
+		</center>
+	</BorderPane>
 </fx:root>
 

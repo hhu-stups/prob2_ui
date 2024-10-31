@@ -162,12 +162,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		CompletableFuture<Trace> loadFuture = machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);
 		return loadFuture.thenApply(trace -> {
-			List<Path> allFiles = trace.getModel().getAllFiles();
-			Platform.runLater(() -> {
-				m.updateModifiedTimesAndResetIfChanged(allFiles);
-				m.reinitPatternManager();
-				m.updateAllProofObligationsFromModel(trace.getModel());
-			});
+			Platform.runLater(() -> m.updateAfterLoad(trace));
 			return trace;
 		});
 	}

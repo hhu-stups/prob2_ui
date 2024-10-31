@@ -3,6 +3,7 @@ package de.prob2.ui.project.machines;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,9 +33,11 @@ import de.prob.model.eventb.ProofObligation;
 import de.prob.model.representation.AbstractModel;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
+import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.chart.ChartFormulaTask;
 import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
@@ -89,7 +92,6 @@ public final class Machine {
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SimulationModel> simulations;
 	private final ObjectProperty<Path> visBVisualisation;
-	private final ListProperty<String> historyChartItems;
 
 	private final ObservableList<ProofObligationItem> proofObligationTasks;
 
@@ -117,8 +119,7 @@ public final class Machine {
 			Collections.emptyList(),
 			Collections.emptyList(),
 			Collections.emptyList(),
-			null,
-			Collections.emptyList()
+			null
 		);
 	}
 
@@ -131,8 +132,7 @@ public final class Machine {
 		@JsonProperty("validationTasks") final List<IValidationTask> validationTasks,
 		@JsonProperty("ltlPatterns") final List<LTLPatternItem> ltlPatterns,
 		@JsonProperty("simulations") final List<SimulationModel> simulations,
-		@JsonProperty("visBVisualisation") final Path visBVisualisation,
-		@JsonProperty("historyChartItems") final List<String> historyChartItems
+		@JsonProperty("visBVisualisation") final Path visBVisualisation
 	) {
 		this.name = new SimpleStringProperty(this, "name", Objects.requireNonNull(name, "name"));
 		this.description = new SimpleStringProperty(this, "description", Objects.requireNonNull(description, "description"));
@@ -142,8 +142,10 @@ public final class Machine {
 		this.validationTasks = new SimpleListProperty<>(this, "validationTasks", FXCollections.observableArrayList(validationTasks));
 		this.ltlPatterns = new SimpleListProperty<>(this, "ltlPatterns", FXCollections.observableArrayList(ltlPatterns));
 		this.simulations = new SimpleListProperty<>(this, "simulations", FXCollections.observableArrayList(simulations));
+		// In previous versions, the default simulation was sometimes saved into the project file - remove it if it exists.
+		// TODO This should probably be moved into the old JSON format conversion code when we bump the project format version the next time
+		this.simulations.removeIf(simulationModel -> Paths.get("").equals(simulationModel.getPath()));
 		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", visBVisualisation);
-		this.historyChartItems = new SimpleListProperty<>(this, "historyChartItems", FXCollections.observableArrayList(historyChartItems));
 
 		// Keep this filtered list alive so that its listener (added in initListeners) keeps working.
 		this.proofObligationTasks = this.getProofObligationTasks();
@@ -168,7 +170,6 @@ public final class Machine {
 		this.getLTLPatterns().addListener(changedListener);
 		this.getSimulations().addListener(changedListener);
 		this.visBVisualizationProperty().addListener(changedListener);
-		this.getHistoryChartItems().addListener(changedListener);
 
 		this.proofObligationTasks.addListener((InvalidationListener)o -> this.updateAllProofObligations());
 	}
@@ -279,7 +280,13 @@ public final class Machine {
 	}
 
 	public void addValidationTask(IValidationTask validationTask) {
-		this.getValidationTasks().add(Objects.requireNonNull(validationTask, "validationTask"));
+		Objects.requireNonNull(validationTask, "validationTask");
+		String id = validationTask.getId();
+		if (id != null && this.getValidationTasks().stream().anyMatch(t -> id.equals(t.getId()))) {
+			throw new IllegalArgumentException("a validation task with the id '" + id + "' already exists");
+		}
+
+		this.getValidationTasks().add(validationTask);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -306,6 +313,11 @@ public final class Machine {
 		int index = this.getValidationTasks().indexOf(oldValidationTask);
 		if (index < 0) {
 			throw new IllegalArgumentException("oldValidationTask not found");
+		}
+
+		String id = newValidationTask.getId();
+		if (id != null && this.getValidationTasks().stream().anyMatch(t -> !oldValidationTask.equals(t) && id.equals(t.getId()))) {
+			throw new IllegalArgumentException("a validation task with the id '" + id + "' already exists");
 		}
 
 		this.getValidationTasks().set(index, newValidationTask);
@@ -382,6 +394,11 @@ public final class Machine {
 		return this.getValidationTasksByClass(TestCaseGenerationItem.class);
 	}
 
+	@JsonIgnore
+	public ObservableList<ChartFormulaTask> getChartFormulaTasks() {
+		return this.getValidationTasksByClass(ChartFormulaTask.class);
+	}
+
 	@JsonGetter("simulations")
 	public ReadOnlyListProperty<SimulationModel> getSimulations() {
 		return this.simulations;
@@ -398,11 +415,6 @@ public final class Machine {
 
 	public void setVisBVisualisation(Path visBVisualisation) {
 		this.visBVisualizationProperty().set(visBVisualisation);
-	}
-
-	@JsonGetter("historyChartItems")
-	public ReadOnlyListProperty<String> getHistoryChartItems() {
-		return this.historyChartItems;
 	}
 
 	@JsonIgnore
@@ -462,11 +474,6 @@ public final class Machine {
 		this.allProofObligations.setAll(updatedAllProofObligations);
 	}
 
-	public void updateAllProofObligationsFromModel(AbstractModel model) {
-		this.lastModelProofObligations = getProofObligationsFromModel(model);
-		this.updateAllProofObligations();
-	}
-
 	@JsonIgnore
 	public CachedEditorState getCachedEditorState() {
 		return cachedEditorState;
@@ -490,13 +497,26 @@ public final class Machine {
 		this.getValidationTasks().forEach(IValidationTask::resetAnimatorDependentState);
 	}
 
-	public void resetStatus() {
+	public void updateAfterLoad(Trace trace) {
+		List<Path> allFiles = trace.getModel().getAllFiles();
+		this.reinitPatternManager();
+		this.updateModifiedTimesAndResetIfChanged(allFiles);
+		this.updateAllProofObligationsFromModel(trace.getModel());
+	}
+
+	private void resetStatus() {
 		for (var vt : this.getValidationTasks()) {
 			vt.reset();
 		}
 
-		this.lastModelProofObligations.clear();
+		// these will be set again in "updateAllProofObligationsFromModel"
+		this.lastModelProofObligations = Collections.emptyList();
 		this.allProofObligations.clear();
+	}
+
+	private void updateAllProofObligationsFromModel(AbstractModel model) {
+		this.lastModelProofObligations = getProofObligationsFromModel(model);
+		this.updateAllProofObligations();
 	}
 
 	private static Map<Path, FileTime> readFileModifiedTimes(List<Path> files) throws IOException {
@@ -507,7 +527,7 @@ public final class Machine {
 		return modifiedTimes;
 	}
 
-	public void updateModifiedTimesAndResetIfChanged(List<Path> newSourceFiles) {
+	private void updateModifiedTimesAndResetIfChanged(List<Path> newSourceFiles) {
 		Map<Path, FileTime> newModifiedTimes;
 		try {
 			newModifiedTimes = readFileModifiedTimes(newSourceFiles);
@@ -540,8 +560,7 @@ public final class Machine {
 				this.getValidationTasks(),
 				this.getLTLPatterns(),
 				this.getSimulations(),
-				this.getVisBVisualisation(),
-				this.getHistoryChartItems()
+				this.getVisBVisualisation()
 		);
 	}
 

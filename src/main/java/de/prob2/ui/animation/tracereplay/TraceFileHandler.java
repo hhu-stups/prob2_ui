@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -11,9 +12,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
@@ -30,17 +33,19 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.table.SimulationItem;
 
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,16 +61,18 @@ public final class TraceFileHandler {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
+	private final Provider<ReplayedTraceStatusAlert> replayedAlertProvider;
 	private final I18n i18n;
 
 	@Inject
 	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject,
-	                        StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n) {
+	                        StageManager stageManager, FileChooserManager fileChooserManager, Provider<ReplayedTraceStatusAlert> replayedAlertProvider, I18n i18n) {
 		this.traceManager = traceManager;
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
+		this.replayedAlertProvider = replayedAlertProvider;
 		this.i18n = i18n;
 	}
 
@@ -165,6 +172,38 @@ public final class TraceFileHandler {
 		});
 	}
 
+	private CompletableFuture<Optional<Trace>> showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
+		CompletableFuture<Optional<Trace>> future = new CompletableFuture<>();
+		Platform.runLater(() -> {
+			ReplayedTraceStatusAlert alert = replayedAlertProvider.get();
+			alert.initReplayTrace(replayTrace);
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.isPresent() && result.get().equals(alert.getAcceptButtonType())) {
+				future.complete(Optional.of(replayTrace.getTrace()));
+			} else {
+				future.complete(Optional.empty());
+			}
+		});
+		return future;
+	}
+
+	/**
+	 * Ask the user whether a replayed trace should be accepted or discarded.
+	 * The user is only prompted if the replay was not fully successful (i. e. there were errors).
+	 * A perfectly replayed trace is always accepted without asking the user.
+	 * 
+	 * @param replayTrace the trace task that was replayed
+	 * @return the trace to be used as the new current trace, or {@link Optional#empty()} if the current trace should be left unchanged (i. e. the user discarded the replayed trace)
+	 */
+	public CompletableFuture<Optional<Trace>> askKeepReplayedTrace(final ReplayTrace replayTrace) {
+		var traceResult = (ReplayTrace.Result)replayTrace.getResult();
+		if (!traceResult.getReplayed().getErrors().isEmpty()) {
+			return showTraceReplayCompleteFailed(replayTrace);
+		} else {
+			return CompletableFuture.completedFuture(Optional.of(traceResult.getTrace()));
+		}
+	}
+
 	public void showSaveError(Throwable e) {
 		Alert alert = stageManager.makeExceptionAlert(e, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg");
 		alert.showAndWait();
@@ -195,7 +234,7 @@ public final class TraceFileHandler {
 			}
 
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
-			for (Trace trace : item.getTraces()) {
+			for (Trace trace : item.getResult().getTraces()) {
 				final Path traceFilePath = path.resolve("Trace_" + numberGeneratedTraces + ".prob2trace");
 				save(trace, traceFilePath, item.createdByForMetadata());
 				this.addTraceFile(machine, traceFilePath);
@@ -280,13 +319,15 @@ public final class TraceFileHandler {
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
-			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
-				csvWriter.header("Position", "Transition");
-
+			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+				.setHeader("Position", "Transition")
+				.build();
+			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				int i = 1;
 				for (Transition transition : trace.getTransitionList()) {
 					String name = OperationItem.forTransitionFast(trace.getStateSpace(), transition).toPrettyString(true);
-					csvWriter.record(i++, name);
+					csvPrinter.printRecord(i, name);
+					i++;
 				}
 			}
 		}

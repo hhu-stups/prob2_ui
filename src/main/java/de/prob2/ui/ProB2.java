@@ -209,19 +209,18 @@ public final class ProB2 extends Application {
 		injector.getInstance(MenuToolkit.class);
 
 		new Thread(() -> {
-			final Scene mainScene;
 			try {
-				mainScene = this.startInBackground(primaryStage);
+				this.startInBackground(primaryStage);
 			} catch (RuntimeException | Error t) {
 				logger.error("Uncaught exception during UI startup", t);
 				Platform.runLater(() -> this.showStartupError(t, primaryStage));
 				return;
 			}
-			Platform.runLater(() -> this.postStart(primaryStage, mainScene));
+			Platform.runLater(() -> this.postStart(primaryStage));
 		}, "Main UI Loader").start();
 	}
 
-	private Scene startInBackground(final Stage primaryStage) {
+	private void startInBackground(final Stage primaryStage) {
 		i18n = injector.getInstance(I18n.class);
 		this.stopActions = injector.getInstance(StopActions.class);
 		this.stopActions.add(() -> injector.getInstance(ProBInstanceProvider.class).shutdownAll());
@@ -256,9 +255,6 @@ public final class ProB2 extends Application {
 			}
 		});
 		currentProject.savedProperty().addListener(titleUpdater);
-
-		Parent root = injector.getInstance(MainController.class);
-		return new Scene(root);
 	}
 
 	private void restoreDetachedView(String viewClassName) {
@@ -328,7 +324,10 @@ public final class ProB2 extends Application {
 		}
 	}
 
-	private void postStart(final Stage primaryStage, final Scene mainScene) {
+	private void postStart(final Stage primaryStage) {
+		Parent root = injector.getInstance(MainController.class);
+		Scene mainScene = new Scene(root);
+
 		primaryStage.hide();
 		primaryStage.setScene(mainScene);
 		primaryStage.sizeToScene();

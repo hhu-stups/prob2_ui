@@ -1,5 +1,6 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.Collections;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -18,7 +19,6 @@ import de.prob.check.StateSpaceStats;
 import de.prob.check.TLCModelChecker;
 import de.prob.check.TLCModelCheckingOptions;
 import de.prob.statespace.StateSpace;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
@@ -114,26 +114,17 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 	}
 
 	@Override
-	public Trace getTrace() {
-		return this.getSteps().isEmpty() ? null : this.getSteps().get(0).getTrace();
-	}
-
-	@Override
 	public void execute(final ExecutionContext context) {
 		StateSpace stateSpace = context.stateSpace();
 
 		final ModelCheckingStep initialStep = new ModelCheckingStep(new NotYetFinished("Starting TLC model check...", Integer.MAX_VALUE), 0, null, null, stateSpace);
-		Platform.runLater(() -> {
-			this.getSteps().clear();
-			this.getSteps().add(initialStep);
-		});
+		Platform.runLater(() -> this.setResult(new ModelCheckingItem.Result(Collections.singletonList(initialStep))));
 
 		IModelCheckListener listener = new IModelCheckListener() {
 			@Override
 			public void updateStats(String jobId, long timeElapsed, IModelCheckingResult result, StateSpaceStats stats) {
 				final ModelCheckingStep step = new ModelCheckingStep(result, timeElapsed, stats, null, stateSpace);
-				setCurrentStep(step);
-				Platform.runLater(() -> getSteps().set(0, step));
+				Platform.runLater(() -> setResult(new ModelCheckingItem.Result(Collections.singletonList(step))));
 			}
 
 			@Override
@@ -142,16 +133,11 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			}
 		};
 
-		try {
-			TLCModelChecker tlcModelChecker = new TLCModelChecker(
-					context.project().getLocation().resolve(context.machine().getLocation()).toString(),
-					stateSpace, listener,
-					new TLCModelCheckingOptions(getOptions()));
-			setCurrentStep(initialStep);
-			tlcModelChecker.call();
-		} finally {
-			setCurrentStep(null);
-		}
+		TLCModelChecker tlcModelChecker = new TLCModelChecker(
+			context.project().getLocation().resolve(context.machine().getLocation()).toString(),
+			stateSpace, listener,
+			new TLCModelCheckingOptions(getOptions()));
+		tlcModelChecker.call();
 	}
 
 	@Override

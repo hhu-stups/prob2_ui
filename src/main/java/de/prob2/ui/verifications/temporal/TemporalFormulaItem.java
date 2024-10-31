@@ -40,8 +40,6 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TemporalFormulaItem.class);
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final String id;
 	private final String code;
 	private final String description;
 	private final int stateLimit;
@@ -51,9 +49,8 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 	private final boolean expectedResult;
 
 	protected TemporalFormulaItem(String id, String code, String description, int stateLimit, StartState startState, String startStateExpression, boolean expectedResult) {
-		super();
+		super(id);
 
-		this.id = id;
 		this.code = Objects.requireNonNull(code, "code");
 		this.description = Objects.requireNonNull(description, "description");
 		this.stateLimit = stateLimit;
@@ -66,11 +63,6 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 			this.startStateExpression = null;
 		}
 		this.expectedResult = expectedResult;
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
 	}
 
 	public String getCode() {
@@ -123,13 +115,12 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 			case FROM_EXPRESSION -> {
 				IValidationExpression expr;
 				try {
-					expr = IValidationExpression.parse(this.getStartStateExpression());
+					expr = IValidationExpression.fromString(this.getStartStateExpression(), context.machine().getValidationTasksById());
 				} catch (VOParseException exc) {
 					LOGGER.error("Parse error in temporal checking start state validation expression", exc);
 					this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "common.result.validationExpressionParseError", exc.getMessage()));
 					yield CompletableFuture.completedFuture(null);
 				}
-				expr.resolveTaskIds(context.machine().getValidationTasksById());
 
 				yield expr.check(executors, context).thenCompose(res -> {
 					Trace trace = expr.getTrace();
@@ -153,15 +144,14 @@ public abstract class TemporalFormulaItem extends AbstractCheckableItem {
 
 	@Override
 	public boolean settingsEqual(Object other) {
-		return other instanceof TemporalFormulaItem that
-			       && Objects.equals(this.getTaskType(), that.getTaskType())
-			       && Objects.equals(this.getId(), that.getId())
-			       && Objects.equals(this.getCode(), that.getCode())
-			       && Objects.equals(this.getDescription(), that.getDescription())
-			       && Objects.equals(this.getStateLimit(), that.getStateLimit())
-			       && this.getStartState().equals(that.getStartState())
-			       && Objects.equals(this.getStartStateExpression(), that.getStartStateExpression())
-			       && Objects.equals(this.getExpectedResult(), that.getExpectedResult());
+		return super.settingsEqual(other)
+			&& other instanceof TemporalFormulaItem that
+			&& Objects.equals(this.getCode(), that.getCode())
+			&& Objects.equals(this.getDescription(), that.getDescription())
+			&& Objects.equals(this.getStateLimit(), that.getStateLimit())
+			&& this.getStartState().equals(that.getStartState())
+			&& Objects.equals(this.getStartStateExpression(), that.getStartStateExpression())
+			&& Objects.equals(this.getExpectedResult(), that.getExpectedResult());
 	}
 
 	@Override

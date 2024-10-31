@@ -32,7 +32,7 @@ stages:
 
 test:jdk-17-linux:
   extends: .test-linux
-  image: eclipse-temurin:17
+  image: eclipse-temurin:17-jammy
   before_script:
     - *default_before_script_linux
     - apt-get install --assume-yes build-essential fakeroot
@@ -41,7 +41,7 @@ test:jdk-17-linux:
 
 test:jdk-21-linux:
   extends: .test-linux
-  image: eclipse-temurin:21
+  image: eclipse-temurin:21-jammy
   script:
     - ./gradlew ${GRADLE_OPTIONS} check
 

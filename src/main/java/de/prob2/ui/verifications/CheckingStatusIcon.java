@@ -12,12 +12,17 @@ public final class CheckingStatusIcon extends BindableGlyph {
 	}
 	
 	public void setStatus(CheckingStatus status) {
-		this.getStyleClass().removeAll("not-checked", "success", "fail", "interrupted", "timeout", "invalid-task");
+		this.getStyleClass().removeAll("not-checked", "in-progress", "success", "fail", "interrupted", "timeout", "invalid-task");
 		final String styleClass;
 		final FontAwesome.Glyph icon = switch (status) {
 			case NOT_CHECKED -> {
 				styleClass = "not-checked";
 				yield FontAwesome.Glyph.QUESTION_CIRCLE;
+			}
+			case IN_PROGRESS -> {
+				// TODO Display a real ProgressIndicator here instead of a spinner icon that doesn't spin
+				styleClass = "in-progress";
+				yield FontAwesome.Glyph.SPINNER;
 			}
 			case SUCCESS -> {
 				styleClass = "success";

@@ -164,25 +164,28 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private void setBindings() {
 		addModelCheckButton.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()));
 
-		final ChangeListener<ModelCheckingStep> showCurrentStepListener = (o, from, to) -> {
-			// When currentStep changes from null to non-null,
+		ChangeListener<CheckingStatus> showRunningStepListener = (o, from, to) -> {
+			// When an item's status changes to IN_PROGRESS,
 			// i. e. a new checking step was started,
 			// select the newly started step so that the checking progress is visible.
-			if (from == null && to != null) {
+			if (to == CheckingStatus.IN_PROGRESS) {
 				final ModelCheckingItem item = (ModelCheckingItem) ((ReadOnlyProperty<?>)o).getBean();
 				Platform.runLater(() -> {
 					itemsTable.getSelectionModel().select(item);
-					stepsTable.getSelectionModel().select(to);
+					stepsTable.getItems().stream()
+						.filter(step -> step.getStatus() == CheckingStatus.IN_PROGRESS)
+						.findFirst()
+						.ifPresent(stepsTable.getSelectionModel()::select);
 				});
 			}
 		};
 		itemsTable.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (from != null) {
-				from.currentStepProperty().removeListener(showCurrentStepListener);
+				from.statusProperty().removeListener(showRunningStepListener);
 			}
 
 			if (to != null) {
-				to.currentStepProperty().addListener(showCurrentStepListener);
+				to.statusProperty().addListener(showRunningStepListener);
 			}
 		});
 
@@ -218,15 +221,20 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 			stepsTable.itemsProperty().unbind();
 			if (to != null) {
-				stepsTable.itemsProperty().bind(to.stepsProperty());
-				if (to.getSteps().isEmpty()) {
-					hideStats();
-				} else {
+				stepsTable.itemsProperty().bind(Bindings.createObjectBinding(() -> {
+					if (to.getResult() instanceof ModelCheckingItem.Result mcResult) {
+						return FXCollections.observableArrayList(mcResult.getSteps());
+					} else {
+						return FXCollections.emptyObservableList();
+					}
+				}, to.resultProperty()));
+
+				if (to.getResult() instanceof ModelCheckingItem.Result) {
 					stepsTable.getSelectionModel().selectLast();
+				} else {
+					hideStats();
 				}
 			} else {
-				// Because of the previous binding, the stepsTable items list is the same object as the steps list of one of the ModelcheckingItems.
-				// This means that we can't just clear stepsTable.getItems(), because that would also clear the ModelcheckingItem's steps, which resets the item's status.
 				stepsTable.setItems(FXCollections.observableArrayList());
 			}
 		});
@@ -272,9 +280,13 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	private StringExpression executeTextBinding(ModelCheckingItem item) {
 		if (item != null) {
-			return Bindings.when(item.stepsProperty().emptyProperty())
-				.then(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check"))
-				.otherwise(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.recheck"));
+			return Bindings.createStringBinding(() -> {
+				if (item.getResult() instanceof ModelCheckingItem.Result) {
+					return i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.recheck");
+				} else {
+					return i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.check");
+				}
+			}, item.resultProperty());
 		} else {
 			return i18n.translateBinding("verifications.modelchecking.modelcheckingView.contextMenu.check");
 		}
@@ -285,8 +297,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			// Enable "Continue Model Checking" only if the item has already been executed at least once, but hasn't completely finished yet.
 			// TODO Continuing should also be disabled if another ModelCheckingItem has been executed after this one stopped, because ProB tracks the checking progress globally and cannot tell apart the different ModelCheckingItems.
 			return this.disableItemBinding(proBItem).or(Bindings.createBooleanBinding(
-				() -> proBItem.getSteps().isEmpty() || proBItem.getSteps().stream().anyMatch(step -> step.getStatus() == CheckingStatus.SUCCESS),
-				proBItem.stepsProperty()
+				() -> !(item.getResult() instanceof ModelCheckingItem.Result mcResult) || mcResult.getSteps().stream().anyMatch(step -> step.getStatus() == CheckingStatus.SUCCESS),
+				item.resultProperty()
 			));
 		} else {
 			return new SimpleBooleanProperty(true);
@@ -306,10 +318,11 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		if (item instanceof ProBModelCheckingItem proBItem) {
 			statsView.updateWhileModelChecking(proBItem);
 			return super.executeItemImpl(item, executors, context).thenApply(res -> {
-				ModelCheckingStep lastStep = item.getSteps().get(item.getSteps().size() - 1);
-				Trace trace = lastStep.getTrace();
-				if (trace != null) {
-					currentTrace.set(trace);
+				if (item.getResult() instanceof ModelCheckingItem.Result mcResult) {
+					Trace trace = mcResult.getLastStep().getTrace();
+					if (trace != null) {
+						currentTrace.set(trace);
+					}
 				}
 				return res;
 			});
@@ -331,10 +344,11 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		ExecutionContext context = getCurrentExecutionContext();
 		item.continueModelChecking(checkingExecutors, context).whenComplete((res, exc) -> {
 			if (exc == null) {
-				ModelCheckingStep lastStep = item.getSteps().get(item.getSteps().size() - 1);
-				Trace trace = lastStep.getTrace();
-				if (trace != null) {
-					currentTrace.set(trace);
+				if (item.getResult() instanceof ModelCheckingItem.Result mcResult) {
+					Trace trace = mcResult.getLastStep().getTrace();
+					if (trace != null) {
+						currentTrace.set(trace);
+					}
 				}
 			} else {
 				handleCheckException(exc);

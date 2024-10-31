@@ -18,6 +18,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.statespace.Trace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -29,6 +30,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MenuController;
 import de.prob2.ui.persistence.UIState;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.ProjectView;
 import de.prob2.ui.stats.StatsView;
 
@@ -43,6 +45,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
 
 import org.slf4j.Logger;
@@ -71,6 +75,7 @@ public final class MainController extends BorderPane {
 
 	private final Injector injector;
 	private final StageManager stageManager;
+	private final CurrentTrace currentTrace;
 	private final UIState uiState;
 	private final I18n i18n;
 	private final Config config;
@@ -78,9 +83,10 @@ public final class MainController extends BorderPane {
 	private final Map<Class<?>, DetachedViewStage> detachedViewStages;
 
 	@Inject
-	public MainController(Injector injector, StageManager stageManager, UIState uiState, I18n i18n, Config config) {
+	public MainController(Injector injector, StageManager stageManager, CurrentTrace currentTrace, UIState uiState, I18n i18n, Config config) {
 		this.injector = injector;
 		this.stageManager = stageManager;
+		this.currentTrace = currentTrace;
 		this.uiState = uiState;
 		this.i18n = i18n;
 		this.config = config;
@@ -92,6 +98,23 @@ public final class MainController extends BorderPane {
 
 	@FXML
 	private void initialize() {
+		// Make the mouse back/forward buttons move back/forward through the current trace.
+		this.addEventFilter(MouseEvent.MOUSE_CLICKED, event -> {
+			if (event.getButton() == MouseButton.BACK) {
+				Trace trace = currentTrace.get();
+				if (trace != null) {
+					currentTrace.set(trace.back());
+					event.consume();
+				}
+			} else if (event.getButton() == MouseButton.FORWARD) {
+				Trace trace = currentTrace.get();
+				if (trace != null) {
+					currentTrace.set(trace.forward());
+					event.consume();
+				}
+			}
+		});
+
 		this.getAccordions().forEach(e -> e.getPanes().forEach(this::addContextMenu));
 
 		final ObservableIntegerValue historySize = historyView.getObservableHistorySize();

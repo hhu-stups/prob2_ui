@@ -19,7 +19,6 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.DynamicCommandItem;
-import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.PlantUmlVisualizationCommand;
@@ -120,7 +119,6 @@ public final class DynamicVisualizationStage extends Stage {
 	private final Provider<DynamicPreferencesStage> preferencesStageProvider;
 	private final AtomicBoolean needsUpdateAfterBusy;
 	private final BackgroundUpdater updater;
-	private final ObservableList<ErrorItem> errors = FXCollections.observableArrayList();
 
 	private DynamicTreeItem lastSelected;
 	private boolean ignoreCommandItemUpdates;
@@ -182,7 +180,6 @@ public final class DynamicVisualizationStage extends Stage {
 			}
 		});
 
-		this.tvFormula.setEditable(true);
 		this.statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
 		this.statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		this.idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
@@ -210,13 +207,13 @@ public final class DynamicVisualizationStage extends Stage {
 				}
 			});
 
-			MenuItem editFormula = new MenuItem(i18n.translate("dynamic.editFormula"));
+			MenuItem editFormula = new MenuItem(i18n.translate("common.editFormula"));
 			editFormula.setOnAction(event -> this.editFormulaWithDialog(row.getItem()));
 
-			MenuItem evaluateItem = new MenuItem(i18n.translate("dynamic.evaluateFormula"));
+			MenuItem evaluateItem = new MenuItem(i18n.translate("common.evaluateFormula"));
 			evaluateItem.setOnAction(event -> this.evaluateFormula(row.getItem()));
 
-			MenuItem dischargeItem = new MenuItem(i18n.translate("dynamic.formulaView.discharge"));
+			MenuItem dischargeItem = new MenuItem(i18n.translate("common.formula.discharge"));
 			dischargeItem.setOnAction(event -> {
 				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
@@ -225,7 +222,7 @@ public final class DynamicVisualizationStage extends Stage {
 				item.setStatus(CheckingStatus.SUCCESS);
 			});
 
-			MenuItem failItem = new MenuItem(this.i18n.translate("dynamic.formulaView.fail"));
+			MenuItem failItem = new MenuItem(this.i18n.translate("common.formula.fail"));
 			failItem.setOnAction(event -> {
 				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
@@ -234,7 +231,7 @@ public final class DynamicVisualizationStage extends Stage {
 				item.setStatus(CheckingStatus.FAIL);
 			});
 
-			MenuItem unknownItem = new MenuItem(this.i18n.translate("dynamic.formulaView.unknown"));
+			MenuItem unknownItem = new MenuItem(this.i18n.translate("common.formula.unknown"));
 			unknownItem.setOnAction(event -> {
 				VisualizationFormulaTask item = row.getItem();
 				if (item == null) {
@@ -243,7 +240,7 @@ public final class DynamicVisualizationStage extends Stage {
 				item.setStatus(CheckingStatus.NOT_CHECKED);
 			});
 
-			Menu statusMenu = new Menu(this.i18n.translate("dynamic.setStatus"), null, dischargeItem, failItem, unknownItem);
+			Menu statusMenu = new Menu(this.i18n.translate("common.formula.setStatus"), null, dischargeItem, failItem, unknownItem);
 
 			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
 			removeItem.setOnAction(event -> {
@@ -304,7 +301,6 @@ public final class DynamicVisualizationStage extends Stage {
 		this.placeholderLabel.setVisible(true);
 		this.errorsView.setVisible(false);
 		this.taErrors.clear();
-		this.errors.clear();
 
 		this.tableView.clearContent();
 		this.graphView.clearContent();
@@ -320,15 +316,20 @@ public final class DynamicVisualizationStage extends Stage {
 			return;
 		}
 
+		Machine machine = currentProject.getCurrentMachine();
 		EditDynamicFormulaStage stage = this.editFormulaStageProvider.get();
 		stage.initOwner(this);
-		stage.setInitialFormulaTask(oldTask, this.errors);
+		stage.setInitialFormulaTask(oldTask);
 		stage.showAndWait();
 
 		VisualizationFormulaTask newTask = stage.getResult();
 		if (newTask != null) {
-			VisualizationFormulaTask added = this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldTask, newTask);
-			this.evaluateFormula(added);
+			if (this.currentProject.getCurrentMachine() == machine) {
+				VisualizationFormulaTask added = this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldTask, newTask);
+				this.evaluateFormula(added);
+			} else {
+				LOGGER.warn("The machine has changed, discarding task changes");
+			}
 		}
 	}
 
@@ -399,7 +400,7 @@ public final class DynamicVisualizationStage extends Stage {
 			if (selectedItem == null) {
 				text = this.i18n.translate("dynamic.placeholder.selectVisualization");
 			} else if (selectedItem.getArity() > 0) {
-				text = this.i18n.translate("dynamic.enterFormula.placeholder");
+				text = this.i18n.translate("common.enterFormula.placeholder");
 			} else {
 				// The placeholder label shouldn't be seen by the user in this case,
 				// because the visualization content should be visible,
@@ -610,7 +611,6 @@ public final class DynamicVisualizationStage extends Stage {
 		Platform.runLater(() -> {
 			this.clearContent();
 			this.placeholderLabel.setVisible(false);
-			this.errors.setAll(e.getErrors());
 			this.taFormula.getErrors().setAll(e.getErrors());
 			this.taErrors.setText(e.getMessage());
 			this.errorsView.setVisible(true);

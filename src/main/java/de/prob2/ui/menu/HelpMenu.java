@@ -1,16 +1,14 @@
 package de.prob2.ui.menu;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob.annotations.Home;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.FXMLInjected;
@@ -30,14 +28,16 @@ public class HelpMenu extends Menu {
 	@FXML
 	private MenuItem aboutItem;
 	
+	private final Path syntaxFilesDir;
 	private final Injector injector;
 	private final StageManager stageManager;
 	private final HostServices hostServices;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HelpMenu.class);
 
 	@Inject
-	private HelpMenu(final StageManager stageManager, final Injector injector, HostServices hostServices) {
+	private HelpMenu(StageManager stageManager, @Home Path proBHomePath, Injector injector, HostServices hostServices) {
 		this.stageManager = stageManager;
+		this.syntaxFilesDir = proBHomePath.resolve("tcl");
 		this.injector = injector;
 		this.hostServices = hostServices;
 		stageManager.loadFXML(this, "helpMenu.fxml");
@@ -89,14 +89,11 @@ public class HelpMenu extends Menu {
 	private void handleSyntax(String filename, String title) {
 		SyntaxStage syntaxStage = injector.getInstance(SyntaxStage.class);
 		syntaxStage.setTitle(title);
-		try (
-			InputStream is = Objects.requireNonNull(this.getClass().getResourceAsStream(filename));
-			InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)
-		) {
-			syntaxStage.setText(CharStreams.toString(isr));
+		try {
+			syntaxStage.setText(Files.readString(syntaxFilesDir.resolve(filename)));
 		} catch (IOException | UncheckedIOException e) {
 			LOGGER.error("Could not read syntax help file: {}", filename, e);
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", filename).show();
+			stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotOpenFile.content", filename).show();
 			return;
 		}
 		syntaxStage.show();

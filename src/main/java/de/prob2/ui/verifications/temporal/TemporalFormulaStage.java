@@ -7,20 +7,20 @@ import com.google.inject.Inject;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.ProBError;
 import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOParser;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.temporal.ctl.CTLFormulaParser;
 import de.prob2.ui.verifications.temporal.ctl.CTLFormulaItem;
+import de.prob2.ui.verifications.temporal.ctl.CTLFormulaParser;
 import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import de.prob2.ui.vomanager.ast.IValidationExpression;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
@@ -195,7 +195,7 @@ public final class TemporalFormulaStage extends TemporalItemStage {
 		if (startState == TemporalFormulaItem.StartState.FROM_EXPRESSION) {
 			startStateExpression = startStateExpressionTextField.getText();
 			try {
-				IValidationExpression.parse(startStateExpression);
+				VOParser.parse(startStateExpression);
 			} catch (VOParseException exc) {
 				ErrorItem errorItem = new ErrorItem(exc.getMessage(), ErrorItem.Type.ERROR, Collections.emptyList());
 				this.showErrors(Collections.singletonList(errorItem));

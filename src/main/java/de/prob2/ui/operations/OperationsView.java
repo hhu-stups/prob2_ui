@@ -65,6 +65,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 import org.controlsfx.glyphfont.FontAwesome;
@@ -75,7 +76,7 @@ import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
-public final class OperationsView extends VBox {
+public final class OperationsView extends BorderPane {
 	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
@@ -536,8 +537,8 @@ public final class OperationsView extends VBox {
 			} catch (NumberFormatException e) {
 				LOGGER.error("Invalid input for executing random number of events",e);
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-					"operations.operationsView.alerts.invalidNumberOfOparations.header",
-					"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput);
+						"operations.operationsView.alerts.invalidNumberOfOperations.header",
+						"operations.operationsView.alerts.invalidNumberOfOperations.content", randomInput);
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 				return;

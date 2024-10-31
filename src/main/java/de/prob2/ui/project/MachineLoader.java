@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.CommandInterruptedException;
@@ -61,7 +62,7 @@ public final class MachineLoader {
 	private final CurrentTrace currentTrace;
 	private final GlobalPreferences globalPreferences;
 	private final ErrorDisplayFilter errorDisplayFilter;
-	private final PrologOutput prologOutput;
+	private final Provider<PrologOutput> prologOutput;
 	private final StatusBar statusBar;
 	private final CliTaskExecutor cliExecutor;
 	private final I18n i18n;
@@ -80,7 +81,7 @@ public final class MachineLoader {
 		final CurrentTrace currentTrace,
 		final GlobalPreferences globalPreferences,
 		final ErrorDisplayFilter errorDisplayFilter,
-		final PrologOutput prologOutput,
+		final Provider<PrologOutput> prologOutput,
 		final StatusBar statusBar,
 		final CliTaskExecutor cliExecutor,
 		final I18n i18n,
@@ -147,7 +148,7 @@ public final class MachineLoader {
 				});
 			}
 		});
-		animator.addConsoleOutputListener(prologOutput.getOutputListener());
+		animator.addConsoleOutputListener(line -> Platform.runLater(() -> prologOutput.get().getOutputListener().lineReceived(line)));
 		return animator;
 	}
 

@@ -353,7 +353,7 @@ public final class RulesView extends AnchorPane {
 	}
 
 	public void clear() {
-		LOGGER.debug("Clear RulesView!");
+		LOGGER.trace("Clear RulesView!");
 
 		tvRootItem.getChildren().clear();
 		filterTextField.setText("");

@@ -47,7 +47,7 @@
 						</ChoiceBox>
 					</HBox>
 					<HBox alignment="CENTER_LEFT">
-						<Label text="%verifications.temporal.formula.temporalFormulaStage.formula" HBox.hgrow="ALWAYS"/>
+						<Label text="%common.formula" HBox.hgrow="ALWAYS"/>
 						<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 						<Spacer/>
 						<Button fx:id="btShowBuiltins" styleClass="button-blue" text="%verifications.temporal.formula.temporalFormulaStage.showBuiltins" onAction="#showBuiltins" HBox.hgrow="NEVER"/>

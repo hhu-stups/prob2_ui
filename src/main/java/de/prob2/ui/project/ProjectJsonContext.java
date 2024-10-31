@@ -1070,6 +1070,17 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 
+	private static void updateV54Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		ArrayNode historyChartItems = checkArray(machine.remove("historyChartItems"));
+		historyChartItems.forEach(taskNode -> {
+			ObjectNode task = validationTasks.addObject();
+			String formula = checkText(taskNode);
+			task.put("taskType", "CHART_FORMULA");
+			task.put("formula", formula);
+		});
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -1258,6 +1269,13 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		if (oldVersion <= 53) {
 			updateV53Project(oldObject);
 		}
+
+		checkArray(oldObject.get("machines")).forEach(machineNode -> {
+			final ObjectNode machine = checkObject(machineNode);
+			if (oldVersion <= 54) {
+				updateV54Machine(machine);
+			}
+		});
 
 		return oldObject;
 	}

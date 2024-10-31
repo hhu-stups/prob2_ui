@@ -1,7 +1,7 @@
 package de.prob2.ui.chart;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,12 +9,11 @@ import java.util.List;
 import javax.imageio.ImageIO;
 
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
-import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.statespace.Trace;
 import de.prob.statespace.TraceElement;
@@ -22,14 +21,13 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -43,91 +41,28 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TextField;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.WritableImage;
-import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class HistoryChartStage extends Stage {
-	private static final class ClassicalBListCell extends ListCell<ClassicalB> {
-		private final StringProperty code;
-
-		private ClassicalBListCell() {
-			super();
-
-			this.code = new SimpleStringProperty(this, "code", null);
-			this.textProperty().bind(this.code);
-		}
-
-		@Override
-		protected void updateItem(final ClassicalB item, final boolean empty) {
-			super.updateItem(item, empty);
-
-			this.code.set(item == null || empty ? null : item.getCode());
-		}
-
-		@Override
-		public void startEdit() {
-			super.startEdit();
-
-			if (!this.isEditing()) {
-				return;
-			}
-
-			final TextField textField = new TextField(this.getText());
-			textField.setOnAction(event -> {
-				textField.getStyleClass().remove("text-field-error");
-				final ClassicalB formula;
-				try {
-					formula = new ClassicalB(textField.getText());
-				} catch (EvaluationException e) {
-					LOGGER.debug("Could not parse user-entered formula", e);
-					textField.getStyleClass().add("text-field-error");
-					return;
-				}
-				this.commitEdit(formula);
-			});
-			textField.setOnKeyPressed(event -> {
-				if (KeyCode.ESCAPE.equals(event.getCode())) {
-					this.cancelEdit();
-				}
-			});
-			textField.textProperty().addListener(observable -> textField.getStyleClass().remove("text-field-error"));
-
-			this.textProperty().unbind();
-			this.setText(null);
-			this.setGraphic(textField);
-			textField.requestFocus();
-		}
-
-		@Override
-		public void commitEdit(final ClassicalB newValue) {
-			super.commitEdit(newValue);
-			this.textProperty().bind(this.code);
-			this.setGraphic(null);
-		}
-
-		@Override
-		public void cancelEdit() {
-			super.cancelEdit();
-			this.textProperty().bind(this.code);
-			this.setGraphic(null);
-		}
-	}
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(HistoryChartStage.class);
 
@@ -138,7 +73,13 @@ public final class HistoryChartStage extends Stage {
 	@FXML
 	private LineChart<Number, Number> singleChart;
 	@FXML
-	private ListView<ClassicalB> formulaList;
+	private TableView<ChartFormulaTask> tvFormula;
+	@FXML
+	private TableColumn<ChartFormulaTask, CheckingStatus> statusColumn;
+	@FXML
+	private TableColumn<ChartFormulaTask, String> idColumn;
+	@FXML
+	private TableColumn<ChartFormulaTask, String> formulaColumn;
 	@FXML
 	private Button addButton;
 	@FXML
@@ -157,12 +98,19 @@ public final class HistoryChartStage extends Stage {
 	private final CurrentProject currentProject;
 	private final FileChooserManager fileChooserManager;
 	private final I18n i18n;
+	private final Provider<EditChartFormulaStage> editChartFormulaStageProvider;
 
 	private final ObservableList<LineChart<Number, Number>> separateCharts;
+	/**
+	 * This field exists to stop the bindings on it from being garbage collected.
+	 * And to have an identity reference to the observable - needed for unbinding!
+	 */
+	private ObservableList<ChartFormulaTask> currentFormulaTasks;
 
 	@Inject
 	private HistoryChartStage(final StageManager stageManager, final CurrentTrace currentTrace, final CurrentProject currentProject,
-	                          final FileChooserManager fileChooserManager, final I18n i18n) {
+	                          final FileChooserManager fileChooserManager, final I18n i18n,
+	                          final Provider<EditChartFormulaStage> editChartFormulaStageProvider) {
 		super();
 
 		this.stageManager = stageManager;
@@ -170,6 +118,7 @@ public final class HistoryChartStage extends Stage {
 		this.currentProject = currentProject;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
+		this.editChartFormulaStageProvider = editChartFormulaStageProvider;
 
 		this.separateCharts = FXCollections.observableArrayList();
 
@@ -178,27 +127,74 @@ public final class HistoryChartStage extends Stage {
 
 	@FXML
 	private void initialize() {
-		helpButton.setHelpContent("mainmenu.visualisations.historyChart", null);
-		this.formulaList.setCellFactory(view -> new ClassicalBListCell());
-		this.formulaList.getItems().addListener((ListChangeListener<ClassicalB>) change -> {
-			while (change.next()) {
-				if (change.wasRemoved()) {
-					this.removeCharts(change.getFrom(), change.getFrom() + change.getRemovedSize());
-				}
+		this.helpButton.setHelpContent("mainmenu.visualisations.historyChart", null);
 
-				if (change.wasAdded()) {
-					this.addCharts(change.getFrom(), change.getTo(), change.getList());
+		this.tvFormula.getItems().addListener(this::onFormulaListChange);
+		this.statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		this.statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		this.idColumn.setCellValueFactory(new PropertyValueFactory<>("id"));
+		this.formulaColumn.setCellValueFactory(new PropertyValueFactory<>("formula"));
+		this.tvFormula.setRowFactory(tv -> {
+			TableRow<ChartFormulaTask> row = new TableRow<>();
+
+			// == edit ==
+			MenuItem editItem = new MenuItem(i18n.translate("common.editFormula"));
+			editItem.setOnAction(event -> this.editFormulaWithDialog(row.getItem()));
+			// ============
+
+			// == change status ==
+			MenuItem dischargeItem = new MenuItem(i18n.translate("common.formula.discharge"));
+			dischargeItem.setOnAction(event -> {
+				ChartFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
 				}
-			}
-			this.updateCharts();
-			this.updateFormulaCodeList();
+				item.setStatus(CheckingStatus.SUCCESS);
+			});
+			MenuItem failItem = new MenuItem(this.i18n.translate("common.formula.fail"));
+			failItem.setOnAction(event -> {
+				ChartFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				item.setStatus(CheckingStatus.FAIL);
+			});
+			MenuItem unknownItem = new MenuItem(this.i18n.translate("common.formula.unknown"));
+			unknownItem.setOnAction(event -> {
+				ChartFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				item.setStatus(CheckingStatus.NOT_CHECKED);
+			});
+			Menu statusMenu = new Menu(this.i18n.translate("common.formula.setStatus"), null, dischargeItem, failItem, unknownItem);
+			// ==============
+
+			// == remove ==
+			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
+			removeItem.setOnAction(event -> {
+				ChartFormulaTask item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				this.currentProject.getCurrentMachine().removeValidationTask(item);
+			});
+			// =====================
+
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(editItem, statusMenu, removeItem)));
+			return row;
 		});
 
-		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadFormulas(currentProject.getCurrentMachine()));
-		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> loadFormulas(to));
+		this.currentProject.currentMachineProperty().addListener((observable, from, to) -> this.loadFormulas(to));
+		this.loadFormulas(this.currentProject.getCurrentMachine());
 
-		this.removeButton.disableProperty()
-				.bind(Bindings.isEmpty(this.formulaList.getSelectionModel().getSelectedIndices()));
+		this.addButton.disableProperty().bind(this.currentProject.currentMachineProperty().isNull());
+		this.removeButton.disableProperty().bind(
+				Bindings.isNull(this.tvFormula.getSelectionModel().selectedItemProperty())
+		);
 
 		this.separateChartsCheckBox.selectedProperty().addListener((observable, from, to) -> {
 			this.chartsPane.getChildren().clear();
@@ -241,6 +237,29 @@ public final class HistoryChartStage extends Stage {
 		addChartMenu(singleChart);
 	}
 
+	private void loadFormulas(Machine machine) {
+		if (this.currentFormulaTasks != null) {
+			Bindings.unbindContent(this.tvFormula.getItems(), this.currentFormulaTasks);
+			this.currentFormulaTasks = null;
+		}
+		if (machine != null) {
+			this.currentFormulaTasks = machine.getChartFormulaTasks();
+			Bindings.bindContent(this.tvFormula.getItems(), this.currentFormulaTasks);
+		}
+	}
+
+	private void onFormulaListChange(ListChangeListener.Change<? extends ChartFormulaTask> change) {
+		while (change.next()) {
+			if (change.wasRemoved()) {
+				this.removeCharts(change.getFrom(), change.getFrom() + change.getRemovedSize());
+			}
+			if (change.wasAdded()) {
+				this.addCharts(change.getFrom(), change.getTo(), change.getList());
+			}
+		}
+		this.updateCharts();
+	}
+
 	private void addChartMenu(LineChart<Number, Number> chart) {
 		final MenuItem saveImageItem = new MenuItem(i18n.translate("chart.historyChart.menus.item.saveAsImage"));
 		saveImageItem.setOnAction(e -> {
@@ -272,10 +291,10 @@ public final class HistoryChartStage extends Stage {
 				return;
 			}
 
-			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
+			try (CSVPrinter csvPrinter = CSVFormat.DEFAULT.print(path, StandardCharsets.UTF_8)) {
 				for (XYChart.Series<Number, Number> series : chart.getData()) {
 					for (XYChart.Data<Number, Number> entry : series.getData()) {
-						csvWriter.record(entry.getXValue(), entry.getYValue());
+						csvPrinter.printRecord(entry.getXValue(), entry.getYValue());
 					}
 				}
 			} catch (IOException ex) {
@@ -295,27 +314,48 @@ public final class HistoryChartStage extends Stage {
 		});
 	}
 
+	private void editFormulaWithDialog(ChartFormulaTask oldTask) {
+		Machine machine = this.currentProject.getCurrentMachine();
+		if (machine == null) {
+			return;
+		}
+
+		EditChartFormulaStage stage = this.editChartFormulaStageProvider.get();
+		stage.initOwner(this);
+		if (oldTask != null) {
+			stage.setInitialFormulaTask(oldTask);
+		}
+		stage.showAndWait();
+
+		ChartFormulaTask newTask = stage.getResult();
+		if (newTask != null) {
+			Machine newMachine = this.currentProject.getCurrentMachine();
+			if (newMachine == machine) {
+				if (oldTask != null) {
+					newMachine.replaceValidationTaskIfNotExist(oldTask, newTask);
+				} else {
+					newMachine.addValidationTaskIfNotExist(newTask);
+				}
+			} else {
+				LOGGER.warn("The machine has changed, discarding task changes");
+			}
+		}
+	}
+
 	@FXML
 	private void handleAdd() {
-		this.formulaList.getItems().add(new ClassicalB("0"));
-		this.formulaList.edit(this.formulaList.getItems().size() - 1);
-		updateFormulaCodeList();
+		this.editFormulaWithDialog(null);
 	}
 
 	@FXML
 	private void handleRemove() {
-		this.formulaList.getItems().remove(this.formulaList.getSelectionModel().getSelectedIndex());
-		updateFormulaCodeList();
-	}
-
-	private void updateFormulaCodeList() {
-		ArrayList<String> formulaCodeList = new ArrayList<>();
-		this.formulaList.getItems().forEach(b -> formulaCodeList.add(b.getCode()));
-		Machine machine = this.currentProject.currentMachineProperty().get();
-		if (machine == null) {
-			return;
+		Machine machine = this.currentProject.getCurrentMachine();
+		if (machine != null) {
+			ChartFormulaTask item = this.tvFormula.getSelectionModel().getSelectedItem();
+			if (item != null) {
+				machine.removeValidationTask(item);
+			}
 		}
-		machine.getHistoryChartItems().setAll(formulaCodeList);
 	}
 
 	private static void updateXAxisTicks(NumberAxis axis, double upperBound) {
@@ -344,13 +384,13 @@ public final class HistoryChartStage extends Stage {
 		}
 	}
 
-	private void addCharts(final int start, final int end, final List<? extends ClassicalB> charts) {
+	private void addCharts(final int start, final int end, final List<? extends ChartFormulaTask> charts) {
 		for (int i = start; i < end; i++) {
-			final XYChart.Series<Number, Number> seriesSingle = new XYChart.Series<>(charts.get(i).getCode(),
+			final XYChart.Series<Number, Number> seriesSingle = new XYChart.Series<>(charts.get(i).getFormula(),
 					FXCollections.observableArrayList());
 			this.singleChart.getData().add(i, seriesSingle);
 
-			final XYChart.Series<Number, Number> seriesSeparate = new XYChart.Series<>(charts.get(i).getCode(),
+			final XYChart.Series<Number, Number> seriesSeparate = new XYChart.Series<>(charts.get(i).getFormula(),
 					FXCollections.observableArrayList());
 			final NumberAxis separateXAxis = new NumberAxis();
 			separateXAxis.getStyleClass().add("time-axis");
@@ -405,16 +445,6 @@ public final class HistoryChartStage extends Stage {
 		}
 	}
 
-	private void loadFormulas(Machine machine) {
-		this.formulaList.getItems().clear();
-		if (machine == null) {
-			return;
-		}
-		if (!machine.getHistoryChartItems().isEmpty()) {
-			machine.getHistoryChartItems().forEach(s -> this.formulaList.getItems().add(new ClassicalB(s)));
-		}
-	}
-
 	private void updateCharts() {
 		if (!this.isShowing()) {
 			return;
@@ -451,7 +481,12 @@ public final class HistoryChartStage extends Stage {
 	}
 
 	private void tryEvalFormulas(final List<List<XYChart.Data<Number, Number>>> newDatas, final int xPos, final TraceElement element, final boolean showErrors) {
-		final List<AbstractEvalResult> results = element.getCurrentState().eval(this.formulaList.getItems());
+		// TODO: cache this
+		var formulas = this.tvFormula.getItems().stream()
+				                            .map(ChartFormulaTask::getFormula)
+				                            .map(this.currentTrace.getModel()::parseFormula)
+				                            .toList();
+		List<AbstractEvalResult> results = element.getCurrentState().eval(formulas);
 		for (int i = 0; i < results.size(); i++) {
 			final AbstractEvalResult result = results.get(i);
 			if (result instanceof IdentifierNotInitialised) {

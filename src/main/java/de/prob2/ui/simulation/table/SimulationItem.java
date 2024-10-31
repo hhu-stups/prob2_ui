@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.table;
 
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -11,7 +12,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
@@ -20,21 +20,17 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationStats;
+import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.ITraceTask;
+import de.prob2.ui.verifications.ICheckingResult;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleListProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
 
 @JsonPropertyOrder({
 	"id",
@@ -42,47 +38,78 @@ import javafx.collections.FXCollections;
 	"type",
 	"information",
 })
-public final class SimulationItem implements ITraceTask {
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String id;
+public final class SimulationItem extends AbstractCheckableItem {
+	public static final class Result implements ICheckingResult {
+		private final SimulationCheckingSimulator.MonteCarloCheckResult result;
+		private final List<Trace> traces;
+		private final List<List<Integer>> timestamps;
+		private final List<CheckingStatus> statuses;
+		private final SimulationStats stats;
+
+		public Result(
+			SimulationCheckingSimulator.MonteCarloCheckResult result,
+			List<Trace> traces,
+			List<List<Integer>> timestamps,
+			List<CheckingStatus> statuses,
+			SimulationStats stats
+		) {
+			this.result = Objects.requireNonNull(result, "result");
+			this.traces = Objects.requireNonNull(traces, "traces");
+			this.timestamps = Objects.requireNonNull(timestamps, "timestamps");
+			this.statuses = Objects.requireNonNull(statuses, "statuses");
+			this.stats = Objects.requireNonNull(stats, "stats");
+		}
+
+		public SimulationCheckingSimulator.MonteCarloCheckResult getResult() {
+			return this.result;
+		}
+
+		@Override
+		public CheckingStatus getStatus() {
+			return switch (this.getResult()) {
+				case SUCCESS -> CheckingStatus.SUCCESS;
+				case FAIL -> CheckingStatus.FAIL;
+				case NOT_FINISHED -> CheckingStatus.NOT_CHECKED;
+				default -> throw new AssertionError("Unhandled simulation checker result: " + this.getResult());
+			};
+		}
+
+		@Override
+		public List<Trace> getTraces() {
+			return Collections.unmodifiableList(this.traces);
+		}
+
+		public List<List<Integer>> getTimestamps() {
+			return Collections.unmodifiableList(this.timestamps);
+		}
+
+		public List<CheckingStatus> getStatuses() {
+			return Collections.unmodifiableList(this.statuses);
+		}
+
+		public SimulationStats getStats() {
+			return this.stats;
+		}
+
+		// TODO We could implement withoutAnimatorDependentState using a custom result type so that the stats are kept
+		// (everything else is animator-dependent and must be discarded)
+	}
+
 	private final Path simulationPath;
-	private SimulationType type;
-	private Map<String, Object> information;
-	@JsonIgnore
-	private ObjectProperty<CheckingStatus> status;
-	@JsonIgnore
-	private SimulationStats simulationStats;
-	@JsonIgnore
-	private ListProperty<Trace> traces;
-	@JsonIgnore
-	private ListProperty<List<Integer>> timestamps;
-	@JsonIgnore
-	private ListProperty<CheckingStatus> statuses;
+	private final SimulationType type;
+	private final Map<String, Object> information;
 
 	public SimulationItem(String id, Path simulationPath, SimulationType type, Map<String, Object> information) {
-		this.id = id;
+		super(id);
+
 		this.simulationPath = Objects.requireNonNull(simulationPath, "simulationPath");
 		this.type = Objects.requireNonNull(type, "type");
 		this.information = Objects.requireNonNull(information, "information");
-		initListeners();
 	}
 
 	@JsonCreator
 	private SimulationItem(@JsonProperty("id") String id, @JsonProperty("simulationPath") Path simulationPath, @JsonProperty("type") SimulationType type, @JsonProperty("information") SimulationCheckingInformation information) {
 		this(id, simulationPath, type, information.getInformation());
-	}
-
-	private void initListeners() {
-		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
-		this.traces = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.timestamps = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.statuses = new SimpleListProperty<>(FXCollections.observableArrayList());
-		this.simulationStats = null;
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
 	}
 
 	@Override
@@ -95,19 +122,19 @@ public final class SimulationItem implements ITraceTask {
 		return i18n.translate(this.getType());
 	}
 
-	@Override
-	public ObjectProperty<CheckingStatus> statusProperty() {
-		return status;
-	}
+	// The selected property from AbstractCheckableItem is (currently?) not used for SimulationItem,
+	// so exclude it from JSON de-/serialization.
 
+	@JsonIgnore
 	@Override
-	public CheckingStatus getStatus() {
-		return status.get();
+	public boolean selected() {
+		return super.selected();
 	}
 
 	@JsonIgnore
-	public void setStatus(CheckingStatus status) {
-		this.status.set(status);
+	@Override
+	public void setSelected(boolean selected) {
+		super.setSelected(selected);
 	}
 
 	@JsonIgnore
@@ -124,7 +151,7 @@ public final class SimulationItem implements ITraceTask {
 	}
 
 	public Map<String, Object> getInformation() {
-		return information;
+		return Collections.unmodifiableMap(information);
 	}
 
 	public boolean containsField(String key) {
@@ -148,78 +175,6 @@ public final class SimulationItem implements ITraceTask {
 		return this.getConfiguration();
 	}
 
-	public ListProperty<Trace> tracesProperty() {
-		return traces;
-	}
-
-	@JsonIgnore
-	public List<Trace> getTraces() {
-		return traces.get();
-	}
-
-	@JsonIgnore
-	public void setTraces(List<Trace> traces) {
-		this.traces.setAll(traces);
-	}
-
-	@Override
-	public Trace getTrace() {
-		return this.getTraces().isEmpty() ? null : this.getTraces().get(0);
-	}
-
-	public ListProperty<List<Integer>> timestampsProperty() {
-		return timestamps;
-	}
-
-	@JsonIgnore
-	public List<List<Integer>> getTimestamps() {
-		return timestamps.get();
-	}
-
-	@JsonIgnore
-	public void setTimestamps(List<List<Integer>> timestamps) {
-		this.timestamps.setAll(timestamps);
-	}
-
-	public ListProperty<CheckingStatus> statusesProperty() {
-		return statuses;
-	}
-
-	@JsonIgnore
-	public List<CheckingStatus> getStatuses() {
-		return statuses.get();
-	}
-
-	@JsonIgnore
-	public void setStatuses(List<CheckingStatus> statuses) {
-		this.statuses.setAll(statuses);
-	}
-
-	@JsonIgnore
-	public SimulationStats getSimulationStats() {
-		return simulationStats;
-	}
-
-	@JsonIgnore
-	public void setSimulationStats(SimulationStats simulationStats) {
-		this.simulationStats = simulationStats;
-	}
-
-	@JsonIgnore
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	@JsonIgnore
-	public void setSimulationType(SimulationType type) {
-		this.type = type;
-	}
-
-	@JsonIgnore
-	public void setInformation(Map<String, Object> information) {
-		this.information = information;
-	}
-
 	public String createdByForMetadata() {
 		String createdBy = "Simulation: " + getTypeAsName() + "; " + getConfiguration();
 		return createdBy.replaceAll("\n", " ");
@@ -233,29 +188,12 @@ public final class SimulationItem implements ITraceTask {
 	}
 
 	@Override
-	public void resetAnimatorDependentState() {
-		// The timestamps aren't directly dependent on the animator,
-		// but they only make sense in combination with the traces,
-		// so clear them both.
-		this.timestamps.clear();
-		this.traces.clear();
-	}
-
-	@Override
-	public void reset() {
-		this.setStatus(CheckingStatus.NOT_CHECKED);
-		this.simulationStats = null;
-		this.resetAnimatorDependentState();
-	}
-
-	@Override
 	public boolean settingsEqual(Object other) {
-		return other instanceof SimulationItem that
-			       && Objects.equals(this.getTaskType(), that.getTaskType())
-			       && Objects.equals(this.getId(), that.getId())
-			       && Objects.equals(this.getSimulationPath(), that.getSimulationPath())
-			       && Objects.equals(this.getType(), that.getType())
-			       && Objects.equals(this.getInformation(), that.getInformation());
+		return super.settingsEqual(other)
+			&& other instanceof SimulationItem that
+			&& Objects.equals(this.getSimulationPath(), that.getSimulationPath())
+			&& Objects.equals(this.getType(), that.getType())
+			&& Objects.equals(this.getInformation(), that.getInformation());
 	}
 
 	@Override
@@ -268,8 +206,14 @@ public final class SimulationItem implements ITraceTask {
 			       .toString();
 	}
 
-	public SimulationItem withSimulationPath(Path simulationPath) {
-		return new SimulationItem(this.getId(), simulationPath, this.getType(), new HashMap<>(this.getInformation()));
+	public SimulationItem withSimulationPath(int executions, Path simulationPath) {
+		Map<String, Object> information = new HashMap<>(this.getInformation());
+		// This could be the case if a SimB validation task is copied from a directory
+		// of timed traces to a SimB simulation or to an external simulation
+		if(!information.containsKey("EXECUTIONS")) {
+			information.put("EXECUTIONS", executions);
+		}
+		return new SimulationItem(this.getId(), simulationPath, this.getType(), information);
 	}
 
 	public static final class SimulationCheckingInformation {

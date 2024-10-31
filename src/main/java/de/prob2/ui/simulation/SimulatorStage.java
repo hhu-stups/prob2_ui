@@ -20,7 +20,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.FileChooserManager;
@@ -35,7 +35,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.sharedviews.InterruptIfRunningButton;
 import de.prob2.ui.simulation.choice.SimulationChoosingStage;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -52,7 +51,6 @@ import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
-import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.simulation.table.SimulationListViewDiagramItem;
@@ -60,6 +58,7 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.application.Platform;
+import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
 import javafx.beans.property.BooleanProperty;
@@ -92,10 +91,11 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.WindowEvent;
 
 import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
@@ -120,14 +120,14 @@ public final class SimulatorStage extends Stage {
 				List<MenuItem> menuItems = FXCollections.observableArrayList();
 
 				MenuItem checkItem = new MenuItem(i18n.translate("simulation.contextMenu.check"));
-				checkItem.disableProperty().bind(configurationPath.isNull().or(simulationItemHandler.runningProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
+				checkItem.disableProperty().bind(configurationPath.isNull().or(disablePropertyController.disableProperty().or(lastSimulator.isNull().or(lastSimulator.get().runningProperty()))));
 				checkItem.setOnAction(e -> simulationItemHandler.checkItem(this.getItem()));
 
 				MenuItem editItem = new MenuItem(i18n.translate("simulation.contextMenu.edit"));
 				editItem.setOnAction(e -> editSimulation(this.getItem()));
 
 				MenuItem removeItem = new MenuItem(i18n.translate("simulation.contextMenu.remove"));
-				removeItem.setOnAction(e -> simulationItemHandler.removeItem(this.getItem()));
+				removeItem.setOnAction(e -> currentProject.getCurrentMachine().removeValidationTask(this.getItem()));
 
 				menuItems.add(checkItem);
 				menuItems.add(editItem);
@@ -143,40 +143,62 @@ public final class SimulatorStage extends Stage {
 						}
 
 						MenuItem menuItem = new MenuItem(targetModel.getPath().toString());
-						menuItem.setOnAction(e -> simulationItemHandler.addItem(item.withSimulationPath(targetModel.getPath())));
+						menuItem.setOnAction(e -> {
+							ISimulationModelConfiguration config = realTimeSimulator.getConfig();
+							int size = item.getInformation().get("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) config).getTimedTraces().size() : (int) item.getInformation().get("EXECUTIONS");
+							currentProject.getCurrentMachine().addValidationTaskIfNotExist(item.withSimulationPath(size, targetModel.getPath()));
+						});
 						copyMenu.getItems().add(menuItem);
 					}
 					copyMenu.setDisable(copyMenu.getItems().isEmpty());
 				}
 				menuItems.add(copyMenu);
 
+				BooleanExpression itemHasNoSimulationResult = Bindings.createBooleanBinding(
+					() -> !(item.getResult() instanceof SimulationItem.Result simulationResult) || simulationResult.getTraces().isEmpty(),
+					item.resultProperty()
+				);
+				// For whatever reason, this does not work properly with map -
+				// the initial state will be incorrect and the context menu options will be enabled from the start,
+				// even though they should be disabled until the items have been executed.
+				//var itemHasNoSimulationResult = item.resultProperty().map(res -> {
+				//	return !(res instanceof SimulationItem.Result simulationResult) || simulationResult.getTraces().isEmpty();
+				//});
+
 				MenuItem showTraces = new MenuItem(i18n.translate("simulation.contextMenu.showTraces"));
-				showTraces.disableProperty().bind(item.tracesProperty().emptyProperty());
+				showTraces.disableProperty().bind(itemHasNoSimulationResult);
 				showTraces.setOnAction(e -> {
-					if (item.getTraces().size() == 1) {
-						currentTrace.set(item.getTraces().get(0));
+					if (!(item.getResult() instanceof SimulationItem.Result simulationResult)) {
+						return;
+					}
+
+					if (simulationResult.getTraces().size() == 1) {
+						currentTrace.set(simulationResult.getTraces().get(0));
 					} else {
 						SimulationTracesView tracesView = injector.getInstance(SimulationTracesView.class);
 						SimulationScenarioHandler simulationScenarioHandler = injector.getInstance(SimulationScenarioHandler.class);
 						simulationScenarioHandler.setSimulatorStage(simulatorStage);
-						tracesView.setItems(item, item.getTraces(), item.getTimestamps(), item.getStatuses(), item.getSimulationStats().getEstimatedValues());
+						tracesView.setFromItem(item);
 						tracesView.show();
 					}
 				});
 				menuItems.add(showTraces);
 
 				MenuItem showStatistics = new MenuItem(i18n.translate("simulation.contextMenu.showStatistics"));
-				showStatistics.disableProperty().bind(item.tracesProperty().emptyProperty());
+				showStatistics.disableProperty().bind(itemHasNoSimulationResult);
 				showStatistics.setOnAction(e -> {
+					if (!(item.getResult() instanceof SimulationItem.Result simulationResult)) {
+						return;
+					}
+
 					SimulationStatsView statsView = injector.getInstance(SimulationStatsView.class);
-					statsView.setStats(item.getSimulationStats());
+					statsView.setStats(simulationResult.getStats());
 					statsView.show();
 				});
 				menuItems.add(showStatistics);
 
 				MenuItem saveTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTraces"));
-				saveTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
-					Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
+				saveTraces.disableProperty().bind(itemHasNoSimulationResult);
 				saveTraces.setOnAction(e -> {
 					if (currentTrace.get() != null) {
 						traceFileHandler.save(item, currentProject.getCurrentMachine());
@@ -185,12 +207,8 @@ public final class SimulatorStage extends Stage {
 				menuItems.add(saveTraces);
 
 				MenuItem saveTimedTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTimedTraces"));
-				saveTimedTraces.disableProperty().bind(item.tracesProperty().emptyProperty().or(
-					Bindings.createBooleanBinding(() -> this.itemProperty().get() == null, this.itemProperty())));
-				saveTimedTraces.setOnAction(e -> {
-					SimulationSaver simulationSaver = injector.getInstance(SimulationSaver.class);
-					simulationSaver.saveConfigurations(item);
-				});
+				saveTimedTraces.disableProperty().bind(itemHasNoSimulationResult);
+				saveTimedTraces.setOnAction(e -> simulationSaver.saveConfigurations(item));
 				menuItems.add(saveTimedTraces);
 
 				contextMenu.getItems().addAll(menuItems);
@@ -198,6 +216,8 @@ public final class SimulatorStage extends Stage {
 			}
 		}
 	}
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimulatorStage.class);
 
 	@FXML
 	private MenuBar menuBar;
@@ -234,9 +254,6 @@ public final class SimulatorStage extends Stage {
 
 	@FXML
 	private Button btCheckMachine;
-
-	@FXML
-	private InterruptIfRunningButton btCancel;
 
 	@FXML
 	private HelpButton helpButton;
@@ -321,6 +338,8 @@ public final class SimulatorStage extends Stage {
 
 	private final TraceFileHandler traceFileHandler;
 
+	private final DisablePropertyController disablePropertyController;
+
 	private final ObjectProperty<Path> configurationPath;
 
 	private final BooleanProperty savedProperty;
@@ -335,6 +354,7 @@ public final class SimulatorStage extends Stage {
 
 	private final ObjectProperty<RealTimeSimulator> lastSimulator;
 
+	private final InvalidationListener simulationModelsListener;
 	private ChangeListener<Number> timeListener;
 
 	@Inject
@@ -344,6 +364,7 @@ public final class SimulatorStage extends Stage {
 		final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
 		final I18n i18n, final FileChooserManager fileChooserManager,
 		final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
+		final DisablePropertyController disablePropertyController,
 		final StopActions stopActions
 	) {
 		super();
@@ -360,11 +381,33 @@ public final class SimulatorStage extends Stage {
 		this.fileChooserManager = fileChooserManager;
 		this.simulationSaver = simulationSaver;
 		this.traceFileHandler = traceFileHandler;
+		this.disablePropertyController = disablePropertyController;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
 		this.savedProperty = new SimpleBooleanProperty(this, "savedProperty", true);
 		this.time = 0;
 		this.timer = new Timer(true);
 		stopActions.add(this::cancelTimer);
+
+		this.simulationModelsListener = o -> {
+			Machine machine = currentProject.getCurrentMachine();
+			// Show the simulation models saved for the machine, or the default simulation if none are saved.
+			if (machine.getSimulations().isEmpty()) {
+				cbSimulation.getItems().setAll(new SimulationModel(Paths.get("")));
+			} else {
+				cbSimulation.getItems().setAll(machine.getSimulations());
+			}
+
+			// If the last selected simulation disappears, select a different one if possible.
+			// Note: it's important to check the selected index and not the selected item!
+			// When items are removed from the list,
+			// the selection model can get into a state where the selected index is -1,
+			// but the selected item is not null and still points to the last selected item.
+			// This may be a bug in JavaFX (last checked with JavaFX 22.0.2).
+			if (cbSimulation.getSelectionModel().getSelectedIndex() == -1 && !cbSimulation.getItems().isEmpty()) {
+				cbSimulation.getSelectionModel().selectFirst();
+			}
+		};
+
 		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
 	}
 
@@ -396,12 +439,7 @@ public final class SimulatorStage extends Stage {
 		final BooleanProperty noSimulations = new SimpleBooleanProperty();
 		noSimulations.bind(SafeBindings.wrappedBooleanBinding(List::isEmpty, simulationItems.itemsProperty()));
 
-		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(simulationItemHandler.runningProperty().or(noSimulations.or(injector.getInstance(DisablePropertyController.class).disableProperty())))));
-		btCancel.runningProperty().bind(simulationItemHandler.runningProperty());
-		btCancel.getInterruptButton().setOnAction(e -> {
-			simulationItemHandler.interrupt();
-			currentTrace.getStateSpace().sendInterrupt();
-		});
+		btCheckMachine.disableProperty().bind(configurationPath.isNull().or(currentTrace.isNull().or(noSimulations.or(disablePropertyController.disableProperty()))));
 		this.titleProperty().bind(
 			Bindings.when(configurationPath.isNull())
 				.then(i18n.translateBinding("simulation.stage.title"))
@@ -413,6 +451,9 @@ public final class SimulatorStage extends Stage {
 				))
 		);
 
+		// The items list is set once here and then always updated in-place.
+		// setItems should never be called again after this.
+		cbSimulation.setItems(FXCollections.observableArrayList());
 		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			checkIfSimulationShouldBeSaved();
 			configurationPath.set(null);
@@ -435,7 +476,7 @@ public final class SimulatorStage extends Stage {
 			uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
 		});
 
-		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(injector.getInstance(DisablePropertyController.class).disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
+		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 
 		BooleanExpression disableSaveTraceProperty = currentProject.currentMachineProperty().isNull().or(currentTrace.isNull());
 		saveTraceMenuItem.disableProperty().bind(disableSaveTraceProperty);
@@ -465,18 +506,13 @@ public final class SimulatorStage extends Stage {
 			resetSimulator();
 		});
 
-		this.addEventFilter(WindowEvent.WINDOW_SHOWING, event -> loadSimulationsFromMachine(currentProject.getCurrentMachine()));
-
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			checkIfSimulationShouldBeSaved();
 			configurationPath.set(null);
 			simulationDiagramItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
-			loadSimulationsFromMachine(to);
+			loadSimulationsFromMachine(from, to);
 		};
-
-		currentProject.addListener((observable, from, to) -> machineChangeListener.changed(null, null, null));
-
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
 
@@ -494,7 +530,7 @@ public final class SimulatorStage extends Stage {
 			SimulationItem item = simulationItems.getSelectionModel().getSelectedItem();
 			if (
 				e.getClickCount() == 2 && e.getButton() == MouseButton.PRIMARY && item != null && currentTrace.get() != null &&
-				configurationPath.get() != null && !simulationItemHandler.runningProperty().get() && lastSimulator.get() != null &&
+				configurationPath.get() != null && !disablePropertyController.disableProperty().get() && lastSimulator.get() != null &&
 				!lastSimulator.get().isRunning()
 			) {
 				simulationItemHandler.checkItem(item);
@@ -643,18 +679,30 @@ public final class SimulatorStage extends Stage {
 	public void addSimulation() {
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
-		choosingStage.setModifying(false, null);
 		choosingStage.showAndWait();
-		simulationItems.refresh();
+		SimulationItem newItem = choosingStage.getResult();
+		if (newItem != null) {
+			SimulationItem toCheck = currentProject.getCurrentMachine().addValidationTaskIfNotExist(newItem);
+			simulationItems.refresh();
+			simulationItemHandler.checkItem(toCheck);
+		}
 	}
 
-	public void editSimulation(SimulationItem item) {
+	public void editSimulation(SimulationItem oldItem) {
+		Machine machine = this.currentProject.getCurrentMachine();
 		SimulationChoosingStage choosingStage = injector.getInstance(SimulationChoosingStage.class);
 		choosingStage.reset();
-		choosingStage.setData(item);
-		choosingStage.setModifying(true, item);
+		choosingStage.setData(oldItem);
 		choosingStage.showAndWait();
-		simulationItems.refresh();
+		SimulationItem newItem = choosingStage.getResult();
+		if (newItem != null) {
+			if (this.currentProject.getCurrentMachine() == machine) {
+				this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldItem, newItem);
+				this.simulationItems.refresh();
+			} else {
+				LOGGER.warn("The machine has changed, discarding task changes");
+			}
+		}
 	}
 
 	private void startTimer(RealTimeSimulator realTimeSimulator) {
@@ -708,30 +756,29 @@ public final class SimulatorStage extends Stage {
 		simulationItemHandler.handleMachine(cbSimulation.getSelectionModel().getSelectedItem());
 	}
 
-	public void loadSimulationsFromMachine(Machine machine) {
-		cbSimulation.itemsProperty().unbind();
+	private void loadSimulationsFromMachine(Machine prevMachine, Machine machine) {
+		if (prevMachine != null) {
+			prevMachine.getSimulations().removeListener(this.simulationModelsListener);
+		}
+		cbSimulation.getItems().clear();
 		if (machine != null) {
-			cbSimulation.setItems(machine.getSimulations());
-			if(cbSimulation.getItems().isEmpty()) {
-				cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
-			}
+			machine.getSimulations().addListener(this.simulationModelsListener);
+			this.simulationModelsListener.invalidated(null);
 			cbSimulation.getSelectionModel().clearSelection();
 			cbSimulation.getSelectionModel().select(0);
-		} else {
-			cbSimulation.setItems(FXCollections.observableArrayList());
 		}
 	}
 
 	public void loadSimulationIntoSimulator(SimulationModel simulation) {
 		configurationPath.set(simulation == null ? null :
 				simulation.getPath().equals(Paths.get("")) ? simulation.getPath() : currentProject.getLocation().resolve(simulation.getPath()));
-		LoadedMachine loadedMachine = currentTrace.getStateSpace() == null ? null : currentTrace.getStateSpace().getLoadedMachine();
-		if (simulation != null && loadedMachine != null) {
-			injector.getInstance(SimulationChoosingStage.class).setPath(configurationPath.get());
+		StateSpace stateSpace = currentTrace.getStateSpace();
+		if (simulation != null && stateSpace != null) {
+			simulationItemHandler.setPath(configurationPath.get());
 			lbTime.setText("");
 			this.time = 0;
 			simulationItemHandler.reset(simulation);
-			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, loadedMachine, configurationPath.get());
+			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, stateSpace.getLoadedMachine(), configurationPath.get());
 			simulationItemHandler.setSimulationModelConfiguration(realTimeSimulator.getConfig());
 			loadSimulationItems();
 		}
@@ -744,11 +791,6 @@ public final class SimulatorStage extends Stage {
 			return;
 		}
 		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
-		if(cbSimulation.getItems().isEmpty()) {
-			cbSimulation.getItems().add(new SimulationModel(Paths.get("")));
-		}
-		cbSimulation.getSelectionModel().clearSelection();
-		cbSimulation.getSelectionModel().select(0);
 	}
 
 	private SimulationModelConfiguration buildSimulationModel() {
@@ -788,7 +830,7 @@ public final class SimulatorStage extends Stage {
 			savedProperty.set(true);
 			simulationSaver.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
 		} catch (IOException ex) {
-			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+			stageManager.makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
 	}
 
@@ -809,18 +851,19 @@ public final class SimulatorStage extends Stage {
 			SimulationModel simulationModel = new SimulationModel(relativePath);
 			Machine currentMachine = currentProject.getCurrentMachine();
 			List<SimulationItem> simulationTasks = simulationItems.getItems();
-			simulationTasks.forEach(task -> currentMachine.addValidationTaskIfNotExist(task.withSimulationPath(relativePath)));
+			ISimulationModelConfiguration config = realTimeSimulator.getConfig();
+			simulationTasks.forEach(task -> {
+				int size = task.getInformation().get("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) config).getTimedTraces().size() : (int) task.getInformation().get("EXECUTIONS");
+				currentMachine.addValidationTaskIfNotExist(task.withSimulationPath(size, relativePath));
+			});
 			if (currentMachine.getSimulations().contains(simulationModel)) {
 				cbSimulation.getSelectionModel().select(simulationModel);
 			} else {
-				if(previousPath.toString().isEmpty()) {
-					cbSimulation.getItems().remove(new SimulationModel(Paths.get("")));
-				}
 				currentMachine.getSimulations().add(simulationModel);
 				cbSimulation.getSelectionModel().selectLast();
 			}
 		} catch (IOException ex) {
-			injector.getInstance(StageManager.class).makeExceptionAlert(ex, "simulation.save.error").showAndWait();
+			stageManager.makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
 	}
 
@@ -860,7 +903,7 @@ public final class SimulatorStage extends Stage {
 		try {
 			injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
 		} catch (IOException exception) {
-			injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.error").showAndWait();
+			stageManager.makeExceptionAlert(exception, "simulation.save.error").showAndWait();
 		}
 	}
 
@@ -869,7 +912,7 @@ public final class SimulatorStage extends Stage {
 		try {
 			injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
 		} catch (IOException exception) {
-			injector.getInstance(StageManager.class).makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
+			stageManager.makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
 		}
 	}
 

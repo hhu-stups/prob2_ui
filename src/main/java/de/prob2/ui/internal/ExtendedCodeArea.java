@@ -56,6 +56,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(ExtendedCodeArea.class);
 	protected static final Map<ErrorItem.Type, String> ERROR_STYLE_CLASSES = Map.of(
+			ErrorItem.Type.MESSAGE, "message",
 			ErrorItem.Type.WARNING, "warning",
 			ErrorItem.Type.ERROR, "error",
 			ErrorItem.Type.INTERNAL_ERROR, "error"
@@ -94,10 +95,10 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 
 		this.caretPos = Bindings.createObjectBinding(
 			() -> this.caretBoundsProperty().getValue()
-				      .map(bounds -> new Point2D(
-					      (bounds.getMinX() + bounds.getMaxX()) / 2.0,
-					      bounds.getMaxY()
-				      )),
+				.map(bounds -> new Point2D(
+					(bounds.getMinX() + bounds.getMaxX()) / 2.0,
+					bounds.getMaxY()
+				)),
 			this.caretBoundsProperty()
 		);
 		this.textBeforeCaret = Bindings.createObjectBinding(() -> {
@@ -151,22 +152,21 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
 			// Inefficient, but works - there should never be so many errors that the iteration has a noticeable performance impact.
 			final String errorsText = this.getErrors().stream()
-				                          .filter(error ->
-					                                  error.getLocations().stream()
-						                                  .anyMatch(
-							                                  location -> e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
-								                                              && e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location)
-						                                  )
-				                          )
-				                          .map(ErrorItem::getMessage)
-				                          .collect(Collectors.joining("\n"));
+				.filter(error ->
+					error.getLocations().stream().anyMatch(location ->
+						e.getCharacterIndex() >= this.errorLocationAbsoluteStart(location)
+						&& e.getCharacterIndex() <= this.errorLocationAbsoluteEnd(location)
+					)
+				)
+				.map(ErrorItem::getMessage)
+				.collect(Collectors.joining("\n"));
 			if (!errorsText.isEmpty()) {
 				this.errorPopupLabel.setText(errorsText);
 				// Try to position the popup under the text being hovered over,
 				// so that the line in question is not covered by the popup.
 				final double popupY = this.getCharacterBoundsOnScreen(e.getCharacterIndex(), e.getCharacterIndex() + 1)
-					                      .map(Bounds::getMaxY)
-					                      .orElse(e.getScreenPosition().getY());
+					.map(Bounds::getMaxY)
+					.orElse(e.getScreenPosition().getY());
 				this.errorPopup.show(this, e.getScreenPosition().getX(), popupY);
 			}
 		});
@@ -251,7 +251,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		if (location.getStartLine() > location.getEndLine()) {
 			throw new IllegalArgumentException("line");
 		} else if (location.getStartLine() == location.getEndLine()
-			           && location.getStartColumn() > location.getEndColumn()) {
+				&& location.getStartColumn() > location.getEndColumn()) {
 			throw new IllegalArgumentException("column");
 		}
 
@@ -315,10 +315,12 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 				int startIndex = this.errorLocationAbsoluteStart(location);
 				int endIndex = this.errorLocationAbsoluteEnd(location);
 				if (endIndex > startIndex) {
+					String errorStyleClass = ERROR_STYLE_CLASSES.getOrDefault(error.getType(), "message");
+
 					highlighting = highlighting.overlay(
 						new StyleSpansBuilder<Collection<String>>()
 								.add(Set.of(), startIndex)
-								.add(Set.of("problem", ERROR_STYLE_CLASSES.get(error.getType())), endIndex - startIndex)
+								.add(Set.of("problem", errorStyleClass), endIndex - startIndex)
 							.create(),
 							ExtendedCodeArea::combineStyleSpans
 					);
@@ -437,6 +439,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 
 	public void clearHistory() {
 		this.getUndoManager().forgetHistory();
+		this.getUndoManager().mark();
 	}
 
 	public ObservableList<ErrorItem> getErrors() {

@@ -10,6 +10,12 @@ public enum CheckingStatus implements Translatable {
 	NOT_CHECKED("checkingStatus.notChecked"),
 	
 	/**
+	 * The task is currently running and has not completed yet.
+	 * This status indicates nothing about the task's result.
+	 */
+	IN_PROGRESS("checkingStatus.inProgress"),
+	
+	/**
 	 * The task ran and completed with a definitely successful result.
 	 * Re-running the task will not change this status,
 	 * unless the model or the task itself changes.

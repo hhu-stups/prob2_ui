@@ -141,20 +141,22 @@ public final class SimulationPropertyChoice extends GridPane {
 	}
 
 
-	public Map<String, Object> extractInformation() {
+	public Map<String, Object> extractInformation(SimulationType simulationType) {
 		Map<String, Object> information = new HashMap<>();
 		SimulationPropertyChoice.SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
-		information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
-		if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
-			information.put("PREDICATE", tfPredicate.getText());
-		}
+		if(simulationType != SimulationType.MONTE_CARLO_SIMULATION) {
+			information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
+			if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
+				information.put("PREDICATE", tfPredicate.getText());
+			}
 
-		if(EXPRESSION_TYPES.contains(checkingChoiceItem.getCheckingType())) {
-			information.put("EXPRESSION", tfExpression.getText());
-		}
+			if(EXPRESSION_TYPES.contains(checkingChoiceItem.getCheckingType())) {
+				information.put("EXPRESSION", tfExpression.getText());
+			}
 
-		if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
-			information.put("TIME", tfMonteCarloTime.getText());
+			if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
+				information.put("TIME", tfMonteCarloTime.getText());
+			}
 		}
 		return information;
 	}

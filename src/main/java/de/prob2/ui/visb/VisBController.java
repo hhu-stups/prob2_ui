@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -21,6 +20,7 @@ import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
 import de.prob.animator.command.VisBPerformClickCommand;
+import de.prob.animator.domainobjects.VisBClickMetaInfos;
 import de.prob.animator.domainobjects.VisBItem;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
@@ -32,7 +32,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
@@ -177,7 +176,7 @@ public final class VisBController {
 	 * This method is used by the {@link VisBView} to execute an event, whenever an svg item was clicked. Only one event per svg item is allowed.
 	 * @param id of the svg item that was clicked
 	 */
-	public CompletableFuture<Trace> executeEvent(String id, int pageX, int pageY, boolean shiftKey, boolean metaKey) {
+	public CompletableFuture<Trace> executeEvent(String id, VisBClickMetaInfos metaInfos) {
 		if (this.isExecutingEvent()) {
 			throw new IllegalStateException("Cannot execute an event while another event is already being executed");
 		}
@@ -187,7 +186,7 @@ public final class VisBController {
 
 		this.executingEvent.set(true);
 		return cliExecutor.submit(() -> {
-			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, Collections.emptyList(), trace.getCurrentState().getId());
+			VisBPerformClickCommand performClickCommand = new VisBPerformClickCommand(trace.getStateSpace(), id, metaInfos, trace.getCurrentState().getId());
 			trace.getStateSpace().execute(performClickCommand);
 			List<Transition> transitions = performClickCommand.getTransitions();
 

@@ -3,13 +3,24 @@
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.project.verifications.MachineTableView?>
 <?import de.prob2.ui.project.verifications.VerificationsTab?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import de.prob2.ui.sharedviews.Spacer?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.BorderPane?>
+
 <fx:root type="VerificationsTab" text="%project.verifications.verificationTab.title" closable="false" xmlns:fx="http://javafx.com/fxml/1">
-	<VBox stylesheets="@/prob.css">
-		<HBox styleClass="border" alignment="CENTER_RIGHT">
-			<HelpButton fx:id="helpButton"/>
-		</HBox>
-		<MachineTableView fx:id="verificationsListView" VBox.vgrow="ALWAYS"/>
-	</VBox>
+	<BorderPane stylesheets="@/prob.css">
+		<top>
+			<ToolBar styleClass="border">
+				<padding>
+					<Insets left="5.0" right="5.0"/>
+				</padding>
+				<Spacer/>
+				<HelpButton fx:id="helpButton"/>
+			</ToolBar>
+		</top>
+		<center>
+			<MachineTableView fx:id="verificationsListView"/>
+		</center>
+	</BorderPane>
 </fx:root>

@@ -4,6 +4,7 @@ import de.prob2.ui.codecompletion.CodeCompletionItem;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
@@ -11,7 +12,10 @@ import javafx.scene.text.TextAlignment;
 
 public class BCCItem implements CodeCompletionItem {
 
-	private static final int MAX_WIDTH = 455, MAX_WRAPPING_WIDTH_REPLACEMENT = 250, MAX_WRAPPING_WIDTH_TYPE = 205;
+	private static final int MAX_WIDTH = 455;
+	private static final int MAX_WRAPPING_WIDTH_REPLACEMENT = 240;
+	private static final int MAX_WRAPPING_WIDTH_TYPE = 200;
+	private static final int PADDING = 15;
 
 	private final String originalText;
 	private final String replacement;
@@ -54,25 +58,32 @@ public class BCCItem implements CodeCompletionItem {
 	}
 
 	private HBox getReplacementTypeBox(Color replacementColor, Color typeColor) {
-		HBox hBox = new HBox();
-
 		Text replaceText = new Text(replacement);
-		double replaceWidth = Math.min(replaceText.getLayoutBounds().getWidth(), MAX_WRAPPING_WIDTH_REPLACEMENT);
 		replaceText.setFill(replacementColor);
-		replaceText.setWrappingWidth(replaceWidth);
-		hBox.getChildren().add(replaceText);
 
 		Text typeText = new Text(type);
-		double typeWidth = Math.min(MAX_WIDTH - replaceWidth, MAX_WRAPPING_WIDTH_TYPE);
 		typeText.setFont(new Font(replaceText.getFont().getSize() - 2));
 		typeText.setFill(typeColor);
 		typeText.setTextAlignment(TextAlignment.RIGHT);
-		typeText.setWrappingWidth(typeWidth);
-		hBox.getChildren().add(typeText);
 
-		hBox.setMaxWidth(MAX_WIDTH);
-		hBox.setAlignment(Pos.CENTER_LEFT);
-		hBox.setSpacing(MAX_WIDTH - typeWidth - replaceWidth);
-		return hBox;
+		HBox right = new HBox(typeText);
+		right.setAlignment(Pos.CENTER_RIGHT);
+		HBox.setHgrow(right, Priority.ALWAYS);
+
+		if (replacement.length() < type.length()) {
+			// limit the replacement text to its max. length (or to its actual length, if shorter) and
+			// use the rest of the space for the (longer) type text
+			double replaceWidth = Math.min(replaceText.getLayoutBounds().getWidth(), MAX_WRAPPING_WIDTH_REPLACEMENT) + PADDING;
+			replaceText.setWrappingWidth(replaceWidth);
+			typeText.setWrappingWidth(MAX_WIDTH - replaceWidth);
+		} else {
+			// limit the type text to its max. length (or to its actual length, if shorter) and
+			// use the rest of the space for the (longer) replacement text
+			double typeWidth = Math.min(typeText.getLayoutBounds().getWidth(), MAX_WRAPPING_WIDTH_TYPE) + PADDING;
+			typeText.setWrappingWidth(typeWidth);
+			replaceText.setWrappingWidth(MAX_WIDTH - typeWidth);
+		}
+
+		return new HBox(replaceText, right);
 	}
 }

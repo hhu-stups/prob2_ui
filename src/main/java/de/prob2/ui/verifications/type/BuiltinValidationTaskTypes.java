@@ -5,6 +5,7 @@ import de.prob2.ui.animation.symbolic.FindValidStateItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.chart.ChartFormulaTask;
 import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.simulation.table.SimulationItem;
 import de.prob2.ui.verifications.WellDefinednessCheckingItem;
@@ -47,6 +48,7 @@ public final class BuiltinValidationTaskTypes {
 	public static final ValidationTaskType<TLCModelCheckingItem> TLC_MODEL_CHECKING = register(new ValidationTaskType<>("TLC_MODEL_CHECKING", TLCModelCheckingItem.class));
 	public static final ValidationTaskType<ProofObligationItem> PROOF_OBLIGATION = register(new ValidationTaskType<>("PROOF_OBLIGATION", ProofObligationItem.class));
 	public static final ValidationTaskType<VisualizationFormulaTask> VISUALIZATION_FORMULA = register(new ValidationTaskType<>("VISUALIZATION_FORMULA", VisualizationFormulaTask.class));
+	public static final ValidationTaskType<ChartFormulaTask> CHART_FORMULA = register(new ValidationTaskType<>("CHART_FORMULA", ChartFormulaTask.class));
 
 	private BuiltinValidationTaskTypes() {
 		throw new AssertionError();

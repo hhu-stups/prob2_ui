@@ -5,7 +5,7 @@ plugins {
 	id "java"
 	id "application"
 
-	id "com.github.johnrengelman.shadow" version "8.1.1"
+	id "com.gradleup.shadow" version "8.3.3"
 	id "com.google.osdetector" version "1.7.3"
 	id "org.openjfx.javafxplugin" version "0.1.0"
 }
@@ -98,6 +98,14 @@ configurations {
 		}
 	}
 
+	javafxMacArm {
+		attributes {
+			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
+			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.MACOS))
+			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.ARM64))
+		}
+	}
+
 	javafxLinux {
 		attributes {
 			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
@@ -116,9 +124,9 @@ dependencies {
 	implementation group: "ch.qos.logback", name: "logback-classic", version: "1.4.14"
 	implementation group: "com.fatboyindustrial.gson-javatime-serialisers", name: "gson-javatime-serialisers", version: "1.1.2"
 	implementation group: "com.google.code.gson", name: "gson", version: "2.11.0"
-	implementation group: "com.google.guava", name: "guava", version: "33.2.1-jre"
+	implementation group: "com.google.guava", name: "guava", version: "33.3.1-jre"
 	implementation group: "io.github.java-diff-utils", name: "java-diff-utils", version: "4.12"
-	implementation group: "commons-cli", name: "commons-cli", version: "1.8.0"
+	implementation group: "commons-cli", name: "commons-cli", version: "1.9.0"
 	implementation group: "de.jangassen", name: "nsmenufx", version: "3.1.0"
 	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.13.2-SNAPSHOT"))
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel"
@@ -130,16 +138,16 @@ dependencies {
 	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.3"
 	implementation group: "org.pf4j", name: "pf4j", version: "3.12.0"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "1.4.1"
+	implementation group: "org.apache.commons", name: "commons-csv", version: "1.12.0"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
-	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.3'
+	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.4'
 
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava'
 
-	testImplementation platform('org.junit:junit-bom:5.10.3')
+	testImplementation platform('org.junit:junit-bom:5.11.1')
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
 	testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
-	testImplementation group: 'org.assertj', name : 'assertj-core', version: '3.26.3'
-	testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.12.0'
+	testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.14.1'
 	testImplementation group: 'org.xmlunit', name: 'xmlunit-assertj3', version: '2.9.1'
 }
 
@@ -159,7 +167,7 @@ final javafxModules = [
 javafx {
 	version = javafxVersion
 	modules = javafxModules
-	configurations += ["javafxWin", "javafxMac", "javafxLinux"]
+	configurations += ["javafxWin", "javafxMac", "javafxMacArm", "javafxLinux"]
 }
 
 final generatedResourcesDir = layout.buildDirectory.dir("generated-src/main/resources").get().asFile
@@ -278,6 +286,7 @@ task multiPlatformShadowJar(type: ShadowJar) {
 		project.configurations.runtimeClasspath,
 		project.configurations.javafxWin,
 		project.configurations.javafxMac,
+		project.configurations.javafxMacArm,
 		project.configurations.javafxLinux,
 	]
 }

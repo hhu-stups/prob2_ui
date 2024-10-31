@@ -539,6 +539,7 @@ public final class BEditorView extends BorderPane {
 			beditor.moveTo(0);
 			beditor.requestFollowCaret();
 			lastSavedText.set(beditor.getText());
+			beditor.clearHistory(); // clear history again to forget setting of text, might fix hhu-stups/prob-issues#363
 			beditor.setEditable(true);
 			LOGGER.debug("Setting editor text took {}", sw.stop());
 		} finally {
