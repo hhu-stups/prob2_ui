@@ -260,7 +260,7 @@ public class RailMLInspectDotStage extends Stage {
 	}
 
 	protected void visualizeCustomGraph() throws InterruptedException {
-		String arguments = DotVisualizer.getArgumentsForGraphDefinition(
+		String graphFormula = DotVisualizer.getGraphDefinitionFormula(
 				visualisationStrategy,
 				balises.isSelected(),
 				bufferstops.isSelected(),
@@ -274,12 +274,13 @@ public class RailMLInspectDotStage extends Stage {
 				traindetectionelements.isSelected(),
 				tvdsections.isSelected(),
 				names.isSelected(),
+				scalingFactor,
 				languageChoiceBox.getValue().toString().toLowerCase(),
 				dotEngineChoiceBox.getValue().toString().toLowerCase(),
 				curvedsplines.isSelected()
 		);
 		List<IEvalElement> customGraphFormula = Collections.singletonList(trace.getStateSpace().getModel()
-			.parseFormula(visualisationStrategy.getCustomGraphDefinition() + arguments, FormulaExpand.EXPAND));
+			.parseFormula(graphFormula, FormulaExpand.EXPAND));
 		this.visualizeCustomGraph(customGraphFormula);
 	}
 
