@@ -87,7 +87,7 @@ public final class BConsoleView extends BorderPane {
 			} else {
 				AbstractModel model = to.getModel();
 				if (model instanceof EventBModel) {
-					languages = List.of(Language.EVENT_B);
+					languages = List.of(Language.EVENT_B, Language.CLASSICAL_B);
 				} else if (model instanceof CSPModel) {
 					languages = List.of(Language.CSP);
 				} else if (model instanceof TLAModel) {
