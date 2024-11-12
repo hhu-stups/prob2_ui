@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<?import de.prob2.ui.consoles.b.BConsole?>
 <?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.geometry.Insets?>
@@ -10,6 +9,8 @@
 <?import javafx.scene.control.ToolBar?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.scene.control.ComboBox?>
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
+<?import javafx.scene.control.SplitPane?>
 
 <fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="400.0" maxWidth="Infinity"
 		 maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
@@ -28,10 +29,17 @@
 		</ToolBar>
 	</top>
 	<center>
-		<VirtualizedScrollPane>
-			<content>
-				<BConsole fx:id="bConsole"/>
-			</content>
-		</VirtualizedScrollPane>
+		<SplitPane orientation="VERTICAL" dividerPositions="0.8">
+			<VirtualizedScrollPane>
+				<content>
+					<ExtendedCodeArea fx:id="consoleHistory" editable="false" />
+				</content>
+			</VirtualizedScrollPane>
+			<VirtualizedScrollPane>
+				<content>
+					<ExtendedCodeArea fx:id="consoleInput"/>
+				</content>
+			</VirtualizedScrollPane>
+		</SplitPane>
 	</center>
 </fx:root>

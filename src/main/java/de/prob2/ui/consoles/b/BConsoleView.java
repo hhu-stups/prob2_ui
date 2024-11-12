@@ -13,6 +13,7 @@ import de.prob.model.representation.XTLModel;
 import de.prob.statespace.Language;
 import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
+import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -22,6 +23,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 
 @FXMLInjected
@@ -31,7 +33,9 @@ public final class BConsoleView extends BorderPane {
 	private final I18n i18n;
 
 	@FXML
-	private BConsole bConsole;
+	private ExtendedCodeArea consoleHistory;
+	@FXML
+	private ExtendedCodeArea consoleInput;
 	@FXML
 	private ComboBox<Language> languageDropdown;
 	@FXML
@@ -58,8 +62,8 @@ public final class BConsoleView extends BorderPane {
 		})));
 		this.languageDropdown.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
 			if (to == null) {
-				this.bConsole.setPrompt("consoles.b.prompt.classicalB");
-				this.bConsole.getInterpreter().setBMode(true);
+				// this.bConsole.setPrompt("consoles.b.prompt.classicalB");
+				// this.bConsole.getInterpreter().setBMode(true);
 			} else {
 				boolean bMode = false;
 				String prompt = switch (to) {
@@ -73,8 +77,8 @@ public final class BConsoleView extends BorderPane {
 					case XTL -> "consoles.b.prompt.xtl";
 					default -> throw new IllegalArgumentException("Unsupported language " + to);
 				};
-				this.bConsole.setPrompt(prompt);
-				this.bConsole.getInterpreter().setBMode(bMode);
+				// this.bConsole.setPrompt(prompt);
+				// this.bConsole.getInterpreter().setBMode(bMode);
 			}
 		});
 
@@ -114,6 +118,6 @@ public final class BConsoleView extends BorderPane {
 
 	@FXML
 	private void handleClear() {
-		bConsole.reset();
+		//bConsole.reset();
 	}
 }
