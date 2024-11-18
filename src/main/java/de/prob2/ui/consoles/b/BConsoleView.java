@@ -14,8 +14,10 @@ import de.prob.model.representation.TLAModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.statespace.Language;
 import de.prob.statespace.Trace;
+import de.prob2.ui.codecompletion.CodeCompletion;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
+import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.FXMLInjected;
@@ -42,9 +44,12 @@ import org.fxmisc.wellbehaved.event.Nodes;
 @Singleton
 public final class BConsoleView extends BorderPane {
 
-	private final CurrentTrace currentTrace;
+	private final StageManager stageManager;
 	private final I18n i18n;
+	private final CurrentTrace currentTrace;
 	private final BInterpreter interpreter;
+
+	private CodeCompletion<BCCItem> codeCompletion;
 
 	@FXML
 	private CodeArea consoleHistory;
@@ -58,6 +63,7 @@ public final class BConsoleView extends BorderPane {
 	@Inject
 	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, BInterpreter interpreter) {
 		super();
+		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.interpreter = interpreter;
@@ -137,6 +143,25 @@ public final class BConsoleView extends BorderPane {
 		this.consoleHistory.setWrapText(true);
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), e -> this.consoleInput.insertText(this.consoleInput.getCaretPosition(), "\n")));
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> this.trigger()));
+
+		// code completion
+		this.codeCompletion = new CodeCompletion<>(
+				stageManager,
+				this.consoleInput.new AbstractParentWithEditableText<>() {
+
+					@Override
+					public void doReplacement(BCCItem replacement) {
+						if (!BConsoleView.this.consoleInput.isEditable()) {
+							return;
+						}
+
+						int caret = BConsoleView.this.consoleInput.getCaretPosition();
+						BConsoleView.this.consoleInput.replace(caret - replacement.getOriginalText().length(), caret, replacement.getReplacement(), Set.of());
+					}
+				},
+				interpreter::getSuggestions
+		);
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));
 	}
 
 	private void initializeHistoryContextMenu() {
@@ -179,5 +204,11 @@ public final class BConsoleView extends BorderPane {
 	@FXML
 	private void handleClear() {
 		this.consoleHistory.clear();
+	}
+
+	private void triggerCodeCompletion() {
+		if (this.consoleInput.isEditable()) {
+			this.codeCompletion.trigger();
+		}
 	}
 }

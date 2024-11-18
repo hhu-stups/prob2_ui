@@ -503,7 +503,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		}
 	}
 
-	protected abstract class AbstractParentWithEditableText<T extends CodeCompletionItem> implements ParentWithEditableText<T> {
+	public abstract class AbstractParentWithEditableText<T extends CodeCompletionItem> implements ParentWithEditableText<T> {
 
 		@Override
 		public Window getWindow() {
