@@ -1,6 +1,8 @@
 package de.prob2.ui.consoles.b;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -12,6 +14,8 @@ import de.prob.model.representation.TLAModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.statespace.Language;
 import de.prob.statespace.Trace;
+import de.prob2.ui.consoles.ConsoleExecResult;
+import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.FXMLInjected;
@@ -23,17 +27,27 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.TextField;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+
+import org.fxmisc.richtext.CodeArea;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 
 @FXMLInjected
 @Singleton
 public final class BConsoleView extends BorderPane {
+
 	private final CurrentTrace currentTrace;
 	private final I18n i18n;
+	private final BInterpreter interpreter;
 
 	@FXML
-	private ExtendedCodeArea consoleHistory;
+	private CodeArea consoleHistory;
 	@FXML
 	private ExtendedCodeArea consoleInput;
 	@FXML
@@ -42,10 +56,11 @@ public final class BConsoleView extends BorderPane {
 	private HelpButton helpButton;
 
 	@Inject
-	private BConsoleView(final StageManager stageManager, final I18n i18n, final CurrentTrace currentTrace) {
+	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, BInterpreter interpreter) {
 		super();
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
+		this.interpreter = interpreter;
 
 		stageManager.loadFXML(this, "b_console_view.fxml");
 	}
@@ -114,10 +129,55 @@ public final class BConsoleView extends BorderPane {
 		traceListener.changed(null, null, null);
 
 		helpButton.setHelpContent("mainView.bconsole", null);
+
+		this.consoleHistory.getStyleClass().add("console");
+		this.consoleHistory.setUndoManager(null);
+		this.initializeHistoryContextMenu();
+		this.consoleHistory.setEditable(false);
+		this.consoleHistory.setWrapText(true);
+		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), e -> this.consoleInput.insertText(this.consoleInput.getCaretPosition(), "\n")));
+		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> this.trigger()));
+	}
+
+	private void initializeHistoryContextMenu() {
+		ContextMenu contextMenu = new ContextMenu();
+
+		MenuItem copyItem = new MenuItem(this.i18n.translate("common.contextMenu.copy"));
+		copyItem.setOnAction(e -> this.consoleHistory.copy());
+		contextMenu.getItems().add(copyItem);
+
+		MenuItem clearItem = new MenuItem(this.i18n.translate("common.contextMenu.clear"));
+		clearItem.setOnAction(e -> this.handleClear());
+		contextMenu.getItems().add(clearItem);
+
+		MenuItem selectAllItem = new MenuItem(this.i18n.translate("common.contextMenu.selectAll"));
+		selectAllItem.setOnAction(e -> this.consoleHistory.selectAll());
+		contextMenu.getItems().add(selectAllItem);
+
+		this.consoleHistory.setContextMenu(contextMenu);
+	}
+
+	private void trigger() {
+		String input = this.consoleInput.getText();
+		this.consoleInput.clear();
+
+		String inputWithPrompt = "B> " + input; // TODO: add prompt
+		this.consoleHistory.append(inputWithPrompt + "\n", Set.of("console", "input"));
+
+		ConsoleExecResult result = this.interpreter.exec(input);
+		if (result.getResultType() == ConsoleExecResultType.CLEAR) {
+			this.handleClear();
+			return;
+		}
+
+		Collection<String> style = result.getResultType() == ConsoleExecResultType.ERROR ? Set.of("console", "error", "output") : Set.of("console", "output");
+		this.consoleHistory.append(result.getResult() + "\n", style);
+
+		this.consoleHistory.requestFollowCaret();
 	}
 
 	@FXML
 	private void handleClear() {
-		//bConsole.reset();
+		this.consoleHistory.clear();
 	}
 }

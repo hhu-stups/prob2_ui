@@ -172,7 +172,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		});
 		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_END, e -> this.errorPopup.hide());
 
-		initializeContextMenu();
+		this.initializeContextMenu();
 	}
 
 	protected boolean showLineNumbers() {
@@ -183,15 +183,30 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		final ContextMenu contextMenu = new ContextMenu();
 
 		final MenuItem undoItem = new MenuItem(i18n.translate("common.contextMenu.undo"));
-		undoItem.setOnAction(e -> this.getUndoManager().undo());
+		undoItem.setOnAction(e -> {
+			if (this.isEditable()) {
+				this.getUndoManager().undo();
+			}
+		});
+		undoItem.disableProperty().bind(this.editableProperty().not());
 		contextMenu.getItems().add(undoItem);
 
 		final MenuItem redoItem = new MenuItem(i18n.translate("common.contextMenu.redo"));
-		redoItem.setOnAction(e -> this.getUndoManager().redo());
+		redoItem.setOnAction(e -> {
+			if (this.isEditable()) {
+				this.getUndoManager().redo();
+			}
+		});
+		redoItem.disableProperty().bind(this.editableProperty().not());
 		contextMenu.getItems().add(redoItem);
 
 		final MenuItem cutItem = new MenuItem(i18n.translate("common.contextMenu.cut"));
-		cutItem.setOnAction(e -> this.cut());
+		cutItem.setOnAction(e -> {
+			if (this.isEditable()) {
+				this.cut();
+			}
+		});
+		cutItem.disableProperty().bind(this.editableProperty().not());
 		contextMenu.getItems().add(cutItem);
 
 		final MenuItem copyItem = new MenuItem(i18n.translate("common.contextMenu.copy"));
@@ -199,11 +214,21 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		contextMenu.getItems().add(copyItem);
 
 		final MenuItem pasteItem = new MenuItem(i18n.translate("common.contextMenu.paste"));
-		pasteItem.setOnAction(e -> this.paste());
+		pasteItem.setOnAction(e -> {
+			if (this.isEditable()) {
+				this.paste();
+			}
+		});
+		pasteItem.disableProperty().bind(this.editableProperty().not());
 		contextMenu.getItems().add(pasteItem);
 
 		final MenuItem deleteItem = new MenuItem(i18n.translate("common.contextMenu.delete"));
-		deleteItem.setOnAction(e -> this.deleteText(this.getSelection()));
+		deleteItem.setOnAction(e -> {
+			if (this.isEditable()) {
+				this.deleteText(this.getSelection());
+			}
+		});
+		deleteItem.disableProperty().bind(this.editableProperty().not());
 		contextMenu.getItems().add(deleteItem);
 
 		final MenuItem selectAllItem = new MenuItem(i18n.translate("common.contextMenu.selectAll"));

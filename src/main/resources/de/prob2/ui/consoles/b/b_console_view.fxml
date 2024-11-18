@@ -11,6 +11,7 @@
 <?import javafx.scene.control.ComboBox?>
 <?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import javafx.scene.control.SplitPane?>
+<?import org.fxmisc.richtext.CodeArea?>
 
 <fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="400.0" maxWidth="Infinity"
 		 maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
@@ -32,7 +33,7 @@
 		<SplitPane orientation="VERTICAL" dividerPositions="0.8">
 			<VirtualizedScrollPane>
 				<content>
-					<ExtendedCodeArea fx:id="consoleHistory" editable="false" />
+					<CodeArea fx:id="consoleHistory" editable="false" />
 				</content>
 			</VirtualizedScrollPane>
 			<VirtualizedScrollPane>
