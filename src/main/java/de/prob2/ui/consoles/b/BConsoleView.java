@@ -30,6 +30,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -58,6 +59,8 @@ public final class BConsoleView extends BorderPane {
 	@FXML
 	private ComboBox<Language> languageDropdown;
 	@FXML
+	private Label promptLabel;
+	@FXML
 	private HelpButton helpButton;
 
 	@Inject
@@ -73,35 +76,29 @@ public final class BConsoleView extends BorderPane {
 
 	@FXML
 	private void initialize() {
-		this.languageDropdown.setConverter(this.i18n.translateConverter(TranslatableAdapter.adapter(language -> switch (language) {
+		this.languageDropdown.setConverter(this.i18n.translateConverter(TranslatableAdapter.adapter(l -> switch (l) {
 			case CLASSICAL_B -> "consoles.b.toolbar.language.classicalB";
 			case EVENT_B -> "consoles.b.toolbar.language.eventB";
 			case TLA -> "consoles.b.toolbar.language.tla";
 			case CSP -> "consoles.b.toolbar.language.csp";
 			case XTL -> "consoles.b.toolbar.language.xtl";
-			default -> throw new IllegalArgumentException("Unsupported language " + language);
+			default -> throw new IllegalArgumentException("Unsupported language " + l);
 		})));
-		this.languageDropdown.getSelectionModel().selectedItemProperty().addListener((o, from, to) -> {
-			if (to == null) {
-				// this.bConsole.setPrompt("consoles.b.prompt.classicalB");
-				// this.bConsole.getInterpreter().setBMode(true);
-			} else {
-				boolean bMode = false;
-				String prompt = switch (to) {
-					case CLASSICAL_B -> {
-						bMode = true;
-						yield "consoles.b.prompt.classicalB";
-					}
+		var prompt = this.languageDropdown.getSelectionModel().selectedItemProperty()
+				.map(l -> switch (l) {
+					case CLASSICAL_B -> "consoles.b.prompt.classicalB";
 					case EVENT_B -> "consoles.b.prompt.eventB";
 					case TLA -> "consoles.b.prompt.tla";
 					case CSP -> "consoles.b.prompt.csp";
 					case XTL -> "consoles.b.prompt.xtl";
-					default -> throw new IllegalArgumentException("Unsupported language " + to);
-				};
-				// this.bConsole.setPrompt(prompt);
-				// this.bConsole.getInterpreter().setBMode(bMode);
-			}
-		});
+					default -> throw new IllegalArgumentException("Unsupported language " + l);
+				})
+				.orElse("consoles.b.prompt.classicalB");
+		this.promptLabel.textProperty().bind(this.i18n.translateBinding(prompt));
+		this.languageDropdown.getSelectionModel().selectedItemProperty()
+				.map(Language.CLASSICAL_B::equals)
+				.orElse(true)
+				.subscribe(this.interpreter::setBMode);
 
 		ChangeListener<Trace> traceListener = (o, from, to) -> {
 			Language selectedItem = this.languageDropdown.getSelectionModel().getSelectedItem();
@@ -186,7 +183,7 @@ public final class BConsoleView extends BorderPane {
 		String input = this.consoleInput.getText();
 		this.consoleInput.clear();
 
-		String inputWithPrompt = "B> " + input; // TODO: add prompt
+		String inputWithPrompt = this.promptLabel.getText() + input;
 		this.consoleHistory.append(inputWithPrompt + "\n", Set.of("console", "input"));
 
 		ConsoleExecResult result = this.interpreter.exec(input);

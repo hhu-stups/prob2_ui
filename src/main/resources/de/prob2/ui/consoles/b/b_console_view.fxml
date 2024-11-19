@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <?import de.prob2.ui.consoles.b.BConsoleView?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
+<?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import de.prob2.ui.helpsystem.HelpButton?>
-<?import javafx.scene.control.ToolBar?>
-<?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.scene.control.ComboBox?>
-<?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
+<?import javafx.scene.control.Label?>
 
 <fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="400.0" maxWidth="Infinity"
 		 maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
@@ -23,24 +27,39 @@
 			<padding>
 				<Insets left="5.0" right="5.0"/>
 			</padding>
-			<ComboBox fx:id="languageDropdown" />
+			<ComboBox fx:id="languageDropdown"/>
 			<Spacer/>
 			<Button onAction="#handleClear" text="%consoles.b.toolbar.clear" styleClass="button-blue" />
 			<HelpButton fx:id="helpButton" />
 		</ToolBar>
 	</top>
 	<center>
-		<SplitPane orientation="VERTICAL" dividerPositions="0.8">
+		<SplitPane orientation="VERTICAL" dividerPositions="0.9">
 			<VirtualizedScrollPane>
 				<content>
 					<CodeArea fx:id="consoleHistory" editable="false" />
 				</content>
 			</VirtualizedScrollPane>
-			<VirtualizedScrollPane>
-				<content>
-					<ExtendedCodeArea fx:id="consoleInput"/>
-				</content>
-			</VirtualizedScrollPane>
+			<HBox>
+				<VBox alignment="CENTER_LEFT">
+					<HBox.margin>
+						<Insets left="5.0" right="5.0"/>
+					</HBox.margin>
+					<Label fx:id="promptLabel"/>
+				</VBox>
+				<VirtualizedScrollPane>
+					<HBox.margin>
+						<Insets left="5.0" right="5.0"/>
+					</HBox.margin>
+					<content>
+						<ExtendedCodeArea fx:id="consoleInput">
+							<placeholder>
+								<Text text="%common.enterFormula.placeholder"/>
+							</placeholder>
+						</ExtendedCodeArea>
+					</content>
+				</VirtualizedScrollPane>
+			</HBox>
 		</SplitPane>
 	</center>
 </fx:root>
