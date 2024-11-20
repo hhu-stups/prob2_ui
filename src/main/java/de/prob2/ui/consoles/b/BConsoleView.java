@@ -1,5 +1,6 @@
 package de.prob2.ui.consoles.b;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -8,12 +9,12 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.model.eventb.EventBModel;
+import de.prob.model.representation.AbstractElement;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.CSPModel;
 import de.prob.model.representation.TLAModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.statespace.Language;
-import de.prob.statespace.Trace;
 import de.prob2.ui.codecompletion.CodeCompletion;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
@@ -26,7 +27,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -100,14 +100,14 @@ public final class BConsoleView extends BorderPane {
 				.orElse(true)
 				.subscribe(this.interpreter::setBMode);
 
-		ChangeListener<Trace> traceListener = (o, from, to) -> {
+		this.currentTrace.stateSpaceProperty().subscribe(ss -> {
 			Language selectedItem = this.languageDropdown.getSelectionModel().getSelectedItem();
 
 			List<Language> languages;
-			if (to == null) {
+			if (ss == null) {
 				languages = List.of(Language.CLASSICAL_B);
 			} else {
-				AbstractModel model = to.getModel();
+				AbstractModel model = ss.getModel();
 				if (model instanceof EventBModel) {
 					languages = List.of(Language.EVENT_B, Language.CLASSICAL_B);
 				} else if (model instanceof CSPModel) {
@@ -119,6 +119,22 @@ public final class BConsoleView extends BorderPane {
 				} else {
 					languages = List.of(Language.CLASSICAL_B);
 				}
+
+				if (model != null) {
+					String name;
+					AbstractElement mainComponent = model.getMainComponent();
+					if (mainComponent != null) {
+						name = mainComponent.toString();
+					} else {
+						File modelFile = model.getModelFile();
+						if (modelFile != null) {
+							name = modelFile.getName();
+						} else {
+							name = this.i18n.translate("common.notAvailable");
+						}
+					}
+					this.appendHistoryWithoutDuplicates(this.i18n.translate("consoles.b.message.modelLoaded", name), Set.of("console", "message"));
+				}
 			}
 			this.languageDropdown.getItems().setAll(languages);
 
@@ -127,9 +143,8 @@ public final class BConsoleView extends BorderPane {
 			} else {
 				this.languageDropdown.getSelectionModel().selectFirst();
 			}
-		};
-		this.currentTrace.addListener(traceListener);
-		traceListener.changed(null, null, null);
+		});
+		this.handleClear();
 
 		helpButton.setHelpContent("mainView.bconsole", null);
 
@@ -183,8 +198,7 @@ public final class BConsoleView extends BorderPane {
 		String input = this.consoleInput.getText();
 		this.consoleInput.clear();
 
-		String inputWithPrompt = this.promptLabel.getText() + input;
-		this.consoleHistory.append(inputWithPrompt + "\n", Set.of("console", "input"));
+		this.appendHistory(this.promptLabel.getText() + input, Set.of("console", "input"));
 
 		ConsoleExecResult result = this.interpreter.exec(input);
 		if (result.getResultType() == ConsoleExecResultType.CLEAR) {
@@ -193,7 +207,7 @@ public final class BConsoleView extends BorderPane {
 		}
 
 		Collection<String> style = result.getResultType() == ConsoleExecResultType.ERROR ? Set.of("console", "error", "output") : Set.of("console", "output");
-		this.consoleHistory.append(result.getResult() + "\n", style);
+		this.appendHistory(result.getResult(), style);
 
 		this.consoleHistory.requestFollowCaret();
 	}
@@ -201,11 +215,35 @@ public final class BConsoleView extends BorderPane {
 	@FXML
 	private void handleClear() {
 		this.consoleHistory.clear();
+		this.appendHistory(this.i18n.translate("consoles.b.header"), Set.of("console", "header"));
 	}
 
 	private void triggerCodeCompletion() {
 		if (this.consoleInput.isEditable()) {
 			this.codeCompletion.trigger();
 		}
+	}
+
+	private void appendHistory(String paragraph, Collection<String> style) {
+		this.consoleHistory.append(paragraph + "\n", style);
+	}
+
+	private void appendHistoryWithoutDuplicates(String paragraph, Collection<String> style) {
+		var paragraphs = this.consoleHistory.getParagraphs();
+		int i = paragraphs.size() - 1;
+		while (i >= 0) {
+			String lastParagraph = paragraphs.get(i).getText();
+			if (paragraph.equals(lastParagraph)) {
+				return;
+			}
+
+			if (!lastParagraph.isBlank()) {
+				break;
+			}
+
+			i--;
+		}
+
+		this.appendHistory(paragraph, style);
 	}
 }
