@@ -12,7 +12,7 @@ import javafx.beans.value.ObservableBooleanValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
-final class ConsoleHistoryAndSearchHandler {
+public final class ConsoleHistoryAndSearchHandler {
 
 	private final Console parent;
 	private final BooleanProperty searchActive;
@@ -24,7 +24,7 @@ final class ConsoleHistoryAndSearchHandler {
 	private String savedInput;
 	private String lastSearch;
 
-	ConsoleHistoryAndSearchHandler(Console parent) {
+	public ConsoleHistoryAndSearchHandler(Console parent) {
 		this.parent = parent;
 		this.searchActive = new SimpleBooleanProperty(false);
 		this.searchFailed = new SimpleBooleanProperty(false);

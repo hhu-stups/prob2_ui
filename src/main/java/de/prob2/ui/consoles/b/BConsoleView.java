@@ -16,6 +16,7 @@ import de.prob.model.representation.TLAModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.statespace.Language;
 import de.prob2.ui.codecompletion.CodeCompletion;
+import de.prob2.ui.config.Config;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.b.codecompletion.BCCItem;
@@ -27,6 +28,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -36,6 +39,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 
+import org.controlsfx.control.SearchableComboBox;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
@@ -49,6 +53,7 @@ public final class BConsoleView extends BorderPane {
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private final BInterpreter interpreter;
+	// private final ConsoleHistoryAndSearchHandler historyAndSearchHandler;
 
 	private CodeCompletion<BCCItem> codeCompletion;
 
@@ -57,6 +62,8 @@ public final class BConsoleView extends BorderPane {
 	@FXML
 	private ExtendedCodeArea consoleInput;
 	@FXML
+	private SearchableComboBox<String> historyDropdown;
+	@FXML
 	private ComboBox<Language> languageDropdown;
 	@FXML
 	private Label promptLabel;
@@ -64,13 +71,27 @@ public final class BConsoleView extends BorderPane {
 	private HelpButton helpButton;
 
 	@Inject
-	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, BInterpreter interpreter) {
+	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, BInterpreter interpreter, Config config) {
 		super();
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.interpreter = interpreter;
+		// this.historyAndSearchHandler = new ConsoleHistoryAndSearchHandler(this);
 
+		/*config.addListener(new ConfigListener() {
+			@Override
+			public void loadConfig(final ConfigData configData) {
+				if (configData.bConsoleInstructions != null) {
+					BConsoleView.this.historyAndSearchHandler.setHistory(configData.bConsoleInstructions);
+				}
+			}
+
+			@Override
+			public void saveConfig(final ConfigData configData) {
+				configData.bConsoleInstructions = BConsoleView.this.historyAndSearchHandler.getHistory();
+			}
+		});*/
 		stageManager.loadFXML(this, "b_console_view.fxml");
 	}
 
@@ -146,7 +167,7 @@ public final class BConsoleView extends BorderPane {
 		});
 		this.handleClear();
 
-		helpButton.setHelpContent("mainView.bconsole", null);
+		this.helpButton.setHelpContent("mainView.bconsole", null);
 
 		this.consoleHistory.getStyleClass().add("console");
 		this.consoleHistory.setUndoManager(null);
@@ -158,7 +179,7 @@ public final class BConsoleView extends BorderPane {
 
 		// code completion
 		this.codeCompletion = new CodeCompletion<>(
-				stageManager,
+				this.stageManager,
 				this.consoleInput.new AbstractParentWithEditableText<>() {
 
 					@Override
@@ -171,9 +192,22 @@ public final class BConsoleView extends BorderPane {
 						BConsoleView.this.consoleInput.replace(caret - replacement.getOriginalText().length(), caret, replacement.getReplacement(), Set.of());
 					}
 				},
-				interpreter::getSuggestions
+				this.interpreter::getSuggestions
 		);
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));
+
+		// history
+		//Bindings.bindContent(this.historyDropdown.getItems(), this.his);
+		this.historyDropdown.getItems().setAll("h1", "h2", "h3", "h4", "h5", "h6");
+		this.historyDropdown.getSelectionModel().selectedItemProperty().subscribe(s -> {
+			if (s != null) {
+				this.consoleInput.replaceText(s);
+				Platform.runLater(() -> {
+					this.historyDropdown.getSelectionModel().clearSelection();
+					//this.consoleInput.requestFocus();
+				});
+			}
+		});
 	}
 
 	private void initializeHistoryContextMenu() {
