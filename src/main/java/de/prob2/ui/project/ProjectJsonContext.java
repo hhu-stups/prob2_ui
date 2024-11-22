@@ -879,6 +879,11 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 
 		checkArray(machine.remove("temporalFormulas"))
 			.forEach(node -> validationTasks.add(checkObject(node)));
+
+		machine.remove("traceReplayStatus");
+		machine.remove("temporalStatus");
+		machine.remove("symbolicCheckingStatus");
+		machine.remove("modelcheckingStatus");
 	}
 
 	private static void updateV40Machine(final ObjectNode machine) {
