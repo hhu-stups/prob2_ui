@@ -507,6 +507,9 @@ public final class SimulatorStage extends Stage {
 		});
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
 			checkIfSimulationShouldBeSaved();
 			configurationPath.set(null);
 			simulationDiagramItems.getItems().clear();
@@ -765,7 +768,6 @@ public final class SimulatorStage extends Stage {
 			machine.getSimulations().addListener(this.simulationModelsListener);
 			this.simulationModelsListener.invalidated(null);
 			cbSimulation.getSelectionModel().clearSelection();
-			cbSimulation.getSelectionModel().select(0);
 		}
 	}
 
