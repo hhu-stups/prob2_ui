@@ -28,7 +28,7 @@ import de.prob.statespace.Transition;
 
 public class OperationItem {
 	public enum Status {
-		DISABLED, ENABLED, TIMEOUT
+		DISABLED, ENABLED, TIMEOUT, MAX_OPERATIONS
 	}
 	
 	/**
@@ -221,9 +221,9 @@ public class OperationItem {
 		return items.values().iterator().next();
 	}
 
-	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters) {
+	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters, final List<String> returnParameters) {
 		return new OperationItem(null, name, status, parameters, Collections.emptyList(),
-				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
+				returnParameters, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
 				Collections.emptySet(), Collections.emptySet());
 	}
 
