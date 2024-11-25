@@ -18,6 +18,7 @@ public class HistoryItem {
 	}
 	
 	public static List<HistoryItem> itemsForTrace(final Trace trace) {
+		// additional information is queried by OperationsDetailsStage when opened
 		final Map<Transition, OperationItem> operations = OperationItem.forTransitionsFast(trace.getStateSpace(), trace.getTransitionList());
 		final List<HistoryItem> items = new ArrayList<>();
 		items.add(new HistoryItem(null, -1)); // Root state

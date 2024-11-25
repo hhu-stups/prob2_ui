@@ -7,7 +7,9 @@ import com.google.inject.Inject;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -53,15 +55,17 @@ public class OperationDetailsStage extends Stage {
 	@FXML private TextArea textArea;
 	
 	private final I18n i18n;
+	private final CliTaskExecutor cliExecutor;
 	
 	private final ObjectProperty<OperationItem> item;
 	
 	@Inject
-	OperationDetailsStage(final StageManager stageManager, final I18n i18n) {
+	OperationDetailsStage(StageManager stageManager, I18n i18n, CliTaskExecutor cliExecutor) {
 		super();
 		
 		this.i18n = i18n;
-		
+		this.cliExecutor = cliExecutor;
+
 		this.item = new SimpleObjectProperty<>(this, "item", null);
 		
 		stageManager.loadFXML(this, "operation_details_stage.fxml");
@@ -82,48 +86,59 @@ public class OperationDetailsStage extends Stage {
 		
 		this.item.addListener((observable, from, to) -> {
 			this.rootItem.getChildren().clear();
-			this.rootItem.getChildren().add(this.parametersItem);
-			this.rootItem.getChildren().add(this.returnValuesItem);
-			this.rootItem.getChildren().add(this.constantsItem);
-			this.rootItem.getChildren().add(this.variablesItem);
-			this.rootItem.getChildren().forEach(ti -> ti.getChildren().clear());
 			if (to == null) {
 				this.setTitle(i18n.translate("operations.operationDetails.title"));
 			} else {
 				this.setTitle(i18n.translate("operations.operationDetails.titleWithName", to.getPrettyName()));
-				
-				final List<String> paramNames = to.getParameterNames();
-				final List<String> paramValues = to.getParameterValues();
-				if (paramValues.isEmpty()) {
-					for (final String name : paramNames) {
-						this.parametersItem.getChildren().add(new TreeItem<>(new ValueItem(name, "")));
-					}
-				} else {
-					for (int i = 0; i < paramValues.size(); i++) {
-						String name = i < paramNames.size() ? paramNames.get(i) : "#" + (i + 1);
-						final String param = paramValues.get(i);
-						this.parametersItem.getChildren().add(new TreeItem<>(new ValueItem(name, param)));
-					}
-				}
-				
-				final List<String> returnNames = to.getReturnParameterNames();
-				final List<String> returnValues = to.getReturnParameterValues();
-				for (int i = 0; i < returnValues.size(); i++) {
-					final String name = i < returnNames.size() ? returnNames.get(i) : "#" + (i + 1);
-					final String retval = returnValues.get(i);
-					this.returnValuesItem.getChildren().add(new TreeItem<>(new ValueItem(name, retval)));
-				}
-				
-				to.getConstants().forEach((key, value) ->
-					this.constantsItem.getChildren().add(new TreeItem<>(new ValueItem(key, value)))
-				);
-				
-				to.getVariables().forEach((key, value) ->
-					this.variablesItem.getChildren().add(new TreeItem<>(new ValueItem(key, value)))
-				);
 			}
-			this.rootItem.getChildren().removeIf(ti -> ti.getChildren().isEmpty());
+
+			if (to != null && to.getTransition() != null) {
+				this.cliExecutor.execute(() -> {
+					// get information about all variables/constants
+					// they are not queried by default - see HistoryItem#itemsForTrace
+					OperationItem target = OperationItem.forTransition(to.getTransition().getStateSpace(), to.getTransition());
+					Platform.runLater(() -> this.update(target));
+				});
+			} else {
+				this.update(to);
+			}
 		});
+	}
+
+	private void update(OperationItem to) {
+		this.rootItem.getChildren().add(this.parametersItem);
+		this.rootItem.getChildren().add(this.returnValuesItem);
+		this.rootItem.getChildren().add(this.constantsItem);
+		this.rootItem.getChildren().add(this.variablesItem);
+		this.rootItem.getChildren().forEach(ti -> ti.getChildren().clear());
+		if (to != null) {
+			final List<String> paramNames = to.getParameterNames();
+			final List<String> paramValues = to.getParameterValues();
+			if (paramValues.isEmpty()) {
+				for (final String name : paramNames) {
+					this.parametersItem.getChildren().add(new TreeItem<>(new ValueItem(name, "")));
+				}
+			} else {
+				for (int i = 0; i < paramValues.size(); i++) {
+					String name = i < paramNames.size() ? paramNames.get(i) : "#" + (i + 1);
+					final String param = paramValues.get(i);
+					this.parametersItem.getChildren().add(new TreeItem<>(new ValueItem(name, param)));
+				}
+			}
+
+			final List<String> returnNames = to.getReturnParameterNames();
+			final List<String> returnValues = to.getReturnParameterValues();
+			for (int i = 0; i < returnValues.size(); i++) {
+				final String name = i < returnNames.size() ? returnNames.get(i) : "#" + (i + 1);
+				final String retval = returnValues.get(i);
+				this.returnValuesItem.getChildren().add(new TreeItem<>(new ValueItem(name, retval)));
+			}
+
+			to.getConstants().forEach((key, value) -> this.constantsItem.getChildren().add(new TreeItem<>(new ValueItem(key, value))));
+
+			to.getVariables().forEach((key, value) -> this.variablesItem.getChildren().add(new TreeItem<>(new ValueItem(key, value))));
+		}
+		this.rootItem.getChildren().removeIf(ti -> ti.getChildren().isEmpty());
 	}
 
 	public ObjectProperty<OperationItem> itemProperty() {
