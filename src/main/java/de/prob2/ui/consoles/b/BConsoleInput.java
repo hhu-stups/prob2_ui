@@ -71,8 +71,11 @@ public final class BConsoleInput extends ExtendedCodeArea {
 			return styleSpans;
 		}
 
-		StyleSpans<Collection<String>> highlighting = BLexerSyntaxHighlighting.computeBFormulaHighlighting(text);
-		return styleSpans.overlay(highlighting, ExtendedCodeArea::combineStyleSpans);
+		return styleSpans.overlay(this.computeCodeHighlighting(text), ExtendedCodeArea::combineStyleSpans);
+	}
+
+	public StyleSpans<Collection<String>> computeCodeHighlighting(String text) {
+		return BLexerSyntaxHighlighting.computeBFormulaHighlighting(text);
 	}
 
 	public BInterpreter getBInterpreter() {

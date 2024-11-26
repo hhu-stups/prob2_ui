@@ -217,7 +217,14 @@ public final class BConsoleView extends BorderPane {
 			return;
 		}
 
-		this.appendHistory(this.promptLabel.getText() + input, Set.of("console", "input"));
+		this.consoleHistory.append(this.promptLabel.getText(), Set.of("console", "input"));
+
+		int pos = this.consoleHistory.getCaretPosition();
+		this.consoleHistory.append(input, Set.of());
+		var styleSpans = this.consoleInput.computeCodeHighlighting(input);
+		this.consoleHistory.setStyleSpans(pos, styleSpans);
+		this.consoleHistory.append("\n", Set.of());
+
 		this.history.add(0, input);
 
 		ConsoleExecResult result = this.consoleInput.getBInterpreter().exec(input);
