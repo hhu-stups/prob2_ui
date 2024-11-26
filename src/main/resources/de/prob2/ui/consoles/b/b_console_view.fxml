@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 
+<?import de.prob2.ui.consoles.b.BConsoleInput?>
 <?import de.prob2.ui.consoles.b.BConsoleView?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
-<?import de.prob2.ui.internal.ExtendedCodeArea?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
@@ -54,11 +54,11 @@
 						<Insets left="5.0" right="5.0"/>
 					</HBox.margin>
 					<content>
-						<ExtendedCodeArea fx:id="consoleInput">
+						<BConsoleInput fx:id="consoleInput">
 							<placeholder>
 								<Text text="%common.enterFormula.placeholder"/>
 							</placeholder>
-						</ExtendedCodeArea>
+						</BConsoleInput>
 					</content>
 				</VirtualizedScrollPane>
 			</HBox>

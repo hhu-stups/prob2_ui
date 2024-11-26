@@ -25,7 +25,6 @@ import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.internal.ExtendedCodeArea;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -66,7 +65,7 @@ public final class BConsoleView extends BorderPane {
 	@FXML
 	private CodeArea consoleHistory;
 	@FXML
-	private ExtendedCodeArea consoleInput;
+	private BConsoleInput consoleInput;
 	@FXML
 	private SearchableComboBox<String> historyDropdown;
 	@FXML
@@ -180,32 +179,12 @@ public final class BConsoleView extends BorderPane {
 		this.helpButton.setHelpContent("mainView.bconsole", null);
 
 		this.consoleHistory.getStyleClass().add("console");
-		this.consoleInput.getStyleClass().add("console");
 		this.consoleHistory.setUndoManager(null);
 		this.initializeHistoryContextMenu();
 		this.consoleHistory.setEditable(false);
 		this.consoleHistory.setWrapText(true);
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), e -> this.consoleInput.insertText(this.consoleInput.getCaretPosition(), "\n")));
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> this.trigger()));
-
-		// code completion
-		this.codeCompletion = new CodeCompletion<>(
-				this.stageManager,
-				this.consoleInput.new AbstractParentWithEditableText<>() {
-
-					@Override
-					public void doReplacement(BCCItem replacement) {
-						if (!BConsoleView.this.consoleInput.isEditable()) {
-							return;
-						}
-
-						int caret = BConsoleView.this.consoleInput.getCaretPosition();
-						BConsoleView.this.consoleInput.replace(caret - replacement.getOriginalText().length(), caret, replacement.getReplacement(), Set.of());
-					}
-				},
-				this.interpreter::getSuggestions
-		);
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));
 
 		// history
 		Bindings.bindContent(this.historyDropdown.getItems(), this.history);
@@ -265,12 +244,6 @@ public final class BConsoleView extends BorderPane {
 	private void handleClear() {
 		this.consoleHistory.clear();
 		this.appendHistory(this.i18n.translate("consoles.b.header"), Set.of("console", "header"));
-	}
-
-	private void triggerCodeCompletion() {
-		if (this.consoleInput.isEditable()) {
-			this.codeCompletion.trigger();
-		}
 	}
 
 	private void appendHistory(String paragraph, Collection<String> style) {
