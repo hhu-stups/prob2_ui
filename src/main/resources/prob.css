@@ -1071,6 +1071,10 @@
 	-fx-text-fill: orange;
 }
 
+.operations-cell.max-operations .glyph-font {
+	-fx-text-fill: orange;
+}
+
 .operations-cell.disabled .glyph-font {
 	-fx-text-fill: red;
 }

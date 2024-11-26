@@ -676,8 +676,9 @@ public final class VisBView extends BorderPane {
 	private void askLoadVisBFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
+		
 		fileChooser.getExtensionFilters().addAll(
-			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json", "def")
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {

@@ -1,7 +1,6 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
@@ -15,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetCandidateOperationsCommand;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.statespace.LoadedMachine;
@@ -112,44 +112,50 @@ public final class OperationsView extends BorderPane {
 		@Override
 		protected void updateItem(OperationItem item, boolean empty) {
 			super.updateItem(item, empty);
-			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled");
+			getStyleClass().removeAll("enabled", "timeout", "max-operations", "unexplored", "errored", "skip", "normal", "disabled");
 			if (item != null && !empty) {
 				setText(item.toPrettyString(showUnambiguous.get()));
 				setDisable(false);
 				final FontAwesome.Glyph icon;
 				switch (item.getStatus()) {
-				case TIMEOUT:
-					icon = FontAwesome.Glyph.CLOCK_ALT;
-					getStyleClass().add("timeout");
-					setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.timeout")));
-					break;
+					case MAX_OPERATIONS:
+						icon = FontAwesome.Glyph.QUESTION;
+						getStyleClass().add("max-operations");
+						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.maxOperations")));
+						break;
 
-				case ENABLED:
-					icon = item.isSkip() ? FontAwesome.Glyph.REPEAT : FontAwesome.Glyph.PLAY;
-					getStyleClass().add("enabled");
-					if (!item.isExplored()) {
-						getStyleClass().add("unexplored");
-						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesUnexplored")));
-					} else if (item.isErrored()) {
-						getStyleClass().add("errored");
-						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesErrored")));
-					} else if (item.isSkip()) {
-						getStyleClass().add("skip");
-						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesSame")));
-					} else {
-						getStyleClass().add("normal");
+					case TIMEOUT:
+						icon = FontAwesome.Glyph.CLOCK_ALT;
+						getStyleClass().add("timeout");
+						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.timeout")));
+						break;
+
+					case ENABLED:
+						icon = item.isSkip() ? FontAwesome.Glyph.REPEAT : FontAwesome.Glyph.PLAY;
+						getStyleClass().add("enabled");
+						if (!item.isExplored()) {
+							getStyleClass().add("unexplored");
+							setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesUnexplored")));
+						} else if (item.isErrored()) {
+							getStyleClass().add("errored");
+							setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesErrored")));
+						} else if (item.isSkip()) {
+							getStyleClass().add("skip");
+							setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesSame")));
+						} else {
+							getStyleClass().add("normal");
+							setTooltip(null);
+						}
+						break;
+
+					case DISABLED:
+						icon = FontAwesome.Glyph.MINUS_CIRCLE;
+						getStyleClass().add("disabled");
 						setTooltip(null);
-					}
-					break;
+						break;
 
-				case DISABLED:
-					icon = FontAwesome.Glyph.MINUS_CIRCLE;
-					getStyleClass().add("disabled");
-					setTooltip(null);
-					break;
-
-				default:
-					throw new IllegalStateException("Unhandled status: " + item.getStatus());
+					default:
+						throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
 				final BindableGlyph graphic = new BindableGlyph("FontAwesome", icon);
 				graphic.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
@@ -348,30 +354,32 @@ public final class OperationsView extends BorderPane {
 		});
 	}
 
-	private void executeOperationIfPossible(final OperationItem item) {
-		final Trace trace = currentTrace.get();
-		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-		if (
-			item != null
-			&& item.getStatus() == OperationItem.Status.ENABLED
-			&& item.getTransition().getSource().equals(trace.getCurrentState())
-		) {
-			UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-			// Use the CLI executor for executing the operation to avoid blocking the UI thread.
-			// Executing the operation itself isn't slow (because the transition is already known),
-			// but changing the current trace can be slow,
-			// because the destination state may not be explored yet.
-			// TODO This might be better solved by moving the state exploring out of CurrentTrace.
-			cliExecutor.execute(() -> {
-				Trace forward = trace.forward();
-				if (forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
-					currentTrace.set(forward);
-					uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
-				} else {
-					currentTrace.set(trace.add(item.getTransition()));
-					uiInteraction.addUserInteraction(realTimeSimulator, item.getTransition());
-				}
-			});
+	private void executeOperationIfPossible(OperationItem item) {
+		if (item != null) {
+			Trace trace = currentTrace.get();
+			if (item.getStatus() == OperationItem.Status.ENABLED && item.getTransition().getSource().equals(trace.getCurrentState())) {
+				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
+				UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
+				// Use the CLI executor for executing the operation to avoid blocking the UI thread.
+				// Executing the operation itself isn't slow (because the transition is already known),
+				// but changing the current trace can be slow,
+				// because the destination state may not be explored yet.
+				// TODO This might be better solved by moving the state exploring out of CurrentTrace.
+				cliExecutor.execute(() -> {
+					Trace forward = trace.forward();
+					if (forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
+						currentTrace.set(forward);
+						uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
+					} else {
+						currentTrace.set(trace.add(item.getTransition()));
+						uiInteraction.addUserInteraction(realTimeSimulator, item.getTransition());
+					}
+				});
+			} else if (item.getStatus() == OperationItem.Status.TIMEOUT || item.getStatus() == OperationItem.Status.MAX_OPERATIONS) {
+				ExecuteByPredicateStage stage = injector.getInstance(ExecuteByPredicateStage.class);
+				stage.setItem(item);
+				stage.show();
+			}
 		}
 	}
 
@@ -390,21 +398,23 @@ public final class OperationsView extends BorderPane {
 
 	private synchronized void updateBG(final Trace trace) {
 		events.clear();
-		final Set<Transition> operations = trace.getNextTransitions();
+		Set<Transition> operations = trace.getNextTransitions();
 		trace.getStateSpace().evaluateTransitions(operations, FormulaExpand.EXPAND);
 		events.addAll(OperationItem.computeUnambiguousConstantsAndVariables(
 			OperationItem.forTransitions(trace.getStateSpace(), operations).values()
 		));
-		
-		final LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
-		final Set<String> disabled = loadedMachine.getOperationNames().stream()
+
+		LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
+		Set<String> disabled = loadedMachine.getOperationNames().stream()
 			.map(loadedMachine::getMachineOperationInfo)
 			.filter(OperationInfo::isTopLevel)
 			.map(OperationInfo::getOperationName)
 			.collect(Collectors.toSet());
 		disabled.removeAll(operations.stream().map(Transition::getName).collect(Collectors.toSet()));
-		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
-		showDisabledAndWithTimeout(loadedMachine, disabled, withTimeout);
+
+		var withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
+		var withMaxOperations = trace.getCurrentState().getCandidateOperations();
+		showDisabledAndWithTimeout(loadedMachine, disabled, withTimeout, withMaxOperations.stream().map(GetCandidateOperationsCommand.Candidate::getOperation).collect(Collectors.toSet()));
 
 		doSort(loadedMachine);
 
@@ -429,19 +439,25 @@ public final class OperationsView extends BorderPane {
 		Platform.runLater(() -> opsListView.getItems().setAll(filtered));
 	}
 
-	private void showDisabledAndWithTimeout(final LoadedMachine loadedMachine, final Set<String> notEnabled, final Set<String> withTimeout) {
+	private void showDisabledAndWithTimeout(LoadedMachine loadedMachine, Set<String> notEnabled, Set<String> withTimeout, Set<String> withMaxOperations) {
 		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
 				if (!Transition.INITIALISE_MACHINE_NAME.equals(s)) {
-					events.add(OperationItem.forDisabled(
-						s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, loadedMachine.getMachineOperationInfo(s).getParameterNames()
-					));
+					if (!withTimeout.contains(s) && !withMaxOperations.contains(s)) {
+						OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
+						events.add(OperationItem.forDisabled(s, OperationItem.Status.DISABLED, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+					}
 				}
 			}
 		}
 		for (String s : withTimeout) {
-			if (!notEnabled.contains(s)) {
-				events.add(OperationItem.forDisabled(s, OperationItem.Status.TIMEOUT, Collections.emptyList()));
+			OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
+			events.add(OperationItem.forDisabled(s, OperationItem.Status.TIMEOUT, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+		}
+		for (String s : withMaxOperations) {
+			if (!withTimeout.contains(s)) {
+				OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
+				events.add(OperationItem.forDisabled(s, OperationItem.Status.MAX_OPERATIONS, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
 			}
 		}
 	}
