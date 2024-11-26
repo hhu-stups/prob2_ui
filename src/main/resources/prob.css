@@ -489,19 +489,23 @@
  * StyledTextArea/Consoles                                                          *
  ************************************************************************************/
 
-.console {
-	-fx-font-family: monospace;
+.code-area.console {
+   -fx-font-weight: bold;
 }
 
-.console .header{
+.console .context-menu {
+	-fx-font-family: initial;
+}
+
+.console .header {
 	-fx-font-weight: bold;
 }
 
-.console .error{
+.console .error {
 	-fx-fill: red;
 }
 
-.console .message{
+.console .message {
 	-fx-fill: gray;
 }
 
@@ -511,7 +515,6 @@
 
 .code-area.editor {
 	-fx-font-weight: bold;
-	-fx-font-size: 15;
 }
 
 .editor .context-menu {

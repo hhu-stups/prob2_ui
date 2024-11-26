@@ -129,6 +129,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	private void initialize() {
+		this.getStyleClass().add("extended-code-area");
 		this.getStyleClass().add("editor");
 		styleProperty().bind(Bindings.format(Locale.ROOT, "-fx-font-size: %dpx;", fontSize.fontSizeProperty()));
 		this.errorPopupLabel.getStyleClass().add("editorPopupLabel");

@@ -180,6 +180,7 @@ public final class BConsoleView extends BorderPane {
 		this.helpButton.setHelpContent("mainView.bconsole", null);
 
 		this.consoleHistory.getStyleClass().add("console");
+		this.consoleInput.getStyleClass().add("console");
 		this.consoleHistory.setUndoManager(null);
 		this.initializeHistoryContextMenu();
 		this.consoleHistory.setEditable(false);
