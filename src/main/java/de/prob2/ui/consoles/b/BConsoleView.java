@@ -1,7 +1,9 @@
 package de.prob2.ui.consoles.b;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -17,6 +19,8 @@ import de.prob.model.representation.XTLModel;
 import de.prob.statespace.Language;
 import de.prob2.ui.codecompletion.CodeCompletion;
 import de.prob2.ui.config.Config;
+import de.prob2.ui.config.ConfigData;
+import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.consoles.b.codecompletion.BCCItem;
@@ -30,6 +34,8 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
@@ -53,7 +59,7 @@ public final class BConsoleView extends BorderPane {
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
 	private final BInterpreter interpreter;
-	// private final ConsoleHistoryAndSearchHandler historyAndSearchHandler;
+	private final ObservableList<String> history;
 
 	private CodeCompletion<BCCItem> codeCompletion;
 
@@ -77,21 +83,25 @@ public final class BConsoleView extends BorderPane {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.interpreter = interpreter;
-		// this.historyAndSearchHandler = new ConsoleHistoryAndSearchHandler(this);
+		this.history = FXCollections.observableArrayList();
 
-		/*config.addListener(new ConfigListener() {
+		config.addListener(new ConfigListener() {
 			@Override
-			public void loadConfig(final ConfigData configData) {
+			public void loadConfig(ConfigData configData) {
 				if (configData.bConsoleInstructions != null) {
-					BConsoleView.this.historyAndSearchHandler.setHistory(configData.bConsoleInstructions);
+					List<String> bConsoleInstructions = new ArrayList<>(configData.bConsoleInstructions);
+					Collections.reverse(bConsoleInstructions);
+					BConsoleView.this.history.setAll(bConsoleInstructions);
 				}
 			}
 
 			@Override
-			public void saveConfig(final ConfigData configData) {
-				configData.bConsoleInstructions = BConsoleView.this.historyAndSearchHandler.getHistory();
+			public void saveConfig(ConfigData configData) {
+				List<String> history = new ArrayList<>(BConsoleView.this.history);
+				Collections.reverse(history);
+				configData.bConsoleInstructions = history;
 			}
-		});*/
+		});
 		stageManager.loadFXML(this, "b_console_view.fxml");
 	}
 
@@ -197,14 +207,13 @@ public final class BConsoleView extends BorderPane {
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.SPACE, KeyCombination.CONTROL_DOWN), e -> this.triggerCodeCompletion()));
 
 		// history
-		//Bindings.bindContent(this.historyDropdown.getItems(), this.his);
-		this.historyDropdown.getItems().setAll("h1", "h2", "h3", "h4", "h5", "h6");
+		Bindings.bindContent(this.historyDropdown.getItems(), this.history);
 		this.historyDropdown.getSelectionModel().selectedItemProperty().subscribe(s -> {
 			if (s != null) {
 				this.consoleInput.replaceText(s);
 				Platform.runLater(() -> {
 					this.historyDropdown.getSelectionModel().clearSelection();
-					//this.consoleInput.requestFocus();
+					this.consoleInput.requestFocus();
 				});
 			}
 		});
@@ -232,7 +241,12 @@ public final class BConsoleView extends BorderPane {
 		String input = this.consoleInput.getText();
 		this.consoleInput.clear();
 
+		if (input.isBlank()) {
+			return;
+		}
+
 		this.appendHistory(this.promptLabel.getText() + input, Set.of("console", "input"));
+		this.history.add(0, input);
 
 		ConsoleExecResult result = this.interpreter.exec(input);
 		if (result.getResultType() == ConsoleExecResultType.CLEAR) {

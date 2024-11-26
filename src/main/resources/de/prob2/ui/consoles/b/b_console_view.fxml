@@ -8,16 +8,15 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Text?>
+<?import org.controlsfx.control.SearchableComboBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
 <?import org.fxmisc.richtext.CodeArea?>
-<?import javafx.scene.control.Label?>
-<?import org.controlsfx.control.SearchableComboBox?>
-<?import de.prob2.ui.layout.BindableGlyph?>
 
 <fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="400.0" maxWidth="Infinity"
 		 maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
@@ -31,11 +30,7 @@
 			</padding>
 			<ComboBox fx:id="languageDropdown"/>
 			<Spacer/>
-			<SearchableComboBox fx:id="historyDropdown">
-				<placeholder>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="CLOCK_ALT" bindableFontSize="${fontSize.fontSize * 2}"/>
-				</placeholder>
-			</SearchableComboBox>
+			<SearchableComboBox fx:id="historyDropdown" prefWidth="200" />
 			<Button onAction="#handleClear" text="%consoles.b.toolbar.clear" styleClass="button-blue" />
 			<HelpButton fx:id="helpButton" />
 		</ToolBar>
