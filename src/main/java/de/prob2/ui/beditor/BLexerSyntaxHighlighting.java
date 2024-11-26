@@ -336,16 +336,50 @@ public final class BLexerSyntaxHighlighting {
 		}
 	}
 
-	static StyleSpans<Collection<String>> computeBHighlighting(String text) {
-		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), text.length()));
+	public static StyleSpans<Collection<String>> computeBFormulaHighlighting(String text) {
+		BLexer lexer = new BLexer(new PushbackReader(new StringReader("#FORMULA " + text), Math.min(BLexer.PUSHBACK_BUFFER_SIZE, text.length())));
 		ParseOptions parseOptions = new ParseOptions();
 		parseOptions.setIgnoreCheckingValidCombinations(true);
 		lexer.setParseOptions(parseOptions);
+		lexer.setPosition(1, 1 - "#FORMULA ".length());
+		return lexAndHighlight(text, lexer);
+	}
+
+	public static StyleSpans<Collection<String>> computeBHighlighting(String text) {
+		BLexer lexer = new BLexer(new PushbackReader(new StringReader(text), Math.min(BLexer.PUSHBACK_BUFFER_SIZE, text.length())));
+		ParseOptions parseOptions = new ParseOptions();
+		parseOptions.setIgnoreCheckingValidCombinations(true);
+		lexer.setParseOptions(parseOptions);
+		return lexAndHighlight(text, lexer);
+	}
+
+	private static StyleSpans<Collection<String>> lexAndHighlight(String text, BLexer lexer) {
 		var spansBuilder = new StyleSpansBuilder<Collection<String>>();
 		try {
-			Token t;
-			do {
-				t = lexer.next();
+			while (true) {
+				Token t = lexer.next();
+				if (t instanceof EOF || Thread.currentThread().isInterrupted()) {
+					break;
+				}
+
+				int line = t.getLine();
+				int start = t.getPos();
+				int length = t.getText() == null ? 0 : t.getText().length();
+				int end = start + length;
+
+				// ignore tokens with negative pos
+				// they are created when the start position is negative because a prefix has to be ignored
+				if (line < 1 || end < 1) {
+					continue;
+				} else if (start < 1) {
+					start = 1;
+					length = end - start;
+				}
+
+				if (length <= 0) {
+					continue;
+				}
+
 				Collection<String> tokenClass;
 				if (t instanceof TIdentifierLiteral && Utils.isProBSpecialDefinitionName(t.getText())) {
 					// Recognize and highlight special identifiers (e. g. ANIMATION_FUNCTION, VISB_JSON_FILE)
@@ -354,10 +388,10 @@ public final class BLexerSyntaxHighlighting {
 					tokenClass = TOKEN_CLASSES.get(t.getClass());
 				}
 
-				spansBuilder.add(tokenClass == null ? Set.of() : tokenClass, t.getText().length());
-			} while (!(t instanceof EOF) && !Thread.currentThread().isInterrupted());
+				spansBuilder.add(tokenClass == null ? Set.of() : tokenClass, length);
+			}
 		} catch (LexerException | IOException e) {
-			LOGGER.info("Failed to lex", e);
+			LOGGER.debug("Failed to lex", e);
 		}
 
 		try {

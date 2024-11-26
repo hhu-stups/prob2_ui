@@ -17,13 +17,11 @@ import de.prob.model.representation.CSPModel;
 import de.prob.model.representation.TLAModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.statespace.Language;
-import de.prob2.ui.codecompletion.CodeCompletion;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
-import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -54,13 +52,9 @@ import org.fxmisc.wellbehaved.event.Nodes;
 @Singleton
 public final class BConsoleView extends BorderPane {
 
-	private final StageManager stageManager;
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
-	private final BInterpreter interpreter;
 	private final ObservableList<String> history;
-
-	private CodeCompletion<BCCItem> codeCompletion;
 
 	@FXML
 	private CodeArea consoleHistory;
@@ -76,12 +70,10 @@ public final class BConsoleView extends BorderPane {
 	private HelpButton helpButton;
 
 	@Inject
-	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, BInterpreter interpreter, Config config) {
+	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, Config config) {
 		super();
-		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
-		this.interpreter = interpreter;
 		this.history = FXCollections.observableArrayList();
 
 		config.addListener(new ConfigListener() {
@@ -128,7 +120,7 @@ public final class BConsoleView extends BorderPane {
 		this.languageDropdown.getSelectionModel().selectedItemProperty()
 				.map(Language.CLASSICAL_B::equals)
 				.orElse(true)
-				.subscribe(this.interpreter::setBMode);
+				.subscribe(this.consoleInput.getBInterpreter()::setBMode);
 
 		this.currentTrace.stateSpaceProperty().subscribe(ss -> {
 			Language selectedItem = this.languageDropdown.getSelectionModel().getSelectedItem();
@@ -228,7 +220,7 @@ public final class BConsoleView extends BorderPane {
 		this.appendHistory(this.promptLabel.getText() + input, Set.of("console", "input"));
 		this.history.add(0, input);
 
-		ConsoleExecResult result = this.interpreter.exec(input);
+		ConsoleExecResult result = this.consoleInput.getBInterpreter().exec(input);
 		if (result.getResultType() == ConsoleExecResultType.CLEAR) {
 			this.handleClear();
 			return;

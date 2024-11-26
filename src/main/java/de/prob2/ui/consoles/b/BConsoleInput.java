@@ -1,10 +1,12 @@
 package de.prob2.ui.consoles.b;
 
+import java.util.Collection;
 import java.util.Set;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.beditor.BLexerSyntaxHighlighting;
 import de.prob2.ui.codecompletion.CodeCompletion;
 import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.internal.ExtendedCodeArea;
@@ -17,6 +19,7 @@ import de.prob2.ui.layout.FontSize;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 
+import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
 import org.fxmisc.wellbehaved.event.Nodes;
@@ -59,5 +62,20 @@ public final class BConsoleInput extends ExtendedCodeArea {
 		if (this.isEditable()) {
 			this.codeCompletion.trigger();
 		}
+	}
+
+	@Override
+	protected StyleSpans<Collection<String>> computeHighlighting(String text) {
+		StyleSpans<Collection<String>> styleSpans = super.computeHighlighting(text);
+		if (styleSpans == null || text.isEmpty()) {
+			return styleSpans;
+		}
+
+		StyleSpans<Collection<String>> highlighting = BLexerSyntaxHighlighting.computeBFormulaHighlighting(text);
+		return styleSpans.overlay(highlighting, ExtendedCodeArea::combineStyleSpans);
+	}
+
+	public BInterpreter getBInterpreter() {
+		return this.bInterpreter;
 	}
 }
