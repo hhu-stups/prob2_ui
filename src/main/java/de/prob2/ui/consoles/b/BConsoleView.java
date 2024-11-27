@@ -29,6 +29,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -184,9 +185,16 @@ public final class BConsoleView extends BorderPane {
 		Bindings.bindContent(this.historyDropdown.getItems(), this.history);
 		this.historyDropdown.getSelectionModel().selectedItemProperty().subscribe(s -> {
 			if (s != null) {
+				this.consoleInput.requestFocus();
 				this.consoleInput.replaceText(s);
 				this.consoleInput.requestFollowCaret();
-				this.consoleInput.requestFocus();
+				Platform.runLater(() -> {
+					this.historyDropdown.getSelectionModel().clearSelection();
+					// on my linux machine the "requestFocus" above causes text in the consoleHistory to become selected?!
+					// this is caused by the history text area somehow receiving mouse dragged events,
+					// even though the dropdown is shown and the focus is requested by the input text area
+					Platform.runLater(() -> this.consoleHistory.deselect());
+				});
 			}
 		});
 
