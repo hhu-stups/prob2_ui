@@ -29,7 +29,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -41,6 +40,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
 
 import org.controlsfx.control.SearchableComboBox;
 import org.fxmisc.richtext.CodeArea;
@@ -56,6 +56,8 @@ public final class BConsoleView extends BorderPane {
 	private final CurrentTrace currentTrace;
 	private final ObservableList<String> history;
 
+	@FXML
+	private VBox consoleContainer;
 	@FXML
 	private CodeArea consoleHistory;
 	@FXML
@@ -183,12 +185,13 @@ public final class BConsoleView extends BorderPane {
 		this.historyDropdown.getSelectionModel().selectedItemProperty().subscribe(s -> {
 			if (s != null) {
 				this.consoleInput.replaceText(s);
-				Platform.runLater(() -> {
-					this.historyDropdown.getSelectionModel().clearSelection();
-					this.consoleInput.requestFocus();
-				});
+				this.consoleInput.requestFollowCaret();
+				this.consoleInput.requestFocus();
 			}
 		});
+
+		this.consoleInput.setAutoHeight(true);
+		this.consoleInput.maxHeightProperty().bind(this.consoleContainer.heightProperty().divide(2.0));
 	}
 
 	private void initializeHistoryContextMenu() {

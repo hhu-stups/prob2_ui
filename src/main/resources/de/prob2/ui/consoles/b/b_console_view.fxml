@@ -36,22 +36,22 @@
 		</ToolBar>
 	</top>
 	<center>
-		<SplitPane orientation="VERTICAL" dividerPositions="0.9">
-			<VirtualizedScrollPane>
+		<VBox fx:id="consoleContainer">
+			<VirtualizedScrollPane VBox.vgrow="ALWAYS">
 				<content>
 					<CodeArea fx:id="consoleHistory" editable="false" />
 				</content>
 			</VirtualizedScrollPane>
-			<HBox>
+			<HBox styleClass="border">
 				<VBox alignment="CENTER_LEFT">
 					<HBox.margin>
-						<Insets left="5.0" right="5.0"/>
+						<Insets left="5.0" right="5.0" />
 					</HBox.margin>
 					<Label fx:id="promptLabel"/>
 				</VBox>
 				<VirtualizedScrollPane HBox.hgrow="ALWAYS">
 					<HBox.margin>
-						<Insets left="5.0" right="5.0"/>
+						<Insets left="5.0" right="5.0" />
 					</HBox.margin>
 					<content>
 						<BConsoleInput fx:id="consoleInput">
@@ -62,6 +62,6 @@
 					</content>
 				</VirtualizedScrollPane>
 			</HBox>
-		</SplitPane>
+		</VBox>
 	</center>
 </fx:root>
