@@ -489,19 +489,23 @@
  * StyledTextArea/Consoles                                                          *
  ************************************************************************************/
 
-.console {
-	-fx-font-family: monospace;
+.code-area.console {
+   -fx-font-weight: bold;
 }
 
-.console .header{
+.console .context-menu {
+	-fx-font-family: initial;
+}
+
+.console .header {
 	-fx-font-weight: bold;
 }
 
-.console .error{
+.console .error {
 	-fx-fill: red;
 }
 
-.console .message{
+.console .message {
 	-fx-fill: gray;
 }
 
@@ -511,71 +515,70 @@
 
 .code-area.editor {
 	-fx-font-weight: bold;
-	-fx-font-size: 15;
 }
 
 .editor .context-menu {
 	-fx-font-family: initial;
 }
 
-.editor .editor_identifier {
+.editor_identifier {
 	-fx-fill:black; /* alternatives: darkslateblue, darkmagenta */
 }
 
-.editor .editor_assignments {
+.editor_assignments {
 	-fx-fill:#268bd2; /* $blue from https://ethanschoonover.com/solarized/; was darkblue; */
 }
 
-.editor .editor_logical,
-.editor .editor_special_identifier {
+.editor_logical,
+.editor_special_identifier {
 	-fx-fill:#cb4b16; /* $orange, was tomato */
 }
 
-.editor .editor_arithmetic{
+.editor_arithmetic{
 	-fx-fill:#2aa198; /* $cyan;  was #5883be; */
 }
 
-.editor .editor_predicates {
+.editor_predicates {
 	-fx-fill:#dc322f; /* $red was royalblue; */
 }
-.editor .editor_operators {
+.editor_operators {
 	-fx-fill:#268bd2; /* $blue was purple; */
 }
 
-.editor .editor_types {
+.editor_types {
 	-fx-fill:#6c71c4; /* $violet; was darkred; */
 }
 
-.editor .editor_string {
+.editor_string {
 	-fx-fill:#859900; /* $green; was rgb(3, 107, 3); */
 }
 
-.editor .editor_unsupported{
+.editor_unsupported {
 	-fx-fill:#b58900; /* $yellow */
 	/* -fx-background-color: yellow; */
 }
 
-.editor .editor_ctrlkeyword {
+.editor_ctrlkeyword {
 	-fx-fill:#d33682; /* $magenta was rgb(96, 22, 216); */
 }
 
-.editor .editor_keyword {
+.editor_keyword {
 	-fx-fill:#268bd2; /* $blue was blue; */
 }
 
-.editor .editor_comment {
+.editor_comment {
 	-fx-fill: #93a1a1;
 	-fx-font-style: italic
 }
-.editor .editor_pragma {
+.editor_pragma {
 	-fx-fill: #818181
 }
 
-.editor .editor_xtl_functor {
+.editor_xtl_functor {
 	-fx-fill:black;
 }
 
-.editor .editor_xtl_variable {
+.editor_xtl_variable {
 	-fx-fill:darkviolet;
 }
 

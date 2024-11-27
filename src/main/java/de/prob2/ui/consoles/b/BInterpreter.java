@@ -78,7 +78,7 @@ public class BInterpreter implements Executable {
 	public ConsoleExecResult exec(String source) {
 		if (source == null || source.isBlank()) {
 			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
-		} else if (":clear".equals(source)) {
+		} else if (":clear".equals(source.trim())) {
 			return new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR);
 		}
 

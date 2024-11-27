@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<?import de.prob2.ui.consoles.b.BConsole?>
+<?import de.prob2.ui.consoles.b.BConsoleInput?>
 <?import de.prob2.ui.consoles.b.BConsoleView?>
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
-<?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import de.prob2.ui.helpsystem.HelpButton?>
-<?import javafx.scene.control.ToolBar?>
-<?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+<?import org.controlsfx.control.SearchableComboBox?>
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import org.fxmisc.richtext.CodeArea?>
 
 <fx:root type="BConsoleView" stylesheets="@/prob.css" prefHeight="400.0" maxWidth="Infinity"
 		 maxHeight="Infinity" xmlns:fx="http://javafx.com/fxml/1">
@@ -21,17 +28,40 @@
 			<padding>
 				<Insets left="5.0" right="5.0"/>
 			</padding>
-			<ComboBox fx:id="languageDropdown" />
+			<ComboBox fx:id="languageDropdown"/>
 			<Spacer/>
+			<SearchableComboBox fx:id="historyDropdown" prefWidth="200" />
 			<Button onAction="#handleClear" text="%consoles.b.toolbar.clear" styleClass="button-blue" />
 			<HelpButton fx:id="helpButton" />
 		</ToolBar>
 	</top>
 	<center>
-		<VirtualizedScrollPane>
-			<content>
-				<BConsole fx:id="bConsole"/>
-			</content>
-		</VirtualizedScrollPane>
+		<VBox fx:id="consoleContainer">
+			<VirtualizedScrollPane VBox.vgrow="ALWAYS">
+				<content>
+					<CodeArea fx:id="consoleHistory" editable="false" />
+				</content>
+			</VirtualizedScrollPane>
+			<HBox styleClass="border">
+				<VBox alignment="CENTER_LEFT">
+					<HBox.margin>
+						<Insets left="5.0" right="5.0" />
+					</HBox.margin>
+					<Label fx:id="promptLabel"/>
+				</VBox>
+				<VirtualizedScrollPane HBox.hgrow="ALWAYS">
+					<HBox.margin>
+						<Insets left="5.0" right="5.0" />
+					</HBox.margin>
+					<content>
+						<BConsoleInput fx:id="consoleInput">
+							<placeholder>
+								<Text text="%common.enterFormula.placeholder"/>
+							</placeholder>
+						</BConsoleInput>
+					</content>
+				</VirtualizedScrollPane>
+			</HBox>
+		</VBox>
 	</center>
 </fx:root>
