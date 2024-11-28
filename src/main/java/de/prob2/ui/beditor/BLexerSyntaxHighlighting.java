@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import de.be4.classicalb.core.parser.BLexer;
+import de.be4.classicalb.core.parser.BParser;
 import de.be4.classicalb.core.parser.ParseOptions;
 import de.be4.classicalb.core.parser.lexer.LexerException;
 import de.be4.classicalb.core.parser.node.EOF;
@@ -337,11 +338,12 @@ public final class BLexerSyntaxHighlighting {
 	}
 
 	public static StyleSpans<Collection<String>> computeBFormulaHighlighting(String text) {
-		BLexer lexer = new BLexer(new PushbackReader(new StringReader("#FORMULA " + text), Math.min(BLexer.PUSHBACK_BUFFER_SIZE, text.length())));
+		String prefix = BParser.FORMULA_PREFIX + " ";
+		BLexer lexer = new BLexer(new PushbackReader(new StringReader(prefix + text), Math.min(BLexer.PUSHBACK_BUFFER_SIZE, text.length())));
 		ParseOptions parseOptions = new ParseOptions();
 		parseOptions.setIgnoreCheckingValidCombinations(true);
 		lexer.setParseOptions(parseOptions);
-		lexer.setPosition(1, 1 - "#FORMULA ".length());
+		lexer.setPosition(1, 1 - prefix.length());
 		return lexAndHighlight(text, lexer);
 	}
 
