@@ -51,7 +51,11 @@ public final class RealTimeSimulator extends Simulator {
 		Trace trace = currentTrace.get();
 		try {
 			Trace newTrace = simulationStep(trace);
-			currentTrace.set(mergeUserInteractions(trace.getTransitionList().size(), currentTrace.get(), newTrace));
+			Trace resultingTrace = newTrace;
+			if(currentTrace.get().getCurrentState().isInitialised()) {
+				resultingTrace = mergeUserInteractions(trace.getTransitionList().size(), currentTrace.get(), newTrace);
+			}
+			currentTrace.set(resultingTrace);
 		} catch (Exception e) {
 			scheduler.endSimulationStep();
 			throw e;
@@ -62,7 +66,14 @@ public final class RealTimeSimulator extends Simulator {
 	private Trace mergeUserInteractions(int index, Trace traceWithUserInteractions, Trace simulatedTrace) {
 		Trace trace = traceWithUserInteractions;
 		for(int i = index; i < simulatedTrace.getTransitionList().size(); i++) {
-			trace = traceWithUserInteractions.add(simulatedTrace.getTransitionList().get(i));
+			Transition nextTransition = simulatedTrace.getTransitionList().get(i);
+			final Transition op = trace.getCurrentState().getOutTransitions().stream()
+					.filter(t -> t.getId().equals(nextTransition.getId()))
+					.findAny()
+					.orElse(null);
+			if(op != null) {
+				trace = traceWithUserInteractions.add(op);
+			}
 		}
 		return trace;
 	}
