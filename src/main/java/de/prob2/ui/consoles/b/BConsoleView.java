@@ -178,6 +178,10 @@ public final class BConsoleView extends BorderPane {
 		this.initializeHistoryContextMenu();
 		this.consoleHistory.setEditable(false);
 		this.consoleHistory.setWrapText(true);
+		Nodes.addInputMap(this.consoleHistory, InputMap.consume(EventPattern.keyTyped(), e -> {
+			this.consoleInput.requestFocus();
+			this.consoleInput.fireEvent(e);
+		}));
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), e -> this.consoleInput.insertText(this.consoleInput.getCaretPosition(), "\n")));
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> this.trigger()));
 
