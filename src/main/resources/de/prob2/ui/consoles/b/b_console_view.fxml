@@ -42,7 +42,7 @@
 					<CodeArea fx:id="consoleHistory" editable="false" />
 				</content>
 			</VirtualizedScrollPane>
-			<HBox styleClass="border">
+			<HBox styleClass="border" minHeight="32">
 				<VBox alignment="CENTER_LEFT">
 					<HBox.margin>
 						<Insets left="5.0" right="5.0" />
