@@ -43,7 +43,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
-import org.controlsfx.control.SearchableComboBox;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.wellbehaved.event.EventPattern;
 import org.fxmisc.wellbehaved.event.InputMap;
@@ -64,7 +63,7 @@ public final class BConsoleView extends BorderPane {
 	@FXML
 	private BConsoleInput consoleInput;
 	@FXML
-	private SearchableComboBox<String> historyDropdown;
+	private ComboBox<String> historyDropdown;
 	@FXML
 	private ComboBox<Language> languageDropdown;
 	@FXML
@@ -186,6 +185,7 @@ public final class BConsoleView extends BorderPane {
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> this.trigger()));
 
 		// history
+		this.historyDropdown.promptTextProperty().bind(this.i18n.translateBinding("consoles.b.history"));
 		Bindings.bindContent(this.historyDropdown.getItems(), this.history);
 		this.historyDropdown.getSelectionModel().selectedItemProperty().subscribe(s -> {
 			if (s != null) {
