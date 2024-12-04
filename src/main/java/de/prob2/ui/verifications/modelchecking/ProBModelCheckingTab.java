@@ -92,7 +92,8 @@ public class ProBModelCheckingTab extends Tab {
 				alert.showAndWait();
 			}
 		});
-		this.tfFindGoal.visibleProperty().bind(findGoal.selectedProperty());
+		this.tfFindGoal.disableProperty().bind(this.findGoal.selectedProperty().not());
+		this.tfFindGoal.visibleProperty().bind(this.findGoal.selectedProperty());
 	}
 
 	public static String getSearchStrategyNameKey(final ModelCheckingSearchStrategy searchStrategy) {
@@ -108,17 +109,17 @@ public class ProBModelCheckingTab extends Tab {
 		ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
 		Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
 		Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;
-		String goal = findGoal.isSelected() ? tfFindGoal.getText() : null;
-		return new ProBModelCheckingItem(id, searchStrategy, nLimit, tLimit, getOptions("GOAL".equals(goal)), goal);
+		String customGoal = findGoal.isSelected() && !tfFindGoal.getText().isEmpty() ? tfFindGoal.getText() : null;
+		return new ProBModelCheckingItem(id, searchStrategy, nLimit, tLimit, getOptions(), customGoal);
 	}
 
-	private Set<ModelCheckingOptions.Options> getOptions(boolean goal) {
+	private Set<ModelCheckingOptions.Options> getOptions() {
 		ModelCheckingOptions options = new ModelCheckingOptions();
 		options = options.checkDeadlocks(findDeadlocks.isSelected());
 		options = options.checkInvariantViolations(findInvViolations.isSelected());
 		options = options.checkAssertions(findBAViolations.isSelected());
 		options = options.checkOtherErrors(findOtherErrors.isSelected());
-		options = options.checkGoal(goal);
+		options = options.checkGoal(findGoal.isSelected());
 		options = options.stopAtFullCoverage(stopAtFullCoverage.isSelected());
 		return options.getPrologOptions();
 	}
@@ -130,7 +131,7 @@ public class ProBModelCheckingTab extends Tab {
 		findInvViolations.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.FIND_INVARIANT_VIOLATIONS));
 		findBAViolations.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.FIND_ASSERTION_VIOLATIONS));
 		stopAtFullCoverage.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.STOP_AT_FULL_COVERAGE));
-
+		findGoal.setSelected(item.getOptions().contains(ModelCheckingOptions.Options.FIND_GOAL));
 		findOtherErrors.setSelected(!item.getOptions().contains(ModelCheckingOptions.Options.IGNORE_OTHER_ERRORS));
 
 		if (item.getNodesLimit() != null){
@@ -147,11 +148,9 @@ public class ProBModelCheckingTab extends Tab {
 			chooseTimeLimit.setSelected(false);
 		}
 
-		if (item.getGoal() != null){
+		if (item.getCustomGoal() != null){
 			findGoal.setSelected(true);
-			tfFindGoal.setText(item.getGoal());
-		} else {
-			findGoal.setSelected(false);
+			tfFindGoal.setText(item.getCustomGoal());
 		}
 	}
 }

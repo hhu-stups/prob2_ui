@@ -2,6 +2,7 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+
 <fx:root type="Tab" text="ProB" closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
 		<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
@@ -103,7 +104,7 @@
 					</HBox>
 					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 						<CheckBox fx:id="findGoal" text="%verifications.modelchecking.modelcheckingStage.options.findGoal"/>
-						<TextField fx:id="tfFindGoal" text="GOAL">
+						<TextField fx:id="tfFindGoal" promptText="GOAL">
 							<tooltip>
 								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.findGoal" />
 							</tooltip>
