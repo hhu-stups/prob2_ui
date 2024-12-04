@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -339,7 +338,7 @@ public final class ProjectManager {
 
 		switch(type) {
 			case VISB:
-				injector.getInstance(VisBView.class).loadFromAbsolutePath(selected);
+				injector.getInstance(VisBView.class).addVisBVisualisationFromAbsolutePath(selected);
 				break;
 			case SIMB:
 				injector.getInstance(SimulatorStage.class).show();

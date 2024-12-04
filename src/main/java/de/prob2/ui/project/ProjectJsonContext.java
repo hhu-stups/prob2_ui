@@ -1099,6 +1099,14 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 
+	private static void updateV56Machine(final ObjectNode machine) {
+		JsonNode visBVisualisation = machine.remove("visBVisualisation");
+		ArrayNode visBVisualisations = machine.putArray("visBVisualisations");
+		if (visBVisualisation != null && visBVisualisation.isTextual()) {
+			visBVisualisations.add(visBVisualisation.textValue());
+		}
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -1295,6 +1303,9 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 55) {
 				updateV55Machine(machine);
+			}
+			if (oldVersion <= 56) {
+				updateV56Machine(machine);
 			}
 		});
 
