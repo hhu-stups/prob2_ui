@@ -60,6 +60,7 @@
 					<MenuItem fx:id="setSelectedAsDefaultItem" text="%visb.settingsMenu.setSelectedVisualisationAsDefault" onAction="#setSelectedAsDefault"/>
 					<MenuItem fx:id="deleteSelectedItem" text="%visb.settingsMenu.deleteSelected" onAction="#deleteSelected"/>
 					<MenuItem fx:id="saveCurrentItem" text="%visb.settingsMenu.saveCurrent" onAction="#saveCurrent"/>
+					<MenuItem fx:id="editCurrentExternalItem" text="%visb.settingsMenu.editCurrentExternal" onAction="#editCurrentExternal"/>
 					<SeparatorMenuItem/>
 					<MenuItem text="%visb.settingsMenu.showDebugWindow" onAction="#showVisBItemsAndEvents"/>
 				</items>

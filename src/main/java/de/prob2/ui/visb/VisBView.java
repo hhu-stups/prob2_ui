@@ -45,6 +45,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.executor.FxThreadExecutor;
+import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.visb.help.UserManualStage;
@@ -151,6 +152,7 @@ public final class VisBView extends BorderPane {
 	private final FxThreadExecutor fxExecutor;
 	private final DisablePropertyController disablePropertyController;
 	private final FileChooserManager fileChooserManager;
+	private final ExternalEditor externalEditor;
 	private final VisBController visBController;
 
 	private final VisBConnector visBConnector;
@@ -172,6 +174,8 @@ public final class VisBView extends BorderPane {
 	private MenuItem deleteSelectedItem;
 	@FXML
 	private MenuItem saveCurrentItem;
+	@FXML
+	private MenuItem editCurrentExternalItem;
 	@FXML
 	private MenuButton saveTraceButton;
 	@FXML
@@ -234,6 +238,7 @@ public final class VisBView extends BorderPane {
 		FxThreadExecutor fxExecutor,
 		DisablePropertyController disablePropertyController,
 		FileChooserManager fileChooserManager,
+		ExternalEditor externalEditor,
 		VisBController visBController
 	) {
 		super();
@@ -246,6 +251,7 @@ public final class VisBView extends BorderPane {
 		this.fxExecutor = fxExecutor;
 		this.disablePropertyController = disablePropertyController;
 		this.fileChooserManager = fileChooserManager;
+		this.externalEditor = externalEditor;
 		this.visBController = visBController;
 
 		this.visBConnector = new VisBConnector();
@@ -323,6 +329,7 @@ public final class VisBView extends BorderPane {
 			setSelectedAsDefaultItem.disableProperty().unbind();
 			deleteSelectedItem.disableProperty().unbind();
 			saveCurrentItem.disableProperty().unbind();
+			editCurrentExternalItem.disableProperty().unbind();
 			cbVisualisations.itemsProperty().unbind();
 			cbVisualisations.getSelectionModel().clearSelection();
 			if (to == null) {
@@ -330,6 +337,7 @@ public final class VisBView extends BorderPane {
 				setSelectedAsDefaultItem.setDisable(true);
 				deleteSelectedItem.setDisable(true);
 				saveCurrentItem.setDisable(true);
+				editCurrentExternalItem.setDisable(true);
 				cbVisualisations.setItems(FXCollections.observableArrayList());
 			} else {
 				ObjectBinding<Path> defaultVis = Bindings.valueAt(to.getVisBVisualisations(), 0);
@@ -339,6 +347,7 @@ public final class VisBView extends BorderPane {
 				setSelectedAsDefaultItem.disableProperty().bind(selectedVis.isNull().or(selectedVis.isEqualTo(defaultVis)));
 				deleteSelectedItem.disableProperty().bind(selectedVis.isNull());
 				saveCurrentItem.disableProperty().bind(currentVis.isNull().or(currentVis.isEqualTo(selectedVis)));
+				editCurrentExternalItem.disableProperty().bind(currentVis.isNull().or(currentVis.isEqualTo(VisBController.NO_PATH)));
 				cbVisualisations.itemsProperty().bind(to.getVisBVisualisations());
 			}
 		});
@@ -832,11 +841,25 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private void saveCurrent() {
 		Path current = this.visBController.getRelativeVisBPath();
+		if (current == null || VisBController.NO_PATH.equals(current)) {
+			return;
+		}
+
 		ObservableList<Path> visBVisualisations = this.currentProject.getCurrentMachine().getVisBVisualisations();
 		if (!visBVisualisations.contains(current)) {
 			visBVisualisations.add(current);
 		}
 		this.cbVisualisations.getSelectionModel().select(current);
+	}
+
+	@FXML
+	private void editCurrentExternal() {
+		Path current = this.visBController.getAbsoluteVisBPath();
+		if (current == null || VisBController.NO_PATH.equals(current)) {
+			return;
+		}
+
+		this.externalEditor.open(current);
 	}
 
 	void performHtmlExport(final boolean onlyCurrentState, final VisBExportOptions options) {
