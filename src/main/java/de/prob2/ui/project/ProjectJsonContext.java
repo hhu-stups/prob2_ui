@@ -1104,6 +1104,8 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		ArrayNode visBVisualisations = machine.putArray("visBVisualisations");
 		if (visBVisualisation != null && visBVisualisation.isTextual()) {
 			visBVisualisations.add(visBVisualisation.textValue());
+		} else {
+			visBVisualisations.add(""); // VisBController.NO_PATH
 		}
 	}
 
