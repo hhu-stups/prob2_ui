@@ -43,7 +43,7 @@
 				</content>
 			</VirtualizedScrollPane>
 			<HBox styleClass="border" minHeight="40">
-				<VBox alignment="CENTER_LEFT">
+				<VBox>
 					<HBox.margin>
 						<Insets left="5.0" right="5.0" />
 					</HBox.margin>
