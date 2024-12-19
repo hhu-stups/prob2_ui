@@ -340,11 +340,11 @@ public final class OperationsView extends BorderPane {
 				if (configData.operationsSortMode != null) {
 					setSortMode(configData.operationsSortMode);
 				}
-				
+
 				setShowDisabledOps(configData.operationsShowDisabled);
 				setShowUnambiguous(configData.operationsShowUnambiguous);
 			}
-			
+
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.operationsSortMode = getSortMode();
@@ -445,19 +445,25 @@ public final class OperationsView extends BorderPane {
 				if (!Transition.INITIALISE_MACHINE_NAME.equals(s)) {
 					if (!withTimeout.contains(s) && !withMaxOperations.contains(s)) {
 						OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
-						events.add(OperationItem.forDisabled(s, OperationItem.Status.DISABLED, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+						if (opInfo != null) {
+							events.add(OperationItem.forDisabled(s, OperationItem.Status.DISABLED, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+						}
 					}
 				}
 			}
 		}
 		for (String s : withTimeout) {
 			OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
-			events.add(OperationItem.forDisabled(s, OperationItem.Status.TIMEOUT, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+			if (opInfo != null) {
+				events.add(OperationItem.forDisabled(s, OperationItem.Status.TIMEOUT, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+			}
 		}
 		for (String s : withMaxOperations) {
 			if (!withTimeout.contains(s)) {
 				OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
-				events.add(OperationItem.forDisabled(s, OperationItem.Status.MAX_OPERATIONS, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+				if (opInfo != null) {
+					events.add(OperationItem.forDisabled(s, OperationItem.Status.MAX_OPERATIONS, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+				}
 			}
 		}
 	}
@@ -591,7 +597,7 @@ public final class OperationsView extends BorderPane {
 	private void setSortMode(final OperationsView.SortMode sortMode) {
 		this.sortMode.set(sortMode);
 	}
-	
+
 	private boolean getShowDisabledOps() {
 		return this.showDisabledOps.get();
 	}
@@ -599,7 +605,7 @@ public final class OperationsView extends BorderPane {
 	private void setShowDisabledOps(boolean showDisabledOps) {
 		this.showDisabledOps.set(showDisabledOps);
 	}
-	
+
 	private boolean getShowUnambiguous() {
 		return this.showUnambiguous.get();
 	}

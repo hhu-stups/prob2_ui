@@ -20,13 +20,13 @@ import de.prob.statespace.Language;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
-import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
@@ -53,6 +53,7 @@ import org.fxmisc.wellbehaved.event.Nodes;
 public final class BConsoleView extends BorderPane {
 
 	private final I18n i18n;
+	private final FxThreadExecutor fxExecutor;
 	private final CurrentTrace currentTrace;
 	private final ObservableList<String> history;
 
@@ -72,10 +73,11 @@ public final class BConsoleView extends BorderPane {
 	private HelpButton helpButton;
 
 	@Inject
-	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, Config config) {
+	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, Config config, FxThreadExecutor fxExecutor) {
 		super();
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
+		this.fxExecutor = fxExecutor;
 		this.history = FXCollections.observableArrayList();
 
 		config.addListener(new ConfigListener() {
@@ -109,15 +111,15 @@ public final class BConsoleView extends BorderPane {
 			default -> throw new IllegalArgumentException("Unsupported language " + l);
 		})));
 		var prompt = this.languageDropdown.getSelectionModel().selectedItemProperty()
-				.map(l -> switch (l) {
-					case CLASSICAL_B -> "consoles.b.prompt.classicalB";
-					case EVENT_B -> "consoles.b.prompt.eventB";
-					case TLA -> "consoles.b.prompt.tla";
-					case CSP -> "consoles.b.prompt.csp";
-					case XTL -> "consoles.b.prompt.xtl";
-					default -> throw new IllegalArgumentException("Unsupported language " + l);
-				})
-				.orElse("consoles.b.prompt.classicalB");
+				             .map(l -> switch (l) {
+					             case CLASSICAL_B -> "consoles.b.prompt.classicalB";
+					             case EVENT_B -> "consoles.b.prompt.eventB";
+					             case TLA -> "consoles.b.prompt.tla";
+					             case CSP -> "consoles.b.prompt.csp";
+					             case XTL -> "consoles.b.prompt.xtl";
+					             default -> throw new IllegalArgumentException("Unsupported language " + l);
+				             })
+				             .orElse("consoles.b.prompt.classicalB");
 		this.promptLabel.textProperty().bind(this.i18n.translateBinding(prompt));
 		this.languageDropdown.getSelectionModel().selectedItemProperty()
 				.map(Language.CLASSICAL_B::equals)
@@ -242,16 +244,25 @@ public final class BConsoleView extends BorderPane {
 
 		this.history.add(0, input);
 
-		ConsoleExecResult result = this.consoleInput.getBInterpreter().exec(input);
-		if (result.getResultType() == ConsoleExecResultType.CLEAR) {
-			this.handleClear();
-			return;
-		}
+		this.consoleInput.setEditable(false);
+		this.consoleInput.getBInterpreter().exec(input)
+				.handleAsync((result, t) -> {
+					if (t != null) {
+						return null;
+					}
 
-		Collection<String> style = result.getResultType() == ConsoleExecResultType.ERROR ? Set.of("console", "error", "output") : Set.of("console", "output");
-		this.appendHistory(result.getResult(), style);
+					if (result.getResultType() == ConsoleExecResultType.CLEAR) {
+						this.handleClear();
+						return null;
+					}
 
-		this.consoleHistory.requestFollowCaret();
+					Collection<String> style = result.getResultType() == ConsoleExecResultType.ERROR ? Set.of("console", "error", "output") : Set.of("console", "output");
+					this.appendHistory(result.getResult(), style);
+
+					this.consoleHistory.requestFollowCaret();
+					return null;
+				}, this.fxExecutor)
+				.thenRunAsync(() -> this.consoleInput.setEditable(true), this.fxExecutor);
 	}
 
 	@FXML
