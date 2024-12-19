@@ -72,6 +72,9 @@ public final class BConsoleView extends BorderPane {
 	@FXML
 	private HelpButton helpButton;
 
+	private String savedText;
+	private int historyPos;
+
 	@Inject
 	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, Config config, FxThreadExecutor fxExecutor) {
 		super();
@@ -79,6 +82,9 @@ public final class BConsoleView extends BorderPane {
 		this.currentTrace = currentTrace;
 		this.fxExecutor = fxExecutor;
 		this.history = FXCollections.observableArrayList();
+
+		this.savedText = "";
+		this.historyPos = -1;
 
 		config.addListener(new ConfigListener() {
 			@Override
@@ -186,13 +192,26 @@ public final class BConsoleView extends BorderPane {
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), e -> this.consoleInput.insertText(this.consoleInput.getCaretPosition(), "\n")));
 		Nodes.addInputMap(this.consoleInput, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> this.trigger()));
 
-		// history
+		// history with arrow keys
+		Nodes.addInputMap(this.consoleInput, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.UP), () -> this.consoleInput.getCurrentParagraph() <= 0, e -> {
+			this.setHistoryPos(this.historyPos + 1);
+		}));
+		Nodes.addInputMap(this.consoleInput, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.DOWN), () -> this.consoleInput.getCurrentParagraph() >= this.consoleInput.getParagraphs().size() - 1, e -> {
+			this.setHistoryPos(this.historyPos - 1);
+		}));
+
+		// history dropdown
 		this.historyDropdown.promptTextProperty().bind(this.i18n.translateBinding("consoles.b.history"));
 		Bindings.bindContent(this.historyDropdown.getItems(), this.history);
-		this.historyDropdown.getSelectionModel().selectedItemProperty().subscribe(s -> {
-			if (s != null) {
+		this.historyDropdown.getSelectionModel().selectedIndexProperty().subscribe(selected -> {
+			if (selected == null) {
+				return;
+			}
+
+			int s = (int) selected;
+			if (s != -1) {
 				this.consoleInput.requestFocus();
-				this.consoleInput.replaceText(s);
+				this.setHistoryPos(s);
 				this.consoleInput.requestFollowCaret();
 				Platform.runLater(() -> {
 					this.historyDropdown.getSelectionModel().clearSelection();
@@ -226,6 +245,19 @@ public final class BConsoleView extends BorderPane {
 		this.consoleHistory.setContextMenu(contextMenu);
 	}
 
+	private void setHistoryPos(int newHistoryPos) {
+		if (this.historyPos == -1) {
+			this.savedText = this.consoleInput.getText();
+		}
+
+		this.historyPos = Math.max(-1, Math.min(this.history.size(), newHistoryPos));
+		if (this.historyPos == -1) {
+			this.consoleInput.replaceText(this.savedText);
+		} else {
+			this.consoleInput.replaceText(this.history.get(this.historyPos));
+		}
+	}
+
 	private void trigger() {
 		String input = this.consoleInput.getText();
 		this.consoleInput.clear();
@@ -242,6 +274,8 @@ public final class BConsoleView extends BorderPane {
 		this.consoleHistory.setStyleSpans(pos, styleSpans);
 		this.consoleHistory.append("\n", Set.of());
 
+		this.savedText = "";
+		this.historyPos = -1;
 		this.history.add(0, input);
 
 		this.consoleInput.setEditable(false);
@@ -267,6 +301,8 @@ public final class BConsoleView extends BorderPane {
 
 	@FXML
 	private void handleClear() {
+		this.savedText = "";
+		this.historyPos = -1;
 		this.consoleHistory.clear();
 		this.appendHistory(this.i18n.translate("consoles.b.header"), Set.of("console", "header"));
 	}
