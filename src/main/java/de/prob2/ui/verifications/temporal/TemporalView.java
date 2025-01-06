@@ -198,8 +198,13 @@ public final class TemporalView extends CheckingViewBase<TemporalFormulaItem> {
 	}
 	
 	@Override
-	protected String configurationForItem(final TemporalFormulaItem item) {
-		return item.getCode();
+	protected String configurationForItem(TemporalFormulaItem item) {
+		boolean inverted = !item.getExpectedResult();
+		if (inverted) {
+			return "¬ " + item.getCode();
+		} else {
+			return item.getCode();
+		}
 	}
 	
 	@Override
