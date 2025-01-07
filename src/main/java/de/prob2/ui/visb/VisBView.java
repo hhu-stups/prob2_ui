@@ -37,6 +37,7 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.plantuml.PlantUmlLocator;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -63,7 +64,6 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
@@ -153,6 +153,7 @@ public final class VisBView extends BorderPane {
 	private final DisablePropertyController disablePropertyController;
 	private final FileChooserManager fileChooserManager;
 	private final ExternalEditor externalEditor;
+	private final PlantUmlLocator plantUmlLocator;
 	private final VisBController visBController;
 
 	private final VisBConnector visBConnector;
@@ -238,7 +239,7 @@ public final class VisBView extends BorderPane {
 		FxThreadExecutor fxExecutor,
 		DisablePropertyController disablePropertyController,
 		FileChooserManager fileChooserManager,
-		ExternalEditor externalEditor,
+		ExternalEditor externalEditor, PlantUmlLocator plantUmlLocator,
 		VisBController visBController
 	) {
 		super();
@@ -252,6 +253,7 @@ public final class VisBView extends BorderPane {
 		this.disablePropertyController = disablePropertyController;
 		this.fileChooserManager = fileChooserManager;
 		this.externalEditor = externalEditor;
+		this.plantUmlLocator = plantUmlLocator;
 		this.visBController = visBController;
 
 		this.visBConnector = new VisBConnector();
@@ -863,12 +865,16 @@ public final class VisBView extends BorderPane {
 	}
 
 	void performHtmlExport(final boolean onlyCurrentState, final VisBExportOptions options) {
-		Trace trace = currentTrace.get();
+		Trace trace = this.currentTrace.get();
 		if (trace == null) {
 			return;
 		}
-		Path path = showHtmlExportFileChooser();
+		Path path = this.showHtmlExportFileChooser();
 		if (path == null) {
+			return;
+		}
+
+		if (options.isShowSequenceChart() && this.plantUmlLocator.findPlantUmlJar().isEmpty()) {
 			return;
 		}
 
@@ -881,6 +887,9 @@ public final class VisBView extends BorderPane {
 		}).handleAsync((res, ex) -> {
 			this.hideInProgress();
 			if (ex != null) {
+				if (options.isShowSequenceChart()) {
+					this.plantUmlLocator.reset(); // could be an error with the plantuml jar, so clear the cached file
+				}
 				this.stageManager.showUnhandledExceptionAlert(ex, this.getScene().getWindow());
 			}
 			return res;
@@ -903,5 +912,3 @@ public final class VisBView extends BorderPane {
 		dialog.showAndWait();
 	}
 }
-
-
