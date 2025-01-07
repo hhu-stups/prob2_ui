@@ -135,13 +135,13 @@ public final class VisBView extends BorderPane {
 			}
 		}
 	}
-	
+
 	private enum LoadingStatus {
 		NONE_LOADED,
 		LOADING,
 		LOADED,
 	}
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBView.class);
 	private final Injector injector;
 	private final I18n i18n;
@@ -542,7 +542,7 @@ public final class VisBView extends BorderPane {
 			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
 		} else if (!trace.getCurrentState().isInitialised()) {
 			this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
-			
+
 			if (trace.getCurrentState().getOutTransitions().size() == 1) {
 				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.deterministic"));
 				this.initButton.setVisible(true);
@@ -703,7 +703,7 @@ public final class VisBView extends BorderPane {
 	private void askLoadVisBFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
-		
+
 		fileChooser.getExtensionFilters().addAll(
 			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json", "def")
 		);
@@ -872,20 +872,19 @@ public final class VisBView extends BorderPane {
 			return;
 		}
 
-		Task<Void> task = new Task<>() {
-			@Override
-			protected Void call() {
-				trace.getStateSpace().execute(onlyCurrentState ?
-					new ExportVisBHtmlForStates(trace.getCurrentState(), options, path)
-						: new ExportVisBForHistoryCommand(trace, options, path));
-				return null;
-			}
-		};
-		task.setOnRunning(r -> showInProgress(i18n.translate("visb.inProgress.htmlExport")));
-		task.setOnSucceeded(s -> hideInProgress());
-		task.setOnFailed(f -> hideInProgress());
 		// makes UI responsive, but we can't do anything with the model during export anyway...
-		cliExecutor.execute(task);
+		this.cliExecutor.submit(() -> {
+			Platform.runLater(() -> this.showInProgress(this.i18n.translate("visb.inProgress.htmlExport")));
+			trace.getStateSpace().execute(onlyCurrentState
+					                              ? new ExportVisBHtmlForStates(trace.getCurrentState(), options, path)
+					                              : new ExportVisBForHistoryCommand(trace, options, path));
+		}).handleAsync((res, ex) -> {
+			this.hideInProgress();
+			if (ex != null) {
+				this.stageManager.showUnhandledExceptionAlert(ex, this.getScene().getWindow());
+			}
+			return res;
+		}, this.fxExecutor);
 	}
 
 	private Path showHtmlExportFileChooser() {
