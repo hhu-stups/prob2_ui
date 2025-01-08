@@ -68,7 +68,13 @@ import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -78,11 +84,11 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
-import netscape.javascript.JSException;
-import netscape.javascript.JSObject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import netscape.javascript.JSException;
+import netscape.javascript.JSObject;
 
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} class.
@@ -239,7 +245,8 @@ public final class VisBView extends BorderPane {
 		FxThreadExecutor fxExecutor,
 		DisablePropertyController disablePropertyController,
 		FileChooserManager fileChooserManager,
-		ExternalEditor externalEditor, PlantUmlLocator plantUmlLocator,
+		ExternalEditor externalEditor,
+		PlantUmlLocator plantUmlLocator,
 		VisBController visBController
 	) {
 		super();

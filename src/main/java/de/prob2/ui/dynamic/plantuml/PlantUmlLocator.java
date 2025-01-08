@@ -2,10 +2,10 @@ package de.prob2.ui.dynamic.plantuml;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.List;
 import java.util.stream.Stream;
 
 import com.google.inject.Inject;
@@ -13,13 +13,17 @@ import com.google.inject.Singleton;
 
 import de.prob.annotations.Home;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.menu.OpenFile;
 
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ProgressBar;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 /**
@@ -32,16 +36,18 @@ public final class PlantUmlLocator {
 	private final Path directory;
 	private final StageManager stageManager;
 	private final I18n i18n;
+	private final FxThreadExecutor fxExecutor;
 	private final OpenFile openFile;
 	private final HostServices hostServices;
 
 	private volatile Path cachedFile;
 
 	@Inject
-	private PlantUmlLocator(@Home Path probHome, StageManager stageManager, I18n i18n, OpenFile openFile, HostServices hostServices) {
+	private PlantUmlLocator(@Home Path probHome, StageManager stageManager, I18n i18n, FxThreadExecutor fxExecutor, OpenFile openFile, HostServices hostServices) {
 		this.directory = probHome.resolve("lib").toAbsolutePath().normalize();
 		this.stageManager = stageManager;
 		this.i18n = i18n;
+		this.fxExecutor = fxExecutor;
 		this.openFile = openFile;
 		this.hostServices = hostServices;
 	}
@@ -70,16 +76,11 @@ public final class PlantUmlLocator {
 
 	public Optional<Path> findPlantUmlJar() {
 		Path cachedFile = this.cachedFile;
-		if (cachedFile == null) {
+		if (cachedFile == null || !Files.isRegularFile(cachedFile)) {
 			synchronized (this) {
 				cachedFile = this.cachedFile;
-				if (cachedFile == null) {
-					cachedFile = this.findImpl();
-					if (cachedFile == null) {
-						Platform.runLater(this::showMissingPlantUmlDialog);
-					} else {
-						this.cachedFile = cachedFile;
-					}
+				if (cachedFile == null || !Files.isRegularFile(cachedFile)) {
+					this.cachedFile = cachedFile = this.findOrShowDialog();
 				}
 			}
 		}
@@ -93,9 +94,17 @@ public final class PlantUmlLocator {
 	 */
 	private CompletableFuture<Path> downloadPlantUmlJar() {
 		try {
+			Path dir = this.directory.getParent().toRealPath();
+			Path executable;
+			if (ProB2Module.IS_WINDOWS) {
+				executable = dir.resolve("probcli.exe");
+			} else {
+				executable = dir.resolve("probcli");
+			}
+
 			return new ProcessBuilder()
-					.directory(this.directory.getParent().toFile())
-		            .command("./probcli", "-install", "plantuml")
+					.directory(dir.toFile())
+					.command(executable.toString(), "-install", "plantuml")
 		            .inheritIO()
 		            .start()
 		            .onExit()
@@ -115,6 +124,14 @@ public final class PlantUmlLocator {
 		} catch (Exception e) {
 			throw new RuntimeException("could not start probcli process", e);
 		}
+	}
+
+	private Path findOrShowDialog() {
+		Path p = this.findImpl();
+		if (p == null) {
+			Platform.runLater(this::showMissingPlantUmlDialog);
+		}
+		return p;
 	}
 
 	private Path findImpl() {
@@ -155,15 +172,15 @@ public final class PlantUmlLocator {
 	private void showMissingPlantUmlDialog() {
 		var dir = this.getDirectory();
 		var url = "https://plantuml.com/download";
-		var download = new ButtonType(this.i18n.translate("dynamic.visualization.error.noPlantUml.button.download"));
-		var openDir = new ButtonType(this.i18n.translate("dynamic.visualization.error.noPlantUml.button.openDir"));
-		var openWebsite = new ButtonType(this.i18n.translate("dynamic.visualization.error.noPlantUml.button.openWebsite"));
+		var download = new ButtonType(this.i18n.translate("plantuml.error.noPlantUml.button.download"));
+		var openDir = new ButtonType(this.i18n.translate("plantuml.error.noPlantUml.button.openDir"));
+		var openWebsite = new ButtonType(this.i18n.translate("plantuml.error.noPlantUml.button.openWebsite"));
 
 		while (true) {
 			Alert alert = this.stageManager.makeAlert(
 					Alert.AlertType.ERROR,
-					"dynamic.visualization.error.noPlantUml.header",
-					"dynamic.visualization.error.noPlantUml.message",
+					"plantuml.error.noPlantUml.header",
+					"plantuml.error.noPlantUml.message",
 					dir
 			);
 			alert.getButtonTypes().addAll(download, openDir, openWebsite);
@@ -172,12 +189,29 @@ public final class PlantUmlLocator {
 
 			var result = alert.showAndWait().orElse(null);
 			if (result == download) {
-				// TODO: do not block the UI thread and show a spinner instead
-				try {
-					this.downloadPlantUmlJar().get();
-				} catch (Exception e) {
-					throw new RuntimeException("error while waiting for download", e);
-				}
+				Alert downloadInfo = this.stageManager.makeAlert(
+						Alert.AlertType.INFORMATION,
+						"plantuml.downloadProgress.header",
+						null
+				);
+				downloadInfo.initOwner(current.getOwner());
+				// indeterminate progressbar, it will just move to indicate work but no actual progress
+				downloadInfo.getDialogPane().setContent(new VBox(10, new ProgressBar()));
+				downloadInfo.show();
+				this.downloadPlantUmlJar().handleAsync((res, ex) -> {
+					downloadInfo.hide();
+					Alert a;
+					if (ex != null) {
+						a = this.stageManager.makeExceptionAlert(ex, "plantuml.downloadProgress.error");
+						a.initOwner(current.getOwner());
+						a.showAndWait();
+					} else if (this.findPlantUmlJar().isPresent()) {
+						a = this.stageManager.makeAlert(Alert.AlertType.INFORMATION, "plantuml.downloadProgress.success", null);
+						a.initOwner(current.getOwner());
+						a.show();
+					}
+					return res;
+				}, this.fxExecutor);
 				break; // we do not need to show the dialog again - assume correct download
 			} else if (result == openDir) {
 				this.openFile.open(dir);
