@@ -12,8 +12,8 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.annotations.Home;
+import de.prob.cli.OsSpecificInfo;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.menu.OpenFile;
@@ -39,17 +39,19 @@ public final class PlantUmlLocator {
 	private final FxThreadExecutor fxExecutor;
 	private final OpenFile openFile;
 	private final HostServices hostServices;
+	private final OsSpecificInfo osInfo;
 
 	private volatile Path cachedFile;
 
 	@Inject
-	private PlantUmlLocator(@Home Path probHome, StageManager stageManager, I18n i18n, FxThreadExecutor fxExecutor, OpenFile openFile, HostServices hostServices) {
+	private PlantUmlLocator(@Home Path probHome, StageManager stageManager, I18n i18n, FxThreadExecutor fxExecutor, OpenFile openFile, HostServices hostServices, OsSpecificInfo osInfo) {
 		this.directory = probHome.resolve("lib").toAbsolutePath().normalize();
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.fxExecutor = fxExecutor;
 		this.openFile = openFile;
 		this.hostServices = hostServices;
+		this.osInfo = osInfo;
 	}
 
 	private static boolean isValid(Path p) {
@@ -94,18 +96,14 @@ public final class PlantUmlLocator {
 	 */
 	private CompletableFuture<Path> downloadPlantUmlJar() {
 		try {
-			Path dir = this.directory.getParent().toRealPath();
-			Path executable;
-			if (ProB2Module.IS_WINDOWS) {
-				executable = dir.resolve("probcli.exe");
-			} else {
-				executable = dir.resolve("probcli");
-			}
-
-			return new ProcessBuilder()
-					.directory(dir.toFile())
+			Path probHome = this.directory.getParent().toRealPath();
+			Path executable = probHome.resolve(this.osInfo.getCliName());
+			var b = new ProcessBuilder()
 					.command(executable.toString(), "-install", "plantuml")
-		            .inheritIO()
+					.directory(probHome.toFile())
+					.inheritIO();
+			b.environment().put("PROB_HOME", probHome.toString());
+			return b
 		            .start()
 		            .onExit()
 		            .orTimeout(10, TimeUnit.MINUTES)
