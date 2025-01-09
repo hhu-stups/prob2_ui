@@ -30,20 +30,11 @@ stages:
     # otherwise texlive-latex-recommended would be enough.
     - apt-get install --assume-yes git pandoc texlive-latex-extra texlive-lang-german
 
-test:jdk-17-linux:
-  extends: .test-linux
-  image: eclipse-temurin:17-jammy
-  before_script:
-    - *default_before_script_linux
-    - apt-get install --assume-yes build-essential fakeroot
-  script:
-    - ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar jpackage
-
 test:jdk-21-linux:
   extends: .test-linux
   image: eclipse-temurin:21-jammy
   script:
-    - ./gradlew ${GRADLE_OPTIONS} check
+    - ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar jpackage
 
 test:jdk-21-macos-x86_64:
   extends: .test-common

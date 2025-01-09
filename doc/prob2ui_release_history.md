@@ -11,6 +11,10 @@ Downloads of the current release and snapshot development builds can be found on
 * Added search to editor
 * Added language selection dropdown to interactive console
 
+**Note:** This is the last release to support Java 17. The next release will require Java 21 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
+
+**Note:** The multi-platform jar might not work on specific macOS architectures anymore - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
+
 ## Version 1.2.1 (2023-08-15)
 
 * Updated the ProB core to version 1.12.2 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)

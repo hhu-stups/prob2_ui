@@ -50,7 +50,7 @@ repositories {
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_17
+	sourceCompatibility = JavaVersion.VERSION_21
 }
 
 // Module export/open declarations for Java 9+
@@ -157,7 +157,7 @@ dependencies {
 }
 
 final osArch = System.getProperty("os.arch")
-final javafxVersion = "22.0.2"
+final javafxVersion = "23.0.1"
 
 final javafxModules = [
 	"javafx.base",
