@@ -374,7 +374,7 @@ public final class VisBView extends BorderPane {
 			if (to != null && (from == null || from.getStateSpace() != to.getStateSpace())) {
 				cbVisualisations.getSelectionModel().selectFirst();
 			}
-			this.updateView(loadingStatus.get(), currentTrace.get());
+			this.updateView(loadingStatus.get(), to);
 		});
 
 		visBController.executingEventProperty().addListener(o -> this.updateInProgress());
@@ -549,18 +549,20 @@ public final class VisBView extends BorderPane {
 			this.loadingProgress.setVisible(true);
 		} else if (status == VisBView.LoadingStatus.NONE_LOADED) {
 			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
-		} else if (!trace.getCurrentState().isInitialised()) {
-			this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
-
-			if (trace.getCurrentState().getOutTransitions().size() == 1) {
-				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.deterministic"));
-				this.initButton.setVisible(true);
-			} else {
-				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.nonDeterministic"));
-			}
 		} else {
 			assert status == VisBView.LoadingStatus.LOADED;
-			this.updateVisualisation(trace.getCurrentState());
+			if (!trace.getCurrentState().isInitialised()) {
+				this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
+
+				if (trace.getCurrentState().getOutTransitions().size() == 1) {
+					this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.deterministic"));
+					this.initButton.setVisible(true);
+				} else {
+					this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.nonDeterministic"));
+				}
+			} else {
+				this.updateVisualisation(trace.getCurrentState());
+			}
 		}
 	}
 
@@ -593,7 +595,8 @@ public final class VisBView extends BorderPane {
 			}
 
 			LOGGER.debug("VisB visualisation reloaded");
-		}, fxExecutor).whenCompleteAsync((res, exc) -> updatingVisualisation.set(false), fxExecutor);
+			updatingVisualisation.set(false);
+		}, fxExecutor);
 	}
 
 	/**
