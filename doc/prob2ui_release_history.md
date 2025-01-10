@@ -10,6 +10,9 @@ Downloads of the current release and snapshot development builds can be found on
 * Improved support for rule validations with rules machines (.rmch)
 * Added search to editor
 * Added language selection dropdown to interactive console
+* Removed support for Java versions older than Java 21
+
+**Note:** The multi-platform jar might not work on all macOS processor architectures - consider using the platform-specific binaries, which are available for both x86_64 and arm64.
 
 ## Version 1.2.1 (2023-08-15)
 
@@ -29,9 +32,9 @@ Downloads of the current release and snapshot development builds can be found on
 * Improved handling of invalid values for ProB preferences
 * Improved feedback for internal errors in VisB
 
-**Note:** This is the last release to support Java 8 and 11. The next release will require Java 21 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
+**Note:** This is the last release to support Java 8, 11, and 17. The next release will require Java 21 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
 
-**Note:** The multi-platform jar might not work on specific macOS architectures anymore - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
+**Note:** The multi-platform jar might not work on all macOS processor architectures - consider using the platform-specific binaries, which are available for both x86_64 and arm64.
 
 ### Downloads for version 1.2.1
 
