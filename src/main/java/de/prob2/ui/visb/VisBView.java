@@ -372,6 +372,9 @@ public final class VisBView extends BorderPane {
 		this.loadingStatus.subscribe(to -> this.updateView(to, currentTrace.get()));
 		this.currentTrace.subscribe((from, to) -> {
 			if (to != null && (from == null || from.getStateSpace() != to.getStateSpace())) {
+				// clear selection first to force change listener to run
+				cbVisualisations.getSelectionModel().clearSelection();
+				// always load first because first=default
 				cbVisualisations.getSelectionModel().selectFirst();
 			}
 			this.updateView(loadingStatus.get(), to);
