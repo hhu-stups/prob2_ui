@@ -210,7 +210,7 @@ public class FileMenu extends Menu {
 			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.classicalB", "mch"),
 			fileChooserManager.getAllExtensionsFilter()
 		);
-		chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getCurrentMachine().getLocation()) + "_flat.mch");
+		chooser.setInitialFileName(MoreFiles.getNameWithoutExtension(currentProject.getCurrentMachine().getLocation()) + "_flat");
 		final Path path = fileChooserManager.showSaveFileChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
 		if (path == null) {
 			return;
@@ -218,9 +218,11 @@ public class FileMenu extends Menu {
 
 		final GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
 		if (event.getSource() == exportAsClassicalBAsciiItem) {
-			cmd.setTranslationMode(FormulaTranslationMode.ASCII);
+			cmd.setTranslationMode(FormulaTranslationMode.ATELIERB);
+			// the ASCII mode contains language-specific constructs (such as TLA+ <<tuples>>),
+			// where ATELIERB gives a true classical B machine
 		} else if (event.getSource() == exportAsClassicalBUnicodeItem) {
-			cmd.setTranslationMode(FormulaTranslationMode.UNICODE);
+			cmd.setTranslationMode(FormulaTranslationMode.UNICODE); // FIXME: very likely produces an unparsable output for Event-B/TLA+
 		} else {
 			throw new AssertionError();
 		}
