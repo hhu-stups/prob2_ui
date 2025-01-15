@@ -8,11 +8,12 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.operations.OperationItem;
 
-public class HistoryItem {
+public final class HistoryItem {
+
 	private final OperationItem operation;
 	private final int index;
-	
-	public HistoryItem(final OperationItem operation, final int index) {
+
+	private HistoryItem(final OperationItem operation, final int index) {
 		this.operation = operation;
 		this.index = index;
 	}
