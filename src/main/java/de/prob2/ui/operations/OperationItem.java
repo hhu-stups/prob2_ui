@@ -1,6 +1,7 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalExpandMode;
 import de.prob.animator.domainobjects.EvalOptions;
 import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.LoadedMachine;
@@ -161,7 +163,7 @@ public class OperationItem {
 						variableEvalElements = Collections.emptyList();
 					} else {
 						variableEvalElements = opInfo.getNonDetWrittenVariables().stream()
-							.map(var -> stateSpace.getModel().parseFormula(var))
+							.map(var -> stateSpace.getModel().formulaFromIdentifier(Arrays.asList(var.split("\\.")), FormulaExpand.EXPAND))
 							.collect(Collectors.toList());
 					}
 			}
