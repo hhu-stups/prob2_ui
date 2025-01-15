@@ -160,7 +160,7 @@ public final class ExecuteByPredicateStage extends Stage {
 			transitions = this.currentTrace.getStateSpace().transitionFromPredicate(
 					this.currentTrace.getCurrentState(),
 					this.getItem().getName(),
-					this.predicateBuilderView.getPredicate(),
+					this.predicateBuilderView.getParsedPredicate(),
 					1
 			);
 		} catch (ExecuteOperationException e) {
