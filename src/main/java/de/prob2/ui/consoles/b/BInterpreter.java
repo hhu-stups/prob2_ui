@@ -15,9 +15,7 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
-import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
-import de.prob.model.representation.TLAModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.consoles.AsyncExecutable;
 import de.prob2.ui.consoles.ConsoleExecResult;
@@ -97,10 +95,8 @@ public class BInterpreter implements AsyncExecutable {
 		IEvalElement formula;
 		try {
 			AbstractModel model = trace.getModel();
-			if (model instanceof TLAModel tlaModel && this.bMode) {
-				formula = tlaModel.parseFormulaAsClassicalB(source, FormulaExpand.EXPAND);
-			} else if (model instanceof EventBModel eventBModel && this.bMode) {
-				formula = eventBModel.parseFormulaAsClassicalB(source, FormulaExpand.EXPAND);
+			if (this.bMode) {
+				formula = model.parseFormulaAsClassicalB(source, FormulaExpand.EXPAND);
 			} else {
 				formula = model.parseFormula(source, FormulaExpand.EXPAND);
 			}
