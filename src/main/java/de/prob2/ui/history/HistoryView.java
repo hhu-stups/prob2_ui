@@ -18,24 +18,27 @@ import de.prob2.ui.operations.OperationDetailsStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
-import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.AccessibleAttribute;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.BorderPane;
 
 @FXMLInjected
@@ -144,18 +147,33 @@ public final class HistoryView extends BorderPane {
 			}
 		});
 
+		// disable horizontal scrollbar
+		// needs a hack because of a missing feature: https://bugs.openjdk.org/browse/JDK-8090721
+		historyTableView.getItems().addListener((ListChangeListener<? super HistoryItem>) c -> {
+			if (historyTableView.queryAccessibleAttribute(AccessibleAttribute.HORIZONTAL_SCROLLBAR) instanceof ScrollBar hsb) {
+				hsb.setPrefHeight(0);
+				hsb.setMaxHeight(0);
+				hsb.setMouseTransparent(true);
+				hsb.setVisible(false);
+			}
+		});
+		historyTableView.addEventFilter(ScrollEvent.ANY, event -> {
+			if (event.getDeltaX() != 0) {
+				event.consume();
+			}
+		});
+
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			if (to != null) {
 				var newItems = HistoryItem.itemsForTrace(to);
 				var current = newItems.get(to.getCurrent().getIndex() + 1);
+				var currentIsLast = to.getCurrent().getIndex() + 1 == newItems.size() - 1;
 				historyTableView.getItems().setAll(newItems);
 				historyTableView.sort();
 				historyTableView.getSelectionModel().focus(lastSelectedIndex);
-
-				historyTableView.scrollTo(current);
-				// on my windows machine the tableview becomes blank when the scroll bar first appears scrollTo is called
-				// fix that by a delayed refresh
-				Platform.runLater(() -> historyTableView.refresh());
+				if (currentIsLast) {
+					historyTableView.scrollTo(current);
+				}
 			} else {
 				historyTableView.getItems().clear();
 			}
@@ -174,8 +192,7 @@ public final class HistoryView extends BorderPane {
 	}
 
 	public ObservableIntegerValue getObservableHistorySize() {
-		return Bindings.createIntegerBinding(() -> Math.max(this.historyTableView.itemsProperty().get().size() - 1, 0),
-				historyTableView.itemsProperty().get());
+		return Bindings.createIntegerBinding(() -> Math.max(this.historyTableView.getItems().size() - 1, 0), historyTableView.getItems());
 	}
 
 	@FXML
