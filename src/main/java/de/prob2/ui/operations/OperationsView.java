@@ -367,7 +367,7 @@ public final class OperationsView extends BorderPane {
 				// TODO This might be better solved by moving the state exploring out of CurrentTrace.
 				cliExecutor.execute(() -> {
 					Trace forward = trace.forward();
-					if (forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
+					if (trace.canGoForward() && item.getTransition().equals(forward.getCurrentTransition())) {
 						currentTrace.set(forward);
 						uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
 					} else {
