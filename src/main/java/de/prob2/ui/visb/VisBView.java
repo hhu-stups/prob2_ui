@@ -37,6 +37,7 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dynamic.plantuml.PlantUmlLocator;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -45,25 +46,35 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.internal.executor.FxThreadExecutor;
+import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.visb.help.UserManualStage;
 
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
+import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
-import javafx.concurrent.Task;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Worker;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.SnapshotParameters;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.image.WritableImage;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
@@ -71,12 +82,13 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
-
-import netscape.javascript.JSException;
-import netscape.javascript.JSObject;
+import javafx.util.StringConverter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import netscape.javascript.JSException;
+import netscape.javascript.JSObject;
 
 /**
  * This class holds the main user interface and interacts with the {@link VisBController} class.
@@ -129,13 +141,13 @@ public final class VisBView extends BorderPane {
 			}
 		}
 	}
-	
+
 	private enum LoadingStatus {
 		NONE_LOADED,
 		LOADING,
 		LOADED,
 	}
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(VisBView.class);
 	private final Injector injector;
 	private final I18n i18n;
@@ -146,6 +158,8 @@ public final class VisBView extends BorderPane {
 	private final FxThreadExecutor fxExecutor;
 	private final DisablePropertyController disablePropertyController;
 	private final FileChooserManager fileChooserManager;
+	private final ExternalEditor externalEditor;
+	private final PlantUmlLocator plantUmlLocator;
 	private final VisBController visBController;
 
 	private final VisBConnector visBConnector;
@@ -158,13 +172,17 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private Button reloadVisualisationButton;
 	@FXML
-	private MenuItem loadDefaultItem;
+	private ComboBox<Path> cbVisualisations;
 	@FXML
 	private MenuItem loadFromDefinitionsItem;
 	@FXML
-	private MenuItem setCurrentAsDefaultItem;
+	private MenuItem setSelectedAsDefaultItem;
 	@FXML
-	private MenuItem unsetDefaultItem;
+	private MenuItem deleteSelectedItem;
+	@FXML
+	private MenuItem saveCurrentItem;
+	@FXML
+	private MenuItem editCurrentExternalItem;
 	@FXML
 	private MenuButton saveTraceButton;
 	@FXML
@@ -196,6 +214,8 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private Button zoomOutButton;
 	@FXML
+	private Label lblActualVisualisationName;
+	@FXML
 	private VBox placeholder;
 	@FXML
 	private ProgressIndicator loadingProgress;
@@ -225,6 +245,8 @@ public final class VisBView extends BorderPane {
 		FxThreadExecutor fxExecutor,
 		DisablePropertyController disablePropertyController,
 		FileChooserManager fileChooserManager,
+		ExternalEditor externalEditor,
+		PlantUmlLocator plantUmlLocator,
 		VisBController visBController
 	) {
 		super();
@@ -237,6 +259,8 @@ public final class VisBView extends BorderPane {
 		this.fxExecutor = fxExecutor;
 		this.disablePropertyController = disablePropertyController;
 		this.fileChooserManager = fileChooserManager;
+		this.externalEditor = externalEditor;
+		this.plantUmlLocator = plantUmlLocator;
 		this.visBController = visBController;
 
 		this.visBConnector = new VisBConnector();
@@ -255,56 +279,106 @@ public final class VisBView extends BorderPane {
 		this.loadVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		this.saveTraceButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
-		ChangeListener<? super Machine> machineListener = (observable, from, to) -> {
-			loadDefaultItem.disableProperty().unbind();
-			loadFromDefinitionsItem.disableProperty().unbind();
-			setCurrentAsDefaultItem.disableProperty().unbind();
-			unsetDefaultItem.disableProperty().unbind();
-			if (to == null) {
-				loadDefaultItem.setDisable(true);
-				loadFromDefinitionsItem.setDisable(true);
-				setCurrentAsDefaultItem.setDisable(true);
-				unsetDefaultItem.setDisable(true);
-			} else {
-				loadDefaultItem.disableProperty().bind(to.visBVisualizationProperty().isNull()
-					.or(visBController.relativeVisBPathProperty().isEqualTo(to.visBVisualizationProperty())));
-				loadFromDefinitionsItem.disableProperty().bind(visBController.relativeVisBPathProperty().isEqualTo(VisBController.NO_PATH));
-				setCurrentAsDefaultItem.disableProperty().bind(visBController.relativeVisBPathProperty().isNull()
-					.or(visBController.relativeVisBPathProperty().isEqualTo(to.visBVisualizationProperty())));
-				unsetDefaultItem.disableProperty().bind(to.visBVisualizationProperty().isNull());
-			}
-		};
-
-		ChangeListener<? super VisBVisualisation> visBListener = (o, from, to) -> {
-			loadingStatus.set(to == null ? VisBView.LoadingStatus.NONE_LOADED : VisBView.LoadingStatus.LOADING);
-			visBController.getAttributeValues().clear();
-			this.updateView(loadingStatus.get(), currentTrace.get());
-
-			if (to != null) {
-				this.loadVisualisationIntoWebView(to);
-			}
-		};
-
-		ChangeListener<Trace> traceListener = (o, from, to) -> {
-			if (from == null || to == null || !from.getStateSpace().equals(to.getStateSpace())) {
-				visBController.closeVisualisation();
-				if (to != null) {
-					loadVisBFileFromMachine(currentProject.getCurrentMachine(), to.getStateSpace());
+		this.cbVisualisations.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(Path path) {
+				if (path == null) {
+					return "";
+				} else if (VisBController.NO_PATH.equals(path)) {
+					return i18n.translate("visb.visualisationDropdown.fromDefinitions");
+				} else {
+					return path.toString();
 				}
 			}
 
+			@Override
+			public Path fromString(String string) {
+				throw new AssertionError("Should never be called");
+			}
+		});
+		this.cbVisualisations.getSelectionModel().selectedItemProperty().subscribe(to -> {
+			this.lblActualVisualisationName.setText("");
+			if (to == null) {
+				this.loadingStatus.setValue(LoadingStatus.NONE_LOADED);
+				this.visBController.closeVisualisation();
+			} else if (VisBController.NO_PATH.equals(to)) {
+				this.loadingStatus.set(VisBView.LoadingStatus.LOADING);
+				try {
+					cliExecutor.submit(() -> getPathFromDefinitions(this.currentTrace.getStateSpace())).thenComposeAsync(path -> {
+						if (path == null) {
+							loadingStatus.set(VisBView.LoadingStatus.NONE_LOADED);
+							return CompletableFuture.completedFuture(null);
+						} else {
+							Path relative = VisBController.relativizeVisBPath(this.currentProject.getLocation(), path);
+							this.lblActualVisualisationName.setText(relative.toString());
+							return visBController.loadFromAbsolutePath(path);
+						}
+					}, fxExecutor).exceptionally(exc -> {
+						Platform.runLater(() -> this.showVisualisationLoadError(exc));
+						return null;
+					});
+				} catch (RuntimeException exc) {
+					this.showVisualisationLoadError(exc);
+				}
+			} else {
+				this.loadingStatus.set(VisBView.LoadingStatus.LOADING);
+				try {
+					this.visBController.loadFromRelativePath(to).exceptionally(exc -> {
+						Platform.runLater(() -> this.showVisualisationLoadError(exc));
+						return null;
+					});
+				} catch (RuntimeException exc) {
+					this.showVisualisationLoadError(exc);
+				}
+			}
+		});
+
+		this.currentProject.currentMachineProperty().subscribe(to -> {
+			loadFromDefinitionsItem.disableProperty().unbind();
+			setSelectedAsDefaultItem.disableProperty().unbind();
+			deleteSelectedItem.disableProperty().unbind();
+			saveCurrentItem.disableProperty().unbind();
+			editCurrentExternalItem.disableProperty().unbind();
+			cbVisualisations.itemsProperty().unbind();
+			cbVisualisations.getSelectionModel().clearSelection();
+			if (to == null) {
+				loadFromDefinitionsItem.setDisable(true);
+				setSelectedAsDefaultItem.setDisable(true);
+				deleteSelectedItem.setDisable(true);
+				saveCurrentItem.setDisable(true);
+				editCurrentExternalItem.setDisable(true);
+				cbVisualisations.setItems(FXCollections.observableArrayList());
+			} else {
+				ObjectBinding<Path> defaultVis = Bindings.valueAt(to.getVisBVisualisations(), 0);
+				ReadOnlyObjectProperty<Path> currentVis = visBController.relativeVisBPathProperty();
+				ReadOnlyObjectProperty<Path> selectedVis = cbVisualisations.getSelectionModel().selectedItemProperty();
+				loadFromDefinitionsItem.disableProperty().bind(selectedVis.isEqualTo(VisBController.NO_PATH));
+				setSelectedAsDefaultItem.disableProperty().bind(selectedVis.isNull().or(selectedVis.isEqualTo(defaultVis)));
+				deleteSelectedItem.disableProperty().bind(selectedVis.isNull());
+				saveCurrentItem.disableProperty().bind(currentVis.isNull().or(currentVis.isEqualTo(selectedVis)));
+				editCurrentExternalItem.disableProperty().bind(currentVis.isNull().or(currentVis.isEqualTo(VisBController.NO_PATH)));
+				cbVisualisations.itemsProperty().bind(to.getVisBVisualisations());
+			}
+		});
+
+		this.visBController.visBVisualisationProperty().subscribe(to-> {
+			loadingStatus.set(to == null ? VisBView.LoadingStatus.NONE_LOADED : VisBView.LoadingStatus.LOADING);
+			visBController.getAttributeValues().clear();
+			if (to != null) {
+				this.loadVisualisationIntoWebView(to);
+			}
+		});
+
+		this.loadingStatus.subscribe(to -> this.updateView(to, currentTrace.get()));
+		this.currentTrace.subscribe((from, to) -> {
+			if (to != null && (from == null || from.getStateSpace() != to.getStateSpace())) {
+				// clear selection first to force change listener to run
+				cbVisualisations.getSelectionModel().clearSelection();
+				// always load first because first=default
+				cbVisualisations.getSelectionModel().selectFirst();
+			}
 			this.updateView(loadingStatus.get(), to);
-		};
-
-		// Load VisB file from machine, when window is opened and set listener on the current machine
-		this.currentProject.currentMachineProperty().addListener(machineListener);
-		this.visBController.visBVisualisationProperty().addListener(visBListener);
-		this.currentTrace.addListener(traceListener);
-		this.loadingStatus.addListener((o, from, to) -> this.updateView(to, currentTrace.get()));
-
-		machineListener.changed(null, null, currentProject.getCurrentMachine());
-		visBListener.changed(null, null, visBController.getVisBVisualisation());
-		traceListener.changed(null, null, currentTrace.get());
+		});
 
 		visBController.executingEventProperty().addListener(o -> this.updateInProgress());
 		updatingVisualisation.addListener(o -> this.updateInProgress());
@@ -361,52 +435,17 @@ public final class VisBView extends BorderPane {
 		}
 	}
 
-	private void loadFromDefinitions(StateSpace stateSpace) {
-		loadingStatus.set(VisBView.LoadingStatus.LOADING);
-		cliExecutor.submit(() -> getPathFromDefinitions(stateSpace)).thenComposeAsync(path -> {
-			if (path == null) {
-				loadingStatus.set(VisBView.LoadingStatus.NONE_LOADED);
-				return CompletableFuture.completedFuture(null);
-			} else {
-				return visBController.loadFromAbsolutePath(path);
-			}
-		}, fxExecutor).exceptionally(exc -> {
-			Platform.runLater(() -> this.showVisualisationLoadError(exc));
-			return null;
-		});
+	public void addVisBVisualisationFromAbsolutePath(Path absolutePath) {
+		Path relativePath = VisBController.relativizeVisBPath(this.currentProject.getLocation(), absolutePath);
+		this.addVisBVisualisationFromRelativePath(relativePath);
 	}
 
-	public void loadFromAbsolutePath(Path path) {
-		loadingStatus.set(VisBView.LoadingStatus.LOADING);
-		try {
-			visBController.loadFromAbsolutePath(path).exceptionally(exc -> {
-				Platform.runLater(() -> this.showVisualisationLoadError(exc));
-				return null;
-			});
-		} catch (RuntimeException exc) {
-			this.showVisualisationLoadError(exc);
+	public void addVisBVisualisationFromRelativePath(Path relativePath) {
+		ObservableList<Path> visBVisualisations = this.currentProject.getCurrentMachine().getVisBVisualisations();
+		if (!visBVisualisations.contains(relativePath)) {
+			visBVisualisations.add(relativePath);
 		}
-	}
-
-	public void loadFromRelativePath(Path path) {
-		loadingStatus.set(VisBView.LoadingStatus.LOADING);
-		try {
-			visBController.loadFromRelativePath(path).exceptionally(exc -> {
-				Platform.runLater(() -> this.showVisualisationLoadError(exc));
-				return null;
-			});
-		} catch (RuntimeException exc) {
-			this.showVisualisationLoadError(exc);
-		}
-	}
-
-	public void loadVisBFileFromMachine(final Machine machine, final StateSpace stateSpace) {
-		Path visBVisualisation = machine.getVisBVisualisation();
-		if (visBVisualisation != null) {
-			this.loadFromRelativePath(visBVisualisation);
-		} else {
-			this.loadFromDefinitions(stateSpace);
-		}
+		this.cbVisualisations.getSelectionModel().select(relativePath);
 	}
 
 	/**
@@ -513,18 +552,20 @@ public final class VisBView extends BorderPane {
 			this.loadingProgress.setVisible(true);
 		} else if (status == VisBView.LoadingStatus.NONE_LOADED) {
 			this.showPlaceholder(i18n.translate("visb.placeholder.noVisualisation"));
-		} else if (!trace.getCurrentState().isInitialised()) {
-			this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
-			
-			if (trace.getCurrentState().getOutTransitions().size() == 1) {
-				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.deterministic"));
-				this.initButton.setVisible(true);
-			} else {
-				this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.nonDeterministic"));
-			}
 		} else {
 			assert status == VisBView.LoadingStatus.LOADED;
-			this.updateVisualisation(trace.getCurrentState());
+			if (!trace.getCurrentState().isInitialised()) {
+				this.initButton.setText(i18n.translate(trace.getCurrentState().isConstantsSetUp() ? "visb.placeholder.button.initialise" : "visb.placeholder.button.setupConstants"));
+
+				if (trace.getCurrentState().getOutTransitions().size() == 1) {
+					this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.deterministic"));
+					this.initButton.setVisible(true);
+				} else {
+					this.showPlaceholder(i18n.translate("visb.placeholder.notInitialised.nonDeterministic"));
+				}
+			} else {
+				this.updateVisualisation(trace.getCurrentState());
+			}
 		}
 	}
 
@@ -557,7 +598,8 @@ public final class VisBView extends BorderPane {
 			}
 
 			LOGGER.debug("VisB visualisation reloaded");
-		}, fxExecutor).whenCompleteAsync((res, exc) -> updatingVisualisation.set(false), fxExecutor);
+			updatingVisualisation.set(false);
+		}, fxExecutor);
 	}
 
 	/**
@@ -676,12 +718,13 @@ public final class VisBView extends BorderPane {
 	private void askLoadVisBFile() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.title"));
+
 		fileChooser.getExtensionFilters().addAll(
-			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json")
+			fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.visBVisualisation", "json", "def")
 		);
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
-			this.loadFromAbsolutePath(path);
+			this.addVisBVisualisationFromAbsolutePath(path);
 		}
 	}
 
@@ -757,11 +800,6 @@ public final class VisBView extends BorderPane {
 	}
 
 	@FXML
-	public void closeVisualisation() {
-		visBController.closeVisualisation();
-	}
-
-	@FXML
 	public void zoomIn() {
 		webView.setZoom(webView.getZoom()*1.2);
 	}
@@ -791,49 +829,84 @@ public final class VisBView extends BorderPane {
 	}
 
 	@FXML
-	private void loadDefault() {
-		this.loadVisBFileFromMachine(currentProject.getCurrentMachine(), currentTrace.getStateSpace());
-	}
-
-	@FXML
 	private void loadFromDefinitions() {
-		this.loadFromDefinitions(currentTrace.getStateSpace());
+		ObservableList<Path> visBVisualisations = this.currentProject.getCurrentMachine().getVisBVisualisations();
+		if (!visBVisualisations.contains(VisBController.NO_PATH)) {
+			visBVisualisations.add(VisBController.NO_PATH);
+		}
+		this.cbVisualisations.getSelectionModel().select(VisBController.NO_PATH);
 	}
 
 	@FXML
-	private void setCurrentAsDefault() {
-		currentProject.getCurrentMachine().setVisBVisualisation(visBController.getRelativeVisBPath());
+	private void setSelectedAsDefault() {
+		Path selected = this.cbVisualisations.getSelectionModel().getSelectedItem();
+		ObservableList<Path> visBVisualisations = this.currentProject.getCurrentMachine().getVisBVisualisations();
+		visBVisualisations.remove(selected);
+		visBVisualisations.add(0, selected);
 	}
 
 	@FXML
-	private void unsetDefault() {
-		currentProject.getCurrentMachine().setVisBVisualisation(null);
+	private void deleteSelected() {
+		Path selected = this.cbVisualisations.getSelectionModel().getSelectedItem();
+		ObservableList<Path> visBVisualisations = this.currentProject.getCurrentMachine().getVisBVisualisations();
+		visBVisualisations.remove(selected);
+		this.cbVisualisations.getSelectionModel().clearSelection();
+	}
+
+	@FXML
+	private void saveCurrent() {
+		Path current = this.visBController.getRelativeVisBPath();
+		if (current == null || VisBController.NO_PATH.equals(current)) {
+			return;
+		}
+
+		ObservableList<Path> visBVisualisations = this.currentProject.getCurrentMachine().getVisBVisualisations();
+		if (!visBVisualisations.contains(current)) {
+			visBVisualisations.add(current);
+		}
+		this.cbVisualisations.getSelectionModel().select(current);
+	}
+
+	@FXML
+	private void editCurrentExternal() {
+		Path current = this.visBController.getAbsoluteVisBPath();
+		if (current == null || VisBController.NO_PATH.equals(current)) {
+			return;
+		}
+
+		this.externalEditor.open(current);
 	}
 
 	void performHtmlExport(final boolean onlyCurrentState, final VisBExportOptions options) {
-		Trace trace = currentTrace.get();
+		Trace trace = this.currentTrace.get();
 		if (trace == null) {
 			return;
 		}
-		Path path = showHtmlExportFileChooser();
+		Path path = this.showHtmlExportFileChooser();
 		if (path == null) {
 			return;
 		}
 
-		Task<Void> task = new Task<>() {
-			@Override
-			protected Void call() {
-				trace.getStateSpace().execute(onlyCurrentState ?
-					new ExportVisBHtmlForStates(trace.getCurrentState(), options, path)
-						: new ExportVisBForHistoryCommand(trace, options, path));
-				return null;
-			}
-		};
-		task.setOnRunning(r -> showInProgress(i18n.translate("visb.inProgress.htmlExport")));
-		task.setOnSucceeded(s -> hideInProgress());
-		task.setOnFailed(f -> hideInProgress());
+		if (options.isShowSequenceChart() && this.plantUmlLocator.findPlantUmlJar().isEmpty()) {
+			return;
+		}
+
 		// makes UI responsive, but we can't do anything with the model during export anyway...
-		cliExecutor.execute(task);
+		this.cliExecutor.submit(() -> {
+			Platform.runLater(() -> this.showInProgress(this.i18n.translate("visb.inProgress.htmlExport")));
+			trace.getStateSpace().execute(onlyCurrentState
+					                              ? new ExportVisBHtmlForStates(trace.getCurrentState(), options, path)
+					                              : new ExportVisBForHistoryCommand(trace, options, path));
+		}).handleAsync((res, ex) -> {
+			this.hideInProgress();
+			if (ex != null) {
+				if (options.isShowSequenceChart()) {
+					this.plantUmlLocator.reset(); // could be an error with the plantuml jar, so clear the cached file
+				}
+				this.stageManager.showUnhandledExceptionAlert(ex, this.getScene().getWindow());
+			}
+			return res;
+		}, this.fxExecutor);
 	}
 
 	private Path showHtmlExportFileChooser() {
@@ -852,5 +925,3 @@ public final class VisBView extends BorderPane {
 		dialog.showAndWait();
 	}
 }
-
-

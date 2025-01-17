@@ -54,7 +54,7 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 	private final Set<ModelCheckingOptions.Options> options;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private final String goal;
+	private final String customGoal;
 
 	@JsonCreator
 	public ProBModelCheckingItem(
@@ -63,14 +63,14 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		@JsonProperty("nodesLimit") final Integer nodesLimit,
 		@JsonProperty("timeLimit") final Integer timeLimit,
 		@JsonProperty("options") final Set<ModelCheckingOptions.Options> options,
-		@JsonProperty("goal") final String goal
+		@JsonProperty("customGoal") final String customGoal
 	) {
 		super(id);
 		this.searchStrategy = Objects.requireNonNull(searchStrategy);
 		this.nodesLimit = nodesLimit;
 		this.timeLimit = timeLimit;
 		this.options = Objects.requireNonNull(options, "options");
-		this.goal = goal;
+		this.customGoal = customGoal;
 	}
 
 	@Override
@@ -83,8 +83,8 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		return i18n.translate("verifications.modelchecking.type.prob");
 	}
 
-	public String getGoal() {
-		return goal;
+	public String getCustomGoal() {
+		return this.customGoal;
 	}
 
 	public Set<ModelCheckingOptions.Options> getOptions() {
@@ -95,8 +95,8 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		ModelCheckingOptions fullOptions = new ModelCheckingOptions(this.getOptions())
 			                                   .searchStrategy(this.getSearchStrategy())
 			                                   .recheckExisting(true);
-		if (this.getGoal() != null) {
-			fullOptions = fullOptions.customGoal(model.parseFormula(this.getGoal()));
+		if (this.getCustomGoal() != null) {
+			fullOptions = fullOptions.customGoal(model.parseFormula(this.getCustomGoal()));
 		}
 		if (this.getNodesLimit() != null) {
 			fullOptions = fullOptions.stateLimit(this.getNodesLimit());
@@ -136,13 +136,16 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		}
 		Set<ModelCheckingOptions.Options> opts = this.getOptions();
 		for (ModelCheckingOptions.Options opt : ModelCheckingOptions.Options.values()) {
+			if (opt == ModelCheckingOptions.Options.FIND_GOAL && this.getCustomGoal() != null) {
+				continue;
+			}
 			boolean expectedContains = opt != ModelCheckingOptions.Options.IGNORE_OTHER_ERRORS;
 			if (opts.contains(opt) == expectedContains) {
 				s.add(i18n.translate("verifications.modelchecking.description.option." + opt.getPrologName()));
 			}
 		}
-		if (this.getGoal() != null) {
-			s.add(i18n.translate("verifications.modelchecking.description.additionalGoal", this.getGoal()));
+		if (this.getCustomGoal() != null) {
+			s.add(i18n.translate("verifications.modelchecking.description.additionalGoal", this.getCustomGoal()));
 		}
 		return s.toString();
 	}
@@ -204,11 +207,11 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 			       && Objects.equals(this.getNodesLimit(), that.getNodesLimit())
 			       && Objects.equals(this.getTimeLimit(), that.getTimeLimit())
 			       && Objects.equals(this.getOptions(), that.getOptions())
-			       && Objects.equals(this.getGoal(), that.getGoal());
+			       && Objects.equals(this.getCustomGoal(), that.getCustomGoal());
 	}
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ROOT, "%s(%s,%s,%s,%s,%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getSearchStrategy(), this.getNodesLimit(), this.getTimeLimit(), this.getGoal(), this.getOptions());
+		return String.format(Locale.ROOT, "%s(%s,%s,%s,%s,%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getSearchStrategy(), this.getNodesLimit(), this.getTimeLimit(), this.getCustomGoal(), this.getOptions());
 	}
 }

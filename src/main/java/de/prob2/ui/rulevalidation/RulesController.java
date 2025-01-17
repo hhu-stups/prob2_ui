@@ -117,24 +117,17 @@ public final class RulesController {
 			@Override
 			protected Void call() {
 				rulesChecker = new RulesChecker(currentTrace.get());
-				rulesChecker.init();
 				int totalNrOfOperations = rulesModel.getRulesProject().getOperationsMap().values().
-					stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
-				// determine all operations that can be executed in this state
-				Set<AbstractOperation> executableOperations = rulesChecker.getExecutableOperations();
-				while (!executableOperations.isEmpty()) {
-					for (AbstractOperation op : executableOperations) {
-						rulesChecker.executeOperation(op);
-						nrExecutedOperations++;
-						Platform.runLater(() -> {
-							ProgressBar progressBar = rulesView.progressBar;
-							progressBar.setProgress((double) nrExecutedOperations / totalNrOfOperations);
-							rulesView.progressOperation.setText(op.getName());
-							rulesView.progressLabel.setText(" (" + nrExecutedOperations + "/" + totalNrOfOperations + ")");
-						});
-					}
-					executableOperations = rulesChecker.getExecutableOperations();
-				}
+						stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
+				rulesChecker.executeAllOperationsDirect((nr, name) -> {
+					nrExecutedOperations = nr;
+					Platform.runLater(() -> {
+						ProgressBar progressBar = rulesView.progressBar;
+						progressBar.setProgress((double) nr / totalNrOfOperations);
+						rulesView.progressOperation.setText(name);
+						rulesView.progressLabel.setText(" (" + nr + "/" + totalNrOfOperations + ")");
+					});
+				}, 1);
 				return null;
 			}
 		}, null);

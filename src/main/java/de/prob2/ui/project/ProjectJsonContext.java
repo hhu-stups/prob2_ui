@@ -879,6 +879,11 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 
 		checkArray(machine.remove("temporalFormulas"))
 			.forEach(node -> validationTasks.add(checkObject(node)));
+
+		machine.remove("traceReplayStatus");
+		machine.remove("temporalStatus");
+		machine.remove("symbolicCheckingStatus");
+		machine.remove("modelcheckingStatus");
 	}
 
 	private static void updateV40Machine(final ObjectNode machine) {
@@ -1081,6 +1086,29 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		});
 	}
 
+	private static void updateV55Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		validationTasks.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			if ("MODEL_CHECKING".equals(checkText(task.get("taskType"))) && task.has("goal")) {
+				String goal = checkText(task.remove("goal"));
+				if (!goal.isEmpty() && !"GOAL".equals(goal)) {
+					task.put("customGoal", goal);
+				}
+			}
+		});
+	}
+
+	private static void updateV56Machine(final ObjectNode machine) {
+		JsonNode visBVisualisation = machine.remove("visBVisualisation");
+		ArrayNode visBVisualisations = machine.putArray("visBVisualisations");
+		if (visBVisualisation != null && visBVisualisation.isTextual()) {
+			visBVisualisations.add(visBVisualisation.textValue());
+		} else {
+			visBVisualisations.add(""); // VisBController.NO_PATH
+		}
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -1274,6 +1302,12 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			final ObjectNode machine = checkObject(machineNode);
 			if (oldVersion <= 54) {
 				updateV54Machine(machine);
+			}
+			if (oldVersion <= 55) {
+				updateV55Machine(machine);
+			}
+			if (oldVersion <= 56) {
+				updateV56Machine(machine);
 			}
 		});
 

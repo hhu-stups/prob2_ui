@@ -36,7 +36,6 @@ import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCombination;
@@ -302,32 +301,6 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 		String javaExecutable = this.javaLocator.getJavaExecutable();
 		Optional<Path> optPlantUmlJar = this.plantUmlLocator.findPlantUmlJar();
 		if (optPlantUmlJar.isEmpty()) {
-			Platform.runLater(() -> {
-				var dir = this.plantUmlLocator.getDirectory();
-				var url = "https://plantuml.com/download";
-				var openDir = new ButtonType(i18n.translate("dynamic.visualization.error.noPlantUml.button.openDir"));
-				var openWebsite = new ButtonType(i18n.translate("dynamic.visualization.error.noPlantUml.button.openWebsite"));
-
-				while (true) {
-					Alert alert = this.stageManager.makeAlert(
-							Alert.AlertType.ERROR,
-							"dynamic.visualization.error.noPlantUml.header",
-							"dynamic.visualization.error.noPlantUml.message",
-							dir
-					);
-					alert.getButtonTypes().addAll(openDir, openWebsite);
-					alert.initOwner(this.getScene().getWindow());
-
-					var result = alert.showAndWait().orElse(null);
-					if (result == openDir) {
-						this.openFile.open(dir);
-					} else if (result == openWebsite) {
-						this.hostServices.showDocument(url);
-					} else {
-						break;
-					}
-				}
-			});
 			return;
 		}
 		Path plantUmlJar = optPlantUmlJar.get();
@@ -388,6 +361,7 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 					.input(pumlInput)
 					.call();
 		} catch (ProBError e) {
+			this.plantUmlLocator.reset(); // most likely an error with the plantuml jar, so clear the cached file
 			LOGGER.error("could not visualize graph with plantuml (java={}, plantuml={}, outputFormat={})", javaCommand, plantUmlJar, outputFormat, e);
 			Platform.runLater(() -> {
 				Alert alert = this.stageManager.makeExceptionAlert(

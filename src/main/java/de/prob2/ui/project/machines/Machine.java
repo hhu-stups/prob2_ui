@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
 	"validationTasks",
 	"ltlPatterns",
 	"simulations",
-	"visBVisualisation",
+	"visBVisualisations",
 	"historyChartItems",
 })
 public final class Machine {
@@ -91,7 +91,7 @@ public final class Machine {
 	private final ReadOnlyListProperty<IValidationTask> validationTasks;
 	private final ListProperty<LTLPatternItem> ltlPatterns;
 	private final ListProperty<SimulationModel> simulations;
-	private final ObjectProperty<Path> visBVisualisation;
+	private final ListProperty<Path> visBVisualisations;
 
 	private final ObservableList<ProofObligationItem> proofObligationTasks;
 
@@ -119,7 +119,7 @@ public final class Machine {
 			Collections.emptyList(),
 			Collections.emptyList(),
 			Collections.emptyList(),
-			null
+			Collections.emptyList()
 		);
 	}
 
@@ -132,7 +132,7 @@ public final class Machine {
 		@JsonProperty("validationTasks") final List<IValidationTask> validationTasks,
 		@JsonProperty("ltlPatterns") final List<LTLPatternItem> ltlPatterns,
 		@JsonProperty("simulations") final List<SimulationModel> simulations,
-		@JsonProperty("visBVisualisation") final Path visBVisualisation
+		@JsonProperty("visBVisualisations") final List<Path> visBVisualisation
 	) {
 		this.name = new SimpleStringProperty(this, "name", Objects.requireNonNull(name, "name"));
 		this.description = new SimpleStringProperty(this, "description", Objects.requireNonNull(description, "description"));
@@ -145,7 +145,7 @@ public final class Machine {
 		// In previous versions, the default simulation was sometimes saved into the project file - remove it if it exists.
 		// TODO This should probably be moved into the old JSON format conversion code when we bump the project format version the next time
 		this.simulations.removeIf(simulationModel -> Paths.get("").equals(simulationModel.getPath()));
-		this.visBVisualisation = new SimpleObjectProperty<>(this, "visBVisualisation", visBVisualisation);
+		this.visBVisualisations = new SimpleListProperty<>(this, "visBVisualisations", FXCollections.observableArrayList(visBVisualisation));
 
 		// Keep this filtered list alive so that its listener (added in initListeners) keeps working.
 		this.proofObligationTasks = this.getProofObligationTasks();
@@ -169,7 +169,7 @@ public final class Machine {
 		this.getValidationTasks().addListener(changedListener);
 		this.getLTLPatterns().addListener(changedListener);
 		this.getSimulations().addListener(changedListener);
-		this.visBVisualizationProperty().addListener(changedListener);
+		this.getVisBVisualisations().addListener(changedListener);
 
 		this.proofObligationTasks.addListener((InvalidationListener)o -> this.updateAllProofObligations());
 	}
@@ -404,17 +404,9 @@ public final class Machine {
 		return this.simulations;
 	}
 
-	public ObjectProperty<Path> visBVisualizationProperty() {
-		return visBVisualisation;
-	}
-
-	@JsonGetter("visBVisualisation")
-	public Path getVisBVisualisation() {
-		return visBVisualisation.get();
-	}
-
-	public void setVisBVisualisation(Path visBVisualisation) {
-		this.visBVisualizationProperty().set(visBVisualisation);
+	@JsonGetter("visBVisualisations")
+	public ReadOnlyListProperty<Path> getVisBVisualisations() {
+		return this.visBVisualisations;
 	}
 
 	@JsonIgnore
@@ -560,7 +552,7 @@ public final class Machine {
 				this.getValidationTasks(),
 				this.getLTLPatterns(),
 				this.getSimulations(),
-				this.getVisBVisualisation()
+				this.getVisBVisualisations()
 		);
 	}
 

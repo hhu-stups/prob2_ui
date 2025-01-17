@@ -346,6 +346,7 @@ public final class RulesView extends AnchorPane {
 		fileChooser.setTitle(i18n.translate("rulevalidation.view.save.title"));
 		fileChooser.setInitialFileName("ValidationReport.html");
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html"));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.xml", "xml"));
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
 			controller.saveValidationReport(path, injector.getInstance(Locale.class));

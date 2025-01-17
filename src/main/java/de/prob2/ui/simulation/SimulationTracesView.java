@@ -58,7 +58,7 @@ public final class SimulationTracesView extends Stage {
 		}
 
 		public Trace getTrace() {
-			return this.result.getTrace();
+			return this.result.getTraces().get(index);
 		}
 
 		public List<Integer> getTimestamps() {

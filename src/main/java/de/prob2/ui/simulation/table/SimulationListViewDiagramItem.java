@@ -1,12 +1,16 @@
 package de.prob2.ui.simulation.table;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
-import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
@@ -15,11 +19,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public final class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration> {
+
 	@FXML
 	private VBox itemBox;
 
@@ -30,26 +31,28 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 	private final I18n i18n;
 
 	private final BooleanProperty savedProperty;
+	private final BooleanProperty runningProperty;
 
-	public SimulationListViewDiagramItem(final StageManager stageManager, final I18n i18n, final BooleanProperty savedProperty) {
+	public SimulationListViewDiagramItem(StageManager stageManager, I18n i18n, BooleanProperty savedProperty, BooleanProperty runningProperty) {
 		super();
 		this.item = null;
 		this.modifiedItem = null;
 		this.i18n = i18n;
 		this.savedProperty = savedProperty;
 		this.savedProperty.addListener((observable, from, to) -> {
-			if(getIndex() < 0) {
+			if (getIndex() < 0) {
 				return;
 			}
-			if(!from && to) {
+			if (!from && to) {
 				this.getListView().getItems().set(getIndex(), modifiedItem);
 			}
 		});
+		this.runningProperty = runningProperty;
 		stageManager.loadFXML(this,"simulation_list_view_item.fxml");
 	}
 
 	@FXML
-	public void initialize(){
+	public void initialize() {
 		this.setText("");
 		this.setGraphic(this.itemBox);
 	}
@@ -57,30 +60,33 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 	@Override
 	protected void updateItem(final DiagramConfiguration item, final boolean empty) {
 		super.updateItem(item, empty);
-		if(item != null) {
-			if(!item.equals(this.item)) {
+		if (empty || item == null) {
+			clear();
+		} else {
+			if (!item.equals(this.item)) {
 				clear();
-				if (item instanceof ActivationOperationConfiguration currentItem) {
-					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getOpName(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(),
-							currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(),
-							currentItem.getUpdating(), currentItem.getWithPredicate());
-					updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
-				} else if (item instanceof ActivationChoiceConfiguration currentItem) {
-					this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getActivations());
-					updateChoiceDiagramItem((ActivationChoiceConfiguration) this.modifiedItem);
-				} else {
-					UIListenerConfiguration currentItem = (UIListenerConfiguration) item;
-					this.modifiedItem = new UIListenerConfiguration(currentItem.getId(), currentItem.getEvent(), currentItem.getPredicate(), currentItem.getActivating());
-					updateListenerItem((UIListenerConfiguration) this.modifiedItem);
+				switch (item) {
+					case ActivationOperationConfiguration currentItem -> {
+						this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getOpName(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
+						updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
+					}
+					case ActivationChoiceConfiguration currentItem -> {
+						this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getActivations());
+						updateChoiceDiagramItem((ActivationChoiceConfiguration) this.modifiedItem);
+					}
+					case UIListenerConfiguration currentItem -> {
+						this.modifiedItem = new UIListenerConfiguration(currentItem.getId(), currentItem.getEvent(), currentItem.getPredicate(), currentItem.getActivating());
+						updateListenerItem((UIListenerConfiguration) this.modifiedItem);
+					}
+					default -> throw new AssertionError("unknown item type");
 				}
+
 				this.item = item;
 				this.setPrefHeight(itemBox.getChildren().size() * 20.0f);
 				this.setGraphic(this.itemBox);
 				this.setText("");
 				this.setItem(modifiedItem);
 			}
-		} else {
-			clear();
 		}
 	}
 
@@ -90,6 +96,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setId(to);
 		});
+		tfID.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(tfID);
 
 		Label lbOpName = new Label(i18n.translate("simulation.item.operation"));
@@ -99,6 +106,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setOpName(from);
 		});
+		tfOpName.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbOpName, tfOpName));
 
 		Label lbTime = new Label(i18n.translate("simulation.item.time"));
@@ -108,6 +116,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setAfter(to.isEmpty() ? "0" : to);
 		});
+		tfTime.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbTime, tfTime));
 
 		Label lbPriority = new Label(i18n.translate("simulation.item.priority"));
@@ -121,6 +130,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 				item.setPriority(0);
 			}
 		});
+		tfPriority.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbPriority, tfPriority));
 
 
@@ -131,6 +141,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setActivating(processActivating(to));
 		});
+		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 
 		Label lbActivationKind = new Label(i18n.translate("simulation.item.activationKind"));
@@ -144,6 +155,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 				item.setActivationKind(null);
 			}
 		});
+		tfActivationKind.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivationKind, tfActivationKind));
 
 		Label lbAdditionalGuards = new Label(i18n.translate("simulation.item.additionalGuards"));
@@ -153,6 +165,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setAdditionalGuards(to.isEmpty() ? null : to);
 		});
+		tfAdditionalGuards.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbAdditionalGuards, tfAdditionalGuards));
 
 
@@ -163,6 +176,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setFixedVariables(processFixedVariables(to));
 		});
+		tfFixedVariables.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbFixedVariables, tfFixedVariables));
 
 		Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables"));
@@ -172,6 +186,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setProbabilisticVariables(processProbabilisticVariables(to));
 		});
+		tfProbabilisticVariables.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, tfProbabilisticVariables));
 	}
 
@@ -181,6 +196,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setId(to);
 		});
+		tfID.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(tfID);
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
@@ -190,6 +206,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setActivations(processChoiceActivation(to));
 		});
+		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 	}
 
@@ -199,6 +216,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setId(to);
 		});
+		tfID.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(tfID);
 
 
@@ -209,6 +227,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setEvent(to);
 		});
+		tfEvent.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbEvent, tfEvent));
 
 		Label lbPredicate = new Label(i18n.translate("simulation.item.predicate"));
@@ -218,6 +237,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setPredicate(to.isEmpty() ? null : to);
 		});
+		tfPredicate.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbPredicate, tfPredicate));
 
 
@@ -228,6 +248,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 			savedProperty.set(false);
 			item.setActivating(processActivating(to));
 		});
+		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 
 	}

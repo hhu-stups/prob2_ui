@@ -23,6 +23,8 @@ public final class VisBHTMLConfigDialog extends Stage {
 	@FXML
 	private CheckBox showHeader;
 	@FXML
+	private CheckBox showInvariants;
+	@FXML
 	private CheckBox showSequenceChart;
 	@FXML
 	private CheckBox showSets;
@@ -66,6 +68,7 @@ public final class VisBHTMLConfigDialog extends Stage {
 		this.showConstants.setSelected(options.isShowConstants());
 		this.showEvents.setSelected(options.isShowEvents());
 		this.showHeader.setSelected(options.isShowHeader());
+		this.showInvariants.setSelected(options.isShowInvariants());
 		this.showSequenceChart.setVisible(!onlyCurrentState);
 		this.showSequenceChart.setManaged(!onlyCurrentState);
 		this.showSequenceChart.setSelected(options.isShowSequenceChart());
@@ -82,6 +85,7 @@ public final class VisBHTMLConfigDialog extends Stage {
 				.withShowConstants(showConstants.isSelected())
 				.withShowEvents(showEvents.isSelected())
 				.withShowHeader(showHeader.isSelected())
+				.withShowInvariants(showInvariants.isSelected())
 				.withShowSequenceChart(showSequenceChart.isSelected())
 				.withShowSets(showSets.isSelected())
 				.withShowSource(showSource.isSelected())

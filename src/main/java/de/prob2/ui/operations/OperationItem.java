@@ -1,6 +1,7 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -18,6 +19,7 @@ import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalExpandMode;
 import de.prob.animator.domainobjects.EvalOptions;
 import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.LoadedMachine;
@@ -28,7 +30,7 @@ import de.prob.statespace.Transition;
 
 public class OperationItem {
 	public enum Status {
-		DISABLED, ENABLED, TIMEOUT
+		DISABLED, ENABLED, TIMEOUT, MAX_OPERATIONS
 	}
 	
 	/**
@@ -161,7 +163,7 @@ public class OperationItem {
 						variableEvalElements = Collections.emptyList();
 					} else {
 						variableEvalElements = opInfo.getNonDetWrittenVariables().stream()
-							.map(var -> stateSpace.getModel().parseFormula(var))
+							.map(var -> stateSpace.getModel().formulaFromIdentifier(Arrays.asList(var.split("\\.")), FormulaExpand.EXPAND))
 							.collect(Collectors.toList());
 					}
 			}
@@ -221,9 +223,9 @@ public class OperationItem {
 		return items.values().iterator().next();
 	}
 
-	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters) {
+	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters, final List<String> returnParameters) {
 		return new OperationItem(null, name, status, parameters, Collections.emptyList(),
-				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
+				returnParameters, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
 				Collections.emptySet(), Collections.emptySet());
 	}
 

@@ -475,6 +475,7 @@ public final class SimulatorStage extends Stage {
 			this.loadSimulationIntoSimulator(to);
 			uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
 		});
+		cbSimulation.disableProperty().bind(currentTrace.isNull().or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 
@@ -497,7 +498,7 @@ public final class SimulatorStage extends Stage {
 		saveAsMenuItem.disableProperty().bind(disableSaveProperty);
 		saveAsItem.disableProperty().bind(disableSaveProperty);
 
-		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n, savedProperty));
+		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n, savedProperty, realTimeSimulator.runningProperty()));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -507,6 +508,9 @@ public final class SimulatorStage extends Stage {
 		});
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
 			checkIfSimulationShouldBeSaved();
 			configurationPath.set(null);
 			simulationDiagramItems.getItems().clear();
@@ -523,8 +527,6 @@ public final class SimulatorStage extends Stage {
 
 
 		simulationItems.setRowFactory(table -> new SimulationItemRow(this));
-
-		this.currentTrace.addListener((observable, from, to) -> simulationDiagramItems.refresh());
 
 		simulationItems.setOnMouseClicked(e -> {
 			SimulationItem item = simulationItems.getSelectionModel().getSelectedItem();
@@ -672,7 +674,6 @@ public final class SimulatorStage extends Stage {
 
 		simulationDiagramItems.getItems().clear();
 		simulationDiagramItems.setItems(observableList);
-		simulationDiagramItems.refresh();
 	}
 
 	@FXML
@@ -683,7 +684,6 @@ public final class SimulatorStage extends Stage {
 		SimulationItem newItem = choosingStage.getResult();
 		if (newItem != null) {
 			SimulationItem toCheck = currentProject.getCurrentMachine().addValidationTaskIfNotExist(newItem);
-			simulationItems.refresh();
 			simulationItemHandler.checkItem(toCheck);
 		}
 	}
@@ -765,7 +765,6 @@ public final class SimulatorStage extends Stage {
 			machine.getSimulations().addListener(this.simulationModelsListener);
 			this.simulationModelsListener.invalidated(null);
 			cbSimulation.getSelectionModel().clearSelection();
-			cbSimulation.getSelectionModel().select(0);
 		}
 	}
 

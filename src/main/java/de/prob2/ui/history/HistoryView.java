@@ -1,8 +1,12 @@
 package de.prob2.ui.history;
 
+import java.io.IOException;
+import java.util.Arrays;
+
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -13,6 +17,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationDetailsStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.SimpleObjectProperty;
@@ -21,13 +27,16 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
 import javafx.fxml.FXML;
 import javafx.scene.Cursor;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.control.TableView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.BorderPane;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 @FXMLInjected
 @Singleton
@@ -49,7 +58,10 @@ public final class HistoryView extends BorderPane {
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll(Arrays.asList("past", "present", "future"));
-			if (!empty) {
+			if (empty || item == null) {
+				this.setCursor(Cursor.DEFAULT);
+				this.setContextMenu(null);
+			} else {
 				this.setCursor(Cursor.HAND);
 				final Trace trace = currentTrace.get();
 				if (trace != null) {
@@ -62,7 +74,7 @@ public final class HistoryView extends BorderPane {
 						this.getStyleClass().add("present");
 					}
 				}
-				
+
 				final MenuItem showDetailsItem = new MenuItem(i18n.translate("operations.operationsView.contextMenu.items.showDetails"));
 				showDetailsItem.setOnAction(event -> {
 					final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
@@ -71,11 +83,8 @@ public final class HistoryView extends BorderPane {
 				});
 				// The root state doesn't have a corresponding operation
 				showDetailsItem.setDisable(item.getOperation() == null);
-				
+
 				this.setContextMenu(new ContextMenu(showDetailsItem));
-			} else {
-				this.setCursor(Cursor.DEFAULT);
-				this.setContextMenu(null);
 			}
 		}
 	}
@@ -136,11 +145,19 @@ public final class HistoryView extends BorderPane {
 		});
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-			historyTableView.getItems().clear();
 			if (to != null) {
-				historyTableView.getItems().addAll(HistoryItem.itemsForTrace(to));
+				var newItems = HistoryItem.itemsForTrace(to);
+				var current = newItems.get(to.getCurrent().getIndex() + 1);
+				historyTableView.getItems().setAll(newItems);
 				historyTableView.sort();
 				historyTableView.getSelectionModel().focus(lastSelectedIndex);
+
+				historyTableView.scrollTo(current);
+				// on my windows machine the tableview becomes blank when the scroll bar first appears scrollTo is called
+				// fix that by a delayed refresh
+				Platform.runLater(() -> historyTableView.refresh());
+			} else {
+				historyTableView.getItems().clear();
 			}
 		};
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());

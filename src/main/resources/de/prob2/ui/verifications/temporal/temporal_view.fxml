@@ -69,8 +69,8 @@
 				<columns>
 					<TableColumn fx:id="shouldExecuteColumn" sortable="false" style="-fx-alignment: CENTER;"
 								 minWidth="${fontSize.fontSize * 2}" maxWidth="${fontSize.fontSize * 2}"/>
-					<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}"
-								 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+					<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 4}"
+								 maxWidth="${fontSize.fontSize * 4}" text="%common.columns.status"/>
 					<TableColumn fx:id="configurationColumn" minWidth="80.0" text="%common.columns.formula"/>
 					<TableColumn fx:id="formulaDescriptionColumn" minWidth="120.0" text="%common.columns.description"/>
 				</columns>
