@@ -1,8 +1,8 @@
 package de.prob2.ui.simulation.external;
 
+import de.prob.animator.command.GetCandidateOperationsCommand;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.simulators.Simulator;
 
 import com.google.gson.Gson;
@@ -118,9 +118,11 @@ public class ExternalSimulatorExecutor {
 			}
 
 			State state = trace.getCurrentState();
-			String enabledOperations = String.join(",", state
-					.getOutTransitions().stream()
-					.map(Transition::getName)
+
+			String enabledOperations = String.join(",", state.getCandidateOperations()
+					.stream()
+					.map(GetCandidateOperationsCommand.Candidate::getOperation)
+					.filter(op -> "TRUE".equals(state.eval(String.format("GET_GUARD_STATUS(\"%s\")", op)).toString()))
 					.collect(Collectors.toSet()));
 			sendContinue(enabledOperations);
 
