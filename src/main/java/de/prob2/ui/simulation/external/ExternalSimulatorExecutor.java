@@ -119,10 +119,9 @@ public class ExternalSimulatorExecutor {
 
 			State state = trace.getCurrentState();
 
-			String enabledOperations = String.join(",", state.getCandidateOperations()
+			String enabledOperations = String.join(",", state.getStateSpace().getLoadedMachine().getOperationNames()
 					.stream()
-					.map(GetCandidateOperationsCommand.Candidate::getOperation)
-					.filter(op -> "TRUE".equals(state.eval(String.format("GET_GUARD_STATUS(\"%s\")", op)).toString()))
+					.filter(op -> state.eval(String.format("GET_GUARD_STATUS(\"%s\")", op)).toString().startsWith("TRUE"))
 					.collect(Collectors.toSet()));
 			sendContinue(enabledOperations);
 
