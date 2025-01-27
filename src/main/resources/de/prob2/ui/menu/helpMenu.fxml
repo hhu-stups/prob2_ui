@@ -6,10 +6,12 @@
 	<MenuItem text="%menu.help.items.openHelp" onAction="#handleOpenHelp" />
 	<Menu text="%menu.help.syntax">
 		<MenuItem text="%menu.help.syntax.b" onAction="#handleBSyntax"/>
+		<MenuItem text="%menu.help.syntax.alloy" onAction="#handleAlloySyntax"/>
 		<MenuItem text="%menu.help.syntax.csp" onAction="#handleCSPSyntax"/>
 		<MenuItem text="%menu.help.syntax.tla" onAction="#handleTLASyntax"/>
 		<MenuItem text="%menu.help.syntax.z" onAction="#handleZSyntax"/>
 		<MenuItem text="%menu.help.syntax.ltl" onAction="#handleLTLSyntax"/>
+		<MenuItem text="%menu.help.syntax.ctl" onAction="#handleCTLSyntax"/>
 	</Menu>
 	<MenuItem text="%menu.help.items.reportBug" onAction="#handleReportBug"/>
 	<MenuItem fx:id="aboutItem" text="%menu.help.items.about" onAction="#handleAboutDialog"/>

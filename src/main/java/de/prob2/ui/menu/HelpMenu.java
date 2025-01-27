@@ -73,9 +73,15 @@ public class HelpMenu extends Menu {
 	}
 
 	@FXML
+	private void handleAlloySyntax() {
+		handleSyntax("alloy_summary.txt", "Alloy");
+	}
+
+	@FXML
 	private void handleCSPSyntax() {
 		handleSyntax("procsp_summary.txt", "CSP");
 	}
+
 	@FXML
 	private void handleTLASyntax() {
 		handleSyntax("tla_summary.txt", "TLA");
@@ -84,6 +90,11 @@ public class HelpMenu extends Menu {
 	@FXML
 	private void handleLTLSyntax() {
 		handleSyntax("ltl_summary.txt", "LTL");
+	}
+
+	@FXML
+	private void handleCTLSyntax() {
+		handleSyntax("ctl_summary.txt", "CTL");
 	}
 
 	private void handleSyntax(String filename, String title) {
