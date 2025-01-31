@@ -1,6 +1,8 @@
 package de.prob2.ui.simulation.external;
 
 import de.prob.animator.command.GetCandidateOperationsCommand;
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -121,7 +123,7 @@ public class ExternalSimulatorExecutor {
 
 			String enabledOperations = String.join(",", state.getStateSpace().getLoadedMachine().getOperationNames()
 					.stream()
-					.filter(op -> state.eval(String.format("GET_GUARD_STATUS(\"%s\")", op)).toString().startsWith("TRUE"))
+					.filter(op -> state.eval(String.format("GET_GUARD_STATUS(\"%s\")", op)) instanceof EvalResult res && "TRUE".equals(res.getValue()))
 					.collect(Collectors.toSet()));
 			sendContinue(enabledOperations);
 
