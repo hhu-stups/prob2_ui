@@ -29,7 +29,8 @@ import de.prob2.ui.project.MachineLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BInterpreter implements AsyncExecutable {
+public final class BInterpreter implements AsyncExecutable {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(BInterpreter.class);
 
 	private final MachineLoader machineLoader;
