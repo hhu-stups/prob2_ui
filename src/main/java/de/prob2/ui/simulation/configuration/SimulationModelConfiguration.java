@@ -34,6 +34,7 @@ public class SimulationModelConfiguration implements HasMetadata, ISimulationMod
 		}
 	}
 
+	public static final String FILE_TYPE = "Simulation";
 	public static final int CURRENT_FORMAT_VERSION = 3;
 
 	private final Map<String, String> variables;

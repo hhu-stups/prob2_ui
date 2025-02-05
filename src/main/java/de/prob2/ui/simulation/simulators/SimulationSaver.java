@@ -16,6 +16,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.SimulationItem;
 
@@ -54,8 +55,8 @@ public final class SimulationSaver {
 	public void saveConfiguration(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveTimedTrace.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + SIMULATION_EXTENSION);
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", SIMULATION_EXTENSION));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + SimulationFileHandler.SIMULATION_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getSimBFilter());
 		final Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			saveConfiguration(trace, timestamps, path, createMetadata(createdBy));

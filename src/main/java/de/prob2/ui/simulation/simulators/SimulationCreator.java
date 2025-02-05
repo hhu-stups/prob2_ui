@@ -40,7 +40,7 @@ public class SimulationCreator {
 
 			int time = timestamps.get(i) - currentTimestamp;
 			State destination = transition.getDestination();
-			Map<String, String> fixedVariables = !"$setup_constants".equals(transition.getName()) ? createFixedVariables(computeFixedVariablesFromDestinationValues(destination.getVariableValues(FormulaExpand.EXPAND)), opInfo) :
+			Map<String, String> fixedVariables = !Transition.SETUP_CONSTANTS_NAME.equals(op) ? createFixedVariables(computeFixedVariablesFromDestinationValues(destination.getVariableValues(FormulaExpand.EXPAND)), opInfo) :
 					createFixedVariables(computeFixedVariablesFromDestinationValues(destination.getConstantValues(FormulaExpand.EXPAND)), opInfo);
 			fixedVariables = fixedVariables == null || fixedVariables.isEmpty() ? null : fixedVariables;
 

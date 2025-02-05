@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,8 +25,8 @@ import de.prob.statespace.Transition;
 
 public class SimulationFileHandler {
 
-	public static final String TRACE_FILE_EXTENSION = "json";
-
+	public static final Path DEFAULT_SIMULATION_PATH = Path.of("");
+	public static final String TIMED_TRACE_FILE_EXTENSION = "json";
 	public static final String SIMULATION_FILE_EXTENSION = "json";
 
 	private static final Gson METADATA_GSON = Converters.registerAll(new GsonBuilder())
@@ -37,35 +36,33 @@ public class SimulationFileHandler {
 			.create();
 
 	public static ISimulationModelConfiguration constructConfiguration(Path inputFile, LoadedMachine loadedMachine) throws IOException, JsonSyntaxException {
-		if(inputFile.equals(Paths.get(""))) {
+		if (DEFAULT_SIMULATION_PATH.equals(inputFile)) {
 			return DefaultSimulationCreator.createDefaultSimulation(loadedMachine);
-		}
-		if(!inputFile.toFile().isDirectory()) {
-			if(inputFile.toFile().getName().endsWith("json")) {
-				Gson gson = new Gson();
-				final JsonObject simulationFile;
-				try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
-					simulationFile = gson.fromJson(reader, JsonObject.class);
-				}
-				Map<String, String> variables = buildVariables(simulationFile.get("variables"));
-				List<DiagramConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
-				List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
-				final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
-				return new SimulationModelConfiguration(variables, activationConfigurations, uiListenerConfigurations, metadata);
-			} else { // Currently ends with py; more could be supported in the future
-				return new SimulationExternalConfiguration(inputFile);
+		} else if (Files.isDirectory(inputFile)) {
+			List<Path> timedTraces;
+			try (var s = Files.walk(inputFile)) {
+				timedTraces = s
+						.filter(Files::isRegularFile)
+						.filter(p -> MoreFiles.getFileExtension(p).equals(TIMED_TRACE_FILE_EXTENSION))
+						.sorted()
+						.collect(Collectors.toList());
 			}
+			return new SimulationBlackBoxModelConfiguration(timedTraces);
+		} else if ("json".equals(MoreFiles.getFileExtension(inputFile))) {
+			Gson gson = new Gson();
+			final JsonObject simulationFile;
+			try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
+				simulationFile = gson.fromJson(reader, JsonObject.class);
+			}
+			Map<String, String> variables = buildVariables(simulationFile.get("variables"));
+			List<DiagramConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
+			List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
+			final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
+			return new SimulationModelConfiguration(variables, activationConfigurations, uiListenerConfigurations, metadata);
+		} else {
+			// Currently ends with py; more could be supported in the future
+			return new SimulationExternalConfiguration(inputFile);
 		}
-
-		List<Path> timedTraces;
-		try (var s = Files.walk(inputFile)) {
-			timedTraces = s
-				              .filter(Files::isRegularFile)
-				              .filter(p -> MoreFiles.getFileExtension(p).equals(SimulationFileHandler.TRACE_FILE_EXTENSION))
-				              .sorted()
-				              .collect(Collectors.toList());
-		}
-		return new SimulationBlackBoxModelConfiguration(timedTraces);
 	}
 
 	private static List<DiagramConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
@@ -242,5 +239,4 @@ public class SimulationFileHandler {
 		List<String> activating = buildActivation(uiListenerObject.get("activating"));
 		return new UIListenerConfiguration(id, event, predicate, activating);
 	}
-
 }
