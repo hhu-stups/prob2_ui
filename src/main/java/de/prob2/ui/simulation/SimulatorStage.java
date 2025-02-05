@@ -295,7 +295,7 @@ public final class SimulatorStage extends Stage {
 	private TableColumn<SimulationItem, CheckingStatus> simulationStatusColumn;
 
 	@FXML
-	private TableColumn<SimulationItem, String> simulationConfigurationColumn;
+	private TableColumn<SimulationItem, SimulationItem> simulationConfigurationColumn;
 
 	@FXML
 	private ChoiceBox<SimulationModel> cbSimulation;
@@ -522,8 +522,8 @@ public final class SimulatorStage extends Stage {
 
 		simulationStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
 		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		simulationConfigurationColumn.setCellFactory(lv -> new SimulationTaskItem(stageManager, i18n));
-		simulationConfigurationColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+		simulationConfigurationColumn.setCellFactory(lv -> new SimulationItemTableCell(stageManager, i18n));
+		simulationConfigurationColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue()));
 
 
 		simulationItems.setRowFactory(table -> new SimulationItemRow(this));

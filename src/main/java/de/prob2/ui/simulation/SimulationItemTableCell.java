@@ -1,5 +1,9 @@
 package de.prob2.ui.simulation;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Map;
+
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
@@ -7,54 +11,48 @@ import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import de.prob2.ui.simulation.table.SimulationItem;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
-import javafx.scene.control.TableRow;
 import javafx.scene.layout.VBox;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Map;
-
-public final class SimulationTaskItem extends TableCell<SimulationItem, String> {
-	@FXML
-	private VBox itemBox;
-
-	private SimulationItem item;
+public final class SimulationItemTableCell extends TableCell<SimulationItem, SimulationItem> {
 
 	private final I18n i18n;
 
-	public SimulationTaskItem(final StageManager stageManager, final I18n i18n) {
+	@FXML
+	private VBox itemBox;
+
+	public SimulationItemTableCell(final StageManager stageManager, final I18n i18n) {
 		super();
-		stageManager.loadFXML(this,"simulation_task_item.fxml");
-		this.item = null;
 		this.i18n = i18n;
+		stageManager.loadFXML(this, "simulation_task_item.fxml");
 	}
 
 	@FXML
-	public void initialize(){
+	@SuppressWarnings("unused")
+	private void initialize() {
 		this.setText("");
 		this.setGraphic(this.itemBox);
 	}
 
 	@Override
-	public void updateItem(final String item, final boolean empty) {
+	public void updateItem(final SimulationItem item, final boolean empty) {
 		super.updateItem(item, empty);
-		final TableRow<SimulationItem> tableRow = this.getTableRow();
-		this.item = tableRow.getItem();
-		if(this.item != null) {
+		if (empty || item == null) {
+			clear();
+		} else {
 			this.itemBox.getChildren().clear();
 			updateItem();
 			this.setPrefHeight(itemBox.getChildren().size() * 20.0f);
 			this.setGraphic(this.itemBox);
 			this.setText("");
-		} else {
-			clear();
 		}
 	}
 
-	public void updateItem() {
+	private void updateItem() {
+		var item = getItem();
 		if(item.getId() != null && !item.getId().isEmpty()) {
 			Label lbID = new Label(item.getId());
 			lbID.getStyleClass().add("id");
@@ -204,7 +202,7 @@ public final class SimulationTaskItem extends TableCell<SimulationItem, String> 
 
 	}
 
-	public void clear() {
+	private void clear() {
 		itemBox.getChildren().clear();
 		this.setGraphic(this.itemBox);
 		this.setText("");
