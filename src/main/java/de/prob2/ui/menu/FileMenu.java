@@ -157,7 +157,7 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	private void handleOpen() throws IOException {
+	private void handleOpen() {
 		final Path selected = fileChooserManager.showOpenAnyFileChooser(stageManager.getMainStage());
 		if (selected == null) {
 			return;
