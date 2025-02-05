@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import de.prob.statespace.Trace;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 import de.prob2.ui.verifications.CheckingStatus;
 
 public interface ISimulationPropertyChecker {

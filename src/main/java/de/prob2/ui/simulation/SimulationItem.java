@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation.table;
+package de.prob2.ui.simulation;
 
 import java.nio.file.Path;
 import java.util.Collections;

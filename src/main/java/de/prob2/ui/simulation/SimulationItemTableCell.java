@@ -10,7 +10,6 @@ import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
-import de.prob2.ui.simulation.table.SimulationItem;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;

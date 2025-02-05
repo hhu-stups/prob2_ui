@@ -42,7 +42,7 @@ import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.simulation.model.SimulationModel;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;

@@ -52,8 +52,6 @@ import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
-import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.simulation.table.SimulationListViewDiagramItem;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
@@ -65,7 +63,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -498,7 +495,7 @@ public final class SimulatorStage extends Stage {
 		saveAsMenuItem.disableProperty().bind(disableSaveProperty);
 		saveAsItem.disableProperty().bind(disableSaveProperty);
 
-		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n, savedProperty, realTimeSimulator.runningProperty()));
+		this.simulationDiagramItems.setCellFactory(lv -> new DiagramConfigurationListCell(stageManager, i18n, savedProperty, realTimeSimulator.runningProperty()));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
 			if (to) {

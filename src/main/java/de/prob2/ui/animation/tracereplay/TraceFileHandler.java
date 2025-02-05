@@ -36,7 +36,7 @@ import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 
 import javafx.application.Platform;
 import javafx.scene.control.Alert;

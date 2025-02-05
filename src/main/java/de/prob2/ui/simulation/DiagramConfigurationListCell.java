@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation.table;
+package de.prob2.ui.simulation;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,7 +19,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public final class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration> {
+public final class DiagramConfigurationListCell extends ListCell<DiagramConfiguration> {
 
 	@FXML
 	private VBox itemBox;
@@ -33,7 +33,7 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 	private final BooleanProperty savedProperty;
 	private final BooleanProperty runningProperty;
 
-	public SimulationListViewDiagramItem(StageManager stageManager, I18n i18n, BooleanProperty savedProperty, BooleanProperty runningProperty) {
+	public DiagramConfigurationListCell(StageManager stageManager, I18n i18n, BooleanProperty savedProperty, BooleanProperty runningProperty) {
 		super();
 		this.item = null;
 		this.modifiedItem = null;
