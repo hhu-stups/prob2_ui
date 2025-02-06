@@ -19,11 +19,14 @@ import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
+import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.simulation.simulators.Simulator;
 
 import javafx.application.Platform;
@@ -42,11 +45,48 @@ public final class SimulationFileHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(SimulationFileHandler.class);
 
 	private final StageManager stageManager;
+	private final VersionInfo versionInfo;
+	private final JacksonManager<SimulationModelConfiguration> jacksonManager;
 	private final ObjectMapper objectMapper;
 
 	@Inject
-	public SimulationFileHandler(StageManager stageManager, ObjectMapper objectMapper) {
+	public SimulationFileHandler(StageManager stageManager, JacksonManager<SimulationModelConfiguration> jacksonManager, ObjectMapper objectMapperForJacksonManager, VersionInfo versionInfo, ObjectMapper objectMapper) {
 		this.stageManager = stageManager;
+		this.jacksonManager = jacksonManager;
+		this.versionInfo = versionInfo;
+		this.jacksonManager.initContext(new JacksonManager.Context<>(objectMapperForJacksonManager, SimulationModelConfiguration.class, SimulationModelConfiguration.FILE_TYPE, SimulationModelConfiguration.CURRENT_FORMAT_VERSION) {
+			@Override
+			public boolean shouldAcceptOldMetadata() {
+				// we want to support hand-written simulations without metadata
+				return true;
+			}
+
+			@Override
+			public ObjectNode convertOldData(ObjectNode oldObject, int oldVersion) {
+				// do not throw exception when loading v0 data (without metadata)
+				return oldObject;
+			}
+
+			@Override
+			public boolean isFileTypeAccepted(JsonMetadata metadata) {
+				// previously simulation configs were saved with these alternative file types
+				return super.isFileTypeAccepted(metadata) || "Timed_Trace".equals(metadata.getFileType()) || "Interaction_Replay".equals(metadata.getFileType());
+			}
+
+			@Override
+			public JsonMetadata updateMetadataOnSave(JsonMetadata metadata) {
+				JsonMetadataBuilder b = new JsonMetadataBuilder(metadata)
+						                        .withFormatVersion(this.currentFormatVersion)
+						                        .withFileType(this.fileType)
+						                        .withSavedNow()
+						                        .withProB2KernelVersion(SimulationFileHandler.this.versionInfo.getKernelVersion())
+						                        .withProBCliVersion(SimulationFileHandler.this.versionInfo.getCliVersion().toString());
+				if (metadata.getCreator() == null) {
+					b.withUserCreator();
+				}
+				return b.build();
+			}
+		});
 		this.objectMapper = objectMapper;
 	}
 
