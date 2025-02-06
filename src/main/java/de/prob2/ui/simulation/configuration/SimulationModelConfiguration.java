@@ -17,7 +17,7 @@ import de.prob.json.JsonMetadataBuilder;
 	"listeners",
 	"metadata",
 })
-public class SimulationModelConfiguration implements HasMetadata, ISimulationModelConfiguration {
+public final class SimulationModelConfiguration implements HasMetadata, ISimulationModelConfiguration {
 
 	public enum SimulationFileType {
 		SIMULATION("Simulation"),
@@ -51,8 +51,8 @@ public class SimulationModelConfiguration implements HasMetadata, ISimulationMod
 		this.metadata = Objects.requireNonNull(metadata, "metadata");
 	}
 
-	public static JsonMetadataBuilder metadataBuilder(SimulationFileType fileType) {
-		return new JsonMetadataBuilder(fileType.getName(), CURRENT_FORMAT_VERSION)
+	public static JsonMetadataBuilder metadataBuilder() {
+		return new JsonMetadataBuilder(FILE_TYPE, CURRENT_FORMAT_VERSION)
 			.withSavedNow()
 			.withUserCreator();
 	}
@@ -79,6 +79,6 @@ public class SimulationModelConfiguration implements HasMetadata, ISimulationMod
 
 	@Override
 	public HasMetadata withMetadata(final JsonMetadata metadata) {
-		return new SimulationModelConfiguration(this.getVariables(), this.getActivationConfigurations(), this.getUiListenerConfigurations(), metadata);
+		return new SimulationModelConfiguration(this.getVariables(), this.getActivationConfigurations(), this.getUiListenerConfigurations(), this.getMetadata());
 	}
 }

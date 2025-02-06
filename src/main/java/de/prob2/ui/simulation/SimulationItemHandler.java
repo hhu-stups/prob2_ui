@@ -51,7 +51,7 @@ public final class SimulationItemHandler {
 	}
 
 	public ObservableList<SimulationItem> getSimulationItems(SimulationModel simulationModel) {
-		if(simulationModel.getPath().equals(Paths.get(""))) {
+		if(simulationModel.getPath().equals(SimulationFileHandler.DEFAULT_SIMULATION_PATH)) {
 			return FXCollections.observableArrayList();
 		}
 		return this.currentProject.getCurrentMachine().getSimulationTasksByModel(simulationModel);

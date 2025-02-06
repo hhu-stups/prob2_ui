@@ -233,7 +233,7 @@ public final class UIInteractionHandler {
 		List<DiagramConfiguration> activationConfigurations = simulationModelConfiguration.getActivationConfigurations();
 		List<DiagramConfiguration> userInteractions = createUserInteractions(realTimeSimulator);
 		List<DiagramConfiguration> activationConfigurationsForResult = createActivationConfigurationsFromUserInteraction(activationConfigurations, userInteractions);
-		return new SimulationModelConfiguration(variables, activationConfigurationsForResult, new ArrayList<>(), SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.INTERACTION_REPLAY).withSavedNow().withUserCreator().build());
+		return new SimulationModelConfiguration(variables, activationConfigurationsForResult, new ArrayList<>(), SimulationModelConfiguration.metadataBuilder().build());
 	}
 
 	public ObjectProperty<Transition> getLastUserInteraction() {

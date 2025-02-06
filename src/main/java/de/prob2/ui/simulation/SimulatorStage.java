@@ -46,11 +46,9 @@ import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
-import de.prob2.ui.simulation.interactive.UIInteractionSaver;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
-import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
@@ -205,7 +203,7 @@ public final class SimulatorStage extends Stage {
 
 				MenuItem saveTimedTraces = new MenuItem(i18n.translate("simulation.contextMenu.saveGeneratedTimedTraces"));
 				saveTimedTraces.disableProperty().bind(itemHasNoSimulationResult);
-				saveTimedTraces.setOnAction(e -> simulationSaver.saveConfigurations(item));
+				saveTimedTraces.setOnAction(e -> simulationFileHandler.saveTimedTracesForSimulationItem(item));
 				menuItems.add(saveTimedTraces);
 
 				contextMenu.getItems().addAll(menuItems);
@@ -323,7 +321,6 @@ public final class SimulatorStage extends Stage {
 	private final MachineLoader machineLoader;
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
-	private final SimulationSaver simulationSaver;
 	private final TraceFileHandler traceFileHandler;
 	private final SimulationFileHandler simulationFileHandler;
 	private final DisablePropertyController disablePropertyController;
@@ -347,8 +344,7 @@ public final class SimulatorStage extends Stage {
 			final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
 			final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
 			final I18n i18n, final FileChooserManager fileChooserManager,
-			final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
-			final DisablePropertyController disablePropertyController,
+			final TraceFileHandler traceFileHandler, final DisablePropertyController disablePropertyController,
 			final StopActions stopActions, SimulationFileHandler simulationFileHandler
 	) {
 		super();
@@ -363,7 +359,6 @@ public final class SimulatorStage extends Stage {
 		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
-		this.simulationSaver = simulationSaver;
 		this.traceFileHandler = traceFileHandler;
 		this.disablePropertyController = disablePropertyController;
 		this.simulationFileHandler = simulationFileHandler;
@@ -748,7 +743,7 @@ public final class SimulatorStage extends Stage {
 
 	public void loadSimulationIntoSimulator(SimulationModel simulation) {
 		configurationPath.set(simulation == null ? null :
-				simulation.getPath().equals(Paths.get("")) ? simulation.getPath() : currentProject.getLocation().resolve(simulation.getPath()));
+				simulation.getPath().equals(SimulationFileHandler.DEFAULT_SIMULATION_PATH) ? simulation.getPath() : currentProject.getLocation().resolve(simulation.getPath()));
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if (simulation != null && stateSpace != null) {
 			simulationItemHandler.setPath(configurationPath.get());
@@ -783,8 +778,7 @@ public final class SimulatorStage extends Stage {
 			}
 		}
 
-		return new SimulationModelConfiguration(variables, activations, listeners, SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.SIMULATION)
-				.build());
+		return new SimulationModelConfiguration(variables, activations, listeners, SimulationModelConfiguration.metadataBuilder().build());
 	}
 
 	private void checkIfSimulationShouldBeSaved() {
@@ -804,8 +798,8 @@ public final class SimulatorStage extends Stage {
 		}
 
 		try {
+			this.simulationFileHandler.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
 			savedProperty.set(true);
-			simulationSaver.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
 		} catch (IOException ex) {
 			stageManager.makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
@@ -821,8 +815,8 @@ public final class SimulatorStage extends Stage {
 			return;
 		}
 		try {
+			this.simulationFileHandler.saveConfiguration(buildSimulationModel(), path);
 			savedProperty.set(true);
-			simulationSaver.saveConfiguration(buildSimulationModel(), path);
 			Path previousPath = configurationPath.get();
 			Path relativePath = currentProject.getLocation().relativize(path);
 			SimulationModel simulationModel = new SimulationModel(relativePath);
@@ -878,7 +872,7 @@ public final class SimulatorStage extends Stage {
 	@FXML
 	private void saveTimedTrace() {
 		try {
-			injector.getInstance(SimulationSaver.class).saveConfiguration(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
+			this.simulationFileHandler.saveTimedTrace(currentTrace.get(), realTimeSimulator.getTimestamps(), "Real-Time Simulation");
 		} catch (IOException exception) {
 			stageManager.makeExceptionAlert(exception, "simulation.save.error").showAndWait();
 		}
@@ -887,7 +881,7 @@ public final class SimulatorStage extends Stage {
 	@FXML
 	private void saveAutomaticSimulation() {
 		try {
-			injector.getInstance(UIInteractionSaver.class).saveUIInteractions();
+			this.simulationFileHandler.saveUIInteractions();
 		} catch (IOException exception) {
 			stageManager.makeExceptionAlert(exception, "simulation.save.ui.error").showAndWait();
 		}
