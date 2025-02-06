@@ -94,7 +94,11 @@ public final class SimulationFileHandler {
 			Map<String, String> variables = buildStringMap(json.get("variables"));
 			List<DiagramConfiguration> activationConfigurations = buildActivationConfigurations(json.get("activations"));
 			List<UIListenerConfiguration> uiListenerConfigurations = buildUIListenerConfigurations(json.get("listeners"));
-			final JsonMetadata metadata = this.objectMapper.treeToValue(json.get("metadata"), JsonMetadata.class);
+			JsonMetadata metadata = this.objectMapper.treeToValue(json.get("metadata"), JsonMetadata.class);
+			if (metadata == null) {
+				metadata = SimulationModelConfiguration.metadataBuilder(SimulationModelConfiguration.SimulationFileType.SIMULATION).build();
+			}
+
 			return new SimulationModelConfiguration(variables, activationConfigurations, uiListenerConfigurations, metadata);
 		} else {
 			// Currently ends with py; more could be supported in the future
