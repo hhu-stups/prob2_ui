@@ -9,7 +9,7 @@ import de.prob.statespace.State;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.SimulationHelperFunctions;
+import de.prob2.ui.simulation.EvaluationMode;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
@@ -105,7 +105,7 @@ public final class UIInteractionHandler {
 		for(UIListenerConfiguration uiListener : uiListenersForEvent) {
 			for(String activatingEvent : uiListener.getActivating()) {
 				State destination = transition.getDestination();
-				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, uiListener.getPredicate(), transition.getParameterNames(), transition.getParameterPredicate(), SimulationHelperFunctions.extractMode(currentTrace.getModel()));
+				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, uiListener.getPredicate(), transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
 				if(parameterRes.startsWith("TRUE")) {
 					realTimeSimulator.handleOperationConfiguration(destination, realTimeSimulator.getActivationConfigurationMap().get(activatingEvent), transition.getParameterNames(), transition.getParameterPredicate());
 					anyActivated = true;
@@ -174,7 +174,7 @@ public final class UIInteractionHandler {
 		for (UIListenerConfiguration uiListener : uiListeners) {
 			if (uiListener.getEvent().equals(op)) {
 				State destination = transition.getDestination();
-				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, uiListener.getPredicate(), transition.getParameterNames(), transition.getParameterPredicate(), SimulationHelperFunctions.extractMode(currentTrace.getModel()));
+				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, uiListener.getPredicate(), transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
 				if(parameterRes.startsWith("TRUE")) {
 					activations.addAll(uiListener.getActivating());
 				}

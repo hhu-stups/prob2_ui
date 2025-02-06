@@ -1,11 +1,13 @@
 package de.prob2.ui.simulation.configuration;
 
+import java.util.Objects;
+
 public abstract class DiagramConfiguration {
 
 	protected String id;
 
 	public DiagramConfiguration(String id) {
-		this.id = id;
+		this.id = Objects.requireNonNull(id, "id");
 	}
 
 	public String getId() {
@@ -13,6 +15,6 @@ public abstract class DiagramConfiguration {
 	}
 
 	public void setId(String id) {
-		this.id = id;
+		this.id = Objects.requireNonNull(id, "id");
 	}
 }

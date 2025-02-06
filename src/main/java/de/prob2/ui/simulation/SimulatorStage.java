@@ -316,33 +316,20 @@ public final class SimulatorStage extends Stage {
 	private ProgressBar progressBar;
 
 	private final StageManager stageManager;
-
 	private final CurrentProject currentProject;
-
 	private final CurrentTrace currentTrace;
-
 	private final Injector injector;
-
 	private final RealTimeSimulator realTimeSimulator;
-
 	private final MachineLoader machineLoader;
-
 	private final I18n i18n;
-
 	private final FileChooserManager fileChooserManager;
-
 	private final SimulationSaver simulationSaver;
-
 	private final TraceFileHandler traceFileHandler;
-
+	private final SimulationFileHandler simulationFileHandler;
 	private final DisablePropertyController disablePropertyController;
-
 	private final ObjectProperty<Path> configurationPath;
-
 	private final BooleanProperty savedProperty;
-
 	private final SimulationItemHandler simulationItemHandler;
-
 	private final SimulationMode simulationMode;
 
 	private int time;
@@ -356,13 +343,13 @@ public final class SimulatorStage extends Stage {
 
 	@Inject
 	public SimulatorStage(
-		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-		final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
-		final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
-		final I18n i18n, final FileChooserManager fileChooserManager,
-		final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
-		final DisablePropertyController disablePropertyController,
-		final StopActions stopActions
+			final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
+			final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
+			final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
+			final I18n i18n, final FileChooserManager fileChooserManager,
+			final SimulationSaver simulationSaver, final TraceFileHandler traceFileHandler,
+			final DisablePropertyController disablePropertyController,
+			final StopActions stopActions, SimulationFileHandler simulationFileHandler
 	) {
 		super();
 		this.stageManager = stageManager;
@@ -379,6 +366,7 @@ public final class SimulatorStage extends Stage {
 		this.simulationSaver = simulationSaver;
 		this.traceFileHandler = traceFileHandler;
 		this.disablePropertyController = disablePropertyController;
+		this.simulationFileHandler = simulationFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
 		this.savedProperty = new SimpleBooleanProperty(this, "savedProperty", true);
 		this.time = 0;
@@ -572,7 +560,7 @@ public final class SimulatorStage extends Stage {
 				injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
 				if (lastSimulator.isNull().get() || !lastSimulator.get().equals(realTimeSimulator)) {
 					this.time = 0;
-					SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, currentTrace.getStateSpace().getLoadedMachine(), configPath);
+					this.simulationFileHandler.initSimulator(this, realTimeSimulator, currentTrace.getStateSpace().getLoadedMachine(), configPath);
 				}
 				realTimeSimulator.run();
 				startTimer(realTimeSimulator);
@@ -580,22 +568,15 @@ public final class SimulatorStage extends Stage {
 				List<Path> timedTraces = ((SimulationBlackBoxModelConfiguration) config).getTimedTraces();
 				configPath = timedTraces.get((int) (Math.random() * timedTraces.size()));
 				injector.getInstance(Scheduler.class).setSimulator(realTimeSimulator);
-				try {
-					this.time = 0;
-					ISimulationModelConfiguration modelConfiguration = SimulationFileHandler.constructConfiguration(configPath, currentTrace.getStateSpace().getLoadedMachine());
-					realTimeSimulator.initSimulator(modelConfiguration);
-					Trace trace = new Trace(currentTrace.getStateSpace());
-					currentTrace.set(trace);
-					realTimeSimulator.setupBeforeSimulation(trace);
-					trace.setExploreStateByDefault(false);
-					realTimeSimulator.run();
-					startTimer(realTimeSimulator);
-					trace.setExploreStateByDefault(true);
-				} catch (IOException e) {
-					final Alert alert = stageManager.makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");
-					alert.initOwner(this);
-					alert.showAndWait();
-				}
+				this.time = 0;
+				this.simulationFileHandler.initSimulator(this, realTimeSimulator, currentTrace.getStateSpace().getLoadedMachine(), configPath);
+				Trace trace = new Trace(currentTrace.getStateSpace());
+				currentTrace.set(trace);
+				realTimeSimulator.setupBeforeSimulation(trace);
+				trace.setExploreStateByDefault(false);
+				realTimeSimulator.run();
+				startTimer(realTimeSimulator);
+				trace.setExploreStateByDefault(true);
 			}
 		}
 	}
@@ -774,7 +755,7 @@ public final class SimulatorStage extends Stage {
 			lbTime.setText("");
 			this.time = 0;
 			simulationItemHandler.reset(simulation);
-			SimulationHelperFunctions.initSimulator(stageManager, this, realTimeSimulator, stateSpace.getLoadedMachine(), configurationPath.get());
+			this.simulationFileHandler.initSimulator(this, realTimeSimulator, stateSpace.getLoadedMachine(), configurationPath.get());
 			simulationItemHandler.setSimulationModelConfiguration(realTimeSimulator.getConfig());
 			loadSimulationItems();
 		}

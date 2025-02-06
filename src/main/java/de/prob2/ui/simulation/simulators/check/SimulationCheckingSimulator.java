@@ -18,8 +18,8 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.EvaluationMode;
 import de.prob2.ui.simulation.SimulationError;
-import de.prob2.ui.simulation.SimulationHelperFunctions;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
@@ -77,42 +77,30 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	}
 
 	private final Injector injector;
+	private final SimulationFileHandler simulationFileHandler;
 
 	private final Map<String, List<Integer>> operationExecutions;
-
 	private final Map<String, List<Integer>> operationEnablings;
-
 	private final List<List<Integer>> resultingTimestamps;
-
 	private final List<Trace> resultingTraces;
-
 	private final List<CheckingStatus> resultingStatus;
-
 	private final int numberExecutions;
-
 	private final int maxStepsBeforeProperty;
-
-	private List<Path> blackBoxTimedTraces;
-
-	private int currentNumberStepsBeforeChecking;
-
-	private boolean startingConditionReached;
-
-	private int startAtStep;
-
-	private int startAtTime;
-
-	private int timing;
-
 	private final Map<String, Object> additionalInformation;
 
+	private List<Path> blackBoxTimedTraces;
+	private int currentNumberStepsBeforeChecking;
+	private boolean startingConditionReached;
+	private int startAtStep;
+	private int startAtTime;
+	private int timing;
 	private SimulationStats stats;
-
 	private MonteCarloCheckResult result;
 
-	public SimulationCheckingSimulator(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
+	public SimulationCheckingSimulator(CurrentTrace currentTrace, CurrentProject currentProject, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
 		super(currentTrace, currentProject);
 		this.injector = injector;
+		this.simulationFileHandler = simulationFileHandler;
 		this.operationExecutions = new HashMap<>();
 		this.operationEnablings = new HashMap<>();
 		this.resultingTraces = new ArrayList<>();
@@ -133,26 +121,26 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	@Override
 	public boolean endingConditionReached(Trace trace) {
-		if(super.endingConditionReached(trace)) {
+		if (super.endingConditionReached(trace)) {
 			return true;
 		}
-		if(!startingConditionReached) {
+		if (!startingConditionReached) {
 			return false;
 		}
-		if(additionalInformation.containsKey("STEPS_PER_EXECUTION")) {
+		if (additionalInformation.containsKey("STEPS_PER_EXECUTION")) {
 			int stepsPerExecution = (int) additionalInformation.get("STEPS_PER_EXECUTION");
 			return stepCounter >= stepsPerExecution + startAtStep;
-		} else if(additionalInformation.containsKey("ENDING_PREDICATE")) {
+		} else if (additionalInformation.containsKey("ENDING_PREDICATE")) {
 			String predicate = (String) additionalInformation.get("ENDING_PREDICATE");
 			State state = trace.getCurrentState();
-			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), predicate, mode);
-			if(evalResult.startsWith("TRUE")) {
+			if (evalResult.startsWith("TRUE")) {
 				return true;
-			} else if(!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
+			} else if (!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
 				throw new SimulationError("Ending predicate is not of type boolean");
 			}
-		} else if(additionalInformation.containsKey("ENDING_TIME")) {
+		} else if (additionalInformation.containsKey("ENDING_TIME")) {
 			int endingTime = (int) additionalInformation.get("ENDING_TIME");
 			return time.get() > startAtTime + endingTime;
 		}
@@ -162,51 +150,51 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	@Override
 	public void updateStartingInformation(Trace trace) {
 		super.updateStartingInformation(trace);
-		if(stepCounter < currentNumberStepsBeforeChecking || startingConditionReached) {
+		if (stepCounter < currentNumberStepsBeforeChecking || startingConditionReached) {
 			return;
 		}
-		if(additionalInformation.containsKey("START_AFTER_STEPS")) {
+		if (additionalInformation.containsKey("START_AFTER_STEPS")) {
 			int startAfterSteps = (int) additionalInformation.get("START_AFTER_STEPS");
-			if(stepCounter >= startAfterSteps) {
+			if (stepCounter >= startAfterSteps) {
 				setStartingInformation();
 			}
-		} else if(additionalInformation.containsKey("STARTING_PREDICATE")) {
+		} else if (additionalInformation.containsKey("STARTING_PREDICATE")) {
 			String predicate = (String) additionalInformation.get("STARTING_PREDICATE");
 			State state = trace.getCurrentState();
-			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), predicate, mode);
 			if (evalResult.startsWith("TRUE")) {
 				setStartingInformation();
 			} else if (!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
 				throw new SimulationError("Starting predicate is not of type boolean");
 			}
-		} else if(additionalInformation.containsKey("STARTING_PREDICATE_ACTIVATED")) {
+		} else if (additionalInformation.containsKey("STARTING_PREDICATE_ACTIVATED")) {
 
 			State previousState = trace.getPreviousState();
 
-			if(previousState == null || !previousState.isInitialised()) {
+			if (previousState == null || !previousState.isInitialised()) {
 				return;
 			}
 
 			String predicate = (String) additionalInformation.get("STARTING_PREDICATE_ACTIVATED");
-			SimulationHelperFunctions.EvaluationMode previousMode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			EvaluationMode previousMode = EvaluationMode.extractMode(currentTrace.getModel());
 			String previousEvalResult = simulationEventHandler.getCache().readValueWithCaching(previousState, this.getVariables(), predicate, previousMode);
 
 			State currentState = trace.getCurrentState();
-			SimulationHelperFunctions.EvaluationMode currentMode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			EvaluationMode currentMode = EvaluationMode.extractMode(currentTrace.getModel());
 			String currentEvalResult = simulationEventHandler.getCache().readValueWithCaching(currentState, this.getVariables(), predicate, currentMode);
 
 
 			if (currentEvalResult.startsWith("TRUE")) {
-				if("FALSE".equals(previousEvalResult)) {
+				if ("FALSE".equals(previousEvalResult)) {
 					setStartingInformation();
 				}
 			} else if (!"FALSE".equals(currentEvalResult) && !currentEvalResult.startsWith("NOT-INITIALISED")) {
 				throw new SimulationError("Starting predicate is not of type boolean");
 			}
-		} else if(additionalInformation.containsKey("STARTING_TIME")) {
+		} else if (additionalInformation.containsKey("STARTING_TIME")) {
 			int startingTime = (int) additionalInformation.get("STARTING_TIME");
-			if(time.get() >= startingTime) {
+			if (time.get() >= startingTime) {
 				setStartingInformation();
 			}
 		} else {
@@ -219,10 +207,10 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		startAtStep = stepCounter;
 		startAtTime = time.get();
 
-		if(additionalInformation.containsKey("TIME")) {
+		if (additionalInformation.containsKey("TIME")) {
 			String time = String.valueOf(this.getAdditionalInformation().get("TIME"));
 			State state = currentTrace.getCurrentState();
-			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), time, mode);
 			timing = Integer.parseInt(evalResult);
 		}
@@ -235,15 +223,15 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	private void initBlackBoxBeforeSimulation(boolean isBlackBox) {
 		blackBoxTimedTraces.clear();
-		if(isBlackBox) {
+		if (isBlackBox) {
 			blackBoxTimedTraces = ((SimulationBlackBoxModelConfiguration) config).getTimedTraces();
 		}
 	}
 
 	private void initForBlackBoxValidationIfNecessary(boolean isBlackBox, int index) {
-		if(isBlackBox) {
+		if (isBlackBox) {
 			try {
-				this.initSimulator(SimulationFileHandler.constructConfiguration(blackBoxTimedTraces.get(index), currentTrace.getStateSpace().getLoadedMachine()));
+				this.initSimulator(this.simulationFileHandler.constructConfiguration(blackBoxTimedTraces.get(index), currentTrace.getStateSpace().getLoadedMachine()));
 			} catch (Exception e) {
 				Platform.runLater(() -> {
 					final Alert alert = injector.getInstance(StageManager.class).makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");
@@ -278,7 +266,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 				CheckingStatus status = simulationPropertyChecker.checkTrace(newTrace, time.get());
 				resultingStatus.add(status);
 				collectOperationStatistics(newTrace);
-				if(i == numberExecutions - 1) {
+				if (i == numberExecutions - 1) {
 					injector.getInstance(SimulatorStage.class).resetSimulationStatistics();
 				} else {
 					injector.getInstance(SimulatorStage.class).updateSimulationStatistics(i + 1, numberExecutions);
@@ -302,7 +290,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 
 	@Override
 	public void check() {
-		if(this.resultingTraces.size() == numberExecutions) {
+		if (this.resultingTraces.size() == numberExecutions) {
 			this.result = MonteCarloCheckResult.SUCCESS;
 		} else {
 			this.result = MonteCarloCheckResult.FAIL;
@@ -318,7 +306,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	private void collectOperationStatistics(Trace trace) {
 		Map<String, Integer> operationExecutionsTrace = new HashMap<>();
 		Map<String, Integer> operationEnablingsTrace = new HashMap<>();
-		for(Transition transition : trace.getTransitionList()) {
+		for (Transition transition : trace.getTransitionList()) {
 			String opName = transition.getName();
 
 			//update executed operations
@@ -333,7 +321,7 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 						operationEnablingsTrace.computeIfPresent(enabledOp, (key, val) -> val + 1);
 					});
 		}
-		for(String key : operationEnablingsTrace.keySet()) {
+		for (String key : operationEnablingsTrace.keySet()) {
 			//update enabled operations for all traces
 			int addedEnabling = operationEnablingsTrace.getOrDefault(key, 0);
 
@@ -367,14 +355,14 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 		Map<String, Integer> executionsResult = new HashMap<>();
 		Map<String, Integer> enablingsResult = new HashMap<>();
 		Map<String, Double> percentageResult = new HashMap<>();
-		for(String key : operationEnablings.keySet()) {
+		for (String key : operationEnablings.keySet()) {
 			int absoluteExecutions = operationExecutions.get(key).stream().reduce(0, Integer::sum);
 			int absoluteEnablings = operationEnablings.get(key).stream().reduce(0, Integer::sum);
 			int operationExecutionsValue = (int) Math.round((double) absoluteExecutions);
 			int operationEnablingsValue = (int) Math.round((double) absoluteEnablings);
 			executionsResult.put(key, operationExecutionsValue);
 			enablingsResult.put(key, operationEnablingsValue);
-			percentageResult.put(key, (double) absoluteExecutions/absoluteEnablings);
+			percentageResult.put(key, (double) absoluteExecutions / absoluteEnablings);
 		}
 		return new SimulationExtendedStats(executionsResult, enablingsResult, percentageResult);
 	}

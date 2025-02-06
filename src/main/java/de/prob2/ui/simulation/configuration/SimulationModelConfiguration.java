@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.configuration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -47,7 +48,7 @@ public class SimulationModelConfiguration implements HasMetadata, ISimulationMod
 		this.variables = variables;
 		this.activations = activations;
 		this.uiListenerConfigurations = uiListenerConfigurations;
-		this.metadata = metadata;
+		this.metadata = Objects.requireNonNull(metadata, "metadata");
 	}
 
 	public static JsonMetadataBuilder metadataBuilder(SimulationFileType fileType) {

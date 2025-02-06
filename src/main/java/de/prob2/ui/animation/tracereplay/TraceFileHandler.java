@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
@@ -49,6 +50,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public final class TraceFileHandler {
 
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";

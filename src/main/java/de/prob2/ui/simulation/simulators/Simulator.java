@@ -29,7 +29,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
 public abstract class Simulator {

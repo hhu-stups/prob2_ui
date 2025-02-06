@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.configuration;
 
 import java.util.Map;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -11,11 +12,11 @@ public class ActivationChoiceConfiguration extends DiagramConfiguration {
 
 	public ActivationChoiceConfiguration(String id, Map<String, String> activations) {
 		super(id);
-		this.activations = activations;
+		this.activations = Objects.requireNonNull(activations, "activations");
 	}
 
 	public void setActivations(Map<String, String> activations) {
-		this.activations = activations;
+		this.activations = Objects.requireNonNull(activations, "activations");
 	}
 
 	public Map<String, String> getActivations() {

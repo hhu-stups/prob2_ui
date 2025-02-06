@@ -13,15 +13,14 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.SimulationHelperFunctions;
-import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
+import de.prob2.ui.simulation.EvaluationMode;
 
 public class SimulatorCache {
 	private final Map<String, IEvalElement> formulasCache = new HashMap<>();
 
 	private final Map<String, Map<String, Map<String, List<Transition>>>> transitionCache = new HashMap<>();
 
-	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, SimulationHelperFunctions.EvaluationMode mode) {
+	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, EvaluationMode mode) {
 		// Replace SimB variables (starting with $ first) before caching
 		if(variables != null && !variables.isEmpty() && expression.contains("$")) {
 			for(Map.Entry<String, String> entry : variables.entrySet()) {
