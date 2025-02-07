@@ -2,7 +2,9 @@ package de.prob2.ui.simulation.configuration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -13,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 	"execute",
 	// For all other properties, the default order (i. e. field order in class) is used.
 })
-public class ActivationOperationConfiguration extends DiagramConfiguration {
+public final class ActivationOperationConfiguration extends DiagramConfiguration.NonUi {
 
 	public enum ActivationKind {
 		SINGLE("single"),
@@ -29,39 +31,34 @@ public class ActivationOperationConfiguration extends DiagramConfiguration {
 
 		@JsonValue
 		public String getName() {
-			return name;
+			return this.name;
 		}
-
 	}
 
 	private String execute;
-
 	private String after;
-
 	private int priority;
-
 	private String additionalGuards;
-
 	private ActivationKind activationKind;
-
 	private Map<String, String> fixedVariables;
-
 	private Object probabilisticVariables;
-
 	private List<String> activating;
-
 	private boolean activatingOnlyWhenExecuted;
-
 	private Map<String, String> updating;
-
 	private String withPredicate;
 
-	public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
+	@JsonCreator
+	public ActivationOperationConfiguration(
+			@JsonProperty(value = "id", required = true) String id,
+			@JsonProperty(value = "execute", required = true) String op,
+			@JsonProperty(value = "after", defaultValue = "0") String time,
+			@JsonProperty(value = "priority", defaultValue = "0") int priority,
+			String additionalGuards, ActivationKind activationKind,
 			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
 			Map<String, String> updating, String withPredicate) {
 		super(id);
-		this.execute = op;
-		this.after = time;
+		this.execute = Objects.requireNonNull(op, "execute");
+		this.after = time != null ? time : "0";
 		this.priority = priority;
 		this.additionalGuards = additionalGuards;
 		this.activationKind = activationKind;
