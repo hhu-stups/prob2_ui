@@ -79,6 +79,6 @@ public final class SimulationModelConfiguration implements HasMetadata, ISimulat
 
 	@Override
 	public HasMetadata withMetadata(final JsonMetadata metadata) {
-		return new SimulationModelConfiguration(this.getVariables(), this.getActivationConfigurations(), this.getUiListenerConfigurations(), this.getMetadata());
+		return new SimulationModelConfiguration(this.getVariables(), this.getActivationConfigurations(), this.getUiListenerConfigurations(), metadata);
 	}
 }
