@@ -19,16 +19,17 @@ import de.prob.json.JsonMetadataBuilder;
 	"listeners",
 	"metadata",
 })
-@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public final class SimulationModelConfiguration implements HasMetadata, ISimulationModelConfiguration {
 
 	public static final String FILE_TYPE = "Simulation";
 	public static final int CURRENT_FORMAT_VERSION = 3;
 
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private final Map<String, String> variables;
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private final List<DiagramConfiguration> activations;
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private final List<UIListenerConfiguration> uiListenerConfigurations;
-	@JsonInclude
 	private final JsonMetadata metadata;
 
 	@JsonCreator

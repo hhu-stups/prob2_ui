@@ -131,7 +131,7 @@ public abstract class Simulator {
 						.filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
 						.map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
 						.forEach(activationConfiguration -> {
-							String opName = activationConfiguration.getOpName();
+							String opName = activationConfiguration.getExecute();
 							operationToActivations.putIfAbsent(opName, new HashSet<>());
 							operationToActivations.get(opName).add(activationConfiguration.getId());
 						});

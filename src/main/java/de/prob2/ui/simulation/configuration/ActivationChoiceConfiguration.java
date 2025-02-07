@@ -14,28 +14,24 @@ import com.google.common.base.MoreObjects;
 public final class ActivationChoiceConfiguration extends DiagramConfiguration.NonUi {
 
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private Map<String, String> activations;
+	private Map<String, String> chooseActivation;
 
 	@JsonCreator
 	public ActivationChoiceConfiguration(
 			@JsonProperty(value = "id", required = true) String id,
-			@JsonProperty("chooseActivation") Map<String, String> activations
+			@JsonProperty("chooseActivation") Map<String, String> chooseActivation
 	) {
 		super(id);
-		this.activations = activations != null ? Map.copyOf(activations) : Map.of();
+		this.chooseActivation = chooseActivation != null ? Map.copyOf(chooseActivation) : Map.of();
 	}
 
-	public void setActivations(Map<String, String> activations) {
-		this.activations = activations != null ? Map.copyOf(activations) : Map.of();
+	public void setChooseActivation(Map<String, String> chooseActivation) {
+		this.chooseActivation = chooseActivation != null ? Map.copyOf(chooseActivation) : Map.of();
 	}
 
 	@JsonGetter("chooseActivation")
-	public Map<String, String> getActivations() {
-		return this.activations;
-	}
-
-	public String getActivationsAsString() {
-		return this.activations.toString();
+	public Map<String, String> getChooseActivation() {
+		return this.chooseActivation;
 	}
 
 	@Override
@@ -45,20 +41,22 @@ public final class ActivationChoiceConfiguration extends DiagramConfiguration.No
 		} else if (!(o instanceof ActivationChoiceConfiguration that)) {
 			return false;
 		} else {
-			return Objects.equals(this.getActivations(), that.getActivations());
+			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getChooseActivation(), that.getChooseActivation());
 		}
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getId(), this.getActivations());
+		return Objects.hash(this.getId(), this.getChooseActivation());
 	}
 
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
-				       .add("id", this.getId())
-				       .add("activations", this.getActivations())
-				       .toString();
+				.omitNullValues()
+				.omitEmptyValues()
+				.add("id", this.getId())
+				.add("chooseActivation", this.getChooseActivation())
+				.toString();
 	}
 }

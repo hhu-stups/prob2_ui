@@ -15,6 +15,7 @@ import com.google.common.base.MoreObjects;
 public final class UIListenerConfiguration extends DiagramConfiguration {
 
 	private String event;
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private String predicate;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<String> activating;
@@ -23,12 +24,12 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 	public UIListenerConfiguration(
 			@JsonProperty(value = "id", required = true) String id,
 			@JsonProperty(value = "event", required = true) String event,
-			@JsonProperty(value = "predicate", defaultValue = "1=1") String predicate,
+			@JsonProperty("predicate") String predicate,
 			@JsonProperty("activating") List<String> activating
 	) {
 		super(id);
 		this.event = Objects.requireNonNull(event, "event");
-		this.predicate = predicate != null ? predicate : "1=1";
+		this.predicate = predicate != null && !predicate.isEmpty() && !"1=1".equals(predicate) ? predicate : null;
 		this.activating = activating != null ? List.copyOf(activating) : List.of();
 	}
 
@@ -41,13 +42,18 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 		this.event = Objects.requireNonNull(event, "event");
 	}
 
-	@JsonGetter("predicate")
+	@JsonIgnore
 	public String getPredicate() {
+		return this.predicate != null ? this.predicate : "1=1";
+	}
+
+	@JsonGetter("predicate")
+	private String getPredicateForJson() {
 		return this.predicate;
 	}
 
 	public void setPredicate(String predicate) {
-		this.predicate = predicate;
+		this.predicate = predicate != null && !predicate.isEmpty() && !"1=1".equals(predicate) ? predicate : null;
 	}
 
 	@JsonGetter("activating")
@@ -57,12 +63,6 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 
 	public void setActivating(List<String> activating) {
 		this.activating = activating != null ? List.copyOf(activating) : List.of();
-	}
-
-	@JsonIgnore
-	public String getActivatingAsString() {
-		var s = this.activating.toString();
-		return s.substring(1, s.length() - 1);
 	}
 
 	@Override
@@ -84,10 +84,12 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
-				       .add("id", this.getId())
-				       .add("event", this.getEvent())
-				       .add("predicate", this.getPredicate())
-				       .add("activating", this.getActivating())
-				       .toString();
+				.omitNullValues()
+				.omitEmptyValues()
+				.add("id", this.getId())
+				.add("event", this.getEvent())
+				.add("predicate", this.getPredicate())
+				.add("activating", this.getActivating())
+				.toString();
 	}
 }

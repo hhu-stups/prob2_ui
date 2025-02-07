@@ -39,7 +39,7 @@ public class SimulationModelConfigurationChecker {
 	@SuppressWarnings("unchecked")
 	private void checkActivationOperationConfiguration(ActivationOperationConfiguration activation) {
 		Object probability = activation.getProbabilisticVariables();
-		String activatedOp = activation.getOpName();
+		String activatedOp = activation.getExecute();
 		if(Transition.isArtificialTransitionName(activatedOp)) {
 			return;
 		}

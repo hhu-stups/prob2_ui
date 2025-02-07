@@ -270,9 +270,9 @@ public class SimulationEventHandler {
 								 List<String> parametersAsString, String parameterPredicates) {
 		double probabilityMinimum = 0.0;
 		double randomDouble = random.nextDouble();
-		for(String id : activationChoiceConfiguration.getActivations().keySet()) {
+		for(String id : activationChoiceConfiguration.getChooseActivation().keySet()) {
 			DiagramConfiguration activationConfiguration = simulator.getActivationConfigurationMap().get(id);
-			double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, simulator.getVariables(), activationChoiceConfiguration.getActivations().get(id), EvaluationMode.CLASSICAL_B));
+			double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, simulator.getVariables(), activationChoiceConfiguration.getChooseActivation().get(id), EvaluationMode.CLASSICAL_B));
 			if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
 				handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
 			}
@@ -290,7 +290,7 @@ public class SimulationEventHandler {
 			return;
 		}
 		String id = activationOperationConfiguration.getId();
-		String opName = activationOperationConfiguration.getOpName();
+		String opName = activationOperationConfiguration.getExecute();
 		String time = activationOperationConfiguration.getAfter();
 		ActivationOperationConfiguration.ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
 		String additionalGuards = activationOperationConfiguration.getAdditionalGuards();

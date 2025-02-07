@@ -64,11 +64,11 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			clear();
 			switch (item) {
 				case ActivationOperationConfiguration currentItem -> {
-					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getOpName(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
+					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getExecute(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
 					updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
 				}
 				case ActivationChoiceConfiguration currentItem -> {
-					this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getActivations());
+					this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getChooseActivation());
 					updateChoiceDiagramItem((ActivationChoiceConfiguration) this.modifiedItem);
 				}
 				case UIListenerConfiguration currentItem -> {
@@ -96,10 +96,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbOpName = new Label(i18n.translate("simulation.item.operation"));
 		lbOpName.getStyleClass().add("information");
-		TextField tfOpName = new TextField(item.getOpName());
+		TextField tfOpName = new TextField(item.getExecute());
 		tfOpName.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setOpName(from);
+			item.setExecute(from);
 		});
 		tfOpName.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbOpName, tfOpName));
@@ -121,7 +121,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			savedProperty.set(false);
 			try {
 				item.setPriority(Integer.parseInt(to));
-			} catch (NumberFormatException e) {
+			} catch (NumberFormatException ignored) {
 				item.setPriority(0);
 			}
 		});
@@ -131,7 +131,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(item.getActivatingAsString());
+		TextField tfActivation = new TextField(collToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(processActivating(to));
@@ -145,9 +145,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		tfActivationKind.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			try {
-				item.setActivationKind(to.isEmpty() ? null :ActivationOperationConfiguration.ActivationKind.valueOf(to));
-			} catch (IllegalArgumentException e) {
-				item.setActivationKind(null);
+				item.setActivationKind(ActivationOperationConfiguration.ActivationKind.fromName(to));
+			} catch (IllegalArgumentException ignored) {
+				item.setActivationKind(ActivationOperationConfiguration.ActivationKind.MULTI);
 			}
 		});
 		tfActivationKind.disableProperty().bind(this.runningProperty);
@@ -166,7 +166,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbFixedVariables = new Label(i18n.translate("simulation.item.fixedVariables"));
 		lbFixedVariables.getStyleClass().add("information");
-		TextField tfFixedVariables = new TextField(item.getFixedVariablesAsString());
+		TextField tfFixedVariables = new TextField(collToString(item.getFixedVariables()));
 		tfFixedVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setFixedVariables(processFixedVariables(to));
@@ -176,7 +176,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables"));
 		lbProbabilisticVariables.getStyleClass().add("information");
-		TextField tfProbabilisticVariables = new TextField(item.getProbabilisticVariablesAsString());
+		TextField tfProbabilisticVariables = new TextField(collToString(item.getProbabilisticVariables()));
 		tfProbabilisticVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setProbabilisticVariables(processProbabilisticVariables(to));
@@ -196,10 +196,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(item.getActivationsAsString());
+		TextField tfActivation = new TextField(collToString(item.getChooseActivation()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setActivations(processChoiceActivation(to));
+			item.setChooseActivation(processChoiceActivation(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
@@ -230,7 +230,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		TextField tfPredicate = new TextField(item.getPredicate());
 		tfPredicate.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setPredicate(to.isEmpty() ? null : to);
+			item.setPredicate(to.isEmpty() ? "1=1" : to);
 		});
 		tfPredicate.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbPredicate, tfPredicate));
@@ -238,7 +238,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(item.getActivatingAsString());
+		TextField tfActivation = new TextField(collToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(processActivating(to));
@@ -246,6 +246,17 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 
+	}
+
+	private static String collToString(Object o) {
+		var s = o.toString();
+		if (s.startsWith("[")) {
+			s = s.substring(1);
+		}
+		if (s.endsWith("]")) {
+			s = s.substring(0, s.length() - 1);
+		}
+		return s;
 	}
 
 	private static List<String> processActivating(String activating) {
