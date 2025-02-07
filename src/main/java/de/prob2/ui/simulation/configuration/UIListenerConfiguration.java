@@ -88,7 +88,7 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 				.omitEmptyValues()
 				.add("id", this.getId())
 				.add("event", this.getEvent())
-				.add("predicate", this.getPredicate())
+				.add("predicate", this.getPredicateForJson())
 				.add("activating", this.getActivating())
 				.toString();
 	}
