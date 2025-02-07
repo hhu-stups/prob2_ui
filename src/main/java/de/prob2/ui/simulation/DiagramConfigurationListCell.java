@@ -249,7 +249,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 	}
 
 	private static String collToString(Object o) {
-		var s = o.toString();
+		var s = o != null ? o.toString() : "";
 		if (s.startsWith("[")) {
 			s = s.substring(1);
 		}
