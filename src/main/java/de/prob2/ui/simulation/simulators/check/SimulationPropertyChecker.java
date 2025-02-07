@@ -1,11 +1,12 @@
 package de.prob2.ui.simulation.simulators.check;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
@@ -32,10 +33,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	private final List<Double> estimatedValues;
 
-	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, CurrentTrace currentTrace, CurrentProject currentProject, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty,
+	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, CurrentTrace currentTrace, CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty,
 	                                 SimulationCheckingType type, Map<String, Object> additionalInformation) {
 		this.hypothesisCheckerOrEstimator = hypothesisCheckerOrEstimator;
-		this.simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, additionalInformation);
+		this.simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
 		this.numberSuccess = 0;

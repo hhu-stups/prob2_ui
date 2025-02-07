@@ -31,48 +31,36 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Provider;
+
 public abstract class Simulator {
 
-	protected ISimulationModelConfiguration config;
-
-	protected Map<String, String> variables;
-
-	protected final IntegerProperty time;
-
-	protected int delay;
-
-	protected int stepCounter;
-
-	protected Map<String, List<Activation>> configurationToActivation;
-
-	protected List<ActivationOperationConfiguration> activationConfigurationsSorted;
-
-	protected Map<String, DiagramConfiguration> activationConfigurationMap;
-
-	protected Map<String, Set<String>> operationToActivations;
-
 	protected final CurrentTrace currentTrace;
-
 	protected final CurrentProject currentProject;
-
+	private final Provider<ObjectMapper> objectMapperProvider;
 	protected final SimulationEventHandler simulationEventHandler;
-
+	protected final IntegerProperty time;
 	protected final ChangeListener<? super Trace> traceListener;
-
+	protected ISimulationModelConfiguration config;
+	protected Map<String, String> variables;
+	protected int delay;
+	protected int stepCounter;
+	protected Map<String, List<Activation>> configurationToActivation;
+	protected List<ActivationOperationConfiguration> activationConfigurationsSorted;
+	protected Map<String, DiagramConfiguration> activationConfigurationMap;
+	protected Map<String, Set<String>> operationToActivations;
 	protected List<Integer> timestamps;
-
 	protected int maxTransitionsBeforeInitialisation;
-
 	protected int maxTransitions;
-
 	protected boolean noActivationQueued;
-
 	protected ExternalSimulatorExecutor externalSimulatorExecutor;
 
-	public Simulator(final CurrentTrace currentTrace, final CurrentProject currentProject) {
+	public Simulator(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider) {
 		super();
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.objectMapperProvider = objectMapperProvider;
 		this.simulationEventHandler = new SimulationEventHandler(this, currentTrace, currentProject);
 		this.time = new SimpleIntegerProperty(0);
 		this.stepCounter = 0;
@@ -155,12 +143,12 @@ public abstract class Simulator {
 				currentTrace.removeListener(traceListener);
 			} else if(config instanceof SimulationExternalConfiguration) {
 				if(this.externalSimulatorExecutor == null) {
-					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this, ((SimulationExternalConfiguration) config).getExternalPath());
+					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this.objectMapperProvider.get(), this, ((SimulationExternalConfiguration) config).getExternalPath());
 					this.externalSimulatorExecutor.start();
 				} else {
 					if(!this.externalSimulatorExecutor.getPythonFile().equals(((SimulationExternalConfiguration) config).getExternalPath())) {
 						this.externalSimulatorExecutor.close();
-						this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this, ((SimulationExternalConfiguration) config).getExternalPath());
+						this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this.objectMapperProvider.get(), this, ((SimulationExternalConfiguration) config).getExternalPath());
 						this.externalSimulatorExecutor.start();
 					} else {
 						this.externalSimulatorExecutor.reset();

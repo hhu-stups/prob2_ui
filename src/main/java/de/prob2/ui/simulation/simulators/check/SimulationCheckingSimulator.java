@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
@@ -97,8 +99,8 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	private SimulationStats stats;
 	private MonteCarloCheckResult result;
 
-	public SimulationCheckingSimulator(CurrentTrace currentTrace, CurrentProject currentProject, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
-		super(currentTrace, currentProject);
+	public SimulationCheckingSimulator(CurrentTrace currentTrace, CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
+		super(currentTrace, currentProject, objectMapperProvider);
 		this.injector = injector;
 		this.simulationFileHandler = simulationFileHandler;
 		this.operationExecutions = new HashMap<>();

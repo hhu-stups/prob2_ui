@@ -1,16 +1,16 @@
 package de.prob2.ui.simulation;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -34,6 +34,7 @@ public final class SimulationItemHandler {
 
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
+	private final Provider<ObjectMapper> objectMapperProvider;
 	private final CliTaskExecutor cliExecutor;
 	private final SimulationFileHandler simulationFileHandler;
 	private final Injector injector;
@@ -42,9 +43,10 @@ public final class SimulationItemHandler {
 	private ISimulationModelConfiguration simulationModelConfiguration;
 
 	@Inject
-	private SimulationItemHandler(CurrentProject currentProject, CurrentTrace currentTrace, I18n i18n, CliTaskExecutor cliExecutor, SimulationFileHandler simulationFileHandler, Injector injector) {
+	private SimulationItemHandler(CurrentProject currentProject, CurrentTrace currentTrace, Provider<ObjectMapper> objectMapperProvider, CliTaskExecutor cliExecutor, SimulationFileHandler simulationFileHandler, Injector injector) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
+		this.objectMapperProvider = objectMapperProvider;
 		this.cliExecutor = cliExecutor;
 		this.simulationFileHandler = simulationFileHandler;
 		this.injector = injector;
@@ -96,7 +98,7 @@ public final class SimulationItemHandler {
 		int executions = item.getField("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) simulationModelConfiguration).getTimedTraces().size() : (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, injector, simulationFileHandler, executions, maxStepsBeforeProperty, additionalInformation);
+		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, executions, maxStepsBeforeProperty, additionalInformation);
 		this.simulationFileHandler.initSimulator(injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, currentTrace.getStateSpace().getLoadedMachine(), path);
 		runAndCheck(item, simulationCheckingSimulator);
 	}
@@ -132,7 +134,7 @@ public final class SimulationItemHandler {
 	}
 
 	private void initializeHypothesisChecker(SimulationHypothesisChecker simulationHypothesisChecker, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		simulationHypothesisChecker.initialize(currentTrace, currentProject, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		simulationHypothesisChecker.initialize(currentTrace, currentProject, objectMapperProvider, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 		this.simulationFileHandler.initSimulator(injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), currentTrace.getStateSpace().getLoadedMachine(), path);
 	}
 
@@ -171,7 +173,7 @@ public final class SimulationItemHandler {
 	}
 
 	private void initializeEstimator(SimulationEstimator simulationEstimator, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		simulationEstimator.initialize(currentTrace, currentProject, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		simulationEstimator.initialize(currentTrace, currentProject, objectMapperProvider, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 		this.simulationFileHandler.initSimulator(injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), currentTrace.getStateSpace().getLoadedMachine(), path);
 	}
 

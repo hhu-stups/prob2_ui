@@ -7,7 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -149,8 +151,8 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 		this.significance = significance;
 	}
 
-	public void initialize(final CurrentTrace currentTrace, final CurrentProject currentProject, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationPropertyChecker(this, currentTrace, currentProject, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+	public void initialize(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		this.simulationPropertyChecker = new SimulationPropertyChecker(this, currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	@Override

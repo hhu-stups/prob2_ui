@@ -3,14 +3,14 @@ package de.prob2.ui.simulation.external;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class ExternalSimulationStep {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public final class ExternalSimulationStep {
 
 	private String op;
-
 	private String predicate;
-
 	private String delta;
-
 	private boolean done;
 
 	public ExternalSimulationStep(String op, String predicate, String delta, boolean done) {
