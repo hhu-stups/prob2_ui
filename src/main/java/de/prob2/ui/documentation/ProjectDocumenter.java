@@ -136,7 +136,7 @@ public class ProjectDocumenter {
 		Files.createDirectories(directory.resolve(htmlDirectory));
 		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
 		StateSpace stateSpace = currentProject.loadMachineWithConfirmation(machine).join().getStateSpace();
-		trace.execute(new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, null));
+		trace.execute(new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, null, i18n));
 		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getTrace(), directory.resolve(htmlPath));
 		stateSpace.execute(cmd);
 		return htmlPath.toString();

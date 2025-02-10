@@ -1,14 +1,22 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 
 import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.prob.animator.command.GetInternalRepresentationCommand;
+import de.prob.animator.domainobjects.FormulaTranslationMode;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob.check.TLCModelCheckingOptions;
-import de.prob.scripting.ClassicalBFactory;
+import de.prob.model.classicalb.ClassicalBModel;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.representation.AbstractModel;
+import de.prob.statespace.FormalismType;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -16,6 +24,8 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.project.Project;
+import de.prob2.ui.project.machines.Machine;
 import de.tlc4b.TLC4B;
 import de.tlc4b.TLC4BOption;
 
@@ -225,27 +235,22 @@ public class TLCModelCheckingTab extends Tab {
 
 		this.checkedTlcApplicable = true;
 
-		// TODO: support other languages by pretty printing internal representation (Event-B)?
-		//  (with current internal repr. not automatically possible)
-		if (currentProject.getCurrentMachine().getModelFactoryClass() == ClassicalBFactory.class) {
-			Path machinePath = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
-			Thread thread = new Thread(() -> {
-				try {
-					TLC4B.checkTLC4BIsApplicable(machinePath.toString());
-				} catch (BCompoundException | RuntimeException exc) {
-					LOGGER.warn("TLC4B is not applicable to this machine", exc);
-					Platform.runLater(() -> this.tlcApplicableError.set(exc.getMessage()));
-					return;
-				}
+		Thread thread = new Thread(() -> {
+			try {
+				Path machinePath = getClassicalBMachine(currentProject, currentTrace.getStateSpace(), i18n);
+				// TODO: show info when internal representation is used
+				TLC4B.checkTLC4BIsApplicable(machinePath.toString());
+			} catch (BCompoundException | RuntimeException exc) {
+				LOGGER.warn("TLC4B is not applicable to this machine", exc);
+				Platform.runLater(() -> this.tlcApplicableError.set(exc.getMessage()));
+				return;
+			}
 
-				Platform.runLater(() -> this.tlcApplicableError.set(null));
-			}, "TLC4B applicability checker");
-			// Don't let this thread keep the JVM alive if it's still running when the UI exits.
-			thread.setDaemon(true);
-			thread.start();
-		} else {
-			this.tlcApplicableError.set(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.onlyClassicalB"));
-		}
+			Platform.runLater(() -> this.tlcApplicableError.set(null));
+		}, "TLC4B applicability checker");
+		// Don't let this thread keep the JVM alive if it's still running when the UI exits.
+		thread.setDaemon(true);
+		thread.start();
 	}
 
 	public ModelCheckingItem getResult() {
@@ -285,6 +290,36 @@ public class TLCModelCheckingTab extends Tab {
 		if (options.containsKey(TLC4BOption.OUTPUT)) {
 			tfSaveLocation.setText(options.get(TLC4BOption.OUTPUT));
 		}
+	}
+
+	public static Path getClassicalBMachine(CurrentProject currentProject, StateSpace stateSpace, I18n i18n) {
+		return getClassicalBMachine(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, i18n);
+	}
+
+	public static Path getClassicalBMachine(Project project, Machine machine, StateSpace stateSpace, I18n i18n) {
+		Path machinePath;
+		AbstractModel model = stateSpace.getModel();
+		if (model instanceof ClassicalBModel) {
+			machinePath = project.getLocation().resolve(machine.getLocation());
+		} else if (model.getFormalismType() == FormalismType.B) { // if not classical B: use internal representation
+			if (model instanceof EventBModel && !stateSpace.getCurrentPreference("NUMBER_OF_ANIMATED_ABSTRACTIONS").equals("0")) {
+				throw new RuntimeException(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.eventBAnimatedAbstractionsError"));
+			}
+			try { // translate Event-B/Alloy etc. to internal classical B representation
+				machinePath = Files.createTempFile("b_internal_rep_",".mch");
+				GetInternalRepresentationCommand cmd = new GetInternalRepresentationCommand();
+				cmd.setTranslationMode(FormulaTranslationMode.ATELIERB);
+				cmd.setTypeInfos(GetInternalRepresentationCommand.TypeInfos.NEEDED);
+				stateSpace.execute(cmd);
+				Files.writeString(machinePath, cmd.getPrettyPrint());
+				machinePath.toFile().deleteOnExit();
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
+		} else { // model has no classical B internal representation
+			throw new RuntimeException(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.onlyClassicalB"));
+		}
+		return machinePath;
 	}
 }
 

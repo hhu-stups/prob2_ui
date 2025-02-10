@@ -3,7 +3,9 @@ package de.prob2.ui.internal;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.guava.GuavaModule;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -15,6 +17,7 @@ import com.google.inject.Singleton;
 
 import de.jangassen.MenuToolkit;
 import de.prob.MainModule;
+import de.prob.json.GsonStylePrettyPrinter;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.menu.OpenFile;
@@ -92,12 +95,20 @@ public class ProB2Module extends AbstractModule {
 
 	@Provides
 	public static ObjectMapper provideObjectMapper() {
-		return new ObjectMapper()
-			       .registerModule(new ParameterNamesModule())
-			       .registerModule(new Jdk8Module())
-			       .registerModule(new JavaTimeModule())
-			       .registerModule(new GuavaModule())
-			       .registerModule(new ProB2UIJacksonModule());
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+		objectMapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		objectMapper.disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS);
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+		objectMapper.setDefaultPrettyPrinter(new GsonStylePrettyPrinter());
+		objectMapper
+				.registerModule(new ParameterNamesModule())
+				.registerModule(new Jdk8Module())
+		        .registerModule(new JavaTimeModule())
+		        .registerModule(new GuavaModule())
+		        .registerModule(new ProB2UIJacksonModule());
+		return objectMapper;
 	}
 
 	@Provides

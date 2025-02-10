@@ -286,7 +286,7 @@ public final class TraceTestView extends Stage {
 	}
 
 	private ExecutionContext buildExecutionContext() {
-		return new ExecutionContext(this.project, this.machine, currentTrace.getStateSpace(), null);
+		return new ExecutionContext(this.project, this.machine, currentTrace.getStateSpace(), null, i18n);
 	}
 
 	private boolean currentTraceIsReplayedTrace() {

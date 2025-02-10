@@ -51,6 +51,7 @@ public final class ConfigData extends BasicConfigData implements HasMetadata {
 	public OperationsView.SortMode operationsSortMode;
 	public boolean operationsShowDisabled;
 	public boolean operationsShowUnambiguous;
+	public boolean operationsShowDescriptions;
 	public Map<String, String> globalPreferences;
 	public Path pluginDirectory;
 	public Map<FileChooserManager.Kind, Path> fileChooserInitialDirectories;

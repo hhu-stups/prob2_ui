@@ -21,13 +21,13 @@ import de.prob.model.eventb.translate.ModelToXML;
 import de.prob.model.representation.AbstractModel;
 import de.prob.model.representation.XTLModel;
 import de.prob.scripting.Api;
-import de.prob.scripting.ClassicalBFactory;
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.documentation.SaveDocumentationStage;
 import de.prob2.ui.error.WarningAlert;
 import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -36,7 +36,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.NewProjectStage;
 import de.prob2.ui.project.ProjectManager;
 
-import de.tlc4b.exceptions.TLC4BException;
+import de.prob2.ui.verifications.modelchecking.TLCModelCheckingTab;
 import javafx.beans.InvalidationListener;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -138,12 +138,10 @@ public class FileMenu extends Menu {
 				this.exportAsEventBProlog.setDisable(noEventBExport);
 			}
 		});
-		currentProject.currentMachineProperty().addListener((o, from, to) ->  {
-			if (to != null) {
-				// TLA Export, TODO: check if possible for Event-B (via pretty printing classical B)
-				this.exportAsTLAModule.setDisable(to.getModelFactoryClass() != ClassicalBFactory.class);
-			}
-		});
+
+		// TLA Export:
+		currentTrace.addListener((o, from, to) ->
+				this.exportAsTLAModule.setDisable(to != null && to.getModel().getFormalismType() != FormalismType.B));
 
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
@@ -157,7 +155,7 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
-	private void handleOpen() throws IOException {
+	private void handleOpen() {
 		final Path selected = fileChooserManager.showOpenAnyFileChooser(stageManager.getMainStage());
 		if (selected == null) {
 			return;
@@ -281,10 +279,10 @@ public class FileMenu extends Menu {
 		final Path outputDir = fileChooserManager.showDirectoryChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
 
 		if (outputDir != null) {
-			Path bMachine = currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation());
 			try {
+				Path bMachine = TLCModelCheckingTab.getClassicalBMachine(currentProject, currentTrace.getStateSpace(), injector.getInstance(I18n.class));
 				TLCModelChecker.generateTLAWithoutTLC(bMachine.toString(), outputDir.toString());
-			} catch (TLC4BException e) {
+			} catch (RuntimeException e) {
 				stageManager.makeAlert(Alert.AlertType.ERROR, "menu.file.items.exportEntireModelAs.tlaModule.exception.header",
 						"menu.file.items.exportEntireModelAs.tlaModule.exception.content", e.getMessage()).show();
 			}

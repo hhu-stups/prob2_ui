@@ -7,7 +7,7 @@ import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.chart.ChartFormulaTask;
 import de.prob2.ui.dynamic.VisualizationFormulaTask;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 import de.prob2.ui.verifications.WellDefinednessCheckingItem;
 import de.prob2.ui.verifications.cbc.CBCDeadlockFreedomCheckingItem;
 import de.prob2.ui.verifications.cbc.CBCDynamicAssertionCheckingItem;

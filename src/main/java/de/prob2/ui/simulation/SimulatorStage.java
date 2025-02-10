@@ -52,8 +52,6 @@ import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.SimulationSaver;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
-import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.simulation.table.SimulationListViewDiagramItem;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
@@ -65,7 +63,6 @@ import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -295,7 +292,7 @@ public final class SimulatorStage extends Stage {
 	private TableColumn<SimulationItem, CheckingStatus> simulationStatusColumn;
 
 	@FXML
-	private TableColumn<SimulationItem, String> simulationConfigurationColumn;
+	private TableColumn<SimulationItem, SimulationItem> simulationConfigurationColumn;
 
 	@FXML
 	private ChoiceBox<SimulationModel> cbSimulation;
@@ -498,7 +495,7 @@ public final class SimulatorStage extends Stage {
 		saveAsMenuItem.disableProperty().bind(disableSaveProperty);
 		saveAsItem.disableProperty().bind(disableSaveProperty);
 
-		this.simulationDiagramItems.setCellFactory(lv -> new SimulationListViewDiagramItem(stageManager, i18n, savedProperty, realTimeSimulator.runningProperty()));
+		this.simulationDiagramItems.setCellFactory(lv -> new DiagramConfigurationListCell(stageManager, i18n, savedProperty, realTimeSimulator.runningProperty()));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
 			if (to) {
@@ -522,8 +519,8 @@ public final class SimulatorStage extends Stage {
 
 		simulationStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
 		simulationStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
-		simulationConfigurationColumn.setCellFactory(lv -> new SimulationTaskItem(stageManager, i18n));
-		simulationConfigurationColumn.setCellValueFactory(features -> new SimpleStringProperty(""));
+		simulationConfigurationColumn.setCellFactory(lv -> new SimulationItemTableCell(stageManager, i18n));
+		simulationConfigurationColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue()));
 
 
 		simulationItems.setRowFactory(table -> new SimulationItemRow(this));

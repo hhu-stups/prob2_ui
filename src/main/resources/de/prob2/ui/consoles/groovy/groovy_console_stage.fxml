@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<?import de.prob2.ui.consoles.groovy.GroovyConsoleView?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+
+<fx:root type="Stage" title="%consoles.groovy.stage.title" minWidth="320" minHeight="240" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<scene>
+		<Scene stylesheets="@/prob.css">
+			<StackPane>
+				<GroovyConsoleView fx:id="groovyConsoleView"/>
+			</StackPane>
+		</Scene>
+	</scene>
+</fx:root>

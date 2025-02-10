@@ -10,7 +10,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.SimulationMode;
 import de.prob2.ui.simulation.model.SimulationModel;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;

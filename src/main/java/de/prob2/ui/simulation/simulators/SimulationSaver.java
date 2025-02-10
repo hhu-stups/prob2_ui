@@ -17,7 +17,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;

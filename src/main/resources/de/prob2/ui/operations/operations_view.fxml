@@ -56,6 +56,8 @@
 								  onAction="#handleDisabledOpsMenuItem"/>
 						<MenuItem fx:id="unambiguousMenuItem" text="%operations.operationsView.menu.showUnambiguous"
 								  onAction="#handleUnambiguousMenuItem"/>
+						<MenuItem fx:id="opDescriptionsMenuItem" text="%operations.operationsView.menu.showDescriptions"
+								  onAction="#handleOpDescriptionsMenuItem"/>
 					</items>
 				</MenuButton>
 

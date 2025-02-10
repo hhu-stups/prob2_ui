@@ -10,15 +10,14 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import javax.imageio.ImageIO;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.CharStreams;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
@@ -108,15 +107,19 @@ public final class VisBView extends BorderPane {
 		public void click(String id, int pageX, int pageY, boolean altKey, boolean ctrlKey, boolean metaKey,
 		                  boolean shiftKey, String jsVars) {
 			// probably pageX,pageY is the one to use as they do not change when scrolling and are relative to the SVG
-			JsonObject visbVarsJson = new Gson().fromJson(jsVars, JsonObject.class);
-			Map<String,String> jsVarsMap = new HashMap<>();
-			for (String key : visbVarsJson.keySet()) {
-				try {
-					jsVarsMap.put(key, visbVarsJson.get(key).getAsString());
-				} catch (UnsupportedOperationException e) {
-					jsVarsMap.put(key, visbVarsJson.get(key).toString());
-				}
+			Map<String, String> jsVarsMap;
+			try {
+				jsVarsMap = objectMapper.readValue(jsVars, new TypeReference<>() {});
+			} catch (Exception e) {
+				LOGGER.error("Uncaught exception in VisBConnector.click called by JavaScript: could not parse jsVars", e);
+				Platform.runLater(() -> {
+					Alert alert = stageManager.makeExceptionAlert(e, "visb.exception.header", "visb.exception.clickEvent");
+					alert.initOwner(getScene().getWindow());
+					alert.showAndWait();
+				});
+				return;
 			}
+
 			LOGGER.debug("SVG Element with ID {} was clicked at page position {},{} with alt {} ctrl {} cmd/meta {} shift {} and JS vars {}",
 					id, pageX, pageY, altKey, ctrlKey, metaKey, shiftKey, jsVarsMap); // 1=left, 2=middle, 3=right
 			try {
@@ -160,6 +163,7 @@ public final class VisBView extends BorderPane {
 	private final FileChooserManager fileChooserManager;
 	private final ExternalEditor externalEditor;
 	private final PlantUmlLocator plantUmlLocator;
+	private final ObjectMapper objectMapper;
 	private final VisBController visBController;
 
 	private final VisBConnector visBConnector;
@@ -246,7 +250,7 @@ public final class VisBView extends BorderPane {
 		DisablePropertyController disablePropertyController,
 		FileChooserManager fileChooserManager,
 		ExternalEditor externalEditor,
-		PlantUmlLocator plantUmlLocator,
+		PlantUmlLocator plantUmlLocator, ObjectMapper objectMapper,
 		VisBController visBController
 	) {
 		super();
@@ -261,6 +265,7 @@ public final class VisBView extends BorderPane {
 		this.fileChooserManager = fileChooserManager;
 		this.externalEditor = externalEditor;
 		this.plantUmlLocator = plantUmlLocator;
+		this.objectMapper = objectMapper;
 		this.visBController = visBController;
 
 		this.visBConnector = new VisBConnector();

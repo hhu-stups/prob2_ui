@@ -22,7 +22,7 @@
 					<Label fx:id="paramsLabel" text="%operations.executeByPredicate.parameters"/>
 					<PredicateBuilderView fx:id="predicateBuilderView"/>
 					<InterruptIfRunningButton fx:id="interruptButton">
-						<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute"/>
+						<Button fx:id="executeButton" styleClass="button-blue" text="%common.buttons.execute" onAction="#handleExecute" defaultButton="true"/>
 					</InterruptIfRunningButton>
 					<HBox alignment="TOP_CENTER" fx:id="executeFailedBox" visible="false" spacing="5.0">
 						<Label fx:id="warningLabel" styleClass="warning" text="%operations.executeByPredicate.alerts.failedToExecuteOperation.content"/>

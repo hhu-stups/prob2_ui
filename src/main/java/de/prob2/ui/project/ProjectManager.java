@@ -1,6 +1,5 @@
 package de.prob2.ui.project;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,7 +10,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.MoreFiles;
@@ -66,22 +64,33 @@ public final class ProjectManager {
 	private final TraceManager traceManager;
 	private final FileChooserManager fileChooserManager;
 	private final I18n i18n;
-	
+	private final ObjectMapper objectMapper;
+
 	private final ObservableList<Path> recentProjects;
 	private final IntegerProperty maximumRecentProjects;
 	private final Injector injector;
 
 	@Inject
-	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager, final TraceManager traceManager,
-												I18n i18n, Config config, final FileChooserManager fileChooserManager, final
-												Injector injector) {
+	public ProjectManager(
+		JacksonManager<Project> jacksonManager,
+		ObjectMapper objectMapperForProject,
+		CurrentProject currentProject,
+		StageManager stageManager,
+		TraceManager traceManager,
+		I18n i18n,
+		Config config,
+		FileChooserManager fileChooserManager,
+		ObjectMapper objectMapper,
+		Injector injector
+	) {
 		this.jacksonManager = jacksonManager;
-		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
+		this.jacksonManager.initContext(new ProjectJsonContext(objectMapperForProject));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.traceManager = traceManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
+		this.objectMapper = objectMapper;
 		this.injector = injector;
 		this.recentProjects = FXCollections.observableArrayList();
 		this.maximumRecentProjects = new SimpleIntegerProperty(this, "maximumRecentProjects");
@@ -315,16 +324,22 @@ public final class ProjectManager {
 		}
 	}
 
-	public void openJson(Path selected) throws IOException {
+	private enum JsonType {
+		VISB, SIMB, NONE
+	}
+
+	public void openJson(Path selected) {
 		if (currentProject.getCurrentMachine() == null) {
-			stageManager.makeAlert(Alert.AlertType.WARNING, "common.alerts.noMachineLoaded.header",
-				"common.alerts.noMachineLoaded.content").show();
+			stageManager.makeAlert(
+					Alert.AlertType.WARNING,
+					"common.alerts.noMachineLoaded.header",
+					"common.alerts.noMachineLoaded.content"
+			).show();
 			return;
 		}
 		JsonType type = JsonType.NONE;
 		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			JsonNode rootNode = objectMapper.readTree(new File(selected.toUri()));
+			JsonNode rootNode = objectMapper.readTree(selected.toFile());
 			if (rootNode.has("items") || rootNode.has("events")) {
 				type = JsonType.VISB;
 			}
@@ -333,22 +348,24 @@ public final class ProjectManager {
 			} else {
 				type = chooseType();
 			}
-		} catch (JsonParseException e){
-			stageManager.makeAlert(Alert.AlertType.ERROR, "project.projectManager.alerts.couldNotOpenJSON.header",
-				"project.projectManager.alerts.couldNotOpenJSON.content").show();
+		} catch (IOException e) {
+			LOGGER.error("Failed to open json file", e);
+			stageManager.makeExceptionAlert(
+					e,
+					"project.projectManager.alerts.couldNotOpenJSON.header",
+					"project.projectManager.alerts.couldNotOpenJSON.content"
+			).showAndWait();
 		}
 
-		switch(type) {
-			case VISB:
-				injector.getInstance(VisBView.class).addVisBVisualisationFromAbsolutePath(selected);
-				break;
-			case SIMB:
+		switch (type) {
+			case VISB -> injector.getInstance(VisBView.class).addVisBVisualisationFromAbsolutePath(selected);
+			case SIMB -> {
 				injector.getInstance(SimulatorStage.class).show();
 				injector.getInstance(SimulatorStage.class).toFront();
 				currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(currentProject.getLocation().relativize(selected)));
-				break;
-			case NONE:
-				break;
+			}
+			case NONE -> {
+			}
 		}
 	}
 
@@ -365,6 +382,7 @@ public final class ProjectManager {
 	}
 
 	private enum JsonType { VISB, SIMB, NONE }
+
 	private JsonType chooseType() {
 		List<ButtonType> buttons = new ArrayList<>();
 		ButtonType visBButton = new ButtonType("VisB");

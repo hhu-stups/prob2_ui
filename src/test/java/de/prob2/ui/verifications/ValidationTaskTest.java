@@ -13,7 +13,7 @@ import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.simulation.choice.SimulationType;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
 
 import org.junit.jupiter.api.BeforeEach;

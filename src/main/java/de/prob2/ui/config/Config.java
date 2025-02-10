@@ -73,7 +73,12 @@ public final class Config {
 					oldObject.put("autoReloadMachine", "true");
 				}
 
-				// Version 5 just adds the RAILML option
+				// Version 5 just adds operations descriptions option
+				if (oldVersion <= 4) {
+					oldObject.put("operationsShowDescriptions", "false");
+				}
+
+				// Version 6 just adds the RAILML option
 
 				return oldObject;
 			}

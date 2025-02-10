@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation.table;
+package de.prob2.ui.simulation;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +19,10 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
-public final class SimulationListViewDiagramItem extends ListCell<DiagramConfiguration> {
+public final class DiagramConfigurationListCell extends ListCell<DiagramConfiguration> {
 
 	@FXML
 	private VBox itemBox;
-
-	private DiagramConfiguration item;
 
 	private DiagramConfiguration modifiedItem;
 
@@ -33,9 +31,8 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 	private final BooleanProperty savedProperty;
 	private final BooleanProperty runningProperty;
 
-	public SimulationListViewDiagramItem(StageManager stageManager, I18n i18n, BooleanProperty savedProperty, BooleanProperty runningProperty) {
+	public DiagramConfigurationListCell(StageManager stageManager, I18n i18n, BooleanProperty savedProperty, BooleanProperty runningProperty) {
 		super();
-		this.item = null;
 		this.modifiedItem = null;
 		this.i18n = i18n;
 		this.savedProperty = savedProperty;
@@ -52,7 +49,8 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 	}
 
 	@FXML
-	public void initialize() {
+	@SuppressWarnings("unused")
+	private void initialize() {
 		this.setText("");
 		this.setGraphic(this.itemBox);
 	}
@@ -63,30 +61,27 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 		if (empty || item == null) {
 			clear();
 		} else {
-			if (!item.equals(this.item)) {
-				clear();
-				switch (item) {
-					case ActivationOperationConfiguration currentItem -> {
-						this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getOpName(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
-						updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
-					}
-					case ActivationChoiceConfiguration currentItem -> {
-						this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getActivations());
-						updateChoiceDiagramItem((ActivationChoiceConfiguration) this.modifiedItem);
-					}
-					case UIListenerConfiguration currentItem -> {
-						this.modifiedItem = new UIListenerConfiguration(currentItem.getId(), currentItem.getEvent(), currentItem.getPredicate(), currentItem.getActivating());
-						updateListenerItem((UIListenerConfiguration) this.modifiedItem);
-					}
-					default -> throw new AssertionError("unknown item type");
+			clear();
+			switch (item) {
+				case ActivationOperationConfiguration currentItem -> {
+					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getOpName(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
+					updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
 				}
-
-				this.item = item;
-				this.setPrefHeight(itemBox.getChildren().size() * 20.0f);
-				this.setGraphic(this.itemBox);
-				this.setText("");
-				this.setItem(modifiedItem);
+				case ActivationChoiceConfiguration currentItem -> {
+					this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getActivations());
+					updateChoiceDiagramItem((ActivationChoiceConfiguration) this.modifiedItem);
+				}
+				case UIListenerConfiguration currentItem -> {
+					this.modifiedItem = new UIListenerConfiguration(currentItem.getId(), currentItem.getEvent(), currentItem.getPredicate(), currentItem.getActivating());
+					updateListenerItem((UIListenerConfiguration) this.modifiedItem);
+				}
+				default -> throw new AssertionError("unknown item type");
 			}
+
+			this.setPrefHeight(itemBox.getChildren().size() * 20.0f);
+			this.setGraphic(this.itemBox);
+			this.setText("");
+			this.setItem(modifiedItem);
 		}
 	}
 
@@ -313,7 +308,6 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 		return probabilisticVariables;
 	}
 
-
 	private static Map<String, String> processChoiceActivation(String choiceActivationAsString) {
 		Map<String, String> choiceActivation = new HashMap<>();
 
@@ -336,12 +330,10 @@ public final class SimulationListViewDiagramItem extends ListCell<DiagramConfigu
 		return choiceActivation;
 	}
 
-	public void clear() {
+	private void clear() {
 		itemBox.getChildren().clear();
 		this.setGraphic(this.itemBox);
 		this.setText("");
-		this.item = null;
 		this.modifiedItem = null;
 	}
-
 }

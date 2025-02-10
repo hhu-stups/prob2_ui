@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import com.google.common.base.MoreObjects;
 
+import de.prob.animator.command.GetOperationDescriptionCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalExpandMode;
 import de.prob.animator.domainobjects.EvalOptions;
@@ -56,7 +57,7 @@ public class OperationItem {
 		private List<String> getParameterValues() {
 			return this.parameterValues;
 		}
-		
+
 		@Override
 		public boolean equals(final Object o) {
 			if (this == o) {
@@ -87,6 +88,7 @@ public class OperationItem {
 	
 	private final Transition transition;
 	private final String name;
+	private final String description;
 	private final OperationItem.Status status;
 	private final List<String> parameterNames;
 	private final List<String> parameterValues;
@@ -114,6 +116,13 @@ public class OperationItem {
 		this.variables = Objects.requireNonNull(variables);
 		this.unambiguousConstantNames = Objects.requireNonNull(unambiguousConstantNames);
 		this.unambiguousVariableNames = Objects.requireNonNull(unambiguousVariableNames);
+		if (transition != null) {
+			GetOperationDescriptionCommand cmd = new GetOperationDescriptionCommand(transition.getSource().getId(), transition.getId());
+			transition.getSource().getStateSpace().execute(cmd);
+			this.description = cmd.getDescription();
+		} else {
+			this.description = "";
+		}
 	}
 
 	private static Map<String, String> extractValues(final Map<IEvalElement, AbstractEvalResult> results, final Collection<IEvalElement> formulas) {
@@ -275,6 +284,10 @@ public class OperationItem {
 		return Transition.prettifyName(this.getName());
 	}
 
+	public String getDescription() {
+		return description;
+	}
+
 	public OperationItem.Status getStatus() {
 		return status;
 	}
@@ -328,6 +341,7 @@ public class OperationItem {
 	public String toString() {
 		return MoreObjects.toStringHelper(this).add("transition", this.getTransition())
 				.add("name", this.getName()).add("status", this.getStatus())
+				.add("description", this.getDescription())
 				.add("parameterNames", this.getParameterNames()).add("parameterValues", this.getParameterValues())
 				.add("returnParameterNames", this.getReturnParameterNames())
 				.add("returnParameterValues", this.getReturnParameterValues())
@@ -338,6 +352,13 @@ public class OperationItem {
 	}
 
 	public String toPrettyString(final boolean includeUnambiguous) {
+		return this.toPrettyString(includeUnambiguous, false);
+	}
+
+	public String toPrettyString(final boolean includeUnambiguous, final boolean showDescriptions) {
+		if (showDescriptions && !this.getDescription().isEmpty()) {
+			return this.getDescription();
+		}
 		StringBuilder sb = new StringBuilder(this.getPrettyName());
 
 		final List<String> args = new ArrayList<>();

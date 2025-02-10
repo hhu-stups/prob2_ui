@@ -42,7 +42,7 @@ import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.internal.CachedEditorState;
 import de.prob2.ui.project.preferences.Preference;
 import de.prob2.ui.simulation.model.SimulationModel;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
@@ -93,10 +93,11 @@ public final class Machine {
 	private final ListProperty<SimulationModel> simulations;
 	private final ListProperty<Path> visBVisualisations;
 
-	private final ObservableList<ProofObligationItem> proofObligationTasks;
-
 	@JsonIgnore
 	private PatternManager patternManager;
+	// to keep the listener alive, see constructor
+	@JsonIgnore
+	private final ObservableList<ProofObligationItem> proofObligationTasks;
 	// For internal use by updateAllProofObligations:
 	// stores the ProofObligation objects from the last model passed to updateAllProofObligationsFromModel.
 	@JsonIgnore
@@ -148,7 +149,7 @@ public final class Machine {
 		this.visBVisualisations = new SimpleListProperty<>(this, "visBVisualisations", FXCollections.observableArrayList(visBVisualisation));
 
 		// Keep this filtered list alive so that its listener (added in initListeners) keeps working.
-		this.proofObligationTasks = this.getProofObligationTasks();
+		this.proofObligationTasks = this.getValidationTasksByClass(ProofObligationItem.class);
 
 		this.patternManager = null;
 		this.lastModelProofObligations = Collections.emptyList();
@@ -376,7 +377,8 @@ public final class Machine {
 
 	@JsonIgnore
 	public ObservableList<ProofObligationItem> getProofObligationTasks() {
-		return this.getValidationTasksByClass(ProofObligationItem.class);
+		// use the cached variant, see constructor
+		return this.proofObligationTasks;
 	}
 
 	@JsonGetter("ltlPatterns")

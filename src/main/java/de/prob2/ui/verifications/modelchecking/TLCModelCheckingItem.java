@@ -134,7 +134,7 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 		};
 
 		TLCModelChecker tlcModelChecker = new TLCModelChecker(
-			context.project().getLocation().resolve(context.machine().getLocation()).toString(),
+			TLCModelCheckingTab.getClassicalBMachine(context.project(), context.machine(), context.stateSpace(), context.i18n()).toString(),
 			stateSpace, listener,
 			new TLCModelCheckingOptions(getOptions()));
 		tlcModelChecker.call();

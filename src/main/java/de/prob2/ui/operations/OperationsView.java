@@ -114,7 +114,7 @@ public final class OperationsView extends BorderPane {
 			super.updateItem(item, empty);
 			getStyleClass().removeAll("enabled", "timeout", "max-operations", "unexplored", "errored", "skip", "normal", "disabled");
 			if (item != null && !empty) {
-				setText(item.toPrettyString(showUnambiguous.get()));
+				setText(item.toPrettyString(showUnambiguous.get(), showOperationDescriptions.get()));
 				setDisable(false);
 				final FontAwesome.Glyph icon;
 				switch (item.getStatus()) {
@@ -188,6 +188,8 @@ public final class OperationsView extends BorderPane {
 	@FXML
 	private MenuItem unambiguousMenuItem;
 	@FXML
+	private MenuItem opDescriptionsMenuItem;
+	@FXML
 	private TextField searchBar;
 	@FXML
 	private TextField randomText;
@@ -213,6 +215,7 @@ public final class OperationsView extends BorderPane {
 	private final List<OperationItem> events = new ArrayList<>();
 	private final BooleanProperty showDisabledOps;
 	private final BooleanProperty showUnambiguous;
+	private final BooleanProperty showOperationDescriptions;
 	private final ObjectProperty<OperationsView.SortMode> sortMode;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
@@ -230,6 +233,7 @@ public final class OperationsView extends BorderPane {
 	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager, final Injector injector, final I18n i18n, final StatusBar statusBar, final DisablePropertyController disablePropertyController, final StopActions stopActions, final Config config, final CliTaskExecutor cliExecutor, FxThreadExecutor fxExecutor) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
+		this.showOperationDescriptions = new SimpleBooleanProperty(this, "showOperationDescriptions", false);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
@@ -307,6 +311,11 @@ public final class OperationsView extends BorderPane {
 			opsListView.refresh();
 		});
 
+		showOperationDescriptions.addListener((o, from, to) -> {
+			opDescriptionsMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideDescriptions") : i18n.translate("operations.operationsView.menu.showDescriptions"));
+			opsListView.refresh();
+		});
+
 		sortMode.addListener((o, from, to) -> {
 			this.sortModeAToZ.setSelected(false);
 			this.sortModeZToA.setSelected(false);
@@ -343,6 +352,7 @@ public final class OperationsView extends BorderPane {
 
 				setShowDisabledOps(configData.operationsShowDisabled);
 				setShowUnambiguous(configData.operationsShowUnambiguous);
+				setShowOperationDescriptions(configData.operationsShowDescriptions);
 			}
 
 			@Override
@@ -350,6 +360,7 @@ public final class OperationsView extends BorderPane {
 				configData.operationsSortMode = getSortMode();
 				configData.operationsShowDisabled = getShowDisabledOps();
 				configData.operationsShowUnambiguous = getShowUnambiguous();
+				configData.operationsShowDescriptions = getShowDescriptions();
 			}
 		});
 	}
@@ -367,7 +378,7 @@ public final class OperationsView extends BorderPane {
 				// TODO This might be better solved by moving the state exploring out of CurrentTrace.
 				cliExecutor.execute(() -> {
 					Trace forward = trace.forward();
-					if (forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
+					if (trace.canGoForward() && item.getTransition().equals(forward.getCurrentTransition())) {
 						currentTrace.set(forward);
 						uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
 					} else {
@@ -516,6 +527,11 @@ public final class OperationsView extends BorderPane {
 		this.setShowUnambiguous(!this.showUnambiguous.get());
 	}
 
+	@FXML
+	private void handleOpDescriptionsMenuItem() {
+		this.setShowOperationDescriptions(!this.showOperationDescriptions.get());
+	}
+
 	private List<OperationItem> applyFilter(final String filter) {
 		return events.stream().filter(op -> op.getPrettyName().toLowerCase().contains(filter.toLowerCase()))
 				.collect(Collectors.toList());
@@ -612,6 +628,14 @@ public final class OperationsView extends BorderPane {
 
 	private void setShowUnambiguous(final boolean showUnambiguous) {
 		this.showUnambiguous.set(showUnambiguous);
+	}
+
+	private boolean getShowDescriptions() {
+		return this.showOperationDescriptions.get();
+	}
+
+	private void setShowOperationDescriptions(final boolean showOperationDescriptions) {
+		this.showOperationDescriptions.set(showOperationDescriptions);
 	}
 
 	@FXML

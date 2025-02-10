@@ -50,7 +50,7 @@ public final class PreferencesStage extends Stage {
 		Locale.ENGLISH,
 		Locale.FRENCH,
 		Locale.GERMAN,
-		new Locale("ru"),
+		Locale.of("ru"),
 	};
 
 	private static final Map<ErrorItem.Type, String> ERROR_LEVEL_DESCRIPTION_KEYS;
