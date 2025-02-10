@@ -769,12 +769,13 @@ public final class SimulatorStage extends Stage {
 		Map<String, String> variables = new HashMap<>();
 		List<DiagramConfiguration.NonUi> activations = new ArrayList<>();
 		List<UIListenerConfiguration> listeners = new ArrayList<>();
-
-		for(DiagramConfiguration diagramConfiguration : simulationDiagramItems.getItems()) {
-			if(diagramConfiguration instanceof ActivationChoiceConfiguration || diagramConfiguration instanceof ActivationOperationConfiguration) {
-				activations.add((DiagramConfiguration.NonUi) diagramConfiguration);
+		for(var diagramConfiguration : simulationDiagramItems.getItems()) {
+			if(diagramConfiguration instanceof DiagramConfiguration.NonUi nonUi) {
+				activations.add(nonUi);
+			} else if (diagramConfiguration instanceof UIListenerConfiguration ui) {
+				listeners.add(ui);
 			} else {
-				listeners.add((UIListenerConfiguration) diagramConfiguration);
+				throw new RuntimeException("Unknown diagram configuration type: " + diagramConfiguration);
 			}
 		}
 
