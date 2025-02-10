@@ -214,7 +214,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Border
 
 	protected ExecutionContext getCurrentExecutionContext() {
 		Trace trace = currentTrace.get();
-		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), trace.getStateSpace(), trace);
+		return new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), trace.getStateSpace(), trace, i18n);
 	}
 
 	/**
