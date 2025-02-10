@@ -49,8 +49,8 @@
 			<columns>
 				<TableColumn fx:id="positionColumn" minWidth="${fontSize.fontSize * 6}"
 							 maxWidth="${fontSize.fontSize * 6}" text="%history.tableView.position"/>
-				<TableColumn fx:id="transitionColumn" text="%history.tableView.transition" sortable="false"
-							 prefWidth="${historyTableView.width - positionColumn.width}"/>
+				<TableColumn fx:id="transitionColumn" text="%history.tableView.transition" sortable="false"/>
+				<TableColumn fx:id="descriptionColumn" text="%history.tableView.description" sortable="false" visible="false"/>
 			</columns>
 			<sortOrder>
 				<fx:reference source="positionColumn"/>
