@@ -381,8 +381,6 @@ public final class ProjectManager {
 		}
 	}
 
-	private enum JsonType { VISB, SIMB, NONE }
-
 	private JsonType chooseType() {
 		List<ButtonType> buttons = new ArrayList<>();
 		ButtonType visBButton = new ButtonType("VisB");
