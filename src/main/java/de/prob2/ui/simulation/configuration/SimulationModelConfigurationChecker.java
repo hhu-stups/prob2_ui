@@ -29,7 +29,7 @@ public class SimulationModelConfigurationChecker {
 	}
 
 	private void checkActivationConfigurations() {
-		for(DiagramConfiguration activationConfiguration : simulationConfiguration.getActivationConfigurations()) {
+		for(DiagramConfiguration activationConfiguration : simulationConfiguration.getActivations()) {
 			if(activationConfiguration instanceof ActivationOperationConfiguration) {
 				this.checkActivationOperationConfiguration((ActivationOperationConfiguration) activationConfiguration);
 			}

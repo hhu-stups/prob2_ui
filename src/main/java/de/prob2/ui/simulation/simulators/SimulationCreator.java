@@ -23,7 +23,7 @@ public class SimulationCreator {
 	public static SimulationModelConfiguration createConfiguration(Trace trace, List<Integer> timestamps, boolean forSave, JsonMetadata metadata) {
 		List<Transition> transitions = trace.getTransitionList();
 
-		List<DiagramConfiguration> activationConfigurations = new ArrayList<>();
+		List<DiagramConfiguration.NonUi> activationConfigurations = new ArrayList<>();
 		int currentTimestamp = 0;
 
 		for(int i = 0; i < transitions.size(); i++) {

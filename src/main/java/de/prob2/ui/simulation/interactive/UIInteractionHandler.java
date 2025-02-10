@@ -68,7 +68,7 @@ public final class UIInteractionHandler {
 		if(!(realTimeSimulator.getConfig() instanceof SimulationModelConfiguration config)) {
 			return;
 		}
-		List<UIListenerConfiguration> uiListeners = config.getUiListenerConfigurations();
+		List<UIListenerConfiguration> uiListeners = config.getListeners();
 		for(UIListenerConfiguration uiListener : uiListeners) {
 			String event = uiListener.getEvent();
 			List<UIListenerConfiguration> uiListenersForEvent = uiListenerConfigurationMap.get(event);
@@ -141,17 +141,17 @@ public final class UIInteractionHandler {
 		timestamps.add(realTimeSimulator.getTime());
 	}
 
-	private List<DiagramConfiguration> createUserInteractions(RealTimeSimulator realTimeSimulator) {
+	private List<DiagramConfiguration.NonUi> createUserInteractions(RealTimeSimulator realTimeSimulator) {
 		SimulationModelConfiguration simulationModelConfiguration = (SimulationModelConfiguration) realTimeSimulator.getConfig();
-		List<UIListenerConfiguration> uiListeners = simulationModelConfiguration.getUiListenerConfigurations();
-		List<DiagramConfiguration> userInteractions = new ArrayList<>();
+		List<UIListenerConfiguration> uiListeners = simulationModelConfiguration.getListeners();
+		List<DiagramConfiguration.NonUi> userInteractions = new ArrayList<>();
 		for(int interactionCounter = 0; interactionCounter < userTransitions.size(); interactionCounter++) {
 			userInteractions.add(createUserInteraction(realTimeSimulator, interactionCounter, uiListeners));
 		}
 		return userInteractions;
 	}
 
-	private DiagramConfiguration createUserInteraction(RealTimeSimulator realTimeSimulator, int interactionCounter, List<UIListenerConfiguration> uiListeners) {
+		private DiagramConfiguration.NonUi createUserInteraction(RealTimeSimulator realTimeSimulator, int interactionCounter, List<UIListenerConfiguration> uiListeners) {
 		Transition transition = userTransitions.get(interactionCounter);
 		int time = timestamps.get(interactionCounter);
 
@@ -183,13 +183,13 @@ public final class UIInteractionHandler {
 		return activations;
 	}
 
-	private List<DiagramConfiguration> createActivationConfigurationsFromUserInteraction(List<DiagramConfiguration> activationConfigurations, List<DiagramConfiguration> userInteractions) {
-		List<DiagramConfiguration> activationConfigurationsForResult = new ArrayList<>();
+	private List<DiagramConfiguration.NonUi> createActivationConfigurationsFromUserInteraction(List<DiagramConfiguration.NonUi> activationConfigurations, List<DiagramConfiguration.NonUi> userInteractions) {
+		List<DiagramConfiguration.NonUi> activationConfigurationsForResult = new ArrayList<>();
 
 		boolean hasSetupConstants = false;
 		boolean hasInitialization = false;
 		List<String> activations = new ArrayList<>();
-		for(DiagramConfiguration diagramConfiguration : activationConfigurations) {
+		for(DiagramConfiguration.NonUi diagramConfiguration : activationConfigurations) {
 			if(Transition.INITIALISE_MACHINE_NAME.equals(diagramConfiguration.getId())) {
 				hasInitialization = true;
 				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) diagramConfiguration;
@@ -230,9 +230,9 @@ public final class UIInteractionHandler {
 	public SimulationModelConfiguration createUserInteractionSimulation(RealTimeSimulator realTimeSimulator) {
 		SimulationModelConfiguration simulationModelConfiguration = (SimulationModelConfiguration) realTimeSimulator.getConfig();
 		Map<String, String> variables = simulationModelConfiguration.getVariables();
-		List<DiagramConfiguration> activationConfigurations = simulationModelConfiguration.getActivationConfigurations();
-		List<DiagramConfiguration> userInteractions = createUserInteractions(realTimeSimulator);
-		List<DiagramConfiguration> activationConfigurationsForResult = createActivationConfigurationsFromUserInteraction(activationConfigurations, userInteractions);
+		List<DiagramConfiguration.NonUi> activationConfigurations = simulationModelConfiguration.getActivations();
+		List<DiagramConfiguration.NonUi> userInteractions = createUserInteractions(realTimeSimulator);
+		List<DiagramConfiguration.NonUi> activationConfigurationsForResult = createActivationConfigurationsFromUserInteraction(activationConfigurations, userInteractions);
 		return new SimulationModelConfiguration(variables, activationConfigurationsForResult, new ArrayList<>(), SimulationModelConfiguration.metadataBuilder().build());
 	}
 

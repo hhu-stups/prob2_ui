@@ -120,14 +120,14 @@ public abstract class Simulator {
 			if(config instanceof SimulationModelConfiguration modelConfig) {
 				// sort after priority
 				this.variables = modelConfig.getVariables() != null ? new HashMap<>(modelConfig.getVariables()) : new HashMap<>();
-				this.activationConfigurationsSorted = modelConfig.getActivationConfigurations().stream()
+				this.activationConfigurationsSorted = modelConfig.getActivations().stream()
 						.filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
 						.map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
 						.sorted(Comparator.comparingInt(ActivationOperationConfiguration::getPriority))
 						.collect(Collectors.toList());
 
-				modelConfig.getActivationConfigurations().forEach(activationConfiguration -> activationConfigurationMap.put(activationConfiguration.getId(), activationConfiguration));
-				modelConfig.getActivationConfigurations().stream()
+				modelConfig.getActivations().forEach(activationConfiguration -> activationConfigurationMap.put(activationConfiguration.getId(), activationConfiguration));
+				modelConfig.getActivations().stream()
 						.filter(activationConfiguration -> activationConfiguration instanceof ActivationOperationConfiguration)
 						.map(activationConfiguration -> (ActivationOperationConfiguration) activationConfiguration)
 						.forEach(activationConfiguration -> {

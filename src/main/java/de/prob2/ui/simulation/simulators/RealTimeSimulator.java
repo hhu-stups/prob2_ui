@@ -98,7 +98,7 @@ public final class RealTimeSimulator extends Simulator {
 	public boolean endingConditionReached(Trace trace) {
 		boolean endingConditionReached = super.endingConditionReached(trace);
 		if(config instanceof SimulationModelConfiguration) {
-			return endingConditionReached && ((SimulationModelConfiguration) config).getUiListenerConfigurations().isEmpty();
+			return endingConditionReached && ((SimulationModelConfiguration) config).getListeners().isEmpty();
 		}
 		return endingConditionReached;
 	}

@@ -640,8 +640,8 @@ public final class SimulatorStage extends Stage {
 		ObservableList<DiagramConfiguration> observableList = FXCollections.observableArrayList();
 		if (config != null) {
 			if (config instanceof SimulationModelConfiguration modelConfig) {
-				observableList.addAll(modelConfig.getActivationConfigurations());
-				observableList.addAll(modelConfig.getUiListenerConfigurations());
+				observableList.addAll(modelConfig.getActivations());
+				observableList.addAll(modelConfig.getListeners());
 			}
 		}
 
@@ -767,12 +767,12 @@ public final class SimulatorStage extends Stage {
 
 	private SimulationModelConfiguration buildSimulationModel() {
 		Map<String, String> variables = new HashMap<>();
-		List<DiagramConfiguration> activations = new ArrayList<>();
+		List<DiagramConfiguration.NonUi> activations = new ArrayList<>();
 		List<UIListenerConfiguration> listeners = new ArrayList<>();
 
 		for(DiagramConfiguration diagramConfiguration : simulationDiagramItems.getItems()) {
 			if(diagramConfiguration instanceof ActivationChoiceConfiguration || diagramConfiguration instanceof ActivationOperationConfiguration) {
-				activations.add(diagramConfiguration);
+				activations.add((DiagramConfiguration.NonUi) diagramConfiguration);
 			} else {
 				listeners.add((UIListenerConfiguration) diagramConfiguration);
 			}
