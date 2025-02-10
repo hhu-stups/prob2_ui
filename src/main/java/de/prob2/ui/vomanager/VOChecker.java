@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
 import de.prob.voparser.VOParseException;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
@@ -22,18 +23,21 @@ public final class VOChecker {
 	private final CurrentTrace currentTrace;
 	private final FxThreadExecutor fxExecutor;
 	private final CheckingExecutors checkingExecutors;
+	private final I18n i18n;
 
 	@Inject
 	public VOChecker(
 		CurrentProject currentProject,
 		CurrentTrace currentTrace,
 		FxThreadExecutor fxExecutor,
-		CheckingExecutors checkingExecutors
+		CheckingExecutors checkingExecutors,
+		I18n i18n
 	) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.fxExecutor = fxExecutor;
 		this.checkingExecutors = checkingExecutors;
+		this.i18n = i18n;
 	}
 
 	public CompletableFuture<?> checkProject() {
@@ -105,7 +109,7 @@ public final class VOChecker {
 			// because the current trace is in an unpredictable state:
 			// if the correct machine was already loaded,
 			// the user may have manually animated the model or executed other validation tasks already.
-			ExecutionContext context = new ExecutionContext(currentProject.get(), machine, trace.getStateSpace(), null);
+			ExecutionContext context = new ExecutionContext(currentProject.get(), machine, trace.getStateSpace(), null, i18n);
 			return validationObligation.getParsedExpression().check(checkingExecutors, context);
 		});
 	}

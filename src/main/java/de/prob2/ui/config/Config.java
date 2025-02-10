@@ -73,6 +73,11 @@ public final class Config {
 					oldObject.put("autoReloadMachine", "true");
 				}
 
+				// Version 5 just adds operations descriptions option
+				if (oldVersion <= 4) {
+					oldObject.put("operationsShowDescriptions", "false");
+				}
+
 				return oldObject;
 			}
 		});

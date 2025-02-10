@@ -15,6 +15,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationDetailsStage;
+import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -36,6 +37,7 @@ import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.ScrollEvent;
@@ -64,6 +66,7 @@ public final class HistoryView extends BorderPane {
 			if (empty || item == null) {
 				this.setCursor(Cursor.DEFAULT);
 				this.setContextMenu(null);
+				this.setTooltip(null);
 			} else {
 				this.setCursor(Cursor.HAND);
 				final Trace trace = currentTrace.get();
@@ -78,16 +81,18 @@ public final class HistoryView extends BorderPane {
 					}
 				}
 
+				OperationItem opItem = item.getOperation();
 				final MenuItem showDetailsItem = new MenuItem(i18n.translate("operations.operationsView.contextMenu.items.showDetails"));
 				showDetailsItem.setOnAction(event -> {
 					final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
-					stage.setItem(item.getOperation());
+					stage.setItem(opItem);
 					stage.show();
 				});
 				// The root state doesn't have a corresponding operation
 				showDetailsItem.setDisable(item.getOperation() == null);
 
 				this.setContextMenu(new ContextMenu(showDetailsItem));
+				this.setTooltip(opItem != null && !opItem.getDescription().isEmpty() ? new Tooltip(opItem.getDescription()) : null);
 			}
 		}
 	}
@@ -98,6 +103,8 @@ public final class HistoryView extends BorderPane {
 	private TableColumn<HistoryItem, Integer> positionColumn;
 	@FXML
 	private TableColumn<HistoryItem, String> transitionColumn;
+	@FXML
+	private TableColumn<HistoryItem, String> descriptionColumn;
 	@FXML
 	private Button openTraceSelectionButton;
 	@FXML
@@ -135,8 +142,20 @@ public final class HistoryView extends BorderPane {
 
 		historyTableView.setRowFactory(item -> new TransitionRow());
 		historyTableView.getSelectionModel().setCellSelectionEnabled(true);
+		historyTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_LAST_COLUMN);
 		positionColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getIndex() + 1));
 		transitionColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().toPrettyString()));
+		descriptionColumn.setCellValueFactory(cellData ->
+				new SimpleStringProperty(cellData.getValue().getOperation() != null
+						? cellData.getValue().getOperation().getDescription()
+						: ""));
+		descriptionColumn.prefWidthProperty().bind(transitionColumn.prefWidthProperty());
+		historyTableView.getItems().addListener((ListChangeListener<HistoryItem>) change -> {
+			boolean allEmpty = historyTableView.getItems().stream()
+					.map(item -> descriptionColumn.getCellData(item))
+					.allMatch(value -> value == null || value.isEmpty());
+			descriptionColumn.setVisible(!allEmpty);
+		});
 
 		this.setOnKeyPressed(event -> {
 			final Trace trace = currentTrace.get();
