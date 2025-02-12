@@ -24,6 +24,7 @@ import de.prob.statespace.Transition;
 		"activationKind",
 		"fixedVariables",
 		"probabilisticVariables",
+		"transitionSelection",
 		"activating",
 		"activatingOnlyWhenExecuted",
 		"updating",
