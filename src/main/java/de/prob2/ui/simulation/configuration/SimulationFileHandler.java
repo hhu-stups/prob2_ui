@@ -258,7 +258,7 @@ public final class SimulationFileHandler {
 		}
 
 		var operations = loadedMachine.getOperationNames();
-		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME, "0", 1, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, List.copyOf(operations), true, null, null));
+		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, List.copyOf(operations), true, null, null));
 		for (var op : operations) {
 			activations.add(new ActivationOperationConfiguration(op, op, "100", 0, null, ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, List.copyOf(operations), true, null, null));
 		}

@@ -69,13 +69,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		super(id);
 		this.execute = Objects.requireNonNull(op, "execute");
 		this.after = after != null && !after.isEmpty() ? after : "0";
-		if (Transition.INITIALISE_MACHINE_NAME.equals(this.execute)) {
-			this.priority = 1;
-		} else if (Transition.SETUP_CONSTANTS_NAME.equals(this.execute)) {
-			this.priority = 0;
-		} else {
-			this.priority = priority != null ? priority : 0;
-		}
+		this.priority = !Transition.isArtificialTransitionName(this.execute) && priority != null ? priority : 0;
 		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
 		this.activationKind = activationKind != null ? activationKind : ActivationKind.MULTI;
 		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
@@ -119,11 +113,13 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	@JsonGetter("priority")
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer getPriorityForJson() {
-		return Transition.INITIALISE_MACHINE_NAME.equals(this.getExecute()) || Transition.SETUP_CONSTANTS_NAME.equals(this.getExecute()) || this.priority == 0 ? null : this.priority;
+		return Transition.isArtificialTransitionName(this.getExecute()) || this.priority == 0 ? null : this.priority;
 	}
 
 	public void setPriority(int priority) {
-		this.priority = priority;
+		if (!Transition.isArtificialTransitionName(this.getExecute())) {
+			this.priority = priority;
+		}
 	}
 
 	@JsonGetter("additionalGuards")
