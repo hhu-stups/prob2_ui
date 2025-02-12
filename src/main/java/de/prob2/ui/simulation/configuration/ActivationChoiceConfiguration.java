@@ -10,7 +10,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
-@JsonPropertyOrder({ "id", "activations" })
+@JsonPropertyOrder({
+		"id",
+		"activations"
+})
 public final class ActivationChoiceConfiguration extends DiagramConfiguration.NonUi {
 
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)

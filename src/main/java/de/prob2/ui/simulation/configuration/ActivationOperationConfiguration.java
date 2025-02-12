@@ -228,13 +228,13 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		} else if (!(o instanceof ActivationOperationConfiguration that)) {
 			return false;
 		} else {
-			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getExecute(), that.getExecute()) && Objects.equals(this.getAfter(), that.getAfter()) && this.getPriority() == that.getPriority() && Objects.equals(this.getAdditionalGuards(), that.getAdditionalGuards()) && Objects.equals(this.getActivationKind(), that.getActivationKind()) && Objects.equals(this.getFixedVariables(), that.getFixedVariables()) && Objects.equals(this.getProbabilisticVariables(), that.getProbabilisticVariables()) && Objects.equals(this.getActivating(), that.getActivating()) && this.isActivatingOnlyWhenExecuted() == that.isActivatingOnlyWhenExecuted() && Objects.equals(this.getUpdating(), that.getUpdating()) && Objects.equals(this.getWithPredicate(), that.getWithPredicate());
+			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getExecute(), that.getExecute()) && Objects.equals(this.getAfter(), that.getAfter()) && this.getPriority() == that.getPriority() && Objects.equals(this.getAdditionalGuards(), that.getAdditionalGuards()) && Objects.equals(this.getActivationKind(), that.getActivationKind()) && Objects.equals(this.getFixedVariables(), that.getFixedVariables()) && Objects.equals(this.getProbabilisticVariables(), that.getProbabilisticVariables())&& Objects.equals(this.getTransitionSelection(), that.getTransitionSelection()) && Objects.equals(this.getActivating(), that.getActivating()) && this.isActivatingOnlyWhenExecuted() == that.isActivatingOnlyWhenExecuted() && Objects.equals(this.getUpdating(), that.getUpdating()) && Objects.equals(this.getWithPredicate(), that.getWithPredicate());
 		}
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getId(), this.getExecute(), this.getAfter(), this.getPriority(), this.getAdditionalGuards(), this.getActivationKind(), this.getFixedVariables(), this.getProbabilisticVariables(), this.getActivating(), this.isActivatingOnlyWhenExecuted(), this.getUpdating(), this.getWithPredicate());
+		return Objects.hash(this.getId(), this.getExecute(), this.getAfter(), this.getPriority(), this.getAdditionalGuards(), this.getActivationKind(), this.getFixedVariables(), this.getProbabilisticVariables(), this.getTransitionSelection(), this.getActivating(), this.isActivatingOnlyWhenExecuted(), this.getUpdating(), this.getWithPredicate());
 	}
 
 	@Override
@@ -250,6 +250,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 				.add("activationKind", this.getActivationKind())
 				.add("fixedVariables", this.getFixedVariables())
 				.add("probabilisticVariables", this.getProbabilisticVariables())
+				.add("transitionSelection", this.getTransitionSelection())
 				.add("activating", this.getActivating())
 				.add("activatingOnlyWhenExecuted", this.isActivatingOnlyWhenExecuted())
 				.add("updating", this.getUpdating())

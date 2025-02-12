@@ -5,13 +5,17 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
-@JsonPropertyOrder({ "id", "event", "predicate", "activating" })
+@JsonPropertyOrder({
+		"id",
+		"event",
+		"predicate",
+		"activating"
+})
 public final class UIListenerConfiguration extends DiagramConfiguration {
 
 	private String event;
@@ -42,13 +46,8 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 		this.event = Objects.requireNonNull(event, "event");
 	}
 
-	@JsonIgnore
-	public String getPredicate() {
-		return this.predicate != null ? this.predicate : "1=1";
-	}
-
 	@JsonGetter("predicate")
-	private String getPredicateForJson() {
+	public String getPredicate() {
 		return this.predicate;
 	}
 
@@ -88,7 +87,7 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 				.omitEmptyValues()
 				.add("id", this.getId())
 				.add("event", this.getEvent())
-				.add("predicate", this.getPredicateForJson())
+				.add("predicate", this.getPredicate())
 				.add("activating", this.getActivating())
 				.toString();
 	}

@@ -114,7 +114,7 @@ public class SimulationEventHandler {
 
 	public String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate, EvaluationMode mode) {
 		String newExpression;
-		if("1=1".equals(parameterPredicate) || parametersAsString.isEmpty()) {
+		if (parameterPredicate == null || parameterPredicate.isEmpty() || "1=1".equals(parameterPredicate) || parametersAsString == null || parametersAsString.isEmpty()) {
 			newExpression = expression;
 		} else {
 			switch (mode) {

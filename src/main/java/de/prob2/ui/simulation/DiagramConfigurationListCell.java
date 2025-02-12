@@ -250,7 +250,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		TextField tfPredicate = new TextField(item.getPredicate());
 		tfPredicate.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setPredicate(to.isEmpty() ? "1=1" : to);
+			item.setPredicate(to);
 		});
 		tfPredicate.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbPredicate, tfPredicate));

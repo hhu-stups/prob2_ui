@@ -108,8 +108,9 @@ public final class UIInteractionHandler {
 		for(UIListenerConfiguration uiListener : uiListenersForEvent) {
 			for(String activatingEvent : uiListener.getActivating()) {
 				State destination = transition.getDestination();
-				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, uiListener.getPredicate(), transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
-				if(parameterRes.startsWith("TRUE")) {
+				String predicate = uiListener.getPredicate() != null ? uiListener.getPredicate() : "1=1";
+				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, predicate, transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
+				if ("TRUE".equals(parameterRes)) {
 					realTimeSimulator.handleOperationConfiguration(destination, realTimeSimulator.getActivationConfigurationMap().get(activatingEvent), transition.getParameterNames(), transition.getParameterPredicate());
 					anyActivated = true;
 				}
@@ -177,8 +178,9 @@ public final class UIInteractionHandler {
 		for (UIListenerConfiguration uiListener : uiListeners) {
 			if (uiListener.getEvent().equals(op)) {
 				State destination = transition.getDestination();
-				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, uiListener.getPredicate(), transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
-				if(parameterRes.startsWith("TRUE")) {
+				String predicate = uiListener.getPredicate() != null ? uiListener.getPredicate() : "1=1";
+				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, predicate, transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
+				if ("TRUE".equals(parameterRes)) {
 					activations.addAll(uiListener.getActivating());
 				}
 			}
