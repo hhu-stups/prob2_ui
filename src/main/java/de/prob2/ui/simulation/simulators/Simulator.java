@@ -21,13 +21,14 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
-import de.prob2.ui.simulation.configuration.ProbabilisticVariables;
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfigurationChecker;
+import de.prob2.ui.simulation.configuration.TransitionSelection;
 import de.prob2.ui.simulation.external.ExternalSimulationStep;
 import de.prob2.ui.simulation.external.ExternalSimulatorExecutor;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
@@ -161,14 +162,15 @@ public abstract class Simulator {
 		}
 	}
 
-	private ActivationOperationConfiguration createDynamicActivation(String id, String op, String time, int priority, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
-	                                                                 Map<String, String> fixedVariables, ProbabilisticVariables probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
+	private ActivationOperationConfiguration createDynamicActivation(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
+	                                                                 Map<String, String> fixedVariables, Map<String, Map<String, String>> probabilisticVariables, TransitionSelection transitionSelection,
+	                                                                 List<String> activations, boolean activatingOnlyWhenExecuted,
 	                                                                 Map<String, String> updating, String withPredicate) {
 		if(id == null || op == null) {
 			throw new RuntimeException("Provided operation is null. There is an error when sending the operation to be executed from the external simulation.");
 		}
 
-		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, activatingOnlyWhenExecuted, updating, withPredicate);
+		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, transitionSelection, activations, activatingOnlyWhenExecuted, updating, withPredicate);
 		if(!activationConfigurationsSorted.contains(activationConfig)) {
 			this.activationConfigurationsSorted.add(activationConfig);
 		}
@@ -238,9 +240,9 @@ public abstract class Simulator {
 
 	private void activateBeforeInitialisation(Trace trace, String operation) {
 		if(config instanceof SimulationExternalConfiguration) {
-			createDynamicActivation("$setup_constants", "$setup_constants", "0", 0,
-					null, ActivationOperationConfiguration.ActivationKind.SINGLE, null, null, null,
-					true, null, null);
+			createDynamicActivation(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, "0", 0,
+					null, ActivationKind.SINGLE, null, null, TransitionSelection.FIRST,
+					null, true, null, null);
 		}
 		if(configurationToActivation.containsKey(operation)) {
 			ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get(operation);
@@ -323,8 +325,8 @@ public abstract class Simulator {
 				}
 
 				ActivationOperationConfiguration newActivation = createDynamicActivation(step.getOp(), step.getOp(), step.getDelta(), 0,
-						null, ActivationOperationConfiguration.ActivationKind.SINGLE, null, null, null,
-						true, null, step.getPredicate());
+						null, ActivationKind.SINGLE, null, null, TransitionSelection.FIRST,
+						null, true, null, step.getPredicate());
 				simulationEventHandler.activateOperation(newTrace.getCurrentState(), newActivation, new ArrayList<>(), "1=1");
 			}
 		}

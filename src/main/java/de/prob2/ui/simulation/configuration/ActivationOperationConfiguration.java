@@ -3,6 +3,7 @@ package de.prob2.ui.simulation.configuration;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
@@ -10,7 +11,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.common.base.MoreObjects;
 
 import de.prob.statespace.Transition;
@@ -31,35 +31,6 @@ import de.prob.statespace.Transition;
 })
 public final class ActivationOperationConfiguration extends DiagramConfiguration.NonUi {
 
-	public enum ActivationKind {
-
-		SINGLE("single"),
-		SINGLE_MIN("single:min"),
-		SINGLE_MAX("single:max"),
-		MULTI("multi");
-
-		private final String name;
-
-		ActivationKind(String name) {
-			this.name = name;
-		}
-
-		@JsonValue
-		public String getName() {
-			return this.name;
-		}
-
-		public static ActivationKind fromName(String name) {
-			return switch (name) {
-				case "single" -> SINGLE;
-				case "single:min" -> SINGLE_MIN;
-				case "single:max" -> SINGLE_MAX;
-				case "multi" -> MULTI;
-				default -> throw new IllegalArgumentException("Unknown activation kind: " + name);
-			};
-		}
-	}
-
 	private String execute;
 	private String after;
 	private int priority;
@@ -68,7 +39,9 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	private ActivationKind activationKind;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Map<String, String> fixedVariables;
-	private ProbabilisticVariables probabilisticVariables;
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private Map<String, Map<String, String>> probabilisticVariables;
+	private TransitionSelection transitionSelection;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<String> activating;
 	private boolean activatingOnlyWhenExecuted;
@@ -86,7 +59,8 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 			@JsonProperty("additionalGuards") String additionalGuards,
 			@JsonProperty(value = "activationKind", defaultValue = "multi") ActivationKind activationKind,
 			@JsonProperty("fixedVariables") Map<String, String> fixedVariables,
-			@JsonProperty(value = "probabilisticVariables", defaultValue = "first") ProbabilisticVariables probabilisticVariables,
+			@JsonProperty("probabilisticVariables") Map<String, Map<String, String>> probabilisticVariables,
+			@JsonProperty(value = "transitionSelection", defaultValue = "first") TransitionSelection transitionSelection,
 			@JsonProperty("activating") List<String> activating,
 			@JsonProperty(value = "activatingOnlyWhenExecuted", defaultValue = "true") Boolean activatingOnlyWhenExecuted,
 			@JsonProperty("updating") Map<String, String> updating,
@@ -105,7 +79,8 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
 		this.activationKind = activationKind != null ? activationKind : ActivationKind.MULTI;
 		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
-		this.probabilisticVariables = probabilisticVariables != null ? probabilisticVariables : ProbabilisticVariables.PerTransition.FIRST;
+		this.probabilisticVariables = probabilisticVariables != null ? probabilisticVariables.entrySet().stream().collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, e -> Map.copyOf(e.getValue()))) : Map.of();
+		this.transitionSelection = transitionSelection != null ? transitionSelection : TransitionSelection.FIRST;
 		this.activating = activating != null ? List.copyOf(activating) : List.of();
 		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted != null ? activatingOnlyWhenExecuted : true;
 		this.updating = updating != null ? Map.copyOf(updating) : Map.of();
@@ -184,19 +159,28 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
 	}
 
-	@JsonIgnore
-	public ProbabilisticVariables getProbabilisticVariables() {
+	@JsonGetter("probabilisticVariables")
+	public Map<String, Map<String, String>> getProbabilisticVariables() {
 		return this.probabilisticVariables;
 	}
 
-	@JsonGetter("probabilisticVariables")
-	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private ProbabilisticVariables getProbabilisticVariablesForJson() {
-		return ProbabilisticVariables.PerTransition.FIRST.equals(this.probabilisticVariables) ? null : this.probabilisticVariables;
+	public void setProbabilisticVariables(Map<String, Map<String, String>> probabilisticVariables) {
+		this.probabilisticVariables = probabilisticVariables != null ? probabilisticVariables.entrySet().stream().collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, e -> Map.copyOf(e.getValue()))) : Map.of();
 	}
 
-	public void setProbabilisticVariables(ProbabilisticVariables probabilisticVariables) {
-		this.probabilisticVariables = probabilisticVariables != null ? probabilisticVariables : ProbabilisticVariables.PerTransition.FIRST;
+	@JsonIgnore
+	public TransitionSelection getTransitionSelection() {
+		return this.transitionSelection;
+	}
+
+	@JsonGetter("transitionSelection")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private TransitionSelection getTransitionSelectionForJson() {
+		return TransitionSelection.FIRST.equals(this.transitionSelection) ? null : this.transitionSelection;
+	}
+
+	public void setTransitionSelection(TransitionSelection transitionSelection) {
+		this.transitionSelection = transitionSelection != null ? transitionSelection : TransitionSelection.FIRST;
 	}
 
 	@JsonGetter("activating")

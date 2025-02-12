@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.configuration;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -8,27 +7,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.json.JacksonManager;
-import de.prob.json.JsonConversionException;
 import de.prob.json.JsonMetadata;
 import de.prob.json.JsonMetadataBuilder;
 import de.prob.model.representation.Named;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -91,6 +85,22 @@ public final class SimulationFileHandler {
 			@Override
 			public ObjectNode convertOldData(ObjectNode oldObject, int oldVersion) {
 				// do not throw exception when loading v0 data (without metadata)
+
+				if (oldVersion <= 3) {
+					// split probabilisticVariables and transitionSelection
+					if (oldObject.get("activations") instanceof ObjectNode activations) {
+						for (JsonNode activationNode : activations) {
+							if (activationNode instanceof ObjectNode activation) {
+								JsonNode probabilisticVariables = activation.get("probabilisticVariables");
+								if (probabilisticVariables != null && probabilisticVariables.isTextual()) {
+									activation.remove("probabilisticVariables");
+									activation.put("transitionSelection", probabilisticVariables.asText());
+								}
+							}
+						}
+					}
+				}
+
 				return oldObject;
 			}
 
@@ -243,18 +253,14 @@ public final class SimulationFileHandler {
 		List<UIListenerConfiguration> uiListenerConfigurations = new ArrayList<>();
 		JsonMetadata metadata = createMetadata(null, null);
 
-		if(!loadedMachine.getConstantNames().isEmpty()) {
-			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME,
-					"0", 0, null, ActivationOperationConfiguration.ActivationKind.MULTI, null, null, null, true, null, null));
+		if (!loadedMachine.getConstantNames().isEmpty()) {
+			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, null, true, null, null));
 		}
 
-		Set<String> operations = loadedMachine.getOperationNames();
-
-		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME,
-				"0", 1, null, ActivationOperationConfiguration.ActivationKind.MULTI, null, null, List.copyOf(operations), true, null, null));
-
-		for(String op : operations) {
-			activations.add(new ActivationOperationConfiguration(op, op, "100", 0, null, ActivationOperationConfiguration.ActivationKind.SINGLE_MAX, null, ProbabilisticVariables.PerTransition.UNIFORM, List.copyOf(operations), true, null, null));
+		var operations = loadedMachine.getOperationNames();
+		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME, "0", 1, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, List.copyOf(operations), true, null, null));
+		for (var op : operations) {
+			activations.add(new ActivationOperationConfiguration(op, op, "100", 0, null, ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, List.copyOf(operations), true, null, null));
 		}
 
 		return new SimulationModelConfiguration(variables, activations, uiListenerConfigurations, metadata);

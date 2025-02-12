@@ -3,16 +3,17 @@ package de.prob2.ui.simulation.simulators;
 import java.util.List;
 import java.util.Map;
 
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.ProbabilisticVariables;
+import de.prob2.ui.simulation.configuration.ActivationKind;
+import de.prob2.ui.simulation.configuration.TransitionSelection;
 
 public record Activation(
 		String operation,
 		int time,
 		String additionalGuards,
-		ActivationOperationConfiguration.ActivationKind activationKind,
+		ActivationKind activationKind,
 		Map<String, String> fixedVariables,
-		ProbabilisticVariables probabilisticVariables,
+		Map<String, Map<String, String>> probabilisticVariables,
+		TransitionSelection transitionSelection,
 		List<String> firingTransitionParameters,
 		String firingTransitionParametersPredicate,
 		String withPredicate
@@ -26,6 +27,7 @@ public record Activation(
 				this.activationKind(),
 				this.fixedVariables(),
 				this.probabilisticVariables(),
+				this.transitionSelection(),
 				this.firingTransitionParameters(),
 				this.firingTransitionParametersPredicate(),
 				this.withPredicate()

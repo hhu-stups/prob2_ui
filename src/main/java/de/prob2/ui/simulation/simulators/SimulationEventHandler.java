@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.simulators;
 
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -16,10 +15,9 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
-import de.prob2.ui.simulation.configuration.ProbabilisticVariables;
-
 
 public class SimulationEventHandler {
 
@@ -88,15 +86,7 @@ public class SimulationEventHandler {
 	}
 
 	public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
-		var probability = activation.probabilisticVariables();
-		if (probability instanceof ProbabilisticVariables.PerVariable(var probabilities)) {
-			return buildProbabilisticChoice(currentState, probabilities);
-		} else {
-			return Map.of();
-		}
-	}
-
-	private Map<String, String> buildProbabilisticChoice(State currentState, Map<String, Map<String, String>> probabilities) {
+		var probabilities = activation.probabilisticVariables();
 		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		Map<String, String> values = new HashMap<>();
 		// TODO: use weights instead of forcing the probabilities to sum to 1
@@ -167,34 +157,28 @@ public class SimulationEventHandler {
 
 	public Transition selectTransition(Activation activation, State currentState, Map<String, String> variables) {
 		String opName = activation.operation();
-		var probabilisticVariables = activation.probabilisticVariables();
 		String predicate = buildPredicateForTransition(currentState, activation);
-		if (probabilisticVariables instanceof ProbabilisticVariables.PerTransition perTransition) {
-			switch (perTransition) {
-				case FIRST -> {
-					List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
-					if (!transitions.isEmpty()) {
-						return transitions.get(0);
-					}
-				}
-				case UNIFORM -> {
-					List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
-					int len = transitions.size();
-					if (len == 1) {
-						return transitions.get(0);
-					} else if (len > 1) {
-						return transitions.get(random.nextInt(len));
-					}
+		return switch (activation.transitionSelection()) {
+			case FIRST -> {
+				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
+				if (!transitions.isEmpty()) {
+					yield transitions.get(0);
+				} else {
+					yield null;
 				}
 			}
-		} else {
-			// assume all parameters have been set, use first valid transition
-			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
-			if (!transitions.isEmpty()) {
-				return transitions.get(0);
+			case UNIFORM -> {
+				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
+				int len = transitions.size();
+				if (len == 1) {
+					yield transitions.get(0);
+				} else if (len > 1) {
+					yield transitions.get(random.nextInt(len));
+				} else {
+					yield null;
+				}
 			}
-		}
-		return null;
+		};
 	}
 
 	private void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
@@ -206,7 +190,7 @@ public class SimulationEventHandler {
 		activationsForOperation.add(insertionIndex, activation);
 	}
 
-	private void activateSingleOperations(String id, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
+	private void activateSingleOperations(String id, ActivationKind activationKind, Activation activation) {
 		int evaluatedTime = activation.time();
 
 		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(id);
@@ -262,6 +246,7 @@ public class SimulationEventHandler {
 
 	private void chooseOperation(State state, ActivationChoiceConfiguration activationChoiceConfiguration,
 								 List<String> parametersAsString, String parameterPredicates) {
+		// TODO: use weights instead of forcing the probabilities to sum to 1
 		double probabilityMinimum = 0.0;
 		double randomDouble = random.nextDouble();
 		for(String id : activationChoiceConfiguration.getChooseActivation().keySet()) {
@@ -286,14 +271,15 @@ public class SimulationEventHandler {
 		String id = activationOperationConfiguration.getId();
 		String opName = activationOperationConfiguration.getExecute();
 		String time = activationOperationConfiguration.getAfter();
-		ActivationOperationConfiguration.ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
+		ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
 		String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
 		Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
-		var probability = activationOperationConfiguration.getProbabilisticVariables();
+		var probabilities = activationOperationConfiguration.getProbabilisticVariables();
+		var transitionSelection = activationOperationConfiguration.getTransitionSelection();
 		int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates, EvaluationMode.CLASSICAL_B));
 		String withPredicate = activationOperationConfiguration.getWithPredicate();
 
-		var activation = new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates, withPredicate);
+		var activation = new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
 		switch (activationKind) {
 			case MULTI:
 				activateMultiOperations(activationsForId, activation);

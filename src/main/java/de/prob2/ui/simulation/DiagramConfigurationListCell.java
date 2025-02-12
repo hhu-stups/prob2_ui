@@ -9,9 +9,10 @@ import java.util.stream.Collectors;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
-import de.prob2.ui.simulation.configuration.ProbabilisticVariables;
+import de.prob2.ui.simulation.configuration.TransitionSelection;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 
 import javafx.beans.property.BooleanProperty;
@@ -67,7 +68,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			clear();
 			switch (item) {
 				case ActivationOperationConfiguration currentItem -> {
-					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getExecute(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
+					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getExecute(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getTransitionSelection(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
 					updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
 				}
 				case ActivationChoiceConfiguration currentItem -> {
@@ -148,9 +149,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		tfActivationKind.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			try {
-				item.setActivationKind(ActivationOperationConfiguration.ActivationKind.fromName(to));
+				item.setActivationKind(ActivationKind.fromName(to));
 			} catch (IllegalArgumentException ignored) {
-				item.setActivationKind(ActivationOperationConfiguration.ActivationKind.MULTI);
+				item.setActivationKind(ActivationKind.MULTI);
 			}
 		});
 		tfActivationKind.disableProperty().bind(this.runningProperty);
@@ -179,13 +180,29 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables"));
 		lbProbabilisticVariables.getStyleClass().add("information");
-		TextField tfProbabilisticVariables = new TextField(probabilisticVariablesToString(item.getProbabilisticVariables()));
+		TextField tfProbabilisticVariables = new TextField(containerToString(item.getProbabilisticVariables()));
 		tfProbabilisticVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setProbabilisticVariables(parseProbabilisticVariables(to));
 		});
 		tfProbabilisticVariables.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, tfProbabilisticVariables));
+
+		Label lbTransitionSelection = new Label(i18n.translate("simulation.item.transitionSelection"));
+		lbProbabilisticVariables.getStyleClass().add("information");
+		TextField tfTransitionSelection = new TextField(item.getTransitionSelection().getName());
+		tfTransitionSelection.textProperty().addListener((observable, from, to) -> {
+			savedProperty.set(false);
+			try {
+				item.setTransitionSelection(TransitionSelection.fromName(to));
+			} catch (IllegalArgumentException ignored) {
+				item.setTransitionSelection(TransitionSelection.FIRST);
+			}
+		});
+		tfTransitionSelection.disableProperty().bind(this.runningProperty);
+		this.itemBox.getChildren().add(new HBox(lbTransitionSelection, tfTransitionSelection));
+
+		// TODO: activatingOnlyWhenExecuted, updating, withPredicate
 	}
 
 	private void updateChoiceDiagramItem(ActivationChoiceConfiguration item) {
@@ -248,7 +265,6 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
-
 	}
 
 	private String containerToString(Object o) {
@@ -288,57 +304,41 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 				.collect(Collectors.toUnmodifiableMap(a -> a[0], a -> a[1], (oldValue, newValue) -> newValue));
 	}
 
-	private String probabilisticVariablesToString(ProbabilisticVariables probabilisticVariables) {
-		return switch (probabilisticVariables) {
-			case ProbabilisticVariables.PerTransition perTransition -> perTransition.getName();
-			case ProbabilisticVariables.PerVariable perVariable -> containerToString(perVariable.probabilities());
-		};
-	}
-
-	private ProbabilisticVariables parseProbabilisticVariables(String s) {
-		try {
-			return ProbabilisticVariables.PerTransition.fromName(s);
-		} catch (Exception ignored) {
+	private Map<String, Map<String, String>> parseProbabilisticVariables(String s) {
+		if (s.startsWith("{") && s.endsWith("}")) {
+			s = s.substring(1, s.length() - 1);
 		}
 
-		if (s.isEmpty()) {
-			return ProbabilisticVariables.PerTransition.FIRST;
-		} else {
-			if (s.startsWith("{") && s.endsWith("}")) {
-				s = s.substring(1, s.length() - 1);
+		// TODO: this doesnt work when the string contains ',', '=' or '}'
+		Map<String, Map<String, String>> probabilisticVariables = new HashMap<>();
+		for (int i = 0, len = s.length(); i < len; ) {
+			int pos = s.indexOf('=', i);
+			if (pos < 0 || pos + 1 >= len) {
+				break;
 			}
 
-			// TODO: this doesnt work when the string contains ',', '=' or '}'
-			Map<String, Map<String, String>> probabilisticVariables = new HashMap<>();
-			for (int i = 0, len = s.length(); i < len; ) {
-				int pos = s.indexOf('=', i);
-				if (pos < 0 || pos + 1 >= len) {
-					break;
-				}
-
-				int entryEnd = s.indexOf('}', pos + 1);
-				if (entryEnd < 0 || entryEnd + 1 >= len) {
-					break;
-				}
-
-				String key = s.substring(i, pos).strip();
-				if (key.isEmpty()) {
-					continue;
-				}
-
-				String value = s.substring(pos + 1, entryEnd + 1).strip();
-				probabilisticVariables.put(key, parseMap(value));
-
-				int next = s.indexOf(',', entryEnd + 1);
-				if (next < 0) {
-					break;
-				}
-
-				i = next + 1;
+			int entryEnd = s.indexOf('}', pos + 1);
+			if (entryEnd < 0 || entryEnd + 1 >= len) {
+				break;
 			}
 
-			return new ProbabilisticVariables.PerVariable(probabilisticVariables);
+			String key = s.substring(i, pos).strip();
+			if (key.isEmpty()) {
+				continue;
+			}
+
+			String value = s.substring(pos + 1, entryEnd + 1).strip();
+			probabilisticVariables.put(key, parseMap(value));
+
+			int next = s.indexOf(',', entryEnd + 1);
+			if (next < 0) {
+				break;
+			}
+
+			i = next + 1;
 		}
+
+		return probabilisticVariables;
 	}
 
 	private void clear() {

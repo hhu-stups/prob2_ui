@@ -24,7 +24,7 @@ import de.prob.json.JsonMetadataBuilder;
 public final class SimulationModelConfiguration implements HasMetadata, ISimulationModelConfiguration {
 
 	public static final String FILE_TYPE = "Simulation";
-	public static final int CURRENT_FORMAT_VERSION = 3;
+	public static final int CURRENT_FORMAT_VERSION = 4;
 
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private final Map<String, String> variables;
