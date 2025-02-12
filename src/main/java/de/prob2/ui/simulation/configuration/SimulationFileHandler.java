@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
@@ -88,7 +89,7 @@ public final class SimulationFileHandler {
 
 				if (oldVersion <= 3) {
 					// split probabilisticVariables and transitionSelection
-					if (oldObject.get("activations") instanceof ObjectNode activations) {
+					if (oldObject.get("activations") instanceof ArrayNode activations) {
 						for (JsonNode activationNode : activations) {
 							if (activationNode instanceof ObjectNode activation) {
 								JsonNode probabilisticVariables = activation.get("probabilisticVariables");
