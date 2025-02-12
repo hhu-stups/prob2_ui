@@ -189,7 +189,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, tfProbabilisticVariables));
 
 		Label lbTransitionSelection = new Label(i18n.translate("simulation.item.transitionSelection"));
-		lbProbabilisticVariables.getStyleClass().add("information");
+		lbTransitionSelection.getStyleClass().add("information");
 		TextField tfTransitionSelection = new TextField(item.getTransitionSelection().getName());
 		tfTransitionSelection.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);

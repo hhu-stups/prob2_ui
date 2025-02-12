@@ -144,7 +144,7 @@ public class SimulationEventHandler {
 
 	private String buildPredicateForTransition(State state, Activation activation) {
 		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
-		String additionalGuardsResult = activation.additionalGuards().isEmpty() || "1=1".equals(activation.additionalGuards()) ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.additionalGuards(), mode);
+		String additionalGuardsResult = activation.additionalGuards() == null || activation.additionalGuards().isEmpty() || "1=1".equals(activation.additionalGuards()) ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.additionalGuards(), mode);
 		if ("FALSE".equals(additionalGuardsResult)) {
 			return "1=2";
 		}
