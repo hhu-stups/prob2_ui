@@ -1,16 +1,6 @@
 package de.prob2.ui.simulation.simulators;
 
 
-import de.prob.formula.PredicateBuilder;
-import de.prob.statespace.State;
-import de.prob.statespace.Transition;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.EvaluationMode;
-import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
-import de.prob2.ui.simulation.configuration.DiagramConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +8,17 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+
+import de.prob.formula.PredicateBuilder;
+import de.prob.statespace.State;
+import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.EvaluationMode;
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
+import de.prob2.ui.simulation.configuration.ProbabilisticVariables;
 
 
 public class SimulationEventHandler {
@@ -74,25 +75,25 @@ public class SimulationEventHandler {
 	}
 
 	public Map<String, String> chooseParameters(Activation activation, State currentState) {
-		var parameters = activation.getFixedVariables();
+		var parameters = activation.fixedVariables();
 		Map<String, String> values = new HashMap<>();
 		if (parameters != null) {
 			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			for (var e : parameters.entrySet()) {
-				String value = evaluateWithParameters(currentState, e.getValue(), activation.getFiringTransitionParameters(), activation.getFiringTransitionParametersPredicate(), mode);
+				String value = evaluateWithParameters(currentState, e.getValue(), activation.firingTransitionParameters(), activation.firingTransitionParametersPredicate(), mode);
 				values.put(e.getKey(), value);
 			}
 		}
 		return values;
 	}
 
-	@SuppressWarnings("unchecked")
 	public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
-		Object probability = activation.getProbabilisticVariables();
-		if (probability == null || probability instanceof String) {
+		var probability = activation.probabilisticVariables();
+		if (probability instanceof ProbabilisticVariables.PerVariable(var probabilities)) {
+			return buildProbabilisticChoice(currentState, probabilities);
+		} else {
 			return Map.of();
 		}
-		return buildProbabilisticChoice(currentState, (Map<String, Map<String, String>>) probability);
 	}
 
 	private Map<String, String> buildProbabilisticChoice(State currentState, Map<String, Map<String, String>> probabilities) {
@@ -153,7 +154,7 @@ public class SimulationEventHandler {
 
 	private String buildPredicateForTransition(State state, Activation activation) {
 		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
-		String additionalGuardsResult = activation.getAdditionalGuards() == null ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.getAdditionalGuards(), mode);
+		String additionalGuardsResult = activation.additionalGuards().isEmpty() || "1=1".equals(activation.additionalGuards()) ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.additionalGuards(), mode);
 		if ("FALSE".equals(additionalGuardsResult)) {
 			return "1=2";
 		}
@@ -161,30 +162,30 @@ public class SimulationEventHandler {
 		Map<String, String> values = new HashMap<>(chooseProbabilistic(activation, state));
 		values.putAll(chooseParameters(activation, state));
 
-		return chooseVariableValues(state, values) + (activation.getWithPredicate() != null && !activation.getWithPredicate().isEmpty() ? " & " + activation.getWithPredicate() : "");
+		return chooseVariableValues(state, values) + (activation.withPredicate() != null && !activation.withPredicate().isEmpty() ? " & " + activation.withPredicate() : "");
 	}
 
-
 	public Transition selectTransition(Activation activation, State currentState, Map<String, String> variables) {
-		String opName = activation.getOperation();
-		Object probabilisticVariables = activation.getProbabilisticVariables();
+		String opName = activation.operation();
+		var probabilisticVariables = activation.probabilisticVariables();
 		String predicate = buildPredicateForTransition(currentState, activation);
-		if (probabilisticVariables instanceof String probabilisticVariablesAsString) {
-			if ("first".equals(probabilisticVariablesAsString)) {
-				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
-				if (!transitions.isEmpty()) {
-					return transitions.get(0);
+		if (probabilisticVariables instanceof ProbabilisticVariables.PerTransition perTransition) {
+			switch (perTransition) {
+				case FIRST -> {
+					List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
+					if (!transitions.isEmpty()) {
+						return transitions.get(0);
+					}
 				}
-			} else if ("uniform".equals(probabilisticVariablesAsString)) {
-				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
-				int len = transitions.size();
-				if (len == 1) {
-					return transitions.get(0);
-				} else if (len > 1) {
-					return transitions.get(random.nextInt(len));
+				case UNIFORM -> {
+					List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
+					int len = transitions.size();
+					if (len == 1) {
+						return transitions.get(0);
+					} else if (len > 1) {
+						return transitions.get(random.nextInt(len));
+					}
 				}
-			} else {
-				throw new RuntimeException("Configuration for probabilistic choice of parameters and non-deterministic variables not supported yet");
 			}
 		} else {
 			// assume all parameters have been set, use first valid transition
@@ -198,22 +199,22 @@ public class SimulationEventHandler {
 
 	private void activateMultiOperations(List<Activation> activationsForOperation, Activation activation) {
 		int insertionIndex = 0;
-		while(insertionIndex < activationsForOperation.size() &&
-				activation.getTime() >= activationsForOperation.get(insertionIndex).getTime()) {
+		while (insertionIndex < activationsForOperation.size()
+				&& activation.time() >= activationsForOperation.get(insertionIndex).time()) {
 			insertionIndex++;
 		}
 		activationsForOperation.add(insertionIndex, activation);
 	}
 
 	private void activateSingleOperations(String id, ActivationOperationConfiguration.ActivationKind activationKind, Activation activation) {
-		int evaluatedTime = activation.getTime();
+		int evaluatedTime = activation.time();
 
 		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(id);
 		if(!activationsForId.isEmpty()) {
 			switch(activationKind) {
 				case SINGLE_MIN: {
 					Activation activationForId = activationsForId.get(0);
-					int otherActivationTime = activationForId.getTime();
+					int otherActivationTime = activationForId.time();
 					if (evaluatedTime < otherActivationTime) {
 						activationsForId.clear();
 						simulator.getConfigurationToActivation().get(id).add(activation);
@@ -222,7 +223,7 @@ public class SimulationEventHandler {
 				}
 				case SINGLE_MAX: {
 					Activation activationForId = activationsForId.get(0);
-					int otherActivationTime = activationForId.getTime();
+					int otherActivationTime = activationForId.time();
 					if (evaluatedTime > otherActivationTime) {
 						activationsForId.clear();
 						simulator.getConfigurationToActivation().get(id).add(activation);
@@ -288,18 +289,19 @@ public class SimulationEventHandler {
 		ActivationOperationConfiguration.ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
 		String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
 		Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
-		Object probability = activationOperationConfiguration.getProbabilisticVariables();
+		var probability = activationOperationConfiguration.getProbabilisticVariables();
 		int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates, EvaluationMode.CLASSICAL_B));
 		String withPredicate = activationOperationConfiguration.getWithPredicate();
 
+		var activation = new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates, withPredicate);
 		switch (activationKind) {
 			case MULTI:
-				activateMultiOperations(activationsForId, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates, withPredicate));
+				activateMultiOperations(activationsForId, activation);
 				break;
 			case SINGLE:
 			case SINGLE_MAX:
 			case SINGLE_MIN:
-				activateSingleOperations(id, activationKind, new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probability, parametersAsString, parameterPredicates, withPredicate));
+				activateSingleOperations(id, activationKind, activation);
 				break;
 		}
 	}

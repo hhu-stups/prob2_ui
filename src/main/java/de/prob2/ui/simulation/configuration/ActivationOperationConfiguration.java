@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.configuration;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -69,8 +68,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	private ActivationKind activationKind;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Map<String, String> fixedVariables;
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private Object probabilisticVariables;
+	private ProbabilisticVariables probabilisticVariables;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<String> activating;
 	private boolean activatingOnlyWhenExecuted;
@@ -88,7 +86,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 			@JsonProperty("additionalGuards") String additionalGuards,
 			@JsonProperty(value = "activationKind", defaultValue = "multi") ActivationKind activationKind,
 			@JsonProperty("fixedVariables") Map<String, String> fixedVariables,
-			@JsonProperty("probabilisticVariables") Object probabilisticVariables,
+			@JsonProperty(value = "probabilisticVariables", defaultValue = "first") ProbabilisticVariables probabilisticVariables,
 			@JsonProperty("activating") List<String> activating,
 			@JsonProperty(value = "activatingOnlyWhenExecuted", defaultValue = "true") Boolean activatingOnlyWhenExecuted,
 			@JsonProperty("updating") Map<String, String> updating,
@@ -107,25 +105,11 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
 		this.activationKind = activationKind != null ? activationKind : ActivationKind.MULTI;
 		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
-		this.probabilisticVariables = sanitizeProbabilities(probabilisticVariables);
+		this.probabilisticVariables = probabilisticVariables != null ? probabilisticVariables : ProbabilisticVariables.PerTransition.FIRST;
 		this.activating = activating != null ? List.copyOf(activating) : List.of();
 		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted != null ? activatingOnlyWhenExecuted : true;
 		this.updating = updating != null ? Map.copyOf(updating) : Map.of();
 		this.withPredicate = withPredicate != null && !withPredicate.isEmpty() && !"1=1".equals(withPredicate) ? withPredicate : null;
-	}
-
-	@SuppressWarnings("unchecked")
-	private static Object sanitizeProbabilities(Object o) {
-		return switch (o) {
-			case null -> null;
-			case String s -> s;
-			case Map<?, ?> m -> {
-				Map<String, Map<String, String>> copy = new HashMap<>();
-				m.forEach((k, v) -> copy.put((String) k, Map.copyOf((Map<String, String>) v)));
-				yield Map.copyOf(copy);
-			}
-			default -> throw new IllegalArgumentException("Invalid probabilities: " + o);
-		};
 	}
 
 	@JsonProperty("execute")
@@ -200,13 +184,19 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
 	}
 
-	@JsonGetter("probabilisticVariables")
-	public Object getProbabilisticVariables() {
+	@JsonIgnore
+	public ProbabilisticVariables getProbabilisticVariables() {
 		return this.probabilisticVariables;
 	}
 
-	public void setProbabilisticVariables(Object probabilisticVariables) {
-		this.probabilisticVariables = sanitizeProbabilities(probabilisticVariables);
+	@JsonGetter("probabilisticVariables")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private ProbabilisticVariables getProbabilisticVariablesForJson() {
+		return ProbabilisticVariables.PerTransition.FIRST.equals(this.probabilisticVariables) ? null : this.probabilisticVariables;
+	}
+
+	public void setProbabilisticVariables(ProbabilisticVariables probabilisticVariables) {
+		this.probabilisticVariables = probabilisticVariables != null ? probabilisticVariables : ProbabilisticVariables.PerTransition.FIRST;
 	}
 
 	@JsonGetter("activating")

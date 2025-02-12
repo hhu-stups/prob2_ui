@@ -254,7 +254,7 @@ public final class SimulationFileHandler {
 				"0", 1, null, ActivationOperationConfiguration.ActivationKind.MULTI, null, null, List.copyOf(operations), true, null, null));
 
 		for(String op : operations) {
-			activations.add(new ActivationOperationConfiguration(op, op, "100", 0, null, ActivationOperationConfiguration.ActivationKind.SINGLE_MAX, null, "uniform", List.copyOf(operations), true, null, null));
+			activations.add(new ActivationOperationConfiguration(op, op, "100", 0, null, ActivationOperationConfiguration.ActivationKind.SINGLE_MAX, null, ProbabilisticVariables.PerTransition.UNIFORM, List.copyOf(operations), true, null, null));
 		}
 
 		return new SimulationModelConfiguration(variables, activations, uiListenerConfigurations, metadata);

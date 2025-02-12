@@ -6,14 +6,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
+import de.prob2.ui.simulation.configuration.ProbabilisticVariables;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 
 import javafx.beans.property.BooleanProperty;
@@ -136,7 +134,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(toJsonString(item.getActivating()));
+		TextField tfActivation = new TextField(containerToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(parseList(to));
@@ -171,7 +169,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbFixedVariables = new Label(i18n.translate("simulation.item.fixedVariables"));
 		lbFixedVariables.getStyleClass().add("information");
-		TextField tfFixedVariables = new TextField(toJsonString(item.getFixedVariables()));
+		TextField tfFixedVariables = new TextField(containerToString(item.getFixedVariables()));
 		tfFixedVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setFixedVariables(parseMap(to));
@@ -181,7 +179,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables"));
 		lbProbabilisticVariables.getStyleClass().add("information");
-		TextField tfProbabilisticVariables = new TextField(toJsonString(item.getProbabilisticVariables()));
+		TextField tfProbabilisticVariables = new TextField(probabilisticVariablesToString(item.getProbabilisticVariables()));
 		tfProbabilisticVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setProbabilisticVariables(parseProbabilisticVariables(to));
@@ -201,7 +199,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(toJsonString(item.getChooseActivation()));
+		TextField tfActivation = new TextField(containerToString(item.getChooseActivation()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setChooseActivation(parseMap(to));
@@ -243,7 +241,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(toJsonString(item.getActivating()));
+		TextField tfActivation = new TextField(containerToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(parseList(to));
@@ -253,7 +251,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 	}
 
-	private String toJsonString(Object o) {
+	private String containerToString(Object o) {
 		if (o == null) {
 			return "";
 		}
@@ -290,11 +288,21 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 				.collect(Collectors.toUnmodifiableMap(a -> a[0], a -> a[1], (oldValue, newValue) -> newValue));
 	}
 
-	private Object parseProbabilisticVariables(String s) {
+	private String probabilisticVariablesToString(ProbabilisticVariables probabilisticVariables) {
+		return switch (probabilisticVariables) {
+			case ProbabilisticVariables.PerTransition perTransition -> perTransition.getName();
+			case ProbabilisticVariables.PerVariable perVariable -> containerToString(perVariable.probabilities());
+		};
+	}
+
+	private ProbabilisticVariables parseProbabilisticVariables(String s) {
+		try {
+			return ProbabilisticVariables.PerTransition.fromName(s);
+		} catch (Exception ignored) {
+		}
+
 		if (s.isEmpty()) {
-			return null;
-		} else if ("uniform".equals(s) || "first".equals(s)) {
-			return s;
+			return ProbabilisticVariables.PerTransition.FIRST;
 		} else {
 			if (s.startsWith("{") && s.endsWith("}")) {
 				s = s.substring(1, s.length() - 1);
@@ -329,7 +337,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 				i = next + 1;
 			}
 
-			return probabilisticVariables;
+			return new ProbabilisticVariables.PerVariable(probabilisticVariables);
 		}
 	}
 

@@ -1,24 +1,5 @@
 package de.prob2.ui.simulation.simulators;
 
-import de.prob.animator.command.GetPreferenceCommand;
-import de.prob.statespace.State;
-import de.prob.statespace.Trace;
-import de.prob.statespace.Transition;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.configuration.DiagramConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationModelConfigurationChecker;
-import de.prob2.ui.simulation.external.ExternalSimulationStep;
-import de.prob2.ui.simulation.external.ExternalSimulatorExecutor;
-import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.value.ChangeListener;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -33,6 +14,27 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Provider;
+
+import de.prob.animator.command.GetPreferenceCommand;
+import de.prob.statespace.State;
+import de.prob.statespace.Trace;
+import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
+import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.ProbabilisticVariables;
+import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfigurationChecker;
+import de.prob2.ui.simulation.external.ExternalSimulationStep;
+import de.prob2.ui.simulation.external.ExternalSimulatorExecutor;
+import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
+
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.value.ChangeListener;
 
 public abstract class Simulator {
 
@@ -160,8 +162,8 @@ public abstract class Simulator {
 	}
 
 	private ActivationOperationConfiguration createDynamicActivation(String id, String op, String time, int priority, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
-										 Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
-										 Map<String, String> updating, String withPredicate) {
+	                                                                 Map<String, String> fixedVariables, ProbabilisticVariables probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
+	                                                                 Map<String, String> updating, String withPredicate) {
 		if(id == null || op == null) {
 			throw new RuntimeException("Provided operation is null. There is an error when sending the operation to be executed from the external simulation.");
 		}
@@ -204,9 +206,9 @@ public abstract class Simulator {
 
 	public void updateRemainingTime(int delay) {
 		this.time.set(this.time.get() + delay);
-		for(String key : configurationToActivation.keySet()) {
-			for(Activation activation : configurationToActivation.get(key)) {
-				activation.decreaseTime(delay);
+		for (List<Activation> activations : configurationToActivation.values()) {
+			for (int i = 0, len = activations.size(); i < len; i++) {
+				activations.set(i, activations.get(i).decreaseTime(delay));
 			}
 		}
 	}
@@ -217,8 +219,8 @@ public abstract class Simulator {
 		for(List<Activation> activations : configurationToActivation.values()) {
 			for(Activation activation : activations) {
 				this.noActivationQueued = false;
-				if(activation.getTime() < delay) {
-					delay = activation.getTime();
+				if(activation.time() < delay) {
+					delay = activation.time();
 				}
 				break;
 			}
@@ -281,7 +283,7 @@ public abstract class Simulator {
 		Trace newTrace = trace;
 		for(Activation activation : activationForOperationCopy) {
 			//select operation only if its time is 0
-			if(activation.getTime() > 0) {
+			if(activation.time() > 0) {
 				break;
 			}
 			activationForOperation.remove(activation);
@@ -297,7 +299,7 @@ public abstract class Simulator {
 				timestamps.add(time.get());
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 				processExternalConfiguration(newTrace);
-			} else if("skip".equals(activation.getOperation())) {
+			} else if("skip".equals(activation.operation())) {
 				updateStartingInformation(newTrace);
 				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
 				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
