@@ -74,46 +74,47 @@ public class SimulationEventHandler {
 	}
 
 	public Map<String, String> chooseParameters(Activation activation, State currentState) {
-		Map<String, String> parameters = activation.getFixedVariables();
-		if(parameters == null) {
-			return null;
-		}
+		var parameters = activation.getFixedVariables();
 		Map<String, String> values = new HashMap<>();
-		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
-		for(String parameter : parameters.keySet()) {
-			String value = evaluateWithParameters(currentState, parameters.get(parameter), activation.getFiringTransitionParameters(), activation.getFiringTransitionParametersPredicate(), mode);
-			values.put(parameter, value);
+		if (parameters != null) {
+			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
+			for (var e : parameters.entrySet()) {
+				String value = evaluateWithParameters(currentState, e.getValue(), activation.getFiringTransitionParameters(), activation.getFiringTransitionParametersPredicate(), mode);
+				values.put(e.getKey(), value);
+			}
 		}
 		return values;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
 		Object probability = activation.getProbabilisticVariables();
-		if(probability == null || probability instanceof String) {
-			return null;
+		if (probability == null || probability instanceof String) {
+			return Map.of();
 		}
-		return buildProbabilisticChoice(currentState, probability);
+		return buildProbabilisticChoice(currentState, (Map<String, Map<String, String>>) probability);
 	}
 
-	@SuppressWarnings("unchecked")
-	private Map<String, String> buildProbabilisticChoice(State currentState, Object probability) {
-		Map<String, Map<String, String>> probabilityMap = (Map<String, Map<String, String>>) probability;
+	private Map<String, String> buildProbabilisticChoice(State currentState, Map<String, Map<String, String>> probabilities) {
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		Map<String, String> values = new HashMap<>();
-		for(String variable : probabilityMap.keySet()) {
-			double probabilityMinimum = 0.0;
-			Map<String, String> probabilityValueMap = probabilityMap.get(variable);
-			double randomDouble = random.nextDouble();
-			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
-			for(String value : probabilityValueMap.keySet()) {
-				String valueProbability = probabilityValueMap.get(value);
-				double evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, simulator.getVariables(), valueProbability, EvaluationMode.CLASSICAL_B));
-				if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
+		// TODO: use weights instead of forcing the probabilities to sum to 1
+		for (var e1 : probabilities.entrySet()) {
+			var variable = e1.getKey();
+			var probabilityValueMap = e1.getValue();
+			var probabilityMinimum = 0.0;
+			var randomDouble = random.nextDouble();
+			for (var e2 : probabilityValueMap.entrySet()) {
+				var value = e2.getKey();
+				var valueProbability = e2.getValue();
+				var evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, simulator.getVariables(), valueProbability, EvaluationMode.CLASSICAL_B));
+				if (randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
 					String evalValue = cache.readValueWithCaching(currentState, simulator.getVariables(), value, mode);
 					values.put(variable, evalValue);
 				}
 				probabilityMinimum += evalProbability;
 			}
-			if(Math.abs(1.0 - probabilityMinimum) > 0.000001) {
+			if (Math.abs(1.0 - probabilityMinimum) > 0.000001) {
 				throw new RuntimeException("Sum of probabilistic choice is not equal 1");
 			}
 		}
@@ -153,19 +154,12 @@ public class SimulationEventHandler {
 	private String buildPredicateForTransition(State state, Activation activation) {
 		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		String additionalGuardsResult = activation.getAdditionalGuards() == null ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.getAdditionalGuards(), mode);
-		if("FALSE".equals(additionalGuardsResult)) {
+		if ("FALSE".equals(additionalGuardsResult)) {
 			return "1=2";
 		}
 
-		Map<String, String> probabilisticChoice = chooseProbabilistic(activation, state);
-		Map<String, String> parameterChoice = chooseParameters(activation, state);
-		Map<String, String> values;
-		if (probabilisticChoice == null || probabilisticChoice.isEmpty()) {
-			values = parameterChoice;
-		} else {
-			values = probabilisticChoice;
-			values.putAll(parameterChoice);
-		}
+		Map<String, String> values = new HashMap<>(chooseProbabilistic(activation, state));
+		values.putAll(chooseParameters(activation, state));
 
 		return chooseVariableValues(state, values) + (activation.getWithPredicate() != null && !activation.getWithPredicate().isEmpty() ? " & " + activation.getWithPredicate() : "");
 	}
@@ -175,29 +169,28 @@ public class SimulationEventHandler {
 		String opName = activation.getOperation();
 		Object probabilisticVariables = activation.getProbabilisticVariables();
 		String predicate = buildPredicateForTransition(currentState, activation);
-		if(probabilisticVariables == null) {
-			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
-			if (!transitions.isEmpty()) {
-				return transitions.get(0);
-			}
-		} else if(probabilisticVariables instanceof Map<?, ?>) {
-			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
-			if (!transitions.isEmpty()) {
-				return transitions.get(0);
-			}
-		} else if (probabilisticVariables instanceof String probabilisticVariablesAsString){
-			if("first".equals(probabilisticVariablesAsString)) {
+		if (probabilisticVariables instanceof String probabilisticVariablesAsString) {
+			if ("first".equals(probabilisticVariablesAsString)) {
 				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
 				if (!transitions.isEmpty()) {
 					return transitions.get(0);
 				}
-			} else if("uniform".equals(probabilisticVariablesAsString)) {
+			} else if ("uniform".equals(probabilisticVariablesAsString)) {
 				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
-				if (!transitions.isEmpty()) {
-					return transitions.get(random.nextInt(transitions.size()));
+				int len = transitions.size();
+				if (len == 1) {
+					return transitions.get(0);
+				} else if (len > 1) {
+					return transitions.get(random.nextInt(len));
 				}
 			} else {
 				throw new RuntimeException("Configuration for probabilistic choice of parameters and non-deterministic variables not supported yet");
+			}
+		} else {
+			// assume all parameters have been set, use first valid transition
+			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
+			if (!transitions.isEmpty()) {
+				return transitions.get(0);
 			}
 		}
 		return null;
