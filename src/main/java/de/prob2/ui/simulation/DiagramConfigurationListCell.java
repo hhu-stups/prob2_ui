@@ -1,8 +1,13 @@
 package de.prob2.ui.simulation;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -131,10 +136,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(collToString(item.getActivating()));
+		TextField tfActivation = new TextField(toJsonString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setActivating(processActivating(to));
+			item.setActivating(parseList(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
@@ -166,20 +171,20 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbFixedVariables = new Label(i18n.translate("simulation.item.fixedVariables"));
 		lbFixedVariables.getStyleClass().add("information");
-		TextField tfFixedVariables = new TextField(collToString(item.getFixedVariables()));
+		TextField tfFixedVariables = new TextField(toJsonString(item.getFixedVariables()));
 		tfFixedVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setFixedVariables(processFixedVariables(to));
+			item.setFixedVariables(parseMap(to));
 		});
 		tfFixedVariables.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbFixedVariables, tfFixedVariables));
 
 		Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables"));
 		lbProbabilisticVariables.getStyleClass().add("information");
-		TextField tfProbabilisticVariables = new TextField(collToString(item.getProbabilisticVariables()));
+		TextField tfProbabilisticVariables = new TextField(toJsonString(item.getProbabilisticVariables()));
 		tfProbabilisticVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setProbabilisticVariables(processProbabilisticVariables(to));
+			item.setProbabilisticVariables(parseProbabilisticVariables(to));
 		});
 		tfProbabilisticVariables.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, tfProbabilisticVariables));
@@ -196,10 +201,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(collToString(item.getChooseActivation()));
+		TextField tfActivation = new TextField(toJsonString(item.getChooseActivation()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setChooseActivation(processChoiceActivation(to));
+			item.setChooseActivation(parseMap(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
@@ -238,107 +243,94 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(collToString(item.getActivating()));
+		TextField tfActivation = new TextField(toJsonString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setActivating(processActivating(to));
+			item.setActivating(parseList(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 
 	}
 
-	private static String collToString(Object o) {
-		var s = o != null ? o.toString() : "";
-		if (s.startsWith("[")) {
-			s = s.substring(1);
+	private String toJsonString(Object o) {
+		if (o == null) {
+			return "";
 		}
-		if (s.endsWith("]")) {
-			s = s.substring(0, s.length() - 1);
+
+		String s = o.toString();
+		if ((s.startsWith("[") && s.endsWith("]")) || (s.startsWith("{") && s.endsWith("}"))) {
+			s = s.substring(1, s.length() - 1);
 		}
+
 		return s;
 	}
 
-	private static List<String> processActivating(String activating) {
-		if(activating.isEmpty()) {
-			return null;
+	private List<String> parseList(String s) {
+		if (s.startsWith("[") && s.endsWith("]")) {
+			s = s.substring(1, s.length() - 1);
 		}
-		return List.of(activating.replaceAll(" ", "").split(","));
+
+		// TODO: this doesnt work when the string contains ','
+		return Arrays.stream(s.split(","))
+				.map(String::strip)
+				.filter(s_ -> !s_.isEmpty())
+				.toList();
 	}
 
-	private static Map<String, String> processFixedVariables(String fixedVariablesAsString) {
-		if(fixedVariablesAsString.isEmpty()) {
-			return null;
-		}
-		Map<String, String> fixedVariables = new HashMap<>();
-
-		if(fixedVariablesAsString.startsWith("{") && fixedVariablesAsString.endsWith("}")) {
-			List<String> entries = List.of(fixedVariablesAsString.substring(1, fixedVariablesAsString.length() - 2).replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				fixedVariables.put(entryAsArray[0], entryAsArray[1]);
-			}
-		} else {
-			List<String> entries = List.of(fixedVariablesAsString.replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				fixedVariables.put(entryAsArray[0], entryAsArray[1]);
-			}
+	private Map<String, String> parseMap(String s) {
+		if (s.startsWith("{") && s.endsWith("}")) {
+			s = s.substring(1, s.length() - 1);
 		}
 
-		return fixedVariables;
+		// TODO: this doesnt work when the string contains ',' or '='
+		return Arrays.stream(s.split(","))
+				.map(e -> Arrays.stream(e.split("=", 2)).map(String::strip).filter(s_ -> !s_.isEmpty()).toArray(String[]::new))
+				.filter(a -> a.length == 2)
+				.collect(Collectors.toUnmodifiableMap(a -> a[0], a -> a[1], (oldValue, newValue) -> newValue));
 	}
 
-	private static Object processProbabilisticVariables(String probabilisticVariablesAsString) {
-		if(probabilisticVariablesAsString.isEmpty()) {
+	private Object parseProbabilisticVariables(String s) {
+		if (s.isEmpty()) {
 			return null;
-		}
-
-		Map<String, String> probabilisticVariables = new HashMap<>();
-
-		if(probabilisticVariablesAsString.startsWith("{") && probabilisticVariablesAsString.endsWith("}")) {
-			List<String> entries = List.of(probabilisticVariablesAsString.substring(1, probabilisticVariablesAsString.length() - 2).replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				probabilisticVariables.put(entryAsArray[0], entryAsArray[1]);
-			}
-		} else if("uniform".equals(probabilisticVariablesAsString) || "first".equals(probabilisticVariablesAsString)) {
-			return probabilisticVariablesAsString;
+		} else if ("uniform".equals(s) || "first".equals(s)) {
+			return s;
 		} else {
-			List<String> entries = List.of(probabilisticVariablesAsString.replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				probabilisticVariables.put(entryAsArray[0], entryAsArray[1]);
+			if (s.startsWith("{") && s.endsWith("}")) {
+				s = s.substring(1, s.length() - 1);
 			}
+
+			// TODO: this doesnt work when the string contains ',', '=' or '}'
+			Map<String, Map<String, String>> probabilisticVariables = new HashMap<>();
+			for (int i = 0, len = s.length(); i < len; ) {
+				int pos = s.indexOf('=', i);
+				if (pos < 0 || pos + 1 >= len) {
+					break;
+				}
+
+				int entryEnd = s.indexOf('}', pos + 1);
+				if (entryEnd < 0 || entryEnd + 1 >= len) {
+					break;
+				}
+
+				String key = s.substring(i, pos).strip();
+				if (key.isEmpty()) {
+					continue;
+				}
+
+				String value = s.substring(pos + 1, entryEnd + 1).strip();
+				probabilisticVariables.put(key, parseMap(value));
+
+				int next = s.indexOf(',', entryEnd + 1);
+				if (next < 0) {
+					break;
+				}
+
+				i = next + 1;
+			}
+
+			return probabilisticVariables;
 		}
-
-		return probabilisticVariables;
-	}
-
-	private static Map<String, String> processChoiceActivation(String choiceActivationAsString) {
-		Map<String, String> choiceActivation = new HashMap<>();
-
-		if(choiceActivationAsString.startsWith("{") && choiceActivationAsString.endsWith("}")) {
-			List<String> entries = List.of(choiceActivationAsString.substring(1, choiceActivationAsString.length() - 2).replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				choiceActivation.put(entryAsArray[0], entryAsArray[1]);
-			}
-		} else {
-			List<String> entries = List.of(choiceActivationAsString.replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				choiceActivation.put(entryAsArray[0], entryAsArray[1]);
-			}
-		}
-
-		return choiceActivation;
 	}
 
 	private void clear() {
