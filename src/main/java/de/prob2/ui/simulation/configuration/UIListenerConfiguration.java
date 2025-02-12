@@ -28,7 +28,7 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 	public UIListenerConfiguration(
 			@JsonProperty(value = "id", required = true) String id,
 			@JsonProperty(value = "event", required = true) String event,
-			@JsonProperty(value = "predicate", defaultValue = "1=1") String predicate,
+			@JsonProperty("predicate") String predicate,
 			@JsonProperty("activating") List<String> activating
 	) {
 		super(id);
