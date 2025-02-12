@@ -180,7 +180,7 @@ public class SimulationEventHandler {
 			if (!transitions.isEmpty()) {
 				return transitions.get(0);
 			}
-		} else if(probabilisticVariables instanceof HashMap) {
+		} else if(probabilisticVariables instanceof Map<?, ?>) {
 			List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
 			if (!transitions.isEmpty()) {
 				return transitions.get(0);
