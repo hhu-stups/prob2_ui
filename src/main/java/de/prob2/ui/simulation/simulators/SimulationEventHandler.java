@@ -11,6 +11,7 @@ import java.util.Random;
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
+import de.prob2.ui.internal.WeightedRandomHelper;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
@@ -58,16 +59,10 @@ public class SimulationEventHandler {
 		});
 	}
 
-	public String chooseVariableValues(State currentState, Map<String, String> values) {
-		if(values == null) {
-			return "1=1";
-		}
-		PredicateBuilder predicateBuilder = new PredicateBuilder();
-		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
-		for(String key : values.keySet()) {
-			String value = values.get(key);
-			String evalResult  = cache.readValueWithCaching(currentState, simulator.getVariables(), value, mode);
-			predicateBuilder.add(key, evalResult);
+	private String makePredicateFromVariableValues(Map<String, String> values) {
+		var predicateBuilder = new PredicateBuilder();
+		if (values != null) {
+			values.forEach(predicateBuilder::add);
 		}
 		return predicateBuilder.toString();
 	}
@@ -78,7 +73,7 @@ public class SimulationEventHandler {
 		if (parameters != null) {
 			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			for (var e : parameters.entrySet()) {
-				String value = evaluateWithParameters(currentState, e.getValue(), activation.firingTransitionParameters(), activation.firingTransitionParametersPredicate(), mode);
+				var value = evaluateWithParameters(currentState, e.getValue(), activation.firingTransitionParameters(), activation.firingTransitionParametersPredicate(), mode);
 				values.put(e.getKey(), value);
 			}
 		}
@@ -86,27 +81,20 @@ public class SimulationEventHandler {
 	}
 
 	public Map<String, String> chooseProbabilistic(Activation activation, State currentState) {
-		var probabilities = activation.probabilisticVariables();
-		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
+		var vars2probabilities = activation.probabilisticVariables();
 		Map<String, String> values = new HashMap<>();
-		// TODO: use weights instead of forcing the probabilities to sum to 1
-		for (var e1 : probabilities.entrySet()) {
-			var variable = e1.getKey();
-			var probabilityValueMap = e1.getValue();
-			var probabilityMinimum = 0.0;
-			var randomDouble = random.nextDouble();
-			for (var e2 : probabilityValueMap.entrySet()) {
-				var value = e2.getKey();
-				var valueProbability = e2.getValue();
-				var evalProbability = Double.parseDouble(cache.readValueWithCaching(currentState, simulator.getVariables(), valueProbability, EvaluationMode.CLASSICAL_B));
-				if (randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
-					String evalValue = cache.readValueWithCaching(currentState, simulator.getVariables(), value, mode);
-					values.put(variable, evalValue);
-				}
-				probabilityMinimum += evalProbability;
-			}
-			if (Math.abs(1.0 - probabilityMinimum) > 0.000001) {
-				throw new RuntimeException("Sum of probabilistic choice is not equal 1");
+		if (vars2probabilities != null) {
+			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
+			for (var e : vars2probabilities.entrySet()) {
+				var weightedValues = e.getValue().entrySet().stream()
+						                     .map(valueAndWeight -> {
+							                     var probabilityEvalResult = cache.readValueWithCaching(currentState, simulator.getVariables(), valueAndWeight.getValue(), EvaluationMode.CLASSICAL_B);
+							                     return new WeightedRandomHelper.WeightedValue<>(valueAndWeight.getKey(), Double.parseDouble(probabilityEvalResult));
+						                     })
+						                     .toList();
+				var value = WeightedRandomHelper.select(this.random, weightedValues);
+				var valueEvalResult = cache.readValueWithCaching(currentState, simulator.getVariables(), value, mode);
+				values.put(e.getKey(), valueEvalResult);
 			}
 		}
 		return values;
@@ -143,7 +131,7 @@ public class SimulationEventHandler {
 	}
 
 	private String buildPredicateForTransition(State state, Activation activation) {
-		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(this.currentTrace.getModel());
 		String additionalGuardsResult = activation.additionalGuards() == null || activation.additionalGuards().isEmpty() || "1=1".equals(activation.additionalGuards()) ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.additionalGuards(), mode);
 		if ("FALSE".equals(additionalGuardsResult)) {
 			return "1=2";
@@ -152,7 +140,7 @@ public class SimulationEventHandler {
 		Map<String, String> values = new HashMap<>(chooseProbabilistic(activation, state));
 		values.putAll(chooseParameters(activation, state));
 
-		return chooseVariableValues(state, values) + (activation.withPredicate() != null && !activation.withPredicate().isEmpty() ? " & " + activation.withPredicate() : "");
+		return makePredicateFromVariableValues(values) + (activation.withPredicate() != null && !activation.withPredicate().isEmpty() ? " & " + activation.withPredicate() : "");
 	}
 
 	public Transition selectTransition(Activation activation, State currentState, Map<String, String> variables) {
@@ -246,20 +234,16 @@ public class SimulationEventHandler {
 
 	private void chooseOperation(State state, ActivationChoiceConfiguration activationChoiceConfiguration,
 								 List<String> parametersAsString, String parameterPredicates) {
-		// TODO: use weights instead of forcing the probabilities to sum to 1
-		double probabilityMinimum = 0.0;
-		double randomDouble = random.nextDouble();
-		for(String id : activationChoiceConfiguration.getChooseActivation().keySet()) {
-			DiagramConfiguration activationConfiguration = simulator.getActivationConfigurationMap().get(id);
-			double evalProbability = Double.parseDouble(cache.readValueWithCaching(state, simulator.getVariables(), activationChoiceConfiguration.getChooseActivation().get(id), EvaluationMode.CLASSICAL_B));
-			if(randomDouble > probabilityMinimum && randomDouble < probabilityMinimum + evalProbability) {
-				handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
-			}
-			probabilityMinimum += evalProbability;
-		}
-		if(Math.abs(1.0 - probabilityMinimum) > 0.000001) {
-			throw new RuntimeException("Sum of probabilistic choice is not equal 1");
-		}
+		var choices = activationChoiceConfiguration.getChooseActivation();
+		var weightedValues = choices.entrySet().stream()
+				                     .map(idAndWeight -> {
+					                     var activationConfiguration = Objects.requireNonNull(simulator.getActivationConfigurationMap().get(idAndWeight.getKey()), "unknown activation configuration");
+					                     var probabilityEvalResult = cache.readValueWithCaching(state, simulator.getVariables(), idAndWeight.getValue(), EvaluationMode.CLASSICAL_B);
+					                     return new WeightedRandomHelper.WeightedValue<>(activationConfiguration, Double.parseDouble(probabilityEvalResult));
+				                     })
+				                     .toList();
+		var activationConfiguration = WeightedRandomHelper.select(this.random, weightedValues);
+		this.handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
 	}
 
 	public void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration,
