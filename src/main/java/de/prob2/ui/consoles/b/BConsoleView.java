@@ -31,6 +31,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.binding.DoubleBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -38,10 +39,11 @@ import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.Region;
 
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.wellbehaved.event.EventPattern;
@@ -58,7 +60,9 @@ public final class BConsoleView extends BorderPane {
 	private final ObservableList<String> history;
 
 	@FXML
-	private VBox consoleContainer;
+	private SplitPane consoleContainer;
+	@FXML
+	private Region inputContainer;
 	@FXML
 	private CodeArea consoleHistory;
 	@FXML
@@ -74,6 +78,11 @@ public final class BConsoleView extends BorderPane {
 
 	private String savedText;
 	private int historyPos;
+	/**
+	 * Keep as field!
+	 * Stops the listeners from being garbage collected.
+	 */
+	private DoubleBinding inputPrefHeight;
 
 	@Inject
 	private BConsoleView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace, Config config, FxThreadExecutor fxExecutor) {
@@ -223,8 +232,37 @@ public final class BConsoleView extends BorderPane {
 			}
 		});
 
+		// required so the textarea calculates its prefHeight based on the text content
 		this.consoleInput.setAutoHeight(true);
-		this.consoleInput.maxHeightProperty().bind(this.consoleContainer.heightProperty().divide(2.0));
+		this.inputPrefHeight = Bindings.createDoubleBinding(
+				() -> this.consoleInput.prefHeight(-1),
+				this.consoleInput.textProperty(), this.consoleInput.autoHeightProperty(), this.consoleInput.prefHeightProperty(), this.consoleInput.widthProperty(), this.consoleInput.prefWidthProperty()
+		);
+		this.inputPrefHeight.subscribe(prefHeight -> this.updateSplitPane());
+		this.consoleContainer.heightProperty().subscribe(this::updateSplitPane);
+	}
+
+	private void updateSplitPane() {
+		var prefHeight = this.inputPrefHeight.get();
+		var containerHeight = this.consoleContainer.getHeight();
+		if (prefHeight >= 0 && containerHeight > 0) {
+			var height = clampHeight(this.inputContainer, prefHeight + 28); // add buffer so there is no scrollbar
+			var divider = Math.max(0.5, 1.0 - height / containerHeight);
+			if (this.consoleInput.getLength() == 0 || divider < this.consoleContainer.getDividerPositions()[0]) {
+				this.consoleContainer.setDividerPositions(divider);
+			}
+		}
+	}
+
+	private static double clampHeight(Region r, double height) {
+		if (r.getMinHeight() >= 0 && height < r.getMinHeight()) {
+			height = r.getMinHeight();
+		}
+		if (r.getMaxHeight() >= 0 && height > r.getMaxHeight()) {
+			height = r.getMaxHeight();
+		}
+
+		return height;
 	}
 
 	private void initializeHistoryContextMenu() {
