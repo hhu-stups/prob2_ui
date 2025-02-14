@@ -63,6 +63,16 @@ final class PrefConstants {
 			"UTF-32BE",
 			"ANSI_X3.4-1968",
 			"windows 1252"
+		)),
+		entry("xbool", List.of(
+			"false",
+			"true",
+			"full"
+		)),
+		entry("dbool", List.of(
+			"default",
+			"false",
+			"true"
 		)));
 
 	// Color values for the subset of Tk colors allowed by ProB.
