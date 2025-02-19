@@ -177,8 +177,7 @@ The general structure of a SimB activation diagram is as follows:
 
 A SimB activation diagram in JSON always contains an `activations` 
 field storing a list of probabilistic and timing elements to control the simulation. 
-Probabilistic values are always evaluated to ensure that the sum of all possibilities is always 1. 
-Otherwise an error will be thrown at runtime. 
+Probabilistic values are always interpreted as weights and thus may sum to any number greater than zero.
 There are two types of activations: *direct activation* and *probabilistic choice*. 
 All activations are identified by their `id`.
 
@@ -197,6 +196,7 @@ Thus, a *direct activation* is of the following form:
    "additionalGuards": ...,
    "fixedVariables": ...,
    "probabilisticVariables": ...,
+   "transitionSelection": ...,
    "priority": ...
 }
 ```
@@ -213,18 +213,19 @@ The explanation of each field is as follows:
   - `single:max` means that the activation will only be queued if (1) there are no queued activations for the same id or (2) there is a queued activation with the same id whose value for the scheduled time is lower. In the case of (2), the already queued activation will be discarded.
 - `additionalGuards` stores optional guards when executing the event stored in execute.
 - `fixedVariables` stores a Map. Here, a variable (parameter, or non-deterministic assigned variable) is assigned to its value.
-- `probabilisticVariables` stores either a Map or a String. Concerning the Map, a variable (parameter, or non-deterministic assigned variable) is assigned to another Map defining the probabilistic choice of its value. The second Map stores Key-Value pairs where values are mapped to the probability. The modeler can also assign probabilisticVariables to first or uniform.
-- `first` means that the first transition is chosen for execution.
-- `uniform` means that a transition is selected from all alternatives uniformly.
+- `probabilisticVariables` stores a Map. Here a variable (parameter, or non-deterministic assigned variable) is assigned to another Map defining the probabilistic choice of its value. The second Map stores Key-Value pairs where values are mapped to the probability/weight.
+- `transitionSelection` determines how SimB choses from multiple possible transitions (due to not specified variables):
+  - `first` (the default) means that the first transition is chosen for execution.
+  - `uniform` means that a transition is selected from all alternatives uniformly.
 - `priority` stores the priority for scheduling execute. Lower number means greater priority.
 
 **Probabilistic Choice.** A *probabilistic choice* selects an event to be executed in the future. 
 It requires the two fields `id`, and `chooseActivation`. 
 `chooseActivation` is a `Map` storing `Key-Value` pairs where `activations` (identified by their `id`) 
-are mapped to a probability. 
+are mapped to a probability/weight. 
 It is possible to chain multiple *probabilistic choices* together, 
 but eventually, a *direct activation* must be reached.
-The sum of the probabilities must evaluate to 1 here.
+The probabilities are always interpreted as weights and may sum to any number greater than zero.
 Thus, a *probabilistic choice* is of the following form:
 
 ~~~json
