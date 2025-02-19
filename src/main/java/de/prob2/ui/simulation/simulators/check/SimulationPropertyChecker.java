@@ -1,19 +1,21 @@
 package de.prob2.ui.simulation.simulators.check;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.SimulationHelperFunctions;
+import de.prob2.ui.simulation.EvaluationMode;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.CheckingStatus;
 
@@ -31,10 +33,10 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	private final List<Double> estimatedValues;
 
-	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, Injector injector, CurrentTrace currentTrace, CurrentProject currentProject, int numberExecutions, int maxStepsBeforeProperty,
-									 SimulationCheckingType type, Map<String, Object> additionalInformation) {
+	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, CurrentTrace currentTrace, CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty,
+	                                 SimulationCheckingType type, Map<String, Object> additionalInformation) {
 		this.hypothesisCheckerOrEstimator = hypothesisCheckerOrEstimator;
-		this.simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, currentProject, numberExecutions, maxStepsBeforeProperty, additionalInformation);
+		this.simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
 		this.numberSuccess = 0;
@@ -113,7 +115,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 	public CheckingStatus checkPredicateInvariant(Trace trace) {
 		boolean invariantOk = true;
 		String invariant = (String) this.getAdditionalInformation().get("PREDICATE");
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
@@ -139,7 +141,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		Transition transition = trace.getTransitionList().get(size - 1);
 		State destination = transition.getDestination();
 		if(destination.isInitialised()) {
-			SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), finalPredicate, mode);
 			if ("FALSE".equals(evalResult)) {
 				predicateOk = false;
@@ -155,7 +157,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 	public CheckingStatus checkPredicateEventually(Trace trace) {
 		boolean predicateOk = false;
 		String predicate = (String) this.getAdditionalInformation().get("PREDICATE");
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
@@ -188,7 +190,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
 		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		int steps = 0;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
@@ -217,7 +219,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
 		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		int steps = 0;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
@@ -249,7 +251,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
 		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
 
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State destination = transition.getDestination();
@@ -276,7 +278,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
 		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
 
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
 			State startState = transition.getSource();
@@ -304,7 +306,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
 		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		int steps = 0;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
@@ -333,7 +335,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
 		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		int steps = 0;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
@@ -364,7 +366,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
 		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		int steps = 0;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);
@@ -393,7 +395,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
 		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
 		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
-		SimulationHelperFunctions.EvaluationMode mode = SimulationHelperFunctions.extractMode(currentTrace.getModel());
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 		int steps = 0;
 		for(int i = 0; i < trace.getTransitionList().size(); i++) {
 			Transition transition = trace.getTransitionList().get(i);

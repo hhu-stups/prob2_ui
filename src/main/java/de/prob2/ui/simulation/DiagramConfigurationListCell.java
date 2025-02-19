@@ -1,14 +1,18 @@
 package de.prob2.ui.simulation;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
+import de.prob2.ui.simulation.configuration.TransitionSelection;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 
 import javafx.beans.property.BooleanProperty;
@@ -64,11 +68,11 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			clear();
 			switch (item) {
 				case ActivationOperationConfiguration currentItem -> {
-					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getOpName(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
+					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getExecute(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getTransitionSelection(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
 					updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
 				}
 				case ActivationChoiceConfiguration currentItem -> {
-					this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getActivations());
+					this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getChooseActivation());
 					updateChoiceDiagramItem((ActivationChoiceConfiguration) this.modifiedItem);
 				}
 				case UIListenerConfiguration currentItem -> {
@@ -96,10 +100,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbOpName = new Label(i18n.translate("simulation.item.operation"));
 		lbOpName.getStyleClass().add("information");
-		TextField tfOpName = new TextField(item.getOpName());
+		TextField tfOpName = new TextField(item.getExecute());
 		tfOpName.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setOpName(from);
+			item.setExecute(from);
 		});
 		tfOpName.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbOpName, tfOpName));
@@ -121,7 +125,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			savedProperty.set(false);
 			try {
 				item.setPriority(Integer.parseInt(to));
-			} catch (NumberFormatException e) {
+			} catch (NumberFormatException ignored) {
 				item.setPriority(0);
 			}
 		});
@@ -131,10 +135,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(item.getActivatingAsString());
+		TextField tfActivation = new TextField(containerToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setActivating(processActivating(to));
+			item.setActivating(parseList(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
@@ -145,9 +149,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		tfActivationKind.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			try {
-				item.setActivationKind(to.isEmpty() ? null :ActivationOperationConfiguration.ActivationKind.valueOf(to));
-			} catch (IllegalArgumentException e) {
-				item.setActivationKind(null);
+				item.setActivationKind(ActivationKind.fromName(to));
+			} catch (IllegalArgumentException ignored) {
+				item.setActivationKind(ActivationKind.MULTI);
 			}
 		});
 		tfActivationKind.disableProperty().bind(this.runningProperty);
@@ -166,23 +170,39 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbFixedVariables = new Label(i18n.translate("simulation.item.fixedVariables"));
 		lbFixedVariables.getStyleClass().add("information");
-		TextField tfFixedVariables = new TextField(item.getFixedVariablesAsString());
+		TextField tfFixedVariables = new TextField(containerToString(item.getFixedVariables()));
 		tfFixedVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setFixedVariables(processFixedVariables(to));
+			item.setFixedVariables(parseMap(to));
 		});
 		tfFixedVariables.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbFixedVariables, tfFixedVariables));
 
 		Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables"));
 		lbProbabilisticVariables.getStyleClass().add("information");
-		TextField tfProbabilisticVariables = new TextField(item.getProbabilisticVariablesAsString());
+		TextField tfProbabilisticVariables = new TextField(containerToString(item.getProbabilisticVariables()));
 		tfProbabilisticVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setProbabilisticVariables(processProbabilisticVariables(to));
+			item.setProbabilisticVariables(parseProbabilisticVariables(to));
 		});
 		tfProbabilisticVariables.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, tfProbabilisticVariables));
+
+		Label lbTransitionSelection = new Label(i18n.translate("simulation.item.transitionSelection"));
+		lbTransitionSelection.getStyleClass().add("information");
+		TextField tfTransitionSelection = new TextField(item.getTransitionSelection().getName());
+		tfTransitionSelection.textProperty().addListener((observable, from, to) -> {
+			savedProperty.set(false);
+			try {
+				item.setTransitionSelection(TransitionSelection.fromName(to));
+			} catch (IllegalArgumentException ignored) {
+				item.setTransitionSelection(TransitionSelection.FIRST);
+			}
+		});
+		tfTransitionSelection.disableProperty().bind(this.runningProperty);
+		this.itemBox.getChildren().add(new HBox(lbTransitionSelection, tfTransitionSelection));
+
+		// TODO: activatingOnlyWhenExecuted, updating, withPredicate
 	}
 
 	private void updateChoiceDiagramItem(ActivationChoiceConfiguration item) {
@@ -196,10 +216,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(item.getActivationsAsString());
+		TextField tfActivation = new TextField(containerToString(item.getChooseActivation()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setActivations(processChoiceActivation(to));
+			item.setChooseActivation(parseMap(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
@@ -230,7 +250,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		TextField tfPredicate = new TextField(item.getPredicate());
 		tfPredicate.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setPredicate(to.isEmpty() ? null : to);
+			item.setPredicate(to);
 		});
 		tfPredicate.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbPredicate, tfPredicate));
@@ -238,96 +258,87 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(item.getActivatingAsString());
+		TextField tfActivation = new TextField(containerToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setActivating(processActivating(to));
+			item.setActivating(parseList(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
-
 	}
 
-	private static List<String> processActivating(String activating) {
-		if(activating.isEmpty()) {
-			return null;
+	private String containerToString(Object o) {
+		if (o == null) {
+			return "";
 		}
-		return List.of(activating.replaceAll(" ", "").split(","));
+
+		String s = o.toString();
+		if ((s.startsWith("[") && s.endsWith("]")) || (s.startsWith("{") && s.endsWith("}"))) {
+			s = s.substring(1, s.length() - 1);
+		}
+
+		return s;
 	}
 
-	private static Map<String, String> processFixedVariables(String fixedVariablesAsString) {
-		if(fixedVariablesAsString.isEmpty()) {
-			return null;
-		}
-		Map<String, String> fixedVariables = new HashMap<>();
-
-		if(fixedVariablesAsString.startsWith("{") && fixedVariablesAsString.endsWith("}")) {
-			List<String> entries = List.of(fixedVariablesAsString.substring(1, fixedVariablesAsString.length() - 2).replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				fixedVariables.put(entryAsArray[0], entryAsArray[1]);
-			}
-		} else {
-			List<String> entries = List.of(fixedVariablesAsString.replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				fixedVariables.put(entryAsArray[0], entryAsArray[1]);
-			}
+	private List<String> parseList(String s) {
+		if (s.startsWith("[") && s.endsWith("]")) {
+			s = s.substring(1, s.length() - 1);
 		}
 
-		return fixedVariables;
+		// TODO: this doesnt work when the string contains ','
+		return Arrays.stream(s.split(","))
+				.map(String::strip)
+				.filter(s_ -> !s_.isEmpty())
+				.toList();
 	}
 
-	private static Object processProbabilisticVariables(String probabilisticVariablesAsString) {
-		if(probabilisticVariablesAsString.isEmpty()) {
-			return null;
+	private Map<String, String> parseMap(String s) {
+		if (s.startsWith("{") && s.endsWith("}")) {
+			s = s.substring(1, s.length() - 1);
 		}
 
-		Map<String, String> probabilisticVariables = new HashMap<>();
+		// TODO: this doesnt work when the string contains ',' or '='
+		return Arrays.stream(s.split(","))
+				.map(e -> Arrays.stream(e.split("=", 2)).map(String::strip).filter(s_ -> !s_.isEmpty()).toArray(String[]::new))
+				.filter(a -> a.length == 2)
+				.collect(Collectors.toUnmodifiableMap(a -> a[0], a -> a[1], (oldValue, newValue) -> newValue));
+	}
 
-		if(probabilisticVariablesAsString.startsWith("{") && probabilisticVariablesAsString.endsWith("}")) {
-			List<String> entries = List.of(probabilisticVariablesAsString.substring(1, probabilisticVariablesAsString.length() - 2).replaceAll(" ", "").split(","));
+	private Map<String, Map<String, String>> parseProbabilisticVariables(String s) {
+		if (s.startsWith("{") && s.endsWith("}")) {
+			s = s.substring(1, s.length() - 1);
+		}
 
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				probabilisticVariables.put(entryAsArray[0], entryAsArray[1]);
+		// TODO: this doesnt work when the string contains ',', '=' or '}'
+		Map<String, Map<String, String>> probabilisticVariables = new HashMap<>();
+		for (int i = 0, len = s.length(); i < len; ) {
+			int pos = s.indexOf('=', i);
+			if (pos < 0 || pos + 1 >= len) {
+				break;
 			}
-		} else if("uniform".equals(probabilisticVariablesAsString) || "first".equals(probabilisticVariablesAsString)) {
-			return probabilisticVariablesAsString;
-		} else {
-			List<String> entries = List.of(probabilisticVariablesAsString.replaceAll(" ", "").split(","));
 
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				probabilisticVariables.put(entryAsArray[0], entryAsArray[1]);
+			int entryEnd = s.indexOf('}', pos + 1);
+			if (entryEnd < 0 || entryEnd + 1 >= len) {
+				break;
 			}
+
+			String key = s.substring(i, pos).strip();
+			if (key.isEmpty()) {
+				continue;
+			}
+
+			String value = s.substring(pos + 1, entryEnd + 1).strip();
+			probabilisticVariables.put(key, parseMap(value));
+
+			int next = s.indexOf(',', entryEnd + 1);
+			if (next < 0) {
+				break;
+			}
+
+			i = next + 1;
 		}
 
 		return probabilisticVariables;
-	}
-
-	private static Map<String, String> processChoiceActivation(String choiceActivationAsString) {
-		Map<String, String> choiceActivation = new HashMap<>();
-
-		if(choiceActivationAsString.startsWith("{") && choiceActivationAsString.endsWith("}")) {
-			List<String> entries = List.of(choiceActivationAsString.substring(1, choiceActivationAsString.length() - 2).replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				choiceActivation.put(entryAsArray[0], entryAsArray[1]);
-			}
-		} else {
-			List<String> entries = List.of(choiceActivationAsString.replaceAll(" ", "").split(","));
-
-			for (String entry : entries) {
-				String[] entryAsArray = entry.split(":");
-				choiceActivation.put(entryAsArray[0], entryAsArray[1]);
-			}
-		}
-
-		return choiceActivation;
 	}
 
 	private void clear() {

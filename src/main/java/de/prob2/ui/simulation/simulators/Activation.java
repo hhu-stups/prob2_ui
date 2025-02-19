@@ -1,100 +1,36 @@
 package de.prob2.ui.simulation.simulators;
 
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
-public class Activation {
+import de.prob2.ui.simulation.configuration.ActivationKind;
+import de.prob2.ui.simulation.configuration.TransitionSelection;
 
-	private final String operation;
+public record Activation(
+		String operation,
+		int time,
+		String additionalGuards,
+		ActivationKind activationKind,
+		Map<String, String> fixedVariables,
+		Map<String, Map<String, String>> probabilisticVariables,
+		TransitionSelection transitionSelection,
+		List<String> firingTransitionParameters,
+		String firingTransitionParametersPredicate,
+		String withPredicate
+) {
 
-	private int time;
-
-	private final String additionalGuards;
-
-	private final ActivationOperationConfiguration.ActivationKind activationKind;
-
-	private final Map<String, String> fixedVariables;
-
-	private final Object probabilisticVariables;
-
-	private final List<String> firingTransitionParameters;
-
-	private final String firingTransitionParametersPredicate;
-
-	private final String withPredicate;
-
-	public Activation(String operation, int time, String additionalGuards, ActivationOperationConfiguration.ActivationKind activationKind,
-			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> firingTransitionParameters, String firingTransitionParametersPredicate, String withPredicate) {
-		this.operation = operation;
-		this.time = time;
-		this.additionalGuards = additionalGuards;
-		this.activationKind = activationKind;
-		this.fixedVariables = fixedVariables;
-		this.probabilisticVariables = probabilisticVariables;
-		this.firingTransitionParameters = firingTransitionParameters;
-		this.firingTransitionParametersPredicate = firingTransitionParametersPredicate;
-		this.withPredicate = withPredicate;
-	}
-
-	public String getOperation() {
-		return operation;
-	}
-
-	public void decreaseTime(int delta) {
-		this.time -= delta;
-	}
-
-	public int getTime() {
-		return time;
-	}
-
-	public String getAdditionalGuards() {
-		return additionalGuards;
-	}
-
-	public ActivationOperationConfiguration.ActivationKind getActivationKind() {
-		return activationKind;
-	}
-
-	public Map<String, String> getFixedVariables() {
-		return fixedVariables;
-	}
-
-	public Object getProbabilisticVariables() {
-		return probabilisticVariables;
-	}
-
-	public List<String> getFiringTransitionParameters() {
-		return firingTransitionParameters;
-	}
-
-	public String getFiringTransitionParametersPredicate() {
-		return firingTransitionParametersPredicate;
-	}
-
-	public String getWithPredicate() {
-		return withPredicate;
-	}
-
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		Activation that = (Activation) o;
-		return operation.equals(that.operation) && time == that.time && Objects.equals(additionalGuards, that.additionalGuards) && activationKind == that.activationKind && Objects.equals(probabilisticVariables, that.probabilisticVariables) && Objects.equals(firingTransitionParameters, that.firingTransitionParameters) && Objects.equals(firingTransitionParametersPredicate, that.firingTransitionParametersPredicate) && Objects.equals(withPredicate, that.withPredicate);
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(operation, time, additionalGuards, activationKind, probabilisticVariables, firingTransitionParameters, firingTransitionParametersPredicate, withPredicate);
-	}
-
-	@Override
-	public String toString() {
-		return String.format(Locale.ROOT, "Activation{operation = %s, time = %s, probability = %s, additionalGuards = %s, activationKind = %s, firingTransitionParameters = %s, firingTransitionParametersPredicate = %s, withPredicate = %s}", operation, time, probabilisticVariables, additionalGuards, activationKind, firingTransitionParameters, firingTransitionParametersPredicate, withPredicate);
+	public Activation decreaseTime(int delta) {
+		return new Activation(
+				this.operation(),
+				this.time() - delta,
+				this.additionalGuards(),
+				this.activationKind(),
+				this.fixedVariables(),
+				this.probabilisticVariables(),
+				this.transitionSelection(),
+				this.firingTransitionParameters(),
+				this.firingTransitionParametersPredicate(),
+				this.withPredicate()
+		);
 	}
 }

@@ -1,6 +1,8 @@
 package de.prob2.ui.simulation.simulators;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.statespace.Trace;
@@ -26,8 +28,8 @@ public final class RealTimeSimulator extends Simulator {
 	private final ChangeListener<Transition> uiListener;
 
 	@Inject
-	public RealTimeSimulator(final CurrentTrace currentTrace, final CurrentProject currentProject, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
-		super(currentTrace, currentProject);
+	public RealTimeSimulator(final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
+		super(currentTrace, currentProject, objectMapperProvider);
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;
@@ -96,7 +98,7 @@ public final class RealTimeSimulator extends Simulator {
 	public boolean endingConditionReached(Trace trace) {
 		boolean endingConditionReached = super.endingConditionReached(trace);
 		if(config instanceof SimulationModelConfiguration) {
-			return endingConditionReached && ((SimulationModelConfiguration) config).getUiListenerConfigurations().isEmpty();
+			return endingConditionReached && ((SimulationModelConfiguration) config).getListeners().isEmpty();
 		}
 		return endingConditionReached;
 	}
