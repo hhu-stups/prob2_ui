@@ -9,6 +9,7 @@ import de.prob.model.brules.output.RulesDependencyGraph;
 import de.prob.model.brules.RulesModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.ui.RulesView;
 import javafx.application.Platform;
@@ -35,6 +36,7 @@ public final class RulesController {
 
 	private final StageManager stageManager;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliTaskExecutor;
 	private RulesModel rulesModel;
 	private RulesChecker rulesChecker;
 
@@ -44,9 +46,10 @@ public final class RulesController {
 	private int nrExecutedOperations = 0;
 
 	@Inject
-	RulesController(final StageManager stageManager, final CurrentTrace currentTrace) {
+	RulesController(final StageManager stageManager, final CurrentTrace currentTrace, final CliTaskExecutor cliTaskExecutor) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
+		this.cliTaskExecutor = cliTaskExecutor;
 		this.model = new RulesDataModel();
 
 		traceListener = (observable, oldTrace, newTrace) -> {
@@ -60,13 +63,13 @@ public final class RulesController {
 					LOGGER.debug("New rules model in new trace!");
 					rulesModel = (RulesModel) newTrace.getModel();
 					rulesChecker = new RulesChecker(newTrace);
-					rulesChecker.init();
+					cliTaskExecutor.execute(() -> rulesChecker.init());
 					initialize(rulesModel);
 					model.update(rulesChecker.getCurrentTrace());
 				} else {
 					// model didn't change -> update view with same collapsed items
 					LOGGER.debug("Update rules view to new trace!");
-					rulesChecker.setTrace(newTrace); // also update RulesChecker; relevant for correct validation report export
+					cliTaskExecutor.execute(() -> rulesChecker.setTrace(newTrace)); // also update RulesChecker; relevant for correct validation report export
 					model.update(newTrace);
 					rulesView.executeAllButton.setDisable(newTrace.getNextTransitions().isEmpty());
 				}
@@ -166,8 +169,7 @@ public final class RulesController {
 			rulesView.executeAllButton.setDisable(false);
 			rulesView.progressBox.setVisible(false);
 		});
-		new Thread(task).start();
-
+		cliTaskExecutor.execute(task);
 	}
 
 	public String getPartialDependencyGraphExpression(final Collection<AbstractOperation> operations) {
