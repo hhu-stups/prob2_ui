@@ -250,18 +250,18 @@ public final class VisBController {
 			}
 		}
 
-		String visBPathString = visBPath.equals(NO_PATH) ? "" : visBPath.toString();
-
 		AbstractCommand loadCmd;
-		if ("def".equals(MoreFiles.getFileExtension(visBPath))) {
+		if (visBPath.equals(NO_PATH)) {
+			// Visualization defined in B definitions in the machine itself.
+			// This is represented by passing an empty file path to probcli.
+			loadCmd = new LoadVisBCommand("");
+		} else if ("def".equals(MoreFiles.getFileExtension(visBPath))) {
 			// Visualization defined in a separate B definition file.
 			var rml = RecursiveMachineLoader.loadFile(visBPath.toFile());
 			loadCmd = new LoadVisBFromDefinitionsCommand(visBPath.toFile(), rml);
 		} else {
-			// Default case:
-			// Visualization defined in a traditional VisB .json file (non-empty path string)
-			// or in B definitions in the machine itself (empty path string).
-			loadCmd = new LoadVisBCommand(visBPathString);
+			// Visualization defined in a traditional VisB .json file.
+			loadCmd = new LoadVisBCommand(visBPath.toString());
 		}
 
 		var svgCmd = new ReadVisBSvgPathCommand();
