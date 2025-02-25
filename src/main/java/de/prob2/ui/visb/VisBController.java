@@ -264,7 +264,7 @@ public final class VisBController {
 			loadCmd = new LoadVisBCommand(visBPathString);
 		}
 
-		var svgCmd = new ReadVisBSvgPathCommand(visBPathString);
+		var svgCmd = new ReadVisBSvgPathCommand();
 		var itemsCmd = new ReadVisBItemsCommand();
 		var eventsCmd = new ReadVisBEventsHoversCommand();
 		var svgObjectsCmd = new GetVisBSVGObjectsCommand();
