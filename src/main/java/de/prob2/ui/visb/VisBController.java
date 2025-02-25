@@ -232,23 +232,23 @@ public final class VisBController {
 	}
 
 	/**
-	 * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
+	 * This method takes a VisB file as input and returns a {@link VisBVisualisation} object.
 	 * @param stateSpace the ProB animator instance using which to load the VisB file
-	 * @param jsonPath path to the VisB JSON file
+	 * @param visBPath path to the .json or .def file for the VisB visualisation
 	 * @return VisBVisualisation object
 	 */
-	private static VisBVisualisation constructVisualisationFromJSON(StateSpace stateSpace, Path jsonPath) throws IOException {
-		if (!jsonPath.equals(NO_PATH)) {
-			jsonPath = jsonPath.toRealPath();
-			if (!Files.isRegularFile(jsonPath)) {
-				throw new IOException("Given json path is not a regular file: " + jsonPath);
+	private static VisBVisualisation constructVisualisationFromFile(StateSpace stateSpace, Path visBPath) throws IOException {
+		if (!visBPath.equals(NO_PATH)) {
+			visBPath = visBPath.toRealPath();
+			if (!Files.isRegularFile(visBPath)) {
+				throw new IOException("Given VisB file is not a regular file: " + visBPath);
 			}
 		}
 
-		String jsonPathString = jsonPath.equals(NO_PATH) ? "" : jsonPath.toString();
+		String visBPathString = visBPath.equals(NO_PATH) ? "" : visBPath.toString();
 
-		var loadCmd = new LoadVisBCommand(jsonPathString);
-		var svgCmd = new ReadVisBSvgPathCommand(jsonPathString);
+		var loadCmd = new LoadVisBCommand(visBPathString);
+		var svgCmd = new ReadVisBSvgPathCommand(visBPathString);
 		var itemsCmd = new ReadVisBItemsCommand();
 		var eventsCmd = new ReadVisBEventsHoversCommand();
 		var svgObjectsCmd = new GetVisBSVGObjectsCommand();
@@ -262,10 +262,10 @@ public final class VisBController {
 			svgPath = NO_PATH;
 			svgContent = defaultSVGCmd.getSVGFileContents();
 		} else {
-			if (jsonPath.equals(NO_PATH)) {
+			if (visBPath.equals(NO_PATH)) {
 				svgPath = Paths.get(svgPathString).toRealPath();
 			} else {
-				svgPath = jsonPath.resolveSibling(svgPathString).toRealPath();
+				svgPath = visBPath.resolveSibling(svgPathString).toRealPath();
 			}
 			if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
 				throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
@@ -288,7 +288,7 @@ public final class VisBController {
 		}
 
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		return cliExecutor.submit(() -> constructVisualisationFromJSON(stateSpace, visBPath)).thenApplyAsync(vis -> {
+		return cliExecutor.submit(() -> constructVisualisationFromFile(stateSpace, visBPath)).thenApplyAsync(vis -> {
 			this.visBVisualisation.set(vis);
 			return vis;
 		}, fxExecutor);

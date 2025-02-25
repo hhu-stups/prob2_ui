@@ -101,7 +101,7 @@ public final class VisBView extends BorderPane {
 	 */
 	public final class VisBConnector {
 		/**
-		 * Whenever a svg item, that has an event in the JSON / VisB file is clicked, this method redirects the click towards the {@link VisBController}
+		 * Whenever a svg item, that has an event in the VisB file is clicked, this method redirects the click towards the {@link VisBController}
 		 * @param id of the svg item, that is clicked
 		 */
 		public void click(String id, int pageX, int pageY, boolean altKey, boolean ctrlKey, boolean metaKey,
