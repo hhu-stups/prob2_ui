@@ -9,13 +9,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.GetVisBDefaultSVGCommand;
 import de.prob.animator.command.GetVisBSVGObjectsCommand;
 import de.prob.animator.command.LoadVisBCommand;
+import de.prob.animator.command.LoadVisBFromDefinitionsCommand;
 import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
@@ -237,7 +242,7 @@ public final class VisBController {
 	 * @param visBPath path to the .json or .def file for the VisB visualisation
 	 * @return VisBVisualisation object
 	 */
-	private static VisBVisualisation constructVisualisationFromFile(StateSpace stateSpace, Path visBPath) throws IOException {
+	private static VisBVisualisation constructVisualisationFromFile(StateSpace stateSpace, Path visBPath) throws BCompoundException, IOException {
 		if (!visBPath.equals(NO_PATH)) {
 			visBPath = visBPath.toRealPath();
 			if (!Files.isRegularFile(visBPath)) {
@@ -247,7 +252,18 @@ public final class VisBController {
 
 		String visBPathString = visBPath.equals(NO_PATH) ? "" : visBPath.toString();
 
-		var loadCmd = new LoadVisBCommand(visBPathString);
+		AbstractCommand loadCmd;
+		if ("def".equals(MoreFiles.getFileExtension(visBPath))) {
+			// Visualization defined in a separate B definition file.
+			var rml = RecursiveMachineLoader.loadFile(visBPath.toFile());
+			loadCmd = new LoadVisBFromDefinitionsCommand(visBPath.toFile(), rml);
+		} else {
+			// Default case:
+			// Visualization defined in a traditional VisB .json file (non-empty path string)
+			// or in B definitions in the machine itself (empty path string).
+			loadCmd = new LoadVisBCommand(visBPathString);
+		}
+
 		var svgCmd = new ReadVisBSvgPathCommand(visBPathString);
 		var itemsCmd = new ReadVisBItemsCommand();
 		var eventsCmd = new ReadVisBEventsHoversCommand();
