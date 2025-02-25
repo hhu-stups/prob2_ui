@@ -66,7 +66,9 @@ public final class RulesController {
 				} else {
 					// model didn't change -> update view with same collapsed items
 					LOGGER.debug("Update rules view to new trace!");
+					rulesChecker.setTrace(newTrace); // also update RulesChecker; relevant for correct validation report export
 					model.update(newTrace);
+					rulesView.executeAllButton.setDisable(newTrace.getNextTransitions().isEmpty());
 				}
 			}
 		};
@@ -104,7 +106,7 @@ public final class RulesController {
 					rulesView.progressOperation.setText(operationName);
 					rulesView.progressLabel.setText("");
 				});
-				rulesChecker = new RulesChecker(currentTrace.get());
+				rulesChecker.setTrace(currentTrace.get());
 				rulesChecker.executeOperationAndDependencies(operationName);
 				rulesView.progressBox.setVisible(false);
 				return null;
@@ -116,7 +118,7 @@ public final class RulesController {
 		execute(new Task<>() {
 			@Override
 			protected Void call() {
-				rulesChecker = new RulesChecker(currentTrace.get());
+				rulesChecker.setTrace(currentTrace.get());
 				int totalNrOfOperations = rulesModel.getRulesProject().getOperationsMap().values().
 						stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
 				rulesChecker.executeAllOperationsDirect((nr, name) -> {
