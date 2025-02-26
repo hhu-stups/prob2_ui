@@ -10,7 +10,6 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.TreeItem;
 
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -32,9 +31,9 @@ class OperationItem extends TreeItem<Object> {
 		this.operation = operation.getName();
 		this.model = model;
 		resultProperty.addListener((observable, oldValue, newValue) -> {
+			executable = true;
 			OperationItem.this.getChildren().clear();
 			if (newValue instanceof RuleResult ruleResult) {
-				executable = true;
 				switch (ruleResult.getRuleState()) {
 					case FAIL, NOT_CHECKED -> createRuleChildren(ruleResult);
 					case SUCCESS -> {
@@ -80,6 +79,8 @@ class OperationItem extends TreeItem<Object> {
 			// create children for disabled dependencies
 			List<String> disabledDependencies = model.getDisabledDependencies(operation);
 			addDisabledDependencies(disabledDependencies);
+		} else {
+			executable = false;
 		}
 	}
 

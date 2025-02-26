@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Locale;
-import java.util.Set;
 
 /**
  * @author Christoph Heinzen
@@ -62,15 +61,14 @@ public final class RulesController {
 					// the model changed -> rebuild view
 					LOGGER.debug("New rules model in new trace!");
 					rulesModel = (RulesModel) newTrace.getModel();
-					rulesChecker = new RulesChecker(newTrace);
-					cliTaskExecutor.execute(() -> rulesChecker.init());
 					initialize(rulesModel);
-					model.update(rulesChecker.getCurrentTrace());
+					model.update(newTrace);
+					cliTaskExecutor.execute(() -> rulesChecker = new RulesChecker(newTrace));
 				} else {
 					// model didn't change -> update view with same collapsed items
 					LOGGER.debug("Update rules view to new trace!");
-					cliTaskExecutor.execute(() -> rulesChecker.setTrace(newTrace)); // also update RulesChecker; relevant for correct validation report export
 					model.update(newTrace);
+					cliTaskExecutor.execute(() -> rulesChecker.setTrace(newTrace)); // also update RulesChecker; relevant for correct validation report export
 					rulesView.executeAllButton.setDisable(newTrace.getNextTransitions().isEmpty());
 				}
 			}
@@ -156,7 +154,7 @@ public final class RulesController {
 				stageManager.makeExceptionAlert(task.getException(),"rulevalidation.execute.error.header", "rulevalidation.execute.error.content.allRules").showAndWait();
 				LOGGER.debug("Task for execution of all rules failed or cancelled!");
 			}
-			currentTrace.set(currentTrace.get());
+			currentTrace.set(rulesChecker.getCurrentTrace());
 			rulesView.executeAllButton.setDisable(false);
 			rulesView.progressBox.setVisible(false);
 		});

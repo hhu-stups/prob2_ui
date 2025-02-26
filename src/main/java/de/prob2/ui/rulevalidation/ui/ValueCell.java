@@ -19,7 +19,7 @@ import java.util.Map;
 public class ValueCell extends TreeTableCell<Object, Object>{
 
 	private final I18n i18n;
-	private boolean executable;
+	private boolean executable = true;
 
 	ValueCell(I18n i18n) {
 		this.i18n = i18n;
