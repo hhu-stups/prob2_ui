@@ -9,6 +9,9 @@ Downloads of the current release and snapshot development builds can be found on
 * Added TLC model checking for classical B machines with TLC4B and export of generated TLA+ files (also limited support for Event-B and models with internal B representation)
 * Improved support for rule validations with rules machines (.rmch)
 * Added search to editor
+* Improve ProB and Groovy consoles
+  * Add syntax highlighting
+  * Fix a bunch of bugs
 * Added language selection dropdown to interactive console (e.g. evaluation of both classical B and TLA+ formulas in the context of a translated TLA+ module)
 * Improved export of (internal) classical B representation for Event-B and translated languages
 * Improve SimB JSON format:
