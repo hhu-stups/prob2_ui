@@ -11,6 +11,10 @@ Downloads of the current release and snapshot development builds can be found on
 * Added search to editor
 * Added language selection dropdown to interactive console (e.g. evaluation of both classical B and TLA+ formulas in the context of a translated TLA+ module)
 * Improved export of (internal) classical B representation for Event-B and translated languages
+* Improve SimB JSON format:
+  * `probabilisticVariables` is now split up into `probabilisticVariables` and `transitionSelection` (refer to https://prob.hhu.de/w/index.php?title=SimB#Direct_Activation for more information)
+  * Interpret all probabilities as weights: they do not have to sum to one anymore
+  * Use the Jackson library for saving and loading (this removes the GSON dependency)
 * Removed support for Java versions older than Java 21
 
 **Note:** The multi-platform jar might not work on all macOS processor architectures - consider using the platform-specific binaries, which are available for both x86_64 and arm64.
