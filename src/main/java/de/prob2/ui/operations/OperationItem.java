@@ -88,7 +88,7 @@ public class OperationItem {
 	
 	private final Transition transition;
 	private final String name;
-	private final String description;
+	private String description;
 	private final OperationItem.Status status;
 	private final List<String> parameterNames;
 	private final List<String> parameterValues;
@@ -116,13 +116,6 @@ public class OperationItem {
 		this.variables = Objects.requireNonNull(variables);
 		this.unambiguousConstantNames = Objects.requireNonNull(unambiguousConstantNames);
 		this.unambiguousVariableNames = Objects.requireNonNull(unambiguousVariableNames);
-		if (transition != null) {
-			GetOperationDescriptionCommand cmd = new GetOperationDescriptionCommand(transition.getSource().getId(), transition.getId());
-			transition.getSource().getStateSpace().execute(cmd);
-			this.description = cmd.getDescription();
-		} else {
-			this.description = "";
-		}
 	}
 
 	private static Map<String, String> extractValues(final Map<IEvalElement, AbstractEvalResult> results, final Collection<IEvalElement> formulas) {
@@ -285,6 +278,16 @@ public class OperationItem {
 	}
 
 	public String getDescription() {
+		// request description only if required
+		if (description == null) {
+			if (transition != null) {
+				GetOperationDescriptionCommand cmd = new GetOperationDescriptionCommand(transition.getSource().getId(), transition.getId());
+				transition.getSource().getStateSpace().execute(cmd);
+				description = cmd.getDescription();
+			} else {
+				description = "";
+			}
+		}
 		return description;
 	}
 
