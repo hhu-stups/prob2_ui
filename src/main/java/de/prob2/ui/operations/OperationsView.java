@@ -279,7 +279,7 @@ public final class OperationsView extends BorderPane {
 			boolean showUnsatCoreButton = false;
 			if (to != null) {
 				final Set<Transition> operations = to.getNextTransitions();
-				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) ||
+				if ((!to.getCurrentState().isConstantsSetUp() && operations.isEmpty()) ||
 						operations.stream().map(Transition::getName).collect(Collectors.toSet()).contains(Transition.PARTIAL_SETUP_CONSTANTS_NAME)) {
 					showUnsatCoreButton = true;
 				}
@@ -438,8 +438,10 @@ public final class OperationsView extends BorderPane {
 			}
 		} else if (trace.getCurrentState().isTimeoutOccurred()) {
 			text = i18n.translate("operations.operationsView.warningLabel.timeoutOccurred");
+		} else if (!trace.getCurrentState().isConstantsSetUp() && operations.isEmpty()) {
+			text = i18n.translate("operations.operationsView.warningLabel.noSetupConstants");
 		} else if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
-			text = i18n.translate("operations.operationsView.warningLabel.noSetupConstantsOrInit");
+			text = i18n.translate("operations.operationsView.warningLabel.noInitialisation");
 		} else {
 			text = "";
 		}
