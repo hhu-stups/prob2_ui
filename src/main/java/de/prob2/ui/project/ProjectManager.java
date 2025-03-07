@@ -295,11 +295,10 @@ public final class ProjectManager {
 		final Path projectLocation = path.getParent();
 		final Path relative = projectLocation.relativize(path);
 		final String shortName = MoreFiles.getNameWithoutExtension(path);
-		final String description = i18n.translate("menu.file.automaticProjectDescription", path);
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if (replacingProject) {
-			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
+			currentProject.switchTo(new Project(shortName, "", Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 			// we already asked the user for confirmation
 			currentProject.loadMachineWithoutConfirmation(machine);
 		}
