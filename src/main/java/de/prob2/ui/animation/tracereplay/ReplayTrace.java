@@ -48,14 +48,20 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	public static final class Result implements ICheckingResult {
 		private final ReplayedTrace replayed;
 		private final Trace trace;
+		private final Trace traceWithSkips;
 
-		public Result(ReplayedTrace replayed, Trace trace) {
+		public Result(ReplayedTrace replayed, Trace trace, Trace traceWithSkips) {
 			this.replayed = Objects.requireNonNull(replayed, "replayed");
 			this.trace = Objects.requireNonNull(trace, "trace");
+			this.traceWithSkips = Objects.requireNonNull(traceWithSkips, "traceWithSkips");
 		}
 
 		public ReplayedTrace getReplayed() {
 			return this.replayed;
+		}
+
+		public Trace getTraceWithSkips() {
+			return this.traceWithSkips;
 		}
 
 		@Override
@@ -189,7 +195,8 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 		}
 		replayed = replayed.withErrors(errors);
 		Trace trace = replayed.getTrace(context.stateSpace());
-		this.setResult(new ReplayTrace.Result(replayed, trace));
+		Trace traceWithSkips = replayed.getTraceWithSkips(context.stateSpace());
+		this.setResult(new ReplayTrace.Result(replayed, trace, traceWithSkips));
 	}
 
 	@Override

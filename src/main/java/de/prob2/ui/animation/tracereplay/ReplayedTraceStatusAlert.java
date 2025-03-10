@@ -138,7 +138,7 @@ public final class ReplayedTraceStatusAlert extends Alert {
 	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws ExecutionException, InterruptedException, IOException {
 		CompletableFuture<Map<Transition, OperationItem>> future;
 		if (replayTrace.getResult() instanceof ReplayTrace.Result traceResult) {
-			Trace traceFromReplayed = traceResult.getTrace();
+			Trace traceFromReplayed = traceResult.getTraceWithSkips(); // show skipped transitions in table
 			// start cli instantly on another thread, while doing IO on this thread
 			future = cliExecutor.submit(() -> OperationItem.forTransitions(
 				traceFromReplayed.getStateSpace(),
@@ -161,7 +161,7 @@ public final class ReplayedTraceStatusAlert extends Alert {
 			List<String> transitionErrorMessages;
 			if (replayTrace.getResult() instanceof ReplayTrace.Result traceResult) {
 				ReplayedTrace replayedTrace = traceResult.getReplayed();
-				Trace traceFromReplayed = traceResult.getTrace();
+				Trace traceFromReplayed = traceResult.getTraceWithSkips(); // show skipped transitions in table
 				replayedTransitionObj = i < traceFromReplayed.size() ? traceFromReplayed.getTransitionList().get(i) : null;
 				transitionReplayPrecision = i < replayedTrace.getTransitionReplayPrecisions().size() ? replayedTrace.getTransitionReplayPrecisions().get(i) : TransitionReplayPrecision.FAILED;
 				transitionErrorMessages = i < replayedTrace.getTransitionErrorMessages().size() ? replayedTrace.getTransitionErrorMessages().get(i) : null;
