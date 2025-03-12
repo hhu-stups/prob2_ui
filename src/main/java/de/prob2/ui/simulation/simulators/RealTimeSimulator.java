@@ -74,7 +74,7 @@ public final class RealTimeSimulator extends Simulator {
 					.findAny()
 					.orElse(null);
 			if(op != null) {
-				trace = traceWithUserInteractions.add(op);
+				trace = trace.add(op);
 			}
 		}
 		return trace;
