@@ -236,8 +236,16 @@ def readCurrentGitCommit() {
 }
 
 processResources {
+	inputs.property("version", project.version)
+	inputs.property("currentGitBranch", readCurrentGitBranch())
+	inputs.property("currentGitCommit", readCurrentGitCommit())
+
 	filesMatching("de/prob2/ui/build.properties") {
-		expand(version: project.version, branch: readCurrentGitBranch(), commit: readCurrentGitCommit())
+		expand(
+			version: inputs.properties["version"],
+			branch: inputs.properties["currentGitBranch"],
+			commit: inputs.properties["currentGitCommit"],
+		)
 	}
 }
 
