@@ -217,28 +217,20 @@ task createHelp {
 }
 processResources.dependsOn(createHelp)
 
-def readCurrentGitBranch() {
-	def proc = ["git", "rev-parse", "--abbrev-ref", "HEAD"].execute(null, project.projectDir)
-	def exitCode = proc.waitFor()
-	if (exitCode != 0) {
-		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
-	}
-	return proc.in.readLines()[0]
-}
-
-def readCurrentGitCommit() {
-	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
-	def exitCode = proc.waitFor()
-	if (exitCode != 0) {
-		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
-	}
-	return proc.in.readLines()[0]
+final firstLineOfProcessOutput = {ExecOutput execOutput ->
+	return execOutput.standardOutput.asText.map {it.split('\n')[0]}
 }
 
 processResources {
 	inputs.property("version", project.version)
-	inputs.property("currentGitBranch", readCurrentGitBranch())
-	inputs.property("currentGitCommit", readCurrentGitCommit())
+	inputs.property("currentGitBranch", firstLineOfProcessOutput(providers.exec {
+		executable = "git"
+		args = ["rev-parse", "--abbrev-ref", "HEAD"]
+	}))
+	inputs.property("currentGitCommit", firstLineOfProcessOutput(providers.exec {
+		executable = "git"
+		args = ["rev-parse", "HEAD"]
+	}))
 
 	filesMatching("de/prob2/ui/build.properties") {
 		expand(
