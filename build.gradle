@@ -183,6 +183,16 @@ sourceSets {
 	}
 }
 
+// This is the shortest recommended way to access ExecOperations.exec :(
+// The other alternative is to create a dedicated class for each task that needs exec,
+// which is even less convenient...
+// https://docs.gradle.org/current/userguide/service_injection.html#execoperations
+interface InjectedExecOperations {
+	@Inject
+	ExecOperations getExecOperations()
+}
+final execOperations = objects.newInstance(InjectedExecOperations).execOperations
+
 final helpSourceDir = file("src/main/helpsources")
 final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
 final helpOutputDir = new File(generatedResourcesDir, "de/prob2/ui/helpsystem/helppages")
@@ -200,7 +210,7 @@ task createHelp {
 			final relativePathWithNewExtension = relativePath.parent.resolve(relativePath.fileName.toString().replaceAll(/\.md$/, ".html"))
 			final outputFile = helpOutputDir.toPath().resolve(relativePathWithNewExtension).toFile()
 			outputFile.parentFile.mkdirs()
-			exec {
+			execOperations.exec {
 				executable = "pandoc"
 				args = [
 					"--from=gfm",
