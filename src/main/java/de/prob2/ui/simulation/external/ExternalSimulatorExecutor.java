@@ -14,6 +14,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.core.JsonFactoryBuilder;
+import com.fasterxml.jackson.core.StreamReadFeature;
+import com.fasterxml.jackson.core.StreamWriteFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
@@ -43,8 +46,13 @@ public final class ExternalSimulatorExecutor {
 	private FutureTask<Void> startTask;
 
 	public ExternalSimulatorExecutor(ObjectMapper objectMapper, Simulator simulator, Path pythonFile) {
-		this.objectMapper = objectMapper;
+		this.objectMapper = objectMapper.copyWith(new JsonFactoryBuilder()
+				.disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+				.disable(StreamWriteFeature.AUTO_CLOSE_CONTENT)
+				.disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
+				.build());
 		this.objectMapper.disable(SerializationFeature.INDENT_OUTPUT);
+		this.objectMapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
 		this.simulator = simulator;
 		this.pythonFile = pythonFile;
 		this.done = false;
@@ -75,6 +83,7 @@ public final class ExternalSimulatorExecutor {
 				pythonExecutable = "python3";
 			}
 			ProcessBuilder pb = new ProcessBuilder(pythonExecutable, pythonFile.getFileName().toString(), String.valueOf(simBPort)).directory(pythonFile.getParent().toFile());
+			pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
 			this.process = pb.start();
 			this.errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 			processErrorMessages();
@@ -114,7 +123,6 @@ public final class ExternalSimulatorExecutor {
 		}
 		ExternalSimulationStep step = null;
 		try {
-			processErrorMessages();
 			if(simulator.endingConditionReached(trace)) {
 				sendFinish();
 				return null;
