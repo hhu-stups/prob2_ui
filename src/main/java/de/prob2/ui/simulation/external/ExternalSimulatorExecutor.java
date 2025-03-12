@@ -1,15 +1,5 @@
 package de.prob2.ui.simulation.external;
 
-import de.prob.animator.domainobjects.EvalResult;
-import de.prob.statespace.State;
-import de.prob.statespace.Trace;
-import de.prob2.ui.simulation.simulators.Simulator;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-
-import javafx.application.Platform;
-
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -23,6 +13,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.statespace.State;
+import de.prob.statespace.Trace;
+import de.prob2.ui.internal.ProB2Module;
+import de.prob2.ui.simulation.simulators.Simulator;
+
+import javafx.application.Platform;
 
 public final class ExternalSimulatorExecutor {
 
@@ -66,7 +67,14 @@ public final class ExternalSimulatorExecutor {
 			});
 
 			threadService.execute(startTask);
-			ProcessBuilder pb = new ProcessBuilder("python3", pythonFile.getFileName().toString(), String.valueOf(simBPort)).directory(pythonFile.getParent().toFile());
+
+			String pythonExecutable;
+			if (ProB2Module.IS_WINDOWS) {
+				pythonExecutable = "python";
+			} else {
+				pythonExecutable = "python3";
+			}
+			ProcessBuilder pb = new ProcessBuilder(pythonExecutable, pythonFile.getFileName().toString(), String.valueOf(simBPort)).directory(pythonFile.getParent().toFile());
 			this.process = pb.start();
 			this.errorReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
 			processErrorMessages();
