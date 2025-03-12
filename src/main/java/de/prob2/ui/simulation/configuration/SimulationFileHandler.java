@@ -255,7 +255,7 @@ public final class SimulationFileHandler {
 		JsonMetadata metadata = createMetadata(null, null);
 
 		if (!loadedMachine.getConstantNames().isEmpty()) {
-			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, null, true, null, null));
+			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, null, false, null, null));
 		}
 
 		var operations = loadedMachine.getOperationNames();

@@ -242,7 +242,7 @@ public abstract class Simulator {
 		if(config instanceof SimulationExternalConfiguration) {
 			createDynamicActivation(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, "0", 0,
 					null, ActivationKind.SINGLE, null, null, TransitionSelection.FIRST,
-					null, true, null, null);
+					null, false, null, null);
 		}
 		if(configurationToActivation.containsKey(operation)) {
 			ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get(operation);
