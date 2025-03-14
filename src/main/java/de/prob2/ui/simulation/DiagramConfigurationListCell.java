@@ -68,15 +68,15 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			clear();
 			switch (item) {
 				case ActivationOperationConfiguration currentItem -> {
-					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getExecute(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getTransitionSelection(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate());
+					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getExecute(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getTransitionSelection(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate(), currentItem.getComment());
 					updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
 				}
 				case ActivationChoiceConfiguration currentItem -> {
-					this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getChooseActivation());
+					this.modifiedItem = new ActivationChoiceConfiguration(currentItem.getId(), currentItem.getChooseActivation(), currentItem.getComment());
 					updateChoiceDiagramItem((ActivationChoiceConfiguration) this.modifiedItem);
 				}
 				case UIListenerConfiguration currentItem -> {
-					this.modifiedItem = new UIListenerConfiguration(currentItem.getId(), currentItem.getEvent(), currentItem.getPredicate(), currentItem.getActivating());
+					this.modifiedItem = new UIListenerConfiguration(currentItem.getId(), currentItem.getEvent(), currentItem.getPredicate(), currentItem.getActivating(), currentItem.getComment());
 					updateListenerItem((UIListenerConfiguration) this.modifiedItem);
 				}
 				default -> throw new AssertionError("unknown item type");

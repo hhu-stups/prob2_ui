@@ -22,9 +22,10 @@ public final class ActivationChoiceConfiguration extends DiagramConfiguration.No
 	@JsonCreator
 	public ActivationChoiceConfiguration(
 			@JsonProperty(value = "id", required = true) String id,
-			@JsonProperty("chooseActivation") Map<String, String> chooseActivation
+			@JsonProperty("chooseActivation") Map<String, String> chooseActivation,
+			@JsonProperty("comment") String comment
 	) {
-		super(id);
+		super(id, comment);
 		this.chooseActivation = chooseActivation != null ? Map.copyOf(chooseActivation) : Map.of();
 	}
 

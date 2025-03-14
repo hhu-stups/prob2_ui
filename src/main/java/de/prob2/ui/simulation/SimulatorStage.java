@@ -856,18 +856,19 @@ public final class SimulatorStage extends Stage {
 				null,
 				true,
 				null,
-				null
+				null,
+				""
 		));
 	}
 
 	@FXML
 	private void addChoiceActivation() {
-		simulationDiagramItems.getItems().add(new ActivationChoiceConfiguration(i18n.translate("simulation.item.newChoiceActivation"), Map.of()));
+		simulationDiagramItems.getItems().add(new ActivationChoiceConfiguration(i18n.translate("simulation.item.newChoiceActivation"), Map.of(), ""));
 	}
 
 	@FXML
 	private void addUiListener() {
-		simulationDiagramItems.getItems().add(new UIListenerConfiguration(i18n.translate("simulation.item.newUiListener"), "Event", null, List.of()));
+		simulationDiagramItems.getItems().add(new UIListenerConfiguration(i18n.translate("simulation.item.newUiListener"), "Event", null, List.of(), ""));
 	}
 
 	@FXML

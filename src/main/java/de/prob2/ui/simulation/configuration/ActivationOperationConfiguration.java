@@ -65,9 +65,10 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 			@JsonProperty("activating") List<String> activating,
 			@JsonProperty(value = "activatingOnlyWhenExecuted", defaultValue = "true") Boolean activatingOnlyWhenExecuted,
 			@JsonProperty("updating") Map<String, String> updating,
-			@JsonProperty("withPredicate") String withPredicate
+			@JsonProperty("withPredicate") String withPredicate,
+			@JsonProperty("comment") String comment
 	) {
-		super(id);
+		super(id, comment);
 		this.execute = Objects.requireNonNull(op, "execute");
 		this.after = after != null && !after.isEmpty() ? after : "0";
 		this.priority = !Transition.isArtificialTransitionName(this.execute) && priority != null ? priority : 0;

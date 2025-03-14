@@ -169,7 +169,7 @@ public final class UIInteractionHandler {
 		}
 		List<String> activations = resolveActivations(realTimeSimulator, transition, uiListeners);
 
-		return new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null);
+		return new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, "");
 	}
 
 	private List<String> resolveActivations(RealTimeSimulator realTimeSimulator, Transition transition, List<UIListenerConfiguration> uiListeners) {
@@ -200,7 +200,7 @@ public final class UIInteractionHandler {
 				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) diagramConfiguration;
 				activations = new ArrayList<>(initializationConfiguration.getActivating());
 				activations.addAll(userInteractions.stream().map(DiagramConfiguration::getId).toList());
-				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), initializationConfiguration.getTransitionSelection(), activations, true, null, null));
+				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), initializationConfiguration.getTransitionSelection(), activations, true, null, null, ""));
 			} else if(Transition.SETUP_CONSTANTS_NAME.equals(diagramConfiguration.getId())) {
 				hasSetupConstants = true;
 			} else {
@@ -215,7 +215,7 @@ public final class UIInteractionHandler {
 				State destination = setupConstantsTransition.getDestination();
 				// Somehow the constructor with 1 argument always sets using destination state to false
 				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(SimulationCreator.computeFixedVariablesFromDestinationValues(destination.getConstantValues(FormulaExpand.EXPAND)), opInfo);
-				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, List.of(), true, null, null));
+				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, null, 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, List.of(), true, null, null, ""));
 			}
 		}
 
@@ -225,7 +225,7 @@ public final class UIInteractionHandler {
 			// Somehow the constructor with 1 argument always sets using destination state to false
 			State destination = initializationTransition.getDestination();
 			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(SimulationCreator.computeFixedVariablesFromDestinationValues(destination.getVariableValues(FormulaExpand.EXPAND)), opInfo);
-			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null));
+			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Transition.INITIALISE_MACHINE_NAME, null, 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, ""));
 		}
 
 		activationConfigurationsForResult.addAll(userInteractions);

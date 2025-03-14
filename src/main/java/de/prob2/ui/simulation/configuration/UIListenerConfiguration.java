@@ -29,9 +29,10 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 			@JsonProperty(value = "id", required = true) String id,
 			@JsonProperty(value = "event", required = true) String event,
 			@JsonProperty("predicate") String predicate,
-			@JsonProperty("activating") List<String> activating
+			@JsonProperty("activating") List<String> activating,
+			@JsonProperty("comment") String comment
 	) {
-		super(id);
+		super(id, comment);
 		this.event = Objects.requireNonNull(event, "event");
 		this.predicate = predicate != null && !predicate.isEmpty() && !"1=1".equals(predicate) ? predicate : null;
 		this.activating = activating != null ? List.copyOf(activating) : List.of();

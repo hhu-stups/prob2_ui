@@ -170,7 +170,7 @@ public abstract class Simulator {
 			throw new RuntimeException("Provided operation is null. There is an error when sending the operation to be executed from the external simulation.");
 		}
 
-		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, transitionSelection, activations, activatingOnlyWhenExecuted, updating, withPredicate);
+		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, transitionSelection, activations, activatingOnlyWhenExecuted, updating, withPredicate, "");
 		if(!activationConfigurationsSorted.contains(activationConfig)) {
 			this.activationConfigurationsSorted.add(activationConfig);
 		}
