@@ -167,14 +167,21 @@ public class TLCModelCheckingTab extends Tab {
 
 		this.tfAddLTL.visibleProperty().bind(addLTLFormula.selectedProperty());
 
+		Path machinePath = this.currentProject.get().getAbsoluteMachinePath(this.currentProject.getCurrentMachine());
+		String machineName = this.currentProject.getCurrentMachine().getName();
+		if (machineName.equals(machinePath.getFileName().toString())) {
+			machineName += "_";
+		}
+		Path saveLocation = this.currentProject.get().relativizeProjectPath(machinePath.resolveSibling(machineName));
+		this.tfSaveLocation.setText(saveLocation.toString());
+
 		this.saveLocationBox.visibleProperty().bind(saveGeneratedFiles.selectedProperty());
-		this.tfSaveLocation.setText(currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation()).getParent().resolve(currentProject.getCurrentMachine().getName()).toString());
 		this.changeLocationButton.setOnAction(e -> {
 			final DirectoryChooser chooser = new DirectoryChooser();
 			chooser.setInitialDirectory(currentProject.getLocation().toFile());
 			Path result = fileChooserManager.showDirectoryChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
 			if (result != null) {
-				this.tfSaveLocation.setText(result.toString());
+				this.tfSaveLocation.setText(this.currentProject.get().relativizeProjectPath(result).toString());
 			}
 		});
 
@@ -300,7 +307,7 @@ public class TLCModelCheckingTab extends Tab {
 		Path machinePath;
 		AbstractModel model = stateSpace.getModel();
 		if (model instanceof ClassicalBModel) {
-			machinePath = project.getLocation().resolve(machine.getLocation());
+			machinePath = project.getAbsoluteMachinePath(machine);
 		} else if (model.getFormalismType() == FormalismType.B) { // if not classical B: use internal representation
 			if (model instanceof EventBModel && !stateSpace.getCurrentPreference("NUMBER_OF_ANIMATED_ABSTRACTIONS").equals("0")) {
 				throw new RuntimeException(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.eventBAnimatedAbstractionsError"));

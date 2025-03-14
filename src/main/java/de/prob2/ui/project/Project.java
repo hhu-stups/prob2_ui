@@ -93,8 +93,24 @@ public class Project implements HasMetadata {
 		if (!this.getMachines().contains(machine)) {
 			throw new IllegalArgumentException("Machine " + machine + " is not part of project " + this);
 		}
-		//Normalize resulting path to get rid of .. and .
-		return this.getLocation().resolve(machine.getLocation()).normalize();
+		return this.resolveProjectPath(machine.getLocation());
+	}
+
+	public Path relativizeProjectPath(Path path) {
+		if (path.isAbsolute()) {
+			Path project = this.getLocation().toAbsolutePath().normalize();
+			path = path.normalize();
+			// normalize resulting path to get rid of .. and .
+			return project.relativize(path).normalize();
+		} else {
+			// assume path is already project relative
+			return path.normalize();
+		}
+	}
+
+	public Path resolveProjectPath(Path path) {
+		// if path is absolute this will just return the given path
+		return this.getLocation().resolve(path).toAbsolutePath().normalize();
 	}
 	
 	public List<Preference> getPreferences() {

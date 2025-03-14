@@ -1,6 +1,8 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.nio.file.Path;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -38,6 +40,9 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final ModelCheckingSearchStrategy searchStrategy;
 
+	/**
+	 * Keep null values ibn this map, they are important!
+	 */
 	private final Map<TLC4BOption, String> options;
 
 	@JsonCreator
@@ -136,8 +141,22 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 		TLCModelChecker tlcModelChecker = new TLCModelChecker(
 			TLCModelCheckingTab.getClassicalBMachine(context.project(), context.machine(), context.stateSpace(), context.i18n()).toString(),
 			stateSpace, listener,
-			new TLCModelCheckingOptions(getOptions()));
+			new TLCModelCheckingOptions(fixPath(context, this.getOptions())));
 		tlcModelChecker.call();
+	}
+
+	private static Map<TLC4BOption, String> fixPath(ExecutionContext context, Map<TLC4BOption, String> options) {
+		String pathStr = options.get(TLC4BOption.OUTPUT);
+		if (pathStr != null) {
+			Path path = Path.of(pathStr);
+			Path resolved = context.project().resolveProjectPath(path);
+			if (!path.equals(resolved)) {
+				HashMap<TLC4BOption, String> fixed = new HashMap<>(options);
+				fixed.put(TLC4BOption.OUTPUT, resolved.toString());
+				return fixed;
+			}
+		}
+		return options;
 	}
 
 	@Override
