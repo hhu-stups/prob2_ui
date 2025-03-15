@@ -12,6 +12,7 @@ import com.google.common.base.MoreObjects;
 
 @JsonPropertyOrder({
 		"id",
+		"comment",
 		"activations"
 })
 public final class ActivationChoiceConfiguration extends DiagramConfiguration.NonUi {
@@ -45,13 +46,13 @@ public final class ActivationChoiceConfiguration extends DiagramConfiguration.No
 		} else if (!(o instanceof ActivationChoiceConfiguration that)) {
 			return false;
 		} else {
-			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getChooseActivation(), that.getChooseActivation());
+			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getComment(), that.getComment()) && Objects.equals(this.getChooseActivation(), that.getChooseActivation());
 		}
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getId(), this.getChooseActivation());
+		return Objects.hash(this.getId(), this.getComment(), this.getChooseActivation());
 	}
 
 	@Override
@@ -60,6 +61,7 @@ public final class ActivationChoiceConfiguration extends DiagramConfiguration.No
 				.omitNullValues()
 				.omitEmptyValues()
 				.add("id", this.getId())
+				.add("comment", this.getComment())
 				.add("chooseActivation", this.getChooseActivation())
 				.toString();
 	}

@@ -10,13 +10,12 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 public abstract sealed class DiagramConfiguration permits DiagramConfiguration.NonUi, UIListenerConfiguration {
 
 	protected String id;
-
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	protected String comment;
 
 	protected DiagramConfiguration(String id, String comment) {
 		this.id = Objects.requireNonNull(id, "id");
-		this.comment = comment;
+		this.comment = comment != null && !comment.isEmpty() ? comment : null;
 	}
 
 	@JsonGetter("id")
@@ -24,18 +23,18 @@ public abstract sealed class DiagramConfiguration permits DiagramConfiguration.N
 		return this.id;
 	}
 
-	@JsonGetter("comment")
-	public String getComment() {
-		return comment;
-	}
-
 	public void setId(String id) {
 		this.id = Objects.requireNonNull(id, "id");
 	}
 
-	// Should be used in the future to add comments via ProB2-UI
+	@JsonGetter("comment")
+	public String getComment() {
+		return this.comment;
+	}
+
 	public void setComment(String comment) {
-		this.comment = comment;
+		// TODO: Should be used in the future to add comments via ProB2-UI
+		this.comment = comment != null && !comment.isEmpty() ? comment : null;
 	}
 
 	@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)

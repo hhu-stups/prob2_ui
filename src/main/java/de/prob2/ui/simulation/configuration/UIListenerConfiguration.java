@@ -12,6 +12,7 @@ import com.google.common.base.MoreObjects;
 
 @JsonPropertyOrder({
 		"id",
+		"comment",
 		"event",
 		"predicate",
 		"activating"
@@ -72,13 +73,13 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 		} else if (!(o instanceof UIListenerConfiguration that)) {
 			return false;
 		} else {
-			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getEvent(), that.getEvent()) && Objects.equals(this.getPredicate(), that.getPredicate()) && Objects.equals(this.getActivating(), that.getActivating());
+			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getComment(), that.getComment()) && Objects.equals(this.getEvent(), that.getEvent()) && Objects.equals(this.getPredicate(), that.getPredicate()) && Objects.equals(this.getActivating(), that.getActivating());
 		}
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getId(), this.getEvent(), this.getPredicate(), this.getActivating());
+		return Objects.hash(this.getId(), this.getComment(), this.getEvent(), this.getPredicate(), this.getActivating());
 	}
 
 	@Override
@@ -87,6 +88,7 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 				.omitNullValues()
 				.omitEmptyValues()
 				.add("id", this.getId())
+				.add("comment", this.getComment())
 				.add("event", this.getEvent())
 				.add("predicate", this.getPredicate())
 				.add("activating", this.getActivating())
