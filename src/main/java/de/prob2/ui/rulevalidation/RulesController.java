@@ -99,6 +99,7 @@ public final class RulesController {
 				rulesChecker.setTrace(currentTrace.get());
 				int totalNrOfOperations = rulesModel.getRulesProject().getOperationsMap().get(operationName)
 								.getTransitiveDependencies().size();
+				updateProgressBar(0, totalNrOfOperations, "");
 				rulesChecker.executeOperationAndDependencies(updateProgressBar(totalNrOfOperations), operationName);
 				rulesView.progressBox.setVisible(false);
 				return null;
@@ -113,6 +114,7 @@ public final class RulesController {
 				rulesChecker.setTrace(currentTrace.get());
 				int totalNrOfOperations = rulesModel.getRulesProject().getOperationsMap().values().
 						stream().filter(op -> !(op instanceof FunctionOperation)).toList().size();
+				updateProgressBar(0, totalNrOfOperations, "");
 				rulesChecker.executeAllOperationsDirect(updateProgressBar(totalNrOfOperations), 1);
 				return null;
 			}
@@ -120,7 +122,11 @@ public final class RulesController {
 	}
 
 	private RulesChecker.RulesCheckListener updateProgressBar(int totalNr) {
-		return (nr, name) -> Platform.runLater(() -> {
+		return (nr, name) -> updateProgressBar(nr, totalNr, name);
+	}
+
+	private void updateProgressBar(int nr, int totalNr, String name) {
+		Platform.runLater(() -> {
 			ProgressBar progressBar = rulesView.progressBar;
 			progressBar.setProgress((double) nr / totalNr);
 			rulesView.progressOperation.setText(name);
