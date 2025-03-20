@@ -92,6 +92,7 @@ public final class BCodeCompletion {
 			if (allowLatex) {
 				cmd.addKeywordContext(CompleteIdentifierCommand.KeywordContext.LATEX);
 			}
+			cmd.addKeywordContext(CompleteIdentifierCommand.KeywordContext.STRING);
 			this.stateSpace.execute(cmd);
 			this.suggestions.addAll(cmd.getCompletions().stream().map(item -> new BCCItem(this.text, item.getCompletion(), item.getType())).toList());
 			// TODO: convert latex commands into unicode directly
