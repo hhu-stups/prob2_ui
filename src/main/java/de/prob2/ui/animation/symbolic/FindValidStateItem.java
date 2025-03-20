@@ -95,7 +95,12 @@ public final class FindValidStateItem extends SymbolicAnimationItem {
 			&& other instanceof FindValidStateItem o
 			&& this.getPredicate().equals(o.getPredicate());
 	}
-	
+
+	@Override
+	public FindValidStateItem copy() {
+		return new FindValidStateItem(this.getId(), this.predicate);
+	}
+
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)

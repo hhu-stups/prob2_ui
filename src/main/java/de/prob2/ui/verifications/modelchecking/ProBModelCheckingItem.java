@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.modelchecking;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -208,6 +209,11 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 			       && Objects.equals(this.getTimeLimit(), that.getTimeLimit())
 			       && Objects.equals(this.getOptions(), that.getOptions())
 			       && Objects.equals(this.getCustomGoal(), that.getCustomGoal());
+	}
+
+	@Override
+	public ProBModelCheckingItem copy() {
+		return new ProBModelCheckingItem(this.getId(), this.searchStrategy, this.nodesLimit, this.timeLimit, new HashSet<>(this.options), this.customGoal);
 	}
 
 	@Override

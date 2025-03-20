@@ -228,6 +228,11 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	}
 
 	@Override
+	public ReplayTrace copy() {
+		return new ReplayTrace(this.getId(), this.location);
+	}
+
+	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())

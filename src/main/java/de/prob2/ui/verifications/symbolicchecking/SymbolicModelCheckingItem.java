@@ -96,7 +96,12 @@ public final class SymbolicModelCheckingItem extends SymbolicCheckingFormulaItem
 			&& other instanceof SymbolicModelCheckingItem o
 			&& this.getAlgorithm().equals(o.getAlgorithm());
 	}
-	
+
+	@Override
+	public SymbolicModelCheckingItem copy() {
+		return new SymbolicModelCheckingItem(this.getId(), this.algorithm);
+	}
+
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)

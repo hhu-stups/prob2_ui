@@ -106,6 +106,11 @@ public final class ChartFormulaTask implements IFormulaTask {
 	}
 
 	@Override
+	public ChartFormulaTask copy() {
+		return new ChartFormulaTask(this.id, this.formula);
+	}
+
+	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())

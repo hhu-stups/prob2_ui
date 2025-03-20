@@ -141,6 +141,11 @@ public final class ProofObligationItem implements IValidationTask {
 	}
 
 	@Override
+	public ProofObligationItem copy() {
+		return new ProofObligationItem(this.getId(), this.name);
+	}
+
+	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())

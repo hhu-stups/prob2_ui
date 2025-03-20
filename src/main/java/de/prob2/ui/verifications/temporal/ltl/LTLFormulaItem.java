@@ -21,8 +21,8 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
-import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.ErrorsResult;
+import de.prob2.ui.verifications.ExecutionContext;
 import de.prob2.ui.verifications.TraceResult;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaParser;
@@ -57,7 +57,12 @@ public final class LTLFormulaItem extends TemporalFormulaItem {
 	public String getTaskType(I18n i18n) {
 		return i18n.translate("verifications.temporal.type.ltl");
 	}
-	
+
+	@Override
+	public LTLFormulaItem copy() {
+		return new LTLFormulaItem(this.getId(), this.getCode(), this.getDescription(), this.getStateLimit(), this.getStartState(), this.getStartStateExpression(), this.getExpectedResult());
+	}
+
 	private void handleFormulaResult(IModelCheckingResult result) {
 		assert !(result instanceof LTLError);
 		

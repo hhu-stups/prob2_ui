@@ -38,7 +38,12 @@ public final class CBCRefinementCheckingItem extends SymbolicCheckingFormulaItem
 	public String getTaskDescription(I18n i18n) {
 		return "";
 	}
-	
+
+	@Override
+	public CBCRefinementCheckingItem copy() {
+		return new CBCRefinementCheckingItem(this.getId());
+	}
+
 	@Override
 	public void execute(ExecutionContext context) {
 		ConstraintBasedRefinementCheckCommand cmd = new ConstraintBasedRefinementCheckCommand();

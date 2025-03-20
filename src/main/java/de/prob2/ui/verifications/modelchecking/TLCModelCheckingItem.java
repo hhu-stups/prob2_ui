@@ -169,6 +169,11 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 	}
 
 	@Override
+	public TLCModelCheckingItem copy() {
+		return new TLCModelCheckingItem(this.getId(), this.searchStrategy, new HashMap<>(this.options));
+	}
+
+	@Override
 	public String toString() {
 		return String.format(Locale.ROOT, "%s(%s,%s,%s)", this.getClass().getSimpleName(), this.getId(), this.getSearchStrategy(), this.getOptions());
 	}

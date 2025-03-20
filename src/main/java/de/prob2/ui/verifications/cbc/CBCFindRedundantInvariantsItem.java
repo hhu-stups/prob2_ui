@@ -40,7 +40,12 @@ public final class CBCFindRedundantInvariantsItem extends SymbolicCheckingFormul
 	public String getTaskDescription(I18n i18n) {
 		return "";
 	}
-	
+
+	@Override
+	public CBCFindRedundantInvariantsItem copy() {
+		return new CBCFindRedundantInvariantsItem(this.getId());
+	}
+
 	@Override
 	public void execute(ExecutionContext context) {
 		GetRedundantInvariantsCommand cmd = new GetRedundantInvariantsCommand();

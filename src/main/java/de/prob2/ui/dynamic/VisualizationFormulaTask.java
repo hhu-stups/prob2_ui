@@ -115,6 +115,11 @@ public final class VisualizationFormulaTask implements IFormulaTask {
 	}
 
 	@Override
+	public VisualizationFormulaTask copy() {
+		return new VisualizationFormulaTask(this.id, this.commandType, this.formula);
+	}
+
+	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())
