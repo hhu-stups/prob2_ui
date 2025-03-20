@@ -131,12 +131,15 @@ dependencies {
 	implementation group: "de.hhu.stups", name: "voparser", version: "0.3.0"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "11.2.1"
 	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.4"
-	implementation group: "org.pf4j", name: "pf4j", version: "3.13.0"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "2.0.0"
 	implementation group: "org.apache.commons", name: "commons-csv", version: "1.12.0"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.4'
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava'
+
+	// for plugins
+	implementation group: 'org.pf4j', name: 'pf4j', version: '3.13.0'
+	annotationProcessor group: 'org.pf4j', name: 'pf4j', version: '3.13.0'
 
 	// nsmenufx indirectly requires the jna:5.9.0:jpms dependency
 	// appdirs 1.2.2+ indirectly requires jna:5.13+, but the jpms classifier does not exist for jna 5.13+
