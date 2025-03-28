@@ -69,8 +69,7 @@ public final class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
 					setGraphic((Node) item);
 				} else {
 					String s = item.toString();
-					Text t = new Text(s);
-					t.wrappingWidthProperty().bind(this.getTableColumn().widthProperty().subtract(5));
+					Text t = getCollapsibleTextWithLimit(s, 100, true);
 
 					setText(null);
 					setGraphic(t);
@@ -95,6 +94,22 @@ public final class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
 						}
 					}
 				}
+			}
+
+			private Text getCollapsibleTextWithLimit(String s, int limit, boolean collapsed) {
+				Text t;
+				if (s.length() > limit) {
+					if (collapsed) {
+						t = new Text("▶ " + s.substring(0, limit) + "...");
+					} else {
+						t = new Text("▼ " + s);
+					}
+				} else {
+					t = new Text(s);
+				}
+				t.setOnMouseClicked(e -> setGraphic(getCollapsibleTextWithLimit(s, limit, !collapsed)));
+				t.wrappingWidthProperty().bind(this.getTableColumn().widthProperty().subtract(5));
+				return t;
 			}
 		};
 	}
