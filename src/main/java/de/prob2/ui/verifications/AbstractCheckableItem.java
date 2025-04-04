@@ -22,7 +22,7 @@ import javafx.beans.property.SimpleObjectProperty;
 	"selected",
 })
 public abstract class AbstractCheckableItem implements ISelectableTask {
-	@JsonInclude(JsonInclude.Include.NON_NULL)
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private final String id;
 	private final BooleanProperty selected;
 
@@ -32,7 +32,7 @@ public abstract class AbstractCheckableItem implements ISelectableTask {
 	final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
 	protected AbstractCheckableItem(String id) {
-		this.id = id; // may be null for tasks that have no ID!
+		this.id = id != null && !id.isEmpty() ? id : null; // may be null for tasks that have no ID!
 		this.selected = new SimpleBooleanProperty(true);
 
 		this.resultProperty().addListener((o, from, to) -> this.status.set(to == null ? CheckingStatus.NOT_CHECKED : to.getStatus()));
@@ -110,6 +110,7 @@ public abstract class AbstractCheckableItem implements ISelectableTask {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
+	        .omitNullValues()
 			.add("id", this.getId())
 			.toString();
 	}
