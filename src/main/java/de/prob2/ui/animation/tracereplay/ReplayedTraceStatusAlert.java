@@ -149,7 +149,7 @@ public final class ReplayedTraceStatusAlert extends Alert {
 		}
 
 		// always load newest trace file from disk
-		TraceJsonFile fileTrace = Objects.requireNonNull(replayTrace.load(), "traceJsonFile");
+		TraceJsonFile fileTrace = Objects.requireNonNull(traceFileHandler.loadJson(replayTrace), "traceJsonFile");
 		int transitionCount = fileTrace.getTransitionList().size();
 
 		ObservableList<ReplayedTraceRow> items = FXCollections.observableArrayList();

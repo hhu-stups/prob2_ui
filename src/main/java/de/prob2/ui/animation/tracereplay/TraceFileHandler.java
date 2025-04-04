@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -160,7 +161,7 @@ public final class TraceFileHandler {
 	}
 
 	public void showLoadError(ReplayTrace trace, Throwable e) {
-		Alert alert = makeTraceLoadErrorAlert(trace.getAbsoluteLocation(), e);
+		Alert alert = makeTraceLoadErrorAlert(this.currentProject.get().resolveProjectPath(trace.getLocation()), e);
 		if (alert == null) {
 			// No alert should be shown for this exception type (e. g. interruption).
 			return;
@@ -211,9 +212,35 @@ public final class TraceFileHandler {
 		alert.showAndWait();
 	}
 
+	/**
+	 * Read and parse the trace file into a {@link TraceJsonFile} object.
+	 * The loaded trace can also be retrieved later using {@link ReplayTrace#getLoadedTrace()}.
+	 *
+	 * @param replayTrace replay trace object
+	 * @return the loaded trace file
+	 * @throws IOException if the trace file is missing, invalid, or otherwise couldn't be loaded
+	 */
+	public TraceJsonFile loadJson(ReplayTrace replayTrace) throws IOException {
+		return replayTrace.load(this.currentProject.get(), this.traceManager);
+	}
+
+	/**
+	 * Overwrite the trace file with the given data.
+	 * This method uses an intermediate temporary file
+	 * so that the existing trace file is not corrupted
+	 * if the new trace data couldn't be written successfully.
+	 *
+	 * @param replayTrace replay trace object
+	 * @param newTrace the new trace data to be saved
+	 * @throws IOException if the trace couldn't be written for any reason
+	 */
+	public void saveModifiedJson(ReplayTrace replayTrace, TraceJsonFile newTrace) throws IOException {
+		replayTrace.saveModified(this.currentProject.get(), this.traceManager, newTrace);
+	}
+
 	public ReplayTrace createReplayTraceForPath(final Path traceFilePath) {
-		final Path relativeLocation = currentProject.getLocation().relativize(traceFilePath);
-		return new ReplayTrace(null, relativeLocation, traceFilePath, traceManager);
+		final Path relativeLocation = this.currentProject.get().relativizeProjectPath(traceFilePath);
+		return new ReplayTrace(null, relativeLocation);
 	}
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
@@ -309,7 +336,7 @@ public final class TraceFileHandler {
 				save(testTrace.getTrace(), traceFilePath, "Test Case Generation");
 				String description = "Test Case Generation Trace\n" + item.getConfigurationDescription() + "\nOperation: " + target.getOperation() + "\nGuard: " + target.getGuardString();
 				ReplayTrace trace = this.addTraceFile(machine, traceFilePath);
-				trace.saveModified(trace.load().changeDescription(description));
+				this.saveModifiedJson(trace, this.loadJson(trace).changeDescription(description));
 			}
 
 		} catch (IOException e) {
@@ -376,8 +403,8 @@ public final class TraceFileHandler {
 			return;
 		}
 
-		Path path = trace.getAbsoluteLocation();
-		if (path == null || !Files.isRegularFile(path)) {
+		Path path = this.currentProject.get().resolveProjectPath(trace.getLocation());
+		if (path == null || !Files.exists(path)) {
 			return;
 		}
 

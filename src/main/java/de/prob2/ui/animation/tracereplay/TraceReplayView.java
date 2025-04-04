@@ -108,10 +108,10 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
 
 			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
-			openInExternalEditorItem.setOnAction(event -> injector.getInstance(ExternalEditor.class).open(this.getItem().getAbsoluteLocation()));
+			openInExternalEditorItem.setOnAction(event -> injector.getInstance(ExternalEditor.class).open(currentProject.get().resolveProjectPath(this.getItem().getLocation())));
 
 			final MenuItem revealInExplorerItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
-			revealInExplorerItem.setOnAction(event -> injector.getInstance(RevealInExplorer.class).revealInExplorer(this.getItem().getAbsoluteLocation()));
+			revealInExplorerItem.setOnAction(event -> injector.getInstance(RevealInExplorer.class).revealInExplorer(currentProject.get().resolveProjectPath(this.getItem().getLocation())));
 
 			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, removeMenuItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem);
 		}
@@ -167,7 +167,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				TraceJsonFile traceFile = trace.getLoadedTrace();
 				if (traceFile == null) {
 					try {
-						traceFile = trace.load();
+						traceFile = traceFileHandler.loadJson(trace);
 					} catch (IOException ignore) {
 						// ignore errors, so the user does not get bombarded with errors on startup
 					}

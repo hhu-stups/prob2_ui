@@ -23,6 +23,7 @@ import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -80,33 +81,15 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	@JsonIgnore
 	private final ObjectProperty<TraceJsonFile> loadedTrace;
 	private final Path location; // relative to project location
-	@JsonIgnore
-	private Path absoluteLocation;
-	@JsonIgnore
-	private TraceManager traceManager;
-
-	public ReplayTrace(String id, Path location, Path absoluteLocation, TraceManager traceManager) {
-		super(id);
-
-		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
-		this.location = Objects.requireNonNull(location, "location");
-		this.absoluteLocation = absoluteLocation;
-		this.traceManager = traceManager;
-	}
 
 	@JsonCreator
-	private ReplayTrace(
-		@JsonProperty("id") final String id,
-		@JsonProperty("location") final Path location
+	public ReplayTrace(
+			@JsonProperty("id") String id,
+			@JsonProperty("location") Path location
 	) {
-		// absoluteLocation and traceManager must be initialized later using initAfterLoad,
-		// otherwise many ReplayTrace methods won't work.
-		this(id, location, null, null);
-	}
-
-	public void initAfterLoad(final Path absoluteLocation, final TraceManager traceManager) {
-		this.absoluteLocation = absoluteLocation;
-		this.traceManager = traceManager;
+		super(id);
+		this.loadedTrace = new SimpleObjectProperty<>(this, "loadedTrace", null);
+		this.location = Objects.requireNonNull(location, "location");
 	}
 
 	@Override
@@ -115,7 +98,7 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	}
 
 	public ReplayTrace withId(final String id) {
-		return new ReplayTrace(id, this.location, this.absoluteLocation, this.traceManager);
+		return new ReplayTrace(id, this.location);
 	}
 
 	public ReadOnlyObjectProperty<TraceJsonFile> loadedTraceProperty() {
@@ -126,10 +109,10 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	 * Get the previously loaded {@link TraceJsonFile} for this trace file.
 	 * This method will <em>never</em> load the trace from the file.
 	 * If the trace file might have received external changes that should be respected,
-	 * call {@link #load()} instead.
-	 * This is especially important before modifying the file using {@link #saveModified(TraceJsonFile)}.
+	 * call {@link #load(Project, TraceManager)} instead.
+	 * This is especially important before modifying the file using {@link #saveModified(Project, TraceManager, TraceJsonFile)}.
 	 *
-	 * @return the trace data previously loaded by {@link #load()}, or {@code null} if the trace hasn't been loaded yet
+	 * @return the trace data previously loaded by {@link #load(Project, TraceManager)}, or {@code null} if the trace hasn't been loaded yet
 	 */
 	public TraceJsonFile getLoadedTrace() {
 		return this.loadedTraceProperty().get();
@@ -137,10 +120,6 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 
 	public Path getLocation() {
 		return this.location;
-	}
-
-	public Path getAbsoluteLocation() {
-		return this.absoluteLocation;
 	}
 
 	@JsonIgnore
@@ -159,33 +138,23 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	}
 
 	/**
-	 * Read and parse the trace file into a {@link TraceJsonFile} object.
-	 * The loaded trace can also be retrieved later using {@link #getLoadedTrace()}.
-	 *
-	 * @return the loaded trace file
-	 * @throws IOException if the trace file is missing, invalid, or otherwise couldn't be loaded
+	 * Call this via {@link TraceFileHandler#loadJson(ReplayTrace)}.
 	 */
-	public TraceJsonFile load() throws IOException {
-		this.loadedTrace.set(this.traceManager.load(this.getAbsoluteLocation()));
+	TraceJsonFile load(Project currentProject, TraceManager traceManager) throws IOException {
+		this.loadedTrace.set(traceManager.load(currentProject.resolveProjectPath(this.getLocation())));
 		return this.getLoadedTrace();
 	}
 
 	/**
-	 * Overwrite the trace file with the given data.
-	 * This method uses an intermediate temporary file
-	 * so that the existing trace file is not corrupted
-	 * if the new trace data couldn't be written successfully.
-	 *
-	 * @param newTrace the new trace data to be saved
-	 * @throws IOException if the trace couldn't be written for any reason
+	 * Call this via {@link TraceFileHandler#saveModifiedJson(ReplayTrace, TraceJsonFile)}.
 	 */
-	public void saveModified(final TraceJsonFile newTrace) throws IOException {
-		this.traceManager.save(this.getAbsoluteLocation(), newTrace);
+	void saveModified(Project currentProject, TraceManager traceManager, TraceJsonFile newTrace) throws IOException {
+		traceManager.save(currentProject.resolveProjectPath(this.getLocation()), newTrace);
 		this.loadedTrace.set(newTrace);
 	}
 
 	private void executeInternal(ExecutionContext context) {
-		ReplayedTrace replayed = TraceReplay.replayTraceFile(context.stateSpace(), this.getAbsoluteLocation());
+		ReplayedTrace replayed = TraceReplay.replayTraceFile(context.stateSpace(), context.project().resolveProjectPath(this.getLocation()));
 		List<ErrorItem> errors = replayed.getErrors();
 		if (errors.isEmpty() && replayed.getReplayStatus() != TraceReplayStatus.PERFECT) {
 			// FIXME Should this case be reported as an error on the Prolog side?
@@ -235,6 +204,7 @@ public final class ReplayTrace extends AbstractCheckableItem implements ICliTask
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
+			       .omitNullValues()
 			       .add("id", this.getId())
 			       .add("location", this.getLocation())
 			       .toString();

@@ -111,14 +111,14 @@ public final class DescriptionView extends AnchorPane {
 		descriptionView.setName(trace.getName());
 		descriptionView.setOnClose(handleClose);
 		try {
-			descriptionView.setDescription(trace.load().getDescription());
+			descriptionView.setDescription(traceFileHandler.loadJson(trace).getDescription());
 		} catch (IOException exc) {
 			traceFileHandler.showLoadError(trace, exc);
 		}
 
 		descriptionView.descriptionProperty().addListener((o, from, to) -> {
 			try {
-				trace.saveModified(trace.load().changeDescription(to));
+				traceFileHandler.saveModifiedJson(trace, traceFileHandler.loadJson(trace).changeDescription(to));
 			} catch (IOException exc) {
 				stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
 			}

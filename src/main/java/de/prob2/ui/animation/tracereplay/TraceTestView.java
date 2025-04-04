@@ -356,15 +356,14 @@ public final class TraceTestView extends Stage {
 		traceTableView.getItems().clear();
 		transitionBoxes.clear();
 
-		final TraceJsonFile traceJsonFile;
 		try {
-			traceJsonFile = replayTrace.load();
+			traceFileHandler.loadJson(replayTrace);
 		} catch (IOException e) {
 			traceFileHandler.showLoadError(replayTrace, e);
 			return;
 		}
 
-		final List<PersistentTransition> transitions = traceJsonFile.getTransitionList();
+		final List<PersistentTransition> transitions = replayTrace.getLoadedTrace().getTransitionList();
 		traceTableView.getItems().addAll(transitions);
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
@@ -417,7 +416,7 @@ public final class TraceTestView extends Stage {
 		}
 
 		try {
-			replayTrace.get().saveModified(replayTrace.get().getLoadedTrace().changeTrace(transitions));
+			traceFileHandler.saveModifiedJson(replayTrace.get(), replayTrace.get().getLoadedTrace().changeTrace(transitions));
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
 			stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
