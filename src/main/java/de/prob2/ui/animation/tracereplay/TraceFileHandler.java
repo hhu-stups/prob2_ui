@@ -218,6 +218,40 @@ public final class TraceFileHandler {
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
 		ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
+		return this.addReplayTraceWithChecks(machine, replayTrace);
+	}
+
+	public ReplayTrace addReplayTraceWithChecks(Machine machine, ReplayTrace replayTrace) {
+		Path newPath = this.currentProject.get().resolveProjectPath(replayTrace.getLocation());
+		for (ReplayTrace existing : machine.getTraces()) {
+			Path existingPath = this.currentProject.get().resolveProjectPath(existing.getLocation());
+			boolean samePath = false;
+			try {
+				samePath = Files.isSameFile(newPath, existingPath);
+			} catch (IOException ignored) {
+			}
+
+			if (samePath) {
+				if (!Objects.equals(replayTrace.getId(), existing.getId())) {
+					if (replayTrace.getId() != null) {
+						if (existing.getId() != null) {
+							// both traces have the same path but a different id
+							throw new IllegalArgumentException("cannot add replay trace for same file with different id");
+						} else {
+							ReplayTrace withNewId = existing.withId(replayTrace.getId());
+							machine.replaceValidationTask(existing, withNewId);
+							existing = withNewId;
+						}
+					} else {
+						assert existing.getId() != null;
+						// this is fine
+					}
+				}
+
+				existing.reset();
+				return existing;
+			}
+		}
 		return machine.addValidationTaskIfNotExist(replayTrace);
 	}
 

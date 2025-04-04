@@ -281,6 +281,11 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	}
 
 	@Override
+	protected ReplayTrace addItem(ReplayTrace newItem) {
+		return this.traceFileHandler.addReplayTraceWithChecks(this.currentProject.getCurrentMachine(), newItem);
+	}
+
+	@Override
 	protected void removeItem(ReplayTrace item) {
 		super.removeItem(item);
 		this.traceFileHandler.deleteTraceFile(item);
