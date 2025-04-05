@@ -173,6 +173,15 @@ public class FileMenu extends Menu {
 	}
 
 	@FXML
+	private void handleOpenProject() {
+		final Path selected = fileChooserManager.showOpenProjectChooser(stageManager.getMainStage());
+		if (selected == null) {
+			return;
+		}
+		projectManager.openFile(selected);
+	}
+
+	@FXML
 	private void saveMachine() {
 		this.bEditorView.handleSave();
 	}

@@ -8,6 +8,7 @@
 		onAction="#createNewProject" />
 	<MenuItem text="%menu.file.items.open"
 			accelerator="Shortcut+O" onAction="#handleOpen" />
+	<MenuItem text="%menu.file.items.openProject" onAction="#handleOpenProject" />
 	<Menu fx:id="recentProjectsMenu" text="%menu.file.items.openRecentProject"/>
 	<SeparatorMenuItem />
 	<MenuItem fx:id="saveMachineItem" text="%menu.file.items.saveMachine" accelerator="Shortcut+S" onAction="#saveMachine"/>
