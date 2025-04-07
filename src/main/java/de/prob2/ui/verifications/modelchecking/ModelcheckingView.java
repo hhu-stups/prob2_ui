@@ -33,6 +33,7 @@ import javafx.beans.binding.BooleanExpression;
 import javafx.beans.binding.StringExpression;
 import javafx.beans.property.ReadOnlyProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -94,7 +95,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private TableColumn<ModelCheckingStep, CheckingStatus> stepStatusColumn;
 
 	@FXML
-	private TableColumn<ModelCheckingStep, String> stepMessageColumn;
+	private TableColumn<ModelCheckingStep, ModelCheckingStep> stepMessageColumn;
 
 	@FXML
 	private HBox executeButtonsBox;
@@ -192,11 +193,11 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		stepStatusColumn.setCellFactory(col -> new CheckingStatusCell<>());
 		stepStatusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
 		stepStatusColumn.setSortable(false);
-		stepMessageColumn.setCellValueFactory(new PropertyValueFactory<>("message"));
+		stepMessageColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue()));
 		stepMessageColumn.setSortable(false);
 
 		stepMessageColumn.setCellFactory(col -> {
-			TableCell<ModelCheckingStep, String> cell = new TableCell<>();
+			TableCell<ModelCheckingStep, ModelCheckingStep> cell = new TableCell<>();
 			cell.itemProperty().addListener((obs, old, newVal) -> {
 				if (newVal != null) {
 					TableRow<ModelCheckingStep> row = cell.getTableRow();
@@ -259,18 +260,15 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		});
 	}
 
-	private Node buildMessageCell(String text, BooleanBinding buttonBinding){
+	private Node buildMessageCell(ModelCheckingStep step, BooleanBinding buttonBinding) {
 		HBox container = new HBox();
 		container.setAlignment(Pos.CENTER_LEFT);
-		container.getChildren().add(new Label(text));
+		container.getChildren().add(new Label(step.getMessage()));
 
 		container.setSpacing(5);
 		Button button = new Button(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
 		button.getStyleClass().add("button-blue");
-		button.setOnAction(actionEvent -> {
-			ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
-			currentTrace.set(step.getTrace());
-		});
+		button.setOnAction(actionEvent -> currentTrace.set(step.getTrace()));
 
 		button.managedProperty().bind(buttonBinding);
 
@@ -372,16 +370,12 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 			row.setOnMouseClicked(event -> {
 				if (event.getClickCount() == 2 && !(row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !row.getItem().hasTrace())) {
-					ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
-					currentTrace.set(step.getTrace());
+					currentTrace.set(row.getItem().getTrace());
 				}
 			});
 
 			MenuItem showTraceItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
-			showTraceItem.setOnAction(e-> {
-				ModelCheckingStep step = stepsTable.getSelectionModel().getSelectedItem();
-				currentTrace.set(step.getTrace());
-			});
+			showTraceItem.setOnAction(e -> currentTrace.set(row.getItem().getTrace()));
 			showTraceItem.disableProperty().bind(Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !row.getItem().hasTrace(),
 					row.emptyProperty(), row.itemProperty()));
