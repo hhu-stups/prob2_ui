@@ -110,7 +110,7 @@ public abstract class AbstractCheckableItem implements ISelectableTask {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
-	        .omitNullValues()
+			.omitNullValues()
 			.add("id", this.getId())
 			.toString();
 	}
