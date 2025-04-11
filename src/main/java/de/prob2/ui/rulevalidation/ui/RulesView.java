@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
+import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResult;
@@ -337,7 +338,10 @@ public final class RulesView extends AnchorPane {
 
 	@FXML
 	public void visualizeCompleteDependencyGraph() {
-		showGraphExpression(controller.getCompleteDependencyGraphExpression());
+		DynamicVisualizationStage expressionTableView = injector.getInstance(DynamicVisualizationStage.class);
+		expressionTableView.show();
+		expressionTableView.toFront();
+		expressionTableView.selectCommand(DotVisualizationCommand.RULE_DEPENDENCY_GRAPH_NAME);
 	}
 
 	@FXML
@@ -447,7 +451,10 @@ public final class RulesView extends AnchorPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				if (row.getItem() instanceof AbstractOperation abstractOperation) {
-					showGraphExpression(controller.getPartialDependencyGraphExpression(Set.of(abstractOperation)));
+					DynamicVisualizationStage dotView = injector.getInstance(DynamicVisualizationStage.class);
+					dotView.show();
+					dotView.toFront();
+					dotView.visualizeFormulaAsGraph(controller.getPartialDependencyGraphExpression(Set.of(abstractOperation)));
 				}
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -462,10 +469,4 @@ public final class RulesView extends AnchorPane {
 		return row;
 	}
 
-	private void showGraphExpression(String expression) {
-		DynamicVisualizationStage dotView = injector.getInstance(DynamicVisualizationStage.class);
-		dotView.show();
-		dotView.toFront();
-		dotView.visualizeFormulaAsGraph(expression);
-	}
 }

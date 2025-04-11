@@ -165,10 +165,6 @@ public final class RulesController {
 		return RulesDependencyGraph.getGraphExpressionAsString(currentTrace.get(), operations);
 	}
 
-	public String getCompleteDependencyGraphExpression() {
-		return RulesDependencyGraph.getGraphExpressionAsString(currentTrace.get(), rulesModel.getRulesProject().getOperationsMap().values());
-	}
-
 	public void saveValidationReport(final Path path, final Locale language) throws IOException {
 		// don't use RuleValidationReport.saveReport directly: duration of checks is measured by RulesChecker
 		rulesChecker.saveValidationReport(path, language);
