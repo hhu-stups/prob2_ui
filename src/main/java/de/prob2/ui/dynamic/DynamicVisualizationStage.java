@@ -74,9 +74,11 @@ public final class DynamicVisualizationStage extends Stage {
 	@FXML
 	private TreeItem<DynamicTreeItem> tvCommandItemsRoot;
 	@FXML
-	private Label lbDescription;
+	private TextArea lbDescription;
 
 	// formulas
+	@FXML
+	private VBox formulaBox;
 	@FXML
 	private TableView<VisualizationFormulaTask> tvFormula;
 	@FXML
@@ -85,8 +87,6 @@ public final class DynamicVisualizationStage extends Stage {
 	private TableColumn<VisualizationFormulaTask, String> idColumn;
 	@FXML
 	private TableColumn<VisualizationFormulaTask, String> formulaColumn;
-	@FXML
-	private VBox enterFormulaBox;
 	@FXML
 	private ExtendedCodeArea taFormula;
 
@@ -499,8 +499,8 @@ public final class DynamicVisualizationStage extends Stage {
 
 		if (to == null || this.currentProject.getCurrentMachine() == null || this.currentTrace.get() == null || !this.isShowing()) {
 			this.lbDescription.setText("");
-			this.enterFormulaBox.setVisible(false);
-			this.tvFormula.setVisible(false);
+			this.formulaBox.setVisible(false);
+			this.formulaBox.setManaged(false);
 			this.tvFormula.setItems(FXCollections.observableArrayList());
 			this.interrupt();
 			return;
@@ -513,10 +513,10 @@ public final class DynamicVisualizationStage extends Stage {
 		}
 
 		boolean needFormula = to.getArity() > 0;
-		this.enterFormulaBox.setVisible(needFormula);
+		this.formulaBox.setVisible(needFormula);
+		this.formulaBox.setManaged(needFormula);
 
 		var visualizationTasks = this.currentProject.getCurrentMachine().getVisualizationFormulaTasksByCommand(to.getCommand());
-		this.tvFormula.visibleProperty().bind(Bindings.isNotEmpty(visualizationTasks));
 		// this should not cause any formula selection updates
 		this.tvFormula.setItems(visualizationTasks);
 
