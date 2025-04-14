@@ -6,12 +6,16 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.command.GetImagesForMachineCommand;
+import de.prob.animator.command.ExportHtmlHistoryCommand;
 import de.prob.annotations.Home;
+import de.prob.statespace.Transition;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -24,15 +28,19 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 
 @Singleton
 public final class VisualisationController {
 	@FXML
 	private VBox probLogoView;
+	@FXML
+	private Button saveHtmlTraceButton;
 	@FXML
 	private ScrollPane visualisationScrollPane;
 	@FXML
@@ -52,15 +60,20 @@ public final class VisualisationController {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final I18n i18n;
+	private final FileChooserManager fileChooserManager;
 	private final Path proBHomePath;
 	private final BackgroundUpdater updater;
 
 	@Inject
-	private VisualisationController(final CurrentTrace currentTrace, final CurrentProject currentProject, final StageManager stageManager, final I18n i18n, final @Home Path proBHomePath, final StopActions stopActions, final StatusBar statusBar) {
+	private VisualisationController(final CurrentTrace currentTrace, final CurrentProject currentProject,
+	                                final StageManager stageManager, final I18n i18n,
+	                                final FileChooserManager fileChooserManager, final @Home Path proBHomePath,
+	                                final StopActions stopActions, final StatusBar statusBar) {
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.i18n = i18n;
+		this.fileChooserManager = fileChooserManager;
 		this.proBHomePath = proBHomePath;
 		this.updater = new BackgroundUpdater("State visualisation updater");
 		stopActions.add(this.updater::shutdownNow);
@@ -70,6 +83,9 @@ public final class VisualisationController {
 	@FXML
 	public void initialize() {
 		visualisationScrollPane.visibleProperty().bind(probLogoView.visibleProperty().not());
+		saveHtmlTraceButton.visibleProperty().bind(visualisationScrollPane.visibleProperty());
+		saveHtmlTraceButton.setOnMouseEntered(e -> saveHtmlTraceButton.setText(i18n.translate("visb.menu.file.export.html.history")));
+		saveHtmlTraceButton.setOnMouseExited(e -> saveHtmlTraceButton.setText(""));
 		probLogoView.visibleProperty().bind(currentStateVisualisationController.visualisationPossibleProperty().not());
 		previousStateVBox.managedProperty().bind(previousStateVisualisationController.visualisationPossibleProperty());
 		previousStateVBox.visibleProperty().bind(previousStateVBox.managedProperty());
@@ -149,5 +165,20 @@ public final class VisualisationController {
 		}
 
 		return machineImages;
+	}
+
+	@FXML
+	private void saveTraceAsHtml() {
+		final FileChooser fileChooser = new FileChooser();
+		FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
+		fileChooser.getExtensionFilters().setAll(htmlFilter);
+		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
+		Path traceFile = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
+		if (traceFile != null) {
+			ExportHtmlHistoryCommand cmd = new ExportHtmlHistoryCommand(traceFile.toFile(),
+					currentTrace.get().getTransitionList().stream().map(Transition::getId).collect(Collectors.toList()));
+			currentTrace.getStateSpace().execute(cmd);
+		}
 	}
 }
