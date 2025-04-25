@@ -227,6 +227,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 	private void updateChoiceDiagramItem(ActivationChoiceConfiguration item) {
 		TextField tfID = new TextField(item.getId());
+		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setId(to);
@@ -235,8 +236,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		this.itemBox.getChildren().add(tfID);
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
+		lbActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.choiceActivations.hover")));
 		lbActivation.getStyleClass().add("information");
 		TextField tfActivation = new TextField(containerToString(item.getChooseActivation()));
+		tfActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.choiceActivations.hover")));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setChooseActivation(parseMap(to));
