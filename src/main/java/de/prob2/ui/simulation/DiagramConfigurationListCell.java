@@ -250,6 +250,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 	private void updateListenerItem(UIListenerConfiguration item) {
 		TextField tfID = new TextField(item.getId());
+		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setId(to);
@@ -259,8 +260,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 
 		Label lbEvent = new Label(i18n.translate("simulation.item.event"));
+		lbEvent.setTooltip(new Tooltip(i18n.translate("simulation.item.eventListener.hover")));
 		lbEvent.getStyleClass().add("information");
 		TextField tfEvent = new TextField(item.getEvent());
+		tfEvent.setTooltip(new Tooltip(i18n.translate("simulation.item.eventListener.hover")));
 		tfEvent.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setEvent(to);
@@ -269,6 +272,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		this.itemBox.getChildren().add(new HBox(lbEvent, tfEvent));
 
 		Label lbPredicate = new Label(i18n.translate("simulation.item.predicate"));
+		lbPredicate.setTooltip(new Tooltip(i18n.translate("simulation.item.predicate.hover")));
 		lbPredicate.getStyleClass().add("information");
 		TextField tfPredicate = new TextField(item.getPredicate());
 		tfPredicate.textProperty().addListener((observable, from, to) -> {
@@ -276,16 +280,19 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			item.setPredicate(to);
 		});
 		tfPredicate.disableProperty().bind(this.runningProperty);
+		tfPredicate.setTooltip(new Tooltip(i18n.translate("simulation.item.predicate.hover")));
 		this.itemBox.getChildren().add(new HBox(lbPredicate, tfPredicate));
 
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
+		lbActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.activations.hover")));
 		TextField tfActivation = new TextField(containerToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(parseList(to));
 		});
+		tfActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.activations.hover")));
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
 	}
