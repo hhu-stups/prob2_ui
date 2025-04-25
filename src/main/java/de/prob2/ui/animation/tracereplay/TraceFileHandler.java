@@ -361,11 +361,16 @@ public final class TraceFileHandler {
 	}
 
 	public Path save(Trace trace, Machine machine) throws IOException {
+		return save(trace, currentProject.getLocation(),
+				currentProject.getCurrentMachine().getName() + "." + TRACE_FILE_EXTENSION, machine);
+	}
+
+	public Path save(Trace trace, Path initialDirectory, String initialFileName, Machine machine) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + TRACE_FILE_EXTENSION);
+		fileChooser.setInitialFileName(initialFileName);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
-		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
+		fileChooser.setInitialDirectory(initialDirectory.toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			save(trace, path, "traceReplay");

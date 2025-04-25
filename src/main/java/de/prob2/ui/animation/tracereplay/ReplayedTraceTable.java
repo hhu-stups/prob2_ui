@@ -85,6 +85,7 @@ public final class ReplayedTraceTable extends TableView<ReplayedTraceRow> {
 				}
 
 				getStyleClass().removeAll("FAULTY", "FOLLOWING");
+				getStyleClass().removeAll("not_possible", "possible", "imprecise", "precise", "skip", "manual"); // interactive replay
 				if (item != null) {
 					TableRow<ReplayedTraceRow> row = getTableRow();
 					if (row != null) {

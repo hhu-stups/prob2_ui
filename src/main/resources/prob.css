@@ -1255,6 +1255,32 @@
 	-fx-text-fill: blue;
 }
 
+/* for interactive trace replay: */
+.trace-diff-cell.not_possible {
+	-fx-font-weight: bold;
+	-fx-background-color: rgba(204, 47, 39, 0.15);
+}
+
+.trace-diff-cell.possible {
+	-fx-font-weight: bold;
+}
+
+.trace-diff-cell.imprecise {
+	-fx-background-color: rgb(255, 165, 0, 0.15) ;
+}
+
+.trace-diff-cell.skip {
+	-fx-background-color: rgba(192, 192, 192, 0.25);
+}
+
+.trace-diff-cell.manual {
+	-fx-background-color: rgba(152, 225, 255, 0.25);
+}
+
+.trace-diff-cell.precise {
+	-fx-background-color: rgba(76, 175, 80, 0.15) ;
+}
+
 /* ==================== GRAPH/TABLE VISUALIZATION ======================== */
 
 .visualization-formula {

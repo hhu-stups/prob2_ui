@@ -4,6 +4,8 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.2.2 (not released yet)
 
+* Added interactive trace replay for user-controlled replay of traces, useful for refinements or refactoring of traces
+* Added options for deterministic animation steps, as long as possible 
 * Added B type information for code completion (if available)
 * Customisable VisB HTML export and SVG export of the current VisB image
 * Added TLC model checking for classical B machines with TLC4B and export of generated TLA+ files (also limited support for Event-B and models with internal B representation)

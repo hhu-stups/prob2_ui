@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
+import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayStage;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -86,6 +87,14 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			// Will be re-added in a different place later.
 			contextMenu.getItems().remove(removeMenuItem);
 
+			final MenuItem interactiveReplayItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTraceInteractively"));
+			interactiveReplayItem.setOnAction(event -> {
+				InteractiveTraceReplayStage interactiveReplayStage = injector.getInstance(InteractiveTraceReplayStage.class);
+				interactiveReplayStage.initializeForTrace(currentProject.getLocation().resolve(this.getItem().getLocation()));
+				interactiveReplayStage.show();
+				interactiveReplayStage.toFront();
+			});
+
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
 			addTestsItem.setOnAction(event -> {
 				TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
@@ -113,7 +122,9 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			final MenuItem revealInExplorerItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
 			revealInExplorerItem.setOnAction(event -> injector.getInstance(RevealInExplorer.class).revealInExplorer(currentProject.get().resolveProjectPath(this.getItem().getLocation())));
 
-			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, removeMenuItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem);
+			contextMenu.getItems().addAll(new SeparatorMenuItem(), interactiveReplayItem, addTestsItem, showStatusItem,
+					new SeparatorMenuItem(), showDescriptionItem, removeMenuItem,
+					new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem);
 		}
 	}
 
