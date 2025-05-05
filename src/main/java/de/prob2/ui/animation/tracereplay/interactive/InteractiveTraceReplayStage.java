@@ -84,30 +84,24 @@ public class InteractiveTraceReplayStage extends Stage {
 		this.traceFileHandler = traceFileHandler;
 		this.cliExecutor = cliExecutor;
 		this.currentTraceListener = (o, oldTrace, newTrace) -> {
-			if (checkTraceIsIReplayTrace(newTrace)) {
-				if (newTrace.size() == ireplay.getCurrentTrace().size() + 1) { // exactly one more animation step
-					Transition newTransition = newTrace.getCurrent().getTransition();
-					cliExecutor.submit(() -> ireplay.performManualAnimationStep(newTransition)).whenComplete((res, exc) -> {
-						if (exc == null) {
-							Platform.runLater(() -> {
-								traceTable.getItems().add(ireplay.getCurrentStepNr() + curRowOffset,
-										new ReplayedTraceRow(ireplay.getCurrentStepNr(), "", newTransition.getPrettyRep(),
-												i18n.translate("animation.tracereplay.interactive.manualPrecision"),
-												"", "", Collections.singleton("manual")));
-								curRowOffset++;
-								updateGUIAfterExecution();
-							});
-						} else {
-							stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
-						}
-					});
-				}
-				// else: do nothing (was trace update from ireplay)
+			savedTrace = false;
+			List<Transition> newTransitions = getManuallyReplayedTransitions(newTrace);
+			if (newTransitions != null) {
+				Transition newTransition = newTrace.getCurrent().getTransition();
+				cliExecutor.submit(() -> newTransitions.forEach(t -> {
+						ireplay.performManualAnimationStep(t);
+						Platform.runLater(() -> {
+							traceTable.getItems().add(ireplay.getCurrentStepNr() + curRowOffset,
+									new ReplayedTraceRow(ireplay.getCurrentStepNr(), "", newTransition.getPrettyRep(),
+											i18n.translate("animation.tracereplay.interactive.manualPrecision"),
+											"", "", Collections.singleton("manual")));
+							curRowOffset++;
+							updateGUIAfterExecution();
+						});
+					}));
 			} else if (newTrace != null) { // trace was not an ireplay trace => restart ireplay
 				restart();
-				Platform.runLater(() -> warningTraceSync.setVisible(true));
 			}
-			savedTrace = false;
 		};
 		stopActions.add(this::finish);
 		stageManager.loadFXML(this, "interactive_trace_replay.fxml", this.getClass().getName());
@@ -144,6 +138,8 @@ public class InteractiveTraceReplayStage extends Stage {
 				progressBar.setProgress(-1);
 				progressLabel.setText(i18n.translate("animation.tracereplay.loadButton.loadTrace"));
 			} else {
+				if (currentTrace.get().size() > 0 && !confirmTraceChange())
+					return;
 				ireplay.restart();
 			}
 
@@ -155,8 +151,9 @@ public class InteractiveTraceReplayStage extends Stage {
 										new ReplayedTraceRow(step.getNr(), step.getDescription(), "", "",
 												createFilteredErrorMessage("",step.getErrors()), "", new ArrayList<>()) )
 								.collect(Collectors.toCollection(FXCollections::observableArrayList)));
-						errorTable.getErrorItems().addAll(ireplay.getErrors());
+						errorTable.getErrorItems().setAll(ireplay.getErrors());
 						updateGUIAfterExecution();
+						currentTrace.set(ireplay.getCurrentTrace());
 					});
 				} else {
 					stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
@@ -182,10 +179,10 @@ public class InteractiveTraceReplayStage extends Stage {
 			if (exc == null) {
 				Trace trace = ireplay.getCurrentTrace();
 				Platform.runLater(() -> {
-					updateReplayedTraceRow(step.getNr()-1, trace.getTransitionList().get(step.getTransitionIndex()),
+					updateReplayedTraceRow(step.getNr()-1, ireplay.getStepTransition(step.getNr()-1),
 							step.getPrecision(), step.getErrors(), false); // row index is Prolog stepNr-1
 					updateGUIAfterExecution();
-					updateCurrentTraceWithCheck(trace);
+					currentTrace.set(trace);
 				});
 			} else {
 				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
@@ -202,11 +199,11 @@ public class InteractiveTraceReplayStage extends Stage {
 				Platform.runLater(() -> {
 					for (int i = prevStepNr; i < ireplay.getCurrentStepNr(); i++) { // don't update current row!
 						InteractiveReplayStep step = ireplay.getStep(i);
-						updateReplayedTraceRow(i, trace.getTransitionList().get(step.getTransitionIndex()), step.getPrecision(),
+						updateReplayedTraceRow(i, ireplay.getStepTransition(i), step.getPrecision(),
 								step.getErrors(), false);
 					}
 					updateGUIAfterExecution();
-					updateCurrentTraceWithCheck(trace);
+					currentTrace.set(trace);
 				});
 			} else {
 				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
@@ -229,19 +226,18 @@ public class InteractiveTraceReplayStage extends Stage {
 	@FXML
 	private void undoLastStep() {
 		int prevStepNr = ireplay.getCurrentStepNr();
-		int prevSize = ireplay.getCurrentTrace().size();
+		int prevSize = prevStepNr + curRowOffset; // is not the trace size because of skips!
 		cliExecutor.submit(() -> ireplay.undoLastStep()).whenComplete((res, exc) -> {
 			if (exc == null) {
-				Trace newTrace = ireplay.getCurrentTrace();
 				Platform.runLater(() ->  {
-					if (newTrace.size() < prevSize-1) { // delete manual animation rows
-						List<ReplayedTraceRow> deleteRows = traceTable.getItems().subList(newTrace.size()+1, prevSize);
-						curRowOffset -= deleteRows.size();
-						deleteRows.clear();
+					ReplayedTraceRow deleteRowCand = traceTable.getItems().get(prevSize-1);
+					if (deleteRowCand != null && deleteRowCand.getStyleClasses().contains("manual")) {
+						curRowOffset--; // delete manual animation row
+						traceTable.getItems().remove(deleteRowCand);
 					}
 					updateReplayedTraceRow(prevStepNr, null, null, new ArrayList<>(), false);
 					updateGUIAfterExecution();
-					updateCurrentTraceWithCheck(newTrace);
+					currentTrace.set(currentTrace.get().gotoPosition(ireplay.getCurrentTrace().size()-1));
 				});
 			} else {
 				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
@@ -269,32 +265,26 @@ public class InteractiveTraceReplayStage extends Stage {
 		traceTable.refresh();
 	}
 
-	private void updateCurrentTraceWithCheck(Trace trace) {
-		if (!checkTraceIsIReplayTrace(currentTrace.get())) {
-			if (!confirmTraceChange()) {
-				warningTraceSync.setVisible(true);
-				return;
-			}
-		}
-		warningTraceSync.setVisible(false);
-		currentTrace.set(trace);
-	}
-
-	private boolean checkTraceIsIReplayTrace(Trace trace) {
-		if (trace == null || ireplay == null) {
-			return false;
+	private List<Transition> getManuallyReplayedTransitions(Trace trace) {
+		if (trace == null || ireplay == null || trace.size() < ireplay.getCurrentTrace().size()) { // trace should extend ireplay trace
+			return null;
 		}
 		List<Transition> ireplayTransitions = ireplay.getCurrentTrace().getTransitionList();
+		List<Transition> newManualTransitions = new ArrayList<>();
 		for (int i = 0; i < trace.size(); i++) {
+			Transition t = trace.getTransitionList().get(i);
 			if (i < ireplayTransitions.size()) {
-				if (!ireplayTransitions.get(i).getId().equals(trace.getTransitionList().get(i).getId())) {
-					return false;
+				if (!ireplayTransitions.get(i).getId().equals(t.getId())) {
+					return null; // traces do not have the same prefix
 				}
-			} else if (i > ireplayTransitions.size()) { // == is OK for +1 animation step
-				return false;
+			} else {
+				if (i > trace.getCurrent().getIndex()) {
+					break;
+				}
+				newManualTransitions.add(t); // add all transitions after the last replayed one (but not these after the current index of the trace)
 			}
 		}
-		return true;
+		return newManualTransitions;
 	}
 
 	private void updateReplayedTraceRow(int stepNr, Transition transition, TransitionReplayPrecision precision,
