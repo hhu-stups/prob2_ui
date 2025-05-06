@@ -5,6 +5,7 @@ import com.google.inject.Singleton;
 import de.prob.check.tracereplay.TransitionReplayPrecision;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.MainController;
 import de.prob2.ui.animation.tracereplay.ReplayedTraceRow;
 import de.prob2.ui.animation.tracereplay.ReplayedTraceTable;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -24,7 +25,6 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
 
 import de.prob.check.tracereplay.interactive.InteractiveTraceReplay;
 import de.prob.check.tracereplay.interactive.InteractiveReplayStep;
@@ -39,7 +39,7 @@ import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 
 @Singleton
 @FXMLInjected
-public class InteractiveTraceReplayStage extends Stage {
+public class InteractiveTraceReplayView extends TitledPane {
 
 	@FXML
 	private TextField fileLocationField;
@@ -50,7 +50,7 @@ public class InteractiveTraceReplayStage extends Stage {
 	@FXML
 	private ProgressBar progressBar;
 	@FXML
-	private Label warningTraceSync;
+	private Label warningNotFinished;
 	@FXML
 	private Button btnRestart, btnUndoStep, btnCurrentStep, btnFastForward, btnSkip, btnSave, btnFinish;
 	@FXML
@@ -66,15 +66,16 @@ public class InteractiveTraceReplayStage extends Stage {
 	private final TraceFileHandler traceFileHandler;
 	private final CliTaskExecutor cliExecutor;
 
+	private final Accordion mainViewAccordion;
 	private final ChangeListener<Trace> currentTraceListener;
 	private InteractiveTraceReplay ireplay;
 	private boolean savedTrace = false;
 	private int curRowOffset = 0; // offset caused by manual animation steps
 
 	@Inject
-	public InteractiveTraceReplayStage(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
-	                                   final I18n i18n, final FileChooserManager fileChooserManager, final TraceFileHandler traceFileHandler,
-	                                   final CliTaskExecutor cliExecutor, final StopActions stopActions) {
+	public InteractiveTraceReplayView(final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
+	                                  final I18n i18n, final FileChooserManager fileChooserManager, final TraceFileHandler traceFileHandler,
+	                                  final CliTaskExecutor cliExecutor, final StopActions stopActions, final MainController mainController) {
 		super();
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
@@ -99,12 +100,13 @@ public class InteractiveTraceReplayStage extends Stage {
 							updateGUIAfterExecution();
 						});
 					}));
-			} else if (newTrace != null) { // trace was not an ireplay trace => restart ireplay
+			} else if (newTrace != null || ireplay.getStateSpace().isKilled()) { // trace was not an ireplay trace => restart ireplay
 				restart();
 			}
 		};
+		mainViewAccordion = mainController.getAccordionById("centerAccordion1");
 		stopActions.add(this::finish);
-		stageManager.loadFXML(this, "interactive_trace_replay.fxml", this.getClass().getName());
+		stageManager.loadFXML(this, "interactive_trace_replay.fxml");
 	}
 
 	@FXML
@@ -116,8 +118,6 @@ public class InteractiveTraceReplayStage extends Stage {
 
 		errorTable.visibleProperty().bind(Bindings.isNotEmpty(errorTable.getErrorItems()));
 		errorTable.managedProperty().bind(errorTable.visibleProperty());
-
-		setOnCloseRequest(e -> this.finish());
 	}
 
 	public void initializeForTrace(Path tracePath) {
@@ -130,7 +130,6 @@ public class InteractiveTraceReplayStage extends Stage {
 				progressBar.setVisible(true);
 				btnRestart.setDisable(false);
 				btnSave.setDisable(false);
-				btnFinish.setDisable(false);
 
 				fileLocationField.setText(tracePath.toString());
 
@@ -159,6 +158,19 @@ public class InteractiveTraceReplayStage extends Stage {
 					stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
 				}
 			});
+		}
+	}
+
+	public void addToMainView() {
+		if (mainViewAccordion != null && !mainViewAccordion.getPanes().contains(this)) {
+			mainViewAccordion.getPanes().addFirst(this);
+			this.setExpanded(true);
+		}
+	}
+
+	public void removeFromMainView() {
+		if (mainViewAccordion != null) {
+			mainViewAccordion.getPanes().remove(this);
 		}
 	}
 
@@ -260,6 +272,7 @@ public class InteractiveTraceReplayStage extends Stage {
 		btnCurrentStep.setDisable(!ireplay.isReplayStepPossible() || ireplay.isFinished());
 		btnFastForward.setDisable(!ireplay.isReplayStepPossible() || ireplay.isFinished());
 		btnSkip.setDisable(ireplay.isFinished());
+		warningNotFinished.setVisible(!ireplay.isFinished());
 
 		//traceTable.scrollTo(curStep);
 		traceTable.refresh();
@@ -340,7 +353,7 @@ public class InteractiveTraceReplayStage extends Stage {
 		if (ireplay != null && !confirmTraceChange()) {
 			return;
 		}
-		close();
+		removeFromMainView();
 		reset();
 	}
 
@@ -383,7 +396,6 @@ public class InteractiveTraceReplayStage extends Stage {
 		btnFastForward.setDisable(true);
 		btnSkip.setDisable(true);
 		btnSave.setDisable(true);
-		btnFinish.setDisable(true);
 		progressBar.setVisible(false);
 		progressLabel.setText("");
 		currentTrace.removeListener(currentTraceListener);

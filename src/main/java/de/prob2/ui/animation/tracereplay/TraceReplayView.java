@@ -18,7 +18,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
-import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayStage;
+import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -89,10 +89,10 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 
 			final MenuItem interactiveReplayItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTraceInteractively"));
 			interactiveReplayItem.setOnAction(event -> {
-				InteractiveTraceReplayStage interactiveReplayStage = injector.getInstance(InteractiveTraceReplayStage.class);
-				interactiveReplayStage.initializeForTrace(currentProject.getLocation().resolve(this.getItem().getLocation()));
-				interactiveReplayStage.show();
-				interactiveReplayStage.toFront();
+				InteractiveTraceReplayView iReplayView = injector.getInstance(InteractiveTraceReplayView.class);
+				iReplayView.initializeForTrace(currentProject.getLocation().resolve(this.getItem().getLocation()));
+				iReplayView.addToMainView();
+				iReplayView.toFront();
 			});
 
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));

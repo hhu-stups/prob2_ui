@@ -4,7 +4,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayStage;
+import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayView;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.internal.FXMLInjected;
@@ -119,8 +119,8 @@ public final class AdvancedMenu extends Menu {
 
 	@FXML
 	private void showInteractiveTraceReplay() {
-		InteractiveTraceReplayStage iReplayStage = injector.getInstance(InteractiveTraceReplayStage.class);
-		iReplayStage.show();
+		InteractiveTraceReplayView iReplayStage = injector.getInstance(InteractiveTraceReplayView.class);
+		iReplayStage.addToMainView();
 		iReplayStage.toFront();
 	}
 
