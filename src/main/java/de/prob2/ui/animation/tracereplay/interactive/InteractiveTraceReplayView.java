@@ -86,7 +86,12 @@ public class InteractiveTraceReplayView extends TitledPane {
 		this.cliExecutor = cliExecutor;
 		this.currentTraceListener = (o, oldTrace, newTrace) -> {
 			savedTrace = false;
-			List<Transition> newTransitions = getManuallyReplayedTransitions(newTrace);
+			List<Transition> newTransitions;
+			if (ireplay != null && ireplay.getStateSpace() != null && !ireplay.getStateSpace().isKilled()) {
+				newTransitions = getManuallyReplayedTransitions(newTrace);
+			} else {
+				newTransitions = null;
+			}
 			if (newTransitions != null) {
 				Transition newTransition = newTrace.getCurrent().getTransition();
 				cliExecutor.submit(() -> newTransitions.forEach(t -> {
@@ -100,7 +105,7 @@ public class InteractiveTraceReplayView extends TitledPane {
 							updateGUIAfterExecution();
 						});
 					}));
-			} else if (newTrace != null || ireplay.getStateSpace().isKilled()) { // trace was not an ireplay trace => restart ireplay
+			} else if (newTrace != null) { // trace was not an ireplay trace => restart ireplay
 				restart();
 			}
 		};
@@ -123,7 +128,7 @@ public class InteractiveTraceReplayView extends TitledPane {
 	public void initializeForTrace(Path tracePath) {
 		if (tracePath != null) {
 			curRowOffset = 0;
-			if (ireplay == null || ireplay.getStateSpace().isKilled()
+			if (ireplay == null || ireplay.getStateSpace() == null || ireplay.getStateSpace().isKilled()
 					|| !tracePath.toFile().equals(ireplay.getTraceFile())) { // don't reinitialise if the same trace file is selected
 				reset();
 				currentTrace.addListener(currentTraceListener);
