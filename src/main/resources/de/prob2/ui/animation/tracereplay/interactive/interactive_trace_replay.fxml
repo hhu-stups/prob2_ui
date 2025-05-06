@@ -31,13 +31,13 @@
 			<Button styleClass="button-dark2" text="%project.newProjectStage.buttons.selectLocation"
 					onAction="#selectTraceFile"/>
 			<padding>
-				<Insets top="20" left="20" bottom="20" right="20"/>
+				<Insets top="10" left="15" bottom="10" right="15"/>
 			</padding>
 		</HBox>
 		<AnchorPane styleClass="border" VBox.vgrow="ALWAYS">
 			<VBox AnchorPane.leftAnchor="15" AnchorPane.rightAnchor="15"
 				  AnchorPane.topAnchor="15" AnchorPane.bottomAnchor="20" alignment="CENTER">
-				<ReplayedTraceTable fx:id="traceTable"/>
+				<ReplayedTraceTable fx:id="traceTable" VBox.vgrow="ALWAYS"/>
 				<ErrorTableView fx:id="errorTable"/>
 				<HBox alignment="CENTER_LEFT">
 					<Label fx:id="warningNotFinished" text="%animation.tracereplay.interactive.warning.notFinished"
@@ -126,8 +126,5 @@
 				<Insets top="10" bottom="5"/>
 			</VBox.margin>
 		</HBox>
-		<padding>
-			<Insets top="15" bottom="5"/>
-		</padding>
 	</VBox>
 </fx:root>
