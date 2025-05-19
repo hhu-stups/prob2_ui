@@ -249,7 +249,7 @@ public final class FileChooserManager {
 		}
 
 		final File file = fileChooser.showSaveDialog(window);
-		if (kind != null && file != null) {
+		if (file != null && Kind.NEW_MACHINE.equals(kind)) {
 			String ext = MoreFiles.getFileExtension(file.toPath());
 			String expectedExtFile = "*." + ext;
 			if (ext.isEmpty() || fileChooser.getExtensionFilters().stream().noneMatch(extensionFilter -> extensionFilter.getExtensions().contains(expectedExtFile))) {
