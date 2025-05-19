@@ -202,7 +202,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			}
 		});
 
-		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
+		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B)
+				.and(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.XTL));
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
 	}
 

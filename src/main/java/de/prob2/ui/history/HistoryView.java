@@ -200,7 +200,8 @@ public final class HistoryView extends BorderPane {
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
 		currentTrace.addListener(traceChangeListener);
 
-		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
+		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B)
+				.and(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.XTL));
 		saveTraceButton.disableProperty()
 				.bind(partOfDisableBinding.or(currentProject.isNotNull().and(currentTrace.isNotNull()).not()));
 	}
