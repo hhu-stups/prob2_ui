@@ -270,15 +270,12 @@ public final class FileChooserManager {
 
 			// this is a hack to fix files with a double extension
 			// https://bugs.openjdk.org/browse/JDK-8352298
-			try {
-				if (Files.isRegularFile(path) && path.getFileName() != null) {
-					String fileName = path.getFileName().toString();
-					String ext = MoreFiles.getFileExtension(path);
-					if (!ext.isEmpty() && fileName.endsWith("." + ext + "." + ext)) {
-						path = path.resolveSibling(fileName.substring(0, fileName.length() - ext.length() - 1));
-					}
+			if (Files.isRegularFile(path) && path.getFileName() != null) {
+				String fileName = path.getFileName().toString();
+				String ext = MoreFiles.getFileExtension(path);
+				if (!ext.isEmpty() && fileName.endsWith("." + ext + "." + ext)) {
+					path = path.resolveSibling(fileName.substring(0, fileName.length() - ext.length() - 1));
 				}
-			} catch (Exception ignored) {
 			}
 		}
 		return path;
