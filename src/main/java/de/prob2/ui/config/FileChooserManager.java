@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -33,7 +34,6 @@ import de.prob.scripting.ZFactory;
 import de.prob.scripting.ZFuzzFactory;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.ProB2Module;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
@@ -43,8 +43,6 @@ import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
-
-import org.apache.commons.io.FilenameUtils;
 
 @Singleton
 public final class FileChooserManager {
@@ -252,7 +250,7 @@ public final class FileChooserManager {
 
 		final File file = fileChooser.showSaveDialog(window);
 		if (kind != null && file != null) {
-			String ext = FilenameUtils.getExtension(file.getName());
+			String ext = MoreFiles.getFileExtension(file.toPath());
 			String expectedExtFile = "*." + ext;
 			if (ext.isEmpty() || fileChooser.getExtensionFilters().stream().noneMatch(extensionFilter -> extensionFilter.getExtensions().contains(expectedExtFile))) {
 				// Either there is no file extension or an invalid one
@@ -275,7 +273,7 @@ public final class FileChooserManager {
 			try {
 				if (Files.isRegularFile(path) && path.getFileName() != null) {
 					String fileName = path.getFileName().toString();
-					String ext = FilenameUtils.getExtension(fileName);
+					String ext = MoreFiles.getFileExtension(path);
 					if (!ext.isEmpty() && fileName.endsWith("." + ext + "." + ext)) {
 						path = path.resolveSibling(fileName.substring(0, fileName.length() - ext.length() - 1));
 					}
