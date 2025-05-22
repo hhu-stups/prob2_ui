@@ -43,8 +43,8 @@ public class DiagramGeneratorTest {
     @Test
     @DisplayName("simple nodes are collected properly")
     public void test1(){
-        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
-        null, null, null, false,null, null, "1=1", "");
+        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE, null,
+        null, null, null, false,null, "1=1", "");
         DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
         UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
@@ -65,8 +65,8 @@ public class DiagramGeneratorTest {
     @Test
     @DisplayName("complex nodes are collected properly")
     public void test2(){
-        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
-        null, null, null, false,null, null, "1=1", "");
+        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE, null,
+        null, null, null, false, null, "1=1", "");
         DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
         UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
@@ -88,8 +88,8 @@ public class DiagramGeneratorTest {
     @Test
     @DisplayName("Correct Simple NodesString is returned")
     public void test3(){
-        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
-        null, null, null, false,null, null, "1=1", "");
+        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE, null,
+        null, null, null, false,null, "1=1", "");
         DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
         UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
@@ -118,8 +118,8 @@ public class DiagramGeneratorTest {
     @Test
     @DisplayName("Correct Complex NodesString is returned")
     public void test4(){
-        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
-        null, null, null, false,null, null, "1=1", "");
+        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE, null,
+        null, null, null, false,null, "1=1", "");
         DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
         UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
