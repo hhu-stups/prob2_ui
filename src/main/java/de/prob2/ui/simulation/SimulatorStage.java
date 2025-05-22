@@ -45,6 +45,7 @@ import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.diagram.DiagramGenerator;
 import de.prob2.ui.simulation.configuration.TransitionSelection;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
@@ -265,6 +266,18 @@ public final class SimulatorStage extends Stage {
 	private Button openVisBButton;
 
 	@FXML
+	private MenuButton btGenerateDiagram;
+
+	@FXML
+	private MenuItem generateDiagram;
+
+	@FXML
+	private MenuItem generateComplexDiagram;
+	
+	@FXML
+	private MenuItem generateLiveDiagram;
+
+	@FXML
 	private MenuButton saveTraceButton;
 
 	@FXML
@@ -331,6 +344,8 @@ public final class SimulatorStage extends Stage {
 	private final SimulationItemHandler simulationItemHandler;
 	private final SimulationMode simulationMode;
 
+	private final DiagramGenerator diagramGenerator;
+
 	private int time;
 
 	private Timer timer;
@@ -347,7 +362,8 @@ public final class SimulatorStage extends Stage {
 			final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
 			final I18n i18n, final FileChooserManager fileChooserManager,
 			final TraceFileHandler traceFileHandler, final DisablePropertyController disablePropertyController,
-			final StopActions stopActions, SimulationFileHandler simulationFileHandler
+			final StopActions stopActions, SimulationFileHandler simulationFileHandler,
+			final DiagramGenerator diagramGenerator
 	) {
 		super();
 		this.stageManager = stageManager;
@@ -362,6 +378,7 @@ public final class SimulatorStage extends Stage {
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.traceFileHandler = traceFileHandler;
+		this.diagramGenerator = diagramGenerator;
 		this.disablePropertyController = disablePropertyController;
 		this.simulationFileHandler = simulationFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
@@ -410,7 +427,7 @@ public final class SimulatorStage extends Stage {
 				});
 			}
 		});
-
+		btGenerateDiagram.disableProperty().bind(configurationPath.isNull().or(currentProject.currentMachineProperty().isNull()));
 		BooleanExpression disableOpenProperty = realTimeSimulator.runningProperty().or(currentProject.currentMachineProperty().isNull());
 		loadSimBModelMenuItem.disableProperty().bind(disableOpenProperty);
 		loadSimBTracesMenuItem.disableProperty().bind(disableOpenProperty);
@@ -766,6 +783,23 @@ public final class SimulatorStage extends Stage {
 		}
 		currentProject.getCurrentMachine().getSimulations().remove(simulationModel);
 	}
+	
+
+	@FXML
+	private void generateDiagram(){
+		diagramGenerator.generateDiagram(false);
+	}
+
+	
+	@FXML
+	private void generateComplexDiagram(){
+		diagramGenerator.generateComplexDiagram(false);
+	}
+
+	@FXML
+	private void generateLiveDiagram(){
+		diagramGenerator.generateLiveDiagram(false,false);
+	}
 
 	private SimulationModelConfiguration buildSimulationModel() {
 		Map<String, String> variables = new HashMap<>();
@@ -919,5 +953,4 @@ public final class SimulatorStage extends Stage {
 			lbSimulationStats.setText("");
 		});
 	}
-
 }

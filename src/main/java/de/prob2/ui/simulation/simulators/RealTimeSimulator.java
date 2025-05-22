@@ -10,8 +10,11 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.diagram.DiagramGenerator;
+import de.prob2.ui.simulation.diagram.DiagramStage;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
+import javafx.application.Platform;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
@@ -27,6 +30,8 @@ public final class RealTimeSimulator extends Simulator {
 
 	private final ChangeListener<Transition> uiListener;
 
+	private DiagramGenerator diagramGenerator;
+
 	@Inject
 	public RealTimeSimulator(final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
 		super(currentTrace, currentProject, objectMapperProvider);
@@ -34,6 +39,7 @@ public final class RealTimeSimulator extends Simulator {
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;
 		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
+		this.diagramGenerator = null;
 	}
 
 	public void run() {
@@ -63,6 +69,13 @@ public final class RealTimeSimulator extends Simulator {
 			throw e;
 		}
 		scheduler.endSimulationStep();
+		Platform.runLater(()->{
+			if (diagramGenerator.getDiaStage()!= null ) {
+				if (diagramGenerator.getDiaStage().isShowing() && diagramGenerator.getDiaStage().getIsLive()) {
+					diagramGenerator.updateGraph();
+				}
+			}
+		});
 	}
 
 	private Trace mergeUserInteractions(int index, Trace traceWithUserInteractions, Trace simulatedTrace) {
@@ -106,5 +119,9 @@ public final class RealTimeSimulator extends Simulator {
 	@Override
 	public void run(ISimulationPropertyChecker simulationPropertyChecker) {
 		throw new UnsupportedOperationException();
+	}
+
+	public void setDiagramGenerator(DiagramGenerator diagramGenerator) {
+		this.diagramGenerator = diagramGenerator;
 	}
 }

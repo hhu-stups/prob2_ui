@@ -130,6 +130,21 @@
 										</tooltip>
 									</Button>
 									<Label fx:id="lbTime" prefWidth="${fontSize.fontSize * 10}" textAlignment="RIGHT" alignment="BOTTOM_RIGHT" prefHeight="${fontSize.fontSize + 8.0}"/>
+									<MenuButton fx:id="btGenerateDiagram" disable="true"
+												contentDisplay="GRAPHIC_ONLY" >
+										<graphic>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="REORDER" bindableFontSize="${fontSize.fontSize + 4.0}" />
+										</graphic>
+										<tooltip>
+											<Tooltip
+													text="%simulation.tooltips.generateDiagram" />
+										</tooltip>
+										<items>
+											<MenuItem fx:id="generateDiagram" text="%simulation.contextMenu.generateDiagram" onAction="#generateDiagram"/>
+											<MenuItem fx:id="generateComplexDiagram" text="%simulation.contextMenu.generateComplexDiagram" onAction="#generateComplexDiagram"/>
+											<MenuItem fx:id="generateLiveDiagram" text="%simulation.contextMenu.generateLiveDiagram" onAction="#generateLiveDiagram"/>
+										</items>
+									</MenuButton>
 								</HBox>
 								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 							</HBox>
