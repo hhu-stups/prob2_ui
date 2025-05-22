@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Map;
 
+import de.prob2.ui.simulation.configuration.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -16,12 +16,6 @@ import com.google.inject.Injector;
 
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
-import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration.ActivationKind;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
 public class DiagramGeneratorTest {
@@ -49,16 +43,16 @@ public class DiagramGeneratorTest {
     @Test
     @DisplayName("simple nodes are collected properly")
     public void test1(){
-        ActivationConfiguration test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
-        null, null, null, false,null, null);
-        ActivationConfiguration test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"));
-        UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"));
+        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
+        null, null, null, false,null, null, "1=1", "");
+        DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
+        UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
-        List<ActivationConfiguration> activationList = List.of(test1,test2); 
+        List<DiagramConfiguration.NonUi> activationList = List.of(test1,test2);
         List<UIListenerConfiguration> listenerList = List.of(test3);
         
-        when(smc.getActivationConfigurations()).thenReturn(activationList);
-        when(smc.getUiListenerConfigurations()).thenReturn(listenerList);
+        when(smc.getActivations()).thenReturn(activationList);
+        when(smc.getListeners()).thenReturn(listenerList);
         List<DiagramNode> nodelist = gen.collectNodes(false);
         assertThat(nodelist.size()==5).isTrue();
         assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
@@ -71,16 +65,16 @@ public class DiagramGeneratorTest {
     @Test
     @DisplayName("complex nodes are collected properly")
     public void test2(){
-        ActivationConfiguration test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
-        null, null, null, false,null, null);
-        ActivationConfiguration test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"));
-        UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"));
+        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
+        null, null, null, false,null, null, "1=1", "");
+        DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
+        UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
-        List<ActivationConfiguration> activationList = List.of(test1,test2); 
+        List<DiagramConfiguration.NonUi> activationList = List.of(test1,test2);
         List<UIListenerConfiguration> listenerList = List.of(test3);
         
-        when(smc.getActivationConfigurations()).thenReturn(activationList);
-        when(smc.getUiListenerConfigurations()).thenReturn(listenerList);
+        when(smc.getActivations()).thenReturn(activationList);
+        when(smc.getListeners()).thenReturn(listenerList);
         List<DiagramNode> nodelist = gen.collectComplexNodes();
         assertThat(nodelist.size()==5).isTrue();
         assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
@@ -94,16 +88,16 @@ public class DiagramGeneratorTest {
     @Test
     @DisplayName("Correct Simple NodesString is returned")
     public void test3(){
-        ActivationConfiguration test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
-        null, null, null, false,null, null);
-        ActivationConfiguration test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"));
-        UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"));
+        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
+        null, null, null, false,null, null, "1=1", "");
+        DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
+        UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
-        List<ActivationConfiguration> activationList = List.of(test1,test2); 
+        List<DiagramConfiguration.NonUi> activationList = List.of(test1,test2);
         List<UIListenerConfiguration> listenerList = List.of(test3);
         
-        when(smc.getActivationConfigurations()).thenReturn(activationList);
-        when(smc.getUiListenerConfigurations()).thenReturn(listenerList);
+        when(smc.getActivations()).thenReturn(activationList);
+        when(smc.getListeners()).thenReturn(listenerList);
         String test = gen.generateDiagram(true);
         assertThat(test).isEqualToIgnoringWhitespace("""
             digraph {
@@ -124,16 +118,16 @@ public class DiagramGeneratorTest {
     @Test
     @DisplayName("Correct Complex NodesString is returned")
     public void test4(){
-        ActivationConfiguration test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
-        null, null, null, false,null, null);
-        ActivationConfiguration test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"));
-        UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"));
+        DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", "coin", "500", 0, null, ActivationKind.SINGLE,
+        null, null, null, false,null, null, "1=1", "");
+        DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
+        UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
-        List<ActivationConfiguration> activationList = List.of(test1,test2); 
+        List<DiagramConfiguration.NonUi> activationList = List.of(test1,test2);
         List<UIListenerConfiguration> listenerList = List.of(test3);
         
-        when(smc.getActivationConfigurations()).thenReturn(activationList);
-        when(smc.getUiListenerConfigurations()).thenReturn(listenerList);
+        when(smc.getActivations()).thenReturn(activationList);
+        when(smc.getListeners()).thenReturn(listenerList);
         String test = gen.generateComplexDiagram(true);
         assertThat(test).isEqualToIgnoringWhitespace("""
             digraph {
