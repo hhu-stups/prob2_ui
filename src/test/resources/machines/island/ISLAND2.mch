@@ -1,25 +1,25 @@
 MACHINE ISLAND2
 
 CONSTANTS
-    maxCars
+	maxCars
 PROPERTIES
-    maxCars = 5
+	maxCars = 5
 
 VARIABLES
-    cars,
-    bark
+	cars,
+	bark
 INVARIANT
-    cars : NAT & bark : BOOL
+	cars : NAT & bark : BOOL
 INITIALISATION
-    cars := 0 || bark := FALSE
+	cars := 0 || bark := FALSE
 
 OPERATIONS
 
-    openBark = PRE cars < maxCars THEN bark := TRUE END;
+	openBark = PRE cars < maxCars THEN bark := TRUE END;
 
-    on = PRE bark = TRUE THEN cars := cars + 1 || bark := FALSE END;
+	on = PRE bark = TRUE THEN cars := cars + 1 || bark := FALSE END;
 
-    off = PRE cars > 0 THEN cars := cars - 1 END
+	off = PRE cars > 0 THEN cars := cars - 1 END
 
 
 END

@@ -2,6 +2,7 @@ package de.prob2.ui.animation.tracereplay;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
@@ -9,13 +10,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.Target;
+import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
+import de.prob.analysis.testcasegeneration.testtrace.TestTrace;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
@@ -28,20 +35,23 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
-import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.simulation.SimulationItem;
 
+import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public final class TraceFileHandler {
 
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
@@ -54,16 +64,18 @@ public final class TraceFileHandler {
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
 	private final FileChooserManager fileChooserManager;
+	private final Provider<ReplayedTraceStatusAlert> replayedAlertProvider;
 	private final I18n i18n;
 
 	@Inject
 	public TraceFileHandler(TraceManager traceManager, VersionInfo versionInfo, CurrentProject currentProject,
-	                        StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n) {
+	                        StageManager stageManager, FileChooserManager fileChooserManager, Provider<ReplayedTraceStatusAlert> replayedAlertProvider, I18n i18n) {
 		this.traceManager = traceManager;
 		this.versionInfo = versionInfo;
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
+		this.replayedAlertProvider = replayedAlertProvider;
 		this.i18n = i18n;
 	}
 
@@ -149,7 +161,7 @@ public final class TraceFileHandler {
 	}
 
 	public void showLoadError(ReplayTrace trace, Throwable e) {
-		Alert alert = makeTraceLoadErrorAlert(trace.getAbsoluteLocation(), e);
+		Alert alert = makeTraceLoadErrorAlert(this.currentProject.get().resolveProjectPath(trace.getLocation()), e);
 		if (alert == null) {
 			// No alert should be shown for this exception type (e. g. interruption).
 			return;
@@ -158,10 +170,41 @@ public final class TraceFileHandler {
 		alert.getButtonTypes().setAll(ButtonType.YES, ButtonType.NO);
 		alert.showAndWait().ifPresent(buttonType -> {
 			if (buttonType.equals(ButtonType.YES)) {
-				Machine currentMachine = currentProject.getCurrentMachine();
-				currentMachine.getMachineProperties().getTraces().remove(trace);
+				currentProject.getCurrentMachine().removeValidationTask(trace);
 			}
 		});
+	}
+
+	private CompletableFuture<Optional<Trace>> showTraceReplayCompleteFailed(final ReplayTrace replayTrace) {
+		CompletableFuture<Optional<Trace>> future = new CompletableFuture<>();
+		Platform.runLater(() -> {
+			ReplayedTraceStatusAlert alert = replayedAlertProvider.get();
+			alert.initReplayTrace(replayTrace);
+			Optional<ButtonType> result = alert.showAndWait();
+			if (result.isPresent() && result.get().equals(alert.getAcceptButtonType())) {
+				future.complete(Optional.of(replayTrace.getTrace()));
+			} else {
+				future.complete(Optional.empty());
+			}
+		});
+		return future;
+	}
+
+	/**
+	 * Ask the user whether a replayed trace should be accepted or discarded.
+	 * The user is only prompted if the replay was not fully successful (i. e. there were errors).
+	 * A perfectly replayed trace is always accepted without asking the user.
+	 * 
+	 * @param replayTrace the trace task that was replayed
+	 * @return the trace to be used as the new current trace, or {@link Optional#empty()} if the current trace should be left unchanged (i. e. the user discarded the replayed trace)
+	 */
+	public CompletableFuture<Optional<Trace>> askKeepReplayedTrace(final ReplayTrace replayTrace) {
+		var traceResult = (ReplayTrace.Result)replayTrace.getResult();
+		if (!traceResult.getReplayed().getErrors().isEmpty()) {
+			return showTraceReplayCompleteFailed(replayTrace);
+		} else {
+			return CompletableFuture.completedFuture(Optional.of(traceResult.getTrace()));
+		}
 	}
 
 	public void showSaveError(Throwable e) {
@@ -169,27 +212,80 @@ public final class TraceFileHandler {
 		alert.showAndWait();
 	}
 
+	/**
+	 * Read and parse the trace file into a {@link TraceJsonFile} object.
+	 * The loaded trace can also be retrieved later using {@link ReplayTrace#getLoadedTrace()}.
+	 *
+	 * @param replayTrace replay trace object
+	 * @return the loaded trace file
+	 * @throws IOException if the trace file is missing, invalid, or otherwise couldn't be loaded
+	 */
+	public TraceJsonFile loadJson(ReplayTrace replayTrace) throws IOException {
+		return replayTrace.load(this.currentProject.get(), this.traceManager);
+	}
+
+	/**
+	 * Overwrite the trace file with the given data.
+	 * This method uses an intermediate temporary file
+	 * so that the existing trace file is not corrupted
+	 * if the new trace data couldn't be written successfully.
+	 *
+	 * @param replayTrace replay trace object
+	 * @param newTrace the new trace data to be saved
+	 * @throws IOException if the trace couldn't be written for any reason
+	 */
+	public void saveModifiedJson(ReplayTrace replayTrace, TraceJsonFile newTrace) throws IOException {
+		replayTrace.saveModified(this.currentProject.get(), this.traceManager, newTrace);
+	}
+
 	public ReplayTrace createReplayTraceForPath(final Path traceFilePath) {
-		final Path relativeLocation = currentProject.getLocation().relativize(traceFilePath);
-		return new ReplayTrace(null, relativeLocation, traceFilePath, traceManager);
+		final Path relativeLocation = this.currentProject.get().relativizeProjectPath(traceFilePath);
+		return new ReplayTrace(null, relativeLocation);
 	}
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
 		ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
-		Optional<ReplayTrace> existingItem = machine.getMachineProperties().getTraces().stream().filter(replayTrace::settingsEqual).findAny();
-		if (existingItem.isEmpty()) {
-			machine.getMachineProperties().getTraces().add(replayTrace);
-			return replayTrace;
-		} else {
-			ReplayTrace t = existingItem.get();
-			t.reset();
-			return t;
+		return this.addReplayTraceWithChecks(machine, replayTrace);
+	}
+
+	public ReplayTrace addReplayTraceWithChecks(Machine machine, ReplayTrace replayTrace) {
+		Path newPath = this.currentProject.get().resolveProjectPath(replayTrace.getLocation());
+		for (ReplayTrace existing : machine.getTraces()) {
+			Path existingPath = this.currentProject.get().resolveProjectPath(existing.getLocation());
+			boolean samePath = false;
+			try {
+				samePath = Files.isSameFile(newPath, existingPath);
+			} catch (IOException ignored) {
+			}
+
+			if (samePath) {
+				if (!Objects.equals(replayTrace.getId(), existing.getId())) {
+					if (replayTrace.getId() != null) {
+						if (existing.getId() != null) {
+							// both traces have the same path but a different id
+							throw new IllegalArgumentException("cannot add replay trace for same file with different id");
+						} else {
+							ReplayTrace withNewId = existing.withId(replayTrace.getId());
+							machine.replaceValidationTask(existing, withNewId);
+							existing = withNewId;
+						}
+					} else {
+						assert existing.getId() != null;
+						// this is fine
+					}
+				}
+
+				existing.reset();
+				return existing;
+			}
 		}
+		return machine.addValidationTaskIfNotExist(replayTrace);
 	}
 
 	public void save(SimulationItem item, Machine machine) {
 		DirectoryChooser fileChooser = new DirectoryChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.savePaths.title"));
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showDirectoryChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path == null) {
 			return;
@@ -201,7 +297,7 @@ public final class TraceFileHandler {
 			}
 
 			int numberGeneratedTraces = 1; //Starts counting with 1 in the file name
-			for (Trace trace : item.getTraces()) {
+			for (Trace trace : item.getResult().getTraces()) {
 				final Path traceFilePath = path.resolve("Trace_" + numberGeneratedTraces + ".prob2trace");
 				save(trace, traceFilePath, item.createdByForMetadata());
 				this.addTraceFile(machine, traceFilePath);
@@ -213,11 +309,12 @@ public final class TraceFileHandler {
 	}
 
 	public void save(TestCaseGenerationItem item, Machine machine) {
-		List<Trace> traces = item.getExamples();
+		TestCaseGeneratorResult result = ((TestCaseGenerationItem.Result)item.getResult()).getResult();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 
 		if (path == null) {
@@ -230,22 +327,23 @@ public final class TraceFileHandler {
 				return;
 			}
 
-			int numberGeneratedTraces = Math.min(traces.size(), NUMBER_MAXIMUM_GENERATED_TRACES);
+			int numberGeneratedTraces = Math.min(result.getTestTraces().size(), NUMBER_MAXIMUM_GENERATED_TRACES);
 			//Starts counting with 1 in the file name
 			for (int i = 0; i < numberGeneratedTraces; i++) {
 				final Path traceFilePath = path.resolve(path.toString().split("\\.")[0] + (i + 1) + ".prob2trace");
-				save(traces.get(i), traceFilePath, item.createdByForMetadata(i));
-				Target target = item.getResult().getTestTraces().get(i).getTarget();
-				String description = "Test Case Generation Trace \nOperation: " + target.getOperation() + "\nGuard: " + target.getGuardString();
+				TestTrace testTrace = result.getTestTraces().get(i);
+				Target target = testTrace.getTarget();
+				save(testTrace.getTrace(), traceFilePath, "Test Case Generation");
+				String description = "Test Case Generation Trace\n" + item.getConfigurationDescription() + "\nOperation: " + target.getOperation() + "\nGuard: " + target.getGuardString();
 				ReplayTrace trace = this.addTraceFile(machine, traceFilePath);
-				trace.saveModified(trace.load().changeDescription(description));
+				this.saveModifiedJson(trace, this.loadJson(trace).changeDescription(description));
 			}
 
 		} catch (IOException e) {
 			stageManager.makeExceptionAlert(e, "animation.testcase.save.error").showAndWait();
 			return;
 		}
-		if (traces.size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
+		if (result.getTestTraces().size() > NUMBER_MAXIMUM_GENERATED_TRACES) {
 			stageManager.makeAlert(Alert.AlertType.INFORMATION,
 				"animation.testcase.notAllTestCasesGenerated.header",
 				"animation.testcase.notAllTestCasesGenerated.content",
@@ -267,6 +365,7 @@ public final class TraceFileHandler {
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + TRACE_FILE_EXTENSION);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			save(trace, path, "traceReplay");
@@ -280,15 +379,18 @@ public final class TraceFileHandler {
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".csv");
 		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
+		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
-			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
-				csvWriter.header("Position", "Transition");
-
+			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+				.setHeader("Position", "Transition")
+				.build();
+			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				int i = 1;
 				for (Transition transition : trace.getTransitionList()) {
 					String name = OperationItem.forTransitionFast(trace.getStateSpace(), transition).toPrettyString(true);
-					csvWriter.record(i++, name);
+					csvPrinter.printRecord(i, name);
+					i++;
 				}
 			}
 		}
@@ -301,8 +403,8 @@ public final class TraceFileHandler {
 			return;
 		}
 
-		Path path = trace.getAbsoluteLocation();
-		if (path == null || !Files.isRegularFile(path)) {
+		Path path = this.currentProject.get().resolveProjectPath(trace.getLocation());
+		if (path == null || !Files.exists(path)) {
 			return;
 		}
 

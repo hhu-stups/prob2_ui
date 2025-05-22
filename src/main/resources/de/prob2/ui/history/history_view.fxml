@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.animation.tracereplay.TraceReplayMenuButton?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.history.HistoryView?>
 <?import de.prob2.ui.layout.BindableGlyph?>
@@ -12,45 +11,53 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Tooltip?>
-<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
+
 <fx:root type="HistoryView" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
-	<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
-		<padding>
-			<Insets left="5.0"/>
-		</padding>
-		<fx:include source="../sharedviews/navigation_buttons.fxml"/>
-		<Spacer/>
-		<MenuButton fx:id="saveTraceButton">
-			<graphic>
-				<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
-			</graphic>
-			<tooltip>
-				<Tooltip text="%common.buttons.saveTrace" />
-			</tooltip>
-			<items>
-				<MenuItem fx:id="saveTraceItem" text="%common.buttons.saveTrace" onAction="#saveTrace"/>
-				<MenuItem fx:id="saveTraceAsTableItem" text="%history.buttons.saveAsTable" onAction="#saveTraceAsTable"/>
-			</items>
-		</MenuButton>
+	<top>
+		<ToolBar styleClass="border">
+			<padding>
+				<Insets left="5.0" right="5.0"/>
+			</padding>
+			<fx:include source="../sharedviews/navigation_buttons.fxml"/>
+			<Spacer/>
+			<MenuButton fx:id="saveTraceButton">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
+								   bindableFontSize="${fontSize.fontSize + 2}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.buttons.saveTrace"/>
+				</tooltip>
+				<items>
+					<MenuItem fx:id="saveTraceItem" text="%common.buttons.saveTrace" onAction="#saveTrace"/>
+					<MenuItem fx:id="saveTraceAsTableItem" text="%history.buttons.saveAsTable"
+							  onAction="#saveTraceAsTable"/>
+				</items>
+			</MenuButton>
 
-		<HelpButton fx:id="helpButton" />
-	</HBox>
-	<TableView fx:id="historyTableView" prefHeight="200.0" VBox.vgrow="ALWAYS">
-		<columns>
-			<TableColumn fx:id="positionColumn" minWidth="${fontSize.fontSize * 6}"
-				maxWidth="${fontSize.fontSize * 6}" text="%history.tableView.position" />
-			<TableColumn fx:id="transitionColumn" text="%history.tableView.transition" sortable="false" prefWidth="${historyTableView.width - positionColumn.width}" />
-		</columns>
-		<sortOrder>
-			<fx:reference source="positionColumn" />
-		</sortOrder>
-		<placeholder>
-			<Label text="%common.noModelLoaded" />
-		</placeholder>
-	</TableView>
+			<HelpButton fx:id="helpButton"/>
+		</ToolBar>
+	</top>
+	<center>
+		<TableView fx:id="historyTableView" prefHeight="200.0" VBox.vgrow="ALWAYS">
+			<columns>
+				<TableColumn fx:id="positionColumn" minWidth="${fontSize.fontSize * 6}"
+							 maxWidth="${fontSize.fontSize * 6}" text="%history.tableView.position"/>
+				<TableColumn fx:id="transitionColumn" text="%history.tableView.transition" sortable="false"/>
+				<TableColumn fx:id="descriptionColumn" text="%history.tableView.description" sortable="false" visible="false"/>
+			</columns>
+			<sortOrder>
+				<fx:reference source="positionColumn"/>
+			</sortOrder>
+			<placeholder>
+				<Label text="%common.noModelLoaded"/>
+			</placeholder>
+		</TableView>
+	</center>
 </fx:root>

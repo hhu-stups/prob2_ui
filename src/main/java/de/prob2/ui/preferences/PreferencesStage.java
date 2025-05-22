@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
+import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -30,14 +31,7 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.ProjectManager;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.Region;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
@@ -56,7 +50,7 @@ public final class PreferencesStage extends Stage {
 		Locale.ENGLISH,
 		Locale.FRENCH,
 		Locale.GERMAN,
-		new Locale("ru"),
+		Locale.of("ru"),
 	};
 
 	private static final Map<ErrorItem.Type, String> ERROR_LEVEL_DESCRIPTION_KEYS;
@@ -71,6 +65,7 @@ public final class PreferencesStage extends Stage {
 	@FXML private ChoiceBox<ErrorItem.Type> errorLevelChoiceBox;
 	@FXML private Spinner<Integer> recentProjectsCountSpinner;
 	@FXML private TextField defaultLocationField;
+	@FXML private CheckBox cbAutoReloadMachine;
 	@FXML private ChoiceBox<Locale> localeOverrideBox;
 	@FXML private PreferencesView globalPrefsView;
 	@FXML private Button undoButton;
@@ -85,6 +80,7 @@ public final class PreferencesStage extends Stage {
 	private final ErrorDisplayFilter errorDisplayFilter;
 	private final ProjectManager projectManager;
 	private final CurrentProject currentProject;
+	private final BEditorView bEditorView;
 	private final UIState uiState;
 	private final GlobalPreferences globalPreferences;
 	private final PreferencesChangeState globalPrefsChangeState;
@@ -99,6 +95,7 @@ public final class PreferencesStage extends Stage {
 		final ErrorDisplayFilter errorDisplayFilter,
 		final ProjectManager projectManager,
 		final CurrentProject currentProject,
+		final BEditorView bEditorView,
 		final UIState uiState,
 		final GlobalPreferences globalPreferences,
 		final Config config,
@@ -110,6 +107,7 @@ public final class PreferencesStage extends Stage {
 		this.errorDisplayFilter = errorDisplayFilter;
 		this.projectManager = projectManager;
 		this.currentProject = currentProject;
+		this.bEditorView = bEditorView;
 		this.uiState = uiState;
 		this.globalPreferences = globalPreferences;
 		this.machineLoader = machineLoader;
@@ -144,6 +142,8 @@ public final class PreferencesStage extends Stage {
 
 		defaultLocationField.setText(this.currentProject.getDefaultLocation().toString());
 		defaultLocationField.textProperty().addListener((observable, from, to) -> this.currentProject.setDefaultLocation(Paths.get(to)));
+
+		this.cbAutoReloadMachine.selectedProperty().bindBidirectional(this.bEditorView.autoReloadMachineProperty());
 
 		localeOverrideBox.valueProperty().bindBidirectional(uiState.localeOverrideProperty());
 		localeOverrideBox.setConverter(new StringConverter<>() {
@@ -222,7 +222,7 @@ public final class PreferencesStage extends Stage {
 			this.machineLoader.getActiveStateSpace().changePreferences(changed);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content");
+			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToApplyChanges.content");
 			alert.initOwner(this);
 			alert.show();
 		}

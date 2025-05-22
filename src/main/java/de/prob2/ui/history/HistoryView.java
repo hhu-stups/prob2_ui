@@ -15,6 +15,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.operations.OperationDetailsStage;
+import de.prob2.ui.operations.OperationItem;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -24,21 +25,27 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableIntegerValue;
+import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
+import javafx.scene.AccessibleAttribute;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollBar;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
+import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
-import javafx.scene.layout.VBox;
+import javafx.scene.input.ScrollEvent;
+import javafx.scene.layout.BorderPane;
 
 @FXMLInjected
 @Singleton
-public final class HistoryView extends VBox {
+public final class HistoryView extends BorderPane {
 	private final class TransitionRow extends TableRow<HistoryItem> {
 		private TransitionRow() {
 			super();
@@ -47,6 +54,7 @@ public final class HistoryView extends VBox {
 				final Trace trace = currentTrace.get();
 				if (!this.isEmpty() && trace != null && MouseButton.PRIMARY.equals(event.getButton())) {
 					currentTrace.set(trace.gotoPosition(this.getItem().getIndex()));
+					lastSelectedIndex = this.getItem().getIndex() + 1;
 				}
 			});
 		}
@@ -55,7 +63,11 @@ public final class HistoryView extends VBox {
 		protected void updateItem(HistoryItem item, boolean empty) {
 			super.updateItem(item, empty);
 			this.getStyleClass().removeAll(Arrays.asList("past", "present", "future"));
-			if (!empty) {
+			if (empty || item == null) {
+				this.setCursor(Cursor.DEFAULT);
+				this.setContextMenu(null);
+				this.setTooltip(null);
+			} else {
 				this.setCursor(Cursor.HAND);
 				final Trace trace = currentTrace.get();
 				if (trace != null) {
@@ -68,20 +80,19 @@ public final class HistoryView extends VBox {
 						this.getStyleClass().add("present");
 					}
 				}
-				
+
+				OperationItem opItem = item.getOperation();
 				final MenuItem showDetailsItem = new MenuItem(i18n.translate("operations.operationsView.contextMenu.items.showDetails"));
 				showDetailsItem.setOnAction(event -> {
 					final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
-					stage.setItem(item.getOperation());
+					stage.setItem(opItem);
 					stage.show();
 				});
 				// The root state doesn't have a corresponding operation
 				showDetailsItem.setDisable(item.getOperation() == null);
-				
+
 				this.setContextMenu(new ContextMenu(showDetailsItem));
-			} else {
-				this.setCursor(Cursor.DEFAULT);
-				this.setContextMenu(null);
+				this.setTooltip(opItem != null && !opItem.getDescription().isEmpty() ? new Tooltip(opItem.getDescription()) : null);
 			}
 		}
 	}
@@ -92,6 +103,8 @@ public final class HistoryView extends VBox {
 	private TableColumn<HistoryItem, Integer> positionColumn;
 	@FXML
 	private TableColumn<HistoryItem, String> transitionColumn;
+	@FXML
+	private TableColumn<HistoryItem, String> descriptionColumn;
 	@FXML
 	private Button openTraceSelectionButton;
 	@FXML
@@ -104,6 +117,7 @@ public final class HistoryView extends VBox {
 	private final Injector injector;
 	private final CurrentProject currentProject;
 	private final TraceFileHandler traceFileHandler;
+	private int lastSelectedIndex = -1;
 
 	@Inject
 	private HistoryView(
@@ -128,14 +142,59 @@ public final class HistoryView extends VBox {
 
 		historyTableView.setRowFactory(item -> new TransitionRow());
 		historyTableView.getSelectionModel().setCellSelectionEnabled(true);
+		historyTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_LAST_COLUMN);
 		positionColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue().getIndex() + 1));
 		transitionColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().toPrettyString()));
+		descriptionColumn.setCellValueFactory(cellData ->
+				new SimpleStringProperty(cellData.getValue().getOperation() != null
+						? cellData.getValue().getOperation().getDescription()
+						: ""));
+		descriptionColumn.prefWidthProperty().bind(transitionColumn.prefWidthProperty());
+		historyTableView.getItems().addListener((ListChangeListener<HistoryItem>) change -> {
+			boolean allEmpty = historyTableView.getItems().stream()
+					.map(item -> descriptionColumn.getCellData(item))
+					.allMatch(value -> value == null || value.isEmpty());
+			descriptionColumn.setVisible(!allEmpty);
+		});
+
+		this.setOnKeyPressed(event -> {
+			final Trace trace = currentTrace.get();
+			final HistoryItem selected = historyTableView.getSelectionModel().getSelectedItem();
+			if (event.getCode().equals(KeyCode.ENTER) && selected != null && trace != null) {
+				currentTrace.set(trace.gotoPosition(selected.getIndex()));
+				lastSelectedIndex = selected.getIndex() + 1;
+			}
+		});
+
+		// disable horizontal scrollbar
+		// needs a hack because of a missing feature: https://bugs.openjdk.org/browse/JDK-8090721
+		historyTableView.getItems().addListener((ListChangeListener<? super HistoryItem>) c -> {
+			if (historyTableView.queryAccessibleAttribute(AccessibleAttribute.HORIZONTAL_SCROLLBAR) instanceof ScrollBar hsb) {
+				hsb.setPrefHeight(0);
+				hsb.setMaxHeight(0);
+				hsb.setMouseTransparent(true);
+				hsb.setVisible(false);
+			}
+		});
+		historyTableView.addEventFilter(ScrollEvent.ANY, event -> {
+			if (event.getDeltaX() != 0) {
+				event.consume();
+			}
+		});
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
-			historyTableView.getItems().clear();
 			if (to != null) {
-				historyTableView.getItems().addAll(HistoryItem.itemsForTrace(to));
+				var newItems = HistoryItem.itemsForTrace(to);
+				var current = newItems.get(to.getCurrent().getIndex() + 1);
+				var currentIsLast = to.getCurrent().getIndex() + 1 == newItems.size() - 1;
+				historyTableView.getItems().setAll(newItems);
 				historyTableView.sort();
+				historyTableView.getSelectionModel().focus(lastSelectedIndex);
+				if (currentIsLast) {
+					historyTableView.scrollTo(current);
+				}
+			} else {
+				historyTableView.getItems().clear();
 			}
 		};
 		traceChangeListener.changed(currentTrace, null, currentTrace.get());
@@ -152,8 +211,7 @@ public final class HistoryView extends VBox {
 	}
 
 	public ObservableIntegerValue getObservableHistorySize() {
-		return Bindings.createIntegerBinding(() -> Math.max(this.historyTableView.itemsProperty().get().size() - 1, 0),
-				historyTableView.itemsProperty().get());
+		return Bindings.createIntegerBinding(() -> Math.max(this.historyTableView.getItems().size() - 1, 0), historyTableView.getItems());
 	}
 
 	@FXML

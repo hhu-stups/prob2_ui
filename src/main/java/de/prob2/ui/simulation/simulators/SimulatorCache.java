@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.simulators;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -12,14 +13,14 @@ import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
-import de.prob2.ui.simulation.SimulationHelperFunctions;
+import de.prob2.ui.simulation.EvaluationMode;
 
 public class SimulatorCache {
 	private final Map<String, IEvalElement> formulasCache = new HashMap<>();
 
 	private final Map<String, Map<String, Map<String, List<Transition>>>> transitionCache = new HashMap<>();
 
-	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, SimulationHelperFunctions.EvaluationMode mode) {
+	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, EvaluationMode mode) {
 		// Replace SimB variables (starting with $ first) before caching
 		if(variables != null && !variables.isEmpty() && expression.contains("$")) {
 			for(Map.Entry<String, String> entry : variables.entrySet()) {
@@ -41,6 +42,7 @@ public class SimulatorCache {
 	}
 
 	public List<Transition> readTransitionsWithCaching(State bState, Map<String, String> variables, String opName, String predicate, int maxTransitions) {
+
 		if(transitionCache.keySet().size() > 5000) {
 			transitionCache.clear();
 		}
@@ -57,6 +59,9 @@ public class SimulatorCache {
 				transitionCache.put(stateID, new HashMap<>());
 			}
 			if(!transitionCache.get(stateID).containsKey(opName)) {
+				if("skip".equals(opName)) {
+					return new ArrayList<>();
+				}
 				transitionCache.get(stateID).put(opName, new HashMap<>());
 			}
 			transitionCache.get(stateID).get(opName).put(predicate, bState.findTransitions(opName, Collections.singletonList(predicate), maxTransitions));

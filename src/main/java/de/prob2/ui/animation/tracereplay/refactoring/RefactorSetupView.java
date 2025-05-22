@@ -355,8 +355,8 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 	}
 
 	public void showAndPerformAction() {
-		RefactorSetup result = this.showAndWait().orElseThrow();
-		if (result.whatToDo == RefactorSetup.WhatToDo.NOTHING) {
+		RefactorSetup result = this.showAndWait().orElse(null);
+		if (result == null || result.whatToDo == RefactorSetup.WhatToDo.NOTHING) {
 			return;
 		}
 
@@ -376,16 +376,17 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 				if(abstractTraceRefinement != null){
 					try {
 						List<PersistentTransition> resultingTrace = abstractTraceRefinement.refineTraceExtendedFeedback().getResultTracePersistentTransition();
-						Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Refinement Successful", ButtonType.OK, new ButtonType("Show"));
+						ButtonType showButtonType = new ButtonType("Show");
+						Alert alert = new Alert(Alert.AlertType.CONFIRMATION, "Refinement Successful", ButtonType.OK, showButtonType);
 						Optional<ButtonType> buttonPressed = alert.showAndWait();
-						if(buttonPressed.isPresent() && buttonPressed.get().getButtonData().equals(ButtonBar.ButtonData.OTHER)){
+						if(buttonPressed.orElse(null) == showButtonType){
 							caterForGraphic(fileObject, resultingTrace, skipTransitions(result, abstractTraceRefinement));
 						}
 						saveRefinedTrace(resultingTrace, fileObject, result, result.getFileBeta().getFileName().toString().replaceFirst("[.][^.]+$", ""));
 					} catch (IOException | BCompoundException e) {
 						e.printStackTrace();
 					} catch (TraceConstructionError e) {
-						createFeedbackMessage("Trace could be refined while enforcing all predicates");
+						createFeedbackMessage("Trace could not be refined while enforcing all predicates");
 					}
 				}
 				break;
@@ -399,12 +400,14 @@ public class RefactorSetupView extends Dialog<RefactorSetup> {
 					List<Transition> resultTrace = AdvancedTraceConstructor.constructTraceWithOptions(fileObject.getTransitionList(), factory.extract(result.fileAlpha.toString()).load(), replayOptions);
 					createFeedbackMessage("Trace could be fully replayed while enforcing all predicates");
 					saveAdaptedTrace(PersistentTransition.createFromList(resultTrace), fileObject, result);
-				} catch ( IOException e) {
+				} catch (IOException e) {
 					e.printStackTrace();
-				} catch (TraceConstructionError e){
-					createFeedbackMessage( "Trace could not fully replayed with all all predicates enforced");
+				} catch (TraceConstructionError e) {
+					createFeedbackMessage("Trace could not be fully replayed while enforcing all predicates");
 				}
 				break;
+			default:
+				throw new AssertionError();
 		}
 	}
 }

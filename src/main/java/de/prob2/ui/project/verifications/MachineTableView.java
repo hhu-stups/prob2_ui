@@ -21,7 +21,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
-public class MachineTableView extends TableView<Machine> {
+public final class MachineTableView extends TableView<Machine> {
 	private final I18n i18n;
 
 	private static final class StatusIconCell extends TableCell<Machine, MachineCheckingStatus> {
@@ -51,7 +51,7 @@ public class MachineTableView extends TableView<Machine> {
 				graphic.setVisible(true);
 				final String styleClass;
 				final FontAwesome.Glyph icon;
-				final MachineCheckingStatus.CheckingStatus status = item.getStatus();
+				final MachineCheckingStatus.Status status = item.getStatus();
 				icon = switch (status) {
 					case UNKNOWN -> {
 						styleClass = "unknown";
@@ -73,7 +73,7 @@ public class MachineTableView extends TableView<Machine> {
 				};
 				graphic.getStyleClass().add(styleClass);
 				graphic.setIcon(icon);
-				this.setText(status == MachineCheckingStatus.CheckingStatus.NONE ? "" : i18n.format("({0,number,integer}/{1,number,integer})", item.getNumberSuccess(), item.getNumberTotal()));
+				this.setText(status == MachineCheckingStatus.Status.NONE ? "" : i18n.format("({0,number,integer}/{1,number,integer})", item.getNumberSuccess(), item.getNumberTotal()));
 			}
 		}
 	}
@@ -101,13 +101,13 @@ public class MachineTableView extends TableView<Machine> {
 	@FXML
 	public void initialize() {
 		machineTraceReplayColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineTraceReplayColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().traceReplayStatusProperty());
+		machineTraceReplayColumn.setCellValueFactory(features -> features.getValue().traceStatusProperty());
 		machineLTLColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineLTLColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().temporalStatusProperty());
+		machineLTLColumn.setCellValueFactory(features -> features.getValue().temporalStatusProperty());
 		machineSymbolicColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineSymbolicColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().symbolicCheckingStatusProperty());
+		machineSymbolicColumn.setCellValueFactory(features -> features.getValue().symbolicCheckingStatusProperty());
 		machineModelcheckColumn.setCellFactory(col -> new StatusIconCell(i18n));
-		machineModelcheckColumn.setCellValueFactory(features -> features.getValue().getMachineProperties().modelcheckingStatusProperty());
+		machineModelcheckColumn.setCellValueFactory(features -> features.getValue().modelCheckingStatusProperty());
 		machineNameColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		this.itemsProperty().bind(currentProject.machinesProperty());
 	}

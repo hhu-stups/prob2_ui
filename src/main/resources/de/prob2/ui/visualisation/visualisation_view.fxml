@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.image.Image?>
@@ -8,6 +12,9 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <StackPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.visualisation.VisualisationController">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
 	<VBox fx:id="probLogoView" spacing="10" alignment="CENTER">
 		<ImageView preserveRatio="true" fitWidth="250.0">
 			<Image url="@/de/prob2/ui/ProB_Logo.png"/>
@@ -28,5 +35,14 @@
 			</VBox>
 		</FlowPane>
 	</ScrollPane>
+	<Button fx:id="saveHtmlTraceButton" onAction="#saveTraceAsHtml" contentDisplay="RIGHT" StackPane.alignment="TOP_RIGHT">
+		<padding>
+			<Insets top="15" right="15"/>
+		</padding>
+		<graphic>
+			<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
+						   bindableFontSize="${fontSize.fontSize + 4}"/>
+		</graphic>
+	</Button>
 </StackPane>
 

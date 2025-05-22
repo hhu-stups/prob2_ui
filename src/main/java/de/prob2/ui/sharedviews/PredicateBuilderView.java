@@ -9,10 +9,13 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 
+import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.formula.PredicateBuilder;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -54,14 +57,16 @@ public final class PredicateBuilderView extends VBox {
 	@FXML private TextField predicateField;
 
 	private final I18n i18n;
+	private final CurrentTrace currentTrace;
 	private final ObjectProperty<Node> placeholder;
 	private final List<PredicateBuilderTableItem> items;
-	
+
 	@Inject
-	private PredicateBuilderView(final StageManager stageManager, final I18n i18n) {
+	private PredicateBuilderView(StageManager stageManager, I18n i18n, CurrentTrace currentTrace) {
 		super();
 
 		this.i18n = i18n;
+		this.currentTrace = currentTrace;
 		this.placeholder = new SimpleObjectProperty<>(this, "placeholder", null);
 		this.items = new ArrayList<>();
 		
@@ -136,5 +141,9 @@ public final class PredicateBuilderView extends VBox {
 			builder.addList(Collections.singletonList(this.predicateField.getText()));
 		}
 		return builder.toString();
+	}
+
+	public IEvalElement getParsedPredicate() {
+		return this.currentTrace.getModel().parseFormulaAsClassicalB(this.getPredicate(), FormulaExpand.EXPAND);
 	}
 }

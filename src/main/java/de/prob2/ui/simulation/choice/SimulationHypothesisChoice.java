@@ -110,4 +110,24 @@ public class SimulationHypothesisChoice extends GridPane {
 		return information;
 	}
 
+	public void setInformation(Map<String, Object> object) {
+		if(object.containsKey("HYPOTHESIS_CHECKING_TYPE")) {
+			hypothesisCheckingChoice.getSelectionModel().select(new SimulationHypothesisChoiceItem(SimulationHypothesisChecker.HypothesisCheckingType.valueOf(object.get("HYPOTHESIS_CHECKING_TYPE").toString())));
+		}
+
+		if(object.containsKey("PROBABILITY")) {
+			tfProbability.setText(object.get("PROBABILITY").toString());
+		}
+
+		if(object.containsKey("SIGNIFICANCE")) {
+			tfSignificance.setText(object.get("SIGNIFICANCE").toString());
+		}
+	}
+
+	public void reset() {
+		hypothesisCheckingChoice.getSelectionModel().clearSelection();
+		tfProbability.clear();
+		tfSignificance.clear();
+	}
+
 }

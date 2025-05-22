@@ -19,7 +19,7 @@ import javafx.geometry.BoundingBox;
 @SuppressWarnings("PublicField")
 public final class ConfigData extends BasicConfigData implements HasMetadata {
 	public static final String FILE_TYPE = "Config";
-	public static final int CURRENT_FORMAT_VERSION = 3;
+	public static final int CURRENT_FORMAT_VERSION = 5;
 	
 	public static String configFileNameForVersion(final int formatVersion) {
 		if (formatVersion >= 2) {
@@ -44,12 +44,14 @@ public final class ConfigData extends BasicConfigData implements HasMetadata {
 	public String currentVisualisationTab;
 	public List<String> expandedTitledPanes;
 	public String defaultProjectLocation;
+	public boolean autoReloadMachine;
 	public double[] horizontalDividerPositions;
 	public double[] verticalDividerPositions;
 	public List<Double> statesViewColumnsWidth;
 	public OperationsView.SortMode operationsSortMode;
 	public boolean operationsShowDisabled;
 	public boolean operationsShowUnambiguous;
+	public boolean operationsShowDescriptions;
 	public Map<String, String> globalPreferences;
 	public Path pluginDirectory;
 	public Map<FileChooserManager.Kind, Path> fileChooserInitialDirectories;

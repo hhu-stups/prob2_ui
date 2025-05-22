@@ -22,8 +22,6 @@ public class Requirement {
 
 	private final String introducedAt; // machine where the requirement is first introduced
 
-	private final RequirementType type;
-
 	private final String text;
 
 	private final Map<String, ValidationObligation> validationObligationsByMachine;
@@ -37,26 +35,23 @@ public class Requirement {
 	@JsonCreator
 	public Requirement(@JsonProperty("name") String name,
 			@JsonProperty("introducedAt") String introducedAt,
-			@JsonProperty("type") RequirementType type,
 			@JsonProperty("text") String text,
 			@JsonProperty("validationObligations") Set<ValidationObligation> validationObligations
 	) {
-		this(name, introducedAt, type, text, validationObligations, Collections.emptyList(), null);
+		this(name, introducedAt, text, validationObligations, Collections.emptyList(), null);
 	}
 
 	public Requirement(
 		String name,
 		String introducedAt,
-		RequirementType type,
 		String text,
 		Set<ValidationObligation> validationObligations,
 		List<Requirement> previousVersions,
 		Requirement parent
 	) {
-		this.name = name;
-		this.introducedAt = introducedAt;
-		this.type = type;
-		this.text = text;
+		this.name = Objects.requireNonNull(name, "name");
+		this.introducedAt = Objects.requireNonNull(introducedAt, "introducedAt");
+		this.text = Objects.requireNonNull(text, "text");
 		this.validationObligationsByMachine = groupVosByMachine(validationObligations);
 		// The collection returned by TreeMap.values() doesn't support equals/hashCode properly,
 		// so we have to copy it into a Set,
@@ -64,7 +59,7 @@ public class Requirement {
 		// Use LinkedHashSet to maintain the order from the map.
 		this.validationObligations = new LinkedHashSet<>(this.validationObligationsByMachine.values());
 		assert this.validationObligations.size() == this.validationObligationsByMachine.size();
-		this.previousVersions = previousVersions;
+		this.previousVersions = Objects.requireNonNull(previousVersions, "previousVersions");
 		this.parent = parent;
 	}
 
@@ -93,10 +88,6 @@ public class Requirement {
 		return introducedAt;
 	}
 
-	public RequirementType getType() {
-		return type;
-	}
-
 	public String getText() {
 		return text;
 	}
@@ -123,17 +114,17 @@ public class Requirement {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		Requirement that = (Requirement) o;
-		return Objects.equals(name, that.name) && Objects.equals(introducedAt, that.introducedAt) && type == that.type && Objects.equals(text, that.text) && getValidationObligations().equals(that.getValidationObligations());
+		return Objects.equals(name, that.name) && Objects.equals(introducedAt, that.introducedAt) && Objects.equals(text, that.text) && getValidationObligations().equals(that.getValidationObligations());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(name, introducedAt, type, text, getValidationObligations());
+		return Objects.hash(name, introducedAt, text, getValidationObligations());
 	}
 
 	@Override
 	public String toString() {
-		return String.format(Locale.ROOT, "Requirement{name = %s, introducedAt = %s, type = %s, text = %s, validationObligations = %s}", name, introducedAt, type, text, getValidationObligations());
+		return String.format(Locale.ROOT, "Requirement{name = %s, introducedAt = %s, text = %s, validationObligations = %s}", name, introducedAt, text, getValidationObligations());
 	}
 
 	@JsonIgnore //TODO Fix this when making history and refinement saving persistent

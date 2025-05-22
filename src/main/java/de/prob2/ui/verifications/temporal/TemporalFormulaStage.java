@@ -1,35 +1,44 @@
 package de.prob2.ui.verifications.temporal;
 
+import java.util.Collections;
+
 import com.google.inject.Inject;
 
+import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.exception.ProBError;
+import de.prob.voparser.VOParseException;
+import de.prob.voparser.VOParser;
+import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.temporal.ctl.CTLFormulaChecker;
-import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaChecker;
+import de.prob2.ui.verifications.temporal.ctl.CTLFormulaItem;
+import de.prob2.ui.verifications.temporal.ctl.CTLFormulaParser;
+import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
+import de.prob2.ui.verifications.temporal.ltl.formula.LTLFormulaParser;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.SimpleIntegerProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.HBox;
+import javafx.util.StringConverter;
 import javafx.util.converter.IntegerStringConverter;
 
-public class TemporalFormulaStage extends TemporalItemStage {
-
+public final class TemporalFormulaStage extends TemporalItemStage {
 	@FXML
-	private ChoiceBox<TemporalItemStage.TemporalFormulaChoiceItem> cbType;
+	private ChoiceBox<ValidationTaskType<?>> cbType;
 
 	@FXML
 	private TextField idTextField;
@@ -50,21 +59,37 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	private Spinner<Integer> stateLimit;
 
 	@FXML
+	private RadioButton startStateAllInitialStates;
+
+	@FXML
+	private RadioButton startStateCurrentState;
+
+	@FXML
+	private RadioButton startStateFromExpression;
+
+	@FXML
+	private TextField startStateExpressionTextField;
+
+	@FXML
 	private Button btShowBuiltins;
 
+	private final CurrentProject currentProject;
+
 	private final CurrentTrace currentTrace;
-	private final IntegerProperty stateLimitProperty;
+
+	private final I18n i18n;
 
 	private TemporalFormulaItem result;
 
 	@Inject
 	public TemporalFormulaStage(
-		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final FontSize fontSize,
+		final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace, final I18n i18n, final FontSize fontSize,
 		final LTLBuiltinsStage builtinsStage
 	) {
-		super(currentProject, fontSize, builtinsStage);
+		super(fontSize, builtinsStage);
+		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.stateLimitProperty = new SimpleIntegerProperty();
+		this.i18n = i18n;
 		this.result = null;
 		stageManager.loadFXML(this, "temporal_formula_stage.fxml");
 	}
@@ -73,47 +98,90 @@ public class TemporalFormulaStage extends TemporalItemStage {
 	public void initialize() {
 		super.initialize();
 
+		cbType.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(ValidationTaskType<?> object) {
+				if (object == BuiltinValidationTaskTypes.LTL) {
+					return i18n.translate("verifications.temporal.type.ltl");
+				} else if (object == BuiltinValidationTaskTypes.CTL) {
+					return i18n.translate("verifications.temporal.type.ctl");
+				} else {
+					throw new AssertionError("Unhandled temporal formula type: " + object);
+				}
+			}
+
+			@Override
+			public ValidationTaskType<? extends TemporalFormulaItem> fromString(String string) {
+				throw new UnsupportedOperationException("Conversion from String to ValidationTaskType not supported");
+			}
+		});
+
 		this.stateLimit.visibleProperty().bind(this.chooseStateLimit.selectedProperty());
 		this.stateLimit.getEditor().setTextFormatter(new TextFormatter<>(new IntegerStringConverter()));
 		this.stateLimit.setValueFactory(new ImprovedIntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 500_000, 1_000));
 
 		// bind the UI elements
-		this.stateLimit.valueProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && newValue >= 1) {
-				this.stateLimitProperty.set(newValue);
-			}
-		});
-		this.chooseStateLimit.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue != null && !newValue) {
-				this.stateLimitProperty.set(-1);
-			}
-		});
-		// reverse binding, used by "setData(TemporalFormulaItem)"
-		this.stateLimitProperty.addListener((observable, oldValue, newValue) -> {
-			if (newValue instanceof Integer) {
-				int n = newValue.intValue();
-				if (n >= 1) {
-					this.stateLimit.getValueFactory().setValue(n);
-					this.chooseStateLimit.setSelected(true);
-				} else {
-					this.chooseStateLimit.setSelected(false);
-				}
-			}
-		});
-
-		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get().getType() == TemporalFormulaItem.TemporalType.LTL, cbType.getSelectionModel().selectedItemProperty());
+		BooleanBinding binding = Bindings.createBooleanBinding(() -> cbType.getSelectionModel().selectedItemProperty().get() != null && cbType.getSelectionModel().selectedItemProperty().get() == BuiltinValidationTaskTypes.LTL, cbType.getSelectionModel().selectedItemProperty());
 		btShowBuiltins.visibleProperty().bind(binding);
 		cbType.getSelectionModel().select(cbType.getItems().get(0));
 		cbExpectedResult.getSelectionModel().select(true);
 	}
 
 	public void setData(final TemporalFormulaItem item) {
-		this.cbType.setValue(new TemporalFormulaChoiceItem(item.getType()));
+		this.cbType.setValue(item.getTaskType());
 		this.idTextField.setText(item.getId() == null ? "" : item.getId());
 		this.taCode.replaceText(item.getCode());
 		this.taDescription.setText(item.getDescription());
 		this.cbExpectedResult.setValue(item.getExpectedResult());
-		this.stateLimitProperty.set(item.getStateLimit());
+		if (item.getStateLimit() >= 1) {
+			this.stateLimit.getValueFactory().setValue(item.getStateLimit());
+			this.chooseStateLimit.setSelected(true);
+		} else {
+			this.chooseStateLimit.setSelected(false);
+		}
+
+		switch (item.getStartState()) {
+			case ALL_INITIAL_STATES:
+				this.startStateAllInitialStates.setSelected(true);
+				this.startStateExpressionTextField.setText("");
+				break;
+
+			case CURRENT_STATE:
+				this.startStateCurrentState.setSelected(true);
+				this.startStateExpressionTextField.setText("");
+				break;
+
+			case FROM_EXPRESSION:
+				this.startStateFromExpression.setSelected(true);
+				this.startStateExpressionTextField.setText(item.getStartStateExpression());
+				break;
+
+			default:
+				throw new AssertionError("Unhandled start state type: " + item.getStartState());
+		}
+	}
+
+	private int getStateLimit() {
+		if (this.chooseStateLimit.isSelected()) {
+			Integer stateLimit = this.stateLimit.getValue();
+			if (stateLimit != null && stateLimit >= 1) {
+				return stateLimit;
+			}
+		}
+
+		return -1;
+	}
+
+	private TemporalFormulaItem.StartState getStartState() {
+		if (this.startStateAllInitialStates.isSelected()) {
+			return TemporalFormulaItem.StartState.ALL_INITIAL_STATES;
+		} else if (this.startStateCurrentState.isSelected()) {
+			return TemporalFormulaItem.StartState.CURRENT_STATE;
+		} else if (this.startStateFromExpression.isSelected()) {
+			return TemporalFormulaItem.StartState.FROM_EXPRESSION;
+		} else {
+			throw new AssertionError("No start state selected?!");
+		}
 	}
 
 	@FXML
@@ -121,24 +189,43 @@ public class TemporalFormulaStage extends TemporalItemStage {
 		result = null;
 		final String id = idTextField.getText().trim().isEmpty() ? null : idTextField.getText();
 		String code = taCode.getText();
-		if (cbType.getValue().getType() == TemporalFormulaItem.TemporalType.LTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.LTL, id, code, taDescription.getText(), this.stateLimitProperty.get(), cbExpectedResult.getValue());
+		TemporalFormulaItem.StartState startState = this.getStartState();
+
+		String startStateExpression;
+		if (startState == TemporalFormulaItem.StartState.FROM_EXPRESSION) {
+			startStateExpression = startStateExpressionTextField.getText();
 			try {
-				LTLFormulaChecker.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
+				VOParser.parse(startStateExpression);
+			} catch (VOParseException exc) {
+				ErrorItem errorItem = new ErrorItem(exc.getMessage(), ErrorItem.Type.ERROR, Collections.emptyList());
+				this.showErrors(Collections.singletonList(errorItem));
+				return;
+			}
+		} else {
+			startStateExpression = null;
+		}
+
+		ValidationTaskType<?> type = cbType.getValue();
+		if (type == BuiltinValidationTaskTypes.LTL) {
+			LTLFormulaItem item = new LTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), startState, startStateExpression, cbExpectedResult.getValue());
+			try {
+				LTLFormulaParser.parseFormula(item.getCode(), currentProject.getCurrentMachine(), currentTrace.getModel());
 			} catch (ProBError e) {
 				this.showErrors(e.getErrors());
 				return;
 			}
 			result = item;
-		} else if (cbType.getValue().getType() == TemporalFormulaItem.TemporalType.CTL) {
-			final TemporalFormulaItem item = new TemporalFormulaItem(TemporalFormulaItem.TemporalType.CTL, id, code, taDescription.getText(), this.stateLimitProperty.get(), cbExpectedResult.getValue());
+		} else if (type == BuiltinValidationTaskTypes.CTL) {
+			CTLFormulaItem item = new CTLFormulaItem(id, code, taDescription.getText(), this.getStateLimit(), startState, startStateExpression, cbExpectedResult.getValue());
 			try {
-				CTLFormulaChecker.parseFormula(item.getCode(), currentTrace.getModel());
+				CTLFormulaParser.parseFormula(item.getCode(), currentTrace.getModel());
 			} catch (ProBError e) {
 				this.showErrors(e.getErrors());
 				return;
 			}
 			result = item;
+		} else {
+			throw new AssertionError();
 		}
 
 		this.close();

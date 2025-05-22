@@ -2,7 +2,6 @@ package de.prob2.ui.vomanager;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -10,25 +9,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.base.MoreObjects;
 
-import de.prob.check.ModelCheckingOptions;
-import de.prob.voparser.VOException;
-import de.prob.voparser.VOParser;
-import de.prob.voparser.VTType;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
-import de.prob2.ui.dynamic.DynamicCommandFormulaItem;
+import de.prob.voparser.VOParseException;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.simulation.choice.SimulationType;
-import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
-import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
-import de.prob2.ui.verifications.po.ProofObligationItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.ast.IValidationExpression;
 import de.prob2.ui.vomanager.ast.ValidationTaskExpression;
 
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.ReadOnlyObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -40,13 +30,13 @@ public final class ValidationObligation {
 	private final String expression;
 
 	@JsonIgnore
-	private final ValidationObligation parent ;
+	private final ValidationObligation parent;
 
 	@JsonIgnore
 	private IValidationExpression parsedExpression;
 
 	@JsonIgnore
-	private final ObjectProperty<Checked> checked = new SimpleObjectProperty<>(this, "checked", Checked.NOT_CHECKED);
+	private final ObjectProperty<CheckingStatus> status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 
 	@JsonIgnore
 	private final ObservableList<IValidationTask> tasks = FXCollections.observableArrayList();
@@ -60,112 +50,68 @@ public final class ValidationObligation {
 	}
 
 
-
-
-
 	public ValidationObligation(String machine, String expression, ValidationObligation parent) {
 		this.machine = machine;
 		this.expression = expression;
 		this.parent = parent;
 
-		final InvalidationListener checkedListener = o -> {
-			if (this.parsedExpression == null) {
-				this.checked.set(Checked.PARSE_ERROR);
-			} else {
-				this.checked.set(this.parsedExpression.getChecked());
-			}
-		};
-		this.getTasks().addListener((ListChangeListener<IValidationTask>)o -> {
+		InvalidationListener statusListener = o -> this.updateStatus();
+		this.getTasks().addListener((ListChangeListener<IValidationTask>) o -> {
 			while (o.next()) {
 				if (o.wasRemoved()) {
 					for (final IValidationTask task : o.getRemoved()) {
-						task.checkedProperty().removeListener(checkedListener);
+						task.statusProperty().removeListener(statusListener);
 					}
 				}
 				if (o.wasAdded()) {
 					for (final IValidationTask task : o.getAddedSubList()) {
-						task.checkedProperty().addListener(checkedListener);
+						task.statusProperty().addListener(statusListener);
 					}
 				}
-				checkedListener.invalidated(null);
+				statusListener.invalidated(null);
 			}
 		});
+	}
+
+	private void updateStatus() {
+		if (this.parsedExpression == null) {
+			this.status.set(CheckingStatus.INVALID_TASK);
+		} else {
+			this.status.set(this.parsedExpression.getStatus());
+		}
 	}
 
 	public void setParsedExpression(final IValidationExpression expression) {
 		this.parsedExpression = expression;
 		if (expression == null) {
-			this.checked.set(Checked.PARSE_ERROR);
 			this.getTasks().clear();
 		} else {
 			this.getTasks().setAll(expression.getAllTasks()
-				.map(ValidationTaskExpression::getTask)
-				.collect(Collectors.toList()));
+				                       .map(ValidationTaskExpression::getTask)
+				                       .collect(Collectors.toList()));
 		}
+		this.updateStatus();
 	}
 
-	private static VTType extractType(IValidationTask validationTask) {
-		if(validationTask instanceof ReplayTrace) {
-			return VTType.TRACE;
-		} else if(validationTask instanceof SimulationItem) {
-			SimulationType simulationType = ((SimulationItem) validationTask).getType();
-			if(simulationType == SimulationType.MONTE_CARLO_SIMULATION || simulationType == SimulationType.HYPOTHESIS_TEST || simulationType == SimulationType.ESTIMATION) {
-				return VTType.EXPLORE;
-			}
-			// TODO: Implement a single simulation
-			return VTType.TRACE;
-		} else if(validationTask instanceof TemporalFormulaItem) {
-			return VTType.EXPLORE;
-		} else if(validationTask instanceof ModelCheckingItem) {
-			Set<ModelCheckingOptions.Options> options = ((ModelCheckingItem) validationTask).getOptions();
-			if(options.contains(ModelCheckingOptions.Options.FIND_GOAL) ||
-				((ModelCheckingItem) validationTask).getGoal() == null ||
-				!((ModelCheckingItem) validationTask).getGoal().isEmpty()) {
-				return VTType.TRACE;
-			}
-			// Otherwise invariant/deadlock checking, or just covering state space
-			return VTType.EXPLORE;
-		} else if(validationTask instanceof SymbolicCheckingFormulaItem) {
-			return VTType.STATIC;
-		} else if(validationTask instanceof ProofObligationItem) {
-			return VTType.STATIC;
-		} else if(validationTask instanceof DynamicCommandFormulaItem) {
-			return VTType.STATE_SPACE;
-		}
-		return null;
-	}
-
-	public void parse(final Map<String, IValidationTask> validationTasks) {
-		final VOParser voParser = new VOParser();
-		validationTasks.forEach((id, vt) -> voParser.registerTask(id, extractType(vt)));
+	public void parse(Map<String, IValidationTask> tasksInScopeById) {
 		try {
-			final IValidationExpression parsed = IValidationExpression.parse(voParser, this.getExpression());
-			parsed.getAllTasks().forEach(taskExpr -> {
-				IValidationTask validationTask;
-				if (validationTasks.containsKey(taskExpr.getIdentifier())) {
-					validationTask = validationTasks.get(taskExpr.getIdentifier());
-				} else {
-					validationTask = new ValidationTaskNotFound(taskExpr.getIdentifier());
-				}
-				taskExpr.setTask(validationTask);
-			});
-			this.setParsedExpression(parsed);
-		} catch (VOException e) {
+			this.setParsedExpression(IValidationExpression.fromString(this.getExpression(), tasksInScopeById));
+		} catch (VOParseException e) {
 			this.setParsedExpression(null);
 			throw e;
 		}
 	}
 
 	public void parse(final Machine machine) {
-		this.parse(machine.getMachineProperties().getValidationTasks());
+		this.parse(machine.getValidationTasksById());
 	}
 
-	public ObjectProperty<Checked> checkedProperty() {
-		return checked;
+	public ReadOnlyObjectProperty<CheckingStatus> statusProperty() {
+		return status;
 	}
 
-	public Checked getChecked() {
-		return checked.get();
+	public CheckingStatus getStatus() {
+		return status.get();
 	}
 
 	public ObservableList<IValidationTask> getTasks() {
@@ -192,9 +138,9 @@ public final class ValidationObligation {
 		if (obj == null || this.getClass() != obj.getClass()) {
 			return false;
 		}
-		final ValidationObligation other = (ValidationObligation)obj;
+		final ValidationObligation other = (ValidationObligation) obj;
 		return this.getMachine().equals(other.getMachine())
-			&& this.getExpression().equals(other.getExpression());
+			       && this.getExpression().equals(other.getExpression());
 	}
 
 	@Override
@@ -205,9 +151,9 @@ public final class ValidationObligation {
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
-			.add("machine", machine)
-			.add("expression", expression)
-			.toString();
+			       .add("machine", machine)
+			       .add("expression", expression)
+			       .toString();
 	}
 
 	@JsonIgnore //TODO Fix this when making history and refinement saving persistent

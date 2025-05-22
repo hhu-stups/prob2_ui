@@ -35,6 +35,10 @@ public interface TranslatableAdapter<T> {
 	}
 
 	static <T extends Enum<T>> TranslatableAdapter<T> enumNameAdapter(String prefix) {
+		if (prefix == null || prefix.isEmpty()) {
+			throw new IllegalArgumentException("Missing prefix");
+		}
+
 		return adapter(object -> prefix + '.' + object.name());
 	}
 }

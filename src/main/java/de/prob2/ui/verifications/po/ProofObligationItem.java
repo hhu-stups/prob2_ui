@@ -1,40 +1,50 @@
 package de.prob2.ui.verifications.po;
 
 import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.concurrent.CompletableFuture;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.common.base.MoreObjects;
 
 import de.prob.model.eventb.ProofObligation;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.vomanager.IValidationTask;
+import de.prob2.ui.verifications.CheckingExecutors;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.IValidationTask;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
-public class ProofObligationItem implements IValidationTask {
-
+public final class ProofObligationItem implements IValidationTask {
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final String id;
 	private final String name;
-	private final String description;
-	private final ObjectProperty<Checked> checked;
 
-	public ProofObligationItem(final String id, final String name, final String description) {
+	@JsonIgnore
+	private final StringProperty description;
+	@JsonIgnore
+	private final ObjectProperty<CheckingStatus> status;
+
+	@JsonCreator
+	public ProofObligationItem(@JsonProperty("id") String id, @JsonProperty("name") String name) {
 		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.checked = new SimpleObjectProperty<>(this, "checked", Checked.PARSE_ERROR);
-	}
+		this.name = Objects.requireNonNull(name, "name");
 
-	public ProofObligationItem(final SavedProofObligationItem po) {
-		this(po.getId(), po.getName(), "");
+		this.description = new SimpleStringProperty(this, "description", null);
+		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.INVALID_TASK);
 	}
 
 	public ProofObligationItem(ProofObligation proofObligation) {
-		this(null, proofObligation.getName(), proofObligation.getDescription());
-		this.setChecked(proofObligation.isDischarged() ? Checked.SUCCESS : Checked.NOT_CHECKED);
+		this(null, proofObligation.getName());
+		this.updateFrom(proofObligation);
 	}
 
 	@Override
@@ -42,9 +52,15 @@ public class ProofObligationItem implements IValidationTask {
 		return id;
 	}
 
+	@Override
+	public ValidationTaskType<ProofObligationItem> getTaskType() {
+		return BuiltinValidationTaskTypes.PROOF_OBLIGATION;
+	}
+
 	public ProofObligationItem withId(final String id) {
-		final ProofObligationItem updatedPO = new ProofObligationItem(id, this.getName(), this.getDescription());
-		updatedPO.setChecked(this.getChecked());
+		final ProofObligationItem updatedPO = new ProofObligationItem(id, this.getName());
+		updatedPO.setDescription(this.getDescription());
+		updatedPO.setStatus(this.getStatus());
 		return updatedPO;
 	}
 
@@ -55,46 +71,85 @@ public class ProofObligationItem implements IValidationTask {
 
 	@Override
 	public String getTaskDescription(I18n i18n) {
-		if (this.getDescription().isEmpty()) {
-			return this.getName();
-		} else {
-			return this.getName() + " // " + getDescription();
-		}
+		return this.getName();
 	}
 
 	public String getName() {
-		return name;
+		return this.name;
 	}
 
+	public StringProperty descriptionProperty() {
+		return this.description;
+	}
+
+	@JsonIgnore
 	public String getDescription() {
-		return description;
+		return this.descriptionProperty().get();
+	}
+
+	public void setDescription(String description) {
+		this.descriptionProperty().set(description);
 	}
 
 	@Override
-	public ObjectProperty<Checked> checkedProperty() {
-		return this.checked;
+	public ObjectProperty<CheckingStatus> statusProperty() {
+		return this.status;
 	}
 
 	@Override
-	public Checked getChecked() {
-		return this.checkedProperty().get();
+	public CheckingStatus getStatus() {
+		return this.statusProperty().get();
 	}
 
-	public void setChecked(final Checked checked) {
-		this.checkedProperty().set(checked);
+	@JsonIgnore
+	public void setStatus(final CheckingStatus status) {
+		this.statusProperty().set(status);
+	}
+
+	public void updateFrom(ProofObligation po) {
+		if (!this.getName().equals(po.getName())) {
+			throw new IllegalArgumentException("Attempted to update ProofObligationItem for PO " + this.getName() + " using different ProofObligation " + po.getName());
+		}
+
+		this.setDescription(po.getDescription());
+		this.setStatus(po.isDischarged() ? CheckingStatus.SUCCESS : CheckingStatus.NOT_CHECKED);
+	}
+
+	@Override
+	public CompletableFuture<?> execute(CheckingExecutors executors, ExecutionContext context) {
+		// Nothing to be done here - the proof status is loaded when the model is loaded
+		// and can only change by reloading the model.
+		return CompletableFuture.completedFuture(null);
+	}
+
+	@Override
+	public void resetAnimatorDependentState() {}
+
+	@Override
+	public void reset() {
+		this.setDescription(null);
+		this.setStatus(CheckingStatus.NOT_CHECKED);
+		this.resetAnimatorDependentState();
+	}
+
+	@Override
+	public boolean settingsEqual(Object other) {
+		return other instanceof ProofObligationItem that
+			       && Objects.equals(this.getTaskType(), that.getTaskType())
+			       && Objects.equals(this.getId(), that.getId())
+			       && Objects.equals(this.getName(), that.getName());
+	}
+
+	@Override
+	public ProofObligationItem copy() {
+		return new ProofObligationItem(this.getId(), this.name);
 	}
 
 	@Override
 	public String toString() {
-		return new StringJoiner(", ", ProofObligationItem.class.getSimpleName() + "[", "]")
-				.add("id='" + id + "'")
-				.add("name='" + name + "'")
-				.add("description='" + description + "'")
-				.add("checked=" + getChecked())
-				.toString();
-	}
-
-	public boolean settingsEqual(final ProofObligationItem that) {
-		return Objects.equals(id, that.id) && Objects.equals(name, that.name) && Objects.equals(description, that.description);
+		return MoreObjects.toStringHelper(this)
+			       .add("id", this.getId())
+			       .add("name", this.getName())
+			       .toString();
 	}
 }

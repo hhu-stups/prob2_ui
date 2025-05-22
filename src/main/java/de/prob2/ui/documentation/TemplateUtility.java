@@ -13,11 +13,13 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.IExecutableItem;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ISelectableTask;
+import de.prob2.ui.verifications.cbc.CBCDeadlockFreedomCheckingItem;
+import de.prob2.ui.verifications.cbc.CBCInvariantPreservationCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingFormulaItem;
-import de.prob2.ui.verifications.symbolicchecking.SymbolicCheckingType;
+import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
 import de.prob2.ui.verifications.temporal.TemporalFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternItem;
 
@@ -37,10 +39,12 @@ public class TemplateUtility {
 	}
 
 	public static String symbolicConfigString(SymbolicCheckingFormulaItem formula, I18n i18n) {
-		String config = formula.getCode();
-		// no configuration is internally represented as 1=1, but that is not intended in the output
-		if(formula.getType().equals(SymbolicCheckingType.DEADLOCK) && config.equals("1=1")){
+		String config;
+		// no predicate is internally represented as 1=1, but that is not intended in the output
+		if (formula instanceof CBCDeadlockFreedomCheckingItem deadlockItem && "1=1".equals(deadlockItem.getPredicate())){
 			return latexSafe(i18n.translate("verifications.symbolicchecking.view.deadlock.noPredicate"));
+		} else {
+			config = formula.getTaskDescription(i18n);
 		}
 		// & is replaced because otherwise a column change takes place in the template table
 		config = config.replaceAll("&",", \\\\newline");
@@ -60,35 +64,34 @@ public class TemplateUtility {
 		return MoreFiles.asCharSource(project.getLocation().resolve(elem.getLocation()), StandardCharsets.UTF_8).read();
 	}
 
-	public static String getTraceHtmlCode(String relativePath, ProjectDocumenter projectDocumenter) throws IOException {
-		return MoreFiles.asCharSource(projectDocumenter.getDirectory().resolve(relativePath), StandardCharsets.UTF_8).read();
-	}
+	public static boolean formulaHasResult(TemporalFormulaItem formula){return (formula.getResult() != null);}
+	public static boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResult() != null);}
+	public static boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResult() != null);}
 
-	public static boolean formulaHasResult(TemporalFormulaItem formula){return (formula.getResultItem() != null);}
-	public static boolean patternHasResult(LTLPatternItem pattern){return (pattern.getResultItem() != null);}
-	public static boolean symbolicHasResult(SymbolicCheckingFormulaItem formula){return (formula.getResultItem() != null);}
-
-	public static int getNumberSelectedTasks(List<? extends IExecutableItem> validationTasks){
+	public static int getNumberSelectedTasks(List<? extends ISelectableTask> validationTasks) {
 		long selectedTasksCount = validationTasks.stream()
-				.filter(IExecutableItem::selected)
+				.filter(ISelectableTask::selected)
 				.count();
 		return Math.toIntExact(selectedTasksCount);
 	}
-	public static int getNumberSuccessfulTasks(List<? extends IExecutableItem> validationTasks){
+
+	public static int getNumberSuccessfulTasks(List<? extends ISelectableTask> validationTasks) {
 		long countSuccessful = validationTasks.stream()
-				.filter(task -> task.selected() && task.getChecked().equals(Checked.SUCCESS))
+				.filter(task -> task.selected() && task.getStatus().equals(CheckingStatus.SUCCESS))
 				.count();
 		return Math.toIntExact(countSuccessful);
 	}
-	public static int getNumberNotCheckedTasks(List<? extends IExecutableItem> validationTasks){
+
+	public static int getNumberNotCheckedTasks(List<? extends ISelectableTask> validationTasks) {
 		long countNotChecked = validationTasks.stream()
-				.filter(task -> task.selected() && task.getChecked().equals(Checked.NOT_CHECKED))
+				.filter(task -> task.selected() && task.getStatus().equals(CheckingStatus.NOT_CHECKED))
 				.count();
 		return Math.toIntExact(countNotChecked);
 	}
-	public static int getNumberFailedTasks(List<? extends IExecutableItem> validationTasks){
+
+	public static int getNumberFailedTasks(List<? extends ISelectableTask> validationTasks) {
 		long countFailed= validationTasks.stream()
-				.filter(task -> task.selected() && (!task.getChecked().equals(Checked.NOT_CHECKED) && !task.getChecked().equals(Checked.SUCCESS)))
+				.filter(task -> task.selected() && (!task.getStatus().equals(CheckingStatus.NOT_CHECKED) && !task.getStatus().equals(CheckingStatus.SUCCESS)))
 				.count();
 		return Math.toIntExact(countFailed);
 	}
@@ -103,7 +106,7 @@ public class TemplateUtility {
 	}
 	public static boolean symbolicConfigurationColumnNecessary(List<SymbolicCheckingFormulaItem> symbolicFormulas){
 		for (SymbolicCheckingFormulaItem formula : symbolicFormulas) {
-			if (!formula.getCode().isEmpty()) {
+			if (formula instanceof CBCInvariantPreservationCheckingItem || formula instanceof CBCDeadlockFreedomCheckingItem || formula instanceof SymbolicModelCheckingItem) {
 				return true;
 			}
 		}

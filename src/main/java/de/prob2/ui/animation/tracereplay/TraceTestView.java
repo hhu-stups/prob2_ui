@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.tracereplay;
 
-import de.prob2.ui.sharedviews.DescriptionView;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +10,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob.check.tracereplay.OperationDisabledness;
 import de.prob.check.tracereplay.OperationEnabledness;
@@ -24,13 +22,18 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedIcon;
+import de.prob2.ui.project.Project;
+import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.sharedviews.DescriptionView;
+import de.prob2.ui.verifications.CheckingExecutors;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusIcon;
+import de.prob2.ui.verifications.ExecutionContext;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -63,8 +66,7 @@ import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 import static de.prob2.ui.sharedviews.DescriptionView.getTraceDescriptionView;
 
 @FXMLInjected
-public class TraceTestView extends Stage {
-
+public final class TraceTestView extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceTestView.class);
 
 	private class TracePositionHighlightCell<S, T> extends TableCell<S, T> {
@@ -217,9 +219,13 @@ public class TraceTestView extends Stage {
 
 	private final CurrentTrace currentTrace;
 
-	private final CliTaskExecutor cliExecutor;
+	private final CheckingExecutors checkingExecutors;
 
-	private final Injector injector;
+	private final TraceFileHandler traceFileHandler;
+
+	private Project project;
+
+	private Machine machine;
 
 	private final SimpleObjectProperty<ReplayTrace> replayTrace;
 
@@ -230,14 +236,20 @@ public class TraceTestView extends Stage {
 	private final List<VBox> transitionBoxes = new ArrayList<>();
 
 	@Inject
-	public TraceTestView(final StageManager stageManager, final FontSize fontSize,
-						 final I18n i18n, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor, final Injector injector) {
+	public TraceTestView(
+		StageManager stageManager,
+		FontSize fontSize,
+		I18n i18n,
+		CurrentTrace currentTrace,
+		CheckingExecutors checkingExecutors,
+		TraceFileHandler traceFileHandler
+	) {
 		this.stageManager = stageManager;
 		this.fontSize = fontSize;
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
-		this.cliExecutor = cliExecutor;
-		this.injector = injector;
+		this.checkingExecutors = checkingExecutors;
+		this.traceFileHandler = traceFileHandler;
 		this.replayTrace = new SimpleObjectProperty<>();
 		stageManager.loadFXML(this, "trace_test_view.fxml");
 	}
@@ -273,31 +285,38 @@ public class TraceTestView extends Stage {
 		});
 	}
 
+	private ExecutionContext buildExecutionContext() {
+		return new ExecutionContext(this.project, this.machine, currentTrace.getStateSpace(), null, i18n);
+	}
+
 	private boolean currentTraceIsReplayedTrace() {
 		final Trace trace = currentTrace.get();
 		final ReplayTrace replayed = replayTrace.get();
 		return trace != null
 			&& replayed != null
-			&& replayed.getAnimatedReplayedTrace() != null
-			&& safeListEquals(trace.getTransitionList(), replayed.getAnimatedReplayedTrace().getTransitionList());
+			&& replayed.getTrace() != null
+			&& safeListEquals(trace.getTransitionList(), replayed.getTrace().getTransitionList());
 	}
 
 	private void goToPositionInReplayTrace(final int index) {
+		Trace trace = currentTrace.get();
 		if (currentTraceIsReplayedTrace()) {
-			final Trace trace = currentTrace.get();
 			if (index < trace.getTransitionList().size()) {
 				currentTrace.set(trace.gotoPosition(index));
 			}
 		} else {
 			this.saveTrace();
 			final ReplayTrace r = replayTrace.get();
-			cliExecutor.submit(() -> {
-				injector.getInstance(TraceChecker.class).check(r);
-				if (r.getAnimatedReplayedTrace() != null) {
-					if (index < r.getLoadedTrace().getTransitionList().size()) {
-						currentTrace.set(r.getAnimatedReplayedTrace().gotoPosition(index));
+			r.execute(checkingExecutors, buildExecutionContext()).whenComplete((res, exc) -> {
+				if (exc == null) {
+					if (r.getTrace() != null) {
+						if (index < r.getLoadedTrace().getTransitionList().size()) {
+							currentTrace.set(r.getTrace().gotoPosition(index));
+						}
+						traceTableView.refresh();
 					}
-					traceTableView.refresh();
+				} else {
+					traceFileHandler.showLoadError(r, exc);
 				}
 			});
 		}
@@ -329,21 +348,22 @@ public class TraceTestView extends Stage {
 		}
 	}
 
-	public void loadReplayTrace(ReplayTrace replayTrace) {
+	public void loadReplayTrace(Project project, Machine machine, ReplayTrace replayTrace) {
 		this.postconditions.clear();
+		this.project = project;
+		this.machine = machine;
 		this.replayTrace.set(replayTrace);
 		traceTableView.getItems().clear();
 		transitionBoxes.clear();
 
-		final TraceJsonFile traceJsonFile;
 		try {
-			traceJsonFile = replayTrace.load();
+			traceFileHandler.loadJson(replayTrace);
 		} catch (IOException e) {
-			injector.getInstance(TraceFileHandler.class).showLoadError(replayTrace, e);
+			traceFileHandler.showLoadError(replayTrace, e);
 			return;
 		}
 
-		final List<PersistentTransition> transitions = traceJsonFile.getTransitionList();
+		final List<PersistentTransition> transitions = replayTrace.getLoadedTrace().getTransitionList();
 		traceTableView.getItems().addAll(transitions);
 		for(int i = 0; i < transitions.size(); i++) {
 			PersistentTransition transition = transitions.get(i);
@@ -373,7 +393,16 @@ public class TraceTestView extends Stage {
 			}
 		}
 		this.saveTrace();
-		cliExecutor.submit(() -> injector.getInstance(TraceChecker.class).check(replayTrace.get()));
+		ReplayTrace r = replayTrace.get();
+		r.execute(checkingExecutors, buildExecutionContext()).thenCompose(res ->
+			traceFileHandler.askKeepReplayedTrace(r)
+		).thenApply(trace -> {
+			trace.ifPresent(currentTrace::set);
+			return null;
+		}).exceptionally(exc -> {
+			Platform.runLater(() -> traceFileHandler.showLoadError(r, exc));
+			return null;
+		});
 		this.close();
 	}
 
@@ -387,7 +416,7 @@ public class TraceTestView extends Stage {
 		}
 
 		try {
-			replayTrace.get().saveModified(replayTrace.get().getLoadedTrace().changeTrace(transitions));
+			traceFileHandler.saveModifiedJson(replayTrace.get(), replayTrace.get().getLoadedTrace().changeTrace(transitions));
 		} catch (IOException | RuntimeException exc) {
 			LOGGER.warn("Failed to save project (caused by saving a trace)", exc);
 			stageManager.makeExceptionAlert(exc, "traceSave.buttons.saveTrace.error", "traceSave.buttons.saveTrace.error.msg").show();
@@ -479,9 +508,9 @@ public class TraceTestView extends Stage {
 	private MenuButton buildAddButton(VBox box, int index) {
 		final MenuButton btAddTest = new MenuButton("", new BindableGlyph("FontAwesome", FontAwesome.Glyph.PLUS_CIRCLE));
 		btAddTest.getStyleClass().add("icon-dark");
-		MenuItem addPredicate = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.predicate"));
-		MenuItem addOperationEnabled = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.enabled"));
-		MenuItem addOperationDisabled = new MenuItem(i18n.translate("animation.trace.replay.test.postcondition.addItem.disabled"));
+		MenuItem addPredicate = new MenuItem(i18n.translate("animation.tracereplay.test.postcondition.addItem.predicate"));
+		MenuItem addOperationEnabled = new MenuItem(i18n.translate("animation.tracereplay.test.postcondition.addItem.enabled"));
+		MenuItem addOperationDisabled = new MenuItem(i18n.translate("animation.tracereplay.test.postcondition.addItem.disabled"));
 
 		addPredicate.setOnAction(e1 -> {
 			PostconditionPredicate postcondition = new PostconditionPredicate();
@@ -514,31 +543,31 @@ public class TraceTestView extends Stage {
 		innerBox.setSpacing(2);
 
 		final Label typeLabel = new Label(i18n.translate(
-				enumNameAdapter("animation.trace.replay.test.postcondition"),
+				enumNameAdapter("animation.tracereplay.test.postcondition"),
 				postcondition.getKind()
 		));
 		final TextField postconditionTextField = buildPostconditionTextField(postcondition);
 		final Label btRemoveTest = buildRemoveButton(box, innerBox, postcondition, index);
-		final CheckedIcon statusIcon = new CheckedIcon();
+		final CheckingStatusIcon statusIcon = new CheckingStatusIcon();
 		statusIcon.setPrefHeight(fontSize.getFontSize());
 		statusIcon.setPrefWidth(fontSize.getFontSize()*1.5);
 
-		final List<List<String>> transitionErrorMessages = replayTrace.get().getReplayedTrace() == null ? new ArrayList<>() : replayTrace.get().getReplayedTrace().getTransitionErrorMessages();
+		List<List<String>> transitionErrorMessages = replayTrace.get().getResult() instanceof ReplayTrace.Result traceResult ? traceResult.getReplayed().getTransitionErrorMessages() : new ArrayList<>();
 		if (transitionErrorMessages.size() <= index || isNewBox) {
-			statusIcon.setChecked(Checked.NOT_CHECKED);
+			statusIcon.setStatus(CheckingStatus.NOT_CHECKED);
 		} else {
 			// TODO There's currently no good way to tell which errors belong to which postcondition.
 			// For now, we display all postconditions as failed if there are any errors for the relevant transition.
-			Checked status = transitionErrorMessages.get(index).isEmpty() ? Checked.SUCCESS : Checked.FAIL;
-			replayTrace.get().checkedProperty().addListener((o, from, to) -> statusIcon.setChecked(status));
-			statusIcon.setChecked(status);
+			CheckingStatus status = transitionErrorMessages.get(index).isEmpty() ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
+			replayTrace.get().statusProperty().addListener((o, from, to) -> statusIcon.setStatus(status));
+			statusIcon.setStatus(status);
 		}
 
 		innerBox.getChildren().add(typeLabel);
 		innerBox.getChildren().add(postconditionTextField);
 
 		if(postcondition instanceof OperationExecutability) {
-			final Label withLabel = new Label(i18n.translate("animation.trace.replay.test.postcondition.with"));
+			final Label withLabel = new Label(i18n.translate("animation.tracereplay.test.postcondition.with"));
 			final TextField predicateTextField = buildOperationPredicateTextField(postcondition);
 			innerBox.getChildren().add(withLabel);
 			innerBox.getChildren().add(predicateTextField);
@@ -575,9 +604,8 @@ public class TraceTestView extends Stage {
 			btShowDescription.setText(i18n.translate("animation.tracereplay.view.contextMenu.showDescription"));
 			return;
 		}
-		TraceFileHandler fileHandler = injector.getInstance(TraceFileHandler.class);
 		final DescriptionView descriptionView = getTraceDescriptionView(this.replayTrace.get(), stageManager,
-				fileHandler, i18n, this::handleTraceDescription);
+				traceFileHandler, i18n, this::handleTraceDescription);
 		btShowDescription.setText(i18n.translate("animation.tracereplay.test.view.hidePathDescription"));
 		vBox.getChildren().add(1, descriptionView);
 	}

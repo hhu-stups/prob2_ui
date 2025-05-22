@@ -1,39 +1,50 @@
 package de.prob2.ui.consoles.b;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.CompletableFuture;
 
 import com.google.inject.Inject;
 
 import de.be4.classicalb.core.parser.exceptions.BCompoundException;
-import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.animator.domainobjects.FormulaExpand;
+import de.prob.animator.domainobjects.IBEvalElement;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
+import de.prob.model.representation.AbstractModel;
 import de.prob.statespace.Trace;
+import de.prob2.ui.consoles.AsyncExecutable;
 import de.prob2.ui.consoles.ConsoleExecResult;
 import de.prob2.ui.consoles.ConsoleExecResultType;
-import de.prob2.ui.consoles.Executable;
 import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.consoles.b.codecompletion.BCodeCompletion;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BInterpreter implements Executable {
+public final class BInterpreter implements AsyncExecutable {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(BInterpreter.class);
 
 	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
+
+	private boolean bMode;
 
 	@Inject
-	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace) {
+	public BInterpreter(final MachineLoader machineLoader, final CurrentTrace currentTrace, CliTaskExecutor cliExecutor) {
 		this.machineLoader = machineLoader;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
+		this.bMode = false;
 	}
 
 	private static ErrorItem getParseErrorFromException(final Exception e) {
@@ -68,35 +79,64 @@ public class BInterpreter implements Executable {
 	}
 
 	@Override
-	public ConsoleExecResult exec(String source) {
-		if (":clear".equals(source)) {
-			return new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR);
+	public CompletableFuture<ConsoleExecResult> exec(String source) {
+		if (source == null || source.isBlank()) {
+			return CompletableFuture.completedFuture(new ConsoleExecResult("", "", ConsoleExecResultType.PASSED));
+		} else if (":clear".equals(source.trim())) {
+			return CompletableFuture.completedFuture(new ConsoleExecResult("", "", ConsoleExecResultType.CLEAR));
 		}
-		if (source.replace(" ", "").isEmpty()) {
-			return new ConsoleExecResult("", "", ConsoleExecResultType.PASSED);
-		}
-		Trace trace = currentTrace.get();
-		if (trace == null) {
+
+		final Trace trace;
+		if (this.currentTrace.get() != null) {
+			trace = this.currentTrace.get();
+		} else {
 			trace = this.getDefaultTrace();
 		}
-		final IEvalElement formula;
+
+		IEvalElement formula;
 		try {
-			formula = trace.getModel().parseFormula(source, FormulaExpand.EXPAND);
-		} catch (EvaluationException e) {
+			AbstractModel model = trace.getModel();
+			if (this.bMode) {
+				formula = model.parseFormulaAsClassicalB(source, FormulaExpand.EXPAND);
+			} else {
+				formula = model.parseFormula(source, FormulaExpand.EXPAND);
+			}
+
+			// force parsing of the string representation because the eventb implementation is lazy
+			// this also helps with error messages because eventb formulas swallow parse errors
+			// when trying to print them as a prolog term
+			if (formula instanceof IBEvalElement bFormula) {
+				bFormula.getAst();
+			}
+		} catch (Exception e) {
 			LOGGER.info("Failed to parse B console user input", e);
-			return new ConsoleExecResult("", formatParseException(source, e), ConsoleExecResultType.ERROR);
+			return CompletableFuture.completedFuture(new ConsoleExecResult("", formatParseException(source, e), ConsoleExecResultType.ERROR));
 		}
-		final AbstractEvalResult res;
-		try {
-			res = trace.evalCurrent(formula);
-		} catch (EvaluationException | ProBError e) {
-			LOGGER.info("B evaluation failed", e);
-			return new ConsoleExecResult("", e.getMessage(), ConsoleExecResultType.ERROR);
-		}
-		return new ConsoleExecResult("", res.toString(), res instanceof EvalResult ? ConsoleExecResultType.PASSED : ConsoleExecResultType.ERROR);
+
+		return this.cliExecutor
+				       .submit(() -> trace.evalCurrent(formula))
+				       .handle((res, t) -> {
+					       if (t instanceof CancellationException) {
+						       return new ConsoleExecResult("", "cancelled", ConsoleExecResultType.ERROR);
+					       } else if (t != null || !(res instanceof EvalResult)) {
+						       LOGGER.warn("B evaluation failed", t);
+						       return new ConsoleExecResult("", t != null ? t.getMessage() : Objects.toString(res), ConsoleExecResultType.ERROR);
+					       } else {
+						       return new ConsoleExecResult("", Objects.toString(res), ConsoleExecResultType.PASSED);
+					       }
+				       });
 	}
 
-	public Collection<? extends BCCItem> getSuggestions(String text) {
+	public List<? extends BCCItem> getSuggestions(String text) {
+		// TODO: we need to use the currently selected language instead of the global model language
 		return BCodeCompletion.doCompletion(this.currentTrace.getStateSpace(), text, false);
+	}
+
+	public boolean isBMode() {
+		return this.bMode;
+	}
+
+	public void setBMode(boolean bMode) {
+		this.bMode = bMode;
 	}
 }

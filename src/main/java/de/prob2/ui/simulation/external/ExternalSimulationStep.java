@@ -3,37 +3,71 @@ package de.prob2.ui.simulation.external;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public class ExternalSimulationStep {
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
-	private final String op;
+@JsonPropertyOrder({
+		"op",
+		"predicate",
+		"delta",
+		"done"
+})
+public final class ExternalSimulationStep {
 
-	private final String predicate;
+	private String op;
+	private String predicate;
+	private String delta;
+	private boolean done;
 
-	private final String delta;
-
-	private final boolean done;
-
-	public ExternalSimulationStep(String op, String predicate, String delta, boolean done) {
+	@JsonCreator
+	public ExternalSimulationStep(
+			@JsonProperty(value = "op", required = true) String op,
+			@JsonProperty(value = "predicate", required = true) String predicate,
+			@JsonProperty(value = "delta", required = true) String delta,
+			@JsonProperty(value = "done", required = true) boolean done
+	) {
 		this.op = op;
 		this.predicate = predicate;
 		this.delta = delta;
 		this.done = done;
 	}
 
+	@JsonGetter("op")
 	public String getOp() {
 		return op;
 	}
 
+	public void setOp(String op) {
+		this.op = op;
+	}
+
+	@JsonGetter("predicate")
 	public String getPredicate() {
 		return predicate;
 	}
 
+	public void setPredicate(String predicate) {
+		this.predicate = predicate;
+	}
+
+	@JsonGetter("delta")
 	public String getDelta() {
 		return delta;
 	}
 
+	public void setDelta(String delta) {
+		this.delta = delta;
+	}
+
+	@JsonGetter("done")
 	public boolean isDone() {
 		return done;
+	}
+
+	public void setDone(boolean done) {
+		this.done = done;
 	}
 
 	@Override

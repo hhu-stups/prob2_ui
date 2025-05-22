@@ -1,5 +1,6 @@
 package de.prob2.ui.rulevalidation;
 
+import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
@@ -7,7 +8,6 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.brules.*;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
-import groovy.lang.Singleton;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -19,8 +19,7 @@ import java.util.*;
  * @since 20.12.17
  */
 @Singleton
-public class RulesDataModel {
-
+public final class RulesDataModel {
 	private static final IdentifierNotInitialised IDENTIFIER_NOT_INITIALISED = new IdentifierNotInitialised(new ArrayList<>());
 
 	private RulesModel model;
@@ -128,7 +127,7 @@ public class RulesDataModel {
 	}
 
 	private void updateRuleResults(State currentState) {
-		RuleResults ruleResults = new RuleResults(model.getRulesProject(), currentState, 10);
+		RuleResults ruleResults = new RuleResults(model.getRulesProject(), currentState, -1, -1);
 		int notCheckableCounter = 0;
 		for (String ruleStr : ruleValueMap.keySet()) {
 			RuleResult result = ruleResults.getRuleResultMap().get(ruleStr);
@@ -183,7 +182,7 @@ public class RulesDataModel {
 			} else if (op instanceof ComputationOperation && computationValueMap.containsKey(op.getName()) &&
 					getComputationValue(op.getName()).get() instanceof Map.Entry) {
 				Object stateObject = getComputationValue(op.getName()).get();
-				if (stateObject instanceof ComputationStatus && (ComputationStatus)stateObject == ComputationStatus.NOT_EXECUTED) {
+				if (stateObject == ComputationStatus.NOT_EXECUTED) {
 					notCheckedDependencies.add(op.getName());
 				}
 			}

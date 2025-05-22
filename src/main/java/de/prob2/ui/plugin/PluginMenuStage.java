@@ -38,7 +38,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class PluginMenuStage extends Stage {
+public final class PluginMenuStage extends Stage {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PluginMenuStage.class);
 
 	private final ProBPluginManager proBPluginManager;

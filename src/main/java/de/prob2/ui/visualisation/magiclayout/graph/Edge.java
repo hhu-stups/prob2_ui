@@ -20,8 +20,7 @@ import javafx.scene.shape.StrokeLineJoin;
 import javafx.scene.text.Font;
 import javafx.scene.transform.Rotate;
 
-public class Edge extends Group {
-
+public final class Edge extends Group {
 	public static class Style {
 		private Color lineColor = Color.BLACK;
 		private Double lineWidth = 1.0;

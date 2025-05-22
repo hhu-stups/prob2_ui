@@ -3,7 +3,12 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CustomMenuItem?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <HBox xmlns:fx="http://javafx.com/fxml/1" fx:controller="de.prob2.ui.sharedviews.NavigationButtonsController" stylesheets="@/prob.css" alignment="CENTER_LEFT">
 	<fx:define>
@@ -41,5 +46,29 @@
 			<Tooltip text="%internal.navigationButtons.fastForward.tooltip"/>
 		</tooltip>
 	</Button>
+	<MenuButton fx:id="fastForwardButtonMenu" HBox.hgrow="NEVER" visible="false" managed="false">
+		<items>
+			<MenuItem fx:id="fiveDeterministicEvents" onAction="#handleFastForwardButton"
+					  text="%internal.navigationButtons.fastForwardMenu.five"/>
+			<MenuItem fx:id="tenDeterministicEvents" onAction="#handleFastForwardButton"
+					  text="%internal.navigationButtons.fastForwardMenu.ten"/>
+			<CustomMenuItem>
+				<content>
+					<AnchorPane>
+						<TextField fx:id="deterministicText" onAction="#handleFastForwardButton"
+
+								   promptText="%operations.operationsView.random.some.prompt"/>
+					</AnchorPane>
+				</content>
+			</CustomMenuItem>
+		</items>
+		<graphic>
+			<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="ANGLE_DOUBLE_RIGHT"
+						   bindableFontSize="${fontSize.fontSize * 1.5 + 2}"/>
+		</graphic>
+		<tooltip>
+			<Tooltip text="%internal.navigationButtons.fastForwardMenu.tooltip"/>
+		</tooltip>
+	</MenuButton>
 	<fx:include source="reload_button.fxml" HBox.hgrow="NEVER" />
 </HBox>

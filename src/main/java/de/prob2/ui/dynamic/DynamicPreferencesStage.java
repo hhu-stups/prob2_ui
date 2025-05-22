@@ -12,8 +12,8 @@ import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
-import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.preferences.PreferencesChangeState;
+import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
 import javafx.fxml.FXML;
@@ -43,8 +43,8 @@ public class DynamicPreferencesStage extends Stage {
 	private final StageManager stageManager;
 	private final GlobalPreferences globalPreferences;
 	private final CurrentTrace currentTrace;
-	
-	private DynamicCommandStage<?> toRefresh;
+
+	private DynamicVisualizationStage toRefresh;
 	
 	@Inject
 	private DynamicPreferencesStage(final StageManager stageManager, final GlobalPreferences globalPreferences, final CurrentTrace currentTrace) {
@@ -62,8 +62,8 @@ public class DynamicPreferencesStage extends Stage {
 		cancelButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		okButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 	}
-	
-	public void setToRefresh(final DynamicCommandStage<?> toRefresh) {
+
+	public void setToRefresh(final DynamicVisualizationStage toRefresh) {
 		this.toRefresh = toRefresh;
 	}
 	
@@ -96,14 +96,16 @@ public class DynamicPreferencesStage extends Stage {
 			this.currentTrace.getStateSpace().changePreferences(changedPreferences);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
-			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToAppyChanges.content");
+			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToApplyChanges.content");
 			alert.initOwner(this);
 			alert.show();
 			return;
 		}
 		this.globalPreferences.get().putAll(changedPreferences);
 		this.preferences.getState().apply();
-		this.toRefresh.refresh();
+		if (this.toRefresh != null) {
+			this.toRefresh.refresh();
+		}
 		this.close();
 	}
 }

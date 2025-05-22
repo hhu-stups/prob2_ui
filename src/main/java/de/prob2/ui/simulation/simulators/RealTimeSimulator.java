@@ -1,24 +1,27 @@
 package de.prob2.ui.simulation.simulators;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
+
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
 import de.prob2.ui.simulation.diagram.DiagramStage;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import javafx.application.Platform;
+
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 
 @Singleton
-public class RealTimeSimulator extends Simulator {
-
+public final class RealTimeSimulator extends Simulator {
 	private final Scheduler scheduler;
 
 	private final CurrentTrace currentTrace;
@@ -29,17 +32,14 @@ public class RealTimeSimulator extends Simulator {
 
 	private DiagramGenerator diagramGenerator;
 
-	private final Injector injector; 
-
 	@Inject
-	public RealTimeSimulator(final CurrentTrace currentTrace, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler, final Injector injector) {
-		super(currentTrace);
+	public RealTimeSimulator(final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
+		super(currentTrace, currentProject, objectMapperProvider);
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;
 		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
-		this.diagramGenerator = null; 
-		this.injector = injector;
+		this.diagramGenerator = null;
 	}
 
 	public void run() {
@@ -57,8 +57,17 @@ public class RealTimeSimulator extends Simulator {
 		scheduler.startSimulationStep();
 		// Read trace and pass it through chooseOperation to avoid race condition
 		Trace trace = currentTrace.get();
-		Trace newTrace = simulationStep(trace);
-		currentTrace.set(newTrace);
+		try {
+			Trace newTrace = simulationStep(trace);
+			Trace resultingTrace = newTrace;
+			if(currentTrace.get().getCurrentState().isInitialised()) {
+				resultingTrace = mergeUserInteractions(trace.getTransitionList().size(), currentTrace.get(), newTrace);
+			}
+			currentTrace.set(resultingTrace);
+		} catch (Exception e) {
+			scheduler.endSimulationStep();
+			throw e;
+		}
 		scheduler.endSimulationStep();
 		Platform.runLater(()->{
 			if (diagramGenerator.getDiaStage()!= null ) {
@@ -67,6 +76,21 @@ public class RealTimeSimulator extends Simulator {
 				}
 			}
 		});
+	}
+
+	private Trace mergeUserInteractions(int index, Trace traceWithUserInteractions, Trace simulatedTrace) {
+		Trace trace = traceWithUserInteractions;
+		for(int i = index; i < simulatedTrace.getTransitionList().size(); i++) {
+			Transition nextTransition = simulatedTrace.getTransitionList().get(i);
+			final Transition op = trace.getCurrentState().getOutTransitions().stream()
+					.filter(t -> t.getId().equals(nextTransition.getId()))
+					.findAny()
+					.orElse(null);
+			if(op != null) {
+				trace = trace.add(op);
+			}
+		}
+		return trace;
 	}
 
 	public BooleanProperty runningProperty() {
@@ -87,7 +111,7 @@ public class RealTimeSimulator extends Simulator {
 	public boolean endingConditionReached(Trace trace) {
 		boolean endingConditionReached = super.endingConditionReached(trace);
 		if(config instanceof SimulationModelConfiguration) {
-			return endingConditionReached && ((SimulationModelConfiguration) config).getUiListenerConfigurations().isEmpty();
+			return endingConditionReached && ((SimulationModelConfiguration) config).getListeners().isEmpty();
 		}
 		return endingConditionReached;
 	}

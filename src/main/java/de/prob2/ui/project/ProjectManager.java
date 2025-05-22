@@ -1,27 +1,20 @@
 package de.prob2.ui.project;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.google.inject.Injector;
-import de.prob2.ui.animation.tracereplay.TraceFileHandler;
-import de.prob2.ui.simulation.SimulatorStage;
-import de.prob2.ui.simulation.model.SimulationModel;
-import de.prob2.ui.visb.VisBView;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.json.TraceManager;
@@ -29,6 +22,7 @@ import de.prob.json.InvalidJsonFormatException;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -37,6 +31,9 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.simulation.SimulatorStage;
+import de.prob2.ui.simulation.model.SimulationModel;
+import de.prob2.ui.visb.VisBView;
 
 import javafx.application.Platform;
 import javafx.beans.property.IntegerProperty;
@@ -55,32 +52,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class ProjectManager {
+public final class ProjectManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProjectManager.class);
 	public static final String PROJECT_FILE_EXTENSION = "prob2project";
 
 	private final JacksonManager<Project> jacksonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final TraceManager traceManager;
 	private final FileChooserManager fileChooserManager;
 	private final I18n i18n;
+	private final ObjectMapper objectMapper;
 	
 	private final ObservableList<Path> recentProjects;
 	private final IntegerProperty maximumRecentProjects;
 	private final Injector injector;
 
 	@Inject
-	public ProjectManager(ObjectMapper objectMapper, JacksonManager<Project> jacksonManager, CurrentProject currentProject, StageManager stageManager, final TraceManager traceManager,
-												I18n i18n, Config config, final FileChooserManager fileChooserManager, final
-												Injector injector) {
+	public ProjectManager(
+		JacksonManager<Project> jacksonManager,
+		ObjectMapper objectMapperForProject,
+		CurrentProject currentProject,
+		StageManager stageManager,
+		I18n i18n,
+		Config config,
+		FileChooserManager fileChooserManager,
+		ObjectMapper objectMapper,
+		Injector injector
+	) {
 		this.jacksonManager = jacksonManager;
-		this.jacksonManager.initContext(new ProjectJsonContext(objectMapper));
+		this.jacksonManager.initContext(new ProjectJsonContext(objectMapperForProject));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.traceManager = traceManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
+		this.objectMapper = objectMapper;
 		this.injector = injector;
 		this.recentProjects = FXCollections.observableArrayList();
 		this.maximumRecentProjects = new SimpleIntegerProperty(this, "maximumRecentProjects");
@@ -207,22 +212,11 @@ public class ProjectManager {
 		);
 		currentProject.set(updatedProject);
 
-		// To avoid corrupting the previously saved project if saving fails/is interrupted for some reason,
-		// save the project under a temporary file name first,
-		// and only once the project has been fully saved rename it to the real file name
-		// (overwriting any existing project file with that name).
-		final Path tempLocation = location.resolveSibling(location.getFileName() + ".tmp");
 		try {
-			this.jacksonManager.writeToFile(tempLocation, updatedProject);
-			Files.move(tempLocation, location, StandardCopyOption.REPLACE_EXISTING);
-		} catch (IOException | RuntimeException exc) {
-			LOGGER.warn("Failed to save project", exc);
-			stageManager.makeExceptionAlert(exc, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
-			try {
-				Files.deleteIfExists(tempLocation);
-			} catch (IOException e) {
-				LOGGER.warn("Failed to delete temporary project file after project save error", e);
-			}
+			this.jacksonManager.writeToFile(location, updatedProject);
+		} catch (Exception e) {
+			LOGGER.warn("Failed to save project file {}", location, e);
+			stageManager.makeExceptionAlert(e, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
 			return;
 		}
 
@@ -237,17 +231,6 @@ public class ProjectManager {
 			((ProjectJsonContext) this.jacksonManager.getContext()).setProjectLocation(path);
 			final Project project = this.jacksonManager.readFromFile(path);
 			project.setLocation(path.getParent());
-			// Because Jackson fills in some parts of the project using setters (especially in Machine),
-			// the project will be marked as changed immediately after loading,
-			// which makes the project savedness tracking behave incorrectly.
-			// To fix this, we forcibly mark the project as unchanged again after it is loaded.
-			project.resetChanged();
-			// Fill in ReplayTrace fields that Jackson cannot set.
-			for (final Machine machine : project.getMachines()) {
-				for (final ReplayTrace trace : machine.getMachineProperties().getTraces()) {
-					trace.initAfterLoad(path.resolveSibling(trace.getLocation()), traceManager);
-				}
-			}
 			return project;
 		} catch (IOException | JsonConversionException exc) {
 			LOGGER.warn("Failed to open project file", exc);
@@ -303,13 +286,12 @@ public class ProjectManager {
 		final Path projectLocation = path.getParent();
 		final Path relative = projectLocation.relativize(path);
 		final String shortName = MoreFiles.getNameWithoutExtension(path);
-		final String description = i18n.translate("menu.file.automaticProjectDescription", path);
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if (replacingProject) {
-			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
-			// call startAnimation directly because we already asked the user for confirmation
-			currentProject.startAnimation(machine);
+			currentProject.switchTo(new Project(shortName, "", Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
+			// we already asked the user for confirmation
+			currentProject.loadMachineWithoutConfirmation(machine);
 		}
 	}
 
@@ -330,16 +312,22 @@ public class ProjectManager {
 		}
 	}
 
-	public void openJson(Path selected) throws IOException {
+	private enum JsonType {
+		VISB, SIMB, NONE
+	}
+
+	public void openJson(Path selected) {
 		if (currentProject.getCurrentMachine() == null) {
-			stageManager.makeAlert(Alert.AlertType.WARNING, "common.alerts.noMachineLoaded.header",
-				"common.alerts.noMachineLoaded.content").show();
+			stageManager.makeAlert(
+					Alert.AlertType.WARNING,
+					"common.alerts.noMachineLoaded.header",
+					"common.alerts.noMachineLoaded.content"
+			).show();
 			return;
 		}
 		JsonType type = JsonType.NONE;
 		try {
-			ObjectMapper objectMapper = new ObjectMapper();
-			JsonNode rootNode = objectMapper.readTree(new File(selected.toUri()));
+			JsonNode rootNode = objectMapper.readTree(selected.toFile());
 			if (rootNode.has("items") || rootNode.has("events")) {
 				type = JsonType.VISB;
 			}
@@ -348,25 +336,27 @@ public class ProjectManager {
 			} else {
 				type = chooseType();
 			}
-		} catch (JsonParseException e){
-			stageManager.makeAlert(Alert.AlertType.ERROR, "project.projectManager.alerts.couldNotOpenJSON.header",
-				"project.projectManager.alerts.couldNotOpenJSON.content").show();
+		} catch (IOException e) {
+			LOGGER.error("Failed to open json file", e);
+			stageManager.makeExceptionAlert(
+					e,
+					"project.projectManager.alerts.couldNotOpenJSON.header",
+					"project.projectManager.alerts.couldNotOpenJSON.content"
+			).showAndWait();
 		}
 
-		switch(type) {
-			case VISB:
-				injector.getInstance(VisBView.class).loadVisBFile(selected);
-				break;
-			case SIMB:
+		switch (type) {
+			case VISB -> injector.getInstance(VisBView.class).addVisBVisualisationFromAbsolutePath(selected);
+			case SIMB -> {
 				injector.getInstance(SimulatorStage.class).show();
 				injector.getInstance(SimulatorStage.class).toFront();
-				currentProject.getCurrentMachine().getMachineProperties().simulationsProperty().add(new SimulationModel(currentProject.getLocation().relativize(selected), Collections.emptyList()));
-				break;
-			case NONE:
-				break;
+				currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(currentProject.getLocation().relativize(selected)));
+			}
+			case NONE -> {
+			}
 		}
 	}
-	private enum JsonType { VISB, SIMB, NONE }
+
 	private JsonType chooseType() {
 		List<ButtonType> buttons = new ArrayList<>();
 		ButtonType visBButton = new ButtonType("VisB");

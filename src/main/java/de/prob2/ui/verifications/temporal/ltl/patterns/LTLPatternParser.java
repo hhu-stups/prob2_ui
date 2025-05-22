@@ -13,9 +13,8 @@ import de.prob.ltl.parser.LtlParser.VarParamContext;
 import de.prob.ltl.parser.pattern.Pattern;
 import de.prob.ltl.parser.pattern.PatternManager;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckingResultItem;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ErrorsResult;
 import de.prob2.ui.verifications.temporal.ltl.LTLParseListener;
 
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -26,20 +25,20 @@ public final class LTLPatternParser {
 	}
 	
 	private static void handlePatternResult(LTLParseListener parseListener, LTLPatternItem item) {
-		CheckingResultItem resultItem;
+		ErrorsResult result;
 		// Empty Patterns do not have parse errors which is a little bit confusing
 		if(parseListener.getErrorMarkers().isEmpty() && !item.getCode().isEmpty()) {
-			resultItem = new TemporalCheckingResultItem(Checked.SUCCESS, parseListener.getErrorMarkers(), "verifications.result.patternParsedSuccessfully");
+			result = new ErrorsResult(CheckingStatus.SUCCESS, parseListener.getErrorMarkers(), "verifications.temporal.ltl.pattern.parsedSuccessfully");
 		} else {
 			List<ErrorItem> errorMarkers = parseListener.getErrorMarkers();
 			if(item.getCode().isEmpty()) {
-				resultItem = new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.temporal.ltl.pattern.empty");
+				result = new ErrorsResult(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.empty");
 			} else {
 				final String msg = parseListener.getErrorMarkers().stream().map(ErrorItem::getMessage).collect(Collectors.joining("\n"));
-				resultItem = new TemporalCheckingResultItem(Checked.PARSE_ERROR, errorMarkers, "verifications.temporal.ltl.pattern.couldNotParsePattern", msg);
+				result = new ErrorsResult(CheckingStatus.INVALID_TASK, errorMarkers, "verifications.temporal.ltl.pattern.couldNotParsePattern", msg);
 			}
 		}
-		item.setResultItem(resultItem);
+		item.setResult(result);
 	}
 	
 	public static LTLPatternItem parsePattern(final String description, final String code, final Machine machine) {
@@ -53,12 +52,12 @@ public final class LTLPatternParser {
 	public static void addPattern(LTLPatternItem item, Machine machine) {
 		Pattern pattern = makePattern(item.getDescription(), item.getCode());
 		handlePatternResult(checkDefinition(pattern, machine), item);
-		machine.getMachineProperties().getPatternManager().getPatterns().add(pattern);
+		machine.getPatternManager().getPatterns().add(pattern);
 	}
 	
 	private static LTLParseListener checkDefinition(Pattern pattern, Machine machine) {
 		LTLParseListener parseListener = initializeParseListener(pattern);
-		pattern.updateDefinitions(machine.getMachineProperties().getPatternManager());
+		pattern.updateDefinitions(machine.getPatternManager());
 		ParseTree ast = pattern.getAst();
 		List<String> patternNames = new ArrayList<>();
 		for(int i = 0; i < ast.getChildCount(); i++) {
@@ -104,7 +103,7 @@ public final class LTLPatternParser {
 	}
 	
 	public static void removePattern(LTLPatternItem item, Machine machine) {
-		PatternManager patternManager = machine.getMachineProperties().getPatternManager();
+		PatternManager patternManager = machine.getPatternManager();
 		Pattern pattern = patternManager.getUserPattern(item.getName());
 		if(pattern != null) {
 			patternManager.removePattern(pattern);
@@ -118,9 +117,4 @@ public final class LTLPatternParser {
 		pattern.setCode(code);
 		return pattern;
 	}
-	
-	public static void parseMachine(Machine machine) {
-		machine.getMachineProperties().getLTLPatterns().forEach(item -> LTLPatternParser.addPattern(item, machine));
-	}
-	
 }

@@ -1,18 +1,23 @@
 package de.prob2.ui.simulation.simulators.check;
 
-import com.google.inject.Injector;
-import de.prob.statespace.Trace;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.choice.SimulationCheckingType;
-import de.prob2.ui.simulation.simulators.Simulator;
-import de.prob2.ui.verifications.Checked;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+
+import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
+import de.prob2.ui.simulation.simulators.Simulator;
+import de.prob2.ui.verifications.CheckingStatus;
 
 public class SimulationEstimator implements ISimulationPropertyChecker {
 
@@ -53,35 +58,34 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	private SimulationPropertyChecker simulationPropertyChecker;
 
 	private final Injector injector;
-
-	private final I18n i18n;
-
+	private final SimulationFileHandler simulationFileHandler;
 	private final EstimationType estimationType;
 
 	private final SimulationCheckingType checkingType;
-
 	private final double desiredValue;
-
 	private final double epsilon;
 
-	public SimulationEstimator(final Injector injector, final I18n i18n, final EstimationType estimationType,
-							   final SimulationCheckingType checkingType, final double desiredValue, final double epsilon) {
+	public SimulationEstimator(final Injector injector, final SimulationFileHandler simulationFileHandler, final EstimationType estimationType,
+	                           final SimulationCheckingType checkingType, final double desiredValue, final double epsilon) {
 		this.injector = injector;
-		this.i18n = i18n;
+		this.simulationFileHandler = simulationFileHandler;
 		this.estimationType = estimationType;
 		this.checkingType = checkingType;
 		this.desiredValue = desiredValue;
 		this.epsilon = epsilon;
 	}
 
-	public void initialize(final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationPropertyChecker(this, injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+	public void initialize(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		this.simulationPropertyChecker = new SimulationPropertyChecker(this, currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	private void checkMinimum() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
 		double sum;
-		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.SUM || checkingType == SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MINIMUM || checkingType == SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MAXIMUM || checkingType == SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS) {
 			sum = simulationPropertyChecker.getEstimatedValues().stream()
 					.reduce(0.0, Double::sum);
 		} else {
@@ -103,7 +107,10 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	private void checkMaximum() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
 		double sum;
-		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.SUM || checkingType == SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MINIMUM || checkingType == SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MAXIMUM || checkingType == SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS) {
 			sum = simulationPropertyChecker.getEstimatedValues().stream()
 					.reduce(0.0, Double::sum);
 		} else {
@@ -125,7 +132,10 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	private void checkMean() {
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
 		double sum;
-		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.SUM) {
+		if(checkingType == SimulationCheckingType.AVERAGE || checkingType == SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.SUM || checkingType == SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MINIMUM || checkingType == SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS ||
+				checkingType == SimulationCheckingType.MAXIMUM || checkingType == SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS) {
 			sum = simulationPropertyChecker.getEstimatedValues().stream()
 					.reduce(0.0, Double::sum);
 		} else {
@@ -186,7 +196,7 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	}
 
 	@Override
-	public List<Checked> getResultingStatus() {
+	public List<CheckingStatus> getResultingStatus() {
 		return simulationPropertyChecker.getResultingStatus();
 	}
 
@@ -215,6 +225,7 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 		return simulationPropertyChecker.calculateExtendedStats();
 	}
 
+	@Override
 	public void calculateStatistics(long time) {
 		double wallTime = new BigDecimal(time / 1000.0f).setScale(3, RoundingMode.HALF_UP).doubleValue();
 		List<Trace> resultingTraces = simulationPropertyChecker.getResultingTraces();
@@ -242,7 +253,7 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	}
 
 	@Override
-	public Checked checkTrace(Trace trace, int time) {
+	public CheckingStatus checkTrace(Trace trace, int time) {
 		return simulationPropertyChecker.checkTrace(trace, time);
 	}
 

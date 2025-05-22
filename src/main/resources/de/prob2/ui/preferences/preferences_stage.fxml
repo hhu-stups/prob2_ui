@@ -4,6 +4,7 @@
 <?import de.prob2.ui.sharedviews.BetterTabPane?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Spinner?>
@@ -43,6 +44,7 @@
 								<Button fx:id="defaultLocationButton" styleClass="button-dark2" text="%preferences.stage.tabs.general.buttons.selectLocation"
 									onAction="#selectDefaultLocation" />
 							</HBox>
+							<CheckBox fx:id="cbAutoReloadMachine" text="%preferences.stage.tabs.general.checkBoxes.autoReloadMachine"/>
 							<HBox spacing="10.0" alignment="CENTER_LEFT">
 								<Label text="%preferences.stage.tabs.general.label.localeOverride"/>
 								<ChoiceBox fx:id="localeOverrideBox"/>

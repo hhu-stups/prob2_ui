@@ -8,7 +8,6 @@
 <?import javafx.scene.control.TitledPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
-
 <fx:root type="javafx.scene.control.TitledPane" fx:id="self" collapsible="true" text="Options" xmlns="http://javafx.com/javafx/11.0.1"
 			xmlns:fx="http://javafx.com/fxml/1">
 	<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="598.0"
@@ -42,40 +41,32 @@
 			<padding>
 				<Insets top="25.0"/>
 			</padding>
-			<children>
-				<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
-					<children>
-						<Label text="Used Identifier"/>
-						<ListView fx:id="usedIDs" prefHeight="200.0" prefWidth="200.0">
-							<VBox.margin>
-								<Insets top="10.0"/>
-							</VBox.margin>
-						</ListView>
-					</children>
-				</VBox>
-				<VBox minHeight="-Infinity" minWidth="-Infinity" spacing="50.0">
-					<children>
-						<Button fx:id="switchLeft" mnemonicParsing="false" text="&lt;"/>
-						<Button fx:id="switchRight" mnemonicParsing="false" text="&gt;"/>
-					</children>
-					<padding>
-						<Insets top="50.0"/>
-					</padding>
-					<HBox.margin>
-						<Insets left="25.0" right="25.0"/>
-					</HBox.margin>
-				</VBox>
-				<VBox>
-					<children>
-						<Label text="Ignored Identifier"/>
-						<ListView fx:id="ignoredIDs" prefHeight="200.0" prefWidth="200.0">
-							<VBox.margin>
-								<Insets top="10.0"/>
-							</VBox.margin>
-						</ListView>
-					</children>
-				</VBox>
-			</children>
+			<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity">
+				<Label text="Used Identifier"/>
+				<ListView fx:id="usedIDs" prefHeight="200.0" prefWidth="200.0">
+					<VBox.margin>
+						<Insets top="10.0"/>
+					</VBox.margin>
+				</ListView>
+			</VBox>
+			<VBox minHeight="-Infinity" minWidth="-Infinity" spacing="50.0">
+				<padding>
+					<Insets top="50.0"/>
+				</padding>
+				<HBox.margin>
+					<Insets left="25.0" right="25.0"/>
+				</HBox.margin>
+				<Button fx:id="switchLeft" mnemonicParsing="false" text="&lt;"/>
+				<Button fx:id="switchRight" mnemonicParsing="false" text="&gt;"/>
+			</VBox>
+			<VBox>
+				<Label text="Ignored Identifier"/>
+				<ListView fx:id="ignoredIDs" prefHeight="200.0" prefWidth="200.0">
+					<VBox.margin>
+						<Insets top="10.0"/>
+					</VBox.margin>
+				</ListView>
+			</VBox>
 		</HBox>
 	</VBox>
 </fx:root>

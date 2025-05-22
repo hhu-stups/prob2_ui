@@ -35,6 +35,7 @@ import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.project.ProjectManager;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
@@ -43,9 +44,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Window;
 
 @Singleton
-public class FileChooserManager {
+public final class FileChooserManager {
 	public enum Kind {
-		PROJECTS_AND_MACHINES, NEW_MACHINE, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, LTL, SIMULATION, HISTORY_CHART
+		PROJECTS_AND_MACHINES, NEW_MACHINE, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, SIMULATION, HISTORY_CHART
 	}
 
 	public static final String EXTENSION_PATTERN_PREFIX = "*.";
@@ -192,9 +193,13 @@ public class FileChooserManager {
 	public FileChooser.ExtensionFilter getProB2ProjectFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.proB2Project", ProjectManager.PROJECT_FILE_EXTENSION);
 	}
-	
+
 	public FileChooser.ExtensionFilter getProB2TraceFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.proB2Trace", TraceFileHandler.TRACE_FILE_EXTENSION);
+	}
+
+	public FileChooser.ExtensionFilter getSimBFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.simulation", SimulationFileHandler.SIMULATION_FILE_EXTENSION);
 	}
 	
 	public FileChooser.ExtensionFilter getPlainTextFilter() {
@@ -205,8 +210,24 @@ public class FileChooserManager {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv");
 	}
 	
+	public FileChooser.ExtensionFilter getSvgFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
+	}
+
 	public FileChooser.ExtensionFilter getPngFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.png", "png");
+	}
+
+	public FileChooser.ExtensionFilter getPdfFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.pdf", "pdf");
+	}
+
+	public FileChooser.ExtensionFilter getDotFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.dot", "dot");
+	}
+
+	public FileChooser.ExtensionFilter getPumlFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.puml", "puml");
 	}
 
 	public Path showOpenFileChooser(final FileChooser fileChooser, final Kind kind, final Window window) {
@@ -255,7 +276,7 @@ public class FileChooserManager {
 		final File dirFile = directoryChooser.showDialog(window);
 		final Path dirPath = dirFile == null ? null : dirFile.toPath();
 		if (dirPath != null) {
-			setInitialDirectory(kind, dirPath);
+			setInitialDirectory(kind, dirPath.getParent());
 		}
 		return dirPath;
 	}
@@ -373,7 +394,7 @@ public class FileChooserManager {
 	}
 
 	private boolean containsValidInitialDirectory(Kind kind) {
-		return kind != null && initialDirectories.containsKey(kind) && Files.exists(initialDirectories.get(kind));
+		return kind != null && initialDirectories.containsKey(kind) && Files.isDirectory(initialDirectories.get(kind));
 	}
 
 	private Path getInitialDirectory(Kind kind) {
@@ -381,7 +402,7 @@ public class FileChooserManager {
 	}
 
 	private void setInitialDirectory(Kind kind, Path dir) {
-		if (kind != null && dir != null && Files.exists(dir)) {
+		if (kind != null && dir != null && Files.isDirectory(dir)) {
 			initialDirectories.put(kind, dir);
 		}
 	}

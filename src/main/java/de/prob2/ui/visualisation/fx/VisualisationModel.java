@@ -271,7 +271,7 @@ public class VisualisationModel {
 		} catch (EvaluationException | VisualisationParseException evalException) {
 			Alert alert = stageManager.makeExceptionAlert(evalException, "", "visualisation.fx.model.alerts.evaluationException.content", formula);
 			alert.show();
-			LOGGER.warn("EvaluationException while evaluating the formula \"" + formula +"\".", evalException);
+			LOGGER.warn("EvaluationException while evaluating the formula \"{}\".", formula, evalException);
 			return null;
 		}
 	}

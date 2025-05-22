@@ -5,8 +5,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.chart.HistoryChartStage;
-import de.prob2.ui.dynamic.dotty.DotView;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.visualisation.magiclayout.MagicLayoutView;
@@ -17,7 +16,7 @@ import javafx.stage.Stage;
 
 @FXMLInjected
 @Singleton
-public class VisualisationMenu extends Menu {
+public final class VisualisationMenu extends Menu {
 	private final Injector injector;
 
 	@Inject
@@ -27,17 +26,10 @@ public class VisualisationMenu extends Menu {
 	}
 
 	@FXML
-	private void openGraphVisualisation() {
-		DotView dotView = injector.getInstance(DotView.class);
-		dotView.show();
-		dotView.toFront();
-	}
-
-	@FXML
-	private void openTableVisualisation() {
-		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
-		expressionTableView.show();
-		expressionTableView.toFront();
+	private void openDynamicVisualisation() {
+		DynamicVisualizationStage stage = injector.getInstance(DynamicVisualizationStage.class);
+		stage.show();
+		stage.toFront();
 	}
 	
 	@FXML
@@ -53,5 +45,4 @@ public class VisualisationMenu extends Menu {
 		chartStage.show();
 		chartStage.toFront();
 	}
-
 }

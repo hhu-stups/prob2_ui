@@ -5,20 +5,22 @@ import com.google.inject.Inject;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.temporal.TemporalCheckingResultItem;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ErrorsResult;
 import de.prob2.ui.verifications.temporal.TemporalItemStage;
 import de.prob2.ui.verifications.temporal.ltl.patterns.builtins.LTLBuiltinsStage;
 
 import javafx.fxml.FXML;
 
-public class LTLPatternStage extends TemporalItemStage {
+public final class LTLPatternStage extends TemporalItemStage {
+	private final CurrentProject currentProject;
 
 	private LTLPatternItem result;
 
 	@Inject
 	public LTLPatternStage(final StageManager stageManager, final CurrentProject currentProject, final FontSize fontSize, final LTLBuiltinsStage builtinsStage) {
-		super(currentProject, fontSize, builtinsStage);
+		super(fontSize, builtinsStage);
+		this.currentProject = currentProject;
 		this.result = null;
 		stageManager.loadFXML(this, "ltlpattern_stage.fxml");
 	}
@@ -37,9 +39,9 @@ public class LTLPatternStage extends TemporalItemStage {
 		this.result = null;
 		String code = this.taCode.getText();
 		LTLPatternItem item = LTLPatternParser.parsePattern(this.taDescription.getText(), code, this.currentProject.getCurrentMachine());
-		final TemporalCheckingResultItem resultItem = (TemporalCheckingResultItem) item.getResultItem();
-		if (resultItem.getChecked() == Checked.PARSE_ERROR) {
-			showErrors(resultItem.getErrorMarkers());
+		ErrorsResult res = item.getResult();
+		if (res.getStatus() == CheckingStatus.INVALID_TASK) {
+			showErrors(res.getErrorMarkers());
 		} else {
 			this.result = item;
 			this.close();

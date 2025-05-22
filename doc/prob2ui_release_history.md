@@ -4,8 +4,23 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.2.2 (not released yet)
 
+* Added B type information for code completion (if available)
+* Customisable VisB HTML export and SVG export of the current VisB image
+* Added TLC model checking for classical B machines with TLC4B and export of generated TLA+ files (also limited support for Event-B and models with internal B representation)
 * Improved support for rule validations with rules machines (.rmch)
 * Added search to editor
+* Improve ProB and Groovy consoles
+  * Add syntax highlighting
+  * Fix a bunch of bugs
+* Added language selection dropdown to interactive console (e.g. evaluation of both classical B and TLA+ formulas in the context of a translated TLA+ module)
+* Improved export of (internal) classical B representation for Event-B and translated languages
+* Improve SimB JSON format:
+  * `probabilisticVariables` is now split up into `probabilisticVariables` and `transitionSelection` (refer to https://prob.hhu.de/w/index.php?title=SimB#Direct_Activation for more information)
+  * Interpret all probabilities as weights: they do not have to sum to one anymore
+  * Use the Jackson library for saving and loading (this removes the GSON dependency)
+* Removed support for Java versions older than Java 21
+
+**Note:** The multi-platform jar might not work on all macOS processor architectures - consider using the platform-specific binaries, which are available for both x86_64 and arm64.
 
 ## Version 1.2.1 (2023-08-15)
 
@@ -25,7 +40,9 @@ Downloads of the current release and snapshot development builds can be found on
 * Improved handling of invalid values for ProB preferences
 * Improved feedback for internal errors in VisB
 
-**Note:** This is the last release to support Java 8 and 11. The next release will require Java 17 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
+**Note:** This is the last release to support Java 8, 11, and 17. The next release will require Java 21 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
+
+**Note:** The multi-platform jar might not work on all macOS processor architectures - consider using the platform-specific binaries, which are available for both x86_64 and arm64.
 
 ### Downloads for version 1.2.1
 

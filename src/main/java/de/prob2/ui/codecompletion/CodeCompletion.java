@@ -1,17 +1,11 @@
 package de.prob2.ui.codecompletion;
 
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import de.prob2.ui.internal.StageManager;
-
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
 import javafx.geometry.Point2D;
+import javafx.scene.Node;
+import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
@@ -19,16 +13,18 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Popup;
 import javafx.util.Callback;
 
-public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
+import java.util.List;
+import java.util.Optional;
 
+public final class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 	private final ParentWithEditableText<? super T> parent;
+	private final Callback<String, List<? extends T>> codeCompletionProvider;
 	private final ChangeListener<Optional<Point2D>> caretBoundsChangeListener;
-	private final Callback<String, Collection<? extends T>> codeCompletionProvider;
 
 	@FXML
 	private ListView<T> lvSuggestions;
 
-	public CodeCompletion(StageManager stageManager, ParentWithEditableText<? super T> parent, Callback<String, Collection<? extends T>> codeCompletionProvider) {
+	public CodeCompletion(StageManager stageManager, ParentWithEditableText<? super T> parent, Callback<String, List<? extends T>> codeCompletionProvider) {
 		super();
 		this.parent = parent;
 		this.codeCompletionProvider = codeCompletionProvider;
@@ -51,6 +47,26 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 	private void initialize() {
 		lvSuggestions.setOnKeyPressed(this::onKeyPressed);
 		lvSuggestions.setOnMouseClicked(this::onMouseClicked);
+		lvSuggestions.setCellFactory(listView -> new ListCell<>() {
+
+			@Override
+			protected void updateItem(T item, boolean empty) {
+				super.updateItem(item, empty);
+				if (empty || item == null) {
+					setText(null);
+					setGraphic(null);
+				} else {
+					Node node = item.getListNode(this.isSelected());
+					if (node != null) {
+						setText(null);
+						setGraphic(node);
+					} else {
+						setText(item.toString());
+						setGraphic(null);
+					}
+				}
+			}
+		});
 	}
 
 	private void recalculateAnchorPosition() {
@@ -77,11 +93,8 @@ public class CodeCompletion<T extends CodeCompletionItem> extends Popup {
 		// TODO: update in another thread and use callbacks
 		Optional<String> text = this.parent.getTextBeforeCaret().getValue();
 		if (text.isPresent()) {
-			Collection<? extends T> suggestions = this.codeCompletionProvider.call(text.get());
-			List<? extends T> sortedSuggestions = suggestions.stream()
-				                                      .sorted(Comparator.comparing(Objects::toString, String.CASE_INSENSITIVE_ORDER))
-				                                      .collect(Collectors.toList());
-			this.lvSuggestions.getItems().setAll(sortedSuggestions);
+			List<? extends T> suggestions = this.codeCompletionProvider.call(text.get());
+			this.lvSuggestions.getItems().setAll(suggestions);
 		} else {
 			this.lvSuggestions.getItems().clear();
 		}

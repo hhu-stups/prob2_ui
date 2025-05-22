@@ -23,8 +23,7 @@ import javafx.util.StringConverter;
 
 @Singleton
 @FXMLInjected
-public class SimulationPropertyChoice extends GridPane {
-
+public final class SimulationPropertyChoice extends GridPane {
 	public static class SimulationPropertyItem {
 
 		private final SimulationCheckingType checkingType;
@@ -62,7 +61,9 @@ public class SimulationPropertyChoice extends GridPane {
 
 	private final List<SimulationCheckingType> PREDICATE_TYPES = Arrays.asList(SimulationCheckingType.PREDICATE_INVARIANT, SimulationCheckingType.PREDICATE_FINAL, SimulationCheckingType.PREDICATE_EVENTUALLY);
 
-	private final List<SimulationCheckingType> EXPRESSION_TYPES = Arrays.asList(SimulationCheckingType.AVERAGE, SimulationCheckingType.SUM);
+	private final List<SimulationCheckingType> EXPRESSION_TYPES = Arrays.asList(SimulationCheckingType.AVERAGE, SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS, SimulationCheckingType.SUM, SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS,
+			SimulationCheckingType.MINIMUM, SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS,
+			SimulationCheckingType.MAXIMUM, SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS);
 
 
 	@FXML
@@ -140,22 +141,49 @@ public class SimulationPropertyChoice extends GridPane {
 	}
 
 
-	public Map<String, Object> extractInformation() {
+	public Map<String, Object> extractInformation(SimulationType simulationType) {
 		Map<String, Object> information = new HashMap<>();
 		SimulationPropertyChoice.SimulationPropertyItem checkingChoiceItem = checkingChoice.getSelectionModel().getSelectedItem();
-		information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
-		if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
-			information.put("PREDICATE", tfPredicate.getText());
-		}
+		if(simulationType != SimulationType.MONTE_CARLO_SIMULATION) {
+			information.put("CHECKING_TYPE", checkingChoiceItem.getCheckingType());
+			if(PREDICATE_TYPES.contains(checkingChoiceItem.getCheckingType())) {
+				information.put("PREDICATE", tfPredicate.getText());
+			}
 
-		if(EXPRESSION_TYPES.contains(checkingChoiceItem.getCheckingType())) {
-			information.put("EXPRESSION", tfExpression.getText());
-		}
+			if(EXPRESSION_TYPES.contains(checkingChoiceItem.getCheckingType())) {
+				information.put("EXPRESSION", tfExpression.getText());
+			}
 
-		if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
-			information.put("TIME", tfMonteCarloTime.getText());
+			if(checkingChoiceItem.getCheckingType() == SimulationCheckingType.TIMING) {
+				information.put("TIME", tfMonteCarloTime.getText());
+			}
 		}
 		return information;
+	}
+
+	public void setInformation(Map<String, Object> object) {
+		if(object.containsKey("CHECKING_TYPE")) {
+			checkingChoice.getSelectionModel().select(new SimulationPropertyItem(SimulationCheckingType.valueOf(object.get("CHECKING_TYPE").toString())));
+		}
+
+		if(object.containsKey("PREDICATE")) {
+			tfPredicate.setText(object.get("PREDICATE").toString());
+		}
+
+		if(object.containsKey("EXPRESSION")) {
+			tfExpression.setText(object.get("EXPRESSION").toString());
+		}
+
+		if(object.containsKey("TIME")) {
+			tfMonteCarloTime.setText(object.get("TIME").toString());
+		}
+	}
+
+	public void reset() {
+		checkingChoice.getSelectionModel().clearSelection();
+		tfPredicate.clear();
+		tfExpression.clear();
+		tfMonteCarloTime.clear();
 	}
 
 	public void setChoosingStage(SimulationChoosingStage choosingStage) {
@@ -165,10 +193,16 @@ public class SimulationPropertyChoice extends GridPane {
 	public void updateCheck(SimulationType simulationType) {
 		checkingChoice.getSelectionModel().clearSelection();
 		if(simulationType == SimulationType.ESTIMATION) {
-			checkingChoice.getItems().addAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.SUM));
+			checkingChoice.getItems().addAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS),
+					new SimulationPropertyItem(SimulationCheckingType.SUM), new SimulationPropertyItem(SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS),
+					new SimulationPropertyItem(SimulationCheckingType.MINIMUM), new SimulationPropertyItem(SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS),
+					new SimulationPropertyItem(SimulationCheckingType.MAXIMUM), new SimulationPropertyItem(SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS));
 			return;
 		}
-		checkingChoice.getItems().removeAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.SUM));
+		checkingChoice.getItems().removeAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS),
+				new SimulationPropertyItem(SimulationCheckingType.SUM), new SimulationPropertyItem(SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS),
+				new SimulationPropertyItem(SimulationCheckingType.MINIMUM), new SimulationPropertyItem(SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS),
+				new SimulationPropertyItem(SimulationCheckingType.MAXIMUM), new SimulationPropertyItem(SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS));
 	}
 
 	public ChoiceBox<SimulationPropertyItem> getCheckingChoice() {

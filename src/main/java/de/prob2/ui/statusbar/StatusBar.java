@@ -7,11 +7,12 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.Trace;
+import de.prob.statespace.State;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.Translatable;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -27,7 +28,7 @@ import javafx.scene.layout.HBox;
 
 @FXMLInjected
 @Singleton
-public class StatusBar extends HBox {
+public final class StatusBar extends HBox {
 	public enum LoadingStatus implements Translatable {
 		NOT_LOADING("common.noModelLoaded"),
 		PARSING_FILE("statusbar.loadStatus.parsingFile"),
@@ -53,18 +54,20 @@ public class StatusBar extends HBox {
 	
 	private final I18n i18n;
 	private final CurrentTrace currentTrace;
+	private final CliTaskExecutor cliExecutor;
 	private final Provider<ErrorStatusStage> errorStatusStageProvider;
 	
 	private final ObjectProperty<StatusBar.LoadingStatus> loadingStatus;
 	private BooleanExpression updating;
 	
 	@Inject
-	private StatusBar(final I18n i18n, final CurrentTrace currentTrace,
+	private StatusBar(final I18n i18n, final CurrentTrace currentTrace, final CliTaskExecutor cliExecutor,
 			final Provider<ErrorStatusStage> errorStatusStageProvider, final StageManager stageManager) {
 		super();
 		
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
+		this.cliExecutor = cliExecutor;
 		this.errorStatusStageProvider = errorStatusStageProvider;
 		this.loadingStatus = new SimpleObjectProperty<>(this, "loadingStatus", StatusBar.LoadingStatus.NOT_LOADING);
 		this.updating = Bindings.createBooleanBinding(() -> false);
@@ -106,48 +109,66 @@ public class StatusBar extends HBox {
 	private void update() {
 		statusLabel.getStyleClass().removeAll("no-error", "warning", "error");
 		infoIcon.setVisible(false);
-		if (this.updating.get()) {
+		if (this.getLoadingStatus() != StatusBar.LoadingStatus.NOT_LOADING) {
+			statusLabel.setText(i18n.translate(this.getLoadingStatus()));
+		} else if (this.updating.get()) {
 			statusLabel.setText(i18n.translate("statusbar.updatingViews"));
 		} else {
-			final Trace trace = this.currentTrace.get();
-			if (trace != null) {
-				final List<String> errorMessages = getErrorMessages(trace);
-				if (errorMessages.isEmpty()) {
-					final List<String> warningMessages = getWarningMessages(trace);
-					if (warningMessages.isEmpty()) {
-						statusLabel.getStyleClass().add("no-error");
-						statusLabel.setText(i18n.translate("statusbar.noErrors"));
-					} else {
-						statusLabel.getStyleClass().add("warning");
-						statusLabel.setText(i18n.translate("statusbar.warnings", String.join(", ", warningMessages)));
-					}
+			State state = this.currentTrace.getCurrentState();
+			if (state != null) {
+				// showStateStatus requires the state to be explored and may hang the UI thread otherwise.
+				// If the current state hasn't been explored yet,
+				// do so on the CLI executor before showing the status.
+				if (state.isExplored()) {
+					this.showStateStatus(state);
 				} else {
-					statusLabel.getStyleClass().add("error");
-					statusLabel.setText(i18n.translate("statusbar.someErrors", String.join(", ", errorMessages)));
+					statusLabel.setText(i18n.translate("statusbar.updatingViews"));
+					cliExecutor.execute(() -> {
+						state.exploreIfNeeded();
+						Platform.runLater(() -> this.showStateStatus(state));
+					});
 				}
-				infoIcon.setVisible(true);
 			} else {
-				statusLabel.setText(i18n.translate(this.getLoadingStatus()));
+				statusLabel.setText(i18n.translate("common.noModelLoaded"));
 			}
 		}
 	}
 
-	private List<String> getErrorMessages(final Trace trace) {
+	private List<String> getErrorMessages(State state) {
 		final List<String> errorMessages = new ArrayList<>();
-		if (!trace.getCurrentState().isInvariantOk()) {
+		if (!state.isInvariantOk()) {
 			errorMessages.add(i18n.translate("statusbar.errors.invariantNotOK"));
 		}
-		if (!trace.getCurrentState().getStateErrors().isEmpty()) {
+		if (!state.getStateErrors().isEmpty()) {
 			errorMessages.add(i18n.translate("statusbar.errors.stateErrors"));
 		}
 		return errorMessages;
 	}
 
-	private List<String> getWarningMessages(final Trace trace) {
+	private List<String> getWarningMessages(State state) {
 		final List<String> warningMessages = new ArrayList<>();
-		if (trace.getCurrentState().getOutTransitions().isEmpty()) {
+		if (state.getOutTransitions().isEmpty()) {
 			warningMessages.add(i18n.translate("statusbar.warnings.deadlock"));
 		}
 		return warningMessages;
+	}
+
+	private void showStateStatus(State state) {
+		assert state.isExplored();
+		List<String> errorMessages = getErrorMessages(state);
+		if (errorMessages.isEmpty()) {
+			List<String> warningMessages = getWarningMessages(state);
+			if (warningMessages.isEmpty()) {
+				statusLabel.getStyleClass().add("no-error");
+				statusLabel.setText(i18n.translate("statusbar.noErrors"));
+			} else {
+				statusLabel.getStyleClass().add("warning");
+				statusLabel.setText(i18n.translate("statusbar.warnings", String.join(", ", warningMessages)));
+			}
+		} else {
+			statusLabel.getStyleClass().add("error");
+			statusLabel.setText(i18n.translate("statusbar.someErrors", String.join(", ", errorMessages)));
+		}
+		infoIcon.setVisible(true);
 	}
 }

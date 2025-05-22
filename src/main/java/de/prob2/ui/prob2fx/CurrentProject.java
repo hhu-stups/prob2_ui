@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -13,6 +15,7 @@ import com.google.inject.Singleton;
 
 import de.prob.json.JsonMetadata;
 import de.prob.statespace.StateSpace;
+import de.prob.statespace.Trace;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -23,11 +26,9 @@ import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.project.preferences.Preference;
-import de.prob2.ui.verifications.temporal.ltl.patterns.LTLPatternParser;
 import de.prob2.ui.vomanager.Requirement;
 
-import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
 import javafx.beans.property.ObjectProperty;
@@ -45,7 +46,6 @@ import javafx.scene.control.ButtonType;
 
 @Singleton
 public final class CurrentProject extends SimpleObjectProperty<Project> {
-	private final BooleanProperty exists;
 	private final StringProperty name;
 	private final StringProperty description;
 	private final ListProperty<Machine> machines;
@@ -72,8 +72,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 
 		this.defaultLocation = new SimpleObjectProperty<>(this, "defaultLocation",
 			Paths.get(System.getProperty("user.home")));
-		this.exists = new SimpleBooleanProperty(this, "exists", false);
-		this.exists.bind(Bindings.isNotNull(this));
 		this.name = new SimpleStringProperty(this, "name", "");
 		this.description = new SimpleStringProperty(this, "description", "");
 		this.machines = new SimpleListProperty<>(this, "machines", FXCollections.observableArrayList());
@@ -103,13 +101,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 				}
 				for (Machine machine : to.getMachines()) {
 					machine.changedProperty().addListener((o1, from1, to1) -> {
-						if (to1) {
-							this.setSaved(false);
-						}
-					});
-				}
-				for (Preference pref : to.getPreferences()) {
-					pref.changedProperty().addListener((o1, from1, to1) -> {
 						if (to1) {
 							this.setSaved(false);
 						}
@@ -152,43 +143,51 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.updateCurrentMachine(null, null);
 	}
 
-	public CompletableFuture<?> startAnimation(Machine m, Preference p) {
+	public CompletableFuture<Trace> loadMachineWithoutConfirmation(Machine m, Preference p) {
 		final StateSpace stateSpace = currentTrace.getStateSpace();
 		if (stateSpace != null) {
 			stateSpace.sendInterrupt();
 		}
 		injector.getInstance(CliTaskExecutor.class).interruptAll();
-		injector.getInstance(BEditorView.class).getErrors().clear();
+		BEditorView bEditorView = injector.getInstance(BEditorView.class);
+		bEditorView.getErrors().clear();
+		bEditorView.updateLoadedText();
+
+		Machine prevMachine = this.getCurrentMachine();
+		if (prevMachine != null) {
+			prevMachine.resetAnimatorDependentState();
+		}
+
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
-		CompletableFuture<?> loadFuture = machineLoader.loadAsync(m, p.getPreferences());
+		CompletableFuture<Trace> loadFuture = machineLoader.loadAsync(m, p.getPreferences());
 		this.updateCurrentMachine(m, p);
-		m.getMachineProperties().resetStatus();
-		LTLPatternParser.parseMachine(m);
-		return loadFuture;
+		return loadFuture.thenApply(trace -> {
+			Platform.runLater(() -> m.updateAfterLoad(trace));
+			return trace;
+		});
 	}
 
-	public CompletableFuture<?> startAnimation(Machine m) {
-		return this.startAnimation(m, this.get().getPreference(m.getLastUsedPreferenceName()));
+	public CompletableFuture<Trace> loadMachineWithoutConfirmation(Machine m) {
+		return this.loadMachineWithoutConfirmation(m, this.get().getPreference(m.getLastUsedPreferenceName()));
 	}
 
-	public CompletableFuture<?> reloadCurrentMachine() {
-		return this.reloadCurrentMachine(this.getCurrentPreference());
+	public CompletableFuture<Trace> reloadCurrentMachine() {
+		// Reload current machine using its last used preference name,
+		// not using the current Preference object,
+		// to ensure that any preference changes take effect after a reload.
+		return this.loadMachineWithConfirmation(this.getCurrentMachine());
 	}
 
-	public CompletableFuture<?> reloadCurrentMachine(Preference preference) {
-		return this.reloadMachine(this.getCurrentMachine(), preference);
-	}
-
-	public CompletableFuture<?> reloadMachine(Machine machine) {
+	public CompletableFuture<Trace> loadMachineWithConfirmation(Machine machine) {
 		if (machine == null) {
 			throw new IllegalStateException("Cannot reload without machine");
 		} else if (!this.confirmMachineReplace()) {
 			return CompletableFuture.completedFuture(null);
 		}
-		return this.startAnimation(machine);
+		return this.loadMachineWithoutConfirmation(machine);
 	}
 
-	public CompletableFuture<?> reloadMachine(Machine machine, Preference preference) {
+	public CompletableFuture<Trace> loadMachineWithConfirmation(Machine machine, Preference preference) {
 		if (machine == null) {
 			throw new IllegalStateException("Cannot reload without machine");
 		} else if (preference == null) {
@@ -196,7 +195,7 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		} else if (!this.confirmMachineReplace()) {
 			return CompletableFuture.completedFuture(null);
 		}
-		return this.startAnimation(machine, preference);
+		return this.loadMachineWithoutConfirmation(machine, preference);
 	}
 
 	public void addMachine(Machine machine) {
@@ -260,6 +259,29 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getRequirements(), preferencesList, this.getMetadata(), this.getLocation()));
 	}
 
+	public void replacePreference(Preference oldPreference, Preference newPreference) {
+		Objects.requireNonNull(oldPreference, "oldPreference");
+		Objects.requireNonNull(newPreference, "newPreference");
+
+		List<Preference> preferencesList = this.getPreferences();
+		int index = preferencesList.indexOf(oldPreference);
+		if (index == -1) {
+			throw new NoSuchElementException("Preference not found in project: " + oldPreference.getName());
+		}
+		preferencesList.set(index, newPreference);
+
+		if (!oldPreference.getName().equals(newPreference.getName())) {
+			// If the preference was renamed, update the lastUsedPreferenceName of machines that use the old name.
+			for (Machine machine : this.getMachines()) {
+				if (oldPreference.getName().equals(machine.getLastUsedPreferenceName())) {
+					machine.setLastUsedPreferenceName(newPreference.getName());
+				}
+			}
+		}
+
+		this.set(new Project(this.getName(), this.getDescription(), this.getMachines(), this.getRequirements(), preferencesList, this.getMetadata(), this.getLocation()));
+	}
+
 	public ReadOnlyObjectProperty<Machine> currentMachineProperty() {
 		return this.currentMachine;
 	}
@@ -291,22 +313,6 @@ public final class CurrentProject extends SimpleObjectProperty<Project> {
 		this.set(project);
 		this.setSaved(true);
 		this.setNewProject(newProject);
-	}
-
-	/**
-	 * @deprecated Use {@link #isNotNull()} instead.
-	 */
-	@Deprecated
-	public BooleanBinding existsProperty() {
-		return this.isNotNull();
-	}
-
-	/**
-	 * @deprecated Use a {@code != null} check instead.
-	 */
-	@Deprecated
-	public boolean exists() {
-		return this.get() != null;
 	}
 
 	public StringProperty nameProperty() {

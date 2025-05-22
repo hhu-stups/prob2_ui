@@ -1,9 +1,10 @@
 package de.prob2.ui.simulation;
 
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Objects;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -14,13 +15,10 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.internal.Translatable;
-import de.prob2.ui.internal.csv.CSVWriter;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.table.SimulationItem;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.CheckingStatusCell;
 
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.verifications.CheckedCell;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
@@ -37,33 +35,20 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVPrinter;
+
 @FXMLInjected
 @Singleton
-public class SimulationTracesView extends Stage {
-
-	public static class SimulationTraceItem implements Translatable {
-
+public final class SimulationTracesView extends Stage {
+	public static final class SimulationTraceItem {
 		private final SimulationItem parent;
-
-		private final Trace trace;
-
-		private final List<Integer> timestamps;
-
-		private final Checked checked;
-
-		private final int traceLength;
-
-		private final double estimatedValue;
-
+		private final SimulationItem.Result result;
 		private final int index;
 
-		public SimulationTraceItem(SimulationItem parent, Trace trace, List<Integer> timestamps, Checked checked, int traceLength, double estimatedValue, int index) {
-			this.parent = parent;
-			this.trace = trace;
-			this.timestamps = timestamps;
-			this.checked = checked;
-			this.traceLength = traceLength;
-			this.estimatedValue = estimatedValue;
+		public SimulationTraceItem(SimulationItem parent, SimulationItem.Result result, int index) {
+			this.parent = Objects.requireNonNull(parent, "parent");
+			this.result = Objects.requireNonNull(result, "result");
 			this.index = index;
 		}
 
@@ -72,45 +57,40 @@ public class SimulationTracesView extends Stage {
 		}
 
 		public Trace getTrace() {
-			return trace;
+			return this.result.getTraces().get(index);
 		}
 
 		public List<Integer> getTimestamps() {
-			return timestamps;
+			return this.result.getTimestamps().get(this.getIndex());
 		}
 
 		public int getIndex() {
 			return index;
 		}
 
-		public Checked getChecked() {
-			return checked;
+		public int getDisplayedIndex() {
+			return this.getIndex() + 1;
+		}
+
+		public CheckingStatus getStatus() {
+			return this.result.getStatus();
 		}
 
 		// Used via PropertyValueFactory
 		public int getTraceLength() {
-			return traceLength;
+			return this.getTrace().size();
 		}
 
 		public double getEstimatedValue() {
-			return estimatedValue;
-		}
-
-		@Override
-		public String getTranslationKey() {
-			return "simulation.traces.view.name";
-		}
-
-		@Override
-		public Object[] getTranslationArguments() {
-			return new Object[]{index};
+			var estimatedValues = this.result.getStats().getEstimatedValues();
+			return estimatedValues.isEmpty() ? 0 : estimatedValues.get(index);
 		}
 	}
 
 	@FXML
 	private TableView<SimulationTraceItem> traceTableView;
 	@FXML
-	private TableColumn<SimulationTraceItem, Checked> statusColumn;
+	private TableColumn<SimulationTraceItem, CheckingStatus> statusColumn;
 	@FXML
 	private TableColumn<SimulationTraceItem, String> traceColumn;
 	@FXML
@@ -145,21 +125,22 @@ public class SimulationTracesView extends Stage {
 		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
 	}
 
-	public void setItems(SimulationItem item, List<Trace> traces, List<List<Integer>> timestamps, List<Checked> status, List<Double> estimatedValues) {
+	public void setFromItem(SimulationItem item) {
+		SimulationItem.Result result = (SimulationItem.Result)item.getResult();
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
-		if(!estimatedValues.isEmpty()) {
+		if (!result.getStats().getEstimatedValues().isEmpty()) {
 			estimatedValueColumn.setVisible(true);
 		}
-		for (int i = 0; i < traces.size(); i++) {
-			items.add(new SimulationTraceItem(item, traces.get(i), timestamps.get(i), status.get(i), traces.get(i).size(), estimatedValues.isEmpty() ? 0 : estimatedValues.get(i), i+1));
+		for (int i = 0; i < result.getTraces().size(); i++) {
+			items.add(new SimulationTraceItem(item, result, i));
 		}
 		traceTableView.setItems(items);
 	}
 
 	private void initTableColumns() {
-		statusColumn.setCellFactory(col -> new CheckedCell<>());
-		statusColumn.setCellValueFactory(new PropertyValueFactory<>("checked"));
-		traceColumn.setCellValueFactory(features -> i18n.translateBinding(features.getValue()));
+		statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		traceColumn.setCellValueFactory(features -> i18n.translateBinding("simulation.traces.view.name", features.getValue().getDisplayedIndex()));
 		traceLengthColumn.setCellValueFactory(new PropertyValueFactory<>("traceLength"));
 		estimatedValueColumn.setCellValueFactory(new PropertyValueFactory<>("estimatedValue"));
 	}
@@ -211,12 +192,13 @@ public class SimulationTracesView extends Stage {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
-			try (CSVWriter csvWriter = new CSVWriter(Files.newBufferedWriter(path))) {
-				csvWriter.header("Status", "Trace", "Trace Length", "Estimated Value");
-
+			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+				.setHeader("Status", "Trace", "Trace Length", "Estimated Value")
+				.build();
+			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				int i = 1;
 				for (SimulationTraceItem traceItem : traceTableView.getItems()) {
-					csvWriter.record(traceItem.getChecked(), String.format("Trace %s", i), traceItem.getTraceLength(), traceItem.getEstimatedValue());
+					csvPrinter.printRecord(traceItem.getStatus(), String.format("Trace %s", i), traceItem.getTraceLength(), traceItem.getEstimatedValue());
 				}
 			}
 		}

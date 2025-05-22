@@ -1,6 +1,6 @@
 The history chart shows values of the machine as a diagram. 
 
-By clicking the plus-button on the left, B-Formular can be added.
+By clicking the plus-button on the left, B formula can be added.
 On the bottom of this view a window appears, where you can enter the formula, or you edit it with a double click in the line.
 By clicking the minus-button you can delete the chosen formula.
 

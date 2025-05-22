@@ -2,19 +2,19 @@
 
 <?import de.prob2.ui.project.verifications.MachineTableView?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
 
 <fx:root type="MachineTableView" stylesheets="@/prob.css" styleClass="machine-table-view" prefHeight="200.0" xmlns:fx="http://javafx.com/fxml/1">
 	<columnResizePolicy>
-		<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+		<TableView fx:constant="CONSTRAINED_RESIZE_POLICY_SUBSEQUENT_COLUMNS"/>
 	</columnResizePolicy>
 	<columns>
-		<TableColumn fx:id="machineNameColumn" minWidth="80.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.machine" />
-		<TableColumn fx:id="machineTraceReplayColumn" minWidth="120.0" maxWidth="120.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.tracereplay" />
-		<TableColumn fx:id="machineModelcheckColumn" minWidth="120.0" maxWidth="120.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.modelChecking" />
-		<TableColumn fx:id="machineLTLColumn" minWidth="120.0" maxWidth="120.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.temporal" />
-		<TableColumn fx:id="machineSymbolicColumn" minWidth="120.0" maxWidth="120.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.symbolic" />
+		<TableColumn fx:id="machineNameColumn" minWidth="60.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.machine" />
+		<TableColumn fx:id="machineTraceReplayColumn" minWidth="60.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.tracereplay" />
+		<TableColumn fx:id="machineModelcheckColumn" minWidth="60.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.modelChecking" />
+		<TableColumn fx:id="machineLTLColumn" minWidth="60.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.temporal" />
+		<TableColumn fx:id="machineSymbolicColumn" minWidth="60.0" style="-fx-alignment: CENTER;" text="%project.verifications.machineTableView.columns.symbolic" />
 	</columns>
 	<placeholder>
 		<Label text="%project.verifications.machineTableView.noMachines" />

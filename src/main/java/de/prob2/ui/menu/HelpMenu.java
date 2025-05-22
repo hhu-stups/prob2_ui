@@ -1,21 +1,20 @@
 package de.prob2.ui.menu;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
-import java.util.Objects;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
-import com.google.common.io.CharStreams;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
+import de.prob.annotations.Home;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
+import javafx.application.HostServices;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
@@ -29,14 +28,18 @@ public class HelpMenu extends Menu {
 	@FXML
 	private MenuItem aboutItem;
 	
+	private final Path syntaxFilesDir;
 	private final Injector injector;
 	private final StageManager stageManager;
+	private final HostServices hostServices;
 	private static final Logger LOGGER = LoggerFactory.getLogger(HelpMenu.class);
 
 	@Inject
-	private HelpMenu(final StageManager stageManager, final Injector injector) {
+	private HelpMenu(StageManager stageManager, @Home Path proBHomePath, Injector injector, HostServices hostServices) {
 		this.stageManager = stageManager;
+		this.syntaxFilesDir = proBHomePath.resolve("tcl");
 		this.injector = injector;
+		this.hostServices = hostServices;
 		stageManager.loadFXML(this, "helpMenu.fxml");
 	}
 
@@ -56,7 +59,7 @@ public class HelpMenu extends Menu {
 
 	@FXML
 	private void handleReportBug() {
-		injector.getInstance(ProB2.class).getHostServices().showDocument(ProB2.BUG_REPORT_URL);
+		hostServices.showDocument(ProB2.BUG_REPORT_URL);
 	}
 
 	@FXML
@@ -70,9 +73,15 @@ public class HelpMenu extends Menu {
 	}
 
 	@FXML
+	private void handleAlloySyntax() {
+		handleSyntax("alloy_summary.txt", "Alloy");
+	}
+
+	@FXML
 	private void handleCSPSyntax() {
 		handleSyntax("procsp_summary.txt", "CSP");
 	}
+
 	@FXML
 	private void handleTLASyntax() {
 		handleSyntax("tla_summary.txt", "TLA");
@@ -83,17 +92,19 @@ public class HelpMenu extends Menu {
 		handleSyntax("ltl_summary.txt", "LTL");
 	}
 
+	@FXML
+	private void handleCTLSyntax() {
+		handleSyntax("ctl_summary.txt", "CTL");
+	}
+
 	private void handleSyntax(String filename, String title) {
 		SyntaxStage syntaxStage = injector.getInstance(SyntaxStage.class);
 		syntaxStage.setTitle(title);
-		try (
-			InputStream is = Objects.requireNonNull(this.getClass().getResourceAsStream(filename));
-			InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)
-		) {
-			syntaxStage.setText(CharStreams.toString(isr));
+		try {
+			syntaxStage.setText(Files.readString(syntaxFilesDir.resolve(filename)));
 		} catch (IOException | UncheckedIOException e) {
 			LOGGER.error("Could not read syntax help file: {}", filename, e);
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotOpenFile.content", filename).show();
+			stageManager.makeExceptionAlert(e, "", "common.alerts.couldNotOpenFile.content", filename).show();
 			return;
 		}
 		syntaxStage.show();

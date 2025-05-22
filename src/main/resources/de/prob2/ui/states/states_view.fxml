@@ -8,17 +8,18 @@
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.control.TreeTableColumn?>
 <?import javafx.scene.control.TreeTableView?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+
 <fx:root type="StatesView" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
-	<VBox spacing="5.0">
-		<HBox alignment="CENTER">
+	<top>
+		<ToolBar>
 			<padding>
 				<Insets top="5.0" left="5.0"/>
 			</padding>
@@ -32,8 +33,14 @@
 				</tooltip>
 			</ToggleButton>
 			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
-		</HBox>
-		<TreeTableView fx:id="tv" VBox.vgrow="ALWAYS" showRoot="false">
+		</ToolBar>
+	</top>
+	<center>
+		<TreeTableView fx:id="tv" showRoot="false">
+			<!-- TODO: this makes resizing way nicer but breaks persistence -->
+			<!--<columnResizePolicy>
+				<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+			</columnResizePolicy>-->
 			<columns>
 				<TreeTableColumn fx:id="tvName" id="name" editable="false" minWidth="80.0" prefWidth="160" sortable="true" text="%states.statesView.columns.name" />
 				<TreeTableColumn fx:id="tvValue" id="value" editable="false" minWidth="80.0" prefWidth="160" sortable="true" text="%states.statesView.columns.value" />
@@ -43,5 +50,5 @@
 				<Label text="%common.noModelLoaded"/>
 			</placeholder>
 		</TreeTableView>
-	</VBox>
+	</center>
 </fx:root>

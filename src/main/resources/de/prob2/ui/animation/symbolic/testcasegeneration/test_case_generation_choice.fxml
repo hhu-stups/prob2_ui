@@ -3,10 +3,12 @@
 <?import de.prob2.ui.animation.symbolic.testcasegeneration.MCDCInputView?>
 <?import de.prob2.ui.animation.symbolic.testcasegeneration.OperationCoverageInputView?>
 <?import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationChoosingStage?>
+<?import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
@@ -24,9 +26,16 @@
 					</padding>
 					<Label text="%animation.testcase.choice.text"/>
 					<HBox alignment="CENTER">
-						<ChoiceBox fx:id="testChoice"/>
+						<ChoiceBox fx:id="testChoice">
+							<BuiltinValidationTaskTypes fx:constant="TEST_CASE_GENERATION_MCDC"/>
+							<BuiltinValidationTaskTypes fx:constant="TEST_CASE_GENERATION_OPERATION_COVERAGE"/>
+						</ChoiceBox>
 					</HBox>
 					<VBox fx:id="input" alignment="CENTER" spacing="10.0">
+						<HBox alignment="CENTER_LEFT" spacing="5.0" VBox.vgrow="NEVER">
+							<Label text="%vomanager.validationTaskId" HBox.hgrow="NEVER"/>
+							<TextField fx:id="idTextField" promptText="%common.optionalPlaceholder" HBox.hgrow="NEVER"/>
+						</HBox>
 						<HBox alignment="CENTER" spacing="10.0" VBox.vgrow="NEVER">
 							<Button onAction="#ok" text="%common.buttons.ok" styleClass="button-blue"/>
 							<Button onAction="#cancel" text="%common.buttons.cancel" styleClass="button-blue"/>

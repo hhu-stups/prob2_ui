@@ -175,7 +175,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 
 		this.statesCalculatedListeners = new ArrayList<>();
 		this.stateSpaceProperty().addListener((o, from, to) -> {
-			if (from != null) {
+			if (from != null && !from.isKilled()) {
 				this.statesCalculatedListeners.forEach(from::removeStatesCalculatedListener);
 			}
 			if (to != null) {
@@ -230,31 +230,6 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 		}
 	}
 	
-	/**
-	 * A read-only boolean property indicating whether a current trace exists
-	 * (i. e. is not null).
-	 * 
-	 * @return a boolean property indicating whether a current trace exists
-	 * 
-	 * @deprecated Use {@link #isNotNull()} instead.
-	 */
-	@Deprecated
-	public BooleanBinding existsProperty() {
-		return this.isNotNull();
-	}
-
-	/**
-	 * Return whether a current trace exists (i. e. is not null).
-	 * 
-	 * @return whether a current trace exists
-	 * 
-	 * @deprecated Use a {@code != null} check instead.
-	 */
-	@Deprecated
-	public boolean exists() {
-		return this.get() != null;
-	}
-
 	/**
 	 * A read-only property indicating whether the animator is currently busy. It
 	 * holds the last value reported by

@@ -1,6 +1,7 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -14,10 +15,12 @@ import java.util.stream.Stream;
 
 import com.google.common.base.MoreObjects;
 
+import de.prob.animator.command.GetOperationDescriptionCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalExpandMode;
 import de.prob.animator.domainobjects.EvalOptions;
 import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.LoadedMachine;
@@ -28,7 +31,7 @@ import de.prob.statespace.Transition;
 
 public class OperationItem {
 	public enum Status {
-		DISABLED, ENABLED, TIMEOUT
+		DISABLED, ENABLED, TIMEOUT, MAX_OPERATIONS
 	}
 	
 	/**
@@ -54,7 +57,7 @@ public class OperationItem {
 		private List<String> getParameterValues() {
 			return this.parameterValues;
 		}
-		
+
 		@Override
 		public boolean equals(final Object o) {
 			if (this == o) {
@@ -85,6 +88,7 @@ public class OperationItem {
 	
 	private final Transition transition;
 	private final String name;
+	private String description;
 	private final OperationItem.Status status;
 	private final List<String> parameterNames;
 	private final List<String> parameterValues;
@@ -161,7 +165,7 @@ public class OperationItem {
 						variableEvalElements = Collections.emptyList();
 					} else {
 						variableEvalElements = opInfo.getNonDetWrittenVariables().stream()
-							.map(var -> stateSpace.getModel().parseFormula(var))
+							.map(var -> stateSpace.getModel().formulaFromIdentifier(Arrays.asList(var.split("\\.")), FormulaExpand.EXPAND))
 							.collect(Collectors.toList());
 					}
 			}
@@ -221,9 +225,9 @@ public class OperationItem {
 		return items.values().iterator().next();
 	}
 
-	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters) {
+	public static OperationItem forDisabled(final String name, final Status status, final List<String> parameters, final List<String> returnParameters) {
 		return new OperationItem(null, name, status, parameters, Collections.emptyList(),
-				Collections.emptyList(), Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
+				returnParameters, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
 				Collections.emptySet(), Collections.emptySet());
 	}
 
@@ -271,6 +275,20 @@ public class OperationItem {
 
 	public String getPrettyName() {
 		return Transition.prettifyName(this.getName());
+	}
+
+	public String getDescription() {
+		// request description only if required
+		if (description == null) {
+			if (transition != null) {
+				GetOperationDescriptionCommand cmd = new GetOperationDescriptionCommand(transition.getSource().getId(), transition.getId());
+				transition.getSource().getStateSpace().execute(cmd);
+				description = cmd.getDescription();
+			} else {
+				description = "";
+			}
+		}
+		return description;
 	}
 
 	public OperationItem.Status getStatus() {
@@ -326,6 +344,7 @@ public class OperationItem {
 	public String toString() {
 		return MoreObjects.toStringHelper(this).add("transition", this.getTransition())
 				.add("name", this.getName()).add("status", this.getStatus())
+				.add("description", this.getDescription())
 				.add("parameterNames", this.getParameterNames()).add("parameterValues", this.getParameterValues())
 				.add("returnParameterNames", this.getReturnParameterNames())
 				.add("returnParameterValues", this.getReturnParameterValues())
@@ -336,6 +355,13 @@ public class OperationItem {
 	}
 
 	public String toPrettyString(final boolean includeUnambiguous) {
+		return this.toPrettyString(includeUnambiguous, false);
+	}
+
+	public String toPrettyString(final boolean includeUnambiguous, final boolean showDescriptions) {
+		if (showDescriptions && !this.getDescription().isEmpty()) {
+			return this.getDescription();
+		}
 		StringBuilder sb = new StringBuilder(this.getPrettyName());
 
 		final List<String> args = new ArrayList<>();

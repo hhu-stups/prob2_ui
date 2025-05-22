@@ -26,19 +26,21 @@ stages:
     # git is needed to read the current commit hash.
     # pandoc is needed to build the ProB 2 UI docs.
     # LaTeX is needed by the documentation generator tests.
-    - apt-get install --assume-yes git pandoc texlive-latex-extra texlive-bibtex-extra texlive-science texlive-lang-german
+    # texlive-latex-extra is needed for the makecell and seqsplit packages,
+    # otherwise texlive-latex-recommended would be enough.
+    - apt-get install --assume-yes git pandoc texlive-latex-extra texlive-lang-german
 
-test:jdk-17-linux:
+test:jdk-21-linux:
   extends: .test-linux
-  image: eclipse-temurin:17
+  image: eclipse-temurin:21-jammy
   before_script:
     - *default_before_script_linux
+    # build-essential and fakeroot are needed for jpackage.
     - apt-get install --assume-yes build-essential fakeroot
-    - apt-get install --assume-yes bash
   script:
     - ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar jpackage
 
-test:jdk-17-macos-x86_64:
+test:jdk-21-macos-x86_64:
   extends: .test-common
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
@@ -46,7 +48,7 @@ test:jdk-17-macos-x86_64:
     - macos
     - x86_64
 
-test:jdk-17-macos-arm64:
+test:jdk-21-macos-arm64:
   extends: .test-common
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
@@ -54,10 +56,10 @@ test:jdk-17-macos-arm64:
     - macos
     - arm64
 
-test:jdk-17-windows64:
+test:jdk-21-windows64:
   extends: .test-common
   script:
-    - .\gradlew.bat %GRADLE_OPTIONS% check jpackage
+    - cmd /c ".\gradlew.bat %GRADLE_OPTIONS% check jpackage"
   tags:
     - windows
 

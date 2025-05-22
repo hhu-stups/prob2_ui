@@ -3,15 +3,21 @@ package de.prob2.ui.internal;
 import java.util.Locale;
 import java.util.ResourceBundle;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.guava.GuavaModule;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import com.google.inject.AbstractModule;
 import com.google.inject.Injector;
-import com.google.inject.Key;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
 
 import de.jangassen.MenuToolkit;
 import de.prob.MainModule;
+import de.prob.json.GsonStylePrettyPrinter;
 import de.prob2.ui.ProB2;
 import de.prob2.ui.config.RuntimeOptions;
 import de.prob2.ui.menu.OpenFile;
@@ -20,6 +26,7 @@ import de.prob2.ui.visualisation.magiclayout.MagicGraphFX;
 import de.prob2.ui.visualisation.magiclayout.MagicGraphI;
 
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.JavaFXBuilderFactory;
 import javafx.util.Builder;
@@ -81,15 +88,34 @@ public class ProB2Module extends AbstractModule {
 	}
 
 	@Provides
-	private static ObjectMapper provideObjectMapper() {
-		return new ObjectMapper().registerModule(new ProB2UIJacksonModule());
+	@Singleton
+	private static HostServices provideHostServices(ProB2 proB2) {
+		return proB2.getHostServices();
+	}
+
+	@Provides
+	public static ObjectMapper provideObjectMapper() {
+		ObjectMapper objectMapper = new ObjectMapper();
+		objectMapper.enable(DeserializationFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL);
+		objectMapper.enable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		objectMapper.disable(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS);
+		objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+		objectMapper.setDefaultPrettyPrinter(new GsonStylePrettyPrinter());
+		objectMapper
+				.registerModule(new ParameterNamesModule())
+				.registerModule(new Jdk8Module())
+		        .registerModule(new JavaTimeModule())
+		        .registerModule(new GuavaModule())
+		        .registerModule(new ProB2UIJacksonModule());
+		return objectMapper;
 	}
 
 	@Provides
 	private static FXMLLoader provideLoader(final Injector injector, I18n i18n) {
 		FXMLLoader fxmlLoader = new FXMLLoader();
 		fxmlLoader.setBuilderFactory(type -> {
-			if (injector.getExistingBinding(Key.get(type)) != null || type.isAnnotationPresent(FXMLInjected.class)) {
+			if (type.isAnnotationPresent(FXMLInjected.class)) {
 				// this allows FXML to configure instances, remember to implement Builder and return "this" in the build method.
 				if (Builder.class.isAssignableFrom(type)) {
 					return (Builder<?>) injector.getInstance(type);

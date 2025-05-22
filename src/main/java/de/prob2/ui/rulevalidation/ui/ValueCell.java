@@ -3,22 +3,26 @@ package de.prob2.ui.rulevalidation.ui;
 import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.brules.ComputationStatus;
 import de.prob.model.brules.RuleResult;
+import de.prob2.ui.internal.I18n;
 import javafx.geometry.Pos;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.*;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
+import javafx.util.Duration;
 
 import java.util.Map;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 14.12.17
  */
 public class ValueCell extends TreeTableCell<Object, Object>{
 
-	private boolean executable;
+	private final I18n i18n;
+	private boolean executable = true;
 
-	ValueCell() {
+	ValueCell(I18n i18n) {
+		this.i18n = i18n;
 		setAlignment(Pos.CENTER_LEFT);
 	}
 
@@ -30,20 +34,22 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 			executable = ((OperationItem) treeItem).isExecutable();
 		}
 		configureEmptyCell();
-		if (item instanceof RuleResult)
-			configureForRuleResult((RuleResult)item);
-		else if (item instanceof RuleResult.CounterExample)
-			setText(((RuleResult.CounterExample)item).getMessage());
-		else if (item instanceof Map.Entry)
-			configureForComputationResult((ComputationStatus)((Map.Entry<?, ?>)item).getValue());
-		else if (item instanceof IdentifierNotInitialised)
-			configureForNotInitialised((IdentifierNotInitialised)item);
+		if (item instanceof RuleResult ruleResult)
+			configureForRuleResult(ruleResult);
+		else if (item instanceof RuleResult.CounterExample counterExample)
+			updateContentWithContextMenu(counterExample.getMessage());
+		else if (item instanceof RuleResult.SuccessMessage successMessage)
+			updateContentWithContextMenu(successMessage.getMessage());
+		else if (item instanceof Map.Entry<?,?> entry)
+			configureForComputationResult((ComputationStatus) entry.getValue());
+		else if (item instanceof IdentifierNotInitialised notInitialised)
+			configureForNotInitialised(notInitialised);
 		setGraphic(null);
 	}
 
 	private void configureForComputationResult(ComputationStatus result) {
 		getTableRow().getTreeItem();
-		setText(result.toString());
+		updateContent(result.toString());
 		switch (result) {
 			case EXECUTED:
 				getStyleClass().add("true");
@@ -53,7 +59,8 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 				break;
 			case NOT_EXECUTED:
 				if (!executable) {
-					setText("NOT_EXECUTABLE");
+					// should not be translated? Appears next to rule states SUCCESS, FAIL, …
+					updateContent("NOT EXECUTABLE");
 				}
 				setStyle(null);
 				break;
@@ -61,13 +68,14 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	}
 
 	private void configureEmptyCell() {
-		setText(null);
+		updateContent(null);
 		setStyle(null);
 		getStyleClass().removeAll("true","false");
+		setContextMenu(null);
 	}
 
 	private void configureForRuleResult(RuleResult result) {
-		setText(result.getRuleState().name());
+		updateContent(result.getRuleState().name());
 		switch (result.getRuleState()) {
 			case FAIL:
 				getStyleClass().add("false");
@@ -77,7 +85,7 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 				break;
 			case NOT_CHECKED:
 				if (!executable) {
-					setText("NOT CHECKABLE");
+					updateContent("NOT CHECKABLE");
 				}
 				setStyle(null);
 				break;
@@ -88,8 +96,33 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	}
 
 	private void configureForNotInitialised(IdentifierNotInitialised item) {
-		setText(item.getResult());
+		updateContent(item.getResult());
 		setStyle(null);
+		setContextMenu(null);
 	}
 
+	private void updateContent(String content) {
+		setText(content);
+		if (content != null && !content.isEmpty()) {
+			Tooltip tooltip = new Tooltip(content);
+			tooltip.setShowDuration(Duration.INDEFINITE);
+			setTooltip(tooltip);
+		} else {
+			setTooltip(null);
+		}
+	}
+
+	private void updateContentWithContextMenu(String message) {
+		updateContent(message);
+		MenuItem copyItem = new MenuItem(i18n.translate("rulevalidation.table.contextMenu.copyMessage"));
+		copyItem.setOnAction(e -> handleCopyName());
+		setContextMenu(new ContextMenu(copyItem));
+	}
+
+	private void handleCopyName() {
+		final Clipboard clipboard = Clipboard.getSystemClipboard();
+		final ClipboardContent content = new ClipboardContent();
+		content.putString(this.getItem().toString());
+		clipboard.setContent(content);
+	}
 }

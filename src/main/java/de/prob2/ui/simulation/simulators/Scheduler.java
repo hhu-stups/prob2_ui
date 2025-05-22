@@ -14,8 +14,7 @@ import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
-public class Scheduler {
-
+public final class Scheduler {
 	private final ChangeListener<Trace> listener;
 
 	private RealTimeSimulator realTimeSimulator;

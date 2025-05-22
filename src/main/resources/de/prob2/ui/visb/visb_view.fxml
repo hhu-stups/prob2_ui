@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.Spacer?>
+<?import de.prob2.ui.visb.VisBView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuButton?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.ProgressIndicator?>
+<?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.ComboBox?>
+
+<fx:root type="VisBView" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize"/>
+	</fx:define>
+	<top>
+		<ToolBar styleClass="border">
+			<padding>
+				<Insets left="5.0" right="5.0"/>
+			</padding>
+			<Button fx:id="loadVisualisationButton" onAction="#askLoadVisBFile">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.file.open"/>
+				</tooltip>
+			</Button>
+			<Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.edit.reload"/>
+				</tooltip>
+			</Button>
+			<ComboBox fx:id="cbVisualisations" />
+			<MenuButton>
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<items>
+					<MenuItem fx:id="loadFromDefinitionsItem" text="%visb.settingsMenu.loadVisualisationFromDefinitions" onAction="#loadFromDefinitions"/>
+					<MenuItem fx:id="setSelectedAsDefaultItem" text="%visb.settingsMenu.setSelectedVisualisationAsDefault" onAction="#setSelectedAsDefault"/>
+					<MenuItem fx:id="deleteSelectedItem" text="%visb.settingsMenu.deleteSelected" onAction="#deleteSelected"/>
+					<MenuItem fx:id="saveCurrentItem" text="%visb.settingsMenu.saveCurrent" onAction="#saveCurrent"/>
+					<MenuItem fx:id="editCurrentExternalItem" text="%visb.settingsMenu.editCurrentExternal" onAction="#editCurrentExternal"/>
+					<SeparatorMenuItem/>
+					<MenuItem text="%visb.settingsMenu.showDebugWindow" onAction="#showVisBItemsAndEvents"/>
+				</items>
+			</MenuButton>
+			<MenuButton fx:id="saveTraceButton">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
+								   bindableFontSize="${fontSize.fontSize + 4}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%common.buttons.saveTrace"/>
+				</tooltip>
+				<items>
+					<Menu fx:id="exportHistoryMenu" text="%visb.menu.file.export.html.history">
+						<MenuItem fx:id="exportHistoryItem" text="%visb.menu.file.export.html.default"/>
+						<MenuItem fx:id="exportHistoryWithSourceItem" text="%visb.menu.file.export.html.withSource"/>
+						<MenuItem fx:id="exportHistoryCustomItem" text="%visb.menu.file.export.html.customConfiguration"/>
+					</Menu>
+					<Menu fx:id="exportCurrentStateMenu" text="%visb.menu.file.export.html.currentState">
+						<MenuItem fx:id="exportCurrentStateItem" text="%visb.menu.file.export.html.default"/>
+						<MenuItem fx:id="exportCurrentStateWithSourceItem" text="%visb.menu.file.export.html.withSource"/>
+						<MenuItem fx:id="exportCurrentStateCustomItem" text="%visb.menu.file.export.html.customConfiguration"/>
+					</Menu>
+					<!-- The export image menu item is disabled until the WebView is created. -->
+					<MenuItem fx:id="exportImageItem" mnemonicParsing="false" text="%visb.menu.file.export.png" disable="true" onAction="#exportImage"/>
+					<MenuItem fx:id="exportSvgItem" mnemonicParsing="false" text="%visb.menu.file.export.svg" disable="true" onAction="#exportSvg"/>
+				</items>
+			</MenuButton>
+			<Spacer/>
+			<HBox fx:id="inProgressBox" spacing="5" alignment="CENTER" visible="false" managed="false">
+				<Label fx:id="inProgressLabel"/>
+				<ProgressIndicator maxHeight="20" maxWidth="20"/>
+			</HBox>
+			<Spacer/>
+			<Label fx:id="lblActualVisualisationName" />
+			<!-- The zoom buttons are disabled until the WebView is created. -->
+			<Button fx:id="zoomInButton" disable="true" onAction="#zoomIn">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_PLUS"
+								   bindableFontSize="${fontSize.fontSize * 1.5}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.view.zoom.in"/>
+				</tooltip>
+			</Button>
+			<Button fx:id="zoomOutButton" disable="true" onAction="#zoomOut">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_MINUS"
+								   bindableFontSize="${fontSize.fontSize * 1.5}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.view.zoom.out"/>
+				</tooltip>
+			</Button>
+			<MenuButton>
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+								   bindableFontSize="${fontSize.fontSize * 2}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%visb.menu.help"/>
+				</tooltip>
+				<items>
+					<MenuItem text="%visb.menu.help.helppages" onAction="#openHelpPage"/>
+					<MenuItem text="%visb.menu.help.user.manual" onAction="#openUserManual"/>
+				</items>
+			</MenuButton>
+		</ToolBar>
+	</top>
+	<center>
+		<StackPane fx:id="mainPane">
+			<VBox fx:id="placeholder" alignment="CENTER">
+				<padding>
+					<Insets topRightBottomLeft="4"/>
+				</padding>
+				<ImageView preserveRatio="true" fitWidth="200.0">
+					<Image url="@/de/prob2/ui/ProB_Logo.png"/>
+				</ImageView>
+				<Label text="%common.noModelLoaded" fx:id="placeholderLabel" textAlignment="CENTER" wrapText="true"/>
+				<StackPane>
+					<!--
+					Warning: This is a load-bearing progress bar. Do not remove.
+					For some reason, JavaFX doesn't reliably redraw the placeholder view after its contents change,
+					at least not until something else triggers a redraw - like this progress bar animation.
+
+					Without this progress bar, this bug usually happens after a VisB visualisation has finished loading:
+					the placeholderLabel should change to "Model not yet initialised" and the initButton should become visible,
+					but this doesn't happen and the text stays as "Loading visualisation..."
+					until the user does something that triggers a redraw
+					(e. g. hovering over the VisB TitledPane header bar).
+
+					I have no idea why this is happening.
+					I checked that all of the relevant listeners are getting called
+					and that they are running on the UI thread.
+					This *feels* like a JavaFX bug, but it's hard to say for sure.
+
+					Last tested with JavaFX 22.0.2, Java 21.0.4, macOS 14.6, and a MacBook Pro 2021 (M1 Pro processor).
+					-->
+					<ProgressBar fx:id="loadingProgress" visible="false"/>
+					<Button fx:id="initButton" styleClass="button-blue" visible="false" onAction="#doInitialisation"/>
+				</StackPane>
+			</VBox>
+		</StackPane>
+	</center>
+</fx:root>

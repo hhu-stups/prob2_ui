@@ -1,20 +1,20 @@
 MACHINE ISLAND
 
 CONSTANTS
-    maxCars
+	maxCars
 PROPERTIES
-    maxCars = 5
+	maxCars = 5
 
 VARIABLES
-    cars
+	cars
 INVARIANT
-    cars : NAT
+	cars : NAT
 INITIALISATION
-    cars := 0
+	cars := 0
 
 OPERATIONS
-    on = PRE cars < maxCars THEN cars := cars + 1 END;
+	on = PRE cars < maxCars THEN cars := cars + 1 END;
 
-    off = PRE cars > 0 THEN cars := cars - 1 END
+	off = PRE cars > 0 THEN cars := cars - 1 END
 
 END

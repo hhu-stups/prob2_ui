@@ -18,8 +18,7 @@ import javafx.scene.layout.GridPane;
 
 @FXMLInjected
 @Singleton
-public class SimulationMonteCarloChoice extends GridPane {
-
+public final class SimulationMonteCarloChoice extends GridPane {
 	@FXML
 	private Label lbSimulations;
 
@@ -45,7 +44,6 @@ public class SimulationMonteCarloChoice extends GridPane {
 	public boolean checkSelection() {
 		try {
 			Integer.parseInt(tfSimulations.getText());
-
 		} catch (NumberFormatException e) {
 			return false;
 		}
@@ -58,6 +56,16 @@ public class SimulationMonteCarloChoice extends GridPane {
 			information.put("EXECUTIONS", Integer.parseInt(tfSimulations.getText()));
 		}
 		return information;
+	}
+
+	public void setInformation(Map<String, Object> object) {
+		if(object.containsKey("EXECUTIONS")) {
+			tfSimulations.setText(object.get("EXECUTIONS").toString());
+		}
+	}
+
+	public void reset() {
+		tfSimulations.clear();
 	}
 
 }

@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.geometry.Insets?>
+<fx:root type="Stage" fx:id="visb_html_config_dialog" resizable="false" maxWidth="400"
+		 title="VisB HTML Export" xmlns:fx="http://javafx.com/fxml/1">
+	<scene>
+		<Scene fill="TRANSPARENT">
+			<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
+				<VBox AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
+					  AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="10.0" spacing="10.0">
+					<Label text="%visb.menu.file.export.html.customConfiguration.dialog.title" styleClass="title"/>
+					<Separator/>
+					<VBox spacing="10.0">
+						<!-- in the order of the sections in the export: -->
+						<CheckBox fx:id="showHeader" text="%visb.menu.file.export.html.customConfiguration.dialog.showHeader"/>
+						<CheckBox fx:id="showSvgDownloads" text="%visb.menu.file.export.html.customConfiguration.dialog.showSvgDownloads"/>
+						<CheckBox fx:id="showSequenceChart" text="%visb.menu.file.export.html.customConfiguration.dialog.showSequenceChart"/>
+						<CheckBox fx:id="showVariables" text="%visb.menu.file.export.html.customConfiguration.dialog.showVariables"/>
+						<CheckBox fx:id="showInvariants" text="%visb.menu.file.export.html.customConfiguration.dialog.showInvariants"/>
+						<CheckBox fx:id="showConstants" text="%visb.menu.file.export.html.customConfiguration.dialog.showConstants"/>
+						<CheckBox fx:id="showSets" text="%visb.menu.file.export.html.customConfiguration.dialog.showSets"/>
+						<CheckBox fx:id="showEvents" text="%visb.menu.file.export.html.customConfiguration.dialog.showEvents"/>
+						<CheckBox fx:id="showSource" text="%visb.menu.file.export.html.customConfiguration.dialog.showSource"/>
+						<CheckBox fx:id="showVersionInfo" text="%visb.menu.file.export.html.customConfiguration.dialog.showVersionInfo"/>
+					</VBox>
+					<Separator/>
+					<HBox>
+						<Button fx:id="btCreateExport" text="%visb.menu.file.export.html.customConfiguration.dialog.buttonCreate"/>
+						<HBox alignment="CENTER" HBox.hgrow="ALWAYS">
+							<Label fx:id="modeLabel" style="-fx-text-fill: lightgray;">
+								<padding>
+									<Insets left="10" right="10"/>
+								</padding>
+							</Label>
+						</HBox>
+					</HBox>
+				</VBox>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>

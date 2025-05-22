@@ -12,8 +12,7 @@ import javafx.scene.control.Dialog;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class ReplayOptionsOverview extends Dialog<ReplayOptions> {
-
+public final class ReplayOptionsOverview extends Dialog<ReplayOptions> {
 	private final Map<String, OperationInfo> operations;
 	private final Map<String, ReplayOptionsChoice> choices;
 	private ReplayOptionsChoice global;

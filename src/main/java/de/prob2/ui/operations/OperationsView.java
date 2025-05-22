@@ -1,11 +1,11 @@
 package de.prob2.ui.operations;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -14,6 +14,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.command.GetCandidateOperationsCommand;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.TableVisualizationCommand;
 import de.prob.statespace.LoadedMachine;
@@ -23,19 +24,20 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
-import de.prob2.ui.dynamic.table.ExpressionTableView;
+import de.prob2.ui.dynamic.DynamicVisualizationStage;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
-import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.internal.executor.BackgroundUpdater;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.statusbar.StatusBar;
 
@@ -63,6 +65,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
 import org.controlsfx.glyphfont.FontAwesome;
@@ -73,7 +76,7 @@ import se.sawano.java.text.AlphanumericComparator;
 
 @FXMLInjected
 @Singleton
-public final class OperationsView extends VBox {
+public final class OperationsView extends BorderPane {
 	public enum SortMode {
 		MODEL_ORDER, A_TO_Z, Z_TO_A
 	}
@@ -109,44 +112,50 @@ public final class OperationsView extends VBox {
 		@Override
 		protected void updateItem(OperationItem item, boolean empty) {
 			super.updateItem(item, empty);
-			getStyleClass().removeAll("enabled", "timeout", "unexplored", "errored", "skip", "normal", "disabled");
+			getStyleClass().removeAll("enabled", "timeout", "max-operations", "unexplored", "errored", "skip", "normal", "disabled");
 			if (item != null && !empty) {
-				setText(item.toPrettyString(showUnambiguous.get()));
+				setText(item.toPrettyString(showUnambiguous.get(), showOperationDescriptions.get()));
 				setDisable(false);
 				final FontAwesome.Glyph icon;
 				switch (item.getStatus()) {
-				case TIMEOUT:
-					icon = FontAwesome.Glyph.CLOCK_ALT;
-					getStyleClass().add("timeout");
-					setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.timeout")));
-					break;
+					case MAX_OPERATIONS:
+						icon = FontAwesome.Glyph.QUESTION;
+						getStyleClass().add("max-operations");
+						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.maxOperations")));
+						break;
 
-				case ENABLED:
-					icon = item.isSkip() ? FontAwesome.Glyph.REPEAT : FontAwesome.Glyph.PLAY;
-					getStyleClass().add("enabled");
-					if (!item.isExplored()) {
-						getStyleClass().add("unexplored");
-						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesUnexplored")));
-					} else if (item.isErrored()) {
-						getStyleClass().add("errored");
-						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesErrored")));
-					} else if (item.isSkip()) {
-						getStyleClass().add("skip");
-						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesSame")));
-					} else {
-						getStyleClass().add("normal");
+					case TIMEOUT:
+						icon = FontAwesome.Glyph.CLOCK_ALT;
+						getStyleClass().add("timeout");
+						setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.timeout")));
+						break;
+
+					case ENABLED:
+						icon = item.isSkip() ? FontAwesome.Glyph.REPEAT : FontAwesome.Glyph.PLAY;
+						getStyleClass().add("enabled");
+						if (!item.isExplored()) {
+							getStyleClass().add("unexplored");
+							setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesUnexplored")));
+						} else if (item.isErrored()) {
+							getStyleClass().add("errored");
+							setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesErrored")));
+						} else if (item.isSkip()) {
+							getStyleClass().add("skip");
+							setTooltip(new Tooltip(i18n.translate("operations.operationsView.tooltips.reachesSame")));
+						} else {
+							getStyleClass().add("normal");
+							setTooltip(null);
+						}
+						break;
+
+					case DISABLED:
+						icon = FontAwesome.Glyph.MINUS_CIRCLE;
+						getStyleClass().add("disabled");
 						setTooltip(null);
-					}
-					break;
+						break;
 
-				case DISABLED:
-					icon = FontAwesome.Glyph.MINUS_CIRCLE;
-					getStyleClass().add("disabled");
-					setTooltip(null);
-					break;
-
-				default:
-					throw new IllegalStateException("Unhandled status: " + item.getStatus());
+					default:
+						throw new IllegalStateException("Unhandled status: " + item.getStatus());
 				}
 				final BindableGlyph graphic = new BindableGlyph("FontAwesome", icon);
 				graphic.bindableFontSizeProperty().bind(injector.getInstance(FontSize.class).fontSizeProperty());
@@ -179,6 +188,8 @@ public final class OperationsView extends VBox {
 	@FXML
 	private MenuItem unambiguousMenuItem;
 	@FXML
+	private MenuItem opDescriptionsMenuItem;
+	@FXML
 	private TextField searchBar;
 	@FXML
 	private TextField randomText;
@@ -204,6 +215,7 @@ public final class OperationsView extends VBox {
 	private final List<OperationItem> events = new ArrayList<>();
 	private final BooleanProperty showDisabledOps;
 	private final BooleanProperty showUnambiguous;
+	private final BooleanProperty showOperationDescriptions;
 	private final ObjectProperty<OperationsView.SortMode> sortMode;
 	private final CurrentTrace currentTrace;
 	private final Injector injector;
@@ -212,17 +224,16 @@ public final class OperationsView extends VBox {
 	private final StageManager stageManager;
 	private final Config config;
 	private final CliTaskExecutor cliExecutor;
+	private final FxThreadExecutor fxExecutor;
 	private final Comparator<CharSequence> alphanumericComparator;
 	private final BackgroundUpdater updater;
 	private final AtomicBoolean needsUpdateAfterBusy;
 
 	@Inject
-	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager,
-						   final Injector injector, final I18n i18n, final StatusBar statusBar,
-						   final DisablePropertyController disablePropertyController, final StopActions stopActions,
-						   final Config config, final CliTaskExecutor cliExecutor) {
+	private OperationsView(final CurrentTrace currentTrace, final Locale locale, final StageManager stageManager, final Injector injector, final I18n i18n, final StatusBar statusBar, final DisablePropertyController disablePropertyController, final StopActions stopActions, final Config config, final CliTaskExecutor cliExecutor, FxThreadExecutor fxExecutor) {
 		this.showDisabledOps = new SimpleBooleanProperty(this, "showDisabledOps", true);
 		this.showUnambiguous = new SimpleBooleanProperty(this, "showUnambiguous", false);
+		this.showOperationDescriptions = new SimpleBooleanProperty(this, "showOperationDescriptions", false);
 		this.sortMode = new SimpleObjectProperty<>(this, "sortMode", OperationsView.SortMode.MODEL_ORDER);
 		this.currentTrace = currentTrace;
 		this.alphanumericComparator = new AlphanumericComparator(locale);
@@ -232,6 +243,7 @@ public final class OperationsView extends VBox {
 		this.stageManager = stageManager;
 		this.config = config;
 		this.cliExecutor = cliExecutor;
+		this.fxExecutor = fxExecutor;
 		this.updater = new BackgroundUpdater("OperationsView Updater");
 		this.needsUpdateAfterBusy = new AtomicBoolean(false);
 		stopActions.add(this.updater::shutdownNow);
@@ -267,7 +279,7 @@ public final class OperationsView extends VBox {
 			boolean showUnsatCoreButton = false;
 			if (to != null) {
 				final Set<Transition> operations = to.getNextTransitions();
-				if ((!to.getCurrentState().isInitialised() && operations.isEmpty()) ||
+				if ((!to.getCurrentState().isConstantsSetUp() && operations.isEmpty()) ||
 						operations.stream().map(Transition::getName).collect(Collectors.toSet()).contains(Transition.PARTIAL_SETUP_CONSTANTS_NAME)) {
 					showUnsatCoreButton = true;
 				}
@@ -296,6 +308,11 @@ public final class OperationsView extends VBox {
 
 		showUnambiguous.addListener((o, from, to) -> {
 			unambiguousMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideUnambiguous") : i18n.translate("operations.operationsView.menu.showUnambiguous"));
+			opsListView.refresh();
+		});
+
+		showOperationDescriptions.addListener((o, from, to) -> {
+			opDescriptionsMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideDescriptions") : i18n.translate("operations.operationsView.menu.showDescriptions"));
 			opsListView.refresh();
 		});
 
@@ -332,44 +349,48 @@ public final class OperationsView extends VBox {
 				if (configData.operationsSortMode != null) {
 					setSortMode(configData.operationsSortMode);
 				}
-				
+
 				setShowDisabledOps(configData.operationsShowDisabled);
 				setShowUnambiguous(configData.operationsShowUnambiguous);
+				setShowOperationDescriptions(configData.operationsShowDescriptions);
 			}
-			
+
 			@Override
 			public void saveConfig(final ConfigData configData) {
 				configData.operationsSortMode = getSortMode();
 				configData.operationsShowDisabled = getShowDisabledOps();
 				configData.operationsShowUnambiguous = getShowUnambiguous();
+				configData.operationsShowDescriptions = getShowDescriptions();
 			}
 		});
 	}
 
-	private void executeOperationIfPossible(final OperationItem item) {
-		final Trace trace = currentTrace.get();
-		RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
-		if (
-			item != null
-			&& item.getStatus() == OperationItem.Status.ENABLED
-			&& item.getTransition().getSource().equals(trace.getCurrentState())
-		) {
-			UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
-			// Use the CLI executor for executing the operation to avoid blocking the UI thread.
-			// Executing the operation itself isn't slow (because the transition is already known),
-			// but changing the current trace can be slow,
-			// because the destination state may not be explored yet.
-			// TODO This might be better solved by moving the state exploring out of CurrentTrace.
-			cliExecutor.submit(() -> {
-				Trace forward = trace.forward();
-				if (forward != null && item.getTransition().equals(forward.getCurrentTransition())) {
-					currentTrace.set(forward);
-					uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
-				} else {
-					currentTrace.set(trace.add(item.getTransition()));
-					uiInteraction.addUserInteraction(realTimeSimulator, item.getTransition());
-				}
-			});
+	private void executeOperationIfPossible(OperationItem item) {
+		if (item != null) {
+			Trace trace = currentTrace.get();
+			if (item.getStatus() == OperationItem.Status.ENABLED && item.getTransition().getSource().equals(trace.getCurrentState())) {
+				RealTimeSimulator realTimeSimulator = injector.getInstance(RealTimeSimulator.class);
+				UIInteractionHandler uiInteraction = injector.getInstance(UIInteractionHandler.class);
+				// Use the CLI executor for executing the operation to avoid blocking the UI thread.
+				// Executing the operation itself isn't slow (because the transition is already known),
+				// but changing the current trace can be slow,
+				// because the destination state may not be explored yet.
+				// TODO This might be better solved by moving the state exploring out of CurrentTrace.
+				cliExecutor.execute(() -> {
+					Trace forward = trace.forward();
+					if (trace.canGoForward() && item.getTransition().equals(forward.getCurrentTransition())) {
+						currentTrace.set(forward);
+						uiInteraction.addUserInteraction(realTimeSimulator, forward.getCurrentTransition());
+					} else {
+						currentTrace.set(trace.add(item.getTransition()));
+						uiInteraction.addUserInteraction(realTimeSimulator, item.getTransition());
+					}
+				});
+			} else if (item.getStatus() == OperationItem.Status.TIMEOUT || item.getStatus() == OperationItem.Status.MAX_OPERATIONS) {
+				ExecuteByPredicateStage stage = injector.getInstance(ExecuteByPredicateStage.class);
+				stage.setItem(item);
+				stage.show();
+			}
 		}
 	}
 
@@ -388,21 +409,23 @@ public final class OperationsView extends VBox {
 
 	private synchronized void updateBG(final Trace trace) {
 		events.clear();
-		final Set<Transition> operations = trace.getNextTransitions();
+		Set<Transition> operations = trace.getNextTransitions();
 		trace.getStateSpace().evaluateTransitions(operations, FormulaExpand.EXPAND);
 		events.addAll(OperationItem.computeUnambiguousConstantsAndVariables(
 			OperationItem.forTransitions(trace.getStateSpace(), operations).values()
 		));
-		
-		final LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
-		final Set<String> disabled = loadedMachine.getOperationNames().stream()
+
+		LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
+		Set<String> disabled = loadedMachine.getOperationNames().stream()
 			.map(loadedMachine::getMachineOperationInfo)
 			.filter(OperationInfo::isTopLevel)
 			.map(OperationInfo::getOperationName)
 			.collect(Collectors.toSet());
 		disabled.removeAll(operations.stream().map(Transition::getName).collect(Collectors.toSet()));
-		final Set<String> withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
-		showDisabledAndWithTimeout(loadedMachine, disabled, withTimeout);
+
+		var withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
+		var withMaxOperations = trace.getCurrentState().getCandidateOperations();
+		showDisabledAndWithTimeout(loadedMachine, disabled, withTimeout, withMaxOperations.stream().map(GetCandidateOperationsCommand.Candidate::getOperation).collect(Collectors.toSet()));
 
 		doSort(loadedMachine);
 
@@ -413,8 +436,12 @@ public final class OperationsView extends VBox {
 			} else {
 				text = i18n.translate("operations.operationsView.warningLabel.maxOperationsReached");
 			}
+		} else if (trace.getCurrentState().isTimeoutOccurred()) {
+			text = i18n.translate("operations.operationsView.warningLabel.timeoutOccurred");
+		} else if (!trace.getCurrentState().isConstantsSetUp() && operations.isEmpty()) {
+			text = i18n.translate("operations.operationsView.warningLabel.noSetupConstants");
 		} else if (!trace.getCurrentState().isInitialised() && operations.isEmpty()) {
-			text = i18n.translate("operations.operationsView.warningLabel.noSetupConstantsOrInit");
+			text = i18n.translate("operations.operationsView.warningLabel.noInitialisation");
 		} else {
 			text = "";
 		}
@@ -425,19 +452,31 @@ public final class OperationsView extends VBox {
 		Platform.runLater(() -> opsListView.getItems().setAll(filtered));
 	}
 
-	private void showDisabledAndWithTimeout(final LoadedMachine loadedMachine, final Set<String> notEnabled, final Set<String> withTimeout) {
+	private void showDisabledAndWithTimeout(LoadedMachine loadedMachine, Set<String> notEnabled, Set<String> withTimeout, Set<String> withMaxOperations) {
 		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
 				if (!Transition.INITIALISE_MACHINE_NAME.equals(s)) {
-					events.add(OperationItem.forDisabled(
-						s, withTimeout.contains(s) ? OperationItem.Status.TIMEOUT : OperationItem.Status.DISABLED, loadedMachine.getMachineOperationInfo(s).getParameterNames()
-					));
+					if (!withTimeout.contains(s) && !withMaxOperations.contains(s)) {
+						OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
+						if (opInfo != null) {
+							events.add(OperationItem.forDisabled(s, OperationItem.Status.DISABLED, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+						}
+					}
 				}
 			}
 		}
 		for (String s : withTimeout) {
-			if (!notEnabled.contains(s)) {
-				events.add(OperationItem.forDisabled(s, OperationItem.Status.TIMEOUT, Collections.emptyList()));
+			OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
+			if (opInfo != null) {
+				events.add(OperationItem.forDisabled(s, OperationItem.Status.TIMEOUT, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+			}
+		}
+		for (String s : withMaxOperations) {
+			if (!withTimeout.contains(s)) {
+				OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
+				if (opInfo != null) {
+					events.add(OperationItem.forDisabled(s, OperationItem.Status.MAX_OPERATIONS, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+				}
 			}
 		}
 	}
@@ -490,6 +529,11 @@ public final class OperationsView extends VBox {
 		this.setShowUnambiguous(!this.showUnambiguous.get());
 	}
 
+	@FXML
+	private void handleOpDescriptionsMenuItem() {
+		this.setShowOperationDescriptions(!this.showOperationDescriptions.get());
+	}
+
 	private List<OperationItem> applyFilter(final String filter) {
 		return events.stream().filter(op -> op.getPrettyName().toLowerCase().contains(filter.toLowerCase()))
 				.collect(Collectors.toList());
@@ -533,8 +577,8 @@ public final class OperationsView extends VBox {
 			} catch (NumberFormatException e) {
 				LOGGER.error("Invalid input for executing random number of events",e);
 				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING,
-					"operations.operationsView.alerts.invalidNumberOfOparations.header",
-					"operations.operationsView.alerts.invalidNumberOfOparations.content", randomInput);
+						"operations.operationsView.alerts.invalidNumberOfOperations.header",
+						"operations.operationsView.alerts.invalidNumberOfOperations.content", randomInput);
 				alert.initOwner(this.getScene().getWindow());
 				alert.showAndWait();
 				return;
@@ -548,13 +592,20 @@ public final class OperationsView extends VBox {
 		} else {
 			throw new AssertionError("Unhandled random animation event source: " + event.getSource());
 		}
-		
-		cliExecutor.submit(() -> {
-			final Trace trace = currentTrace.get();
-			if (trace != null) {
-				currentTrace.set(trace.randomAnimation(operationCount));
-			}
-		});
+
+		Trace currentTrace = this.currentTrace.get();
+		if (currentTrace != null) {
+			this.cliExecutor.submit(() -> currentTrace.randomAnimation(operationCount)).whenCompleteAsync((res, exc) -> {
+				if (exc != null) {
+					if (!(exc instanceof CancellationException)) {
+						LOGGER.error("error while randomly animating", exc);
+						this.stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+					}
+				} else if (res != null) {
+					this.currentTrace.set(res);
+				}
+			}, this.fxExecutor);
+		}
 	}
 
 	private OperationsView.SortMode getSortMode() {
@@ -564,7 +615,7 @@ public final class OperationsView extends VBox {
 	private void setSortMode(final OperationsView.SortMode sortMode) {
 		this.sortMode.set(sortMode);
 	}
-	
+
 	private boolean getShowDisabledOps() {
 		return this.showDisabledOps.get();
 	}
@@ -572,7 +623,7 @@ public final class OperationsView extends VBox {
 	private void setShowDisabledOps(boolean showDisabledOps) {
 		this.showDisabledOps.set(showDisabledOps);
 	}
-	
+
 	private boolean getShowUnambiguous() {
 		return this.showUnambiguous.get();
 	}
@@ -581,9 +632,17 @@ public final class OperationsView extends VBox {
 		this.showUnambiguous.set(showUnambiguous);
 	}
 
+	private boolean getShowDescriptions() {
+		return this.showOperationDescriptions.get();
+	}
+
+	private void setShowOperationDescriptions(final boolean showOperationDescriptions) {
+		this.showOperationDescriptions.set(showOperationDescriptions);
+	}
+
 	@FXML
 	private void computeUnsatCore() {
-		ExpressionTableView expressionTableView = injector.getInstance(ExpressionTableView.class);
+		DynamicVisualizationStage expressionTableView = injector.getInstance(DynamicVisualizationStage.class);
 		expressionTableView.show();
 		expressionTableView.toFront();
 		expressionTableView.selectCommand(TableVisualizationCommand.UNSAT_CORE_PROPERTIES_NAME);

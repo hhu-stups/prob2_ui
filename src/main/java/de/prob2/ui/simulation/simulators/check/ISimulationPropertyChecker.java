@@ -1,15 +1,16 @@
 package de.prob2.ui.simulation.simulators.check;
 
-import de.prob.statespace.Trace;
-import de.prob2.ui.verifications.Checked;
-
 import java.util.List;
 import java.util.Map;
+
+import de.prob.statespace.Trace;
+import de.prob2.ui.simulation.SimulationItem;
+import de.prob2.ui.verifications.CheckingStatus;
 
 public interface ISimulationPropertyChecker {
 	List<Trace> getResultingTraces();
 	List<List<Integer>> getResultingTimestamps();
-	List<Checked> getResultingStatus();
+	List<CheckingStatus> getResultingStatus();
 	SimulationStats getStats();
 	SimulationCheckingSimulator.MonteCarloCheckResult getResult();
 	void setResult(SimulationCheckingSimulator.MonteCarloCheckResult result);
@@ -18,7 +19,17 @@ public interface ISimulationPropertyChecker {
 	SimulationExtendedStats calculateExtendedStats();
 	void run();
 	void check();
-	Checked checkTrace(Trace trace, int time);
+	CheckingStatus checkTrace(Trace trace, int time);
 	void calculateStatistics(long time);
 	Map<String, List<Integer>> getOperationExecutions();
+
+	default SimulationItem.Result getSimulationResult() {
+		return new SimulationItem.Result(
+			this.getResult(),
+			this.getResultingTraces(),
+			this.getResultingTimestamps(),
+			this.getResultingStatus(),
+			this.getStats()
+		);
+	}
 }

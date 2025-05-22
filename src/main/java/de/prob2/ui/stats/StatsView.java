@@ -2,6 +2,7 @@ package de.prob2.ui.stats;
 
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -18,8 +19,11 @@ import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.sharedviews.SimpleStatsView;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ICheckingResult;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ModelCheckingStep;
+import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
 
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectProperty;
@@ -39,7 +43,7 @@ import org.controlsfx.glyphfont.FontAwesome;
 
 @FXMLInjected
 @Singleton
-public class StatsView extends ScrollPane {
+public final class StatsView extends ScrollPane {
 	@FXML
 	private SimpleStatsView simpleStatsView;
 	@FXML
@@ -69,11 +73,16 @@ public class StatsView extends ScrollPane {
 	private final CurrentTrace currentTrace;
 	private final FontSize fontSize;
 
+	private final AtomicBoolean needsUpdateAfterBusy;
+
 	@Inject
 	public StatsView(final I18n i18n, final StageManager stageManager, final CurrentTrace currentTrace, final FontSize fontSize) {
 		this.i18n = i18n;
 		this.currentTrace = currentTrace;
 		this.fontSize = fontSize;
+
+		this.needsUpdateAfterBusy = new AtomicBoolean(false);
+
 		stageManager.loadFXML(this, "stats_view.fxml");
 	}
 
@@ -87,9 +96,14 @@ public class StatsView extends ScrollPane {
 		statsBox.managedProperty().bind(statsBox.visibleProperty());
 		noStatsLabel.managedProperty().bind(noStatsLabel.visibleProperty());
 
-		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.update(to));
-		this.currentTrace.addStatesCalculatedListener(newTransitions -> this.update(this.currentTrace.getStateSpace()));
-		this.update(currentTrace.getStateSpace());
+		this.currentTrace.animatorBusyProperty().addListener((o, from, to) -> {
+			if (!to && this.needsUpdateAfterBusy.getAndSet(false)) {
+				this.update(this.currentTrace.getStateSpace());
+			}
+		});
+		this.currentTrace.stateSpaceProperty().addListener((o, from, to) -> this.updateWhenNotBusy(to));
+		this.currentTrace.addStatesCalculatedListener(newTransitions -> this.updateWhenNotBusy(this.currentTrace.getStateSpace()));
+		this.updateWhenNotBusy(currentTrace.getStateSpace());
 
 		((BindableGlyph) helpButton.getGraphic()).bindableFontSizeProperty().bind(fontSize.fontSizeProperty().multiply(1.2));
 
@@ -125,9 +139,7 @@ public class StatsView extends ScrollPane {
 	private void update(final StateSpace stateSpace) {
 		if (stateSpace != null) {
 			// Don't attempt to update any stats while probcli is busy (i. e. can't execute commands for a while).
-			// During model checking, simple stats are still updated,
-			// because probcli automatically returns them after every model checking step
-			// and Modelchecker reports these stats to StatsView.
+			// During model checking, simple stats are still updated - see the updateWhileModelChecking method.
 			if (!stateSpace.isBusy()) {
 				final ComputeStateSpaceStatsCommand stateSpaceStatsCmd = new ComputeStateSpaceStatsCommand();
 				stateSpace.execute(stateSpaceStatsCmd);
@@ -146,21 +158,36 @@ public class StatsView extends ScrollPane {
 		}
 	}
 
+	private void updateWhenNotBusy(StateSpace stateSpace) {
+		if (stateSpace != null && stateSpace.isBusy()) {
+			this.needsUpdateAfterBusy.set(true);
+		} else {
+			this.update(stateSpace);
+		}
+	}
+
 	public void updateSimpleStats(StateSpaceStats result) {
 		Platform.runLater(() -> simpleStatsView.setStats(result));
 	}
 
-	public void updateWhileModelChecking(final ModelCheckingItem item) {
-		item.currentStepProperty().addListener(new ChangeListener<>() {
+	public void updateWhileModelChecking(ProBModelCheckingItem item) {
+		item.resultProperty().addListener(new ChangeListener<>() {
 			@Override
-			public void changed(final ObservableValue<? extends ModelCheckingStep> o, final ModelCheckingStep from, final ModelCheckingStep to) {
-				if (to == null) {
+			public void changed(ObservableValue<? extends ICheckingResult> o, ICheckingResult from, ICheckingResult to) {
+				if (!(to instanceof ModelCheckingItem.Result mcResult)) {
+					// Item was reset - if for some reason this listener is still active, remove it now.
+					o.removeListener(this);
+					return;
+				}
+
+				ModelCheckingStep lastStep = mcResult.getLastStep();
+				if (lastStep.getStatus() != CheckingStatus.IN_PROGRESS) {
 					// Model check has finished - stop updating stats based on this task.
 					o.removeListener(this);
 				} else {
 					// While the model check is running, probcli is blocked, so StatsView cannot update itself normally.
 					// Instead, update it based on the stats returned by the model checker.
-					final StateSpaceStats stats = to.getStats();
+					StateSpaceStats stats = lastStep.getStats();
 					if (stats != null) {
 						updateSimpleStats(stats);
 					}

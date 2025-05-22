@@ -81,6 +81,8 @@ public class ViewMenu extends Menu {
 
 	@FXML
 	private void handleFullScreen() {
-		stageManager.getCurrent().setFullScreen(!stageManager.getCurrent().isFullScreen());
+		if (stageManager.getCurrent() != null) {
+			stageManager.getCurrent().setFullScreen(!stageManager.getCurrent().isFullScreen());
+		}
 	}
 }

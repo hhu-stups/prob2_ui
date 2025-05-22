@@ -1,20 +1,25 @@
 package de.prob2.ui.simulation.simulators.check;
 
-import com.google.inject.Injector;
-import de.prob.statespace.Trace;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.choice.SimulationCheckingType;
-import de.prob2.ui.simulation.simulators.Simulator;
-import de.prob2.ui.verifications.Checked;
-import org.apache.commons.math3.special.Erf;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.inject.Injector;
+import com.google.inject.Provider;
+
+import de.prob.statespace.Trace;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
+import de.prob2.ui.simulation.simulators.Simulator;
+import de.prob2.ui.verifications.CheckingStatus;
+
+import org.apache.commons.math3.special.Erf;
 
 public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 
@@ -132,25 +137,22 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	private SimulationPropertyChecker simulationPropertyChecker;
 
 	private final Injector injector;
-
-	private final I18n i18n;
+	private final SimulationFileHandler simulationFileHandler;
 
 	private final HypothesisCheckingType hypothesisCheckingType;
-
 	private final double probability;
-
 	private final double significance;
 
-	public SimulationHypothesisChecker(final Injector injector, final I18n i18n, final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance) {
+	public SimulationHypothesisChecker(final Injector injector, SimulationFileHandler simulationFileHandler, final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance) {
 		this.injector = injector;
-		this.i18n = i18n;
+		this.simulationFileHandler = simulationFileHandler;
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.significance = significance;
 	}
 
-	public void initialize(final CurrentTrace currentTrace, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationPropertyChecker(this, injector, currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+	public void initialize(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		this.simulationPropertyChecker = new SimulationPropertyChecker(this, currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	@Override
@@ -176,7 +178,7 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	}
 
 	@Override
-	public Checked checkTrace(Trace trace, int time) {
+	public CheckingStatus checkTrace(Trace trace, int time) {
 		return simulationPropertyChecker.checkTrace(trace, time);
 	}
 
@@ -191,7 +193,7 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 	}
 
 	@Override
-	public List<Checked> getResultingStatus() {
+	public List<CheckingStatus> getResultingStatus() {
 		return simulationPropertyChecker.getResultingStatus();
 	}
 

@@ -11,8 +11,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
-import de.prob2.ui.vomanager.IValidationTask;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.vomanager.Requirement;
 import de.prob2.ui.vomanager.ValidationObligation;
 
@@ -54,11 +54,10 @@ public final class VOFeedback {
 		Map<Requirement, Set<Requirement>> fullDependencies = computeFullDependencies(vosByRequirement);
 		vosByRequirement.forEach((requirement, vo) -> {
 			// For each failed VO
-			if(vo.getChecked() == Checked.FAIL) {
-
+			if (vo.getStatus() == CheckingStatus.FAIL) {
 				// Determine possible error sources in VTs
 				Set<String> dependentVTs = vo.getTasks().stream()
-						.filter(task -> task.getChecked() == Checked.FAIL)
+						.filter(task -> task.getStatus() == CheckingStatus.FAIL)
 						.map(IValidationTask::getId).collect(Collectors.toCollection(LinkedHashSet::new));
 
 				// Determine possible error sources in requirements

@@ -5,7 +5,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.Checked;
+import de.prob2.ui.verifications.CheckingStatus;
 
 import javafx.beans.Observable;
 import javafx.beans.binding.Bindings;
@@ -25,9 +25,9 @@ abstract class VOManagerItem {
 		}
 		
 		@Override
-		ObjectExpression<Checked> checkedProperty() {
-			return checkedPropertyConjunction(this.getRequirement().getValidationObligations().stream()
-				.map(ValidationObligation::checkedProperty)
+		ObjectExpression<CheckingStatus> statusProperty() {
+			return statusPropertyConjunction(this.getRequirement().getValidationObligations().stream()
+				.map(ValidationObligation::statusProperty)
 				.collect(Collectors.toList()));
 		}
 	}
@@ -46,12 +46,12 @@ abstract class VOManagerItem {
 		}
 		
 		@Override
-		ObjectExpression<Checked> checkedProperty() {
-			return checkedPropertyConjunction(this.projectRequirements.stream()
+		ObjectExpression<CheckingStatus> statusProperty() {
+			return statusPropertyConjunction(this.projectRequirements.stream()
 				.map(req -> req.getValidationObligation(this.getMachineName()))
 				.filter(Optional::isPresent)
 				.map(Optional::get)
-				.map(ValidationObligation::checkedProperty)
+				.map(ValidationObligation::statusProperty)
 				.collect(Collectors.toList()));
 		}
 	}
@@ -62,13 +62,13 @@ abstract class VOManagerItem {
 		}
 		
 		@Override
-		ObjectExpression<Checked> checkedProperty() {
+		ObjectExpression<CheckingStatus> statusProperty() {
 			if (this.getVo() == null) {
 				// If the requirement doesn't contain any VOs yet,
 				// the tree will contain a RequirementUnderMachine item with a null VO.
 				return new SimpleObjectProperty<>(null);
 			} else {
-				return this.getVo().checkedProperty();
+				return this.getVo().statusProperty();
 			}
 		}
 	}
@@ -139,20 +139,20 @@ abstract class VOManagerItem {
 		return this.vo;
 	}
 	
-	private static ObjectExpression<Checked> checkedPropertyConjunction(final Collection<? extends ObjectExpression<Checked>> checkeds) {
+	private static ObjectExpression<CheckingStatus> statusPropertyConjunction(final Collection<? extends ObjectExpression<CheckingStatus>> statuses) {
 		return Bindings.createObjectBinding(() ->
-				checkeds.stream()
+				statuses.stream()
 					.map(ObservableObjectValue::get)
-					.reduce(Checked::and)
+					.reduce(CheckingStatus::and)
 					.orElse(null),
-			checkeds.toArray(new Observable[0]));
+			statuses.toArray(new Observable[0]));
 	}
 	
 	abstract String getDisplayText();
 	
-	abstract ObjectExpression<Checked> checkedProperty();
+	abstract ObjectExpression<CheckingStatus> statusProperty();
 	
-	Checked getChecked() {
-		return this.checkedProperty().get();
+	CheckingStatus getStatus() {
+		return this.statusProperty().get();
 	}
 }

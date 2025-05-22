@@ -1,145 +1,105 @@
 package de.prob2.ui.simulation;
 
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.internal.DisablePropertyController;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import de.prob2.ui.simulation.simulators.check.SimulationCheckingSimulator;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
-import de.prob2.ui.simulation.table.SimulationItem;
-import de.prob2.ui.verifications.Checked;
 
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.ListProperty;
-import javafx.beans.property.SimpleListProperty;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 @Singleton
-public class SimulationItemHandler {
+public final class SimulationItemHandler {
 
+	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
-
-	private final StageManager stageManager;
-
+	private final Provider<ObjectMapper> objectMapperProvider;
+	private final CliTaskExecutor cliExecutor;
+	private final SimulationFileHandler simulationFileHandler;
 	private final Injector injector;
 
 	private Path path;
-
-	private final ListProperty<Thread> currentJobThreads;
-
 	private ISimulationModelConfiguration simulationModelConfiguration;
 
 	@Inject
-	private SimulationItemHandler(final CurrentTrace currentTrace, final StageManager stageManager, final Injector injector, final DisablePropertyController disablePropertyController) {
+	private SimulationItemHandler(CurrentProject currentProject, CurrentTrace currentTrace, Provider<ObjectMapper> objectMapperProvider, CliTaskExecutor cliExecutor, SimulationFileHandler simulationFileHandler, Injector injector) {
+		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
-		this.stageManager = stageManager;
+		this.objectMapperProvider = objectMapperProvider;
+		this.cliExecutor = cliExecutor;
+		this.simulationFileHandler = simulationFileHandler;
 		this.injector = injector;
-		this.currentJobThreads = new SimpleListProperty<>(this, "currentJobThreads", FXCollections.observableArrayList());
-		disablePropertyController.addDisableExpression(this.runningProperty());
 	}
 
-	public List<SimulationItem> getItems(final SimulationModel simulationModel) {
-		if(simulationModel == null) {
-			return new ArrayList<>();
+	public ObservableList<SimulationItem> getSimulationItems(SimulationModel simulationModel) {
+		if(simulationModel.getPath().equals(SimulationFileHandler.DEFAULT_SIMULATION_PATH)) {
+			return FXCollections.observableArrayList();
 		}
-		return simulationModel.getSimulationItems();
+		return this.currentProject.getCurrentMachine().getSimulationTasksByModel(simulationModel);
 	}
 
-	public Optional<SimulationItem> addItem(final SimulationModel simulationModel, final SimulationItem item) {
-		final List<SimulationItem> items = this.getItems(simulationModel);
-		final Optional<SimulationItem> existingItem = items.stream().filter(item::equals).findAny();
-		if(existingItem.isEmpty()) {
-			items.add(item);
-		}
-		return existingItem;
-	}
-
-	public void removeItem(final SimulationModel simulationModel, SimulationItem item) {
-		final List<SimulationItem> items = this.getItems(simulationModel);
-		items.remove(item);
+	public void reset(SimulationModel simulationModel) {
+		this.getSimulationItems(simulationModel).forEach(SimulationItem::reset);
 	}
 
 	private Map<String, Object> extractAdditionalInformation(SimulationItem item) {
 		Map<String, Object> additionalInformation = new HashMap<>();
 
-		if(item.containsField("START_AFTER_STEPS")) {
+		if (item.containsField("START_AFTER_STEPS")) {
 			additionalInformation.put("START_AFTER_STEPS", item.getField("START_AFTER_STEPS"));
-		} else if(item.containsField("STARTING_PREDICATE")) {
+		} else if (item.containsField("STARTING_PREDICATE")) {
 			additionalInformation.put("STARTING_PREDICATE", item.getField("STARTING_PREDICATE"));
-		} else if(item.containsField("STARTING_PREDICATE_ACTIVATED")) {
+		} else if (item.containsField("STARTING_PREDICATE_ACTIVATED")) {
 			additionalInformation.put("STARTING_PREDICATE_ACTIVATED", item.getField("STARTING_PREDICATE_ACTIVATED"));
-		} else if(item.containsField("STARTING_TIME")) {
+		} else if (item.containsField("STARTING_TIME")) {
 			additionalInformation.put("STARTING_TIME", item.getField("STARTING_TIME"));
 		}
 
-		if(item.containsField("STEPS_PER_EXECUTION")) {
+		if (item.containsField("STEPS_PER_EXECUTION")) {
 			additionalInformation.put("STEPS_PER_EXECUTION", item.getField("STEPS_PER_EXECUTION"));
-		} else if(item.containsField("ENDING_PREDICATE")) {
+		} else if (item.containsField("ENDING_PREDICATE")) {
 			additionalInformation.put("ENDING_PREDICATE", item.getField("ENDING_PREDICATE"));
-		} else if(item.containsField("ENDING_TIME")) {
+		} else if (item.containsField("ENDING_TIME")) {
 			additionalInformation.put("ENDING_TIME", item.getField("ENDING_TIME"));
 		}
 
 		return additionalInformation;
 	}
 
-	private void setResult(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
-		item.setTraces(simulationPropertyChecker.getResultingTraces());
-		item.setTimestamps(simulationPropertyChecker.getResultingTimestamps());
-		item.setStatuses(simulationPropertyChecker.getResultingStatus());
-		item.setSimulationStats(simulationPropertyChecker.getStats());
-		Platform.runLater(() -> {
-			switch (simulationPropertyChecker.getResult()) {
-				case SUCCESS:
-					item.setChecked(Checked.SUCCESS);
-					break;
-				case FAIL:
-					item.setChecked(Checked.FAIL);
-					break;
-				case NOT_FINISHED:
-					item.setChecked(Checked.NOT_CHECKED);
-					break;
-				default:
-					break;
-			}
-		});
-	}
-
 	private void runAndCheck(SimulationItem item, ISimulationPropertyChecker simulationPropertyChecker) {
-		Thread thread = new Thread(() -> {
+		cliExecutor.execute(() -> {
 			simulationPropertyChecker.run();
-			setResult(item, simulationPropertyChecker);
-			currentJobThreads.remove(Thread.currentThread());
+			Platform.runLater(() -> item.setResult(simulationPropertyChecker.getSimulationResult()));
 		});
-		currentJobThreads.add(thread);
-		thread.start();
 	}
 
 	private void handleMonteCarloSimulation(SimulationItem item) {
-		int executions = (int) item.getField("EXECUTIONS");
+		int executions = item.getField("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) simulationModelConfiguration).getTimedTraces().size() : (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(injector, currentTrace, executions, maxStepsBeforeProperty, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, path);
+		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, executions, maxStepsBeforeProperty, additionalInformation);
+		this.simulationFileHandler.initSimulator(injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, currentTrace.getStateSpace().getLoadedMachine(), path);
 		runAndCheck(item, simulationCheckingSimulator);
 	}
 
@@ -152,30 +112,30 @@ public class SimulationItemHandler {
 		double probability = (double) item.getField("PROBABILITY");
 		double significance = (double) item.getField("SIGNIFICANCE");
 
-		if(item.containsField("PROBABILITY")) {
+		if (item.containsField("PROBABILITY")) {
 			additionalInformation.put("PROBABILITY", probability);
 		}
 
-		if(item.containsField("SIGNIFICANCE")) {
+		if (item.containsField("SIGNIFICANCE")) {
 			additionalInformation.put("SIGNIFICANCE", significance);
 		}
 
-		if(item.containsField("PREDICATE")) {
+		if (item.containsField("PREDICATE")) {
 			additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
 		}
 
-		if(item.containsField("TIME")) {
+		if (item.containsField("TIME")) {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, injector.getInstance(I18n.class), hypothesisCheckingType, probability, significance);
+		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, simulationFileHandler, hypothesisCheckingType, probability, significance);
 		initializeHypothesisChecker(hypothesisChecker, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, hypothesisChecker);
 	}
 
 	private void initializeHypothesisChecker(SimulationHypothesisChecker simulationHypothesisChecker, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		simulationHypothesisChecker.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), path);
+		simulationHypothesisChecker.initialize(currentTrace, currentProject, objectMapperProvider, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		this.simulationFileHandler.initSimulator(injector.getInstance(SimulatorStage.class), simulationHypothesisChecker.getSimulator(), currentTrace.getStateSpace().getLoadedMachine(), path);
 	}
 
 	private void handleEstimation(SimulationItem item) {
@@ -187,34 +147,34 @@ public class SimulationItemHandler {
 		double desiredValue = (double) item.getField("DESIRED_VALUE");
 		double epsilon = (double) item.getField("EPSILON");
 
-		if(item.containsField("DESIRED_VALUE")) {
+		if (item.containsField("DESIRED_VALUE")) {
 			additionalInformation.put("DESIRED_VALUE", desiredValue);
 		}
 
-		if(item.containsField("EPSILON")) {
+		if (item.containsField("EPSILON")) {
 			additionalInformation.put("EPSILON", epsilon);
 		}
 
-		if(item.containsField("PREDICATE")) {
+		if (item.containsField("PREDICATE")) {
 			additionalInformation.put("PREDICATE", item.getField("PREDICATE"));
 		}
 
-		if(item.containsField("TIME")) {
+		if (item.containsField("TIME")) {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		if(item.containsField("EXPRESSION")) {
+		if (item.containsField("EXPRESSION")) {
 			additionalInformation.put("EXPRESSION", item.getField("EXPRESSION"));
 		}
 
-		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, injector.getInstance(I18n.class), estimationType, checkingType, desiredValue, epsilon);
+		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, simulationFileHandler, estimationType, checkingType, desiredValue, epsilon);
 		initializeEstimator(simulationEstimator, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, simulationEstimator);
 	}
 
 	private void initializeEstimator(SimulationEstimator simulationEstimator, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		simulationEstimator.initialize(currentTrace, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
-		SimulationHelperFunctions.initSimulator(stageManager, injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), path);
+		simulationEstimator.initialize(currentTrace, currentProject, objectMapperProvider, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		this.simulationFileHandler.initSimulator(injector.getInstance(SimulatorStage.class), simulationEstimator.getSimulator(), currentTrace.getStateSpace().getLoadedMachine(), path);
 	}
 
 	public void checkItem(SimulationItem item) {
@@ -223,7 +183,7 @@ public class SimulationItemHandler {
 		}*/
 		// TODO
 		SimulationType type = item.getType();
-		switch(type) {
+		switch (type) {
 			case MONTE_CARLO_SIMULATION:
 				handleMonteCarloSimulation(item);
 				break;
@@ -239,35 +199,15 @@ public class SimulationItemHandler {
 	}
 
 	public void handleMachine(SimulationModel simulationModel) {
-		Thread thread = new Thread(() -> {
-			for (SimulationItem item : simulationModel.getSimulationItems()) {
+		List<SimulationItem> items = this.currentProject.getCurrentMachine().getSimulationTasksByModel(simulationModel);
+		cliExecutor.execute(() -> {
+			for (SimulationItem item : items) {
 				this.checkItem(item);
-				if(Thread.currentThread().isInterrupted()) {
+				if (Thread.currentThread().isInterrupted()) {
 					break;
 				}
 			}
-			currentJobThreads.remove(Thread.currentThread());
-		}, "Simulation Thread");
-		currentJobThreads.add(thread);
-		thread.start();
-	}
-
-	public void interrupt() {
-		List<Thread> removedThreads = new ArrayList<>();
-		for (Thread thread : currentJobThreads) {
-			thread.interrupt();
-			removedThreads.add(thread);
-		}
-		currentTrace.getStateSpace().sendInterrupt();
-		currentJobThreads.removeAll(removedThreads);
-	}
-
-	public BooleanExpression runningProperty() {
-		return currentJobThreads.emptyProperty().not();
-	}
-
-	public boolean isRunning() {
-		return this.runningProperty().get();
+		});
 	}
 
 	public void setPath(Path path) {

@@ -839,6 +839,276 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		);
 	}
 
+	private static void updateV38Machine(final ObjectNode machine) {
+		checkArray(machine.get("temporalFormulas")).forEach(
+			node -> checkObject(node).put("taskType", "TEMPORAL")
+		);
+		checkArray(machine.get("symbolicCheckingFormulas")).forEach(
+			node -> checkObject(node).put("taskType", "SYMBOLIC")
+		);
+		checkArray(machine.get("traces")).forEach(
+			node -> checkObject(node).put("taskType", "REPLAY_TRACE")
+		);
+		checkArray(machine.get("modelcheckingItems")).forEach(
+			node -> checkObject(node).put("taskType", "MODEL_CHECKING")
+		);
+		// POs are saved via SavedProofObligationItem
+		checkArray(machine.get("simulations")).forEach(
+			modelNode -> checkArray(checkObject(modelNode).get("simulationItems"))
+				.forEach(node -> checkObject(node).put("taskType", "SIMULATION"))
+		);
+		checkObject(machine.get("dotVisualizationItems")).forEach(
+			listNode -> checkArray(listNode)
+				.forEach(node -> checkObject(node).put("taskType", "DYNAMIC_FORMULA"))
+		);
+		checkObject(machine.get("tableVisualizationItems")).forEach(
+			listNode -> checkArray(listNode)
+				.forEach(node -> checkObject(node).put("taskType", "DYNAMIC_FORMULA"))
+		);
+	}
+
+	private static void updateV39Machine(final ObjectNode machine) {
+		ArrayNode validationTasks;
+		JsonNode validationTasksNode = machine.get("validationTasks");
+		if (validationTasksNode == null) {
+			validationTasks = machine.arrayNode();
+			machine.set("validationTasks", validationTasks);
+		} else {
+			validationTasks = checkArray(validationTasksNode);
+		}
+
+		checkArray(machine.remove("temporalFormulas"))
+			.forEach(node -> validationTasks.add(checkObject(node)));
+
+		machine.remove("traceReplayStatus");
+		machine.remove("temporalStatus");
+		machine.remove("symbolicCheckingStatus");
+		machine.remove("modelcheckingStatus");
+	}
+
+	private static void updateV40Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("symbolicCheckingFormulas"))
+			.forEach(node -> validationTasks.add(checkObject(node)));
+	}
+
+	private static void updateV41Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("traces"))
+			.forEach(node -> validationTasks.add(checkObject(node)));
+	}
+
+	private static void updateV42Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("modelcheckingItems"))
+			.forEach(node -> validationTasks.add(checkObject(node)));
+	}
+
+	private static void updateV43Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkObject(machine.remove("dotVisualizationItems")).forEach(listNode ->
+			checkArray(listNode).forEach(node -> {
+				ObjectNode obj = checkObject(node);
+				obj.put("taskType", "DOT_FORMULA");
+				validationTasks.add(obj);
+			})
+		);
+		checkObject(machine.remove("tableVisualizationItems")).forEach(listNode ->
+			checkArray(listNode).forEach(node -> {
+				ObjectNode obj = checkObject(node);
+				obj.put("taskType", "TABLE_FORMULA");
+				validationTasks.add(obj);
+			})
+		);
+	}
+
+	private static void updateV44Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.get("simulations")).forEach(modelNode -> {
+			ObjectNode model = checkObject(modelNode);
+			checkArray(model.remove("simulationItems")).forEach(node -> {
+				ObjectNode obj = checkObject(node);
+				obj.put("simulationPath", checkText(model.get("path")));
+				validationTasks.add(obj);
+			});
+		});
+	}
+
+	private static void updateV45Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		checkArray(machine.remove("proofObligationItems"))
+			.forEach(node -> {
+				ObjectNode obj = checkObject(node);
+				obj.put("taskType", "PROOF_OBLIGATION");
+				validationTasks.add(obj);
+			});
+	}
+
+	private static void updateV46Machine(final ObjectNode machine) {
+		checkArray(machine.get("validationTasks")).forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String taskType = checkText(task.get("taskType"));
+			if ("MODEL_CHECKING".equals(taskType)) {
+				task.set("selected", task.remove("shouldExecute"));
+			}
+		});
+	}
+
+	private static void updateV47Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		validationTasks.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String taskType = checkText(task.get("taskType"));
+			if ("TEMPORAL".equals(taskType)) {
+				task.replace("taskType", task.remove("type"));
+			}
+		});
+	}
+
+	private static void updateV48Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		validationTasks.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String taskType = checkText(task.get("taskType"));
+			if ("SYMBOLIC".equals(taskType)) {
+				String symbolicType = checkText(task.remove("type"));
+				String code = checkText(task.remove("code"));
+				String newTaskType = switch (symbolicType) {
+					case "INVARIANT" -> {
+						task.put("operationName", code.isEmpty() ? null : code);
+						yield "CBC_INVARIANT_PRESERVATION_CHECKING";
+					}
+					case "DEADLOCK" -> {
+						task.put("predicate", code);
+						yield "CBC_DEADLOCK_FREEDOM_CHECKING";
+					}
+					case "CHECK_REFINEMENT" -> "CBC_REFINEMENT_CHECKING";
+					case "CHECK_STATIC_ASSERTIONS" -> "CBC_STATIC_ASSERTION_CHECKING";
+					case "CHECK_DYNAMIC_ASSERTIONS" -> "CBC_DYNAMIC_ASSERTION_CHECKING";
+					case "CHECK_WELL_DEFINEDNESS" -> "WELL_DEFINEDNESS_CHECKING";
+					case "FIND_REDUNDANT_INVARIANTS" -> "CBC_FIND_REDUNDANT_INVARIANTS";
+					case "SYMBOLIC_MODEL_CHECK" -> {
+						task.put("algorithm", code);
+						yield "SYMBOLIC_MODEL_CHECKING";
+					}
+					default -> throw new JsonConversionException("Invalid symbolic checking type: " + symbolicType);
+				};
+				task.put("taskType", newTaskType);
+			}
+		});
+	}
+
+	private static void updateV49Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		ArrayNode symbolicAnimationFormulas = checkArray(machine.remove("symbolicAnimationFormulas"));
+		symbolicAnimationFormulas.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String symbolicType = checkText(task.remove("type"));
+			String code = checkText(task.remove("code"));
+			String newTaskType = switch (symbolicType) {
+				case "SEQUENCE" -> {
+					String[] operationNames = code.replace(" ", "").split(";");
+					ArrayNode operationNamesNode = task.putArray("operationNames");
+					for (String operationName : operationNames) {
+						operationNamesNode.add(operationName);
+					}
+					yield "CBC_FIND_SEQUENCE";
+				}
+				case "FIND_VALID_STATE" -> {
+					task.put("predicate", code);
+					yield "FIND_VALID_STATE";
+				}
+				default -> throw new JsonConversionException("Invalid symbolic animation type: " + symbolicType);
+			};
+			task.put("taskType", newTaskType);
+			validationTasks.add(task);
+		});
+	}
+
+	private static void updateV50Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		ArrayNode testCases = checkArray(machine.remove("testCases"));
+		testCases.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String testCaseGenerationType = checkText(task.remove("type"));
+			String newTaskType = switch (testCaseGenerationType) {
+				case "MCDC" -> "TEST_CASE_GENERATION_MCDC";
+				case "COVERED_OPERATIONS" -> "TEST_CASE_GENERATION_OPERATION_COVERAGE";
+				default -> throw new JsonConversionException("Invalid test case generation type: " + testCaseGenerationType);
+			};
+			task.put("taskType", newTaskType);
+			validationTasks.add(task);
+		});
+	}
+
+	private static void updateV51Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		validationTasks.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String taskType = checkText(task.get("taskType"));
+			if ("DOT_FORMULA".equals(taskType) || "PLANTUML_FORMULA".equals(taskType) || "TABLE_FORMULA".equals(taskType)) {
+				task.put("taskType", "VISUALIZATION_FORMULA");
+			}
+		});
+	}
+
+	private static void updateV52Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		validationTasks.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			String taskType = checkText(task.get("taskType"));
+			if ("LTL".equals(taskType) || "CTL".equals(taskType)) {
+				task.put("startState", "ALL_INITIAL_STATES");
+			}
+		});
+	}
+
+	private static void updateV53Project(ObjectNode project) {
+		ArrayNode requirements = checkArray(project.get("requirements"));
+		requirements.forEach(requirementNode -> {
+			ObjectNode requirement = checkObject(requirementNode);
+			String type = checkText(requirement.remove("type"));
+			if ("NON_FUNCTIONAL".equals(type)) {
+				String name = checkText(requirement.get("name"));
+				requirement.put("name", "(non-functional) " + name);
+			}
+		});
+	}
+
+	private static void updateV54Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		ArrayNode historyChartItems = checkArray(machine.remove("historyChartItems"));
+		historyChartItems.forEach(taskNode -> {
+			ObjectNode task = validationTasks.addObject();
+			String formula = checkText(taskNode);
+			task.put("taskType", "CHART_FORMULA");
+			task.put("formula", formula);
+		});
+	}
+
+	private static void updateV55Machine(final ObjectNode machine) {
+		ArrayNode validationTasks = checkArray(machine.get("validationTasks"));
+		validationTasks.forEach(taskNode -> {
+			ObjectNode task = checkObject(taskNode);
+			if ("MODEL_CHECKING".equals(checkText(task.get("taskType"))) && task.has("goal")) {
+				String goal = checkText(task.remove("goal"));
+				if (!goal.isEmpty() && !"GOAL".equals(goal)) {
+					task.put("customGoal", goal);
+				}
+			}
+		});
+	}
+
+	private static void updateV56Machine(final ObjectNode machine) {
+		JsonNode visBVisualisation = machine.remove("visBVisualisation");
+		ArrayNode visBVisualisations = machine.putArray("visBVisualisations");
+		if (visBVisualisation != null && visBVisualisation.isTextual()) {
+			visBVisualisations.add(visBVisualisation.textValue());
+		} else {
+			visBVisualisations.add(""); // VisBController.NO_PATH
+		}
+	}
+
 	@Override
 	public ObjectNode convertOldData(final ObjectNode oldObject, final int oldVersion) {
 		if (oldVersion <= 0) {
@@ -976,6 +1246,68 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 			}
 			if (oldVersion <= 37) {
 				updateV37Machine(machine);
+			}
+			if (oldVersion <= 38) {
+				updateV38Machine(machine);
+			}
+			if (oldVersion <= 39) {
+				updateV39Machine(machine);
+			}
+			if (oldVersion <= 40) {
+				updateV40Machine(machine);
+			}
+			if (oldVersion <= 41) {
+				updateV41Machine(machine);
+			}
+			if (oldVersion <= 42) {
+				updateV42Machine(machine);
+			}
+			if (oldVersion <= 43) {
+				updateV43Machine(machine);
+			}
+			if (oldVersion <= 44) {
+				updateV44Machine(machine);
+			}
+			if (oldVersion <= 45) {
+				updateV45Machine(machine);
+			}
+			if (oldVersion <= 46) {
+				updateV46Machine(machine);
+			}
+			if (oldVersion <= 47) {
+				updateV47Machine(machine);
+			}
+			if (oldVersion <= 48) {
+				updateV48Machine(machine);
+			}
+			if (oldVersion <= 49) {
+				updateV49Machine(machine);
+			}
+			if (oldVersion <= 50) {
+				updateV50Machine(machine);
+			}
+			if (oldVersion <= 51) {
+				updateV51Machine(machine);
+			}
+			if (oldVersion <= 52) {
+				updateV52Machine(machine);
+			}
+		});
+
+		if (oldVersion <= 53) {
+			updateV53Project(oldObject);
+		}
+
+		checkArray(oldObject.get("machines")).forEach(machineNode -> {
+			final ObjectNode machine = checkObject(machineNode);
+			if (oldVersion <= 54) {
+				updateV54Machine(machine);
+			}
+			if (oldVersion <= 55) {
+				updateV55Machine(machine);
+			}
+			if (oldVersion <= 56) {
+				updateV56Machine(machine);
 			}
 		});
 

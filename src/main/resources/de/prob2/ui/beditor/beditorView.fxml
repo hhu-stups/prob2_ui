@@ -13,12 +13,17 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<?import javafx.scene.control.ToolBar?>
+
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<top>
-		<HBox styleClass="border" alignment="CENTER_LEFT">
+		<ToolBar styleClass="border">
+			<padding>
+				<Insets left="5.0" right="5.0"/>
+			</padding>
 			<Button fx:id="saveButton" onAction="#handleSave">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 4}" />
@@ -52,7 +57,7 @@
 					<Insets topRightBottomLeft="5.0"/>
 				</HBox.margin>
 			</ChoiceBox>
-		</HBox>
+		</ToolBar>
 	</top>
 	<center>
 		<VirtualizedScrollPane fx:id="virtualizedScrollPane" hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">

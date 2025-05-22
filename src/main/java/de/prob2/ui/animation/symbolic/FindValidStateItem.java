@@ -1,0 +1,127 @@
+package de.prob2.ui.animation.symbolic;
+
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.google.common.base.MoreObjects;
+
+import de.prob.animator.CommandInterruptedException;
+import de.prob.animator.command.FindStateCommand;
+import de.prob.animator.command.NoStateFoundException;
+import de.prob.animator.command.NoTraceFoundException;
+import de.prob.animator.domainobjects.ClassicalB;
+import de.prob.statespace.Trace;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.verifications.CheckingResult;
+import de.prob2.ui.verifications.CheckingStatus;
+import de.prob2.ui.verifications.ExecutionContext;
+import de.prob2.ui.verifications.TraceResult;
+import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
+import de.prob2.ui.verifications.type.ValidationTaskType;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@JsonPropertyOrder({
+	"id",
+	"selected",
+	"operationNames",
+})
+public final class FindValidStateItem extends SymbolicAnimationItem {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FindValidStateItem.class);
+	
+	private final String predicate;
+	
+	@JsonCreator
+	public FindValidStateItem(
+		@JsonProperty("id") String id,
+		@JsonProperty("predicate") String predicate
+	) {
+		super(id);
+		
+		this.predicate = Objects.requireNonNull(predicate, "predicate");
+	}
+	
+	public String getPredicate() {
+		return this.predicate;
+	}
+	
+	@Override
+	public ValidationTaskType<?> getTaskType() {
+		return BuiltinValidationTaskTypes.FIND_VALID_STATE;
+	}
+	
+	@Override
+	public String getTaskType(I18n i18n) {
+		return i18n.translate("animation.symbolic.type.findValidState");
+	}
+	
+	@Override
+	public String getTaskDescription(I18n i18n) {
+		return this.getPredicate();
+	}
+	
+	@Override
+	public void execute(ExecutionContext context) {
+		FindStateCommand cmd = new FindStateCommand(context.stateSpace(), new ClassicalB(getPredicate()), true);
+		try {
+			context.stateSpace().execute(cmd);
+		} catch (CommandInterruptedException exc) {
+			LOGGER.info("Find valid state interrupted by user", exc);
+			this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
+			return;
+		}
+		
+		switch (cmd.getResult()) {
+			case STATE_FOUND: {
+				Trace trace;
+				try {
+					trace = cmd.getTrace(context.stateSpace());
+				} catch (NoStateFoundException | NoTraceFoundException exc) {
+					LOGGER.info("Find valid state did not find a trace to the state", exc);
+					this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.findValidState.result.traceNotFound"));
+					return;
+				} catch (CommandInterruptedException exc) {
+					LOGGER.info("Find valid state interrupted by user", exc);
+					this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
+					return;
+				}
+				this.setResult(new TraceResult(CheckingStatus.SUCCESS, trace, "animation.symbolic.findValidState.result.found"));
+				break;
+			}
+			case NO_STATE_FOUND:
+				this.setResult(new CheckingResult(CheckingStatus.FAIL, "animation.symbolic.findValidState.result.notFound"));
+				break;
+			case INTERRUPTED:
+				this.setResult(new CheckingResult(CheckingStatus.INTERRUPTED));
+				break;
+			case ERROR:
+				this.setResult(new CheckingResult(CheckingStatus.INVALID_TASK, "animation.symbolic.findValidState.result.error"));
+				break;
+			default:
+				throw new AssertionError("Unhandled find valid state result: " + cmd.getResult());
+		}
+	}
+	
+	@Override
+	public boolean settingsEqual(Object other) {
+		return super.settingsEqual(other)
+			&& other instanceof FindValidStateItem o
+			&& this.getPredicate().equals(o.getPredicate());
+	}
+
+	@Override
+	public FindValidStateItem copy() {
+		return new FindValidStateItem(this.getId(), this.predicate);
+	}
+
+	@Override
+	public String toString() {
+		return MoreObjects.toStringHelper(this)
+			.add("id", this.getId())
+			.add("predicate", this.getPredicate())
+			.toString();
+	}
+}

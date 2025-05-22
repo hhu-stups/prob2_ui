@@ -30,8 +30,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class SearchStage extends Stage {
-
+public final class SearchStage extends Stage {
 	private static final String STYLE_ERROR = "search-error";
 	private static final String STYLE_NO_RESULTS = "search-no-results";
 	private static final String STYLE_RESULTS = "search-has-results";
@@ -49,10 +48,6 @@ public class SearchStage extends Stage {
 	private CheckBox cbWordsOnly;
 	@FXML
 	private CheckBox cbRegex;
-	/*@FXML
-	private CheckBox cbDotAll;
-	@FXML
-	private CheckBox cbMultiline;*/
 	@FXML
 	private Label lblResults;
 	@FXML
@@ -83,25 +78,25 @@ public class SearchStage extends Stage {
 			));
 		}
 
-		if (this.isShowing()) {
-			this.requestFocus();
-		} else {
+		if (!this.isShowing()) {
 			this.show();
 		}
+
+		this.requestFocus();
+		this.tfSearch.requestFocus();
 	}
 
 	@FXML
 	private void initialize() {
 		this.setAlwaysOnTop(true);
 
-		// this.cbDotAll.disableProperty().bind(this.cbRegex.selectedProperty().not());
-		// this.cbMultiline.disableProperty().bind(this.cbRegex.selectedProperty().not());
-
 		this.lblResults.getStyleClass().clear();
 
 		this.findButton.disableProperty().bind(this.tfSearch.textProperty().isEmpty());
 
 		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> handleFind()));
+
+		this.setOnCloseRequest(e -> this.handleClose());
 	}
 
 	@FXML
@@ -124,8 +119,6 @@ public class SearchStage extends Stage {
 
 		// regex options
 		boolean regex = this.cbRegex.isSelected();
-		boolean dotAll = false; // this.cbDotAll.isSelected();
-		boolean multiline = false; // this.cbMultiline.isSelected();
 
 		// unicode support always enabled
 		int flags = Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS | Pattern.CANON_EQ;
@@ -137,12 +130,6 @@ public class SearchStage extends Stage {
 		}
 		if (wordsOnly) {
 			searchText = "\\b" + searchText + "\\b";
-		}
-		if (regex && dotAll) {
-			flags |= Pattern.DOTALL;
-		}
-		if (regex && multiline) {
-			flags |= Pattern.MULTILINE;
 		}
 
 		Pattern searchPattern;

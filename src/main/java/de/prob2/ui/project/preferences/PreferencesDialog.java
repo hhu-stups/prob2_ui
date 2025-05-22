@@ -38,7 +38,6 @@ public class PreferencesDialog extends Dialog<Preference> {
 	private final I18n i18n;
 	private final PreferencesChangeState state;
 	private final CurrentProject currentProject;
-	private Preference preference;
 	private Set<String> preferencesNamesSet;
 
 	@Inject
@@ -55,9 +54,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 			if (type == null || type.getButtonData() == ButtonBar.ButtonData.CANCEL_CLOSE) {
 				return null;
 			} else {
-				preference.setName(this.nameField.getText());
-				preference.setPreferences(new HashMap<>(this.state.getPreferenceChanges()));
-				return preference; 
+				return new Preference(this.nameField.getText(), new HashMap<>(this.state.getPreferenceChanges()));
 			}
 		});
 
@@ -68,7 +65,6 @@ public class PreferencesDialog extends Dialog<Preference> {
 	private void initialize() {
 		this.setResizable(true);
 		this.prefsView.setState(this.state);
-		this.preference = new Preference("", new HashMap<>());
 
 		List<Preference> preferencesList = currentProject.getPreferences();
 		preferencesNamesSet = preferencesList.stream()
@@ -81,7 +77,7 @@ public class PreferencesDialog extends Dialog<Preference> {
 			if (preferencesNamesSet.contains(to)) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText(i18n.translate("project.preferences.preferencesDialog.errorLabel.preferenceAlreadyExists", to));
-			} else if ("default".equals(to)) {
+			} else if (Preference.DEFAULT.getName().equals(to)) {
 				okButton.setDisable(true);
 				errorExplanationLabel.setText(i18n.translate("project.preferences.preferencesDialog.errorLabel.nameCannotBeDefault"));
 			} else if (to.isEmpty()) {
@@ -96,7 +92,6 @@ public class PreferencesDialog extends Dialog<Preference> {
 
 	void setPreference(Preference preference) {
 		this.setTitle(i18n.translate("project.preferences.preferencesDialog.editPreferenceTitle", preference.getName()));
-		this.preference = preference;
 		preferencesNamesSet.remove(preference.getName());
 		this.nameField.setText(preference.getName());
 		for (Map.Entry<String, String> pref : preference.getPreferences().entrySet()) {

@@ -11,12 +11,11 @@ import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob2.ui.ProB2;
 import de.prob2.ui.internal.StageManager;
 
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.concurrent.Worker;
 import javafx.fxml.FXML;
@@ -25,14 +24,13 @@ import javafx.scene.control.TreeCell;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.StackPane;
-import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @Singleton
-public class HelpSystem extends StackPane {
+public final class HelpSystem extends StackPane {
 	private final class HelpCell extends TreeCell<String> {
 		private HelpCell() {
 			super();
@@ -55,18 +53,20 @@ public class HelpSystem extends StackPane {
 	@FXML private Button external;
 	@FXML private TreeView<String> treeView;
 	@FXML private WebView webView;
-	final WebEngine webEngine;
-	private boolean updateTreeSelection;
+
+	private final StageManager stageManager;
+	private final HostServices hostServices;
 	private final ResourceBundle helpPageTitles;
 	private final ResourceBundle helpPageResourcePaths;
 	private final Map<String, TreeItem<String>> itemsByKey;
 	private final Map<URI, String> keysByUri;
-	private final TreeItem<String> root;
+	private boolean updateTreeSelection;
 
 	@Inject
-	private HelpSystem(final StageManager stageManager, final Injector injector) {
-		stageManager.loadFXML(this, "helpsystem.fxml");
-		updateTreeSelection = true;
+	private HelpSystem(final StageManager stageManager, final HostServices hostServices) {
+		this.stageManager = stageManager;
+		this.hostServices = hostServices;
+		this.updateTreeSelection = true;
 
 		this.helpPageTitles = ResourceBundle.getBundle("de.prob2.ui.helpsystem.help_page_titles");
 		this.helpPageResourcePaths = ResourceBundle.getBundle("de.prob2.ui.helpsystem.help_page_resource_paths");
@@ -74,34 +74,40 @@ public class HelpSystem extends StackPane {
 		this.keysByUri = this.helpPageResourcePaths.keySet().stream()
 			.collect(Collectors.toMap(this::uriForPage, k -> k));
 
-		this.root = new TreeItem<>();
-		this.helpPageTitles.keySet().forEach(this::findInTreeOrAdd);
-		sortTree(root, Comparator.comparing(item -> titleForPage(item.getValue())));
-		root.setExpanded(true);
-		treeView.setRoot(root);
+		stageManager.loadFXML(this, "helpsystem.fxml");
+	}
+
+	@FXML
+	private void initialize() {
 		treeView.setShowRoot(false);
+		treeView.setCellFactory(tv -> new HelpCell());
 		treeView.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal != null && newVal.isLeaf() && updateTreeSelection) {
 				this.openHelpForKeyAndAnchor(newVal.getValue(), null);
 			}
 		});
-		treeView.setCellFactory(tv -> new HelpCell());
 
-		webEngine = webView.getEngine();
+		var root = new TreeItem<String>();
+		root.setExpanded(true);
+		treeView.setRoot(root);
+		this.helpPageTitles.keySet().forEach(this::findInTreeOrAdd);
+		sortTree(root, Comparator.comparing(item -> titleForPage(item.getValue())));
+
+		external.setOnAction(e -> hostServices.showDocument("https://prob.hhu.de/w/"));
+
+		stageManager.initWebView(webView);
+		var webEngine = webView.getEngine();
 		webEngine.setUserStyleSheetLocation(this.getClass().getResource("help.css").toString());
-		webEngine.setJavaScriptEnabled(true);
 		webEngine.getLoadWorker().stateProperty().addListener((obs, oldVal, newVal) -> {
 			if (newVal == Worker.State.SUCCEEDED) {
 				String url = webEngine.getLocation();
 				if (url.contains("http://") || url.contains("https://")) {
 					webView.getEngine().getHistory().go(-1);
-					injector.getInstance(ProB2.class).getHostServices().showDocument(url);
+					hostServices.showDocument(url);
 				}
 				findMatchingTreeViewEntryToSelect(url);
 			}
 		});
-
-		external.setOnAction(e -> injector.getInstance(ProB2.class).getHostServices().showDocument("https://prob.hhu.de/w/"));
 
 		this.openHelpForKeyAndAnchor("proB2UI", null);
 	}
@@ -156,7 +162,7 @@ public class HelpSystem extends StackPane {
 		final int indexOfLastDot = key.lastIndexOf('.');
 		if (indexOfLastDot == -1) {
 			// Key doesn't contain any dots, meaning it is top-level. Use the root item as the parent.
-			parent = this.root;
+			parent = this.treeView.getRoot();
 		} else {
 			// Key contains a dot. Split off the parent key (everything before the last dot) and use the corresponding item as the parent.
 			// This continues recursively until a parent key is reached that has a matching item (or the root is reached, see above).
@@ -226,6 +232,6 @@ public class HelpSystem extends StackPane {
 		}
 		
 		LOGGER.debug("Opening help page at URL: {}", uriWithAnchor);
-		this.webEngine.load(uriWithAnchor.toString());
+		this.webView.getEngine().load(uriWithAnchor.toString());
 	}
 }

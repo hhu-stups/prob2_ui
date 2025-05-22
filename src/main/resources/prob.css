@@ -19,14 +19,14 @@
 }
 
 /************************************************************************************
- * Accordion																		  *
+ * Accordion                                                                        *
  ************************************************************************************/
 .accordion {
 	-fx-background-color: -prob-grey;
 }
 
 /************************************************************************************
- * Buttons & Icons																  *
+ * Buttons & Icons                                                                  *
  ************************************************************************************/
 .button, .toggle-button, .menu-button {
 	-fx-background-color: transparent;
@@ -99,7 +99,7 @@
 }
 
 /************************************************************************************
- * CheckBox																		  *
+ * CheckBox                                                                         *
  ************************************************************************************/
 .check-box {
 	-fx-background-color: transparent;
@@ -126,7 +126,7 @@
 }
 
 /************************************************************************************
- * ChoiceBox																		  *
+ * ChoiceBox                                                                        *
  ************************************************************************************/
 .choice-box {
 	-fx-background-color: transparent;
@@ -140,7 +140,7 @@
 }
 
 /************************************************************************************
- * ColorPicker																	  *
+ * ColorPicker                                                                      *
  ************************************************************************************/
 .color-picker {
 	-fx-background-color: transparent;
@@ -155,23 +155,27 @@
 
 .table-view .color-picker,
 .list-view .color-picker,
+.tree-view .color-picker,
 .tree-table-view .color-picker {
 	-fx-color-rect-width: 0.6em;
 	-fx-color-rect-height: 0.6em;
 }
 .table-view .color-picker > .arrow-button,
 .list-view .color-picker > .arrow-button,
+.tree-view .color-picker > .arrow-button,
 .tree-table-view .color-picker > .arrow-button {
 	-fx-padding: 0.02em 0.5em 0.02em 0em;
 }
 .table-view .color-picker > .label,
 .list-view .color-picker > .label,
+.tree-view .color-picker > .label,
 .tree-table-view .color-picker > .label {
 	-fx-padding: 0.02em 0.5em 0.02em 0.5em;
 	-fx-font-size: 0.95em;
 }
 .table-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
 .list-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
+.tree-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect,
 .tree-table-view .color-picker > .color-picker-label > .picker-color > .picker-color-rect {
 	-fx-stroke: -prob-grey;
 }
@@ -205,9 +209,9 @@
 	-fx-background-color: -prob-grey;
 	-fx-padding: 0.08em;
 }
- 
+
 /************************************************************************************
- * ComboBox																		  *
+ * ComboBox                                                                         *
  ************************************************************************************/
 .combo-box {
 	-fx-background-radius: 5.0;
@@ -245,23 +249,26 @@
 
 .table-view .combo-box,
 .list-view .combo-box,
+.tree-view .combo-box,
 .tree-table-view .combo-box {
 	-fx-pref-height: 0;
 }
 .table-view .combo-box > .list-cell,
 .list-view .combo-box > .list-cell,
+.tree-view .combo-box > .list-cell,
 .tree-table-view .combo-box > .list-cell {
 	-fx-font-size: 0.95em;
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
 }
 .table-view .combo-box-base > *.arrow-button,
 .list-view .combo-box-base > *.arrow-button,
+.tree-view .combo-box-base > *.arrow-button,
 .tree-table-view .combo-box-base > *.arrow-button {
 	-fx-padding: 0.02em 0.5em 0.02em 0.25em;
 }
 
 /************************************************************************************
- * DialogPane																	  *
+ * DialogPane                                                                       *
  ************************************************************************************/
 .dialog-pane .button {
 	-fx-background-color: transparent;
@@ -278,43 +285,50 @@
 
 
 /************************************************************************************
- * ListView																		  *
+ * ListView/TreeView                                                                *
  ************************************************************************************/
-.list-view {
+.list-view,
+.tree-view {
 	-fx-focus-color: transparent;
 	-fx-faint-focus-color: transparent;
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.2em 0.0 0.2em 0.0;
 }
-.list-cell {
+.list-cell,
+.tree-cell {
 	-fx-cell-size: 1.5em;
-	-fx-padding: 0em 1em 0.05em 1em;
 }
-.list-cell:odd {
+.list-cell:odd,
+.tree-cell:odd {
 	-fx-background-color: -prob-grey-odd;
 }
-.list-cell:selected {
+.list-cell:selected,
+.tree-cell:selected {
 	-fx-background-color: -prob-aqua;
 	-fx-text-fill: white;
 }
-.list-cell:selected:hover {
+.list-cell:selected:hover,
+.tree-cell:selected:hover {
 	-fx-background-color: -prob-grey;
 	-fx-text-fill: white;
 }
-.list-cell:hover {
+.list-cell:hover,
+.tree-cell:hover {
 	-fx-background-color: -prob-grey-20;
 	-fx-text-fill: black;
 }
-.list-cell:empty:hover {
+.list-cell:empty:hover,
+.tree-cell:empty:hover {
 	-fx-background-color: white;
 }
-.popup .list-view {
+.popup .list-view,
+.popup .tree-view {
 	-fx-border-color: -prob-grey;
 	-fx-border-width: 0.02em 0.02em 0.02em 0.2em;
 }
 
 /************************************************************************************
- * Menu, ContextMenu, MenuBar													  *
+ * Menu, ContextMenu, MenuBar                                                       *
  ************************************************************************************/
 .context-menu {
 	-fx-background-color: rgba(85, 85, 96, 0.95); /* increased opacity to 95, was prob-grey-75 */
@@ -366,17 +380,7 @@
 }
 
 /************************************************************************************
- * RadioButton																	  *
- ************************************************************************************/
-.radio-button {
-	-fx-background-color: transparent;
-	-fx-text-fill: white;
-	-fx-border-radius: 5.0;
-	-fx-border-color: -prob-grey;
-}
-
-/************************************************************************************
- * ScrollBar, ScrollPane															  *
+ * ScrollBar, ScrollPane                                                            *
  ************************************************************************************/
 .scroll-bar {
 	-fx-background-color: transparent;
@@ -416,7 +420,7 @@
 }
 
 /************************************************************************************
- * Spinner																		  *
+ * Spinner                                                                          *
  ************************************************************************************/
 .spinner .increment-arrow-button {
 	-fx-background-color: -prob-grey-75, white;
@@ -438,28 +442,32 @@
 
 .table-view .spinner,
 .list-view .spinner,
+.tree-view .spinner,
 .tree-table-view .spinner {
 	-fx-pref-height: 0;
 }
 .table-view .spinner > .text-field,
 .list-view .spinner > .text-field,
+.tree-view .spinner > .text-field,
 .tree-table-view .spinner > .text-field {
 	-fx-font-size: 0.95em;
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
 }
 .table-view .spinner .increment-arrow-button .increment-arrow,
 .list-view .spinner .increment-arrow-button .increment-arrow,
+.tree-view .spinner .increment-arrow-button .increment-arrow,
 .tree-table-view .spinner .increment-arrow-button .increment-arrow {
 	-fx-padding: 0.05em 0.25em 0.05em 0.25em;
 }
 .table-view .decrement-arrow-button .decrement-arrow,
 .list-view .decrement-arrow-button .decrement-arrow,
+.tree-view .decrement-arrow-button .decrement-arrow,
 .tree-table-view .spinner .decrement-arrow-button .decrement-arrow {
 	-fx-padding: 0.05em 0.25em 0.05em 0.25em;
 }
 
 /************************************************************************************
- * SplitView																		  *
+ * SplitView                                                                        *
  ************************************************************************************/
 .split-pane {
 	-fx-padding: 0.0;
@@ -478,102 +486,109 @@
 }
 
 /************************************************************************************
- * StyledTextArea/Consoles														  *
+ * StyledTextArea/Consoles                                                          *
  ************************************************************************************/
 
-.console {
-	-fx-font-family: monospace;
+.code-area.console {
+   -fx-font-weight: bold;
 }
 
-.console .header{
+.console .context-menu {
+	-fx-font-family: initial;
+}
+
+.console .header {
 	-fx-font-weight: bold;
 }
 
-.console .error{
+.console .error {
 	-fx-fill: red;
 }
 
-.console .message{
+.console .message {
 	-fx-fill: gray;
 }
 
 /************************************************************************************
- * BEditor																			*
+ * BEditor                                                                          *
  ************************************************************************************/
 
 .code-area.editor {
 	-fx-font-weight: bold;
-	-fx-font-size: 15;
 }
 
 .editor .context-menu {
 	-fx-font-family: initial;
 }
 
-.editor .editor_identifier {
+.editor_identifier {
 	-fx-fill:black; /* alternatives: darkslateblue, darkmagenta */
 }
 
-.editor .editor_assignments {
+.editor_assignments {
 	-fx-fill:#268bd2; /* $blue from https://ethanschoonover.com/solarized/; was darkblue; */
 }
 
-.editor .editor_logical,
-.editor .editor_special_identifier {
+.editor_logical,
+.editor_special_identifier {
 	-fx-fill:#cb4b16; /* $orange, was tomato */
 }
 
-.editor .editor_arithmetic{
+.editor_arithmetic{
 	-fx-fill:#2aa198; /* $cyan;  was #5883be; */
 }
 
-.editor .editor_predicates {
+.editor_predicates {
 	-fx-fill:#dc322f; /* $red was royalblue; */
 }
-.editor .editor_operators {
+.editor_operators {
 	-fx-fill:#268bd2; /* $blue was purple; */
 }
 
-.editor .editor_types {
+.editor_types {
 	-fx-fill:#6c71c4; /* $violet; was darkred; */
 }
 
-.editor .editor_string {
+.editor_string {
 	-fx-fill:#859900; /* $green; was rgb(3, 107, 3); */
 }
 
-.editor .editor_unsupported{
-    -fx-fill:#b58900; /* $yellow */
+.editor_unsupported {
+	-fx-fill:#b58900; /* $yellow */
 	/* -fx-background-color: yellow; */
 }
 
-.editor .editor_ctrlkeyword {
+.editor_ctrlkeyword {
 	-fx-fill:#d33682; /* $magenta was rgb(96, 22, 216); */
 }
 
-.editor .editor_keyword {
+.editor_keyword {
 	-fx-fill:#268bd2; /* $blue was blue; */
 }
 
-.editor .editor_comment {
+.editor_comment {
 	-fx-fill: #93a1a1;
 	-fx-font-style: italic
 }
-.editor .editor_pragma {
+.editor_pragma {
 	-fx-fill: #818181
 }
 
-.editor .editor_xtl_functor {
+.editor_xtl_functor {
 	-fx-fill:black;
 }
 
-.editor .editor_xtl_variable {
+.editor_xtl_variable {
 	-fx-fill:darkviolet;
 }
 
 .editor .problem {
 	-rtfx-underline-width: 2px;
 	-rtfx-underline-dash-array: 3px;
+}
+
+.editor .problem.message {
+	-rtfx-underline-color: gray;
 }
 
 .editor .problem.warning {
@@ -597,9 +612,9 @@
 }
 
 /************************************************************************************
- * TabPane																		  *
+ * TabPane                                                                          *
  ************************************************************************************/
- 
+
 .tab-pane > .tab-header-area > .headers-region > .tab > .tab-container > .tab-label {
 	-fx-text-fill: -prob-white;
 }
@@ -634,7 +649,7 @@
 }
 
 /************************************************************************************
- * TextArea																		  *
+ * TextArea                                                                         *
  ************************************************************************************/
 .text-area {
 	-fx-background-color: -prob-grey-20;
@@ -668,7 +683,7 @@
 }
 
 /************************************************************************************
- * TextField																		  *
+ * TextField                                                                        *
  ************************************************************************************/
 .text-field {
 	-fx-background-color: white;
@@ -683,13 +698,14 @@
 
 .table-view .text-field,
 .list-view .text-field,
+.tree-view .text-field,
 .tree-table-view .text-field {
 	-fx-padding: 0.02em 0.25em 0.02em 0.5em;
 	-fx-font-size: 0.95em;
 }
 
 /************************************************************************************
- * Titled Pane																	  *
+ * Titled Pane                                                                      *
  ************************************************************************************/
 .titled-pane {
 	-fx-text-fill: -prob-white;
@@ -714,7 +730,7 @@
 }
 
 /************************************************************************************
- * TableView, TreeTableView														  *
+ * TableView, TreeTableView                                                         *
  ************************************************************************************/
 .table-view {
 	-fx-padding: -1.0;
@@ -763,7 +779,6 @@
 .table-view .table-cell,
 .tree-table-view .tree-table-cell {
 	-fx-border-color: transparent;
-	-fx-padding: 0em 0.25em 0.05em 0.25em;
 }
 .table-row-cell:disabled {
 	-fx-text-fill: -prob-lightgrey;
@@ -782,7 +797,18 @@
 }
 
 /************************************************************************************
- * WebView																		  *
+ * ToolBar                                                                          *
+ ************************************************************************************/
+
+.tool-bar-overflow-button .context-menu {
+	-fx-background-color: -prob-lightgrey;
+	-fx-border-color: -prob-grey;
+	-fx-border-width: 1px;
+	-fx-border-radius: 5px;
+}
+
+/************************************************************************************
+ * WebView                                                                          *
  ************************************************************************************/
 .web-view .scroll-bar,
 .web-view .scroll-bar > .track {
@@ -791,7 +817,7 @@
 
 
 /************************************************************************************
- * Specific Styles																  *
+ * Specific Styles                                                                  *
  ************************************************************************************/
 .left, .left .label {
 	-fx-alignment: center-left;
@@ -816,8 +842,8 @@
 }
 
 .label.warning {
-	-fx-text-fill: -prob-orange;
-	-fx-font-weight: bold;
+	-fx-text-fill: -prob-orange !important;
+	-fx-font-weight: bold !important;
 }
 
 /* ===================== DIALOG ====================== */
@@ -886,7 +912,7 @@
 
 .trace-information-row.replayable .table-cell {
 	-fx-font-family: ARIAL;
-	-fx-fill: white;	
+	-fx-fill: white;
 	-fx-text-fill: -prob-aqua;
 }
 
@@ -896,7 +922,7 @@
 
 .trace-information-row.not-replayable .table-cell {
 	-fx-font-family: ARIAL;
-	-fx-fill: white;	
+	-fx-fill: white;
 	-fx-text-fill: -prob-orange;
 }
 
@@ -985,21 +1011,22 @@
 	-fx-border-width: 0.5;
 }
 
-.checked-icon.not-checked {
+.checking-status-icon.not-checked,
+.checking-status-icon.in-progress {
 	-fx-text-fill: blue;
 }
 
-.checked-icon.success {
+.checking-status-icon.success {
 	-fx-text-fill: green;
 }
 
-.checked-icon.fail {
+.checking-status-icon.fail {
 	-fx-text-fill: red;
 }
 
-.checked-icon.interrupted,
-.checked-icon.timeout,
-.checked-icon.parse-error {
+.checking-status-icon.interrupted,
+.checking-status-icon.timeout,
+.checking-status-icon.invalid-task {
 	-fx-text-fill: orange;
 }
 
@@ -1044,6 +1071,10 @@
 }
 
 .operations-cell.timeout .glyph-font {
+	-fx-text-fill: orange;
+}
+
+.operations-cell.max-operations .glyph-font {
 	-fx-text-fill: orange;
 }
 
@@ -1113,6 +1144,8 @@
 
 .simulation-item {
 	-fx-cell-size: 6.8em;
+	-fx-border-width: 2px 0px 0px 0px;
+	-fx-border-color: black;
 }
 .simulation-item .id {
 	-fx-font-family: ARIAL;
@@ -1140,7 +1173,7 @@
 }
 
 .tree-table-cell.true {
- -fx-background-color: rgba(76, 175, 80, 0.15) ; /* was #A4D8B4 palegreen */
+	-fx-background-color: rgba(76, 175, 80, 0.15) ; /* was #A4D8B4 palegreen */
 }
 
 
@@ -1208,12 +1241,6 @@
 	-fx-alignment: CENTER;
 }
 
-
-.visb-location {
-	-fx-font-family: ARIAL;
-	-fx-font-style: italic;
-	-fx-font-size: 0.9em;
-}
 
 /* ==================== TRACE DIFF ======================== */
 .trace-diff-cell {

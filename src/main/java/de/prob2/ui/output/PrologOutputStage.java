@@ -15,7 +15,7 @@ import javafx.scene.control.Label;
 import javafx.stage.Stage;
 
 @Singleton
-public class PrologOutputStage extends Stage {
+public final class PrologOutputStage extends Stage {
 	private final I18n i18n;
 	private final MachineLoader machineLoader;
 	private final CurrentTrace currentTrace;

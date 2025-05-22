@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root type="Tab" text="ProB" closable="false" xmlns:fx="http://javafx.com/fxml/1">
+	<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
+		<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
+			AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+			AnchorPane.bottomAnchor="0.0">
+			<AnchorPane>
+				<VBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">
+					<HBox alignment="CENTER_LEFT" spacing="5.0">
+						<Label text="%verifications.modelchecking.modelcheckingStage.searchStrategy"/>
+						<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+							<ChoiceBox fx:id="selectSearchStrategy">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.searchStrategy" />
+								</tooltip>
+							</ChoiceBox>
+						</HBox>
+					</HBox>
+				</VBox>
+			</AnchorPane>
+
+			<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
+						 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+						 AnchorPane.bottomAnchor="0.0">
+				<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+						<Label text="%verifications.modelchecking.modelcheckingStage.errors" style="-fx-font-weight: bold;"/>
+					</HBox>
+				</VBox>
+				<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="findDeadlocks" selected="true"
+							text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="findInvViolations" selected="true"
+							text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="findBAViolations"
+							text="%verifications.modelchecking.modelcheckingStage.options.findBAViolations">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findBAViolations" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="findOtherErrors" selected="true"
+								  text="%verifications.modelchecking.modelcheckingStage.options.findOtherErrors">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findOtherErrors" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+				</VBox>
+				<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+						<Label text="%verifications.modelchecking.modelcheckingStage.goals" style="-fx-font-weight: bold;"/>
+					</HBox>
+				</VBox>
+				<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="stopAtFullCoverage" text="%verifications.modelchecking.modelcheckingStage.options.stopAtFullCoverage">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.stopAtFullCoverage" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="chooseNodesLimit" text="%verifications.modelchecking.modelcheckingStage.nodesLimit">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.chooseNodesLimit" />
+							</tooltip>
+						</CheckBox>
+						<Spinner fx:id="nodesLimit" editable="true">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.nodesLimit" />
+							</tooltip>
+						</Spinner>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="chooseTimeLimit" text="%verifications.modelchecking.modelcheckingStage.timeLimit">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.chooseTimeLimit" />
+							</tooltip>
+						</CheckBox>
+						<Spinner fx:id="timeLimit" editable="true">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.timeLimit" />
+							</tooltip>
+						</Spinner>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="findGoal" text="%verifications.modelchecking.modelcheckingStage.options.findGoal"/>
+						<TextField fx:id="tfFindGoal" promptText="GOAL">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tooltips.findGoal" />
+							</tooltip>
+						</TextField>
+					</HBox>
+				</VBox>
+			</VBox>
+		</VBox>
+	</AnchorPane>
+</fx:root>

@@ -2,12 +2,11 @@ package de.prob2.ui.plugin;
 
 import java.util.Arrays;
 
-import javax.annotation.Nonnull;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob2.ui.MainController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.MainView;
@@ -26,19 +25,31 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
-public class ProBPluginHelper {
-
+public final class ProBPluginHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ProBPluginHelper.class);
 
 	private final Injector injector;
 	private final CurrentTrace currentTrace;
 	private final StageManager stageManager;
+	private final MainView mainView;
+	private final MenuController menuController;
+	private final MainController mainController;
 
 	@Inject
-	public ProBPluginHelper(Injector injector, CurrentTrace currentTrace, StageManager stageManager) {
+	private ProBPluginHelper(
+		Injector injector,
+		CurrentTrace currentTrace,
+		StageManager stageManager,
+		MainView mainView,
+		MenuController menuController,
+		MainController mainController
+	) {
 		this.injector = injector;
 		this.currentTrace = currentTrace;
 		this.stageManager = stageManager;
+		this.mainView = mainView;
+		this.menuController = menuController;
+		this.mainController = mainController;
 	}
 
 	public Injector getInjector() {
@@ -53,29 +64,27 @@ public class ProBPluginHelper {
 		return stageManager;
 	}
 
-	public void addTab(@Nonnull final Tab tab) {
-		TabPane tabPane = injector.getInstance(MainView.class).getTabPane();
+	public void addTab(Tab tab) {
+		TabPane tabPane = mainView.getTabPane();
 		tabPane.getTabs().add(tab);
 		tabPane.getSelectionModel().select(tab);
 	}
 
-	public void removeTab(@Nonnull final Tab tab) {
-		TabPane tabPane = injector.getInstance(MainView.class).getTabPane();
+	public void removeTab(Tab tab) {
+		TabPane tabPane = mainView.getTabPane();
 		tabPane.getTabs().remove(tab);
 	}
 
-	public void addMenu(@Nonnull final Menu menu) {
-		MenuController menuController = injector.getInstance(MenuController.class);
+	public void addMenu(Menu menu) {
 		menuController.getMenus().add(menu);
 	}
 
-	public void removeMenu(@Nonnull final Menu menu) {
-		MenuController menuController = injector.getInstance(MenuController.class);
+	public void removeMenu(Menu menu) {
 		menuController.getMenus().remove(menu);
 	}
 
-	public void addMenuItem(@Nonnull final MenuEnum menu, @Nonnull final MenuItem... items) {
-		Menu menuToAddItems = menu.searchMenu(injector);
+	public void addMenuItem(MenuEnum menu, MenuItem... items) {
+		Menu menuToAddItems = menuController.getMenuById(menu.id());
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().addAll(items);
 		} else {
@@ -83,10 +92,8 @@ public class ProBPluginHelper {
 		}
 	}
 
-	public void addMenuItem(@Nonnull final MenuEnum menu,
-							final int position,
-							@Nonnull final MenuItem... items) {
-		Menu menuToAddItems = menu.searchMenu(injector);
+	public void addMenuItem(MenuEnum menu, int position, MenuItem... items) {
+		Menu menuToAddItems = menuController.getMenuById(menu.id());
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().addAll(position, Arrays.asList(items));
 		} else {
@@ -94,9 +101,8 @@ public class ProBPluginHelper {
 		}
 	}
 
-	public void removeMenuItem(@Nonnull final MenuEnum menu,
-							   @Nonnull final MenuItem... items) {
-		Menu menuToAddItems = menu.searchMenu(injector);
+	public void removeMenuItem(MenuEnum menu, MenuItem... items) {
+		Menu menuToAddItems = menuController.getMenuById(menu.id());
 		if (menuToAddItems != null) {
 			menuToAddItems.getItems().removeAll(items);
 		} else {
@@ -104,22 +110,22 @@ public class ProBPluginHelper {
 		}
 	}
 
-	public void addPane(@Nonnull final AccordionEnum accordion, @Nonnull final TitledPane pane) {
-		Accordion acc = accordion.getAccordion(injector);
+	public void addPane(AccordionEnum accordion, TitledPane pane) {
+		Accordion acc = mainController.getAccordionById(accordion.id());
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) {
 			acc.getPanes().add(pane);
 		}
 	}
 
-	public void addPane(@Nonnull final AccordionEnum accordion, final int position, @Nonnull final TitledPane pane) {
-		Accordion acc = accordion.getAccordion(injector);
+	public void addPane(AccordionEnum accordion, int position, TitledPane pane) {
+		Accordion acc = mainController.getAccordionById(accordion.id());
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) acc.getPanes().add(position,pane);
 	}
 
-	public void removePane(@Nonnull final AccordionEnum accordion, @Nonnull final TitledPane pane) {
-		Accordion acc = accordion.getAccordion(injector);
+	public void removePane(AccordionEnum accordion, TitledPane pane) {
+		Accordion acc = mainController.getAccordionById(accordion.id());
 		//TODO: react when the Accordion doesn't exist
 		if (acc != null) acc.getPanes().remove(pane);
 	}
