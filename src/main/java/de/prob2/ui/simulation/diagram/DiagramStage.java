@@ -30,12 +30,11 @@ import javafx.stage.Stage;
 
 @Singleton
 public class DiagramStage extends Stage {
-
-    private final StageManager stageManager;
+	private final StageManager stageManager;
 
 	private final boolean islive;
 
-    private final FileChooserManager fileChooserManager;
+	private final FileChooserManager fileChooserManager;
 
 	private final CurrentProject currentProject;
 
@@ -43,46 +42,46 @@ public class DiagramStage extends Stage {
 
 	private final Injector injector;
 
-    private final I18n i18n;
+	private final I18n i18n;
 
-    private String nodesString;
+	private String nodesString;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(DiagramStage.class);
-    
-    @FXML
-    private WebView diagramView; 
+	
+	@FXML
+	private WebView diagramView; 
 
-    @FXML
-    private Button zoomInButton;
-    
-    @FXML
-    private Button zoomOutButton;
+	@FXML
+	private Button zoomInButton;
+	
+	@FXML
+	private Button zoomOutButton;
 
-    @FXML
-    private Button saveButton;
+	@FXML
+	private Button saveButton;
 
-    @Inject
-    public DiagramStage(StageManager stageManager, CurrentProject currentProject, CurrentTrace currentTrace,
-            Injector injector, I18n i18n, String nodesString, FileChooserManager fileChooserManager, boolean islive) {
+	@Inject
+	public DiagramStage(StageManager stageManager, CurrentProject currentProject, CurrentTrace currentTrace,
+			Injector injector, I18n i18n, String nodesString, FileChooserManager fileChooserManager, boolean islive) {
 		
-        super();
-        this.stageManager = stageManager;
-        this.fileChooserManager = fileChooserManager;
-        this.currentProject = currentProject;
-        this.currentTrace = currentTrace;
-        this.injector = injector;
-        this.i18n = i18n;
-        this.nodesString = nodesString;
-        stageManager.loadFXML(this, "activation_Diagram_Stage.fxml", this.getClass().getName());
+		super();
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
+		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
+		this.injector = injector;
+		this.i18n = i18n;
+		this.nodesString = nodesString;
+		stageManager.loadFXML(this, "activation_Diagram_Stage.fxml", this.getClass().getName());
 		this.islive = islive;
-        }
+	}
 
 
-    @FXML
-    public void initialize(){
-        loadGraph(new String(makeGraphString(), StandardCharsets.UTF_8));
+	@FXML
+	public void initialize(){
+		loadGraph(new String(makeGraphString(), StandardCharsets.UTF_8));
 		
-    }
+	}
 
 	public void updateGraph(String newDiagram){
 		nodesString = newDiagram;
@@ -90,29 +89,28 @@ public class DiagramStage extends Stage {
 	}
 
 	//Calls dotengine to build SVG string to load in FXML 
-    public byte[] makeGraphString(){
-        byte[] svgdiagramm=null; 
-        DotCall dotCall = new DotCall("dot")
-            .layoutEngine("dot")
-            .outputFormat(DotOutputFormat.SVG)
-            .input(nodesString);
-        try {
-            svgdiagramm = dotCall.call();
-        } catch (ProBError |InterruptedException e) {
-            LOGGER.error("Could not Visualize Graph with dot input)",e);
-            return null;
-        }
-        return svgdiagramm;
-    }
+	public byte[] makeGraphString(){
+		byte[] svgdiagramm=null; 
+		DotCall dotCall = new DotCall("dot")
+			.layoutEngine("dot")
+			.outputFormat(DotOutputFormat.SVG)
+			.input(nodesString);
+		try {
+			svgdiagramm = dotCall.call();
+		} catch (ProBError |InterruptedException e) {
+			LOGGER.error("Could not Visualize Graph with dot input)",e);
+			return null;
+		}
+		return svgdiagramm;
+	}
 
 	//loads diagram into FXML page
-    public void loadGraph(String svgContent){
-            diagramView.getEngine().loadContent("<center>" + svgContent + "</center>");
-		    diagramView.setVisible(true);
-            
-    }
+	public void loadGraph(String svgContent){
+		diagramView.getEngine().loadContent("<center>" + svgContent + "</center>");
+		diagramView.setVisible(true);
+	}
 
-    @FXML
+	@FXML
 	private void zoomIn() {
 		zoomByFactor(1.15);
 	}
@@ -121,12 +119,12 @@ public class DiagramStage extends Stage {
 	private void zoomOut() {
 		zoomByFactor(0.85);
 	}
-    
+
 	private void zoomByFactor(double factor) {
 		diagramView.setZoom(diagramView.getZoom() * factor);
 	}
 
-    @FXML
+	@FXML
 	private void save() {
 		final FileChooser fileChooser = new FileChooser();
 		FileChooser.ExtensionFilter svgFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
@@ -172,10 +170,10 @@ public class DiagramStage extends Stage {
 	private void saveConverted(String format, final Path path) {
 		try {
 			Files.write(path, new DotCall("dot")
-					.layoutEngine("dot")
-					.outputFormat(format)
-					.input(nodesString)
-					.call());
+				.layoutEngine("dot")
+				.outputFormat(format)
+				.input(nodesString)
+				.call());
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}

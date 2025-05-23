@@ -24,10 +24,9 @@ import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
 public class DiagramGenerator {
+	private final StageManager stageManager;
 
-    private final StageManager stageManager;
-
-    private final FileChooserManager fileChooserManager;
+	private final FileChooserManager fileChooserManager;
 
 	private final CurrentProject currentProject;
 
@@ -35,29 +34,26 @@ public class DiagramGenerator {
 
 	private final Injector injector;
 
-    private final I18n i18n;
+	private final I18n i18n;
 
 	private DiagramStage diaStage; 
 
-    private final RealTimeSimulator realTimeSimulator;
+	private final RealTimeSimulator realTimeSimulator;
 
-    
 	@Inject
-    public DiagramGenerator(StageManager stageManager, FileChooserManager fileChooserManager,
-            CurrentProject currentProject, CurrentTrace currentTrace, Injector injector, I18n i18n, RealTimeSimulator realTimeSimulator) {
-
-                
-        this.stageManager = stageManager;
-        this.fileChooserManager = fileChooserManager;
-        this.currentProject = currentProject;
-        this.currentTrace = currentTrace;
-        this.injector = injector;
-        this.i18n = i18n;
-        this.realTimeSimulator = realTimeSimulator;
+	public DiagramGenerator(StageManager stageManager, FileChooserManager fileChooserManager,
+			CurrentProject currentProject, CurrentTrace currentTrace, Injector injector, I18n i18n, RealTimeSimulator realTimeSimulator) {
+		this.stageManager = stageManager;
+		this.fileChooserManager = fileChooserManager;
+		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
+		this.injector = injector;
+		this.i18n = i18n;
+		this.realTimeSimulator = realTimeSimulator;
 		this.realTimeSimulator.setDiagramGenerator(this);
-    }
+	}
 
-    //Initializes Velocity engine for diagram generation
+	//Initializes Velocity engine for diagram generation
 	private VelocityContext velocityInit(){
 		Properties props = new Properties();
 		VelocityContext nodeContext = new VelocityContext();
@@ -174,50 +170,50 @@ public class DiagramGenerator {
 		return diaNode;
 	}
 
-		//collects Nodes for complex activation Diagram
-		List<DiagramNode> collectComplexNodes(){
-			SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
-			List<DiagramConfiguration.NonUi> activations = config.getActivations();
-			List<UIListenerConfiguration> listeners = config.getListeners();
-			List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
-			ActivationOperationConfiguration opConfig;
+	//collects Nodes for complex activation Diagram
+	List<DiagramNode> collectComplexNodes(){
+		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+		List<DiagramConfiguration.NonUi> activations = config.getActivations();
+		List<UIListenerConfiguration> listeners = config.getListeners();
+		List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
+		ActivationOperationConfiguration opConfig;
 
-			//Adding nodes to context
-			for (DiagramConfiguration.NonUi activation : activations) {
-				if (activation.getClass().equals(ActivationChoiceConfiguration.class)) {
-					diaNode.add(new DiagramNode(activation.getId(),"red",activation.getId(), "diamond"));
-	
-				} else {
-					opConfig = (ActivationOperationConfiguration)activation;
-					//Discard static events mark differentiate events and OperationConfigurations
-					if (!activation.getId().equals("$setup_constants")) {
-						if (opConfig.getWithPredicate() == null) {
-							diaNode.add(new DiagramNode(opConfig.getExecute()+"_event","white",opConfig.getExecute(), "ellipse"));
-						} else {
-							diaNode.add(new ComplexListener(opConfig.getExecute()+"_event", "white", opConfig.getExecute(), "ellipse", opConfig.getWithPredicate()));
-						}
-					}
-					if(!activation.getId().equals("$initialise_machine") && !activation.getId().equals("$setup_constants")){
-						diaNode.add(new ComplexNode(activation.getId(),
-							"yellow",
-							opConfig.getId(), 
-							"ellipse",
-							opConfig.getActivationKind().getName(),
-							opConfig.getAdditionalGuards(),
-							opConfig.getPriority()));
+		//Adding nodes to context
+		for (DiagramConfiguration.NonUi activation : activations) {
+			if (activation.getClass().equals(ActivationChoiceConfiguration.class)) {
+				diaNode.add(new DiagramNode(activation.getId(),"red",activation.getId(), "diamond"));
+
+			} else {
+				opConfig = (ActivationOperationConfiguration)activation;
+				//Discard static events mark differentiate events and OperationConfigurations
+				if (!activation.getId().equals("$setup_constants")) {
+					if (opConfig.getWithPredicate() == null) {
+						diaNode.add(new DiagramNode(opConfig.getExecute()+"_event","white",opConfig.getExecute(), "ellipse"));
+					} else {
+						diaNode.add(new ComplexListener(opConfig.getExecute()+"_event", "white", opConfig.getExecute(), "ellipse", opConfig.getWithPredicate()));
 					}
 				}
-			}
-			for(UIListenerConfiguration listener : listeners){
-				boolean listenerinit = true;
-				if (listenerinit) {
-					diaNode.add(new DiagramNode("User", "white", "User", "ellipse"));
-					listenerinit = false;
+				if(!activation.getId().equals("$initialise_machine") && !activation.getId().equals("$setup_constants")){
+					diaNode.add(new ComplexNode(activation.getId(),
+						"yellow",
+						opConfig.getId(), 
+						"ellipse",
+						opConfig.getActivationKind().getName(),
+						opConfig.getAdditionalGuards(),
+						opConfig.getPriority()));
 				}
-				diaNode.add(new ComplexListener(listener.getEvent(), "white", listener.getEvent(), "ellipse", listener.getPredicate()));
 			}
-			return diaNode;
 		}
+		for(UIListenerConfiguration listener : listeners){
+			boolean listenerinit = true;
+			if (listenerinit) {
+				diaNode.add(new DiagramNode("User", "white", "User", "ellipse"));
+				listenerinit = false;
+			}
+			diaNode.add(new ComplexListener(listener.getEvent(), "white", listener.getEvent(), "ellipse", listener.getPredicate()));
+		}
+		return diaNode;
+	}
 
 	//Method that collects all relevant edges between Nodes of the Activation diagramms
 	List<DiagramEdge> collectEdges(){
@@ -265,7 +261,7 @@ public class DiagramGenerator {
 					}
 					if (!isPresent) {
 						activating.add(edge);
-				}
+					}
 				}
 				
 			}

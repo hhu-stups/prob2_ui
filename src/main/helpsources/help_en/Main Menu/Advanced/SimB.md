@@ -240,24 +240,24 @@ Thus, a *probabilistic choice* is of the following form:
 
 ~~~json
 {
-  "activations": [
-    {"id":"$initialise_machine", "execute":"$initialise_machine", 
-    	"activating":"choose"},
-	{"id":"choose", "chooseActivation":
-  	    {"cars_ry": "0.8", "peds_g": "0.2"}},
-    {"id":"cars_ry", "execute":"cars_ry", "after":5000, 
-	    "activating":"cars_g"},
-	{"id":"cars_g", "execute":"cars_g", "after":500, 
-	    "activating":"cars_y"},
-    {"id":"cars_y", "execute":"cars_y", "after":5000, 
-	    "activating":"cars_r"},
-    {"id":"cars_r", "execute":"cars_r", "after":500, 
-	    "activating":"choose"},
-    {"id":"peds_g", "execute":"peds_g", "after":5000, 
-	   "activating":"peds_r"},
-    {"id":"peds_r", "execute":"peds_r", "after":5000, 
-	    "activating":"choose"}
-  ]
+	"activations": [
+		{"id":"$initialise_machine", "execute":"$initialise_machine", 
+			"activating":"choose"},
+		{"id":"choose", "chooseActivation":
+			{"cars_ry": "0.8", "peds_g": "0.2"}},
+		{"id":"cars_ry", "execute":"cars_ry", "after":5000, 
+			"activating":"cars_g"},
+		{"id":"cars_g", "execute":"cars_g", "after":500, 
+			"activating":"cars_y"},
+		{"id":"cars_y", "execute":"cars_y", "after":5000, 
+			"activating":"cars_r"},
+		{"id":"cars_r", "execute":"cars_r", "after":500, 
+			"activating":"choose"},
+		{"id":"peds_g", "execute":"peds_g", "after":5000, 
+			"activating":"peds_r"},
+		{"id":"peds_r", "execute":"peds_r", "after":5000, 
+			"activating":"choose"}
+	]
 }
 ~~~
 
@@ -295,30 +295,30 @@ An example is shown below:
 
 ~~~json
 {
-  "activations": [
-    {
-    "id": "blinking_on",
-    "execute": "RTIME_BlinkerOn",
-    "after": "curDeadlines(blink_deadline)",
-    "activating" : "blinking_off",
-    ...
-    },
-    {
-    "id": "blinking_off",
-    "execute": "RTIME_BlinkerOff",
-    "after": "curDeadlines(blink_deadline)",
-    "activating" : "blinking_on",
-    ...
-    },
-    ...
-  ]
-  "listeners": [
-    {
-    "id": "start_blinking",
-    "event": "ENV_Pitman_DirectionBlinking",
-    "activating" : ["blinking_on", "blinking_off"]
-    }
-  ]
+	"activations": [
+		{
+			"id": "blinking_on",
+			"execute": "RTIME_BlinkerOn",
+			"after": "curDeadlines(blink_deadline)",
+			"activating": "blinking_off",
+			...
+		},
+		{
+			"id": "blinking_off",
+			"execute": "RTIME_BlinkerOff",
+			"after": "curDeadlines(blink_deadline)",
+			"activating": "blinking_on",
+			...
+		},
+		...
+	]
+	"listeners": [
+		{
+			"id": "start_blinking",
+			"event": "ENV_Pitman_DirectionBlinking",
+			"activating": ["blinking_on", "blinking_off"]
+		}
+	]
 }
 ~~~
 
@@ -415,12 +415,8 @@ An example for a mapping to a variable in the formal B model is as follows:
 
 ~~~
 def get_VehiclesX(obs):
-  return "{{EgoVehicle |-> {0}, Vehicles2 |-> {1}, 
-           Vehicles3 |-> {2}, Vehicles4 |-> {3},
-           Vehicles5 |-> {4}}}"
-           .format(obs[0][1]*200, obs[1][1]*200, 
-               obs[2][1]*200, obs[3][1]*200, 
-               obs[4][1]*200)
+	return "{{EgoVehicle |-> {0}, Vehicles2 |-> {1}, Vehicles3 |-> {2}, Vehicles4 |-> {3}, Vehicles5 |-> {4}}}".format(
+		obs[0][1]*200, obs[1][1]*200, obs[2][1]*200, obs[3][1]*200, obs[4][1]*200)
 ~~~
 
 4. Implement necessary messages sent between the ProB animator and the RL agent. The list of enabled operations is used by the RL agent to predict the enabled operation with the highest reward. Simulation should be a while-loop which runs while the simulation has not finished. Example code (line 70 - 113; particularly 86 - 113): [https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py](https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py)
@@ -545,8 +541,7 @@ To cite SimB's interactive simulation, please use:
 ~~~bibtex
 @InProceedings{simb,
 Author    = {Vu, Fabian and Leuschel, Michael},
-Title     = {{Validation of Formal Models by 
-              Interactive Simulation}},
+Title     = {{Validation of Formal Models by Interactive Simulation}},
 Booktitle = {Proceedings ABZ},
 Year      = 2023,
 Series    = {LNCS},
@@ -559,10 +554,8 @@ To cite SimB's functionalities to simulate a Reinforcement Learning Agent and En
 
 ~~~bibtex
 @InProceedings{validation_rl,
-author    = {Vu, Fabian and Dunkelau, Jannik and 
-             Leuschel, Michael},
-title     = {{Validation of Reinforcement Learning Agents 
-              and Safety Shields with ProB}},
+author    = {Vu, Fabian and Dunkelau, Jannik and Leuschel, Michael},
+title     = {{Validation of Reinforcement Learning Agents and Safety Shields with ProB}},
 booktitle = {{Proceedings NFM}},
 year      = 2024,
 pages     = {279--297}
