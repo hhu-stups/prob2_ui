@@ -13,6 +13,9 @@
 /out/
 *.iml
 
+# VS Code
+.vscode
+
 # Gradle
 .gradle/
 /build/
