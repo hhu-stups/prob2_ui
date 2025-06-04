@@ -196,9 +196,11 @@ public final class ReplayedTraceStatusAlert extends Alert {
 			}
 
 			String replayedTransition;
+			boolean isSkip = false;
 			if (replayedTransitionObj != null) {
 				OperationItem opItem = future.get().get(replayedTransitionObj);
 				replayedTransition = opItem.toPrettyString(true);
+				isSkip = opItem.getTransition().getId().equals("skip");
 			} else {
 				replayedTransition = "";
 			}
@@ -207,13 +209,15 @@ public final class ReplayedTraceStatusAlert extends Alert {
 			String errorMessage = transitionErrorMessages != null ? String.join("\n", transitionErrorMessages) : "";
 
 			Collection<String> styleClasses;
-			if (
-				transitionReplayPrecision != TransitionReplayPrecision.PRECISE
-					|| (transitionErrorMessages == null || !transitionErrorMessages.isEmpty())
-			) {
-				styleClasses = Set.of("FAULTY");
+			if (isSkip) {
+				styleClasses = Set.of("skip");
+			} else if (transitionReplayPrecision == TransitionReplayPrecision.FAILED) {
+				styleClasses = Set.of("not_possible");
+			} else if (transitionReplayPrecision != TransitionReplayPrecision.PRECISE
+					|| (transitionErrorMessages == null || !transitionErrorMessages.isEmpty())) {
+				styleClasses = Set.of("imprecise");
 			} else {
-				styleClasses = Set.of();
+				styleClasses = Set.of("precise");
 			}
 
 			items.add(new ReplayedTraceRow(step, fileTransition, replayedTransition, precision, errorMessage, null, styleClasses));
