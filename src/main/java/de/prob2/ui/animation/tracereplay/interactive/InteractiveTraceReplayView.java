@@ -363,7 +363,7 @@ public class InteractiveTraceReplayView extends TitledPane {
 	}
 
 	private boolean confirmTraceChange() {
-		if (savedTrace || currentTrace.get().size() == 0) {
+		if (savedTrace || (currentTrace.get() != null && currentTrace.get().size() == 0)) {
 			return true;
 		}
 		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
