@@ -125,7 +125,7 @@ dependencies {
 	implementation group: "com.google.guava", name: "guava", version: "33.4.0-jre"
 	implementation group: "io.github.java-diff-utils", name: "java-diff-utils", version: "4.15"
 	implementation group: "commons-cli", name: "commons-cli", version: "1.9.0"
-	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.13.2-SNAPSHOT"))
+	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.15.0-SNAPSHOT"))
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel"
 	implementation group: "de.hhu.stups", name: "voparser", version: "0.3.0-SNAPSHOT"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "11.2.1"
