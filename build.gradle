@@ -39,12 +39,13 @@ test {
 	}
 }
 
+final snapshotsRepoUrl = "https://central.sonatype.com/repository/maven-snapshots/"
 repositories {
 	mavenCentral()
 	if (isSnapshot) {
 		maven {
-			name = "sonatype snapshots"
-			url = "https://oss.sonatype.org/content/repositories/snapshots"
+			name = "Sonatype snapshots"
+			url = snapshotsRepoUrl
 		}
 	}
 }
