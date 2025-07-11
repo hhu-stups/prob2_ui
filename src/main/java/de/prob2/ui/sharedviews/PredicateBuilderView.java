@@ -9,9 +9,11 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 
+import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.formula.PredicateBuilder;
+import de.prob.model.representation.XTLModel;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -132,8 +134,14 @@ public final class PredicateBuilderView extends VBox {
 		final PredicateBuilder builder = new PredicateBuilder();
 		final Map<String, String> filteredItems = new LinkedHashMap<>();
 		this.items.forEach(item -> {
-			if(!item.getValue().isEmpty()) {
-				filteredItems.put(item.getName(), item.getValue());
+			if (!item.getValue().isEmpty()) {
+				String value;
+				if (currentTrace.getModel() instanceof XTLModel) {
+					value = "STRING_TO_TERM(\"" + Utils.escapeStringContents(item.getValue()) + "\")";
+				} else {
+					value = item.getValue();
+				}
+				filteredItems.put(item.getName(), value);
 			}
 		});
 		builder.addMap(filteredItems);
