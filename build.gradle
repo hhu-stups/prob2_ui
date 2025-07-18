@@ -128,6 +128,11 @@ dependencies {
 	implementation group: "commons-cli", name: "commons-cli", version: "1.9.0"
 	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.15.0"))
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel"
+
+	// manually update TLA2B/TLC4B
+	implementation group: "de.hhu.stups", name: "tla2bAST", version: "1.4.2"
+	implementation group: "de.hhu.stups", name: "tlc4b", version: "1.2.2"
+
 	implementation group: "de.hhu.stups", name: "voparser", version: "0.3.0"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "11.2.1"
 	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.4"
