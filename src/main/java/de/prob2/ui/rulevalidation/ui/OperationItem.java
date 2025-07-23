@@ -119,6 +119,7 @@ class OperationItem extends TreeItem<Object> {
 				break;
 		}
 		addSuccessMessages(result);
+		addUncheckedMessages(result);
 	}
 
 	private void addCounterExamples(RuleResult result) {
@@ -134,6 +135,14 @@ class OperationItem extends TreeItem<Object> {
 			this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.successful.infinitelyMany")));
 		} else {
 			addMessages(result.getSuccessMessages(), i18n.translate("rulevalidation.table.successful"));
+		}
+	}
+
+	private void addUncheckedMessages(RuleResult result) {
+		if (result.getNumberOfUnchecked() == -1) {
+			this.getChildren().add(new TreeItem<>(i18n.translate("rulevalidation.table.unchecked.infinitelyMany")));
+		} else {
+			addMessages(result.getUncheckedMessages(), i18n.translate("rulevalidation.table.unchecked"));
 		}
 	}
 

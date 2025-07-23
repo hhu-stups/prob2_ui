@@ -127,7 +127,7 @@ public final class RulesDataModel {
 	}
 
 	private void updateRuleResults(State currentState) {
-		RuleResults ruleResults = new RuleResults(model.getRulesProject(), currentState, -1, -1);
+		RuleResults ruleResults = new RuleResults(model.getRulesProject(), currentState, -1, -1, -1);
 		int notCheckableCounter = 0;
 		for (String ruleStr : ruleValueMap.keySet()) {
 			RuleResult result = ruleResults.getRuleResultMap().get(ruleStr);
