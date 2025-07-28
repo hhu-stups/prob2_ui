@@ -16,11 +16,19 @@ A short overview can be found [on our wiki](https://prob.hhu.de/w/index.php/ProB
 
 ## Requirements
 
-ProB 2 UI **requires Java 21** or later.
-The last version compatible with older Java versions (down to Java 8) is [ProB 2 UI 1.2.1](https://github.com/hhu-stups/prob2_ui/blob/HEAD/doc/prob2ui_release_history.md#version-121-2023-08-15).
+Supported operating systems:
 
-Any OpenJDK 21 distribution can be used (we test with Eclipse Adoptium).
+* Windows 10 or later on x86\_64
+* macOS 11 or later on x86\_64 or arm64
+* Linux with glibc 2.17 or later on x86\_64
+
+When using the platform-specific installers, you don't need to install Java yourself - an appropriate Java version is bundled with the application.
+
+When using the multi-platform jar or building from source, ProB 2 UI **requires Java 21** or later.
+Any OpenJDK distribution can be used (we test with Eclipse Adoptium).
 JavaFX is included as a regular library dependency and does *not* need to be installed manually.
+
+The last version compatible with older Java versions (down to Java 8) and older OSes (Windows 8.1 and older, macOS 10.15 and older) is [ProB 2 UI 1.2.1](https://github.com/hhu-stups/prob2_ui/blob/HEAD/doc/prob2ui_release_history.md#version-121-2023-08-15).
 
 ## Running from source
 

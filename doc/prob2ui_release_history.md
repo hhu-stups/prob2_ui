@@ -21,6 +21,7 @@ Downloads of the current release and snapshot development builds can be found on
   * Interpret all probabilities as weights: they do not have to sum to one anymore
   * Use the Jackson library for saving and loading (this removes the GSON dependency)
 * Removed support for Java versions older than Java 21
+* Removed support for Windows versions older than Windows 10 and macOS versions older than macOS 11
 
 **Note:** The multi-platform jar might not work on all macOS processor architectures - consider using the platform-specific binaries, which are available for both x86_64 and arm64.
 
@@ -43,6 +44,8 @@ Downloads of the current release and snapshot development builds can be found on
 * Improved feedback for internal errors in VisB
 
 **Note:** This is the last release to support Java 8, 11, and 17. The next release will require Java 21 or newer. This only affects users of the multi-platform jar - consider using the platform-specific binaries, which have an appropriate JRE version bundled.
+
+**Note:** This is the last release to support Windows 8.1 and older and macOS 10.15 and older. The next release will require at least Windows 10 or macOS 11.
 
 **Note:** The multi-platform jar might not work on all macOS processor architectures - consider using the platform-specific binaries, which are available for both x86_64 and arm64.
 
