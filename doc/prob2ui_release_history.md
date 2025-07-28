@@ -11,15 +11,14 @@ Downloads of the current release and snapshot development builds can be found on
 * Added TLC model checking for classical B machines with TLC4B and export of generated TLA+ files (also limited support for Event-B and models with internal B representation)
 * Improved support for rule validations with rules machines (.rmch)
 * Added search to editor
-* Improve ProB and Groovy consoles
-  * Add syntax highlighting
-  * Fix a bunch of bugs
+* Added syntax highlighting to ProB and Groovy consoles
 * Added language selection dropdown to interactive console (e.g. evaluation of both classical B and TLA+ formulas in the context of a translated TLA+ module)
 * Improved export of (internal) classical B representation for Event-B and translated languages
-* Improve SimB JSON format:
+* Improved SimB JSON format:
   * `probabilisticVariables` is now split up into `probabilisticVariables` and `transitionSelection` (refer to https://prob.hhu.de/w/index.php?title=SimB#Direct_Activation for more information)
-  * Interpret all probabilities as weights: they do not have to sum to one anymore
+  * All probabilities are interpreted as weights: they do not have to sum to one anymore
   * Use the Jackson library for saving and loading (this removes the GSON dependency)
+* Fixed various text editing bugs in ProB and Groovy consoles
 * Removed support for Java versions older than Java 21
 * Removed support for Windows versions older than Windows 10 and macOS versions older than macOS 11
 
