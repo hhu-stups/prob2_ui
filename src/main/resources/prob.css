@@ -897,6 +897,10 @@
 .dark .check-box:selected:hover > .box > .mark {
 	-fx-background-color: -prob-white-75;
 }
+.dark .radio-button {
+	-fx-background-color: transparent;
+	-fx-text-fill: -prob-white;
+}
 
 /* ================== DYNAMIC COMMAND VIEW ================= */
 

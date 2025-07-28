@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -8,6 +7,7 @@
 <fx:root type="Tab" text="LTSmin" closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
+		<ToggleGroup fx:id="modeGroup" />
 	</fx:define>
 	<StackPane>
 		<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
@@ -31,23 +31,33 @@
 				<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
 							 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 							 AnchorPane.bottomAnchor="0.0">
+					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+							<Label text="%verifications.modelchecking.modelcheckingStage.ltsminTab.modePreferences" style="-fx-font-weight: bold;"/>
+						</HBox>
+					</VBox>
 					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="findDeadlocks" selected="true"
+						<VBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<RadioButton fx:id="findInvViolations" toggleGroup="$modeGroup" selected="true"
+										 text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations" />
+								</tooltip>
+							</RadioButton>
+							<RadioButton fx:id="findDeadlocks" toggleGroup="$modeGroup"
 								text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks">
 								<tooltip>
 									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks" />
 								</tooltip>
-							</CheckBox>
+							</RadioButton>
+						</VBox>
+					</VBox>
+					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+							<Label text="%verifications.modelchecking.modelcheckingStage.ltsminTab.otherPreferences" style="-fx-font-weight: bold;"/>
 						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="findInvViolations" selected="true"
-								text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
+					</VBox>
+					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<CheckBox fx:id="usePOR" selected="true"
 								text="%verifications.modelchecking.modelcheckingStage.ltsminTab.partialOrderReduction">

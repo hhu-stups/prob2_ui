@@ -39,9 +39,9 @@ public final class LTSminModelCheckingItem extends ModelCheckingItem {
 
 	@JsonCreator
 	public LTSminModelCheckingItem(
-		@JsonProperty("id") final String id,
-		@JsonProperty("backend") final LTSminModelCheckingOptions.Backend backend,
-		@JsonProperty("options") final Set<LTSminModelCheckingOptions.Option> options
+		@JsonProperty("id") String id,
+		@JsonProperty("backend") LTSminModelCheckingOptions.Backend backend,
+		@JsonProperty("options") Set<LTSminModelCheckingOptions.Option> options
 	) {
 		super(id);
 		this.backend = Objects.requireNonNull(backend);
@@ -129,6 +129,7 @@ public final class LTSminModelCheckingItem extends ModelCheckingItem {
 		return other instanceof LTSminModelCheckingItem that
 			       && Objects.equals(this.getTaskType(), that.getTaskType())
 			       && Objects.equals(this.getId(), that.getId())
+			       && Objects.equals(this.getBackend(), that.getBackend())
 			       && Objects.equals(this.getOptions(), that.getOptions());
 	}
 

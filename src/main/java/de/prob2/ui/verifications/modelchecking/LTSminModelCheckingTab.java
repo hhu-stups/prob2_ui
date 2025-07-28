@@ -13,6 +13,7 @@ import de.prob2.ui.internal.TranslatableAdapter;
 import javafx.fxml.FXML;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Tab;
 
 @FXMLInjected
@@ -21,9 +22,9 @@ public class LTSminModelCheckingTab extends Tab {
 	@FXML
 	private ChoiceBox<LTSminModelCheckingOptions.Backend> selectBackend;
 	@FXML
-	private CheckBox findDeadlocks;
+	private RadioButton findDeadlocks;
 	@FXML
-	private CheckBox findInvViolations;
+	private RadioButton findInvViolations;
 	@FXML
 	private CheckBox usePOR;
 
@@ -60,9 +61,11 @@ public class LTSminModelCheckingTab extends Tab {
 	}
 
 	private Set<LTSminModelCheckingOptions.Option> getOptions() {
+		boolean invariant = findInvViolations.isSelected();
 		return LTSminModelCheckingOptions.DEFAULT
-				       .checkDeadlocks(findDeadlocks.isSelected())
-				       .checkInvariantViolations(findInvViolations.isSelected())
+				       .backend(selectBackend.getValue())
+				       .checkInvariantViolations(invariant)
+				       .checkDeadlocks(!invariant)
 				       .partialOrderReduction(usePOR.isSelected())
 				       .getPrologOptions();
 	}
@@ -80,8 +83,10 @@ public class LTSminModelCheckingTab extends Tab {
 		this.result = item;
 		LTSminModelCheckingOptions opts = item.getFullOptions();
 		selectBackend.setValue(opts.backend());
-		findDeadlocks.setSelected(opts.checkDeadlocks());
-		findInvViolations.setSelected(opts.checkInvariantViolations());
+		boolean invariant = opts.checkInvariantViolations();
+		// either invariant violations or deadlocks, never both
+		findInvViolations.setSelected(invariant);
+		findDeadlocks.setSelected(!invariant);
 		usePOR.setSelected(opts.partialOrderReduction());
 	}
 }
