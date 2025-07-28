@@ -54,13 +54,12 @@ Downloads of the current release and snapshot development builds can be found on
 * Improved SimB Monte Carlo simulation:
   * SimB validation tasks can now be edited after creation
   * Added more estimation types (minimum/maximum, mean between steps)
-  * Starting/ending predicates can now use free variables
   * Time can now be any B expression, not just a constant value
   * Progress information is shown while a Monte Carlo simulation is running
 * Changed SimB external simulator (RL agent) protocol:
   * The protocol now uses JSON instead of simple lines of text
   * The external simulator is sent a list of all enabled operations from which it may choose (rather than the external simulator choosing an operation and then SimB replying whether that operation is allowed or not)
-  * Removed support for `SHIELD_INTERVENTION` definitions (as a consequence of the protocol change)
+  * Removed support for `SHIELD_INTERVENTION` definitions
 * Improved layout of test case generation details window
 * Improved layout of toolbars with many buttons
 * Improved VO manager (still experimental):
