@@ -18,7 +18,6 @@ Downloads of the current release and snapshot development builds can be found on
 * Improved SimB JSON format:
   * `probabilisticVariables` is now split up into `probabilisticVariables` and `transitionSelection` (refer to https://prob.hhu.de/w/index.php?title=SimB#Direct_Activation for more information)
   * All probabilities are interpreted as weights: they do not have to sum to one anymore
-  * Use the Jackson library for saving and loading (this removes the GSON dependency)
 * Fixed various text editing bugs in ProB and Groovy consoles
 * Removed support for Java versions older than Java 21
 * Removed support for Windows versions older than Windows 10 and macOS versions older than macOS 11
