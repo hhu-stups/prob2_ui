@@ -4,6 +4,7 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.2.2 (not released yet)
 
+* Updated the ProB core to version 1.15.0 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
 * Added interactive trace replay for user-controlled replay of traces, useful for refinements or refactoring of traces
 * Added options for deterministic animation steps, as long as possible 
 * Added B type information for code completion (if available)
