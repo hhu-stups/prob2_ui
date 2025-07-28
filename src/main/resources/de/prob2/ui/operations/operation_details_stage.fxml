@@ -27,6 +27,7 @@
 								<TreeItem fx:id="returnValuesItem" expanded="true"/>
 								<TreeItem fx:id="constantsItem" expanded="true"/>
 								<TreeItem fx:id="variablesItem" expanded="true"/>
+								<TreeItem fx:id="transitionInfosItem" expanded="true"/>
 							</children>
 						</TreeItem>
 					</TreeTableView>

@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 import com.google.common.base.MoreObjects;
 
 import de.prob.animator.command.GetOperationDescriptionCommand;
+import de.prob.animator.command.GetTransitionInfosCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalExpandMode;
 import de.prob.animator.domainobjects.EvalOptions;
@@ -23,6 +24,7 @@ import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
+import de.prob.prolog.term.PrologTerm;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.State;
@@ -89,6 +91,7 @@ public class OperationItem {
 	private final Transition transition;
 	private final String name;
 	private String description;
+	private Map<String,List<PrologTerm>> transitionInfos;
 	private final OperationItem.Status status;
 	private final List<String> parameterNames;
 	private final List<String> parameterValues;
@@ -289,6 +292,20 @@ public class OperationItem {
 			}
 		}
 		return description;
+	}
+
+	public Map<String,List<PrologTerm>> getTransitionInfos() {
+		// request infos only if required
+		if (transitionInfos == null) {
+			if (transition != null) {
+				GetTransitionInfosCommand cmd = new GetTransitionInfosCommand(transition.getId());
+				transition.getSource().getStateSpace().execute(cmd);
+				transitionInfos = cmd.getInfos();
+			} else {
+				transitionInfos = new HashMap<>();
+			}
+		}
+		return transitionInfos;
 	}
 
 	public OperationItem.Status getStatus() {
