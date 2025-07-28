@@ -12,6 +12,7 @@ import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -43,7 +44,7 @@ import javafx.application.Platform;
 	"selected",
 })
 public final class ProBModelCheckingItem extends ModelCheckingItem {
-	@JsonInclude(JsonInclude.Include.NON_NULL)
+
 	private final ModelCheckingSearchStrategy searchStrategy;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -92,7 +93,8 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		return this.options;
 	}
 
-	public ModelCheckingOptions getFullOptions(final AbstractModel model) {
+	@JsonIgnore
+	ModelCheckingOptions getFullOptions(final AbstractModel model) {
 		ModelCheckingOptions fullOptions = new ModelCheckingOptions(this.getOptions())
 			                                   .searchStrategy(this.getSearchStrategy())
 			                                   .recheckExisting(true);

@@ -201,7 +201,7 @@ public class TLCModelCheckingTab extends Tab {
 		};
 	}
 
-	ModelCheckingItem startModelCheck(String id) {
+	TLCModelCheckingItem startModelCheck(String id) {
 		ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
 		return new TLCModelCheckingItem(id, searchStrategy, getOptions());
 	}

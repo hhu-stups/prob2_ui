@@ -202,7 +202,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 				if (newVal != null) {
 					TableRow<ModelCheckingStep> row = cell.getTableRow();
 					BooleanBinding buttonBinding = Bindings.createBooleanBinding(
-						() -> !row.isEmpty() && !(row.getItem() == null) && !(row.getItem().getStats() == null) && row.getItem().hasTrace(),
+						() -> !row.isEmpty() && !(row.getItem() == null) && row.getItem().hasTrace(),
 						row.emptyProperty(), row.itemProperty());
 					Node box = buildMessageCell(newVal, buttonBinding);
 					cell.graphicProperty().bind(Bindings.when(cell.emptyProperty()).then((Node) null).otherwise(box));

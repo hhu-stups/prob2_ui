@@ -15,6 +15,7 @@ import de.prob2.ui.verifications.cbc.CBCFindRedundantInvariantsItem;
 import de.prob2.ui.verifications.cbc.CBCInvariantPreservationCheckingItem;
 import de.prob2.ui.verifications.cbc.CBCRefinementCheckingItem;
 import de.prob2.ui.verifications.cbc.CBCStaticAssertionCheckingItem;
+import de.prob2.ui.verifications.modelchecking.LTSminModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.ProBModelCheckingItem;
 import de.prob2.ui.verifications.modelchecking.TLCModelCheckingItem;
 import de.prob2.ui.verifications.po.ProofObligationItem;
@@ -46,6 +47,7 @@ public final class BuiltinValidationTaskTypes {
 	public static final ValidationTaskType<ReplayTrace> REPLAY_TRACE = register(new ValidationTaskType<>("REPLAY_TRACE", ReplayTrace.class));
 	public static final ValidationTaskType<ProBModelCheckingItem> MODEL_CHECKING = register(new ValidationTaskType<>("MODEL_CHECKING", ProBModelCheckingItem.class));
 	public static final ValidationTaskType<TLCModelCheckingItem> TLC_MODEL_CHECKING = register(new ValidationTaskType<>("TLC_MODEL_CHECKING", TLCModelCheckingItem.class));
+	public static final ValidationTaskType<LTSminModelCheckingItem> LTSMIN_MODEL_CHECKING = register(new ValidationTaskType<>("LTSMIN_MODEL_CHECKING", LTSminModelCheckingItem.class));
 	public static final ValidationTaskType<ProofObligationItem> PROOF_OBLIGATION = register(new ValidationTaskType<>("PROOF_OBLIGATION", ProofObligationItem.class));
 	public static final ValidationTaskType<VisualizationFormulaTask> VISUALIZATION_FORMULA = register(new ValidationTaskType<>("VISUALIZATION_FORMULA", VisualizationFormulaTask.class));
 	public static final ValidationTaskType<ChartFormulaTask> CHART_FORMULA = register(new ValidationTaskType<>("CHART_FORMULA", ChartFormulaTask.class));

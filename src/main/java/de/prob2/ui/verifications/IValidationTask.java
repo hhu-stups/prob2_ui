@@ -65,6 +65,7 @@ public interface IValidationTask {
 	 * @param other other object
 	 * @return true iff this == that wrt the constraints above
 	 */
+	@JsonIgnore
 	boolean settingsEqual(Object other);
 
 	/**

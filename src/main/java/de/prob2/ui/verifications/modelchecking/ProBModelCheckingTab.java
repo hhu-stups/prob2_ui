@@ -113,7 +113,7 @@ public class ProBModelCheckingTab extends Tab {
 		};
 	}
 
-	ModelCheckingItem startModelCheck(final String id) {
+	ProBModelCheckingItem startModelCheck(final String id) {
 		ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
 		Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
 		Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;

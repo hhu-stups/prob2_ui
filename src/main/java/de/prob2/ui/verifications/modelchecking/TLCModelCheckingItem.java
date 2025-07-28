@@ -37,7 +37,6 @@ import javafx.application.Platform;
 })
 public final class TLCModelCheckingItem extends ModelCheckingItem {
 
-	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private final ModelCheckingSearchStrategy searchStrategy;
 
 	/**

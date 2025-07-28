@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<fx:root type="Tab" text="LTSmin" closable="false" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<StackPane>
+		<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
+			<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
+				  AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+				  AnchorPane.bottomAnchor="0.0">
+			<AnchorPane>
+				<VBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">
+					<HBox alignment="CENTER_LEFT" spacing="5.0">
+						<Label text="%verifications.modelchecking.modelcheckingStage.ltsminTab.backend"/>
+						<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+							<ChoiceBox fx:id="selectBackend">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.ltsminTab.backend.tooltip" />
+								</tooltip>
+							</ChoiceBox>
+						</HBox>
+					</HBox>
+				</VBox>
+			</AnchorPane>
+				<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
+							 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+							 AnchorPane.bottomAnchor="0.0">
+					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="findDeadlocks" selected="true"
+								text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="findInvViolations" selected="true"
+								text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="usePOR" selected="true"
+								text="%verifications.modelchecking.modelcheckingStage.ltsminTab.partialOrderReduction">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.ltsminTab.partialOrderReduction" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
+					</VBox>
+				</VBox>
+			</VBox>
+		</AnchorPane>
+	</StackPane>
+</fx:root>
