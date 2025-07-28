@@ -8,17 +8,93 @@ Downloads of the current release and snapshot development builds can be found on
 * Added interactive trace replay for user-controlled replay of traces, useful for refinements or refactoring of traces
 * Added options for deterministic animation steps, as long as possible 
 * Added B type information for code completion (if available)
-* Customisable VisB HTML export and SVG export of the current VisB image
+* Added VisB export as SVG in addition to PNG
+* Added customization options for VisB HTML export
 * Added TLC model checking for classical B machines with TLC4B and export of generated TLA+ files (also limited support for Event-B and models with internal B representation)
+* Added menu item for exporting a B machine as a TLA+ module
 * Improved support for rule validations with rules machines (.rmch)
+* Added trace replay support for XTL Prolog models
+* Added graphical visualization of SimB activation diagrams
+* Added a default SimB configuration that can be used when no configuration has been written yet
+* Added deterministic animation menu to operations and history views (under "fast forward" button)
+* Added state limit option to LTL/CTL model checking
+* Added option for LTL/CTL model checking starting from a specific state (instead of starting from all initial states)
+* Added ability to copy validation tasks between machines in the same project
+* Added ability to change a machine's location
+* Added ability to duplicate machines
+* Added tooltip for machine descriptions in project machine list
+* Added preference for automatically reloading the current machine after saving in the editor
 * Added search to editor
+* Added line numbers and syntax highlighting to internal representation window
 * Added syntax highlighting to ProB and Groovy consoles
+* Added error highlighting to formula input text fields in visualization windows
 * Added language selection dropdown to interactive console (e.g. evaluation of both classical B and TLA+ formulas in the context of a translated TLA+ module)
+* Added state view context menu entries for quickly visualizing a value as a graph or table
+* Added option to display the full text for large values in state view "Show details" window
+* Added menu option for editing the current VisB file in external editor
+* Added context menu option for copying error messages in error alerts
+* Added keyboard support to history view
+* Added support for moving backwards/forwards through history using mouse back/forward buttons (mouse buttons 4 and 5)
+* Added zoom gesture support to VisB (for multi-touch trackpads and tablet touchscreens)
+* Operations view shows more clearly if a timeout occurred while calculating all outgoing transitions
+* Simplified executing operations that timed out or that have `MAX_OPERATIONS` set to 0
+* Improved formatting feature in state view "Show details" window
 * Improved export of (internal) classical B representation for Event-B and translated languages
+* When deleting a trace from a project, the user is now asked whether the trace file should also be deleted from disk
+* If model checking stops before fully finishing, the user can choose whether to resume model checking from this point or to restart from the beginning
+* Improved error display when editing LTL/CTL formulas and LTL patterns
+* Combined graph and table visualization into a single window
+* Simplified UI for changing the default VisB visualization
+* Improved feedback in VisB view if the model is not initialized yet (the visualization is no longer displayed in an uninitialized state)
+* Improved layout of SimB window
 * Improved SimB JSON format:
+  * SimB JSON configurations can now be edited and saved in the SimB window, not just by editing the JSON file directly
   * `probabilisticVariables` is now split up into `probabilisticVariables` and `transitionSelection` (refer to https://prob.hhu.de/w/index.php?title=SimB#Direct_Activation for more information)
   * All probabilities are interpreted as weights: they do not have to sum to one anymore
+* Improved SimB Monte Carlo simulation:
+  * SimB validation tasks can now be edited after creation
+  * Added more estimation types (minimum/maximum, mean between steps)
+  * Starting/ending predicates can now use free variables
+  * Time can now be any B expression, not just a constant value
+  * Progress information is shown while a Monte Carlo simulation is running
+* Changed SimB external simulator (RL agent) protocol:
+  * The protocol now uses JSON instead of simple lines of text
+  * The external simulator is sent a list of all enabled operations from which it may choose (rather than the external simulator choosing an operation and then SimB replying whether that operation is allowed or not)
+  * Removed support for `SHIELD_INTERVENTION` definitions (as a consequence of the protocol change)
+* Improved layout of test case generation details window
+* Improved layout of toolbars with many buttons
+* Improved VO manager (still experimental):
+  * Added ability to check all VOs in a machine or an entire project
+  * Symbolic checking, symbolic animation, test case generation, and history chart formulas can now be used as validation tasks
+  * Validation task statuses are now preserved when switching between machines (as long as the machine to which the tasks belong hasn't been modified)
+  * Validation tasks are not re-executed if they have already been executed before and their result is already known
+  * Improved error feedback when creating requirements
+  * Fixed VO status icons sometimes incorrectly turning yellow
+  * Removed formal distinction between requirement types (functional and non-functional) as the VO manager doesn't use this information
+* Improved UI responsiveness while updating the status bar or a VisB visualization
+* Improved startup performance slightly
+* Fixed multiple problems when starting multiple instances of ProB 2 UI at once
+* Fixed editor discarding changes made while saving
+* Fixed editor sometimes overwriting file contents when using undo together with switching between files
 * Fixed various text editing bugs in ProB and Groovy consoles
+* Fixed number input bugs when configuring MC/DC test case generation
+* Fixed model checking result "Show Trace" button sometimes showing the wrong trace (if multiple errors were found) or unloading the machine
+* Fixed proof obligation view working only for machines and not for contexts
+* Fixed history chart formulas sometimes disappearing
+* Fixed statistics possibly not updating after long-running tasks
+* Fixed preference windows not showing the correct "changed" status of preferences
+* Fixed various bugs in SimB
+* Fixed various bugs in documentation generator
+* Fixed inability to cancel certain tasks, such as random animation
+* Fixed certain internal errors not being displayed to user
+* Fixed internal error when interrupting/cancelling certain tasks, such as loading a machine or model checking
+* Fixed text rendering problems in help window on some systems
+* Fixed rare random exception on startup
+* Fixed reattaching of detached views sometimes not working properly
+* Fixed the Quit menu item on macOS causing open windows to not be restored on next startup
+* Fixed windows visibly jumping around when opened
+* Removed default description from projects automatically created from files
+* Removed save/load feature for LTL formulas and patterns (replaced by new feature for copying validation tasks inside a project)
 * Removed support for Java versions older than Java 21
 * Removed support for Windows versions older than Windows 10 and macOS versions older than macOS 11
 
