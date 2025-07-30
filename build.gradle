@@ -11,7 +11,7 @@ plugins {
 }
 
 project.group = "de.hhu.stups"
-project.version = "1.3.0-SNAPSHOT"
+project.version = "1.3.0"
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 if (project != rootProject) {
