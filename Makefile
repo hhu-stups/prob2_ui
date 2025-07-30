@@ -29,7 +29,7 @@ clean:
 	rm out.prop
 
 # version of ProB2UI without optional SNAPSHOT suffixes:
-PROB2UI_VERSION=1.3.0
+PROB2UI_VERSION=1.3.1
 SNAPSH=
 # comment in next line for SNAPSHOT builds
 SNAPSH=-SNAPSHOT
@@ -111,7 +111,7 @@ $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
 	#/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
 	zip -vr $(ZIP_FILE) $(APPFILE)
 	
-NOTVERS = 1.3.0
+NOTVERS = 1.3.1
 notarize-app-old: $(ZIP_FILE)
 	@echo "Step 6: Sending Notarization request to Apple for APP (in zipfile $(ZIP_FILE))"
 	xcrun altool --notarize-app\
