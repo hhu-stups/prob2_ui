@@ -169,7 +169,7 @@ Downloads of the current release and snapshot development builds can be found on
 
 * [Standalone jar file (all platforms)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/prob2-ui-1.2.0-multi.jar)
 * [Windows installer (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/ProB%202%20UI-1.2.0.exe)
-* [macOS application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/ProB%202%20UI-1.2.0.dmg)
+* [macOS x86_64 (Intel) application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/ProB%202%20UI-1.2.0.dmg)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/prob2-ui_1.2.0-1_amd64.deb)
 
 ## Version 1.1.0 (2021-01-26)
@@ -196,7 +196,7 @@ Downloads of the current release and snapshot development builds can be found on
 
 * [Standalone jar file (all platforms)](https://stups.hhu-hosting.de/downloads/prob2/1.1.0/prob2-ui-1.1.0-multi.jar)
 * [Windows installer (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.1.0/ProB2UI-1.1.0.exe)
-* [macOS application (with bundled JRE, notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.1.0/ProB2-UI-1.1.0-notarized.zip)
+* [macOS x86_64 (Intel) application (with bundled JRE, notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.1.0/ProB2-UI-1.1.0-notarized.zip)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.1.0/prob2-ui_1.1.0-1_amd64.deb)
 
 ## Version 1.0.0 (2019-07-18)
@@ -207,4 +207,4 @@ Downloads of the current release and snapshot development builds can be found on
 
 * [Standalone jar file (all platforms)](https://stups.hhu-hosting.de/downloads/prob2/1.0.0/prob2-ui-1.0.0-all.jar)
 * [Zip distribution (all platforms)](https://stups.hhu-hosting.de/downloads/prob2/1.0.0/prob2-ui-1.0.0.zip)
-* [macOS application (without JRE, not notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.0.0/prob2-ui-1.0.0-mac.zip)
+* [macOS x86_64 (Intel) application (without JRE, not notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.0.0/prob2-ui-1.0.0-mac.zip)
