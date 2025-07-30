@@ -111,7 +111,7 @@
 					<ProgressBar fx:id="progressBar" prefHeight="50.0" HBox.hgrow="ALWAYS" progress="0.0"/>
 				</HBox>
 				<SimpleStatsView fx:id="simpleStatsView"/>
-				<HBox spacing="7.0">
+				<HBox fx:id="memoryContainer" spacing="7.0">
 					<Label text="%verifications.modelchecking.modelcheckingStats.memoryUsage" styleClass="bold"/>
 					<Label fx:id="memoryUsage"/>
 				</HBox>

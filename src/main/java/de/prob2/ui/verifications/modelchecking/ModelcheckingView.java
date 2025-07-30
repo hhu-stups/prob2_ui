@@ -45,6 +45,7 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -118,6 +119,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	@FXML
 	private SimpleStatsView simpleStatsView;
 
+	@FXML
+	private Node memoryContainer;
 	@FXML
 	private Label memoryUsage;
 
@@ -242,8 +245,8 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 		stepsTable.getSelectionModel().selectedItemProperty().addListener((observable, from, to) ->
 			Platform.runLater(() -> {
-				if (to != null && to.getStats() != null) {
-					showStats(to.getTimeElapsed(), to.getStats(), to.getMemoryUsed());
+				if (to != null) {
+					showStats(to);
 				} else {
 					hideStats();
 				}
@@ -369,7 +372,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			final TableRow<ModelCheckingStep> row = new TableRow<>();
 
 			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && !(row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !row.getItem().hasTrace())) {
+				if (event.getClickCount() == 2 && !(row.isEmpty() || row.getItem() == null || !row.getItem().hasTrace())) {
 					currentTrace.set(row.getItem().getTrace());
 				}
 			});
@@ -377,7 +380,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			MenuItem showTraceItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
 			showTraceItem.setOnAction(e -> currentTrace.set(row.getItem().getTrace()));
 			showTraceItem.disableProperty().bind(Bindings.createBooleanBinding(
-					() -> row.isEmpty() || row.getItem() == null || row.getItem().getStats() == null || !row.getItem().hasTrace(),
+					() -> row.isEmpty() || row.getItem() == null || !row.getItem().hasTrace(),
 					row.emptyProperty(), row.itemProperty()));
 
 			row.contextMenuProperty().bind(
@@ -396,13 +399,38 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		return Optional.ofNullable(modelcheckingStage.getResult());
 	}
 
-	private void showStats(final long timeElapsed, final StateSpaceStats stats, final BigInteger memory) {
-		elapsedTime.setText(String.format("%.1f", timeElapsed / 1000.0) + " s");
+	private void showStats(ModelCheckingStep step) {
+		elapsedTime.setText(String.format("%.1f", step.getTimeElapsed() / 1000.0) + " s");
+
+		StateSpaceStats stats = step.getStats();
+		simpleStatsView.setStats(stats);
 		if (stats != null) {
 			progressBar.setProgress(calculateProgress(stats));
-			simpleStatsView.setStats(stats);
+			simpleStatsView.setVisible(true);
+			simpleStatsView.setManaged(true);
+		} else {
+			if (step.getStatus() == CheckingStatus.IN_PROGRESS) {
+				progressBar.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+			} else if (step.getStatus() == CheckingStatus.NOT_CHECKED) {
+				progressBar.setProgress(0);
+			} else {
+				progressBar.setProgress(1);
+			}
+			simpleStatsView.setVisible(false);
+			simpleStatsView.setManaged(false);
 		}
-		memoryUsage.setText(memory != null ? memory.divide(MIB_FACTOR) + " MiB" : "-");
+
+		BigInteger memory = step.getMemoryUsed();
+		if (memory != null) {
+			memoryUsage.setText(memory.divide(MIB_FACTOR) + " MiB");
+			memoryContainer.setVisible(true);
+			memoryContainer.setManaged(true);
+		} else {
+			memoryUsage.setText("-");
+			memoryContainer.setVisible(false);
+			memoryContainer.setManaged(false);
+		}
+
 		statsBox.setVisible(true);
 	}
 
