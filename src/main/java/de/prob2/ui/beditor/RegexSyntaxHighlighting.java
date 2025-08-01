@@ -62,7 +62,7 @@ public final class RegexSyntaxHighlighting {
 
 		//XTL Regex
 		var tokenClassesForXTL = List.of(
-				new TokenClass("editor_keyword", compile("start|trans_prop|trans|prop|heuristic_function_result|heuristic_function_active|nr_state_properties|prob_pragma_string|animation_(?:function_result|image|image_right_click_transition|image_click_transition)")),
+				new TokenClass("editor_keyword", compile("start|symb_trans_enabled|symb_trans|trans_prop|trans|prop|heuristic_function_result|heuristic_function_active|nr_state_properties|prob_pragma_string|animation_(?:function_result|image|image_right_click_transition|image_click_transition)")),
 				new TokenClass("editor_types", compile("true|fail|atomic|compound|nonvar|var|functor|arg|op|is|ground|number|copy_term|dif|member|memberchk|append|length|nonmember|keysort|term_variables|reverse|last|delete|select|selectchk|maplist|nth1|nth0|nth|perm2|perm|permutation|same_length|add_error|print|write|sort")),
 				new TokenClass("editor_string", compile("\"(?:[^\"\n\r\\\\]|\\\\.)*\"|'(?:[^'\n\r\\\\]|\\\\.)*'")),
 				new TokenClass("editor_xtl_variable", compile("[_A-Z][_a-zA-Z0-9]*")),
