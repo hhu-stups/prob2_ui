@@ -149,6 +149,13 @@
 										style="-fx-background-color: white;"/>
 							</HBox>
 						</HBox>
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<CheckBox fx:id="noTranslation" text="%verifications.modelchecking.modelcheckingStage.tlcTab.noTranslation">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.noTranslation" />
+								</tooltip>
+							</CheckBox>
+						</HBox>
 					</VBox>
 				</VBox>
 			</VBox>

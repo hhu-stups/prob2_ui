@@ -15,6 +15,7 @@ import de.prob.check.TLCModelCheckingOptions;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
+import de.prob.model.representation.TLAModel;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
@@ -97,6 +98,8 @@ public class TLCModelCheckingTab extends Tab {
 	private TextField tfSaveLocation;
 	@FXML
 	private Button changeLocationButton;
+	@FXML
+	private CheckBox noTranslation;
 
 	private int oldNrWorkers = 1;
 
@@ -224,6 +227,7 @@ public class TLCModelCheckingTab extends Tab {
 			.useSymmetry(useSymmetry.isSelected())
 			.saveGeneratedFiles(saveGeneratedFiles.isSelected())
 			.outputDir(saveGeneratedFiles.isSelected() ? tfSaveLocation.getText() : null)
+			.noTranslation(noTranslation.isSelected())
 			.getOptions();
 	}
 
@@ -242,11 +246,12 @@ public class TLCModelCheckingTab extends Tab {
 
 		this.checkedTlcApplicable = true;
 
+		final boolean noTranslation = this.noTranslation.isSelected();
 		Thread thread = new Thread(() -> {
 			try {
-				Path machinePath = getClassicalBMachine(currentProject, currentTrace.getStateSpace(), i18n);
+				Path machinePath = getMachinePathForTlc(currentProject, currentTrace.getStateSpace(), i18n, noTranslation);
 				// TODO: show info when internal representation is used
-				TLC4B.checkTLC4BIsApplicable(machinePath.toString());
+				TLC4B.checkTLC4BIsApplicable(machinePath.toString(), noTranslation);
 			} catch (BCompoundException | RuntimeException exc) {
 				LOGGER.warn("TLC4B is not applicable to this machine", exc);
 				Platform.runLater(() -> this.tlcApplicableError.set(exc.getMessage()));
@@ -297,16 +302,23 @@ public class TLCModelCheckingTab extends Tab {
 		if (options.containsKey(TLC4BOption.OUTPUT)) {
 			tfSaveLocation.setText(options.get(TLC4BOption.OUTPUT));
 		}
+		noTranslation.setSelected(options.containsKey(TLC4BOption.NOTRANSLATION));
 	}
 
-	public static Path getClassicalBMachine(CurrentProject currentProject, StateSpace stateSpace, I18n i18n) {
-		return getClassicalBMachine(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, i18n);
+	public static Path getMachinePathForTlc(CurrentProject currentProject, StateSpace stateSpace, I18n i18n, boolean noTranslation) {
+		return getMachinePathForTlc(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, i18n, noTranslation);
 	}
 
-	public static Path getClassicalBMachine(Project project, Machine machine, StateSpace stateSpace, I18n i18n) {
+	public static Path getMachinePathForTlc(Project project, Machine machine, StateSpace stateSpace, I18n i18n, boolean noTranslation) {
 		Path machinePath;
 		AbstractModel model = stateSpace.getModel();
-		if (model instanceof ClassicalBModel) {
+		if (noTranslation) {
+			if (model instanceof TLAModel) {
+				machinePath = project.getAbsoluteMachinePath(machine);
+			} else {
+				throw new RuntimeException(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.noTranslationRequiresTla"));
+			}
+		} else if (model instanceof ClassicalBModel) {
 			machinePath = project.getAbsoluteMachinePath(machine);
 		} else if (model.getFormalismType() == FormalismType.B) { // if not classical B: use internal representation
 			if (model instanceof EventBModel && !stateSpace.getCurrentPreference("NUMBER_OF_ANIMATED_ABSTRACTIONS").equals("0")) {
@@ -329,4 +341,3 @@ public class TLCModelCheckingTab extends Tab {
 		return machinePath;
 	}
 }
-

@@ -9,7 +9,6 @@ import java.util.Objects;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
@@ -40,7 +39,7 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 	private final ModelCheckingSearchStrategy searchStrategy;
 
 	/**
-	 * Keep null values ibn this map, they are important!
+	 * Keep null values in this map, they are important!
 	 */
 	private final Map<TLC4BOption, String> options;
 
@@ -77,7 +76,10 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 	public String getTaskDescription(final I18n i18n) {
 		final StringJoiner s = new StringJoiner(", ");
 		s.add("TLC");
-
+		final Map<TLC4BOption, String> opts = this.getOptions();
+		if (!opts.containsKey(TLC4BOption.NOTRANSLATION)) {
+			s.add(i18n.translate("verifications.modelchecking.description.tlcOption.translation"));
+		}
 		final String strategyKey = TLCModelCheckingTab.getSearchStrategyNameKey(this.getSearchStrategy());
 		if (strategyKey != null) {
 			String depth = this.options.containsKey(TLC4BOption.DFID) ? " (" + this.options.get(TLC4BOption.DFID) + ")" : "";
@@ -85,7 +87,6 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 		} else {
 			s.add(this.getSearchStrategy().toString());
 		}
-		Map<TLC4BOption, String> opts = this.getOptions();
 		if (opts.containsKey(TLC4BOption.WORKERS)) {
 			s.add(opts.get(TLC4BOption.WORKERS) + " workers");
 		}
@@ -105,7 +106,7 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			s.add(i18n.translate("verifications.modelchecking.description.tlcOption.noltl"));
 		}
 		for (TLC4BOption opt : opts.keySet()) {
-			if (opt == TLC4BOption.DFID || opt == TLC4BOption.NODEAD || opt == TLC4BOption.NOINV || opt == TLC4BOption.NOASS
+			if (opt == TLC4BOption.NOTRANSLATION || opt == TLC4BOption.DFID || opt == TLC4BOption.NODEAD || opt == TLC4BOption.NOINV || opt == TLC4BOption.NOASS
 				|| opt == TLC4BOption.NOGOAL || opt == TLC4BOption.NOLTL || opt == TLC4BOption.WORKERS ) {
 				continue; // already handled
 			}
@@ -137,10 +138,10 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 			}
 		};
 
+		TLCModelCheckingOptions tlcOptions = new TLCModelCheckingOptions(fixPath(context, this.getOptions()));
 		TLCModelChecker tlcModelChecker = new TLCModelChecker(
-			TLCModelCheckingTab.getClassicalBMachine(context.project(), context.machine(), context.stateSpace(), context.i18n()).toString(),
-			stateSpace, listener,
-			new TLCModelCheckingOptions(fixPath(context, this.getOptions())));
+			TLCModelCheckingTab.getMachinePathForTlc(context.project(), context.machine(), context.stateSpace(), context.i18n(), tlcOptions.getOptions().containsKey(TLC4BOption.NOTRANSLATION)).toString(),
+			stateSpace, listener, tlcOptions);
 		tlcModelChecker.call();
 	}
 
