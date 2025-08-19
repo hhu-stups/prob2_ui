@@ -119,28 +119,14 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 				// Lists get a ComboBox.
 				changeToComboBox(pref);
 			} else {
-				final String type = pref.getPreferenceInfo().type.atomToString();
-				if ("bool".equals(type)) {
-					// Booleans get a CheckBox.
-					changeToCheckBox(pref);
-				} else if ("int".equals(type)) {
-					// Integers get a spinner.
-					changeToSpinner(pref, Integer.MIN_VALUE, Integer.MAX_VALUE);
-				} else if ("nat".equals(type)) {
-					// Nonnegative integers get a spinner.
-					changeToSpinner(pref, 0, Integer.MAX_VALUE);
-				} else if ("nat1".equals(type)) {
-					// Positive integers get a spinner.
-					changeToSpinner(pref, 1, Integer.MAX_VALUE);
-				} else if ("neg".equals(type)) {
-					// Nonpositive integers get a spinner.
-					changeToSpinner(pref, Integer.MIN_VALUE, 0);
-				} else if ("rgb_color".equals(type)) {
-					// Colors get a ColorPicker.
-					changeToColorPicker(pref);
-				} else {
-					// Default to a simple text field if type is unknown.
-					changeToTextField(pref);
+				switch (pref.getPreferenceInfo().type.atomToString()) {
+					case "bool"        -> changeToCheckBox(pref);                                      // Booleans get a CheckBox.
+					case "int"         -> changeToSpinner(pref, Integer.MIN_VALUE, Integer.MAX_VALUE); // Integers get a spinner.
+					case "nat"         -> changeToSpinner(pref, 0, Integer.MAX_VALUE);            // Nonnegative integers get a spinner.
+					case "nat1"        -> changeToSpinner(pref, 1, Integer.MAX_VALUE);            // Positive integers get a spinner.
+					case "neg"         -> changeToSpinner(pref, Integer.MIN_VALUE, 0);           // Nonpositive integers get a spinner.
+					case "rgb_color"   -> changeToColorPicker(pref);                                  // Colors get a ColorPicker.
+					case null, default -> changeToTextField(pref);                                    // Default to a simple text field if type is unknown.
 				}
 			}
 		} else {
