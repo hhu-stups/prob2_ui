@@ -64,7 +64,8 @@ public class ModelcheckingStage extends Stage {
 
 	@FXML
 	private void cancel() {
-		this.hide();
+		this.result = null;
+		this.close();
 	}
 
 	public ModelCheckingItem getResult() {

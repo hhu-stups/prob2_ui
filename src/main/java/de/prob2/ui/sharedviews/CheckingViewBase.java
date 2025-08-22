@@ -22,6 +22,7 @@ import de.prob2.ui.verifications.ISelectableTask;
 import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
@@ -280,7 +281,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Border
 		}
 
 		LOGGER.error("Unhandled exception during checking", exc);
-		stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+		Platform.runLater(() -> stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow()));
 	}
 
 	/**
@@ -330,16 +331,22 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Border
 
 	@FXML
 	protected Optional<T> askToAddItem() {
-		return this.showItemDialog(null).map(newItem -> {
-			final T toCheck = this.addItem(newItem);
-			this.itemsTable.getSelectionModel().select(toCheck);
-			// The returned item might already be checked
-			// if there was already another item with the same configuration as newItem
-			// and that existing item was already checked previously.
-			if (toCheck.getStatus() == CheckingStatus.NOT_CHECKED) {
-				this.executeItemIfEnabled(toCheck);
+		Machine currentMachine = currentProject.getCurrentMachine();
+		return this.showItemDialog(null).flatMap(newItem -> {
+			if (currentProject.getCurrentMachine() == currentMachine) {
+				final T toCheck = this.addItem(newItem);
+				this.itemsTable.getSelectionModel().select(toCheck);
+				// The returned item might already be checked
+				// if there was already another item with the same configuration as newItem
+				// and that existing item was already checked previously.
+				if (toCheck.getStatus() == CheckingStatus.NOT_CHECKED) {
+					this.executeItemIfEnabled(toCheck);
+				}
+				return Optional.of(toCheck);
+			} else {
+				LOGGER.warn("The machine has changed, discarding task changes");
+				return Optional.empty();
 			}
-			return toCheck;
 		});
 	}
 }

@@ -9,7 +9,6 @@ import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
 import de.prob.check.StateSpaceStats;
-import de.prob.statespace.Trace;
 import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
@@ -271,7 +270,7 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 		container.setSpacing(5);
 		Button button = new Button(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
 		button.getStyleClass().add("button-blue");
-		button.setOnAction(actionEvent -> currentTrace.set(step.getTrace()));
+		button.setOnAction(actionEvent -> this.setTraceFromStep(step));
 
 		button.managedProperty().bind(buttonBinding);
 
@@ -318,18 +317,12 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	protected CompletableFuture<?> executeItemImpl(ModelCheckingItem item, CheckingExecutors executors, ExecutionContext context) {
 		if (item instanceof ProBModelCheckingItem proBItem) {
 			statsView.updateWhileModelChecking(proBItem);
-			return super.executeItemImpl(item, executors, context).thenApply(res -> {
-				if (item.getResult() instanceof ModelCheckingItem.Result mcResult) {
-					Trace trace = mcResult.getLastStep().getTrace();
-					if (trace != null) {
-						currentTrace.set(trace);
-					}
-				}
-				return res;
-			});
-		} else {
-			return super.executeItemImpl(item, executors, context);
 		}
+		return super.executeItemImpl(item, executors, context).whenCompleteAsync((res, exc) -> {
+			if (exc == null) {
+				this.setTraceFromResult(item);
+			}
+		});
 	}
 
 	@FXML
@@ -343,16 +336,11 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 	private void continueModelChecking(ProBModelCheckingItem item) {
 		statsView.updateWhileModelChecking(item);
 		ExecutionContext context = getCurrentExecutionContext();
-		item.continueModelChecking(checkingExecutors, context).whenComplete((res, exc) -> {
+		item.continueModelChecking(checkingExecutors, context).whenCompleteAsync((res, exc) -> {
 			if (exc == null) {
-				if (item.getResult() instanceof ModelCheckingItem.Result mcResult) {
-					Trace trace = mcResult.getLastStep().getTrace();
-					if (trace != null) {
-						currentTrace.set(trace);
-					}
-				}
+				this.setTraceFromResult(item);
 			} else {
-				handleCheckException(exc);
+				this.handleCheckException(exc);
 			}
 		});
 	}
@@ -372,13 +360,13 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 			final TableRow<ModelCheckingStep> row = new TableRow<>();
 
 			row.setOnMouseClicked(event -> {
-				if (event.getClickCount() == 2 && !(row.isEmpty() || row.getItem() == null || !row.getItem().hasTrace())) {
-					currentTrace.set(row.getItem().getTrace());
+				if (event.getClickCount() == 2 && !row.isEmpty()) {
+					this.setTraceFromStep(row.getItem());
 				}
 			});
 
 			MenuItem showTraceItem = new MenuItem(i18n.translate("verifications.modelchecking.modelcheckingView.contextMenu.showTrace"));
-			showTraceItem.setOnAction(e -> currentTrace.set(row.getItem().getTrace()));
+			showTraceItem.setOnAction(e -> this.setTraceFromStep(row.getItem()));
 			showTraceItem.disableProperty().bind(Bindings.createBooleanBinding(
 					() -> row.isEmpty() || row.getItem() == null || !row.getItem().hasTrace(),
 					row.emptyProperty(), row.itemProperty()));
@@ -442,5 +430,29 @@ public final class ModelcheckingView extends CheckingViewBase<ModelCheckingItem>
 
 	public void hideStats() {
 		statsBox.setVisible(false);
+	}
+
+	private void setTraceFromResult(ModelCheckingItem item) {
+		// the result is set in a Platform.runLater(...) call
+		// so we need to check after it has changed
+		Platform.runLater(() -> {
+			if (item != null && item.getResult() instanceof ModelCheckingItem.Result mcResult) {
+				this.setTraceFromStep(mcResult.getLastStep());
+			}
+		});
+	}
+
+	private void setTraceFromStep(ModelCheckingStep step) {
+		if (step != null && step.hasTrace()) {
+			this.checkingExecutors.cliExecutor().submit(step::getTrace).whenComplete((res, exc) -> {
+				if (exc == null) {
+					if (res != null) {
+						Platform.runLater(() -> this.currentTrace.set(res));
+					}
+				} else {
+					this.handleCheckException(exc);
+				}
+			});
+		}
 	}
 }

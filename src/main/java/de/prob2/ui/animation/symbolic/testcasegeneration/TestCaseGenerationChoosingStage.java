@@ -153,13 +153,13 @@ public class TestCaseGenerationChoosingStage extends Stage {
 		if (!checkValid()) {
 			return;
 		}
-		this.close();
 		this.setItem(extractItem());
+		this.close();
 	}
 
 	@FXML
 	public void cancel() {
-		this.close();
 		this.setItem(null);
+		this.close();
 	}
 }
