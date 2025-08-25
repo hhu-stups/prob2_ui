@@ -21,6 +21,11 @@ public class ImprovedIntegerSpinnerValueFactory extends SpinnerValueFactory.Inte
 	public ImprovedIntegerSpinnerValueFactory(@NamedArg("min") int min, @NamedArg("max") int max, @NamedArg("initialValue") int initialValue, @NamedArg("amountToStepBy") int amountToStepBy) {
 		super(min, max, initialValue, amountToStepBy);
 		this.initialValue = initialValue >= min && initialValue <= max ? initialValue : min;
+		this.valueProperty().subscribe((from, to) -> {
+			if (to == null) {
+				this.setValue(from != null ? from : this.getInitialValue());
+			}
+		});
 	}
 
 	public int getInitialValue() {
