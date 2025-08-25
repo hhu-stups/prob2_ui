@@ -12,6 +12,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import de.prob.check.CheckError;
 import de.prob.check.IModelCheckListener;
 import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckingSearchStrategy;
@@ -82,8 +83,8 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 		}
 		final String strategyKey = TLCModelCheckingTab.getSearchStrategyNameKey(this.getSearchStrategy());
 		if (strategyKey != null) {
-			String depth = this.options.containsKey(TLC4BOption.DFID) ? " (" + this.options.get(TLC4BOption.DFID) + ")" : "";
-			s.add(i18n.translate(strategyKey) + depth);
+			String maxDepth = this.options.containsKey(TLC4BOption.DFID) ? " (" + this.options.get(TLC4BOption.DFID) + ")" : "";
+			s.add(i18n.translate(strategyKey) + maxDepth);
 		} else {
 			s.add(this.getSearchStrategy().toString());
 		}
@@ -139,8 +140,16 @@ public final class TLCModelCheckingItem extends ModelCheckingItem {
 		};
 
 		TLCModelCheckingOptions tlcOptions = new TLCModelCheckingOptions(fixPath(context, this.getOptions()));
+		Path machinePathForTlc;
+		try {
+			machinePathForTlc = TLCModelCheckingTab.getMachinePathForTlc(context.project(), context.machine(), context.stateSpace(), context.i18n(), tlcOptions.getOptions().containsKey(TLC4BOption.NOTRANSLATION));
+		} catch (Exception e) {
+			ModelCheckingStep step = new ModelCheckingStep(new CheckError(e.getMessage()), 0, null, null, stateSpace);
+			Platform.runLater(() -> setResult(new ModelCheckingItem.Result(Collections.singletonList(step))));
+			return;
+		}
 		TLCModelChecker tlcModelChecker = new TLCModelChecker(
-			TLCModelCheckingTab.getMachinePathForTlc(context.project(), context.machine(), context.stateSpace(), context.i18n(), tlcOptions.getOptions().containsKey(TLC4BOption.NOTRANSLATION)).toString(),
+			machinePathForTlc.toString(),
 			stateSpace, listener, tlcOptions);
 		tlcModelChecker.call();
 	}

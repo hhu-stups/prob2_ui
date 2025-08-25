@@ -83,6 +83,7 @@ public class ModelcheckingStage extends Stage {
 				case TLCModelCheckingItem tlcItem -> {
 					tlcTab.setData(tlcItem);
 					modelCheckerTabs.getSelectionModel().select(tlcTab);
+					tlcTab.checkTlcApplicable();
 				}
 				case LTSminModelCheckingItem ltsminItem -> {
 					ltsminTab.setData(ltsminItem);
