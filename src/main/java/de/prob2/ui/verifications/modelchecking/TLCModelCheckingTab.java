@@ -121,7 +121,7 @@ public class TLCModelCheckingTab extends Tab {
 
 	private final CurrentTrace currentTrace;
 
-	private boolean checkedTlcApplicable;
+	private volatile boolean checkedTlcApplicable;
 	private final StringProperty tlcApplicableError;
 
 	private ModelCheckingItem result;
@@ -251,25 +251,31 @@ public class TLCModelCheckingTab extends Tab {
 		if (this.checkedTlcApplicable) {
 			return;
 		}
-		this.checkedTlcApplicable = true;
-
-		final boolean noTranslation = this.rbNoTranslation.isSelected();
-		Thread thread = new Thread(() -> {
-			try {
-				Path machinePath = getMachinePathForTlc(currentProject, currentTrace.getStateSpace(), i18n, noTranslation);
-				// TODO: show info when internal representation is used
-				TLC4B.checkTLC4BIsApplicable(machinePath.toString(), noTranslation);
-			} catch (Exception exc) {
-				LOGGER.warn("TLC4B is not applicable to this machine", exc);
-				Platform.runLater(() -> this.tlcApplicableError.set(exc.getMessage()));
+		synchronized (this) {
+			if (this.checkedTlcApplicable) {
 				return;
 			}
+			this.checkedTlcApplicable = true;
 
-			Platform.runLater(() -> this.tlcApplicableError.set(null));
-		}, "TLC4B applicability checker");
-		// Don't let this thread keep the JVM alive if it's still running when the UI exits.
-		thread.setDaemon(true);
-		thread.start();
+			LOGGER.debug("Checking TLC applicability");
+			final boolean noTranslation = this.rbNoTranslation.isSelected();
+			Thread thread = new Thread(() -> {
+				try {
+					Path machinePath = getMachinePathForTlc(currentProject, currentTrace.getStateSpace(), i18n, noTranslation);
+					// TODO: show info when internal representation is used
+					TLC4B.checkTLC4BIsApplicable(machinePath.toString(), noTranslation);
+				} catch (Exception exc) {
+					LOGGER.warn("TLC4B is not applicable to this machine", exc);
+					Platform.runLater(() -> this.tlcApplicableError.set(exc.getMessage()));
+					return;
+				}
+
+				Platform.runLater(() -> this.tlcApplicableError.set(null));
+			}, "TLC4B applicability checker");
+			// Don't let this thread keep the JVM alive if it's still running when the UI exits.
+			thread.setDaemon(true);
+			thread.start();
+		}
 	}
 
 	public ModelCheckingItem getResult() {
