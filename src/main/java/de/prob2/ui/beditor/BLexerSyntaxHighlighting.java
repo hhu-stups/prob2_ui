@@ -141,6 +141,7 @@ import de.be4.classicalb.core.parser.node.TPartialBijection;
 import de.be4.classicalb.core.parser.node.TPartialFunction;
 import de.be4.classicalb.core.parser.node.TPartialInjection;
 import de.be4.classicalb.core.parser.node.TPartialSurjection;
+import de.be4.classicalb.core.parser.node.TPartition;
 import de.be4.classicalb.core.parser.node.TPerm;
 import de.be4.classicalb.core.parser.node.TPi;
 import de.be4.classicalb.core.parser.node.TPlus;
@@ -248,7 +249,7 @@ public final class BLexerSyntaxHighlighting {
 			TFnc.class, TRel.class,
 			TQuantifiedInter.class, TQuantifiedUnion.class,
 			TGeneralizedInter.class, TGeneralizedUnion.class,
-			TFinite.class,
+			TFinite.class, TPartition.class,
 			TLessGreater.class, // empty sequence
 			TRev.class,
 			TFirst.class, TLast.class, TFront.class, TTail.class, TConc.class
