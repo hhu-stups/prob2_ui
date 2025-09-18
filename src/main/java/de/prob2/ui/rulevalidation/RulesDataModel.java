@@ -30,6 +30,8 @@ public final class RulesDataModel {
 	private final Map<String, RuleOperation> ruleMap = new LinkedHashMap<>();
 	private final Map<String, ComputationOperation> computationMap = new LinkedHashMap<>();
 
+	private Map<AbstractOperation, OperationStatus> operationStatusMap;
+
 	// Summary properties
 	private final SimpleStringProperty failedRules = new SimpleStringProperty("-");
 	private final SimpleStringProperty successRules = new SimpleStringProperty("-");
@@ -87,6 +89,7 @@ public final class RulesDataModel {
 
 	void update(Trace newTrace) {
 		if (newTrace.getCurrentState().isInitialised()) {
+			operationStatusMap = OperationStatuses.getStatuses(model, newTrace.getCurrentState());
 			updateRuleResults(newTrace.getCurrentState());
 			updateComputationResults(newTrace.getCurrentState());
 		} else {
@@ -148,24 +151,20 @@ public final class RulesDataModel {
 	public List<String> getFailedDependenciesOfComputation(String comp) {
 		List<String> failedDependencies = new ArrayList<>();
  		for (AbstractOperation op : computationMap.get(comp).getTransitiveDependencies()) {
-			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName())
-					&& getRuleValue(op.getName()).get() instanceof RuleResult ruleResult
-					&& ruleResult.getRuleState() == RuleStatus.FAIL) {
+			if (op instanceof RuleOperation && operationStatusMap.get(op) == RuleStatus.FAIL) {
 				failedDependencies.add(op.getName());
 			}
 		}
+		Collections.sort(failedDependencies);
 		return failedDependencies;
 	}
 
 	public List<String> getNotCheckedDependenciesOfComputation(String comp) {
 		List<String> notCheckedDependencies = new ArrayList<>();
 		for (AbstractOperation op : getComputationMap().get(comp).getTransitiveDependencies()) {
-			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName())
-					&& getRuleValue(op.getName()).get() instanceof RuleResult ruleResult
-					&& ruleResult.getRuleState().isNotExecuted()) {
+			if (op instanceof RuleOperation && operationStatusMap.get(op) == RuleStatus.NOT_CHECKED) {
 				notCheckedDependencies.add(op.getName());
-			} else if (op instanceof ComputationOperation && computationValueMap.containsKey(op.getName())
-					&& getComputationValue(op.getName()).get() == ComputationStatus.NOT_EXECUTED) {
+			} else if (op instanceof ComputationOperation && operationStatusMap.get(op) == ComputationStatus.NOT_EXECUTED) {
 				notCheckedDependencies.add(op.getName());
 			}
 		}
@@ -183,12 +182,9 @@ public final class RulesDataModel {
 
 		List<String> disableDependencies = new ArrayList<>();
 		for (AbstractOperation op : dependencies) {
-			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName())
-					&& getRuleValue(op.getName()).get() instanceof RuleResult ruleResult
-					&& ruleResult.getRuleState().isDisabled()) {
+			if (op instanceof RuleOperation && operationStatusMap.get(op) == RuleStatus.DISABLED) {
 				disableDependencies.add(op.getName());
-			} else if (op instanceof ComputationOperation && computationValueMap.containsKey(op.getName())
-					&& getComputationValue(op.getName()).get() == ComputationStatus.DISABLED) {
+			} else if (op instanceof ComputationOperation && operationStatusMap.get(op) == ComputationStatus.DISABLED) {
 				disableDependencies.add(op.getName());
 			}
 		}
