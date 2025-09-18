@@ -353,7 +353,7 @@ public final class RulesView extends AnchorPane {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.xml", "xml"));
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
-			controller.saveValidationReport(path, injector.getInstance(Locale.class));
+			controller.saveValidationReport(path);
 		}
 	}
 

@@ -165,8 +165,8 @@ public final class RulesController {
 		return RulesDependencyGraph.getGraphExpressionAsString(currentTrace.get(), operations);
 	}
 
-	public void saveValidationReport(final Path path, final Locale language) throws IOException {
+	public void saveValidationReport(final Path path) {
 		// don't use RuleValidationReport.saveReport directly: duration of checks is measured by RulesChecker
-		rulesChecker.saveValidationReport(path, language);
+		rulesChecker.saveValidationReport(path);
 	}
 }
