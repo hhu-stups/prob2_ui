@@ -147,9 +147,9 @@ public final class RulesDataModel {
 	}
 
 	private void updateComputationResults(State currentState) {
-		ComputationStatuses computationResults = new ComputationStatuses(model.getRulesProject(), currentState);
-		computationResults.getResults().entrySet().forEach(computationResult -> {
-			SimpleObjectProperty<Object> prop = computationValueMap.get(computationResult.getKey());
+		Map<AbstractOperation,OperationStatus> computationResults = OperationStatuses.getStatuses(model, currentState);
+		computationResults.entrySet().forEach(computationResult -> {
+			SimpleObjectProperty<Object> prop = computationValueMap.get(computationResult.getKey().getName());
 			if (prop != null) {
 				prop.set(computationResult);
 			}
