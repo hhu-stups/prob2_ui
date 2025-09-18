@@ -19,7 +19,6 @@ import java.util.List;
 class OperationItem extends TreeItem<Object> {
 
 	private final I18n i18n;
-
 	private final RulesDataModel model;
 	private final String operation;
 	private boolean executable = true;
@@ -31,19 +30,15 @@ class OperationItem extends TreeItem<Object> {
 		this.model = model;
 		resultProperty.addListener((observable, oldValue, newValue) -> {
 			executable = true;
-			OperationItem.this.getChildren().clear();
+			this.getChildren().clear();
 			if (newValue instanceof RuleResult ruleResult) {
 				switch (ruleResult.getRuleState()) {
 					case FAIL, NOT_CHECKED -> createRuleChildren(ruleResult);
 					case SUCCESS -> {
-						OperationItem.this.getChildren().clear();
 						addSuccessMessages(ruleResult);
 						executable = false;
 					}
-					case DISABLED -> {
-						OperationItem.this.getChildren().clear();
-						executable = false;
-					}
+					case DISABLED -> executable = false;
 				}
 			} else if (newValue instanceof ComputationStatus status && operation instanceof ComputationOperation computationOperation) {
 				createComputationChildren(status, computationOperation);
@@ -120,10 +115,6 @@ class OperationItem extends TreeItem<Object> {
 					addDisabledDependencies(disabledDependencies);
 					executable = false;
 				}
-				break;
-			case DISABLED:
-				executable = false;
-				break;
 		}
 		addSuccessMessages(result);
 		addUncheckedMessages(result);

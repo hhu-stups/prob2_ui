@@ -49,19 +49,15 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 		getTableRow().getTreeItem();
 		updateContent(result.toString());
 		switch (result) {
-			case EXECUTED:
-				getStyleClass().add("true");
-				break;
-			case DISABLED:
-				setStyle("-fx-background-color:lightgray");
-				break;
-			case NOT_EXECUTED:
+			case EXECUTED -> getStyleClass().add("true");
+			case DISABLED -> setStyle("-fx-background-color:lightgray");
+			case NOT_EXECUTED -> {
 				if (!executable) {
 					// should not be translated? Appears next to rule states SUCCESS, FAIL, …
 					updateContent("NOT EXECUTABLE");
 				}
 				setStyle(null);
-				break;
+			}
 		}
 	}
 
@@ -75,21 +71,15 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	private void configureForRuleResult(RuleResult result) {
 		updateContent(result.getRuleState().name());
 		switch (result.getRuleState()) {
-			case FAIL:
-				getStyleClass().add("false");
-				break;
-			case SUCCESS:
-				getStyleClass().add("true");
-				break;
-			case NOT_CHECKED:
+			case FAIL -> getStyleClass().add("false");
+			case SUCCESS -> getStyleClass().add("true");
+			case NOT_CHECKED -> {
 				if (!executable) {
 					updateContent("NOT CHECKABLE");
 				}
 				setStyle(null);
-				break;
-			case DISABLED:
-				setStyle("-fx-background-color:lightgray");
-				break;
+			}
+			case DISABLED -> setStyle("-fx-background-color:lightgray");
 		}
 	}
 
