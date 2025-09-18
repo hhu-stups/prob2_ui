@@ -27,8 +27,8 @@ public final class RulesDataModel {
 	private Map<String, SimpleObjectProperty<Object>> ruleValueMap;
 	private Map<String, SimpleObjectProperty<Object>> computationValueMap;
 	// static information about the loaded rules machine
-	private Map<String, RuleOperation> ruleMap;
-	private Map<String, ComputationOperation> computationMap;
+	private final Map<String, RuleOperation> ruleMap = new LinkedHashMap<>();
+	private final Map<String, ComputationOperation> computationMap = new LinkedHashMap<>();
 
 	// Summary properties
 	private final SimpleStringProperty failedRules = new SimpleStringProperty("-");
@@ -71,23 +71,18 @@ public final class RulesDataModel {
 	void initialize(RulesModel newModel) {
 		this.model = newModel;
 
-		Map<String, RuleOperation> rulesMap = new HashMap<>();
-		Map<String, ComputationOperation> computationsMap = new HashMap<>();
+		model.getRulesProject().getOperationsMap().forEach((name, op) -> {
+			if (op instanceof RuleOperation)
+				ruleMap.put(name, (RuleOperation) op);
+			else if (op instanceof ComputationOperation)
+				computationMap.put(name, (ComputationOperation) op);
+		});
 
-		for (Map.Entry<String, AbstractOperation> entry : model.getRulesProject().getOperationsMap().entrySet()) {
-			if (entry.getValue() instanceof RuleOperation)
-				rulesMap.put(entry.getKey(), (RuleOperation) entry.getValue());
-			if (entry.getValue() instanceof ComputationOperation)
-				computationsMap.put(entry.getKey(), (ComputationOperation) entry.getValue());
-		}
+		ruleValueMap = new LinkedHashMap<>(ruleMap.size());
+		initializeValueMap(ruleMap.keySet(), ruleValueMap);
 
-		ruleValueMap = new LinkedHashMap<>(rulesMap.size());
-		ruleMap = new LinkedHashMap<>(rulesMap.size());
-		initializeValueMap(rulesMap, ruleMap, ruleValueMap);
-
-		computationValueMap = new LinkedHashMap<>(computationsMap.size());
-		computationMap = new LinkedHashMap<>(computationsMap.size());
-		initializeValueMap(computationsMap, computationMap, computationValueMap);
+		computationValueMap = new LinkedHashMap<>(computationMap.size());
+		initializeValueMap(computationMap.keySet(), computationValueMap);
 	}
 
 	void update(Trace newTrace) {
@@ -111,13 +106,11 @@ public final class RulesDataModel {
 		disabledRules.set("-");
 	}
 
-	private <T> void initializeValueMap(Map<String, T> operations, Map<String, T> operationsMap,
-										Map<String, SimpleObjectProperty<Object>> operationsValueMap) {
-		List<String> sortedOperations = new ArrayList<>(operations.keySet());
+	private void initializeValueMap(Set<String> operations, Map<String, SimpleObjectProperty<Object>> operationsValueMap) {
+		List<String> sortedOperations = new ArrayList<>(operations);
 		Collections.sort(sortedOperations);
 
 		for (String operation : sortedOperations) {
-			operationsMap.put(operation, operations.get(operation));
 			operationsValueMap.put(operation, new SimpleObjectProperty<>(IDENTIFIER_NOT_INITIALISED));
 		}
 	}
