@@ -10,8 +10,6 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.util.Duration;
 
-import java.util.Map;
-
 /**
  * @author Christoph Heinzen
  * @since 14.12.17
@@ -40,8 +38,8 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 			updateContentWithContextMenu(counterExample.getMessage());
 		else if (item instanceof RuleResult.SuccessMessage successMessage)
 			updateContentWithContextMenu(successMessage.getMessage());
-		else if (item instanceof Map.Entry<?,?> entry)
-			configureForComputationResult((ComputationStatus) entry.getValue());
+		else if (item instanceof ComputationStatus status)
+			configureForComputationResult(status);
 		else if (item instanceof IdentifierNotInitialised notInitialised)
 			configureForNotInitialised(notInitialised);
 		setGraphic(null);

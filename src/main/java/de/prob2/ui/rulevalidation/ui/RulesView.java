@@ -397,10 +397,10 @@ public final class RulesView extends AnchorPane {
 		classificationItems = new HashMap<>();
 		if (!dataModel.getRuleMap().isEmpty()) {
 			List<TreeItem<Object>> noClassificationItem = new ArrayList<>();
-			for (Map.Entry<String, RuleOperation> entry : dataModel.getRuleMap().entrySet()) {
-				LOGGER.debug("Add item for rule {}   {}.", entry.getKey(), entry.getValue());
-				TreeItem<Object> operationItem = new OperationItem(i18n, entry.getValue(), dataModel.getRuleValue(entry.getKey()), dataModel);
-				String classification = entry.getValue().getClassification();
+			dataModel.getRuleMap().forEach((name,value) -> {
+				LOGGER.debug("Add item for rule {}   {}.", name, value);
+				TreeItem<Object> operationItem = new OperationItem(i18n, value, dataModel.getRuleValue(name), dataModel);
+				String classification = value.getClassification();
 				if (classification != null && classificationItems.containsKey(classification)) {
 					classificationItems.get(classification).add(operationItem);
 				} else if (classification != null) {
@@ -409,7 +409,7 @@ public final class RulesView extends AnchorPane {
 				} else {
 					noClassificationItem.add(operationItem);
 				}
-			}
+			});
 			for (String cl : classificationItems.keySet()) {
 				TreeItem<Object> classificationItem = new TreeItem<>(cl + " (" + classificationItems.get(cl).size() + ")");
 				classificationItem.getChildren().addAll(classificationItems.get(cl));
@@ -421,11 +421,11 @@ public final class RulesView extends AnchorPane {
 
 		tvComputationsItem = new TreeItem<>("COMPUTATIONS");
 		if (!dataModel.getComputationMap().isEmpty()) {
-			for (Map.Entry<String, ComputationOperation> entry : dataModel.getComputationMap().entrySet()) {
-				LOGGER.debug("Add item for computation {}.", entry.getKey());
+			dataModel.getComputationMap().forEach((name, value) -> {
+				LOGGER.debug("Add item for computation {}.", name);
 				tvComputationsItem.getChildren()
-						.add(new OperationItem(i18n, entry.getValue(), dataModel.getComputationValue(entry.getKey()), dataModel));
-			}
+						.add(new OperationItem(i18n, value, dataModel.getComputationValue(name), dataModel));
+			});
 			tvRootItem.getChildren().add(tvComputationsItem);
 		}
 

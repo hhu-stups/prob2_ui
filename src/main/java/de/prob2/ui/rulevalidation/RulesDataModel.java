@@ -15,7 +15,6 @@ import java.util.*;
 
 /**
  * @author Christoph Heinzen
- * @version 0.1.0
  * @since 20.12.17
  */
 @Singleton
@@ -28,8 +27,8 @@ public final class RulesDataModel {
 	private Map<String, SimpleObjectProperty<Object>> ruleValueMap;
 	private Map<String, SimpleObjectProperty<Object>> computationValueMap;
 	// static information about the loaded rules machine
-	private LinkedHashMap<String, RuleOperation> ruleMap;
-	private LinkedHashMap<String, ComputationOperation> computationMap;
+	private Map<String, RuleOperation> ruleMap;
+	private Map<String, ComputationOperation> computationMap;
 
 	// Summary properties
 	private final SimpleStringProperty failedRules = new SimpleStringProperty("-");
@@ -44,13 +43,13 @@ public final class RulesDataModel {
 	public SimpleObjectProperty<Object> getRuleValue(String rule) {
 		return ruleValueMap.get(rule);
 	}
-	public LinkedHashMap<String, RuleOperation> getRuleMap() {
+	public Map<String, RuleOperation> getRuleMap() {
 		return ruleMap;
 	}
 	public Map<String, SimpleObjectProperty<Object>> getComputationValueMap() {
 		return computationValueMap;
 	}
-	public LinkedHashMap<String, ComputationOperation> getComputationMap() {
+	public Map<String, ComputationOperation> getComputationMap() {
 		return computationMap;
 	}
 	public SimpleObjectProperty<Object> getComputationValue(String computation) {
@@ -112,10 +111,8 @@ public final class RulesDataModel {
 		disabledRules.set("-");
 	}
 
-	private <T> void initializeValueMap(Map<String, T> operations,
-									Map<String, T> operationsMap,
-									Map<String, SimpleObjectProperty<Object>> operationsValueMap) {
-		//sort
+	private <T> void initializeValueMap(Map<String, T> operations, Map<String, T> operationsMap,
+										Map<String, SimpleObjectProperty<Object>> operationsValueMap) {
 		List<String> sortedOperations = new ArrayList<>(operations.keySet());
 		Collections.sort(sortedOperations);
 
@@ -123,7 +120,6 @@ public final class RulesDataModel {
 			operationsMap.put(operation, operations.get(operation));
 			operationsValueMap.put(operation, new SimpleObjectProperty<>(IDENTIFIER_NOT_INITIALISED));
 		}
-
 	}
 
 	private void updateRuleResults(State currentState) {
@@ -148,43 +144,36 @@ public final class RulesDataModel {
 
 	private void updateComputationResults(State currentState) {
 		Map<AbstractOperation,OperationStatus> computationResults = OperationStatuses.getStatuses(model, currentState);
-		computationResults.entrySet().forEach(computationResult -> {
-			SimpleObjectProperty<Object> prop = computationValueMap.get(computationResult.getKey().getName());
+		computationResults.forEach((op, result) -> {
+			SimpleObjectProperty<Object> prop = computationValueMap.get(op.getName());
 			if (prop != null) {
-				prop.set(computationResult);
+				prop.set(result);
 			}
 		});
 	}
 
 	public List<String> getFailedDependenciesOfComputation(String comp) {
-		ComputationOperation operation = getComputationMap().get(comp);
 		List<String> failedDependencies = new ArrayList<>();
- 		for (AbstractOperation op : operation.getTransitiveDependencies()) {
-			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName()) &&
-				getRuleValue(op.getName()).get() instanceof RuleResult ruleResult) {
-				if (ruleResult.getRuleState() == RuleStatus.FAIL) {
-					failedDependencies.add(op.getName());
-				}
+ 		for (AbstractOperation op : computationMap.get(comp).getTransitiveDependencies()) {
+			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName())
+					&& getRuleValue(op.getName()).get() instanceof RuleResult ruleResult
+					&& ruleResult.getRuleState() == RuleStatus.FAIL) {
+				failedDependencies.add(op.getName());
 			}
 		}
 		return failedDependencies;
 	}
 
 	public List<String> getNotCheckedDependenciesOfComputation(String comp) {
-		ComputationOperation operation = getComputationMap().get(comp);
 		List<String> notCheckedDependencies = new ArrayList<>();
-		for (AbstractOperation op : operation.getTransitiveDependencies()) {
-			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName()) &&
-				getRuleValue(op.getName()).get() instanceof RuleResult ruleResult) {
-				if (ruleResult.getRuleState() == RuleStatus.NOT_CHECKED) {
-					notCheckedDependencies.add(op.getName());
-				}
-			} else if (op instanceof ComputationOperation && computationValueMap.containsKey(op.getName()) &&
-					getComputationValue(op.getName()).get() instanceof Map.Entry) {
-				Object stateObject = getComputationValue(op.getName()).get();
-				if (stateObject == ComputationStatus.NOT_EXECUTED) {
-					notCheckedDependencies.add(op.getName());
-				}
+		for (AbstractOperation op : getComputationMap().get(comp).getTransitiveDependencies()) {
+			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName())
+					&& getRuleValue(op.getName()).get() instanceof RuleResult ruleResult
+					&& ruleResult.getRuleState().isNotExecuted()) {
+				notCheckedDependencies.add(op.getName());
+			} else if (op instanceof ComputationOperation && computationValueMap.containsKey(op.getName())
+					&& getComputationValue(op.getName()).get() == ComputationStatus.NOT_EXECUTED) {
+				notCheckedDependencies.add(op.getName());
 			}
 		}
 		Collections.sort(notCheckedDependencies);
@@ -193,24 +182,21 @@ public final class RulesDataModel {
 
 	public List<String> getDisabledDependencies(String operation) {
 		Set<AbstractOperation> dependencies = new HashSet<>();
-		List<String> disableDependencies = new ArrayList<>();
 		if (ruleMap.containsKey(operation)) {
 			dependencies = ruleMap.get(operation).getTransitiveDependencies();
 		} else if (computationMap.containsKey(operation)) {
 			dependencies = computationMap.get(operation).getTransitiveDependencies();
 		}
+
+		List<String> disableDependencies = new ArrayList<>();
 		for (AbstractOperation op : dependencies) {
-			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName()) &&
-				getRuleValue(op.getName()).get() instanceof RuleResult ruleResult) {
-				if (ruleResult.getRuleState() == RuleStatus.DISABLED) {
-					disableDependencies.add(op.getName());
-				}
-			} else if (op instanceof ComputationOperation && computationValueMap.containsKey(op.getName()) &&
-					getComputationValue(op.getName()).get() instanceof Map.Entry) {
-				Object stateObject = getComputationValue(op.getName()).get();
-				if (stateObject == ComputationStatus.DISABLED) {
-					disableDependencies.add(op.getName());
-				}
+			if (op instanceof RuleOperation && ruleValueMap.containsKey(op.getName())
+					&& getRuleValue(op.getName()).get() instanceof RuleResult ruleResult
+					&& ruleResult.getRuleState().isDisabled()) {
+				disableDependencies.add(op.getName());
+			} else if (op instanceof ComputationOperation && computationValueMap.containsKey(op.getName())
+					&& getComputationValue(op.getName()).get() == ComputationStatus.DISABLED) {
+				disableDependencies.add(op.getName());
 			}
 		}
 		Collections.sort(disableDependencies);

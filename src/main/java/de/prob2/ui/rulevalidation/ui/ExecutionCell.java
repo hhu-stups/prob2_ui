@@ -5,7 +5,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.rulevalidation.RulesController;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
-import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
