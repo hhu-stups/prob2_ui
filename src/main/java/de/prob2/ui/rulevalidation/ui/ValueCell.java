@@ -14,7 +14,7 @@ import javafx.util.Duration;
  * @author Christoph Heinzen
  * @since 14.12.17
  */
-public class ValueCell extends TreeTableCell<Object, Object>{
+public class ValueCell extends TreeTableCell<Object, Object> {
 
 	private final I18n i18n;
 	private boolean executable = true;
@@ -27,9 +27,9 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	@Override
 	protected void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
-		TreeItem<Object> treeItem = getTableRow().getTreeItem();
-		if (treeItem instanceof OperationItem) {
-			executable = ((OperationItem) treeItem).isExecutable();
+		getTreeTableView().refresh();
+		if (getTableRow().getTreeItem() instanceof OperationItem opItem) {
+			executable = opItem.isExecutable();
 		}
 		configureEmptyCell();
 		if (item instanceof RuleResult ruleResult)
@@ -46,7 +46,6 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	}
 
 	private void configureForComputationResult(ComputationStatus result) {
-		getTableRow().getTreeItem();
 		updateContent(result.toString());
 		switch (result) {
 			case EXECUTED -> getStyleClass().add("true");
