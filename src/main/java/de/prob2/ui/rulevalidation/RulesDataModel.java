@@ -123,6 +123,9 @@ public final class RulesDataModel {
 		int notCheckableCounter = 0;
 		for (String ruleStr : ruleValueMap.keySet()) {
 			RuleResult result = ruleResults.getRuleResultMap().get(ruleStr);
+			if (ruleValueMap.get(ruleStr).get().equals(result)) {
+				ruleValueMap.get(ruleStr).set(null); // trigger listener for update of dependency items
+			}
 			ruleValueMap.get(ruleStr).set(result);
 			if ((result.getFailedDependencies() != null && !result.getFailedDependencies().isEmpty()) ||
 					!getDisabledDependencies(ruleStr).isEmpty()) {
@@ -143,6 +146,9 @@ public final class RulesDataModel {
 		computationResults.forEach((op, result) -> {
 			SimpleObjectProperty<Object> prop = computationValueMap.get(op.getName());
 			if (prop != null) {
+				if (prop.get().equals(result)) {
+					prop.set(null); // trigger listener for update of dependency items
+				}
 				prop.set(result);
 			}
 		});
