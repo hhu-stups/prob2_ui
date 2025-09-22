@@ -123,11 +123,11 @@ public final class RulesDataModel {
 		int notCheckableCounter = 0;
 		for (String ruleStr : ruleValueMap.keySet()) {
 			RuleResult result = ruleResults.getRuleResultMap().get(ruleStr);
-			if (ruleValueMap.get(ruleStr).get().equals(result)) {
+			if (ruleValueMap.get(ruleStr).get() != null && ruleValueMap.get(ruleStr).get().equals(result)) {
 				ruleValueMap.get(ruleStr).set(null); // trigger listener for update of dependency items
 			}
 			ruleValueMap.get(ruleStr).set(result);
-			if ((result.getFailedDependencies() != null && !result.getFailedDependencies().isEmpty()) ||
+			if ((result != null && result.getFailedDependencies() != null && !result.getFailedDependencies().isEmpty()) ||
 					!getDisabledDependencies(ruleStr).isEmpty()) {
 				notCheckableCounter++;
 			}
