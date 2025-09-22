@@ -24,8 +24,8 @@ public final class RulesDataModel {
 	private RulesModel model;
 
 	// dynamic information about the loaded rules machine
-	private Map<String, SimpleObjectProperty<Object>> ruleValueMap;
-	private Map<String, SimpleObjectProperty<Object>> computationValueMap;
+	private final Map<String, SimpleObjectProperty<Object>> ruleValueMap = new HashMap<>();
+	private final Map<String, SimpleObjectProperty<Object>> computationValueMap = new HashMap<>();
 	// static information about the loaded rules machine
 	private final Map<String, RuleOperation> ruleMap = new LinkedHashMap<>();
 	private final Map<String, ComputationOperation> computationMap = new LinkedHashMap<>();
@@ -73,18 +73,20 @@ public final class RulesDataModel {
 	void initialize(RulesModel newModel) {
 		this.model = newModel;
 
-		model.getRulesProject().getOperationsMap().forEach((name, op) -> {
-			if (op instanceof RuleOperation)
+		List<String> sortedOp = new ArrayList<>(model.getRulesProject().getOperationsMap().keySet());
+		Collections.sort(sortedOp);
+
+		for (String name : sortedOp) {
+			AbstractOperation op = model.getRulesProject().getOperationsMap().get(name);
+			if (op instanceof RuleOperation) {
 				ruleMap.put(name, (RuleOperation) op);
-			else if (op instanceof ComputationOperation)
+				ruleValueMap.put(name, new SimpleObjectProperty<>(IDENTIFIER_NOT_INITIALISED));
+			}
+			else if (op instanceof ComputationOperation) {
 				computationMap.put(name, (ComputationOperation) op);
-		});
-
-		ruleValueMap = new LinkedHashMap<>(ruleMap.size());
-		initializeValueMap(ruleMap.keySet(), ruleValueMap);
-
-		computationValueMap = new LinkedHashMap<>(computationMap.size());
-		initializeValueMap(computationMap.keySet(), computationValueMap);
+				computationValueMap.put(name, new SimpleObjectProperty<>(IDENTIFIER_NOT_INITIALISED));
+			}
+		}
 	}
 
 	void update(Trace newTrace) {
@@ -107,15 +109,6 @@ public final class RulesDataModel {
 		successRules.set("-");
 		notCheckedRules.set("-");
 		disabledRules.set("-");
-	}
-
-	private void initializeValueMap(Set<String> operations, Map<String, SimpleObjectProperty<Object>> operationsValueMap) {
-		List<String> sortedOperations = new ArrayList<>(operations);
-		Collections.sort(sortedOperations);
-
-		for (String operation : sortedOperations) {
-			operationsValueMap.put(operation, new SimpleObjectProperty<>(IDENTIFIER_NOT_INITIALISED));
-		}
 	}
 
 	private void updateRuleResults(State currentState) {
