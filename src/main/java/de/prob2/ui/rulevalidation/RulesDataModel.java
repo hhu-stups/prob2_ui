@@ -72,6 +72,10 @@ public final class RulesDataModel {
 
 	void initialize(RulesModel newModel) {
 		this.model = newModel;
+		this.ruleMap.clear();
+		this.computationMap.clear();
+		this.ruleValueMap.clear();
+		this.computationValueMap.clear();
 
 		List<String> sortedOp = new ArrayList<>(model.getRulesProject().getOperationsMap().keySet());
 		Collections.sort(sortedOp);

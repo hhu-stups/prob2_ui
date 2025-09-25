@@ -10,6 +10,7 @@ import de.prob.model.brules.RulesModel;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
+import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.ui.RulesView;
 import javafx.application.Platform;
@@ -21,10 +22,8 @@ import javafx.scene.control.ProgressBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
-import java.util.Locale;
 
 /**
  * @author Christoph Heinzen
@@ -45,7 +44,8 @@ public final class RulesController {
 	private final RulesDataModel model;
 
 	@Inject
-	RulesController(final StageManager stageManager, final CurrentTrace currentTrace, final CliTaskExecutor cliTaskExecutor) {
+	RulesController(final StageManager stageManager, final CurrentTrace currentTrace,
+	                final CurrentProject currentProject, final CliTaskExecutor cliTaskExecutor) {
 		this.stageManager = stageManager;
 		this.currentTrace = currentTrace;
 		this.cliTaskExecutor = cliTaskExecutor;
@@ -75,6 +75,7 @@ public final class RulesController {
 		};
 
 		currentTrace.addListener(traceListener);
+		currentProject.currentMachineProperty().addListener(obs -> traceListener.changed(null, null, currentTrace.get()));
 	}
 
 	private void initialize(RulesModel newModel) {
