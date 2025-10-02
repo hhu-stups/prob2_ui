@@ -260,7 +260,13 @@ public class SimulationEventHandler {
 		Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
 		var probabilities = activationOperationConfiguration.getProbabilisticVariables();
 		var transitionSelection = activationOperationConfiguration.getTransitionSelection();
-		int evaluatedTime = Integer.parseInt(evaluateWithParameters(state, time, parametersAsString, parameterPredicates, EvaluationMode.CLASSICAL_B));
+		String evaluatedTimeAsString = evaluateWithParameters(state, time, parametersAsString, parameterPredicates, EvaluationMode.CLASSICAL_B);
+		int evaluatedTime;
+		try {
+			evaluatedTime = Integer.parseInt(evaluatedTimeAsString);
+		} catch (NumberFormatException e) {
+			evaluatedTime = (int) Double.parseDouble(evaluatedTimeAsString);
+		}
 		String withPredicate = activationOperationConfiguration.getWithPredicate();
 
 		var activation = new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
