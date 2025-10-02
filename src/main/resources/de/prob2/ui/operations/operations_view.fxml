@@ -82,6 +82,8 @@
 									</AnchorPane>
 								</content>
 							</CustomMenuItem>
+							<MenuItem fx:id="thousandDetEvents" onAction="#random"
+									  text="%operations.operationsView.det.thousand"/>
 						</items>
 						<graphic>
 							<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RANDOM"
