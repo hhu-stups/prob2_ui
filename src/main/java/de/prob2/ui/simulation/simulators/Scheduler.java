@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Singleton
 public final class Scheduler {
-	private final ChangeListener<Trace> listener;
 
 	private RealTimeSimulator realTimeSimulator;
 
@@ -37,13 +36,6 @@ public final class Scheduler {
 		this.currentTrace = currentTrace;
 		this.runningProperty = new SimpleBooleanProperty(false);
 		this.executingOperationProperty = new SimpleBooleanProperty(false);
-		this.listener = (observable, from, to) -> {
-			if(to != null) {
-				if (!to.getCurrentState().isInitialised()) {
-					realTimeSimulator.setupBeforeSimulation(to);
-				}
-			}
-		};
 		disablePropertyController.addDisableExpression(this.executingOperationProperty);
 	}
 
@@ -57,7 +49,6 @@ public final class Scheduler {
 			currentTrace.set(trace);
 		}
 		realTimeSimulator.setupBeforeSimulation(trace);
-		currentTrace.addListener(listener);
 		startSimulationLoop();
 	}
 
@@ -94,7 +85,6 @@ public final class Scheduler {
 	}
 
 	public void stop() {
-		currentTrace.removeListener(listener);
 		runningProperty.set(false);
 	}
 
@@ -115,7 +105,6 @@ public final class Scheduler {
 	}
 
 	public void finish() {
-		currentTrace.removeListener(listener);
 		executingOperationProperty.set(false);
 	}
 
