@@ -605,9 +605,13 @@ public final class OperationsView extends BorderPane {
 
 		Trace currentTrace = this.currentTrace.get();
 		if (currentTrace != null) {
-			this.cliExecutor.submit(() ->
-				currentTrace.randomAnimation(operationCount, stopIfNonDet)
-			).whenCompleteAsync((res, exc) -> {
+			this.cliExecutor.submit(() -> {
+				if (stopIfNonDet) {
+					return currentTrace.deterministicAnimation(operationCount);
+				} else {
+					return currentTrace.randomAnimation(operationCount);
+				}
+			}).whenCompleteAsync((res, exc) -> {
 				if (exc != null) {
 					if (!(exc instanceof CancellationException)) {
 						LOGGER.error("error while randomly animating", exc);
