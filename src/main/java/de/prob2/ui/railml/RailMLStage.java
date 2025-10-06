@@ -9,6 +9,7 @@ import de.hhu.stups.railml2b.exceptions.RailML2BException;
 import de.hhu.stups.railml2b.exceptions.RailML2BIOException;
 import de.hhu.stups.railml2b.exceptions.RailML2BVisualisationException;
 import de.hhu.stups.railml2b.load.ImportArguments;
+import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResults;
 import de.prob2.ui.config.FileChooserManager;
@@ -213,7 +214,7 @@ public class RailMLStage extends Stage {
 		if (path != null) {
 			resetUI();
 			outputPath = path.getParent().toAbsolutePath();
-			importArguments.file(path).output(outputPath).modelName(MoreFiles.getNameWithoutExtension(path));
+			importArguments.file(path.toFile()).output(outputPath).modelName(MoreFiles.getNameWithoutExtension(path));
 			modelName = importArguments.modelName();
 			fileLocationField.setText(path.toAbsolutePath().toString());
 			locationField.setText(outputPath.toString());
@@ -274,17 +275,17 @@ public class RailMLStage extends Stage {
 	@FXML
 	private void generateAndFinish() {
 		generationRunning.set(true);
-		importArguments.generateDataMachine(dataMachineCheckbox.isSelected())
+		importArguments.saveGeneratedDataMachine(dataMachineCheckbox.isSelected())
 				.generateAnimationMachine(animationMachineCheckbox.isSelected())
 				.generateValidationMachine(validationMachineCheckbox.isSelected())
-				.generateVisualisation(visualisationCheckbox.isSelected())
+				.generateVisualisation(visualisationCheckbox.isSelected() ? DotOutputFormat.SVG : null)
 				.visualisationStrategy(visualisationCheckbox.isSelected() ? visualisationStrategyChoiceBox.getValue() : null);
 		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
-		if (importArguments.generateVisualisation()) {
+		if (importArguments.generateVisualisation() != null) {
 			railMLInspectDotStage.initializeForArguments(importArguments, railML2B.getMachineLoader().getCurrentTrace());
 			railMLInspectDotStage.show();
 			railMLInspectDotStage.toFront();
-			if (importArguments.generateDataMachine() || importArguments.generateAnimationMachine() || importArguments.generateValidationMachine()) {
+			if (importArguments.saveGeneratedDataMachine() || importArguments.generateAnimationMachine() || importArguments.generateValidationMachine()) {
 				railMLInspectDotStage.setOnHidden(event -> createMachinesAndProject());
 			}
 		} else {
@@ -301,8 +302,8 @@ public class RailMLStage extends Stage {
 				currentProject.switchTo(new Project(modelName, "", Collections.emptyList(), Collections.emptyList(),
 					Collections.emptyList(), Project.metadataBuilder().build(), outputPath), true);
 
-				Path fileName = importArguments.file().getFileName();
-				if (importArguments.generateDataMachine()) {
+				String fileName = importArguments.file().getName();
+				if (importArguments.saveGeneratedDataMachine()) {
 					railML2B.generateDataMachine();
 					currentProject.addMachine(new Machine(modelName + DATA,
 						"Data machine generated from " + fileName, outputPath.relativize(outputPath.resolve(modelName + DATA_MCH))));
@@ -310,7 +311,7 @@ public class RailMLStage extends Stage {
 				if (importArguments.generateValidationMachine()) {
 					railML2B.generateValidationMachine();
 					currentProject.addMachine(new Machine(modelName + VALIDATION,
-						"Validation machine generated from " + importArguments.file().getFileName(),
+						"Validation machine generated from " + fileName,
 						importArguments.output().relativize(importArguments.output().resolve(modelName + VALIDATION_MCH))));
 				}
 				if (importArguments.generateAnimationMachine()) {
@@ -324,7 +325,7 @@ public class RailMLStage extends Stage {
 
 				List<Machine> createdMachines = currentProject.getMachines();
 				if (!createdMachines.isEmpty()) {
-					currentProject.loadMachineWithConfirmation(createdMachines.get(createdMachines.size() - 1));
+					currentProject.loadMachineWithConfirmation(createdMachines.getLast());
 				}
 			} catch (RailML2BIOException e) {
 				// TODO: exception handling
@@ -338,7 +339,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	private void saveValidationReport() throws RailML2BIOException {
 		if (railML2B != null && importSuccess.get()) {
-			railML2B.saveValidationReport();
+			railML2B.saveValidationReport("HTML"); // TODO: XML
 			validationInfoMessage.setText("Saved report at output location.");
 		} else {
 			validationInfoMessage.setText("Report could NOT be saved!");
@@ -348,7 +349,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	private void visualizeCompleteDependencyGraph() throws RailML2BVisualisationException {
 		if (railML2B != null && importSuccess.get()) {
-			railML2B.saveRuleDependencyGraphAsPdf();
+			railML2B.saveRuleDependencyGraph(DotOutputFormat.PDF); // TODO other formats
 			validationInfoMessage.setText("Saved graph at output location.");
 		} else {
 			validationInfoMessage.setText("Graph could NOT be saved!");
