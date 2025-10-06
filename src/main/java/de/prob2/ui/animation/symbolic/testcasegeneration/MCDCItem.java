@@ -54,4 +54,9 @@ public final class MCDCItem extends TestCaseGenerationItem {
 			       && super.settingsEqual(that)
 			       && Objects.equals(this.getLevel(), that.getLevel());
 	}
+
+	@Override
+	public MCDCItem copy() {
+		return new MCDCItem(this.getId(), this.getMaxDepth(), this.level);
+	}
 }

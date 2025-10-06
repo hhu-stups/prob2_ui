@@ -874,6 +874,7 @@
 	-fx-border-color: -prob-aqua;
 	-fx-border-width: 0.2em 0.0 0.0 0.0;
 	-fx-padding: 1.0em;
+	-fx-text-fill: -prob-white;
 }
 .dark .list-cell {
 	-fx-background-color: -prob-grey-75;
@@ -896,6 +897,15 @@
 }
 .dark .check-box:selected:hover > .box > .mark {
 	-fx-background-color: -prob-white-75;
+}
+.dark .radio-button {
+	-fx-background-color: transparent;
+	-fx-text-fill: -prob-white;
+}
+.dark .choice-box {
+	-fx-background-color: -prob-white;
+	-fx-text-fill: -prob-grey;
+	-fx-border-color: -prob-grey;
 }
 
 /* ================== DYNAMIC COMMAND VIEW ================= */
@@ -1253,6 +1263,32 @@
 
 .trace-diff-cell.FOLLOWING {
 	-fx-text-fill: blue;
+}
+
+/* for interactive trace replay: */
+.trace-diff-cell.not_possible {
+	-fx-font-weight: bold;
+	-fx-background-color: rgba(204, 47, 39, 0.15);
+}
+
+.trace-diff-cell.possible {
+	-fx-font-weight: bold;
+}
+
+.trace-diff-cell.imprecise {
+	-fx-background-color: rgb(255, 165, 0, 0.15) ;
+}
+
+.trace-diff-cell.skip {
+	-fx-background-color: rgba(192, 192, 192, 0.25);
+}
+
+.trace-diff-cell.manual {
+	-fx-background-color: rgba(152, 225, 255, 0.25);
+}
+
+.trace-diff-cell.precise {
+	-fx-background-color: rgba(76, 175, 80, 0.15) ;
 }
 
 /* ==================== GRAPH/TABLE VISUALIZATION ======================== */

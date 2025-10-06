@@ -1,26 +1,24 @@
 package de.prob2.ui.plugin;
 
-import org.pf4j.PluginWrapper;
+public final class InvalidPlugin extends ProBPlugin {
 
-public class InvalidPlugin extends ProBPlugin{
+	private final Exception exception;
+	private final String messageBundleKey;
+	private final String pluginClassName;
 
-	private Exception exception;
-	private String messageBundleKey;
-	private String pluginClassName;
-
-	public InvalidPlugin(PluginWrapper wrapper) {
-		super(wrapper, null, null);
+	InvalidPlugin(PluginContext context) {
+		this(context, null, null);
 	}
 
-	public InvalidPlugin(PluginWrapper wrapper, String messageBundleKey, String pluginClassName) {
-		this(wrapper);
+	InvalidPlugin(PluginContext context, String messageBundleKey, String pluginClassName) {
+		this(context, messageBundleKey, pluginClassName, null);
+	}
+
+	InvalidPlugin(PluginContext context, String messageBundleKey, String pluginClassName, Exception exception) {
+		super(context);
+		this.exception = exception;
 		this.messageBundleKey = messageBundleKey;
 		this.pluginClassName = pluginClassName;
-	}
-
-	public InvalidPlugin(PluginWrapper wrapper, String messageBundleKey, String pluginClassName, Exception exception) {
-		this(wrapper, messageBundleKey, pluginClassName);
-		this.exception = exception;
 	}
 
 	@Override
@@ -38,15 +36,20 @@ public class InvalidPlugin extends ProBPlugin{
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	protected void deletePlugin() {
+		throw new UnsupportedOperationException();
+	}
+
 	public Exception getException() {
-		return exception;
+		return this.exception;
 	}
 
 	public String getMessageBundleKey() {
-		return messageBundleKey;
+		return this.messageBundleKey;
 	}
 	
 	public String getPluginClassName() {
-		return pluginClassName;
+		return this.pluginClassName;
 	}
 }

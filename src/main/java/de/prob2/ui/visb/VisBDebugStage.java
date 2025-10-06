@@ -240,7 +240,7 @@ public final class VisBDebugStage extends Stage {
 	}
 
 	/**
-	 * After loading the JSON/ VisB file and preparing it in the {@link VisBController} the ListViews are initialised.
+	 * After loading the VisB file and preparing it in the {@link VisBController} the ListViews are initialised.
 	 * @param visBVisualisation is needed to display the items and events in the ListViews
 	 */
 	private void initialiseListViews(VisBVisualisation visBVisualisation){

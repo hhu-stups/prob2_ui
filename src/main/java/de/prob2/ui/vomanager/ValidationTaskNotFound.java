@@ -86,6 +86,11 @@ public final class ValidationTaskNotFound implements IValidationTask {
 	}
 
 	@Override
+	public ValidationTaskNotFound copy() {
+		return new ValidationTaskNotFound(this.id);
+	}
+
+	@Override
 	public String toString() {
 		return String.format(Locale.ROOT, "%s(%s)", this.getClass().getSimpleName(), this.getId());
 	}

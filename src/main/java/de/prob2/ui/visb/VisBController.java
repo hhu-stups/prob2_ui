@@ -9,13 +9,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.be4.classicalb.core.parser.analysis.prolog.RecursiveMachineLoader;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.prob.animator.command.AbstractCommand;
 import de.prob.animator.command.GetVisBDefaultSVGCommand;
 import de.prob.animator.command.GetVisBSVGObjectsCommand;
 import de.prob.animator.command.LoadVisBCommand;
+import de.prob.animator.command.LoadVisBFromDefinitionsCommand;
 import de.prob.animator.command.ReadVisBEventsHoversCommand;
 import de.prob.animator.command.ReadVisBItemsCommand;
 import de.prob.animator.command.ReadVisBSvgPathCommand;
@@ -232,23 +237,34 @@ public final class VisBController {
 	}
 
 	/**
-	 * This method takes a JSON / VisB file as input and returns a {@link VisBVisualisation} object.
+	 * This method takes a VisB file as input and returns a {@link VisBVisualisation} object.
 	 * @param stateSpace the ProB animator instance using which to load the VisB file
-	 * @param jsonPath path to the VisB JSON file
+	 * @param visBPath path to the .json or .def file for the VisB visualisation
 	 * @return VisBVisualisation object
 	 */
-	private static VisBVisualisation constructVisualisationFromJSON(StateSpace stateSpace, Path jsonPath) throws IOException {
-		if (!jsonPath.equals(NO_PATH)) {
-			jsonPath = jsonPath.toRealPath();
-			if (!Files.isRegularFile(jsonPath)) {
-				throw new IOException("Given json path is not a regular file: " + jsonPath);
+	private static VisBVisualisation constructVisualisationFromFile(StateSpace stateSpace, Path visBPath) throws BCompoundException, IOException {
+		if (!visBPath.equals(NO_PATH)) {
+			visBPath = visBPath.toRealPath();
+			if (!Files.isRegularFile(visBPath)) {
+				throw new IOException("Given VisB file is not a regular file: " + visBPath);
 			}
 		}
 
-		String jsonPathString = jsonPath.equals(NO_PATH) ? "" : jsonPath.toString();
+		AbstractCommand loadCmd;
+		if (visBPath.equals(NO_PATH)) {
+			// Visualization defined in B definitions in the machine itself.
+			// This is represented by passing an empty file path to probcli.
+			loadCmd = new LoadVisBCommand("");
+		} else if ("def".equals(MoreFiles.getFileExtension(visBPath))) {
+			// Visualization defined in a separate B definition file.
+			var rml = RecursiveMachineLoader.loadFile(visBPath.toFile());
+			loadCmd = new LoadVisBFromDefinitionsCommand(visBPath.toFile(), rml);
+		} else {
+			// Visualization defined in a traditional VisB .json file.
+			loadCmd = new LoadVisBCommand(visBPath.toString());
+		}
 
-		var loadCmd = new LoadVisBCommand(jsonPathString);
-		var svgCmd = new ReadVisBSvgPathCommand(jsonPathString);
+		var svgCmd = new ReadVisBSvgPathCommand();
 		var itemsCmd = new ReadVisBItemsCommand();
 		var eventsCmd = new ReadVisBEventsHoversCommand();
 		var svgObjectsCmd = new GetVisBSVGObjectsCommand();
@@ -262,10 +278,10 @@ public final class VisBController {
 			svgPath = NO_PATH;
 			svgContent = defaultSVGCmd.getSVGFileContents();
 		} else {
-			if (jsonPath.equals(NO_PATH)) {
+			if (visBPath.equals(NO_PATH)) {
 				svgPath = Paths.get(svgPathString).toRealPath();
 			} else {
-				svgPath = jsonPath.resolveSibling(svgPathString).toRealPath();
+				svgPath = visBPath.resolveSibling(svgPathString).toRealPath();
 			}
 			if (!Files.isRegularFile(svgPath) || Files.size(svgPath) <= 0) {
 				throw new IOException("Given svg path is not a non-empty regular file: " + svgPath);
@@ -288,7 +304,7 @@ public final class VisBController {
 		}
 
 		StateSpace stateSpace = currentTrace.getStateSpace();
-		return cliExecutor.submit(() -> constructVisualisationFromJSON(stateSpace, visBPath)).thenApplyAsync(vis -> {
+		return cliExecutor.submit(() -> constructVisualisationFromFile(stateSpace, visBPath)).thenApplyAsync(vis -> {
 			this.visBVisualisation.set(vis);
 			return vis;
 		}, fxExecutor);

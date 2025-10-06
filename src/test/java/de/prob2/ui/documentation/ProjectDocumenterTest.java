@@ -62,7 +62,7 @@ class ProjectDocumenterTest {
 	@BeforeAll
 	void setup() {
 		Path traceLocation = Paths.get("src/test/resources/machines/TrafficLight/TrafficLight_Cars.prob2trace");
-		ReplayTrace trace = new ReplayTrace(null, traceLocation, traceLocation.toAbsolutePath(), Mockito.mock(TraceManager.class));
+		ReplayTrace trace = new ReplayTrace(null, traceLocation);
 
 		trafficLight.addValidationTask(trace);
 		trafficLight.addValidationTask(proBModelCheckingItem);

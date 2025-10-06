@@ -197,6 +197,11 @@ public final class SimulationItem extends AbstractCheckableItem {
 	}
 
 	@Override
+	public SimulationItem copy() {
+		return new SimulationItem(this.getId(), this.simulationPath, this.type, new HashMap<>(this.information));
+	}
+
+	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)
 			       .add("id", this.getId())

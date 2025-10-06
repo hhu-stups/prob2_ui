@@ -138,7 +138,7 @@ public final class ReplayedTraceStatusAlert extends Alert {
 	private ObservableList<ReplayedTraceRow> buildRowsAsync() throws ExecutionException, InterruptedException, IOException {
 		CompletableFuture<Map<Transition, OperationItem>> future;
 		if (replayTrace.getResult() instanceof ReplayTrace.Result traceResult) {
-			Trace traceFromReplayed = traceResult.getTrace();
+			Trace traceFromReplayed = traceResult.getTraceWithSkips(); // show skipped transitions in table
 			// start cli instantly on another thread, while doing IO on this thread
 			future = cliExecutor.submit(() -> OperationItem.forTransitions(
 				traceFromReplayed.getStateSpace(),
@@ -149,7 +149,7 @@ public final class ReplayedTraceStatusAlert extends Alert {
 		}
 
 		// always load newest trace file from disk
-		TraceJsonFile fileTrace = Objects.requireNonNull(replayTrace.load(), "traceJsonFile");
+		TraceJsonFile fileTrace = Objects.requireNonNull(traceFileHandler.loadJson(replayTrace), "traceJsonFile");
 		int transitionCount = fileTrace.getTransitionList().size();
 
 		ObservableList<ReplayedTraceRow> items = FXCollections.observableArrayList();
@@ -161,7 +161,7 @@ public final class ReplayedTraceStatusAlert extends Alert {
 			List<String> transitionErrorMessages;
 			if (replayTrace.getResult() instanceof ReplayTrace.Result traceResult) {
 				ReplayedTrace replayedTrace = traceResult.getReplayed();
-				Trace traceFromReplayed = traceResult.getTrace();
+				Trace traceFromReplayed = traceResult.getTraceWithSkips(); // show skipped transitions in table
 				replayedTransitionObj = i < traceFromReplayed.size() ? traceFromReplayed.getTransitionList().get(i) : null;
 				transitionReplayPrecision = i < replayedTrace.getTransitionReplayPrecisions().size() ? replayedTrace.getTransitionReplayPrecisions().get(i) : TransitionReplayPrecision.FAILED;
 				transitionErrorMessages = i < replayedTrace.getTransitionErrorMessages().size() ? replayedTrace.getTransitionErrorMessages().get(i) : null;
@@ -196,9 +196,11 @@ public final class ReplayedTraceStatusAlert extends Alert {
 			}
 
 			String replayedTransition;
+			boolean isSkip = false;
 			if (replayedTransitionObj != null) {
 				OperationItem opItem = future.get().get(replayedTransitionObj);
 				replayedTransition = opItem.toPrettyString(true);
+				isSkip = opItem.getTransition().getId().equals("skip");
 			} else {
 				replayedTransition = "";
 			}
@@ -207,13 +209,15 @@ public final class ReplayedTraceStatusAlert extends Alert {
 			String errorMessage = transitionErrorMessages != null ? String.join("\n", transitionErrorMessages) : "";
 
 			Collection<String> styleClasses;
-			if (
-				transitionReplayPrecision != TransitionReplayPrecision.PRECISE
-					|| (transitionErrorMessages == null || !transitionErrorMessages.isEmpty())
-			) {
-				styleClasses = Set.of("FAULTY");
+			if (isSkip) {
+				styleClasses = Set.of("skip");
+			} else if (transitionReplayPrecision == TransitionReplayPrecision.FAILED) {
+				styleClasses = Set.of("not_possible");
+			} else if (transitionReplayPrecision != TransitionReplayPrecision.PRECISE
+					|| (transitionErrorMessages == null || !transitionErrorMessages.isEmpty())) {
+				styleClasses = Set.of("imprecise");
 			} else {
-				styleClasses = Set.of();
+				styleClasses = Set.of("precise");
 			}
 
 			items.add(new ReplayedTraceRow(step, fileTransition, replayedTransition, precision, errorMessage, null, styleClasses));

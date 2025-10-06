@@ -16,7 +16,6 @@ import de.prob.check.IModelCheckingResult;
 import de.prob.check.ModelCheckOk;
 import de.prob.check.NotYetFinished;
 import de.prob.exception.ProBError;
-import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -99,7 +98,12 @@ public final class CBCDeadlockFreedomCheckingItem extends SymbolicCheckingFormul
 			&& other instanceof CBCDeadlockFreedomCheckingItem o
 			&& this.getPredicate().equals(o.getPredicate());
 	}
-	
+
+	@Override
+	public CBCDeadlockFreedomCheckingItem copy() {
+		return new CBCDeadlockFreedomCheckingItem(this.getId(), this.predicate);
+	}
+
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)

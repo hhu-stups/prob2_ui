@@ -6,13 +6,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Injector;
+import com.google.inject.Provider;
 
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.CheckingStatus;
 
@@ -55,29 +58,25 @@ public class SimulationEstimator implements ISimulationPropertyChecker {
 	private SimulationPropertyChecker simulationPropertyChecker;
 
 	private final Injector injector;
-
-	private final I18n i18n;
-
+	private final SimulationFileHandler simulationFileHandler;
 	private final EstimationType estimationType;
 
 	private final SimulationCheckingType checkingType;
-
 	private final double desiredValue;
-
 	private final double epsilon;
 
-	public SimulationEstimator(final Injector injector, final I18n i18n, final EstimationType estimationType,
-							   final SimulationCheckingType checkingType, final double desiredValue, final double epsilon) {
+	public SimulationEstimator(final Injector injector, final SimulationFileHandler simulationFileHandler, final EstimationType estimationType,
+	                           final SimulationCheckingType checkingType, final double desiredValue, final double epsilon) {
 		this.injector = injector;
-		this.i18n = i18n;
+		this.simulationFileHandler = simulationFileHandler;
 		this.estimationType = estimationType;
 		this.checkingType = checkingType;
 		this.desiredValue = desiredValue;
 		this.epsilon = epsilon;
 	}
 
-	public void initialize(final CurrentTrace currentTrace, final CurrentProject currentProject, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationPropertyChecker(this, injector, currentTrace, currentProject, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+	public void initialize(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
+		this.simulationPropertyChecker = new SimulationPropertyChecker(this, currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	private void checkMinimum() {

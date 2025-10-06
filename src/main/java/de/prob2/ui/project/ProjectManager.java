@@ -61,7 +61,6 @@ public final class ProjectManager {
 	private final JacksonManager<Project> jacksonManager;
 	private final CurrentProject currentProject;
 	private final StageManager stageManager;
-	private final TraceManager traceManager;
 	private final FileChooserManager fileChooserManager;
 	private final I18n i18n;
 	private final ObjectMapper objectMapper;
@@ -76,7 +75,6 @@ public final class ProjectManager {
 		ObjectMapper objectMapperForProject,
 		CurrentProject currentProject,
 		StageManager stageManager,
-		TraceManager traceManager,
 		I18n i18n,
 		Config config,
 		FileChooserManager fileChooserManager,
@@ -87,7 +85,6 @@ public final class ProjectManager {
 		this.jacksonManager.initContext(new ProjectJsonContext(objectMapperForProject));
 		this.currentProject = currentProject;
 		this.stageManager = stageManager;
-		this.traceManager = traceManager;
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
 		this.objectMapper = objectMapper;
@@ -236,12 +233,6 @@ public final class ProjectManager {
 			((ProjectJsonContext) this.jacksonManager.getContext()).setProjectLocation(path);
 			final Project project = this.jacksonManager.readFromFile(path);
 			project.setLocation(path.getParent());
-			// Fill in ReplayTrace fields that Jackson cannot set.
-			for (final Machine machine : project.getMachines()) {
-				for (final ReplayTrace trace : machine.getTraces()) {
-					trace.initAfterLoad(path.resolveSibling(trace.getLocation()), traceManager);
-				}
-			}
 			return project;
 		} catch (IOException | JsonConversionException exc) {
 			LOGGER.warn("Failed to open project file", exc);
@@ -297,11 +288,10 @@ public final class ProjectManager {
 		final Path projectLocation = path.getParent();
 		final Path relative = projectLocation.relativize(path);
 		final String shortName = MoreFiles.getNameWithoutExtension(path);
-		final String description = i18n.translate("menu.file.automaticProjectDescription", path);
 		final Machine machine = new Machine(shortName, "", relative);
 		boolean replacingProject = currentProject.confirmReplacingProject();
 		if (replacingProject) {
-			currentProject.switchTo(new Project(shortName, description, Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
+			currentProject.switchTo(new Project(shortName, "", Collections.singletonList(machine), Collections.emptyList(), Collections.emptyList(), Project.metadataBuilder().build(), projectLocation), true);
 			// we already asked the user for confirmation
 			currentProject.loadMachineWithoutConfirmation(machine);
 		}

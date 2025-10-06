@@ -17,6 +17,7 @@ import com.google.inject.Singleton;
 import de.be4.classicalb.core.parser.rules.AbstractOperation;
 import de.be4.classicalb.core.parser.rules.ComputationOperation;
 import de.be4.classicalb.core.parser.rules.RuleOperation;
+import de.prob.animator.domainobjects.DotVisualizationCommand;
 import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResult;
@@ -337,7 +338,10 @@ public final class RulesView extends AnchorPane {
 
 	@FXML
 	public void visualizeCompleteDependencyGraph() {
-		showGraphExpression(controller.getCompleteDependencyGraphExpression());
+		DynamicVisualizationStage expressionTableView = injector.getInstance(DynamicVisualizationStage.class);
+		expressionTableView.show();
+		expressionTableView.toFront();
+		expressionTableView.selectCommand(DotVisualizationCommand.RULE_DEPENDENCY_GRAPH_NAME);
 	}
 
 	@FXML
@@ -349,7 +353,7 @@ public final class RulesView extends AnchorPane {
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.xml", "xml"));
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
-			controller.saveValidationReport(path, injector.getInstance(Locale.class));
+			controller.saveValidationReport(path);
 		}
 	}
 
@@ -393,10 +397,10 @@ public final class RulesView extends AnchorPane {
 		classificationItems = new HashMap<>();
 		if (!dataModel.getRuleMap().isEmpty()) {
 			List<TreeItem<Object>> noClassificationItem = new ArrayList<>();
-			for (Map.Entry<String, RuleOperation> entry : dataModel.getRuleMap().entrySet()) {
-				LOGGER.debug("Add item for rule {}   {}.", entry.getKey(), entry.getValue());
-				TreeItem<Object> operationItem = new OperationItem(i18n, entry.getValue(), dataModel.getRuleValue(entry.getKey()), dataModel);
-				String classification = entry.getValue().getClassification();
+			dataModel.getRuleMap().forEach((name,value) -> {
+				LOGGER.debug("Add item for rule {}   {}.", name, value);
+				TreeItem<Object> operationItem = new OperationItem(i18n, value, dataModel.getRuleValue(name), dataModel);
+				String classification = value.getClassification();
 				if (classification != null && classificationItems.containsKey(classification)) {
 					classificationItems.get(classification).add(operationItem);
 				} else if (classification != null) {
@@ -405,7 +409,7 @@ public final class RulesView extends AnchorPane {
 				} else {
 					noClassificationItem.add(operationItem);
 				}
-			}
+			});
 			for (String cl : classificationItems.keySet()) {
 				TreeItem<Object> classificationItem = new TreeItem<>(cl + " (" + classificationItems.get(cl).size() + ")");
 				classificationItem.getChildren().addAll(classificationItems.get(cl));
@@ -417,11 +421,11 @@ public final class RulesView extends AnchorPane {
 
 		tvComputationsItem = new TreeItem<>("COMPUTATIONS");
 		if (!dataModel.getComputationMap().isEmpty()) {
-			for (Map.Entry<String, ComputationOperation> entry : dataModel.getComputationMap().entrySet()) {
-				LOGGER.debug("Add item for computation {}.", entry.getKey());
+			dataModel.getComputationMap().forEach((name, value) -> {
+				LOGGER.debug("Add item for computation {}.", name);
 				tvComputationsItem.getChildren()
-						.add(new OperationItem(i18n, entry.getValue(), dataModel.getComputationValue(entry.getKey()), dataModel));
-			}
+						.add(new OperationItem(i18n, value, dataModel.getComputationValue(name), dataModel));
+			});
 			tvRootItem.getChildren().add(tvComputationsItem);
 		}
 
@@ -447,7 +451,10 @@ public final class RulesView extends AnchorPane {
 		visualizeExpressionAsGraphItem.setOnAction(event -> {
 			try {
 				if (row.getItem() instanceof AbstractOperation abstractOperation) {
-					showGraphExpression(controller.getPartialDependencyGraphExpression(Set.of(abstractOperation)));
+					DynamicVisualizationStage dotView = injector.getInstance(DynamicVisualizationStage.class);
+					dotView.show();
+					dotView.toFront();
+					dotView.visualizeFormulaAsGraph(controller.getPartialDependencyGraphExpression(Set.of(abstractOperation)));
 				}
 			} catch (EvaluationException | ProBError e) {
 				LOGGER.error("Could not visualize formula", e);
@@ -462,10 +469,4 @@ public final class RulesView extends AnchorPane {
 		return row;
 	}
 
-	private void showGraphExpression(String expression) {
-		DynamicVisualizationStage dotView = injector.getInstance(DynamicVisualizationStage.class);
-		dotView.show();
-		dotView.toFront();
-		dotView.visualizeFormulaAsGraph(expression);
-	}
 }

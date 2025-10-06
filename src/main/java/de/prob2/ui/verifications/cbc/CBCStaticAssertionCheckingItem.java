@@ -28,7 +28,12 @@ public final class CBCStaticAssertionCheckingItem extends CBCAssertionCheckingIt
 	public String getTaskDescription(I18n i18n) {
 		return "";
 	}
-	
+
+	@Override
+	public CBCStaticAssertionCheckingItem copy() {
+		return new CBCStaticAssertionCheckingItem(this.getId());
+	}
+
 	@Override
 	protected ConstraintBasedAssertionCheckCommand.CheckingType getAssertionCheckingType() {
 		return ConstraintBasedAssertionCheckCommand.CheckingType.STATIC;

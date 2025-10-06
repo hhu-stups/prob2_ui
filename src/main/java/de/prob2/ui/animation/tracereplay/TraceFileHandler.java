@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
@@ -17,6 +18,7 @@ import java.util.concurrent.CompletableFuture;
 import com.fasterxml.jackson.core.JacksonException;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+import com.google.inject.Singleton;
 
 import de.prob.analysis.testcasegeneration.Target;
 import de.prob.analysis.testcasegeneration.TestCaseGeneratorResult;
@@ -49,6 +51,7 @@ import org.apache.commons.csv.CSVPrinter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@Singleton
 public final class TraceFileHandler {
 
 	public static final String TRACE_FILE_EXTENSION = "prob2trace";
@@ -158,7 +161,7 @@ public final class TraceFileHandler {
 	}
 
 	public void showLoadError(ReplayTrace trace, Throwable e) {
-		Alert alert = makeTraceLoadErrorAlert(trace.getAbsoluteLocation(), e);
+		Alert alert = makeTraceLoadErrorAlert(this.currentProject.get().resolveProjectPath(trace.getLocation()), e);
 		if (alert == null) {
 			// No alert should be shown for this exception type (e. g. interruption).
 			return;
@@ -209,13 +212,73 @@ public final class TraceFileHandler {
 		alert.showAndWait();
 	}
 
+	/**
+	 * Read and parse the trace file into a {@link TraceJsonFile} object.
+	 * The loaded trace can also be retrieved later using {@link ReplayTrace#getLoadedTrace()}.
+	 *
+	 * @param replayTrace replay trace object
+	 * @return the loaded trace file
+	 * @throws IOException if the trace file is missing, invalid, or otherwise couldn't be loaded
+	 */
+	public TraceJsonFile loadJson(ReplayTrace replayTrace) throws IOException {
+		return replayTrace.load(this.currentProject.get(), this.traceManager);
+	}
+
+	/**
+	 * Overwrite the trace file with the given data.
+	 * This method uses an intermediate temporary file
+	 * so that the existing trace file is not corrupted
+	 * if the new trace data couldn't be written successfully.
+	 *
+	 * @param replayTrace replay trace object
+	 * @param newTrace the new trace data to be saved
+	 * @throws IOException if the trace couldn't be written for any reason
+	 */
+	public void saveModifiedJson(ReplayTrace replayTrace, TraceJsonFile newTrace) throws IOException {
+		replayTrace.saveModified(this.currentProject.get(), this.traceManager, newTrace);
+	}
+
 	public ReplayTrace createReplayTraceForPath(final Path traceFilePath) {
-		final Path relativeLocation = currentProject.getLocation().relativize(traceFilePath);
-		return new ReplayTrace(null, relativeLocation, traceFilePath, traceManager);
+		final Path relativeLocation = this.currentProject.get().relativizeProjectPath(traceFilePath);
+		return new ReplayTrace(null, relativeLocation);
 	}
 
 	public ReplayTrace addTraceFile(final Machine machine, final Path traceFilePath) {
 		ReplayTrace replayTrace = createReplayTraceForPath(traceFilePath);
+		return this.addReplayTraceWithChecks(machine, replayTrace);
+	}
+
+	public ReplayTrace addReplayTraceWithChecks(Machine machine, ReplayTrace replayTrace) {
+		Path newPath = this.currentProject.get().resolveProjectPath(replayTrace.getLocation());
+		for (ReplayTrace existing : machine.getTraces()) {
+			Path existingPath = this.currentProject.get().resolveProjectPath(existing.getLocation());
+			boolean samePath = false;
+			try {
+				samePath = Files.isSameFile(newPath, existingPath);
+			} catch (IOException ignored) {
+			}
+
+			if (samePath) {
+				if (!Objects.equals(replayTrace.getId(), existing.getId())) {
+					if (replayTrace.getId() != null) {
+						if (existing.getId() != null) {
+							// both traces have the same path but a different id
+							throw new IllegalArgumentException("cannot add replay trace for same file with different id");
+						} else {
+							ReplayTrace withNewId = existing.withId(replayTrace.getId());
+							machine.replaceValidationTask(existing, withNewId);
+							existing = withNewId;
+						}
+					} else {
+						assert existing.getId() != null;
+						// this is fine
+					}
+				}
+
+				existing.reset();
+				return existing;
+			}
+		}
 		return machine.addValidationTaskIfNotExist(replayTrace);
 	}
 
@@ -273,7 +336,7 @@ public final class TraceFileHandler {
 				save(testTrace.getTrace(), traceFilePath, "Test Case Generation");
 				String description = "Test Case Generation Trace\n" + item.getConfigurationDescription() + "\nOperation: " + target.getOperation() + "\nGuard: " + target.getGuardString();
 				ReplayTrace trace = this.addTraceFile(machine, traceFilePath);
-				trace.saveModified(trace.load().changeDescription(description));
+				this.saveModifiedJson(trace, this.loadJson(trace).changeDescription(description));
 			}
 
 		} catch (IOException e) {
@@ -298,11 +361,16 @@ public final class TraceFileHandler {
 	}
 
 	public Path save(Trace trace, Machine machine) throws IOException {
+		return save(trace, currentProject.getLocation(),
+				currentProject.getCurrentMachine().getName() + "." + TRACE_FILE_EXTENSION, machine);
+	}
+
+	public Path save(Trace trace, Path initialDirectory, String initialFileName, Machine machine) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + TRACE_FILE_EXTENSION);
+		fileChooser.setInitialFileName(initialFileName);
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
-		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
+		fileChooser.setInitialDirectory(initialDirectory.toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (path != null) {
 			save(trace, path, "traceReplay");
@@ -340,8 +408,8 @@ public final class TraceFileHandler {
 			return;
 		}
 
-		Path path = trace.getAbsoluteLocation();
-		if (path == null || !Files.isRegularFile(path)) {
+		Path path = this.currentProject.get().resolveProjectPath(trace.getLocation());
+		if (path == null || !Files.exists(path)) {
 			return;
 		}
 

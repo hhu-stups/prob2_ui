@@ -3,6 +3,7 @@ package de.prob2.ui.verifications.modelchecking;
 import java.math.BigInteger;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -11,6 +12,7 @@ import java.util.StringJoiner;
 import java.util.concurrent.CompletableFuture;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -42,7 +44,7 @@ import javafx.application.Platform;
 	"selected",
 })
 public final class ProBModelCheckingItem extends ModelCheckingItem {
-	@JsonInclude(JsonInclude.Include.NON_NULL)
+
 	private final ModelCheckingSearchStrategy searchStrategy;
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)
@@ -91,7 +93,8 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 		return this.options;
 	}
 
-	public ModelCheckingOptions getFullOptions(final AbstractModel model) {
+	@JsonIgnore
+	ModelCheckingOptions getFullOptions(final AbstractModel model) {
 		ModelCheckingOptions fullOptions = new ModelCheckingOptions(this.getOptions())
 			                                   .searchStrategy(this.getSearchStrategy())
 			                                   .recheckExisting(true);
@@ -208,6 +211,11 @@ public final class ProBModelCheckingItem extends ModelCheckingItem {
 			       && Objects.equals(this.getTimeLimit(), that.getTimeLimit())
 			       && Objects.equals(this.getOptions(), that.getOptions())
 			       && Objects.equals(this.getCustomGoal(), that.getCustomGoal());
+	}
+
+	@Override
+	public ProBModelCheckingItem copy() {
+		return new ProBModelCheckingItem(this.getId(), this.searchStrategy, this.nodesLimit, this.timeLimit, new HashSet<>(this.options), this.customGoal);
 	}
 
 	@Override

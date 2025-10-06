@@ -4,19 +4,133 @@
 <?import de.prob2.ui.layout.FontSize?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+
 <fx:root type="Tab" text="TLC" closable="false" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
+		<ToggleGroup fx:id="translationGroup" />
 	</fx:define>
 	<StackPane>
 		<AnchorPane stylesheets="@/prob.css" styleClass="dialog">
 			<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
 				AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
 				AnchorPane.bottomAnchor="0.0">
-				<AnchorPane>
-					<VBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">
-						<HBox alignment="CENTER_LEFT" spacing="5.0">
-							<Label text="%verifications.modelchecking.modelcheckingStage.searchStrategy"/>
+				<!-- Translation options -->
+				<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+						<Label text="%verifications.modelchecking.modelcheckingStage.tlcTab.translationPreferences" style="-fx-font-weight: bold;"/>
+					</HBox>
+				</VBox>
+				<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+					<RadioButton fx:id="rbNoTranslation" toggleGroup="$translationGroup" text="%verifications.modelchecking.modelcheckingStage.tlcTab.noTranslation">
+						<tooltip>
+							<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.tooltips.noTranslation" />
+						</tooltip>
+					</RadioButton>
+				</HBox>
+				<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+					<RadioButton fx:id="rbDoTranslation" toggleGroup="$translationGroup" text="%verifications.modelchecking.modelcheckingStage.tlcTab.doTranslation">
+						<tooltip>
+							<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.doTranslation" />
+						</tooltip>
+					</RadioButton>
+				</HBox>
+				<VBox fx:id="translationOptionsContainer" spacing="10.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+					<VBox.margin>
+						<Insets left="15" right="15" bottom="5" />
+					</VBox.margin>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="findInvViolations" selected="true"
+							text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="findBAViolations" selected="true"
+							text="%verifications.modelchecking.modelcheckingStage.options.findBAViolations">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findBAViolations" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="checkWelldefinedness" text="%verifications.modelchecking.modelcheckingStage.tlcTab.wdCheck">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.wdCheck" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="checkLTL" text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTL">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTL" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="addLTLFormula" text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTLFormula"/>
+						<TextField fx:id="tfAddLTL" HBox.hgrow="always"
+								   promptText="%verifications.modelchecking.modelcheckingStage.tlcTab.LTLFormulaPrompt">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.tooltips.checkLTLFormula" />
+							</tooltip>
+						</TextField>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="checkGoal" text="%verifications.modelchecking.modelcheckingStage.tlcTab.searchGoal">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.searchGoal" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="setupConstantsUsingProB" text="%verifications.modelchecking.modelcheckingStage.tlcTab.setupConstants">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.setupConstants" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="proofGuidedMC" text="%verifications.modelchecking.modelcheckingStage.tlcTab.proofGuidedMC">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.proofGuidedMC" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="useSymmetry" text="%verifications.modelchecking.modelcheckingStage.tlcTab.useSymmetry">
+							<tooltip>
+								<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.useSymmetry" />
+							</tooltip>
+						</CheckBox>
+					</HBox>
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+						<CheckBox fx:id="saveGeneratedFiles" text="%verifications.modelchecking.modelcheckingStage.tlcTab.saveGenerated"/>
+						<HBox HBox.hgrow="always" fx:id="saveLocationBox">
+							<TextField fx:id="tfSaveLocation" HBox.hgrow="always">
+								<tooltip>
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.tooltips.saveLocation"/>
+								</tooltip>
+							</TextField>
+							<Button fx:id="changeLocationButton" text="%common.buttons.editPathDots" HBox.hgrow="always"
+									style="-fx-background-color: white;"/>
+						</HBox>
+					</HBox>
+				</VBox>
+
+				<!-- TLC options -->
+				<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+					<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
+						<Label text="%verifications.modelchecking.modelcheckingStage.tlcTab.tlcPreferences" style="-fx-font-weight: bold;"/>
+					</HBox>
+				</VBox>
+				<StackPane>
+					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
+						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
+							<Label text="%verifications.modelchecking.modelcheckingStage.searchStrategy" style="-fx-text-fill: white;"/>
 							<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
 								<ChoiceBox fx:id="selectSearchStrategy">
 									<tooltip>
@@ -25,93 +139,13 @@
 								</ChoiceBox>
 							</HBox>
 							<HBox fx:id="dfidDepthBox" HBox.hgrow="ALWAYS" alignment="CENTER_RIGHT" spacing="5.0" visible="false">
-								<Label text="%verifications.modelchecking.modelcheckingStage.tlcTab.initialDepth"/>
-								<Spinner fx:id="dfidInitialDepth" editable="true">
+								<Label text="%verifications.modelchecking.modelcheckingStage.tlcTab.maxDepth" style="-fx-text-fill: white;"/>
+								<Spinner fx:id="dfidMaxDepth" editable="true">
 									<tooltip>
-										<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.tooltips.initialDepth" />
+										<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.tooltips.maxDepth" />
 									</tooltip>
 								</Spinner>
 							</HBox>
-						</HBox>
-					</VBox>
-				</AnchorPane>
-
-				<VBox spacing="20.0" AnchorPane.topAnchor="20.0"
-							 AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-							 AnchorPane.bottomAnchor="0.0">
-					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="%verifications.modelchecking.modelcheckingStage.tlcTab.errors" style="-fx-font-weight: bold;"/>
-						</HBox>
-					</VBox>
-					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="findDeadlocks" selected="true"
-								text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="findInvViolations" selected="true"
-								text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findInvViolations" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="findBAViolations" selected="true"
-								text="%verifications.modelchecking.modelcheckingStage.options.findBAViolations">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findBAViolations" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="checkWelldefinedness" text="%verifications.modelchecking.modelcheckingStage.tlcTab.wdCheck">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.wdCheck" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="checkLTL" text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTL">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTL" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="addLTLFormula" text="%verifications.modelchecking.modelcheckingStage.tlcTab.checkLTLFormula"/>
-							<TextField fx:id="tfAddLTL" HBox.hgrow="always"
-									   promptText="%verifications.modelchecking.modelcheckingStage.tlcTab.LTLFormulaPrompt">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.tooltips.checkLTLFormula" />
-								</tooltip>
-							</TextField>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="checkGoal" text="%verifications.modelchecking.modelcheckingStage.tlcTab.searchGoal">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.searchGoal" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-					</VBox>
-					<VBox spacing="15.0" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="10.0">
-							<Label text="%verifications.modelchecking.modelcheckingStage.tlcTab.preferences" style="-fx-font-weight: bold;"/>
-						</HBox>
-					</VBox>
-					<VBox spacing="15.0" styleClass="dark" VBox.vgrow="ALWAYS" alignment="CENTER_LEFT">
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="setupConstantsUsingProB" text="%verifications.modelchecking.modelcheckingStage.tlcTab.setupConstants">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.setupConstants" />
-								</tooltip>
-							</CheckBox>
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
 							<Label text="%verifications.modelchecking.modelcheckingStage.tlcTab.nrWorkers" style="-fx-text-fill: white;"/>
@@ -124,41 +158,23 @@
 							</HBox>
 						</HBox>
 						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="proofGuidedMC" text="%verifications.modelchecking.modelcheckingStage.tlcTab.proofGuidedMC">
+							<CheckBox fx:id="findDeadlocks" selected="true"
+									  text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks">
 								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.proofGuidedMC" />
+									<Tooltip text="%verifications.modelchecking.modelcheckingStage.options.findDeadlocks" />
 								</tooltip>
 							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="useSymmetry" text="%verifications.modelchecking.modelcheckingStage.tlcTab.useSymmetry">
-								<tooltip>
-									<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.useSymmetry" />
-								</tooltip>
-							</CheckBox>
-						</HBox>
-						<HBox VBox.vgrow="ALWAYS" alignment="CENTER_LEFT" spacing="5.0">
-							<CheckBox fx:id="saveGeneratedFiles" text="%verifications.modelchecking.modelcheckingStage.tlcTab.saveGenerated"/>
-							<HBox HBox.hgrow="always" fx:id="saveLocationBox">
-								<TextField fx:id="tfSaveLocation" HBox.hgrow="always">
-									<tooltip>
-										<Tooltip text="%verifications.modelchecking.modelcheckingStage.tlcTab.tooltips.saveLocation"/>
-									</tooltip>
-								</TextField>
-								<Button fx:id="changeLocationButton" text="%common.buttons.editPathDots" HBox.hgrow="always"
-										style="-fx-background-color: white;"/>
-							</HBox>
 						</HBox>
 					</VBox>
-				</VBox>
+					<VBox fx:id="errorMessageBox" style="-fx-background-color: rgba(255, 255, 255, 0.85);" alignment="CENTER" visible="false" spacing="40">
+						<BindableGlyph styleClass="icon-dark" style="-fx-text-fill: red;" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 6}"/>
+						<VBox alignment="CENTER" spacing="10">
+							<Label style="-fx-text-fill: red; -fx-font-weight: bold;" text="%verifications.modelchecking.modelcheckingStage.tlcTab.error.notApplicable"/>
+							<Label fx:id="errorMessage" style="-fx-text-fill: red;" wrapText="true" prefWidth="350" alignment="CENTER"/>
+						</VBox>
+					</VBox>
+				</StackPane>
 			</VBox>
 		</AnchorPane>
-		<VBox fx:id="errorMessageBox" style="-fx-background-color: rgba(255, 255, 255, 0.85);" alignment="CENTER" visible="false" spacing="40">
-			<BindableGlyph styleClass="icon-dark" style="-fx-text-fill: red;" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize * 6}"/>
-			<VBox alignment="CENTER" spacing="10">
-				<Label style="-fx-text-fill: red; -fx-font-weight: bold;" text="%verifications.modelchecking.modelcheckingStage.tlcTab.error.notApplicable"/>
-				<Label fx:id="errorMessage" style="-fx-text-fill: red;" wrapText="true" prefWidth="350" alignment="CENTER"/>
-			</VBox>
-		</VBox>
 	</StackPane>
 </fx:root>

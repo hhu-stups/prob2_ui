@@ -1,246 +1,269 @@
 package de.prob2.ui.simulation.configuration;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.fatboyindustrial.gsonjavatime.Converters;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.io.MoreFiles;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSyntaxException;
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
 
+import de.prob.json.JacksonManager;
 import de.prob.json.JsonMetadata;
+import de.prob.json.JsonMetadataBuilder;
+import de.prob.model.representation.Named;
 import de.prob.statespace.LoadedMachine;
-import de.prob.statespace.Transition;
+import de.prob.statespace.Trace;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.VersionInfo;
+import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.simulation.SimulationItem;
+import de.prob2.ui.simulation.interactive.UIInteractionHandler;
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+import de.prob2.ui.simulation.simulators.SimulationCreator;
+import de.prob2.ui.simulation.simulators.Simulator;
 
-public class SimulationFileHandler {
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+import javafx.stage.Window;
 
-	public static final String TRACE_FILE_EXTENSION = "json";
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import static de.prob.statespace.Transition.INITIALISE_MACHINE_NAME;
+import static de.prob.statespace.Transition.SETUP_CONSTANTS_NAME;
+
+@Singleton
+public final class SimulationFileHandler {
+
+	public static final Path DEFAULT_SIMULATION_PATH = Path.of("");
 	public static final String SIMULATION_FILE_EXTENSION = "json";
+	public static final String SIMULATION_TRACE_PREFIX = "Timed_Simulation_";
 
-	private static final Gson METADATA_GSON = Converters.registerAll(new GsonBuilder())
-			.disableHtmlEscaping()
-			.serializeNulls()
-			.setPrettyPrinting()
-			.create();
+	private static final Logger LOGGER = LoggerFactory.getLogger(SimulationFileHandler.class);
 
-	public static ISimulationModelConfiguration constructConfiguration(Path inputFile, LoadedMachine loadedMachine) throws IOException, JsonSyntaxException {
-		if(inputFile.equals(Paths.get(""))) {
-			return DefaultSimulationCreator.createDefaultSimulation(loadedMachine);
-		}
-		if(!inputFile.toFile().isDirectory()) {
-			if(inputFile.toFile().getName().endsWith("json")) {
-				Gson gson = new Gson();
-				final JsonObject simulationFile;
-				try (final BufferedReader reader = Files.newBufferedReader(inputFile)) {
-					simulationFile = gson.fromJson(reader, JsonObject.class);
-				}
-				Map<String, String> variables = buildVariables(simulationFile.get("variables"));
-				List<DiagramConfiguration> activationConfigurations = buildActivationConfigurations(simulationFile.get("activations"));
-				List<UIListenerConfiguration> uiListenerConfigurations = simulationFile.get("listeners") == null ? new ArrayList<>() : buildUIListenerConfigurations(simulationFile.get("listeners"));
-				final JsonMetadata metadata = METADATA_GSON.fromJson(simulationFile.get("metadata"), JsonMetadata.class);
-				return new SimulationModelConfiguration(variables, activationConfigurations, uiListenerConfigurations, metadata);
-			} else { // Currently ends with py; more could be supported in the future
-				return new SimulationExternalConfiguration(inputFile);
+	private final StageManager stageManager;
+	private final I18n i18n;
+	private final FileChooserManager fileChooserManager;
+	private final CurrentProject currentProject;
+	private final UIInteractionHandler uiInteraction;
+	private final RealTimeSimulator realTimeSimulator;
+	private final VersionInfo versionInfo;
+	private final JacksonManager<SimulationModelConfiguration> jacksonManager;
+
+	@Inject
+	public SimulationFileHandler(StageManager stageManager, JacksonManager<SimulationModelConfiguration> jacksonManager, ObjectMapper objectMapper, I18n i18n, FileChooserManager fileChooserManager, CurrentProject currentProject, UIInteractionHandler uiInteraction, RealTimeSimulator realTimeSimulator, VersionInfo versionInfo) {
+		this.stageManager = stageManager;
+		this.jacksonManager = jacksonManager;
+		this.i18n = i18n;
+		this.fileChooserManager = fileChooserManager;
+		this.currentProject = currentProject;
+		this.uiInteraction = uiInteraction;
+		this.realTimeSimulator = realTimeSimulator;
+		this.versionInfo = versionInfo;
+		objectMapper.enable(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY);
+		this.jacksonManager.initContext(new JacksonManager.Context<>(objectMapper, SimulationModelConfiguration.class, SimulationModelConfiguration.FILE_TYPE, SimulationModelConfiguration.CURRENT_FORMAT_VERSION) {
+			@Override
+			public boolean shouldAcceptOldMetadata() {
+				// we want to support hand-written simulations without metadata
+				return true;
 			}
-		}
 
-		List<Path> timedTraces;
-		try (var s = Files.walk(inputFile)) {
-			timedTraces = s
-				              .filter(Files::isRegularFile)
-				              .filter(p -> MoreFiles.getFileExtension(p).equals(SimulationFileHandler.TRACE_FILE_EXTENSION))
-				              .sorted()
-				              .collect(Collectors.toList());
-		}
-		return new SimulationBlackBoxModelConfiguration(timedTraces);
+			@Override
+			public ObjectNode convertOldData(ObjectNode oldObject, int oldVersion) {
+				// do not throw exception when loading v0 data (without metadata)
+
+				if (oldVersion <= 3) {
+					// split probabilisticVariables and transitionSelection
+					if (oldObject.get("activations") instanceof ArrayNode activations) {
+						for (JsonNode activationNode : activations) {
+							if (activationNode instanceof ObjectNode activation) {
+								JsonNode probabilisticVariables = activation.get("probabilisticVariables");
+								if (probabilisticVariables != null && probabilisticVariables.isTextual()) {
+									activation.remove("probabilisticVariables");
+									activation.put("transitionSelection", probabilisticVariables.asText());
+								}
+							}
+						}
+					}
+				}
+
+				return oldObject;
+			}
+
+			@Override
+			public boolean isFileTypeAccepted(JsonMetadata metadata) {
+				// previously simulation configs were saved with these alternative file types
+				return super.isFileTypeAccepted(metadata) || "Timed_Trace".equals(metadata.getFileType()) || "Interaction_Replay".equals(metadata.getFileType());
+			}
+
+			@Override
+			public JsonMetadata updateMetadataOnSave(JsonMetadata metadata) {
+				JsonMetadataBuilder b = new JsonMetadataBuilder(metadata)
+						                        .withFormatVersion(this.currentFormatVersion)
+						                        .withFileType(this.fileType)
+						                        .withSavedNow()
+						                        .withProB2KernelVersion(SimulationFileHandler.this.versionInfo.getKernelVersion())
+						                        .withProBCliVersion(SimulationFileHandler.this.versionInfo.getCliVersion().toString());
+				if (metadata.getCreator() == null) {
+					b.withUserCreator();
+				}
+				return b.build();
+			}
+		});
 	}
 
-	private static List<DiagramConfiguration> buildActivationConfigurations(JsonElement jsonElement) {
-		List<DiagramConfiguration> activationConfigurations = new ArrayList<>();
-		JsonArray activationConfigurationsAsArray = jsonElement.getAsJsonArray();
-		for (JsonElement activationElement : activationConfigurationsAsArray) {
-			DiagramConfiguration activationConfiguration = buildActivationConfiguration(activationElement);
-			activationConfigurations.add(activationConfiguration);
+	public void initSimulator(Window window, Simulator simulator, LoadedMachine loadedMachine, Path path) {
+		try {
+			simulator.initSimulator(this.loadConfiguration(path, loadedMachine));
+		} catch (IOException e) {
+			LOGGER.error("Tried to load simulation configuration file", e);
+			Platform.runLater(() -> {
+				Alert alert = this.stageManager.makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");
+				alert.initOwner(window);
+				alert.showAndWait();
+			});
+		} catch (Exception e) {
+			LOGGER.error("Errors in simulation configuration file detected", e);
+			Platform.runLater(() -> {
+				Alert alert = this.stageManager.makeExceptionAlert(e, "simulation.error.header.configurationError", "simulation.error.body.configurationError");
+				alert.initOwner(window);
+				alert.showAndWait();
+			});
 		}
-		return activationConfigurations;
 	}
 
-	private static List<UIListenerConfiguration> buildUIListenerConfigurations(JsonElement jsonElement) {
+	public ISimulationModelConfiguration loadConfiguration(Path path, LoadedMachine loadedMachine) throws IOException {
+		if (DEFAULT_SIMULATION_PATH.equals(path)) {
+			return this.createDefaultSimulation(loadedMachine);
+		}
+
+		path = path.toRealPath();
+		if (Files.isDirectory(path)) {
+			List<Path> timedTraces;
+			try (var s = Files.walk(path)) {
+				timedTraces = s
+						              .filter(Files::isRegularFile)
+						              .filter(p -> MoreFiles.getFileExtension(p).equals(SIMULATION_FILE_EXTENSION))
+						              .sorted()
+						              .collect(Collectors.toList());
+			}
+			return new SimulationBlackBoxModelConfiguration(timedTraces);
+		} else if (SIMULATION_FILE_EXTENSION.equals(MoreFiles.getFileExtension(path))) {
+			return this.jacksonManager.readFromFile(path);
+		} else {
+			// Currently ends with py; more could be supported in the future
+			return new SimulationExternalConfiguration(path);
+		}
+	}
+
+	public void saveTimedTrace(Trace trace, List<Integer> timestamps, String createdBy) throws IOException {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveTimedTrace.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + SimulationFileHandler.SIMULATION_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getSimBFilter());
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
+		if (path != null) {
+			this.saveTimedTrace(trace, timestamps, path, createMetadata(createdBy, trace.getModel() != null && trace.getModel().getMainComponent() instanceof Named named ? named.getName() : null));
+		}
+	}
+
+	public void saveUIInteractions() throws IOException {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveUIReplay.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "." + SIMULATION_FILE_EXTENSION);
+		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.simulation", SIMULATION_FILE_EXTENSION));
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
+		if (path != null) {
+			SimulationModelConfiguration configuration = uiInteraction.createUserInteractionSimulation(realTimeSimulator);
+			this.saveConfiguration(configuration, path);
+		}
+	}
+
+	public void saveConfiguration(SimulationModelConfiguration configuration, Path location) throws IOException {
+		if (configuration != null && location != null) {
+			this.jacksonManager.writeToFile(location, configuration);
+		}
+	}
+
+	public void saveTimedTracesForSimulationItem(SimulationItem item) {
+		SimulationItem.Result result = (SimulationItem.Result) item.getResult();
+		List<Trace> traces = result.getTraces();
+		List<List<Integer>> timestamps = result.getTimestamps();
+
+		final DirectoryChooser directoryChooser = new DirectoryChooser();
+		directoryChooser.setTitle(i18n.translate("simulation.tracereplay.fileChooser.saveTimedPaths.title"));
+		final Path path = this.fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
+		if (path == null) {
+			return;
+		}
+
+		try {
+			if (fileChooserManager.checkIfPathAlreadyContainsFiles(path, SIMULATION_TRACE_PREFIX, "simulation.save.directoryAlreadyContainsSimulations")) {
+				return;
+			}
+
+			for (int i = 0, len = traces.size(); i < len; i++) {
+				// Starts counting with 1 in the file name
+				final Path traceFilePath = path.resolve(SIMULATION_TRACE_PREFIX + (i + 1) + "." + SIMULATION_FILE_EXTENSION);
+				Trace trace = traces.get(i);
+				this.saveTimedTrace(trace, timestamps.get(i), traceFilePath, createMetadata(item.createdByForMetadata(), trace.getModel() != null && trace.getModel().getMainComponent() instanceof Named named ? named.getName() : null));
+			}
+		} catch (IOException e) {
+			stageManager.makeExceptionAlert(e, "simulation.save.error").showAndWait();
+		}
+	}
+
+	private JsonMetadata createMetadata(String createdBy, String modelName) {
+		JsonMetadataBuilder b = SimulationModelConfiguration.metadataBuilder()
+				                        .withProB2KernelVersion(this.versionInfo.getKernelVersion())
+				                        .withProBCliVersion(this.versionInfo.getCliVersion().toString());
+		if (createdBy != null) {
+			b.withCreator(createdBy);
+		}
+		if (modelName != null) {
+			b.withModelName(modelName);
+		}
+		return b.build();
+	}
+
+	private void saveTimedTrace(Trace trace, List<Integer> timestamps, Path location, JsonMetadata jsonMetadata) throws IOException {
+		if (location != null) {
+			SimulationModelConfiguration configuration = SimulationCreator.createConfiguration(trace, timestamps, true, jsonMetadata);
+			this.saveConfiguration(configuration, location);
+		}
+	}
+
+	private SimulationModelConfiguration createDefaultSimulation(LoadedMachine loadedMachine) {
+		Map<String, String> variables = new HashMap<>();
+		List<DiagramConfiguration.NonUi> activations = new ArrayList<>();
 		List<UIListenerConfiguration> uiListenerConfigurations = new ArrayList<>();
-		JsonArray uiListenerConfigurationsAsArray = jsonElement.getAsJsonArray();
-		for (JsonElement uiListenerElement : uiListenerConfigurationsAsArray) {
-			UIListenerConfiguration uiListenerConfiguration = buildUIListenerConfiguration(uiListenerElement);
-			uiListenerConfigurations.add(uiListenerConfiguration);
+		JsonMetadata metadata = createMetadata(null, null);
+
+		if (!loadedMachine.getConstantNames().isEmpty()) {
+			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, null, false, null, null, ""));
 		}
-		return uiListenerConfigurations;
-	}
 
-	private static ActivationChoiceConfiguration buildChoiceActivationConfiguration(JsonElement activationElement) {
-		JsonObject activationAsObject = activationElement.getAsJsonObject();
-		String id = activationAsObject.get("id").getAsString();
-		JsonObject chooseActivationAsObject = activationAsObject.getAsJsonObject("chooseActivation");
-		Map<String, String> activations = new HashMap<>();
-		for(String key : chooseActivationAsObject.keySet()) {
-			activations.put(key, chooseActivationAsObject.get(key).getAsString());
+		var operations = loadedMachine.getOperationNames();
+		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, List.copyOf(operations), true, null, null, ""));
+		for (var op : operations) {
+			activations.add(new ActivationOperationConfiguration(op, op, "100", 0, null, ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, List.copyOf(operations), true, null, null, ""));
 		}
-		return new ActivationChoiceConfiguration(id, activations);
+
+		return new SimulationModelConfiguration(variables, activations, uiListenerConfigurations, metadata);
 	}
-
-	private static ActivationOperationConfiguration buildOperationConfiguration(JsonElement activationElement) {
-		JsonObject activationAsObject = activationElement.getAsJsonObject();
-		String id = activationAsObject.get("id").getAsString();
-		String opName = activationAsObject.get("execute").getAsString();
-
-		int priority;
-		if(Transition.INITIALISE_MACHINE_NAME.equals(opName)) {
-			priority = 1;
-		} else if(Transition.SETUP_CONSTANTS_NAME.equals(opName) || activationAsObject.get("priority") == null) {
-			priority = 0;
-		} else {
-			priority = activationAsObject.get("priority").getAsInt();
-		}
-		List<String> activations = buildActivation(activationAsObject.get("activating"));
-
-		String after = activationAsObject.get("after") == null || activationAsObject.get("after").isJsonNull() ? "0" : activationAsObject.get("after").getAsString();
-		String additionalGuards = activationAsObject.get("additionalGuards") == null || activationAsObject.get("additionalGuards").isJsonNull() ? null : activationAsObject.get("additionalGuards").getAsString();
-		ActivationOperationConfiguration.ActivationKind activationKind = buildActivationKind(activationAsObject.get("activationKind"));
-		Map<String, String> fixedVariables = buildParameters(activationAsObject.get("fixedVariables"));
-		Object probabilisticVariables = buildProbability(activationAsObject.get("probabilisticVariables"));
-		boolean onlyWhenExecuted = activationAsObject.get("activatingOnlyWhenExecuted") == null || activationAsObject.get("activatingOnlyWhenExecuted").getAsBoolean();
-		Map<String, String> updating = buildUpdating(activationAsObject.get("updating"));
-		String withPredicate = activationAsObject.get("withPredicate") == null || activationAsObject.get("withPredicate").isJsonNull() ? null : activationAsObject.get("withPredicate").getAsString();
-		return new ActivationOperationConfiguration(id, opName, after, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, activations, onlyWhenExecuted, updating, withPredicate);
-	}
-
-	private static Map<String, String> buildVariables(JsonElement jsonElement) {
-		Map<String, String> updating;
-		if(jsonElement == null || jsonElement.isJsonNull()) {
-			updating = null;
-		} else {
-			updating = new HashMap<>();
-			JsonObject variableAsObject = jsonElement.getAsJsonObject();
-			for (String variable : variableAsObject.keySet()) {
-				String value = variableAsObject.get(variable).getAsString();
-				updating.put(variable, value);
-			}
-		}
-		return updating;
-	}
-
-
-	private static DiagramConfiguration buildActivationConfiguration(JsonElement activationElement) {
-		if(!activationElement.getAsJsonObject().has("execute")) {
-			return buildChoiceActivationConfiguration(activationElement);
-		} else {
-			return buildOperationConfiguration(activationElement);
-		}
-	}
-
-	private static Map<String, String> buildParameters(JsonElement jsonElement) {
-		Map<String, String> parameters;
-		if(jsonElement == null || jsonElement.isJsonNull()) {
-			parameters = null;
-		} else {
-			parameters = new HashMap<>();
-			JsonObject parametersAsObject = jsonElement.getAsJsonObject();
-			for (String parameter : parametersAsObject.keySet()) {
-				String parameterValue = parametersAsObject.get(parameter).getAsString();
-				parameters.put(parameter, parameterValue);
-			}
-		}
-		return parameters;
-	}
-
-	private static Map<String, String> buildUpdating(JsonElement jsonElement) {
-		Map<String, String> updating;
-		if(jsonElement == null || jsonElement.isJsonNull()) {
-			updating = null;
-		} else {
-			updating = new HashMap<>();
-			JsonObject updateAsObject = jsonElement.getAsJsonObject();
-			for (String variable : updateAsObject.keySet()) {
-				String value = updateAsObject.get(variable).getAsString();
-				updating.put(variable, value);
-			}
-		}
-		return updating;
-	}
-
-	private static Object buildProbability(JsonElement jsonElement) {
-		Object probability;
-		if(jsonElement == null ||jsonElement.isJsonNull()) {
-			probability = null;
-		} else if(jsonElement.isJsonPrimitive()) {
-			probability = jsonElement.getAsString();
-		} else {
-			JsonObject probabilityObject = jsonElement.getAsJsonObject();
-			Map<String, Map<String, String>> probabilityMap = new HashMap<>();
-			JsonObject probabilityVariableObject = probabilityObject.getAsJsonObject();
-
-			for (String variable : probabilityVariableObject.keySet()) {
-				JsonObject probabilityValueObject = probabilityVariableObject.get(variable).getAsJsonObject();
-				Map<String, String> probabilityValueMap = new HashMap<>();
-				for (String parameter : probabilityValueObject.keySet()) {
-					probabilityValueMap.put(parameter, probabilityValueObject.get(parameter).getAsString());
-				}
-				probabilityMap.put(variable, probabilityValueMap);
-			}
-			probability = probabilityMap;
-		}
-		return probability;
-	}
-
-	private static List<String> buildActivation(JsonElement jsonElement) {
-		List<String> activations = null;
-		if(jsonElement != null && !jsonElement.isJsonNull()) {
-			activations = new ArrayList<>();
-			if(jsonElement.isJsonArray()) {
-				for(int j = 0; j < jsonElement.getAsJsonArray().size(); j++) {
-					activations.add(jsonElement.getAsJsonArray().get(j).getAsString());
-				}
-			} else {
-				activations.add(jsonElement.getAsString());
-			}
-		}
-		return activations;
-	}
-
-	private static ActivationOperationConfiguration.ActivationKind buildActivationKind(JsonElement jsonElement) {
-		ActivationOperationConfiguration.ActivationKind activationKind;
-		if(jsonElement == null || jsonElement.isJsonNull() || "multi".equals(jsonElement.getAsString())) {
-			activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
-		} else if("single:max".equals(jsonElement.getAsString())) {
-			activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE_MAX;
-		} else if("single:min".equals(jsonElement.getAsString())) {
-			activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE_MIN;
-		} else if("single".equals(jsonElement.getAsString())) {
-			activationKind = ActivationOperationConfiguration.ActivationKind.SINGLE;
-		} else {
-			activationKind = ActivationOperationConfiguration.ActivationKind.MULTI;
-		}
-		return activationKind;
-	}
-
-	private static UIListenerConfiguration buildUIListenerConfiguration(JsonElement uiListenerElement) {
-		JsonObject uiListenerObject = uiListenerElement.getAsJsonObject();
-		String id = uiListenerObject.get("id").getAsString();
-		String event = uiListenerObject.get("event").getAsString();
-		String predicate = uiListenerObject.get("predicate") == null ? "1=1" : uiListenerObject.get("predicate").getAsString();
-		List<String> activating = buildActivation(uiListenerObject.get("activating"));
-		return new UIListenerConfiguration(id, event, predicate, activating);
-	}
-
 }

@@ -124,24 +124,21 @@ public class FileMenu extends Menu {
 		this.exportAsMenu.disableProperty().bind(currentTrace.isNull());
 		this.saveDocumentationItem.disableProperty().bind(currentProject.isNull());
 
-		currentTrace.stateSpaceProperty().addListener((o, from, to) -> {
-			if (to != null) {
-				final AbstractModel model = to.getModel();
-				// Pretty-printing is not supported for XTL.
-				final boolean noClassicalBExport = model instanceof XTLModel;
-				// ProB 2's Event-B exporters currently only work with models loaded from a Rodin project, not from an .eventb package.
-				final boolean noEventBExport = !(model instanceof EventBModel) || model instanceof EventBPackageModel;
+		currentTrace.stateSpaceProperty().subscribe(to -> {
+			AbstractModel model = to != null ? to.getModel() : null;
+			// Pretty-printing is not supported for XTL.
+			final boolean noClassicalBExport = model == null || model instanceof XTLModel;
+			// ProB 2's Event-B exporters currently only work with models loaded from a Rodin project, not from an .eventb package.
+			final boolean noEventBExport = !(model instanceof EventBModel) || model instanceof EventBPackageModel;
+			// TLA+ Export
+			final boolean noTlaExport = model == null || model.getFormalismType() != FormalismType.B;
 
-				this.exportAsClassicalBAsciiItem.setDisable(noClassicalBExport);
-				this.exportAsClassicalBUnicodeItem.setDisable(noClassicalBExport);
-				this.exportAsRodinProject.setDisable(noEventBExport);
-				this.exportAsEventBProlog.setDisable(noEventBExport);
-			}
+			this.exportAsClassicalBAsciiItem.setDisable(noClassicalBExport);
+			this.exportAsClassicalBUnicodeItem.setDisable(noClassicalBExport);
+			this.exportAsRodinProject.setDisable(noEventBExport);
+			this.exportAsEventBProlog.setDisable(noEventBExport);
+			this.exportAsTLAModule.setDisable(noTlaExport);
 		});
-
-		// TLA Export:
-		currentTrace.addListener((o, from, to) ->
-				this.exportAsTLAModule.setDisable(to != null && to.getModel().getFormalismType() != FormalismType.B));
 
 		MachineLoader machineLoader = injector.getInstance(MachineLoader.class);
 		this.reloadMachineItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(machineLoader.loadingProperty()));
@@ -171,6 +168,15 @@ public class FileMenu extends Menu {
 		}
 		if (selected.toString().endsWith(".railml")){
 			projectManager.openRailML(selected);
+			return;
+		}
+		projectManager.openFile(selected);
+	}
+
+	@FXML
+	private void handleOpenProject() {
+		final Path selected = fileChooserManager.showOpenProjectChooser(stageManager.getMainStage());
+		if (selected == null) {
 			return;
 		}
 		projectManager.openFile(selected);
@@ -280,7 +286,7 @@ public class FileMenu extends Menu {
 
 		if (outputDir != null) {
 			try {
-				Path bMachine = TLCModelCheckingTab.getClassicalBMachine(currentProject, currentTrace.getStateSpace(), injector.getInstance(I18n.class));
+				Path bMachine = TLCModelCheckingTab.getMachinePathForTlc(currentProject, currentTrace.getStateSpace(), injector.getInstance(I18n.class), false);
 				TLCModelChecker.generateTLAWithoutTLC(bMachine.toString(), outputDir.toString());
 			} catch (RuntimeException e) {
 				stageManager.makeAlert(Alert.AlertType.ERROR, "menu.file.items.exportEntireModelAs.tlaModule.exception.header",

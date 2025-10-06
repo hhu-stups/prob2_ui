@@ -21,6 +21,8 @@ public class ModelcheckingStage extends Stage {
 	private ProBModelCheckingTab probTab;
 	@FXML
 	private TLCModelCheckingTab tlcTab;
+	@FXML
+	private LTSminModelCheckingTab ltsminTab;
 
 	@FXML
 	private Button btStartModelCheck;
@@ -54,13 +56,16 @@ public class ModelcheckingStage extends Stage {
 			this.result = probTab.startModelCheck(id);
 		} else if (tlcTab.isSelected()) {
 			this.result = tlcTab.startModelCheck(id);
+		} else if (ltsminTab.isSelected()) {
+			this.result = ltsminTab.startModelCheck(id);
 		}
 		this.hide();
 	}
 
 	@FXML
 	private void cancel() {
-		this.hide();
+		this.result = null;
+		this.close();
 	}
 
 	public ModelCheckingItem getResult() {
@@ -70,12 +75,21 @@ public class ModelcheckingStage extends Stage {
 	public void setData(final ModelCheckingItem item) {
 		if (item != null) {
 			idTextField.setText(item.getId() == null ? "" : item.getId());
-			if (item instanceof ProBModelCheckingItem probItem) {
-				probTab.setData(probItem);
-				modelCheckerTabs.getSelectionModel().select(probTab);
-			} else if (item instanceof TLCModelCheckingItem tlcItem) {
-				tlcTab.setData(tlcItem);
-				modelCheckerTabs.getSelectionModel().select(tlcTab);
+			switch (item) {
+				case ProBModelCheckingItem probItem -> {
+					probTab.setData(probItem);
+					modelCheckerTabs.getSelectionModel().select(probTab);
+				}
+				case TLCModelCheckingItem tlcItem -> {
+					tlcTab.setData(tlcItem);
+					modelCheckerTabs.getSelectionModel().select(tlcTab);
+					tlcTab.checkTlcApplicable();
+				}
+				case LTSminModelCheckingItem ltsminItem -> {
+					ltsminTab.setData(ltsminItem);
+					modelCheckerTabs.getSelectionModel().select(ltsminTab);
+				}
+				default -> throw new IllegalArgumentException("unknown model checking item: " + item);
 			}
 		}
 		this.result = item;

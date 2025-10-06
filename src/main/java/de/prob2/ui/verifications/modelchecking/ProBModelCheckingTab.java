@@ -1,16 +1,24 @@
 package de.prob2.ui.verifications.modelchecking;
 
+import java.util.Set;
+
 import com.google.inject.Inject;
+
 import de.prob.check.ModelCheckingOptions;
 import de.prob.check.ModelCheckingSearchStrategy;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
-import javafx.fxml.FXML;
-import javafx.scene.control.*;
 
-import java.util.Set;
+import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Spinner;
+import javafx.scene.control.SpinnerValueFactory;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TextField;
 
 @FXMLInjected
 public class ProBModelCheckingTab extends Tab {
@@ -105,7 +113,7 @@ public class ProBModelCheckingTab extends Tab {
 		};
 	}
 
-	ModelCheckingItem startModelCheck(final String id) {
+	ProBModelCheckingItem startModelCheck(final String id) {
 		ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
 		Integer nLimit = chooseNodesLimit.isSelected() ? nodesLimit.getValue() : null;
 		Integer tLimit = chooseTimeLimit.isSelected() ? timeLimit.getValue() : null;

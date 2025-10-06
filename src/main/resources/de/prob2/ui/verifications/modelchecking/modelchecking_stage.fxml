@@ -2,10 +2,12 @@
 
 <?import de.prob2.ui.verifications.modelchecking.ProBModelCheckingTab?>
 <?import de.prob2.ui.verifications.modelchecking.TLCModelCheckingTab?>
+<?import de.prob2.ui.verifications.modelchecking.LTSminModelCheckingTab?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
+
 <fx:root type="Stage" fx:id="mcheckStage" resizable="false"
 		 title="%verifications.modelchecking.modelcheckingStage.title" xmlns:fx="http://javafx.com/fxml/1">
 	<scene>
@@ -15,6 +17,7 @@
 					<TabPane fx:id="modelCheckerTabs">
 						<ProBModelCheckingTab fx:id="probTab"/>
 						<TLCModelCheckingTab fx:id="tlcTab"/>
+						<LTSminModelCheckingTab fx:id="ltsminTab"/>
 					</TabPane>
 					<AnchorPane>
 						<VBox AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">

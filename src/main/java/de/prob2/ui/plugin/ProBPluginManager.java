@@ -36,7 +36,9 @@ import javafx.stage.FileChooser;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import org.pf4j.DefaultExtensionFinder;
 import org.pf4j.DefaultPluginManager;
+import org.pf4j.ExtensionFinder;
 import org.pf4j.PluginDependency;
 import org.pf4j.PluginDescriptor;
 import org.pf4j.PluginFactory;
@@ -404,11 +406,18 @@ public final class ProBPluginManager {
 	 * @see org.pf4j.DefaultPluginManager
 	 * @see org.pf4j.AbstractPluginManager
 	 */
-	public class ProBJarPluginManager extends DefaultPluginManager {
+	public final class ProBJarPluginManager extends DefaultPluginManager {
 
-		private ProBJarPluginManager(){
+		private ProBJarPluginManager() {
 			setSystemVersion(versionInfo.getUIVersion());
 			setExactVersionAllowed(true);
+		}
+
+		@Override
+		protected ExtensionFinder createExtensionFinder() {
+			DefaultExtensionFinder extensionFinder = (DefaultExtensionFinder) super.createExtensionFinder();
+			extensionFinder.addServiceProviderExtensionFinder();
+			return extensionFinder;
 		}
 
 		@Override
@@ -425,16 +434,17 @@ public final class ProBPluginManager {
 		//changed to use the ProBPlugin clazz
 		protected PluginFactory createPluginFactory() {
 			return pluginWrapper -> {
+				PluginContext context = new PluginContext(pluginWrapper, ProBPluginManager.this);
+
 				String pluginClassName = pluginWrapper.getDescriptor().getPluginClass();
-				LOGGER.debug("Create instance for plugin '{}'", pluginClassName);
+				LOGGER.debug("Creating instance for plugin '{}'", pluginClassName);
 
 				Class<?> pluginClass;
 				try {
 					pluginClass = pluginWrapper.getPluginClassLoader().loadClass(pluginClassName);
 				} catch (ClassNotFoundException e) {
-					LOGGER.error(e.getMessage(), e);
-					return new InvalidPlugin(pluginWrapper, "plugin.invalidPlugin.message.couldNotFindPluginClass",
-							pluginClassName, e);
+					LOGGER.error("Could find plugin class", e);
+					return new InvalidPlugin(context, "plugin.invalidPlugin.message.couldNotFindPluginClass", pluginClassName, e);
 				}
 
 				// once we have the clazz, we can do some checks on it to ensure
@@ -443,20 +453,16 @@ public final class ProBPluginManager {
 				if (Modifier.isAbstract(modifiers) || Modifier.isInterface(modifiers)
 						|| (!ProBPlugin.class.isAssignableFrom(pluginClass))) {
 					LOGGER.error("The plugin class '{}' is not a valid ProBPlugin", pluginClassName);
-					return new InvalidPlugin(pluginWrapper,
-							"plugin.invalidPlugin.message.notAValidPluginClass", pluginClassName);
+					return new InvalidPlugin(context, "plugin.invalidPlugin.message.notAValidPluginClass", pluginClassName);
 				}
 
 				// create the ProBPlugin instance
 				try {
-					Constructor<?> constructor =
-							pluginClass.getConstructor(PluginWrapper.class, ProBPluginManager.class, ProBPluginHelper.class);
-					return (ProBPlugin) constructor.newInstance(pluginWrapper, ProBPluginManager.this, proBPluginHelper);
+					Constructor<?> constructor = pluginClass.getConstructor(PluginContext.class);
+					return (ProBPlugin) constructor.newInstance(context);
 				} catch (Exception e) {
-					LOGGER.error(e.getMessage(), e);
-					return new InvalidPlugin(pluginWrapper, "plugin.invalidPlugin.message.couldNotCreateInstance",
-							pluginClassName, e);
-
+					LOGGER.error("Could not create plugin instance", e);
+					return new InvalidPlugin(context, "plugin.invalidPlugin.message.couldNotCreateInstance", pluginClassName, e);
 				}
 			};
 		}
@@ -469,19 +475,12 @@ public final class ProBPluginManager {
 		@Override
 		//also checked required version
 		protected void validatePluginDescriptor(PluginDescriptor descriptor) {
-			//TODO: show what is wrong in an alert
+			// TODO: show what is wrong in an alert
 			super.validatePluginDescriptor(descriptor);
-			/* TODO:
-			    The following check seems not to be necessary, as the DefaultVersionManager allows NullOrEmpty and "*" for checkVersionConstraint to leave "requires" unspecified.
-			    In addition, there seem to be problems with x.x.x-SNAPSHOT version number matching, which prevents compatible plugins from loading.
-			*/
-			/*if (descriptor.getRequires() == null || descriptor.getRequires().isEmpty() || descriptor.getRequires().equals("*")) {
-				throw new PluginRuntimeException("Plugin-Requires has to be specified!");
-			}*/
 			if (!descriptor.getDependencies().isEmpty()) {
 				StringBuilder builder = new StringBuilder("Plugin-Dependencies are not supported but the plugin has the following dependencies:");
 				for (PluginDependency dependency : descriptor.getDependencies()) {
-					builder.append(System.getProperty("line.separator"));
+					builder.append(System.lineSeparator());
 					builder.append(dependency.getPluginId());
 				}
 				throw new PluginRuntimeException(builder.toString());

@@ -104,7 +104,12 @@ public final class CBCInvariantPreservationCheckingItem extends SymbolicChecking
 			&& other instanceof CBCInvariantPreservationCheckingItem o
 			&& Objects.equals(this.getOperationName(), o.getOperationName());
 	}
-	
+
+	@Override
+	public CBCInvariantPreservationCheckingItem copy() {
+		return new CBCInvariantPreservationCheckingItem(this.getId(), this.operationName);
+	}
+
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)

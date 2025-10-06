@@ -5,13 +5,13 @@ plugins {
 	id "java"
 	id "application"
 
-	id "com.gradleup.shadow" version "8.3.5"
+	id "com.gradleup.shadow" version "8.3.6"
 	id "com.google.osdetector" version "1.7.3"
 	id "org.openjfx.javafxplugin" version "0.1.0"
 }
 
 project.group = "de.hhu.stups"
-project.version = "1.2.2-SNAPSHOT"
+project.version = "1.3.1-SNAPSHOT"
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 if (project != rootProject) {
@@ -39,12 +39,13 @@ test {
 	}
 }
 
+final snapshotsRepoUrl = "https://central.sonatype.com/repository/maven-snapshots/"
 repositories {
 	mavenCentral()
 	if (isSnapshot) {
 		maven {
-			name = "sonatype snapshots"
-			url = "https://oss.sonatype.org/content/repositories/snapshots"
+			name = "Sonatype snapshots"
+			url = snapshotsRepoUrl
 		}
 	}
 }
@@ -122,23 +123,24 @@ configurations.all {
 
 dependencies {
 	implementation group: "ch.qos.logback", name: "logback-classic", version: "1.3.15"
-	implementation group: "com.fatboyindustrial.gson-javatime-serialisers", name: "gson-javatime-serialisers", version: "1.1.2"
-	implementation group: "com.google.code.gson", name: "gson", version: "2.11.0"
 	implementation group: "com.google.guava", name: "guava", version: "33.4.0-jre"
 	implementation group: "io.github.java-diff-utils", name: "java-diff-utils", version: "4.15"
 	implementation group: "commons-cli", name: "commons-cli", version: "1.9.0"
-	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.13.2-SNAPSHOT"))
+	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.15.1-SNAPSHOT"))
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel"
-	implementation group: "de.hhu.stups", name: "voparser", version: "0.3.0-SNAPSHOT"
-	implementation group: "de.hhu.stups", name: "railml2b", version: "0.1.0-SNAPSHOT"
+	implementation group: "de.hhu.stups", name: "voparser", version: "0.3.0"
+    implementation group: "de.hhu.stups", name: "railml2b", version: "0.1.0-SNAPSHOT"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "11.2.1"
 	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.4"
-	implementation group: "org.pf4j", name: "pf4j", version: "3.13.0"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "2.0.0"
 	implementation group: "org.apache.commons", name: "commons-csv", version: "1.12.0"
 	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
 	implementation group: 'org.apache.velocity', name: 'velocity-engine-core', version: '2.4'
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-guava'
+
+	// for plugins
+	implementation group: 'org.pf4j', name: 'pf4j', version: '3.13.0'
+	annotationProcessor group: 'org.pf4j', name: 'pf4j', version: '3.13.0'
 
 	// nsmenufx indirectly requires the jna:5.9.0:jpms dependency
 	// appdirs 1.2.2+ indirectly requires jna:5.13+, but the jpms classifier does not exist for jna 5.13+
@@ -151,15 +153,17 @@ dependencies {
 	}
 	implementation group: "net.java.dev.jna", name: "jna-platform", version: "5.16.0"
 
-	testImplementation platform('org.junit:junit-bom:5.11.4')
+	testImplementation platform('org.junit:junit-bom:5.12.0')
 	testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter'
 	testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
 	testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.15.2'
-	testImplementation group: 'org.xmlunit', name: 'xmlunit-assertj3', version: '2.9.1'
+    testImplementation group: 'org.xmlunit', name: 'xmlunit-assertj3', version: '2.9.1'
+
+	testImplementation 'org.assertj:assertj-core:3.25.3'
 }
 
 final osArch = System.getProperty("os.arch")
-final javafxVersion = "23.0.1"
+final javafxVersion = "23.0.2"
 
 final javafxModules = [
 	"javafx.base",
@@ -187,6 +191,16 @@ sourceSets {
 	}
 }
 
+// This is the shortest recommended way to access ExecOperations.exec :(
+// The other alternative is to create a dedicated class for each task that needs exec,
+// which is even less convenient...
+// https://docs.gradle.org/current/userguide/service_injection.html#execoperations
+interface InjectedExecOperations {
+	@Inject
+	ExecOperations getExecOperations()
+}
+final execOperations = objects.newInstance(InjectedExecOperations).execOperations
+
 final helpSourceDir = file("src/main/helpsources")
 final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
 final helpOutputDir = new File(generatedResourcesDir, "de/prob2/ui/helpsystem/helppages")
@@ -204,7 +218,7 @@ task createHelp {
 			final relativePathWithNewExtension = relativePath.parent.resolve(relativePath.fileName.toString().replaceAll(/\.md$/, ".html"))
 			final outputFile = helpOutputDir.toPath().resolve(relativePathWithNewExtension).toFile()
 			outputFile.parentFile.mkdirs()
-			exec {
+			execOperations.exec {
 				executable = "pandoc"
 				args = [
 					"--from=gfm",
@@ -221,27 +235,27 @@ task createHelp {
 }
 processResources.dependsOn(createHelp)
 
-def readCurrentGitBranch() {
-	def proc = ["git", "rev-parse", "--abbrev-ref", "HEAD"].execute(null, project.projectDir)
-	def exitCode = proc.waitFor()
-	if (exitCode != 0) {
-		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
-	}
-	return proc.in.readLines()[0]
-}
-
-def readCurrentGitCommit() {
-	def proc = ["git", "rev-parse", "HEAD"].execute(null, project.projectDir)
-	def exitCode = proc.waitFor()
-	if (exitCode != 0) {
-		throw new IllegalStateException("git rev-parse command exited with status code ${exitCode}:\n" + proc.err.readLines().join("\n"))
-	}
-	return proc.in.readLines()[0]
+final firstLineOfProcessOutput = {ExecOutput execOutput ->
+	return execOutput.standardOutput.asText.map {it.split('\n')[0]}
 }
 
 processResources {
+	inputs.property("version", project.version)
+	inputs.property("currentGitBranch", firstLineOfProcessOutput(providers.exec {
+		executable = "git"
+		args = ["rev-parse", "--abbrev-ref", "HEAD"]
+	}))
+	inputs.property("currentGitCommit", firstLineOfProcessOutput(providers.exec {
+		executable = "git"
+		args = ["rev-parse", "HEAD"]
+	}))
+
 	filesMatching("de/prob2/ui/build.properties") {
-		expand(version: project.version, branch: readCurrentGitBranch(), commit: readCurrentGitCommit())
+		expand(
+			version: inputs.properties["version"],
+			branch: inputs.properties["currentGitBranch"],
+			commit: inputs.properties["currentGitCommit"],
+		)
 	}
 }
 

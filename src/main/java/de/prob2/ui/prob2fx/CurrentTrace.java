@@ -175,7 +175,7 @@ public final class CurrentTrace extends ReadOnlyObjectPropertyBase<Trace> {
 
 		this.statesCalculatedListeners = new ArrayList<>();
 		this.stateSpaceProperty().addListener((o, from, to) -> {
-			if (from != null) {
+			if (from != null && !from.isKilled()) {
 				this.statesCalculatedListeners.forEach(from::removeStatesCalculatedListener);
 			}
 			if (to != null) {

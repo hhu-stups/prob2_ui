@@ -22,6 +22,7 @@ import de.prob2.ui.verifications.ISelectableTask;
 import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.ItemSelectedFactory;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.BooleanExpression;
@@ -33,6 +34,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
@@ -51,6 +53,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Border
 		protected final MenuItem executeMenuItem;
 		protected final MenuItem editMenuItem;
 		protected final MenuItem removeMenuItem;
+		protected final Menu copyMenu;
 
 		protected RowBase() {
 			// Execute item (if possible) when double-clicked.
@@ -84,7 +87,22 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Border
 
 			this.removeMenuItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
 			this.removeMenuItem.setOnAction(e -> removeItem(this.getItem()));
-			this.contextMenu.getItems().add(removeMenuItem);
+			this.contextMenu.getItems().add(this.removeMenuItem);
+
+			this.copyMenu = new Menu(i18n.translate("sharedviews.checking.contextMenu.copy"));
+			Runnable copyMenuUpdater = () -> this.copyMenu.getItems().setAll(
+					currentProject.getMachines().stream()
+							.filter(m -> currentProject.getCurrentMachine() != m)
+							.map(m -> {
+								MenuItem menuItem = new MenuItem(m.getName());
+								menuItem.setOnAction(e -> copyItemTo(this.getItem(), m));
+								return menuItem;
+							})
+							.toList()
+			);
+			currentProject.machinesProperty().subscribe(machines -> copyMenuUpdater.run());
+			currentProject.currentMachineProperty().subscribe(m -> copyMenuUpdater.run());
+			this.contextMenu.getItems().add(this.copyMenu);
 
 			this.itemProperty().addListener((o, from, to) -> {
 				if (to == null) {
@@ -195,6 +213,13 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Border
 		return this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldItem, newItem);
 	}
 
+	protected void copyItemTo(T item, Machine target) {
+		if (item == null || target == null || target == this.currentProject.getCurrentMachine()) {
+			return;
+		}
+		target.addValidationTaskIfNotExist(item.copy());
+	}
+
 	/**
 	 * Describe the item's configuration as a string,
 	 * which will be displayed in the {@link #configurationColumn}.
@@ -256,7 +281,7 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Border
 		}
 
 		LOGGER.error("Unhandled exception during checking", exc);
-		stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
+		Platform.runLater(() -> stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow()));
 	}
 
 	/**
@@ -306,16 +331,22 @@ public abstract class CheckingViewBase<T extends ISelectableTask> extends Border
 
 	@FXML
 	protected Optional<T> askToAddItem() {
-		return this.showItemDialog(null).map(newItem -> {
-			final T toCheck = this.addItem(newItem);
-			this.itemsTable.getSelectionModel().select(toCheck);
-			// The returned item might already be checked
-			// if there was already another item with the same configuration as newItem
-			// and that existing item was already checked previously.
-			if (toCheck.getStatus() == CheckingStatus.NOT_CHECKED) {
-				this.executeItemIfEnabled(toCheck);
+		Machine currentMachine = currentProject.getCurrentMachine();
+		return this.showItemDialog(null).flatMap(newItem -> {
+			if (currentProject.getCurrentMachine() == currentMachine) {
+				final T toCheck = this.addItem(newItem);
+				this.itemsTable.getSelectionModel().select(toCheck);
+				// The returned item might already be checked
+				// if there was already another item with the same configuration as newItem
+				// and that existing item was already checked previously.
+				if (toCheck.getStatus() == CheckingStatus.NOT_CHECKED) {
+					this.executeItemIfEnabled(toCheck);
+				}
+				return Optional.of(toCheck);
+			} else {
+				LOGGER.warn("The machine has changed, discarding task changes");
+				return Optional.empty();
 			}
-			return toCheck;
 		});
 	}
 }

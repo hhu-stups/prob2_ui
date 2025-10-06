@@ -24,6 +24,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
+
 <fx:root type="DynamicVisualizationStage" title="%dynamic.visualization.stage.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
@@ -64,35 +65,34 @@
 							<TreeView fx:id="tvCommandItems" showRoot="false" VBox.vgrow="ALWAYS">
 								<TreeItem fx:id="tvCommandItemsRoot" expanded="true"/>
 							</TreeView>
-							<HBox alignment="CENTER" VBox.vgrow="NEVER">
-								<Label fx:id="lbDescription" prefHeight="80.0" wrapText="true" VBox.vgrow="ALWAYS"/>
-							</HBox>
-
-							<TableView fx:id="tvFormula" visible="false" minHeight="100.0" maxHeight="100.0">
-								<columnResizePolicy>
-									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
-								</columnResizePolicy>
-								<columns>
-									<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
-									<TableColumn fx:id="idColumn" minWidth="80.0" maxWidth="150.0" text="%verifications.common.columns.id"/>
-									<TableColumn fx:id="formulaColumn" minWidth="80.0" text="%common.columns.formula"/>
-								</columns>
-							</TableView>
-							<VBox alignment="CENTER" spacing="10.0" VBox.vgrow="ALWAYS">
-								<VBox spacing="10.0" styleClass="border" fx:id="enterFormulaBox" visible="false" VBox.vgrow="NEVER" alignment="CENTER">
-									<padding>
-										<Insets top="5" right="5" bottom="5" left="5"/>
-									</padding>
-									<Label text="%common.enterFormula" VBox.vgrow="NEVER"/>
-									<VirtualizedScrollPane fx:id="virtualizedScrollPane" minWidth="80.0" minHeight="20.0" prefWidth="200.0" prefHeight="300.0">
-										<content>
-											<ExtendedCodeArea fx:id="taFormula" VBox.vgrow="ALWAYS"/>
-										</content>
-									</VirtualizedScrollPane>
-									<HBox alignment="CENTER" VBox.vgrow="NEVER" spacing="10.0">
-										<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%common.evaluateFormula" onAction="#evaluateFormulaDirect"/>
-										<Button fx:id="addFormulaButton" styleClass="button-blue" text="%common.saveFormula" onAction="#addFormulaDirect"/>
-									</HBox>
+							<VBox VBox.vgrow="ALWAYS">
+								<TextArea fx:id="lbDescription" prefHeight="80.0" wrapText="true" VBox.vgrow="SOMETIMES" editable="false" />
+								<VBox fx:id="formulaBox" managed="false" visible="false" VBox.vgrow="ALWAYS">
+									<TableView fx:id="tvFormula" minHeight="100.0" maxHeight="100.0">
+										<columnResizePolicy>
+											<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+										</columnResizePolicy>
+										<columns>
+											<TableColumn fx:id="statusColumn" style="-fx-alignment: CENTER;" minWidth="${fontSize.fontSize * 6}" maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>
+											<TableColumn fx:id="idColumn" minWidth="80.0" maxWidth="150.0" text="%verifications.common.columns.id"/>
+											<TableColumn fx:id="formulaColumn" minWidth="80.0" text="%common.columns.formula"/>
+										</columns>
+									</TableView>
+									<VBox spacing="10.0" styleClass="border" VBox.vgrow="ALWAYS" alignment="CENTER">
+										<padding>
+											<Insets top="5" right="5" bottom="5" left="5"/>
+										</padding>
+										<Label text="%common.enterFormula" VBox.vgrow="NEVER"/>
+										<VirtualizedScrollPane fx:id="virtualizedScrollPane" minWidth="80.0" minHeight="20.0" prefWidth="200.0" prefHeight="300.0">
+											<content>
+												<ExtendedCodeArea fx:id="taFormula" VBox.vgrow="ALWAYS"/>
+											</content>
+										</VirtualizedScrollPane>
+										<HBox alignment="CENTER" VBox.vgrow="NEVER" spacing="10.0">
+											<Button fx:id="evaluateFormulaButton" styleClass="button-blue" text="%common.evaluateFormula" onAction="#evaluateFormulaDirect"/>
+											<Button fx:id="addFormulaButton" styleClass="button-blue" text="%common.saveFormula" onAction="#addFormulaDirect"/>
+										</HBox>
+									</VBox>
 								</VBox>
 							</VBox>
 						</VBox>

@@ -10,16 +10,14 @@ import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.util.Duration;
 
-import java.util.Map;
-
 /**
  * @author Christoph Heinzen
  * @since 14.12.17
  */
-public class ValueCell extends TreeTableCell<Object, Object>{
+public class ValueCell extends TreeTableCell<Object, Object> {
 
 	private final I18n i18n;
-	private boolean executable;
+	private boolean executable = true;
 
 	ValueCell(I18n i18n) {
 		this.i18n = i18n;
@@ -29,9 +27,9 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	@Override
 	protected void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
-		TreeItem<Object> treeItem = getTableRow().getTreeItem();
-		if (treeItem instanceof OperationItem) {
-			executable = ((OperationItem) treeItem).isExecutable();
+		getTreeTableView().refresh();
+		if (getTableRow().getTreeItem() instanceof OperationItem opItem) {
+			executable = opItem.isExecutable();
 		}
 		configureEmptyCell();
 		if (item instanceof RuleResult ruleResult)
@@ -40,30 +38,25 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 			updateContentWithContextMenu(counterExample.getMessage());
 		else if (item instanceof RuleResult.SuccessMessage successMessage)
 			updateContentWithContextMenu(successMessage.getMessage());
-		else if (item instanceof Map.Entry<?,?> entry)
-			configureForComputationResult((ComputationStatus) entry.getValue());
+		else if (item instanceof ComputationStatus status)
+			configureForComputationResult(status);
 		else if (item instanceof IdentifierNotInitialised notInitialised)
 			configureForNotInitialised(notInitialised);
 		setGraphic(null);
 	}
 
 	private void configureForComputationResult(ComputationStatus result) {
-		getTableRow().getTreeItem();
 		updateContent(result.toString());
 		switch (result) {
-			case EXECUTED:
-				getStyleClass().add("true");
-				break;
-			case DISABLED:
-				setStyle("-fx-background-color:lightgray");
-				break;
-			case NOT_EXECUTED:
+			case EXECUTED -> getStyleClass().add("true");
+			case DISABLED -> setStyle("-fx-background-color:lightgray");
+			case NOT_EXECUTED -> {
 				if (!executable) {
 					// should not be translated? Appears next to rule states SUCCESS, FAIL, …
 					updateContent("NOT EXECUTABLE");
 				}
 				setStyle(null);
-				break;
+			}
 		}
 	}
 
@@ -77,21 +70,15 @@ public class ValueCell extends TreeTableCell<Object, Object>{
 	private void configureForRuleResult(RuleResult result) {
 		updateContent(result.getRuleState().name());
 		switch (result.getRuleState()) {
-			case FAIL:
-				getStyleClass().add("false");
-				break;
-			case SUCCESS:
-				getStyleClass().add("true");
-				break;
-			case NOT_CHECKED:
+			case FAIL -> getStyleClass().add("false");
+			case SUCCESS -> getStyleClass().add("true");
+			case NOT_CHECKED -> {
 				if (!executable) {
 					updateContent("NOT CHECKABLE");
 				}
 				setStyle(null);
-				break;
-			case DISABLED:
-				setStyle("-fx-background-color:lightgray");
-				break;
+			}
+			case DISABLED -> setStyle("-fx-background-color:lightgray");
 		}
 	}
 

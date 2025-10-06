@@ -2,253 +2,263 @@ package de.prob2.ui.simulation.configuration;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.fasterxml.jackson.annotation.JsonValue;
+import com.google.common.base.MoreObjects;
+
+import de.prob.statespace.Transition;
 
 @JsonPropertyOrder({
-	"id",
-	"execute",
-	// For all other properties, the default order (i. e. field order in class) is used.
+		"id",
+		"comment",
+		"execute",
+		"after",
+		"priority",
+		"additionalGuards",
+		"activationKind",
+		"fixedVariables",
+		"probabilisticVariables",
+		"transitionSelection",
+		"activating",
+		"activatingOnlyWhenExecuted",
+		"updating",
+		"withPredicate"
 })
-public class ActivationOperationConfiguration extends DiagramConfiguration {
-
-	public enum ActivationKind {
-		SINGLE("single"),
-		SINGLE_MIN("single:min"),
-		SINGLE_MAX("single:max"),
-		MULTI("multi");
-
-		private final String name;
-
-		ActivationKind(String name) {
-			this.name = name;
-		}
-
-		@JsonValue
-		public String getName() {
-			return name;
-		}
-
-	}
+public final class ActivationOperationConfiguration extends DiagramConfiguration.NonUi {
 
 	private String execute;
-
 	private String after;
-
 	private int priority;
-
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private String additionalGuards;
-
 	private ActivationKind activationKind;
-
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Map<String, String> fixedVariables;
-
-	private Object probabilisticVariables;
-
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private Map<String, Map<String, String>> probabilisticVariables;
+	private TransitionSelection transitionSelection;
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private List<String> activating;
-
 	private boolean activatingOnlyWhenExecuted;
-
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Map<String, String> updating;
-
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private String withPredicate;
 
-	public ActivationOperationConfiguration(String id, String op, String time, int priority, String additionalGuards, ActivationKind activationKind,
-			Map<String, String> fixedVariables, Object probabilisticVariables, List<String> activations, boolean activatingOnlyWhenExecuted,
-			Map<String, String> updating, String withPredicate) {
-		super(id);
-		this.execute = op;
-		this.after = time;
-		this.priority = priority;
-		this.additionalGuards = additionalGuards;
-		this.activationKind = activationKind;
-		this.fixedVariables = fixedVariables;
-		this.probabilisticVariables = probabilisticVariables;
-		this.activating = activations;
-		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted;
-		this.updating = updating;
-		this.withPredicate = withPredicate;
+	@JsonCreator
+	public ActivationOperationConfiguration(
+			@JsonProperty(value = "id", required = true) String id,
+			@JsonProperty(value = "execute", required = true) String op,
+			@JsonProperty(value = "after", defaultValue = "0") String after,
+			@JsonProperty(value = "priority", defaultValue = "0") Integer priority,
+			@JsonProperty("additionalGuards") String additionalGuards,
+			@JsonProperty(value = "activationKind", defaultValue = "multi") ActivationKind activationKind,
+			@JsonProperty("fixedVariables") Map<String, String> fixedVariables,
+			@JsonProperty("probabilisticVariables") Map<String, Map<String, String>> probabilisticVariables,
+			@JsonProperty(value = "transitionSelection", defaultValue = "first") TransitionSelection transitionSelection,
+			@JsonProperty("activating") List<String> activating,
+			@JsonProperty(value = "activatingOnlyWhenExecuted", defaultValue = "true") Boolean activatingOnlyWhenExecuted,
+			@JsonProperty("updating") Map<String, String> updating,
+			@JsonProperty("withPredicate") String withPredicate,
+			@JsonProperty("comment") String comment
+	) {
+		super(id, comment);
+		this.execute = Objects.requireNonNull(op, "execute");
+		this.after = after != null && !after.isEmpty() ? after : "0";
+		this.priority = !Transition.isArtificialTransitionName(this.execute) && priority != null ? priority : 0;
+		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
+		this.activationKind = activationKind != null ? activationKind : ActivationKind.MULTI;
+		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
+		this.probabilisticVariables = probabilisticVariables != null ? probabilisticVariables.entrySet().stream().collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, e -> Map.copyOf(e.getValue()))) : Map.of();
+		this.transitionSelection = transitionSelection != null ? transitionSelection : TransitionSelection.FIRST;
+		this.activating = activating != null ? List.copyOf(activating) : List.of();
+		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted != null ? activatingOnlyWhenExecuted : true;
+		this.updating = updating != null ? Map.copyOf(updating) : Map.of();
+		this.withPredicate = withPredicate != null && !withPredicate.isEmpty() && !"1=1".equals(withPredicate) ? withPredicate : null;
 	}
 
 	@JsonProperty("execute")
-	public String getOpName() {
-		return execute;
+	public String getExecute() {
+		return this.execute;
 	}
 
-	public void setOpName(String execute) {
+	public void setExecute(String execute) {
 		this.execute = execute;
 	}
 
+	@JsonIgnore
 	public String getAfter() {
-		return after;
+		return this.after;
+	}
+
+	@JsonGetter("after")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private String getAfterForJson() {
+		return "0".equals(this.after) ? null : this.after;
 	}
 
 	public void setAfter(String after) {
-		this.after = after;
+		this.after = after != null && !after.isEmpty() ? after : "0";
 	}
 
+	@JsonIgnore
 	public int getPriority() {
-		return priority;
+		return this.priority;
+	}
+
+	@JsonGetter("priority")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Integer getPriorityForJson() {
+		return Transition.isArtificialTransitionName(this.getExecute()) || this.priority == 0 ? null : this.priority;
 	}
 
 	public void setPriority(int priority) {
-		this.priority = priority;
+		if (!Transition.isArtificialTransitionName(this.getExecute())) {
+			this.priority = priority;
+		}
 	}
 
+	@JsonGetter("additionalGuards")
 	public String getAdditionalGuards() {
-		return additionalGuards;
+		return this.additionalGuards;
 	}
 
 	public void setAdditionalGuards(String additionalGuards) {
-		this.additionalGuards = additionalGuards;
+		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
 	}
 
 	@JsonIgnore
-	public String getAdditionalGuardsAsString() {
-		return additionalGuards == null ? "" : additionalGuards;
+	public ActivationKind getActivationKind() {
+		return this.activationKind;
 	}
 
-	public ActivationKind getActivationKind() {
-		return activationKind;
+	@JsonGetter("activationKind")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private ActivationKind getActivationKindForJson() {
+		return ActivationKind.MULTI.equals(this.activationKind) ? null : this.activationKind;
 	}
 
 	public void setActivationKind(ActivationKind activationKind) {
-		this.activationKind = activationKind;
+		this.activationKind = activationKind != null ? activationKind : ActivationKind.MULTI;
 	}
 
+	@JsonGetter("fixedVariables")
 	public Map<String, String> getFixedVariables() {
-		return fixedVariables;
+		return this.fixedVariables;
 	}
 
 	public void setFixedVariables(Map<String, String> fixedVariables) {
-		this.fixedVariables = fixedVariables;
+		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
+	}
+
+	@JsonGetter("probabilisticVariables")
+	public Map<String, Map<String, String>> getProbabilisticVariables() {
+		return this.probabilisticVariables;
+	}
+
+	public void setProbabilisticVariables(Map<String, Map<String, String>> probabilisticVariables) {
+		this.probabilisticVariables = probabilisticVariables != null ? probabilisticVariables.entrySet().stream().collect(Collectors.toUnmodifiableMap(Map.Entry::getKey, e -> Map.copyOf(e.getValue()))) : Map.of();
 	}
 
 	@JsonIgnore
-	public String getFixedVariablesAsString() {
-		return fixedVariables == null ? "" : fixedVariables.toString();
+	public TransitionSelection getTransitionSelection() {
+		return this.transitionSelection;
 	}
 
-	public Object getProbabilisticVariables() {
-		return probabilisticVariables;
+	@JsonGetter("transitionSelection")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private TransitionSelection getTransitionSelectionForJson() {
+		return TransitionSelection.FIRST.equals(this.transitionSelection) ? null : this.transitionSelection;
 	}
 
-	public void setProbabilisticVariables(Object probabilisticVariables) {
-		this.probabilisticVariables = probabilisticVariables;
+	public void setTransitionSelection(TransitionSelection transitionSelection) {
+		this.transitionSelection = transitionSelection != null ? transitionSelection : TransitionSelection.FIRST;
 	}
 
-	@JsonIgnore
-	public String getProbabilisticVariablesAsString() {
-		return probabilisticVariables == null ? "" : probabilisticVariables.toString();
-	}
-
+	@JsonGetter("activating")
 	public List<String> getActivating() {
-		return activating;
+		return this.activating;
 	}
 
 	public void setActivating(List<String> activating) {
-		this.activating = activating;
+		this.activating = activating != null ? List.copyOf(activating) : List.of();
 	}
 
 	@JsonIgnore
-	public String getActivatingAsString() {
-		return activating == null ? "" : activating.toString().substring(1, activating.toString().length() - 1);
+	public boolean isActivatingOnlyWhenExecuted() {
+		return this.activatingOnlyWhenExecuted;
 	}
 
-	public boolean isActivatingOnlyWhenExecuted() {
-		return activatingOnlyWhenExecuted;
+	@JsonGetter("activatingOnlyWhenExecuted")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Boolean isActivatingOnlyWhenExecutedForJson() {
+		return this.activatingOnlyWhenExecuted ? null : false;
 	}
 
 	public void setActivatingOnlyWhenExecuted(boolean activatingOnlyWhenExecuted) {
 		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted;
 	}
 
+	@JsonGetter("updating")
 	public Map<String, String> getUpdating() {
-		return updating;
+		return this.updating;
 	}
 
 	public void setUpdating(Map<String, String> updating) {
-		this.updating = updating;
+		this.updating = updating != null ? Map.copyOf(updating) : Map.of();
 	}
 
+	@JsonGetter("withPredicate")
 	public String getWithPredicate() {
-		return withPredicate;
+		return this.withPredicate;
 	}
 
 	public void setWithPredicate(String withPredicate) {
-		this.withPredicate = withPredicate;
+		this.withPredicate = withPredicate != null && !withPredicate.isEmpty() && !"1=1".equals(withPredicate) ? withPredicate : null;
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) {
+			return true;
+		} else if (!(o instanceof ActivationOperationConfiguration that)) {
+			return false;
+		} else {
+			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getComment(), that.getComment()) && Objects.equals(this.getExecute(), that.getExecute()) && Objects.equals(this.getAfter(), that.getAfter()) && this.getPriority() == that.getPriority() && Objects.equals(this.getAdditionalGuards(), that.getAdditionalGuards()) && Objects.equals(this.getActivationKind(), that.getActivationKind()) && Objects.equals(this.getFixedVariables(), that.getFixedVariables()) && Objects.equals(this.getProbabilisticVariables(), that.getProbabilisticVariables())&& Objects.equals(this.getTransitionSelection(), that.getTransitionSelection()) && Objects.equals(this.getActivating(), that.getActivating()) && this.isActivatingOnlyWhenExecuted() == that.isActivatingOnlyWhenExecuted() && Objects.equals(this.getUpdating(), that.getUpdating()) && Objects.equals(this.getWithPredicate(), that.getWithPredicate());
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.getId(), this.getComment(), this.getExecute(), this.getAfter(), this.getPriority(), this.getAdditionalGuards(), this.getActivationKind(), this.getFixedVariables(), this.getProbabilisticVariables(), this.getTransitionSelection(), this.getActivating(), this.isActivatingOnlyWhenExecuted(), this.getUpdating(), this.getWithPredicate());
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("ActivationOperationConfiguration(");
-		sb.append("id");
-		sb.append("=");
-		sb.append(id);
-		sb.append(", ");
-		sb.append("execute");
-		sb.append("=");
-		sb.append(execute);
-		sb.append(", ");
-		sb.append("after");
-		sb.append("=");
-		sb.append(after);
-		sb.append(", ");
-		sb.append("priority");
-		sb.append("=");
-		sb.append(priority);
-		sb.append(", ");
-		if(additionalGuards != null) {
-			sb.append("additionalGuards");
-			sb.append("=");
-			sb.append(additionalGuards);
-			sb.append(", ");
-		}
-		sb.append("activationKind");
-		sb.append("=");
-		sb.append(activationKind);
-
-		if(fixedVariables != null) {
-			sb.append(", ");
-			sb.append("fixedVariables");
-			sb.append("=");
-			sb.append(fixedVariables);
-			sb.append(", ");
-		}
-		if(probabilisticVariables != null) {
-			sb.append(", ");
-			sb.append("probabilisticVariables");
-			sb.append("=");
-			sb.append(probabilisticVariables);
-			sb.append(", ");
-		}
-		if(activating != null) {
-			sb.append(", ");
-			sb.append("activating");
-			sb.append("=");
-			sb.append(activating);
-		}
-		sb.append(", ");
-		sb.append("activatingOnlyWhenExecuted");
-		sb.append("=");
-		sb.append(activatingOnlyWhenExecuted);
-		sb.append(")");
-		if(updating != null) {
-			sb.append(", ");
-			sb.append("updating");
-			sb.append("=");
-			sb.append(updating);
-		}
-		if(withPredicate != null) {
-			sb.append(", ");
-			sb.append("withPredicate");
-			sb.append("=");
-			sb.append(withPredicate);
-		}
-		return sb.toString();
+		return MoreObjects.toStringHelper(this)
+				.omitNullValues()
+				.omitEmptyValues()
+				.add("id", this.getId())
+				.add("comment", this.getComment())
+				.add("execute", this.getExecute())
+				.add("after", this.getAfter())
+				.add("priority", this.getPriority())
+				.add("additionalGuards", this.getAdditionalGuards())
+				.add("activationKind", this.getActivationKind())
+				.add("fixedVariables", this.getFixedVariables())
+				.add("probabilisticVariables", this.getProbabilisticVariables())
+				.add("transitionSelection", this.getTransitionSelection())
+				.add("activating", this.getActivating())
+				.add("activatingOnlyWhenExecuted", this.isActivatingOnlyWhenExecuted())
+				.add("updating", this.getUpdating())
+				.add("withPredicate", this.getWithPredicate())
+				.toString();
 	}
 }

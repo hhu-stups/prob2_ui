@@ -15,11 +15,13 @@ import de.prob.check.TLCModelCheckingOptions;
 import de.prob.model.classicalb.ClassicalBModel;
 import de.prob.model.eventb.EventBModel;
 import de.prob.model.representation.AbstractModel;
+import de.prob.model.representation.TLAModel;
 import de.prob.statespace.FormalismType;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -34,15 +36,15 @@ import javafx.beans.property.ReadOnlyStringProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.RadioButton;
 import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleGroup;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -52,7 +54,10 @@ import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 public class TLCModelCheckingTab extends Tab {
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(TLCModelCheckingTab.class);
+	private static final int DEFAULT_DFID_MAX_DEPTH = 10;
+	private static final int DEFAULT_WORKERS = 1;
 
 	@FXML
 	private VBox errorMessageBox;
@@ -63,7 +68,7 @@ public class TLCModelCheckingTab extends Tab {
 	@FXML
 	private HBox dfidDepthBox;
 	@FXML
-	private Spinner<Integer> dfidInitialDepth;
+	private Spinner<Integer> dfidMaxDepth;
 	@FXML
 	private CheckBox findDeadlocks;
 	@FXML
@@ -97,8 +102,14 @@ public class TLCModelCheckingTab extends Tab {
 	private TextField tfSaveLocation;
 	@FXML
 	private Button changeLocationButton;
+	@FXML
+	private RadioButton rbNoTranslation;
+	@FXML
+	private RadioButton rbDoTranslation;
+	@FXML
+	private VBox translationOptionsContainer;
 
-	private int oldNrWorkers = 1;
+	private int oldNrWorkers = DEFAULT_WORKERS;
 
 	private final I18n i18n;
 
@@ -110,7 +121,7 @@ public class TLCModelCheckingTab extends Tab {
 
 	private final CurrentTrace currentTrace;
 
-	private boolean checkedTlcApplicable;
+	private volatile boolean checkedTlcApplicable;
 	private final StringProperty tlcApplicableError;
 
 	private ModelCheckingItem result;
@@ -137,16 +148,15 @@ public class TLCModelCheckingTab extends Tab {
 			ModelCheckingSearchStrategy.BREADTH_FIRST,
 			ModelCheckingSearchStrategy.DEPTH_FIRST
 		);
-		this.selectSearchStrategy.setValue(ModelCheckingSearchStrategy.BREADTH_FIRST);
 		this.selectSearchStrategy.setConverter(i18n.translateConverter(TranslatableAdapter.adapter(TLCModelCheckingTab::getSearchStrategyNameKey)));
 
-		this.dfidInitialDepth.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1));
+		this.dfidMaxDepth.setValueFactory(new ImprovedIntegerSpinnerValueFactory(0, Integer.MAX_VALUE, DEFAULT_DFID_MAX_DEPTH));
 		this.selectSearchStrategy.getSelectionModel().selectedItemProperty().addListener((obs, from, to) -> {
 			if (to == ModelCheckingSearchStrategy.DEPTH_FIRST) {
 				this.dfidDepthBox.setVisible(true);
 				this.nrWorkers.setDisable(true);
 				this.oldNrWorkers = nrWorkers.getValue();
-				this.nrWorkers.getValueFactory().setValue(1);
+				this.nrWorkers.getValueFactory().setValue(DEFAULT_WORKERS);
 			} else {
 				this.dfidDepthBox.setVisible(false);
 				this.nrWorkers.getValueFactory().setValue(oldNrWorkers);
@@ -154,32 +164,38 @@ public class TLCModelCheckingTab extends Tab {
 			}
 		});
 
-		this.nrWorkers.setValueFactory(new SpinnerValueFactory.IntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1));
-		this.nrWorkers.getEditor().textProperty().addListener((observable, from, to) -> {
-			try {
-				nrWorkers.getValueFactory().setValue(Integer.parseInt(to));
-			} catch (NumberFormatException e) {
-				final Alert alert = stageManager.makeAlert(Alert.AlertType.WARNING, "", "verifications.modelchecking.modelcheckingStage.invalidInput");
-				alert.initOwner(stageManager.getCurrent());
-				alert.showAndWait();
-			}
-		});
+		this.nrWorkers.setValueFactory(new ImprovedIntegerSpinnerValueFactory(1, Integer.MAX_VALUE, 1));
 
 		this.tfAddLTL.visibleProperty().bind(addLTLFormula.selectedProperty());
 
+		Path machinePath = this.currentProject.get().getAbsoluteMachinePath(this.currentProject.getCurrentMachine());
+		String machineName = this.currentProject.getCurrentMachine().getName();
+		if (machineName.equals(machinePath.getFileName().toString())) {
+			machineName += "_";
+		}
+		Path saveLocation = this.currentProject.get().relativizeProjectPath(machinePath.resolveSibling(machineName));
+		this.tfSaveLocation.setText(saveLocation.toString());
+
 		this.saveLocationBox.visibleProperty().bind(saveGeneratedFiles.selectedProperty());
-		this.tfSaveLocation.setText(currentProject.getLocation().resolve(currentProject.getCurrentMachine().getLocation()).getParent().resolve(currentProject.getCurrentMachine().getName()).toString());
 		this.changeLocationButton.setOnAction(e -> {
 			final DirectoryChooser chooser = new DirectoryChooser();
 			chooser.setInitialDirectory(currentProject.getLocation().toFile());
 			Path result = fileChooserManager.showDirectoryChooser(chooser, FileChooserManager.Kind.NEW_MACHINE, stageManager.getCurrent());
 			if (result != null) {
-				this.tfSaveLocation.setText(result.toString());
+				this.tfSaveLocation.setText(this.currentProject.get().relativizeProjectPath(result).toString());
 			}
 		});
 
 		errorMessageBox.visibleProperty().bind(this.tlcApplicableErrorProperty().isNotNull());
 		errorMessage.textProperty().bind(this.tlcApplicableErrorProperty());
+
+		translationOptionsContainer.disableProperty().bind(rbNoTranslation.toggleGroupProperty().flatMap(ToggleGroup::selectedToggleProperty).map(v -> rbNoTranslation == v));
+		rbNoTranslation.getToggleGroup().selectedToggleProperty().addListener((obs, from, to) -> {
+			if (currentProject.getCurrentMachine() != null) {
+				this.checkedTlcApplicable = false;
+				this.checkTlcApplicable();
+			}
+		});
 
 		// initialize with current preferences, e.g. WORKERS
 		// FIXME This runs a ProB command on the UI thread to get the current preference values. This should be made lazy and/or moved to the CliTaskExecutor to avoid blocking the UI thread.
@@ -194,7 +210,7 @@ public class TLCModelCheckingTab extends Tab {
 		};
 	}
 
-	ModelCheckingItem startModelCheck(String id) {
+	TLCModelCheckingItem startModelCheck(String id) {
 		ModelCheckingSearchStrategy searchStrategy = selectSearchStrategy.getValue();
 		return new TLCModelCheckingItem(id, searchStrategy, getOptions());
 	}
@@ -202,9 +218,13 @@ public class TLCModelCheckingTab extends Tab {
 	private Map<TLC4BOption, String> getOptions() {
 		// FIXME This runs a ProB command on the UI thread to get the current preference values. This should be changed to use the existing options from setData as defaults, instead of calculating them again from the ProB preferences.
 		return TLCModelCheckingOptions.fromPreferences(currentTrace.getStateSpace())
+			// TLC options
 			.useDepthFirstSearch(selectSearchStrategy.getSelectionModel().getSelectedItem() == ModelCheckingSearchStrategy.DEPTH_FIRST ?
-				String.valueOf(dfidInitialDepth.getValue()) : null)
+				dfidMaxDepth.getValue().toString() : null)
+			.setNumberOfWorkers(nrWorkers.getValue().toString())
 			.checkDeadlocks(findDeadlocks.isSelected())
+			// translation options
+			.noTranslation(rbNoTranslation.isSelected())
 			.checkInvariantViolations(findInvViolations.isSelected())
 			.checkAssertions(findBAViolations.isSelected())
 			.checkWelldefinedness(checkWelldefinedness.isSelected())
@@ -212,7 +232,6 @@ public class TLCModelCheckingTab extends Tab {
 			.checkGoal(checkGoal.isSelected())
 			.checkLTLFormula(addLTLFormula.isSelected() ? tfAddLTL.getText() : null)
 			.setupConstantsUsingProB(setupConstantsUsingProB.isSelected())
-			.setNumberOfWorkers(nrWorkers.getValueFactory().getValue().toString())
 			.proofGuidedModelChecking(proofGuidedMC.isSelected())
 			.useSymmetry(useSymmetry.isSelected())
 			.saveGeneratedFiles(saveGeneratedFiles.isSelected())
@@ -232,25 +251,31 @@ public class TLCModelCheckingTab extends Tab {
 		if (this.checkedTlcApplicable) {
 			return;
 		}
-
-		this.checkedTlcApplicable = true;
-
-		Thread thread = new Thread(() -> {
-			try {
-				Path machinePath = getClassicalBMachine(currentProject, currentTrace.getStateSpace(), i18n);
-				// TODO: show info when internal representation is used
-				TLC4B.checkTLC4BIsApplicable(machinePath.toString());
-			} catch (BCompoundException | RuntimeException exc) {
-				LOGGER.warn("TLC4B is not applicable to this machine", exc);
-				Platform.runLater(() -> this.tlcApplicableError.set(exc.getMessage()));
+		synchronized (this) {
+			if (this.checkedTlcApplicable) {
 				return;
 			}
+			this.checkedTlcApplicable = true;
 
-			Platform.runLater(() -> this.tlcApplicableError.set(null));
-		}, "TLC4B applicability checker");
-		// Don't let this thread keep the JVM alive if it's still running when the UI exits.
-		thread.setDaemon(true);
-		thread.start();
+			LOGGER.debug("Checking TLC applicability");
+			final boolean noTranslation = this.rbNoTranslation.isSelected();
+			Thread thread = new Thread(() -> {
+				try {
+					Path machinePath = getMachinePathForTlc(currentProject, currentTrace.getStateSpace(), i18n, noTranslation);
+					// TODO: show info when internal representation is used
+					TLC4B.checkTLC4BIsApplicable(machinePath.toString(), noTranslation);
+				} catch (Exception exc) {
+					LOGGER.warn("TLC4B is not applicable to this machine", exc);
+					Platform.runLater(() -> this.tlcApplicableError.set(exc.getMessage()));
+					return;
+				}
+
+				Platform.runLater(() -> this.tlcApplicableError.set(null));
+			}, "TLC4B applicability checker");
+			// Don't let this thread keep the JVM alive if it's still running when the UI exits.
+			thread.setDaemon(true);
+			thread.start();
+		}
 	}
 
 	public ModelCheckingItem getResult() {
@@ -265,11 +290,23 @@ public class TLCModelCheckingTab extends Tab {
 	private void setData(final Map<TLC4BOption, String> options) {
 		checkedTlcApplicable = false;
 		tlcApplicableError.set(null);
+		// TLC options
 		if (options.containsKey(TLC4BOption.DFID)) {
 			selectSearchStrategy.getSelectionModel().select(ModelCheckingSearchStrategy.DEPTH_FIRST);
-			dfidInitialDepth.getValueFactory().setValue(Integer.parseInt(options.get(TLC4BOption.DFID)));
+			try {
+				dfidMaxDepth.getValueFactory().setValue(Integer.parseInt(options.get(TLC4BOption.DFID)));
+			} catch (NumberFormatException ignored) {
+			}
+		} else {
+			selectSearchStrategy.getSelectionModel().select(ModelCheckingSearchStrategy.BREADTH_FIRST);
+		}
+		try {
+			nrWorkers.getValueFactory().setValue(Integer.parseInt(options.get(TLC4BOption.WORKERS)));
+		} catch (NumberFormatException ignored) {
 		}
 		findDeadlocks.setSelected(!options.containsKey(TLC4BOption.NODEAD));
+		// translation options
+		rbNoTranslation.getToggleGroup().selectToggle(options.containsKey(TLC4BOption.NOTRANSLATION) ? rbNoTranslation : rbDoTranslation);
 		findInvViolations.setSelected(!options.containsKey(TLC4BOption.NOINV));
 		findBAViolations.setSelected(!options.containsKey(TLC4BOption.NOASS));
 		checkWelldefinedness.setSelected(options.containsKey(TLC4BOption.WDCHECK));
@@ -283,7 +320,6 @@ public class TLCModelCheckingTab extends Tab {
 			addLTLFormula.setSelected(false);
 		}
 		setupConstantsUsingProB.setSelected(options.containsKey(TLC4BOption.CONSTANTSSETUP));
-		nrWorkers.getValueFactory().setValue(Integer.parseInt(options.get(TLC4BOption.WORKERS)));
 		proofGuidedMC.setSelected(options.containsKey(TLC4BOption.PARINVEVAL));
 		useSymmetry.setSelected(options.containsKey(TLC4BOption.SYMMETRY));
 		saveGeneratedFiles.setSelected(!options.containsKey(TLC4BOption.TMP));
@@ -292,15 +328,21 @@ public class TLCModelCheckingTab extends Tab {
 		}
 	}
 
-	public static Path getClassicalBMachine(CurrentProject currentProject, StateSpace stateSpace, I18n i18n) {
-		return getClassicalBMachine(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, i18n);
+	public static Path getMachinePathForTlc(CurrentProject currentProject, StateSpace stateSpace, I18n i18n, boolean noTranslation) {
+		return getMachinePathForTlc(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, i18n, noTranslation);
 	}
 
-	public static Path getClassicalBMachine(Project project, Machine machine, StateSpace stateSpace, I18n i18n) {
+	public static Path getMachinePathForTlc(Project project, Machine machine, StateSpace stateSpace, I18n i18n, boolean noTranslation) {
 		Path machinePath;
 		AbstractModel model = stateSpace.getModel();
-		if (model instanceof ClassicalBModel) {
-			machinePath = project.getLocation().resolve(machine.getLocation());
+		if (noTranslation) {
+			if (model instanceof TLAModel) {
+				machinePath = project.getAbsoluteMachinePath(machine);
+			} else {
+				throw new RuntimeException(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.noTranslationRequiresTla"));
+			}
+		} else if (model instanceof ClassicalBModel) {
+			machinePath = project.getAbsoluteMachinePath(machine);
 		} else if (model.getFormalismType() == FormalismType.B) { // if not classical B: use internal representation
 			if (model instanceof EventBModel && !stateSpace.getCurrentPreference("NUMBER_OF_ANIMATED_ABSTRACTIONS").equals("0")) {
 				throw new RuntimeException(i18n.translate("verifications.modelchecking.modelcheckingStage.tlcTab.eventBAnimatedAbstractionsError"));
@@ -322,4 +364,3 @@ public class TLCModelCheckingTab extends Tab {
 		return machinePath;
 	}
 }
-

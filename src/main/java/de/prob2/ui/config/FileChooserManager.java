@@ -16,6 +16,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -238,11 +239,15 @@ public final class FileChooserManager {
 		if (containsValidInitialDirectory(kind)) {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind).toFile());
 		}
+
 		final File file = fileChooser.showOpenDialog(window);
-		final Path path = file == null ? null : file.toPath();
-		if (path != null) {
-			setInitialDirectory(kind, path.getParent());
+		if (file == null) {
+			// User canceled the open dialog.
+			return null;
 		}
+
+		Path path = file.toPath();
+		setInitialDirectory(kind, path.getParent());
 		return path;
 	}
 
@@ -250,26 +255,42 @@ public final class FileChooserManager {
 		if (containsValidInitialDirectory(kind)) {
 			fileChooser.setInitialDirectory(getInitialDirectory(kind).toFile());
 		}
+
 		final File file = fileChooser.showSaveDialog(window);
-		if (file != null && Kind.NEW_MACHINE.equals(kind)) {
-			int i = file.toString().lastIndexOf('.');
-			String fileExtension = i == -1 ? null : "*" + file.toString().substring(i);
-			if (fileExtension == null || fileChooser.getExtensionFilters().stream().noneMatch(extensionFilter -> extensionFilter.getExtensions().contains(fileExtension))) {
+		if (file == null) {
+			// User canceled the save dialog.
+			return null;
+		}
+
+		Path path = file.toPath();
+		if (Kind.NEW_MACHINE.equals(kind)) {
+			String ext = MoreFiles.getFileExtension(path);
+			String expectedExtFile = "*." + ext;
+			if (ext.isEmpty() || fileChooser.getExtensionFilters().stream().noneMatch(extensionFilter -> extensionFilter.getExtensions().contains(expectedExtFile))) {
 				// Either there is no file extension or an invalid one
 				stageManager.makeAlert(
 						Alert.AlertType.WARNING,
 						"common.fileChooser.invalidExtension.warning.header",
 						"common.fileChooser.invalidExtension.warning.content",
-						fileExtension == null ? i18n.translate("common.fileChooser.invalidExtension.warning.content.empty") : fileExtension
+						ext.isEmpty() ? i18n.translate("common.fileChooser.invalidExtension.warning.content.empty") : ext
 				).showAndWait();
 				fileChooser.setTitle(i18n.translate("common.fileChooser.invalidExtension.fileChooser.header"));
 				return showSaveFileChooser(fileChooser, kind, window);
 			}
 		}
-		final Path path = file == null ? null : file.toPath();
-		if (path != null) {
-			setInitialDirectory(kind, path.getParent());
+
+		setInitialDirectory(kind, path.getParent());
+
+		// this is a hack to fix files with a double extension
+		// https://bugs.openjdk.org/browse/JDK-8352298
+		if (Files.isRegularFile(path) && path.getFileName() != null) {
+			String fileName = path.getFileName().toString();
+			String ext = MoreFiles.getFileExtension(path);
+			if (!ext.isEmpty() && fileName.endsWith("." + ext + "." + ext)) {
+				path = path.resolveSibling(fileName.substring(0, fileName.length() - ext.length() - 1));
+			}
 		}
+
 		return path;
 	}
 
@@ -277,11 +298,15 @@ public final class FileChooserManager {
 		if (containsValidInitialDirectory(kind)) {
 			directoryChooser.setInitialDirectory(getInitialDirectory(kind).toFile());
 		}
+
 		final File dirFile = directoryChooser.showDialog(window);
-		final Path dirPath = dirFile == null ? null : dirFile.toPath();
-		if (dirPath != null) {
-			setInitialDirectory(kind, dirPath.getParent());
+		if (dirFile == null) {
+			// User canceled the open dialog.
+			return null;
 		}
+
+		Path dirPath = dirFile.toPath();
+		setInitialDirectory(kind, dirPath.getParent());
 		return dirPath;
 	}
 	

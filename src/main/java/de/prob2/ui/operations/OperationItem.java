@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.stream.Stream;
 import com.google.common.base.MoreObjects;
 
 import de.prob.animator.command.GetOperationDescriptionCommand;
+import de.prob.animator.command.GetTransitionInfosCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalExpandMode;
 import de.prob.animator.domainobjects.EvalOptions;
@@ -23,6 +25,7 @@ import de.prob.animator.domainobjects.EvalResult;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
+import de.prob.prolog.term.PrologTerm;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.State;
@@ -88,7 +91,8 @@ public class OperationItem {
 	
 	private final Transition transition;
 	private final String name;
-	private final String description;
+	private String description;
+	private Map<String,List<PrologTerm>> transitionInfos;
 	private final OperationItem.Status status;
 	private final List<String> parameterNames;
 	private final List<String> parameterValues;
@@ -116,13 +120,6 @@ public class OperationItem {
 		this.variables = Objects.requireNonNull(variables);
 		this.unambiguousConstantNames = Objects.requireNonNull(unambiguousConstantNames);
 		this.unambiguousVariableNames = Objects.requireNonNull(unambiguousVariableNames);
-		if (transition != null) {
-			GetOperationDescriptionCommand cmd = new GetOperationDescriptionCommand(transition.getSource().getId(), transition.getId());
-			transition.getSource().getStateSpace().execute(cmd);
-			this.description = cmd.getDescription();
-		} else {
-			this.description = "";
-		}
 	}
 
 	private static Map<String, String> extractValues(final Map<IEvalElement, AbstractEvalResult> results, final Collection<IEvalElement> formulas) {
@@ -285,7 +282,31 @@ public class OperationItem {
 	}
 
 	public String getDescription() {
+		// request description only if required
+		if (description == null) {
+			if (transition != null) {
+				GetOperationDescriptionCommand cmd = new GetOperationDescriptionCommand(transition.getSource().getId(), transition.getId());
+				transition.getSource().getStateSpace().execute(cmd);
+				description = cmd.getDescription();
+			} else {
+				description = "";
+			}
+		}
 		return description;
+	}
+
+	public Map<String,List<PrologTerm>> getTransitionInfos() {
+		// request infos only if required
+		if (transitionInfos == null) {
+			if (transition != null) {
+				GetTransitionInfosCommand cmd = new GetTransitionInfosCommand(transition.getId());
+				transition.getSource().getStateSpace().execute(cmd);
+				transitionInfos = cmd.getInfos();
+			} else {
+				transitionInfos = new HashMap<>();
+			}
+		}
+		return transitionInfos;
 	}
 
 	public OperationItem.Status getStatus() {

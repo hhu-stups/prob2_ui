@@ -42,7 +42,7 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 		
 		this.operationNames = new ArrayList<>(operationNames);
 	}
-	
+
 	public List<String> getOperationNames() {
 		return Collections.unmodifiableList(this.operationNames);
 	}
@@ -100,7 +100,12 @@ public final class CBCFindSequenceItem extends SymbolicAnimationItem {
 			&& other instanceof CBCFindSequenceItem o
 			&& this.getOperationNames().equals(o.getOperationNames());
 	}
-	
+
+	@Override
+	public CBCFindSequenceItem copy() {
+		return new CBCFindSequenceItem(this.getId(), new ArrayList<>(this.operationNames));
+	}
+
 	@Override
 	public String toString() {
 		return MoreObjects.toStringHelper(this)

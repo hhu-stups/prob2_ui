@@ -2,7 +2,6 @@ package de.prob2.ui.verifications.cbc;
 
 import de.prob.animator.CommandInterruptedException;
 import de.prob.animator.command.ConstraintBasedAssertionCheckCommand;
-import de.prob.statespace.Trace;
 import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;

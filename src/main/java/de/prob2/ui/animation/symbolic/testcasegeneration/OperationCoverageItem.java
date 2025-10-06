@@ -57,4 +57,9 @@ public final class OperationCoverageItem extends TestCaseGenerationItem {
 			       && super.settingsEqual(that)
 			       && Objects.equals(this.getOperations(), that.getOperations());
 	}
+
+	@Override
+	public OperationCoverageItem copy() {
+		return new OperationCoverageItem(this.getId(), this.getMaxDepth(), new ArrayList<>(this.operations));
+	}
 }

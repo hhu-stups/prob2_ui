@@ -65,5 +65,14 @@ public interface IValidationTask {
 	 * @param other other object
 	 * @return true iff this == that wrt the constraints above
 	 */
+	@JsonIgnore
 	boolean settingsEqual(Object other);
+
+	/**
+	 * Create a copy of this task with the same settings.
+	 *
+	 * @return a copy
+	 */
+	IValidationTask copy();
+
 }

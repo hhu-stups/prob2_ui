@@ -28,7 +28,12 @@ public final class CBCDynamicAssertionCheckingItem extends CBCAssertionCheckingI
 	public String getTaskDescription(I18n i18n) {
 		return "";
 	}
-	
+
+	@Override
+	public CBCDynamicAssertionCheckingItem copy() {
+		return new CBCDynamicAssertionCheckingItem(this.getId());
+	}
+
 	@Override
 	protected ConstraintBasedAssertionCheckCommand.CheckingType getAssertionCheckingType() {
 		return ConstraintBasedAssertionCheckCommand.CheckingType.DYNAMIC;

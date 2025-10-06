@@ -177,8 +177,7 @@ The general structure of a SimB activation diagram is as follows:
 
 A SimB activation diagram in JSON always contains an `activations` 
 field storing a list of probabilistic and timing elements to control the simulation. 
-Probabilistic values are always evaluated to ensure that the sum of all possibilities is always 1. 
-Otherwise an error will be thrown at runtime. 
+Probabilistic values are always interpreted as weights and thus may sum to any number greater than zero.
 There are two types of activations: *direct activation* and *probabilistic choice*. 
 All activations are identified by their `id`.
 
@@ -197,6 +196,7 @@ Thus, a *direct activation* is of the following form:
    "additionalGuards": ...,
    "fixedVariables": ...,
    "probabilisticVariables": ...,
+   "transitionSelection": ...,
    "priority": ...
 }
 ```
@@ -213,18 +213,19 @@ The explanation of each field is as follows:
   - `single:max` means that the activation will only be queued if (1) there are no queued activations for the same id or (2) there is a queued activation with the same id whose value for the scheduled time is lower. In the case of (2), the already queued activation will be discarded.
 - `additionalGuards` stores optional guards when executing the event stored in execute.
 - `fixedVariables` stores a Map. Here, a variable (parameter, or non-deterministic assigned variable) is assigned to its value.
-- `probabilisticVariables` stores either a Map or a String. Concerning the Map, a variable (parameter, or non-deterministic assigned variable) is assigned to another Map defining the probabilistic choice of its value. The second Map stores Key-Value pairs where values are mapped to the probability. The modeler can also assign probabilisticVariables to first or uniform.
-- `first` means that the first transition is chosen for execution.
-- `uniform` means that a transition is selected from all alternatives uniformly.
+- `probabilisticVariables` stores a Map. Here a variable (parameter, or non-deterministic assigned variable) is assigned to another Map defining the probabilistic choice of its value. The second Map stores Key-Value pairs where values are mapped to the probability/weight.
+- `transitionSelection` determines how SimB choses from multiple possible transitions (due to not specified variables):
+  - `first` (the default) means that the first transition is chosen for execution.
+  - `uniform` means that a transition is selected from all alternatives uniformly.
 - `priority` stores the priority for scheduling execute. Lower number means greater priority.
 
 **Probabilistic Choice.** A *probabilistic choice* selects an event to be executed in the future. 
 It requires the two fields `id`, and `chooseActivation`. 
 `chooseActivation` is a `Map` storing `Key-Value` pairs where `activations` (identified by their `id`) 
-are mapped to a probability. 
+are mapped to a probability/weight. 
 It is possible to chain multiple *probabilistic choices* together, 
 but eventually, a *direct activation* must be reached.
-The sum of the probabilities must evaluate to 1 here.
+The probabilities are always interpreted as weights and may sum to any number greater than zero.
 Thus, a *probabilistic choice* is of the following form:
 
 ~~~json
@@ -239,24 +240,24 @@ Thus, a *probabilistic choice* is of the following form:
 
 ~~~json
 {
-  "activations": [
-    {"id":"$initialise_machine", "execute":"$initialise_machine", 
-    	"activating":"choose"},
-	{"id":"choose", "chooseActivation":
-  	    {"cars_ry": "0.8", "peds_g": "0.2"}},
-    {"id":"cars_ry", "execute":"cars_ry", "after":5000, 
-	    "activating":"cars_g"},
-	{"id":"cars_g", "execute":"cars_g", "after":500, 
-	    "activating":"cars_y"},
-    {"id":"cars_y", "execute":"cars_y", "after":5000, 
-	    "activating":"cars_r"},
-    {"id":"cars_r", "execute":"cars_r", "after":500, 
-	    "activating":"choose"},
-    {"id":"peds_g", "execute":"peds_g", "after":5000, 
-	   "activating":"peds_r"},
-    {"id":"peds_r", "execute":"peds_r", "after":5000, 
-	    "activating":"choose"}
-  ]
+	"activations": [
+		{"id":"$initialise_machine", "execute":"$initialise_machine", 
+			"activating":"choose"},
+		{"id":"choose", "chooseActivation":
+			{"cars_ry": "0.8", "peds_g": "0.2"}},
+		{"id":"cars_ry", "execute":"cars_ry", "after":5000, 
+			"activating":"cars_g"},
+		{"id":"cars_g", "execute":"cars_g", "after":500, 
+			"activating":"cars_y"},
+		{"id":"cars_y", "execute":"cars_y", "after":5000, 
+			"activating":"cars_r"},
+		{"id":"cars_r", "execute":"cars_r", "after":500, 
+			"activating":"choose"},
+		{"id":"peds_g", "execute":"peds_g", "after":5000, 
+			"activating":"peds_r"},
+		{"id":"peds_r", "execute":"peds_r", "after":5000, 
+			"activating":"choose"}
+	]
 }
 ~~~
 
@@ -294,30 +295,30 @@ An example is shown below:
 
 ~~~json
 {
-  "activations": [
-    {
-    "id": "blinking_on",
-    "execute": "RTIME_BlinkerOn",
-    "after": "curDeadlines(blink_deadline)",
-    "activating" : "blinking_off",
-    ...
-    },
-    {
-    "id": "blinking_off",
-    "execute": "RTIME_BlinkerOff",
-    "after": "curDeadlines(blink_deadline)",
-    "activating" : "blinking_on",
-    ...
-    },
-    ...
-  ]
-  "listeners": [
-    {
-    "id": "start_blinking",
-    "event": "ENV_Pitman_DirectionBlinking",
-    "activating" : ["blinking_on", "blinking_off"]
-    }
-  ]
+	"activations": [
+		{
+			"id": "blinking_on",
+			"execute": "RTIME_BlinkerOn",
+			"after": "curDeadlines(blink_deadline)",
+			"activating": "blinking_off",
+			...
+		},
+		{
+			"id": "blinking_off",
+			"execute": "RTIME_BlinkerOff",
+			"after": "curDeadlines(blink_deadline)",
+			"activating": "blinking_on",
+			...
+		},
+		...
+	]
+	"listeners": [
+		{
+			"id": "start_blinking",
+			"event": "ENV_Pitman_DirectionBlinking",
+			"activating": ["blinking_on", "blinking_off"]
+		}
+	]
 }
 ~~~
 
@@ -414,12 +415,8 @@ An example for a mapping to a variable in the formal B model is as follows:
 
 ~~~
 def get_VehiclesX(obs):
-  return "{{EgoVehicle |-> {0}, Vehicles2 |-> {1}, 
-           Vehicles3 |-> {2}, Vehicles4 |-> {3},
-           Vehicles5 |-> {4}}}"
-           .format(obs[0][1]*200, obs[1][1]*200, 
-               obs[2][1]*200, obs[3][1]*200, 
-               obs[4][1]*200)
+	return "{{EgoVehicle |-> {0}, Vehicles2 |-> {1}, Vehicles3 |-> {2}, Vehicles4 |-> {3}, Vehicles5 |-> {4}}}".format(
+		obs[0][1]*200, obs[1][1]*200, obs[2][1]*200, obs[3][1]*200, obs[4][1]*200)
 ~~~
 
 4. Implement necessary messages sent between the ProB animator and the RL agent. The list of enabled operations is used by the RL agent to predict the enabled operation with the highest reward. Simulation should be a while-loop which runs while the simulation has not finished. Example code (line 70 - 113; particularly 86 - 113): [https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py](https://github.com/hhu-stups/reinforcement-learning-b-models/blob/main/HighwayEnvironment/HighwayEnvironment.py)
@@ -544,8 +541,7 @@ To cite SimB's interactive simulation, please use:
 ~~~bibtex
 @InProceedings{simb,
 Author    = {Vu, Fabian and Leuschel, Michael},
-Title     = {{Validation of Formal Models by 
-              Interactive Simulation}},
+Title     = {{Validation of Formal Models by Interactive Simulation}},
 Booktitle = {Proceedings ABZ},
 Year      = 2023,
 Series    = {LNCS},
@@ -558,10 +554,8 @@ To cite SimB's functionalities to simulate a Reinforcement Learning Agent and En
 
 ~~~bibtex
 @InProceedings{validation_rl,
-author    = {Vu, Fabian and Dunkelau, Jannik and 
-             Leuschel, Michael},
-title     = {{Validation of Reinforcement Learning Agents 
-              and Safety Shields with ProB}},
+author    = {Vu, Fabian and Dunkelau, Jannik and Leuschel, Michael},
+title     = {{Validation of Reinforcement Learning Agents and Safety Shields with ProB}},
 booktitle = {{Proceedings NFM}},
 year      = 2024,
 pages     = {279--297}

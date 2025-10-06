@@ -35,7 +35,12 @@ public final class WellDefinednessCheckingItem extends SymbolicCheckingFormulaIt
 	public String getTaskDescription(I18n i18n) {
 		return "";
 	}
-	
+
+	@Override
+	public WellDefinednessCheckingItem copy() {
+		return new WellDefinednessCheckingItem(this.getId());
+	}
+
 	@Override
 	public void execute(ExecutionContext context) {
 		CheckWellDefinednessCommand cmd = new CheckWellDefinednessCommand();

@@ -18,6 +18,7 @@ import com.google.inject.Singleton;
 
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
+import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -86,6 +87,14 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			// Will be re-added in a different place later.
 			contextMenu.getItems().remove(removeMenuItem);
 
+			final MenuItem interactiveReplayItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.replayTraceInteractively"));
+			interactiveReplayItem.setOnAction(event -> {
+				InteractiveTraceReplayView iReplayView = injector.getInstance(InteractiveTraceReplayView.class);
+				iReplayView.initializeForTrace(currentProject.getLocation().resolve(this.getItem().getLocation()));
+				iReplayView.addToMainView();
+				iReplayView.toFront();
+			});
+
 			final MenuItem addTestsItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.editTrace"));
 			addTestsItem.setOnAction(event -> {
 				TraceTestView traceTestView = injector.getInstance(TraceTestView.class);
@@ -108,12 +117,14 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			showDescriptionItem.setOnAction(event -> showDescription(this.getItem()));
 
 			final MenuItem openInExternalEditorItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.openInExternalEditor"));
-			openInExternalEditorItem.setOnAction(event -> injector.getInstance(ExternalEditor.class).open(this.getItem().getAbsoluteLocation()));
+			openInExternalEditorItem.setOnAction(event -> injector.getInstance(ExternalEditor.class).open(currentProject.get().resolveProjectPath(this.getItem().getLocation())));
 
 			final MenuItem revealInExplorerItem = new MenuItem(i18n.translate("animation.tracereplay.view.contextMenu.revealInExplorer"));
-			revealInExplorerItem.setOnAction(event -> injector.getInstance(RevealInExplorer.class).revealInExplorer(this.getItem().getAbsoluteLocation()));
+			revealInExplorerItem.setOnAction(event -> injector.getInstance(RevealInExplorer.class).revealInExplorer(currentProject.get().resolveProjectPath(this.getItem().getLocation())));
 
-			contextMenu.getItems().addAll(addTestsItem, showStatusItem, new SeparatorMenuItem(), showDescriptionItem, removeMenuItem, new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem);
+			contextMenu.getItems().addAll(new SeparatorMenuItem(), interactiveReplayItem, addTestsItem, showStatusItem,
+					new SeparatorMenuItem(), showDescriptionItem, removeMenuItem,
+					new SeparatorMenuItem(), openInExternalEditorItem, revealInExplorerItem);
 		}
 	}
 
@@ -167,7 +178,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				TraceJsonFile traceFile = trace.getLoadedTrace();
 				if (traceFile == null) {
 					try {
-						traceFile = trace.load();
+						traceFile = traceFileHandler.loadJson(trace);
 					} catch (IOException ignore) {
 						// ignore errors, so the user does not get bombarded with errors on startup
 					}
@@ -191,7 +202,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 			}
 		});
 
-		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
+		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B)
+				.and(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.XTL));
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
 	}
 
@@ -278,6 +290,11 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 				traceFileHandler.addTraceFile(currentProject.getCurrentMachine(), path);
 			}
 		}
+	}
+
+	@Override
+	protected ReplayTrace addItem(ReplayTrace newItem) {
+		return this.traceFileHandler.addReplayTraceWithChecks(this.currentProject.getCurrentMachine(), newItem);
 	}
 
 	@Override
