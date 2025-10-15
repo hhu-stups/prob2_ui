@@ -51,6 +51,14 @@
 									<Insets top="5"/>
 								</VBox.margin>
 							</HBox>
+							<HBox alignment="CENTER_RIGHT" fx:id="preOptions" spacing="20">
+								<CheckBox text="%railml.stage.translatedOnly" fx:id="onlyTranslation"/>
+								<CheckBox text="%railml.stage.semanticChecks" fx:id="semanticChecks" selected="true"/>
+								<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox"/>
+								<VBox.margin>
+									<Insets top="20" bottom="5"/>
+								</VBox.margin>
+							</HBox>
 							<HBox alignment="CENTER">
 								<HBox alignment="CENTER_LEFT">
 									<Label fx:id="progressDescription" styleClass="bold"/>
@@ -161,11 +169,16 @@
 								<Insets left="20" top="10" bottom="10" />
 							</padding>
 						</Label>
-						<HBox alignment="CENTER" spacing="20">
-							<CheckBox text="%railml.stage.machineChoice.data" fx:id="dataMachineCheckbox"/>
-							<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"/>
-							<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"/>
-						</HBox>
+						<GridPane hgap="50" vgap="8" alignment="CENTER">
+							<CheckBox text="%railml.stage.machineChoice.translatedData" fx:id="translatedMachineCheckbox"
+									  GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+							<CheckBox text="%railml.stage.machineChoice.data" fx:id="dataMachineCheckbox"
+									  GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+							<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"
+									  GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+							<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"
+									  GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+						</GridPane>
 						<Separator>
 							<padding>
 								<Insets top="10" bottom="10"/>
@@ -173,7 +186,7 @@
 						</Separator>
 					</VBox>
 					<HBox alignment="CENTER" fx:id="visualisationOptions" spacing="20" visible="false">
-						<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox"/>
+						<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckboxExport"/>
 						<Label text="%railml.stage.visualisation.strategy" fx:id="visualisationStrategyField" visible="false"/>
 						<ChoiceBox fx:id="visualisationStrategyChoiceBox" visible="false"/>
 						<padding>
