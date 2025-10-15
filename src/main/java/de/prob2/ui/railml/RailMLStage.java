@@ -226,9 +226,10 @@ public class RailMLStage extends Stage {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
 		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
-		if(path != null) {
+		if (path != null) {
 			outputPath = path.toAbsolutePath();
 			importArguments.output(outputPath);
+			locationField.setText(outputPath.toString());
 		}
 	}
 
