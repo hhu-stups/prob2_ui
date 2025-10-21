@@ -47,18 +47,45 @@
 					</tooltip>
 					<items>
 						<Menu fx:id="sortMenuItem" text="%operations.operationsView.menu.sort">
-							<CheckMenuItem fx:id="sortModeAToZ" text="A - Z" onAction="#setSortModeAToZ"/>
-							<CheckMenuItem fx:id="sortModeZToA" text="Z - A" onAction="#setSortModeZToA"/>
+							<CheckMenuItem fx:id="sortModeAToZ" text=" A - Z" onAction="#setSortModeAToZ">
+								<graphic>
+									<BindableGlyph styleClass="icon-basic" fontFamily="FontAwesome" icon="SORT_ALPHA_ASC" bindableFontSize="${fontSize.fontSize + 2}" />
+								</graphic>
+							</CheckMenuItem>
+							<CheckMenuItem fx:id="sortModeZToA" text=" Z - A" onAction="#setSortModeZToA">
+								<graphic>
+									<BindableGlyph styleClass="icon-basic" fontFamily="FontAwesome" icon="SORT_ALPHA_DESC" bindableFontSize="${fontSize.fontSize + 2}" />
+								</graphic>
+							</CheckMenuItem>
 							<CheckMenuItem fx:id="sortModeModelOrder"
 										   text="%operations.operationsView.menu.sortModelOrder"
-										   onAction="#setSortModeToModelOrder"/>
+										   onAction="#setSortModeToModelOrder">
+								<graphic>
+									<BindableGlyph styleClass="icon-basic" fontFamily="FontAwesome" icon="SORT_AMOUNT_DESC" bindableFontSize="${fontSize.fontSize + 2}" />
+								</graphic>
+							</CheckMenuItem>
+							<graphic>
+								<BindableGlyph styleClass="icon-basic" fontFamily="FontAwesome" icon="SORT" bindableFontSize="${fontSize.fontSize + 2}" />
+							</graphic>
 						</Menu>
 						<MenuItem fx:id="disabledOpsMenuItem" text="%operations.operationsView.menu.hideDisabled"
-								  onAction="#handleDisabledOpsMenuItem"/>
+								  onAction="#handleDisabledOpsMenuItem">
+							<graphic>
+								<BindableGlyph fx:id="disabledOpsIcon" styleClass="icon-basic" fontFamily="FontAwesome" icon="EYE_SLASH" bindableFontSize="${fontSize.fontSize + 2}" />
+							</graphic>
+						</MenuItem>
 						<MenuItem fx:id="unambiguousMenuItem" text="%operations.operationsView.menu.showUnambiguous"
-								  onAction="#handleUnambiguousMenuItem"/>
+								  onAction="#handleUnambiguousMenuItem">
+							<graphic>
+								<BindableGlyph fx:id="unambiguousIcon" styleClass="icon-basic" fontFamily="FontAwesome" icon="EYE" bindableFontSize="${fontSize.fontSize + 2}" />
+							</graphic>
+						</MenuItem>
 						<MenuItem fx:id="opDescriptionsMenuItem" text="%operations.operationsView.menu.showDescriptions"
-								  onAction="#handleOpDescriptionsMenuItem"/>
+								  onAction="#handleOpDescriptionsMenuItem">
+							<graphic>
+								<BindableGlyph fx:id="opDescriptionsIcon" styleClass="icon-basic" fontFamily="FontAwesome" icon="EYE" bindableFontSize="${fontSize.fontSize + 2}" />
+							</graphic>
+						</MenuItem>
 					</items>
 				</MenuButton>
 

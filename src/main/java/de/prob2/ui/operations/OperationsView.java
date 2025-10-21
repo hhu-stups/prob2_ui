@@ -191,6 +191,12 @@ public final class OperationsView extends BorderPane {
 	@FXML
 	private MenuItem opDescriptionsMenuItem;
 	@FXML
+	private BindableGlyph disabledOpsIcon;
+	@FXML
+	private BindableGlyph unambiguousIcon;
+	@FXML
+	private BindableGlyph opDescriptionsIcon;
+	@FXML
 	private TextField searchBar;
 	@FXML
 	private TextField randomText;
@@ -305,17 +311,20 @@ public final class OperationsView extends BorderPane {
 
 		showDisabledOps.addListener((o, from, to) -> {
 			disabledOpsMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideDisabled") : i18n.translate("operations.operationsView.menu.showDisabled"));
+			disabledOpsIcon.setIcon(to ? FontAwesome.Glyph.EYE_SLASH : FontAwesome.Glyph.EYE);
 			showDisabledOps.set(to);
 			update(currentTrace.get());
 		});
 
 		showUnambiguous.addListener((o, from, to) -> {
 			unambiguousMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideUnambiguous") : i18n.translate("operations.operationsView.menu.showUnambiguous"));
+			unambiguousIcon.setIcon(to ? FontAwesome.Glyph.EYE_SLASH : FontAwesome.Glyph.EYE);
 			opsListView.refresh();
 		});
 
 		showOperationDescriptions.addListener((o, from, to) -> {
 			opDescriptionsMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideDescriptions") : i18n.translate("operations.operationsView.menu.showDescriptions"));
+			opDescriptionsIcon.setIcon(to ? FontAwesome.Glyph.EYE_SLASH : FontAwesome.Glyph.EYE);
 			opsListView.refresh();
 		});
 
