@@ -8,6 +8,7 @@
 <?import de.prob2.ui.sharedviews.Spacer?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.CustomMenuItem?>
 <?import javafx.scene.control.Label?>
@@ -82,8 +83,13 @@
 									</AnchorPane>
 								</content>
 							</CustomMenuItem>
-							<MenuItem fx:id="thousandDetEvents" onAction="#random"
-									  text="%operations.operationsView.det.thousand"/>
+							<CustomMenuItem hideOnClick="false" styleClass="dark">
+								<content>
+									<AnchorPane>
+										<CheckBox fx:id="cbDeterministic" text="%operations.operationsView.random.deterministic"/>
+									</AnchorPane>
+								</content>
+							</CustomMenuItem>
 						</items>
 						<graphic>
 							<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="RANDOM"
