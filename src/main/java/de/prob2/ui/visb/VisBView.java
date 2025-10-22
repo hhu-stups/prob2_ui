@@ -752,6 +752,7 @@ public final class VisBView extends BorderPane {
 	private void exportImage() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getPngFilter());
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		exportImageWithPath(path);
@@ -774,6 +775,7 @@ public final class VisBView extends BorderPane {
 	private void exportSvg() {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("visb.stage.filechooser.export.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getSvgFilter());
 		Path path = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		exportSvgWithPath(path);
