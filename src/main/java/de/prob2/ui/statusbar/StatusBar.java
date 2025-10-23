@@ -148,7 +148,11 @@ public final class StatusBar extends HBox {
 	private List<String> getWarningMessages(State state) {
 		final List<String> warningMessages = new ArrayList<>();
 		if (state.getOutTransitions().isEmpty()) {
-			warningMessages.add(i18n.translate("statusbar.warnings.deadlock"));
+			if (state.getCandidateOperations().isEmpty()) {
+				warningMessages.add(i18n.translate("statusbar.warnings.deadlock"));
+			} else {
+				warningMessages.add(i18n.translate("statusbar.warnings.potentialDeadlock"));
+			}
 		}
 		return warningMessages;
 	}
