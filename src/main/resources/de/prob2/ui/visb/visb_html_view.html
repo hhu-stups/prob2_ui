@@ -98,7 +98,7 @@
 			}
 		}
 
-		function changeAttribute(id, attribute, value){
+		function changeAttribute(id, attribute, value) {
 			// console.log("changeAttribute: " + id + "." + attribute + " = "+value);
 			runWhenLoaded(function(){
 				const obj = checkSvgId(id, "attribute " + attribute);
@@ -106,6 +106,9 @@
 					// obj not found (error message has already been displayed by checkSvgId)
 				} else {
 					changeElementAttribute(obj, attribute, value);
+					if (obj.tagName.toLowerCase() === "script" && attribute === "text") {
+						eval(value);
+					}
 				}
 			});
 		}
