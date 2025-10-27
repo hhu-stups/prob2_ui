@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Provider;
 
 import de.prob.animator.command.GetPreferenceCommand;
+import de.prob.model.representation.XTLModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
@@ -252,9 +253,11 @@ public abstract class Simulator {
 
 	public void setupBeforeSimulation(Trace trace) {
 		updateStartingInformation(trace);
-		if(!trace.getCurrentState().isInitialised()) {
+		if (currentTrace.getModel() instanceof XTLModel) {
+			activateBeforeInitialisation(trace, "start_xtl_system");
+		} else if (!trace.getCurrentState().isInitialised()) {
 			activateBeforeInitialisation(trace, Transition.SETUP_CONSTANTS_NAME);
-			if(!(config instanceof SimulationExternalConfiguration)) {
+			if (!(config instanceof SimulationExternalConfiguration)) {
 				activateBeforeInitialisation(trace, Transition.INITIALISE_MACHINE_NAME);
 			}
 		}
