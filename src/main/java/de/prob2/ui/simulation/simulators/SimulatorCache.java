@@ -30,7 +30,7 @@ public class SimulatorCache {
 			}
 		}
 		IEvalElement formula = formulasCache.computeIfAbsent(expression, expr -> switch (mode) {
-			case CLASSICAL_B ->
+			case CLASSICAL_B, XTL ->
 					// Use EXPAND instead of TRUNCATE, otherwise the evaluated formula is shortened to a specific length with ... in the end
 					new ClassicalB(expr, FormulaExpand.EXPAND);
 			case EVENT_B ->

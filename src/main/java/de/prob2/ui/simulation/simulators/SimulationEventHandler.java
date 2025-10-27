@@ -106,7 +106,7 @@ public class SimulationEventHandler {
 			newExpression = expression;
 		} else {
 			switch (mode) {
-				case CLASSICAL_B:
+				case CLASSICAL_B, XTL:
 					// TODO: Rises problem when one of the parameters are the empty set. In this case, the type cannot be infered. Fix this in the future by inspecting the AST.
 					if(!parametersAsString.stream().map(expression::contains).findAny().get()) {
 						newExpression = expression;
