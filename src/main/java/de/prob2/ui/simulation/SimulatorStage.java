@@ -298,6 +298,9 @@ public final class SimulatorStage extends Stage {
 	private MenuItem saveAutomaticSimulationItem;
 
 	@FXML
+	private Button openExternalButton;
+
+	@FXML
 	private TableView<SimulationItem> simulationItems;
 
 	@FXML
@@ -500,6 +503,8 @@ public final class SimulatorStage extends Stage {
 
 		saveAsMenuItem.disableProperty().bind(disableSaveProperty);
 		saveAsItem.disableProperty().bind(disableSaveProperty);
+
+		openExternalButton.disableProperty().bind(configurationPath.isNull());
 
 		this.simulationDiagramItems.setCellFactory(lv -> new DiagramConfigurationListCell(stageManager, i18n, savedProperty, realTimeSimulator.runningProperty()));
 
