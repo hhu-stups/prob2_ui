@@ -58,6 +58,7 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
 import de.prob2.ui.visb.VisBController;
+import de.prob2.ui.visb.VisBView;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -301,6 +302,9 @@ public final class SimulatorStage extends Stage {
 	private Button openExternalButton;
 
 	@FXML
+	private Button reloadSimulationButton;
+
+	@FXML
 	private TableView<SimulationItem> simulationItems;
 
 	@FXML
@@ -460,27 +464,7 @@ public final class SimulatorStage extends Stage {
 		// The items list is set once here and then always updated in-place.
 		// setItems should never be called again after this.
 		cbSimulation.setItems(FXCollections.observableArrayList());
-		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			checkIfSimulationShouldBeSaved();
-			configurationPath.set(null);
-			simulationMode.setMode(to == null ? null :
-					currentProject.getLocation().resolve(to.getPath()).toFile().isDirectory() ? SimulationMode.Mode.BLACK_BOX :
-					SimulationMode.Mode.MONTE_CARLO);
-			injector.getInstance(SimulationChoosingStage.class).setSimulation(to);
-			simulationDiagramItems.getItems().clear();
-			simulationItems.itemsProperty().unbind();
-
-			if (to != null) {
-				simulationItems.setItems(simulationItemHandler.getSimulationItems(to));
-			} else {
-				simulationItems.setItems(FXCollections.observableArrayList());
-			}
-
-			UIInteractionHandler uiInteractionHandler = injector.getInstance(UIInteractionHandler.class);
-			uiInteractionHandler.reset();
-			this.loadSimulationIntoSimulator(to);
-			uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
-		});
+		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> loadCurrentSimulation(to));
 		cbSimulation.disableProperty().bind(currentTrace.isNull().or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
@@ -505,6 +489,7 @@ public final class SimulatorStage extends Stage {
 		saveAsItem.disableProperty().bind(disableSaveProperty);
 
 		openExternalButton.disableProperty().bind(configurationPath.isNull());
+		reloadSimulationButton.disableProperty().bind(configurationPath.isNull());
 
 		this.simulationDiagramItems.setCellFactory(lv -> new DiagramConfigurationListCell(stageManager, i18n, savedProperty, realTimeSimulator.runningProperty()));
 
@@ -971,5 +956,32 @@ public final class SimulatorStage extends Stage {
 		}
 
 		this.externalEditor.open(current);
+	}
+
+	@FXML
+	public void reloadSimulation() {
+		loadCurrentSimulation(cbSimulation.getSelectionModel().getSelectedItem());
+	}
+
+	private void loadCurrentSimulation(SimulationModel simulationModel) {
+		checkIfSimulationShouldBeSaved();
+		configurationPath.set(null);
+		simulationMode.setMode(simulationModel == null ? null :
+				currentProject.getLocation().resolve(simulationModel.getPath()).toFile().isDirectory() ? SimulationMode.Mode.BLACK_BOX :
+						SimulationMode.Mode.MONTE_CARLO);
+		injector.getInstance(SimulationChoosingStage.class).setSimulation(simulationModel);
+		simulationDiagramItems.getItems().clear();
+		simulationItems.itemsProperty().unbind();
+
+		if (simulationModel != null) {
+			simulationItems.setItems(simulationItemHandler.getSimulationItems(simulationModel));
+		} else {
+			simulationItems.setItems(FXCollections.observableArrayList());
+		}
+
+		UIInteractionHandler uiInteractionHandler = injector.getInstance(UIInteractionHandler.class);
+		uiInteractionHandler.reset();
+		this.loadSimulationIntoSimulator(simulationModel);
+		uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
 	}
 }

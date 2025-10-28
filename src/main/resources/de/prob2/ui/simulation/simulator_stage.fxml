@@ -83,6 +83,15 @@
 											<MenuItem fx:id="loadExternalSimulation" text="%simulation.file.open.external" onAction="#loadExternal"/>
 										</items>
 									</MenuButton>
+									<Button fx:id="reloadSimulationButton" onAction="#reloadSimulation">
+										<graphic>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
+														   bindableFontSize="${fontSize.fontSize + 4}"/>
+										</graphic>
+										<tooltip>
+											<Tooltip text="%simulation.file.reload"/>
+										</tooltip>
+									</Button>
 									<MenuButton fx:id="btAddDiagramElement" contentDisplay="GRAPHIC_ONLY" >
 										<graphic>
 											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 4.0}" />
