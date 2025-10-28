@@ -31,6 +31,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.SafeBindings;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
+import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.MachineLoader;
@@ -56,6 +57,7 @@ import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
+import de.prob2.ui.visb.VisBController;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -334,6 +336,7 @@ public final class SimulatorStage extends Stage {
 	private final Injector injector;
 	private final RealTimeSimulator realTimeSimulator;
 	private final MachineLoader machineLoader;
+	private final ExternalEditor externalEditor;
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
 	private final TraceFileHandler traceFileHandler;
@@ -359,7 +362,7 @@ public final class SimulatorStage extends Stage {
 	public SimulatorStage(
 			final StageManager stageManager, final CurrentProject currentProject, final CurrentTrace currentTrace,
 			final Injector injector, final RealTimeSimulator realTimeSimulator, final MachineLoader machineLoader,
-			final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
+			final ExternalEditor externalEditor, final SimulationItemHandler simulationItemHandler, final SimulationMode simulationMode,
 			final I18n i18n, final FileChooserManager fileChooserManager,
 			final TraceFileHandler traceFileHandler, final DisablePropertyController disablePropertyController,
 			final StopActions stopActions, SimulationFileHandler simulationFileHandler,
@@ -372,6 +375,7 @@ public final class SimulatorStage extends Stage {
 		this.injector = injector;
 		this.realTimeSimulator = realTimeSimulator;
 		this.machineLoader = machineLoader;
+		this.externalEditor = externalEditor;
 		this.simulationItemHandler = simulationItemHandler;
 		this.simulationMode = simulationMode;
 		this.lastSimulator = new SimpleObjectProperty<>(this, "lastSimulator", realTimeSimulator);
@@ -952,5 +956,15 @@ public final class SimulatorStage extends Stage {
 			progressBar.setProgress(0);
 			lbSimulationStats.setText("");
 		});
+	}
+
+	@FXML
+	private void editCurrentExternal() {
+		Path current = configurationPath.get();
+		if (current == null || Paths.get("").equals(current)) {
+			return;
+		}
+
+		this.externalEditor.open(current);
 	}
 }
