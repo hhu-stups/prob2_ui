@@ -139,6 +139,8 @@ public final class UIInteractionHandler {
 			initializationTransition = transition;
 			return;
 		}
+		// Set to null so that JavaFX actually recognizes when the same transition is triggered again
+		lastUserInteraction.set(null);
 		lastUserInteraction.set(transition);
 		userTransitions.add(transition);
 		realTimeSimulator.getTimestamps().add(realTimeSimulator.getTime());

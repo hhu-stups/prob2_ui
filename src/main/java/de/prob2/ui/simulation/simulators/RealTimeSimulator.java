@@ -38,7 +38,7 @@ public final class RealTimeSimulator extends Simulator {
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;
-		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
+		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);;
 		this.diagramGenerator = null;
 	}
 
