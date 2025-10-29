@@ -248,6 +248,7 @@ public final class SimulationFileHandler {
 		}
 	}
 
+    // create a default simulation as a starting point, if user has not provided one
 	private SimulationModelConfiguration createDefaultSimulation(LoadedMachine loadedMachine) {
 		Map<String, String> variables = new HashMap<>();
 		List<DiagramConfiguration.NonUi> activations = new ArrayList<>();
@@ -255,13 +256,20 @@ public final class SimulationFileHandler {
 		JsonMetadata metadata = createMetadata(null, null);
 
 		if (!loadedMachine.getConstantNames().isEmpty()) {
-			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, null, false, null, null, ""));
+			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, 
+			                "0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, 
+			                null, false, null, null, "Activation SETUP_CONSTANTS"));
 		}
 
 		var operations = loadedMachine.getOperationNames();
-		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, List.copyOf(operations), true, null, null, ""));
+		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME,
+		                    "0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST,
+		                    List.copyOf(operations), true, null, null, "Activation for INITIALISATION"));
+	
 		for (var op : operations) {
-			activations.add(new ActivationOperationConfiguration(op, op, "100", 0, null, ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, List.copyOf(operations), true, null, null, ""));
+			activations.add(new ActivationOperationConfiguration(op, op, 
+			                 "100", 0, "btrue", ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, 
+			                 List.copyOf(operations), true, null, null, "Activation for "+op));
 		}
 
 		return new SimulationModelConfiguration(variables, activations, uiListenerConfigurations, metadata);
