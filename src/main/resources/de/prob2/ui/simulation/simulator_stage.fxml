@@ -63,7 +63,7 @@
 											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize + 4.0}" />
 										</graphic>
 										<tooltip>
-											<Tooltip text="%common.buttons.cancel" />
+											<Tooltip text="%simulation.button.removeSimulation" />
 										</tooltip>
 									</Button>
 								</HBox>
