@@ -46,6 +46,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 				return;
 			}
 			if (!from && to) {
+				this.setItem(modifiedItem);
 				this.getListView().getItems().set(getIndex(), modifiedItem);
 			}
 		});
@@ -86,7 +87,6 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			this.setPrefHeight(itemBox.getChildren().size() * 20.0f);
 			this.setGraphic(this.itemBox);
 			this.setText("");
-			this.setItem(modifiedItem);
 		}
 	}
 
@@ -377,7 +377,8 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 	private void clear() {
 		itemBox.getChildren().clear();
-		this.setGraphic(this.itemBox);
+		//this.setGraphic(this.itemBox);
+		this.setGraphic(null);
 		this.setText("");
 		this.modifiedItem = null;
 	}

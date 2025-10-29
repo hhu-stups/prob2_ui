@@ -831,10 +831,10 @@ public final class SimulatorStage extends Stage {
 			saveSimulationAs();
 			return;
 		}
-
 		try {
-			this.simulationFileHandler.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
+			// Set savedProperty first so that latest changest are set
 			savedProperty.set(true);
+			this.simulationFileHandler.saveConfiguration(buildSimulationModel(), currentProject.getLocation().resolve(configurationPath.get()));
 		} catch (IOException ex) {
 			stageManager.makeExceptionAlert(ex, "simulation.save.error").showAndWait();
 		}
@@ -850,8 +850,9 @@ public final class SimulatorStage extends Stage {
 			return;
 		}
 		try {
-			this.simulationFileHandler.saveConfiguration(buildSimulationModel(), path);
+			// Set savedProperty first so that latest changest are set
 			savedProperty.set(true);
+			this.simulationFileHandler.saveConfiguration(buildSimulationModel(), path);
 			Path previousPath = configurationPath.get();
 			Path relativePath = currentProject.getLocation().relativize(path);
 			SimulationModel simulationModel = new SimulationModel(relativePath);
