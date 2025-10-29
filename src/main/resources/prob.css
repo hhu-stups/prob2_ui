@@ -1168,6 +1168,17 @@
 	-fx-font-size: 0.9em;
 }
 
+.simulation-item .table-cell:selected {
+	-fx-background-color: -prob-grey-50;
+	-fx-fill: -prob-grey-50;
+	-fx-text-fill: white;
+}
+
+.simulation-item .table-cell:selected:hover {
+	-fx-background-color: -prob-grey;
+	-fx-text-fill: white;
+}
+
 /* =================== STATES VIEW =================== */
 
 .tree-table-row-cell.changed {
