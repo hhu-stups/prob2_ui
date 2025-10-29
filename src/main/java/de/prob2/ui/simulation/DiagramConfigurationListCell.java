@@ -91,6 +91,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 	}
 
 	private void updateOperationDiagramItem(ActivationOperationConfiguration item) {
+		Label lbID = new Label(i18n.translate("simulation.item.id"));
+		lbID.getStyleClass().add("information");
+		lbID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
+
 		TextField tfID = new TextField(item.getId());
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
@@ -98,7 +102,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfID.disableProperty().bind(this.runningProperty);
 		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
-		this.itemBox.getChildren().add(tfID);
+		this.itemBox.getChildren().add(new HBox(lbID, tfID));
 
 		Label lbOpName = new Label(i18n.translate("simulation.item.operation"));
 		lbOpName.getStyleClass().add("information");
