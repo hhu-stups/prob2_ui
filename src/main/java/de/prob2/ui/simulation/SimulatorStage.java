@@ -57,8 +57,6 @@ import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
-import de.prob2.ui.visb.VisBController;
-import de.prob2.ui.visb.VisBView;
 import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
@@ -612,7 +610,12 @@ public final class SimulatorStage extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.SIMULATION, stageManager.getCurrent());
 		if (path != null) {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
-			currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
+			SimulationModel simulationModel = new SimulationModel(resolvedPath);
+			if(!currentProject.getCurrentMachine().getSimulations().contains(simulationModel)) {
+				currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
+			} else {
+				cbSimulation.getSelectionModel().select(simulationModel);
+			}
 		}
 	}
 
