@@ -422,7 +422,9 @@ public final class SimulatorStage extends Stage {
 
 	@FXML
 	public void initialize() {
-		stageManager.setMacMenuBar(this, menuBar);
+		if(menuBar != null) {
+			stageManager.setMacMenuBar(this, menuBar);
+		}
 
 		realTimeSimulator.runningProperty().addListener((observable, from, to) -> {
 			if (to) {
