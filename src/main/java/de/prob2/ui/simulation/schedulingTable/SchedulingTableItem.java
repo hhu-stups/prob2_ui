@@ -1,4 +1,4 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.schedulingTable;
 
 import de.prob2.ui.simulation.simulators.Activation;
 

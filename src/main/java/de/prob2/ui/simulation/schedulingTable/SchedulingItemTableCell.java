@@ -1,20 +1,12 @@
-package de.prob2.ui.simulation;
+package de.prob2.ui.simulation.schedulingTable;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.choice.SimulationCheckingType;
-import de.prob2.ui.simulation.choice.SimulationType;
 import de.prob2.ui.simulation.simulators.Activation;
-import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
-import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.layout.VBox;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.Map;
 
 public final class SchedulingItemTableCell extends TableCell<SchedulingTableItem, SchedulingTableItem> {
 
