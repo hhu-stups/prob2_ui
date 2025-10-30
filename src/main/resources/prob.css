@@ -1156,6 +1156,8 @@
 	-fx-cell-size: 6.8em;
 	-fx-border-width: 2px 0px 0px 0px;
 	-fx-border-color: black;
+	-fx-focus-color: transparent;
+	-fx-faint-focus-color: transparent;
 }
 .simulation-item .id {
 	-fx-font-family: ARIAL;
@@ -1166,17 +1168,6 @@
 	-fx-font-family: ARIAL;
 	-fx-font-style: italic;
 	-fx-font-size: 0.9em;
-}
-
-.simulation-item .table-cell:selected {
-	-fx-background-color: -prob-grey-50;
-	-fx-fill: -prob-grey-50;
-	-fx-text-fill: white;
-}
-
-.simulation-item .table-cell:selected:hover {
-	-fx-background-color: -prob-grey;
-	-fx-text-fill: white;
 }
 
 /* =================== STATES VIEW =================== */

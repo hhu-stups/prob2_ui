@@ -26,6 +26,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.ProgressBar?>
+<?import javafx.scene.control.TitledPane?>
 <fx:root title="Simulator" type="SimulatorStage" width="1200" height="500" minHeight="500" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -53,120 +54,139 @@
 				</top>
 				<center>
 					<SplitPane dividerPositions="0.7" orientation="HORIZONTAL" VBox.vgrow="ALWAYS">
-						<VBox>
-							<Label text="%simulation.label.model"/>
-							<HBox spacing="40.0">
-								<HBox>
-									<ChoiceBox fx:id="cbSimulation" bindableFontSize="${fontSize.fontSize + 4.0}"/>
-									<Button fx:id="btRemoveSimulation" onAction="#removeSimulation" >
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize + 4.0}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.button.removeSimulation" />
-										</tooltip>
-									</Button>
+						<SplitPane dividerPositions="0.6" orientation="VERTICAL" VBox.vgrow="ALWAYS">
+							<VBox>
+								<Label text="%simulation.label.model"/>
+								<HBox spacing="40.0">
+									<HBox>
+										<ChoiceBox fx:id="cbSimulation" bindableFontSize="${fontSize.fontSize + 4.0}"/>
+										<Button fx:id="btRemoveSimulation" onAction="#removeSimulation" >
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TIMES_CIRCLE_ALT" bindableFontSize="${fontSize.fontSize + 4.0}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%simulation.button.removeSimulation" />
+											</tooltip>
+										</Button>
+									</HBox>
+									<HBox>
+										<MenuButton fx:id="btLoadConfiguration" >
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 4.0}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%simulation.file.open" />
+											</tooltip>
+											<items>
+												<MenuItem fx:id="loadSimBModelItem" text="%simulation.file.open.model" onAction="#loadSimBModel"/>
+												<SeparatorMenuItem/>
+												<MenuItem fx:id="advancedItem" style="-fx-text-fill:white; -fx-font-weight: bold;" text="%simulation.file.open.advanced"/>
+												<MenuItem fx:id="loadSimBTraces" text="%simulation.file.open.blackbox" onAction="#loadSimBTraces"/>
+												<MenuItem fx:id="loadExternalSimulation" text="%simulation.file.open.external" onAction="#loadExternal"/>
+											</items>
+										</MenuButton>
+										<Button fx:id="reloadSimulationButton" onAction="#reloadSimulation">
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
+															   bindableFontSize="${fontSize.fontSize + 4}"/>
+											</graphic>
+											<tooltip>
+												<Tooltip text="%simulation.file.reload"/>
+											</tooltip>
+										</Button>
+										<MenuButton fx:id="btAddDiagramElement" contentDisplay="GRAPHIC_ONLY" >
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 4.0}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%simulation.tooltips.addDiagramElement" />
+											</tooltip>
+											<items>
+												<MenuItem fx:id="addDirectActivation" text="%simulation.contextMenu.addDirectActivation" onAction="#addDirectActivation"/>
+												<MenuItem fx:id="addChoiceActivation" text="%simulation.contextMenu.addChoiceActivation" onAction="#addChoiceActivation"/>
+												<MenuItem fx:id="addUiListener" text="%simulation.contextMenu.addUiListener" onAction="#addUiListener"/>
+											</items>
+										</MenuButton>
+										<Button fx:id="btRemoveDiagramElement" contentDisplay="GRAPHIC_ONLY" onAction="#removeDiagramElement" >
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 4.0}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%simulation.tooltips.removeDiagramElement" />
+											</tooltip>
+										</Button>
+										<Spacer/>
+										<MenuButton fx:id="saveTraceButton" >
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 4.0}"/>
+											</graphic>
+											<tooltip>
+												<Tooltip text="%common.buttons.saveTrace" />
+											</tooltip>
+											<items>
+												<MenuItem fx:id="saveItem" text="%simulation.menuBar.save" onAction="#saveSimulation"/>
+												<MenuItem fx:id="saveAsItem" text="%simulation.menuBar.saveAs" onAction="#saveSimulationAs"/>
+												<SeparatorMenuItem/>
+												<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace" onAction="#saveTrace"/>
+												<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace" onAction="#saveTimedTrace"/>
+												<MenuItem fx:id="saveAutomaticSimulationItem" text="%simulation.contextMenu.saveUIReplay" onAction="#saveAutomaticSimulation"/>
+											</items>
+										</MenuButton>
+										<Button fx:id="openExternalButton" onAction="#editCurrentExternal">
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="EXTERNAL_LINK" bindableFontSize="${fontSize.fontSize + 4}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%simulation.editCurrentExternal"/>
+											</tooltip>
+										</Button>
+										<Button fx:id="btSimulate" onAction="#simulate" >
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY" bindableFontSize="${fontSize.fontSize + 4.0}" />
+											</graphic>
+											<tooltip>
+												<Tooltip text="%simulation.button.start" />
+											</tooltip>
+										</Button>
+										<Label fx:id="lbTime" prefWidth="${fontSize.fontSize * 10}" textAlignment="RIGHT" alignment="BOTTOM_RIGHT" prefHeight="${fontSize.fontSize + 8.0}"/>
+										<MenuButton fx:id="btGenerateDiagram" disable="true"
+													contentDisplay="GRAPHIC_ONLY" >
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="REORDER" bindableFontSize="${fontSize.fontSize + 4.0}" />
+											</graphic>
+											<tooltip>
+												<Tooltip
+														text="%simulation.tooltips.generateDiagram" />
+											</tooltip>
+											<items>
+												<MenuItem fx:id="generateDiagram" text="%simulation.contextMenu.generateDiagram" onAction="#generateDiagram"/>
+												<MenuItem fx:id="generateComplexDiagram" text="%simulation.contextMenu.generateComplexDiagram" onAction="#generateComplexDiagram"/>
+												<MenuItem fx:id="generateLiveDiagram" text="%simulation.contextMenu.generateLiveDiagram" onAction="#generateLiveDiagram"/>
+											</items>
+										</MenuButton>
+									</HBox>
+									<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 								</HBox>
-								<HBox>
-									<MenuButton fx:id="btLoadConfiguration" >
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN" bindableFontSize="${fontSize.fontSize + 4.0}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.file.open" />
-										</tooltip>
-										<items>
-											<MenuItem fx:id="loadSimBModelItem" text="%simulation.file.open.model" onAction="#loadSimBModel"/>
-											<SeparatorMenuItem/>
-											<MenuItem fx:id="advancedItem" style="-fx-text-fill:white; -fx-font-weight: bold;" text="%simulation.file.open.advanced"/>
-											<MenuItem fx:id="loadSimBTraces" text="%simulation.file.open.blackbox" onAction="#loadSimBTraces"/>
-											<MenuItem fx:id="loadExternalSimulation" text="%simulation.file.open.external" onAction="#loadExternal"/>
-										</items>
-									</MenuButton>
-									<Button fx:id="reloadSimulationButton" onAction="#reloadSimulation">
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
-														   bindableFontSize="${fontSize.fontSize + 4}"/>
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.file.reload"/>
-										</tooltip>
-									</Button>
-									<MenuButton fx:id="btAddDiagramElement" contentDisplay="GRAPHIC_ONLY" >
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 4.0}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.tooltips.addDiagramElement" />
-										</tooltip>
-										<items>
-											<MenuItem fx:id="addDirectActivation" text="%simulation.contextMenu.addDirectActivation" onAction="#addDirectActivation"/>
-											<MenuItem fx:id="addChoiceActivation" text="%simulation.contextMenu.addChoiceActivation" onAction="#addChoiceActivation"/>
-											<MenuItem fx:id="addUiListener" text="%simulation.contextMenu.addUiListener" onAction="#addUiListener"/>
-										</items>
-									</MenuButton>
-									<Button fx:id="btRemoveDiagramElement" contentDisplay="GRAPHIC_ONLY" onAction="#removeDiagramElement" >
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize + 4.0}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.tooltips.removeDiagramElement" />
-										</tooltip>
-									</Button>
-									<Spacer/>
-									<MenuButton fx:id="saveTraceButton" >
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 4.0}"/>
-										</graphic>
-										<tooltip>
-											<Tooltip text="%common.buttons.saveTrace" />
-										</tooltip>
-										<items>
-											<MenuItem fx:id="saveItem" text="%simulation.menuBar.save" onAction="#saveSimulation"/>
-											<MenuItem fx:id="saveAsItem" text="%simulation.menuBar.saveAs" onAction="#saveSimulationAs"/>
-											<SeparatorMenuItem/>
-											<MenuItem fx:id="saveTraceItem" text="%simulation.contextMenu.saveTrace" onAction="#saveTrace"/>
-											<MenuItem fx:id="saveTimedTraceItem" text="%simulation.contextMenu.saveTimedTrace" onAction="#saveTimedTrace"/>
-											<MenuItem fx:id="saveAutomaticSimulationItem" text="%simulation.contextMenu.saveUIReplay" onAction="#saveAutomaticSimulation"/>
-										</items>
-									</MenuButton>
-									<Button fx:id="openExternalButton" onAction="#editCurrentExternal">
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="EXTERNAL_LINK" bindableFontSize="${fontSize.fontSize + 4}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.editCurrentExternal"/>
-										</tooltip>
-									</Button>
-									<Button fx:id="btSimulate" onAction="#simulate" >
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLAY" bindableFontSize="${fontSize.fontSize + 4.0}" />
-										</graphic>
-										<tooltip>
-											<Tooltip text="%simulation.button.start" />
-										</tooltip>
-									</Button>
-									<Label fx:id="lbTime" prefWidth="${fontSize.fontSize * 10}" textAlignment="RIGHT" alignment="BOTTOM_RIGHT" prefHeight="${fontSize.fontSize + 8.0}"/>
-									<MenuButton fx:id="btGenerateDiagram" disable="true"
-												contentDisplay="GRAPHIC_ONLY" >
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="REORDER" bindableFontSize="${fontSize.fontSize + 4.0}" />
-										</graphic>
-										<tooltip>
-											<Tooltip
-													text="%simulation.tooltips.generateDiagram" />
-										</tooltip>
-										<items>
-											<MenuItem fx:id="generateDiagram" text="%simulation.contextMenu.generateDiagram" onAction="#generateDiagram"/>
-											<MenuItem fx:id="generateComplexDiagram" text="%simulation.contextMenu.generateComplexDiagram" onAction="#generateComplexDiagram"/>
-											<MenuItem fx:id="generateLiveDiagram" text="%simulation.contextMenu.generateLiveDiagram" onAction="#generateLiveDiagram"/>
-										</items>
-									</MenuButton>
-								</HBox>
-								<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
-							</HBox>
-							<ListView fx:id="simulationDiagramItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
-						</VBox>
+								<ListView fx:id="simulationDiagramItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
+							</VBox>
+							<TitledPane id="schedulingTable" fx:id="schedulingTablePane" text="%simulation.schedulingTable.title" expanded="false" animated="false">
+								<TableView fx:id="schedulingItems">
+									<columnResizePolicy>
+										<TableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+									</columnResizePolicy>
+									<columns>
+										<TableColumn fx:id="activationTimeColumn" style="-fx-alignment: CENTER;"
+													 minWidth="${fontSize.fontSize * 10}"
+													 maxWidth="${fontSize.fontSize * 10}" text="%simulation.schedulingTable.table.time"/>
+										<TableColumn fx:id="activationInformationColumn" minWidth="80.0"
+													 text="%simulation.schedulingTable.table.activation"/>
+									</columns>
+									<placeholder>
+										<Label text="%simulation.schedulingTable.table.noActivation"/>
+									</placeholder>
+								</TableView>
+							</TitledPane>
+						</SplitPane>
 						<VBox>
 							<HBox styleClass="border" alignment="CENTER_LEFT" VBox.vgrow="NEVER">
 								<padding>

@@ -51,6 +51,7 @@ import de.prob2.ui.simulation.configuration.TransitionSelection;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.model.SimulationModel;
+import de.prob2.ui.simulation.simulators.Activation;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.Scheduler;
 import de.prob2.ui.simulation.simulators.check.SimulationStatsView;
@@ -335,6 +336,16 @@ public final class SimulatorStage extends Stage {
 	@FXML
 	private ProgressBar progressBar;
 
+	@FXML
+	private TableView<SchedulingTableItem> schedulingItems;
+
+	@FXML
+	private TableColumn<SchedulingTableItem, Integer> activationTimeColumn;
+
+	@FXML
+	private TableColumn<SchedulingTableItem, SchedulingTableItem> activationInformationColumn;
+
+
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
@@ -519,7 +530,6 @@ public final class SimulatorStage extends Stage {
 		simulationConfigurationColumn.setCellFactory(lv -> new SimulationItemTableCell(stageManager, i18n));
 		simulationConfigurationColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue()));
 
-
 		simulationItems.setRowFactory(table -> new SimulationItemRow(this));
 
 		simulationItems.setOnMouseClicked(e -> {
@@ -532,6 +542,10 @@ public final class SimulatorStage extends Stage {
 				simulationItemHandler.checkItem(item);
 			}
 		});
+
+		activationTimeColumn.setCellValueFactory(new PropertyValueFactory<>("time"));
+		activationInformationColumn.setCellFactory(lv -> new SchedulingItemTableCell(stageManager, i18n));
+		activationInformationColumn.setCellValueFactory(features -> new SimpleObjectProperty<>(features.getValue()));
 
 		btRemoveSimulation.disableProperty().bind(cbSimulation.getSelectionModel().selectedItemProperty().isNull());
 		btAddDiagramElement.disableProperty().bind(Bindings.createBooleanBinding(() ->
@@ -553,6 +567,9 @@ public final class SimulatorStage extends Stage {
 
 	public void simulate(RealTimeSimulator realTimeSimulator) {
 		if (!realTimeSimulator.isRunning()) {
+			if(this.time == 0) {
+				this.schedulingItems.getItems().clear();
+			}
 			runSimulator(realTimeSimulator);
 		} else {
 			stopSimulator(realTimeSimulator);
@@ -587,6 +604,11 @@ public final class SimulatorStage extends Stage {
 				startTimer(realTimeSimulator);
 				trace.setExploreStateByDefault(true);
 			}
+			realTimeSimulator.performedActivationProperty().addListener((observable, from, to) -> {
+				if(to != null) {
+					schedulingItems.getItems().add(new SchedulingTableItem(realTimeSimulator.getTime(), to));
+				}
+			});
 		}
 	}
 
@@ -650,6 +672,7 @@ public final class SimulatorStage extends Stage {
 	private void resetSimulator() {
 		lbTime.setText("");
 		this.time = 0;
+		this.schedulingItems.getItems().clear();
 		realTimeSimulator.resetSimulator();
 	}
 

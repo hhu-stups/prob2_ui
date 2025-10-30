@@ -70,7 +70,7 @@ public final class RealTimeSimulator extends Simulator {
 		}
 		scheduler.endSimulationStep();
 		Platform.runLater(()->{
-			if (diagramGenerator.getDiaStage()!= null ) {
+			if (diagramGenerator.getDiaStage() != null ) {
 				if (diagramGenerator.getDiaStage().isShowing() && diagramGenerator.getDiaStage().getIsLive()) {
 					diagramGenerator.updateGraph();
 				}
