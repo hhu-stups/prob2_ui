@@ -148,7 +148,7 @@
 												<Tooltip text="%simulation.button.start" />
 											</tooltip>
 										</Button>
-										<Label fx:id="lbTime" prefWidth="${fontSize.fontSize * 10}" textAlignment="RIGHT" alignment="BOTTOM_RIGHT" prefHeight="${fontSize.fontSize + 8.0}"/>
+										<Label fx:id="lbTime" text="%simulation.label.noSimulation" prefWidth="${fontSize.fontSize * 10}" textAlignment="RIGHT" alignment="BOTTOM_RIGHT" prefHeight="${fontSize.fontSize + 8.0}"/>
 										<MenuButton fx:id="btGenerateDiagram" disable="true"
 													contentDisplay="GRAPHIC_ONLY" >
 											<graphic>

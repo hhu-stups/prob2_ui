@@ -671,7 +671,7 @@ public final class SimulatorStage extends Stage {
 	}
 
 	private void resetSimulator() {
-		lbTime.setText("");
+		lbTime.setText(i18n.translate("simulation.label.noSimulation"));
 		this.time = 0;
 		this.schedulingItems.getItems().clear();
 		realTimeSimulator.resetSimulator();
@@ -729,7 +729,7 @@ public final class SimulatorStage extends Stage {
 			if (!realTimeSimulator.endingConditionReached(currentTrace.get())) {
 				time = to.intValue();
 				if (time == 0) {
-					Platform.runLater(() -> lbTime.setText(""));
+					Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.label.noSimulation")));
 				} else {
 					BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 					Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.time.second", seconds.doubleValue())));
@@ -790,7 +790,7 @@ public final class SimulatorStage extends Stage {
 		StateSpace stateSpace = currentTrace.getStateSpace();
 		if (simulation != null && stateSpace != null) {
 			simulationItemHandler.setPath(configurationPath.get());
-			lbTime.setText("");
+			lbTime.setText(i18n.translate("simulation.label.noSimulation"));
 			this.time = 0;
 			simulationItemHandler.reset(simulation);
 			this.simulationFileHandler.initSimulator(this, realTimeSimulator, stateSpace.getLoadedMachine(), configurationPath.get());
