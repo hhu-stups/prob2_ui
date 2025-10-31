@@ -42,12 +42,13 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		this.i18n = i18n;
 		this.savedProperty = savedProperty;
 		this.savedProperty.addListener((observable, from, to) -> {
-			if (getIndex() < 0) {
+			int index = this.getListView().getItems().indexOf(this.getItem());
+			if (index < 0) {
 				return;
 			}
 			if (!from && to) {
 				this.setItem(modifiedItem);
-				this.getListView().getItems().set(getIndex(), modifiedItem);
+				this.getListView().getItems().set(index, modifiedItem);
 			}
 		});
 		this.runningProperty = runningProperty;
