@@ -2,6 +2,7 @@ package de.prob2.ui.simulation;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -745,7 +746,10 @@ public final class SimulatorStage extends Stage {
 					time = realTimeSimulator.timeProperty().get();
 					firstStart.set(0, false);
 				} else if (!realTimeSimulator.endingConditionReached(currentTrace.get())) {
-					if (currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised() && time + 100 < realTimeSimulator.getTime() + realTimeSimulator.getDelay()) {
+					BigInteger nextTime = BigInteger.valueOf(time).add(BigInteger.valueOf(100));
+					BigInteger simulatorNextTime = BigInteger.valueOf(realTimeSimulator.getTime()).add(BigInteger.valueOf(realTimeSimulator.getDelay()));
+					boolean nextTimeLessSimulatorNextTime = nextTime.compareTo(simulatorNextTime) < 0;
+					if (currentTrace.getCurrentState() != null && currentTrace.getCurrentState().isInitialised() && nextTimeLessSimulatorNextTime) {
 						time += 100;
 						BigDecimal seconds = new BigDecimal(time / 1000.0f).setScale(1, RoundingMode.HALF_DOWN);
 						Platform.runLater(() -> lbTime.setText(i18n.translate("simulation.time.second", seconds.doubleValue())));
