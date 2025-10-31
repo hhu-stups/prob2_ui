@@ -86,7 +86,6 @@ public final class Scheduler {
 	}
 
 	public void stop() {
-		runningTasks.set(0);
 		runningProperty.set(false);
 	}
 
