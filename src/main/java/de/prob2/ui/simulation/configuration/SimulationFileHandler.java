@@ -114,11 +114,11 @@ public final class SimulationFileHandler {
 			@Override
 			public JsonMetadata updateMetadataOnSave(JsonMetadata metadata) {
 				JsonMetadataBuilder b = new JsonMetadataBuilder(metadata)
-						                        .withFormatVersion(this.currentFormatVersion)
-						                        .withFileType(this.fileType)
-						                        .withSavedNow()
-						                        .withProB2KernelVersion(SimulationFileHandler.this.versionInfo.getKernelVersion())
-						                        .withProBCliVersion(SimulationFileHandler.this.versionInfo.getCliVersion().toString());
+					.withFormatVersion(this.currentFormatVersion)
+					.withFileType(this.fileType)
+					.withSavedNow()
+					.withProB2KernelVersion(SimulationFileHandler.this.versionInfo.getKernelVersion())
+					.withProBCliVersion(SimulationFileHandler.this.versionInfo.getCliVersion().toString());
 				if (metadata.getCreator() == null) {
 					b.withUserCreator();
 				}
@@ -157,10 +157,10 @@ public final class SimulationFileHandler {
 			List<Path> timedTraces;
 			try (var s = Files.walk(path)) {
 				timedTraces = s
-						              .filter(Files::isRegularFile)
-						              .filter(p -> MoreFiles.getFileExtension(p).equals(SIMULATION_FILE_EXTENSION))
-						              .sorted()
-						              .collect(Collectors.toList());
+					.filter(Files::isRegularFile)
+					.filter(p -> MoreFiles.getFileExtension(p).equals(SIMULATION_FILE_EXTENSION))
+					.sorted()
+					.collect(Collectors.toList());
 			}
 			return new SimulationBlackBoxModelConfiguration(timedTraces);
 		} else if (SIMULATION_FILE_EXTENSION.equals(MoreFiles.getFileExtension(path))) {
@@ -230,8 +230,8 @@ public final class SimulationFileHandler {
 
 	private JsonMetadata createMetadata(String createdBy, String modelName) {
 		JsonMetadataBuilder b = SimulationModelConfiguration.metadataBuilder()
-				                        .withProB2KernelVersion(this.versionInfo.getKernelVersion())
-				                        .withProBCliVersion(this.versionInfo.getCliVersion().toString());
+			.withProB2KernelVersion(this.versionInfo.getKernelVersion())
+			.withProBCliVersion(this.versionInfo.getCliVersion().toString());
 		if (createdBy != null) {
 			b.withCreator(createdBy);
 		}
@@ -248,7 +248,7 @@ public final class SimulationFileHandler {
 		}
 	}
 
-    // create a default simulation as a starting point, if user has not provided one
+	// create a default simulation as a starting point, if user has not provided one
 	private SimulationModelConfiguration createDefaultSimulation(LoadedMachine loadedMachine) {
 		Map<String, String> variables = new HashMap<>();
 		List<DiagramConfiguration.NonUi> activations = new ArrayList<>();
@@ -256,20 +256,26 @@ public final class SimulationFileHandler {
 		JsonMetadata metadata = createMetadata(null, null);
 
 		if (!loadedMachine.getConstantNames().isEmpty()) {
-			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, 
-			                "0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, 
-			                null, false, null, null, "Activation SETUP_CONSTANTS"));
+			activations.add(new ActivationOperationConfiguration(
+				SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, 
+				"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, 
+				null, false, null, null, "Activation SETUP_CONSTANTS"
+			));
 		}
 
 		var operations = loadedMachine.getOperationNames();
-		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME,
-		                    "0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST,
-		                    List.copyOf(operations), true, null, null, "Activation for INITIALISATION"));
-	
+		activations.add(new ActivationOperationConfiguration(
+			INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME,
+			"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST,
+			List.copyOf(operations), true, null, null, "Activation for INITIALISATION"
+		));
+
 		for (var op : operations) {
-			activations.add(new ActivationOperationConfiguration(op, op, 
-			                 "100", 0, "btrue", ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, 
-			                 List.copyOf(operations), true, null, null, "Activation for "+op));
+			activations.add(new ActivationOperationConfiguration(
+				op, op, 
+				"100", 0, "btrue", ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, 
+				List.copyOf(operations), true, null, null, "Activation for " + op
+			));
 		}
 
 		return new SimulationModelConfiguration(variables, activations, uiListenerConfigurations, metadata);

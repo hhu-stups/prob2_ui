@@ -38,7 +38,7 @@ public final class RealTimeSimulator extends Simulator {
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;
-		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);;
+		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
 		this.diagramGenerator = null;
 	}
 
@@ -69,8 +69,8 @@ public final class RealTimeSimulator extends Simulator {
 			throw e;
 		}
 		scheduler.endSimulationStep();
-		Platform.runLater(()->{
-			if (diagramGenerator.getDiaStage() != null ) {
+		Platform.runLater(() -> {
+			if (diagramGenerator.getDiaStage() != null) {
 				if (diagramGenerator.getDiaStage().isShowing() && diagramGenerator.getDiaStage().getIsLive()) {
 					diagramGenerator.updateGraph();
 				}
