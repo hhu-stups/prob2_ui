@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.configuration;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -130,10 +131,19 @@ public final class SimulationFileHandler {
 	public void initSimulator(Window window, Simulator simulator, LoadedMachine loadedMachine, Path path) {
 		try {
 			simulator.initSimulator(this.loadConfiguration(path, loadedMachine));
-		} catch (IOException e) {
+		}
+		catch (FileNotFoundException e) {
 			LOGGER.error("Tried to load simulation configuration file", e);
 			Platform.runLater(() -> {
 				Alert alert = this.stageManager.makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");
+				alert.initOwner(window);
+				alert.showAndWait();
+			});
+		} catch (IOException e) {
+			// an IOException exception probably comes from Jackson JSON library
+			LOGGER.error("JSON errors in simulation configuration file", e);
+			Platform.runLater(() -> {
+				Alert alert = this.stageManager.makeExceptionAlert(e, "simulation.error.header.fileHasIOError", "simulation.error.body.fileHasIOError");
 				alert.initOwner(window);
 				alert.showAndWait();
 			});
