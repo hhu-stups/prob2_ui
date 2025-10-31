@@ -72,6 +72,9 @@ public class SimulationEventHandler {
 		Map<String, String> values = new HashMap<>();
 		if (parameters != null) {
 			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
+			if (mode == EvaluationMode.XTL) {
+				return parameters; // do not evaluate value in XTL mode too early to avoid type conflicts with STRING_TO_TERM (disadvantage: no SimB caching)
+			}
 			for (var e : parameters.entrySet()) {
 				var value = evaluateWithParameters(currentState, e.getValue(), activation.firingTransitionParameters(), activation.firingTransitionParametersPredicate(), mode);
 				values.put(e.getKey(), value);
