@@ -155,7 +155,7 @@ public abstract class Simulator {
 					this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this.objectMapperProvider.get(), this, ((SimulationExternalConfiguration) config).getExternalPath());
 					this.externalSimulatorExecutor.start();
 				} else {
-					if(!this.externalSimulatorExecutor.getPythonFile().equals(((SimulationExternalConfiguration) config).getExternalPath())) {
+					if(this instanceof RealTimeSimulator || !this.externalSimulatorExecutor.getPythonFile().equals(((SimulationExternalConfiguration) config).getExternalPath())) {
 						this.externalSimulatorExecutor.close();
 						this.externalSimulatorExecutor = new ExternalSimulatorExecutor(this.objectMapperProvider.get(), this, ((SimulationExternalConfiguration) config).getExternalPath());
 						this.externalSimulatorExecutor.start();
