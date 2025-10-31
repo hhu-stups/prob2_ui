@@ -442,7 +442,7 @@ public final class SimulatorStage extends Stage {
 			if (to) {
 				Platform.runLater(() -> {
 					((Glyph)btSimulate.getGraphic()).setIcon(FontAwesome.Glyph.PAUSE);
-					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.stop")));
+					btSimulate.setTooltip(new Tooltip(i18n.translate("simulation.button.pause")));
 				});
 			} else {
 				Platform.runLater(() -> {
