@@ -131,8 +131,7 @@ public final class SimulationFileHandler {
 	public void initSimulator(Window window, Simulator simulator, LoadedMachine loadedMachine, Path path) {
 		try {
 			simulator.initSimulator(this.loadConfiguration(path, loadedMachine));
-		}
-		catch (FileNotFoundException e) {
+		} catch (FileNotFoundException e) {
 			LOGGER.error("Tried to load simulation configuration file", e);
 			Platform.runLater(() -> {
 				Alert alert = this.stageManager.makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");
