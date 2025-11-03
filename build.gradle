@@ -129,6 +129,7 @@ dependencies {
 	implementation(platform(group: "de.hhu.stups", name: "prob-java-bom", version: "4.15.1-SNAPSHOT"))
 	implementation group: "de.hhu.stups", name: "de.prob2.kernel"
 	implementation group: "de.hhu.stups", name: "voparser", version: "0.3.0"
+	implementation group: "jakarta.annotation", name: "jakarta.annotation-api", version: "3.0.0"
 	implementation group: "org.controlsfx", name: "controlsfx", version: "11.2.1"
 	implementation group: "org.fxmisc.richtext", name: "richtextfx", version: "0.11.4"
 	implementation group: "se.sawano.java", name: "alphanumeric-comparator", version: "2.0.0"
