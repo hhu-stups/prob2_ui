@@ -231,6 +231,8 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 	}
 
 	private void updateChoiceDiagramItem(ActivationChoiceConfiguration item) {
+		Label lbID = new Label(i18n.translate("simulation.item.id"));
+		lbID.getStyleClass().add("information");
 		TextField tfID = new TextField(item.getId());
 		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
 		tfID.textProperty().addListener((observable, from, to) -> {
@@ -238,7 +240,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			item.setId(to);
 		});
 		tfID.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(tfID);
+		this.itemBox.getChildren().add(new HBox(lbID, tfID));
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.choiceActivations.hover")));
@@ -254,6 +256,8 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 	}
 
 	private void updateListenerItem(UIListenerConfiguration item) {
+		Label lbID = new Label(i18n.translate("simulation.item.listenerId"));
+		lbID.getStyleClass().add("information");
 		TextField tfID = new TextField(item.getId());
 		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
 		tfID.textProperty().addListener((observable, from, to) -> {
@@ -261,8 +265,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			item.setId(to);
 		});
 		tfID.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(tfID);
-
+		this.itemBox.getChildren().add(new HBox(lbID, tfID));
 
 		Label lbEvent = new Label(i18n.translate("simulation.item.event"));
 		lbEvent.setTooltip(new Tooltip(i18n.translate("simulation.item.eventListener.hover")));
