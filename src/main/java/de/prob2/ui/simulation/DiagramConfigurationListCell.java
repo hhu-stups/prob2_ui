@@ -100,44 +100,36 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 	private void updateOperationDiagramItem(ActivationOperationConfiguration item) {
 		Label lbID = new Label(i18n.translate("simulation.item.id"));
 		lbID.getStyleClass().add("information");
-		lbID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
-
 		TextField tfID = new TextField(item.getId());
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setId(to);
 		});
 		tfID.disableProperty().bind(this.runningProperty);
-		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
 		this.itemBox.getChildren().add(new HBox(lbID, createHelpIcon("id"), tfID));
 
 		Label lbOpName = new Label(i18n.translate("simulation.item.operation"));
 		lbOpName.getStyleClass().add("information");
-		lbOpName.setTooltip(new Tooltip(i18n.translate("simulation.item.operation.hover")));
 		TextField tfOpName = new TextField(item.getExecute());
 		tfOpName.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setExecute(from);
 		});
 		tfOpName.disableProperty().bind(this.runningProperty);
-		tfOpName.setTooltip(new Tooltip(i18n.translate("simulation.item.operation.hover")));
 		this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), tfOpName));
 
 		Label lbTime = new Label(i18n.translate("simulation.item.time"));
 		lbTime.getStyleClass().add("information");
-		lbTime.setTooltip(new Tooltip(i18n.translate("simulation.item.time.hover")));
 		TextField tfTime = new TextField(item.getAfter());
 		tfTime.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setAfter(to.isEmpty() ? "0" : to);
 		});
 		tfTime.disableProperty().bind(this.runningProperty);
-		tfTime.setTooltip(new Tooltip(i18n.translate("simulation.item.time.hover")));
 		this.itemBox.getChildren().add(new HBox(lbTime, createHelpIcon("time"), tfTime));
 
 		Label lbPriority = new Label(i18n.translate("simulation.item.priority"));
 		lbPriority.getStyleClass().add("information");
-		lbPriority.setTooltip(new Tooltip(i18n.translate("simulation.item.priority.hover")));
 		TextField tfPriority = new TextField(String.valueOf(item.getPriority()));
 		tfPriority.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
@@ -148,24 +140,20 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			}
 		});
 		tfPriority.disableProperty().bind(this.runningProperty);
-		tfPriority.setTooltip(new Tooltip(i18n.translate("simulation.item.priority.hover")));
 		this.itemBox.getChildren().add(new HBox(lbPriority, createHelpIcon("priority"), tfPriority));
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		lbActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.activations.hover")));
 		TextField tfActivation = new TextField(containerToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(parseList(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
-		tfActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.activations.hover")));
 		this.itemBox.getChildren().add(new HBox(lbActivation, createHelpIcon("activations"), tfActivation));
 
 		Label lbActivationKind = new Label(i18n.translate("simulation.item.activationKind"));
 		lbActivationKind.getStyleClass().add("information");
-		lbActivationKind.setTooltip(new Tooltip(i18n.translate("simulation.item.activationKind.hover")));
 		TextField tfActivationKind = new TextField(item.getActivationKind().getName());
 		tfActivationKind.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
@@ -176,48 +164,40 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			}
 		});
 		tfActivationKind.disableProperty().bind(this.runningProperty);
-		tfActivationKind.setTooltip(new Tooltip(i18n.translate("simulation.item.activationKind.hover")));
 		this.itemBox.getChildren().add(new HBox(lbActivationKind, createHelpIcon("activationKind"), tfActivationKind));
 
 		Label lbAdditionalGuards = new Label(i18n.translate("simulation.item.additionalGuards"));
 		lbAdditionalGuards.getStyleClass().add("information");
-		lbAdditionalGuards.setTooltip(new Tooltip(i18n.translate("simulation.item.additionalGuards.hover")));
 		TextField tfAdditionalGuards = new TextField(item.getAdditionalGuards());
 		tfAdditionalGuards.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setAdditionalGuards(to.isEmpty() ? null : to);
 		});
 		tfAdditionalGuards.disableProperty().bind(this.runningProperty);
-		tfAdditionalGuards.setTooltip(new Tooltip(i18n.translate("simulation.item.additionalGuards.hover")));
 		this.itemBox.getChildren().add(new HBox(lbAdditionalGuards, createHelpIcon("additionalGuards"), tfAdditionalGuards));
 
 		Label lbFixedVariables = new Label(i18n.translate("simulation.item.fixedVariables"));
 		lbFixedVariables.getStyleClass().add("information");
-		lbFixedVariables.setTooltip(new Tooltip(i18n.translate("simulation.item.fixedVariables.hover")));
 		TextField tfFixedVariables = new TextField(containerToString(item.getFixedVariables()));
 		tfFixedVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setFixedVariables(parseMap(to));
 		});
 		tfFixedVariables.disableProperty().bind(this.runningProperty);
-		tfFixedVariables.setTooltip(new Tooltip(i18n.translate("simulation.item.fixedVariables.hover")));
 		this.itemBox.getChildren().add(new HBox(lbFixedVariables, createHelpIcon("fixedVariables"), tfFixedVariables));
 
 		Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables"));
 		lbProbabilisticVariables.getStyleClass().add("information");
-		lbProbabilisticVariables.setTooltip(new Tooltip(i18n.translate("simulation.item.probabilisticVariables.hover")));
 		TextField tfProbabilisticVariables = new TextField(containerToString(item.getProbabilisticVariables()));
 		tfProbabilisticVariables.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setProbabilisticVariables(parseProbabilisticVariables(to));
 		});
 		tfProbabilisticVariables.disableProperty().bind(this.runningProperty);
-		tfProbabilisticVariables.setTooltip(new Tooltip(i18n.translate("simulation.item.probabilisticVariables.hover")));
 		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, createHelpIcon("probabilisticVariables"), tfProbabilisticVariables));
 
 		Label lbTransitionSelection = new Label(i18n.translate("simulation.item.transitionSelection"));
 		lbTransitionSelection.getStyleClass().add("information");
-		lbTransitionSelection.setTooltip(new Tooltip(i18n.translate("simulation.item.transitionSelection.hover")));
 		TextField tfTransitionSelection = new TextField(item.getTransitionSelection().getName());
 		tfTransitionSelection.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
@@ -228,7 +208,6 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			}
 		});
 		tfTransitionSelection.disableProperty().bind(this.runningProperty);
-		tfTransitionSelection.setTooltip(new Tooltip(i18n.translate("simulation.item.transitionSelection.hover")));
 		this.itemBox.getChildren().add(new HBox(lbTransitionSelection, createHelpIcon("transitionSelection"), tfTransitionSelection));
 
 		// TODO: activatingOnlyWhenExecuted, updating, withPredicate
@@ -238,7 +217,6 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		Label lbID = new Label(i18n.translate("simulation.item.id"));
 		lbID.getStyleClass().add("information");
 		TextField tfID = new TextField(item.getId());
-		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setId(to);
@@ -247,10 +225,8 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		this.itemBox.getChildren().add(new HBox(lbID, createHelpIcon("id"), tfID));
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
-		lbActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.choiceActivations.hover")));
 		lbActivation.getStyleClass().add("information");
 		TextField tfActivation = new TextField(containerToString(item.getChooseActivation()));
-		tfActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.choiceActivations.hover")));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setChooseActivation(parseMap(to));
@@ -263,7 +239,6 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		Label lbID = new Label(i18n.translate("simulation.item.listenerId"));
 		lbID.getStyleClass().add("information");
 		TextField tfID = new TextField(item.getId());
-		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
 		tfID.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setId(to);
@@ -272,10 +247,8 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		this.itemBox.getChildren().add(new HBox(lbID, createHelpIcon("listenerId"), tfID));
 
 		Label lbEvent = new Label(i18n.translate("simulation.item.event"));
-		lbEvent.setTooltip(new Tooltip(i18n.translate("simulation.item.eventListener.hover")));
 		lbEvent.getStyleClass().add("information");
 		TextField tfEvent = new TextField(item.getEvent());
-		tfEvent.setTooltip(new Tooltip(i18n.translate("simulation.item.eventListener.hover")));
 		tfEvent.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setEvent(to);
@@ -284,7 +257,6 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		this.itemBox.getChildren().add(new HBox(lbEvent, createHelpIcon("eventListener"), tfEvent));
 
 		Label lbPredicate = new Label(i18n.translate("simulation.item.predicate"));
-		lbPredicate.setTooltip(new Tooltip(i18n.translate("simulation.item.predicate.hover")));
 		lbPredicate.getStyleClass().add("information");
 		TextField tfPredicate = new TextField(item.getPredicate());
 		tfPredicate.textProperty().addListener((observable, from, to) -> {
@@ -292,18 +264,15 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			item.setPredicate(to);
 		});
 		tfPredicate.disableProperty().bind(this.runningProperty);
-		tfPredicate.setTooltip(new Tooltip(i18n.translate("simulation.item.predicate.hover")));
 		this.itemBox.getChildren().add(new HBox(lbPredicate, createHelpIcon("predicate"), tfPredicate));
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		lbActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.activations.hover")));
 		TextField tfActivation = new TextField(containerToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setActivating(parseList(to));
 		});
-		tfActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.activations.hover")));
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, createHelpIcon("activations"), tfActivation));
 	}
