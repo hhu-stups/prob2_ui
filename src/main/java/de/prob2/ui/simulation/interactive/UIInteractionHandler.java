@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.FormulaExpand;
@@ -16,6 +17,7 @@ import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
+import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
@@ -32,6 +34,8 @@ import javafx.beans.property.SimpleObjectProperty;
 @Singleton
 public final class UIInteractionHandler {
 	private final ObjectProperty<Transition> lastUserInteraction;
+
+	private final Injector injector;
 
 	private final Scheduler scheduler;
 
@@ -51,7 +55,8 @@ public final class UIInteractionHandler {
 	private Transition initializationTransition;
 
 	@Inject
-	public UIInteractionHandler(final Scheduler scheduler, final CurrentTrace currentTrace, final CurrentProject currentProject) {
+	public UIInteractionHandler(final Injector injector, final Scheduler scheduler, final CurrentTrace currentTrace, final CurrentProject currentProject) {
+		this.injector = injector;
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.lastUserInteraction = new SimpleObjectProperty<>(null);
@@ -143,6 +148,7 @@ public final class UIInteractionHandler {
 		lastUserInteraction.set(null);
 		lastUserInteraction.set(transition);
 		userTransitions.add(transition);
+		realTimeSimulator.setTime(injector.getInstance(SimulatorStage.class).getTime());
 		realTimeSimulator.getTimestamps().add(realTimeSimulator.getTime());
 		timestamps.add(realTimeSimulator.getTime());
 	}
