@@ -174,9 +174,9 @@ public final class ProB2 extends Application {
 	}
 
 	private void showStartupError(final Throwable t, final Stage primaryStage) {
-		primaryStage.setTitle("Error during ProB 2.0 startup");
+		primaryStage.setTitle("Error during ProB2-UI startup");
 
-		final String errorText = "An error occurred while starting ProB 2.0. Please copy the error information below and create a bug report at: " + BUG_REPORT_URL + "\n\n" + ExceptionAlert.getExceptionStackTrace(t);
+		final String errorText = "An error occurred while starting ProB2-UI. Please copy the error information below and create a bug report at: " + BUG_REPORT_URL + "\n\n" + ExceptionAlert.getExceptionStackTrace(t);
 		final TextArea errorTextArea = new TextArea(errorText);
 		errorTextArea.setEditable(false);
 		errorTextArea.setWrapText(true);
@@ -197,7 +197,7 @@ public final class ProB2 extends Application {
 		loadingImageView.setFitHeight(100.0);
 		final Scene loadingScene = new Scene(new BorderPane(loadingImageView));
 		primaryStage.setScene(loadingScene);
-		primaryStage.setTitle("Loading ProB 2.0...");
+		primaryStage.setTitle("Loading ProB2-UI...");
 		primaryStage.getIcons().add(StageManager.ICON);
 		primaryStage.show();
 
@@ -369,7 +369,7 @@ public final class ProB2 extends Application {
 			title.append(" - ");
 		}
 
-		title.append("ProB 2.0");
+		title.append("ProB2-UI");
 
 		if (!currentProject.isSaved()) {
 			title.append('*');

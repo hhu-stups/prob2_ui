@@ -74,7 +74,7 @@ Downloads of the current release and snapshot development builds can be found on
   * Removed formal distinction between requirement types (functional and non-functional) as the VO manager doesn't use this information
 * Improved UI responsiveness while updating the status bar or a VisB visualization
 * Improved startup performance slightly
-* Fixed multiple problems when starting multiple instances of ProB 2 UI at once
+* Fixed multiple problems when starting multiple instances of ProB2-UI at once
 * Fixed editor discarding changes made while saving
 * Fixed editor sometimes overwriting file contents when using undo together with switching between files
 * Fixed various text editing bugs in ProB and Groovy consoles
@@ -171,7 +171,7 @@ Downloads of the current release and snapshot development builds can be found on
 * Fixed inefficient expansion of symbolic sets in some places
 * Fixed various keyboard problems with some OSes and keyboard layouts (Shift on Windows, undo/redo with non-US layouts, zoom shortcuts, consoles)
 * Fixed some toolbar icons becoming invisible for small window/view sizes
-* Fixed errors with the config file when switching between different versions of ProB 2 UI
+* Fixed errors with the config file when switching between different versions of ProB2-UI
 
 ### Downloads for version 1.2.0
 
