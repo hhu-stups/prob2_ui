@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.layout.BindableGlyph;
+import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -17,12 +19,16 @@ import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.fxml.FXML;
+import javafx.geometry.Insets;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.util.Duration;
+import org.controlsfx.glyphfont.FontAwesome;
 
 public final class DiagramConfigurationListCell extends ListCell<DiagramConfiguration> {
 
@@ -103,7 +109,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfID.disableProperty().bind(this.runningProperty);
 		tfID.setTooltip(new Tooltip(i18n.translate("simulation.item.id.hover")));
-		this.itemBox.getChildren().add(new HBox(lbID, tfID));
+		this.itemBox.getChildren().add(new HBox(lbID, createHelpIcon("id"), tfID));
 
 		Label lbOpName = new Label(i18n.translate("simulation.item.operation"));
 		lbOpName.getStyleClass().add("information");
@@ -115,7 +121,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfOpName.disableProperty().bind(this.runningProperty);
 		tfOpName.setTooltip(new Tooltip(i18n.translate("simulation.item.operation.hover")));
-		this.itemBox.getChildren().add(new HBox(lbOpName, tfOpName));
+		this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), tfOpName));
 
 		Label lbTime = new Label(i18n.translate("simulation.item.time"));
 		lbTime.getStyleClass().add("information");
@@ -127,7 +133,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfTime.disableProperty().bind(this.runningProperty);
 		tfTime.setTooltip(new Tooltip(i18n.translate("simulation.item.time.hover")));
-		this.itemBox.getChildren().add(new HBox(lbTime, tfTime));
+		this.itemBox.getChildren().add(new HBox(lbTime, createHelpIcon("time"), tfTime));
 
 		Label lbPriority = new Label(i18n.translate("simulation.item.priority"));
 		lbPriority.getStyleClass().add("information");
@@ -143,8 +149,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfPriority.disableProperty().bind(this.runningProperty);
 		tfPriority.setTooltip(new Tooltip(i18n.translate("simulation.item.priority.hover")));
-		this.itemBox.getChildren().add(new HBox(lbPriority, tfPriority));
-
+		this.itemBox.getChildren().add(new HBox(lbPriority, createHelpIcon("priority"), tfPriority));
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
@@ -156,7 +161,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		tfActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.activations.hover")));
-		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
+		this.itemBox.getChildren().add(new HBox(lbActivation, createHelpIcon("activations"), tfActivation));
 
 		Label lbActivationKind = new Label(i18n.translate("simulation.item.activationKind"));
 		lbActivationKind.getStyleClass().add("information");
@@ -172,7 +177,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfActivationKind.disableProperty().bind(this.runningProperty);
 		tfActivationKind.setTooltip(new Tooltip(i18n.translate("simulation.item.activationKind.hover")));
-		this.itemBox.getChildren().add(new HBox(lbActivationKind, tfActivationKind));
+		this.itemBox.getChildren().add(new HBox(lbActivationKind, createHelpIcon("activationKind"), tfActivationKind));
 
 		Label lbAdditionalGuards = new Label(i18n.translate("simulation.item.additionalGuards"));
 		lbAdditionalGuards.getStyleClass().add("information");
@@ -184,8 +189,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfAdditionalGuards.disableProperty().bind(this.runningProperty);
 		tfAdditionalGuards.setTooltip(new Tooltip(i18n.translate("simulation.item.additionalGuards.hover")));
-		this.itemBox.getChildren().add(new HBox(lbAdditionalGuards, tfAdditionalGuards));
-
+		this.itemBox.getChildren().add(new HBox(lbAdditionalGuards, createHelpIcon("additionalGuards"), tfAdditionalGuards));
 
 		Label lbFixedVariables = new Label(i18n.translate("simulation.item.fixedVariables"));
 		lbFixedVariables.getStyleClass().add("information");
@@ -197,7 +201,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfFixedVariables.disableProperty().bind(this.runningProperty);
 		tfFixedVariables.setTooltip(new Tooltip(i18n.translate("simulation.item.fixedVariables.hover")));
-		this.itemBox.getChildren().add(new HBox(lbFixedVariables, tfFixedVariables));
+		this.itemBox.getChildren().add(new HBox(lbFixedVariables, createHelpIcon("fixedVariables"), tfFixedVariables));
 
 		Label lbProbabilisticVariables = new Label(i18n.translate("simulation.item.probabilisticVariables"));
 		lbProbabilisticVariables.getStyleClass().add("information");
@@ -209,7 +213,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfProbabilisticVariables.disableProperty().bind(this.runningProperty);
 		tfProbabilisticVariables.setTooltip(new Tooltip(i18n.translate("simulation.item.probabilisticVariables.hover")));
-		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, tfProbabilisticVariables));
+		this.itemBox.getChildren().add(new HBox(lbProbabilisticVariables, createHelpIcon("probabilisticVariables"), tfProbabilisticVariables));
 
 		Label lbTransitionSelection = new Label(i18n.translate("simulation.item.transitionSelection"));
 		lbTransitionSelection.getStyleClass().add("information");
@@ -225,7 +229,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfTransitionSelection.disableProperty().bind(this.runningProperty);
 		tfTransitionSelection.setTooltip(new Tooltip(i18n.translate("simulation.item.transitionSelection.hover")));
-		this.itemBox.getChildren().add(new HBox(lbTransitionSelection, tfTransitionSelection));
+		this.itemBox.getChildren().add(new HBox(lbTransitionSelection, createHelpIcon("transitionSelection"), tfTransitionSelection));
 
 		// TODO: activatingOnlyWhenExecuted, updating, withPredicate
 	}
@@ -240,7 +244,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			item.setId(to);
 		});
 		tfID.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(new HBox(lbID, tfID));
+		this.itemBox.getChildren().add(new HBox(lbID, createHelpIcon("id"), tfID));
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.choiceActivations.hover")));
@@ -252,7 +256,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			item.setChooseActivation(parseMap(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
+		this.itemBox.getChildren().add(new HBox(lbActivation, createHelpIcon("choiceActivations"), tfActivation));
 	}
 
 	private void updateListenerItem(UIListenerConfiguration item) {
@@ -265,7 +269,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			item.setId(to);
 		});
 		tfID.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(new HBox(lbID, tfID));
+		this.itemBox.getChildren().add(new HBox(lbID, createHelpIcon("listenerId"), tfID));
 
 		Label lbEvent = new Label(i18n.translate("simulation.item.event"));
 		lbEvent.setTooltip(new Tooltip(i18n.translate("simulation.item.eventListener.hover")));
@@ -277,7 +281,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			item.setEvent(to);
 		});
 		tfEvent.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(new HBox(lbEvent, tfEvent));
+		this.itemBox.getChildren().add(new HBox(lbEvent, createHelpIcon("eventListener"), tfEvent));
 
 		Label lbPredicate = new Label(i18n.translate("simulation.item.predicate"));
 		lbPredicate.setTooltip(new Tooltip(i18n.translate("simulation.item.predicate.hover")));
@@ -289,8 +293,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfPredicate.disableProperty().bind(this.runningProperty);
 		tfPredicate.setTooltip(new Tooltip(i18n.translate("simulation.item.predicate.hover")));
-		this.itemBox.getChildren().add(new HBox(lbPredicate, tfPredicate));
-
+		this.itemBox.getChildren().add(new HBox(lbPredicate, createHelpIcon("predicate"), tfPredicate));
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
@@ -302,7 +305,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		});
 		tfActivation.setTooltip(new Tooltip(i18n.translate("simulation.item.activations.hover")));
 		tfActivation.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(new HBox(lbActivation, tfActivation));
+		this.itemBox.getChildren().add(new HBox(lbActivation, createHelpIcon("activations"), tfActivation));
 	}
 
 	private String containerToString(Object o) {
@@ -385,5 +388,22 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		this.setGraphic(null);
 		this.setText("");
 		this.modifiedItem = null;
+	}
+
+	private Button createHelpIcon(String helpTextKey) {
+		Button button = new Button();
+		button.setStyle("-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;");
+
+		BindableGlyph glyph = new BindableGlyph("FontAwesome", FontAwesome.Glyph.QUESTION_CIRCLE);
+		glyph.getStyleClass().add("icon-dark");
+		button.setGraphic(glyph);
+
+		Tooltip tooltip = new Tooltip(i18n.translate("simulation.item." + helpTextKey + ".hover"));
+		tooltip.setShowDelay(Duration.ZERO);
+		tooltip.setShowDuration(Duration.INDEFINITE);
+		button.setTooltip(tooltip);
+
+		HBox.setMargin(button, new Insets(0,7.5,0,5));
+		return button;
 	}
 }
