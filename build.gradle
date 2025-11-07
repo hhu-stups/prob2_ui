@@ -346,8 +346,8 @@ task jpackage(type: Exec) {
 		'--main-class', application.mainClass.get(),
 		"--name", applicationName,
 		"--app-version", applicationVersion,
-		"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2023",
-		"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
+		"--copyright", "Heinrich Heine University Düsseldorf, Lehrstuhl für Softwaretechnik und Programmiersprachen 2025",
+		"--vendor", "Heinrich Heine University Düsseldorf, Lehrstuhl für Softwaretechnik und Programmiersprachen",
 		"--license-file", "LICENSE",
 	]
 
