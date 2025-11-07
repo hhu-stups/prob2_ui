@@ -328,8 +328,7 @@ task jpackage(type: Exec) {
 	// Show jpackage --verbose output only if running Gradle with --info (or higher)
 	logging.captureStandardOutput(LogLevel.INFO)
 
-	final applicationName = "ProB 2 UI"
-	final applicationNameNoSpaces = "ProB2-UI"
+	final applicationName = "ProB2-UI"
 	// Some platforms (Windows, macOS) require that versions follow a strict x.y.z format and don't allow string components like SNAPSHOT.
 	final applicationVersion = project.version.replaceAll(/-SNAPSHOT/, "")
 
@@ -345,8 +344,7 @@ task jpackage(type: Exec) {
 		"--input", shadowJarFile.parent,
 		"--main-jar", shadowJarFile.name, // file name given to --main-jar is relative to the path given to --input
 		'--main-class', application.mainClass.get(),
-		// When targetting Linux, jpackage doesn't handle spaces in the application name correctly.
-		"--name", osdetector.os == "linux" ? applicationNameNoSpaces : applicationName,
+		"--name", applicationName,
 		"--app-version", applicationVersion,
 		"--copyright", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen 2023",
 		"--vendor", "Heinrich-Heine-University, Institut für Softwaretechnik und Programmiersprachen",
