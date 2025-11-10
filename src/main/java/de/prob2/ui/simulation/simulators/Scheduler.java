@@ -7,7 +7,6 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
 
 import java.util.Timer;
 import java.util.TimerTask;
