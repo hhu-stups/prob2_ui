@@ -4,6 +4,15 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.3.1 (not released yet)
 
+* Added transition information stored in state space to operation details stage (e.g. details about the execution of operations with STORE_DETAILED_TRANSITION_INFOS preference)
+* Added menu for data import of XML files with XML2B
+* Improved RulesView (display messages for UNCHECKED rules)
+* Improved XTL Prolog mode 
+  * Enabled execute by predicate for registered transitions (`trans_prop`), can be used to specify parameter values
+  * Enabled JSON trace replay, also with interactive trace replay
+  * Enabled simulation with SimB (basic functionality, without caching)
+  * Improved support for visualisation with VisB (using B definitions)
+
 ## Version 1.3.0 (2025-07-30)
 
 * Updated the ProB core to version 1.15.0 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
