@@ -148,7 +148,7 @@ public final class VOManagerStage extends Stage {
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.relatedMachineNames = FXCollections.observableSet();
 		this.currentMachineVTs = new SimpleListProperty<>(this, "currentMachineVTs", FXCollections.emptyObservableList());
-		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
+		stageManager.loadFXML(this, "vo_manager_view.fxml");
 	}
 
 	@FXML

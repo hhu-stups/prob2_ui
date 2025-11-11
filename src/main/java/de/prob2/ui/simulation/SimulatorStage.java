@@ -430,7 +430,7 @@ public final class SimulatorStage extends Stage {
 			}
 		};
 
-		stageManager.loadFXML(this, "simulator_stage.fxml", this.getClass().getName());
+		stageManager.loadFXML(this, "simulator_stage.fxml");
 	}
 
 	@FXML
