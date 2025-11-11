@@ -7,6 +7,7 @@ import com.google.inject.Singleton;
 import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayView;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
+import de.prob2.ui.dataimport.XML2BDataImportDialog;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
@@ -35,6 +36,9 @@ public final class AdvancedMenu extends Menu {
 
 	@FXML
 	private MenuItem refactorTraceItem;
+
+	@FXML
+	private Menu importDataFiles;
 
 	@FXML
 	private MenuItem openVisualisationItem;
@@ -127,6 +131,11 @@ public final class AdvancedMenu extends Menu {
 	@FXML
 	private void showRefactorTrace() {
 		injector.getInstance(RefactorSetupView.class).showAndPerformAction();
+	}
+
+	@FXML
+	private void showXML2BImport() {
+		injector.getInstance(XML2BDataImportDialog.class).showAndWait();
 	}
 
 	@FXML

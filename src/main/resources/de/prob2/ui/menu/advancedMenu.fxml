@@ -13,6 +13,9 @@
 	<MenuItem text="%menu.advanced.items.simb" onAction="#openSimulator"/>
 	<MenuItem fx:id="interactiveTraceItem" text="%menu.advanced.items.interactiveTraceReplay" onAction="#showInteractiveTraceReplay"/>
 	<MenuItem fx:id="refactorTraceItem" text="%menu.advanced.items.refactorTrace" onAction="#showRefactorTrace"/>
+	<Menu fx:id="importDataFiles" text="%menu.advanced.items.dataImport">
+		<MenuItem fx:id="importXML2BData" text="XML" onAction="#showXML2BImport"/>
+	</Menu>
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
 	<SeparatorMenuItem />

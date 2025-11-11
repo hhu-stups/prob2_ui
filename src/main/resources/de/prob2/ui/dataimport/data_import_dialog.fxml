@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.geometry.Insets?>
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<fx:root type="Stage" fx:id="xml_import_dialog" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<scene>
+		<Scene fill="TRANSPARENT">
+			<AnchorPane stylesheets="@/prob.css" styleClass="dialog" prefWidth="600">
+				<VBox AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
+					  AnchorPane.bottomAnchor="10.0" AnchorPane.topAnchor="10.0" spacing="10.0">
+					<HBox>
+						<Label fx:id="dialogTitle" styleClass="title"/>
+						<Button style="-fx-background-color: transparent; -fx-border-color: transparent;">
+							<graphic>
+								<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+											   bindableFontSize="${fontSize.fontSize}"/>
+							</graphic>
+							<tooltip>
+								<Tooltip text="%dataimport.dialog.helpText" showDuration="1m" showDelay="0s"/>
+							</tooltip>
+							<HBox.margin>
+								<Insets left="10"/>
+							</HBox.margin>
+						</Button>
+					</HBox>
+					<Separator/>
+					<VBox fx:id="dialogOptions">
+						<Label fx:id="fileType"/>
+						<HBox spacing="10">
+							<TextField fx:id="fileLocationField" HBox.hgrow="always" editable="false">
+								<tooltip>
+									<Tooltip fx:id="fileLocationTooltip" showDuration="1m"/>
+								</tooltip>
+							</TextField>
+							<Button styleClass="button-dark2" text="%dataimport.dialog.fileChooser.title"
+									onAction="#selectFile"/>
+							<VBox.margin>
+								<Insets top="5" bottom="12.5"/>
+							</VBox.margin>
+						</HBox>
+						<Label text="%dataimport.dialog.options.outputLocation"/>
+						<HBox spacing="10">
+							<TextField fx:id="directoryField" HBox.hgrow="always" editable="false">
+								<tooltip>
+									<Tooltip fx:id="directoryTooltip" showDuration="1m"/>
+								</tooltip>
+							</TextField>
+							<Button styleClass="button-dark2" text="%dataimport.dialog.button.sameAsFile"
+									onAction="#selectDefaultDirectory"/>
+							<Button styleClass="button-dark2" text="%project.newProjectStage.buttons.selectLocation"
+									onAction="#selectDirectory"/>
+							<VBox.margin>
+								<Insets top="5" bottom="12.5"/>
+							</VBox.margin>
+						</HBox>
+						<VBox>
+							<CheckBox fx:id="cbMachineName" text="%dataimport.dialog.options.customMachineName"/>
+							<HBox fx:id="nameBox" spacing="10" disable="true">
+								<TextField fx:id="machineNameField" HBox.hgrow="always"/>
+								<Button styleClass="button-dark2" text="%dataimport.dialog.button.sameAsFile"
+										onAction="#selectDefaultName"/>
+								<VBox.margin>
+									<Insets top="5"/>
+								</VBox.margin>
+							</HBox>
+							<VBox.margin>
+								<Insets top="5" bottom="12.5"/>
+							</VBox.margin>
+						</VBox>
+					</VBox>
+					<Separator/>
+					<HBox spacing="10" alignment="CENTER_RIGHT">
+						<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+							<Label fx:id="version" style="-fx-text-fill: lightgray;">
+								<padding>
+									<Insets left="10" right="10"/>
+								</padding>
+							</Label>
+						</HBox>
+						<ProgressIndicator fx:id="progressIndicator" maxHeight="20" maxWidth="20" visible="false"/>
+						<Button fx:id="btCancel" text="%common.buttons.cancel" visible="false" onAction="#cancel"/>
+						<Button fx:id="btImportAndOpen" text="%dataimport.dialog.button.importOpen"/>
+					</HBox>
+				</VBox>
+			</AnchorPane>
+		</Scene>
+	</scene>
+</fx:root>

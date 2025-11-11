@@ -129,6 +129,7 @@ dependencies {
 	implementation(platform("de.hhu.stups:prob-java-bom:4.15.1-SNAPSHOT"))
 	implementation("de.hhu.stups:de.prob2.kernel")
 	implementation("de.hhu.stups:voparser:0.3.0")
+	implementation("de.hhu.stups:xml2b:1.0.1-SNAPSHOT")
 	implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
 	implementation("org.controlsfx:controlsfx:11.2.2")
 	implementation("org.fxmisc.richtext:richtextfx:0.11.6")
