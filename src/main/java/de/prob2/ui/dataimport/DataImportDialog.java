@@ -79,7 +79,7 @@ public class DataImportDialog extends Stage {
 	public void initialize() {
 		initModality(Modality.APPLICATION_MODAL);
 
-		String title = importType.getType() + " " + i18n.translate("dataimport.dialog.title");
+		String title = importType.getType() + " " + i18n.translate("menu.advanced.items.dataImport");
 		this.setTitle(title);
 		this.dialogTitle.setText(title);
 		this.fileType.setText(importType.getType() + " " +  i18n.translate("dataimport.dialog.options.file"));
