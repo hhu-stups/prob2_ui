@@ -202,7 +202,7 @@ public final class GroovyConsoleView extends BorderPane {
 			this.savedText = this.consoleInput.getText();
 		}
 
-		this.historyPos = Math.max(-1, Math.min(this.history.size(), newHistoryPos));
+		this.historyPos = Math.max(-1, Math.min(this.history.size()-1, newHistoryPos));
 		if (this.historyPos == -1) {
 			this.consoleInput.replaceText(this.savedText);
 		} else {
