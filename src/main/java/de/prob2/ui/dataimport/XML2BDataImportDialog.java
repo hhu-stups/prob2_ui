@@ -51,9 +51,6 @@ public final class XML2BDataImportDialog extends DataImportDialog {
 	@FXML
 	public void initialize() {
 		super.initialize();
-		double size = 440;
-		this.setMinHeight(size);
-		this.setMaxHeight(size);
 		this.addAdditionalOptions();
 
 		this.version.setText("XML2B " + XML2B.getVersion());

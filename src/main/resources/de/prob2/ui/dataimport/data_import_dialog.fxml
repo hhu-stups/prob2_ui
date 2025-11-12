@@ -32,50 +32,52 @@
 						</Button>
 					</HBox>
 					<Separator/>
-					<VBox fx:id="dialogOptions">
-						<Label fx:id="fileType"/>
-						<HBox spacing="10">
-							<TextField fx:id="fileLocationField" HBox.hgrow="always" editable="false">
-								<tooltip>
-									<Tooltip fx:id="fileLocationTooltip" showDuration="1m"/>
-								</tooltip>
-							</TextField>
-							<Button styleClass="button-dark2" text="%dataimport.dialog.fileChooser.title"
-									onAction="#selectFile"/>
-							<VBox.margin>
-								<Insets top="5" bottom="12.5"/>
-							</VBox.margin>
-						</HBox>
-						<Label text="%dataimport.dialog.options.outputLocation"/>
-						<HBox spacing="10">
-							<TextField fx:id="directoryField" HBox.hgrow="always" editable="false">
-								<tooltip>
-									<Tooltip fx:id="directoryTooltip" showDuration="1m"/>
-								</tooltip>
-							</TextField>
-							<Button styleClass="button-dark2" text="%dataimport.dialog.button.sameAsFile"
-									onAction="#selectDefaultDirectory"/>
-							<Button styleClass="button-dark2" text="%project.newProjectStage.buttons.selectLocation"
-									onAction="#selectDirectory"/>
-							<VBox.margin>
-								<Insets top="5" bottom="12.5"/>
-							</VBox.margin>
-						</HBox>
-						<VBox>
-							<CheckBox fx:id="cbMachineName" text="%dataimport.dialog.options.customMachineName"/>
-							<HBox fx:id="nameBox" spacing="10" disable="true">
-								<TextField fx:id="machineNameField" HBox.hgrow="always"/>
-								<Button styleClass="button-dark2" text="%dataimport.dialog.button.sameAsFile"
-										onAction="#selectDefaultName"/>
+					<ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+						<VBox fx:id="dialogOptions">
+							<Label fx:id="fileType"/>
+							<HBox spacing="10">
+								<TextField fx:id="fileLocationField" HBox.hgrow="always" editable="false">
+									<tooltip>
+										<Tooltip fx:id="fileLocationTooltip" showDuration="1m"/>
+									</tooltip>
+								</TextField>
+								<Button styleClass="button-dark2" text="%dataimport.dialog.fileChooser.title"
+										onAction="#selectFile"/>
 								<VBox.margin>
-									<Insets top="5"/>
+									<Insets top="5" bottom="12.5"/>
 								</VBox.margin>
 							</HBox>
-							<VBox.margin>
-								<Insets top="5" bottom="12.5"/>
-							</VBox.margin>
+							<Label text="%dataimport.dialog.options.outputLocation"/>
+							<HBox spacing="10">
+								<TextField fx:id="directoryField" HBox.hgrow="always" editable="false">
+									<tooltip>
+										<Tooltip fx:id="directoryTooltip" showDuration="1m"/>
+									</tooltip>
+								</TextField>
+								<Button styleClass="button-dark2" text="%dataimport.dialog.button.sameAsFile"
+										onAction="#selectDefaultDirectory"/>
+								<Button styleClass="button-dark2" text="%project.newProjectStage.buttons.selectLocation"
+										onAction="#selectDirectory"/>
+								<VBox.margin>
+									<Insets top="5" bottom="12.5"/>
+								</VBox.margin>
+							</HBox>
+							<VBox>
+								<CheckBox fx:id="cbMachineName" text="%dataimport.dialog.options.customMachineName"/>
+								<HBox fx:id="nameBox" spacing="10" disable="true">
+									<TextField fx:id="machineNameField" HBox.hgrow="always"/>
+									<Button styleClass="button-dark2" text="%dataimport.dialog.button.sameAsFile"
+											onAction="#selectDefaultName"/>
+									<VBox.margin>
+										<Insets top="5"/>
+									</VBox.margin>
+								</HBox>
+								<VBox.margin>
+									<Insets top="5" bottom="12.5"/>
+								</VBox.margin>
+							</VBox>
 						</VBox>
-					</VBox>
+					</ScrollPane>
 					<Separator/>
 					<HBox spacing="10" alignment="CENTER_RIGHT">
 						<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
