@@ -1,0 +1,245 @@
+package de.prob2.ui.beditor;
+
+import java.nio.file.Path;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import com.google.inject.Inject;
+import com.google.inject.Singleton;
+
+import de.prob.animator.domainobjects.ErrorItem;
+import de.prob2.ui.internal.FXMLInjected;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.internal.StageManager;
+
+import javafx.animation.PauseTransition;
+import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
+import javafx.scene.layout.AnchorPane;
+
+import javafx.util.Duration;
+import org.fxmisc.richtext.model.TwoDimensional;
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+@FXMLInjected
+@Singleton
+public final class SearchPane extends AnchorPane {
+	private record MatchPosition(int start, int end) { }
+
+	private static final String STYLE_ERROR = "search-error";
+	private static final String STYLE_NO_RESULTS = "search-no-results";
+	private static final String STYLE_RESULTS = "search-has-results";
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(SearchPane.class);
+
+	private final I18n i18n;
+	private BEditorView bEditorView;
+
+	private final ObservableList<MatchPosition> matches = FXCollections.observableArrayList();
+	private int currentMatch = 0;
+	private final PauseTransition pause = new PauseTransition(Duration.millis(100));
+
+	@FXML
+	private TextField tfSearch;
+	@FXML
+	private ToggleButton btMatchCase;
+	@FXML
+	private ToggleButton btWordsOnly;
+	@FXML
+	private ToggleButton btRegex;
+	@FXML
+	private Label lblResults;
+	@FXML
+	private Button btPrev;
+	@FXML
+	private Button btNext;
+
+	@Inject
+	public SearchPane(StageManager stageManager, I18n i18n) {
+		this.i18n = i18n;
+		stageManager.loadFXML(this, "search_pane.fxml");
+	}
+
+	public void show(BEditorView bEditorView) {
+		Objects.requireNonNull(bEditorView);
+		if (this.bEditorView != bEditorView) {
+			if (this.bEditorView != null) {
+				this.bEditorView.getEditor().setSearchResult(null);
+			}
+
+			this.bEditorView = bEditorView;
+		}
+
+		this.requestFocus();
+		this.focusText();
+		this.handleFind();
+	}
+
+	@FXML
+	private void initialize() {
+		this.lblResults.getStyleClass().clear();
+
+		pause.setOnFinished(e -> this.handleFind());
+		tfSearch.textProperty().addListener((obs, ov, nv) -> pause.playFromStart());
+
+		btMatchCase.selectedProperty().addListener(getToggleButtonListener(btMatchCase));
+		btWordsOnly.selectedProperty().addListener(getToggleButtonListener(btWordsOnly));
+		btRegex.selectedProperty().addListener(getToggleButtonListener(btRegex));
+
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btMatchCase.setSelected(!btMatchCase.isSelected())));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.W, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btWordsOnly.setSelected(!btWordsOnly.isSelected())));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.X, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btRegex.setSelected(!btRegex.isSelected())));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN), e -> handleGotoPrevious()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHORTCUT_DOWN), e -> handleGotoNext()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> handleGotoNext()));
+	}
+
+	private ChangeListener<Boolean> getToggleButtonListener(ToggleButton button) {
+		return (obs, ov, nv) -> {
+			if (nv) {
+				button.getGraphic().setStyle("-fx-background-color: lightgray; -fx-background-radius: 4;");
+			} else {
+				button.getGraphic().setStyle("");
+			}
+			pause.playFromStart();
+		};
+	}
+
+	@FXML
+	private void handleGotoPrevious() {
+		if (matches.isEmpty()) {
+			return;
+		}
+		this.currentMatch--;
+		if (currentMatch < 0) {
+			this.currentMatch = matches.size() - 1;
+		}
+		this.gotoMatch(currentMatch);
+	}
+
+	@FXML
+	private void handleGotoNext() {
+		if (matches.isEmpty()) {
+			return;
+		}
+		this.currentMatch++;
+		if (currentMatch >= matches.size()) {
+			this.currentMatch = 0;
+		}
+		this.gotoMatch(currentMatch);
+	}
+
+	@FXML
+	private void handleFind() {
+		if (this.bEditorView == null) {
+			this.setResultText(STYLE_NO_RESULTS, "beditor.searchPane.resultLabel.noResults");
+			return;
+		}
+
+		this.bEditorView.getEditor().setSearchResult(null);
+		this.matches.clear();
+		this.currentMatch = 0;
+
+		String searchText = this.tfSearch.getText();
+		if (searchText.isEmpty()) {
+			this.setResultText(STYLE_RESULTS, "beditor.searchPane.resultLabel.noResults");
+			return;
+		}
+
+		// normal matching options
+		boolean matchCase = this.btMatchCase.isSelected();
+		boolean wordsOnly = this.btWordsOnly.isSelected();
+
+		// regex options
+		boolean regex = this.btRegex.isSelected();
+
+		// Unicode support always enabled
+		int flags = Pattern.UNICODE_CASE | Pattern.UNICODE_CHARACTER_CLASS | Pattern.CANON_EQ;
+		if (!matchCase) {
+			flags |= Pattern.CASE_INSENSITIVE;
+		}
+		if (!regex) {
+			searchText = Pattern.quote(searchText);
+		}
+		if (wordsOnly) {
+			searchText = "\\b" + searchText + "\\b";
+		}
+
+		Pattern searchPattern;
+		try {
+			searchPattern = Pattern.compile(searchText, flags);
+		} catch (PatternSyntaxException e) {
+			LOGGER.trace("unable to parse search string regex", e);
+			this.setResultText(STYLE_ERROR, "beditor.searchPane.resultLabel.error");
+			return;
+		}
+
+		String text = this.bEditorView.getEditor().getText();
+		Matcher m = searchPattern.matcher(text);
+		while (m.find()) {
+			this.matches.add(new MatchPosition(m.start(), m.end()));
+		}
+
+		this.btNext.setDisable(matches.isEmpty());
+		this.btPrev.setDisable(matches.isEmpty());
+
+		if (matches.isEmpty()) {
+			this.setResultText(STYLE_NO_RESULTS, "beditor.searchPane.resultLabel.noResults");
+			return;
+		}
+		this.gotoMatch(0);
+	}
+
+	private void focusText() {
+		this.tfSearch.requestFocus();
+		this.tfSearch.end();
+	}
+
+	private void gotoMatch(int matchIdx) {
+		MatchPosition match = matches.get(matchIdx);
+		this.bEditorView.jumpToSearchResult(this.buildSearchResultLocation(match.start(), match.end()));
+		this.setResultText(STYLE_RESULTS, "beditor.searchPane.resultLabel.results", currentMatch+1, this.matches.size());
+		this.focusText();
+	}
+
+	public void hide() {
+		if (this.bEditorView != null) {
+			this.bEditorView.getEditor().setSearchResult(null);
+		}
+
+		this.lblResults.setText("");
+		this.bEditorView = null;
+	}
+
+	private ErrorItem.Location buildSearchResultLocation(int start, int end) {
+		Path path = this.bEditorView.getPath();
+		TwoDimensional.Position startPos = this.bEditorView.getEditor().getContent().offsetToPosition(start, TwoDimensional.Bias.Forward);
+		TwoDimensional.Position endPos = startPos.offsetBy(end - start, TwoDimensional.Bias.Backward);
+		return new ErrorItem.Location(
+			path.toString(),
+			startPos.getMajor() + 1,
+			startPos.getMinor(),
+			endPos.getMajor() + 1,
+			endPos.getMinor()
+		);
+	}
+
+	private void setResultText(String style, String key, Object... args) {
+		this.lblResults.setText(i18n.translate(key, args));
+		this.lblResults.getStyleClass().setAll(style);
+	}
+}

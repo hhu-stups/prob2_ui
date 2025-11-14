@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<fx:root type="AnchorPane" minWidth="400" xmlns:fx="http://javafx.com/fxml/1">
+	<fx:define>
+		<FontSize fx:id="fontSize" />
+	</fx:define>
+	<VBox fx:id="searchBox" AnchorPane.topAnchor="5.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0"
+		  AnchorPane.bottomAnchor="5.0" spacing="10.0">
+		<HBox alignment="CENTER">
+			<TextField fx:id="tfSearch" promptText="%menu.file.items.search" HBox.hgrow="ALWAYS"/>
+			<HBox spacing="-15">
+				<ToggleButton fx:id="btMatchCase" maxHeight="20" maxWidth="20">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FONT" bindableFontSize="${fontSize.fontSize + 4}">
+							<padding>
+								<Insets topRightBottomLeft="5"/>
+							</padding>
+						</BindableGlyph>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%beditor.searchPane.matchCase.tooltip"/>
+					</tooltip>
+				</ToggleButton>
+				<ToggleButton fx:id="btWordsOnly">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="TEXT_WIDTH" bindableFontSize="${fontSize.fontSize + 4}">
+							<padding>
+								<Insets topRightBottomLeft="5"/>
+							</padding>
+						</BindableGlyph>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%beditor.searchPane.wordsOnly.tooltip"/>
+					</tooltip>
+				</ToggleButton>
+				<ToggleButton fx:id="btRegex">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="ASTERISK" bindableFontSize="${fontSize.fontSize + 4}">
+							<padding>
+								<Insets topRightBottomLeft="5"/>
+							</padding>
+						</BindableGlyph>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%beditor.searchPane.regex.tooltip"/>
+					</tooltip>
+				</ToggleButton>
+			</HBox>
+			<Separator orientation="VERTICAL"/>
+			<HBox alignment="CENTER">
+				<Label fx:id="lblResults" HBox.hgrow="ALWAYS" text="%beditor.searchPane.resultLabel.noResults">
+					<padding>
+						<Insets left="10" right="10"/>
+					</padding>
+				</Label>
+				<Button fx:id="btPrev" alignment="TOP_CENTER" onAction="#handleGotoPrevious">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="LONG_ARROW_UP" bindableFontSize="${fontSize.fontSize + 4}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%beditor.searchPane.button.previous"/>
+					</tooltip>
+				</Button>
+				<Button fx:id="btNext" alignment="BOTTOM_CENTER" onAction="#handleGotoNext">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="LONG_ARROW_DOWN" bindableFontSize="${fontSize.fontSize + 4}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%beditor.searchPane.button.find"/>
+					</tooltip>
+				</Button>
+			</HBox>
+		</HBox>
+	</VBox>
+</fx:root>

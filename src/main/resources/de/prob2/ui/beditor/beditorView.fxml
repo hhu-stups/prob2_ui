@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import de.prob2.ui.beditor.BEditor?>
+<?import de.prob2.ui.beditor.SearchPane?>
 <?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
@@ -9,55 +10,60 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.CheckBox?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.flowless.VirtualizedScrollPane?>
-<?import javafx.scene.control.ToolBar?>
 
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
 	</fx:define>
 	<top>
-		<ToolBar styleClass="border">
-			<padding>
-				<Insets left="5.0" right="5.0"/>
-			</padding>
-			<Button fx:id="saveButton" onAction="#handleSave">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 4}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%menu.file.items.saveMachine"/>
-				</tooltip>
-			</Button>
-			<Button fx:id="openExternalButton" onAction="#handleOpenExternal">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="EXTERNAL_LINK" bindableFontSize="${fontSize.fontSize + 4}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%beditor.tooltips.openMachine"/>
-				</tooltip>
-			</Button>
-			<fx:include source="../sharedviews/reload_button.fxml"/>
-			<Button fx:id="searchButton" onAction="#handleSearch">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize + 4}" />
-				</graphic>
-				<tooltip>
-					<Tooltip text="%menu.file.items.search"/>
-				</tooltip>
-			</Button>
-			<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
-			<Label fx:id="warningLabel" styleClass="warning" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
-			<CheckBox fx:id="cbUnicode" text="%common.checkbox.unicode" visible="false" alignment="CENTER_RIGHT" HBox.hgrow="NEVER"/>
-			<ChoiceBox fx:id="machineChoice" prefWidth="100.0">
-				<HBox.margin>
-					<Insets topRightBottomLeft="5.0"/>
-				</HBox.margin>
-			</ChoiceBox>
-		</ToolBar>
+		<VBox styleClass="border">
+			<ToolBar>
+				<padding>
+					<Insets left="5.0" right="5.0"/>
+				</padding>
+				<Button fx:id="saveButton" onAction="#handleSave">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 4}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%menu.file.items.saveMachine"/>
+					</tooltip>
+				</Button>
+				<Button fx:id="openExternalButton" onAction="#handleOpenExternal">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="EXTERNAL_LINK" bindableFontSize="${fontSize.fontSize + 4}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%beditor.tooltips.openMachine"/>
+					</tooltip>
+				</Button>
+				<fx:include source="../sharedviews/reload_button.fxml"/>
+				<ToggleButton fx:id="searchButton">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize + 4}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%menu.file.items.search"/>
+					</tooltip>
+				</ToggleButton>
+				<HelpButton fx:id="helpButton" HBox.hgrow="NEVER" />
+				<Label fx:id="warningLabel" styleClass="warning" HBox.hgrow="ALWAYS" minWidth="16.0" maxWidth="Infinity" maxHeight="Infinity" alignment="CENTER" />
+				<CheckBox fx:id="cbUnicode" text="%common.checkbox.unicode" visible="false" alignment="CENTER_RIGHT" HBox.hgrow="NEVER"/>
+				<ChoiceBox fx:id="machineChoice" prefWidth="100.0">
+					<HBox.margin>
+						<Insets topRightBottomLeft="5.0"/>
+					</HBox.margin>
+				</ChoiceBox>
+			</ToolBar>
+			<SearchPane fx:id="searchPane"/>
+		</VBox>
 	</top>
 	<center>
 		<VirtualizedScrollPane fx:id="virtualizedScrollPane" hbarPolicy="ALWAYS" vbarPolicy="ALWAYS">

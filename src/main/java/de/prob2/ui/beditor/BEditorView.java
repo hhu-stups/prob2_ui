@@ -61,6 +61,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
@@ -85,7 +86,10 @@ public final class BEditorView extends BorderPane {
 	private Button openExternalButton;
 
 	@FXML
-	private Button searchButton;
+	private ToggleButton searchButton;
+
+	@FXML
+	private SearchPane searchPane;
 
 	@FXML
 	private Label warningLabel;
@@ -183,6 +187,15 @@ public final class BEditorView extends BorderPane {
 		saveButton.disableProperty().bind(saved);
 		openExternalButton.disableProperty().bind(this.pathProperty().isNull());
 		searchButton.disableProperty().bind(this.pathProperty().isNull());
+		searchButton.selectedProperty().addListener((obs, ov, nv) -> {
+			if (nv) {
+				searchPane.show(this);
+			} else {
+				searchPane.hide();
+			}
+		});
+		searchPane.visibleProperty().bind(searchButton.selectedProperty());
+		searchPane.managedProperty().bind(searchButton.selectedProperty());
 		warningLabel.textProperty().bind(
 			Bindings.when(saved)
 				.then(Bindings.when(fileContentChanged)
@@ -288,7 +301,7 @@ public final class BEditorView extends BorderPane {
 
 		helpButton.setHelpContent("mainView.editor", null);
 
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.SHORTCUT_DOWN), e -> handleSearch()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.SHORTCUT_DOWN), e -> searchButton.fire()));
 	}
 
 	BEditor getEditor() {
@@ -344,6 +357,8 @@ public final class BEditorView extends BorderPane {
 				stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
 			}
 		});
+		if (searchButton.isSelected())
+			searchButton.fire(); // hide search
 	}
 
 	private void restoreState(TextAreaState textAreaState) {
@@ -623,11 +638,6 @@ public final class BEditorView extends BorderPane {
 	@FXML
 	private void handleOpenExternal() {
 		injector.getInstance(ExternalEditor.class).open(this.getPath());
-	}
-
-	@FXML
-	public void handleSearch() {
-		injector.getInstance(SearchStage.class).open(this);
 	}
 
 	private static boolean fileNameMatchesCurrentPath(String filename, Path currentPath) {

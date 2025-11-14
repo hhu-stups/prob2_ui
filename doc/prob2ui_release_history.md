@@ -6,6 +6,7 @@ Downloads of the current release and snapshot development builds can be found on
 
 * Added transition information stored in state space to operation details stage (e.g. details about the execution of operations with STORE_DETAILED_TRANSITION_INFOS preference)
 * Added menu for data import of XML files with XML2B
+* Improved search in editor (now integrated into the editor view)
 * Improved RulesView (display messages for UNCHECKED rules)
 * Improved XTL Prolog mode 
   * Enabled execute by predicate for registered transitions (`trans_prop`), can be used to specify parameter values
