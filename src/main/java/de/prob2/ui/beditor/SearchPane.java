@@ -52,6 +52,7 @@ public final class SearchPane extends AnchorPane {
 	private final ObservableList<MatchPosition> matches = FXCollections.observableArrayList();
 	private int currentMatch = 0;
 	private final PauseTransition pause = new PauseTransition(Duration.millis(100));
+	private final ChangeListener<String> textListener = (obs, ov, nv) -> pause.playFromStart();
 
 	@FXML
 	private TextField tfSearch;
@@ -85,8 +86,17 @@ public final class SearchPane extends AnchorPane {
 		}
 
 		this.requestFocus();
-		this.focusText();
+
+		String selected = this.bEditorView.getEditor().getSelectedText();
+		if (!selected.isEmpty()) { // do not clear text if selection is empty
+			this.tfSearch.setText(selected);
+		}
 		this.handleFind();
+		if (!this.tfSearch.isFocused()) {
+			this.tfSearch.requestFocus();
+		}
+		this.tfSearch.selectAll();
+		this.tfSearch.textProperty().addListener(textListener);
 	}
 
 	@FXML
@@ -94,15 +104,14 @@ public final class SearchPane extends AnchorPane {
 		this.lblResults.getStyleClass().clear();
 
 		pause.setOnFinished(e -> this.handleFind());
-		tfSearch.textProperty().addListener((obs, ov, nv) -> pause.playFromStart());
 
 		btMatchCase.selectedProperty().addListener(getToggleButtonListener(btMatchCase));
 		btWordsOnly.selectedProperty().addListener(getToggleButtonListener(btWordsOnly));
 		btRegex.selectedProperty().addListener(getToggleButtonListener(btRegex));
 
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btMatchCase.setSelected(!btMatchCase.isSelected())));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.W, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btWordsOnly.setSelected(!btWordsOnly.isSelected())));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.X, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btRegex.setSelected(!btRegex.isSelected())));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btMatchCase.fire()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.W, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btWordsOnly.fire()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.X, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btRegex.fire()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN), e -> handleGotoPrevious()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHORTCUT_DOWN), e -> handleGotoNext()));
 		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> handleGotoNext()));
@@ -204,16 +213,13 @@ public final class SearchPane extends AnchorPane {
 		this.gotoMatch(0);
 	}
 
-	private void focusText() {
-		this.tfSearch.requestFocus();
-		this.tfSearch.end();
-	}
-
 	private void gotoMatch(int matchIdx) {
 		MatchPosition match = matches.get(matchIdx);
+		int caret = tfSearch.getCaretPosition();
 		this.bEditorView.jumpToSearchResult(this.buildSearchResultLocation(match.start(), match.end()));
 		this.setResultText(STYLE_RESULTS, "beditor.searchPane.resultLabel.results", currentMatch+1, this.matches.size());
-		this.focusText();
+		this.tfSearch.requestFocus();
+		this.tfSearch.positionCaret(caret);
 	}
 
 	public void hide() {
@@ -223,6 +229,7 @@ public final class SearchPane extends AnchorPane {
 
 		this.lblResults.setText("");
 		this.bEditorView = null;
+		this.tfSearch.textProperty().removeListener(textListener);
 	}
 
 	private ErrorItem.Location buildSearchResultLocation(int start, int end) {
