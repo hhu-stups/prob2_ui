@@ -238,6 +238,10 @@ public final class SearchPane extends AnchorPane {
 	public void hide() {
 		if (this.bEditorView != null) {
 			this.bEditorView.getEditor().setSearchResults(null);
+			if (!matches.isEmpty() && 0 <= currentMatch && currentMatch < matches.size()) {
+				MatchPosition match = matches.get(currentMatch);
+				this.bEditorView.getEditor().selectRange(match.start(), match.end());
+			}
 		}
 
 		this.lblResults.setText("");
