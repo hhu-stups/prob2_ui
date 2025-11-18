@@ -5,7 +5,6 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -21,6 +20,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.IndexRange;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -162,7 +162,6 @@ public final class SearchPane extends AnchorPane {
 
 		this.bEditorView.getEditor().setSearchResults(null);
 		this.matches.clear();
-		this.currentMatch = 0;
 
 		String searchText = this.tfSearch.getText();
 		if (searchText.isEmpty()) {
@@ -212,7 +211,8 @@ public final class SearchPane extends AnchorPane {
 			return;
 		}
 		this.bEditorView.getEditor().setSearchResults(matches.stream().map(match -> this.buildSearchResultLocation(match.start(), match.end())).toList());
-		this.gotoMatch(0);
+		this.currentMatch = findSelectedMatch();
+		this.gotoMatch(currentMatch);
 	}
 
 	private void gotoMatch(int matchIdx) {
@@ -222,6 +222,17 @@ public final class SearchPane extends AnchorPane {
 		this.setResultText(STYLE_RESULTS, "beditor.searchPane.resultLabel.results", currentMatch+1, this.matches.size());
 		this.tfSearch.requestFocus();
 		this.tfSearch.positionCaret(caret);
+	}
+
+	private int findSelectedMatch() {
+		for (int i=0; i<this.matches.size(); i++) {
+			IndexRange selection = bEditorView.getEditor().getSelection();
+			MatchPosition match = this.matches.get(i);
+			if (selection.getStart() == match.start() && selection.getEnd() == match.end()) {
+				return i; // the selected match in the editor from which the search was started
+			}
+		}
+		return 0; // first match
 	}
 
 	public void hide() {
