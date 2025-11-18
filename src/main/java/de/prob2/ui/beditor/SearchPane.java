@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -79,7 +80,7 @@ public final class SearchPane extends AnchorPane {
 		Objects.requireNonNull(bEditorView);
 		if (this.bEditorView != bEditorView) {
 			if (this.bEditorView != null) {
-				this.bEditorView.getEditor().setSearchResult(null);
+				this.bEditorView.getEditor().setSearchResults(null);
 			}
 
 			this.bEditorView = bEditorView;
@@ -159,7 +160,7 @@ public final class SearchPane extends AnchorPane {
 			return;
 		}
 
-		this.bEditorView.getEditor().setSearchResult(null);
+		this.bEditorView.getEditor().setSearchResults(null);
 		this.matches.clear();
 		this.currentMatch = 0;
 
@@ -210,6 +211,7 @@ public final class SearchPane extends AnchorPane {
 			this.setResultText(STYLE_NO_RESULTS, "beditor.searchPane.resultLabel.noResults");
 			return;
 		}
+		this.bEditorView.getEditor().setSearchResults(matches.stream().map(match -> this.buildSearchResultLocation(match.start(), match.end())).toList());
 		this.gotoMatch(0);
 	}
 
@@ -224,7 +226,7 @@ public final class SearchPane extends AnchorPane {
 
 	public void hide() {
 		if (this.bEditorView != null) {
-			this.bEditorView.getEditor().setSearchResult(null);
+			this.bEditorView.getEditor().setSearchResults(null);
 		}
 
 		this.lblResults.setText("");

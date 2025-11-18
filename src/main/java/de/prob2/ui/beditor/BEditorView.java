@@ -545,7 +545,7 @@ public final class BEditorView extends BorderPane {
 			Stopwatch sw = Stopwatch.createStarted();
 			// reset state
 			beditor.clearHistory();
-			beditor.setSearchResult(null);
+			beditor.setSearchResults(null);
 			beditor.cancelHighlighting();
 			// load new text
 			this.setPath(path);

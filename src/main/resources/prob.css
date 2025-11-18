@@ -1310,7 +1310,11 @@
 /* ==================== SEARCH ======================== */
 
 .editor .searchResult {
-	-rtfx-background-color: grey;
+	-rtfx-background-color: rgba(255, 165, 0, 0.75);
+}
+
+.editor .currentSearchResult {
+	-rtfx-background-color: rgba(0, 122, 198, 0.5);
 }
 
 .search-error {
