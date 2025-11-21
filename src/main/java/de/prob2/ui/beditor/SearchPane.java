@@ -86,6 +86,11 @@ public final class SearchPane extends AnchorPane {
 			this.bEditorView = bEditorView;
 		}
 
+		this.startSearch();
+	}
+
+	public void startSearch() {
+		this.tfSearch.textProperty().removeListener(textListener);
 		this.requestFocus();
 
 		String selected = this.bEditorView.getEditor().getSelectedText();

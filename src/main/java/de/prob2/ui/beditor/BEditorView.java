@@ -301,7 +301,18 @@ public final class BEditorView extends BorderPane {
 
 		helpButton.setHelpContent("mainView.editor", null);
 
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.SHORTCUT_DOWN), e -> searchButton.fire()));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.SHORTCUT_DOWN), e -> {
+			if (searchButton.isSelected()) {
+				searchPane.startSearch();
+			} else {
+				searchButton.fire();
+			}
+		}));
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ESCAPE), e -> {
+			if (searchButton.isSelected()) {
+				searchButton.fire();
+			}
+		}));
 	}
 
 	BEditor getEditor() {
