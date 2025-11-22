@@ -115,12 +115,11 @@ public final class SearchPane extends AnchorPane {
 		btWordsOnly.selectedProperty().addListener(getToggleButtonListener(btWordsOnly));
 		btRegex.selectedProperty().addListener(getToggleButtonListener(btRegex));
 
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btMatchCase.fire()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.W, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btWordsOnly.fire()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.X, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btRegex.fire()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN), e -> handleGotoPrevious()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHORTCUT_DOWN), e -> handleGotoNext()));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> handleGotoNext()));
+		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btMatchCase.fire()));
+		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.W, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btWordsOnly.fire()));
+		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.X, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btRegex.fire()));
+		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> handleGotoNext(false)));
+		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), e -> handleGotoPrevious(false)));
 	}
 
 	private ChangeListener<Boolean> getToggleButtonListener(ToggleButton button) {
@@ -136,6 +135,10 @@ public final class SearchPane extends AnchorPane {
 
 	@FXML
 	private void handleGotoPrevious() {
+		handleGotoPrevious(false);
+	}
+
+	void handleGotoPrevious(boolean focusEditor) {
 		if (matches.isEmpty()) {
 			return;
 		}
@@ -143,11 +146,15 @@ public final class SearchPane extends AnchorPane {
 		if (currentMatch < 0) {
 			this.currentMatch = matches.size() - 1;
 		}
-		this.gotoMatch(currentMatch);
+		this.gotoMatch(currentMatch, focusEditor);
 	}
 
 	@FXML
 	private void handleGotoNext() {
+		handleGotoNext(false);
+	}
+
+	void handleGotoNext(boolean focusEditor) {
 		if (matches.isEmpty()) {
 			return;
 		}
@@ -155,7 +162,7 @@ public final class SearchPane extends AnchorPane {
 		if (currentMatch >= matches.size()) {
 			this.currentMatch = 0;
 		}
-		this.gotoMatch(currentMatch);
+		this.gotoMatch(currentMatch, focusEditor);
 	}
 
 	@FXML
@@ -217,16 +224,20 @@ public final class SearchPane extends AnchorPane {
 		}
 		this.bEditorView.getEditor().setSearchResults(matches.stream().map(match -> this.buildSearchResultLocation(match.start(), match.end())).toList());
 		this.currentMatch = findSelectedMatch();
-		this.gotoMatch(currentMatch);
+		this.gotoMatch(currentMatch, false);
 	}
 
-	private void gotoMatch(int matchIdx) {
+	private void gotoMatch(int matchIdx, boolean focusEditor) {
 		MatchPosition match = matches.get(matchIdx);
 		int caret = tfSearch.getCaretPosition();
 		this.bEditorView.jumpToSearchResult(this.buildSearchResultLocation(match.start(), match.end()));
 		this.setResultText(STYLE_RESULTS, "beditor.searchPane.resultLabel.results", currentMatch+1, this.matches.size());
-		this.tfSearch.requestFocus();
-		this.tfSearch.positionCaret(caret);
+		if (focusEditor) {
+			selectCurrentMatchInEditor();
+		} else {
+			this.tfSearch.requestFocus();
+			this.tfSearch.positionCaret(caret);
+		}
 	}
 
 	private int findSelectedMatch() {
@@ -243,15 +254,21 @@ public final class SearchPane extends AnchorPane {
 	public void hide() {
 		if (this.bEditorView != null) {
 			this.bEditorView.getEditor().setSearchResults(null);
-			if (!matches.isEmpty() && 0 <= currentMatch && currentMatch < matches.size()) {
-				MatchPosition match = matches.get(currentMatch);
-				this.bEditorView.getEditor().selectRange(match.start(), match.end());
-			}
+			selectCurrentMatchInEditor();
 		}
 
 		this.lblResults.setText("");
 		this.bEditorView = null;
 		this.tfSearch.textProperty().removeListener(textListener);
+	}
+
+	private void selectCurrentMatchInEditor() {
+		if (this.bEditorView != null) {
+			if (!matches.isEmpty() && 0 <= currentMatch && currentMatch < matches.size()) {
+				MatchPosition match = matches.get(currentMatch);
+				this.bEditorView.getEditor().selectRange(match.start(), match.end());
+			}
+		}
 	}
 
 	private ErrorItem.Location buildSearchResultLocation(int start, int end) {

@@ -308,11 +308,12 @@ public final class BEditorView extends BorderPane {
 				searchButton.fire();
 			}
 		}));
-		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.ESCAPE), e -> {
-			if (searchButton.isSelected()) {
-				searchButton.fire();
-			}
-		}));
+		Nodes.addInputMap(this, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.ESCAPE),
+				() -> searchButton.isSelected(), e -> searchButton.fire()));
+		Nodes.addInputMap(this, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHORTCUT_DOWN),
+				() -> searchButton.isSelected(), e -> searchPane.handleGotoNext(true)));
+		Nodes.addInputMap(this, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN),
+				() -> searchButton.isSelected(), e -> searchPane.handleGotoPrevious(true)));
 	}
 
 	BEditor getEditor() {
