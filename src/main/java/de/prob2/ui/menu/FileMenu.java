@@ -73,6 +73,8 @@ public class FileMenu extends Menu {
 	@FXML
 	private MenuItem exportAsClassicalBUnicodeItem;
 	@FXML
+	private MenuItem exportAsClassicalBCurrentState;
+	@FXML
 	private MenuItem exportAsRodinProject;
 	@FXML
 	private MenuItem exportAsEventBProlog;
@@ -135,6 +137,7 @@ public class FileMenu extends Menu {
 
 			this.exportAsClassicalBAsciiItem.setDisable(noClassicalBExport);
 			this.exportAsClassicalBUnicodeItem.setDisable(noClassicalBExport);
+			this.exportAsClassicalBCurrentState.setDisable(noClassicalBExport);
 			this.exportAsRodinProject.setDisable(noEventBExport);
 			this.exportAsEventBProlog.setDisable(noEventBExport);
 			this.exportAsTLAModule.setDisable(noTlaExport);
@@ -241,6 +244,14 @@ public class FileMenu extends Menu {
 			LOGGER.error("Failed to save pretty-print", e);
 			stageManager.makeExceptionAlert(e, "common.alerts.couldNotSaveFile.content", path).show();
 		}
+	}
+
+	@FXML
+	private void handleExportCurrentState() {
+		ExportStateAsMachineStage dialog = injector.getInstance(ExportStateAsMachineStage.class);
+		dialog.show();
+		dialog.toFront();
+		dialog.initialiseForCurrentState();
 	}
 
 	@FXML
