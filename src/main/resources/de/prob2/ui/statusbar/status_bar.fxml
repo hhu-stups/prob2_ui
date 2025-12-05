@@ -2,6 +2,7 @@
 
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.Cursor?>
@@ -16,6 +17,11 @@
 		</cursor>
 		<graphic>
 			<HBox spacing="2">
+				<Label fx:id="modelInfo" visible="false" managed="false">
+					<padding>
+						<Insets left="10" right="5"/>
+					</padding>
+				</Label>
 				<Label fx:id="statusLabel" styleClass="status-label" text="%common.noModelLoaded" HBox.hgrow="NEVER"/>
 				<BindableGlyph fx:id="infoIcon" styleClass="icon-dark" fontFamily="FontAwesome" icon="INFO_CIRCLE" bindableFontSize="${fontSize.fontSize}" visible="false" HBox.hgrow="NEVER"/>
 			</HBox>
