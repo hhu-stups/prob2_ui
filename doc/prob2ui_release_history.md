@@ -5,7 +5,9 @@ Downloads of the current release and snapshot development builds can be found on
 ## Version 1.3.1 (not released yet)
 
 * Added transition information stored in state space to operation details stage (e.g. details about the execution of operations with STORE_DETAILED_TRANSITION_INFOS preference)
-* Added menu for data import of XML files with XML2B
+* Added menu for data import of XML files with XML2B and JSON/CSV with ProB's libraries
+* Added transition descriptions for right click options in state visualisation view
+* Added export of current state as classical B machine
 * Improved search in editor (now integrated into the editor view)
 * Improved RulesView (display messages for UNCHECKED rules)
 * Improved XTL Prolog mode 
