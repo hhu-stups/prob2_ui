@@ -7,7 +7,10 @@ import com.google.inject.Singleton;
 import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayView;
 import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
+import de.prob2.ui.dataimport.CSVDataImportDialog;
+import de.prob2.ui.dataimport.JSONDataImportDialog;
 import de.prob2.ui.dataimport.XML2BDataImportDialog;
+import de.prob2.ui.dataimport.XMLDataImportDialog;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
@@ -136,6 +139,21 @@ public final class AdvancedMenu extends Menu {
 	@FXML
 	private void showXML2BImport() {
 		injector.getInstance(XML2BDataImportDialog.class).showAndWait();
+	}
+
+	@FXML
+	private void showXMLImport() {
+		injector.getInstance(XMLDataImportDialog.class).showAndWait();
+	}
+
+	@FXML
+	private void showJSONImport() {
+		injector.getInstance(JSONDataImportDialog.class).showAndWait();
+	}
+
+	@FXML
+	private void showCSVImport() {
+		injector.getInstance(CSVDataImportDialog.class).showAndWait();
 	}
 
 	@FXML
