@@ -1,6 +1,7 @@
 package de.prob2.ui.internal;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -388,7 +389,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	protected StyleSpans<Collection<String>> addSearchHighlighting(StyleSpans<Collection<String>> highlighting) {
-		for (ErrorItem.Location searchResult : searchResults) {
+		for (ErrorItem.Location searchResult : new ArrayList<>(searchResults)) {
 			if (searchResult != null) {
 				int startIndex = this.errorLocationAbsoluteStart(searchResult);
 				int endIndex = this.errorLocationAbsoluteEnd(searchResult);
