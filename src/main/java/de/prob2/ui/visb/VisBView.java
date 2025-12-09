@@ -460,7 +460,8 @@ public final class VisBView extends BorderPane {
 	private void updateDynamicSVGObjects(VisBVisualisation visBVisualisation) {
 		for (VisBSVGObject svgObject : visBVisualisation.getSVGObjects()) {
 			Map<String, String> attributes = svgObject.getAttributes();
-			JSObject object = (JSObject)this.getJSWindow().call("getOrCreateSvgElement", svgObject.getId(), svgObject.getObject());
+			String parentId = attributes.remove("parentId");
+			JSObject object = (JSObject)this.getJSWindow().call("getOrCreateSvgElement", svgObject.getId(), svgObject.getObject(), parentId);
 			for (Map.Entry<String, String> entry : attributes.entrySet()) {
 				this.getJSWindow().call("changeCreatedElementAttribute", object, entry.getKey(), entry.getValue());
 				// TODO: provide preference to specify which value has precedence: existing one in SVG or this one

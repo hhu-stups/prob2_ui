@@ -47,17 +47,17 @@
 			return element;
 		}
 
-		function getOrCreateSvgElement(id, object) {
+		function getOrCreateSvgElement(id, object, parentId) {
 			const foundElement = document.getElementById(id);
 			if (foundElement === null) {
 				// console.log("Create SVG id " + id);
 				const createdElement = document.createElementNS("http://www.w3.org/2000/svg", object);
 				createdElement.setAttribute("id", id);
 				createdElement.setAttribute("__created_by_VisB__", "true");
-				if(object["parentId"] !== undefined) {
-				   document.getElementById(object["parentId"]).appendChild(createdElement);
+				if (parentId !== null) {
+					document.getElementById(parentId).appendChild(createdElement);
 				} else {
-				   document.querySelector("svg").appendChild(createdElement);
+					document.querySelector("svg").appendChild(createdElement);
 				}
 				return createdElement;
 			} else {
