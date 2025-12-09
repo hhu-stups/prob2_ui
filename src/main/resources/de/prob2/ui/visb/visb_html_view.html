@@ -54,7 +54,11 @@
 				const createdElement = document.createElementNS("http://www.w3.org/2000/svg", object);
 				createdElement.setAttribute("id", id);
 				createdElement.setAttribute("__created_by_VisB__", "true");
-				document.querySelector("svg").appendChild(createdElement);
+				if(object["parentId"] !== undefined) {
+				   document.getElementById(object["parentId"]).appendChild(createdElement);
+				} else {
+				   document.querySelector("svg").appendChild(createdElement);
+				}
 				return createdElement;
 			} else {
 				return foundElement;
