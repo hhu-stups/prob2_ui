@@ -55,12 +55,12 @@
 				createdElement.setAttribute("id", id);
 				createdElement.setAttribute("__created_by_VisB__", "true");
 				if (parentId !== null) {
-			        const foundParent = document.getElementById(parentId);
-			        if (foundParent !== null) {
-					   foundParent.appendChild(createdElement);
-					   console.log("Did not find parentID "+ parentId + " of SVG object " + id);
+					const foundParent = document.getElementById(parentId);
+					if (foundParent !== null) {
+						foundParent.appendChild(createdElement);
+						console.log("Did not find parentID "+ parentId + " of SVG object " + id);
 					} else {
-					   document.querySelector("svg").appendChild(createdElement);
+						document.querySelector("svg").appendChild(createdElement);
 					}
 				} else {
 					document.querySelector("svg").appendChild(createdElement);
