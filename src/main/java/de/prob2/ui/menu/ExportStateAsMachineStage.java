@@ -9,7 +9,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxListCell;
@@ -24,16 +23,17 @@ import java.util.List;
 @Singleton
 @FXMLInjected
 public final class ExportStateAsMachineStage extends Stage {
-	private static class IdentifierEntry {
+	private class IdentifierEntry {
 		String id;
-		ObservableValue<Boolean> selected = new SimpleBooleanProperty(true);
+		SimpleBooleanProperty selected = new SimpleBooleanProperty(true);
 
 		IdentifierEntry(String id) {
 			this.id = id;
+			this.selected.addListener((obs, ov, nv) -> identifiers.getSelectionModel().getSelectedItems().forEach(selected -> selected.setSelected(nv)));
 		}
 
 		void setSelected(boolean selected) {
-			this.selected = new SimpleBooleanProperty(selected);
+			this.selected.set(selected);
 		}
 
 		@Override
