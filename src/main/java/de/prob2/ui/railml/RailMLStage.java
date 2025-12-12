@@ -226,7 +226,7 @@ public class RailMLStage extends Stage {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("railml.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getRailMLFilter());
-		initializeForPath(fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent()));
+		initializeForPath(fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.DATA_IMPORT, stageManager.getCurrent()));
 	}
 
 	public void initializeForPath(Path path) {
@@ -244,7 +244,7 @@ public class RailMLStage extends Stage {
 	private void selectRailMLDirectory() {
 		DirectoryChooser directoryChooser = new DirectoryChooser();
 		directoryChooser.setTitle(i18n.translate("railml.stage.directorychooser.title"));
-		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.RAILML, stageManager.getCurrent());
+		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.DATA_IMPORT, stageManager.getCurrent());
 		if (path != null) {
 			outputPath = path.toAbsolutePath();
 			importArguments.output(outputPath);
