@@ -16,13 +16,18 @@ import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ListProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import javafx.util.StringConverter;
 import org.controlsfx.glyphfont.FontAwesome;
+
+import static de.prob2.ui.simulation.configuration.ActivationKind.*;
 
 
 public final class DiagramConfigurationListCell extends ListCell<DiagramConfiguration> {
@@ -154,17 +159,29 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivationKind = new Label(i18n.translate("simulation.item.activationKind"));
 		lbActivationKind.getStyleClass().add("information");
-		TextField tfActivationKind = new TextField(item.getActivationKind().getName());
-		tfActivationKind.textProperty().addListener((observable, from, to) -> {
+		ComboBox<ActivationKind> cbActivatioKind = new ComboBox<>(FXCollections.observableArrayList(MULTI, SINGLE, SINGLE_MAX, SINGLE_MIN));
+		cbActivatioKind.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			try {
-				item.setActivationKind(ActivationKind.fromName(to));
+				item.setActivationKind(to);
 			} catch (IllegalArgumentException ignored) {
-				item.setActivationKind(ActivationKind.MULTI);
+				item.setActivationKind(MULTI);
 			}
 		});
-		tfActivationKind.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(new HBox(lbActivationKind, createHelpIcon("activationKind"), tfActivationKind));
+		cbActivatioKind.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(ActivationKind kind) {
+				return kind.getName();
+			}
+
+			@Override
+			public ActivationKind fromString(String name) {
+				return ActivationKind.fromName(name);
+			}
+		});
+		cbActivatioKind.disableProperty().bind(this.runningProperty);
+		cbActivatioKind.getSelectionModel().select(ActivationKind.fromName(item.getActivationKind().getName()));
+		this.itemBox.getChildren().add(new HBox(lbActivationKind, createHelpIcon("activationKind"), cbActivatioKind));
 
 		Label lbAdditionalGuards = new Label(i18n.translate("simulation.item.additionalGuards"));
 		lbAdditionalGuards.getStyleClass().add("information");
