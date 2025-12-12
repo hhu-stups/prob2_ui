@@ -4,9 +4,11 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 
+import de.prob.model.representation.XTLModel;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -37,15 +39,18 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 	private DiagramConfiguration modifiedItem;
 
+	private final CurrentTrace currentTrace;
+
 	private final I18n i18n;
 
 	private final BooleanProperty savedProperty;
 	private final ListProperty<String> operationsProperty;
 	private final BooleanProperty runningProperty;
 
-	public DiagramConfigurationListCell(StageManager stageManager, I18n i18n, ListProperty<String> operationsProperty, BooleanProperty savedProperty, BooleanProperty runningProperty) {
+	public DiagramConfigurationListCell(StageManager stageManager, CurrentTrace currentTrace, I18n i18n, ListProperty<String> operationsProperty, BooleanProperty savedProperty, BooleanProperty runningProperty) {
 		super();
 		this.modifiedItem = null;
+		this.currentTrace = currentTrace;
 		this.i18n = i18n;
 		this.operationsProperty = operationsProperty;
 		this.savedProperty = savedProperty;
@@ -113,15 +118,25 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		Label lbOpName = new Label(i18n.translate("simulation.item.operation"));
 		lbOpName.getStyleClass().add("information");
 
-		ComboBox<String> cbOpName = new ComboBox<>(operationsProperty.get());
-		cbOpName.itemsProperty().bind(operationsProperty);
-		cbOpName.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
-			item.setExecute(from);
-		});
-		cbOpName.disableProperty().bind(this.runningProperty);
-		cbOpName.getSelectionModel().select(item.getExecute());
-		this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), cbOpName));
+		if (currentTrace.getModel() instanceof XTLModel) {
+			TextField tfOpName = new TextField(item.getExecute());
+			tfOpName.textProperty().addListener((observable, from, to) -> {
+				savedProperty.set(false);
+				item.setExecute(from);
+			});
+			tfOpName.disableProperty().bind(this.runningProperty);
+			this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), tfOpName));
+		} else {
+			ComboBox<String> cbOpName = new ComboBox<>(operationsProperty.get());
+			cbOpName.itemsProperty().bind(operationsProperty);
+			cbOpName.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+				savedProperty.set(false);
+				item.setExecute(from);
+			});
+			cbOpName.disableProperty().bind(this.runningProperty);
+			cbOpName.getSelectionModel().select(item.getExecute());
+			this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), cbOpName));
+		}
 
 		Label lbTime = new Label(i18n.translate("simulation.item.time"));
 		lbTime.getStyleClass().add("information");
