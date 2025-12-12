@@ -43,6 +43,7 @@ import de.prob2.ui.simulation.SimulationItem;
 import javafx.application.Platform;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
@@ -403,32 +404,36 @@ public final class TraceFileHandler {
 		return path;
 	}
 
-	public void deleteTraceFile(ReplayTrace trace) {
+	public boolean deleteTraceFile(ReplayTrace trace) {
 		if (trace == null) {
-			return;
+			return false;
 		}
 
 		Path path = this.currentProject.get().resolveProjectPath(trace.getLocation());
 		if (path == null || !Files.exists(path)) {
-			return;
+			return false;
 		}
 
-		Optional<ButtonType> selected = stageManager.makeAlert(
-			Alert.AlertType.CONFIRMATION,
-			Arrays.asList(ButtonType.YES, ButtonType.NO),
-			"animation.tracereplay.dialog.deleteTraceFile.title",
-			"animation.tracereplay.dialog.deleteTraceFile.content",
-			path
-		).showAndWait();
+		Alert alert = stageManager.makeAlertWithCheckBox(
+				Alert.AlertType.CONFIRMATION,
+				Arrays.asList(ButtonType.YES, ButtonType.NO),
+				"animation.tracereplay.dialog.deleteTraceFile.title",
+				"animation.tracereplay.dialog.deleteTraceFile.checkbox",
+				"animation.tracereplay.dialog.deleteTraceFile.content",
+				path
+		);
+		Optional<ButtonType> selected = alert.showAndWait();
 		if (selected.isEmpty() || selected.get() != ButtonType.YES) {
-			return;
+			return false;
 		}
-
-		try {
-			Files.delete(path);
-		} catch (IOException e) {
-			LOGGER.warn("could not delete trace file {}", path, e);
-			stageManager.makeExceptionAlert(e, "common.alerts.couldNotDeleteFile.content").show();
+		if (alert.getDialogPane().getProperties().get("checkBox") instanceof CheckBox cb && cb.isSelected()) {
+			try {
+				Files.delete(path);
+			} catch (IOException e) {
+				LOGGER.warn("could not delete trace file {}", path, e);
+				stageManager.makeExceptionAlert(e, "common.alerts.couldNotDeleteFile.content").show();
+			}
 		}
+		return true;
 	}
 }
