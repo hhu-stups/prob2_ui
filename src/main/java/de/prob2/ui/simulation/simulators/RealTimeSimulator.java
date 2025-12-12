@@ -11,7 +11,6 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
-import de.prob2.ui.simulation.diagram.DiagramStage;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import javafx.application.Platform;
@@ -69,8 +68,8 @@ public final class RealTimeSimulator extends Simulator {
 			throw e;
 		}
 		scheduler.endSimulationStep();
-		Platform.runLater(()->{
-			if (diagramGenerator.getDiaStage()!= null ) {
+		Platform.runLater(() -> {
+			if (diagramGenerator.getDiaStage() != null) {
 				if (diagramGenerator.getDiaStage().isShowing() && diagramGenerator.getDiaStage().getIsLive()) {
 					diagramGenerator.updateGraph();
 				}
@@ -124,4 +123,9 @@ public final class RealTimeSimulator extends Simulator {
 	public void setDiagramGenerator(DiagramGenerator diagramGenerator) {
 		this.diagramGenerator = diagramGenerator;
 	}
+
+	public void setTime(int time) {
+		this.time.set(time);
+	}
+
 }

@@ -13,8 +13,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-import javax.annotation.Nullable;
-
 import com.google.common.io.MoreFiles;
 import com.google.common.io.RecursiveDeleteOption;
 import com.google.inject.Inject;
@@ -26,6 +24,8 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.error.ExceptionAlert;
 import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.persistence.UIState;
+
+import jakarta.annotation.Nullable;
 
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;

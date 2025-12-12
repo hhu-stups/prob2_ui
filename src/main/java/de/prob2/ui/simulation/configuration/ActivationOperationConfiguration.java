@@ -131,7 +131,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	}
 
 	public void setAdditionalGuards(String additionalGuards) {
-		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
+		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() ? additionalGuards : null;
 	}
 
 	@JsonIgnore

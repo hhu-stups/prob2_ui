@@ -47,14 +47,24 @@
 			return element;
 		}
 
-		function getOrCreateSvgElement(id, object) {
+		function getOrCreateSvgElement(id, object, parentId) {
 			const foundElement = document.getElementById(id);
 			if (foundElement === null) {
 				// console.log("Create SVG id " + id);
 				const createdElement = document.createElementNS("http://www.w3.org/2000/svg", object);
 				createdElement.setAttribute("id", id);
 				createdElement.setAttribute("__created_by_VisB__", "true");
-				document.querySelector("svg").appendChild(createdElement);
+				if (parentId !== null) {
+					const foundParent = document.getElementById(parentId);
+					if (foundParent !== null) {
+						foundParent.appendChild(createdElement);
+						console.log("Did not find parentID "+ parentId + " of SVG object " + id);
+					} else {
+						document.querySelector("svg").appendChild(createdElement);
+					}
+				} else {
+					document.querySelector("svg").appendChild(createdElement);
+				}
 				return createdElement;
 			} else {
 				return foundElement;
@@ -98,7 +108,7 @@
 			}
 		}
 
-		function changeAttribute(id, attribute, value){
+		function changeAttribute(id, attribute, value) {
 			// console.log("changeAttribute: " + id + "." + attribute + " = "+value);
 			runWhenLoaded(function(){
 				const obj = checkSvgId(id, "attribute " + attribute);
@@ -106,6 +116,9 @@
 					// obj not found (error message has already been displayed by checkSvgId)
 				} else {
 					changeElementAttribute(obj, attribute, value);
+					if (obj.tagName.toLowerCase() === "script" && attribute === "text") {
+						eval(value);
+					}
 				}
 			});
 		}

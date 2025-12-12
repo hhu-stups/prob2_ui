@@ -1,8 +1,10 @@
 package de.prob2.ui.internal;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -70,7 +72,8 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	protected final Popup errorPopup;
 	protected final Label errorPopupLabel;
 	protected final SimpleObjectProperty<ErrorItem.Location> errorHighlight;
-	protected final SimpleObjectProperty<ErrorItem.Location> searchResult;
+	protected final SimpleObjectProperty<ErrorItem.Location> currentSearchResult;
+	protected final ObservableList<ErrorItem.Location> searchResults;
 	private final BackgroundUpdater executor;
 	private final ObservableValue<Optional<Point2D>> caretPos;
 	private final ObservableValue<Optional<String>> textBeforeCaret;
@@ -91,7 +94,8 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		this.errorPopup.getContent().add(this.errorPopupLabel);
 
 		this.errorHighlight = new SimpleObjectProperty<>(null, "errorHighlight", null);
-		this.searchResult = new SimpleObjectProperty<>(null, "searchResult", null);
+		this.currentSearchResult = new SimpleObjectProperty<>(null, "currentSearchResult", null);
+		this.searchResults = FXCollections.observableArrayList();
 
 		this.caretPos = Bindings.createObjectBinding(
 			() -> this.caretBoundsProperty().getValue()
@@ -147,7 +151,8 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			this.reloadHighlighting();
 		});
 		this.errorHighlight.addListener((observable, oldValue, newValue) -> this.reloadHighlighting());
-		this.searchResult.addListener((observable, oldValue, newValue) -> this.reloadHighlighting());
+		this.currentSearchResult.addListener((observable, oldValue, newValue) -> this.reloadHighlighting());
+		this.searchResults.addListener((ListChangeListener<ErrorItem.Location>) change -> this.reloadHighlighting());
 
 		this.setMouseOverTextDelay(Duration.ofMillis(500));
 		this.addEventHandler(MouseOverTextEvent.MOUSE_OVER_TEXT_BEGIN, e -> {
@@ -372,26 +377,32 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 	}
 
 	public void jumpToSearchResult(ErrorItem.Location searchResultLocation) {
+		if (!this.searchResults.contains(searchResultLocation)) {
+			return;
+		}
 		this.moveTo(this.getClampedAbsolutePosition(
 			searchResultLocation.getEndLine() - 1,
 			searchResultLocation.getEndColumn()
 		));
 		this.requestFollowCaret();
-		this.setSearchResult(searchResultLocation);
+		this.setCurrentSearchResult(searchResultLocation);
 	}
 
 	protected StyleSpans<Collection<String>> addSearchHighlighting(StyleSpans<Collection<String>> highlighting) {
-		if (searchResult.get() != null) {
-			int startIndex = this.errorLocationAbsoluteStart(searchResult.get());
-			int endIndex = this.errorLocationAbsoluteEnd(searchResult.get());
-			if (endIndex > startIndex) {
-				highlighting = highlighting.overlay(
-					new StyleSpansBuilder<Collection<String>>()
-							.add(Set.of(), startIndex)
-							.add(Set.of("searchResult"), endIndex - startIndex)
-						.create(),
-						ExtendedCodeArea::combineStyleSpans
-				);
+		for (ErrorItem.Location searchResult : new ArrayList<>(searchResults)) {
+			if (searchResult != null) {
+				int startIndex = this.errorLocationAbsoluteStart(searchResult);
+				int endIndex = this.errorLocationAbsoluteEnd(searchResult);
+				if (endIndex > startIndex) {
+					String style = searchResult.equals(currentSearchResult.get()) ? "currentSearchResult" : "searchResult";
+					highlighting = highlighting.overlay(
+							new StyleSpansBuilder<Collection<String>>()
+									.add(Set.of(), startIndex)
+									.add(Set.of(style), endIndex - startIndex)
+									.create(),
+							ExtendedCodeArea::combineStyleSpans
+					);
+				}
 			}
 		}
 
@@ -476,8 +487,17 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 		this.errorHighlight.set(errorLocation);
 	}
 
-	public void setSearchResult(ErrorItem.Location searchResultLocation) {
-		this.searchResult.set(searchResultLocation);
+	public void setCurrentSearchResult(ErrorItem.Location searchResultLocation) {
+		this.currentSearchResult.set(searchResultLocation);
+	}
+
+	public void setSearchResults(List<ErrorItem.Location> searchResultLocation) {
+		if (searchResultLocation == null) {
+			this.searchResults.clear();
+			this.currentSearchResult.set(null);
+			return;
+		}
+		this.searchResults.setAll(searchResultLocation);
 	}
 
 	@Override

@@ -13,6 +13,7 @@ import java.util.regex.Pattern;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.node.TextNode;
 
@@ -1067,10 +1068,13 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 		ArrayNode requirements = checkArray(project.get("requirements"));
 		requirements.forEach(requirementNode -> {
 			ObjectNode requirement = checkObject(requirementNode);
-			String type = checkText(requirement.remove("type"));
-			if ("NON_FUNCTIONAL".equals(type)) {
-				String name = checkText(requirement.get("name"));
-				requirement.put("name", "(non-functional) " + name);
+			JsonNode newRequirementNode = requirement.remove("type");
+			if(!(newRequirementNode instanceof NullNode)) {
+				String type = checkText(newRequirementNode);
+				if ("NON_FUNCTIONAL".equals(type)) {
+					String name = checkText(requirement.get("name"));
+					requirement.put("name", "(non-functional) " + name);
+				}
 			}
 		});
 	}

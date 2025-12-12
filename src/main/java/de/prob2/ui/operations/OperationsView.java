@@ -52,6 +52,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.CustomMenuItem;
@@ -190,6 +191,12 @@ public final class OperationsView extends BorderPane {
 	@FXML
 	private MenuItem opDescriptionsMenuItem;
 	@FXML
+	private BindableGlyph disabledOpsIcon;
+	@FXML
+	private BindableGlyph unambiguousIcon;
+	@FXML
+	private BindableGlyph opDescriptionsIcon;
+	@FXML
 	private TextField searchBar;
 	@FXML
 	private TextField randomText;
@@ -202,7 +209,7 @@ public final class OperationsView extends BorderPane {
 	@FXML
 	private MenuItem tenRandomEvents;
 	@FXML
-	private MenuItem thousandDetEvents;
+	private CheckBox cbDeterministic;
 	@FXML
 	private CustomMenuItem someRandomEvents;
 	@FXML
@@ -304,17 +311,20 @@ public final class OperationsView extends BorderPane {
 
 		showDisabledOps.addListener((o, from, to) -> {
 			disabledOpsMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideDisabled") : i18n.translate("operations.operationsView.menu.showDisabled"));
+			disabledOpsIcon.setIcon(to ? FontAwesome.Glyph.EYE_SLASH : FontAwesome.Glyph.EYE);
 			showDisabledOps.set(to);
 			update(currentTrace.get());
 		});
 
 		showUnambiguous.addListener((o, from, to) -> {
 			unambiguousMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideUnambiguous") : i18n.translate("operations.operationsView.menu.showUnambiguous"));
+			unambiguousIcon.setIcon(to ? FontAwesome.Glyph.EYE_SLASH : FontAwesome.Glyph.EYE);
 			opsListView.refresh();
 		});
 
 		showOperationDescriptions.addListener((o, from, to) -> {
 			opDescriptionsMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideDescriptions") : i18n.translate("operations.operationsView.menu.showDescriptions"));
+			opDescriptionsIcon.setIcon(to ? FontAwesome.Glyph.EYE_SLASH : FontAwesome.Glyph.EYE);
 			opsListView.refresh();
 		});
 
@@ -569,7 +579,6 @@ public final class OperationsView extends BorderPane {
 	@FXML
 	public void random(ActionEvent event) {
 		final int operationCount;
-		final boolean stopIfNonDet;
 		if (event.getSource().equals(randomText)) {
 			final String randomInput = randomText.getText();
 			if (randomInput.isEmpty()) {
@@ -586,19 +595,12 @@ public final class OperationsView extends BorderPane {
 				alert.showAndWait();
 				return;
 			}
-			stopIfNonDet = false;
 		} else if (event.getSource().equals(oneRandomEvent)) {
 			operationCount = 1;
-			stopIfNonDet = false;
 		} else if (event.getSource().equals(fiveRandomEvents)) {
 			operationCount = 5;
-			stopIfNonDet = false;
 		} else if (event.getSource().equals(tenRandomEvents)) {
 			operationCount = 10;
-			stopIfNonDet = false;
-		} else if (event.getSource().equals(thousandDetEvents)) {
-			operationCount = 1000;
-			stopIfNonDet = true;
 		} else {
 			throw new AssertionError("Unhandled random animation event source: " + event.getSource());
 		}
@@ -606,7 +608,7 @@ public final class OperationsView extends BorderPane {
 		Trace currentTrace = this.currentTrace.get();
 		if (currentTrace != null) {
 			this.cliExecutor.submit(() -> {
-				if (stopIfNonDet) {
+				if (cbDeterministic.isSelected()) {
 					return currentTrace.deterministicAnimation(operationCount);
 				} else {
 					return currentTrace.randomAnimation(operationCount);

@@ -113,6 +113,7 @@
 								<TableColumn fx:id="vtIdColumn" prefWidth="${fontSize.fontSize * 6}" text="%verifications.common.columns.id"/>
 								<TableColumn fx:id="vtTypeColumn" prefWidth="${fontSize.fontSize * 8}" text="%common.columns.type"/>
 								<TableColumn fx:id="vtConfigurationColumn" prefWidth="${fontSize.fontSize * 10}" text="%common.columns.configuration"/>
+								<TableColumn fx:id="vtValidatesColumn" prefWidth="${fontSize.fontSize * 10}" text="%common.columns.validates"/>
 							</columns>
 							<sortOrder>
 								<fx:reference source="vtIdColumn"/>

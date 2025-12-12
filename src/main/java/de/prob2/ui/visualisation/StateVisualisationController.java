@@ -88,11 +88,13 @@ public class StateVisualisationController {
 		GetRightClickOptionsForStateVisualizationCommand getOptionsCommand = new GetRightClickOptionsForStateVisualizationCommand(
 				trace.getCurrentState().getId(), entry.getRow(), entry.getColumn());
 		stateSpace.execute(getOptionsCommand);
-		List<String> options = getOptionsCommand.getOptions();
-		for (String opt : options) {
-			final MenuItem item = new MenuItem(opt);
+		List<GetRightClickOptionsForStateVisualizationCommand.Option> options = getOptionsCommand.getOptionsWithDescription();
+		for (GetRightClickOptionsForStateVisualizationCommand.Option opt : options) {
+			String term = opt.getTransitionTerm();
+			String desc = opt.getDescription();
+			final MenuItem item = new MenuItem(desc.isEmpty() ? term : desc);
 			item.setOnAction(e -> {
-				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(trace.getCurrentState().getId(), entry.getRow(), entry.getColumn(), opt);
+				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(trace.getCurrentState().getId(), entry.getRow(), entry.getColumn(), term);
 				stateSpace.execute(executeCommand);
 				String transitionId = executeCommand.getTransitionID();
 				currentTrace.set(trace.add(transitionId));

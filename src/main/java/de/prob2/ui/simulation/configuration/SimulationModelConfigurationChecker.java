@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import de.prob.model.representation.XTLModel;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
@@ -35,8 +36,9 @@ public class SimulationModelConfigurationChecker {
 	private void checkActivationOperationConfiguration(ActivationOperationConfiguration activation) {
 		var probabilities = activation.getProbabilisticVariables();
 		var opName = activation.getExecute();
-		if (!Transition.isArtificialTransitionName(opName)) {
+		if (!Transition.isArtificialTransitionName(opName) && !(this.stateSpace.getModel() instanceof XTLModel)) {
 			// Check whether given operation name exists
+			// in XTL mode not all transition names are registered -> skip check
 			OperationInfo opInfo = this.stateSpace.getLoadedMachine().getMachineOperationInfo(opName);
 			if (!"skip".equals(opName) && opInfo == null) {
 				this.errors.add(new ConfigurationCheckingError(String.format("Used operation %s does not exist", opName)));

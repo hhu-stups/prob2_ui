@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.configuration;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -114,11 +115,11 @@ public final class SimulationFileHandler {
 			@Override
 			public JsonMetadata updateMetadataOnSave(JsonMetadata metadata) {
 				JsonMetadataBuilder b = new JsonMetadataBuilder(metadata)
-						                        .withFormatVersion(this.currentFormatVersion)
-						                        .withFileType(this.fileType)
-						                        .withSavedNow()
-						                        .withProB2KernelVersion(SimulationFileHandler.this.versionInfo.getKernelVersion())
-						                        .withProBCliVersion(SimulationFileHandler.this.versionInfo.getCliVersion().toString());
+					.withFormatVersion(this.currentFormatVersion)
+					.withFileType(this.fileType)
+					.withSavedNow()
+					.withProB2KernelVersion(SimulationFileHandler.this.versionInfo.getKernelVersion())
+					.withProBCliVersion(SimulationFileHandler.this.versionInfo.getCliVersion().toString());
 				if (metadata.getCreator() == null) {
 					b.withUserCreator();
 				}
@@ -130,10 +131,18 @@ public final class SimulationFileHandler {
 	public void initSimulator(Window window, Simulator simulator, LoadedMachine loadedMachine, Path path) {
 		try {
 			simulator.initSimulator(this.loadConfiguration(path, loadedMachine));
-		} catch (IOException e) {
+		} catch (FileNotFoundException e) {
 			LOGGER.error("Tried to load simulation configuration file", e);
 			Platform.runLater(() -> {
 				Alert alert = this.stageManager.makeExceptionAlert(e, "simulation.error.header.fileNotFound", "simulation.error.body.fileNotFound");
+				alert.initOwner(window);
+				alert.showAndWait();
+			});
+		} catch (IOException e) {
+			// an IOException exception probably comes from Jackson JSON library
+			LOGGER.error("JSON errors in simulation configuration file", e);
+			Platform.runLater(() -> {
+				Alert alert = this.stageManager.makeExceptionAlert(e, "simulation.error.header.fileHasIOError", "simulation.error.body.fileHasIOError");
 				alert.initOwner(window);
 				alert.showAndWait();
 			});
@@ -157,10 +166,10 @@ public final class SimulationFileHandler {
 			List<Path> timedTraces;
 			try (var s = Files.walk(path)) {
 				timedTraces = s
-						              .filter(Files::isRegularFile)
-						              .filter(p -> MoreFiles.getFileExtension(p).equals(SIMULATION_FILE_EXTENSION))
-						              .sorted()
-						              .collect(Collectors.toList());
+					.filter(Files::isRegularFile)
+					.filter(p -> MoreFiles.getFileExtension(p).equals(SIMULATION_FILE_EXTENSION))
+					.sorted()
+					.collect(Collectors.toList());
 			}
 			return new SimulationBlackBoxModelConfiguration(timedTraces);
 		} else if (SIMULATION_FILE_EXTENSION.equals(MoreFiles.getFileExtension(path))) {
@@ -230,8 +239,8 @@ public final class SimulationFileHandler {
 
 	private JsonMetadata createMetadata(String createdBy, String modelName) {
 		JsonMetadataBuilder b = SimulationModelConfiguration.metadataBuilder()
-				                        .withProB2KernelVersion(this.versionInfo.getKernelVersion())
-				                        .withProBCliVersion(this.versionInfo.getCliVersion().toString());
+			.withProB2KernelVersion(this.versionInfo.getKernelVersion())
+			.withProBCliVersion(this.versionInfo.getCliVersion().toString());
 		if (createdBy != null) {
 			b.withCreator(createdBy);
 		}
@@ -248,6 +257,7 @@ public final class SimulationFileHandler {
 		}
 	}
 
+	// create a default simulation as a starting point, if user has not provided one
 	private SimulationModelConfiguration createDefaultSimulation(LoadedMachine loadedMachine) {
 		Map<String, String> variables = new HashMap<>();
 		List<DiagramConfiguration.NonUi> activations = new ArrayList<>();
@@ -255,13 +265,26 @@ public final class SimulationFileHandler {
 		JsonMetadata metadata = createMetadata(null, null);
 
 		if (!loadedMachine.getConstantNames().isEmpty()) {
-			activations.add(new ActivationOperationConfiguration(SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, null, false, null, null, ""));
+			activations.add(new ActivationOperationConfiguration(
+				SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, 
+				"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, 
+				null, false, null, null, "Activation SETUP_CONSTANTS"
+			));
 		}
 
 		var operations = loadedMachine.getOperationNames();
-		activations.add(new ActivationOperationConfiguration(INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME, "0", 0, null, ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, List.copyOf(operations), true, null, null, ""));
+		activations.add(new ActivationOperationConfiguration(
+			INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME,
+			"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST,
+			List.copyOf(operations), true, null, null, "Activation for INITIALISATION"
+		));
+
 		for (var op : operations) {
-			activations.add(new ActivationOperationConfiguration(op, op, "100", 0, null, ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, List.copyOf(operations), true, null, null, ""));
+			activations.add(new ActivationOperationConfiguration(
+				op, op, 
+				"100", 0, "btrue", ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, 
+				List.copyOf(operations), true, null, null, "Activation for " + op
+			));
 		}
 
 		return new SimulationModelConfiguration(variables, activations, uiListenerConfigurations, metadata);

@@ -1156,6 +1156,8 @@
 	-fx-cell-size: 6.8em;
 	-fx-border-width: 2px 0px 0px 0px;
 	-fx-border-color: black;
+	-fx-focus-color: transparent;
+	-fx-faint-focus-color: transparent;
 }
 .simulation-item .id {
 	-fx-font-family: ARIAL;
@@ -1308,7 +1310,11 @@
 /* ==================== SEARCH ======================== */
 
 .editor .searchResult {
-	-rtfx-background-color: grey;
+	-rtfx-background-color: rgba(255, 165, 0, 0.75);
+}
+
+.editor .currentSearchResult {
+	-rtfx-background-color: rgba(0, 122, 198, 0.5);
 }
 
 .search-error {

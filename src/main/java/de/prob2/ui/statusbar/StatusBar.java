@@ -48,7 +48,8 @@ public final class StatusBar extends HBox {
 			return this.messageKey;
 		}
 	}
-	
+
+	@FXML private Label modelInfo;
 	@FXML private Label statusLabel;
 	@FXML private BindableGlyph infoIcon;
 	
@@ -132,6 +133,12 @@ public final class StatusBar extends HBox {
 				statusLabel.setText(i18n.translate("common.noModelLoaded"));
 			}
 		}
+		boolean showModelInfo = this.currentTrace != null && this.currentTrace.getModel() != null;
+		if (showModelInfo) {
+			modelInfo.setText(this.currentTrace.getModel().getLanguage().getPrettyName());
+		}
+		modelInfo.setVisible(showModelInfo);
+		modelInfo.setManaged(showModelInfo);
 	}
 
 	private List<String> getErrorMessages(State state) {
@@ -148,7 +155,11 @@ public final class StatusBar extends HBox {
 	private List<String> getWarningMessages(State state) {
 		final List<String> warningMessages = new ArrayList<>();
 		if (state.getOutTransitions().isEmpty()) {
-			warningMessages.add(i18n.translate("statusbar.warnings.deadlock"));
+			if (state.getCandidateOperations().isEmpty()) {
+				warningMessages.add(i18n.translate("statusbar.warnings.deadlock"));
+			} else {
+				warningMessages.add(i18n.translate("statusbar.warnings.potentialDeadlock"));
+			}
 		}
 		return warningMessages;
 	}

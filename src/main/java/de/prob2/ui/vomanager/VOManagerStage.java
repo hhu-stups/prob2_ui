@@ -118,6 +118,9 @@ public final class VOManagerStage extends Stage {
 	@FXML
 	private TableColumn<IValidationTask, String> vtConfigurationColumn;
 
+	@FXML
+	private TableColumn<IValidationTask, String> vtValidatesColumn;
+
 	private final StageManager stageManager;
 
 	private final CurrentProject currentProject;
@@ -145,7 +148,7 @@ public final class VOManagerStage extends Stage {
 		this.modeProperty = new SimpleObjectProperty<>(Mode.NONE);
 		this.relatedMachineNames = FXCollections.observableSet();
 		this.currentMachineVTs = new SimpleListProperty<>(this, "currentMachineVTs", FXCollections.emptyObservableList());
-		stageManager.loadFXML(this, "vo_manager_view.fxml", this.getClass().getName());
+		stageManager.loadFXML(this, "vo_manager_view.fxml");
 	}
 
 	@FXML
@@ -261,6 +264,24 @@ public final class VOManagerStage extends Stage {
 		vtIdColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getId()));
 		vtTypeColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskType(i18n)));
 		vtConfigurationColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> features.getValue().getTaskDescription(i18n)));
+		vtValidatesColumn.setCellValueFactory(features -> Bindings.createStringBinding(() -> {
+			List<String> results = new ArrayList<>();
+			IValidationTask vt = features.getValue();
+			if(vt == null) {
+				return "";
+			}
+			String vtID = vt.getId();
+			for(Requirement requirement : currentProject.getRequirements()) {
+				ValidationObligation vo = requirement.getValidationObligationsByMachine().get(currentProject.getCurrentMachine().getName());
+				if(vo == null) {
+					continue;
+				}
+				if(vo.getTasks().contains(vt)) {
+					results.add(requirement.getName());
+				}
+			}
+			return String.join(", ", results);
+		}));
 
 		final InvalidationListener validationFeedbackListener = o -> showFeedback();
 		currentMachineVTs.addListener((ListChangeListener<IValidationTask>) c -> {

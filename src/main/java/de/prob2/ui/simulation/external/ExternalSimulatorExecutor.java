@@ -8,6 +8,8 @@ import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -35,6 +37,8 @@ public final class ExternalSimulatorExecutor {
 	private final Path pythonFile;
 	private final ExecutorService threadService = Executors.newFixedThreadPool(1);
 	private final ExecutorService errorThreadService = Executors.newFixedThreadPool(1);
+	private final Map<String, String> externalValues;
+	private Map<String, String> externalFormulas;
 
 	private ServerSocket serverSocket;
 	private Socket clientSocket;
@@ -50,16 +54,21 @@ public final class ExternalSimulatorExecutor {
 				.disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
 				.disable(StreamWriteFeature.AUTO_CLOSE_CONTENT)
 				.disable(StreamReadFeature.AUTO_CLOSE_SOURCE)
+				.enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
 				.build());
 		this.objectMapper.disable(SerializationFeature.INDENT_OUTPUT);
 		this.objectMapper.disable(SerializationFeature.CLOSE_CLOSEABLE);
 		this.simulator = simulator;
 		this.pythonFile = pythonFile;
 		this.done = false;
+		this.externalValues = new HashMap<>();
+		this.externalFormulas = new HashMap<>();
 	}
 
 	public void reset() {
 		this.done = false;
+		this.externalFormulas.clear();
+		this.externalValues.clear();
 	}
 
 	public void start() {
@@ -129,14 +138,15 @@ public final class ExternalSimulatorExecutor {
 			}
 
 			State state = trace.getCurrentState();
-
+			this.computeExternalValues(state, externalFormulas);
 			String enabledOperations = String.join(",", state.getStateSpace().getLoadedMachine().getOperationNames()
 					.stream()
 					.filter(op -> state.eval(String.format("GET_GUARD_STATUS(\"%s\")", op)) instanceof EvalResult res && "TRUE".equals(res.getValue()))
 					.collect(Collectors.toSet()));
-			sendContinue(enabledOperations);
+			sendContinue(enabledOperations, externalValues);
 
 			step = this.objectMapper.readValue(reader, ExternalSimulationStep.class);
+			this.externalFormulas = step.getExternalFormulas() == null ? new HashMap<>() : step.getExternalFormulas();
 		} catch(Exception e){
 			e.printStackTrace();
 		}
@@ -144,6 +154,15 @@ public final class ExternalSimulatorExecutor {
 			setDone(step.isDone());
 		}
 		return step;
+	}
+
+	private void computeExternalValues(State state, Map<String, String> externalFormulas) {
+		if(externalFormulas == null) {
+			return;
+		}
+		for(String key : externalFormulas.keySet()) {
+			externalValues.put(key, state.eval(externalFormulas.get(key)).toString());
+		}
 	}
 
 	public void close() {
@@ -178,7 +197,7 @@ public final class ExternalSimulatorExecutor {
 		setDone(true);
 
 		try {
-			this.objectMapper.writeValue(writer, new ExternalSimulationRequest(1, ""));
+			this.objectMapper.writeValue(writer, new ExternalSimulationRequest(1, "", null));
 			writer.newLine();
 			writer.flush();
 		} catch (IOException e) {
@@ -186,9 +205,9 @@ public final class ExternalSimulatorExecutor {
 		}
 	}
 
-	public void sendContinue(String enabledOperations) {
+	public void sendContinue(String enabledOperations, Map<String, String> externalValues) {
 		try {
-			this.objectMapper.writeValue(writer, new ExternalSimulationRequest(0, enabledOperations));
+			this.objectMapper.writeValue(writer, new ExternalSimulationRequest(0, enabledOperations, externalValues));
 			writer.newLine();
 			writer.flush();
 		} catch (IOException e) {

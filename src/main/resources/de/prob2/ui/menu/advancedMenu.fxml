@@ -13,6 +13,12 @@
 	<MenuItem text="%menu.advanced.items.simb" onAction="#openSimulator"/>
 	<MenuItem fx:id="interactiveTraceItem" text="%menu.advanced.items.interactiveTraceReplay" onAction="#showInteractiveTraceReplay"/>
 	<MenuItem fx:id="refactorTraceItem" text="%menu.advanced.items.refactorTrace" onAction="#showRefactorTrace"/>
+	<Menu fx:id="importDataFiles" text="%menu.advanced.items.dataImport">
+		<MenuItem fx:id="importXML2BData" text="XML" onAction="#showXML2BImport"/>
+		<MenuItem fx:id="importXMLData" text="%menu.advanced.items.dataImport.untypedXML" onAction="#showXMLImport"/>
+		<MenuItem fx:id="importJSONData" text="JSON" onAction="#showJSONImport"/>
+		<MenuItem fx:id="importCSVData" text="CSV" onAction="#showCSVImport"/>
+	</Menu>
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.railMLImport" onAction="#openRailMLImport"/>
 	<SeparatorMenuItem />

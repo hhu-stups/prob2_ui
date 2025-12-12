@@ -1,7 +1,5 @@
 package de.prob2.ui.menu;
 
-import javax.annotation.Nullable;
-
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
@@ -9,6 +7,8 @@ import de.jangassen.MenuToolkit;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+
+import jakarta.annotation.Nullable;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;

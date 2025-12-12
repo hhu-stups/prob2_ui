@@ -73,7 +73,7 @@ public final class SimulationTracesView extends Stage {
 		}
 
 		public CheckingStatus getStatus() {
-			return this.result.getStatus();
+			return this.result.getStatuses().get(index);
 		}
 
 		// Used via PropertyValueFactory

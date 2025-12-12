@@ -3,8 +3,6 @@ package de.prob2.ui.menu;
 import java.nio.file.Path;
 import java.util.Arrays;
 
-import javax.annotation.Nullable;
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 
@@ -17,6 +15,8 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.PerspectiveKind;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.UIState;
+
+import jakarta.annotation.Nullable;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;

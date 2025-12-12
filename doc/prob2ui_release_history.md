@@ -4,6 +4,18 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.3.1 (not released yet)
 
+* Added transition information stored in state space to operation details stage (e.g. details about the execution of operations with STORE_DETAILED_TRANSITION_INFOS preference)
+* Added menu for data import of XML files with XML2B and JSON/CSV with ProB's libraries
+* Added transition descriptions for right click options in state visualisation view
+* Added export of current state as classical B machine
+* Improved search in editor (now integrated into the editor view)
+* Improved RulesView (display messages for UNCHECKED rules)
+* Improved XTL Prolog mode 
+  * Enabled execute by predicate for registered transitions (`trans_prop`), can be used to specify parameter values
+  * Enabled JSON trace replay, also with interactive trace replay
+  * Enabled simulation with SimB (basic functionality, without caching)
+  * Improved support for visualisation with VisB (using B definitions)
+
 ## Version 1.3.0 (2025-07-30)
 
 * Updated the ProB core to version 1.15.0 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
@@ -74,7 +86,7 @@ Downloads of the current release and snapshot development builds can be found on
   * Removed formal distinction between requirement types (functional and non-functional) as the VO manager doesn't use this information
 * Improved UI responsiveness while updating the status bar or a VisB visualization
 * Improved startup performance slightly
-* Fixed multiple problems when starting multiple instances of ProB 2 UI at once
+* Fixed multiple problems when starting multiple instances of ProB2-UI at once
 * Fixed editor discarding changes made while saving
 * Fixed editor sometimes overwriting file contents when using undo together with switching between files
 * Fixed various text editing bugs in ProB and Groovy consoles
@@ -171,7 +183,7 @@ Downloads of the current release and snapshot development builds can be found on
 * Fixed inefficient expansion of symbolic sets in some places
 * Fixed various keyboard problems with some OSes and keyboard layouts (Shift on Windows, undo/redo with non-US layouts, zoom shortcuts, consoles)
 * Fixed some toolbar icons becoming invisible for small window/view sizes
-* Fixed errors with the config file when switching between different versions of ProB 2 UI
+* Fixed errors with the config file when switching between different versions of ProB2-UI
 
 ### Downloads for version 1.2.0
 
