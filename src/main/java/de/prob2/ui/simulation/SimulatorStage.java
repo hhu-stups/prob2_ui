@@ -21,6 +21,8 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.statespace.LoadedMachine;
+import de.prob.statespace.OperationInfo;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -64,10 +66,7 @@ import javafx.application.Platform;
 import javafx.beans.InvalidationListener;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanExpression;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -98,6 +97,9 @@ import org.controlsfx.glyphfont.FontAwesome;
 import org.controlsfx.glyphfont.Glyph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static de.prob.statespace.Transition.INITIALISE_MACHINE_NAME;
+import static de.prob.statespace.Transition.SETUP_CONSTANTS_NAME;
 
 @FXMLInjected
 @Singleton
@@ -140,7 +142,7 @@ public final class SimulatorStage extends Stage {
 					copyMenu.getItems().clear();
 					SimulationModel sourceModel = cbSimulation.getSelectionModel().getSelectedItem();
 					for (SimulationModel targetModel : currentProject.getCurrentMachine().getSimulations()) {
-						if (sourceModel.equals(targetModel)) {
+						if (targetModel.equals(sourceModel)) {
 							continue;
 						}
 
@@ -347,6 +349,8 @@ public final class SimulatorStage extends Stage {
 	@FXML
 	private TableColumn<SchedulingTableItem, SchedulingTableItem> activationInformationColumn;
 
+	private final SimpleListProperty<String> operationsProperty;
+
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
@@ -405,6 +409,7 @@ public final class SimulatorStage extends Stage {
 		this.simulationFileHandler = simulationFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
 		this.savedProperty = new SimpleBooleanProperty(this, "savedProperty", true);
+		this.operationsProperty = new SimpleListProperty<>(this, "operationsProperty", FXCollections.observableArrayList());
 		this.time = 0;
 		this.timer = new Timer(true);
 		stopActions.add(this::cancelTimer);
@@ -478,7 +483,23 @@ public final class SimulatorStage extends Stage {
 		// The items list is set once here and then always updated in-place.
 		// setItems should never be called again after this.
 		cbSimulation.setItems(FXCollections.observableArrayList());
-		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> loadCurrentSimulation(to));
+		cbSimulation.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			loadCurrentSimulation(to);
+			if(to == null || currentTrace.getStateSpace() == null) {
+				return;
+			}
+			LoadedMachine loadedMachine = currentTrace.getStateSpace().getLoadedMachine();
+			List<String> operations = new ArrayList<>();
+			operations.add(SETUP_CONSTANTS_NAME);
+			operations.add(INITIALISE_MACHINE_NAME);
+			operations.addAll(loadedMachine.getOperationNames().stream()
+					.map(loadedMachine::getMachineOperationInfo)
+					.filter(OperationInfo::isTopLevel)
+					.map(OperationInfo::getOperationName).toList());
+			operations.add("skip");
+			operationsProperty.clear();
+			operationsProperty.setAll(operations);
+		});
 		cbSimulation.disableProperty().bind(currentTrace.isNull().or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 
 		btAddSimulation.disableProperty().bind(currentTrace.isNull().or(disablePropertyController.disableProperty()).or(configurationPath.isNull()).or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
@@ -505,7 +526,7 @@ public final class SimulatorStage extends Stage {
 		openExternalButton.disableProperty().bind(configurationPath.isNull());
 		reloadSimulationButton.disableProperty().bind(configurationPath.isNull());
 
-		this.simulationDiagramItems.setCellFactory(lv -> new DiagramConfigurationListCell(stageManager, i18n, savedProperty, realTimeSimulator.runningProperty()));
+		this.simulationDiagramItems.setCellFactory(lv -> new DiagramConfigurationListCell(stageManager, i18n, operationsProperty, savedProperty, realTimeSimulator.runningProperty()));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
 			if (to) {

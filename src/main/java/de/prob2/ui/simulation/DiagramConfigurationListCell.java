@@ -1,15 +1,12 @@
 package de.prob2.ui.simulation;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+
 
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
-import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -18,17 +15,15 @@ import de.prob2.ui.simulation.configuration.TransitionSelection;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 import org.controlsfx.glyphfont.FontAwesome;
+
 
 public final class DiagramConfigurationListCell extends ListCell<DiagramConfiguration> {
 
@@ -40,12 +35,14 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 	private final I18n i18n;
 
 	private final BooleanProperty savedProperty;
+	private final ListProperty<String> operationsProperty;
 	private final BooleanProperty runningProperty;
 
-	public DiagramConfigurationListCell(StageManager stageManager, I18n i18n, BooleanProperty savedProperty, BooleanProperty runningProperty) {
+	public DiagramConfigurationListCell(StageManager stageManager, I18n i18n, ListProperty<String> operationsProperty, BooleanProperty savedProperty, BooleanProperty runningProperty) {
 		super();
 		this.modifiedItem = null;
 		this.i18n = i18n;
+		this.operationsProperty = operationsProperty;
 		this.savedProperty = savedProperty;
 		this.savedProperty.addListener((observable, from, to) -> {
 			int index = this.getListView().getItems().indexOf(this.getItem());
@@ -110,13 +107,16 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbOpName = new Label(i18n.translate("simulation.item.operation"));
 		lbOpName.getStyleClass().add("information");
-		TextField tfOpName = new TextField(item.getExecute());
-		tfOpName.textProperty().addListener((observable, from, to) -> {
+
+		ComboBox<String> cbOpName = new ComboBox<>(operationsProperty.get());
+		cbOpName.itemsProperty().bind(operationsProperty);
+		cbOpName.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			item.setExecute(from);
 		});
-		tfOpName.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), tfOpName));
+		cbOpName.disableProperty().bind(this.runningProperty);
+		cbOpName.getSelectionModel().select(item.getExecute());
+		this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), cbOpName));
 
 		Label lbTime = new Label(i18n.translate("simulation.item.time"));
 		lbTime.getStyleClass().add("information");
