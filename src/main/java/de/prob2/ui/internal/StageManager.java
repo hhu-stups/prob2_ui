@@ -34,12 +34,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.BoundingBox;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.DialogPane;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.image.Image;
@@ -319,6 +322,46 @@ public final class StageManager {
 		dialog.initOwner(this.getMainStage());
 		dialog.setResizable(true); // Necessary to make a registered dialog readable
 		dialog.getDialogPane().getStylesheets().add(STYLESHEET);
+	}
+
+	/**
+	 * Create and initialize a new alert with custom buttons and an additional checkbox.
+	 *
+	 * @param type the alert type
+	 * @param buttons the custom buttons
+	 * @param headerBundleKey the resource bundle key for the alert header
+	 * text, or either {@code null} or {@code ""} for the default header text provided by JavaFX
+	 * @param checkboxBundleKey the resource bundle key for the checkbox label
+	 * @param contentBundleKey the resource bundle key for the alert content
+	 * text, whose localized value may contain {@link MessageFormat}-style
+	 * placeholders
+	 * @param contentParams the objects to insert into the placeholders in
+	 * {@code contentBundleKey}'s localized value
+	 * @return a new alert
+	 */
+	public Alert makeAlertWithCheckBox(final Alert.AlertType type, final List<ButtonType> buttons,
+	                                   final String headerBundleKey, final String checkboxBundleKey, final String contentBundleKey,
+	                                   final Object... contentParams) {
+		// idea from https://stackoverflow.com/questions/36949595/how-do-i-create-a-javafx-alert-with-a-check-box-for-do-not-ask-again
+		Alert alert = new Alert(type);
+		alert.setDialogPane(new DialogPane() {
+			@Override
+			protected Node createDetailsButton() {
+				CheckBox checkBox = new CheckBox();
+				checkBox.setText(i18n.translate(checkboxBundleKey));
+				this.getProperties().put("checkBox", checkBox); // allows access to the checkbox to obtain the selection
+				return checkBox;
+			}
+		});
+		alert.getDialogPane().getButtonTypes().addAll(buttons);
+		alert.getDialogPane().setContentText(contentBundleKey != null && !contentBundleKey.isEmpty() ? i18n.translate(contentBundleKey, contentParams) : "");
+		alert.getDialogPane().setExpandableContent(new Group());
+		alert.getDialogPane().setMinHeight(Region.USE_PREF_SIZE);
+		this.register(alert);
+		if (headerBundleKey != null && !headerBundleKey.isEmpty()) {
+			alert.setHeaderText(i18n.translate(headerBundleKey));
+		}
+		return alert;
 	}
 
 	/**
