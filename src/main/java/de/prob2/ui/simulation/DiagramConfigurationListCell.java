@@ -215,17 +215,30 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbTransitionSelection = new Label(i18n.translate("simulation.item.transitionSelection"));
 		lbTransitionSelection.getStyleClass().add("information");
-		TextField tfTransitionSelection = new TextField(item.getTransitionSelection().getName());
-		tfTransitionSelection.textProperty().addListener((observable, from, to) -> {
+
+		ComboBox<TransitionSelection> cbTransitionSelection = new ComboBox<>(FXCollections.observableArrayList(TransitionSelection.FIRST, TransitionSelection.UNIFORM));
+		cbTransitionSelection.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			try {
-				item.setTransitionSelection(TransitionSelection.fromName(to));
+				item.setTransitionSelection(to);
 			} catch (IllegalArgumentException ignored) {
 				item.setTransitionSelection(TransitionSelection.FIRST);
 			}
 		});
-		tfTransitionSelection.disableProperty().bind(this.runningProperty);
-		this.itemBox.getChildren().add(new HBox(lbTransitionSelection, createHelpIcon("transitionSelection"), tfTransitionSelection));
+		cbTransitionSelection.setConverter(new StringConverter<>() {
+			@Override
+			public String toString(TransitionSelection selection) {
+				return selection.getName();
+			}
+
+			@Override
+			public TransitionSelection fromString(String name) {
+				return TransitionSelection.fromName(name);
+			}
+		});
+		cbTransitionSelection.getSelectionModel().select(TransitionSelection.fromName(item.getTransitionSelection().getName()));
+		cbTransitionSelection.disableProperty().bind(this.runningProperty);
+		this.itemBox.getChildren().add(new HBox(lbTransitionSelection, createHelpIcon("transitionSelection"), cbTransitionSelection));
 
 		// TODO: activatingOnlyWhenExecuted, updating, withPredicate
 	}
