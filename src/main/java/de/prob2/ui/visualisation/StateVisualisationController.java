@@ -96,8 +96,11 @@ public class StateVisualisationController {
 			item.setOnAction(e -> {
 				ExecuteRightClickCommand executeCommand = new ExecuteRightClickCommand(trace.getCurrentState().getId(), entry.getRow(), entry.getColumn(), term);
 				stateSpace.execute(executeCommand);
-				String transitionId = executeCommand.getTransitionID();
-				currentTrace.set(trace.add(transitionId));
+				Trace newTrace = trace;
+				for (String transitionId : executeCommand.getTransitionIDs()) {
+					newTrace = newTrace.add(transitionId);
+				}
+				currentTrace.set(newTrace);
 			});
 			contextMenu.getItems().add(item);
 		}
