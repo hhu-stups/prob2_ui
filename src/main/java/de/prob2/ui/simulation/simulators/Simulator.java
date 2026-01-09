@@ -40,8 +40,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 
-import static de.prob.statespace.Transition.SETUP_CONSTANTS_NAME;
-
 public abstract class Simulator {
 
 	protected final CurrentTrace currentTrace;
@@ -260,7 +258,7 @@ public abstract class Simulator {
 		if (currentTrace.getModel() instanceof XTLModel) {
 			activateBeforeInitialisation(trace, "start_xtl_system");
 		} else if (!trace.getCurrentState().isInitialised()) {
-			activateBeforeInitialisation(trace, SETUP_CONSTANTS_NAME);
+			activateBeforeInitialisation(trace, Transition.SETUP_CONSTANTS_NAME);
 			if (!(config instanceof SimulationExternalConfiguration)) {
 				activateBeforeInitialisation(trace, Transition.INITIALISE_MACHINE_NAME);
 			}
