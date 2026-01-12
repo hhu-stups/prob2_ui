@@ -23,6 +23,7 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.menu.OpenFile;
+import de.prob2.ui.prob2fx.CurrentProject;
 
 import javafx.application.HostServices;
 import javafx.application.Platform;
@@ -69,6 +70,7 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 	private final StageManager stageManager;
 	private final I18n i18n;
 	private final FileChooserManager fileChooserManager;
+	private final CurrentProject currentProject;
 	private final JavaLocator javaLocator;
 	private final PlantUmlLocator plantUmlLocator;
 	private final OpenFile openFile;
@@ -81,10 +83,13 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 	private String cachedDotEngine;
 
 	@Inject
-	public DynamicGraphView(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager, JavaLocator javaLocator, PlantUmlLocator plantUmlLocator, OpenFile openFile, HostServices hostServices) {
+	public DynamicGraphView(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager,
+	                        CurrentProject currentProject, JavaLocator javaLocator, PlantUmlLocator plantUmlLocator,
+	                        OpenFile openFile, HostServices hostServices) {
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
+		this.currentProject = currentProject;
 		this.javaLocator = javaLocator;
 		this.plantUmlLocator = plantUmlLocator;
 		this.openFile = openFile;
@@ -153,6 +158,7 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 		}
 
 		fileChooser.setTitle(this.i18n.translate("common.fileChooser.save.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, this.getScene().getWindow());
 		if (path == null || path.getFileName() == null || path.getParent() == null) {
 			return;

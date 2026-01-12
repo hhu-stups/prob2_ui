@@ -526,7 +526,7 @@ public final class SimulatorStage extends Stage {
 		openExternalButton.disableProperty().bind(configurationPath.isNull());
 		reloadSimulationButton.disableProperty().bind(configurationPath.isNull());
 
-		this.simulationDiagramItems.setCellFactory(lv -> new DiagramConfigurationListCell(stageManager, i18n, operationsProperty, savedProperty, realTimeSimulator.runningProperty()));
+		this.simulationDiagramItems.setCellFactory(lv -> new DiagramConfigurationListCell(stageManager, currentTrace, i18n, operationsProperty, savedProperty, realTimeSimulator.runningProperty()));
 
 		machineLoader.loadingProperty().addListener((observable, from, to) -> {
 			if (to) {

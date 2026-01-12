@@ -246,11 +246,8 @@ public abstract class Simulator {
 
 	private void activateBeforeInitialisation(Trace trace, String operation) {
 		if(config instanceof SimulationExternalConfiguration) {
-			createDynamicActivation(Transition.SETUP_CONSTANTS_NAME, Transition.SETUP_CONSTANTS_NAME, "0", 0,
-					null, ActivationKind.SINGLE, null, null, TransitionSelection.FIRST,
-					null, false, null, null);
-		}
-		if(configurationToActivation.containsKey(operation)) {
+			processExternalConfiguration(trace);
+		} else if(configurationToActivation.containsKey(operation)) {
 			ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get(operation);
 			simulationEventHandler.activateOperation(trace.getCurrentState(), setupConfiguration, new ArrayList<>(), "1=1");
 		}
@@ -283,7 +280,6 @@ public abstract class Simulator {
 	}
 
 	public Trace executeActivatedOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
-
 		String id = activationConfig.getId();
 		List<String> activationConfiguration = activationConfig.getActivating();
 
