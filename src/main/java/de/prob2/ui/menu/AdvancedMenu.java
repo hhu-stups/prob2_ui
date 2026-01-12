@@ -159,6 +159,18 @@ public final class AdvancedMenu extends Menu {
 	}
 
 	@FXML
+	private void showRailMLImport() {
+		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
+		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
+		if (railMLInspectDotStage.isShowing()) {
+			railMLInspectDotStage.toFront();
+		} else {
+			railMLStage.show();
+			railMLStage.toFront();
+		}
+	}
+
+	@FXML
 	private void openVOManager() {
 		VOManagerStage voManagerStage = injector.getInstance(VOManagerStage.class);
 		voManagerStage.show();
@@ -168,18 +180,6 @@ public final class AdvancedMenu extends Menu {
 		alert.initOwner(voManagerStage);
 		alert.initModality(Modality.WINDOW_MODAL);
 		alert.show();
-	}
-
-	@FXML
-	private void openRailMLImport() {
-		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
-		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
-		if (railMLInspectDotStage.isShowing()) {
-			railMLInspectDotStage.toFront();
-		} else {
-			railMLStage.show();
-			railMLStage.toFront();
-		}
 	}
 
 }

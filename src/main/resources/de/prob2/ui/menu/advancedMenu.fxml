@@ -18,9 +18,8 @@
 		<MenuItem fx:id="importXMLData" text="%menu.advanced.items.dataImport.untypedXML" onAction="#showXMLImport"/>
 		<MenuItem fx:id="importJSONData" text="JSON" onAction="#showJSONImport"/>
 		<MenuItem fx:id="importCSVData" text="CSV" onAction="#showCSVImport"/>
+		<MenuItem fx:id="importRailMLData" text="railML 3" onAction="#showRailMLImport"/>
 	</Menu>
-	<SeparatorMenuItem />
-	<MenuItem text="%menu.advanced.items.railMLImport" onAction="#openRailMLImport"/>
 	<SeparatorMenuItem />
 	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
 	<SeparatorMenuItem />
