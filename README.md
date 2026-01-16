@@ -1,11 +1,11 @@
-# ProB 2 UI
+# ProB2-UI
 
 ProB2-UI is a modern JavaFX-based user interface for the animator, constraint solver, and model checker [ProB](https://prob.hhu.de).
 In addition to the [B-method](http://en.wikipedia.org/wiki/B-Method), ProB also supports [Event-B](http://www.event-b.org), [CSP-M](http://en.wikipedia.org/wiki/Communicating_sequential_processes), [TLA+](http://research.microsoft.com/en-us/um/people/lamport/tla/tla.html), and [Z](http://en.wikipedia.org/wiki/Z_notation).
 
 ## Download
 
-Pre-built binaries for the ProB 2 UI can be downloaded [here](https://prob.hhu.de/w/index.php?title=Download#ProB2-UI).
+Pre-built binaries for the ProB2-UI can be downloaded [here](https://prob.hhu.de/w/index.php?title=Download#ProB2-UI).
 
 ## Main Features
 
@@ -24,17 +24,17 @@ Supported operating systems:
 
 When using the platform-specific installers, you don't need to install Java yourself - an appropriate Java version is bundled with the application.
 
-When using the multi-platform jar or building from source, ProB 2 UI **requires Java 21** or later.
+When using the multi-platform jar or building from source, ProB2-UI **requires Java 21** or later.
 Any OpenJDK distribution can be used (we test with Eclipse Adoptium).
 JavaFX is included as a regular library dependency and does *not* need to be installed manually.
 
-The last version compatible with older Java versions (down to Java 8) and older OSes (Windows 8.1 and older, macOS 10.15 and older) is [ProB 2 UI 1.2.1](https://github.com/hhu-stups/prob2_ui/blob/HEAD/doc/prob2ui_release_history.md#version-121-2023-08-15).
+The last version compatible with older Java versions (down to Java 8) and older OSes (Windows 8.1 and older, macOS 10.15 and older) is [ProB2-UI 1.2.1](https://github.com/hhu-stups/prob2_ui/blob/HEAD/doc/prob2ui_release_history.md#version-121-2023-08-15).
 
 ## Running from source
 
-The ProB 2 UI can be started from source using the Gradle `run` task (`./gradlew run` on Linux/macOS/etc., `.\gradlew run` on Windows).
+The ProB2-UI can be started from source using the Gradle `run` task (`./gradlew run` on Linux/macOS/etc., `.\gradlew run` on Windows).
 
-Building the ProB 2 UI from source requires [Pandoc](https://pandoc.org/) to generate the help files for the UI's built-in help function. Pandoc is available from all popular package managers, or as an installer from [the Pandoc website](https://pandoc.org/installing.html).
+Building the ProB2-UI from source requires [Pandoc](https://pandoc.org/) to generate the help files for the UI's built-in help function. Pandoc is available from all popular package managers, or as an installer from [the Pandoc website](https://pandoc.org/installing.html).
 
 If you want to build the UI without installing Pandoc, you can pass the option `--exclude-task createHelp` to Gradle to skip the help build. The UI is fully functional without the built help files, except that the help window will have no content.
 
