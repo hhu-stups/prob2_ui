@@ -13,6 +13,7 @@ import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
@@ -60,28 +61,34 @@ public final class NavigationButtonsController {
 
 	@FXML
 	private void initialize() {
-		BooleanBinding forwardExecutingNextOperationBinding = Bindings.createBooleanBinding(() -> currentTrace.get() != null && !currentTrace.get().canGoForward() && currentTrace.get().getNextTransitions().size() == 1, currentTrace);
+		ObjectBinding<Trace> deterministicStepTraceBinding = Bindings.createObjectBinding(() -> {
+			Trace t = currentTrace.get();
+			if (t != null && !t.canGoForward() && t.getNextTransitions().size() == 1) {
+				return t;
+			}
+			return null;
+		}, currentTrace);
+		BooleanBinding deterministicStepBinding = Bindings.isNotNull(deterministicStepTraceBinding);
 
 		backButton.disableProperty().bind(currentTrace.canGoBackProperty().not().or(realTimeSimulator.runningProperty()));
 		fastBackButton.disableProperty().bind(currentTrace.canGoBackProperty().not().or(realTimeSimulator.runningProperty()));
-		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().and(forwardExecutingNextOperationBinding.not()).or(realTimeSimulator.runningProperty()));
-		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().or(forwardExecutingNextOperationBinding).or(realTimeSimulator.runningProperty()));
-		fastForwardButtonMenu.disableProperty().bind(currentTrace.canGoForwardProperty().or(forwardExecutingNextOperationBinding.not()).or(realTimeSimulator.runningProperty()));
+		forwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().and(deterministicStepBinding.not()).or(realTimeSimulator.runningProperty()));
+		fastForwardButton.disableProperty().bind(currentTrace.canGoForwardProperty().not().or(deterministicStepBinding).or(realTimeSimulator.runningProperty()));
+		fastForwardButtonMenu.disableProperty().bind(currentTrace.canGoForwardProperty().or(deterministicStepBinding.not()).or(realTimeSimulator.runningProperty()));
 		fastForwardButton.visibleProperty().bind(fastForwardButtonMenu.disabledProperty());
 		fastForwardButton.managedProperty().bind(fastForwardButtonMenu.disabledProperty());
 		fastForwardButtonMenu.visibleProperty().bind(fastForwardButton.visibleProperty().not());
 		fastForwardButtonMenu.managedProperty().bind(fastForwardButton.managedProperty().not());
 
-		forwardExecutingNextOperationBinding.addListener((observable, from, to) -> {
+		deterministicStepTraceBinding.addListener((observable, from, to) -> {
 			Node forwardGraphic = forwardButton.getGraphic();
 			Node fastForwardGraphic = fastForwardButtonMenu.getGraphic();
 			forwardGraphic.getStyleClass().clear();
 			fastForwardGraphic.getStyleClass().clear();
-			Trace trace = currentTrace.get();
-			if (to) {
-				State currentState = trace.getCurrentState();
-				Transition transition = (Transition) trace.getNextTransitions().toArray()[0];
-				if(!currentState.getId().equals(transition.getDestination().getId())) {
+			if (to != null) { // with the above BooleanBinding, we can get an index out of bound exception
+				State currentState = to.getCurrentState();
+				Transition transition = (Transition) to.getNextTransitions().toArray()[0];
+				if (!currentState.getId().equals(transition.getDestination().getId())) {
 					forwardGraphic.getStyleClass().add("icon-green");
 					fastForwardGraphic.getStyleClass().add("icon-green");
 				} else {
