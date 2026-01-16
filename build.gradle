@@ -5,7 +5,7 @@ plugins {
 	id "java"
 	id "application"
 
-	id "com.gradleup.shadow" version "8.3.6"
+	id "com.gradleup.shadow" version "8.3.9"
 	id "com.google.osdetector" version "1.7.3"
 	id "org.openjfx.javafxplugin" version "0.1.0"
 }
@@ -125,13 +125,13 @@ dependencies {
 	implementation("ch.qos.logback:logback-classic:1.3.15")
 	implementation("com.google.guava:guava:33.5.0-jre")
 	implementation("io.github.java-diff-utils:java-diff-utils:4.16")
-	implementation("commons-cli:commons-cli:1.10.0")
+	implementation("commons-cli:commons-cli:1.11.0")
 	implementation(platform("de.hhu.stups:prob-java-bom:4.15.1"))
 	implementation("de.hhu.stups:de.prob2.kernel")
 	implementation("de.hhu.stups:voparser:0.3.0")
 	implementation("de.hhu.stups:xml2b:1.1.0")
 	implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
-	implementation("org.controlsfx:controlsfx:11.2.2")
+	implementation("org.controlsfx:controlsfx:11.2.3")
 	implementation("org.fxmisc.richtext:richtextfx:0.11.4")
 	implementation("se.sawano.java:alphanumeric-comparator:2.0.0")
 	implementation("org.apache.commons:commons-csv:1.14.1")
@@ -140,8 +140,8 @@ dependencies {
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava")
 
 	// for plugins
-	implementation("org.pf4j:pf4j:3.13.0")
-	annotationProcessor("org.pf4j:pf4j:3.13.0")
+	implementation("org.pf4j:pf4j:3.14.1")
+	annotationProcessor("org.pf4j:pf4j:3.14.1")
 
 	// nsmenufx indirectly requires the jna:5.9.0:jpms dependency
 	// appdirs 1.2.2+ indirectly requires jna:5.13+, but the jpms classifier does not exist for jna 5.13+
@@ -154,10 +154,10 @@ dependencies {
 	}
 	implementation("net.java.dev.jna:jna-platform:5.18.1")
 
-	testImplementation(platform("org.junit:junit-bom:5.14.1"))
+	testImplementation(platform("org.junit:junit-bom:5.14.2"))
 	testImplementation("org.junit.jupiter:junit-jupiter")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	testImplementation("org.mockito:mockito-core:5.20.0")
+	testImplementation("org.mockito:mockito-core:5.21.0")
 
 	testImplementation("org.assertj:assertj-core:3.27.6")
 }
