@@ -4,10 +4,15 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.3.1 (not released yet)
 
+* Updated the ProB core to version 1.15.1 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
+* Added LTSmin model checking
+* Added option to model check TLA+ specifications with TLC natively, without an intermediate translation to B
+* Added option for automatic deterministic animation, in addition to random animation
 * Added transition information stored in state space to operation details stage (e.g. details about the execution of operations with STORE_DETAILED_TRANSITION_INFOS preference)
 * Added menu for data import of XML files with XML2B and JSON/CSV with ProB's libraries
 * Added transition descriptions for right click options in state visualisation view
 * Added export of current state as classical B machine
+* Added column in VO manager validation task table showing which requirements are validated by a particular task
 * Improved search in editor (now integrated into the editor view)
 * Improved RulesView (display messages for UNCHECKED rules)
 * Improved XTL Prolog mode 
@@ -15,6 +20,20 @@ Downloads of the current release and snapshot development builds can be found on
   * Enabled JSON trace replay, also with interactive trace replay
   * Enabled simulation with SimB (basic functionality, without caching)
   * Improved support for visualisation with VisB (using B definitions)
+* Improved SimB
+  * Added support for XTL Prolog models
+  * Added support for real numbers in after expressions
+  * Added scheduling history view
+  * Added button for opening the current SimB JSON configuration file in an external editor
+  * Added reload button
+  * Improved SimB configuration editor and tooltips
+  * Fixed various small bugs
+* Improved feedback for apparent deadlock states where some operations might not have been explored
+* Fixed inconsistent spelling of application name - the correct spelling is "ProB2-UI"
+
+**Note:** The multi-platfom jar download will be removed in a future release, because this build type has been long unsupported by JavaFX and doesn't work properly on some systems, notably on macOS with an arm64 (Apple Silicon) processor. Please use the platform-specific binaries instead, which are available for most OSes and architectures supported by ProB. On systems that cannot use these binaries, future versions of ProB2-UI can only be built from source.
+
+**Note:** Support for plugins and custom Java-based visualizations will be removed in a future release. All known existing ProB2-UI plugins have already been incompatible with recent ProB2-UI versions, because of the lack of a stable plugin API. Users who need advanced customization of ProB2-UI are encouraged to fork the ProB2-UI source code instead - this offers better stability than developing a plugin. ProB2-UI's built-in VisB and SimB features can also be used to implement moderately complex visualizations and automatic animation without needing to modify/extend the ProB2-UI code.
 
 ## Version 1.3.0 (2025-07-30)
 
