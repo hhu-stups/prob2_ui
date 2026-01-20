@@ -126,7 +126,7 @@ dependencies {
 	implementation("com.google.guava:guava:33.5.0-jre")
 	implementation("io.github.java-diff-utils:java-diff-utils:4.16")
 	implementation("commons-cli:commons-cli:1.11.0")
-	implementation(platform("de.hhu.stups:prob-java-bom:4.15.1"))
+	implementation(platform("de.hhu.stups:prob-java-bom:4.15.2-SNAPSHOT"))
 	implementation("de.hhu.stups:de.prob2.kernel")
 	implementation("de.hhu.stups:voparser:0.3.0")
 	implementation("de.hhu.stups:xml2b:1.1.0")
