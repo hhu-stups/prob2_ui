@@ -2,6 +2,7 @@ package de.prob2.ui.operations;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
@@ -437,7 +438,7 @@ public final class OperationsView extends BorderPane {
 
 		var withTimeout = trace.getCurrentState().getTransitionsWithTimeout();
 		var withMaxOperations = trace.getCurrentState().getCandidateOperations();
-		showDisabledAndWithTimeout(loadedMachine, disabled, withTimeout, withMaxOperations.stream().map(GetCandidateOperationsCommand.Candidate::getOperation).collect(Collectors.toSet()));
+		showDisabledAndWithTimeout(loadedMachine, disabled, withTimeout, new HashSet<>(withMaxOperations));
 
 		doSort(loadedMachine);
 
@@ -464,11 +465,13 @@ public final class OperationsView extends BorderPane {
 		Platform.runLater(() -> opsListView.getItems().setAll(filtered));
 	}
 
-	private void showDisabledAndWithTimeout(LoadedMachine loadedMachine, Set<String> notEnabled, Set<String> withTimeout, Set<String> withMaxOperations) {
+	private void showDisabledAndWithTimeout(LoadedMachine loadedMachine, Set<String> notEnabled, Set<String> withTimeout,
+	                                        Set<GetCandidateOperationsCommand.Candidate> withMaxOperations) {
+		Set<String> candidateOpNames = withMaxOperations.stream().map(GetCandidateOperationsCommand.Candidate::getOperation).collect(Collectors.toSet());
 		if (this.getShowDisabledOps()) {
 			for (String s : notEnabled) {
 				if (!Transition.INITIALISE_MACHINE_NAME.equals(s)) {
-					if (!withTimeout.contains(s) && !withMaxOperations.contains(s)) {
+					if (!withTimeout.contains(s) && !candidateOpNames.contains(s)) {
 						OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
 						if (opInfo != null) {
 							events.add(OperationItem.forDisabled(s, OperationItem.Status.DISABLED, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
@@ -483,11 +486,12 @@ public final class OperationsView extends BorderPane {
 				events.add(OperationItem.forDisabled(s, OperationItem.Status.TIMEOUT, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
 			}
 		}
-		for (String s : withMaxOperations) {
-			if (!withTimeout.contains(s)) {
-				OperationInfo opInfo = loadedMachine.getMachineOperationInfo(s);
+		for (GetCandidateOperationsCommand.Candidate s : withMaxOperations) {
+			String opName = s.getOperation();
+			if (!withTimeout.contains(opName)) {
+				OperationInfo opInfo = loadedMachine.getMachineOperationInfo(opName);
 				if (opInfo != null) {
-					events.add(OperationItem.forDisabled(s, OperationItem.Status.MAX_OPERATIONS, opInfo.getParameterNames(), opInfo.getOutputParameterNames()));
+					events.add(OperationItem.forCandidate(opName, OperationItem.Status.MAX_OPERATIONS, opInfo.getParameterNames(), s.getParameterValues(), opInfo.getOutputParameterNames()));
 				}
 			}
 		}

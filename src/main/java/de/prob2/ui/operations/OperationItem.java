@@ -235,6 +235,13 @@ public class OperationItem {
 				Collections.emptySet(), Collections.emptySet());
 	}
 
+	public static OperationItem forCandidate(final String name, final Status status, final List<String> parameters, final List<String> parameterValues,
+	                                         final List<String> returnParameters) {
+		return new OperationItem(null, name, status, parameters, parameterValues,
+				returnParameters, Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap(),
+				Collections.emptySet(), Collections.emptySet());
+	}
+
 	private static Stream<OperationItem> computeUnambiguousConstantsAndVariablesInternal(final Collection<OperationItem> items) {
 		assert !items.isEmpty();
 		final OperationItem first = items.iterator().next();
