@@ -45,6 +45,14 @@ Downloads of the current release and snapshot development builds can be found on
 * [macOS x86_64 (Intel) application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.3.1/ProB2-UI-x86_64-1.3.1.dmg)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.3.1/prob2-ui_1.3.1_amd64.deb)
 
+Supported operating systems:
+
+* Windows 10 or later on x86\_64
+* macOS 11 or later on x86\_64 or arm64
+* Linux with glibc 2.17 or later on x86\_64
+
+The multi-platform jar requires Java 21 or later.
+
 ## Version 1.3.0 (2025-07-30)
 
 * Updated the ProB core to version 1.15.0 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
@@ -149,6 +157,14 @@ Downloads of the current release and snapshot development builds can be found on
 * [macOS arm64 (Apple Silicon) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/ProB%202%20UI-aarch64-1.3.0.dmg)
 * [macOS x86_64 (Intel) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/ProB%202%20UI-x86_64-1.3.0.dmg)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/prob2-ui_1.3.0_amd64.deb)
+
+Supported operating systems:
+
+* Windows 10 or later on x86\_64
+* macOS 11 or later on x86\_64 or arm64
+* Linux with glibc 2.17 or later on x86\_64
+
+The multi-platform jar requires Java 21 or later.
 
 ## Version 1.2.1 (2023-08-15)
 
