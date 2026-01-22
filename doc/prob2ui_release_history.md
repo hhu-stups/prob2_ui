@@ -146,8 +146,8 @@ Downloads of the current release and snapshot development builds can be found on
 
 * [Standalone jar file (all platforms)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/prob2-ui-1.3.0-multi.jar)
 * [Windows installer (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/ProB%202%20UI-1.3.0.exe)
-* [macOS arm64 (Apple Silicon) application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/ProB%202%20UI-aarch64-1.3.0.dmg)
-* [macOS x86_64 (Intel) application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/ProB%202%20UI-x86_64-1.3.0.dmg)
+* [macOS arm64 (Apple Silicon) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/ProB%202%20UI-aarch64-1.3.0.dmg)
+* [macOS x86_64 (Intel) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/ProB%202%20UI-x86_64-1.3.0.dmg)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.3.0/prob2-ui_1.3.0_amd64.deb)
 
 ## Version 1.2.1 (2023-08-15)
@@ -218,7 +218,7 @@ Downloads of the current release and snapshot development builds can be found on
 
 * [Standalone jar file (all platforms)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/prob2-ui-1.2.0-multi.jar)
 * [Windows installer (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/ProB%202%20UI-1.2.0.exe)
-* [macOS x86_64 (Intel) application (with bundled JRE, not signed/notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/ProB%202%20UI-1.2.0.dmg)
+* [macOS x86_64 (Intel) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/ProB%202%20UI-1.2.0.dmg)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.2.0/prob2-ui_1.2.0-1_amd64.deb)
 
 ## Version 1.1.0 (2021-01-26)
