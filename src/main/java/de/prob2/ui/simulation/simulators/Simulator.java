@@ -284,6 +284,9 @@ public abstract class Simulator {
 		List<String> activationConfiguration = activationConfig.getActivating();
 
 		List<Activation> activationForOperation = configurationToActivation.get(id);
+		if(activationForOperation == null) {
+			return trace;
+		}
 		List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
 
 		Trace newTrace = trace;
