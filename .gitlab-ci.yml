@@ -16,7 +16,6 @@ stages:
     expire_in: 1 week
     paths:
       - build/distributions
-      - build/libs
 
 .test-linux:
   extends: .test-common
