@@ -1,12 +1,13 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.nio.file.Files
+import org.gradle.nativeplatform.OperatingSystemFamily
+import org.openjfx.gradle.JavaFXPlatform
 
 plugins {
 	id "java"
 	id "application"
 
 	id "com.gradleup.shadow" version "8.3.9"
-	id "com.google.osdetector" version "1.7.3"
 	id "org.openjfx.javafxplugin" version "0.1.0"
 }
 
@@ -227,27 +228,25 @@ jar {
 }
 
 final probBinariesByOs = [
-	"windows": "windows64",
-	"osx": "macos",
-	"linux": "linux64",
+	(OperatingSystemFamily.WINDOWS): "windows64",
+	(OperatingSystemFamily.MACOS): "macos",
+	(OperatingSystemFamily.LINUX): "linux64",
 ].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
 
 shadowJar {
-	// Set the classifier depending on the current OS to make it clear that this jar is platform-specific.
-	// This code converts the OS names to the format used by the OpenJFX Maven artifacts (this isn't necessary, but it's more consistent this way).
-	if (osdetector.os == "osx") {
-		// Include architecture for Mac builds to distinguish x86_64 and aarch64.
+	// Set the classifier depending on the current platform to make it clear that this jar is platform-specific.
+	if (javafx.platform == JavaFXPlatform.OSX) { // This is x86_64 macOS specifically! aarch64 macOS would be JavaFXPlatform.OSX_AARCH64.
+		// The JavaFX classifier for x86_64 Mac builds is simply "mac".
+		// Change it to "mac-x86_64" to be explicit and for consistency with "mac-aarch64".
 		archiveClassifier = "mac-" + osArch
-	} else if (osdetector.os == "windows") {
-		archiveClassifier = "win"
 	} else {
-		archiveClassifier = osdetector.os
+		archiveClassifier = javafx.platform.classifier
 	}
 
 	// Exclude all probcli zips that are not for the current platform.
 	// It's safer to do this with an exclude rule that lists all resources that we know we don't want.
 	// This way nothing will break if ProB 2 adds new resources that shouldn't be excluded.
-	exclude(probBinariesByOs.findAll {k, v -> k != osdetector.os}.values())
+	exclude(probBinariesByOs.findAll {k, v -> k != javafx.platform.osFamily}.values())
 }
 
 if (project.hasProperty("probHome")) {
@@ -289,7 +288,7 @@ task jpackage(type: Exec) {
 		"--license-file", "LICENSE",
 	]
 
-	if (osdetector.os == "windows") {
+	if (javafx.platform.osFamily == OperatingSystemFamily.WINDOWS) {
 		args += [
 			"--icon", new File(jpackageIconsDir, "prob2-ui.ico"),
 			"--win-dir-chooser",
@@ -307,7 +306,7 @@ task jpackage(type: Exec) {
 			// and add an alternative console launcher that can be used to see stdout/stderr output.
 			"--add-launcher", "${applicationName} (with console)=" + new File(jpackageLaunchersDir, "windows_console.properties"),
 		]
-	} else if (osdetector.os == "osx") {
+	} else if (javafx.platform.osFamily == OperatingSystemFamily.MACOS) {
 		args += [
 			//"--mac-sign", "--mac-signing-key-user-name", "Michael Leuschel (794LFG5T52)",
 			//"--mac-package-signing-prefix", "de.prob2.ui",
@@ -322,7 +321,7 @@ task jpackage(type: Exec) {
 			final renamedPath = originalPath.resolveSibling("${applicationName}-${osArch}-${applicationVersion}.dmg")
 			Files.move(originalPath, renamedPath)
 		}
-	} else if (osdetector.os == "linux") {
+	} else if (javafx.platform.osFamily == OperatingSystemFamily.LINUX) {
 		args += [
 			"--icon", new File(jpackageIconsDir, "prob2-ui.png"),
 			// This corresponds to the Categories key in the generated .desktop file.
@@ -332,6 +331,6 @@ task jpackage(type: Exec) {
 			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
 		]
 	} else {
-		throw new GradleException("Unsupported OS: ${osdetector.os} (expected windows, osx, or linux)")
+		throw new GradleException("Unsupported OS: ${javafx.platform.osFamily} (expected WINDOWS, MACOS, or LINUX)")
 	}
 }
