@@ -5,6 +5,7 @@ Downloads of the current release and snapshot development builds can be found on
 ## Version 1.4.0 (not released yet)
 
 * Updated the ProB core to version 1.16.0 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
+* Removed the multi-platform shadow jar build due to being not properly supported by JavaFX and incompatible with multiple processor architectures. Please use the platform-specific binaries instead, which are available for most OSes and architectures supported by ProB. On systems that cannot use these binaries, ProB2-UI must now be built from source.
 
 ## Version 1.3.1 (2026-01-22)
 

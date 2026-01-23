@@ -38,7 +38,7 @@ test:jdk-21-linux:
     # build-essential and fakeroot are needed for jpackage.
     - apt-get install --assume-yes build-essential fakeroot
   script:
-    - ./gradlew ${GRADLE_OPTIONS} check multiPlatformShadowJar jpackage
+    - ./gradlew ${GRADLE_OPTIONS} check jpackage
 
 test:jdk-21-macos-x86_64:
   extends: .test-common
@@ -71,7 +71,7 @@ deploy:snapshot:
   before_script:
     - apk update
     - apk add lftp openssh-client
-  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/snapshot/; mput -e build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe build/libs/*-multi.jar"
+  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/snapshot/; mput -e build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe"
 
 deploy:release:
   stage: deploy
@@ -81,4 +81,4 @@ deploy:release:
   before_script:
     - apk update
     - apk add lftp openssh-client
-  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/; mkdir release-next; cd release-next; mput build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe build/libs/*-multi.jar"
+  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/; mkdir release-next; cd release-next; mput build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe"

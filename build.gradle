@@ -79,43 +79,6 @@ tasks.withType(JavaCompile) {
 	options.release = Integer.parseInt(java.sourceCompatibility.toString())
 }
 
-configurations {
-	// These configurations are used by the multi-platform jar build.
-	// Each OS needs its own configuration - otherwise Gradle complains about conflicts between different OS versions of the same dependency.
-
-	javafxWin {
-		attributes {
-			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
-			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.WINDOWS))
-			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
-		}
-	}
-
-	javafxMac {
-		attributes {
-			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
-			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.MACOS))
-			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
-		}
-	}
-
-	javafxMacArm {
-		attributes {
-			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
-			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.MACOS))
-			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.ARM64))
-		}
-	}
-
-	javafxLinux {
-		attributes {
-			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
-			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.LINUX))
-			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
-		}
-	}
-}
-
 configurations.all {
 	resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
 	resolutionStrategy.cacheDynamicVersionsFor(0, 'seconds')
@@ -178,7 +141,6 @@ final javafxModules = [
 javafx {
 	version = javafxVersion
 	modules = javafxModules
-	configurations += ["javafxWin", "javafxMac", "javafxMacArm", "javafxLinux"]
 }
 
 final generatedResourcesDir = layout.buildDirectory.dir("generated-src/main/resources").get().asFile
@@ -292,26 +254,6 @@ shadowJar {
 	exclude(probBinariesByOs.findAll {k, v -> k != osdetector.os}.values())
 }
 
-task multiPlatformShadowJar(type: ShadowJar) {
-	manifest {
-		inheritFrom(jar.manifest)
-		attributes([
-			"Main-Class": application.mainClass.get(),
-			"Multi-Release": "true",
-		])
-	}
-
-	archiveClassifier = "multi"
-	from(sourceSets.main.output)
-	configurations = [
-		project.configurations.runtimeClasspath,
-		project.configurations.javafxWin,
-		project.configurations.javafxMac,
-		project.configurations.javafxMacArm,
-		project.configurations.javafxLinux,
-	]
-}
-
 if (project.hasProperty("probHome")) {
 	allprojects {
 		tasks.withType(JavaForkOptions) {
@@ -323,7 +265,6 @@ if (project.hasProperty("probHome")) {
 // Assumes that the correct version of jpackage is on the PATH.
 // This task does not respect JAVA_HOME or other non-default JDK locations!
 task jpackage(type: Exec) {
-	// Use single-platform shadowJar
 	dependsOn 'shadowJar'
 
 	// Show jpackage --verbose output only if running Gradle with --info (or higher)
