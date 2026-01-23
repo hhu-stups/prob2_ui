@@ -4,6 +4,8 @@ Downloads of the current release and snapshot development builds can be found on
 
 ## Version 1.4.0 (not released yet)
 
+* Updated the ProB core to version 1.16.0 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
+
 ## Version 1.3.1 (2026-01-22)
 
 * Updated the ProB core to version 1.15.1 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
