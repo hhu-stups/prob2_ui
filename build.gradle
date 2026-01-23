@@ -126,20 +126,17 @@ dependencies {
 }
 
 final osArch = System.getProperty("os.arch")
-final javafxVersion = "23.0.2"
-
-final javafxModules = [
-	"javafx.base",
-	"javafx.controls",
-	"javafx.fxml",
-	"javafx.graphics",
-	"javafx.swing",
-	"javafx.web",
-]
 
 javafx {
-	version = javafxVersion
-	modules = javafxModules
+	version = "23.0.2"
+	modules = [
+		"javafx.base",
+		"javafx.controls",
+		"javafx.fxml",
+		"javafx.graphics",
+		"javafx.swing",
+		"javafx.web",
+	]
 }
 
 final generatedResourcesDir = layout.buildDirectory.dir("generated-src/main/resources").get().asFile
