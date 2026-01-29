@@ -126,7 +126,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 				if(from != null && !from.equals(to)) {
 					savedProperty.set(false);
 				}
-				item.setExecute(from);
+				if(to != null) {
+					item.setExecute(to);
+				}
 			});
 			tfOpName.disableProperty().bind(this.runningProperty);
 			this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), tfOpName));
@@ -137,7 +139,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 				if(from != null && !from.equals(to)) {
 					savedProperty.set(false);
 				}
-				item.setExecute(from);
+				if(to != null) {
+					item.setExecute(to);
+				}
 			});
 			cbOpName.disableProperty().bind(this.runningProperty);
 			cbOpName.getSelectionModel().select(item.getExecute());
