@@ -167,6 +167,7 @@
 									</HBox>
 									<HelpButton fx:id="helpButton" HBox.hgrow="NEVER"/>
 								</HBox>
+								<Label fx:id="lbUnsavedWarning" styleClass="warning" text="%simulation.save.unsaved" visible="false"/>
 								<ListView fx:id="simulationDiagramItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
 							</VBox>
 							<TitledPane id="schedulingTable" fx:id="schedulingTablePane" text="%simulation.schedulingTable.title" expanded="false" animated="false">

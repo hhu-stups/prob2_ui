@@ -349,6 +349,9 @@ public final class SimulatorStage extends Stage {
 	@FXML
 	private TableColumn<SchedulingTableItem, SchedulingTableItem> activationInformationColumn;
 
+	@FXML
+	private Label lbUnsavedWarning;
+
 	private final SimpleListProperty<String> operationsProperty;
 
 
@@ -499,6 +502,7 @@ public final class SimulatorStage extends Stage {
 			operations.add("skip");
 			operationsProperty.clear();
 			operationsProperty.setAll(operations);
+			savedProperty.set(true);
 		});
 		cbSimulation.disableProperty().bind(currentTrace.isNull().or(realTimeSimulator.runningProperty()).or(currentProject.currentMachineProperty().isNull()));
 
@@ -544,6 +548,7 @@ public final class SimulatorStage extends Stage {
 			simulationDiagramItems.getItems().clear();
 			simulationItems.itemsProperty().unbind();
 			loadSimulationsFromMachine(from, to);
+			savedProperty.set(true);
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
@@ -576,7 +581,7 @@ public final class SimulatorStage extends Stage {
 				cbSimulation.getSelectionModel().selectedItemProperty(), configurationPath));
 
 		btRemoveDiagramElement.disableProperty().bind(simulationDiagramItems.getSelectionModel().selectedItemProperty().isNull());
-
+		lbUnsavedWarning.visibleProperty().bind(savedProperty.not());
 		setOnCloseRequest(e -> {
 			if (realTimeSimulator.isRunning())
 				stopSimulator(realTimeSimulator);
@@ -712,6 +717,7 @@ public final class SimulatorStage extends Stage {
 
 		simulationDiagramItems.getItems().clear();
 		simulationDiagramItems.setItems(observableList);
+		savedProperty.set(true);
 	}
 
 	@FXML
@@ -1039,6 +1045,7 @@ public final class SimulatorStage extends Stage {
 		uiInteractionHandler.reset();
 		this.loadSimulationIntoSimulator(simulationModel);
 		uiInteractionHandler.loadUIListenersIntoSimulator(realTimeSimulator);
+		savedProperty.set(true);
 	}
 
 	public int getTime() {
