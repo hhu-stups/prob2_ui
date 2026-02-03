@@ -8,6 +8,7 @@ plugins {
 	id "com.gradleup.shadow" version "8.3.9"
 	id "com.google.osdetector" version "1.7.3"
 	id "org.openjfx.javafxplugin" version "0.1.0"
+	//id("org.beryx.jlink") version "3.2.1"
 }
 
 project.group = "de.hhu.stups"
@@ -372,8 +373,8 @@ task jpackage(type: Exec) {
 		]
 	} else if (osdetector.os == "osx") {
 		args += [
-			//"--mac-sign", "--mac-signing-key-user-name", "Michael Leuschel (794LFG5T52)",
-			//"--mac-package-signing-prefix", "de.prob2.ui",
+			"--mac-sign", "--mac-signing-key-user-name", "Michael Leuschel (794LFG5T52)",
+			"--mac-package-identifier", "de.prob2.ui",
 			"--icon", new File(jpackageIconsDir, "prob2-ui.icns")
 		]
 
