@@ -27,6 +27,9 @@
 <?import javafx.scene.Scene?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TitledPane?>
+
+<?import javafx.scene.layout.AnchorPane?>
+
 <fx:root title="Simulator" type="SimulatorStage" width="1200" height="500" minHeight="500" minWidth="1200" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize" />
@@ -170,6 +173,30 @@
 								<Label fx:id="lbUnsavedWarning" styleClass="warning" text="%simulation.save.unsaved" visible="false"/>
 								<ListView fx:id="simulationDiagramItems" styleClass="list-view" VBox.vgrow="ALWAYS"/>
 							</VBox>
+							<TitledPane id="schedulingFutureTable" fx:id="schedulingFutureTablePane" text="%simulation.schedulingFutureTable.title" expanded="false" animated="false">
+								<VBox spacing="5.0" style="-fx-padding: 0;">
+									<HBox spacing="5.0">
+										<Label text="%simulation.schedulingTable.timestamp"/>
+										<ChoiceBox fx:id="cbTimestampsForLogging"/>
+									</HBox>
+
+									<TableView fx:id="schedulingFutureItems" style="-fx-background-insets: 0; -fx-padding: 0" styleClass="border">
+										<columnResizePolicy>
+											<TableView fx:constant="CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN"/>
+										</columnResizePolicy>
+										<columns>
+											<TableColumn fx:id="futureActivationTimeColumn" style="-fx-alignment: CENTER;"
+														 minWidth="${fontSize.fontSize * 10}"
+														 maxWidth="${fontSize.fontSize * 10}" text="%simulation.schedulingTable.table.time"/>
+											<TableColumn fx:id="futureActivationInformationColumn" minWidth="80.0"
+														 text="%simulation.schedulingTable.table.activation"/>
+										</columns>
+										<placeholder>
+											<Label text="%simulation.schedulingTable.table.noActivation"/>
+										</placeholder>
+									</TableView>
+								</VBox>
+							</TitledPane>
 							<TitledPane id="schedulingTable" fx:id="schedulingTablePane" text="%simulation.schedulingTable.title" expanded="false" animated="false">
 								<TableView fx:id="schedulingItems">
 									<columnResizePolicy>
