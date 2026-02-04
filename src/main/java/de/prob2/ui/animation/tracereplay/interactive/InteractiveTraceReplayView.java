@@ -52,6 +52,10 @@ public class InteractiveTraceReplayView extends TitledPane {
 	@FXML
 	private Label warningNotFinished;
 	@FXML
+	private CheckBox checkBoxPrecision;
+	@FXML
+	private ChoiceBox<TransitionReplayPrecision> cbPrecision;
+	@FXML
 	private Button btnRestart, btnUndoStep, btnCurrentStep, btnFastForward, btnSkip, btnSave, btnFinish;
 	@FXML
 	private ReplayedTraceTable traceTable;
@@ -117,6 +121,18 @@ public class InteractiveTraceReplayView extends TitledPane {
 	@FXML
 	public void initialize() {
 		fileLocationTooltip.textProperty().bind(fileLocationField.textProperty());
+		checkBoxPrecision.selectedProperty().addListener((o, ov, nv) -> {
+			ireplay.setPrecision(nv ? cbPrecision.getValue() : TransitionReplayPrecision.KEEP_NAME); // if not selected: back to default
+			updateGUIAfterExecution();
+		});
+		cbPrecision.disableProperty().bind(checkBoxPrecision.selectedProperty().not());
+		cbPrecision.getItems().addAll(Set.of(TransitionReplayPrecision.PRECISE, TransitionReplayPrecision.PARAMETERS_AND_RESULTS, TransitionReplayPrecision.KEEP_NAME));
+		cbPrecision.getSelectionModel().select(TransitionReplayPrecision.KEEP_NAME);
+		cbPrecision.setConverter(i18n.translateConverter(enumNameAdapter("animation.tracereplay.replayedStatus.transitionReplayPrecision")));
+		cbPrecision.getSelectionModel().selectedItemProperty().addListener((o, ov, nv) -> {
+			ireplay.setPrecision(nv);
+			updateGUIAfterExecution();
+		});
 
 		traceTable.setMinHeight(150);
 		errorTable.setMinHeight(100);

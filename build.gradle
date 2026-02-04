@@ -1,17 +1,18 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import java.nio.file.Files
+import org.gradle.nativeplatform.OperatingSystemFamily
+import org.openjfx.gradle.JavaFXPlatform
 
 plugins {
 	id "java"
 	id "application"
 
-	id "com.gradleup.shadow" version "8.3.6"
-	id "com.google.osdetector" version "1.7.3"
+	id "com.gradleup.shadow" version "8.3.9"
 	id "org.openjfx.javafxplugin" version "0.1.0"
 }
 
 project.group = "de.hhu.stups"
-project.version = "1.3.1-SNAPSHOT"
+project.version = "1.4.0-SNAPSHOT"
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 if (project != rootProject) {
@@ -79,43 +80,6 @@ tasks.withType(JavaCompile) {
 	options.release = Integer.parseInt(java.sourceCompatibility.toString())
 }
 
-configurations {
-	// These configurations are used by the multi-platform jar build.
-	// Each OS needs its own configuration - otherwise Gradle complains about conflicts between different OS versions of the same dependency.
-
-	javafxWin {
-		attributes {
-			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
-			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.WINDOWS))
-			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
-		}
-	}
-
-	javafxMac {
-		attributes {
-			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
-			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.MACOS))
-			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
-		}
-	}
-
-	javafxMacArm {
-		attributes {
-			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
-			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.MACOS))
-			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.ARM64))
-		}
-	}
-
-	javafxLinux {
-		attributes {
-			attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage, Usage.JAVA_RUNTIME))
-			attribute(OperatingSystemFamily.OPERATING_SYSTEM_ATTRIBUTE, objects.named(OperatingSystemFamily, OperatingSystemFamily.LINUX))
-			attribute(MachineArchitecture.ARCHITECTURE_ATTRIBUTE, objects.named(MachineArchitecture, MachineArchitecture.X86_64))
-		}
-	}
-}
-
 configurations.all {
 	resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
 	resolutionStrategy.cacheDynamicVersionsFor(0, 'seconds')
@@ -125,14 +89,14 @@ dependencies {
 	implementation("ch.qos.logback:logback-classic:1.3.15")
 	implementation("com.google.guava:guava:33.5.0-jre")
 	implementation("io.github.java-diff-utils:java-diff-utils:4.16")
-	implementation("commons-cli:commons-cli:1.10.0")
-	implementation(platform("de.hhu.stups:prob-java-bom:4.15.1-SNAPSHOT"))
+	implementation("commons-cli:commons-cli:1.11.0")
+	implementation(platform("de.hhu.stups:prob-java-bom:4.15.2-SNAPSHOT"))
 	implementation("de.hhu.stups:de.prob2.kernel")
 	implementation("de.hhu.stups:voparser:0.3.0")
-	implementation("de.hhu.stups:xml2b:1.0.1-SNAPSHOT")
+	implementation("de.hhu.stups:xml2b:1.1.0")
 	implementation("de.hhu.stups:railml2b:1.0.0-SNAPSHOT")
 	implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
-	implementation("org.controlsfx:controlsfx:11.2.2")
+	implementation("org.controlsfx:controlsfx:11.2.3")
 	implementation("org.fxmisc.richtext:richtextfx:0.11.4")
 	implementation("se.sawano.java:alphanumeric-comparator:2.0.0")
 	implementation("org.apache.commons:commons-csv:1.14.1")
@@ -141,8 +105,8 @@ dependencies {
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-guava")
 
 	// for plugins
-	implementation("org.pf4j:pf4j:3.13.0")
-	annotationProcessor("org.pf4j:pf4j:3.13.0")
+	implementation("org.pf4j:pf4j:3.14.1")
+	annotationProcessor("org.pf4j:pf4j:3.14.1")
 
 	// nsmenufx indirectly requires the jna:5.9.0:jpms dependency
 	// appdirs 1.2.2+ indirectly requires jna:5.13+, but the jpms classifier does not exist for jna 5.13+
@@ -155,31 +119,26 @@ dependencies {
 	}
 	implementation("net.java.dev.jna:jna-platform:5.18.1")
 
-	testImplementation(platform("org.junit:junit-bom:5.14.1"))
+	testImplementation(platform("org.junit:junit-bom:5.14.2"))
 	testImplementation("org.junit.jupiter:junit-jupiter")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-	testImplementation("org.mockito:mockito-core:5.20.0")
+	testImplementation("org.mockito:mockito-core:5.21.0")
 
 	testImplementation("org.assertj:assertj-core:3.27.6")
 }
 
 final osArch = System.getProperty("os.arch")
-final javafxVersion = "23.0.2"
-
-final javafxModules = [
-	"javafx.base",
-	"javafx.controls",
-	"javafx.fxml",
-	"javafx.graphics",
-	"javafx.media",
-	"javafx.swing",
-	"javafx.web",
-]
 
 javafx {
-	version = javafxVersion
-	modules = javafxModules
-	configurations += ["javafxWin", "javafxMac", "javafxMacArm", "javafxLinux"]
+	version = "23.0.2"
+	modules = [
+		"javafx.base",
+		"javafx.controls",
+		"javafx.fxml",
+		"javafx.graphics",
+		"javafx.swing",
+		"javafx.web",
+	]
 }
 
 final generatedResourcesDir = layout.buildDirectory.dir("generated-src/main/resources").get().asFile
@@ -270,47 +229,25 @@ jar {
 }
 
 final probBinariesByOs = [
-	"windows": "windows64",
-	"osx": "macos",
-	"linux": "linux64",
+	(OperatingSystemFamily.WINDOWS): "windows64",
+	(OperatingSystemFamily.MACOS): "macos",
+	(OperatingSystemFamily.LINUX): "linux64",
 ].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
 
 shadowJar {
-	// Set the classifier depending on the current OS to make it clear that this jar is platform-specific.
-	// This code converts the OS names to the format used by the OpenJFX Maven artifacts (this isn't necessary, but it's more consistent this way).
-	if (osdetector.os == "osx") {
-		// Include architecture for Mac builds to distinguish x86_64 and aarch64.
+	// Set the classifier depending on the current platform to make it clear that this jar is platform-specific.
+	if (javafx.platform == JavaFXPlatform.OSX) { // This is x86_64 macOS specifically! aarch64 macOS would be JavaFXPlatform.OSX_AARCH64.
+		// The JavaFX classifier for x86_64 Mac builds is simply "mac".
+		// Change it to "mac-x86_64" to be explicit and for consistency with "mac-aarch64".
 		archiveClassifier = "mac-" + osArch
-	} else if (osdetector.os == "windows") {
-		archiveClassifier = "win"
 	} else {
-		archiveClassifier = osdetector.os
+		archiveClassifier = javafx.platform.classifier
 	}
 
 	// Exclude all probcli zips that are not for the current platform.
 	// It's safer to do this with an exclude rule that lists all resources that we know we don't want.
 	// This way nothing will break if ProB 2 adds new resources that shouldn't be excluded.
-	exclude(probBinariesByOs.findAll {k, v -> k != osdetector.os}.values())
-}
-
-task multiPlatformShadowJar(type: ShadowJar) {
-	manifest {
-		inheritFrom(jar.manifest)
-		attributes([
-			"Main-Class": application.mainClass.get(),
-			"Multi-Release": "true",
-		])
-	}
-
-	archiveClassifier = "multi"
-	from(sourceSets.main.output)
-	configurations = [
-		project.configurations.runtimeClasspath,
-		project.configurations.javafxWin,
-		project.configurations.javafxMac,
-		project.configurations.javafxMacArm,
-		project.configurations.javafxLinux,
-	]
+	exclude(probBinariesByOs.findAll {k, v -> k != javafx.platform.osFamily}.values())
 }
 
 if (project.hasProperty("probHome")) {
@@ -324,7 +261,6 @@ if (project.hasProperty("probHome")) {
 // Assumes that the correct version of jpackage is on the PATH.
 // This task does not respect JAVA_HOME or other non-default JDK locations!
 task jpackage(type: Exec) {
-	// Use single-platform shadowJar
 	dependsOn 'shadowJar'
 
 	// Show jpackage --verbose output only if running Gradle with --info (or higher)
@@ -353,7 +289,7 @@ task jpackage(type: Exec) {
 		"--license-file", "LICENSE",
 	]
 
-	if (osdetector.os == "windows") {
+	if (javafx.platform.osFamily == OperatingSystemFamily.WINDOWS) {
 		args += [
 			"--icon", new File(jpackageIconsDir, "prob2-ui.ico"),
 			"--win-dir-chooser",
@@ -371,10 +307,10 @@ task jpackage(type: Exec) {
 			// and add an alternative console launcher that can be used to see stdout/stderr output.
 			"--add-launcher", "${applicationName} (with console)=" + new File(jpackageLaunchersDir, "windows_console.properties"),
 		]
-	} else if (osdetector.os == "osx") {
+	} else if (javafx.platform.osFamily == OperatingSystemFamily.MACOS) {
 		args += [
 			//"--mac-sign", "--mac-signing-key-user-name", "Michael Leuschel (794LFG5T52)",
-			//"--mac-package-signing-prefix", "de.prob2.ui",
+			//"--mac-package-identifier", "de.prob2.ui",
 			"--icon", new File(jpackageIconsDir, "prob2-ui.icns")
 		]
 
@@ -386,7 +322,7 @@ task jpackage(type: Exec) {
 			final renamedPath = originalPath.resolveSibling("${applicationName}-${osArch}-${applicationVersion}.dmg")
 			Files.move(originalPath, renamedPath)
 		}
-	} else if (osdetector.os == "linux") {
+	} else if (javafx.platform.osFamily == OperatingSystemFamily.LINUX) {
 		args += [
 			"--icon", new File(jpackageIconsDir, "prob2-ui.png"),
 			// This corresponds to the Categories key in the generated .desktop file.
@@ -396,6 +332,6 @@ task jpackage(type: Exec) {
 			"--linux-deb-maintainer", "Michael.Leuschel@hhu.de",
 		]
 	} else {
-		throw new GradleException("Unsupported OS: ${osdetector.os} (expected windows, osx, or linux)")
+		throw new GradleException("Unsupported OS: ${javafx.platform.osFamily} (expected WINDOWS, MACOS, or LINUX)")
 	}
 }

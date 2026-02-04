@@ -64,7 +64,7 @@ public class ExtendedCodeArea extends CodeArea implements Builder<ExtendedCodeAr
 			ErrorItem.Type.INTERNAL_ERROR, "error"
 	);
 	private static final int MAX_TEXT_LENGTH_FOR_STYLING = 100_000;
-	private static final int MAX_PAR_LENGTH_FOR_STYLING = 100_000;
+	private static final int MAX_PAR_LENGTH_FOR_STYLING = 30_000;
 
 	protected final FontSize fontSize;
 	protected final I18n i18n;

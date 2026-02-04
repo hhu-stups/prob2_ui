@@ -9,6 +9,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
@@ -18,6 +19,12 @@ import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.fxml.FXML;
+import javafx.beans.property.ListProperty;
+import javafx.collections.FXCollections;
+import javafx.beans.property.SimpleListProperty;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Singleton
 public final class RealTimeSimulator extends Simulator {
@@ -31,6 +38,10 @@ public final class RealTimeSimulator extends Simulator {
 
 	private DiagramGenerator diagramGenerator;
 
+	private final ListProperty<Integer> timestampsForLogging;
+
+	private final ListProperty<List<Activation>> activationsForLoggedTimestamps;
+
 	@Inject
 	public RealTimeSimulator(final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
 		super(currentTrace, currentProject, objectMapperProvider);
@@ -39,6 +50,8 @@ public final class RealTimeSimulator extends Simulator {
 		this.uiInteractionHandler = uiInteractionHandler;
 		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
 		this.diagramGenerator = null;
+		this.timestampsForLogging = new SimpleListProperty<>(this, "timestampsForLogging", FXCollections.observableArrayList());
+		this.activationsForLoggedTimestamps = new SimpleListProperty<>(this, "activationsForLoggedTimestamps", FXCollections.observableArrayList());
 	}
 
 	public void run() {
@@ -104,6 +117,8 @@ public final class RealTimeSimulator extends Simulator {
 	public void resetSimulator() {
 		super.resetSimulator();
 		scheduler.stop();
+		timestampsForLogging.clear();
+		activationsForLoggedTimestamps.clear();
 	}
 
 	@Override
@@ -113,6 +128,41 @@ public final class RealTimeSimulator extends Simulator {
 			return endingConditionReached && ((SimulationModelConfiguration) config).getListeners().isEmpty();
 		}
 		return endingConditionReached;
+	}
+
+	@Override
+	protected Trace executeActivatedOperations(Trace trace) {
+		Trace result = super.executeActivatedOperations(trace);
+		List<Activation> currentActivations = new ArrayList<>();
+		boolean timePassed = timestampsForLogging.isEmpty() || getTime() != timestampsForLogging.get(timestampsForLogging.size() - 1);
+		if(timePassed) {
+			timestampsForLogging.add(getTime());
+		} else {
+			currentActivations = activationsForLoggedTimestamps.get(activationsForLoggedTimestamps.size() - 1);
+		}
+		for(List<Activation> activations : configurationToActivation.values()) {
+			currentActivations.addAll(activations);
+		}
+		if(timePassed) {
+			activationsForLoggedTimestamps.add(currentActivations);
+		}
+		return result;
+	}
+
+	public List<Integer> getTimestampsForLogging() {
+		return timestampsForLogging.get();
+	}
+
+	public ListProperty<Integer> timestampsForLoggingProperty() {
+		return timestampsForLogging;
+	}
+
+	public List<List<Activation>> getActivationsForLoggedTimestamps() {
+		return activationsForLoggedTimestamps.get();
+	}
+
+	public ListProperty<List<Activation>> activationsForLoggedTimestampsProperty() {
+		return activationsForLoggedTimestamps;
 	}
 
 	@Override

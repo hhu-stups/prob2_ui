@@ -109,7 +109,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbID.getStyleClass().add("information");
 		TextField tfID = new TextField(item.getId());
 		tfID.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setId(to);
 		});
 		tfID.disableProperty().bind(this.runningProperty);
@@ -121,8 +123,12 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		if (currentTrace.getModel() instanceof XTLModel) {
 			TextField tfOpName = new TextField(item.getExecute());
 			tfOpName.textProperty().addListener((observable, from, to) -> {
-				savedProperty.set(false);
-				item.setExecute(from);
+				if(from != null && !from.equals(to)) {
+					savedProperty.set(false);
+				}
+				if(to != null) {
+					item.setExecute(to);
+				}
 			});
 			tfOpName.disableProperty().bind(this.runningProperty);
 			this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), tfOpName));
@@ -130,8 +136,12 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			ComboBox<String> cbOpName = new ComboBox<>(operationsProperty.get());
 			cbOpName.itemsProperty().bind(operationsProperty);
 			cbOpName.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-				savedProperty.set(false);
-				item.setExecute(from);
+				if(from != null && !from.equals(to)) {
+					savedProperty.set(false);
+				}
+				if(to != null) {
+					item.setExecute(to);
+				}
 			});
 			cbOpName.disableProperty().bind(this.runningProperty);
 			cbOpName.getSelectionModel().select(item.getExecute());
@@ -142,7 +152,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbTime.getStyleClass().add("information");
 		TextField tfTime = new TextField(item.getAfter());
 		tfTime.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setAfter(to.isEmpty() ? "0" : to);
 		});
 		tfTime.disableProperty().bind(this.runningProperty);
@@ -152,7 +164,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbPriority.getStyleClass().add("information");
 		TextField tfPriority = new TextField(String.valueOf(item.getPriority()));
 		tfPriority.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			try {
 				item.setPriority(Integer.parseInt(to));
 			} catch (NumberFormatException ignored) {
@@ -176,7 +190,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbActivationKind.getStyleClass().add("information");
 		ComboBox<ActivationKind> cbActivatioKind = new ComboBox<>(FXCollections.observableArrayList(MULTI, SINGLE, SINGLE_MAX, SINGLE_MIN));
 		cbActivatioKind.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			try {
 				item.setActivationKind(to);
 			} catch (IllegalArgumentException ignored) {
@@ -202,7 +218,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbAdditionalGuards.getStyleClass().add("information");
 		TextField tfAdditionalGuards = new TextField(item.getAdditionalGuards());
 		tfAdditionalGuards.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setAdditionalGuards(to.isEmpty() ? null : to);
 		});
 		tfAdditionalGuards.disableProperty().bind(this.runningProperty);
@@ -222,7 +240,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbProbabilisticVariables.getStyleClass().add("information");
 		TextField tfProbabilisticVariables = new TextField(containerToString(item.getProbabilisticVariables()));
 		tfProbabilisticVariables.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setProbabilisticVariables(parseProbabilisticVariables(to));
 		});
 		tfProbabilisticVariables.disableProperty().bind(this.runningProperty);
@@ -233,7 +253,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		ComboBox<TransitionSelection> cbTransitionSelection = new ComboBox<>(FXCollections.observableArrayList(TransitionSelection.FIRST, TransitionSelection.UNIFORM));
 		cbTransitionSelection.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			try {
 				item.setTransitionSelection(to);
 			} catch (IllegalArgumentException ignored) {
@@ -263,7 +285,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbID.getStyleClass().add("information");
 		TextField tfID = new TextField(item.getId());
 		tfID.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setId(to);
 		});
 		tfID.disableProperty().bind(this.runningProperty);
@@ -273,7 +297,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbActivation.getStyleClass().add("information");
 		TextField tfActivation = new TextField(containerToString(item.getChooseActivation()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setChooseActivation(parseMap(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
@@ -285,7 +311,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbID.getStyleClass().add("information");
 		TextField tfID = new TextField(item.getId());
 		tfID.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setId(to);
 		});
 		tfID.disableProperty().bind(this.runningProperty);
@@ -295,7 +323,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbEvent.getStyleClass().add("information");
 		TextField tfEvent = new TextField(item.getEvent());
 		tfEvent.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setEvent(to);
 		});
 		tfEvent.disableProperty().bind(this.runningProperty);
@@ -305,7 +335,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbPredicate.getStyleClass().add("information");
 		TextField tfPredicate = new TextField(item.getPredicate());
 		tfPredicate.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setPredicate(to);
 		});
 		tfPredicate.disableProperty().bind(this.runningProperty);
@@ -315,7 +347,9 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbActivation.getStyleClass().add("information");
 		TextField tfActivation = new TextField(containerToString(item.getActivating()));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
-			savedProperty.set(false);
+			if(from != null && !from.equals(to)) {
+				savedProperty.set(false);
+			}
 			item.setActivating(parseList(to));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);

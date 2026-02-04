@@ -266,7 +266,9 @@ public final class SearchPane extends AnchorPane {
 		if (this.bEditorView != null) {
 			if (!matches.isEmpty() && 0 <= currentMatch && currentMatch < matches.size()) {
 				MatchPosition match = matches.get(currentMatch);
-				this.bEditorView.getEditor().selectRange(match.start(), match.end());
+				if (match.end() <= this.bEditorView.getEditor().getLength()) { // do not attempt to highlight when triggered by switching to shorter new machine
+					this.bEditorView.getEditor().selectRange(match.start(), match.end());
+				}
 			}
 		}
 	}

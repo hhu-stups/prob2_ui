@@ -8,6 +8,8 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ButtonBar?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.TextField?>
@@ -39,6 +41,17 @@
 				  AnchorPane.topAnchor="15" AnchorPane.bottomAnchor="20" alignment="CENTER">
 				<ReplayedTraceTable fx:id="traceTable" VBox.vgrow="ALWAYS"/>
 				<ErrorTableView fx:id="errorTable"/>
+				<HBox alignment="CENTER_RIGHT">
+					<CheckBox fx:id="checkBoxPrecision" text="%animation.tracereplay.interactive.precision.checkBox.label"/>
+					<ChoiceBox fx:id="cbPrecision">
+						<HBox.margin>
+							<Insets left="10"/>
+						</HBox.margin>
+					</ChoiceBox>
+					<VBox.margin>
+						<Insets top="20"/>
+					</VBox.margin>
+				</HBox>
 				<HBox alignment="CENTER_LEFT">
 					<Label fx:id="warningNotFinished" text="%animation.tracereplay.interactive.warning.notFinished"
 						   textAlignment="CENTER" visible="false" style="-fx-text-fill: firebrick;" wrapText="true"
@@ -88,7 +101,7 @@
 						</buttons>
 					</ButtonBar>
 					<VBox.margin>
-						<Insets top="20"/>
+						<Insets top="15"/>
 					</VBox.margin>
 				</HBox>
 			</VBox>
