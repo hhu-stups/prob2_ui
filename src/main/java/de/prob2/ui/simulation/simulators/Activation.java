@@ -7,6 +7,7 @@ import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.TransitionSelection;
 
 public record Activation(
+		String id,
 		String operation,
 		int time,
 		String additionalGuards,
@@ -21,6 +22,7 @@ public record Activation(
 
 	public Activation decreaseTime(int delta) {
 		return new Activation(
+				this.id(),
 				this.operation(),
 				this.time() - delta,
 				this.additionalGuards(),

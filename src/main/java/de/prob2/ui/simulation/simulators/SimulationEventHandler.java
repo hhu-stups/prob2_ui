@@ -272,7 +272,7 @@ public class SimulationEventHandler {
 		}
 		String withPredicate = activationOperationConfiguration.getWithPredicate();
 
-		var activation = new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
+		var activation = new Activation(id, opName, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
 		switch (activationKind) {
 			case MULTI:
 				activateMultiOperations(activationsForId, activation);
