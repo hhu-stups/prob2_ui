@@ -47,7 +47,8 @@ VOLUME=/Volumes/$(APPRPOB2)/
 DMGAPPFILE=$(VOLUME)$(APPRPOB2).app
 BUILDDIR=build/distributions/
 #Name of the .app folder:
-APPFILE=$(BUILDDIR)ProB\ 2\ UI.app
+#APPFILE=$(BUILDDIR)ProB\ 2\ UI.app
+APPFILE=$(BUILDDIR)ProB2-UI.app
 AC_USERNAME = "michael.leuschel@hhu.de"
 ADC_CERTIFICATE_NAME = "Michael Leuschel (794LFG5T52)"
 
@@ -115,15 +116,18 @@ check:
 
 $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
 	@echo "Step 5: Putting APP into a zipfile for Apple's notarization (into $(ZIP_FILE))"
-	#/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
-	zip -vr $(ZIP_FILE) $(APPFILE)
+	# (ditto creates a reproducible, resource‑preserving archive)
+	/usr/bin/ditto -c -k --keepParent --sequesterRsrc "$(APPFILE)" $(ZIP_FILE)
+	#zip -vr $(ZIP_FILE) $(APPFILE)
 	
 NOTVERS = 1.3.2
 notarize-info: $(ZIP_FILE)
 	@echo "JAR_TO_SIGN =  $(JAR_TO_SIGN)"
 	@echo "PROB2APP_CONTENTS =  $(PROB2APP_CONTENTS)"
 	@echo "APPRPOB2 =  $(APPRPOB2)"
+	@echo "APPFILE =  $(APPFILE)"
 	@echo "ZIP_FILE =  $(ZIP_FILE)"
+	@echo "(PROB2APP_CONTENTS)MacOS/(APPRPOB2) = $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)"
 	@echo "Notarization request to Apple for APP is in zipfile $(ZIP_FILE)"
 notarize-app: $(ZIP_FILE)
 	@echo "Step 6: Sending Notarization request to Apple for APP (in zipfile $(ZIP_FILE))"
