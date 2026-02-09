@@ -42,12 +42,14 @@ DMGPROB2=ProB2-UI-aarch64
 APPRPOB2=ProB2-UI
 DMGFILE=build/distributions/$(DMGPROB2)-$(PROB2UI_VERSION).dmg
 ZIP_FILE=build/distributions/ProB2-UI-ForNotarization.zip
+FINAL_ZIP_FILE=build/distributions/ProB2-UI$(ARCHSUFFIX)-$(PROB2UI_VERSION)-notarized.zip
 # app file available after mounting dmg; could be done by command-line command
 VOLUME=/Volumes/$(APPRPOB2)/
 DMGAPPFILE=$(VOLUME)$(APPRPOB2).app
 BUILDDIR=build/distributions/
 #Name of the .app folder:
-APPFILE=$(BUILDDIR)ProB\ 2\ UI.app
+#APPFILE=$(BUILDDIR)ProB\ 2\ UI.app
+APPFILE=$(BUILDDIR)ProB2-UI.app
 AC_USERNAME = "michael.leuschel@hhu.de"
 ADC_CERTIFICATE_NAME = "Michael Leuschel (794LFG5T52)"
 
@@ -94,7 +96,10 @@ macos_sign: $(JAR_TO_SIGN)
 	$(CODESIGNRT2) "$(JAR_TO_SIGN)/com/sun/jna/darwin$(ARCHSUFFIX2)/libjnidispatch.jnilib"
 	make makejar
 	@echo "3c: Signing app binary $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)"
+	# The following is required
 	$(CODESIGNRT2) $(PROB2APP_CONTENTS)runtime/Contents/MacOS/libjli.dylib
+	# alternatively : remove folder https://mail.openjdk.org/pipermail/core-libs-dev/2020-February/064687.html
+	rm -rf $(PROB2APP_CONTENTS)runtime/Contents/MacOS/
 	$(CODESIGNRT2) $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
 makejar:
 	@echo "Step 3b: Repacking the JAR with signed components"
@@ -110,20 +115,25 @@ check:
 	@echo "Check signing of Java and JavaFX dylibs"
 	for file in $(libs); do codesign -vv --deep-verify $(JAR_TO_SIGN)/$$file ; done
 	codesign -vv --deep-verify $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
-	codesign -vv --deep-verify $(PROB2APP_CONTENTS)runtime/Contents/MacOS/libjli.dylib
+	#codesign -vv --deep-verify $(PROB2APP_CONTENTS)runtime/Contents/MacOS/libjli.dylib
 
 
 $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
 	@echo "Step 5: Putting APP into a zipfile for Apple's notarization (into $(ZIP_FILE))"
 	#/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
-	zip -vr $(ZIP_FILE) $(APPFILE)
+	/usr/bin/ditto -c -k --keepParent --sequesterRsrc "$(APPFILE)" $(ZIP_FILE)
+	#zip -vr $(ZIP_FILE) $(APPFILE)
 	
 NOTVERS = 1.3.1
 notarize-info: $(ZIP_FILE)
 	@echo "JAR_TO_SIGN =  $(JAR_TO_SIGN)"
 	@echo "PROB2APP_CONTENTS =  $(PROB2APP_CONTENTS)"
 	@echo "APPRPOB2 =  $(APPRPOB2)"
-	@echo "ZIP_FILE =  $(ZIP_FILE)"
+	@echo "APPFILE =  $(APPFILE)"
+	@echo "ZIP_FILE (for Apple) =  $(ZIP_FILE)"
+	@echo "FINAL_ZIP_FILE (for ProB Website)=  $(FINAL_ZIP_FILE)"
+	@echo "PROB2UI_VERSION =  $(PROB2UI_VERSION)"
+	@echo "(PROB2APP_CONTENTS)MacOS/(APPRPOB2) = $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)"
 	@echo "Notarization request to Apple for APP is in zipfile $(ZIP_FILE)"
 notarize-app: $(ZIP_FILE)
 	@echo "Step 6: Sending Notarization request to Apple for APP (in zipfile $(ZIP_FILE))"
@@ -146,7 +156,8 @@ verify-app:
 	codesign -vv --deep-verify $(APPFILE)
 	@echo "Step 8: check stapling of the APP $(APPFILE)"
 	spctl --assess --type execute --verbose $(APPFILE)
-	@echo "Step 9: You can now zip and upload $(APPFILE) to the download area /stupshome/stups/downloads/prob2/ProB2-UI-$(PROB2UI_VERSION)-notarized.zip"
+	/usr/bin/ditto -c -k --keepParent --sequesterRsrc "$(APPFILE)" "$(FINAL_ZIP_FILE)"
+	@echo "Step 9: You can now zip and upload $(FINAL_ZIP_FILE) to the download area /stupshome/stups/downloads/prob2/ProB2-UI-$(PROB2UI_VERSION)-notarized.zip"
 
 
 
