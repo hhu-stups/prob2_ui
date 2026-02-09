@@ -42,6 +42,7 @@ DMGPROB2=ProB2-UI-aarch64
 APPRPOB2=ProB2-UI
 DMGFILE=build/distributions/$(DMGPROB2)-$(PROB2UI_VERSION).dmg
 ZIP_FILE=build/distributions/ProB2-UI-ForNotarization.zip
+FINAL_ZIP_FILE=build/distributions/ProB2-UI$(ARCHSUFFIX)-$(PROB2UI_VERSION)-notarized.zip
 # app file available after mounting dmg; could be done by command-line command
 VOLUME=/Volumes/$(APPRPOB2)/
 DMGAPPFILE=$(VOLUME)$(APPRPOB2).app
@@ -126,7 +127,9 @@ notarize-info: $(ZIP_FILE)
 	@echo "PROB2APP_CONTENTS =  $(PROB2APP_CONTENTS)"
 	@echo "APPRPOB2 =  $(APPRPOB2)"
 	@echo "APPFILE =  $(APPFILE)"
-	@echo "ZIP_FILE =  $(ZIP_FILE)"
+	@echo "ZIP_FILE (for Apple) =  $(ZIP_FILE)"
+	@echo "FINAL_ZIP_FILE (for ProB Website)=  $(FINAL_ZIP_FILE)"
+	@echo "PROB2UI_VERSION =  $(PROB2UI_VERSION)"
 	@echo "(PROB2APP_CONTENTS)MacOS/(APPRPOB2) = $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)"
 	@echo "Notarization request to Apple for APP is in zipfile $(ZIP_FILE)"
 notarize-app: $(ZIP_FILE)
@@ -150,7 +153,8 @@ verify-app:
 	codesign -vv --deep-verify $(APPFILE)
 	@echo "Step 8: check stapling of the APP $(APPFILE)"
 	spctl --assess --type execute --verbose $(APPFILE)
-	@echo "Step 9: You can now zip and upload $(APPFILE) to the download area /stupshome/stups/downloads/prob2/ProB2-UI-$(PROB2UI_VERSION)-notarized.zip"
+	/usr/bin/ditto -c -k --keepParent --sequesterRsrc "$(APPFILE)" "$(FINAL_ZIP_FILE)"
+	@echo "Step 9: You can now zip and upload $(FINAL_ZIP_FILE) to the download area /stupshome/stups/downloads/prob2/ProB2-UI-$(PROB2UI_VERSION)-notarized.zip"
 
 
 
