@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -74,7 +75,8 @@ public final class RealTimeSimulator extends Simulator {
 		try {
 			Trace newTrace = simulationStep(trace);
 			Trace resultingTrace = newTrace;
-			if(currentTrace.get().getCurrentState().isInitialised()) {
+			State state = currentTrace.get().getCurrentState();
+			if(state != null && state.isInitialised()) {
 				resultingTrace = mergeUserInteractions(trace.getTransitionList().size(), currentTrace.get(), newTrace);
 			}
 			currentTrace.set(resultingTrace);
