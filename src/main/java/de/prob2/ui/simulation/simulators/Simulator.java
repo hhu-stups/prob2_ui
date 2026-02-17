@@ -316,7 +316,7 @@ public abstract class Simulator {
 				processExternalConfiguration(newTrace);
 			} else if("skip".equals(activation.operation())) {
 				updateStartingInformation(newTrace);
-				if(!activationConfig.isActivatingOnlyWhenExecuted() || "TRUE".equals(simulationEventHandler.evaluateAdditionalGuards(newTrace.getCurrentState(), activation))) {
+				if(!activationConfig.isActivatingOnlyWhenExecuted() || "FALSE".equals(simulationEventHandler.evaluateAdditionalGuards(newTrace.getCurrentState(), activation))) {
 					simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
 					simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 					processExternalConfiguration(newTrace);
