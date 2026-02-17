@@ -287,6 +287,9 @@ public abstract class Simulator {
 		if(activationForOperation == null) {
 			return trace;
 		}
+		if(trace == null) {
+			return trace;
+		}
 		List<Activation> activationForOperationCopy = new ArrayList<>(activationForOperation);
 
 		Trace newTrace = trace;

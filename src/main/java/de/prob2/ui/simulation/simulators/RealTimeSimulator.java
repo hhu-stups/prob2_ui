@@ -133,19 +133,21 @@ public final class RealTimeSimulator extends Simulator {
 	@Override
 	protected Trace executeActivatedOperations(Trace trace) {
 		Trace result = super.executeActivatedOperations(trace);
-		List<Activation> currentActivations = new ArrayList<>();
-		boolean timePassed = timestampsForLogging.isEmpty() || getTime() != timestampsForLogging.get(timestampsForLogging.size() - 1);
-		if(timePassed) {
-			timestampsForLogging.add(getTime());
-		} else {
-			currentActivations = activationsForLoggedTimestamps.get(activationsForLoggedTimestamps.size() - 1);
-		}
-		for(List<Activation> activations : configurationToActivation.values()) {
-			currentActivations.addAll(activations);
-		}
-		if(timePassed) {
-			activationsForLoggedTimestamps.add(currentActivations);
-		}
+		Platform.runLater(() -> {
+			List<Activation> currentActivations = new ArrayList<>();
+			boolean timePassed = timestampsForLogging.isEmpty() || getTime() != timestampsForLogging.get(timestampsForLogging.size() - 1);
+			if (timePassed) {
+				timestampsForLogging.add(getTime());
+			} else {
+				currentActivations = activationsForLoggedTimestamps.get(activationsForLoggedTimestamps.size() - 1);
+			}
+			for (List<Activation> activations : configurationToActivation.values()) {
+				currentActivations.addAll(activations);
+			}
+			if (timePassed) {
+				activationsForLoggedTimestamps.add(currentActivations);
+			}
+		});
 		return result;
 	}
 
