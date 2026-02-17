@@ -55,6 +55,8 @@ public final class RealTimeSimulator extends Simulator {
 	}
 
 	public void run() {
+		timestampsForLogging.clear();
+		activationsForLoggedTimestamps.clear();
 		scheduler.run();
 		uiInteractionHandler.getLastUserInteraction().addListener(uiListener);
 	}
@@ -117,8 +119,6 @@ public final class RealTimeSimulator extends Simulator {
 	public void resetSimulator() {
 		super.resetSimulator();
 		scheduler.stop();
-		timestampsForLogging.clear();
-		activationsForLoggedTimestamps.clear();
 	}
 
 	@Override
