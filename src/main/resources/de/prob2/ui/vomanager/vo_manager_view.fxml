@@ -81,7 +81,7 @@
 							</columnResizePolicy>
 							<columns>
 								<TreeTableColumn fx:id="requirementNameColumn" minWidth="70.0"
-											 text="%vomanager.table.requirements.column.name"/>
+											 text="%common.columns.name"/>
 								<TreeTableColumn fx:id="requirementStatusColumn" style="-fx-alignment: CENTER;"
 											 minWidth="${fontSize.fontSize * 6}"
 											 maxWidth="${fontSize.fontSize * 6}" text="%common.columns.status"/>

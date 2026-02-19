@@ -18,8 +18,8 @@
 							<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 						</columnResizePolicy>
 						<columns>
-							<TreeTableColumn fx:id="nameColumn" minWidth="80.0" text="%operations.operationDetails.columns.name"/>
-							<TreeTableColumn fx:id="valueColumn" minWidth="80.0" text="%operations.operationDetails.columns.value"/>
+							<TreeTableColumn fx:id="nameColumn" minWidth="80.0" text="%common.columns.name"/>
+							<TreeTableColumn fx:id="valueColumn" minWidth="80.0" text="%common.columns.value"/>
 						</columns>
 						<TreeItem fx:id="rootItem" expanded="true">
 							<children>
