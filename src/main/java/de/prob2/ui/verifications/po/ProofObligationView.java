@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob2.ui.internal.FXMLInjected;
@@ -40,6 +41,7 @@ public final class ProofObligationView extends BorderPane {
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
+	private final Injector injector;
 	private final I18n i18n;
 
 	@FXML
@@ -53,9 +55,10 @@ public final class ProofObligationView extends BorderPane {
 	private TableColumn<ProofObligationItem, String> poColumn;
 
 	@Inject
-	private ProofObligationView(StageManager stageManager, CurrentProject currentProject, I18n i18n) {
+	private ProofObligationView(StageManager stageManager, CurrentProject currentProject, Injector injector, I18n i18n) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.injector = injector;
 		this.i18n = i18n;
 
 		stageManager.loadFXML(this, "po_view.fxml");
@@ -70,6 +73,14 @@ public final class ProofObligationView extends BorderPane {
 
 		this.tvProofObligations.setRowFactory(param -> {
 			final TableRow<ProofObligationItem> row = new TableRow<>();
+			final MenuItem showDetailsItem = new MenuItem(i18n.translate("common.contextMenu.showDetails"));
+			showDetailsItem.setOnAction(event -> {
+				final ProofObligationDetailsStage stage = injector.getInstance(ProofObligationDetailsStage.class);
+				stage.setItems(param.getItems(), row.getItem());
+				stage.show();
+				stage.toFront();
+			});
+
 			MenuItem editItem = new MenuItem(i18n.translate("verifications.po.poView.contextMenu.editId"));
 			editItem.setOnAction(event -> this.editItem(row.getItem()));
 
@@ -81,7 +92,7 @@ public final class ProofObligationView extends BorderPane {
 				}
 			});
 
-			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(new ContextMenu(editItem)));
+			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(new ContextMenu(showDetailsItem, editItem)));
 			return row;
 		});
 

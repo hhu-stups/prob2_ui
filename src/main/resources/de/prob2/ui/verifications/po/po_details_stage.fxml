@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import de.prob2.ui.verifications.po.ProofSequentCodeArea?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TreeItem?>
+<?import javafx.scene.control.TreeTableView?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.Scene?>
+<?import javafx.stage.Stage?>
+<?import javafx.scene.control.TreeTableColumn?>
+<fx:root type="Stage" minWidth="480" minHeight="360" xmlns:fx="http://javafx.com/fxml/1" title="%verifications.po.poView.details">
+	<scene>
+		<Scene>
+			<StackPane>
+				<SplitPane dividerPositions="0.4">
+					<TreeTableView fx:id="poTreeView" showRoot="false">
+						<columnResizePolicy>
+							<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
+						</columnResizePolicy>
+						<columns>
+							<TreeTableColumn fx:id="nameColumn" minWidth="80.0" text="%common.columns.name"/>
+							<TreeTableColumn fx:id="descriptionColumn" minWidth="80.0" text="%common.columns.description"/>
+						</columns>
+						<TreeItem fx:id="rootItem" expanded="true">
+						</TreeItem>
+					</TreeTableView>
+					<ProofSequentCodeArea fx:id="textArea" editable="false"/>
+				</SplitPane>
+			</StackPane>
+		</Scene>
+	</scene>
+</fx:root>
