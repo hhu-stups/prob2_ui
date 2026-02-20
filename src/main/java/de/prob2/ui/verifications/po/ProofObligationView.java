@@ -75,9 +75,7 @@ public final class ProofObligationView extends BorderPane {
 
 			row.itemProperty().addListener((observable, from, to) -> {
 				if (to != null) {
-					Tooltip tooltip = new Tooltip();
-					tooltip.textProperty().bind(to.descriptionProperty());
-					row.setTooltip(tooltip);
+					row.setTooltip(new Tooltip(to.getProofObligation().getDescription()));
 				} else {
 					row.setTooltip(null);
 				}
