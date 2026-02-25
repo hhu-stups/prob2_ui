@@ -28,6 +28,7 @@ import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
 import de.prob.scripting.FactoryProvider;
 import de.prob.scripting.ModelFactory;
+import de.prob.scripting.SequentProverFactory;
 import de.prob.scripting.TLAFactory;
 import de.prob.scripting.XTLFactory;
 import de.prob.scripting.ZFactory;
@@ -62,6 +63,7 @@ public final class FileChooserManager {
 		map.put(TLAFactory.class, "common.fileChooser.fileTypes.tla");
 		map.put(RulesModelFactory.class, "common.fileChooser.fileTypes.bRules");
 		map.put(XTLFactory.class, "common.fileChooser.fileTypes.xtl");
+		map.put(SequentProverFactory.class, "common.fileChooser.fileTypes.probpo");
 		map.put(ZFactory.class, "common.fileChooser.fileTypes.z");
 		map.put(ZFuzzFactory.class, "common.fileChooser.fileTypes.zFuzz");
 		map.put(AlloyFactory.class, "common.fileChooser.fileTypes.alloy");
