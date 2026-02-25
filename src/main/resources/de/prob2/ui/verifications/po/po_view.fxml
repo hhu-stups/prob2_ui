@@ -1,14 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
+<?import de.prob2.ui.sharedviews.Spacer?>
 <?import de.prob2.ui.verifications.po.ProofObligationView?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.ToolBar?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.HBox?>
 
 <fx:root type="ProofObligationView" stylesheets="@/prob.css" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
+	<top>
+		<ToolBar styleClass="border">
+			<padding>
+				<Insets top="5" bottom="5" left="5" right="5"/>
+			</padding>
+			<Spacer/>
+			<Button fx:id="btnDisproverAll" onAction="#saveAsDisproverAll">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 4}" />
+				</graphic>
+				<tooltip>
+					<Tooltip text="%verifications.po.poView.save.disprover.all"/>
+				</tooltip>
+				<HBox.margin>
+					<Insets top="5" bottom="5" right="5"/>
+				</HBox.margin>
+			</Button>
+		</ToolBar>
+	</top>
 	<center>
 		<TableView fx:id="tvProofObligations" minHeight="80.0">
 			<columnResizePolicy>
