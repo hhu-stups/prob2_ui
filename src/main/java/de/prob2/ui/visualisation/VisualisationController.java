@@ -96,7 +96,7 @@ public final class VisualisationController {
 		}));
 
 		currentTrace.addListener((o, from, to) -> {
-			if (to == null) {
+			if (to == null || to.getCurrentState() == null) {
 				placeholderLabel.setText(i18n.translate("common.noModelLoaded"));
 			} else if (!currentTrace.getCurrentState().isInitialised()) {
 				placeholderLabel.setText(i18n.translate("common.notInitialised"));

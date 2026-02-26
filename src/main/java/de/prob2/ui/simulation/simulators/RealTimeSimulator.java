@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import com.google.inject.Provider;
 import com.google.inject.Singleton;
 
+import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -55,6 +56,8 @@ public final class RealTimeSimulator extends Simulator {
 	}
 
 	public void run() {
+		timestampsForLogging.clear();
+		activationsForLoggedTimestamps.clear();
 		scheduler.run();
 		uiInteractionHandler.getLastUserInteraction().addListener(uiListener);
 	}
@@ -72,7 +75,8 @@ public final class RealTimeSimulator extends Simulator {
 		try {
 			Trace newTrace = simulationStep(trace);
 			Trace resultingTrace = newTrace;
-			if(currentTrace.get().getCurrentState().isInitialised()) {
+			State state = currentTrace.get().getCurrentState();
+			if(state != null && state.isInitialised()) {
 				resultingTrace = mergeUserInteractions(trace.getTransitionList().size(), currentTrace.get(), newTrace);
 			}
 			currentTrace.set(resultingTrace);
@@ -117,8 +121,6 @@ public final class RealTimeSimulator extends Simulator {
 	public void resetSimulator() {
 		super.resetSimulator();
 		scheduler.stop();
-		timestampsForLogging.clear();
-		activationsForLoggedTimestamps.clear();
 	}
 
 	@Override
@@ -133,19 +135,21 @@ public final class RealTimeSimulator extends Simulator {
 	@Override
 	protected Trace executeActivatedOperations(Trace trace) {
 		Trace result = super.executeActivatedOperations(trace);
-		List<Activation> currentActivations = new ArrayList<>();
-		boolean timePassed = timestampsForLogging.isEmpty() || getTime() != timestampsForLogging.get(timestampsForLogging.size() - 1);
-		if(timePassed) {
-			timestampsForLogging.add(getTime());
-		} else {
-			currentActivations = activationsForLoggedTimestamps.get(activationsForLoggedTimestamps.size() - 1);
-		}
-		for(List<Activation> activations : configurationToActivation.values()) {
-			currentActivations.addAll(activations);
-		}
-		if(timePassed) {
-			activationsForLoggedTimestamps.add(currentActivations);
-		}
+		Platform.runLater(() -> {
+			List<Activation> currentActivations = new ArrayList<>();
+			boolean timePassed = timestampsForLogging.isEmpty() || getTime() != timestampsForLogging.get(timestampsForLogging.size() - 1);
+			if (timePassed) {
+				timestampsForLogging.add(getTime());
+			} else {
+				currentActivations = activationsForLoggedTimestamps.get(activationsForLoggedTimestamps.size() - 1);
+			}
+			for (List<Activation> activations : configurationToActivation.values()) {
+				currentActivations.addAll(activations);
+			}
+			if (timePassed) {
+				activationsForLoggedTimestamps.add(currentActivations);
+			}
+		});
 		return result;
 	}
 

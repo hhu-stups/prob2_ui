@@ -32,8 +32,8 @@
 					<TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY"/>
 				</columnResizePolicy>
 				<columns>
-					<TreeTableColumn fx:id="tvNameColumn" id="name" editable="false" minWidth="80.0" sortable="false" text="%states.statesView.columns.name" />
-					<TreeTableColumn fx:id="tvValueColumn" id="value" editable="false" minWidth="80.0"  sortable="false" text="%states.statesView.columns.value" />
+					<TreeTableColumn fx:id="tvNameColumn" id="name" editable="false" minWidth="80.0" sortable="false" text="%common.columns.name" />
+					<TreeTableColumn fx:id="tvValueColumn" id="value" editable="false" minWidth="80.0"  sortable="false" text="%common.columns.value" />
 					<TreeTableColumn fx:id="tvExecuteColumn" id="execute" editable="false" minWidth="80.0"  sortable="false"/>
 				</columns>
 				<placeholder>

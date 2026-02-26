@@ -46,6 +46,12 @@ public final class SchedulingItemTableCell extends TableCell<SchedulingTableItem
 		SchedulingTableItem item = this.getItem();
 		Activation activation = item.getActivation();
 
+		if(activation.id() != null && !activation.id().isEmpty()) {
+			Label lbID = new Label(String.format("%s: %s", i18n.translate("simulation.item.id"), activation.id()));
+			lbID.getStyleClass().add("information");
+			this.itemBox.getChildren().add(lbID);
+		}
+
 		if(activation.operation() != null && !activation.operation().isEmpty()) {
 			Label lbOperation = new Label(String.format("%s: %s", i18n.translate("simulation.item.operation"), activation.operation()));
 			lbOperation.getStyleClass().add("information");

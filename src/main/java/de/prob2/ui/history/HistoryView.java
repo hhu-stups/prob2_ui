@@ -82,7 +82,7 @@ public final class HistoryView extends BorderPane {
 				}
 
 				OperationItem opItem = item.getOperation();
-				final MenuItem showDetailsItem = new MenuItem(i18n.translate("operations.operationsView.contextMenu.items.showDetails"));
+				final MenuItem showDetailsItem = new MenuItem(i18n.translate("common.contextMenu.showDetails"));
 				showDetailsItem.setOnAction(event -> {
 					final OperationDetailsStage stage = injector.getInstance(OperationDetailsStage.class);
 					stage.setItem(opItem);

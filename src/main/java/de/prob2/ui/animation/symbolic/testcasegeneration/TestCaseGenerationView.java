@@ -43,7 +43,7 @@ public final class TestCaseGenerationView extends CheckingViewBase<TestCaseGener
 		private Row() {
 			executeMenuItem.setText(i18n.translate("animation.testcase.view.contextMenu.generate"));
 
-			MenuItem showDetails = new MenuItem(i18n.translate("animation.testcase.view.contextMenu.showDetails"));
+			MenuItem showDetails = new MenuItem(i18n.translate("common.contextMenu.showDetails"));
 			showDetails.setDisable(true);
 			showDetails.setOnAction(e -> showDetails(((TestCaseGenerationItem.Result)this.getItem().getResult()).getResult()));
 			this.setOnMouseClicked(e -> {

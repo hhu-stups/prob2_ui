@@ -1,24 +1,31 @@
 package de.prob2.ui.verifications.po;
 
-import java.util.Comparator;
-import java.util.Objects;
-import java.util.Optional;
-
 import com.google.inject.Inject;
+import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.model.eventb.Context;
+import de.prob.model.eventb.EventBMachine;
+import de.prob.model.eventb.EventBModel;
+import de.prob.model.eventb.translate.ProofObligationToProlog;
+import de.prob.prolog.output.IPrologTermOutput;
+import de.prob.prolog.output.PrologTermOutput;
+import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
@@ -28,9 +35,18 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.Writer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.Objects;
+import java.util.Optional;
 
 @FXMLInjected
 @Singleton
@@ -40,6 +56,8 @@ public final class ProofObligationView extends BorderPane {
 
 	private final StageManager stageManager;
 	private final CurrentProject currentProject;
+	private final CurrentTrace currentTrace;
+	private final Injector injector;
 	private final I18n i18n;
 
 	@FXML
@@ -52,10 +70,15 @@ public final class ProofObligationView extends BorderPane {
 	@FXML
 	private TableColumn<ProofObligationItem, String> poColumn;
 
+	@FXML
+	private Button btnDisproverAll;
+
 	@Inject
-	private ProofObligationView(StageManager stageManager, CurrentProject currentProject, I18n i18n) {
+	private ProofObligationView(StageManager stageManager, CurrentProject currentProject, CurrentTrace currentTrace, Injector injector, I18n i18n) {
 		this.stageManager = stageManager;
 		this.currentProject = currentProject;
+		this.currentTrace = currentTrace;
+		this.injector = injector;
 		this.i18n = i18n;
 
 		stageManager.loadFXML(this, "po_view.fxml");
@@ -70,20 +93,26 @@ public final class ProofObligationView extends BorderPane {
 
 		this.tvProofObligations.setRowFactory(param -> {
 			final TableRow<ProofObligationItem> row = new TableRow<>();
+			final MenuItem showDetailsItem = new MenuItem(i18n.translate("common.contextMenu.showDetails"));
+			showDetailsItem.setOnAction(event -> {
+				final ProofObligationDetailsStage stage = injector.getInstance(ProofObligationDetailsStage.class);
+				stage.setItems(param.getItems(), row.getItem());
+				stage.show();
+				stage.toFront();
+			});
+
 			MenuItem editItem = new MenuItem(i18n.translate("verifications.po.poView.contextMenu.editId"));
 			editItem.setOnAction(event -> this.editItem(row.getItem()));
 
 			row.itemProperty().addListener((observable, from, to) -> {
 				if (to != null) {
-					Tooltip tooltip = new Tooltip();
-					tooltip.textProperty().bind(to.descriptionProperty());
-					row.setTooltip(tooltip);
+					row.setTooltip(new Tooltip(to.getProofObligation().getDescription()));
 				} else {
 					row.setTooltip(null);
 				}
 			});
 
-			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(new ContextMenu(editItem)));
+			row.contextMenuProperty().bind(Bindings.when(row.emptyProperty()).then((ContextMenu) null).otherwise(new ContextMenu(showDetailsItem, editItem)));
 			return row;
 		});
 
@@ -98,6 +127,10 @@ public final class ProofObligationView extends BorderPane {
 		};
 		this.currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, this.currentProject.getCurrentMachine());
+
+		SimpleListProperty<ProofObligationItem> poItems = new SimpleListProperty<>();
+		poItems.bind(this.tvProofObligations.itemsProperty());
+		this.btnDisproverAll.disableProperty().bind(poItems.emptyProperty());
 	}
 
 	private void editItem(ProofObligationItem item) {
@@ -129,5 +162,26 @@ public final class ProofObligationView extends BorderPane {
 				}
 			}
 		});
+	}
+
+	@FXML
+	private void saveAsDisproverAll() throws IOException {
+		final FileChooser fileChooser = new FileChooser();
+		FileChooserManager fileChooserManager = injector.getInstance(FileChooserManager.class);
+		FileChooser.ExtensionFilter poFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.probpo", "probpo");
+		fileChooser.getExtensionFilters().setAll(poFilter);
+		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
+		Path poFile = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.PROJECTS_AND_MACHINES, stageManager.getCurrent());
+		if (poFile != null && this.currentTrace.getModel() instanceof EventBModel eventBModel) {
+			try (final Writer writer = Files.newBufferedWriter(poFile)) {
+				IPrologTermOutput pto = new PrologTermOutput(writer, false);
+				if (eventBModel.getMainComponent() instanceof EventBMachine mch) {
+					ProofObligationToProlog.toDisproverProlog(mch, pto);
+				} else if (eventBModel.getMainComponent() instanceof Context ctx) {
+					ProofObligationToProlog.toDisproverProlog(ctx, pto);
+				}
+			}
+		}
 	}
 }

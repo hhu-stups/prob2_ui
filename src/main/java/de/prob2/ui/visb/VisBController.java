@@ -269,6 +269,9 @@ public final class VisBController {
 		var eventsCmd = new ReadVisBEventsHoversCommand();
 		var svgObjectsCmd = new GetVisBSVGObjectsCommand();
 		var defaultSVGCmd = new GetVisBDefaultSVGCommand();
+		if(stateSpace == null) {
+			return null;
+		}
 		stateSpace.execute(loadCmd, svgCmd, itemsCmd, eventsCmd, svgObjectsCmd, defaultSVGCmd);
 
 		String svgPathString = svgCmd.getSvgPath();

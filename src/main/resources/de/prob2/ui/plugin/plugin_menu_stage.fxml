@@ -32,7 +32,7 @@
 									<TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
 								</columnResizePolicy>
 								<columns>
-									<TableColumn fx:id="nameCol" text="%plugin.pluginMenu.table.columns.name" editable="false"/>
+									<TableColumn fx:id="nameCol" text="%common.columns.name" editable="false"/>
 									<TableColumn fx:id="versionCol" text="%plugin.pluginMenu.table.columns.version"
 												 maxWidth="100" minWidth="100" sortable="false" editable="false"/>
 									<TableColumn fx:id="activeCol" text="%plugin.pluginMenu.table.columns.active"  maxWidth="100" minWidth="100"/>

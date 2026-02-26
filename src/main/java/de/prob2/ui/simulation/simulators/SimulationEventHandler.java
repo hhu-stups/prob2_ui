@@ -133,9 +133,13 @@ public class SimulationEventHandler {
 		return cache.readValueWithCaching(state, simulator.getVariables(), newExpression, mode);
 	}
 
-	private String buildPredicateForTransition(State state, Activation activation) {
+	public String evaluateAdditionalGuards(State state, Activation activation) {
 		EvaluationMode mode = EvaluationMode.extractMode(this.currentTrace.getModel());
-		String additionalGuardsResult = activation.additionalGuards() == null || activation.additionalGuards().isEmpty() || "1=1".equals(activation.additionalGuards()) ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.additionalGuards(), mode);
+		return activation.additionalGuards() == null || activation.additionalGuards().isEmpty() || "1=1".equals(activation.additionalGuards()) ? "TRUE" : cache.readValueWithCaching(state, simulator.getVariables(), activation.additionalGuards(), mode);
+	}
+
+	private String buildPredicateForTransition(State state, Activation activation) {
+		String additionalGuardsResult = evaluateAdditionalGuards(state, activation);
 		if ("FALSE".equals(additionalGuardsResult)) {
 			return "1=2";
 		}
@@ -272,7 +276,7 @@ public class SimulationEventHandler {
 		}
 		String withPredicate = activationOperationConfiguration.getWithPredicate();
 
-		var activation = new Activation(opName, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
+		var activation = new Activation(id, opName, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
 		switch (activationKind) {
 			case MULTI:
 				activateMultiOperations(activationsForId, activation);

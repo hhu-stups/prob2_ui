@@ -567,7 +567,7 @@ public final class SimulatorStage extends Stage {
 			if (to) {
 				stopSimulator(lastSimulator.get());
 			}
-			resetSimulator();
+			Platform.runLater(() -> resetSimulator());
 		});
 
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
@@ -738,7 +738,7 @@ public final class SimulatorStage extends Stage {
 		this.time = 0;
 		this.schedulingItems.getItems().clear();
 		this.schedulingFutureItems.getItems().clear();
-		cbTimestampsForLogging.getItems().clear();
+		this.cbTimestampsForLogging.getItems().clear();
 		realTimeSimulator.resetSimulator();
 	}
 

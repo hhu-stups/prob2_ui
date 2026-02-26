@@ -17,7 +17,7 @@
 					</columnResizePolicy>
 					<columns>
 						<TableColumn fx:id="pattern" editable="false" prefWidth="20.0" text="%verifications.temporal.ltl.pattern.builtins.pattern" />
-						<TableColumn fx:id="description" editable="false" prefWidth="200.0" text="%verifications.temporal.ltl.pattern.builtins.description" />
+						<TableColumn fx:id="description" editable="false" prefWidth="200.0" text="%common.columns.description" />
 					</columns>
 				</TableView>
 			</AnchorPane>

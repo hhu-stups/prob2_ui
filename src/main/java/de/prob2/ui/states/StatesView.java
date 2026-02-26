@@ -367,7 +367,7 @@ public final class StatesView extends BorderPane {
 			}
 		});
 
-		final MenuItem showDetailsItem = new MenuItem(i18n.translate("states.statesView.contextMenu.items.showDetails"));
+		final MenuItem showDetailsItem = new MenuItem(i18n.translate("common.contextMenu.showDetails"));
 		showDetailsItem.disableProperty().bind(row.itemProperty().isNull());
 		showDetailsItem.setOnAction(event -> this.showDetails(row.getItem()));
 

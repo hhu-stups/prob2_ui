@@ -9,6 +9,7 @@ import com.google.inject.Singleton;
 import de.prob.model.brules.RulesModelFactory;
 import de.prob.scripting.ClassicalBFactory;
 import de.prob.scripting.ModelFactory;
+import de.prob.scripting.SequentProverFactory;
 import de.prob2.ui.codecompletion.CodeCompletion;
 import de.prob2.ui.consoles.b.codecompletion.BCCItem;
 import de.prob2.ui.consoles.b.codecompletion.BCodeCompletion;
@@ -21,6 +22,7 @@ import de.prob2.ui.layout.FontSize;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
+import de.prob2.ui.verifications.po.ProofSequentCodeArea;
 
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCombination;
@@ -96,6 +98,8 @@ public final class BEditor extends ExtendedCodeArea {
 
 			if (modelFactoryClass == ClassicalBFactory.class) {
 				highlighting = BLexerSyntaxHighlighting.computeBHighlighting(text);
+			} else if (modelFactoryClass == SequentProverFactory.class) {
+				highlighting = ProofSequentCodeArea.computeSequentHighlighting(text);
 			} else if (RegexSyntaxHighlighting.canHighlight(modelFactoryClass)) {
 				highlighting = RegexSyntaxHighlighting.computeHighlighting(modelFactoryClass, text);
 			}

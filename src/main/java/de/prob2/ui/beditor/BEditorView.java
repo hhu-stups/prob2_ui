@@ -26,6 +26,7 @@ import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.FormulaTranslationMode;
 import de.prob.scripting.EventBFactory;
 import de.prob.scripting.EventBPackageFactory;
+import de.prob.scripting.SequentProverFactory;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -379,7 +380,8 @@ public final class BEditorView extends BorderPane {
 	}
 
 	private CompletableFuture<Void> loadText(Path machinePath) {
-		if (currentProject.getCurrentMachine().getModelFactoryClass() == EventBFactory.class || currentProject.getCurrentMachine().getModelFactoryClass() == EventBPackageFactory.class) {
+		Class<?> modelFactory = currentProject.getCurrentMachine().getModelFactoryClass();
+		if (modelFactory == EventBFactory.class || modelFactory == EventBPackageFactory.class || modelFactory == SequentProverFactory.class) {
 			final StateSpace stateSpace = currentTrace.getStateSpace();
 			cbUnicode.setVisible(true);
 			cbUnicode.setManaged(true);
