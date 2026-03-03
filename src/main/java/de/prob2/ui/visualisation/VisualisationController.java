@@ -176,8 +176,7 @@ public final class VisualisationController {
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
 		Path traceFile = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
-			ExportHtmlHistoryCommand cmd = new ExportHtmlHistoryCommand(traceFile.toFile(),
-					currentTrace.get().getTransitionList().stream().map(Transition::getId).collect(Collectors.toList()));
+			ExportHtmlHistoryCommand cmd = new ExportHtmlHistoryCommand(traceFile.toFile(), currentTrace.get());
 			currentTrace.getStateSpace().execute(cmd);
 		}
 	}
