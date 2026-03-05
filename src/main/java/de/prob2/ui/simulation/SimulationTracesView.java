@@ -121,8 +121,7 @@ public final class SimulationTracesView extends Stage {
 	private void initialize() {
 		initTableColumns();
 		initTableRows();
-		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
-		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
+		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
 	}
 
 	public void setFromItem(SimulationItem item) {
