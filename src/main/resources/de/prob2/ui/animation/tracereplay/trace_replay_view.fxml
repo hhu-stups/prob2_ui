@@ -42,6 +42,15 @@
 				</Button>
 			</InterruptIfRunningButton>
 			<Spacer/>
+			<Button fx:id="statisticsButton" onAction="#showStatisticsOverTraces">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="INFO_CIRCLE"
+								   bindableFontSize="${fontSize.fontSize * 2}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="Evaluate Statistics"/>
+				</tooltip>
+			</Button>
 			<MenuButton fx:id="loadTraceButton">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
