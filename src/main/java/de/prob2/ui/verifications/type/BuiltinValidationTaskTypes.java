@@ -22,6 +22,7 @@ import de.prob2.ui.verifications.po.ProofObligationItem;
 import de.prob2.ui.verifications.symbolicchecking.SymbolicModelCheckingItem;
 import de.prob2.ui.verifications.temporal.ctl.CTLFormulaItem;
 import de.prob2.ui.verifications.temporal.ltl.LTLFormulaItem;
+import de.prob2.ui.animation.tracereplay.statistics.TraceStatisticsFormulasItem;
 import de.prob2.ui.vomanager.ValidationTaskNotFound;
 
 import static de.prob2.ui.verifications.type.ValidationTaskType.register;
@@ -51,6 +52,7 @@ public final class BuiltinValidationTaskTypes {
 	public static final ValidationTaskType<ProofObligationItem> PROOF_OBLIGATION = register(new ValidationTaskType<>("PROOF_OBLIGATION", ProofObligationItem.class));
 	public static final ValidationTaskType<VisualizationFormulaTask> VISUALIZATION_FORMULA = register(new ValidationTaskType<>("VISUALIZATION_FORMULA", VisualizationFormulaTask.class));
 	public static final ValidationTaskType<ChartFormulaTask> CHART_FORMULA = register(new ValidationTaskType<>("CHART_FORMULA", ChartFormulaTask.class));
+	public static final ValidationTaskType<TraceStatisticsFormulasItem> TRACE_STATISTICS_FORMULAS = register(new ValidationTaskType<>("TRACE_STATISTICS_FORMULAS", TraceStatisticsFormulasItem.class));
 
 	private BuiltinValidationTaskTypes() {
 		throw new AssertionError();

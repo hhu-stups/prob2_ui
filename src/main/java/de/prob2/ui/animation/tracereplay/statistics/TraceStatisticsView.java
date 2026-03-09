@@ -90,19 +90,44 @@ public final class TraceStatisticsView extends Stage {
 	private Button btEvaluate;
 
 	@FXML
+	private Button btAdd;
+
+	@FXML
+	private Button btEdit;
+
+	@FXML
 	private TextField tfDesiredEffects;
 
 	@FXML
 	private TextField tfComputations;
 
 	@FXML
+	private TableView<TraceStatisticsFormulasItem> formulaTableView;
+
+	@FXML
+	private TableColumn<TraceStatisticsFormulasItem, CheckingStatus> statusColumn;
+
+	@FXML
+	private TableColumn<TraceStatisticsFormulasItem, String> formulaOperationColumn;
+
+	@FXML
+	private TableColumn<TraceStatisticsFormulasItem, String> formulaComputationsColumn;
+
+	@FXML
+	private TableColumn<TraceStatisticsFormulasItem, String> formulaEffectColumn;
+
+	@FXML
 	private TableView<TraceStatisticsItem> statisticsTableView;
+
 	@FXML
 	private TableColumn<TraceStatisticsItem, String> traceColumn;
+
 	@FXML
 	private TableColumn<TraceStatisticsItem, Integer> totalComputationsColumn;
+
 	@FXML
 	private TableColumn<TraceStatisticsItem, Integer> effectColumn;
+
 	@FXML
 	private TableColumn<TraceStatisticsItem, Float> percentageColumn;
 
@@ -126,7 +151,7 @@ public final class TraceStatisticsView extends Stage {
 
 	@FXML
 	private void initialize() {
-		initTableColumns();
+		initTable();
 		statisticsTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
 		final ChangeListener<Machine> machineChangeListener = (observable, from, to) -> {
 			clear();
@@ -134,7 +159,15 @@ public final class TraceStatisticsView extends Stage {
 		};
 		currentProject.currentMachineProperty().addListener(machineChangeListener);
 		machineChangeListener.changed(null, null, currentProject.getCurrentMachine());
+
+		currentTrace.addListener((observable, from, to) -> {
+			clear();
+			setup();
+		});
+
 		btEvaluate.disableProperty().bind(cbOperation.getSelectionModel().selectedItemProperty().isNull());
+		btAdd.disableProperty().bind(cbOperation.getSelectionModel().selectedItemProperty().isNull());
+		btEdit.disableProperty().bind(formulaTableView.getSelectionModel().selectedItemProperty().isNull());
 	}
 
 	private void setup() {
@@ -150,13 +183,100 @@ public final class TraceStatisticsView extends Stage {
 				.filter(OperationInfo::isTopLevel)
 				.map(OperationInfo::getOperationName).toList());
 		cbOperation.getItems().addAll(operations);
+		Machine machine = currentProject.getCurrentMachine();
+		if (machine != null) {
+			formulaTableView.setItems(machine.getTraceStatisticsFormulas());
+		} else {
+			formulaTableView.setItems(FXCollections.emptyObservableList());
+		}
+
+		formulaTableView.getSelectionModel().selectedItemProperty().addListener((observable, from, to) -> {
+			if(to == null) {
+				return;
+			}
+			cbOperation.getSelectionModel().select(to.getOperation());
+			tfComputations.setText(to.getComputations());
+			tfDesiredEffects.setText(to.getDesiredEffects());
+		});
 	}
 
-	private void initTableColumns() {
+	private void initTable() {
+		statusColumn.setCellFactory(col -> new CheckingStatusCell<>());
+		statusColumn.setCellValueFactory(new PropertyValueFactory<>("status"));
+		formulaOperationColumn.setCellValueFactory(new PropertyValueFactory<>("operationWithId"));
+		formulaComputationsColumn.setCellValueFactory(new PropertyValueFactory<>("computations"));
+		formulaEffectColumn.setCellValueFactory(new PropertyValueFactory<>("desiredEffects"));
+
 		traceColumn.setCellValueFactory(new PropertyValueFactory<>("name"));
 		totalComputationsColumn.setCellValueFactory(new PropertyValueFactory<>("totalComputations"));
 		effectColumn.setCellValueFactory(new PropertyValueFactory<>("effectObserved"));
 		percentageColumn.setCellValueFactory(new PropertyValueFactory<>("percentage"));
+
+		this.formulaTableView.setRowFactory(param -> {
+			TableRow<TraceStatisticsFormulasItem> row = new TableRow<>();
+
+			row.setOnMouseClicked(e -> {
+				if (e.getClickCount() == 2) {
+					this.evaluate();
+				}
+			});
+
+			MenuItem editFormula = new MenuItem(i18n.translate("animation.tracereplay.statistics.editID"));
+			editFormula.setOnAction(event -> {
+				TraceStatisticsFormulasItem item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				editID(item);
+			});
+
+			MenuItem evaluateItem = new MenuItem(i18n.translate("common.evaluateFormula"));
+			evaluateItem.setOnAction(event -> this.evaluate());
+
+			MenuItem dischargeItem = new MenuItem(i18n.translate("common.formula.discharge"));
+			dischargeItem.setOnAction(event -> {
+				TraceStatisticsFormulasItem item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				item.setStatus(CheckingStatus.SUCCESS);
+			});
+
+			MenuItem failItem = new MenuItem(this.i18n.translate("common.formula.fail"));
+			failItem.setOnAction(event -> {
+				TraceStatisticsFormulasItem item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				item.setStatus(CheckingStatus.FAIL);
+			});
+
+			MenuItem unknownItem = new MenuItem(this.i18n.translate("common.formula.unknown"));
+			unknownItem.setOnAction(event -> {
+				TraceStatisticsFormulasItem item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				item.setStatus(CheckingStatus.NOT_CHECKED);
+			});
+
+			Menu statusMenu = new Menu(this.i18n.translate("common.formula.setStatus"), null, dischargeItem, failItem, unknownItem);
+
+			MenuItem removeItem = new MenuItem(i18n.translate("sharedviews.checking.contextMenu.remove"));
+			removeItem.setOnAction(event -> {
+				TraceStatisticsFormulasItem item = row.getItem();
+				if (item == null) {
+					return;
+				}
+				this.currentProject.getCurrentMachine().removeValidationTask(item);
+			});
+
+			row.contextMenuProperty().bind(
+					Bindings.when(row.emptyProperty())
+							.then((ContextMenu) null)
+							.otherwise(new ContextMenu(evaluateItem, editFormula, statusMenu, removeItem)));
+			return row;
+		});
 	}
 
 	public void refresh() {
@@ -169,8 +289,22 @@ public final class TraceStatisticsView extends Stage {
 	}
 
 	@FXML
-	private void exportCSV() {
-
+	private void exportCSV() throws IOException {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("animation.tracereplay.statistics.save.title"));
+		fileChooser.setInitialFileName("TraceStatistics.csv");
+		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
+		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACE_STATISTICS, stageManager.getCurrent());
+		if (path != null) {
+			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
+					.setHeader(i18n.translate("animation.tracereplay.statistics.table.columns.trace"), i18n.translate("animation.tracereplay.statistics.table.columns.totalComputation"), i18n.translate("animation.tracereplay.statistics.table.columns.desiredEffect"), i18n.translate("animation.tracereplay.statistics.table.columns.percentage"))
+					.build();
+			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
+				for (TraceStatisticsItem item : statisticsTableView.getItems()) {
+					csvPrinter.printRecord(item.getName(), item.getTotalComputations(), item.getEffectObserved(), item.getPercentage());
+				}
+			}
+		}
 	}
 
 	@FXML
@@ -224,4 +358,46 @@ public final class TraceStatisticsView extends Stage {
 			}
 		}
 	}
+
+	@FXML
+	private void add() {
+		Machine machine = currentProject.getCurrentMachine();
+		String operation = cbOperation.getSelectionModel().getSelectedItem();
+		if(operation == null) {
+			return;
+		}
+		String computations = tfComputations.getText();
+		String desiredEffects = tfDesiredEffects.getText();
+		TraceStatisticsFormulasItem item = new TraceStatisticsFormulasItem(null, operation, computations, desiredEffects);
+		machine.addValidationTaskIfNotExist(item);
+	}
+
+	@FXML
+	private void edit() {
+		TraceStatisticsFormulasItem oldItem = formulaTableView.getSelectionModel().getSelectedItem();
+		if(oldItem == null) {
+			return;
+		}
+		String operation = cbOperation.getSelectionModel().getSelectedItem();
+		String computations = tfComputations.getText();
+		String desiredEffects = tfDesiredEffects.getText();
+		TraceStatisticsFormulasItem newItem = new TraceStatisticsFormulasItem(oldItem.getId(), operation, computations, desiredEffects);
+		this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldItem, newItem);
+	}
+
+	private void editID(TraceStatisticsFormulasItem item) {
+		final TextInputDialog dialog = new TextInputDialog(item.getId() == null ? "" : item.getId());
+		stageManager.register(dialog);
+		dialog.setTitle(i18n.translate("animation.tracereplay.view.contextMenu.editId"));
+		dialog.setHeaderText(i18n.translate("vomanager.validationTaskId"));
+		dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
+		dialog.showAndWait().map(idText -> {
+			final String id = idText.trim().isEmpty() ? null : idText;
+			TraceStatisticsFormulasItem newItem = new TraceStatisticsFormulasItem(id, item.getOperation(), item.getComputations(), item.getDesiredEffects());
+			this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(item, newItem);
+			return null;
+		});
+	}
+
+
 }

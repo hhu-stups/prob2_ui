@@ -37,6 +37,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.animation.symbolic.SymbolicAnimationItem;
 import de.prob2.ui.animation.symbolic.testcasegeneration.TestCaseGenerationItem;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
+import de.prob2.ui.animation.tracereplay.statistics.TraceStatisticsFormulasItem;
 import de.prob2.ui.chart.ChartFormulaTask;
 import de.prob2.ui.dynamic.VisualizationFormulaTask;
 import de.prob2.ui.internal.CachedEditorState;
@@ -399,6 +400,11 @@ public final class Machine {
 	@JsonIgnore
 	public ObservableList<ChartFormulaTask> getChartFormulaTasks() {
 		return this.getValidationTasksByClass(ChartFormulaTask.class);
+	}
+
+	@JsonIgnore
+	public ObservableList<TraceStatisticsFormulasItem> getTraceStatisticsFormulas() {
+		return this.getValidationTasksByClass(TraceStatisticsFormulasItem.class);
 	}
 
 	@JsonGetter("simulations")
