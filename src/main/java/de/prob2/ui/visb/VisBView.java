@@ -922,7 +922,7 @@ public final class VisBView extends BorderPane {
 
 	private Path showHtmlExportFileChooser() {
 		final FileChooser fileChooser = new FileChooser();
-		FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
+		FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getHtmlFilter();
 		fileChooser.getExtensionFilters().setAll(htmlFilter);
 		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());

@@ -212,6 +212,10 @@ public final class FileChooserManager {
 	public FileChooser.ExtensionFilter getCsvFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv");
 	}
+
+	public FileChooser.ExtensionFilter getHtmlFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
+	}
 	
 	public FileChooser.ExtensionFilter getSvgFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
