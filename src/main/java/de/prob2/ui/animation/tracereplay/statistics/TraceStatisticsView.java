@@ -352,9 +352,9 @@ public final class TraceStatisticsView extends Stage {
 		Machine machine = currentProject.getCurrentMachine();
 		ObservableList<ReplayTrace> traces = machine.getTraces();
 
-		List<Integer> listNumberComputations = new ArrayList();
-		List<Integer> listNumberDesiredEffects = new ArrayList();
-		List<Double> listPercentages = new ArrayList();
+		List<Number> listNumberComputations = new ArrayList();
+		List<Number> listNumberDesiredEffects = new ArrayList();
+		List<Number> listPercentages = new ArrayList();
 
 		for(ReplayTrace replayTrace : traces) {
 			if(replayTrace.selected()) {
@@ -374,10 +374,7 @@ public final class TraceStatisticsView extends Stage {
 							try {
 								numberComputations += Integer.parseInt(computationsResult);
 							} catch (NumberFormatException e) {
-								final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.statistics.alert.header",
-										"animation.tracereplay.statistics.alert.content");
-								alert.initOwner(this);
-								alert.show();
+								showErrorAlertInStatistics(e);
 								throw new IllegalArgumentException("Could not evaluate formula for trace statistics: Not a valid integer", e);
 							}
 							numberDesiredEffects++;
@@ -386,16 +383,13 @@ public final class TraceStatisticsView extends Stage {
 								numberComputations += Integer.parseInt(computationsResult);
 								numberDesiredEffects += Integer.parseInt(desiredEffectsResult);
 							} catch (NumberFormatException e) {
-								final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.statistics.alert.header",
-										"animation.tracereplay.statistics.alert.content");
-								alert.initOwner(this);
-								alert.show();
+								showErrorAlertInStatistics(e);
 								throw new IllegalArgumentException("Could not evaluate formula for trace statistics: Not a valid integer", e);
 							}
 						}
 					}
 				}
-				double percentage = numberComputations == 0 ? 0.0f : 100.0f * numberDesiredEffects / numberComputations;
+				double percentage = computePercentage(numberDesiredEffects, numberComputations);
 				listNumberComputations.add(numberComputations);
 				listNumberDesiredEffects.add(numberDesiredEffects);
 				listPercentages.add(percentage);
@@ -404,20 +398,59 @@ public final class TraceStatisticsView extends Stage {
 		}
 
 		if(!statisticsTableView.getItems().isEmpty()) {
-			double totalComputationsMean = listNumberComputations.stream().mapToInt(Integer::intValue).average().orElse(0.0f);
-			double effectsObservedMean = listNumberDesiredEffects.stream().mapToInt(Integer::intValue).average().orElse(0.0f);
-			double percentagesMean = listPercentages.stream().mapToDouble(Double::doubleValue).average().orElse(0.0f);
+			double totalComputationsMean = computeMeanFromList(listNumberComputations);
+			double effectsObservedMean = computeMeanFromList(listNumberDesiredEffects);
+			double percentagesMean = computeMeanFromList(listPercentages);
 
-			double totalComputationsStd = Math.sqrt(listNumberComputations.stream().mapToDouble(val -> Math.pow(val - totalComputationsMean, 2)).average().orElse(0.0f));
-			double effectsObservedStd = Math.sqrt(listNumberDesiredEffects.stream().mapToDouble(val -> Math.pow(val - effectsObservedMean, 2)).average().orElse(0.0f));
-			double percentagesStd = Math.sqrt(listPercentages.stream().mapToDouble(val -> Math.pow(val - percentagesMean, 2)).average().orElse(0.0f));
+			double totalComputationsStd = computeStdFromList(listNumberComputations, totalComputationsMean);
+			double effectsObservedStd = computeStdFromList(listNumberDesiredEffects, effectsObservedMean);
+			double percentagesStd = computeStdFromList(listPercentages, percentagesMean);
 
-			statisticsTableView.getItems().add(new TraceStatisticsItem(i18n.translate("animation.tracereplay.statistics.table.special.mean"), String.format("%.2f +- %.2f", totalComputationsMean, totalComputationsStd), String.format("%.2f +- %.2f", effectsObservedMean, effectsObservedStd), String.format("%.2f +- %.2f", percentagesMean, percentagesStd)));
+			statisticsTableView.getItems().add(new TraceStatisticsItem(i18n.translate("animation.tracereplay.statistics.table.special.mean"), convertMeanWithStd(totalComputationsMean, totalComputationsStd), convertMeanWithStd(effectsObservedMean, effectsObservedStd), convertMeanWithStd(percentagesMean, percentagesStd)));
 
-			double totalComputationsSum = listNumberComputations.stream().mapToInt(Integer::intValue).sum();
-			double effectsObservedSum = listNumberDesiredEffects.stream().mapToInt(Integer::intValue).sum();
-			statisticsTableView.getItems().add(new TraceStatisticsItem(i18n.translate("animation.tracereplay.statistics.table.special.sum"), String.format("%.2f", totalComputationsSum), String.format("%.2f", effectsObservedSum), String.format("%.2f", totalComputationsSum == 0 ? 0.0f : 100.0f * effectsObservedSum / totalComputationsSum)));
+			double totalComputationsSum = computeSumFromList(listNumberComputations);
+			double effectsObservedSum = computeSumFromList(listNumberDesiredEffects);
+			statisticsTableView.getItems().add(new TraceStatisticsItem(i18n.translate("animation.tracereplay.statistics.table.special.sum"), convertIntToStringForTable(totalComputationsSum), convertIntToStringForTable(effectsObservedSum), convertIntToStringForTable(computePercentage(effectsObservedSum, totalComputationsSum))));
 		}
+	}
+
+	private double computeMeanFromList(List<Number> list) {
+		return list.stream().mapToDouble(val -> val.doubleValue()).average().orElse(0.0f);
+	}
+
+	private double computeStdFromList(List<Number> list, double mean) {
+		return Math.sqrt(list.stream().mapToDouble(val -> Math.pow(val.doubleValue() - mean, 2)).average().orElse(0.0f));
+	}
+
+	private double computeSumFromList(List<Number> list) {
+		return list.stream().mapToDouble(val -> val.doubleValue()).sum();
+	}
+
+	private double computePercentage(double d1, double d2) {
+		double result = 100.0f * d1 / d2;
+		if(!Double.isFinite(result)) {
+			return 0.0;
+		}
+		return result;
+	}
+
+	private String convertIntToStringForTable(int number) {
+		return String.format("%.2f", number);
+	}
+
+	private String convertIntToStringForTable(double number) {
+		return String.format("%.2f", number);
+	}
+
+	private String convertMeanWithStd(double mean, double std) {
+		return String.format("%.2f +- %.2f", mean, std);
+	}
+
+	private void showErrorAlertInStatistics(NumberFormatException e) {
+		final Alert alert = stageManager.makeExceptionAlert(e, "animation.tracereplay.statistics.alert.header",
+				"animation.tracereplay.statistics.alert.content");
+		alert.initOwner(this);
+		alert.show();
 	}
 
 	@FXML
