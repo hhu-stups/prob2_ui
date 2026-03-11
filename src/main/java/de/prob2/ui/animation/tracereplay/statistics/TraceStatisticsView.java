@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -53,11 +54,11 @@ public final class TraceStatisticsView extends Stage {
 	public static final class TraceStatisticsItem {
 
 		private final String name;
-		private final int totalComputations;
-		private final int effectObserved;
-		private final float percentage;
+		private final String totalComputations;
+		private final String effectObserved;
+		private final String percentage;
 
-		public TraceStatisticsItem(String name, int totalComputations, int effectObserved, float percentage) {
+		public TraceStatisticsItem(String name, String totalComputations, String effectObserved, String percentage) {
 			this.name = name;
 			this.totalComputations = totalComputations;
 			this.effectObserved = effectObserved;
@@ -68,15 +69,15 @@ public final class TraceStatisticsView extends Stage {
 			return name;
 		}
 
-		public int getTotalComputations() {
+		public String getTotalComputations() {
 			return totalComputations;
 		}
 
-		public int getEffectObserved() {
+		public String getEffectObserved() {
 			return effectObserved;
 		}
 
-		public float getPercentage() {
+		public String getPercentage() {
 			return percentage;
 		}
 	}
@@ -212,6 +213,41 @@ public final class TraceStatisticsView extends Stage {
 		effectColumn.setCellValueFactory(new PropertyValueFactory<>("effectObserved"));
 		percentageColumn.setCellValueFactory(new PropertyValueFactory<>("percentage"));
 
+		traceColumn.setCellFactory(col -> new TableCell<TraceStatisticsItem, String>() {
+			@Override
+			protected void updateItem(String item, boolean empty) {
+				super.updateItem(item, empty);
+				if(empty || item == null) {
+					setText(null);
+					setStyle("");
+				} else {
+					setText(item);
+					if(item.equals(i18n.translate("animation.tracereplay.statistics.table.special.mean")) || item.equals(i18n.translate("animation.tracereplay.statistics.table.special.sum"))) {
+						setStyle("-fx-font-weight: bold;");
+					} else {
+						setStyle("");
+					}
+				}
+			}
+		});
+
+		statisticsTableView.setSortPolicy(tv -> {
+			Comparator<TraceStatisticsItem> comparator = (a, b) -> {
+				boolean aSpecial = a.equals(i18n.translate("animation.tracereplay.statistics.table.special.mean")) || a.equals(i18n.translate("animation.tracereplay.statistics.table.special.sum"));
+				boolean bSpecial = b.equals(i18n.translate("animation.tracereplay.statistics.table.special.mean")) || b.equals(i18n.translate("animation.tracereplay.statistics.table.special.sum"));
+
+				if(aSpecial && !bSpecial) {
+					return -1;
+				}
+				if(!aSpecial && bSpecial) {
+					return 1;
+				}
+				return 0;
+			};
+			FXCollections.sort(tv.getItems(), tv.getComparator() == null ? comparator.reversed() : comparator.reversed().thenComparing(tv.getComparator()));
+			return true;
+		});
+
 		this.formulaTableView.setRowFactory(param -> {
 			TableRow<TraceStatisticsFormulasItem> row = new TableRow<>();
 
@@ -315,6 +351,11 @@ public final class TraceStatisticsView extends Stage {
 		String desiredEffects = tfDesiredEffects.getText();
 		Machine machine = currentProject.getCurrentMachine();
 		ObservableList<ReplayTrace> traces = machine.getTraces();
+
+		List<Integer> listNumberComputations = new ArrayList();
+		List<Integer> listNumberDesiredEffects = new ArrayList();
+		List<Double> listPercentages = new ArrayList();
+
 		for(ReplayTrace replayTrace : traces) {
 			if(replayTrace.selected()) {
 				Trace trace = replayTrace.getTrace();
@@ -354,8 +395,28 @@ public final class TraceStatisticsView extends Stage {
 						}
 					}
 				}
-				statisticsTableView.getItems().add(new TraceStatisticsItem(replayTrace.getName(), numberComputations, numberDesiredEffects, numberComputations == 0 ? 0.0f : 100.0f * numberDesiredEffects / numberComputations));
+				double percentage = numberComputations == 0 ? 0.0f : 100.0f * numberDesiredEffects / numberComputations;
+				listNumberComputations.add(numberComputations);
+				listNumberDesiredEffects.add(numberDesiredEffects);
+				listPercentages.add(percentage);
+				statisticsTableView.getItems().add(new TraceStatisticsItem(replayTrace.getName(), String.valueOf(numberComputations), String.valueOf(numberDesiredEffects), String.valueOf(percentage)));
 			}
+		}
+
+		if(!statisticsTableView.getItems().isEmpty()) {
+			double totalComputationsMean = listNumberComputations.stream().mapToInt(Integer::intValue).average().orElse(0.0f);
+			double effectsObservedMean = listNumberDesiredEffects.stream().mapToInt(Integer::intValue).average().orElse(0.0f);
+			double percentagesMean = listPercentages.stream().mapToDouble(Double::doubleValue).average().orElse(0.0f);
+
+			double totalComputationsStd = Math.sqrt(listNumberComputations.stream().mapToDouble(val -> Math.pow(val - totalComputationsMean, 2)).average().orElse(0.0f));
+			double effectsObservedStd = Math.sqrt(listNumberDesiredEffects.stream().mapToDouble(val -> Math.pow(val - effectsObservedMean, 2)).average().orElse(0.0f));
+			double percentagesStd = Math.sqrt(listPercentages.stream().mapToDouble(val -> Math.pow(val - percentagesMean, 2)).average().orElse(0.0f));
+
+			statisticsTableView.getItems().add(new TraceStatisticsItem(i18n.translate("animation.tracereplay.statistics.table.special.mean"), String.format("%.2f +- %.2f", totalComputationsMean, totalComputationsStd), String.format("%.2f +- %.2f", effectsObservedMean, effectsObservedStd), String.format("%.2f +- %.2f", percentagesMean, percentagesStd)));
+
+			double totalComputationsSum = listNumberComputations.stream().mapToInt(Integer::intValue).sum();
+			double effectsObservedSum = listNumberDesiredEffects.stream().mapToInt(Integer::intValue).sum();
+			statisticsTableView.getItems().add(new TraceStatisticsItem(i18n.translate("animation.tracereplay.statistics.table.special.sum"), String.format("%.2f", totalComputationsSum), String.format("%.2f", effectsObservedSum), String.format("%.2f", totalComputationsSum == 0 ? 0.0f : 100.0f * effectsObservedSum / totalComputationsSum)));
 		}
 	}
 
