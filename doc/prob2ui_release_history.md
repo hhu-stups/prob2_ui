@@ -6,6 +6,12 @@ Downloads of the current release and snapshot development builds can be found on
 
 * Updated the ProB core to version 1.16.0 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
 * Removed the multi-platform shadow jar build due to being not properly supported by JavaFX and incompatible with multiple processor architectures. Please use the platform-specific binaries instead, which are available for most OSes and architectures supported by ProB. On systems that cannot use these binaries, ProB2-UI must now be built from source.
+* Added support for ProB's new sequent prover mode:
+  * Enabled to load `.probpo` files to use the animator for interactive proving of Event-B proof obligations
+  * Added export of proof traces as standalone HTML, BPR for replay in Rodin, and proof tree visualisation
+* Improved inspection of proof obligations for Rodin projects
+  * Added stage showing the proof sequent and type information
+  * Added export of Rodin proof obligations as Prolog facts for use with the ProB Disprover and ProB Sequent Prover (`.probpo` files)
 
 ## Version 1.3.1 (2026-01-22)
 
