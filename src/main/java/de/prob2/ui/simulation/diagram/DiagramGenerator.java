@@ -244,29 +244,33 @@ public class DiagramGenerator {
 			} else {
 				opConfig = (ActivationOperationConfiguration) activation;
 				if(!activation.getId().equals("$initialise_machine")){
-					edge = new DiagramEdge(opConfig.getId(), Collections.singletonList(opConfig.getExecute()+"_event"), Collections.singletonList(opConfig.getAfter()), "");
-					activating.add(edge);
+					for(String op : opConfig.getExecute()) {
+						edge = new DiagramEdge(opConfig.getId(), Collections.singletonList(op + "_event"), Collections.singletonList(opConfig.getAfter()), "");
+						activating.add(edge);
+					}
 				}
 				if (opConfig.getActivating() != null) {
-					edge = new DiagramEdge(opConfig.getExecute()+"_event", new ArrayList<>(opConfig.getActivating()), opConfig.getActivating().stream().map(n -> "Activating").collect(Collectors.toList()), "");
-					boolean isPresent = false;
+					for(String op : opConfig.getExecute()) {
+						edge = new DiagramEdge(op + "_event", new ArrayList<>(opConfig.getActivating()), opConfig.getActivating().stream().map(n -> "Activating").collect(Collectors.toList()), "");
+						boolean isPresent = false;
 
-					//If EdgeObject is already present: Add edges from new edge to old edge if applicable, then discard new object
-					for (DiagramEdge compareEdge : activating) {
-						if (compareEdge.getFrom().equals(edge.getFrom())) {
-							if(edge.getTo() != null && compareEdge.getTo() != null) {
-								edge.getTo().stream().filter(Objects::nonNull).forEach(x -> {
-									if (!compareEdge.getTo().contains(x)) {
-										compareEdge.getTo().add(x);
-										compareEdge.getEdgeLabel().add("activating");
-									}
-								});
+						//If EdgeObject is already present: Add edges from new edge to old edge if applicable, then discard new object
+						for (DiagramEdge compareEdge : activating) {
+							if (compareEdge.getFrom().equals(edge.getFrom())) {
+								if (edge.getTo() != null && compareEdge.getTo() != null) {
+									edge.getTo().stream().filter(Objects::nonNull).forEach(x -> {
+										if (!compareEdge.getTo().contains(x)) {
+											compareEdge.getTo().add(x);
+											compareEdge.getEdgeLabel().add("activating");
+										}
+									});
+								}
+								isPresent = true;
 							}
-							isPresent = true;
 						}
-					}
-					if (!isPresent) {
-						activating.add(edge);
+						if (!isPresent) {
+							activating.add(edge);
+						}
 					}
 				}
 				
