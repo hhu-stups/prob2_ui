@@ -121,13 +121,13 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		lbOpName.getStyleClass().add("information");
 
 		if (currentTrace.getModel() instanceof XTLModel) {
-			TextField tfOpName = new TextField(item.getExecute());
+			TextField tfOpName = new TextField(item.getExecute().get(0)); // TODO: Handle multiple events
 			tfOpName.textProperty().addListener((observable, from, to) -> {
 				if(from != null && !from.equals(to)) {
 					savedProperty.set(false);
 				}
 				if(to != null) {
-					item.setExecute(to);
+					item.setExecute(Arrays.asList(to)); // TODO: Handle multiple events
 				}
 			});
 			tfOpName.disableProperty().bind(this.runningProperty);
@@ -140,11 +140,11 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 					savedProperty.set(false);
 				}
 				if(to != null) {
-					item.setExecute(to);
+					item.setExecute(Arrays.asList(to)); // TODO: Handle multiple events
 				}
 			});
 			cbOpName.disableProperty().bind(this.runningProperty);
-			cbOpName.getSelectionModel().select(item.getExecute());
+			cbOpName.getSelectionModel().select(item.getExecute().get(0)); // TODO: Handle multiple events
 			this.itemBox.getChildren().add(new HBox(lbOpName, createHelpIcon("operation"), cbOpName));
 		}
 

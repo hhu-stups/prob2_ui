@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -266,7 +267,7 @@ public final class SimulationFileHandler {
 
 		if (!loadedMachine.getConstantNames().isEmpty()) {
 			activations.add(new ActivationOperationConfiguration(
-				SETUP_CONSTANTS_NAME, SETUP_CONSTANTS_NAME, 
+				SETUP_CONSTANTS_NAME, Arrays.asList(SETUP_CONSTANTS_NAME),
 				"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, 
 				null, false, null, null, "Activation SETUP_CONSTANTS"
 			));
@@ -274,14 +275,14 @@ public final class SimulationFileHandler {
 
 		var operations = loadedMachine.getOperationNames();
 		activations.add(new ActivationOperationConfiguration(
-			INITIALISE_MACHINE_NAME, INITIALISE_MACHINE_NAME,
+			INITIALISE_MACHINE_NAME, Arrays.asList(INITIALISE_MACHINE_NAME),
 			"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST,
 			List.copyOf(operations), true, null, null, "Activation for INITIALISATION"
 		));
 
 		for (var op : operations) {
 			activations.add(new ActivationOperationConfiguration(
-				op, op, 
+				op, Arrays.asList(op),
 				"100", 0, "btrue", ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, 
 				List.copyOf(operations), true, null, null, "Activation for " + op
 			));

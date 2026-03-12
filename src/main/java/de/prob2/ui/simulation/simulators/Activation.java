@@ -8,7 +8,7 @@ import de.prob2.ui.simulation.configuration.TransitionSelection;
 
 public record Activation(
 		String id,
-		String operation,
+		List<String> operation,
 		int time,
 		String additionalGuards,
 		ActivationKind activationKind,

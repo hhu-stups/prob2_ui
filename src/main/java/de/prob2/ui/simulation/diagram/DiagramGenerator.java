@@ -155,7 +155,9 @@ public class DiagramGenerator {
 					eventColour = "aqua";
 				}
 				if (!activation.getId().equals("$setup_constants")) {
-					diaNode.add(new DiagramNode(opConfig.getExecute()+"_event", eventColour, opConfig.getExecute(), "ellipse"));
+					for(String execute : opConfig.getExecute()) {
+						diaNode.add(new DiagramNode(execute + "_event", eventColour, execute, "ellipse"));
+					}
 				}
 				
 				if(!activation.getId().equals("$initialise_machine") && !activation.getId().equals("$setup_constants")){
@@ -188,9 +190,13 @@ public class DiagramGenerator {
 				//Discard static events mark differentiate events and OperationConfigurations
 				if (!activation.getId().equals("$setup_constants")) {
 					if (opConfig.getWithPredicate() == null) {
-						diaNode.add(new DiagramNode(opConfig.getExecute()+"_event","white",opConfig.getExecute(), "ellipse"));
+						for(String execute : opConfig.getExecute()) {
+							diaNode.add(new DiagramNode(execute + "_event", "white",execute, "ellipse"));
+						}
 					} else {
-						diaNode.add(new ComplexListener(opConfig.getExecute()+"_event", "white", opConfig.getExecute(), "ellipse", opConfig.getWithPredicate()));
+						for(String execute : opConfig.getExecute()) {
+							diaNode.add(new ComplexListener(execute + "_event", "white",execute, "ellipse", opConfig.getWithPredicate()));
+						}
 					}
 				}
 				if(!activation.getId().equals("$initialise_machine") && !activation.getId().equals("$setup_constants")){

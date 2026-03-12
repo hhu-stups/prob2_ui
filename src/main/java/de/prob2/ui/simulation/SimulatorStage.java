@@ -973,7 +973,7 @@ public final class SimulatorStage extends Stage {
 	private void addDirectActivation() {
 		simulationDiagramItems.getItems().add(new ActivationOperationConfiguration(
 				i18n.translate("simulation.item.newDirectActivation"),
-				"Event",
+				Arrays.asList("Event"),
 				"0",
 				0,
 				null,

@@ -33,7 +33,7 @@ import de.prob.statespace.Transition;
 })
 public final class ActivationOperationConfiguration extends DiagramConfiguration.NonUi {
 
-	private String execute;
+	private List<String> execute;
 	private String after;
 	private int priority;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -55,7 +55,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	@JsonCreator
 	public ActivationOperationConfiguration(
 			@JsonProperty(value = "id", required = true) String id,
-			@JsonProperty(value = "execute", required = true) String op,
+			@JsonProperty(value = "execute", required = true) List<String> op,
 			@JsonProperty(value = "after", defaultValue = "0") String after,
 			@JsonProperty(value = "priority", defaultValue = "0") Integer priority,
 			@JsonProperty("additionalGuards") String additionalGuards,
@@ -72,7 +72,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		super(id, comment);
 		this.execute = Objects.requireNonNull(op, "execute");
 		this.after = after != null && !after.isEmpty() ? after : "0";
-		this.priority = !Transition.isArtificialTransitionName(this.execute) && priority != null ? priority : 0;
+		this.priority = this.execute.stream().allMatch(e -> !Transition.isArtificialTransitionName(e)) && priority != null ? priority : 0;
 		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
 		this.activationKind = activationKind != null ? activationKind : ActivationKind.MULTI;
 		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
@@ -85,11 +85,11 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	}
 
 	@JsonProperty("execute")
-	public String getExecute() {
+	public List<String> getExecute() {
 		return this.execute;
 	}
 
-	public void setExecute(String execute) {
+	public void setExecute(List<String> execute) {
 		this.execute = execute;
 	}
 
@@ -116,11 +116,11 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	@JsonGetter("priority")
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer getPriorityForJson() {
-		return Transition.isArtificialTransitionName(this.getExecute()) || this.priority == 0 ? null : this.priority;
+		return (this.getExecute().stream().anyMatch(e -> Transition.isArtificialTransitionName(e)) || this.priority == 0) ? null : this.priority;
 	}
 
 	public void setPriority(int priority) {
-		if (!Transition.isArtificialTransitionName(this.getExecute())) {
+		if (this.getExecute().stream().allMatch(e -> !Transition.isArtificialTransitionName(e))) {
 			this.priority = priority;
 		}
 	}

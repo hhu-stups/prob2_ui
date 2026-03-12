@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.simulators;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -151,19 +152,23 @@ public class SimulationEventHandler {
 	}
 
 	public Transition selectTransition(Activation activation, State currentState, Map<String, String> variables) {
-		String opName = activation.operation();
+		List<String> operations = activation.operation();
 		String predicate = buildPredicateForTransition(currentState, activation);
 		return switch (activation.transitionSelection()) {
 			case FIRST -> {
-				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
-				if (!transitions.isEmpty()) {
-					yield transitions.get(0);
-				} else {
-					yield null;
+				for(String opName : operations) {
+					List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
+					if (!transitions.isEmpty()) {
+						yield transitions.get(0);
+					}
 				}
+				yield null;
 			}
 			case UNIFORM -> {
-				List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation());
+				List<Transition> transitions = new ArrayList();
+				for(String opName : operations) {
+					transitions.addAll(cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation()));
+				}
 				int len = transitions.size();
 				if (len == 1) {
 					yield transitions.get(0);
@@ -260,7 +265,7 @@ public class SimulationEventHandler {
 			return;
 		}
 		String id = activationOperationConfiguration.getId();
-		String opName = activationOperationConfiguration.getExecute();
+		List<String> operations = activationOperationConfiguration.getExecute();
 		String time = activationOperationConfiguration.getAfter();
 		ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
 		String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
@@ -276,7 +281,7 @@ public class SimulationEventHandler {
 		}
 		String withPredicate = activationOperationConfiguration.getWithPredicate();
 
-		var activation = new Activation(id, opName, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
+		var activation = new Activation(id, operations, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
 		switch (activationKind) {
 			case MULTI:
 				activateMultiOperations(activationsForId, activation);
