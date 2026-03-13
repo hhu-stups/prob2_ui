@@ -27,8 +27,16 @@ import javafx.beans.property.SimpleListProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.control.Alert;
+import de.prob2.ui.simulation.SimulatorStage;
+import com.google.inject.Injector;
+import de.prob2.ui.internal.StageManager;
+
 @Singleton
 public final class RealTimeSimulator extends Simulator {
+
+	private final Injector injector;
+
 	private final Scheduler scheduler;
 
 	private final CurrentTrace currentTrace;
@@ -44,8 +52,9 @@ public final class RealTimeSimulator extends Simulator {
 	private final ListProperty<List<Activation>> activationsForLoggedTimestamps;
 
 	@Inject
-	public RealTimeSimulator(final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
+	public RealTimeSimulator(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
 		super(currentTrace, currentProject, objectMapperProvider);
+		this.injector = injector;
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;
@@ -151,6 +160,15 @@ public final class RealTimeSimulator extends Simulator {
 			}
 		});
 		return result;
+	}
+
+	@Override
+	protected void handleErrorWhenExecuted(String id) {
+		Platform.runLater(() -> {
+			final Alert alert = injector.getInstance(StageManager.class).makeAlert(Alert.AlertType.WARNING, "simulation.error.header.errorWhenExecuted", "simulation.error.body.errorWhenExecuted", id);
+			alert.initOwner(injector.getInstance(SimulatorStage.class));
+			alert.showAndWait();
+		});
 	}
 
 	public List<Integer> getTimestampsForLogging() {

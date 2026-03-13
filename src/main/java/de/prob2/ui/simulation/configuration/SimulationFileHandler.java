@@ -269,7 +269,7 @@ public final class SimulationFileHandler {
 			activations.add(new ActivationOperationConfiguration(
 				SETUP_CONSTANTS_NAME, Arrays.asList(SETUP_CONSTANTS_NAME),
 				"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, 
-				null, false, null, null, "Activation SETUP_CONSTANTS"
+				null, false, null, null, true, "Activation SETUP_CONSTANTS"
 			));
 		}
 
@@ -277,14 +277,14 @@ public final class SimulationFileHandler {
 		activations.add(new ActivationOperationConfiguration(
 			INITIALISE_MACHINE_NAME, Arrays.asList(INITIALISE_MACHINE_NAME),
 			"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST,
-			List.copyOf(operations), true, null, null, "Activation for INITIALISATION"
+			List.copyOf(operations), true, null, null, true, "Activation for INITIALISATION"
 		));
 
 		for (var op : operations) {
 			activations.add(new ActivationOperationConfiguration(
 				op, Arrays.asList(op),
 				"100", 0, "btrue", ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, 
-				List.copyOf(operations), true, null, null, "Activation for " + op
+				List.copyOf(operations), true, null, null, false, "Activation for " + op
 			));
 		}
 

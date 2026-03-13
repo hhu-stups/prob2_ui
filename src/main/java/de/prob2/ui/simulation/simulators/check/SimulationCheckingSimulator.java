@@ -291,6 +291,11 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	}
 
 	@Override
+	protected void handleErrorWhenExecuted(String id) {
+		// Error when executed is only shown for Real Time Simulation
+	}
+
+	@Override
 	public void check() {
 		if (this.resultingTraces.size() == numberExecutions) {
 			this.result = MonteCarloCheckResult.SUCCESS;

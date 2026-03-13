@@ -161,12 +161,12 @@ public abstract class Simulator {
 	private ActivationOperationConfiguration createDynamicActivation(String id, List<String> op, String time, int priority, String additionalGuards, ActivationKind activationKind,
 	                                                                 Map<String, String> fixedVariables, Map<String, Map<String, String>> probabilisticVariables, TransitionSelection transitionSelection,
 	                                                                 List<String> activations, boolean activatingOnlyWhenExecuted,
-	                                                                 Map<String, String> updating, String withPredicate) {
+	                                                                 Map<String, String> updating, String withPredicate, boolean errorWhenNotExecuted) {
 		if(id == null || op == null) {
 			throw new RuntimeException("Provided operation is null. There is an error when sending the operation to be executed from the external simulation.");
 		}
 
-		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, transitionSelection, activations, activatingOnlyWhenExecuted, updating, withPredicate, "");
+		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, transitionSelection, activations, activatingOnlyWhenExecuted, updating, withPredicate, errorWhenNotExecuted, "");
 		if(!activationConfigurationsSorted.contains(activationConfig)) {
 			this.activationConfigurationsSorted.add(activationConfig);
 		}
@@ -307,10 +307,15 @@ public abstract class Simulator {
 					simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
 					processExternalConfiguration(newTrace);
 				}
-			} else if(!activationConfig.isActivatingOnlyWhenExecuted()) {
-				simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
-				simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
-				processExternalConfiguration(newTrace);
+			} else {
+				if (!activationConfig.isActivatingOnlyWhenExecuted()) {
+					simulationEventHandler.activateOperations(newTrace.getCurrentState(), activationConfiguration, new ArrayList<>(), "1=1");
+					simulationEventHandler.updateVariables(newTrace.getCurrentState(), variables, activationConfig.getUpdating());
+					processExternalConfiguration(newTrace);
+				}
+				if(activationConfig.isErrorWhenNotExecuted()) {
+					this.handleErrorWhenExecuted(id);
+				}
 			}
 		}
 		return newTrace;
@@ -327,7 +332,7 @@ public abstract class Simulator {
 
 				ActivationOperationConfiguration newActivation = createDynamicActivation(step.getOp(), Arrays.asList(step.getOp()), step.getDelta(), 0,
 						null, ActivationKind.SINGLE, null, null, TransitionSelection.FIRST,
-						null, true, null, step.getPredicate());
+						null, true, null, step.getPredicate(), false);
 				simulationEventHandler.activateOperation(newTrace.getCurrentState(), newActivation, new ArrayList<>(), "1=1");
 			}
 		}
@@ -344,6 +349,8 @@ public abstract class Simulator {
 	public boolean endingConditionReached(Trace trace) {
 		return noActivationQueued;
 	}
+
+	protected abstract void handleErrorWhenExecuted(String id);
 
 	public ISimulationModelConfiguration getConfig() {
 		return config;

@@ -985,6 +985,7 @@ public final class SimulatorStage extends Stage {
 				true,
 				null,
 				null,
+				false,
 				""
 		));
 	}

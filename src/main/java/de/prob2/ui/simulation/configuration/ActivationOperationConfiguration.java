@@ -29,7 +29,8 @@ import de.prob.statespace.Transition;
 		"activating",
 		"activatingOnlyWhenExecuted",
 		"updating",
-		"withPredicate"
+		"withPredicate",
+		"errorWhenNotExecuted"
 })
 public final class ActivationOperationConfiguration extends DiagramConfiguration.NonUi {
 
@@ -51,6 +52,8 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	private Map<String, String> updating;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private String withPredicate;
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private boolean errorWhenNotExecuted;
 
 	@JsonCreator
 	public ActivationOperationConfiguration(
@@ -67,6 +70,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 			@JsonProperty(value = "activatingOnlyWhenExecuted", defaultValue = "true") Boolean activatingOnlyWhenExecuted,
 			@JsonProperty("updating") Map<String, String> updating,
 			@JsonProperty("withPredicate") String withPredicate,
+			@JsonProperty(value = "errorWhenNotExecuted", defaultValue = "false") Boolean errorWhenNotExecuted,
 			@JsonProperty("comment") String comment
 	) {
 		super(id, comment);
@@ -82,6 +86,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted != null ? activatingOnlyWhenExecuted : true;
 		this.updating = updating != null ? Map.copyOf(updating) : Map.of();
 		this.withPredicate = withPredicate != null && !withPredicate.isEmpty() && !"1=1".equals(withPredicate) ? withPredicate : null;
+		this.errorWhenNotExecuted =  errorWhenNotExecuted != null ? errorWhenNotExecuted : false;
 	}
 
 	@JsonProperty("execute")
@@ -224,6 +229,21 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		this.withPredicate = withPredicate != null && !withPredicate.isEmpty() && !"1=1".equals(withPredicate) ? withPredicate : null;
 	}
 
+	@JsonIgnore
+	public boolean isErrorWhenNotExecuted() {
+		return this.errorWhenNotExecuted;
+	}
+
+	@JsonGetter("errorWhenNotExecuted")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Boolean isErrorWhenNotExecutedForJson() {
+		return this.errorWhenNotExecuted ? null : false;
+	}
+
+	public void setErrorWhenNotExecuted(boolean errorWhenNotExecuted) {
+		this.errorWhenNotExecuted = errorWhenNotExecuted;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -259,6 +279,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 				.add("activatingOnlyWhenExecuted", this.isActivatingOnlyWhenExecuted())
 				.add("updating", this.getUpdating())
 				.add("withPredicate", this.getWithPredicate())
+				.add("errorWhenNotExecuted", this.isErrorWhenNotExecuted())
 				.toString();
 	}
 }
