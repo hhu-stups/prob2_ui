@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 	"operation",
 	"computations",
 	"desiredEffects",
+	"evaluateChanged",
 	"selected",
 })
 public class TraceStatisticsFormulasItem implements IValidationTask {
@@ -48,6 +49,7 @@ public class TraceStatisticsFormulasItem implements IValidationTask {
 	private final String operation;
 	private final String computations;
 	private final String desiredEffects;
+	private boolean evaluateChanged;
 	@JsonIgnore
 	private final ObjectProperty<CheckingStatus> status;
 
@@ -56,12 +58,14 @@ public class TraceStatisticsFormulasItem implements IValidationTask {
 			@JsonProperty("id") final String id,
 			@JsonProperty("operation") final String operation,
 			@JsonProperty("computations") final String computations,
-			@JsonProperty("desiredEffects") final String desiredEffects
+			@JsonProperty("desiredEffects") final String desiredEffects,
+			@JsonProperty("evaluateChanged") final Boolean evaluateChanged
 	) {
 		this.id = id;
 		this.operation = Objects.requireNonNull(operation, "operation");
 		this.computations = Objects.requireNonNull(computations, "computations");
 		this.desiredEffects = Objects.requireNonNull(desiredEffects, "desiredEffects");
+		this.evaluateChanged = evaluateChanged == null ? false : evaluateChanged;
 		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 	}
 
@@ -90,6 +94,10 @@ public class TraceStatisticsFormulasItem implements IValidationTask {
 		return desiredEffects;
 	}
 
+	public boolean evaluateChanged() {
+		return evaluateChanged;
+	}
+
 	@Override
 	public ValidationTaskType<TraceStatisticsFormulasItem> getTaskType() {
 		return BuiltinValidationTaskTypes.TRACE_STATISTICS_FORMULAS;
@@ -102,7 +110,7 @@ public class TraceStatisticsFormulasItem implements IValidationTask {
 
 	@Override
 	public String getTaskDescription(I18n i18n) {
-		return "Operation: " + this.getOperation() + ", Computations: " + this.getComputations() + ", Desired Effects: " + this.getDesiredEffects();
+		return "Operation: " + this.getOperation() + ", Computations: " + this.getComputations() + ", Desired Effects: " + this.getDesiredEffects() + ", Evaluate Changed: " + this.evaluateChanged();
 	}
 
 	@Override
@@ -136,7 +144,7 @@ public class TraceStatisticsFormulasItem implements IValidationTask {
 
 	@Override
 	public TraceStatisticsFormulasItem copy() {
-		return new TraceStatisticsFormulasItem(this.id, this.operation, this.computations, this.desiredEffects);
+		return new TraceStatisticsFormulasItem(this.id, this.operation, this.computations, this.desiredEffects, this.evaluateChanged);
 	}
 
 	@Override
@@ -145,7 +153,8 @@ public class TraceStatisticsFormulasItem implements IValidationTask {
 				&& Objects.equals(this.getId(), that.getId())
 				&& Objects.equals(this.getOperation(), that.getOperation())
 				&& Objects.equals(this.getComputations(), that.getComputations())
-				&& Objects.equals(this.getDesiredEffects(), that.getDesiredEffects());
+				&& Objects.equals(this.getDesiredEffects(), that.getDesiredEffects())
+				&& Objects.equals(this.evaluateChanged(), that.evaluateChanged());
 	}
 
 	@Override
@@ -155,6 +164,7 @@ public class TraceStatisticsFormulasItem implements IValidationTask {
 				.add("operation", this.getOperation())
 				.add("computations", this.getComputations())
 				.add("desiredEffects", this.getDesiredEffects())
+				.add("evaluateChanged", this.evaluateChanged())
 				.toString();
 	}
 

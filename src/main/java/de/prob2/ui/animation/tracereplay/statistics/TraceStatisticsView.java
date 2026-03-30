@@ -82,6 +82,10 @@ public final class TraceStatisticsView extends Stage {
 		}
 	}
 
+	private static final String ALL_OPERATIONS = "(all)";
+
+	private static final String FINAL = "(final)";
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceStatisticsView.class);
 
 	@FXML
@@ -101,6 +105,9 @@ public final class TraceStatisticsView extends Stage {
 
 	@FXML
 	private TextField tfComputations;
+
+	@FXML
+	private CheckBox cbEvaluateChanged;
 
 	@FXML
 	private TableView<TraceStatisticsFormulasItem> formulaTableView;
@@ -183,6 +190,8 @@ public final class TraceStatisticsView extends Stage {
 				.map(loadedMachine::getMachineOperationInfo)
 				.filter(OperationInfo::isTopLevel)
 				.map(OperationInfo::getOperationName).toList());
+		cbOperation.getItems().add(ALL_OPERATIONS);
+		cbOperation.getItems().add(FINAL);
 		cbOperation.getItems().addAll(operations);
 		Machine machine = currentProject.getCurrentMachine();
 		if (machine != null) {
@@ -198,6 +207,7 @@ public final class TraceStatisticsView extends Stage {
 			cbOperation.getSelectionModel().select(to.getOperation());
 			tfComputations.setText(to.getComputations());
 			tfDesiredEffects.setText(to.getDesiredEffects());
+			cbEvaluateChanged.setSelected(to.evaluateChanged());
 		});
 	}
 
@@ -349,6 +359,7 @@ public final class TraceStatisticsView extends Stage {
 		String selectedOperation = cbOperation.getSelectionModel().getSelectedItem();
 		String computations = tfComputations.getText();
 		String desiredEffects = tfDesiredEffects.getText();
+		boolean evaluateChanged = cbEvaluateChanged.isSelected();
 		Machine machine = currentProject.getCurrentMachine();
 		ObservableList<ReplayTrace> traces = machine.getTraces();
 
@@ -363,13 +374,23 @@ public final class TraceStatisticsView extends Stage {
 					continue;
 				}
 				int numberComputations = 0;
-				int numberDesiredEffects = 0;
+				double numberDesiredEffects = 0;
 				List<Transition> transitions = trace.getTransitionList();
+				int i = -1;
 				for(Transition transition : transitions) {
-					if(transition.getName().equals(selectedOperation)) {
+					i++;
+					if(FINAL.equals(selectedOperation) || ALL_OPERATIONS.equals(selectedOperation) || transition.getName().equals(selectedOperation)) {
+						State source = transition.getSource();
 						State destination = transition.getDestination();
+						if(FINAL.equals(selectedOperation) && i < transitions.size() - 1) {
+							continue;
+						}
+						if(!destination.isInitialised()) {
+							continue;
+						}
 						String computationsResult = destination.eval(computations).toString();
 						String desiredEffectsResult = destination.eval(desiredEffects).toString();
+						String previousEffectsResult = source.eval(desiredEffects).toString();
 						if("TRUE".equals(desiredEffectsResult)) {
 							try {
 								numberComputations += Integer.parseInt(computationsResult);
@@ -377,14 +398,28 @@ public final class TraceStatisticsView extends Stage {
 								showErrorAlertInStatistics(e);
 								throw new IllegalArgumentException("Could not evaluate formula for trace statistics: Not a valid integer", e);
 							}
-							numberDesiredEffects++;
+							if(evaluateChanged) {
+								if("FALSE".equals(previousEffectsResult)) {
+									numberDesiredEffects++;
+								}
+							} else {
+								numberDesiredEffects++;
+							}
 						} else {
 							try {
 								numberComputations += Integer.parseInt(computationsResult);
-								numberDesiredEffects += Integer.parseInt(desiredEffectsResult);
+								if(evaluateChanged) {
+									numberDesiredEffects += Double.parseDouble(desiredEffectsResult) - Double.parseDouble(previousEffectsResult);
+								} else {
+									numberDesiredEffects += Double.parseDouble(desiredEffectsResult);
+								}
 							} catch (NumberFormatException e) {
-								showErrorAlertInStatistics(e);
-								throw new IllegalArgumentException("Could not evaluate formula for trace statistics: Not a valid integer", e);
+								if(evaluateChanged) {
+									numberDesiredEffects += desiredEffectsResult.equals(previousEffectsResult) ? 0.0 : 1.0;
+								} else {
+									showErrorAlertInStatistics(e);
+									throw new IllegalArgumentException("Could not evaluate formula for trace statistics: Not a valid integer", e);
+								}
 							}
 						}
 					}
@@ -462,7 +497,8 @@ public final class TraceStatisticsView extends Stage {
 		}
 		String computations = tfComputations.getText();
 		String desiredEffects = tfDesiredEffects.getText();
-		TraceStatisticsFormulasItem item = new TraceStatisticsFormulasItem(null, operation, computations, desiredEffects);
+		boolean evaluateChanged = cbEvaluateChanged.isSelected();
+		TraceStatisticsFormulasItem item = new TraceStatisticsFormulasItem(null, operation, computations, desiredEffects, evaluateChanged);
 		machine.addValidationTaskIfNotExist(item);
 	}
 
@@ -475,7 +511,8 @@ public final class TraceStatisticsView extends Stage {
 		String operation = cbOperation.getSelectionModel().getSelectedItem();
 		String computations = tfComputations.getText();
 		String desiredEffects = tfDesiredEffects.getText();
-		TraceStatisticsFormulasItem newItem = new TraceStatisticsFormulasItem(oldItem.getId(), operation, computations, desiredEffects);
+		boolean evaluateChanged = cbEvaluateChanged.isSelected();
+		TraceStatisticsFormulasItem newItem = new TraceStatisticsFormulasItem(oldItem.getId(), operation, computations, desiredEffects, evaluateChanged);
 		this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(oldItem, newItem);
 	}
 
@@ -487,7 +524,7 @@ public final class TraceStatisticsView extends Stage {
 		dialog.getEditor().setPromptText(i18n.translate("common.optionalPlaceholder"));
 		dialog.showAndWait().map(idText -> {
 			final String id = idText.trim().isEmpty() ? null : idText;
-			TraceStatisticsFormulasItem newItem = new TraceStatisticsFormulasItem(id, item.getOperation(), item.getComputations(), item.getDesiredEffects());
+			TraceStatisticsFormulasItem newItem = new TraceStatisticsFormulasItem(id, item.getOperation(), item.getComputations(), item.getDesiredEffects(), item.evaluateChanged());
 			this.currentProject.getCurrentMachine().replaceValidationTaskIfNotExist(item, newItem);
 			return null;
 		});
