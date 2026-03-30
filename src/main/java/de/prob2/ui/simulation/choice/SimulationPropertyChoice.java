@@ -63,7 +63,8 @@ public final class SimulationPropertyChoice extends GridPane {
 
 	private final List<SimulationCheckingType> EXPRESSION_TYPES = Arrays.asList(SimulationCheckingType.AVERAGE, SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS, SimulationCheckingType.SUM, SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS,
 			SimulationCheckingType.MINIMUM, SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS,
-			SimulationCheckingType.MAXIMUM, SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS);
+			SimulationCheckingType.MAXIMUM, SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS,
+			SimulationCheckingType.FINAL_VALUE);
 
 
 	@FXML
@@ -196,13 +197,15 @@ public final class SimulationPropertyChoice extends GridPane {
 			checkingChoice.getItems().addAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS),
 					new SimulationPropertyItem(SimulationCheckingType.SUM), new SimulationPropertyItem(SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS),
 					new SimulationPropertyItem(SimulationCheckingType.MINIMUM), new SimulationPropertyItem(SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS),
-					new SimulationPropertyItem(SimulationCheckingType.MAXIMUM), new SimulationPropertyItem(SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS));
+					new SimulationPropertyItem(SimulationCheckingType.MAXIMUM), new SimulationPropertyItem(SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS),
+					new SimulationPropertyItem(SimulationCheckingType.FINAL_VALUE));
 			return;
 		}
 		checkingChoice.getItems().removeAll(new SimulationPropertyItem(SimulationCheckingType.AVERAGE), new SimulationPropertyItem(SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS),
 				new SimulationPropertyItem(SimulationCheckingType.SUM), new SimulationPropertyItem(SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS),
 				new SimulationPropertyItem(SimulationCheckingType.MINIMUM), new SimulationPropertyItem(SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS),
-				new SimulationPropertyItem(SimulationCheckingType.MAXIMUM), new SimulationPropertyItem(SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS));
+				new SimulationPropertyItem(SimulationCheckingType.MAXIMUM), new SimulationPropertyItem(SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS),
+				new SimulationPropertyItem(SimulationCheckingType.FINAL_VALUE));
 	}
 
 	public ChoiceBox<SimulationPropertyItem> getCheckingChoice() {

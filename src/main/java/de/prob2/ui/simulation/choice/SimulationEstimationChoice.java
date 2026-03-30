@@ -90,7 +90,8 @@ public class SimulationEstimationChoice extends GridPane {
 		boolean estimateProbability = checkingType != SimulationCheckingType.AVERAGE && checkingType != SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS &&
 				checkingType != SimulationCheckingType.SUM && checkingType != SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS &&
 				checkingType != SimulationCheckingType.MINIMUM && checkingType != SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS &&
-				checkingType != SimulationCheckingType.MAXIMUM && checkingType != SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS;
+				checkingType != SimulationCheckingType.MAXIMUM && checkingType != SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS &&
+				checkingType != SimulationCheckingType.FINAL_VALUE;
 
 		try {
 			double desiredValue = Double.parseDouble(tfDesiredValue.getText());

@@ -12,6 +12,7 @@ public enum SimulationCheckingType {
 	SUM("simulation.type.property.sum"),
 	MINIMUM("simulation.type.property.minimum"),
 	MAXIMUM("simulation.type.property.maximum"),
+	FINAL_VALUE("simulation.type.property.finalValue"),
 	AVERAGE_MEAN_BETWEEN_STEPS("simulation.type.property.averageBetweenSteps"),
 	SUM_MEAN_BETWEEN_STEPS("simulation.type.property.sumBetweenSteps"),
 	MINIMUM_MEAN_BETWEEN_STEPS("simulation.type.property.minimumBetweenSteps"),
