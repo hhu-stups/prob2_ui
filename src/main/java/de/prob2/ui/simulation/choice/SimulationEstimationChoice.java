@@ -101,10 +101,9 @@ public class SimulationEstimationChoice extends GridPane {
 					case MINIMUM:
 					case MAXIMUM:
 					case MEAN:
-						if (desiredValue <= 0.0 || desiredValue >= 1.0 || epsilon <= 0.0) {
+						if (desiredValue < 0.0 || desiredValue > 1.0 || epsilon < 0.0) {
 							return false;
 						}
-						return epsilon <= Math.min(desiredValue, 1 - desiredValue);
 					default:
 						break;
 				}
