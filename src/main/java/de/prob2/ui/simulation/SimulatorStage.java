@@ -701,10 +701,9 @@ public final class SimulatorStage extends Stage {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
 			SimulationModel simulationModel = new SimulationModel(resolvedPath);
 			if(!currentProject.getCurrentMachine().getSimulations().contains(simulationModel)) {
-				currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
-			} else {
-				cbSimulation.getSelectionModel().select(simulationModel);
+				currentProject.getCurrentMachine().getSimulations().add(simulationModel);
 			}
+			cbSimulation.getSelectionModel().select(simulationModel);
 		}
 	}
 
