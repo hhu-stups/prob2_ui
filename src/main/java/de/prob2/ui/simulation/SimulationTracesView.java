@@ -127,9 +127,7 @@ public final class SimulationTracesView extends Stage {
 	public void setFromItem(SimulationItem item) {
 		SimulationItem.Result result = (SimulationItem.Result)item.getResult();
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
-		if (!result.getStats().getEstimatedValues().isEmpty()) {
-			estimatedValueColumn.setVisible(true);
-		}
+		estimatedValueColumn.setVisible(!result.getStats().getEstimatedValues().isEmpty());
 		for (int i = 0; i < result.getTraces().size(); i++) {
 			items.add(new SimulationTraceItem(item, result, i));
 		}
