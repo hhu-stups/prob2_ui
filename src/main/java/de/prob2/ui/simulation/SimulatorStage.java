@@ -21,8 +21,12 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
+import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
+import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -439,6 +443,21 @@ public final class SimulatorStage extends Stage {
 				cbSimulation.getItems().setAll(new SimulationModel(Paths.get("")));
 			} else {
 				cbSimulation.getItems().setAll(machine.getSimulations());
+			}
+
+			State state = currentTrace.getCurrentState();
+			if(state == null) {
+				return;
+			}
+			AbstractEvalResult evalResult = state.eval("SIMB_JSON_FILE");
+			boolean hasConfiguredSimulation = evalResult instanceof EvalResult;
+			if(hasConfiguredSimulation) {
+				String definitionsPath = ((EvalResult) evalResult).getValue();
+				definitionsPath = definitionsPath.replaceAll("\"", "");
+				SimulationModel model = new SimulationModel(Paths.get(definitionsPath));
+				if(!cbSimulation.getItems().contains(model)) {
+					cbSimulation.getItems().add(0, model);
+				}
 			}
 
 			// If the last selected simulation disappears, select a different one if possible.
