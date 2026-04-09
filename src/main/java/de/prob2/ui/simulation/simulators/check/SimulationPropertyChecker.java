@@ -124,7 +124,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
 				String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), invariant, mode);
-				if (i >= simulationCheckingSimulator.getStartAtStep() && "FALSE".equals(evalResult)) {
+				if (i >= simulationCheckingSimulator.getStartAtStep() && !"TRUE".equals(evalResult)) { // Do not check for "FALSE".equals(...) as the result could also be a parse error
 					invariantOk = false;
 					break;
 				}
@@ -146,7 +146,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		if(destination.isInitialised()) {
 			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), finalPredicate, mode);
-			if ("FALSE".equals(evalResult)) {
+			if (!"TRUE".equals(evalResult)) { // Do not check for "FALSE".equals(...) as the result could also be a parse error
 				predicateOk = false;
 			}
 		}
