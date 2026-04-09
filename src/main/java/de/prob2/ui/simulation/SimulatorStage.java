@@ -23,7 +23,6 @@ import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.AbstractEvalResult;
 import de.prob.animator.domainobjects.EvalResult;
-import de.prob.animator.domainobjects.EvaluationException;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
 import de.prob.statespace.State;

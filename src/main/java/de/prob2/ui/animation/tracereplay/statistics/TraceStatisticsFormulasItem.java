@@ -1,6 +1,5 @@
 package de.prob2.ui.animation.tracereplay.statistics;
 
-import java.util.Locale;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -11,20 +10,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.google.common.base.MoreObjects;
 
-import de.prob.statespace.State;
-import de.prob.statespace.Trace;
-import de.prob.voparser.VOParseException;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.verifications.AbstractCheckableItem;
 import de.prob2.ui.verifications.CheckingExecutors;
-import de.prob2.ui.verifications.CheckingResult;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ExecutionContext;
-import de.prob2.ui.verifications.IFormulaTask;
 import de.prob2.ui.verifications.IValidationTask;
 import de.prob2.ui.verifications.type.BuiltinValidationTaskTypes;
 import de.prob2.ui.verifications.type.ValidationTaskType;
-import de.prob2.ui.vomanager.ast.IValidationExpression;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

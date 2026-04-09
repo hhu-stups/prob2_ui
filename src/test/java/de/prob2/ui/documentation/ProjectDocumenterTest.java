@@ -19,7 +19,6 @@ import com.google.common.io.RecursiveDeleteOption;
 
 import de.prob.animator.command.SymbolicModelcheckCommand;
 import de.prob.check.ModelCheckingSearchStrategy;
-import de.prob.check.tracereplay.json.TraceManager;
 import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.prob2fx.CurrentProject;

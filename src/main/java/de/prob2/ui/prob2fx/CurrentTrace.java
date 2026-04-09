@@ -19,7 +19,6 @@ import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.application.Platform;
-import javafx.beans.binding.BooleanBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.ReadOnlyBooleanPropertyBase;

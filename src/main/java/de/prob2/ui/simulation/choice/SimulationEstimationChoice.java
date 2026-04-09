@@ -11,7 +11,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 
-import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;

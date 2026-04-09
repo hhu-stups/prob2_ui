@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -14,7 +13,6 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetImagesForMachineCommand;
 import de.prob.animator.command.ExportHtmlHistoryCommand;
 import de.prob.annotations.Home;
-import de.prob.statespace.Transition;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;

@@ -9,7 +9,6 @@ import java.util.Objects;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
@@ -20,7 +19,6 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;

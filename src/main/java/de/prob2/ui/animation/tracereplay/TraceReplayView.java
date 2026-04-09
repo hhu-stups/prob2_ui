@@ -34,8 +34,6 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.sharedviews.CheckingViewBase;
 import de.prob2.ui.sharedviews.DescriptionView;
-import de.prob2.ui.simulation.SimulationScenarioHandler;
-import de.prob2.ui.simulation.SimulationTracesView;
 import de.prob2.ui.verifications.CheckingExecutors;
 import de.prob2.ui.verifications.ExecutionContext;
 

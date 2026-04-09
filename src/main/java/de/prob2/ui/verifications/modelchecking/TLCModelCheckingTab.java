@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.prob.animator.command.GetInternalRepresentationCommand;
 import de.prob.animator.domainobjects.FormulaTranslationMode;
 import de.prob.check.ModelCheckingSearchStrategy;

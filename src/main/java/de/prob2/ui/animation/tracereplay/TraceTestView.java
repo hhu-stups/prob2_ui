@@ -17,7 +17,6 @@ import de.prob.check.tracereplay.OperationExecutability;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.Postcondition;
 import de.prob.check.tracereplay.PostconditionPredicate;
-import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.Trace;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;

@@ -1,6 +1,5 @@
 package de.prob2.ui.preferences;
 
-import java.util.List;
 import java.util.Map;
 
 import javafx.scene.paint.Color;
