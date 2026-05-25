@@ -9,6 +9,7 @@ Downloads of the current release and snapshot development builds can be found on
 * Added support for ProB's new sequent prover mode:
   * Enabled to load `.probpo` files to use the animator for interactive proving of Event-B proof obligations
   * Added export of proof traces as standalone HTML, BPR for replay in Rodin, and proof tree visualisation
+* Added search for VisB visualisations
 * Improved inspection of proof obligations for Rodin projects
   * Added stage showing the proof sequent and type information
   * Added export of Rodin proof obligations as Prolog facts for use with the ProB Disprover and ProB Sequent Prover (`.probpo` files)

@@ -74,7 +74,10 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.WritableImage;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -83,6 +86,9 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.util.StringConverter;
 
+import org.fxmisc.wellbehaved.event.EventPattern;
+import org.fxmisc.wellbehaved.event.InputMap;
+import org.fxmisc.wellbehaved.event.Nodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -213,6 +219,10 @@ public final class VisBView extends BorderPane {
 	private HBox inProgressBox;
 	@FXML
 	private Label inProgressLabel;
+	@FXML
+	private ToggleButton searchButton;
+	@FXML
+	private VisBSearchPane visBSearchPane;
 	@FXML
 	private Button zoomInButton;
 	@FXML
@@ -383,6 +393,9 @@ public final class VisBView extends BorderPane {
 				cbVisualisations.getSelectionModel().selectFirst();
 			}
 			this.updateView(loadingStatus.get(), to);
+			if ((from == null || to == null) && searchButton.isSelected()) {
+				searchButton.setSelected(false); // hide
+			}
 		});
 
 		visBController.executingEventProperty().addListener(o -> this.updateInProgress());
@@ -409,6 +422,30 @@ public final class VisBView extends BorderPane {
 				}
 			}
 		});
+
+		searchButton.selectedProperty().addListener((obs, ov, nv) -> {
+			if (nv) {
+				visBSearchPane.show(this.webView);
+			} else {
+				visBSearchPane.hide();
+			}
+		});
+		visBSearchPane.visibleProperty().bind(searchButton.selectedProperty());
+		visBSearchPane.managedProperty().bind(searchButton.selectedProperty());
+
+		Nodes.addInputMap(this, InputMap.consume(EventPattern.keyPressed(KeyCode.F, KeyCombination.SHORTCUT_DOWN), e -> {
+			if (searchButton.isSelected()) {
+				visBSearchPane.startSearch();
+			} else {
+				searchButton.fire();
+			}
+		}));
+		Nodes.addInputMap(this, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.ESCAPE),
+				() -> searchButton.isSelected(), e -> searchButton.fire()));
+		Nodes.addInputMap(this, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHORTCUT_DOWN),
+				() -> searchButton.isSelected(), e -> visBSearchPane.find(false)));
+		Nodes.addInputMap(this, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN),
+				() -> searchButton.isSelected(), e -> visBSearchPane.find(true)));
 	}
 
 	@FXML
@@ -493,6 +530,7 @@ public final class VisBView extends BorderPane {
 		// Enable WebView-related actions only when the WebView is visible.
 		exportImageItem.disableProperty().bind(this.placeholder.visibleProperty());
 		exportSvgItem.disableProperty().bind(this.placeholder.visibleProperty());
+		searchButton.disableProperty().bind(this.placeholder.visibleProperty());
 		zoomInButton.disableProperty().bind(this.placeholder.visibleProperty());
 		zoomOutButton.disableProperty().bind(this.placeholder.visibleProperty());
 	}
