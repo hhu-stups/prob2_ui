@@ -153,6 +153,7 @@ public class OperationItem {
 			final List<IEvalElement> constantEvalElements;
 			final List<IEvalElement> variableEvalElements;
 			switch (name) {
+				case Transition.PARTIAL_SETUP_CONSTANTS_NAME:
 				case Transition.SETUP_CONSTANTS_NAME:
 					constantEvalElements = loadedMachine.getConstantEvalElements();
 					variableEvalElements = Collections.emptyList();
