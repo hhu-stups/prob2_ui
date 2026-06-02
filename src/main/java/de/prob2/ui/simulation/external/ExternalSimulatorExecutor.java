@@ -75,7 +75,6 @@ public final class ExternalSimulatorExecutor {
 		try {
 			this.serverSocket = new ServerSocket(0);
 			int simBPort = serverSocket.getLocalPort();
-			System.out.println("SimB Port: " + simBPort);
 			startTask = new FutureTask<>(() -> {
 				clientSocket = serverSocket.accept();
 				this.reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));

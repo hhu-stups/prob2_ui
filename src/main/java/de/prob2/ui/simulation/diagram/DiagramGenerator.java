@@ -76,10 +76,10 @@ public final class DiagramGenerator {
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
 
-		//Prints dot diagramm and Activation config into console as well as opening a pop-up with the Visualised Diagramm
+		//Opens a pop-up with the Visualised Diagramm
 		//Debug allows to disable UI dependency for testing
 		if (!debug) {
-			printSimulationDiagramm(nodesString, false);
+			makeDiagramStage(nodesString, false);
 		}
 		return nodesString;
 	}
@@ -96,10 +96,10 @@ public final class DiagramGenerator {
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
 
-		//Prints dot diagramm and Activation config into console as well as opening a pop-up with the Visualised Diagramm
+		//Opens a pop-up with the Visualised Diagramm
 		//Debug allows to disable UI dependency for testing
 		if (!debug) {
-			printSimulationDiagramm(nodesString, false);
+			makeDiagramStage(nodesString, false);
 		}
 		return nodesString;
 	}
@@ -117,12 +117,12 @@ public final class DiagramGenerator {
 		String nodesString = sw.toString();
 
 
-		//Prints dot diagramm and Activation config into console as well as opening a pop-up with the Visualised diagram
+		//Opens a pop-up with the Visualised Diagramm
 		//If updatetoggle is true, then it will simply update the diagram inside the already open diagram
 		//Debug allows to disable UI dependency for testing
 		if (!debug) {
 			if (!updatetoggle) {
-				printSimulationDiagramm(nodesString, true);
+				makeDiagramStage(nodesString, true);
 			} else {
 				diaStage.updateGraph(nodesString);
 			}
@@ -287,18 +287,6 @@ public final class DiagramGenerator {
 		return activating;
 	}
 
-	private void printSimulationDiagramm(String nodesString, boolean islive){
-		//Getting Activation data; Only used for console information
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
-		//Printing diagram information into console, then building diagram
-		System.out.println("ACTIVATIONS:");
-		System.out.println(config.getActivations());
-		System.out.println("LISTENERS:");
-		System.out.println(config.getListeners());
-		System.out.println("DOT: \n" + nodesString);
-		makeDiagramStage(nodesString, islive);
-	}
-	
 	//Builds the Diagramstage which displays the diagramm
 	private void makeDiagramStage(String nodesString, boolean islive){
 		if (diaStage!=null) {
