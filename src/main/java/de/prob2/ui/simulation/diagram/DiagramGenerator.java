@@ -47,7 +47,7 @@ public final class DiagramGenerator {
 		
 	}
 	
-	public String generateDiagram(Boolean debug){
+	public String generateDiagram(boolean debug) {
 		//Initialisation of Velocity engine
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
