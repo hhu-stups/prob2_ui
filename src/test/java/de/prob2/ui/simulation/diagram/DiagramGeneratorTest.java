@@ -18,20 +18,16 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 public class DiagramGeneratorTest {
 	DiagramGenerator gen;
 	RealTimeSimulator rts;
-	SimulationModelConfiguration smc;
 
 	@BeforeEach
 	public void before(){
 		rts = Mockito.mock(RealTimeSimulator.class);
-		smc = Mockito.mock(SimulationModelConfiguration.class);
 
 		gen = new DiagramGenerator(null, rts);
-		when(rts.getConfig()).thenReturn(smc);
 	}
 
 	@Test
@@ -42,12 +38,13 @@ public class DiagramGeneratorTest {
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
 		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
-		List<DiagramConfiguration.NonUi> activationList = List.of(test1,test2);
-		List<UIListenerConfiguration> listenerList = List.of(test3);
-		
-		when(smc.getActivations()).thenReturn(activationList);
-		when(smc.getListeners()).thenReturn(listenerList);
-		List<DiagramNode> nodelist = gen.collectNodes(smc, false);
+		var config = new SimulationModelConfiguration(
+			Map.of(),
+			List.of(test1, test2),
+			List.of(test3),
+			SimulationModelConfiguration.metadataBuilder().build()
+		);
+		List<DiagramNode> nodelist = gen.collectNodes(config, false);
 		assertThat(nodelist.size()==5).isTrue();
 		assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
 		assertThat(nodelist.get(1).id.equals("coin")).isTrue();
@@ -64,12 +61,13 @@ public class DiagramGeneratorTest {
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
 		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
-		List<DiagramConfiguration.NonUi> activationList = List.of(test1,test2);
-		List<UIListenerConfiguration> listenerList = List.of(test3);
-		
-		when(smc.getActivations()).thenReturn(activationList);
-		when(smc.getListeners()).thenReturn(listenerList);
-		List<DiagramNode> nodelist = DiagramGenerator.collectComplexNodes(smc);
+		var config = new SimulationModelConfiguration(
+			Map.of(),
+			List.of(test1, test2),
+			List.of(test3),
+			SimulationModelConfiguration.metadataBuilder().build()
+		);
+		List<DiagramNode> nodelist = DiagramGenerator.collectComplexNodes(config);
 		assertThat(nodelist.size()==5).isTrue();
 		assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
 		assertThat(nodelist.get(1).id.equals("coin")).isTrue();
@@ -87,12 +85,13 @@ public class DiagramGeneratorTest {
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
 		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
-		List<DiagramConfiguration.NonUi> activationList = List.of(test1,test2);
-		List<UIListenerConfiguration> listenerList = List.of(test3);
-
-		when(smc.getActivations()).thenReturn(activationList);
-		when(smc.getListeners()).thenReturn(listenerList);
-		String test = gen.generateDiagram(smc, true);
+		var config = new SimulationModelConfiguration(
+			Map.of(),
+			List.of(test1, test2),
+			List.of(test3),
+			SimulationModelConfiguration.metadataBuilder().build()
+		);
+		String test = gen.generateDiagram(config, true);
 		assertThat(test).isEqualToIgnoringWhitespace("""
 			digraph {
 			node [style="filled"]
@@ -117,12 +116,13 @@ public class DiagramGeneratorTest {
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
 		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
 
-		List<DiagramConfiguration.NonUi> activationList = List.of(test1,test2);
-		List<UIListenerConfiguration> listenerList = List.of(test3);
-
-		when(smc.getActivations()).thenReturn(activationList);
-		when(smc.getListeners()).thenReturn(listenerList);
-		String test = gen.generateComplexDiagram(smc, true);
+		var config = new SimulationModelConfiguration(
+			Map.of(),
+			List.of(test1, test2),
+			List.of(test3),
+			SimulationModelConfiguration.metadataBuilder().build()
+		);
+		String test = gen.generateComplexDiagram(config, true);
 		assertThat(test).isEqualToIgnoringWhitespace("""
 			digraph {
 				node [style="filled"]
