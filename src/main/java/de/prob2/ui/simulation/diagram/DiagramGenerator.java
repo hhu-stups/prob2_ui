@@ -279,7 +279,8 @@ public final class DiagramGenerator {
 		if (diaStage!=null) {
 			diaStage.close();
 		}
-		diaStage = new DiagramStage(stageManager, i18n, nodesString, fileChooserManager, islive);
+		diaStage = new DiagramStage(stageManager, i18n, fileChooserManager, islive);
+		diaStage.updateGraph(nodesString);
 		diaStage.show();
 	}
 

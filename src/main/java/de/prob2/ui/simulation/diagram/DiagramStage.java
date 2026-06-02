@@ -49,20 +49,13 @@ public final class DiagramStage extends Stage {
 	private Button saveButton;
 
 	@Inject
-	public DiagramStage(StageManager stageManager, I18n i18n, String nodesString, FileChooserManager fileChooserManager, boolean islive) {
+	public DiagramStage(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager, boolean islive) {
 		super();
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
-		this.nodesString = nodesString;
+		this.nodesString = null;
 		stageManager.loadFXML(this, "activation_Diagram_Stage.fxml", this.getClass().getName());
 		this.islive = islive;
-	}
-
-
-	@FXML
-	public void initialize(){
-		loadGraph(new String(makeGraphString(), StandardCharsets.UTF_8));
-		
 	}
 
 	public void updateGraph(String newDiagram){
