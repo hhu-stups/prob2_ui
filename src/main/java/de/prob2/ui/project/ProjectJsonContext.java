@@ -649,8 +649,8 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 				final ObjectNode simulationItem = checkObject(simulationItemNode);
 				final ObjectNode information = checkObject(simulationItem.get("information"));
 				final StringJoiner configuration = new StringJoiner(",\n");
-				information.fields().forEachRemaining(entry ->
-					configuration.add(String.format(Locale.ROOT, "%s : %s", entry.getKey(), entry.getValue().asText()))
+				information.forEachEntry((key, value) ->
+					configuration.add(String.format(Locale.ROOT, "%s : %s", key, value.asText()))
 				);
 				simulationItem.put("id", idByParams.get(configuration.toString()));
 			}
@@ -816,8 +816,8 @@ class ProjectJsonContext extends JacksonManager.Context<Project> {
 
 		for (final String key : new String[] {"dotVisualizationItems", "tableVisualizationItems"}) {
 			final ObjectNode itemsByType = checkObject(machine.get(key));
-			itemsByType.fields().forEachRemaining(e -> {
-				for (final JsonNode itemNode : checkArray(e.getValue())) {
+			itemsByType.forEachEntry((type, itemsNode) -> {
+				for (final JsonNode itemNode : checkArray(itemsNode)) {
 					final ObjectNode item = checkObject(itemNode);
 					item.remove("selected");
 				}
