@@ -65,18 +65,16 @@ public final class DiagramStage extends Stage {
 
 	//Calls dotengine to build SVG string to load in FXML 
 	public byte[] makeGraphString(){
-		byte[] svgdiagramm=null; 
 		DotCall dotCall = new DotCall("dot")
 			.layoutEngine("dot")
 			.outputFormat(DotOutputFormat.SVG)
 			.input(nodesString);
 		try {
-			svgdiagramm = dotCall.call();
+			return dotCall.call();
 		} catch (ProBError |InterruptedException e) {
 			LOGGER.error("Could not Visualize Graph with dot input)",e);
 			return null;
 		}
-		return svgdiagramm;
 	}
 
 	//loads diagram into FXML page
