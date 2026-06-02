@@ -897,18 +897,18 @@ public final class SimulatorStage extends Stage {
 
 	@FXML
 	private void generateDiagram(){
-		diagramGenerator.generateDiagram(false);
+		diagramGenerator.generateDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig(), false);
 	}
 
 	
 	@FXML
 	private void generateComplexDiagram(){
-		diagramGenerator.generateComplexDiagram(false);
+		diagramGenerator.generateComplexDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig(), false);
 	}
 
 	@FXML
 	private void generateLiveDiagram(){
-		diagramGenerator.generateLiveDiagram(false,false);
+		diagramGenerator.generateLiveDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig(), false, false);
 	}
 
 	private SimulationModelConfiguration buildSimulationModel() {

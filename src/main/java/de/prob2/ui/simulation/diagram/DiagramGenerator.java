@@ -47,15 +47,15 @@ public final class DiagramGenerator {
 		
 	}
 	
-	public String generateDiagram(boolean debug) {
+	public String generateDiagram(SimulationModelConfiguration config, boolean debug) {
 		//Initialisation of Velocity engine
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
 		StringWriter sw = new StringWriter(); 
 		
 		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectNodes(false));
-		nodeContext.put("activations", collectEdges());
+		nodeContext.put("nodes", collectNodes(config, false));
+		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
 
@@ -68,15 +68,15 @@ public final class DiagramGenerator {
 		return nodesString;
 	}
 	
-	public String generateComplexDiagram(boolean debug){
+	public String generateComplexDiagram(SimulationModelConfiguration config, boolean debug) {
 		//init velocity
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/complex_template.vm");
 		StringWriter sw = new StringWriter();
 		
 		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectComplexNodes());
-		nodeContext.put("activations", collectEdges());
+		nodeContext.put("nodes", collectComplexNodes(config));
+		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
 
@@ -89,15 +89,15 @@ public final class DiagramGenerator {
 		return nodesString;
 	}
 
-	public String generateLiveDiagram(boolean updatetoggle, boolean debug){
+	public String generateLiveDiagram(SimulationModelConfiguration config, boolean updatetoggle, boolean debug) {
 		//Initialisation of Velocity engine
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
 		StringWriter sw = new StringWriter(); 
 		
 		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectNodes(true));
-		nodeContext.put("activations", collectEdges());
+		nodeContext.put("nodes", collectNodes(config, true));
+		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
 
@@ -117,9 +117,7 @@ public final class DiagramGenerator {
 	}
 
 	//Method that collects all nodes for simple activation diagram
-	List<DiagramNode> collectNodes(boolean showCurrent){
-		//init of Configs for Simple nodes
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+	List<DiagramNode> collectNodes(SimulationModelConfiguration config, boolean showCurrent) {
 		List<DiagramConfiguration.NonUi> activations = config.getActivations();
 		List<UIListenerConfiguration> listeners = config.getListeners();
 		List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
@@ -159,8 +157,7 @@ public final class DiagramGenerator {
 	}
 
 	//collects Nodes for complex activation Diagram
-	List<DiagramNode> collectComplexNodes(){
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+	static List<DiagramNode> collectComplexNodes(SimulationModelConfiguration config) {
 		List<DiagramConfiguration.NonUi> activations = config.getActivations();
 		List<UIListenerConfiguration> listeners = config.getListeners();
 		List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
@@ -208,9 +205,7 @@ public final class DiagramGenerator {
 	}
 
 	//Method that collects all relevant edges between Nodes of the Activation diagramms
-	List<DiagramEdge> collectEdges(){
-
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+	private static List<DiagramEdge> collectEdges(SimulationModelConfiguration config) {
 		List<DiagramConfiguration.NonUi> activations = config.getActivations();
 		List<UIListenerConfiguration> listeners = config.getListeners();
 		List<DiagramEdge> activating = new ArrayList<DiagramEdge>();
@@ -285,7 +280,7 @@ public final class DiagramGenerator {
 	}
 
 	//Updates the live Diagramm
-	public void updateGraph(){
-		generateLiveDiagram(true, false);
+	public void updateGraph(SimulationModelConfiguration config) {
+		generateLiveDiagram(config, true, false);
 	}
 }

@@ -95,7 +95,7 @@ public final class RealTimeSimulator extends Simulator {
 		scheduler.endSimulationStep();
 
 		if (diagramGenerator.isLiveUpdates()) {
-			Platform.runLater(diagramGenerator::updateGraph);
+			Platform.runLater(() -> diagramGenerator.updateGraph((SimulationModelConfiguration)this.getConfig()));
 		}
 	}
 

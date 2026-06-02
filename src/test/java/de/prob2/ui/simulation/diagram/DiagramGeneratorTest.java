@@ -47,7 +47,7 @@ public class DiagramGeneratorTest {
 		
 		when(smc.getActivations()).thenReturn(activationList);
 		when(smc.getListeners()).thenReturn(listenerList);
-		List<DiagramNode> nodelist = gen.collectNodes(false);
+		List<DiagramNode> nodelist = gen.collectNodes(smc, false);
 		assertThat(nodelist.size()==5).isTrue();
 		assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
 		assertThat(nodelist.get(1).id.equals("coin")).isTrue();
@@ -69,7 +69,7 @@ public class DiagramGeneratorTest {
 		
 		when(smc.getActivations()).thenReturn(activationList);
 		when(smc.getListeners()).thenReturn(listenerList);
-		List<DiagramNode> nodelist = gen.collectComplexNodes();
+		List<DiagramNode> nodelist = DiagramGenerator.collectComplexNodes(smc);
 		assertThat(nodelist.size()==5).isTrue();
 		assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
 		assertThat(nodelist.get(1).id.equals("coin")).isTrue();
@@ -92,7 +92,7 @@ public class DiagramGeneratorTest {
 
 		when(smc.getActivations()).thenReturn(activationList);
 		when(smc.getListeners()).thenReturn(listenerList);
-		String test = gen.generateDiagram(true);
+		String test = gen.generateDiagram(smc, true);
 		assertThat(test).isEqualToIgnoringWhitespace("""
 			digraph {
 			node [style="filled"]
@@ -122,7 +122,7 @@ public class DiagramGeneratorTest {
 
 		when(smc.getActivations()).thenReturn(activationList);
 		when(smc.getListeners()).thenReturn(listenerList);
-		String test = gen.generateComplexDiagram(true);
+		String test = gen.generateComplexDiagram(smc, true);
 		assertThat(test).isEqualToIgnoringWhitespace("""
 			digraph {
 				node [style="filled"]
