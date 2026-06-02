@@ -79,7 +79,7 @@ public class DiagramGeneratorTest {
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
 		String test = DiagramGenerator.generateDiagram(config);
-		assertThat(test).isEqualToIgnoringWhitespace("""
+		assertThat(test).isEqualTo("""
 			digraph {
 			node [style="filled"]
 						"coin_event" [fillcolor= white, label= "coin", shape= "ellipse"];
@@ -87,10 +87,10 @@ public class DiagramGeneratorTest {
 						"throwcoin" [fillcolor= red, label= "throwcoin", shape= "diamond"];
 						"User"[fillcolor = white, label = "[User]", shape = "plaintext"];
 						"button" [fillcolor= white, label= "button", shape= "ellipse"];
-						"coin" -> "coin_event" [label = "500" , style= ""];
-						"throwcoin" -> "coin" [label = "500" , style= "dotted"];
-						"User" -> "button" [label = "Interaction" , style= ""];
-						"button" -> "throwcoin" [label = "Activating" , style= ""];
+						"coin" -> "coin_event" [label = "500", style= ""];
+						"throwcoin" -> "coin" [label = "500", style= "dotted"];
+						"User" -> "button" [label = "Interaction", style= ""];
+						"button" -> "throwcoin" [label = "Activating", style= ""];
 			}
 			""");
 	}
@@ -110,19 +110,19 @@ public class DiagramGeneratorTest {
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
 		String test = DiagramGenerator.generateComplexDiagram(config);
-		assertThat(test).isEqualToIgnoringWhitespace("""
+		assertThat(test).isEqualTo("""
 			digraph {
-				node [style="filled"]
-							"coin_event" [fillcolor= white, label= "coin", shape= "ellipse"];
-							"coin" [fillcolor= "yellow", shape= "record", label= "{ coin | Priority: 0 |single }"];
-							"throwcoin" [fillcolor= red, label= "throwcoin", shape= "diamond"];
-							"User"[fillcolor = white, label = "[User]", shape = "plaintext"];
-							"button" [fillcolor = "white", shape="record", label = "{ button | 1:1 }"]
-							"coin" -> "coin_event" [label = "500" , style= ""];
-							"throwcoin" -> "coin" [label = "500" , style= "dotted"];
-							"User" -> "button" [label = "Interaction" , style= ""];
-							"button" -> "throwcoin" [label = "Activating" , style= ""];
-				}
+			node [style="filled"]
+						"coin_event" [fillcolor= white, label= "coin", shape= "ellipse"];
+						"coin" [fillcolor= "yellow", shape= "record", label= "{ coin | Priority: 0 |single }"];
+						"throwcoin" [fillcolor= red, label= "throwcoin", shape= "diamond"];
+						"User"[fillcolor = white, label = "[User]", shape = "plaintext"];
+						"button" [fillcolor = "white", shape="record", label = "{ button | 1:1 }"]
+						"coin" -> "coin_event" [label = "500", style= ""];
+						"throwcoin" -> "coin" [label = "500", style= "dotted"];
+						"User" -> "button" [label = "Interaction", style= ""];
+						"button" -> "throwcoin" [label = "Activating", style= ""];
+			}
 			""");
 	}
 }

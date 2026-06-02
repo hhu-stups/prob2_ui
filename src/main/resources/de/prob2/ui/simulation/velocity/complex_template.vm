@@ -6,16 +6,12 @@ node [style="filled"]
 	#else
 		#if($node.getId() == "User")
 			"User"[fillcolor = $node.getColour(), label = "[User]", shape = "plaintext"];
+		#elseif( $node.getClass().getSimpleName() =="DiagramNode")
+			"$node.getId()" [fillcolor= $node.getColour(), label= "$node.getLabel()", shape= "$node.getStyle()"];
+		#elseif($node.getClass().getSimpleName()=="ComplexListener")
+			"$node.getId()" [fillcolor = "$node.getColour()", shape="record", label = "{ $node.getLabel() | $node.getPredicate() }"]
 		#else
-			#if( $node.getClass().getSimpleName() =="DiagramNode")
-				"$node.getId()" [fillcolor= $node.getColour(), label= "$node.getLabel()", shape= "$node.getStyle()"];
-			#else
-				#if($node.getClass().getSimpleName()=="ComplexListener")
-					"$node.getId()" [fillcolor = "$node.getColour()", shape="record", label = "{ $node.getLabel() | $node.getPredicate() }"]
-				#else
-					"$node.getId()" [fillcolor= "$node.getColour()", shape= "record", label= "{ $node.getLabel() | Priority: $node.getPriority() |$node.getActivationKind() }"];
-				#end
-			#end
+			"$node.getId()" [fillcolor= "$node.getColour()", shape= "record", label= "{ $node.getLabel() | Priority: $node.getPriority() |$node.getActivationKind() }"];
 		#end
 	#end
 #end
@@ -30,4 +26,3 @@ node [style="filled"]
 	#end
 #end
 }
-
