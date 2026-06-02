@@ -34,7 +34,7 @@ public final class DiagramGenerator {
 	}
 
 	//Initializes Velocity engine for diagram generation
-	private VelocityContext velocityInit(){
+	private static VelocityContext velocityInit() {
 		Properties props = new Properties();
 		VelocityContext nodeContext = new VelocityContext();
 		props.setProperty("resource.loader", "class");
@@ -44,7 +44,7 @@ public final class DiagramGenerator {
 		
 	}
 	
-	public String generateDiagram(SimulationModelConfiguration config, boolean debug) {
+	public static String generateDiagram(SimulationModelConfiguration config) {
 		//Initialisation of Velocity engine
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
@@ -54,18 +54,10 @@ public final class DiagramGenerator {
 		nodeContext.put("nodes", collectNodes(config, Map.of()));
 		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
-		String nodesString = sw.toString();
-
-		//Opens a pop-up with the Visualised Diagramm
-		//Debug allows to disable UI dependency for testing
-		if (!debug) {
-			this.liveUpdates = false;
-			makeDiagramStage(nodesString);
-		}
-		return nodesString;
+		return sw.toString();
 	}
 	
-	public String generateComplexDiagram(SimulationModelConfiguration config, boolean debug) {
+	public static String generateComplexDiagram(SimulationModelConfiguration config) {
 		//init velocity
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/complex_template.vm");
@@ -75,18 +67,10 @@ public final class DiagramGenerator {
 		nodeContext.put("nodes", collectComplexNodes(config));
 		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
-		String nodesString = sw.toString();
-
-		//Opens a pop-up with the Visualised Diagramm
-		//Debug allows to disable UI dependency for testing
-		if (!debug) {
-			this.liveUpdates = false;
-			makeDiagramStage(nodesString);
-		}
-		return nodesString;
+		return sw.toString();
 	}
 
-	public String generateLiveDiagram(SimulationModelConfiguration config, Map<String, List<Activation>> configurationToActivation, boolean updatetoggle, boolean debug) {
+	public static String generateLiveDiagram(SimulationModelConfiguration config, Map<String, List<Activation>> configurationToActivation) {
 		//Initialisation of Velocity engine
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
@@ -96,21 +80,7 @@ public final class DiagramGenerator {
 		nodeContext.put("nodes", collectNodes(config, configurationToActivation));
 		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
-		String nodesString = sw.toString();
-
-
-		//Opens a pop-up with the Visualised Diagramm
-		//If updatetoggle is true, then it will simply update the diagram inside the already open diagram
-		//Debug allows to disable UI dependency for testing
-		if (!debug) {
-			this.liveUpdates = true;
-			if (!updatetoggle) {
-				makeDiagramStage(nodesString);
-			} else {
-				diaStage.updateGraph(nodesString);
-			}
-		}
-		return nodesString;
+		return sw.toString();
 	}
 
 	//Method that collects all nodes for simple activation diagram
@@ -265,19 +235,19 @@ public final class DiagramGenerator {
 		return activating;
 	}
 
-	//Builds the Diagramstage which displays the diagramm
-	private void makeDiagramStage(String nodesString) {
+	public void updateDiagramStage(String nodesString, boolean show) {
 		diaStage.updateGraph(nodesString);
-		diaStage.show();
-		diaStage.toFront();
+		if (show) {
+			diaStage.show();
+			diaStage.toFront();
+		}
 	}
 
 	public boolean isLiveUpdates() {
 		return this.liveUpdates;
 	}
 
-	//Updates the live Diagramm
-	public void updateGraph(SimulationModelConfiguration config, Map<String, List<Activation>> configurationToActivation) {
-		generateLiveDiagram(config, configurationToActivation, true, false);
+	public void setLiveUpdates(boolean liveUpdates) {
+		this.liveUpdates = liveUpdates;
 	}
 }

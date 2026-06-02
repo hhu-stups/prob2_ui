@@ -11,20 +11,12 @@ import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DiagramGeneratorTest {
-	DiagramGenerator gen;
-
-	@BeforeEach
-	public void before() {
-		gen = new DiagramGenerator(null);
-	}
-
 	@Test
 	@DisplayName("simple nodes are collected properly")
 	public void test1(){
@@ -86,7 +78,7 @@ public class DiagramGeneratorTest {
 			List.of(test3),
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
-		String test = gen.generateDiagram(config, true);
+		String test = DiagramGenerator.generateDiagram(config);
 		assertThat(test).isEqualToIgnoringWhitespace("""
 			digraph {
 			node [style="filled"]
@@ -117,7 +109,7 @@ public class DiagramGeneratorTest {
 			List.of(test3),
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
-		String test = gen.generateComplexDiagram(config, true);
+		String test = DiagramGenerator.generateComplexDiagram(config);
 		assertThat(test).isEqualToIgnoringWhitespace("""
 			digraph {
 				node [style="filled"]
