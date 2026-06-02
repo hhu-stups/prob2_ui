@@ -425,6 +425,7 @@ public final class SimulatorStage extends Stage {
 		this.fileChooserManager = fileChooserManager;
 		this.traceFileHandler = traceFileHandler;
 		this.diagramGenerator = diagramGenerator;
+		this.realTimeSimulator.setDiagramGenerator(this.diagramGenerator);
 		this.disablePropertyController = disablePropertyController;
 		this.simulationFileHandler = simulationFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);

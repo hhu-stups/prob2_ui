@@ -17,24 +17,19 @@ import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.simulators.Activation;
-import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 public final class DiagramGenerator {
-	private final DiagramStage diaStage; 
-
-	private final RealTimeSimulator realTimeSimulator;
+	private final DiagramStage diaStage;
 
 	private boolean liveUpdates;
 
 	@Inject
-	public DiagramGenerator(DiagramStage diaStage, RealTimeSimulator realTimeSimulator) {
+	public DiagramGenerator(DiagramStage diaStage) {
 		this.diaStage = diaStage;
-		this.realTimeSimulator = realTimeSimulator;
-		this.realTimeSimulator.setDiagramGenerator(this);
 		this.liveUpdates = false;
 	}
 

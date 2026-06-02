@@ -10,24 +10,19 @@ import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
-import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class DiagramGeneratorTest {
 	DiagramGenerator gen;
-	RealTimeSimulator rts;
 
 	@BeforeEach
-	public void before(){
-		rts = Mockito.mock(RealTimeSimulator.class);
-
-		gen = new DiagramGenerator(null, rts);
+	public void before() {
+		gen = new DiagramGenerator(null);
 	}
 
 	@Test
