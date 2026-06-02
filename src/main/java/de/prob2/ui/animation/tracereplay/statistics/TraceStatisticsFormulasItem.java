@@ -21,9 +21,6 @@ import de.prob2.ui.verifications.type.ValidationTaskType;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 @JsonPropertyOrder({
 	"id",
 	"operation",
@@ -33,14 +30,12 @@ import org.slf4j.LoggerFactory;
 	"selected",
 })
 public final class TraceStatisticsFormulasItem implements IValidationTask {
-	private static final Logger LOGGER = LoggerFactory.getLogger(TraceStatisticsFormulasItem.class);
-
 	@JsonInclude(JsonInclude.Include.NON_NULL)
-	private String id;
+	private final String id;
 	private final String operation;
 	private final String computations;
 	private final String desiredEffects;
-	private boolean evaluateChanged;
+	private final boolean evaluateChanged;
 	@JsonIgnore
 	private final ObjectProperty<CheckingStatus> status;
 
@@ -56,7 +51,7 @@ public final class TraceStatisticsFormulasItem implements IValidationTask {
 		this.operation = Objects.requireNonNull(operation, "operation");
 		this.computations = Objects.requireNonNull(computations, "computations");
 		this.desiredEffects = Objects.requireNonNull(desiredEffects, "desiredEffects");
-		this.evaluateChanged = evaluateChanged == null ? false : evaluateChanged;
+		this.evaluateChanged = evaluateChanged != null && evaluateChanged;
 		this.status = new SimpleObjectProperty<>(this, "status", CheckingStatus.NOT_CHECKED);
 	}
 
