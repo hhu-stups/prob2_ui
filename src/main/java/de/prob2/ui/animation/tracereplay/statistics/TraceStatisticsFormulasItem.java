@@ -32,8 +32,7 @@ import org.slf4j.LoggerFactory;
 	"evaluateChanged",
 	"selected",
 })
-public class TraceStatisticsFormulasItem implements IValidationTask {
-
+public final class TraceStatisticsFormulasItem implements IValidationTask {
 	private static final Logger LOGGER = LoggerFactory.getLogger(TraceStatisticsFormulasItem.class);
 
 	@JsonInclude(JsonInclude.Include.NON_NULL)

@@ -23,7 +23,7 @@ import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
-public class DiagramGenerator {
+public final class DiagramGenerator {
 	private final StageManager stageManager;
 
 	private final FileChooserManager fileChooserManager;

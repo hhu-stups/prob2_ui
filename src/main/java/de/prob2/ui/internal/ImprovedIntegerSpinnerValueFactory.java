@@ -6,8 +6,7 @@ import javafx.scene.control.SpinnerValueFactory;
 /**
  * This class is an extension of {@link SpinnerValueFactory.IntegerSpinnerValueFactory} that does not crash when incrementing/decrementing with an empty text field.
  */
-public class ImprovedIntegerSpinnerValueFactory extends SpinnerValueFactory.IntegerSpinnerValueFactory {
-
+public final class ImprovedIntegerSpinnerValueFactory extends SpinnerValueFactory.IntegerSpinnerValueFactory {
 	private final int initialValue;
 
 	public ImprovedIntegerSpinnerValueFactory(@NamedArg("min") int min, @NamedArg("max") int max) {

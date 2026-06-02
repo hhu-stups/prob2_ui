@@ -26,9 +26,8 @@ import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-
 @Singleton
-public class DiagramStage extends Stage {
+public final class DiagramStage extends Stage {
 	private final StageManager stageManager;
 
 	private final boolean islive;
