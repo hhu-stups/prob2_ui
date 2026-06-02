@@ -55,6 +55,7 @@ import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
 import de.prob2.ui.simulation.configuration.TransitionSelection;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+import de.prob2.ui.simulation.diagram.DiagramStage;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.schedulingTable.SchedulingItemTableCell;
@@ -388,8 +389,7 @@ public final class SimulatorStage extends Stage {
 	private final BooleanProperty savedProperty;
 	private final SimulationItemHandler simulationItemHandler;
 	private final SimulationMode simulationMode;
-
-	private final DiagramGenerator diagramGenerator;
+	private final DiagramStage diagramStage;
 
 	private int time;
 
@@ -408,7 +408,7 @@ public final class SimulatorStage extends Stage {
 			final I18n i18n, final FileChooserManager fileChooserManager,
 			final TraceFileHandler traceFileHandler, final DisablePropertyController disablePropertyController,
 			final StopActions stopActions, SimulationFileHandler simulationFileHandler,
-			final DiagramGenerator diagramGenerator
+			final DiagramStage diagramStage
 	) {
 		super();
 		this.stageManager = stageManager;
@@ -424,8 +424,7 @@ public final class SimulatorStage extends Stage {
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.traceFileHandler = traceFileHandler;
-		this.diagramGenerator = diagramGenerator;
-		this.realTimeSimulator.setDiagramGenerator(this.diagramGenerator);
+		this.diagramStage = diagramStage;
 		this.disablePropertyController = disablePropertyController;
 		this.simulationFileHandler = simulationFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
@@ -898,24 +897,30 @@ public final class SimulatorStage extends Stage {
 
 	@FXML
 	private void generateDiagram(){
-		diagramGenerator.setLiveUpdates(false);
+		realTimeSimulator.setLiveDiagramStage(null);
 		String nodesString = DiagramGenerator.generateDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig());
-		diagramGenerator.updateDiagramStage(nodesString, true);
+		diagramStage.updateGraph(nodesString);
+		diagramStage.show();
+		diagramStage.toFront();
 	}
 
 	
 	@FXML
 	private void generateComplexDiagram(){
-		diagramGenerator.setLiveUpdates(false);
+		realTimeSimulator.setLiveDiagramStage(null);
 		String nodesString = DiagramGenerator.generateComplexDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig());
-		diagramGenerator.updateDiagramStage(nodesString, true);
+		diagramStage.updateGraph(nodesString);
+		diagramStage.show();
+		diagramStage.toFront();
 	}
 
 	@FXML
 	private void generateLiveDiagram(){
-		diagramGenerator.setLiveUpdates(true);
+		realTimeSimulator.setLiveDiagramStage(diagramStage);
 		String nodesString = DiagramGenerator.generateLiveDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig(), realTimeSimulator.getConfigurationToActivation());
-		diagramGenerator.updateDiagramStage(nodesString, true);
+		diagramStage.updateGraph(nodesString);
+		diagramStage.show();
+		diagramStage.toFront();
 	}
 
 	private SimulationModelConfiguration buildSimulationModel() {

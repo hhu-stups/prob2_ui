@@ -9,8 +9,6 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
 
-import com.google.inject.Inject;
-
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
@@ -23,14 +21,8 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 public final class DiagramGenerator {
-	private final DiagramStage diaStage;
-
-	private boolean liveUpdates;
-
-	@Inject
-	public DiagramGenerator(DiagramStage diaStage) {
-		this.diaStage = diaStage;
-		this.liveUpdates = false;
+	private DiagramGenerator() {
+		throw new AssertionError("Utility class");
 	}
 
 	//Initializes Velocity engine for diagram generation
@@ -233,21 +225,5 @@ public final class DiagramGenerator {
 		}
 
 		return activating;
-	}
-
-	public void updateDiagramStage(String nodesString, boolean show) {
-		diaStage.updateGraph(nodesString);
-		if (show) {
-			diaStage.show();
-			diaStage.toFront();
-		}
-	}
-
-	public boolean isLiveUpdates() {
-		return this.liveUpdates;
-	}
-
-	public void setLiveUpdates(boolean liveUpdates) {
-		this.liveUpdates = liveUpdates;
 	}
 }

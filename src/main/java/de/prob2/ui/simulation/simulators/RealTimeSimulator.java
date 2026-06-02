@@ -12,6 +12,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
+import de.prob2.ui.simulation.diagram.DiagramStage;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import javafx.application.Platform;
@@ -44,11 +45,11 @@ public final class RealTimeSimulator extends Simulator {
 
 	private final ChangeListener<Transition> uiListener;
 
-	private DiagramGenerator diagramGenerator;
-
 	private final ListProperty<Integer> timestampsForLogging;
 
 	private final ListProperty<List<Activation>> activationsForLoggedTimestamps;
+
+	private DiagramStage liveDiagramStage;
 
 	@Inject
 	public RealTimeSimulator(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
@@ -58,9 +59,9 @@ public final class RealTimeSimulator extends Simulator {
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;
 		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
-		this.diagramGenerator = null;
 		this.timestampsForLogging = new SimpleListProperty<>(this, "timestampsForLogging", FXCollections.observableArrayList());
 		this.activationsForLoggedTimestamps = new SimpleListProperty<>(this, "activationsForLoggedTimestamps", FXCollections.observableArrayList());
+		this.liveDiagramStage = null;
 	}
 
 	public void run() {
@@ -94,10 +95,10 @@ public final class RealTimeSimulator extends Simulator {
 		}
 		scheduler.endSimulationStep();
 
-		if (diagramGenerator.isLiveUpdates()) {
+		if (liveDiagramStage != null) {
 			Platform.runLater(() -> {
 				String nodesString = DiagramGenerator.generateLiveDiagram((SimulationModelConfiguration)this.getConfig(), this.getConfigurationToActivation());
-				diagramGenerator.updateDiagramStage(nodesString, false);
+				liveDiagramStage.updateGraph(nodesString);
 			});
 		}
 	}
@@ -191,12 +192,11 @@ public final class RealTimeSimulator extends Simulator {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setDiagramGenerator(DiagramGenerator diagramGenerator) {
-		this.diagramGenerator = diagramGenerator;
-	}
-
 	public void setTime(int time) {
 		this.time.set(time);
 	}
 
+	public void setLiveDiagramStage(DiagramStage liveDiagramStage) {
+		this.liveDiagramStage = liveDiagramStage;
+	}
 }
