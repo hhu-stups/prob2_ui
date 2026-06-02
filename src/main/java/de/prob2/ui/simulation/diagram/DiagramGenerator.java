@@ -1,43 +1,36 @@
 package de.prob2.ui.simulation.diagram;
 
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.stream.Collectors;
+
+import com.google.inject.Inject;
+
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
-import com.google.inject.Inject;
-
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
-import de.prob2.ui.simulation.configuration.DiagramConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
-import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
-import de.prob2.ui.simulation.simulators.RealTimeSimulator;
-
 public final class DiagramGenerator {
-	private final StageManager stageManager;
-
-	private final FileChooserManager fileChooserManager;
-
-	private final I18n i18n;
-
-	private DiagramStage diaStage; 
+	private final DiagramStage diaStage; 
 
 	private final RealTimeSimulator realTimeSimulator;
 
 	private boolean liveUpdates;
 
 	@Inject
-	public DiagramGenerator(StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n, RealTimeSimulator realTimeSimulator) {
-		this.stageManager = stageManager;
-		this.fileChooserManager = fileChooserManager;
-		this.i18n = i18n;
+	public DiagramGenerator(DiagramStage diaStage, RealTimeSimulator realTimeSimulator) {
+		this.diaStage = diaStage;
 		this.realTimeSimulator = realTimeSimulator;
 		this.realTimeSimulator.setDiagramGenerator(this);
 		this.liveUpdates = false;
@@ -282,12 +275,9 @@ public final class DiagramGenerator {
 
 	//Builds the Diagramstage which displays the diagramm
 	private void makeDiagramStage(String nodesString) {
-		if (diaStage!=null) {
-			diaStage.close();
-		}
-		diaStage = new DiagramStage(stageManager, i18n, fileChooserManager);
 		diaStage.updateGraph(nodesString);
 		diaStage.show();
+		diaStage.toFront();
 	}
 
 	public boolean isLiveUpdates() {
