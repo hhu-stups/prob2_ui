@@ -357,9 +357,9 @@ public final class TraceStatisticsView extends Stage {
 		Machine machine = currentProject.getCurrentMachine();
 		ObservableList<ReplayTrace> traces = machine.getTraces();
 
-		List<Number> listNumberComputations = new ArrayList();
-		List<Number> listNumberDesiredEffects = new ArrayList();
-		List<Number> listPercentages = new ArrayList();
+		List<Number> listNumberComputations = new ArrayList<>();
+		List<Number> listNumberDesiredEffects = new ArrayList<>();
+		List<Number> listPercentages = new ArrayList<>();
 
 		for(ReplayTrace replayTrace : traces) {
 			if(replayTrace.selected()) {

@@ -165,7 +165,7 @@ public class SimulationEventHandler {
 				yield null;
 			}
 			case UNIFORM -> {
-				List<Transition> transitions = new ArrayList();
+				List<Transition> transitions = new ArrayList<>();
 				for(String opName : operations) {
 					transitions.addAll(cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation()));
 				}
