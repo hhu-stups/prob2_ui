@@ -60,15 +60,15 @@ public final class DiagramStage extends Stage {
 
 	public void updateGraph(String newDiagram){
 		nodesString = newDiagram;
-		loadGraph(makeGraphString());
+		loadGraph(makeGraphString(newDiagram));
 	}
 
 	//Calls dotengine to build SVG string to load in FXML 
-	public String makeGraphString(){
+	private static String makeGraphString(String input) {
 		DotCall dotCall = new DotCall("dot")
 			.layoutEngine("dot")
 			.outputFormat(DotOutputFormat.SVG)
-			.input(nodesString);
+			.input(input);
 		try {
 			byte[] svgBytes = dotCall.call();
 			return new String(svgBytes, StandardCharsets.UTF_8);
