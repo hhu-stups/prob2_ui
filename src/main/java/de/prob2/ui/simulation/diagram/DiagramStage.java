@@ -60,17 +60,18 @@ public final class DiagramStage extends Stage {
 
 	public void updateGraph(String newDiagram){
 		nodesString = newDiagram;
-		loadGraph(new String(makeGraphString(),StandardCharsets.UTF_8));
+		loadGraph(makeGraphString());
 	}
 
 	//Calls dotengine to build SVG string to load in FXML 
-	public byte[] makeGraphString(){
+	public String makeGraphString(){
 		DotCall dotCall = new DotCall("dot")
 			.layoutEngine("dot")
 			.outputFormat(DotOutputFormat.SVG)
 			.input(nodesString);
 		try {
-			return dotCall.call();
+			byte[] svgBytes = dotCall.call();
+			return new String(svgBytes, StandardCharsets.UTF_8);
 		} catch (ProBError |InterruptedException e) {
 			LOGGER.error("Could not Visualize Graph with dot input)",e);
 			return null;
