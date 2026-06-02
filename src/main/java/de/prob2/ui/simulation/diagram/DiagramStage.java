@@ -26,8 +26,6 @@ import org.slf4j.LoggerFactory;
 
 @Singleton
 public final class DiagramStage extends Stage {
-	private final boolean islive;
-
 	private final FileChooserManager fileChooserManager;
 
 	private final I18n i18n;
@@ -49,13 +47,12 @@ public final class DiagramStage extends Stage {
 	private Button saveButton;
 
 	@Inject
-	public DiagramStage(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager, boolean islive) {
+	public DiagramStage(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager) {
 		super();
 		this.fileChooserManager = fileChooserManager;
 		this.i18n = i18n;
 		this.nodesString = null;
 		stageManager.loadFXML(this, "activation_Diagram_Stage.fxml", this.getClass().getName());
-		this.islive = islive;
 	}
 
 	public void updateGraph(String newDiagram){
@@ -150,9 +147,5 @@ public final class DiagramStage extends Stage {
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}
-	}
-
-	public boolean getIsLive(){
-		return islive;
 	}
 }

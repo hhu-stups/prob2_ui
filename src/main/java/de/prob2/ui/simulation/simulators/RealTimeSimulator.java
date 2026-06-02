@@ -93,13 +93,10 @@ public final class RealTimeSimulator extends Simulator {
 			throw e;
 		}
 		scheduler.endSimulationStep();
-		Platform.runLater(() -> {
-			if (diagramGenerator.getDiaStage() != null) {
-				if (diagramGenerator.getDiaStage().isShowing() && diagramGenerator.getDiaStage().getIsLive()) {
-					diagramGenerator.updateGraph();
-				}
-			}
-		});
+
+		if (diagramGenerator.isLiveUpdates()) {
+			Platform.runLater(diagramGenerator::updateGraph);
+		}
 	}
 
 	private Trace mergeUserInteractions(int index, Trace traceWithUserInteractions, Trace simulatedTrace) {

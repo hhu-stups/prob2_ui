@@ -31,6 +31,8 @@ public final class DiagramGenerator {
 
 	private final RealTimeSimulator realTimeSimulator;
 
+	private boolean liveUpdates;
+
 	@Inject
 	public DiagramGenerator(StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n, RealTimeSimulator realTimeSimulator) {
 		this.stageManager = stageManager;
@@ -38,6 +40,7 @@ public final class DiagramGenerator {
 		this.i18n = i18n;
 		this.realTimeSimulator = realTimeSimulator;
 		this.realTimeSimulator.setDiagramGenerator(this);
+		this.liveUpdates = false;
 	}
 
 	//Initializes Velocity engine for diagram generation
@@ -66,7 +69,8 @@ public final class DiagramGenerator {
 		//Opens a pop-up with the Visualised Diagramm
 		//Debug allows to disable UI dependency for testing
 		if (!debug) {
-			makeDiagramStage(nodesString, false);
+			this.liveUpdates = false;
+			makeDiagramStage(nodesString);
 		}
 		return nodesString;
 	}
@@ -86,7 +90,8 @@ public final class DiagramGenerator {
 		//Opens a pop-up with the Visualised Diagramm
 		//Debug allows to disable UI dependency for testing
 		if (!debug) {
-			makeDiagramStage(nodesString, false);
+			this.liveUpdates = false;
+			makeDiagramStage(nodesString);
 		}
 		return nodesString;
 	}
@@ -108,8 +113,9 @@ public final class DiagramGenerator {
 		//If updatetoggle is true, then it will simply update the diagram inside the already open diagram
 		//Debug allows to disable UI dependency for testing
 		if (!debug) {
+			this.liveUpdates = true;
 			if (!updatetoggle) {
-				makeDiagramStage(nodesString, true);
+				makeDiagramStage(nodesString);
 			} else {
 				diaStage.updateGraph(nodesString);
 			}
@@ -275,22 +281,21 @@ public final class DiagramGenerator {
 	}
 
 	//Builds the Diagramstage which displays the diagramm
-	private void makeDiagramStage(String nodesString, boolean islive){
+	private void makeDiagramStage(String nodesString) {
 		if (diaStage!=null) {
 			diaStage.close();
 		}
-		diaStage = new DiagramStage(stageManager, i18n, fileChooserManager, islive);
+		diaStage = new DiagramStage(stageManager, i18n, fileChooserManager);
 		diaStage.updateGraph(nodesString);
 		diaStage.show();
+	}
+
+	public boolean isLiveUpdates() {
+		return this.liveUpdates;
 	}
 
 	//Updates the live Diagramm
 	public void updateGraph(){
 		generateLiveDiagram(true, false);
-	}
-
-
-	public DiagramStage getDiaStage() {
-		return diaStage;
 	}
 }
