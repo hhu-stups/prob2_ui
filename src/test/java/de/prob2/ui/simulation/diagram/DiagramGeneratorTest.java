@@ -44,7 +44,7 @@ public class DiagramGeneratorTest {
 			List.of(test3),
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
-		List<DiagramNode> nodelist = gen.collectNodes(config, false);
+		List<DiagramNode> nodelist = DiagramGenerator.collectNodes(config, Map.of());
 		assertThat(nodelist.size()==5).isTrue();
 		assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
 		assertThat(nodelist.get(1).id.equals("coin")).isTrue();

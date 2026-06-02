@@ -4,6 +4,7 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.stream.Collectors;
@@ -15,6 +16,7 @@ import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+import de.prob2.ui.simulation.simulators.Activation;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 
 import org.apache.velocity.Template;
@@ -54,7 +56,7 @@ public final class DiagramGenerator {
 		StringWriter sw = new StringWriter(); 
 		
 		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectNodes(config, false));
+		nodeContext.put("nodes", collectNodes(config, Map.of()));
 		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
@@ -89,14 +91,14 @@ public final class DiagramGenerator {
 		return nodesString;
 	}
 
-	public String generateLiveDiagram(SimulationModelConfiguration config, boolean updatetoggle, boolean debug) {
+	public String generateLiveDiagram(SimulationModelConfiguration config, Map<String, List<Activation>> configurationToActivation, boolean updatetoggle, boolean debug) {
 		//Initialisation of Velocity engine
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
 		StringWriter sw = new StringWriter(); 
 		
 		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectNodes(config, true));
+		nodeContext.put("nodes", collectNodes(config, configurationToActivation));
 		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
 		String nodesString = sw.toString();
@@ -117,7 +119,7 @@ public final class DiagramGenerator {
 	}
 
 	//Method that collects all nodes for simple activation diagram
-	List<DiagramNode> collectNodes(SimulationModelConfiguration config, boolean showCurrent) {
+	static List<DiagramNode> collectNodes(SimulationModelConfiguration config, Map<String, List<Activation>> configurationToActivation) {
 		List<DiagramConfiguration.NonUi> activations = config.getActivations();
 		List<UIListenerConfiguration> listeners = config.getListeners();
 		List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
@@ -134,7 +136,7 @@ public final class DiagramGenerator {
 				String eventColour = "white";
 				String opColour = "yellow";
 				//change color if currently active
-				if (showCurrent && !realTimeSimulator.getConfigurationToActivation().get(opConfig.getId()).isEmpty()) {
+				if (configurationToActivation.containsKey(opConfig.getId()) && !configurationToActivation.get(opConfig.getId()).isEmpty()) {
 					opColour = "aqua";
 					eventColour = "aqua";
 				}
@@ -280,7 +282,7 @@ public final class DiagramGenerator {
 	}
 
 	//Updates the live Diagramm
-	public void updateGraph(SimulationModelConfiguration config) {
-		generateLiveDiagram(config, true, false);
+	public void updateGraph(SimulationModelConfiguration config, Map<String, List<Activation>> configurationToActivation) {
+		generateLiveDiagram(config, configurationToActivation, true, false);
 	}
 }
