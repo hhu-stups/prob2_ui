@@ -101,11 +101,11 @@ public class DiagramGeneratorTest {
 		assertThat(test).isEqualToIgnoringWhitespace("""
 			digraph {
 			node [style="filled"]
-						"coin_event" [fillcolor= white, label= "coin", shape= "ellipse"]; 
-						"coin" [fillcolor= yellow, label= "coin", shape= "diamond"]; 
-						"throwcoin" [fillcolor= red, label= "throwcoin", shape= "diamond"]; 
+						"coin_event" [fillcolor= white, label= "coin", shape= "ellipse"];
+						"coin" [fillcolor= yellow, label= "coin", shape= "diamond"];
+						"throwcoin" [fillcolor= red, label= "throwcoin", shape= "diamond"];
 						"User"[fillcolor = white, label = "[User]", shape = "plaintext"];
-						"button" [fillcolor= white, label= "button", shape= "ellipse"]; 
+						"button" [fillcolor= white, label= "button", shape= "ellipse"];
 						"coin" -> "coin_event" [label = "500" , style= ""];
 						"throwcoin" -> "coin" [label = "500" , style= "dotted"];
 						"User" -> "button" [label = "Interaction" , style= ""];
