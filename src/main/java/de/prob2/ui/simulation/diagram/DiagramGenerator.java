@@ -37,16 +37,7 @@ public final class DiagramGenerator {
 	}
 	
 	public static String generateDiagram(SimulationModelConfiguration config) {
-		//Initialisation of Velocity engine
-		VelocityContext nodeContext = velocityInit();
-		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
-		StringWriter sw = new StringWriter(); 
-		
-		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectNodes(config, Map.of()));
-		nodeContext.put("activations", collectEdges(config));
-		nodes.merge(nodeContext, sw);
-		return sw.toString();
+		return generateLiveDiagram(config, Map.of());
 	}
 	
 	public static String generateComplexDiagram(SimulationModelConfiguration config) {
