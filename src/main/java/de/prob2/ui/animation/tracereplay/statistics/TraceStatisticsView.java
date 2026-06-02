@@ -338,7 +338,7 @@ public final class TraceStatisticsView extends Stage {
 		if (path != null) {
 			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
 					.setHeader(i18n.translate("animation.tracereplay.statistics.table.columns.trace"), i18n.translate("animation.tracereplay.statistics.table.columns.totalComputation"), i18n.translate("animation.tracereplay.statistics.table.columns.desiredEffect"), i18n.translate("animation.tracereplay.statistics.table.columns.percentage"))
-					.build();
+					.get();
 			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				for (TraceStatisticsItem item : statisticsTableView.getItems()) {
 					csvPrinter.printRecord(item.getName(), item.getTotalComputations(), item.getEffectObserved(), item.getPercentage());

@@ -109,7 +109,7 @@ public final class DynamicTableView extends BorderPane implements Builder<Dynami
 			Files.createDirectories(path.getParent());
 			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
 				.setHeader(this.currentTable.get().getHeader().toArray(new String[0]))
-				.build();
+				.get();
 			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				for (List<String> row : this.currentTable.get().getRows()) {
 					csvPrinter.printRecord(row);

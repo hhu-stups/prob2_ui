@@ -189,7 +189,7 @@ public final class SimulationTracesView extends Stage {
 		if (path != null) {
 			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
 				.setHeader("Status", "Trace", "Trace Length", "Estimated Value")
-				.build();
+				.get();
 			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				int i = 1;
 				for (SimulationTraceItem traceItem : traceTableView.getItems()) {
