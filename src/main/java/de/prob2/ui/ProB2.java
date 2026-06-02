@@ -406,7 +406,7 @@ public final class ProB2 extends Application {
 				.setShowSince(false)
 				.get()
 				.printHelp("prob2-ui", "", options, "", true);
-			throw die(null, 2);
+			throw die(null, 0);
 		}
 
 		if (!cl.getArgList().isEmpty()) {

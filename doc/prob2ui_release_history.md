@@ -13,6 +13,7 @@ Downloads of the current release and snapshot development builds can be found on
 * Improved inspection of proof obligations for Rodin projects
   * Added stage showing the proof sequent and type information
   * Added export of Rodin proof obligations as Prolog facts for use with the ProB Disprover and ProB Sequent Prover (`.probpo` files)
+* Fixed the `--help` option returning an unsuccessful exit code.
 
 ## Version 1.3.1 (2026-01-22)
 
