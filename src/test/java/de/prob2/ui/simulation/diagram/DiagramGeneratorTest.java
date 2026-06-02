@@ -1,23 +1,26 @@
 package de.prob2.ui.simulation.diagram;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import de.prob2.ui.simulation.configuration.*;
+import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.I18n;
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationKind;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import com.google.inject.Injector;
-
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.simulation.simulators.RealTimeSimulator;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 
 public class DiagramGeneratorTest {
 	DiagramGenerator gen; 
@@ -28,14 +31,11 @@ public class DiagramGeneratorTest {
 	@BeforeEach
 	public void before(){
 		fcm = Mockito.mock(FileChooserManager.class);
-		Injector inj = Mockito.mock(Injector.class);
 		I18n i18n = Mockito.mock(I18n.class);
 		rts = Mockito.mock(RealTimeSimulator.class);
 		smc = Mockito.mock(SimulationModelConfiguration.class);
 
-
-		
-		gen = new DiagramGenerator(null, fcm, null, null, inj, i18n, rts);
+		gen = new DiagramGenerator(null, fcm, i18n, rts);
 		when(rts.getConfig()).thenReturn(smc);
 	}
 

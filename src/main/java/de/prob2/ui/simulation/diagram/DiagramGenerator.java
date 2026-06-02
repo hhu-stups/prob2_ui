@@ -9,13 +9,10 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -28,12 +25,6 @@ public final class DiagramGenerator {
 
 	private final FileChooserManager fileChooserManager;
 
-	private final CurrentProject currentProject;
-
-	private final CurrentTrace currentTrace;
-
-	private final Injector injector;
-
 	private final I18n i18n;
 
 	private DiagramStage diaStage; 
@@ -41,13 +32,9 @@ public final class DiagramGenerator {
 	private final RealTimeSimulator realTimeSimulator;
 
 	@Inject
-	public DiagramGenerator(StageManager stageManager, FileChooserManager fileChooserManager,
-			CurrentProject currentProject, CurrentTrace currentTrace, Injector injector, I18n i18n, RealTimeSimulator realTimeSimulator) {
+	public DiagramGenerator(StageManager stageManager, FileChooserManager fileChooserManager, I18n i18n, RealTimeSimulator realTimeSimulator) {
 		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.currentProject = currentProject;
-		this.currentTrace = currentTrace;
-		this.injector = injector;
 		this.i18n = i18n;
 		this.realTimeSimulator = realTimeSimulator;
 		this.realTimeSimulator.setDiagramGenerator(this);
@@ -292,7 +279,7 @@ public final class DiagramGenerator {
 		if (diaStage!=null) {
 			diaStage.close();
 		}
-		diaStage = new DiagramStage(stageManager, currentProject, currentTrace, injector, i18n, nodesString, fileChooserManager, islive);
+		diaStage = new DiagramStage(stageManager, i18n, nodesString, fileChooserManager, islive);
 		diaStage.show();
 	}
 

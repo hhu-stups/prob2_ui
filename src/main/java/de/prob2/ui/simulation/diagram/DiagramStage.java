@@ -5,11 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.DotCall;
@@ -18,27 +14,21 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Singleton
 public final class DiagramStage extends Stage {
-	private final StageManager stageManager;
-
 	private final boolean islive;
 
 	private final FileChooserManager fileChooserManager;
-
-	private final CurrentProject currentProject;
-
-	private final CurrentTrace currentTrace;
-
-	private final Injector injector;
 
 	private final I18n i18n;
 
@@ -59,15 +49,9 @@ public final class DiagramStage extends Stage {
 	private Button saveButton;
 
 	@Inject
-	public DiagramStage(StageManager stageManager, CurrentProject currentProject, CurrentTrace currentTrace,
-			Injector injector, I18n i18n, String nodesString, FileChooserManager fileChooserManager, boolean islive) {
-		
+	public DiagramStage(StageManager stageManager, I18n i18n, String nodesString, FileChooserManager fileChooserManager, boolean islive) {
 		super();
-		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.currentProject = currentProject;
-		this.currentTrace = currentTrace;
-		this.injector = injector;
 		this.i18n = i18n;
 		this.nodesString = nodesString;
 		stageManager.loadFXML(this, "activation_Diagram_Stage.fxml", this.getClass().getName());
