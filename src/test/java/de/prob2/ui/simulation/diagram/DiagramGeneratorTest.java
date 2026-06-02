@@ -14,7 +14,7 @@ import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DiagramGeneratorTest {
 	@Test
@@ -32,12 +32,12 @@ public class DiagramGeneratorTest {
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
 		List<DiagramNode> nodelist = DiagramGenerator.collectNodes(config, Map.of());
-		assertThat(nodelist.size()==5).isTrue();
-		assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
-		assertThat(nodelist.get(1).id.equals("coin")).isTrue();
-		assertThat(nodelist.get(2).id.equals("throwcoin")).isTrue();
-		assertThat(nodelist.get(3).id.equals("User")).isTrue();
-		assertThat(nodelist.get(4).id.equals("button")).isTrue();
+		assertEquals(5, nodelist.size());
+		assertEquals("coin_event", nodelist.get(0).id);
+		assertEquals("coin", nodelist.get(1).id);
+		assertEquals("throwcoin", nodelist.get(2).id);
+		assertEquals("User", nodelist.get(3).id);
+		assertEquals("button", nodelist.get(4).id);
 	}
 
 	@Test
@@ -55,12 +55,12 @@ public class DiagramGeneratorTest {
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
 		List<DiagramNode> nodelist = DiagramGenerator.collectComplexNodes(config);
-		assertThat(nodelist.size()==5).isTrue();
-		assertThat(nodelist.get(0).id.equals("coin_event")).isTrue();
-		assertThat(nodelist.get(1).id.equals("coin")).isTrue();
-		assertThat(nodelist.get(2).id.equals("throwcoin")).isTrue();
-		assertThat(nodelist.get(3).id.equals("User")).isTrue();
-		assertThat(nodelist.get(4).id.equals("button")).isTrue();
+		assertEquals(5, nodelist.size());
+		assertEquals("coin_event", nodelist.get(0).id);
+		assertEquals("coin", nodelist.get(1).id);
+		assertEquals("throwcoin", nodelist.get(2).id);
+		assertEquals("User", nodelist.get(3).id);
+		assertEquals("button", nodelist.get(4).id);
 	}
 
 	
@@ -79,7 +79,7 @@ public class DiagramGeneratorTest {
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
 		String test = DiagramGenerator.generateDiagram(config);
-		assertThat(test).isEqualTo("""
+		assertEquals("""
 			digraph {
 			node [style="filled"]
 						"coin_event" [fillcolor= white, label= "coin", shape= "ellipse"];
@@ -92,7 +92,7 @@ public class DiagramGeneratorTest {
 						"User" -> "button" [label = "Interaction", style= ""];
 						"button" -> "throwcoin" [label = "Activating", style= ""];
 			}
-			""");
+			""", test);
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class DiagramGeneratorTest {
 			SimulationModelConfiguration.metadataBuilder().build()
 		);
 		String test = DiagramGenerator.generateComplexDiagram(config);
-		assertThat(test).isEqualTo("""
+		assertEquals("""
 			digraph {
 			node [style="filled"]
 						"coin_event" [fillcolor= white, label= "coin", shape= "ellipse"];
@@ -123,6 +123,6 @@ public class DiagramGeneratorTest {
 						"User" -> "button" [label = "Interaction", style= ""];
 						"button" -> "throwcoin" [label = "Activating", style= ""];
 			}
-			""");
+			""", test);
 	}
 }
