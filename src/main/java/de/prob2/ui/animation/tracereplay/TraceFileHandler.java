@@ -390,7 +390,7 @@ public final class TraceFileHandler {
 		if (path != null) {
 			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
 				.setHeader("Position", "Transition")
-				.build();
+				.get();
 			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				int i = 1;
 				for (Transition transition : trace.getTransitionList()) {

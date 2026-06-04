@@ -6,7 +6,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -14,7 +13,6 @@ import com.google.inject.Singleton;
 import de.prob.animator.command.GetImagesForMachineCommand;
 import de.prob.animator.command.ExportHtmlHistoryCommand;
 import de.prob.annotations.Home;
-import de.prob.statespace.Transition;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
@@ -170,14 +168,13 @@ public final class VisualisationController {
 	@FXML
 	private void saveTraceAsHtml() {
 		final FileChooser fileChooser = new FileChooser();
-		FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
+		FileChooser.ExtensionFilter htmlFilter = fileChooserManager.getHtmlFilter();
 		fileChooser.getExtensionFilters().setAll(htmlFilter);
 		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName());
 		Path traceFile = fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
 		if (traceFile != null) {
-			ExportHtmlHistoryCommand cmd = new ExportHtmlHistoryCommand(traceFile.toFile(),
-					currentTrace.get().getTransitionList().stream().map(Transition::getId).collect(Collectors.toList()));
+			ExportHtmlHistoryCommand cmd = new ExportHtmlHistoryCommand(traceFile.toFile(), currentTrace.get());
 			currentTrace.getStateSpace().execute(cmd);
 		}
 	}

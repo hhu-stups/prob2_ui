@@ -40,7 +40,6 @@ import de.prob2.ui.verifications.CheckingStatusCell;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.Parent;
 import javafx.scene.control.Button;

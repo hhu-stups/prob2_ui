@@ -35,19 +35,21 @@ public class SimulationModelConfigurationChecker {
 
 	private void checkActivationOperationConfiguration(ActivationOperationConfiguration activation) {
 		var probabilities = activation.getProbabilisticVariables();
-		var opName = activation.getExecute();
-		if (!Transition.isArtificialTransitionName(opName) && !(this.stateSpace.getModel() instanceof XTLModel)) {
-			// Check whether given operation name exists
-			// in XTL mode not all transition names are registered -> skip check
-			OperationInfo opInfo = this.stateSpace.getLoadedMachine().getMachineOperationInfo(opName);
-			if (!"skip".equals(opName) && opInfo == null) {
-				this.errors.add(new ConfigurationCheckingError(String.format("Used operation %s does not exist", opName)));
+		var operations = activation.getExecute();
+		for(String opName : operations) {
+			if (!Transition.isArtificialTransitionName(opName) && !(this.stateSpace.getModel() instanceof XTLModel)) {
+				// Check whether given operation name exists
+				// in XTL mode not all transition names are registered -> skip check
+				OperationInfo opInfo = this.stateSpace.getLoadedMachine().getMachineOperationInfo(opName);
+				if (!"skip".equals(opName) && opInfo == null) {
+					this.errors.add(new ConfigurationCheckingError(String.format("Used operation %s does not exist", opName)));
+				}
 			}
-		}
 
-		// Check whether fixed variables, and those for probabilistic choice are disjunct
-		if (activation.getFixedVariables().keySet().stream().anyMatch(probabilities::containsKey)) {
-			this.errors.add(new ConfigurationCheckingError(String.format(Locale.ROOT, "Fixed variables and those defined for probabilistic choice for operation %s must be disjunct", opName)));
+			// Check whether fixed variables, and those for probabilistic choice are disjunct
+			if (activation.getFixedVariables().keySet().stream().anyMatch(probabilities::containsKey)) {
+				this.errors.add(new ConfigurationCheckingError(String.format(Locale.ROOT, "Fixed variables and those defined for probabilistic choice for operation %s must be disjunct", opName)));
+			}
 		}
 	}
 

@@ -137,10 +137,10 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			State state = trace.getCurrentState();
 			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			String evalResult = simulationEventHandler.getCache().readValueWithCaching(state, this.getVariables(), predicate, mode);
-			if (evalResult.startsWith("TRUE")) {
+			if ("TRUE".equals(evalResult)) {
 				return true;
 			} else if (!"FALSE".equals(evalResult) && !evalResult.startsWith("NOT-INITIALISED")) {
-				throw new SimulationError("Ending predicate is not of type boolean");
+				throw new SimulationError("Ending predicate is not correct");
 			}
 		} else if (additionalInformation.containsKey("ENDING_TIME")) {
 			int endingTime = (int) additionalInformation.get("ENDING_TIME");
@@ -288,6 +288,11 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 			startTrace.getStateSpace().endTransaction();
 		}
 		simulationPropertyChecker.calculateStatistics(wallTime);
+	}
+
+	@Override
+	protected void handleErrorWhenExecuted(String id) {
+		// Error when executed is only shown for Real Time Simulation
 	}
 
 	@Override

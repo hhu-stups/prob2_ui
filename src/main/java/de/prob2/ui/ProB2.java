@@ -57,9 +57,9 @@ import javafx.stage.Stage;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.help.HelpFormatter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,7 +118,7 @@ public final class ProB2 extends Application {
 	}
 
 	@Override
-	public void init() {
+	public void init() throws IOException {
 		if (!System.getProperties().containsKey(ClassicConstants.CONFIG_FILE_PROPERTY)) {
 			System.setProperty(ClassicConstants.CONFIG_FILE_PROPERTY, "de/prob2/ui/logback_config.xml");
 		}
@@ -378,7 +378,7 @@ public final class ProB2 extends Application {
 		stage.setTitle(title.toString());
 	}
 
-	private RuntimeOptions parseRuntimeOptions(final String[] args) {
+	private RuntimeOptions parseRuntimeOptions(final String[] args) throws IOException {
 		logger.info("Parsing arguments: {}", (Object) args);
 
 		final Options options = new Options();
@@ -402,9 +402,11 @@ public final class ProB2 extends Application {
 		logger.info("Parsed command line: args {}, options {}", cl.getArgs(), cl.getOptions());
 
 		if (cl.hasOption("help")) {
-			final HelpFormatter hf = new HelpFormatter();
-			hf.printHelp("prob2-ui", options, true);
-			throw die(null, 2);
+			HelpFormatter.builder()
+				.setShowSince(false)
+				.get()
+				.printHelp("prob2-ui", "", options, "", true);
+			throw die(null, 0);
 		}
 
 		if (!cl.getArgList().isEmpty()) {

@@ -37,6 +37,9 @@ public class ProofObligationDetailsStage extends Stage {
 
 	@FXML
 	private void initialize() {
+		this.setWidth(800);
+		this.setHeight(400);
+
 		this.poTreeView.getSelectionModel().selectedItemProperty().addListener((obs, from, to) -> {
 				if (to != null && to.getValue() instanceof ProofObligationItem item) {
 					this.textArea.replaceText(item.getProofObligation().getSequentPrettyPrint(true));

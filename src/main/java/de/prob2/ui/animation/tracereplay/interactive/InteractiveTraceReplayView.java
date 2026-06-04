@@ -39,8 +39,7 @@ import static de.prob2.ui.internal.TranslatableAdapter.enumNameAdapter;
 
 @Singleton
 @FXMLInjected
-public class InteractiveTraceReplayView extends TitledPane {
-
+public final class InteractiveTraceReplayView extends TitledPane {
 	@FXML
 	private TextField fileLocationField;
 	@FXML

@@ -64,6 +64,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			case MINIMUM_MEAN_BETWEEN_STEPS:
 			case MAXIMUM:
 			case MAXIMUM_MEAN_BETWEEN_STEPS:
+			case FINAL_VALUE:
 				return estimateValue(trace);
 			default:
 				break;
@@ -89,6 +90,8 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 				return estimateMaximum(trace);
 			case MAXIMUM_MEAN_BETWEEN_STEPS:
 				return estimateMaximumWithMeanBetweenSteps(trace);
+			case FINAL_VALUE:
+				return estimateFinalValue(trace);
 			default:
 				break;
 		}
@@ -121,7 +124,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 			State destination = transition.getDestination();
 			if(destination.isInitialised()) {
 				String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), invariant, mode);
-				if (i >= simulationCheckingSimulator.getStartAtStep() && "FALSE".equals(evalResult)) {
+				if (i >= simulationCheckingSimulator.getStartAtStep() && !"TRUE".equals(evalResult)) { // Do not check for "FALSE".equals(...) as the result could also be a parse error
 					invariantOk = false;
 					break;
 				}
@@ -143,7 +146,7 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		if(destination.isInitialised()) {
 			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
 			String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), finalPredicate, mode);
-			if ("FALSE".equals(evalResult)) {
+			if (!"TRUE".equals(evalResult)) { // Do not check for "FALSE".equals(...) as the result could also be a parse error
 				predicateOk = false;
 			}
 		}
@@ -387,6 +390,31 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 		}
 
 		estimatedValues.add(res);
+		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
+	}
+
+	public CheckingStatus estimateFinalValue(Trace trace) {
+		double value = 0.0;
+		String expression = (String) this.getAdditionalInformation().get("EXPRESSION");
+		double desiredValue = (double) this.getAdditionalInformation().get("DESIRED_VALUE");
+		double epsilon = (double) this.getAdditionalInformation().get("EPSILON");
+		EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
+		int index = trace.getTransitionList().size() - 1;
+		Transition transition = trace.getTransitionList().get(index);
+		State destination = transition.getDestination();
+		if(destination.isInitialised()) {
+			String evalResult = simulationCheckingSimulator.getSimulationEventHandler().getCache().readValueWithCaching(destination, simulationCheckingSimulator.getVariables(), expression, mode);
+			if (index >= simulationCheckingSimulator.getStartAtStep()) {
+				value = Double.parseDouble(evalResult);
+			}
+		}
+
+		boolean success = ((SimulationEstimator) hypothesisCheckerOrEstimator).check(value, desiredValue, epsilon);
+		if(success) {
+			numberSuccess++;
+		}
+
+		estimatedValues.add(value);
 		return success ? CheckingStatus.SUCCESS : CheckingStatus.FAIL;
 	}
 

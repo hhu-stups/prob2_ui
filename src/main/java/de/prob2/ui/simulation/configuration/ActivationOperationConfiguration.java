@@ -29,11 +29,12 @@ import de.prob.statespace.Transition;
 		"activating",
 		"activatingOnlyWhenExecuted",
 		"updating",
-		"withPredicate"
+		"withPredicate",
+		"errorWhenNotExecuted"
 })
 public final class ActivationOperationConfiguration extends DiagramConfiguration.NonUi {
 
-	private String execute;
+	private List<String> execute;
 	private String after;
 	private int priority;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -51,11 +52,13 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	private Map<String, String> updating;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private String withPredicate;
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private boolean errorWhenNotExecuted;
 
 	@JsonCreator
 	public ActivationOperationConfiguration(
 			@JsonProperty(value = "id", required = true) String id,
-			@JsonProperty(value = "execute", required = true) String op,
+			@JsonProperty(value = "execute", required = true) List<String> op,
 			@JsonProperty(value = "after", defaultValue = "0") String after,
 			@JsonProperty(value = "priority", defaultValue = "0") Integer priority,
 			@JsonProperty("additionalGuards") String additionalGuards,
@@ -67,12 +70,13 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 			@JsonProperty(value = "activatingOnlyWhenExecuted", defaultValue = "true") Boolean activatingOnlyWhenExecuted,
 			@JsonProperty("updating") Map<String, String> updating,
 			@JsonProperty("withPredicate") String withPredicate,
+			@JsonProperty(value = "errorWhenNotExecuted", defaultValue = "false") Boolean errorWhenNotExecuted,
 			@JsonProperty("comment") String comment
 	) {
 		super(id, comment);
 		this.execute = Objects.requireNonNull(op, "execute");
 		this.after = after != null && !after.isEmpty() ? after : "0";
-		this.priority = !Transition.isArtificialTransitionName(this.execute) && priority != null ? priority : 0;
+		this.priority = this.execute.stream().allMatch(e -> !Transition.isArtificialTransitionName(e)) && priority != null ? priority : 0;
 		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
 		this.activationKind = activationKind != null ? activationKind : ActivationKind.MULTI;
 		this.fixedVariables = fixedVariables != null ? Map.copyOf(fixedVariables) : Map.of();
@@ -82,14 +86,15 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		this.activatingOnlyWhenExecuted = activatingOnlyWhenExecuted != null ? activatingOnlyWhenExecuted : true;
 		this.updating = updating != null ? Map.copyOf(updating) : Map.of();
 		this.withPredicate = withPredicate != null && !withPredicate.isEmpty() && !"1=1".equals(withPredicate) ? withPredicate : null;
+		this.errorWhenNotExecuted =  errorWhenNotExecuted != null ? errorWhenNotExecuted : false;
 	}
 
 	@JsonProperty("execute")
-	public String getExecute() {
+	public List<String> getExecute() {
 		return this.execute;
 	}
 
-	public void setExecute(String execute) {
+	public void setExecute(List<String> execute) {
 		this.execute = execute;
 	}
 
@@ -116,11 +121,11 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	@JsonGetter("priority")
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private Integer getPriorityForJson() {
-		return Transition.isArtificialTransitionName(this.getExecute()) || this.priority == 0 ? null : this.priority;
+		return (this.getExecute().stream().anyMatch(e -> Transition.isArtificialTransitionName(e)) || this.priority == 0) ? null : this.priority;
 	}
 
 	public void setPriority(int priority) {
-		if (!Transition.isArtificialTransitionName(this.getExecute())) {
+		if (this.getExecute().stream().allMatch(e -> !Transition.isArtificialTransitionName(e))) {
 			this.priority = priority;
 		}
 	}
@@ -224,6 +229,21 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		this.withPredicate = withPredicate != null && !withPredicate.isEmpty() && !"1=1".equals(withPredicate) ? withPredicate : null;
 	}
 
+	@JsonIgnore
+	public boolean isErrorWhenNotExecuted() {
+		return this.errorWhenNotExecuted;
+	}
+
+	@JsonGetter("errorWhenNotExecuted")
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Boolean isErrorWhenNotExecutedForJson() {
+		return this.errorWhenNotExecuted ? null : false;
+	}
+
+	public void setErrorWhenNotExecuted(boolean errorWhenNotExecuted) {
+		this.errorWhenNotExecuted = errorWhenNotExecuted;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -259,6 +279,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 				.add("activatingOnlyWhenExecuted", this.isActivatingOnlyWhenExecuted())
 				.add("updating", this.getUpdating())
 				.add("withPredicate", this.getWithPredicate())
+				.add("errorWhenNotExecuted", this.isErrorWhenNotExecuted())
 				.toString();
 	}
 }

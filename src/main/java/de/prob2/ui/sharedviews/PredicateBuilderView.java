@@ -9,13 +9,10 @@ import java.util.Map;
 
 import com.google.inject.Inject;
 
-import de.be4.classicalb.core.parser.util.Utils;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.formula.PredicateBuilder;
 import de.prob.model.eventb.EventBModel;
-import de.prob.model.representation.XTLModel;
-import de.prob.statespace.Transition;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;

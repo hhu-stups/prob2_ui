@@ -19,6 +19,7 @@ import com.google.inject.Singleton;
 import de.prob.check.tracereplay.json.storage.TraceJsonFile;
 import de.prob.statespace.FormalismType;
 import de.prob2.ui.animation.tracereplay.interactive.InteractiveTraceReplayView;
+import de.prob2.ui.animation.tracereplay.statistics.TraceStatisticsView;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.config.FileChooserManager.Kind;
 import de.prob2.ui.helpsystem.HelpButton;
@@ -44,6 +45,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -143,6 +145,8 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 	@FXML
 	private HelpButton helpButton;
 	@FXML
+	private Button statisticsButton;
+	@FXML
 	private SplitPane splitPane;
 	private boolean showDescription;
 
@@ -205,6 +209,7 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B)
 				.and(currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.XTL));
 		loadTraceButton.disableProperty().bind(partOfDisableBinding.or(currentProject.currentMachineProperty().isNull()));
+		statisticsButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 	}
 
 	@Override
@@ -302,5 +307,11 @@ public final class TraceReplayView extends CheckingViewBase<ReplayTrace> {
 		if (this.traceFileHandler.deleteTraceFile(item)) {
 			super.removeItem(item);
 		}
+	}
+
+	@FXML
+	public void showStatisticsOverTraces() {
+		TraceStatisticsView traceStatisticsView = injector.getInstance(TraceStatisticsView.class);
+		traceStatisticsView.show();
 	}
 }

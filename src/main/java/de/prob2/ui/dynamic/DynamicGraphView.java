@@ -12,6 +12,7 @@ import com.google.inject.Inject;
 import de.prob.animator.domainobjects.DotCall;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.animator.domainobjects.DotVisualizationCommand;
+import de.prob.animator.domainobjects.DynamicCommandItem;
 import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.animator.domainobjects.PlantUmlVisualizationCommand;
 import de.prob.exception.ProBError;
@@ -22,10 +23,8 @@ import de.prob2.ui.dynamic.plantuml.PlantUmlLocator;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.menu.OpenFile;
 import de.prob2.ui.prob2fx.CurrentProject;
 
-import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
@@ -73,9 +72,8 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 	private final CurrentProject currentProject;
 	private final JavaLocator javaLocator;
 	private final PlantUmlLocator plantUmlLocator;
-	private final OpenFile openFile;
-	private final HostServices hostServices;
 	private final ObjectProperty<GraphMode> graphMode;
+	private final ObjectProperty<DynamicCommandItem> currentCommand; // only relevant for dot
 	private final ObjectProperty<byte[]> currentInput;
 	private final StringProperty currentSvg;
 
@@ -84,17 +82,15 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 
 	@Inject
 	public DynamicGraphView(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager,
-	                        CurrentProject currentProject, JavaLocator javaLocator, PlantUmlLocator plantUmlLocator,
-	                        OpenFile openFile, HostServices hostServices) {
+	                        CurrentProject currentProject, JavaLocator javaLocator, PlantUmlLocator plantUmlLocator) {
 		this.stageManager = stageManager;
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.currentProject = currentProject;
 		this.javaLocator = javaLocator;
 		this.plantUmlLocator = plantUmlLocator;
-		this.openFile = openFile;
-		this.hostServices = hostServices;
 		this.graphMode = new SimpleObjectProperty<>(this, "graphMode", null);
+		this.currentCommand = new SimpleObjectProperty<>(this, "currentCommand", null);
 		this.currentInput = new SimpleObjectProperty<>(this, "currentInput", null);
 		this.currentSvg = new SimpleStringProperty(this, "currentSvg", null);
 		stageManager.loadFXML(this, "graph_view.fxml");
@@ -183,7 +179,9 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 							throw new AssertionError();
 						}
 
-						byte[] data = this.visualizeDot(this.cachedDotCommand, this.cachedDotEngine, outputFormat, this.currentInput.get());
+						DotVisualizationCommand cmd = (DotVisualizationCommand) this.currentCommand.get();
+						byte[] data = this.visualizeDot(this.cachedDotCommand, this.cachedDotEngine, outputFormat,
+								this.currentInput.get(), cmd.getExtraArguments());
 						if (data != null) {
 							Files.write(path, data);
 						}
@@ -285,7 +283,7 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 		}
 
 		String outputFormat = DotOutputFormat.SVG;
-		byte[] svgBytes = this.visualizeDot(dotCommand, dotEngine, outputFormat, dotInput);
+		byte[] svgBytes = this.visualizeDot(dotCommand, dotEngine, outputFormat, dotInput, command.getExtraArguments());
 		if (svgBytes == null) {
 			return;
 		}
@@ -296,6 +294,7 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 				this.cachedDotCommand = dotCommand;
 				this.cachedDotEngine = dotEngine;
 				this.graphMode.set(GraphMode.DOT);
+				this.currentCommand.set(command);
 				this.currentInput.set(dotInput);
 				this.currentSvg.set(svgString);
 				this.setVisible(true);
@@ -328,6 +327,7 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 				this.cachedDotCommand = null;
 				this.cachedDotEngine = null;
 				this.graphMode.set(GraphMode.PUML);
+				this.currentCommand.set(command);
 				this.currentInput.set(pumlInput);
 				this.currentSvg.set(svgString);
 				this.setVisible(true);
@@ -335,12 +335,14 @@ public final class DynamicGraphView extends BorderPane implements Builder<Dynami
 		}
 	}
 
-	private byte[] visualizeDot(String dotCommand, String dotEngine, String outputFormat, byte[] dotInput) throws InterruptedException {
+	private byte[] visualizeDot(String dotCommand, String dotEngine, String outputFormat, byte[] dotInput,
+	                            List<String> extraDotArgs) throws InterruptedException {
 		try {
 			return new DotCall(dotCommand)
 					.layoutEngine(dotEngine)
 					.outputFormat(outputFormat)
 					.input(dotInput)
+					.extraDotArgs(extraDotArgs)
 					.call();
 		} catch (ProBError e) {
 			LOGGER.error("could not visualize graph with dot (command={}, layoutEngine={}, outputFormat={})", dotCommand, dotEngine, outputFormat, e);

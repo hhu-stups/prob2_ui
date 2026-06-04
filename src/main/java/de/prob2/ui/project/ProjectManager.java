@@ -17,11 +17,9 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
-import de.prob.check.tracereplay.json.TraceManager;
 import de.prob.json.InvalidJsonFormatException;
 import de.prob.json.JacksonManager;
 import de.prob.json.JsonConversionException;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;

@@ -9,7 +9,6 @@ import java.util.Objects;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
-import de.prob.statespace.FormalismType;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
@@ -20,7 +19,6 @@ import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.CheckingStatusCell;
 
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -121,16 +119,13 @@ public final class SimulationTracesView extends Stage {
 	private void initialize() {
 		initTableColumns();
 		initTableRows();
-		final BooleanBinding partOfDisableBinding = currentTrace.modelProperty().formalismTypeProperty().isNotEqualTo(FormalismType.B);
-		traceTableView.disableProperty().bind(partOfDisableBinding.or(currentTrace.stateSpaceProperty().isNull()));
+		traceTableView.disableProperty().bind(currentTrace.stateSpaceProperty().isNull());
 	}
 
 	public void setFromItem(SimulationItem item) {
 		SimulationItem.Result result = (SimulationItem.Result)item.getResult();
 		ObservableList<SimulationTraceItem> items = FXCollections.observableArrayList();
-		if (!result.getStats().getEstimatedValues().isEmpty()) {
-			estimatedValueColumn.setVisible(true);
-		}
+		estimatedValueColumn.setVisible(!result.getStats().getEstimatedValues().isEmpty());
 		for (int i = 0; i < result.getTraces().size(); i++) {
 			items.add(new SimulationTraceItem(item, result, i));
 		}
@@ -194,7 +189,7 @@ public final class SimulationTracesView extends Stage {
 		if (path != null) {
 			CSVFormat csvFormat = CSVFormat.DEFAULT.builder()
 				.setHeader("Status", "Trace", "Trace Length", "Estimated Value")
-				.build();
+				.get();
 			try (CSVPrinter csvPrinter = csvFormat.print(path, StandardCharsets.UTF_8)) {
 				int i = 1;
 				for (SimulationTraceItem traceItem : traceTableView.getItems()) {

@@ -1,60 +1,32 @@
 package de.prob2.ui.simulation.diagram;
 
 import java.io.StringWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
 import java.util.stream.Collectors;
+
+import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.DiagramConfiguration;
+import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
+import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+import de.prob2.ui.simulation.simulators.Activation;
 
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
-import com.google.inject.Inject;
-import com.google.inject.Injector;
-
-import de.prob2.ui.config.FileChooserManager;
-import de.prob2.ui.internal.I18n;
-import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
-import de.prob2.ui.simulation.configuration.DiagramConfiguration;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
-import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
-import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
-import de.prob2.ui.simulation.simulators.RealTimeSimulator;
-
-public class DiagramGenerator {
-	private final StageManager stageManager;
-
-	private final FileChooserManager fileChooserManager;
-
-	private final CurrentProject currentProject;
-
-	private final CurrentTrace currentTrace;
-
-	private final Injector injector;
-
-	private final I18n i18n;
-
-	private DiagramStage diaStage; 
-
-	private final RealTimeSimulator realTimeSimulator;
-
-	@Inject
-	public DiagramGenerator(StageManager stageManager, FileChooserManager fileChooserManager,
-			CurrentProject currentProject, CurrentTrace currentTrace, Injector injector, I18n i18n, RealTimeSimulator realTimeSimulator) {
-		this.stageManager = stageManager;
-		this.fileChooserManager = fileChooserManager;
-		this.currentProject = currentProject;
-		this.currentTrace = currentTrace;
-		this.injector = injector;
-		this.i18n = i18n;
-		this.realTimeSimulator = realTimeSimulator;
-		this.realTimeSimulator.setDiagramGenerator(this);
+public final class DiagramGenerator {
+	private DiagramGenerator() {
+		throw new AssertionError("Utility class");
 	}
 
 	//Initializes Velocity engine for diagram generation
-	private VelocityContext velocityInit(){
+	private static VelocityContext velocityInit() {
 		Properties props = new Properties();
 		VelocityContext nodeContext = new VelocityContext();
 		props.setProperty("resource.loader", "class");
@@ -64,76 +36,38 @@ public class DiagramGenerator {
 		
 	}
 	
-	public String generateDiagram(Boolean debug){
-		//Initialisation of Velocity engine
-		VelocityContext nodeContext = velocityInit();
-		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
-		StringWriter sw = new StringWriter(); 
-		
-		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectNodes(false));
-		nodeContext.put("activations", collectEdges());
-		nodes.merge(nodeContext, sw);
-		String nodesString = sw.toString();
-
-		//Prints dot diagramm and Activation config into console as well as opening a pop-up with the Visualised Diagramm
-		//Debug allows to disable UI dependency for testing
-		if (!debug) {
-			printSimulationDiagramm(nodesString, false);
-		}
-		return nodesString;
+	public static String generateDiagram(SimulationModelConfiguration config) {
+		return generateLiveDiagram(config, Map.of());
 	}
 	
-	public String generateComplexDiagram(boolean debug){
+	public static String generateComplexDiagram(SimulationModelConfiguration config) {
 		//init velocity
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/complex_template.vm");
 		StringWriter sw = new StringWriter();
 		
 		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectComplexNodes());
-		nodeContext.put("activations", collectEdges());
+		nodeContext.put("nodes", collectComplexNodes(config));
+		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
-		String nodesString = sw.toString();
-
-		//Prints dot diagramm and Activation config into console as well as opening a pop-up with the Visualised Diagramm
-		//Debug allows to disable UI dependency for testing
-		if (!debug) {
-			printSimulationDiagramm(nodesString, false);
-		}
-		return nodesString;
+		return sw.toString();
 	}
 
-	public String generateLiveDiagram(boolean updatetoggle, boolean debug){
+	public static String generateLiveDiagram(SimulationModelConfiguration config, Map<String, List<Activation>> configurationToActivation) {
 		//Initialisation of Velocity engine
 		VelocityContext nodeContext = velocityInit();
 		Template nodes = Velocity.getTemplate("/de/prob2/ui/simulation/velocity/nodes_template.vm");
 		StringWriter sw = new StringWriter(); 
 		
 		//Nodes and edges are collected and put into velocity context
-		nodeContext.put("nodes", collectNodes(true));
-		nodeContext.put("activations", collectEdges());
+		nodeContext.put("nodes", collectNodes(config, configurationToActivation));
+		nodeContext.put("activations", collectEdges(config));
 		nodes.merge(nodeContext, sw);
-		String nodesString = sw.toString();
-
-
-		//Prints dot diagramm and Activation config into console as well as opening a pop-up with the Visualised diagram
-		//If updatetoggle is true, then it will simply update the diagram inside the already open diagram
-		//Debug allows to disable UI dependency for testing
-		if (!debug) {
-			if (!updatetoggle) {
-				printSimulationDiagramm(nodesString, true);
-			} else {
-				diaStage.updateGraph(nodesString);
-			}
-		}
-		return nodesString;
+		return sw.toString();
 	}
 
 	//Method that collects all nodes for simple activation diagram
-	List<DiagramNode> collectNodes(boolean showCurrent){
-		//init of Configs for Simple nodes
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+	static List<DiagramNode> collectNodes(SimulationModelConfiguration config, Map<String, List<Activation>> configurationToActivation) {
 		List<DiagramConfiguration.NonUi> activations = config.getActivations();
 		List<UIListenerConfiguration> listeners = config.getListeners();
 		List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
@@ -150,12 +84,14 @@ public class DiagramGenerator {
 				String eventColour = "white";
 				String opColour = "yellow";
 				//change color if currently active
-				if (showCurrent && !realTimeSimulator.getConfigurationToActivation().get(opConfig.getId()).isEmpty()) {
+				if (configurationToActivation.containsKey(opConfig.getId()) && !configurationToActivation.get(opConfig.getId()).isEmpty()) {
 					opColour = "aqua";
 					eventColour = "aqua";
 				}
 				if (!activation.getId().equals("$setup_constants")) {
-					diaNode.add(new DiagramNode(opConfig.getExecute()+"_event", eventColour, opConfig.getExecute(), "ellipse"));
+					for(String execute : opConfig.getExecute()) {
+						diaNode.add(new DiagramNode(execute + "_event", eventColour, execute, "ellipse"));
+					}
 				}
 				
 				if(!activation.getId().equals("$initialise_machine") && !activation.getId().equals("$setup_constants")){
@@ -171,8 +107,7 @@ public class DiagramGenerator {
 	}
 
 	//collects Nodes for complex activation Diagram
-	List<DiagramNode> collectComplexNodes(){
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+	static List<DiagramNode> collectComplexNodes(SimulationModelConfiguration config) {
 		List<DiagramConfiguration.NonUi> activations = config.getActivations();
 		List<UIListenerConfiguration> listeners = config.getListeners();
 		List<DiagramNode> diaNode = new ArrayList<DiagramNode>();
@@ -188,9 +123,13 @@ public class DiagramGenerator {
 				//Discard static events mark differentiate events and OperationConfigurations
 				if (!activation.getId().equals("$setup_constants")) {
 					if (opConfig.getWithPredicate() == null) {
-						diaNode.add(new DiagramNode(opConfig.getExecute()+"_event","white",opConfig.getExecute(), "ellipse"));
+						for(String execute : opConfig.getExecute()) {
+							diaNode.add(new DiagramNode(execute + "_event", "white",execute, "ellipse"));
+						}
 					} else {
-						diaNode.add(new ComplexListener(opConfig.getExecute()+"_event", "white", opConfig.getExecute(), "ellipse", opConfig.getWithPredicate()));
+						for(String execute : opConfig.getExecute()) {
+							diaNode.add(new ComplexListener(execute + "_event", "white",execute, "ellipse", opConfig.getWithPredicate()));
+						}
 					}
 				}
 				if(!activation.getId().equals("$initialise_machine") && !activation.getId().equals("$setup_constants")){
@@ -216,9 +155,7 @@ public class DiagramGenerator {
 	}
 
 	//Method that collects all relevant edges between Nodes of the Activation diagramms
-	List<DiagramEdge> collectEdges(){
-
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
+	private static List<DiagramEdge> collectEdges(SimulationModelConfiguration config) {
 		List<DiagramConfiguration.NonUi> activations = config.getActivations();
 		List<UIListenerConfiguration> listeners = config.getListeners();
 		List<DiagramEdge> activating = new ArrayList<DiagramEdge>();
@@ -238,29 +175,33 @@ public class DiagramGenerator {
 			} else {
 				opConfig = (ActivationOperationConfiguration) activation;
 				if(!activation.getId().equals("$initialise_machine")){
-					edge = new DiagramEdge(opConfig.getId(), Collections.singletonList(opConfig.getExecute()+"_event"), Collections.singletonList(opConfig.getAfter()), "");
-					activating.add(edge);
+					for(String op : opConfig.getExecute()) {
+						edge = new DiagramEdge(opConfig.getId(), Collections.singletonList(op + "_event"), Collections.singletonList(opConfig.getAfter()), "");
+						activating.add(edge);
+					}
 				}
 				if (opConfig.getActivating() != null) {
-					edge = new DiagramEdge(opConfig.getExecute()+"_event", new ArrayList<>(opConfig.getActivating()), opConfig.getActivating().stream().map(n -> "Activating").collect(Collectors.toList()), "");
-					boolean isPresent = false;
+					for(String op : opConfig.getExecute()) {
+						edge = new DiagramEdge(op + "_event", new ArrayList<>(opConfig.getActivating()), opConfig.getActivating().stream().map(n -> "Activating").collect(Collectors.toList()), "");
+						boolean isPresent = false;
 
-					//If EdgeObject is already present: Add edges from new edge to old edge if applicable, then discard new object
-					for (DiagramEdge compareEdge : activating) {
-						if (compareEdge.getFrom().equals(edge.getFrom())) {
-							if(edge.getTo() != null && compareEdge.getTo() != null) {
-								edge.getTo().stream().filter(Objects::nonNull).forEach(x -> {
-									if (!compareEdge.getTo().contains(x)) {
-										compareEdge.getTo().add(x);
-										compareEdge.getEdgeLabel().add("activating");
-									}
-								});
+						//If EdgeObject is already present: Add edges from new edge to old edge if applicable, then discard new object
+						for (DiagramEdge compareEdge : activating) {
+							if (compareEdge.getFrom().equals(edge.getFrom())) {
+								if (edge.getTo() != null && compareEdge.getTo() != null) {
+									edge.getTo().stream().filter(Objects::nonNull).forEach(x -> {
+										if (!compareEdge.getTo().contains(x)) {
+											compareEdge.getTo().add(x);
+											compareEdge.getEdgeLabel().add("activating");
+										}
+									});
+								}
+								isPresent = true;
 							}
-							isPresent = true;
 						}
-					}
-					if (!isPresent) {
-						activating.add(edge);
+						if (!isPresent) {
+							activating.add(edge);
+						}
 					}
 				}
 				
@@ -275,36 +216,5 @@ public class DiagramGenerator {
 		}
 
 		return activating;
-	}
-
-	private void printSimulationDiagramm(String nodesString, boolean islive){
-		//Getting Activation data; Only used for console information
-		SimulationModelConfiguration config = (SimulationModelConfiguration) realTimeSimulator.getConfig();
-		//Printing diagram information into console, then building diagram
-		System.out.println("ACTIVATIONS:");
-		System.out.println(config.getActivations());
-		System.out.println("LISTENERS:");
-		System.out.println(config.getListeners());
-		System.out.println("DOT: \n" + nodesString);
-		makeDiagramStage(nodesString, islive);
-	}
-	
-	//Builds the Diagramstage which displays the diagramm
-	private void makeDiagramStage(String nodesString, boolean islive){
-		if (diaStage!=null) {
-			diaStage.close();
-		}
-		diaStage = new DiagramStage(stageManager, currentProject, currentTrace, injector, i18n, nodesString, fileChooserManager, islive);
-		diaStage.show();
-	}
-
-	//Updates the live Diagramm
-	public void updateGraph(){
-		generateLiveDiagram(true, false);
-	}
-
-
-	public DiagramStage getDiaStage() {
-		return diaStage;
 	}
 }

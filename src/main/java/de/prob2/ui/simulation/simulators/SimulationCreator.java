@@ -1,6 +1,7 @@
 package de.prob2.ui.simulation.simulators;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +54,7 @@ public class SimulationCreator {
 			fixedVariables = fixedVariables.isEmpty() ? null : fixedVariables;
 
 			List<String> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(nextOp);
-			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, "");
+			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, Arrays.asList(op), String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, true, "");
 			activationConfigurations.add(activationConfig);
 			currentTimestamp = timestamps.get(i);
 		}

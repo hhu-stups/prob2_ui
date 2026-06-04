@@ -21,8 +21,11 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
+import de.prob.animator.domainobjects.AbstractEvalResult;
+import de.prob.animator.domainobjects.EvalResult;
 import de.prob.statespace.LoadedMachine;
 import de.prob.statespace.OperationInfo;
+import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.animation.tracereplay.TraceFileHandler;
@@ -52,6 +55,7 @@ import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
 import de.prob2.ui.simulation.configuration.TransitionSelection;
 import de.prob2.ui.simulation.configuration.UIListenerConfiguration;
+import de.prob2.ui.simulation.diagram.DiagramStage;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.simulation.schedulingTable.SchedulingItemTableCell;
@@ -385,8 +389,7 @@ public final class SimulatorStage extends Stage {
 	private final BooleanProperty savedProperty;
 	private final SimulationItemHandler simulationItemHandler;
 	private final SimulationMode simulationMode;
-
-	private final DiagramGenerator diagramGenerator;
+	private final DiagramStage diagramStage;
 
 	private int time;
 
@@ -405,7 +408,7 @@ public final class SimulatorStage extends Stage {
 			final I18n i18n, final FileChooserManager fileChooserManager,
 			final TraceFileHandler traceFileHandler, final DisablePropertyController disablePropertyController,
 			final StopActions stopActions, SimulationFileHandler simulationFileHandler,
-			final DiagramGenerator diagramGenerator
+			final DiagramStage diagramStage
 	) {
 		super();
 		this.stageManager = stageManager;
@@ -421,7 +424,7 @@ public final class SimulatorStage extends Stage {
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.traceFileHandler = traceFileHandler;
-		this.diagramGenerator = diagramGenerator;
+		this.diagramStage = diagramStage;
 		this.disablePropertyController = disablePropertyController;
 		this.simulationFileHandler = simulationFileHandler;
 		this.configurationPath = new SimpleObjectProperty<>(this, "configurationPath", null);
@@ -439,6 +442,21 @@ public final class SimulatorStage extends Stage {
 				cbSimulation.getItems().setAll(new SimulationModel(Paths.get("")));
 			} else {
 				cbSimulation.getItems().setAll(machine.getSimulations());
+			}
+
+			State state = currentTrace.getCurrentState();
+			if(state == null) {
+				return;
+			}
+			AbstractEvalResult evalResult = state.eval("SIMB_JSON_FILE");
+			boolean hasConfiguredSimulation = evalResult instanceof EvalResult;
+			if(hasConfiguredSimulation) {
+				String definitionsPath = ((EvalResult) evalResult).getValue();
+				definitionsPath = definitionsPath.replaceAll("\"", "");
+				SimulationModel model = new SimulationModel(Paths.get(definitionsPath));
+				if(!cbSimulation.getItems().contains(model)) {
+					cbSimulation.getItems().add(0, model);
+				}
 			}
 
 			// If the last selected simulation disappears, select a different one if possible.
@@ -701,10 +719,9 @@ public final class SimulatorStage extends Stage {
 			Path resolvedPath = currentProject.getLocation().relativize(path);
 			SimulationModel simulationModel = new SimulationModel(resolvedPath);
 			if(!currentProject.getCurrentMachine().getSimulations().contains(simulationModel)) {
-				currentProject.getCurrentMachine().getSimulations().add(new SimulationModel(resolvedPath));
-			} else {
-				cbSimulation.getSelectionModel().select(simulationModel);
+				currentProject.getCurrentMachine().getSimulations().add(simulationModel);
 			}
+			cbSimulation.getSelectionModel().select(simulationModel);
 		}
 	}
 
@@ -880,18 +897,30 @@ public final class SimulatorStage extends Stage {
 
 	@FXML
 	private void generateDiagram(){
-		diagramGenerator.generateDiagram(false);
+		realTimeSimulator.setLiveDiagramStage(null);
+		String nodesString = DiagramGenerator.generateDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig());
+		diagramStage.updateGraph(nodesString);
+		diagramStage.show();
+		diagramStage.toFront();
 	}
 
 	
 	@FXML
 	private void generateComplexDiagram(){
-		diagramGenerator.generateComplexDiagram(false);
+		realTimeSimulator.setLiveDiagramStage(null);
+		String nodesString = DiagramGenerator.generateComplexDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig());
+		diagramStage.updateGraph(nodesString);
+		diagramStage.show();
+		diagramStage.toFront();
 	}
 
 	@FXML
 	private void generateLiveDiagram(){
-		diagramGenerator.generateLiveDiagram(false,false);
+		realTimeSimulator.setLiveDiagramStage(diagramStage);
+		String nodesString = DiagramGenerator.generateLiveDiagram((SimulationModelConfiguration)realTimeSimulator.getConfig(), realTimeSimulator.getConfigurationToActivation());
+		diagramStage.updateGraph(nodesString);
+		diagramStage.show();
+		diagramStage.toFront();
 	}
 
 	private SimulationModelConfiguration buildSimulationModel() {
@@ -973,7 +1002,7 @@ public final class SimulatorStage extends Stage {
 	private void addDirectActivation() {
 		simulationDiagramItems.getItems().add(new ActivationOperationConfiguration(
 				i18n.translate("simulation.item.newDirectActivation"),
-				"Event",
+				Arrays.asList("Event"),
 				"0",
 				0,
 				null,
@@ -985,6 +1014,7 @@ public final class SimulatorStage extends Stage {
 				true,
 				null,
 				null,
+				false,
 				""
 		));
 	}

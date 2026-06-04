@@ -1,10 +1,10 @@
 package de.prob2.ui.menu;
 
-
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.prob.model.brules.RulesModel;
+import de.prob.model.representation.SequentProverModel;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
@@ -14,6 +14,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.persistence.PersistenceUtils;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.ui.RulesView;
+import de.prob2.ui.sequentprover.SequentProverView;
 import javafx.fxml.FXML;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
@@ -65,11 +66,17 @@ public final class MainView extends StackPane {
 		RulesView rulesView = injector.getInstance(RulesView.class);
 		Tab rulevalidationTab = new Tab(i18n.translate("menu.mainView.tabs.rulevalidation"));
 		rulevalidationTab.setContent(rulesView);
+
+		SequentProverView sequentProverView = injector.getInstance(SequentProverView.class);
+		Tab sequentProverTab = new Tab("Sequent Prover");
+		sequentProverTab.setContent(sequentProverView);
 		currentTrace.addListener((observable, oldTrace, newTrace) -> {
-			if (newTrace == null || !(newTrace.getModel() instanceof RulesModel)) {
-				tabPane.getTabs().remove(rulevalidationTab);
-			}  else {
+			if (newTrace != null && newTrace.getModel() instanceof SequentProverModel) {
+				tabPane.getTabs().add(sequentProverTab);
+			} else if (newTrace != null && newTrace.getModel() instanceof RulesModel) {
 				tabPane.getTabs().add(rulevalidationTab);
+			} else {
+				tabPane.getTabs().removeAll(rulevalidationTab, sequentProverTab);
 			}
 		});
 	}

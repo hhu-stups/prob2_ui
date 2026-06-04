@@ -5,11 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.DotCall;
@@ -18,29 +14,19 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
-import de.prob2.ui.prob2fx.CurrentProject;
-import de.prob2.ui.prob2fx.CurrentTrace;
-import javafx.application.Platform;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Singleton
-public class DiagramStage extends Stage {
-	private final StageManager stageManager;
-
-	private final boolean islive;
-
+public final class DiagramStage extends Stage {
 	private final FileChooserManager fileChooserManager;
-
-	private final CurrentProject currentProject;
-
-	private final CurrentTrace currentTrace;
-
-	private final Injector injector;
 
 	private final I18n i18n;
 
@@ -61,47 +47,31 @@ public class DiagramStage extends Stage {
 	private Button saveButton;
 
 	@Inject
-	public DiagramStage(StageManager stageManager, CurrentProject currentProject, CurrentTrace currentTrace,
-			Injector injector, I18n i18n, String nodesString, FileChooserManager fileChooserManager, boolean islive) {
-		
+	public DiagramStage(StageManager stageManager, I18n i18n, FileChooserManager fileChooserManager) {
 		super();
-		this.stageManager = stageManager;
 		this.fileChooserManager = fileChooserManager;
-		this.currentProject = currentProject;
-		this.currentTrace = currentTrace;
-		this.injector = injector;
 		this.i18n = i18n;
-		this.nodesString = nodesString;
+		this.nodesString = null;
 		stageManager.loadFXML(this, "activation_Diagram_Stage.fxml", this.getClass().getName());
-		this.islive = islive;
-	}
-
-
-	@FXML
-	public void initialize(){
-		loadGraph(new String(makeGraphString(), StandardCharsets.UTF_8));
-		
 	}
 
 	public void updateGraph(String newDiagram){
 		nodesString = newDiagram;
-		loadGraph(new String(makeGraphString(),StandardCharsets.UTF_8));
+		try {
+			loadGraph(makeGraphString(newDiagram));
+		} catch (InterruptedException | ProBError exc) {
+			LOGGER.error("Failed to render simulation diagram", exc);
+		}
 	}
 
 	//Calls dotengine to build SVG string to load in FXML 
-	public byte[] makeGraphString(){
-		byte[] svgdiagramm=null; 
-		DotCall dotCall = new DotCall("dot")
+	private static String makeGraphString(String input) throws InterruptedException {
+		byte[] svgBytes = new DotCall("dot")
 			.layoutEngine("dot")
 			.outputFormat(DotOutputFormat.SVG)
-			.input(nodesString);
-		try {
-			svgdiagramm = dotCall.call();
-		} catch (ProBError |InterruptedException e) {
-			LOGGER.error("Could not Visualize Graph with dot input)",e);
-			return null;
-		}
-		return svgdiagramm;
+			.input(input)
+			.call();
+		return new String(svgBytes, StandardCharsets.UTF_8);
 	}
 
 	//loads diagram into FXML page
@@ -177,9 +147,5 @@ public class DiagramStage extends Stage {
 		} catch (IOException | InterruptedException e) {
 			LOGGER.error("Failed to save file converted from dot", e);
 		}
-	}
-
-	public boolean getIsLive(){
-		return islive;
 	}
 }

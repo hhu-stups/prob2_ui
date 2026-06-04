@@ -11,7 +11,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.simulation.simulators.check.SimulationEstimator;
 
-import de.prob2.ui.simulation.simulators.check.SimulationHypothesisChecker;
 import javafx.beans.NamedArg;
 import javafx.fxml.FXML;
 import javafx.scene.control.ChoiceBox;
@@ -90,7 +89,8 @@ public class SimulationEstimationChoice extends GridPane {
 		boolean estimateProbability = checkingType != SimulationCheckingType.AVERAGE && checkingType != SimulationCheckingType.AVERAGE_MEAN_BETWEEN_STEPS &&
 				checkingType != SimulationCheckingType.SUM && checkingType != SimulationCheckingType.SUM_MEAN_BETWEEN_STEPS &&
 				checkingType != SimulationCheckingType.MINIMUM && checkingType != SimulationCheckingType.MINIMUM_MEAN_BETWEEN_STEPS &&
-				checkingType != SimulationCheckingType.MAXIMUM && checkingType != SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS;
+				checkingType != SimulationCheckingType.MAXIMUM && checkingType != SimulationCheckingType.MAXIMUM_MEAN_BETWEEN_STEPS &&
+				checkingType != SimulationCheckingType.FINAL_VALUE;
 
 		try {
 			double desiredValue = Double.parseDouble(tfDesiredValue.getText());
@@ -100,10 +100,9 @@ public class SimulationEstimationChoice extends GridPane {
 					case MINIMUM:
 					case MAXIMUM:
 					case MEAN:
-						if (desiredValue <= 0.0 || desiredValue >= 1.0 || epsilon <= 0.0) {
+						if (desiredValue < 0.0 || desiredValue > 1.0 || epsilon < 0.0) {
 							return false;
 						}
-						return epsilon <= Math.min(desiredValue, 1 - desiredValue);
 					default:
 						break;
 				}

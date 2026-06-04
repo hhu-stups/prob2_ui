@@ -48,7 +48,7 @@ import javafx.stage.Window;
 @Singleton
 public final class FileChooserManager {
 	public enum Kind {
-		PROJECTS_AND_MACHINES, NEW_MACHINE, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, SIMULATION, HISTORY_CHART, DATA_IMPORT
+		PROJECTS_AND_MACHINES, NEW_MACHINE, PLUGINS, VISUALISATIONS, PERSPECTIVES, TRACES, SIMULATION, HISTORY_CHART, DATA_IMPORT, TRACE_STATISTICS
 	}
 
 	public static final String EXTENSION_PATTERN_PREFIX = "*.";
@@ -215,6 +215,10 @@ public final class FileChooserManager {
 	
 	public FileChooser.ExtensionFilter getCsvFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.csv", "csv");
+	}
+
+	public FileChooser.ExtensionFilter getHtmlFilter() {
+		return this.getExtensionFilter("common.fileChooser.fileTypes.html", "html");
 	}
 	
 	public FileChooser.ExtensionFilter getSvgFilter() {

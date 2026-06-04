@@ -3,9 +3,11 @@
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.Spacer?>
+<?import de.prob2.ui.visb.VisBSearchPane?>
 <?import de.prob2.ui.visb.VisBView?>
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuButton?>
@@ -13,122 +15,133 @@
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.ProgressIndicator?>
 <?import javafx.scene.control.SeparatorMenuItem?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.control.ToolBar?>
-<?import javafx.scene.control.ComboBox?>
 
 <fx:root type="VisBView" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
 	<top>
-		<ToolBar styleClass="border">
-			<padding>
-				<Insets left="5.0" right="5.0"/>
-			</padding>
-			<Button fx:id="loadVisualisationButton" onAction="#askLoadVisBFile">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
-								   bindableFontSize="${fontSize.fontSize + 4}"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%visb.menu.file.open"/>
-				</tooltip>
-			</Button>
-			<Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
-								   bindableFontSize="${fontSize.fontSize + 4}"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%visb.menu.edit.reload"/>
-				</tooltip>
-			</Button>
-			<ComboBox fx:id="cbVisualisations" />
-			<MenuButton>
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG"
-								   bindableFontSize="${fontSize.fontSize + 4}"/>
-				</graphic>
-				<items>
-					<MenuItem fx:id="loadFromDefinitionsItem" text="%visb.settingsMenu.loadVisualisationFromDefinitions" onAction="#loadFromDefinitions"/>
-					<MenuItem fx:id="setSelectedAsDefaultItem" text="%visb.settingsMenu.setSelectedVisualisationAsDefault" onAction="#setSelectedAsDefault"/>
-					<MenuItem fx:id="deleteSelectedItem" text="%visb.settingsMenu.deleteSelected" onAction="#deleteSelected"/>
-					<MenuItem fx:id="saveCurrentItem" text="%visb.settingsMenu.saveCurrent" onAction="#saveCurrent"/>
-					<MenuItem fx:id="editCurrentExternalItem" text="%visb.settingsMenu.editCurrentExternal" onAction="#editCurrentExternal"/>
-					<SeparatorMenuItem/>
-					<MenuItem text="%visb.settingsMenu.showDebugWindow" onAction="#showVisBItemsAndEvents"/>
-				</items>
-			</MenuButton>
-			<MenuButton fx:id="saveTraceButton">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
-								   bindableFontSize="${fontSize.fontSize + 4}"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%common.buttons.saveTrace"/>
-				</tooltip>
-				<items>
-					<Menu fx:id="exportHistoryMenu" text="%visb.menu.file.export.html.history">
-						<MenuItem fx:id="exportHistoryItem" text="%visb.menu.file.export.html.default"/>
-						<MenuItem fx:id="exportHistoryWithSourceItem" text="%visb.menu.file.export.html.withSource"/>
-						<MenuItem fx:id="exportHistoryCustomItem" text="%visb.menu.file.export.html.customConfiguration"/>
-					</Menu>
-					<Menu fx:id="exportCurrentStateMenu" text="%visb.menu.file.export.html.currentState">
-						<MenuItem fx:id="exportCurrentStateItem" text="%visb.menu.file.export.html.default"/>
-						<MenuItem fx:id="exportCurrentStateWithSourceItem" text="%visb.menu.file.export.html.withSource"/>
-						<MenuItem fx:id="exportCurrentStateCustomItem" text="%visb.menu.file.export.html.customConfiguration"/>
-					</Menu>
-					<!-- The export image menu item is disabled until the WebView is created. -->
-					<MenuItem fx:id="exportImageItem" mnemonicParsing="false" text="%visb.menu.file.export.png" disable="true" onAction="#exportImage"/>
-					<MenuItem fx:id="exportSvgItem" mnemonicParsing="false" text="%visb.menu.file.export.svg" disable="true" onAction="#exportSvg"/>
-				</items>
-			</MenuButton>
-			<Spacer/>
-			<HBox fx:id="inProgressBox" spacing="5" alignment="CENTER" visible="false" managed="false">
-				<Label fx:id="inProgressLabel"/>
-				<ProgressIndicator maxHeight="20" maxWidth="20"/>
-			</HBox>
-			<Spacer/>
-			<Label fx:id="lblActualVisualisationName" />
-			<!-- The zoom buttons are disabled until the WebView is created. -->
-			<Button fx:id="zoomInButton" disable="true" onAction="#zoomIn">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_PLUS"
-								   bindableFontSize="${fontSize.fontSize * 1.5}"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%visb.menu.view.zoom.in"/>
-				</tooltip>
-			</Button>
-			<Button fx:id="zoomOutButton" disable="true" onAction="#zoomOut">
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_MINUS"
-								   bindableFontSize="${fontSize.fontSize * 1.5}"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%visb.menu.view.zoom.out"/>
-				</tooltip>
-			</Button>
-			<MenuButton>
-				<graphic>
-					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
-								   bindableFontSize="${fontSize.fontSize * 2}"/>
-				</graphic>
-				<tooltip>
-					<Tooltip text="%visb.menu.help"/>
-				</tooltip>
-				<items>
-					<MenuItem text="%visb.menu.help.helppages" onAction="#openHelpPage"/>
-					<MenuItem text="%visb.menu.help.user.manual" onAction="#openUserManual"/>
-				</items>
-			</MenuButton>
-		</ToolBar>
+		<VBox styleClass="border">
+			<ToolBar>
+				<padding>
+					<Insets left="5.0" right="5.0"/>
+				</padding>
+				<Button fx:id="loadVisualisationButton" onAction="#askLoadVisBFile">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="FOLDER_OPEN"
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%visb.menu.file.open"/>
+					</tooltip>
+				</Button>
+				<Button fx:id="reloadVisualisationButton" onAction="#reloadVisualisation">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%visb.menu.edit.reload"/>
+					</tooltip>
+				</Button>
+				<ComboBox fx:id="cbVisualisations" />
+				<MenuButton>
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="COG"
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
+					</graphic>
+					<items>
+						<MenuItem fx:id="loadFromDefinitionsItem" text="%visb.settingsMenu.loadVisualisationFromDefinitions" onAction="#loadFromDefinitions"/>
+						<MenuItem fx:id="setSelectedAsDefaultItem" text="%visb.settingsMenu.setSelectedVisualisationAsDefault" onAction="#setSelectedAsDefault"/>
+						<MenuItem fx:id="deleteSelectedItem" text="%visb.settingsMenu.deleteSelected" onAction="#deleteSelected"/>
+						<MenuItem fx:id="saveCurrentItem" text="%visb.settingsMenu.saveCurrent" onAction="#saveCurrent"/>
+						<MenuItem fx:id="editCurrentExternalItem" text="%visb.settingsMenu.editCurrentExternal" onAction="#editCurrentExternal"/>
+						<SeparatorMenuItem/>
+						<MenuItem text="%visb.settingsMenu.showDebugWindow" onAction="#showVisBItemsAndEvents"/>
+					</items>
+				</MenuButton>
+				<MenuButton fx:id="saveTraceButton">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE"
+									   bindableFontSize="${fontSize.fontSize + 4}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%common.buttons.saveTrace"/>
+					</tooltip>
+					<items>
+						<Menu fx:id="exportHistoryMenu" text="%visb.menu.file.export.html.history">
+							<MenuItem fx:id="exportHistoryItem" text="%visb.menu.file.export.html.default"/>
+							<MenuItem fx:id="exportHistoryWithSourceItem" text="%visb.menu.file.export.html.withSource"/>
+							<MenuItem fx:id="exportHistoryCustomItem" text="%visb.menu.file.export.html.customConfiguration"/>
+						</Menu>
+						<Menu fx:id="exportCurrentStateMenu" text="%visb.menu.file.export.html.currentState">
+							<MenuItem fx:id="exportCurrentStateItem" text="%visb.menu.file.export.html.default"/>
+							<MenuItem fx:id="exportCurrentStateWithSourceItem" text="%visb.menu.file.export.html.withSource"/>
+							<MenuItem fx:id="exportCurrentStateCustomItem" text="%visb.menu.file.export.html.customConfiguration"/>
+						</Menu>
+						<!-- The export image menu item is disabled until the WebView is created. -->
+						<MenuItem fx:id="exportImageItem" mnemonicParsing="false" text="%visb.menu.file.export.png" disable="true" onAction="#exportImage"/>
+						<MenuItem fx:id="exportSvgItem" mnemonicParsing="false" text="%visb.menu.file.export.svg" disable="true" onAction="#exportSvg"/>
+					</items>
+				</MenuButton>
+				<Spacer/>
+				<HBox fx:id="inProgressBox" spacing="5" alignment="CENTER" visible="false" managed="false">
+					<Label fx:id="inProgressLabel"/>
+					<ProgressIndicator maxHeight="20" maxWidth="20"/>
+				</HBox>
+				<Spacer/>
+				<Label fx:id="lblActualVisualisationName" />
+				<ToggleButton fx:id="searchButton" disable="true">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH" bindableFontSize="${fontSize.fontSize + 4}" />
+					</graphic>
+					<tooltip>
+						<Tooltip text="%menu.file.items.search"/>
+					</tooltip>
+				</ToggleButton>
+				<!-- The zoom buttons are disabled until the WebView is created. -->
+				<Button fx:id="zoomInButton" disable="true" onAction="#zoomIn">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_PLUS"
+									   bindableFontSize="${fontSize.fontSize * 1.5}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%visb.menu.view.zoom.in"/>
+					</tooltip>
+				</Button>
+				<Button fx:id="zoomOutButton" disable="true" onAction="#zoomOut">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SEARCH_MINUS"
+									   bindableFontSize="${fontSize.fontSize * 1.5}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%visb.menu.view.zoom.out"/>
+					</tooltip>
+				</Button>
+				<MenuButton>
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+									   bindableFontSize="${fontSize.fontSize * 2}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%visb.menu.help"/>
+					</tooltip>
+					<items>
+						<MenuItem text="%visb.menu.help.helppages" onAction="#openHelpPage"/>
+						<MenuItem text="%visb.menu.help.user.manual" onAction="#openUserManual"/>
+					</items>
+				</MenuButton>
+			</ToolBar>
+			<VisBSearchPane fx:id="visBSearchPane"/>
+		</VBox>
 	</top>
 	<center>
 		<StackPane fx:id="mainPane">

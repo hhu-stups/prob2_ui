@@ -7,7 +7,7 @@
 <?import javafx.scene.Scene?>
 <?import javafx.stage.Stage?>
 <?import javafx.scene.control.TreeTableColumn?>
-<fx:root type="Stage" minWidth="480" minHeight="360" xmlns:fx="http://javafx.com/fxml/1" title="%verifications.po.poView.details">
+<fx:root type="Stage" minWidth="400" minHeight="200" xmlns:fx="http://javafx.com/fxml/1" title="%verifications.po.poView.details">
 	<scene>
 		<Scene>
 			<StackPane>

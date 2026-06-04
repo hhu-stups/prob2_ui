@@ -10,9 +10,9 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
+import de.prob2.ui.simulation.diagram.DiagramStage;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.check.ISimulationPropertyChecker;
 import javafx.application.Platform;
@@ -27,8 +27,16 @@ import javafx.beans.property.SimpleListProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+import javafx.scene.control.Alert;
+import de.prob2.ui.simulation.SimulatorStage;
+import com.google.inject.Injector;
+import de.prob2.ui.internal.StageManager;
+
 @Singleton
 public final class RealTimeSimulator extends Simulator {
+
+	private final Injector injector;
+
 	private final Scheduler scheduler;
 
 	private final CurrentTrace currentTrace;
@@ -37,22 +45,23 @@ public final class RealTimeSimulator extends Simulator {
 
 	private final ChangeListener<Transition> uiListener;
 
-	private DiagramGenerator diagramGenerator;
-
 	private final ListProperty<Integer> timestampsForLogging;
 
 	private final ListProperty<List<Activation>> activationsForLoggedTimestamps;
 
+	private DiagramStage liveDiagramStage;
+
 	@Inject
-	public RealTimeSimulator(final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
+	public RealTimeSimulator(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
 		super(currentTrace, currentProject, objectMapperProvider);
+		this.injector = injector;
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
 		this.uiInteractionHandler = uiInteractionHandler;
 		this.uiListener = (observable, from, to) -> uiInteractionHandler.handleUserInteraction(this, to);
-		this.diagramGenerator = null;
 		this.timestampsForLogging = new SimpleListProperty<>(this, "timestampsForLogging", FXCollections.observableArrayList());
 		this.activationsForLoggedTimestamps = new SimpleListProperty<>(this, "activationsForLoggedTimestamps", FXCollections.observableArrayList());
+		this.liveDiagramStage = null;
 	}
 
 	public void run() {
@@ -85,13 +94,13 @@ public final class RealTimeSimulator extends Simulator {
 			throw e;
 		}
 		scheduler.endSimulationStep();
-		Platform.runLater(() -> {
-			if (diagramGenerator.getDiaStage() != null) {
-				if (diagramGenerator.getDiaStage().isShowing() && diagramGenerator.getDiaStage().getIsLive()) {
-					diagramGenerator.updateGraph();
-				}
-			}
-		});
+
+		if (liveDiagramStage != null) {
+			Platform.runLater(() -> {
+				String nodesString = DiagramGenerator.generateLiveDiagram((SimulationModelConfiguration)this.getConfig(), this.getConfigurationToActivation());
+				liveDiagramStage.updateGraph(nodesString);
+			});
+		}
 	}
 
 	private Trace mergeUserInteractions(int index, Trace traceWithUserInteractions, Trace simulatedTrace) {
@@ -153,6 +162,15 @@ public final class RealTimeSimulator extends Simulator {
 		return result;
 	}
 
+	@Override
+	protected void handleErrorWhenExecuted(String id) {
+		Platform.runLater(() -> {
+			final Alert alert = injector.getInstance(StageManager.class).makeAlert(Alert.AlertType.WARNING, "simulation.error.header.errorWhenExecuted", "simulation.error.body.errorWhenExecuted", id);
+			alert.initOwner(injector.getInstance(SimulatorStage.class));
+			alert.showAndWait();
+		});
+	}
+
 	public List<Integer> getTimestampsForLogging() {
 		return timestampsForLogging.get();
 	}
@@ -174,12 +192,11 @@ public final class RealTimeSimulator extends Simulator {
 		throw new UnsupportedOperationException();
 	}
 
-	public void setDiagramGenerator(DiagramGenerator diagramGenerator) {
-		this.diagramGenerator = diagramGenerator;
-	}
-
 	public void setTime(int time) {
 		this.time.set(time);
 	}
 
+	public void setLiveDiagramStage(DiagramStage liveDiagramStage) {
+		this.liveDiagramStage = liveDiagramStage;
+	}
 }

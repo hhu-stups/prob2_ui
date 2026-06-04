@@ -11,6 +11,7 @@ import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EventB;
 import de.prob.animator.domainobjects.FormulaExpand;
 import de.prob.animator.domainobjects.IEvalElement;
+import de.prob.model.representation.XTLModel;
 import de.prob.statespace.State;
 import de.prob.statespace.Transition;
 import de.prob2.ui.simulation.EvaluationMode;
@@ -42,6 +43,10 @@ public class SimulatorCache {
 	}
 
 	public List<Transition> readTransitionsWithCaching(State bState, Map<String, String> variables, String opName, String predicate, int maxTransitions) {
+
+		if (bState.getStateSpace().getModel() instanceof XTLModel) {
+			return bState.findTransitions(opName, Collections.singletonList(predicate), maxTransitions);
+		}
 
 		if(transitionCache.keySet().size() > 5000) {
 			transitionCache.clear();

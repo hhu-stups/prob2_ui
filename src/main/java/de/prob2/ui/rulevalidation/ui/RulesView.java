@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
@@ -349,7 +348,7 @@ public final class RulesView extends AnchorPane {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("rulevalidation.view.save.title"));
 		fileChooser.setInitialFileName("ValidationReport.html");
-		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.html", "html"));
+		fileChooser.getExtensionFilters().add(fileChooserManager.getHtmlFilter());
 		fileChooser.getExtensionFilters().add(fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.xml", "xml"));
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
