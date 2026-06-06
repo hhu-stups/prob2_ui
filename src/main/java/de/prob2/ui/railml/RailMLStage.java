@@ -333,8 +333,6 @@ public class RailMLStage extends Stage {
 		} else {
 			createMachinesAndProject();
 		}
-		if (closeAfterGeneration.isSelected())
-			this.close();
 		generationRunning.set(false);
 	}
 
@@ -381,6 +379,8 @@ public class RailMLStage extends Stage {
 				throw new RuntimeException(e);
 			}
 		}
+		if (closeAfterGeneration.isSelected())
+			this.close();
 	}
 
 	@FXML

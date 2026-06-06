@@ -428,20 +428,9 @@ public class RailMLInspectDotStage extends Stage {
 
 	@FXML
 	private void cancel() {
-		boolean abortImport = confirmAbortImport();
-		if (abortImport) {
-			updater.cancel(true);
-			this.interrupt();
-			this.close();
-		}
-	}
-
-	private boolean confirmAbortImport() {
-		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
-				"railml.inspectDot.alerts.confirmAbortImport.header",
-				"railml.inspectDot.alerts.confirmAbortImport.content");
-		Optional<ButtonType> result = alert.showAndWait();
-		return result.isPresent() && ButtonType.OK.equals(result.get());
+		updater.cancel(true);
+		this.interrupt();
+		this.close();
 	}
 
 	/* -------------------------------
