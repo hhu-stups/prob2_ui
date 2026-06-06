@@ -470,10 +470,10 @@ public class RailMLInspectDotStage extends Stage {
 	@FXML
 	private void save() {
 		final FileChooser fileChooser = new FileChooser();
-		FileChooser.ExtensionFilter svgFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.svg", "svg");
+		FileChooser.ExtensionFilter svgFilter = fileChooserManager.getSvgFilter();
 		FileChooser.ExtensionFilter pngFilter = fileChooserManager.getPngFilter();
-		FileChooser.ExtensionFilter dotFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.dot", "dot");
-		FileChooser.ExtensionFilter pdfFilter = fileChooserManager.getExtensionFilter("common.fileChooser.fileTypes.pdf", "pdf");
+		FileChooser.ExtensionFilter dotFilter = fileChooserManager.getDotFilter();
+		FileChooser.ExtensionFilter pdfFilter = fileChooserManager.getPdfFilter();
 		fileChooser.getExtensionFilters().setAll(svgFilter, pngFilter, dotFilter, pdfFilter);
 		fileChooser.setTitle(i18n.translate("common.fileChooser.save.title"));
 		final Path path = fileChooserManager.showSaveFileChooser(fileChooser, null, this.getScene().getWindow());
