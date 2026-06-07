@@ -47,6 +47,8 @@ public final class VisBSearchPane extends AnchorPane {
 	@FXML
 	private ToggleButton btWordsOnly;
 	@FXML
+	private ToggleButton btSearchIds;
+	@FXML
 	private Label lblResults;
 	@FXML
 	private Button btPrev;
@@ -67,9 +69,18 @@ public final class VisBSearchPane extends AnchorPane {
 
 		btMatchCase.selectedProperty().addListener(getToggleButtonListener(btMatchCase));
 		btWordsOnly.selectedProperty().addListener(getToggleButtonListener(btWordsOnly));
+		btSearchIds.selectedProperty().addListener(getToggleButtonListener(btSearchIds));
+		btSearchIds.selectedProperty().addListener((o, ov, nv) -> {
+			// ID search is currently only supported for a precise match, TODO: improve
+			btMatchCase.setSelected(nv);
+			btMatchCase.setDisable(nv);
+			btWordsOnly.setSelected(nv);
+			btWordsOnly.setDisable(nv);
+		});
 
 		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.C, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btMatchCase.fire()));
 		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.W, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btWordsOnly.fire()));
+		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.I, KeyCombination.CONTROL_DOWN, KeyCombination.ALT_DOWN), e -> btSearchIds.fire()));
 		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER), e -> find(false)));
 		Nodes.addInputMap(this.tfSearch, InputMap.consume(EventPattern.keyPressed(KeyCode.ENTER, KeyCombination.SHIFT_DOWN), e -> find(true)));
 	}
@@ -152,13 +163,17 @@ public final class VisBSearchPane extends AnchorPane {
 		}
 
 		boolean found;
-		if (keepPosition) {
-			// stay on the same search result by searching backwards first, then forwards
-			search(searchText, true);
-			found = search(searchText, false);
-		} else {
-			// search in the direction specified by 'backwards'
-			found = search(searchText, backwards);
+		if (btSearchIds.isSelected()) { // search for SVG IDs
+			found = searchForId(searchText);
+		} else { // standard text search
+			if (keepPosition) {
+				// stay on the same search result by searching backwards first, then forwards
+				search(searchText, true);
+				found = search(searchText, false);
+			} else {
+				// search in the direction specified by 'backwards'
+				found = search(searchText, backwards);
+			}
 		}
 
 		if (found) {
@@ -182,13 +197,28 @@ public final class VisBSearchPane extends AnchorPane {
 	}
 
 	private String findWithArguments(String searchText, boolean backwards) {
-		// search(string, caseSensitive, backwards, wrapAround, wholeWord, searchInFrames, showDialog)
+		// find(string, caseSensitive, backwards, wrapAround, wholeWord, searchInFrames, showDialog)
 		return "window.find('" + searchText + "',"
 				+ this.btMatchCase.isSelected() + ","
 				+ backwards + ","
 				+ "true,"
 				+ this.btWordsOnly.isSelected() + ","
 				+ "true,false)";
+	}
+
+	private boolean searchForId(String id) {
+		String elem = "elem_" + (id.hashCode() & Integer.MAX_VALUE); // to allow removal of blink effect of previous search result after timeout
+		String escId = id.replace("\\", "\\\\").replace("'", "\\'");
+		String js = "var "+ elem + " = document.getElementById('" + escId + "');"
+				+ "if ("+ elem + ") {"
+				+ "  var rect = " + elem + ".getBoundingClientRect();"
+				+ "  window.scrollTo({top: rect.top + window.scrollY - (window.innerHeight / 2),"
+				+ "                   left: rect.left + window.scrollX - (window.innerWidth / 2)});"
+				+ "  " + elem + ".classList.add('search-highlight');"
+				+ "  setTimeout(() => " + elem + ".classList.remove('search-highlight'), 3000);"
+				+ "}"
+				+ elem + " != null;";
+		return (Boolean) webView.getEngine().executeScript(js);
 	}
 
 	private void setResultText(String style, String key, Object... args) {

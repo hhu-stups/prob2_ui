@@ -46,6 +46,18 @@
 						<Tooltip text="%beditor.searchPane.wordsOnly.tooltip"/>
 					</tooltip>
 				</ToggleButton>
+				<ToggleButton fx:id="btSearchIds">
+					<graphic>
+						<Label text="ID">
+							<padding>
+								<Insets topRightBottomLeft="5"/>
+							</padding>
+						</Label>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%visb.searchPane.searchIds.tooltip"/>
+					</tooltip>
+				</ToggleButton>
 			</HBox>
 			<Separator orientation="VERTICAL"/>
 			<HBox alignment="CENTER">
