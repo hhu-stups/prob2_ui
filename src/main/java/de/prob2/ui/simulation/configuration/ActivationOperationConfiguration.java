@@ -1,5 +1,6 @@
 package de.prob2.ui.simulation.configuration;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -19,6 +20,7 @@ import de.prob.statespace.Transition;
 		"id",
 		"comment",
 		"execute",
+		"params",
 		"after",
 		"priority",
 		"additionalGuards",
@@ -35,6 +37,7 @@ import de.prob.statespace.Transition;
 public final class ActivationOperationConfiguration extends DiagramConfiguration.NonUi {
 
 	private List<String> execute;
+	private List<String> params;
 	private String after;
 	private int priority;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -46,7 +49,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	private Map<String, Map<String, String>> probabilisticVariables;
 	private TransitionSelection transitionSelection;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private List<String> activating;
+	private List<ActivationCall> activating;
 	private boolean activatingOnlyWhenExecuted;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private Map<String, String> updating;
@@ -59,6 +62,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	public ActivationOperationConfiguration(
 			@JsonProperty(value = "id", required = true) String id,
 			@JsonProperty(value = "execute", required = true) List<String> op,
+			@JsonProperty(value = "params") List<String> params,
 			@JsonProperty(value = "after", defaultValue = "0") String after,
 			@JsonProperty(value = "priority", defaultValue = "0") Integer priority,
 			@JsonProperty("additionalGuards") String additionalGuards,
@@ -66,7 +70,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 			@JsonProperty("fixedVariables") Map<String, String> fixedVariables,
 			@JsonProperty("probabilisticVariables") Map<String, Map<String, String>> probabilisticVariables,
 			@JsonProperty(value = "transitionSelection", defaultValue = "first") TransitionSelection transitionSelection,
-			@JsonProperty("activating") List<String> activating,
+			@JsonProperty("activating") List<ActivationCall> activating,
 			@JsonProperty(value = "activatingOnlyWhenExecuted", defaultValue = "true") Boolean activatingOnlyWhenExecuted,
 			@JsonProperty("updating") Map<String, String> updating,
 			@JsonProperty("withPredicate") String withPredicate,
@@ -75,6 +79,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	) {
 		super(id, comment);
 		this.execute = Objects.requireNonNull(op, "execute");
+		this.params = params == null ? new ArrayList() : params;
 		this.after = after != null && !after.isEmpty() ? after : "0";
 		this.priority = this.execute.stream().allMatch(e -> !Transition.isArtificialTransitionName(e)) && priority != null ? priority : 0;
 		this.additionalGuards = additionalGuards != null && !additionalGuards.isEmpty() && !"1=1".equals(additionalGuards) ? additionalGuards : null;
@@ -96,6 +101,15 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 
 	public void setExecute(List<String> execute) {
 		this.execute = execute;
+	}
+
+	@JsonProperty("params")
+	public List<String> getParams() {
+		return this.params;
+	}
+
+	public void setParams(List<String> params) {
+		this.params = params == null ? new ArrayList() : params;
 	}
 
 	@JsonIgnore
@@ -188,11 +202,11 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 	}
 
 	@JsonGetter("activating")
-	public List<String> getActivating() {
+	public List<ActivationCall> getActivating() {
 		return this.activating;
 	}
 
-	public void setActivating(List<String> activating) {
+	public void setActivating(List<ActivationCall> activating) {
 		this.activating = activating != null ? List.copyOf(activating) : List.of();
 	}
 
@@ -251,13 +265,13 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 		} else if (!(o instanceof ActivationOperationConfiguration that)) {
 			return false;
 		} else {
-			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getComment(), that.getComment()) && Objects.equals(this.getExecute(), that.getExecute()) && Objects.equals(this.getAfter(), that.getAfter()) && this.getPriority() == that.getPriority() && Objects.equals(this.getAdditionalGuards(), that.getAdditionalGuards()) && Objects.equals(this.getActivationKind(), that.getActivationKind()) && Objects.equals(this.getFixedVariables(), that.getFixedVariables()) && Objects.equals(this.getProbabilisticVariables(), that.getProbabilisticVariables())&& Objects.equals(this.getTransitionSelection(), that.getTransitionSelection()) && Objects.equals(this.getActivating(), that.getActivating()) && this.isActivatingOnlyWhenExecuted() == that.isActivatingOnlyWhenExecuted() && Objects.equals(this.getUpdating(), that.getUpdating()) && Objects.equals(this.getWithPredicate(), that.getWithPredicate());
+			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getComment(), that.getComment()) && Objects.equals(this.getExecute(), that.getExecute()) && Objects.equals(this.getParams(), that.getParams()) && Objects.equals(this.getAfter(), that.getAfter()) && this.getPriority() == that.getPriority() && Objects.equals(this.getAdditionalGuards(), that.getAdditionalGuards()) && Objects.equals(this.getActivationKind(), that.getActivationKind()) && Objects.equals(this.getFixedVariables(), that.getFixedVariables()) && Objects.equals(this.getProbabilisticVariables(), that.getProbabilisticVariables())&& Objects.equals(this.getTransitionSelection(), that.getTransitionSelection()) && Objects.equals(this.getActivating(), that.getActivating()) && this.isActivatingOnlyWhenExecuted() == that.isActivatingOnlyWhenExecuted() && Objects.equals(this.getUpdating(), that.getUpdating()) && Objects.equals(this.getWithPredicate(), that.getWithPredicate());
 		}
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getId(), this.getComment(), this.getExecute(), this.getAfter(), this.getPriority(), this.getAdditionalGuards(), this.getActivationKind(), this.getFixedVariables(), this.getProbabilisticVariables(), this.getTransitionSelection(), this.getActivating(), this.isActivatingOnlyWhenExecuted(), this.getUpdating(), this.getWithPredicate());
+		return Objects.hash(this.getId(), this.getComment(), this.getExecute(), this.getParams(), this.getAfter(), this.getPriority(), this.getAdditionalGuards(), this.getActivationKind(), this.getFixedVariables(), this.getProbabilisticVariables(), this.getTransitionSelection(), this.getActivating(), this.isActivatingOnlyWhenExecuted(), this.getUpdating(), this.getWithPredicate());
 	}
 
 	@Override
@@ -268,6 +282,7 @@ public final class ActivationOperationConfiguration extends DiagramConfiguration
 				.add("id", this.getId())
 				.add("comment", this.getComment())
 				.add("execute", this.getExecute())
+				.add("params", this.getParams())
 				.add("after", this.getAfter())
 				.add("priority", this.getPriority())
 				.add("additionalGuards", this.getAdditionalGuards())

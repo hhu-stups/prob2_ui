@@ -9,6 +9,7 @@ import de.prob2.ui.simulation.configuration.TransitionSelection;
 public record Activation(
 		String id,
 		List<String> operation,
+		Map<String, String> paramValues,
 		int time,
 		String additionalGuards,
 		ActivationKind activationKind,
@@ -24,6 +25,7 @@ public record Activation(
 		return new Activation(
 				this.id(),
 				this.operation(),
+				this.paramValues(),
 				this.time() - delta,
 				this.additionalGuards(),
 				this.activationKind(),

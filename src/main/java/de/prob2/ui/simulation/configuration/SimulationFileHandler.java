@@ -267,7 +267,7 @@ public final class SimulationFileHandler {
 
 		if (!loadedMachine.getConstantNames().isEmpty()) {
 			activations.add(new ActivationOperationConfiguration(
-				SETUP_CONSTANTS_NAME, Arrays.asList(SETUP_CONSTANTS_NAME),
+				SETUP_CONSTANTS_NAME, Arrays.asList(SETUP_CONSTANTS_NAME), List.of(),
 				"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST, 
 				null, false, null, null, true, "Activation SETUP_CONSTANTS"
 			));
@@ -275,16 +275,16 @@ public final class SimulationFileHandler {
 
 		var operations = loadedMachine.getOperationNames();
 		activations.add(new ActivationOperationConfiguration(
-			INITIALISE_MACHINE_NAME, Arrays.asList(INITIALISE_MACHINE_NAME),
+			INITIALISE_MACHINE_NAME, Arrays.asList(INITIALISE_MACHINE_NAME), List.of(),
 			"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST,
-			List.copyOf(operations), true, null, null, true, "Activation for INITIALISATION"
+			List.copyOf(operations.stream().map(op -> new ActivationCall(op, new HashMap<>())).collect(Collectors.toList())), true, null, null, true, "Activation for INITIALISATION"
 		));
 
 		for (var op : operations) {
 			activations.add(new ActivationOperationConfiguration(
-				op, Arrays.asList(op),
+				op, Arrays.asList(op), List.of(),
 				"100", 0, "btrue", ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, 
-				List.copyOf(operations), true, null, null, false, "Activation for " + op
+				List.copyOf(operations.stream().map(operation -> new ActivationCall(operation, new HashMap<>())).collect(Collectors.toList())), true, null, null, false, "Activation for " + op
 			));
 		}
 
