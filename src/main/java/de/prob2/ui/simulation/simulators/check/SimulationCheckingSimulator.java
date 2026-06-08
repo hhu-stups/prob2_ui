@@ -23,6 +23,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
 import de.prob2.ui.simulation.SimulationError;
 import de.prob2.ui.simulation.SimulatorStage;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
@@ -99,8 +100,9 @@ public class SimulationCheckingSimulator extends Simulator implements ISimulatio
 	private SimulationStats stats;
 	private MonteCarloCheckResult result;
 
-	public SimulationCheckingSimulator(CurrentTrace currentTrace, CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
-		super(currentTrace, currentProject, objectMapperProvider);
+	public SimulationCheckingSimulator(CurrentTrace currentTrace, CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider,
+									   final ActivationParameterHandler activationParameterHandler, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty, Map<String, Object> additionalInformation) {
+		super(currentTrace, currentProject, objectMapperProvider, activationParameterHandler);
 		this.injector = injector;
 		this.simulationFileHandler = simulationFileHandler;
 		this.operationExecutions = new HashMap<>();

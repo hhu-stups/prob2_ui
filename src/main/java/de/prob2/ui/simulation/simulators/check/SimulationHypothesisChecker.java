@@ -15,6 +15,7 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -138,21 +139,24 @@ public class SimulationHypothesisChecker implements ISimulationPropertyChecker {
 
 	private final Injector injector;
 	private final SimulationFileHandler simulationFileHandler;
+	private final ActivationParameterHandler activationParameterHandler;
 
 	private final HypothesisCheckingType hypothesisCheckingType;
 	private final double probability;
 	private final double significance;
 
-	public SimulationHypothesisChecker(final Injector injector, SimulationFileHandler simulationFileHandler, final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance) {
+	public SimulationHypothesisChecker(final Injector injector, SimulationFileHandler simulationFileHandler,
+									   final ActivationParameterHandler activationParameterHandler, final HypothesisCheckingType hypothesisCheckingType, final double probability, final double significance) {
 		this.injector = injector;
 		this.simulationFileHandler = simulationFileHandler;
+		this.activationParameterHandler = activationParameterHandler;
 		this.hypothesisCheckingType = hypothesisCheckingType;
 		this.probability = probability;
 		this.significance = significance;
 	}
 
 	public void initialize(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, final int numberExecutions, final int maxStepsBeforeProperty, final SimulationCheckingType type, final Map<String, Object> additionalInformation) {
-		this.simulationPropertyChecker = new SimulationPropertyChecker(this, currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
+		this.simulationPropertyChecker = new SimulationPropertyChecker(this, currentTrace, currentProject, objectMapperProvider, activationParameterHandler, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, type, additionalInformation);
 	}
 
 	@Override

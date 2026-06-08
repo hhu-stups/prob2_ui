@@ -17,6 +17,7 @@ import de.prob2.ui.internal.WeightedRandomHelper;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
@@ -40,13 +41,17 @@ public class SimulationEventHandler {
 
 	private final LinkedList<String> visitedChoiceIDs;
 
+	private final ActivationParameterHandler activationParameterHandler;
 
-	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace, final CurrentProject currentProject) {
+
+	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace, final CurrentProject currentProject,
+								  final ActivationParameterHandler activationParameterHandler) {
 		this.simulator = simulator;
 		this.cache = new SimulatorCache();
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.visitedChoiceIDs = new LinkedList<>();
+		this.activationParameterHandler = activationParameterHandler;
 		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> cache.clear());
 
 		this.currentProject.addListener((observable, from, to) -> {
@@ -109,31 +114,7 @@ public class SimulationEventHandler {
 	public String evaluateWithParameters(State state, String expression, Map<String, String> activationParamsVal, List<String> parametersAsString, String parameterPredicate, EvaluationMode mode) {
 		String newExpression;
 		if (parameterPredicate == null || parameterPredicate.isEmpty() || "1=1".equals(parameterPredicate) || parametersAsString == null || parametersAsString.isEmpty()) {
-			newExpression = expression;
-			if(!activationParamsVal.isEmpty()) {
-				switch (mode) {
-					case CLASSICAL_B, XTL:
-						newExpression = String.format("LET %s BE %s IN %s END",
-								String.join(", ", activationParamsVal.keySet()),
-								activationParamsVal.entrySet().stream()
-										.map(entry -> String.format("%s = %s", entry.getKey(), entry.getValue()))
-										.collect(Collectors.joining(" & ")),
-								newExpression);
-						break;
-					case EVENT_B:
-						if(!activationParamsVal.isEmpty()) {
-							newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)",
-									String.join(" |-> ", activationParamsVal.keySet()),
-									activationParamsVal.entrySet().stream()
-											.map(entry -> String.format("%s = %s", entry.getKey(), entry.getValue()))
-											.collect(Collectors.joining(" & ")),
-									newExpression);
-						}
-						break;
-					default:
-						throw new RuntimeException("Evaluation mode is not supported.");
-				}
-			}
+			newExpression = activationParameterHandler.buildExpressionOrPredicateWithActivationParameters(expression, activationParamsVal, mode);
 		} else {
 			switch (mode) {
 				case CLASSICAL_B, XTL:
@@ -143,14 +124,7 @@ public class SimulationEventHandler {
 					} else {
 						newExpression = String.format(Locale.ROOT, "LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
 					}
-					if(!activationParamsVal.isEmpty()) {
-						newExpression = String.format("LET %s BE %s IN %s END",
-								String.join(", ", activationParamsVal.keySet()),
-								activationParamsVal.entrySet().stream()
-										.map(entry -> String.format("%s = %s", entry.getKey(), entry.getValue()))
-										.collect(Collectors.joining(" & ")),
-								newExpression);
-					}
+					newExpression = activationParameterHandler.buildExpressionOrPredicateWithActivationParameters(expression, activationParamsVal, mode);
 					break;
 				case EVENT_B:
 					// TODO: Rises problem when one of the parameters are the empty set. In this case, the type cannot be infered. Fix this in the future by inspecting the AST.
@@ -159,14 +133,7 @@ public class SimulationEventHandler {
 					} else {
 						newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
 					}
-					if(!activationParamsVal.isEmpty()) {
-						newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)",
-								String.join(" |-> ", activationParamsVal.keySet()),
-								activationParamsVal.entrySet().stream()
-										.map(entry -> String.format("%s = %s", entry.getKey(), entry.getValue()))
-										.collect(Collectors.joining(" & ")),
-								newExpression);
-					}
+					newExpression = activationParameterHandler.buildExpressionOrPredicateWithActivationParameters(expression, activationParamsVal, mode);
 					break;
 				default:
 					throw new RuntimeException("Evaluation mode is not supported.");

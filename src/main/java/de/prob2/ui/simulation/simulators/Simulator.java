@@ -24,6 +24,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
@@ -62,12 +63,12 @@ public abstract class Simulator {
 	protected boolean noActivationQueued;
 	protected ExternalSimulatorExecutor externalSimulatorExecutor;
 
-	public Simulator(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider) {
+	public Simulator(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, final ActivationParameterHandler activationParameterHandler) {
 		super();
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.objectMapperProvider = objectMapperProvider;
-		this.simulationEventHandler = new SimulationEventHandler(this, currentTrace, currentProject);
+		this.simulationEventHandler = new SimulationEventHandler(this, currentTrace, currentProject, activationParameterHandler);
 		this.time = new SimpleIntegerProperty(0);
 		this.stepCounter = 0;
 		this.delay = 0;
