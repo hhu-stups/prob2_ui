@@ -11,7 +11,7 @@ import com.google.common.io.MoreFiles;
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.statespace.Transition;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.verifications.CheckingStatus;
 import de.prob2.ui.verifications.ISelectableTask;
@@ -60,7 +60,7 @@ public class TemplateUtility {
 		return description.replaceAll(",", ",\\\\newline");
 	}
 
-	public static String getMachineCode(Machine elem, CurrentProject project) throws IOException {
+	public static String getMachineCode(Machine elem, Project project) throws IOException {
 		return MoreFiles.asCharSource(project.getLocation().resolve(elem.getLocation()), StandardCharsets.UTF_8).read();
 	}
 
