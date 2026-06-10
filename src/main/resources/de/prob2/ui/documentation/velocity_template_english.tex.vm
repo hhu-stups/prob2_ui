@@ -69,7 +69,7 @@ $util.getMachineCode($machine,$project)
 #if(!$machine.getTemporalFormulas().isEmpty())
 	The B Machine $util.latexSafe($machine.getName()) has $util.getNumberSelectedTasks($machine.getTemporalFormulas()) LTL/CTL Formulas of which $util.getNumberSuccessfulTasks($machine.getTemporalFormulas()) were checked successfully
 	$util.getNumberFailedTasks($machine.getTemporalFormulas()) failed and $util.getNumberNotCheckedTasks($machine.getTemporalFormulas()) were not checked at all.
- 	#* checks if descriptions exist so that extra column can be generated *#
+	#* checks if descriptions exist so that extra column can be generated *#
 	#set($createDescriptionColumn = $util.ltlDescriptionColumnNecessary($machine.getTemporalFormulas()))
 	\begin{tablestyling}
 	\begin{longtable}{p{0.5\textwidth} #if($createDescriptionColumn) p{0.25\textwidth}P{0.25\textwidth} #else P{0.4\textwidth} #end}

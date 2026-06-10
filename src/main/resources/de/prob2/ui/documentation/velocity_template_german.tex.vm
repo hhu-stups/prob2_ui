@@ -75,7 +75,7 @@ $util.getMachineCode($machine,$project)
 	Die B-Maschine $util.latexSafe($machine.getName()) verfügt über $util.getNumberSelectedTasks($machine.getTemporalFormulas()) LTL/CTL-Formeln,
 	von denen $util.getNumberSuccessfulTasks($machine.getTemporalFormulas()) erfolgreich überprüft wurden, $util.getNumberFailedTasks($machine.getTemporalFormulas())
 	scheiterten und $util.getNumberNotCheckedTasks($machine.getTemporalFormulas()) wurden überhaupt nicht überprüft.
- 	#* checks if descriptions exist so that extra column can be generated *#
+	#* checks if descriptions exist so that extra column can be generated *#
 	#set($createDescriptionColumn = $util.ltlDescriptionColumnNecessary($machine.getTemporalFormulas()))
 
 	\begin{tablestyling}
@@ -106,7 +106,7 @@ $formula.getCode()
 #if(!$machine.getLTLPatterns().isEmpty())
 	\begin{tablestyling}
 	\begin{longtable}{p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
-	  	\toprule
+		\toprule
 		\rowcolor{headerGray} \thead{Pattern Name} & \thead{Code} & \thead{Ergebnis}\\
 		\endfirsthead
 		\rowcolor{headerGray} \thead{Pattern Name} & \thead{Code} & \thead{Ergebnis}\\
