@@ -9,6 +9,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -84,7 +85,7 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			clear();
 			switch (item) {
 				case ActivationOperationConfiguration currentItem -> {
-					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getExecute(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getTransitionSelection(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate(), currentItem.isErrorWhenNotExecuted(), currentItem.getComment());
+					this.modifiedItem = new ActivationOperationConfiguration(currentItem.getId(), currentItem.getExecute(), currentItem.getParams(), currentItem.getAfter(), currentItem.getPriority(), currentItem.getAdditionalGuards(), currentItem.getActivationKind(), currentItem.getFixedVariables(), currentItem.getProbabilisticVariables(), currentItem.getTransitionSelection(), currentItem.getActivating(), currentItem.isActivatingOnlyWhenExecuted(), currentItem.getUpdating(), currentItem.getWithPredicate(), currentItem.isErrorWhenNotExecuted(), currentItem.getComment());
 					updateOperationDiagramItem((ActivationOperationConfiguration) this.modifiedItem);
 				}
 				case ActivationChoiceConfiguration currentItem -> {
@@ -178,10 +179,18 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 
 		Label lbActivation = new Label(i18n.translate("simulation.item.activations"));
 		lbActivation.getStyleClass().add("information");
-		TextField tfActivation = new TextField(containerToString(item.getActivating()));
+		TextField tfActivation = new TextField(containerToString(item.getActivating()
+				.stream()
+				.map(call -> call.toValue())
+				.collect(Collectors.toList())));
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
-			item.setActivating(parseList(to));
+			List<String> activations = parseList(to);
+			// TODO: Support activation call with parameters
+			item.setActivating(activations
+					.stream()
+					.map(activation -> new ActivationCall(activation, new HashMap<>()))
+					.collect(Collectors.toList()));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, createHelpIcon("activations"), tfActivation));
@@ -350,7 +359,12 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 			if(from != null && !from.equals(to)) {
 				savedProperty.set(false);
 			}
-			item.setActivating(parseList(to));
+			List<String> activations = parseList(to);
+			// TODO: Support activation call with parameters
+			item.setActivating(activations
+					.stream()
+					.map(activation -> new ActivationCall(activation, new HashMap<>()))
+					.collect(Collectors.toList()));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
 		this.itemBox.getChildren().add(new HBox(lbActivation, createHelpIcon("activations"), tfActivation));

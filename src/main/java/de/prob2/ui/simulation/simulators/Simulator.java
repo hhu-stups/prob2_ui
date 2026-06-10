@@ -21,8 +21,10 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationExternalConfiguration;
@@ -61,12 +63,12 @@ public abstract class Simulator {
 	protected boolean noActivationQueued;
 	protected ExternalSimulatorExecutor externalSimulatorExecutor;
 
-	public Simulator(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider) {
+	public Simulator(final CurrentTrace currentTrace, final CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, final ActivationParameterHandler activationParameterHandler) {
 		super();
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.objectMapperProvider = objectMapperProvider;
-		this.simulationEventHandler = new SimulationEventHandler(this, currentTrace, currentProject);
+		this.simulationEventHandler = new SimulationEventHandler(this, currentTrace, currentProject, activationParameterHandler);
 		this.time = new SimpleIntegerProperty(0);
 		this.stepCounter = 0;
 		this.delay = 0;
@@ -156,15 +158,15 @@ public abstract class Simulator {
 		}
 	}
 
-	private ActivationOperationConfiguration createDynamicActivation(String id, List<String> op, String time, int priority, String additionalGuards, ActivationKind activationKind,
+	private ActivationOperationConfiguration createDynamicActivation(String id, List<String> op, List<String> params, String time, int priority, String additionalGuards, ActivationKind activationKind,
 	                                                                 Map<String, String> fixedVariables, Map<String, Map<String, String>> probabilisticVariables, TransitionSelection transitionSelection,
-	                                                                 List<String> activations, boolean activatingOnlyWhenExecuted,
+	                                                                 List<ActivationCall> activations, boolean activatingOnlyWhenExecuted,
 	                                                                 Map<String, String> updating, String withPredicate, boolean errorWhenNotExecuted) {
 		if(id == null || op == null) {
 			throw new RuntimeException("Provided operation is null. There is an error when sending the operation to be executed from the external simulation.");
 		}
 
-		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, transitionSelection, activations, activatingOnlyWhenExecuted, updating, withPredicate, errorWhenNotExecuted, "");
+		ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, op, params, time, priority, additionalGuards, activationKind, fixedVariables, probabilisticVariables, transitionSelection, activations, activatingOnlyWhenExecuted, updating, withPredicate, errorWhenNotExecuted, "");
 		if(!activationConfigurationsSorted.contains(activationConfig)) {
 			this.activationConfigurationsSorted.add(activationConfig);
 		}
@@ -233,7 +235,7 @@ public abstract class Simulator {
 			processExternalConfiguration(trace);
 		} else if(configurationToActivation.containsKey(id)) {
 			ActivationOperationConfiguration setupConfiguration = (ActivationOperationConfiguration) activationConfigurationMap.get(id);
-			simulationEventHandler.activateOperation(trace.getCurrentState(), setupConfiguration, new ArrayList<>(), "1=1");
+			simulationEventHandler.activateOperation(trace.getCurrentState(), setupConfiguration, new HashMap<>(), new ArrayList<>(), "1=1");
 		}
 	}
 
@@ -265,7 +267,7 @@ public abstract class Simulator {
 
 	public Trace executeActivatedOperation(ActivationOperationConfiguration activationConfig, Trace trace) {
 		String id = activationConfig.getId();
-		List<String> activationConfiguration = activationConfig.getActivating();
+		List<ActivationCall> activationConfiguration = activationConfig.getActivating();
 
 		List<Activation> activationForId = configurationToActivation.get(id);
 		if(activationForId == null) {
@@ -328,10 +330,10 @@ public abstract class Simulator {
 					return;
 				}
 
-				ActivationOperationConfiguration newActivation = createDynamicActivation(step.getOp(), Arrays.asList(step.getOp()), step.getDelta(), 0,
+				ActivationOperationConfiguration newActivation = createDynamicActivation(step.getOp(), Arrays.asList(step.getOp()), List.of(), step.getDelta(), 0,
 						null, ActivationKind.SINGLE, null, null, TransitionSelection.FIRST,
 						null, true, null, step.getPredicate(), false);
-				simulationEventHandler.activateOperation(newTrace.getCurrentState(), newActivation, new ArrayList<>(), "1=1");
+				simulationEventHandler.activateOperation(newTrace.getCurrentState(), newActivation, new HashMap<>(), new ArrayList<>(), "1=1");
 			}
 		}
 	}
@@ -340,8 +342,8 @@ public abstract class Simulator {
 		// This is used in Monte Carlo Simulation to check when the starting condition is reached
 	}
 
-	public void handleOperationConfiguration(State state, DiagramConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
-		simulationEventHandler.handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
+	public void handleOperationConfiguration(State state, DiagramConfiguration activationConfiguration, Map<String, String> activationParams, List<String> parametersAsString, String parameterPredicates) {
+		simulationEventHandler.handleOperationConfiguration(state, activationConfiguration, activationParams, parametersAsString, parameterPredicates);
 	}
 
 	public boolean endingConditionReached(Trace trace) {

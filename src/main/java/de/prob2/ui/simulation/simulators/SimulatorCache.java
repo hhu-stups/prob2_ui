@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import de.prob.animator.domainobjects.ClassicalB;
 import de.prob.animator.domainobjects.EventB;
@@ -22,6 +23,10 @@ public class SimulatorCache {
 	private final Map<String, Map<String, Map<String, List<Transition>>>> transitionCache = new HashMap<>();
 
 	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, EvaluationMode mode) {
+		return this.readValueWithCaching(bState, variables, expression, new ArrayList<>(), new HashMap<>(), mode);
+	}
+
+	public String readValueWithCaching(State bState, Map<String, String> variables, String expression, List<String> activationParams, Map<String, String> activationParamsVal, EvaluationMode mode) {
 		// Replace SimB variables (starting with $ first) before caching
 		if(variables != null && !variables.isEmpty() && expression.contains("$")) {
 			for(Map.Entry<String, String> entry : variables.entrySet()) {
@@ -29,6 +34,14 @@ public class SimulatorCache {
 				String val = entry.getValue();
 				expression = expression.replaceAll(Pattern.quote("$") + key, val);
 			}
+		}
+		if(!activationParams.isEmpty()) {
+			expression = String.format("LET %s BE %s IN %s END",
+					String.join(", ", activationParams),
+					activationParamsVal.entrySet().stream()
+							.map(entry -> String.format("%s = %s", entry.getKey(), entry.getValue()))
+							.collect(Collectors.joining(" & ")),
+					expression);
 		}
 		IEvalElement formula = formulasCache.computeIfAbsent(expression, expr -> switch (mode) {
 			case CLASSICAL_B, XTL ->
@@ -42,8 +55,15 @@ public class SimulatorCache {
 		return bState.eval(formula).toString();
 	}
 
-	public List<Transition> readTransitionsWithCaching(State bState, Map<String, String> variables, String opName, String predicate, int maxTransitions) {
-
+	public List<Transition> readTransitionsWithCaching(State bState, Map<String, String> variables, String opName, Map<String, String> paramValues, String predicate, int maxTransitions) {
+		if(!paramValues.isEmpty()) {
+			predicate = String.format("LET %s BE %s IN %s END",
+					String.join(", ", paramValues.keySet()),
+					paramValues.entrySet().stream()
+							.map(entry -> String.format("%s = %s", entry.getKey(), entry.getValue()))
+							.collect(Collectors.joining(" & ")),
+					predicate);
+		}
 		if (bState.getStateSpace().getModel() instanceof XTLModel) {
 			return bState.findTransitions(opName, Collections.singletonList(predicate), maxTransitions);
 		}

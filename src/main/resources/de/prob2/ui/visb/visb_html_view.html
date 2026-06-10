@@ -177,6 +177,19 @@
 		// This marker variable is checked by VisBView to verify that the JavaScript code loaded correctly.
 		window.visBJavaScriptLoaded = "VisB JavaScript loaded";
 	</script>
+	<style>
+		.search-highlight {
+			animation: blink-highlight 1s infinite;
+		}
+		@keyframes blink-highlight {
+			0%, 100% {
+				outline: 3px solid rgb(223,0,0,0.25);
+			}
+			50% {
+				outline: 3px solid rgb(223,0,0,1);
+			}
+		}
+	</style>
 	</head>
 
 	<body>

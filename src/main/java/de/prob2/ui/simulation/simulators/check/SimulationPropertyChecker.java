@@ -15,6 +15,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
 import de.prob2.ui.simulation.simulators.Simulator;
 import de.prob2.ui.verifications.CheckingStatus;
@@ -33,10 +34,11 @@ public class SimulationPropertyChecker implements ISimulationPropertyChecker {
 
 	private final List<Double> estimatedValues;
 
-	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, CurrentTrace currentTrace, CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty,
+	public SimulationPropertyChecker(ISimulationPropertyChecker hypothesisCheckerOrEstimator, CurrentTrace currentTrace, CurrentProject currentProject, Provider<ObjectMapper> objectMapperProvider,
+									 ActivationParameterHandler activationParameterHandler, Injector injector, SimulationFileHandler simulationFileHandler, int numberExecutions, int maxStepsBeforeProperty,
 	                                 SimulationCheckingType type, Map<String, Object> additionalInformation) {
 		this.hypothesisCheckerOrEstimator = hypothesisCheckerOrEstimator;
-		this.simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, additionalInformation);
+		this.simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, objectMapperProvider, activationParameterHandler, injector, simulationFileHandler, numberExecutions, maxStepsBeforeProperty, additionalInformation);
 		this.currentTrace = currentTrace;
 		this.type = type;
 		this.numberSuccess = 0;

@@ -19,6 +19,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
 import de.prob2.ui.simulation.SimulatorStage;
+import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
 import de.prob2.ui.simulation.configuration.DiagramConfiguration;
@@ -112,12 +113,14 @@ public final class UIInteractionHandler {
 		}
 
 		for(UIListenerConfiguration uiListener : uiListenersForEvent) {
-			for(String activatingEvent : uiListener.getActivating()) {
+			for(ActivationCall activationCall : uiListener.getActivating()) {
+				String activatingEvent = activationCall.getId();
+				Map<String, String> activationParams = activationCall.getParams();
 				State destination = transition.getDestination();
 				String predicate = uiListener.getPredicate() != null ? uiListener.getPredicate() : "1=1";
-				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, predicate, transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
+				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, predicate, activationCall.getParams(), transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
 				if ("TRUE".equals(parameterRes)) {
-					realTimeSimulator.handleOperationConfiguration(destination, realTimeSimulator.getActivationConfigurationMap().get(activatingEvent), transition.getParameterNames(), transition.getParameterPredicate());
+					realTimeSimulator.handleOperationConfiguration(destination, realTimeSimulator.getActivationConfigurationMap().get(activatingEvent), activationParams, transition.getParameterNames(), transition.getParameterPredicate());
 					anyActivated = true;
 				}
 			}
@@ -176,19 +179,19 @@ public final class UIInteractionHandler {
 			String value = transition.getParameterValues().get(i);
 			fixedVariables.put(name, value);
 		}
-		List<String> activations = resolveActivations(realTimeSimulator, transition, uiListeners);
+		List<ActivationCall> activations = resolveActivations(realTimeSimulator, transition, new HashMap<>(), uiListeners);
 
-		return new ActivationOperationConfiguration(id, Arrays.asList(op), String.valueOf(time), 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, true, "");
+		return new ActivationOperationConfiguration(id, Arrays.asList(op), List.of(), String.valueOf(time), 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, true, "");
 	}
 
-	private List<String> resolveActivations(RealTimeSimulator realTimeSimulator, Transition transition, List<UIListenerConfiguration> uiListeners) {
+	private List<ActivationCall> resolveActivations(RealTimeSimulator realTimeSimulator, Transition transition, Map<String, String> activationParams, List<UIListenerConfiguration> uiListeners) {
 		String op = transition.getName();
-		List<String> activations = new ArrayList<>();
+		List<ActivationCall> activations = new ArrayList<>();
 		for (UIListenerConfiguration uiListener : uiListeners) {
 			if (uiListener.getEvent().equals(op)) {
 				State destination = transition.getDestination();
 				String predicate = uiListener.getPredicate() != null ? uiListener.getPredicate() : "1=1";
-				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, predicate, transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
+				String parameterRes = realTimeSimulator.getSimulationEventHandler().evaluateWithParameters(destination, predicate, activationParams, transition.getParameterNames(), transition.getParameterPredicate(), EvaluationMode.extractMode(currentTrace.getModel()));
 				if ("TRUE".equals(parameterRes)) {
 					activations.addAll(uiListener.getActivating());
 				}
@@ -202,14 +205,18 @@ public final class UIInteractionHandler {
 
 		boolean hasSetupConstants = false;
 		boolean hasInitialization = false;
-		List<String> activations = new ArrayList<>();
+		List<ActivationCall> activations = new ArrayList<>();
 		for(DiagramConfiguration.NonUi diagramConfiguration : activationConfigurations) {
 			if(Transition.INITIALISE_MACHINE_NAME.equals(diagramConfiguration.getId())) {
 				hasInitialization = true;
 				ActivationOperationConfiguration initializationConfiguration = (ActivationOperationConfiguration) diagramConfiguration;
 				activations = new ArrayList<>(initializationConfiguration.getActivating());
-				activations.addAll(userInteractions.stream().map(DiagramConfiguration::getId).toList());
-				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Arrays.asList(Transition.INITIALISE_MACHINE_NAME), initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), initializationConfiguration.getTransitionSelection(), activations, true, null, null, true, ""));
+				activations.addAll(userInteractions
+						.stream()
+						.map(DiagramConfiguration::getId)
+						.map(id -> new ActivationCall(id, new HashMap<>()))
+						.toList());
+				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Arrays.asList(Transition.INITIALISE_MACHINE_NAME), List.of(), initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), initializationConfiguration.getTransitionSelection(), activations, true, null, null, true, ""));
 			} else if(Transition.SETUP_CONSTANTS_NAME.equals(diagramConfiguration.getId())) {
 				hasSetupConstants = true;
 			} else {
@@ -224,17 +231,20 @@ public final class UIInteractionHandler {
 				State destination = setupConstantsTransition.getDestination();
 				// Somehow the constructor with 1 argument always sets using destination state to false
 				Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(SimulationCreator.computeFixedVariablesFromDestinationValues(destination.getConstantValues(FormulaExpand.EXPAND)), opInfo);
-				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Arrays.asList(Transition.SETUP_CONSTANTS_NAME), null, 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, List.of(), true, null, null, true, ""));
+				activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.SETUP_CONSTANTS_NAME, Arrays.asList(Transition.SETUP_CONSTANTS_NAME), List.of(), null, 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, List.of(), true, null, null, true, ""));
 			}
 		}
 
 		if(!hasInitialization) {
-			activations.addAll(userInteractions.stream().map(DiagramConfiguration::getId).toList());
+			activations.addAll(userInteractions
+					.stream()
+					.map(conf -> new ActivationCall(conf.getId(), new HashMap<>()))
+					.toList());
 			OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.INITIALISE_MACHINE_NAME);
 			// Somehow the constructor with 1 argument always sets using destination state to false
 			State destination = initializationTransition.getDestination();
 			Map<String, String> fixedVariables = SimulationCreator.createFixedVariables(SimulationCreator.computeFixedVariablesFromDestinationValues(destination.getVariableValues(FormulaExpand.EXPAND)), opInfo);
-			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Arrays.asList(Transition.INITIALISE_MACHINE_NAME), null, 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, true, ""));
+			activationConfigurationsForResult.add(0, new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Arrays.asList(Transition.INITIALISE_MACHINE_NAME), List.of(), null, 0, null, ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, true, ""));
 		}
 
 		activationConfigurationsForResult.addAll(userInteractions);

@@ -23,14 +23,14 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	private String predicate;
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	private List<String> activating;
+	private List<ActivationCall> activating;
 
 	@JsonCreator
 	public UIListenerConfiguration(
 			@JsonProperty(value = "id", required = true) String id,
 			@JsonProperty(value = "event", required = true) String event,
 			@JsonProperty("predicate") String predicate,
-			@JsonProperty("activating") List<String> activating,
+			@JsonProperty("activating") List<ActivationCall> activating,
 			@JsonProperty("comment") String comment
 	) {
 		super(id, comment);
@@ -58,11 +58,11 @@ public final class UIListenerConfiguration extends DiagramConfiguration {
 	}
 
 	@JsonGetter("activating")
-	public List<String> getActivating() {
+	public List<ActivationCall> getActivating() {
 		return this.activating;
 	}
 
-	public void setActivating(List<String> activating) {
+	public void setActivating(List<ActivationCall> activating) {
 		this.activating = activating != null ? List.copyOf(activating) : List.of();
 	}
 

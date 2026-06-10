@@ -8,6 +8,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.State;
@@ -16,6 +17,8 @@ import de.prob2.ui.internal.WeightedRandomHelper;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
+import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -38,13 +41,17 @@ public class SimulationEventHandler {
 
 	private final LinkedList<String> visitedChoiceIDs;
 
+	private final ActivationParameterHandler activationParameterHandler;
 
-	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace, final CurrentProject currentProject) {
+
+	public SimulationEventHandler(final Simulator simulator, final CurrentTrace currentTrace, final CurrentProject currentProject,
+								  final ActivationParameterHandler activationParameterHandler) {
 		this.simulator = simulator;
 		this.cache = new SimulatorCache();
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
 		this.visitedChoiceIDs = new LinkedList<>();
+		this.activationParameterHandler = activationParameterHandler;
 		currentTrace.stateSpaceProperty().addListener((observable, from, to) -> cache.clear());
 
 		this.currentProject.addListener((observable, from, to) -> {
@@ -77,7 +84,7 @@ public class SimulationEventHandler {
 				return parameters; // do not evaluate value in XTL mode too early to avoid type conflicts with STRING_TO_TERM (disadvantage: no SimB caching)
 			}
 			for (var e : parameters.entrySet()) {
-				var value = evaluateWithParameters(currentState, e.getValue(), activation.firingTransitionParameters(), activation.firingTransitionParametersPredicate(), mode);
+				var value = evaluateWithParameters(currentState, e.getValue(), activation.paramValues(), activation.firingTransitionParameters(), activation.firingTransitionParametersPredicate(), mode);
 				values.put(e.getKey(), value);
 			}
 		}
@@ -104,10 +111,10 @@ public class SimulationEventHandler {
 		return values;
 	}
 
-	public String evaluateWithParameters(State state, String expression, List<String> parametersAsString, String parameterPredicate, EvaluationMode mode) {
+	public String evaluateWithParameters(State state, String expression, Map<String, String> activationParamsVal, List<String> parametersAsString, String parameterPredicate, EvaluationMode mode) {
 		String newExpression;
 		if (parameterPredicate == null || parameterPredicate.isEmpty() || "1=1".equals(parameterPredicate) || parametersAsString == null || parametersAsString.isEmpty()) {
-			newExpression = expression;
+			newExpression = activationParameterHandler.buildExpressionOrPredicateWithActivationParameters(expression, activationParamsVal, mode);
 		} else {
 			switch (mode) {
 				case CLASSICAL_B, XTL:
@@ -117,6 +124,7 @@ public class SimulationEventHandler {
 					} else {
 						newExpression = String.format(Locale.ROOT, "LET %s BE %s IN %s END", String.join(", ", parametersAsString), parameterPredicate, expression);
 					}
+					newExpression = activationParameterHandler.buildExpressionOrPredicateWithActivationParameters(expression, activationParamsVal, mode);
 					break;
 				case EVENT_B:
 					// TODO: Rises problem when one of the parameters are the empty set. In this case, the type cannot be infered. Fix this in the future by inspecting the AST.
@@ -125,6 +133,7 @@ public class SimulationEventHandler {
 					} else {
 						newExpression = String.format(Locale.ROOT, "{x |-> y | x = TRUE & y : ran((%%%s.%s | %s))}(TRUE)", String.join(" |-> ", parametersAsString), parameterPredicate, expression);
 					}
+					newExpression = activationParameterHandler.buildExpressionOrPredicateWithActivationParameters(expression, activationParamsVal, mode);
 					break;
 				default:
 					throw new RuntimeException("Evaluation mode is not supported.");
@@ -153,11 +162,12 @@ public class SimulationEventHandler {
 
 	public Transition selectTransition(Activation activation, State currentState, Map<String, String> variables) {
 		List<String> operations = activation.operation();
+		Map<String, String> paramValues = activation.paramValues();
 		String predicate = buildPredicateForTransition(currentState, activation);
 		return switch (activation.transitionSelection()) {
 			case FIRST -> {
 				for(String opName : operations) {
-					List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, predicate, 1);
+					List<Transition> transitions = cache.readTransitionsWithCaching(currentState, variables, opName, paramValues, predicate, 1);
 					if (!transitions.isEmpty()) {
 						yield transitions.get(0);
 					}
@@ -167,7 +177,7 @@ public class SimulationEventHandler {
 			case UNIFORM -> {
 				List<Transition> transitions = new ArrayList<>();
 				for(String opName : operations) {
-					transitions.addAll(cache.readTransitionsWithCaching(currentState, variables, opName, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation()));
+					transitions.addAll(cache.readTransitionsWithCaching(currentState, variables, opName, paramValues, predicate, currentState.isInitialised() ? simulator.getMaxTransitions() : simulator.getMaxTransitionsBeforeInitialisation()));
 				}
 				int len = transitions.size();
 				if (len == 1) {
@@ -225,13 +235,13 @@ public class SimulationEventHandler {
 	}
 
 
-	public void activateOperations(State state, List<String> activation, List<String> parametersAsString, String parameterPredicates) {
+	public void activateOperations(State state, List<ActivationCall> activation, List<String> parametersAsString, String parameterPredicates) {
 		if(activation != null) {
-			activation.forEach(activationConfiguration -> handleOperationConfiguration(state, simulator.getActivationConfigurationMap().get(activationConfiguration), parametersAsString, parameterPredicates));
+			activation.forEach(activationConfiguration -> handleOperationConfiguration(state, simulator.getActivationConfigurationMap().get(activationConfiguration.getId()), activationConfiguration.getParams(), parametersAsString, parameterPredicates));
 		}
 	}
 
-	public void handleOperationConfiguration(State state, DiagramConfiguration activationConfiguration, List<String> parametersAsString, String parameterPredicates) {
+	public void handleOperationConfiguration(State state, DiagramConfiguration activationConfiguration, Map<String, String> activationParams, List<String> parametersAsString, String parameterPredicates) {
 		if(activationConfiguration instanceof ActivationChoiceConfiguration) {
 			if(visitedChoiceIDs.contains(activationConfiguration.getId())) {
 				throw new RuntimeException("Cycle in activation diagram detected");
@@ -240,7 +250,7 @@ public class SimulationEventHandler {
 			chooseOperation(state, (ActivationChoiceConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
 			visitedChoiceIDs.pop();
 		} else if(activationConfiguration instanceof ActivationOperationConfiguration) {
-			activateOperation(state, (ActivationOperationConfiguration) activationConfiguration, parametersAsString, parameterPredicates);
+			activateOperation(state, (ActivationOperationConfiguration) activationConfiguration, activationParams, parametersAsString, parameterPredicates);
 		}
 	}
 
@@ -255,24 +265,25 @@ public class SimulationEventHandler {
 				                     })
 				                     .toList();
 		var activationConfiguration = WeightedRandomHelper.select(this.random, weightedValues);
-		this.handleOperationConfiguration(state, activationConfiguration, parametersAsString, parameterPredicates);
+		this.handleOperationConfiguration(state, activationConfiguration, new HashMap<>(), parametersAsString, parameterPredicates);
 	}
 
-	public void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration,
-								   List<String> parametersAsString, String parameterPredicates) {
+	public void activateOperation(State state, ActivationOperationConfiguration activationOperationConfiguration, Map<String, String> activationParams,
+								  List<String> parametersAsString, String parameterPredicates) {
 		List<Activation> activationsForId = simulator.getConfigurationToActivation().get(activationOperationConfiguration.getId());
 		if(activationsForId == null) {
 			return;
 		}
 		String id = activationOperationConfiguration.getId();
 		List<String> operations = activationOperationConfiguration.getExecute();
+		List<String> activationParameters = activationOperationConfiguration.getParams();
 		String time = activationOperationConfiguration.getAfter();
 		ActivationKind activationKind = activationOperationConfiguration.getActivationKind();
 		String additionalGuards = activationOperationConfiguration.getAdditionalGuards();
 		Map<String, String> parameters = activationOperationConfiguration.getFixedVariables();
 		var probabilities = activationOperationConfiguration.getProbabilisticVariables();
 		var transitionSelection = activationOperationConfiguration.getTransitionSelection();
-		String evaluatedTimeAsString = evaluateWithParameters(state, time, parametersAsString, parameterPredicates, EvaluationMode.CLASSICAL_B);
+		String evaluatedTimeAsString = evaluateWithParameters(state, time, activationParams, parametersAsString, parameterPredicates, EvaluationMode.CLASSICAL_B);
 		int evaluatedTime;
 		try {
 			evaluatedTime = Integer.parseInt(evaluatedTimeAsString);
@@ -281,7 +292,7 @@ public class SimulationEventHandler {
 		}
 		String withPredicate = activationOperationConfiguration.getWithPredicate();
 
-		var activation = new Activation(id, operations, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
+		var activation = new Activation(id, operations, activationParams, evaluatedTime, additionalGuards, activationKind, parameters, probabilities, transitionSelection, parametersAsString, parameterPredicates, withPredicate);
 		switch (activationKind) {
 			case MULTI:
 				activateMultiOperations(activationsForId, activation);

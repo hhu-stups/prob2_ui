@@ -182,7 +182,11 @@ public final class DiagramGenerator {
 				}
 				if (opConfig.getActivating() != null) {
 					for(String op : opConfig.getExecute()) {
-						edge = new DiagramEdge(op + "_event", new ArrayList<>(opConfig.getActivating()), opConfig.getActivating().stream().map(n -> "Activating").collect(Collectors.toList()), "");
+						edge = new DiagramEdge(op + "_event", new ArrayList<>(opConfig.getActivating()
+								.stream()
+								.map(activated -> activated.getId())
+								.collect(Collectors.toList())),
+								opConfig.getActivating().stream().map(n -> "Activating").collect(Collectors.toList()), "");
 						boolean isPresent = false;
 
 						//If EdgeObject is already present: Add edges from new edge to old edge if applicable, then discard new object
@@ -210,7 +214,9 @@ public final class DiagramGenerator {
 		//Collects listener edges
 		for(UIListenerConfiguration listener : listeners){
 			activating.add(new DiagramEdge("User", Collections.singletonList(listener.getEvent()), Collections.singletonList("Interaction"), ""));
-			edge = new DiagramEdge(listener.getEvent(), listener.getActivating(), listener.getActivating().stream()
+			edge = new DiagramEdge(listener.getEvent(), listener.getActivating()
+					.stream()
+					.map(activation -> activation.getId()).collect(Collectors.toList()), listener.getActivating().stream()
 					.map(n -> "Activating").toList(), "");
 			activating.add(edge);
 		}

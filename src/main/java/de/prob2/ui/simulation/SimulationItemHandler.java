@@ -16,6 +16,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.choice.SimulationCheckingType;
 import de.prob2.ui.simulation.choice.SimulationType;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.ISimulationModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationBlackBoxModelConfiguration;
 import de.prob2.ui.simulation.configuration.SimulationFileHandler;
@@ -35,6 +36,7 @@ public final class SimulationItemHandler {
 	private final CurrentProject currentProject;
 	private final CurrentTrace currentTrace;
 	private final Provider<ObjectMapper> objectMapperProvider;
+	private final ActivationParameterHandler activationParameterHandler;
 	private final CliTaskExecutor cliExecutor;
 	private final SimulationFileHandler simulationFileHandler;
 	private final Injector injector;
@@ -43,11 +45,13 @@ public final class SimulationItemHandler {
 	private ISimulationModelConfiguration simulationModelConfiguration;
 
 	@Inject
-	private SimulationItemHandler(CurrentProject currentProject, CurrentTrace currentTrace, Provider<ObjectMapper> objectMapperProvider, CliTaskExecutor cliExecutor, SimulationFileHandler simulationFileHandler, Injector injector) {
+	private SimulationItemHandler(CurrentProject currentProject, CurrentTrace currentTrace, Provider<ObjectMapper> objectMapperProvider, CliTaskExecutor cliExecutor,
+								  ActivationParameterHandler activationParameterHandler, SimulationFileHandler simulationFileHandler, Injector injector) {
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.objectMapperProvider = objectMapperProvider;
 		this.cliExecutor = cliExecutor;
+		this.activationParameterHandler = activationParameterHandler;
 		this.simulationFileHandler = simulationFileHandler;
 		this.injector = injector;
 	}
@@ -98,7 +102,7 @@ public final class SimulationItemHandler {
 		int executions = item.getField("EXECUTIONS") == null ? ((SimulationBlackBoxModelConfiguration) simulationModelConfiguration).getTimedTraces().size() : (int) item.getField("EXECUTIONS");
 		int maxStepsBeforeProperty = item.getField("MAX_STEPS_BEFORE_PROPERTY") == null ? 0 : (int) item.getField("MAX_STEPS_BEFORE_PROPERTY");
 		Map<String, Object> additionalInformation = extractAdditionalInformation(item);
-		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, objectMapperProvider, injector, simulationFileHandler, executions, maxStepsBeforeProperty, additionalInformation);
+		SimulationCheckingSimulator simulationCheckingSimulator = new SimulationCheckingSimulator(currentTrace, currentProject, objectMapperProvider, activationParameterHandler, injector, simulationFileHandler, executions, maxStepsBeforeProperty, additionalInformation);
 		this.simulationFileHandler.initSimulator(injector.getInstance(SimulatorStage.class), simulationCheckingSimulator, currentTrace.getStateSpace().getLoadedMachine(), path);
 		runAndCheck(item, simulationCheckingSimulator);
 	}
@@ -128,7 +132,7 @@ public final class SimulationItemHandler {
 			additionalInformation.put("TIME", item.getField("TIME"));
 		}
 
-		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, simulationFileHandler, hypothesisCheckingType, probability, significance);
+		SimulationHypothesisChecker hypothesisChecker = new SimulationHypothesisChecker(injector, simulationFileHandler, activationParameterHandler, hypothesisCheckingType, probability, significance);
 		initializeHypothesisChecker(hypothesisChecker, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, hypothesisChecker);
 	}
@@ -167,7 +171,7 @@ public final class SimulationItemHandler {
 			additionalInformation.put("EXPRESSION", item.getField("EXPRESSION"));
 		}
 
-		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, simulationFileHandler, estimationType, checkingType, desiredValue, epsilon);
+		SimulationEstimator simulationEstimator = new SimulationEstimator(injector, simulationFileHandler, activationParameterHandler, estimationType, checkingType, desiredValue, epsilon);
 		initializeEstimator(simulationEstimator, executions, maxStepsBeforeProperty, checkingType, additionalInformation);
 		runAndCheck(item, simulationEstimator);
 	}

@@ -1,9 +1,8 @@
 package de.prob2.ui.simulation.diagram;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -20,10 +19,10 @@ public class DiagramGeneratorTest {
 	@Test
 	@DisplayName("simple nodes are collected properly")
 	public void test1(){
-		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), "500", 0, null, ActivationKind.SINGLE, null,
+		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), new ArrayList<>(), "500", 0, null, ActivationKind.SINGLE, null,
 		null, null, null, false,null, "1=1", false, "");
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
-		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
+		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>())), "");
 
 		var config = new SimulationModelConfiguration(
 			Map.of(),
@@ -43,10 +42,10 @@ public class DiagramGeneratorTest {
 	@Test
 	@DisplayName("complex nodes are collected properly")
 	public void test2(){
-		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), "500", 0, null, ActivationKind.SINGLE, null,
+		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), new ArrayList<>(), "500", 0, null, ActivationKind.SINGLE, null,
 		null, null, null, false, null, "1=1", false, "");
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
-		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
+		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>())), "");
 
 		var config = new SimulationModelConfiguration(
 			Map.of(),
@@ -67,10 +66,10 @@ public class DiagramGeneratorTest {
 	@Test
 	@DisplayName("Correct Simple NodesString is returned")
 	public void test3(){
-		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), "500", 0, null, ActivationKind.SINGLE, null,
+		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), new ArrayList<>(), "500", 0, null, ActivationKind.SINGLE, null,
 		null, null, null, false,null, "1=1", false, "");
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
-		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
+		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>())), "");
 
 		var config = new SimulationModelConfiguration(
 			Map.of(),
@@ -98,10 +97,10 @@ public class DiagramGeneratorTest {
 	@Test
 	@DisplayName("Correct Complex NodesString is returned")
 	public void test4(){
-		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), "500", 0, null, ActivationKind.SINGLE, null,
+		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), new ArrayList<>(), "500", 0, null, ActivationKind.SINGLE, null,
 		null, null, null, false,null, "1=1", false, "");
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
-		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of("throwcoin"), "");
+		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>())), "");
 
 		var config = new SimulationModelConfiguration(
 			Map.of(),

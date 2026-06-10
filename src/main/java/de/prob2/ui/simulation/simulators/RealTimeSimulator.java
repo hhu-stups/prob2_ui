@@ -10,6 +10,7 @@ import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.SimulationModelConfiguration;
 import de.prob2.ui.simulation.diagram.DiagramGenerator;
 import de.prob2.ui.simulation.diagram.DiagramStage;
@@ -52,8 +53,9 @@ public final class RealTimeSimulator extends Simulator {
 	private DiagramStage liveDiagramStage;
 
 	@Inject
-	public RealTimeSimulator(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler) {
-		super(currentTrace, currentProject, objectMapperProvider);
+	public RealTimeSimulator(final Injector injector, final CurrentTrace currentTrace, final CurrentProject currentProject, final Provider<ObjectMapper> objectMapperProvider, final Scheduler scheduler, final UIInteractionHandler uiInteractionHandler,
+							 final ActivationParameterHandler activationParameterHandler) {
+		super(currentTrace, currentProject, objectMapperProvider, activationParameterHandler);
 		this.injector = injector;
 		this.scheduler = scheduler;
 		this.currentTrace = currentTrace;
