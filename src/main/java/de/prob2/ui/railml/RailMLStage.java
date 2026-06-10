@@ -241,7 +241,7 @@ public class RailMLStage extends Stage {
 
 	public void initializeForPath(Path path) {
 		if (path != null) {
-			resetUI();
+			this.resetUI();
 			outputPath = path.getParent().toAbsolutePath();
 			importArguments.file(path.toFile()).output(outputPath).modelName(MoreFiles.getNameWithoutExtension(path));
 			modelName = importArguments.modelName();
@@ -412,16 +412,16 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	private void cancel() {
-		if (confirmAbortImport()) {
-			if (!updater.isRunning()) {
-				this.close();
-			} else {
+		if (updater.isRunning()) {
+			if (confirmAbortImport()) {
 				updater.cancel(true);
+				if (railML2B != null) railML2B.finish();
+			} else {
+				this.toFront();
+				return;
 			}
-			this.resetUI();
-			if (railML2B != null) railML2B.finish();
 		}
-		this.toFront();
+		this.close();
 	}
 
 	private boolean confirmAbortImport() {
