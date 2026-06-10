@@ -160,8 +160,6 @@ $pattern.getCode()
 	The trace can be visualized as a table that lists the operations chronologically, with the step column indicating the index of the order, and the transition
 	column indicating the name of the operation. This can be useful for understanding the behavior of the system and identifying any errors or issues that may be present.
 	Traces are orders of operations. The B Machine $util.latexSafe($machine.getName()) has $machine.getTraces().size() Traces.
-	In addition to the table, a visualization of every trace is generated via VisB. The visualization provides an interactive and visual
-	representation of the system's behavior during the trace transitions.
 #foreach($trace in $machine.getTraces())
 	#call($trace.load())
 	\begin{tablestyling}
@@ -179,10 +177,6 @@ $pattern.getCode()
 	\rowcolor{white} \caption{$util.latexSafe($trace.getName())} \\
 	\end{longtable}
 	\end{tablestyling}
-
-	\begin{center}
-	For the HTML Trace Visualization of $util.latexSafe($trace.getName()) \href{run:$documenter.saveTraceHtml($machine,$trace)}{[click here!]}
-	\end{center}
 #end
 #end
 #end ##END LOOP OVER ALL MACHINES
