@@ -150,7 +150,7 @@ public class SaveDocumentationStage extends Stage {
 																.map(MachineDocumentationItem::getMachineItem)
 																.collect(Collectors.toList());
 		ProjectDocumenter documenter = new ProjectDocumenter(
-			currentProject,
+			currentProject.get(),
 			locale,
 			i18n,
 			documentModelchecking.isSelected(),

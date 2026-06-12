@@ -75,7 +75,7 @@ $util.getMachineCode($machine,$project)
 	Die B-Maschine $util.latexSafe($machine.getName()) verfügt über $util.getNumberSelectedTasks($machine.getTemporalFormulas()) LTL/CTL-Formeln,
 	von denen $util.getNumberSuccessfulTasks($machine.getTemporalFormulas()) erfolgreich überprüft wurden, $util.getNumberFailedTasks($machine.getTemporalFormulas())
 	scheiterten und $util.getNumberNotCheckedTasks($machine.getTemporalFormulas()) wurden überhaupt nicht überprüft.
- 	#* checks if descriptions exist so that extra column can be generated *#
+	#* checks if descriptions exist so that extra column can be generated *#
 	#set($createDescriptionColumn = $util.ltlDescriptionColumnNecessary($machine.getTemporalFormulas()))
 
 	\begin{tablestyling}
@@ -106,7 +106,7 @@ $formula.getCode()
 #if(!$machine.getLTLPatterns().isEmpty())
 	\begin{tablestyling}
 	\begin{longtable}{p{0.3\textwidth}p{0.3\textwidth}p{0.3\textwidth}}
-	  	\toprule
+		\toprule
 		\rowcolor{headerGray} \thead{Pattern Name} & \thead{Code} & \thead{Ergebnis}\\
 		\endfirsthead
 		\rowcolor{headerGray} \thead{Pattern Name} & \thead{Code} & \thead{Ergebnis}\\
@@ -168,7 +168,6 @@ $util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgesc
 	Der Trace kann als Tabelle visualisiert werden, die die Operationen chronologisch auflistet, wobei die Spalte \glqq Schritt \grqq den Index der Reihenfolge
 	angibt und die Spalte \glqq Transition \grqq den Namen der Operation. Dies kann nützlich sein, um das Verhalten des Systems zu verstehen und mögliche Fehler oder Probleme zu identifizieren.
 	Traces sind Abfolgen von Operationen. Die B-Maschine $util.latexSafe($machine.getName()) verfügt über $machine.getTraces().size() Traces.
-	Neben der Tabelle wird mittels VisB eine Visualisierung jedes Traces erstellt. Die Visualisierung bietet eine interaktive und visuelle Darstellung des Verhaltens des Systems während den Transitionen.
 	#foreach($trace in $machine.getTraces())
 	#call($trace.load())
 
@@ -187,10 +186,6 @@ $util.getNumberFailedTasks($machine.getSymbolicCheckingFormulas()) sind fehlgesc
 	\rowcolor{white} \caption{$util.latexSafe($trace.getName())} \\
 	\end{longtable}
 	\end{tablestyling}
-
-	\begin{center}
-	Für die HTML Trace Visualisierung von $util.latexSafe($trace.getName()) \href{run:$documenter.saveTraceHtml($machine,$trace)}{[klicke hier!]}
-	\end{center}
 	#end
 #end
 #end ##END LOOP OVER ALL MACHINES

@@ -6,30 +6,24 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Properties;
 
-import com.google.inject.Inject;
-
-import de.prob.animator.command.ExportVisBForHistoryCommand;
-import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 import de.prob2.ui.Main;
-import de.prob2.ui.animation.tracereplay.ReplayTrace;
 import de.prob2.ui.internal.I18n;
-import de.prob2.ui.prob2fx.CurrentProject;
+import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.verifications.ExecutionContext;
 
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.Velocity;
 
 public class ProjectDocumenter {
 	private final String filename;
+	private final Project project;
 	private final Locale locale;
 	private final I18n i18n;
 	private final Path directory;
@@ -38,11 +32,9 @@ public class ProjectDocumenter {
 	private final boolean symbolic;
 	private final boolean makePdf;
 	private final List<Machine> machines;
-	private final CurrentProject currentProject;
 
-	@Inject
 	public ProjectDocumenter(
-		CurrentProject currentProject,
+		Project project,
 		Locale locale,
 		I18n i18n,
 		boolean modelchecking,
@@ -53,7 +45,7 @@ public class ProjectDocumenter {
 		Path dir,
 		String filename
 	) {
-		this.currentProject = currentProject;
+		this.project = project;
 		this.locale = locale;
 		this.i18n = i18n;
 		this.modelchecking = modelchecking;
@@ -119,7 +111,7 @@ public class ProjectDocumenter {
 
 	private VelocityContext getVelocityContext() {
 		VelocityContext context = new VelocityContext();
-		context.put("project", currentProject.get());
+		context.put("project", project);
 		context.put("documenter",this);
 		context.put("machines", machines);
 		context.put("modelchecking", modelchecking);
@@ -131,22 +123,7 @@ public class ProjectDocumenter {
 		return context;
 	}
 
-	public String saveTraceHtml(Machine machine, ReplayTrace trace) throws IOException {
-		Path htmlDirectory = getHtmlDirectory(machine);
-		Files.createDirectories(directory.resolve(htmlDirectory));
-		Path htmlPath = htmlDirectory.resolve(trace.getName() + ".html");
-		StateSpace stateSpace = currentProject.loadMachineWithConfirmation(machine).join().getStateSpace();
-		trace.execute(new ExecutionContext(currentProject.get(), currentProject.getCurrentMachine(), stateSpace, null, i18n));
-		ExportVisBForHistoryCommand cmd = new ExportVisBForHistoryCommand(trace.getTrace(), directory.resolve(htmlPath));
-		stateSpace.execute(cmd);
-		return htmlPath.toString();
-	}
-
 	public Path getDirectory() {
 		return directory;
-	}
-
-	public static Path getHtmlDirectory(Machine machine) {
-		return Paths.get("html_files", machine.getName());
 	}
 }

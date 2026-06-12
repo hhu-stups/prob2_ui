@@ -69,7 +69,7 @@ $util.getMachineCode($machine,$project)
 #if(!$machine.getTemporalFormulas().isEmpty())
 	The B Machine $util.latexSafe($machine.getName()) has $util.getNumberSelectedTasks($machine.getTemporalFormulas()) LTL/CTL Formulas of which $util.getNumberSuccessfulTasks($machine.getTemporalFormulas()) were checked successfully
 	$util.getNumberFailedTasks($machine.getTemporalFormulas()) failed and $util.getNumberNotCheckedTasks($machine.getTemporalFormulas()) were not checked at all.
- 	#* checks if descriptions exist so that extra column can be generated *#
+	#* checks if descriptions exist so that extra column can be generated *#
 	#set($createDescriptionColumn = $util.ltlDescriptionColumnNecessary($machine.getTemporalFormulas()))
 	\begin{tablestyling}
 	\begin{longtable}{p{0.5\textwidth} #if($createDescriptionColumn) p{0.25\textwidth}P{0.25\textwidth} #else P{0.4\textwidth} #end}
@@ -160,8 +160,6 @@ $pattern.getCode()
 	The trace can be visualized as a table that lists the operations chronologically, with the step column indicating the index of the order, and the transition
 	column indicating the name of the operation. This can be useful for understanding the behavior of the system and identifying any errors or issues that may be present.
 	Traces are orders of operations. The B Machine $util.latexSafe($machine.getName()) has $machine.getTraces().size() Traces.
-	In addition to the table, a visualization of every trace is generated via VisB. The visualization provides an interactive and visual
-	representation of the system's behavior during the trace transitions.
 #foreach($trace in $machine.getTraces())
 	#call($trace.load())
 	\begin{tablestyling}
@@ -179,10 +177,6 @@ $pattern.getCode()
 	\rowcolor{white} \caption{$util.latexSafe($trace.getName())} \\
 	\end{longtable}
 	\end{tablestyling}
-
-	\begin{center}
-	For the HTML Trace Visualization of $util.latexSafe($trace.getName()) \href{run:$documenter.saveTraceHtml($machine,$trace)}{[click here!]}
-	\end{center}
 #end
 #end
 #end ##END LOOP OVER ALL MACHINES
