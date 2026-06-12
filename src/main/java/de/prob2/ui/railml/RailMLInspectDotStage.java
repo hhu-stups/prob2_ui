@@ -368,7 +368,7 @@ public class RailMLInspectDotStage extends Stage {
 		saveConverted(DotOutputFormat.SVG, tempSvgFile);
 
 		try {
-			SvgConverter.convertSvgForVisB(tempSvgFile.toString(), visualisationStrategy);
+			SvgConverter.convertSvgForVisB(tempSvgFile, visualisationStrategy);
 		} catch (Exception e) {
 			throw new ProBError("Failed to convert railML SVG file", e);
 		}
