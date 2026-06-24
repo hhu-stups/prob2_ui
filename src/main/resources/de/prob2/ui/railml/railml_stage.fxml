@@ -7,13 +7,13 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.Scene?>
-<fx:root title="railML Import" type="RailMLStage" xmlns:fx="http://javafx.com/fxml/1" resizable="false">
+<fx:root title="railML Import" type="RailMLStage" xmlns:fx="http://javafx.com/fxml/1">
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
 	<scene>
-		<Scene stylesheets="@/prob.css">
-			<AnchorPane prefWidth="600">
+		<Scene fill="TRANSPARENT">
+			<AnchorPane stylesheets="@/prob.css" styleClass="dialog" prefWidth="600">
 				<VBox spacing="5" AnchorPane.topAnchor="20"
 					  AnchorPane.bottomAnchor="10" AnchorPane.leftAnchor="0"
 					  AnchorPane.rightAnchor="0">
@@ -52,9 +52,21 @@
 								</VBox.margin>
 							</HBox>
 							<HBox alignment="CENTER_RIGHT" fx:id="preOptions" spacing="20">
-								<CheckBox text="%railml.stage.translatedOnly" fx:id="onlyTranslation"/>
-								<CheckBox text="%railml.stage.semanticChecks" fx:id="semanticChecks" selected="true"/>
-								<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox"/>
+								<CheckBox text="%railml.stage.translatedOnly" fx:id="onlyTranslation">
+									<tooltip>
+										<Tooltip text="%railml.stage.translatedOnly.tooltip"/>
+									</tooltip>
+								</CheckBox>
+								<CheckBox text="%railml.stage.semanticChecks" fx:id="semanticChecks" selected="true">
+									<tooltip>
+										<Tooltip text="%railml.stage.semanticChecks.tooltip"/>
+									</tooltip>
+								</CheckBox>
+								<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox">
+									<tooltip>
+										<Tooltip text="%railml.stage.visualisation.check.tooltip"/>
+									</tooltip>
+								</CheckBox>
 								<VBox.margin>
 									<Insets top="20" bottom="5"/>
 								</VBox.margin>
@@ -68,6 +80,15 @@
 								<ButtonBar styleClass="dialog" HBox.hgrow="ALWAYS">
 									<buttons>
 										<Button fx:id="btCancelImport" text="%common.buttons.cancel" cancelButton="true" onAction="#cancel" />
+										<Button fx:id="btReload" onAction="#resetUI">
+											<graphic>
+												<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
+												               bindableFontSize="${fontSize.fontSize + 4}"/>
+											</graphic>
+											<tooltip>
+												<Tooltip text="%railml.stage.button.restart"/>
+											</tooltip>
+										</Button>
 										<Button fx:id="btStartImport" text="%railml.stage.button.import" onAction="#startImport"/>
 									</buttons>
 								</ButtonBar>
@@ -171,39 +192,47 @@
 						</Label>
 						<GridPane hgap="50" vgap="8" alignment="CENTER">
 							<CheckBox text="%railml.stage.machineChoice.translatedData" fx:id="translatedMachineCheckbox"
-									  GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+									  GridPane.rowIndex="0" GridPane.columnIndex="0">
+								<tooltip>
+									<Tooltip text="%railml.stage.machineChoice.translatedData.tooltip"/>
+								</tooltip>
+							</CheckBox>
 							<CheckBox text="%railml.stage.machineChoice.data" fx:id="dataMachineCheckbox"
-									  GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+									  GridPane.rowIndex="1" GridPane.columnIndex="0">
+								<tooltip>
+									<Tooltip text="%railml.stage.machineChoice.data.tooltip"/>
+								</tooltip>
+							</CheckBox>
 							<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"
-									  GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+									  GridPane.rowIndex="0" GridPane.columnIndex="1">
+								<tooltip>
+									<Tooltip text="%railml.stage.machineChoice.animation.tooltip"/>
+								</tooltip>
+							</CheckBox>
 							<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"
-									  GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+									  GridPane.rowIndex="1" GridPane.columnIndex="1">
+								<tooltip>
+									<Tooltip text="%railml.stage.machineChoice.validation.tooltip"/>
+								</tooltip>
+							</CheckBox>
 						</GridPane>
-						<Separator>
-							<padding>
-								<Insets top="10" bottom="10"/>
-							</padding>
-						</Separator>
-					</VBox>
-					<HBox alignment="CENTER" fx:id="visualisationOptions" spacing="20" visible="false">
-						<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckboxExport"/>
-						<Label text="%railml.stage.visualisation.strategy" fx:id="visualisationStrategyField" visible="false"/>
-						<ChoiceBox fx:id="visualisationStrategyChoiceBox" visible="false"/>
 						<padding>
 							<Insets bottom="10"/>
 						</padding>
-					</HBox>
-					<AnchorPane styleClass="border" fx:id="generatedFiles" visible="false">
-						<Label text="%railml.stage.generatedfiles.title">
-							<padding>
-								<Insets left="20" top="15"/>
-							</padding>
-						</Label>
-						<VBox AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20"
-							  AnchorPane.topAnchor="35" AnchorPane.bottomAnchor="20" alignment="center_right">
-							<ListView style="-fx-border-width: 0" fx:id="generateFileListView"/>
-						</VBox>
-					</AnchorPane>
+					</VBox>
+					<VBox fx:id="generatedFiles" visible="false">
+						<AnchorPane styleClass="border">
+							<VBox AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20"
+							      AnchorPane.topAnchor="15" AnchorPane.bottomAnchor="15">
+								<Label text="%railml.stage.generatedfiles.title">
+									<padding>
+										<Insets bottom="5"/>
+									</padding>
+								</Label>
+								<ListView style="-fx-border-width: 0" fx:id="generateFileListView" fixedCellSize="${fontSize.fontSize * 2}"/>
+							</VBox>
+						</AnchorPane>
+					</VBox>
 					<HBox fx:id="finishBox" alignment="CENTER_RIGHT" visible="false">
 						<HBox alignment="CENTER">
 							<CheckBox fx:id="closeAfterGeneration" text="%railml.stage.closeAfterGeneration"/>

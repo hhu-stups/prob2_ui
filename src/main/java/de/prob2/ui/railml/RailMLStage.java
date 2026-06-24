@@ -26,6 +26,7 @@ import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -34,13 +35,11 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -63,23 +62,21 @@ public class RailMLStage extends Stage {
 	@FXML
 	private Label rulesLabel, notCheckedLabel, successLabel, failLabel, disabledLabel, validationInfoMessage;
 	@FXML
-	private HBox visualisationOptions, finishBox;
+	private HBox finishBox;
 	@FXML
-	private Button btGenerateAndFinish, btCancelImport, btStartImport;
+	private Button btGenerateAndFinish, btCancelImport, btReload, btStartImport;
 	@FXML
 	private TextField fileLocationField, locationField;
 	@FXML
 	private Tooltip fileLocationTooltip, locationTooltip;
 	@FXML
-	private Label visualisationStrategyField;
-	@FXML
-	private AnchorPane generatedFiles;
+	private VBox generatedFiles;
 	@FXML
 	private ListView<String> generateFileListView;
 	private final ObservableList<String> generateFileList = FXCollections.observableArrayList();
 	@FXML
 	private CheckBox onlyTranslation, semanticChecks, animationMachineCheckbox, translatedMachineCheckbox, dataMachineCheckbox,
-			validationMachineCheckbox, visualisationCheckbox, visualisationCheckboxExport, closeAfterGeneration;
+			validationMachineCheckbox, visualisationCheckbox, closeAfterGeneration;
 	@FXML
 	public VBox progressBox;
 	@FXML
@@ -89,9 +86,6 @@ public class RailMLStage extends Stage {
 	@FXML
 	private ButtonBar generateButtonBar;
 
-
-	@FXML
-	private ChoiceBox<ImportArguments.VisualisationStrategy> visualisationStrategyChoiceBox;
 	private final ImportArguments importArguments;
 	private Path outputPath = null;
 	private String modelName = null;
@@ -100,11 +94,8 @@ public class RailMLStage extends Stage {
 	private final BooleanProperty generationRunning = new SimpleBooleanProperty(false);
 
 	private final StageManager stageManager;
-
 	private final CurrentProject currentProject;
-
 	private final Injector injector;
-
 	private final I18n i18n;
 
 	private final FileChooserManager fileChooserManager;
@@ -131,16 +122,18 @@ public class RailMLStage extends Stage {
 	@FXML
 	public void initialize() {
 		btCancelImport.visibleProperty().bind(importSuccess.not().or(updater.runningProperty()));
-		btStartImport.disableProperty()
-			.bind(fileLocationField.lengthProperty().lessThanOrEqualTo(0)
-			.or(updater.runningProperty())
-			.or(importSuccess));
+		btReload.visibleProperty().bind(importSuccess.and(updater.runningProperty().not()));
+		btReload.managedProperty().bind(btReload.visibleProperty());
+		btStartImport.disableProperty().bind(
+				fileLocationField.lengthProperty().lessThanOrEqualTo(0)
+				.or(updater.runningProperty())
+				.or(importSuccess));
 		btGenerateAndFinish.disableProperty().bind(
-				(dataMachineCheckbox.selectedProperty()
+				translatedMachineCheckbox.selectedProperty()
+				.or(dataMachineCheckbox.selectedProperty()
 				.or(animationMachineCheckbox.selectedProperty())
 				.or(validationMachineCheckbox.selectedProperty())
-				.or(visualisationCheckbox.selectedProperty()
-						.and(visualisationStrategyChoiceBox.valueProperty().isNull().not()))
+				.or(visualisationCheckbox.selectedProperty())
 				.or(generationRunning))
 				.not());
 		finishBox.visibleProperty().bind(importSuccess);
@@ -150,16 +143,23 @@ public class RailMLStage extends Stage {
 		locationField.setText("");
 		locationTooltip.textProperty().bind(locationField.textProperty());
 
-		onlyTranslation.disableProperty().bind(visualisationCheckbox.selectedProperty().or(semanticChecks.selectedProperty()).or(importSuccess.or(updater.runningProperty())));
-		semanticChecks.disableProperty().bind(onlyTranslation.selectedProperty().or(importSuccess.or(updater.runningProperty())));
+		onlyTranslation.disableProperty().bind(visualisationCheckbox.selectedProperty().or(semanticChecks.selectedProperty()).or(updater.runningProperty()).or(importSuccess));
+		semanticChecks.disableProperty().bind(onlyTranslation.selectedProperty().or(updater.runningProperty()).or(importSuccess));
+		visualisationCheckbox.disableProperty().bind(onlyTranslation.selectedProperty().or(updater.runningProperty()).or(importSuccess));
+		visualisationCheckbox.selectedProperty().addListener((obs, o, n) -> {
+			if (n) {
+				generateFileList.add(modelName + ".svg");
+			} else {
+				generateFileList.remove(modelName + ".svg");
+			}
+		});
 
 		generatedFiles.visibleProperty().bind(importSuccess.and(Bindings.isEmpty(generateFileList).not()));
 		generatedFiles.managedProperty().bind(generatedFiles.visibleProperty());
 		generateFileListView.setItems(generateFileList);
-		generateFileListView.setFixedCellSize(24);
-		generateFileListView.prefHeightProperty().bind(Bindings.size(generateFileList).multiply(generateFileListView.getFixedCellSize()).add(2));
+		generateFileListView.prefHeightProperty().bind(Bindings.size(generateFileList).multiply(generateFileListView.getFixedCellSize()));
 
-		validationResults.visibleProperty().bind(importSuccess);
+		validationResults.visibleProperty().bind(importSuccess.and(semanticChecks.selectedProperty()));
 		validationResults.managedProperty().bind(validationResults.visibleProperty());
 
 		machineOptions.visibleProperty().bind(importSuccess);
@@ -204,30 +204,21 @@ public class RailMLStage extends Stage {
 			}
 		});
 
-		visualisationCheckbox.disableProperty().bind(onlyTranslation.selectedProperty().or(updater.runningProperty()));
-		visualisationCheckbox.visibleProperty().bind(importSuccess.not());
-		visualisationCheckbox.managedProperty().bind(visualisationCheckbox.visibleProperty());
-		visualisationCheckbox.selectedProperty().bindBidirectional(visualisationCheckboxExport.selectedProperty());
-		visualisationOptions.visibleProperty().bind(importSuccess.and(importForVisualisation));
-		visualisationOptions.managedProperty().bind(visualisationOptions.visibleProperty());
-		visualisationStrategyChoiceBox.setValue(ImportArguments.VisualisationStrategy.DOT);
-		visualisationCheckboxExport.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue) {
-				generateFileList.add(modelName + ".svg");
-			} else {
-				generateFileList.remove(modelName + ".svg");
-			}
-		});
-		visualisationStrategyField.visibleProperty().bind(visualisationCheckbox.selectedProperty());
-		visualisationStrategyChoiceBox.getItems().addAll(ImportArguments.VisualisationStrategy.values());
-		visualisationStrategyChoiceBox.visibleProperty().bind(visualisationCheckbox.selectedProperty());
-
 		progressBox.visibleProperty().bind(updater.runningProperty());
 		progressBox.managedProperty().bind(progressBox.visibleProperty());
 		progressBar.visibleProperty().bind(updater.runningProperty());
 		progressBar.managedProperty().bind(progressBar.visibleProperty());
 
-		this.getScene().addPreLayoutPulseListener(this::sizeToScene);
+		ChangeListener<Boolean> sizeToSceneListener = (obs, o, n) -> this.sizeToScene();
+		rulesLabel.fontProperty().addListener((obs, o, n) -> this.sizeToScene());
+		importSuccess.addListener(sizeToSceneListener);
+		progressBar.visibleProperty().addListener(sizeToSceneListener);
+		translatedMachineCheckbox.selectedProperty().addListener(sizeToSceneListener);
+		dataMachineCheckbox.selectedProperty().addListener(sizeToSceneListener);
+		animationMachineCheckbox.selectedProperty().addListener(sizeToSceneListener);
+		validationMachineCheckbox.selectedProperty().addListener(sizeToSceneListener);
+
+		this.setOnShown(e -> this.sizeToScene());
 		setOnCloseRequest(e -> this.cancel());
 	}
 
@@ -265,11 +256,8 @@ public class RailMLStage extends Stage {
 	@FXML
 	private void startImport() {
 		clearProgressWithMessage("Initialise import");
-		importArguments.doValidation(semanticChecks.isSelected())
-				.onlyTranslation(onlyTranslation.isSelected())
-				.saveTranslatedDataMachine(onlyTranslation.isSelected())
-				.generateVisualisation(visualisationCheckbox.isSelected() ? DotOutputFormat.SVG : null)
-				.visualisationStrategy(visualisationCheckbox.isSelected() ? visualisationStrategyChoiceBox.getValue() : null);
+		this.sizeToScene();
+		updateArguments();
 		updater.execute(() -> {
 			try {
 				railML2B = injector.getInstance(RailML2B.class);
@@ -316,12 +304,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	private void generateAndFinish() {
 		generationRunning.set(true);
-		importArguments.saveTranslatedDataMachine(translatedMachineCheckbox.isSelected())
-				.saveGeneratedDataMachine(dataMachineCheckbox.isSelected())
-				.generateAnimationMachine(animationMachineCheckbox.isSelected())
-				.generateValidationMachine(validationMachineCheckbox.isSelected())
-				.generateVisualisation(visualisationCheckbox.isSelected() ? DotOutputFormat.SVG : null)
-				.visualisationStrategy(visualisationCheckbox.isSelected() ? visualisationStrategyChoiceBox.getValue() : null);
+		updateArguments();
 		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
 		if (importArguments.generateVisualisation() != null) {
 			railMLInspectDotStage.initializeForArguments(importArguments, railML2B.getMachineLoader().getCurrentTrace());
@@ -342,27 +325,29 @@ public class RailMLStage extends Stage {
 				currentProject.switchTo(new Project(modelName, "", Collections.emptyList(), Collections.emptyList(),
 					Collections.emptyList(), Project.metadataBuilder().build(), outputPath), true);
 
-				String fileName = importArguments.file().getName();
 				if (importArguments.saveTranslatedDataMachine()) {
 					railML2B.generateTranslatedDataMachine();
 					currentProject.addMachine(new Machine(modelName,
-							"Translated data machine generated from " + fileName, outputPath.relativize(outputPath.resolve(modelName + ".mch"))));
+							i18n.translate("railml.stage.machineChoice.translatedData.tooltip"),
+							outputPath.relativize(outputPath.resolve(modelName + ".mch"))));
 				}
 				if (importArguments.saveGeneratedDataMachine()) {
 					railML2B.generateDataMachine();
 					currentProject.addMachine(new Machine(modelName + DATA,
-						"Data machine generated from " + fileName, outputPath.relativize(outputPath.resolve(modelName + DATA_MCH))));
+						i18n.translate("railml.stage.machineChoice.data.tooltip"),
+							outputPath.relativize(outputPath.resolve(modelName + DATA_MCH))));
 				}
 				if (importArguments.generateValidationMachine()) {
 					railML2B.generateValidationMachine();
 					currentProject.addMachine(new Machine(modelName + VALIDATION,
-						"Validation machine generated from " + fileName,
-						importArguments.output().relativize(importArguments.output().resolve(modelName + VALIDATION_MCH))));
+						i18n.translate("railml.stage.machineChoice.validation.tooltip"),
+						outputPath.relativize(outputPath.resolve(modelName + VALIDATION_MCH))));
 				}
 				if (importArguments.generateAnimationMachine()) {
 					railML2B.generateAnimationMachine();
 					final Machine animationMachine = new Machine(modelName + ANIMATION,
-						"Animation machine generated from " + fileName, outputPath.relativize(outputPath.resolve(modelName + ANIMATION_MCH)));
+						i18n.translate("railml.stage.machineChoice.animation.tooltip"),
+							outputPath.relativize(outputPath.resolve(modelName + ANIMATION_MCH)));
 					animationMachine.getSimulations()
 						.add(new SimulationModel(outputPath.relativize(outputPath.resolve("railML3_SimB.json"))));
 					currentProject.addMachine(animationMachine);
@@ -424,6 +409,17 @@ public class RailMLStage extends Stage {
 		this.close();
 	}
 
+	private void updateArguments() {
+		importArguments.doValidation(semanticChecks.isSelected())
+				.onlyTranslation(onlyTranslation.isSelected())
+				.saveTranslatedDataMachine(onlyTranslation.isSelected() || translatedMachineCheckbox.isSelected())
+				.saveGeneratedDataMachine(dataMachineCheckbox.isSelected())
+				.generateAnimationMachine(animationMachineCheckbox.isSelected())
+				.generateValidationMachine(validationMachineCheckbox.isSelected())
+				.generateVisualisation(visualisationCheckbox.isSelected() ? DotOutputFormat.SVG : null)
+				.visualisationStrategy(visualisationCheckbox.isSelected() ? ImportArguments.VisualisationStrategy.DOT : null);
+	}
+
 	private boolean confirmAbortImport() {
 		final Alert alert = stageManager.makeAlert(Alert.AlertType.CONFIRMATION,
 			"railml.inspectDot.alerts.confirmAbortImport.header",
@@ -432,6 +428,21 @@ public class RailMLStage extends Stage {
 		return result.isPresent() && ButtonType.OK.equals(result.get());
 	}
 
+	@Override
+	public void sizeToScene() {
+		Platform.runLater(() -> {
+			this.setMinWidth(this.getWidth());
+			this.setMinHeight(0);
+			this.setMaxHeight(Double.MAX_VALUE);
+			super.sizeToScene();
+			this.setWidth(this.getMinWidth());
+			this.setMinWidth(0);
+			this.setMinHeight(this.getHeight());
+			this.setMaxHeight(this.getHeight());
+		});
+	}
+
+	@FXML
 	private void resetUI() {
 		importSuccess.set(false);
 		importForVisualisation.set(false);
