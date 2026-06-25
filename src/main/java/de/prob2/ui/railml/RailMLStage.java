@@ -255,7 +255,7 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	private void startImport() {
-		clearProgressWithMessage("Initialise import");
+		clearProgressWithMessage(i18n.translate("railml.stage.messages.importInit"));
 		this.sizeToScene();
 		updateArguments();
 		updater.execute(() -> {
@@ -276,7 +276,7 @@ public class RailMLStage extends Stage {
 				RuleResults.ResultSummary summary = results.getSummary();
 
 				Platform.runLater(() -> {
-					clearProgressWithMessage("Import successful.");
+					clearProgressWithMessage(i18n.translate("railml.stage.messages.importSuccessful"));
 					rulesLabel.setText(String.valueOf(summary.numberOfRules));
 					notCheckedLabel.setText(String.valueOf(summary.numberOfRulesNotChecked));
 					successLabel.setText(String.valueOf(summary.numberOfRulesSucceeded));
@@ -357,11 +357,8 @@ public class RailMLStage extends Stage {
 				if (!createdMachines.isEmpty()) {
 					currentProject.loadMachineWithConfirmation(createdMachines.getLast());
 				}
-			} catch (RailML2BIOException e) {
-				// TODO: exception handling
-				stageManager.makeExceptionAlert(e, "", "");
 			} catch (RailML2BException e) {
-				throw new RuntimeException(e);
+				stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait();
 			}
 		}
 		if (closeAfterGeneration.isSelected())
@@ -372,9 +369,9 @@ public class RailMLStage extends Stage {
 	private void saveValidationReport() throws RailML2BIOException {
 		if (railML2B != null && importSuccess.get()) {
 			railML2B.saveValidationReport("HTML"); // TODO: XML
-			validationInfoMessage.setText("Saved report at output location.");
+			validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedReport"));
 		} else {
-			validationInfoMessage.setText("Report could NOT be saved!");
+			validationInfoMessage.setText(i18n.translate("railml.stage.messages.reportFail"));
 		}
 	}
 
@@ -382,9 +379,9 @@ public class RailMLStage extends Stage {
 	private void visualizeCompleteDependencyGraph() throws RailML2BVisualisationException {
 		if (railML2B != null && importSuccess.get()) {
 			railML2B.saveRuleDependencyGraph(DotOutputFormat.PDF); // TODO other formats
-			validationInfoMessage.setText("Saved graph at output location.");
+			validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedGraph"));
 		} else {
-			validationInfoMessage.setText("Graph could NOT be saved!");
+			validationInfoMessage.setText(i18n.translate("railml.stage.messages.graphFail"));
 		}
 	}
 
