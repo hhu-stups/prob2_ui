@@ -37,6 +37,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.MenuButton;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -61,6 +63,10 @@ public class RailMLStage extends Stage {
 	private VBox mainPane, validationResults, machineOptions;
 	@FXML
 	private Label rulesLabel, notCheckedLabel, successLabel, failLabel, disabledLabel, validationInfoMessage;
+	@FXML
+	public MenuButton visualizeGraphButton, validationReportButton;
+	@FXML
+	public MenuItem btGraphPdf, btGraphSvg, btGraphPng, btGraphDot, btReportHtml, btReportXml;
 	@FXML
 	private HBox finishBox;
 	@FXML
@@ -161,6 +167,12 @@ public class RailMLStage extends Stage {
 
 		validationResults.visibleProperty().bind(importSuccess.and(semanticChecks.selectedProperty()));
 		validationResults.managedProperty().bind(validationResults.visibleProperty());
+		btGraphPdf.setOnAction(e -> this.visualizeCompleteDependencyGraph(DotOutputFormat.PDF));
+		btGraphSvg.setOnAction(e -> this.visualizeCompleteDependencyGraph(DotOutputFormat.SVG));
+		btGraphPng.setOnAction(e -> this.visualizeCompleteDependencyGraph(DotOutputFormat.PNG));
+		btGraphDot.setOnAction(e -> this.visualizeCompleteDependencyGraph(DotOutputFormat.DOT));
+		btReportHtml.setOnAction(e -> this.saveValidationReport("HTML"));
+		btReportXml.setOnAction(e -> this.saveValidationReport("XML"));
 
 		machineOptions.visibleProperty().bind(importSuccess);
 		machineOptions.managedProperty().bind(machineOptions.visibleProperty());
@@ -365,21 +377,27 @@ public class RailMLStage extends Stage {
 			this.close();
 	}
 
-	@FXML
-	private void saveValidationReport() throws RailML2BIOException {
+	private void saveValidationReport(String outputFormat) {
 		if (railML2B != null && importSuccess.get()) {
-			railML2B.saveValidationReport("HTML"); // TODO: XML
-			validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedReport"));
+			try {
+				railML2B.saveValidationReport(outputFormat);
+				validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedReport"));
+			} catch (RailML2BException e) {
+				stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait();
+			}
 		} else {
 			validationInfoMessage.setText(i18n.translate("railml.stage.messages.reportFail"));
 		}
 	}
 
-	@FXML
-	private void visualizeCompleteDependencyGraph() throws RailML2BVisualisationException {
+	private void visualizeCompleteDependencyGraph(String dotOutputFormat) {
 		if (railML2B != null && importSuccess.get()) {
-			railML2B.saveRuleDependencyGraph(DotOutputFormat.PDF); // TODO other formats
-			validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedGraph"));
+			try {
+				railML2B.saveRuleDependencyGraph(dotOutputFormat);
+				validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedGraph"));
+			} catch (RailML2BVisualisationException e) {
+				stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait();
+			}
 		} else {
 			validationInfoMessage.setText(i18n.translate("railml.stage.messages.graphFail"));
 		}

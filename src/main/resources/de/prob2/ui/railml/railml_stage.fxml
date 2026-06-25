@@ -164,20 +164,29 @@
 									</HBox>
 									<ButtonBar styleClass="dialog" HBox.hgrow="ALWAYS">
 										<buttons>
-											<Button fx:id="visualizeGraphButton" text="Dependency Graph"
-													onAction="#visualizeCompleteDependencyGraph" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
+											<MenuButton fx:id="visualizeGraphButton" text="%railml.stage.button.graph" HBox.hgrow="NEVER">
+												<items>
+													<MenuItem fx:id="btGraphPdf" text="PDF"/>
+													<MenuItem fx:id="btGraphSvg" text="SVG"/>
+													<MenuItem fx:id="btGraphPng" text="PNG"/>
+													<MenuItem fx:id="btGraphDot" text="DOT"/>
+												</items>
 												<graphic>
-													<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="&#xf1e0;" />
+													<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="&#xf1e0;" bindableFontSize="${fontSize.fontSize + 2}"/>
 												</graphic>
 												<tooltip>
 													<Tooltip text="%rulevalidation.view.dependencyGraph.complete"/>
 												</tooltip>
-											</Button>
-											<Button fx:id="validationReportButton" text="%rulevalidation.view.save" onAction="#saveValidationReport">
+											</MenuButton>
+											<MenuButton fx:id="validationReportButton" text="%rulevalidation.view.save">
+												<items>
+													<MenuItem fx:id="btReportHtml" text="HTML"/>
+													<MenuItem fx:id="btReportXml" text="XML"/>
+												</items>
 												<graphic>
-													<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
+													<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}"/>
 												</graphic>
-											</Button>
+											</MenuButton>
 										</buttons>
 									</ButtonBar>
 								</HBox>
