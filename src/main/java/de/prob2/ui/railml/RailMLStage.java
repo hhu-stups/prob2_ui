@@ -449,11 +449,15 @@ public class RailMLStage extends Stage {
 			this.setMinWidth(this.getWidth());
 			this.setMinHeight(0);
 			this.setMaxHeight(Double.MAX_VALUE);
-			super.sizeToScene();
-			this.setWidth(this.getMinWidth());
-			this.setMinWidth(0);
-			this.setMinHeight(this.getHeight());
-			this.setMaxHeight(this.getHeight());
+			Platform.runLater(() -> {
+				super.sizeToScene();
+				this.setWidth(this.getMinWidth());
+				this.setMinWidth(0);
+				this.setMinHeight(this.getHeight());
+				this.setMaxHeight(this.getHeight());
+				this.getScene().getRoot().applyCss();
+				this.getScene().getRoot().layout();
+			});
 		});
 	}
 
