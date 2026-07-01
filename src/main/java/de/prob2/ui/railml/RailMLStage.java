@@ -93,6 +93,7 @@ public class RailMLStage extends Stage {
 	private final ImportArguments importArguments;
 	private Path outputPath = null;
 	private String modelName = null;
+	private final BooleanProperty invalidFile = new SimpleBooleanProperty(false);
 	private final BooleanProperty importSuccess = new SimpleBooleanProperty(false);
 	private final BooleanProperty generationRunning = new SimpleBooleanProperty(false);
 
@@ -130,6 +131,7 @@ public class RailMLStage extends Stage {
 		btStartImport.disableProperty().bind(
 				fileLocationField.lengthProperty().lessThanOrEqualTo(0)
 				.or(updater.runningProperty())
+				.or(invalidFile)
 				.or(importSuccess));
 		btGenerateAndFinish.disableProperty().bind(
 				translatedMachineCheckbox.selectedProperty()
@@ -243,7 +245,12 @@ public class RailMLStage extends Stage {
 		if (path != null) {
 			this.resetUI();
 			outputPath = path.getParent().toAbsolutePath();
-			importArguments.file(path.toFile()).output(outputPath).modelName(MoreFiles.getNameWithoutExtension(path));
+			try {
+				importArguments.file(path.toFile()).output(outputPath).modelName(MoreFiles.getNameWithoutExtension(path));
+			} catch (RailML2BException e) {
+				invalidFile.set(true);
+				stageManager.makeExceptionAlert(e, "railml.stage.filename.error.header").showAndWait();
+			}
 			modelName = importArguments.modelName();
 			fileLocationField.setText(path.toAbsolutePath().toString());
 			locationField.setText(outputPath.toString());
@@ -461,6 +468,7 @@ public class RailMLStage extends Stage {
 
 	@FXML
 	private void resetUI() {
+		invalidFile.set(false);
 		importSuccess.set(false);
 		clearProgressWithMessage("");
 		animationMachineCheckbox.setSelected(false);
