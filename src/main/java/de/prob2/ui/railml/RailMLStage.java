@@ -94,7 +94,6 @@ public class RailMLStage extends Stage {
 	private Path outputPath = null;
 	private String modelName = null;
 	private final BooleanProperty importSuccess = new SimpleBooleanProperty(false);
-	private final BooleanProperty importForVisualisation = new SimpleBooleanProperty(false);
 	private final BooleanProperty generationRunning = new SimpleBooleanProperty(false);
 
 	private final StageManager stageManager;
@@ -294,7 +293,6 @@ public class RailMLStage extends Stage {
 					disabledLabel.setText(String.valueOf(summary.numberOfRulesDisabled));
 				});
 				importSuccess.set(true);
-				importForVisualisation.set(importArguments.generateVisualisation() != null);
 			} catch (ProBError e) {
 				Platform.runLater(() -> {
 					boolean isRailMLError = e.getErrors().stream().allMatch(error -> error.getMessage().startsWith("RailML"));
@@ -464,7 +462,6 @@ public class RailMLStage extends Stage {
 	@FXML
 	private void resetUI() {
 		importSuccess.set(false);
-		importForVisualisation.set(false);
 		clearProgressWithMessage("");
 		animationMachineCheckbox.setSelected(false);
 		validationMachineCheckbox.setSelected(false);
