@@ -333,45 +333,47 @@ public class RailMLStage extends Stage {
 
 	private void createMachinesAndProject() {
 		if (currentProject.confirmReplacingProject()) {
-			try {
-				currentProject.switchTo(new Project(modelName, "", Collections.emptyList(), Collections.emptyList(),
-					Collections.emptyList(), Project.metadataBuilder().build(), outputPath), true);
+			currentProject.switchTo(new Project(modelName, "", Collections.emptyList(), Collections.emptyList(),
+				Collections.emptyList(), Project.metadataBuilder().build(), outputPath), true);
 
-				if (importArguments.saveTranslatedDataMachine()) {
-					railML2B.generateTranslatedDataMachine();
-					currentProject.addMachine(new Machine(modelName,
-							i18n.translate("railml.stage.machineChoice.translatedData.tooltip"),
-							outputPath.relativize(outputPath.resolve(modelName + ".mch"))));
-				}
-				if (importArguments.saveGeneratedDataMachine()) {
-					railML2B.generateDataMachine();
-					currentProject.addMachine(new Machine(modelName + DATA,
-						i18n.translate("railml.stage.machineChoice.data.tooltip"),
-							outputPath.relativize(outputPath.resolve(modelName + DATA_MCH))));
-				}
-				if (importArguments.generateValidationMachine()) {
-					railML2B.generateValidationMachine();
-					currentProject.addMachine(new Machine(modelName + VALIDATION,
-						i18n.translate("railml.stage.machineChoice.validation.tooltip"),
-						outputPath.relativize(outputPath.resolve(modelName + VALIDATION_MCH))));
-				}
-				if (importArguments.generateAnimationMachine()) {
-					railML2B.generateAnimationMachine();
-					final Machine animationMachine = new Machine(modelName + ANIMATION,
-						i18n.translate("railml.stage.machineChoice.animation.tooltip"),
-							outputPath.relativize(outputPath.resolve(modelName + ANIMATION_MCH)));
-					animationMachine.getSimulations()
-						.add(new SimulationModel(outputPath.relativize(outputPath.resolve("railML3_SimB.json"))));
-					currentProject.addMachine(animationMachine);
-				}
+			updater.execute(() -> {
+				try {
+					if (importArguments.saveTranslatedDataMachine()) {
+						railML2B.generateTranslatedDataMachine();
+						Platform.runLater(() -> currentProject.addMachine(new Machine(modelName,
+								i18n.translate("railml.stage.machineChoice.translatedData.tooltip"),
+								outputPath.relativize(outputPath.resolve(modelName + ".mch")))));
+					}
+					if (importArguments.saveGeneratedDataMachine()) {
+						railML2B.generateDataMachine();
+						Platform.runLater(() -> currentProject.addMachine(new Machine(modelName + DATA,
+								i18n.translate("railml.stage.machineChoice.data.tooltip"),
+								outputPath.relativize(outputPath.resolve(modelName + DATA_MCH)))));
+					}
+					if (importArguments.generateValidationMachine()) {
+						railML2B.generateValidationMachine();
+						Platform.runLater(() -> currentProject.addMachine(new Machine(modelName + VALIDATION,
+								i18n.translate("railml.stage.machineChoice.validation.tooltip"),
+								outputPath.relativize(outputPath.resolve(modelName + VALIDATION_MCH)))));
+					}
+					if (importArguments.generateAnimationMachine()) {
+						railML2B.generateAnimationMachine();
+						final Machine animationMachine = new Machine(modelName + ANIMATION,
+								i18n.translate("railml.stage.machineChoice.animation.tooltip"),
+								outputPath.relativize(outputPath.resolve(modelName + ANIMATION_MCH)));
+						animationMachine.getSimulations()
+								.add(new SimulationModel(outputPath.relativize(outputPath.resolve("railML3_SimB.json"))));
+						Platform.runLater(() -> currentProject.addMachine(animationMachine));
+					}
 
-				List<Machine> createdMachines = currentProject.getMachines();
-				if (!createdMachines.isEmpty()) {
-					currentProject.loadMachineWithConfirmation(createdMachines.getLast());
+					List<Machine> createdMachines = currentProject.getMachines();
+					if (!createdMachines.isEmpty()) {
+						Platform.runLater(() -> currentProject.loadMachineWithConfirmation(createdMachines.getLast()));
+					}
+				} catch (RailML2BException e) {
+					Platform.runLater(() -> stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait());
 				}
-			} catch (RailML2BException e) {
-				stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait();
-			}
+			});
 		}
 		if (closeAfterGeneration.isSelected())
 			this.close();
