@@ -471,10 +471,10 @@ public class RailMLInspectDotStage extends Stage {
 		}
 		FileChooser.ExtensionFilter selectedFilter = fileChooser.getSelectedExtensionFilter();
 		if (selectedFilter.equals(dotFilter)) {
-			saveDot(path);
+			updater.execute(() -> saveDot(path));
 		} else {
 			final String format = getTargetFormat(selectedFilter, svgFilter, pngFilter, pdfFilter);
-			saveConverted(format, path);
+			updater.execute(() -> saveConverted(format, path));
 		}
 	}
 
