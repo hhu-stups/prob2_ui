@@ -6,7 +6,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import de.hhu.stups.railml2b.RailML2B;
 import de.hhu.stups.railml2b.exceptions.RailML2BException;
-import de.hhu.stups.railml2b.exceptions.RailML2BIOException;
 import de.hhu.stups.railml2b.exceptions.RailML2BVisualisationException;
 import de.hhu.stups.railml2b.load.ImportArguments;
 import de.prob.animator.domainobjects.DotOutputFormat;
@@ -32,7 +31,6 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
-import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
@@ -90,7 +88,7 @@ public class RailMLStage extends Stage {
 	@FXML
 	public ProgressBar progressBar;
 	@FXML
-	private ButtonBar generateButtonBar;
+	private HBox generateButtonBar;
 
 	private final ImportArguments importArguments;
 	private Path outputPath = null;
