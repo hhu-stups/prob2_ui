@@ -152,18 +152,17 @@
 								</BorderPane>
 								<WebView fx:id="dotView" visible="false"/>
 							</StackPane>
-							<HBox alignment="BOTTOM_RIGHT">
-								<ButtonBar styleClass="dialog">
-									<buttons>
-										<Button text="%common.buttons.cancel" cancelButton="true"
-												onAction="#cancel" />
-										<Button fx:id="btContinue" text="%railml.inspectDot.button.continue"
-												onAction="#acceptVisualisation" />
-									</buttons>
-									<VBox.margin>
-										<Insets left="10" right="10" top="10" />
-									</VBox.margin>
-								</ButtonBar>
+							<HBox alignment="CENTER_RIGHT">
+								<Button styleClass="button-dark2" text="%common.buttons.cancel" cancelButton="true" onAction="#cancel">
+									<HBox.margin>
+										<Insets right="10"/>
+									</HBox.margin>
+								</Button>
+								<Button fx:id="btContinue" styleClass="button-dark2" text="%railml.inspectDot.button.continue"
+										onAction="#acceptVisualisation"/>
+								<VBox.margin>
+									<Insets topRightBottomLeft="10"/>
+								</VBox.margin>
 							</HBox>
 						</VBox>
 					</SplitPane>

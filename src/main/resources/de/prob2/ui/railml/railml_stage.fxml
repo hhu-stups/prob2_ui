@@ -256,14 +256,12 @@
 							</HBox.margin>
 						</HBox>
 						<HBox fx:id="generateButtonBar">
-							<Button text="%common.buttons.cancel" cancelButton="true"
-									onAction="#cancel">
+							<Button text="%common.buttons.cancel" cancelButton="true" onAction="#cancel">
 								<HBox.margin>
 									<Insets right="10"/>
 								</HBox.margin>
 							</Button>
-							<Button fx:id="btGenerateAndFinish" text="%railml.stage.generateAndFinish"
-									onAction="#generateAndFinish">
+							<Button fx:id="btGenerateAndFinish" text="%railml.stage.generateAndFinish" onAction="#generateAndFinish">
 								<graphic>
 									<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 								</graphic>
