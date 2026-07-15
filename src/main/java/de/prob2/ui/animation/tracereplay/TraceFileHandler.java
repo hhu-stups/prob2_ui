@@ -313,7 +313,7 @@ public final class TraceFileHandler {
 		TestCaseGeneratorResult result = ((TestCaseGenerationItem.Result)item.getResult()).getResult();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION);
+		fileChooser.setInitialFileName(StripExtension(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
@@ -369,7 +369,7 @@ public final class TraceFileHandler {
 	public Path save(Trace trace, Path initialDirectory, String initialFileName, Machine machine) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(initialFileName);
+		fileChooser.setInitialFileName(StripExtension(initialFileName));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		fileChooser.setInitialDirectory(initialDirectory.toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
@@ -379,11 +379,22 @@ public final class TraceFileHandler {
 		}
 		return path;
 	}
+	
+	// strip filename extension if necessary on macOS/darwin
+	public static String StripExtension(String name) {
+	    if (System.getProperty("os.name").toLowerCase().contains("mac")) { // otherwise we have two extensions in macOS
+	        int dot = name.lastIndexOf('.');
+			if (dot > 0) {
+				return name.substring(0, dot);
+			}
+        } 
+        return name;
+	}
 
 	public Path saveAsTable(Trace trace) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".csv");
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".csv"); // here macOS has no problem and does not generate two .csv extensions
 		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
