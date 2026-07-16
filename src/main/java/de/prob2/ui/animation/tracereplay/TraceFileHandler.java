@@ -313,7 +313,7 @@ public final class TraceFileHandler {
 		TestCaseGeneratorResult result = ((TestCaseGenerationItem.Result)item.getResult()).getResult();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(StripExtension(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION));
+		fileChooser.setInitialFileName(stripExtension(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
@@ -369,7 +369,7 @@ public final class TraceFileHandler {
 	public Path save(Trace trace, Path initialDirectory, String initialFileName, Machine machine) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(StripExtension(initialFileName));
+		fileChooser.setInitialFileName(stripExtension(initialFileName));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		fileChooser.setInitialDirectory(initialDirectory.toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
@@ -381,7 +381,7 @@ public final class TraceFileHandler {
 	}
 	
 	// strip filename extension if necessary on macOS/darwin
-	public static String StripExtension(String name) {
+	public static String stripExtension(String name) {
 		if (System.getProperty("os.name").toLowerCase().contains("mac")) { // otherwise we have two extensions in macOS
 			int dot = name.lastIndexOf('.');
 			if (dot > 0) {
