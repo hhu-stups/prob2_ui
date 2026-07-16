@@ -380,9 +380,32 @@ public final class TraceFileHandler {
 		return path;
 	}
 	
-	// strip filename extension if necessary on macOS/darwin
+	/**
+	 * <p>
+	 * Workaround for an issue in recent macOS versions
+	 * (since at least macOS 15)
+	 * where the initial file name provided to a FileChooser sometimes has its file extension duplicated.
+	 * For example, if "Hello.prob2trace" is set as the initial file name,
+	 * macOS puts "Hello.prob2trace.prob2trace" into the file name text field.
+	 * </p>
+	 * <p>
+	 * The workaround is to remove the extension from the initial file name.
+	 * This gives the correct result,
+	 * because macOS still appends the extension from the file extension filter.
+	 * This works on all macOS versions, but not on all other systems -
+	 * on Linux for example, the initial file name <em>must</em> include the file extension.
+	 * </p>
+	 * <p>
+	 * JavaFX has added <a href="https://bugs.openjdk.org/browse/JDK-8352298">its own workaround</a> for this issue starting with JavaFX 27.
+	 * Once we update to a JavaFX version with that workaround,
+	 * we can remove our own workaround.
+	 * </p>
+	 * 
+	 * @param name a file name including an extension
+	 * @return the file name without extension if on macOS, or the unmodified file name on other systems
+	 */
 	public static String stripExtension(String name) {
-		if (System.getProperty("os.name").toLowerCase().contains("mac")) { // otherwise we have two extensions in macOS
+		if (System.getProperty("os.name").toLowerCase().contains("mac")) {
 			int dot = name.lastIndexOf('.');
 			if (dot > 0) {
 				return name.substring(0, dot);
