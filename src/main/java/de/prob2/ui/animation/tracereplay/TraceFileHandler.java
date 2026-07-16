@@ -382,13 +382,13 @@ public final class TraceFileHandler {
 	
 	// strip filename extension if necessary on macOS/darwin
 	public static String StripExtension(String name) {
-	    if (System.getProperty("os.name").toLowerCase().contains("mac")) { // otherwise we have two extensions in macOS
-	        int dot = name.lastIndexOf('.');
+		if (System.getProperty("os.name").toLowerCase().contains("mac")) { // otherwise we have two extensions in macOS
+			int dot = name.lastIndexOf('.');
 			if (dot > 0) {
 				return name.substring(0, dot);
 			}
-        } 
-        return name;
+		}
+		return name;
 	}
 
 	public Path saveAsTable(Trace trace) throws IOException {
