@@ -9,6 +9,7 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.layout.BindableGlyph;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.simulation.SimulatorUtils;
 import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
@@ -186,10 +187,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 		tfActivation.textProperty().addListener((observable, from, to) -> {
 			savedProperty.set(false);
 			List<String> activations = parseList(to);
-			// TODO: Support activation call with parameters
+			// TODO: Support activation call with parameters and probabilities in SimB editor
 			item.setActivating(activations
 					.stream()
-					.map(activation -> new ActivationCall(activation, new HashMap<>()))
+					.map(activation -> new ActivationCall(activation, new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING))
 					.collect(Collectors.toList()));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);
@@ -360,10 +361,10 @@ public final class DiagramConfigurationListCell extends ListCell<DiagramConfigur
 				savedProperty.set(false);
 			}
 			List<String> activations = parseList(to);
-			// TODO: Support activation call with parameters
+			// TODO: Support activation call with parameters and probabilities in SimB editor
 			item.setActivating(activations
 					.stream()
-					.map(activation -> new ActivationCall(activation, new HashMap<>()))
+					.map(activation -> new ActivationCall(activation, new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING))
 					.collect(Collectors.toList()));
 		});
 		tfActivation.disableProperty().bind(this.runningProperty);

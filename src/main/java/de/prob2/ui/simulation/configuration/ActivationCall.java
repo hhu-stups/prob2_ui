@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import de.prob2.ui.simulation.SimulatorUtils;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -17,20 +19,24 @@ import com.google.common.base.MoreObjects;
 @JsonPropertyOrder({
 		"id",
 		"params",
+		"probability"
 })
 @JsonDeserialize(using = ActivationCallDeserializer.class)
 public final class ActivationCall {
 
 	private String id;
 	private Map<String, String> params;
+	private String probability;
 
 	@JsonCreator
 	public ActivationCall(
 			@JsonProperty(value = "id", required = true) String id,
-			@JsonProperty("params") Map<String, String> params
+			@JsonProperty("params") Map<String, String> params,
+			@JsonProperty(value = "id") String probability
 	) {
 		this.id = Objects.requireNonNull(id, "id");
 		this.params = params == null ? new HashMap<>() : params;
+		this.probability = probability == null ? SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING : probability;
 	}
 
 	@JsonGetter("id")
@@ -39,7 +45,7 @@ public final class ActivationCall {
 	}
 
 	public void setId(String id) {
-		this.id = Objects.requireNonNull(id, "id");
+		this.id = Objects.requireNonNull(id, SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING);
 	}
 
 	@JsonGetter("params")
@@ -51,6 +57,14 @@ public final class ActivationCall {
 		this.params = params == null ? new HashMap<>() : params;
 	}
 
+	public String getProbability() {
+		return probability;
+	}
+
+	public void setProbability(String probability) {
+		this.probability = probability == null ? SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING : probability;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) {
@@ -58,13 +72,14 @@ public final class ActivationCall {
 		} else if (!(o instanceof ActivationCall that)) {
 			return false;
 		} else {
-			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getParams(), that.getParams());
+			return Objects.equals(this.getId(), that.getId()) && Objects.equals(this.getParams(), that.getParams())
+					&& Objects.equals(this.getProbability(), that.getProbability());
 		}
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.getId(), this.getParams());
+		return Objects.hash(this.getId(), this.getParams(), this.getProbability());
 	}
 
 	@Override
@@ -74,6 +89,7 @@ public final class ActivationCall {
 				.omitEmptyValues()
 				.add("id", this.getId())
 				.add("params", this.getParams())
+				.add("probability", this.getProbability())
 				.toString();
 	}
 
@@ -85,7 +101,7 @@ public final class ActivationCall {
 				.stream()
 				.map(entry -> String.format("%s : %s", entry.getKey(), entry.getValue()))
 				.collect(Collectors.joining(", "));
-		return String.format("{\"id\": %s, \"params\": {%s}}", id, paramsAsValue);
+		return String.format("{\"id\": %s, \"params\": {%s}, \"probability\" : %s}", id, paramsAsValue, probability);
 	}
 
 }

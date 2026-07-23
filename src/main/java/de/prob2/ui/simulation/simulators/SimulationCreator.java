@@ -15,6 +15,7 @@ import de.prob.statespace.OperationInfo;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
 import de.prob.statespace.Transition;
+import de.prob2.ui.simulation.SimulatorUtils;
 import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -54,7 +55,7 @@ public class SimulationCreator {
 			}
 			fixedVariables = fixedVariables.isEmpty() ? null : fixedVariables;
 
-			List<ActivationCall> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(new ActivationCall(nextOp, new HashMap<>()));
+			List<ActivationCall> activations = Transition.SETUP_CONSTANTS_NAME.equals(op) || nextOp == null ? null : Collections.singletonList(new ActivationCall(nextOp, new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING));
 			ActivationOperationConfiguration activationConfig = new ActivationOperationConfiguration(id, Arrays.asList(op), List.of(), String.valueOf(time), 0, forSave ? null : "1=1", forSave ? null : ActivationKind.MULTI, fixedVariables, null, TransitionSelection.FIRST, activations, true, null, null, true, "");
 			activationConfigurations.add(activationConfig);
 			currentTimestamp = timestamps.get(i);

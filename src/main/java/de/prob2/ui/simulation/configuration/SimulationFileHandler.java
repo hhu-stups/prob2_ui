@@ -32,6 +32,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.VersionInfo;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.simulation.SimulationItem;
+import de.prob2.ui.simulation.SimulatorUtils;
 import de.prob2.ui.simulation.interactive.UIInteractionHandler;
 import de.prob2.ui.simulation.simulators.RealTimeSimulator;
 import de.prob2.ui.simulation.simulators.SimulationCreator;
@@ -277,14 +278,14 @@ public final class SimulationFileHandler {
 		activations.add(new ActivationOperationConfiguration(
 			INITIALISE_MACHINE_NAME, Arrays.asList(INITIALISE_MACHINE_NAME), List.of(),
 			"0", 0, "btrue", ActivationKind.MULTI, Map.of(), Map.of(), TransitionSelection.FIRST,
-			List.copyOf(operations.stream().map(op -> new ActivationCall(op, new HashMap<>())).collect(Collectors.toList())), true, null, null, true, "Activation for INITIALISATION"
+			List.copyOf(operations.stream().map(op -> new ActivationCall(op, new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING)).collect(Collectors.toList())), true, null, null, true, "Activation for INITIALISATION"
 		));
 
 		for (var op : operations) {
 			activations.add(new ActivationOperationConfiguration(
 				op, Arrays.asList(op), List.of(),
 				"100", 0, "btrue", ActivationKind.SINGLE_MAX, Map.of(), Map.of(), TransitionSelection.UNIFORM, 
-				List.copyOf(operations.stream().map(operation -> new ActivationCall(operation, new HashMap<>())).collect(Collectors.toList())), true, null, null, false, "Activation for " + op
+				List.copyOf(operations.stream().map(operation -> new ActivationCall(operation, new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING)).collect(Collectors.toList())), true, null, null, false, "Activation for " + op
 			));
 		}
 
