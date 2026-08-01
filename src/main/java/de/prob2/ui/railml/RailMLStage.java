@@ -79,7 +79,7 @@ public class RailMLStage extends Stage {
 	private ListView<String> generateFileListView;
 	private final ObservableList<String> generateFileList = FXCollections.observableArrayList();
 	@FXML
-	private CheckBox onlyTranslation, semanticChecks, animationMachineCheckbox, translatedMachineCheckbox, dataMachineCheckbox,
+	private CheckBox onlyTranslation, semanticChecks, invariants, animationMachineCheckbox, translatedMachineCheckbox, dataMachineCheckbox,
 			validationMachineCheckbox, visualisationCheckbox, closeAfterGeneration;
 	@FXML
 	public VBox progressBox;
@@ -150,6 +150,8 @@ public class RailMLStage extends Stage {
 
 		onlyTranslation.disableProperty().bind(visualisationCheckbox.selectedProperty().or(semanticChecks.selectedProperty()).or(updater.runningProperty()).or(importSuccess));
 		semanticChecks.disableProperty().bind(onlyTranslation.selectedProperty().or(updater.runningProperty()).or(importSuccess));
+		semanticChecks.selectedProperty().addListener((obs, o, n) -> invariants.setSelected(false));
+		invariants.disableProperty().bind(onlyTranslation.selectedProperty().or(semanticChecks.selectedProperty().not()).or(updater.runningProperty()).or(importSuccess));
 		visualisationCheckbox.disableProperty().bind(onlyTranslation.selectedProperty().or(updater.runningProperty()).or(importSuccess));
 		visualisationCheckbox.selectedProperty().addListener((obs, o, n) -> {
 			if (n) {
@@ -437,7 +439,8 @@ public class RailMLStage extends Stage {
 				.generateAnimationMachine(animationMachineCheckbox.isSelected())
 				.generateValidationMachine(validationMachineCheckbox.isSelected())
 				.generateVisualisation(visualisationCheckbox.isSelected() ? DotOutputFormat.SVG : null)
-				.visualisationStrategy(visualisationCheckbox.isSelected() ? ImportArguments.VisualisationStrategy.DOT : null);
+				.visualisationStrategy(visualisationCheckbox.isSelected() ? ImportArguments.VisualisationStrategy.DOT : null)
+				.checkInvariants(invariants.isSelected());
 	}
 
 	private boolean confirmAbortImport() {

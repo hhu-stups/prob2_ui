@@ -51,17 +51,27 @@
 									<Insets top="5"/>
 								</VBox.margin>
 							</HBox>
-							<HBox alignment="CENTER_RIGHT" fx:id="preOptions" spacing="20">
+							<HBox alignment="TOP_CENTER" fx:id="preOptions" spacing="20">
 								<CheckBox text="%railml.stage.translatedOnly" fx:id="onlyTranslation">
 									<tooltip>
 										<Tooltip text="%railml.stage.translatedOnly.tooltip"/>
 									</tooltip>
 								</CheckBox>
-								<CheckBox text="%railml.stage.semanticChecks" fx:id="semanticChecks" selected="true">
-									<tooltip>
-										<Tooltip text="%railml.stage.semanticChecks.tooltip"/>
-									</tooltip>
-								</CheckBox>
+								<VBox>
+									<CheckBox text="%railml.stage.semanticChecks" fx:id="semanticChecks" selected="true">
+										<tooltip>
+											<Tooltip text="%railml.stage.semanticChecks.tooltip"/>
+										</tooltip>
+										<padding>
+											<Insets bottom="5"/>
+										</padding>
+									</CheckBox>
+									<CheckBox text="%railml.stage.invariants" fx:id="invariants">
+										<tooltip>
+											<Tooltip text="%railml.stage.invariants.tooltip"/>
+										</tooltip>
+									</CheckBox>
+								</VBox>
 								<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox">
 									<tooltip>
 										<Tooltip text="%railml.stage.visualisation.check.tooltip"/>
