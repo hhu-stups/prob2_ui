@@ -4,6 +4,8 @@ import com.google.common.io.MoreFiles;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import de.be4.classicalb.core.parser.exceptions.BCompoundException;
+import de.be4.classicalb.core.parser.exceptions.BException;
 import de.hhu.stups.railml2b.RailML2B;
 import de.hhu.stups.railml2b.exceptions.RailML2BException;
 import de.hhu.stups.railml2b.exceptions.RailML2BVisualisationException;
@@ -251,7 +253,7 @@ public class RailMLStage extends Stage {
 				importArguments.file(path.toFile()).output(outputPath).modelName(MoreFiles.getNameWithoutExtension(path));
 			} catch (RailML2BException e) {
 				invalidFile.set(true);
-				stageManager.makeExceptionAlert(e, "railml.stage.filename.error.header").showAndWait();
+				showError(e, "railml.stage.filename.error.header");
 			}
 			modelName = importArguments.modelName();
 			fileLocationField.setText(path.toAbsolutePath().toString());
@@ -300,20 +302,25 @@ public class RailMLStage extends Stage {
 					successLabel.setText(String.valueOf(summary.numberOfRulesSucceeded));
 					failLabel.setText(String.valueOf(summary.numberOfRulesFailed));
 					disabledLabel.setText(String.valueOf(summary.numberOfRulesDisabled));
+
+					List<BException> violatedInvariants = railML2B.getMachineLoader().getViolatedInvariants();
+					if (!violatedInvariants.isEmpty()) {
+						showError(new ProBError(new BCompoundException(violatedInvariants)), "The following invariants are violated");
+					}
 				});
 				importSuccess.set(true);
 			} catch (ProBError e) {
 				Platform.runLater(() -> {
 					boolean isRailMLError = e.getErrors().stream().allMatch(error -> error.getMessage().startsWith("RailML"));
 					if (isRailMLError) {
-						stageManager.makeExceptionAlert(e, "railml.stage.import.error.header", "railml.stage.import.error.content").showAndWait();
+						showError(e, "railml.stage.import.error.header", "railml.stage.import.error.content");
 					} else {
-						stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait();
+						showError(e, "error.errorTable.type.INTERNAL_ERROR");
 					}
 					this.toFront();
 				});
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				showError(e, "error.errorTable.type.INTERNAL_ERROR");
 			}
 		});
 	}
@@ -376,7 +383,7 @@ public class RailMLStage extends Stage {
 						Platform.runLater(() -> currentProject.loadMachineWithConfirmation(createdMachines.getLast()));
 					}
 				} catch (RailML2BException e) {
-					Platform.runLater(() -> stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait());
+					Platform.runLater(() -> showError(e, "error.errorTable.type.INTERNAL_ERROR"));
 				}
 			});
 		}
@@ -390,7 +397,7 @@ public class RailMLStage extends Stage {
 				railML2B.saveValidationReport(outputFormat);
 				validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedReport"));
 			} catch (RailML2BException e) {
-				stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait();
+				showError(e, "error.errorTable.type.INTERNAL_ERROR");
 			}
 		} else {
 			validationInfoMessage.setText(i18n.translate("railml.stage.messages.reportFail"));
@@ -403,7 +410,7 @@ public class RailMLStage extends Stage {
 				railML2B.saveRuleDependencyGraph(dotOutputFormat);
 				validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedGraph"));
 			} catch (RailML2BVisualisationException e) {
-				stageManager.makeExceptionAlert(e, "error.errorTable.type.INTERNAL_ERROR").showAndWait();
+				showError(e, "error.errorTable.type.INTERNAL_ERROR");
 			}
 		} else {
 			validationInfoMessage.setText(i18n.translate("railml.stage.messages.graphFail"));
@@ -415,6 +422,15 @@ public class RailMLStage extends Stage {
 		progressLabel.setText("");
 		progressBar.setProgress(-1);
 		progressOperation.setText("");
+	}
+
+	private void showError(Throwable e, String headerBundleKey, String contentBundleKey) {
+		stageManager.makeExceptionAlert(e, headerBundleKey, contentBundleKey).showAndWait();
+		this.toFront();
+	}
+
+	private void showError(Throwable e, String contentBundleKey) {
+		showError(e, null, contentBundleKey);
 	}
 
 	@FXML
