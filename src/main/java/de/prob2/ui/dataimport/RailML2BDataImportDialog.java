@@ -42,10 +42,7 @@ public class RailML2BDataImportDialog extends DataImportDialog {
 		fileChooser.setTitle(i18n.translate("railml.stage.filechooser.title"));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getRailMLFilter());
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.DATA_IMPORT, stageManager.getCurrent());
-		if (path != null) {
-			file.set(path.toFile());
-			options.initializeForPath(path);
-		}
+		setPath(path);
 	}
 
 	@Override
@@ -56,6 +53,13 @@ public class RailML2BDataImportDialog extends DataImportDialog {
 		if (path != null) {
 			directory.set(path.toAbsolutePath());
 			options.setDirectory(path);
+		}
+	}
+
+	public void setPath(Path path) {
+		if (path != null) {
+			file.set(path.toFile());
+			options.initializeForPath(path);
 		}
 	}
 

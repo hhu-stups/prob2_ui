@@ -25,12 +25,11 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dataimport.RailML2BDataImportDialog;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.railml.RailMLInspectDotStage;
-import de.prob2.ui.railml.RailMLStage;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.simulation.model.SimulationModel;
 import de.prob2.ui.visb.VisBView;
@@ -358,15 +357,9 @@ public final class ProjectManager {
 	}
 
 	public void openRailML(Path selected) {
-		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
-		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
-		if (railMLInspectDotStage.isShowing()) {
-			railMLInspectDotStage.toFront();
-		} else {
-			railMLStage.initializeForPath(selected);
-			railMLStage.show();
-			railMLStage.toFront();
-		}
+		RailML2BDataImportDialog railMLDialog = injector.getInstance(RailML2BDataImportDialog.class);
+		railMLDialog.setPath(selected);
+		railMLDialog.showAndWait();
 	}
 
 	private JsonType chooseType() {
