@@ -25,6 +25,7 @@ public class DataImportDialog extends Stage {
 	public enum ImportType {
 		CSV("CSV"),
 		JSON("JSON"),
+		RAILML("railML 3"),
 		XML("XML");
 
 		private final String type;
@@ -47,13 +48,13 @@ public class DataImportDialog extends Stage {
 	@FXML
 	private Tooltip fileLocationTooltip, directoryTooltip;
 	@FXML
-	private CheckBox cbMachineName;
+	CheckBox cbMachineName;
 	@FXML
 	private HBox nameBox;
 	@FXML
-	private ProgressIndicator progressIndicator;
+	ProgressIndicator progressIndicator;
 	@FXML
-	private Button btCancel, btImportAndOpen;
+	Button btCancel, btImportAndOpen;
 
 	final SimpleObjectProperty<File> file = new SimpleObjectProperty<>();
 	final SimpleObjectProperty<Path> directory = new SimpleObjectProperty<>();

@@ -9,6 +9,7 @@ import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.dataimport.CSVDataImportDialog;
 import de.prob2.ui.dataimport.JSONDataImportDialog;
+import de.prob2.ui.dataimport.RailML2BDataImportDialog;
 import de.prob2.ui.dataimport.XML2BDataImportDialog;
 import de.prob2.ui.dataimport.XMLDataImportDialog;
 import de.prob2.ui.internal.FXMLInjected;
@@ -17,8 +18,6 @@ import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.railml.RailMLInspectDotStage;
-import de.prob2.ui.railml.RailMLStage;
 import de.prob2.ui.simulation.SimulatorStage;
 import de.prob2.ui.visualisation.fx.VisualisationController;
 import de.prob2.ui.vomanager.VOManagerStage;
@@ -160,14 +159,9 @@ public final class AdvancedMenu extends Menu {
 
 	@FXML
 	private void showRailMLImport() {
-		RailMLStage railMLStage = injector.getInstance(RailMLStage.class);
-		RailMLInspectDotStage railMLInspectDotStage = injector.getInstance(RailMLInspectDotStage.class);
-		if (railMLInspectDotStage.isShowing()) {
-			railMLInspectDotStage.toFront();
-		} else {
-			railMLStage.show();
-			railMLStage.toFront();
-		}
+		RailML2BDataImportDialog dialog = injector.getInstance(RailML2BDataImportDialog.class);
+		dialog.show();
+		dialog.toFront();
 	}
 
 	@FXML
