@@ -205,8 +205,12 @@ public final class FileChooserManager {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.simulation", SimulationFileHandler.SIMULATION_FILE_EXTENSION);
 	}
 
-	public FileChooser.ExtensionFilter getRailMLFilter() {
-		return this.getExtensionFilter("common.fileChooser.fileTypes.railml", "railml", "railmlx", "xml");
+	public FileChooser.ExtensionFilter getRailMLFilter(boolean allowXml) {
+		if (allowXml) {
+			return this.getExtensionFilter("common.fileChooser.fileTypes.railml", "railml", "railmlx", "xml");
+		} else {
+			return this.getExtensionFilter("common.fileChooser.fileTypes.railml", "railml", "railmlx");
+		}
 	}
 
 	public FileChooser.ExtensionFilter getPlainTextFilter() {
@@ -342,13 +346,13 @@ public final class FileChooserManager {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + TraceFileHandler.TRACE_FILE_EXTENSION);
 			fileChooser.getExtensionFilters().addAll(this.getProB2TraceFilter());
 		}
-		if(visualisations) {
+		if (visualisations) {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + "json");
 			fileChooser.getExtensionFilters().addAll(this.getExtensionFilter("common.fileChooser.fileTypes.simOrVisB", "json"));
 		}
-		if(railml) {
+		if (railml) {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + "railml");
-			fileChooser.getExtensionFilters().addAll(this.getRailMLFilter());
+			fileChooser.getExtensionFilters().addAll(this.getRailMLFilter(false));
 		}
 
 		// This extension filter is created manually instead of with getExtensionFilter,
