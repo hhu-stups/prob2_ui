@@ -11,6 +11,7 @@ import de.hhu.stups.railml2b.exceptions.RailML2BException;
 import de.hhu.stups.railml2b.exceptions.RailML2BVisualisationException;
 import de.hhu.stups.railml2b.internal.ProgressListener;
 import de.hhu.stups.railml2b.load.ImportArguments;
+import de.hhu.stups.railml2b.output.MachinePrinter;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResults;
@@ -24,19 +25,15 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.model.SimulationModel;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
@@ -47,8 +44,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-
-import static de.hhu.stups.railml2b.output.MachinePrinter.*;
 
 @Singleton
 public class RailML2BDataImportOptions extends VBox {
@@ -97,11 +92,6 @@ public class RailML2BDataImportOptions extends VBox {
 	public MenuItem btGraphPdf, btGraphSvg, btGraphPng, btGraphDot, btReportHtml, btReportXml;
 	@FXML
 	private Button btReload;
-	@FXML
-	private VBox generatedFiles;
-	@FXML
-	private ListView<String> generateFileListView;
-	private final ObservableList<String> generateFileList = FXCollections.observableArrayList();
 	@FXML
 	private CheckBox onlyTranslation, semanticChecks, invariants, animationMachineCheckbox, translatedMachineCheckbox, dataMachineCheckbox,
 			validationMachineCheckbox, visualisationCheckbox;
@@ -154,18 +144,6 @@ public class RailML2BDataImportOptions extends VBox {
 		semanticChecks.selectedProperty().addListener((obs, o, n) -> invariants.setSelected(false));
 		invariants.disableProperty().bind(onlyTranslation.selectedProperty().or(semanticChecks.selectedProperty().not()).or(updater.runningProperty()).or(importSuccess));
 		visualisationCheckbox.disableProperty().bind(onlyTranslation.selectedProperty().or(updater.runningProperty()).or(importSuccess));
-		visualisationCheckbox.selectedProperty().addListener((obs, o, n) -> {
-			if (n) {
-				generateFileList.add(modelName + ".svg");
-			} else {
-				generateFileList.remove(modelName + ".svg");
-			}
-		});
-
-		generatedFiles.visibleProperty().bind(importSuccess.and(Bindings.isEmpty(generateFileList).not()));
-		generatedFiles.managedProperty().bind(generatedFiles.visibleProperty());
-		generateFileListView.setItems(generateFileList);
-		generateFileListView.prefHeightProperty().bind(Bindings.size(generateFileList).multiply(generateFileListView.getFixedCellSize()));
 
 		validationResults.visibleProperty().bind(importSuccess.and(semanticChecks.selectedProperty()));
 		validationResults.managedProperty().bind(validationResults.visibleProperty());
@@ -179,44 +157,30 @@ public class RailML2BDataImportOptions extends VBox {
 		machineOptions.visibleProperty().bind(importSuccess);
 		machineOptions.managedProperty().bind(machineOptions.visibleProperty());
 
-		// TODO: remove list of generated files
-		translatedMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
-			if (newValue) {
-				generateFileList.add(modelName + ".mch");
-			} else {
-				generateFileList.remove(modelName + ".mch");
-			}
-		});
 		dataMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
 				translatedMachineCheckbox.setSelected(true);
 				translatedMachineCheckbox.setDisable(true);
-				generateFileList.add(modelName + DATA_MCH);
 			} else {
 				translatedMachineCheckbox.setDisable(false);
-				generateFileList.remove(modelName + DATA_MCH);
 			}
 		});
 		animationMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
 				dataMachineCheckbox.setSelected(true);
 				dataMachineCheckbox.setDisable(true);
-				generateFileList.addAll(modelName + ANIMATION_MCH, VISB_DEF, SIMB_JSON);
 			} else {
 				if (!validationMachineCheckbox.isSelected())
 					dataMachineCheckbox.setDisable(false);
-				generateFileList.removeAll(modelName + ANIMATION_MCH, VISB_DEF, SIMB_JSON);
 			}
 		});
 		validationMachineCheckbox.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
 				dataMachineCheckbox.setSelected(true);
 				dataMachineCheckbox.setDisable(true);
-				generateFileList.add(modelName + VALIDATION_MCH);
 			} else {
 				if (!animationMachineCheckbox.isSelected())
 					dataMachineCheckbox.setDisable(false);
-				generateFileList.remove(modelName + VALIDATION_MCH);
 			}
 		});
 
@@ -356,21 +320,21 @@ public class RailML2BDataImportOptions extends VBox {
 						}
 						if (importArguments.saveGeneratedDataMachine()) {
 							railML2B.generateDataMachine();
-							Platform.runLater(() -> currentProject.addMachine(new Machine(customName + DATA,
+							Platform.runLater(() -> currentProject.addMachine(new Machine(customName + MachinePrinter.DATA,
 									i18n.translate("railml.stage.machineChoice.data.tooltip"),
-									outputPath.relativize(outputPath.resolve(customName + DATA_MCH)))));
+									outputPath.relativize(outputPath.resolve(customName + MachinePrinter.DATA_MCH)))));
 						}
 						if (importArguments.generateValidationMachine()) {
 							railML2B.generateValidationMachine();
-							Platform.runLater(() -> currentProject.addMachine(new Machine(customName + VALIDATION,
+							Platform.runLater(() -> currentProject.addMachine(new Machine(customName + MachinePrinter.VALIDATION,
 									i18n.translate("railml.stage.machineChoice.validation.tooltip"),
-									outputPath.relativize(outputPath.resolve(customName + VALIDATION_MCH)))));
+									outputPath.relativize(outputPath.resolve(customName + MachinePrinter.VALIDATION_MCH)))));
 						}
 						if (importArguments.generateAnimationMachine()) {
 							railML2B.generateAnimationMachine();
-							final Machine animationMachine = new Machine(customName + ANIMATION,
+							final Machine animationMachine = new Machine(customName + MachinePrinter.ANIMATION,
 									i18n.translate("railml.stage.machineChoice.animation.tooltip"),
-									outputPath.relativize(outputPath.resolve(customName + ANIMATION_MCH)));
+									outputPath.relativize(outputPath.resolve(customName + MachinePrinter.ANIMATION_MCH)));
 							animationMachine.getSimulations()
 									.add(new SimulationModel(outputPath.relativize(outputPath.resolve("railML3_SimB.json"))));
 							Platform.runLater(() -> currentProject.addMachine(animationMachine));
@@ -512,7 +476,6 @@ public class RailML2BDataImportOptions extends VBox {
 			animationMachineCheckbox.setSelected(false);
 			validationMachineCheckbox.setSelected(false);
 			validationInfoMessage.setText("");
-			generateFileList.clear();
 			generationRunning.set(false);
 			setupButtonForLoading();
 		});

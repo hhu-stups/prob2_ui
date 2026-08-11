@@ -287,17 +287,4 @@
 			<Insets bottom="10"/>
 		</padding>
 	</VBox>
-	<VBox fx:id="generatedFiles" visible="false">
-		<AnchorPane styleClass="border">
-			<VBox AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20"
-				  AnchorPane.topAnchor="15" AnchorPane.bottomAnchor="15">
-				<Label text="%railml.stage.generatedfiles.title">
-					<padding>
-						<Insets bottom="5"/>
-					</padding>
-				</Label>
-				<ListView style="-fx-border-width: 0" fx:id="generateFileListView" fixedCellSize="${fontSize.fontSize * 2}"/>
-			</VBox>
-		</AnchorPane>
-	</VBox>
 </fx:root>
