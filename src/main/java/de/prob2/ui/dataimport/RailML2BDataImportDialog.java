@@ -60,6 +60,7 @@ public class RailML2BDataImportDialog extends DataImportDialog {
 		if (path != null) {
 			file.set(path.toFile());
 			options.initializeForPath(path);
+			checkAndUpdateMachineName(false);
 		}
 	}
 
