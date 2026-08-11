@@ -11,31 +11,68 @@
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
 	<HBox alignment="TOP_CENTER" fx:id="preOptions" spacing="20">
-		<CheckBox text="%railml.stage.translatedOnly" fx:id="onlyTranslation">
-			<tooltip>
-				<Tooltip text="%railml.stage.translatedOnly.tooltip"/>
-			</tooltip>
-		</CheckBox>
+		<HBox>
+			<CheckBox text="%railml.stage.translatedOnly" fx:id="onlyTranslation"/>
+			<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+								   bindableFontSize="${fontSize.fontSize}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%railml.stage.translatedOnly.tooltip" showDuration="1m" showDelay="0s"/>
+				</tooltip>
+				<HBox.margin>
+					<Insets left="5"/>
+				</HBox.margin>
+			</Button>
+		</HBox>
 		<VBox>
-			<CheckBox text="%railml.stage.semanticChecks" fx:id="semanticChecks" selected="true">
-				<tooltip>
-					<Tooltip text="%railml.stage.semanticChecks.tooltip"/>
-				</tooltip>
-				<padding>
-					<Insets bottom="5"/>
-				</padding>
-			</CheckBox>
-			<CheckBox text="%railml.stage.invariants" fx:id="invariants">
-				<tooltip>
-					<Tooltip text="%railml.stage.invariants.tooltip"/>
-				</tooltip>
-			</CheckBox>
+			<HBox>
+				<CheckBox text="%railml.stage.semanticChecks" fx:id="semanticChecks" selected="true"/>
+				<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+						               bindableFontSize="${fontSize.fontSize}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%railml.stage.semanticChecks.tooltip" showDuration="1m" showDelay="0s"/>
+					</tooltip>
+					<HBox.margin>
+						<Insets left="5" bottom="5"/>
+					</HBox.margin>
+				</Button>
+			</HBox>
+			<HBox>
+				<CheckBox text="%railml.stage.invariants" fx:id="invariants"/>
+				<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+						               bindableFontSize="${fontSize.fontSize}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%railml.stage.invariants.tooltip" showDuration="1m" showDelay="0s"/>
+					</tooltip>
+					<HBox.margin>
+						<Insets left="5"/>
+					</HBox.margin>
+				</Button>
+			</HBox>
 		</VBox>
-		<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox">
-			<tooltip>
-				<Tooltip text="%railml.stage.visualisation.check.tooltip"/>
-			</tooltip>
-		</CheckBox>
+		<HBox>
+			<CheckBox text="%railml.stage.visualisation.check" fx:id="visualisationCheckbox"/>
+			<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+					               bindableFontSize="${fontSize.fontSize}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%railml.stage.visualisation.check.tooltip" showDuration="1m" showDelay="0s"/>
+				</tooltip>
+				<HBox.margin>
+					<Insets left="5"/>
+				</HBox.margin>
+			</Button>
+		</HBox>
 		<VBox.margin>
 			<Insets top="20" bottom="5"/>
 		</VBox.margin>
@@ -47,11 +84,6 @@
 			<Label fx:id="progressLabel"/>
 		</HBox>
 		<HBox styleClass="dialog" alignment="CENTER_RIGHT" HBox.hgrow="ALWAYS">
-			<!--<Button fx:id="btCancelImport" styleClass="button-dark2" text="%common.buttons.cancel" cancelButton="true" onAction="#cancel">
-				<HBox.margin>
-					<Insets right="10"/>
-				</HBox.margin>
-			</Button>-->
 			<Button fx:id="btReload" styleClass="button-dark2" onAction="#resetUI">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO"
@@ -177,30 +209,66 @@
 			</padding>
 		</Label>
 		<GridPane hgap="50" vgap="8" alignment="CENTER">
-			<CheckBox text="%railml.stage.machineChoice.translatedData" fx:id="translatedMachineCheckbox"
-					  GridPane.rowIndex="0" GridPane.columnIndex="0">
-				<tooltip>
-					<Tooltip text="%railml.stage.machineChoice.translatedData.tooltip"/>
-				</tooltip>
-			</CheckBox>
-			<CheckBox text="%railml.stage.machineChoice.data" fx:id="dataMachineCheckbox"
-					  GridPane.rowIndex="1" GridPane.columnIndex="0">
-				<tooltip>
-					<Tooltip text="%railml.stage.machineChoice.data.tooltip"/>
-				</tooltip>
-			</CheckBox>
-			<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"
-					  GridPane.rowIndex="0" GridPane.columnIndex="1">
-				<tooltip>
-					<Tooltip text="%railml.stage.machineChoice.animation.tooltip"/>
-				</tooltip>
-			</CheckBox>
-			<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"
-					  GridPane.rowIndex="1" GridPane.columnIndex="1">
-				<tooltip>
-					<Tooltip text="%railml.stage.machineChoice.validation.tooltip"/>
-				</tooltip>
-			</CheckBox>
+			<HBox GridPane.rowIndex="0" GridPane.columnIndex="0">
+				<CheckBox text="%railml.stage.machineChoice.translatedData" fx:id="translatedMachineCheckbox"/>
+				<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+						               bindableFontSize="${fontSize.fontSize}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%railml.stage.machineChoice.translatedData.tooltip" showDuration="1m" showDelay="0s"/>
+					</tooltip>
+					<HBox.margin>
+						<Insets left="5"/>
+					</HBox.margin>
+				</Button>
+			</HBox>
+			<HBox GridPane.rowIndex="1" GridPane.columnIndex="0">
+				<CheckBox text="%railml.stage.machineChoice.data" fx:id="dataMachineCheckbox"/>
+				<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+						               bindableFontSize="${fontSize.fontSize}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%railml.stage.machineChoice.data.tooltip" showDuration="1m" showDelay="0s"/>
+					</tooltip>
+					<HBox.margin>
+						<Insets left="5"/>
+					</HBox.margin>
+				</Button>
+			</HBox>
+			<HBox GridPane.rowIndex="0" GridPane.columnIndex="1">
+				<CheckBox text="%railml.stage.machineChoice.animation" fx:id="animationMachineCheckbox"/>
+				<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+						               bindableFontSize="${fontSize.fontSize}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%railml.stage.machineChoice.animation.tooltip" showDuration="1m" showDelay="0s"/>
+					</tooltip>
+					<HBox.margin>
+						<Insets left="5"/>
+					</HBox.margin>
+				</Button>
+			</HBox>
+			<HBox GridPane.rowIndex="1" GridPane.columnIndex="1">
+				<CheckBox text="%railml.stage.machineChoice.validation" fx:id="validationMachineCheckbox"/>
+				<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+					<graphic>
+						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+						               bindableFontSize="${fontSize.fontSize}"/>
+					</graphic>
+					<tooltip>
+						<Tooltip text="%railml.stage.machineChoice.validation.tooltip" showDuration="1m" showDelay="0s"/>
+					</tooltip>
+					<HBox.margin>
+						<Insets left="5"/>
+					</HBox.margin>
+				</Button>
+			</HBox>
 		</GridPane>
 		<padding>
 			<Insets bottom="10"/>
