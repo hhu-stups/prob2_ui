@@ -28,6 +28,7 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.TranslatableAdapter;
 import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.prob2fx.CurrentTrace;
+import de.prob2.ui.states.FullValueStage;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -35,6 +36,7 @@ import javafx.beans.binding.DoubleBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
@@ -67,6 +69,8 @@ public final class BConsoleView extends BorderPane {
 	private CodeArea consoleHistory;
 	@FXML
 	private BConsoleInput consoleInput;
+	@FXML
+	private CheckBox prettifyCheckBox;
 	@FXML
 	private ComboBox<String> historyDropdown;
 	@FXML
@@ -346,7 +350,7 @@ public final class BConsoleView extends BorderPane {
 	}
 
 	private void appendHistory(String paragraph, Collection<String> style) {
-		this.consoleHistory.append(paragraph + "\n", style);
+		this.consoleHistory.append((prettifyCheckBox.isSelected() ? FullValueStage.prettify(paragraph) : paragraph) + "\n", style);
 	}
 
 	private void appendHistoryWithoutDuplicates(String paragraph, Collection<String> style) {
