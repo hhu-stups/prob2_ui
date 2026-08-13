@@ -8,6 +8,7 @@ import de.prob.animator.domainobjects.IdentifierNotInitialised;
 import de.prob.model.brules.*;
 import de.prob.statespace.State;
 import de.prob.statespace.Trace;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -117,30 +118,32 @@ public final class RulesDataModel {
 
 	private void updateRuleResults(State currentState) {
 		RuleResults ruleResults = new RuleResults(model.getRulesProject(), currentState, -1, -1, -1);
-		int notCheckableCounter = 0;
-		for (String ruleStr : ruleValueMap.keySet()) {
-			RuleResult result = ruleResults.getRuleResultMap().get(ruleStr);
-			if (ruleValueMap.get(ruleStr).get() != null && ruleValueMap.get(ruleStr).get().equals(result)) {
-				ruleValueMap.get(ruleStr).set(null); // trigger listener for update of dependency items
+		Platform.runLater(() -> {
+			int notCheckableCounter = 0;
+			for (String ruleStr : ruleValueMap.keySet()) {
+				RuleResult result = ruleResults.getRuleResultMap().get(ruleStr);
+				if (ruleValueMap.get(ruleStr).get() != null && ruleValueMap.get(ruleStr).get().equals(result)) {
+					ruleValueMap.get(ruleStr).set(null); // trigger listener for update of dependency items
+				}
+				ruleValueMap.get(ruleStr).set(result);
+				if ((result != null && result.getFailedDependencies() != null && !result.getFailedDependencies().isEmpty()) ||
+						!getDisabledDependencies(ruleStr).isEmpty()) {
+					notCheckableCounter++;
+				}
 			}
-			ruleValueMap.get(ruleStr).set(result);
-			if ((result != null && result.getFailedDependencies() != null && !result.getFailedDependencies().isEmpty()) ||
-					!getDisabledDependencies(ruleStr).isEmpty()) {
-				notCheckableCounter++;
-			}
-		}
 
-		//update summary
-		RuleResults.ResultSummary summary = ruleResults.getSummary();
-		failedRules.set(summary.numberOfRulesFailed + "");
-		successRules.set(summary.numberOfRulesSucceeded + "");
-		notCheckedRules.set((summary.numberOfRulesNotChecked - notCheckableCounter) + " (" + notCheckableCounter + ")");
-		disabledRules.set(summary.numberOfRulesDisabled + "");
+			//update summary
+			RuleResults.ResultSummary summary = ruleResults.getSummary();
+			failedRules.set(summary.numberOfRulesFailed + "");
+			successRules.set(summary.numberOfRulesSucceeded + "");
+			notCheckedRules.set((summary.numberOfRulesNotChecked - notCheckableCounter) + " (" + notCheckableCounter + ")");
+			disabledRules.set(summary.numberOfRulesDisabled + "");
+		});
 	}
 
 	private void updateComputationResults(State currentState) {
 		Map<AbstractOperation,OperationStatus> computationResults = OperationStatuses.getStatuses(model, currentState);
-		computationResults.forEach((op, result) -> {
+		Platform.runLater(() -> computationResults.forEach((op, result) -> {
 			SimpleObjectProperty<Object> prop = computationValueMap.get(op.getName());
 			if (prop != null) {
 				if (prop.get().equals(result)) {
@@ -148,7 +151,7 @@ public final class RulesDataModel {
 				}
 				prop.set(result);
 			}
-		});
+		}));
 	}
 
 	public List<String> getFailedDependenciesOfComputation(String comp) {
