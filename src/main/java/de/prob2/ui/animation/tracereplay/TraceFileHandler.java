@@ -444,7 +444,7 @@ public final class TraceFileHandler {
 		}
 
 		Path path = this.currentProject.get().resolveProjectPath(trace.getLocation());
-		if (path == null || !Files.exists(path)) {
+		if (path == null) {
 			return false;
 		}
 
@@ -462,7 +462,9 @@ public final class TraceFileHandler {
 		}
 		if (alert.getDialogPane().getProperties().get("checkBox") instanceof CheckBox cb && cb.isSelected()) {
 			try {
-				Files.delete(path);
+				if (Files.exists(path)) {
+					Files.delete(path);
+				}
 			} catch (IOException e) {
 				LOGGER.warn("could not delete trace file {}", path, e);
 				stageManager.makeExceptionAlert(e, "common.alerts.couldNotDeleteFile.content").show();
