@@ -19,6 +19,7 @@ import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
 import de.prob2.ui.simulation.SimulatorStage;
+import de.prob2.ui.simulation.SimulatorUtils;
 import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationKind;
 import de.prob2.ui.simulation.configuration.ActivationOperationConfiguration;
@@ -214,7 +215,7 @@ public final class UIInteractionHandler {
 				activations.addAll(userInteractions
 						.stream()
 						.map(DiagramConfiguration::getId)
-						.map(id -> new ActivationCall(id, new HashMap<>()))
+						.map(id -> new ActivationCall(id, new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING))
 						.toList());
 				activationConfigurationsForResult.add(new ActivationOperationConfiguration(Transition.INITIALISE_MACHINE_NAME, Arrays.asList(Transition.INITIALISE_MACHINE_NAME), List.of(), initializationConfiguration.getAfter(), initializationConfiguration.getPriority(), initializationConfiguration.getAdditionalGuards(), initializationConfiguration.getActivationKind(), initializationConfiguration.getFixedVariables(), initializationConfiguration.getProbabilisticVariables(), initializationConfiguration.getTransitionSelection(), activations, true, null, null, true, ""));
 			} else if(Transition.SETUP_CONSTANTS_NAME.equals(diagramConfiguration.getId())) {
@@ -238,7 +239,7 @@ public final class UIInteractionHandler {
 		if(!hasInitialization) {
 			activations.addAll(userInteractions
 					.stream()
-					.map(conf -> new ActivationCall(conf.getId(), new HashMap<>()))
+					.map(conf -> new ActivationCall(conf.getId(), new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING))
 					.toList());
 			OperationInfo opInfo = currentTrace.getStateSpace().getLoadedMachine().getMachineOperationInfo(Transition.INITIALISE_MACHINE_NAME);
 			// Somehow the constructor with 1 argument always sets using destination state to false

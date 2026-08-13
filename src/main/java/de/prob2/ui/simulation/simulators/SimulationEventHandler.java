@@ -17,6 +17,7 @@ import de.prob2.ui.internal.WeightedRandomHelper;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.EvaluationMode;
+import de.prob2.ui.simulation.SimulatorUtils;
 import de.prob2.ui.simulation.configuration.ActivationParameterHandler;
 import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
@@ -234,10 +235,33 @@ public class SimulationEventHandler {
 		simulator.getConfigurationToActivation().get(id).add(activation);
 	}
 
-
 	public void activateOperations(State state, List<ActivationCall> activation, List<String> parametersAsString, String parameterPredicates) {
 		if(activation != null) {
-			activation.forEach(activationConfiguration -> handleOperationConfiguration(state, simulator.getActivationConfigurationMap().get(activationConfiguration.getId()), activationConfiguration.getParams(), parametersAsString, parameterPredicates));
+			int i = 0;
+			double currentProbability = 0.0;
+			double randomNumber = Math.random();
+			boolean executeAll = true;
+			boolean executed = false;
+			EvaluationMode mode = EvaluationMode.extractMode(currentTrace.getModel());
+			for(ActivationCall activationConfiguration : activation) {
+				String probability = activationConfiguration.getProbability();
+				if(SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING.equals(probability)) {
+					currentProbability = 1.0;
+					executed = true;
+					handleOperationConfiguration(state, simulator.getActivationConfigurationMap().get(activationConfiguration.getId()), activationConfiguration.getParams(), parametersAsString, parameterPredicates);
+				} else {
+					double evaluatedProbability = Double.parseDouble(this.getCache().readValueWithCaching(state, simulator.getVariables(), probability, mode));
+					if(!executed && randomNumber < evaluatedProbability) {
+						currentProbability = currentProbability + evaluatedProbability;
+						executed = true;
+						handleOperationConfiguration(state, simulator.getActivationConfigurationMap().get(activationConfiguration.getId()), activationConfiguration.getParams(), parametersAsString, parameterPredicates);
+						executeAll = false;
+					}
+					if(currentProbability > 1.0) {
+						throw new RuntimeException("Chose probability values sum up to greater than 1.");
+					}
+				}
+			}
 		}
 	}
 

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
+import de.prob2.ui.simulation.SimulatorUtils;
+
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -21,7 +23,7 @@ public class ActivationCallDeserializer extends JsonDeserializer<ActivationCall>
 		JsonNode node = parser.getCodec().readTree(parser);
 
 		if(node.isTextual()) {
-			return new ActivationCall(node.asText(), new HashMap<>());
+			return new ActivationCall(node.asText(), new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING);
 		}
 
 		JsonNode idNode = node.get("id");
@@ -36,7 +38,8 @@ public class ActivationCallDeserializer extends JsonDeserializer<ActivationCall>
 				params = parser.getCodec().treeToValue(paramsNode, Map.class);
 			}
 		}
-		return new ActivationCall(idNode.asText(), params);
+		JsonNode probabilityNode = node.get("probability");
+		return new ActivationCall(idNode.asText(), params, probabilityNode.asText());
 
 	}
 

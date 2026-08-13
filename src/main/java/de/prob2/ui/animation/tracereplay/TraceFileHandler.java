@@ -313,7 +313,7 @@ public final class TraceFileHandler {
 		TestCaseGeneratorResult result = ((TestCaseGenerationItem.Result)item.getResult()).getResult();
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION);
+		fileChooser.setInitialFileName(stripExtension(currentProject.getCurrentMachine().getName() + "TestCase." + TRACE_FILE_EXTENSION));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
@@ -369,7 +369,7 @@ public final class TraceFileHandler {
 	public Path save(Trace trace, Path initialDirectory, String initialFileName, Machine machine) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(initialFileName);
+		fileChooser.setInitialFileName(stripExtension(initialFileName));
 		fileChooser.getExtensionFilters().add(fileChooserManager.getProB2TraceFilter());
 		fileChooser.setInitialDirectory(initialDirectory.toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
@@ -379,11 +379,45 @@ public final class TraceFileHandler {
 		}
 		return path;
 	}
+	
+	/**
+	 * <p>
+	 * Workaround for an issue in recent macOS versions
+	 * (since at least macOS 15)
+	 * where the initial file name provided to a FileChooser sometimes has its file extension duplicated.
+	 * For example, if "Hello.prob2trace" is set as the initial file name,
+	 * macOS puts "Hello.prob2trace.prob2trace" into the file name text field.
+	 * </p>
+	 * <p>
+	 * The workaround is to remove the extension from the initial file name.
+	 * This gives the correct result,
+	 * because macOS still appends the extension from the file extension filter.
+	 * This works on all macOS versions, but not on all other systems -
+	 * on Linux for example, the initial file name <em>must</em> include the file extension.
+	 * </p>
+	 * <p>
+	 * JavaFX has added <a href="https://bugs.openjdk.org/browse/JDK-8352298">its own workaround</a> for this issue starting with JavaFX 27.
+	 * Once we update to a JavaFX version with that workaround,
+	 * we can remove our own workaround.
+	 * </p>
+	 * 
+	 * @param name a file name including an extension
+	 * @return the file name without extension if on macOS, or the unmodified file name on other systems
+	 */
+	public static String stripExtension(String name) {
+		if (System.getProperty("os.name").toLowerCase().contains("mac")) {
+			int dot = name.lastIndexOf('.');
+			if (dot > 0) {
+				return name.substring(0, dot);
+			}
+		}
+		return name;
+	}
 
 	public Path saveAsTable(Trace trace) throws IOException {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("animation.tracereplay.fileChooser.saveTrace.title"));
-		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".csv");
+		fileChooser.setInitialFileName(currentProject.getCurrentMachine().getName() + ".csv"); // here macOS has no problem and does not generate two .csv extensions
 		fileChooser.getExtensionFilters().add(fileChooserManager.getCsvFilter());
 		fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.TRACES, stageManager.getCurrent());
@@ -410,7 +444,7 @@ public final class TraceFileHandler {
 		}
 
 		Path path = this.currentProject.get().resolveProjectPath(trace.getLocation());
-		if (path == null || !Files.exists(path)) {
+		if (path == null) {
 			return false;
 		}
 
@@ -428,7 +462,9 @@ public final class TraceFileHandler {
 		}
 		if (alert.getDialogPane().getProperties().get("checkBox") instanceof CheckBox cb && cb.isSelected()) {
 			try {
-				Files.delete(path);
+				if (Files.exists(path)) {
+					Files.delete(path);
+				}
 			} catch (IOException e) {
 				LOGGER.warn("could not delete trace file {}", path, e);
 				stageManager.makeExceptionAlert(e, "common.alerts.couldNotDeleteFile.content").show();

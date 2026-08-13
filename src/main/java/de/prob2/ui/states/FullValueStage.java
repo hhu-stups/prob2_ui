@@ -179,7 +179,7 @@ public final class FullValueStage extends Stage {
 		currentValueTextarea.contextMenuProperty().setValue(new ContextMenu(visualizeExpressionAsGraphItem, visualizeExpressionAsTableItem));
 	}
 
-	private static String prettify(final String s) {
+	public static String prettify(final String s) {
 		int len = s.length();
 		StringBuilder out = new StringBuilder(len);
 

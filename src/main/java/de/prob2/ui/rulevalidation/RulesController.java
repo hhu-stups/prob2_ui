@@ -62,13 +62,17 @@ public final class RulesController {
 					LOGGER.debug("New rules model in new trace!");
 					rulesModel = (RulesModel) newTrace.getModel();
 					initialize(rulesModel);
-					model.update(newTrace);
-					cliTaskExecutor.execute(() -> rulesChecker = new RulesChecker(newTrace));
+					cliTaskExecutor.execute(() -> {
+						model.update(newTrace);
+						rulesChecker = new RulesChecker(newTrace);
+					});
 				} else {
 					// model didn't change -> update view with same collapsed items
 					LOGGER.debug("Update rules view to new trace!");
-					model.update(newTrace);
-					cliTaskExecutor.execute(() -> rulesChecker.setTrace(newTrace)); // also update RulesChecker; relevant for correct validation report export
+					cliTaskExecutor.execute(() -> {
+						model.update(newTrace); // evaluates RuleResults
+						rulesChecker.setTrace(newTrace);
+					}); // also update RulesChecker; relevant for correct validation report export
 					rulesView.executeAllButton.setDisable(newTrace.getNextTransitions().isEmpty());
 				}
 			}

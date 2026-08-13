@@ -2,6 +2,7 @@ package de.prob2.ui.simulation.diagram;
 
 import java.util.*;
 
+import de.prob2.ui.simulation.SimulatorUtils;
 import de.prob2.ui.simulation.configuration.ActivationCall;
 import de.prob2.ui.simulation.configuration.ActivationChoiceConfiguration;
 import de.prob2.ui.simulation.configuration.ActivationKind;
@@ -22,7 +23,7 @@ public class DiagramGeneratorTest {
 		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), new ArrayList<>(), "500", 0, null, ActivationKind.SINGLE, null,
 		null, null, null, false,null, "1=1", false, "");
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
-		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>())), "");
+		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING)), "");
 
 		var config = new SimulationModelConfiguration(
 			Map.of(),
@@ -45,7 +46,7 @@ public class DiagramGeneratorTest {
 		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), new ArrayList<>(), "500", 0, null, ActivationKind.SINGLE, null,
 		null, null, null, false, null, "1=1", false, "");
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
-		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>())), "");
+		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING)), "");
 
 		var config = new SimulationModelConfiguration(
 			Map.of(),
@@ -69,7 +70,7 @@ public class DiagramGeneratorTest {
 		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), new ArrayList<>(), "500", 0, null, ActivationKind.SINGLE, null,
 		null, null, null, false,null, "1=1", false, "");
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
-		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>())), "");
+		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING)), "");
 
 		var config = new SimulationModelConfiguration(
 			Map.of(),
@@ -100,7 +101,7 @@ public class DiagramGeneratorTest {
 		DiagramConfiguration.NonUi test1 = new ActivationOperationConfiguration( "coin", Arrays.asList("coin"), new ArrayList<>(), "500", 0, null, ActivationKind.SINGLE, null,
 		null, null, null, false,null, "1=1", false, "");
 		DiagramConfiguration.NonUi test2 = new ActivationChoiceConfiguration("throwcoin",Map.of("coin","500"), "");
-		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>())), "");
+		UIListenerConfiguration test3 = new UIListenerConfiguration("button", "button", "1:1",List.of(new ActivationCall("throwcoin", new HashMap<>(), SimulatorUtils.DEFAULT_PROBABILITY_AS_STRING)), "");
 
 		var config = new SimulationModelConfiguration(
 			Map.of(),
