@@ -78,7 +78,7 @@ public final class Config {
 					oldObject.put("operationsShowDescriptions", "false");
 				}
 
-				// Version 6 just adds the RAILML option
+				// Version 6 just adds the DATA_IMPORT option
 
 				return oldObject;
 			}
