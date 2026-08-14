@@ -8,7 +8,14 @@ import de.prob2.ui.internal.executor.BackgroundUpdater;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.DirectoryChooser;
@@ -25,6 +32,7 @@ public class DataImportDialog extends Stage {
 	public enum ImportType {
 		CSV("CSV"),
 		JSON("JSON"),
+		RAILML("railML 3"),
 		XML("XML");
 
 		private final String type;
@@ -47,13 +55,13 @@ public class DataImportDialog extends Stage {
 	@FXML
 	private Tooltip fileLocationTooltip, directoryTooltip;
 	@FXML
-	private CheckBox cbMachineName;
+	CheckBox cbMachineName;
 	@FXML
 	private HBox nameBox;
 	@FXML
-	private ProgressIndicator progressIndicator;
+	ProgressIndicator progressIndicator;
 	@FXML
-	private Button btCancel, btImportAndOpen;
+	Button btCancel, btImportAndOpen;
 
 	final SimpleObjectProperty<File> file = new SimpleObjectProperty<>();
 	final SimpleObjectProperty<Path> directory = new SimpleObjectProperty<>();
@@ -131,6 +139,7 @@ public class DataImportDialog extends Stage {
 		Path path = fileChooserManager.showOpenFileChooser(fileChooser, FileChooserManager.Kind.DATA_IMPORT, stageManager.getCurrent());
 		if (path != null) {
 			file.set(path.toFile());
+			checkAndUpdateMachineName(false);
 		}
 	}
 
@@ -179,17 +188,8 @@ public class DataImportDialog extends Stage {
 			return false;
 		}
 
-		if (cbMachineName.isSelected()) {
-			machineName.set(this.machineNameField.getText());
-		} else {
-			machineName.set(MoreFiles.getNameWithoutExtension(file.get().toPath()));
-		}
-		if (invalidMachineName(machineName.get())) {
-			Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "dataimport.dialog.error.failed", "dataimport.dialog.error.invalidName", machineNameField.getText());
-			alert.initOwner(this);
-			alert.show();
+		if (!checkAndUpdateMachineName(true))
 			return false;
-		}
 
 		Path machinePath = directory.get().resolve(machineName.get() + ".mch");
 		if (confirmMachineReplace() && Files.exists(machinePath) && !confirmReplace(machinePath.toString())) {
@@ -217,6 +217,28 @@ public class DataImportDialog extends Stage {
 		} else {
 			this.machineNameField.setStyle("");
 		}
+	}
+
+	boolean checkAndUpdateMachineName(boolean showAlert) {
+		if (cbMachineName.isSelected()) {
+			machineName.set(this.machineNameField.getText());
+		} else {
+			machineName.set(MoreFiles.getNameWithoutExtension(file.get().toPath()));
+		}
+
+		if (invalidMachineName(machineName.get())) {
+			if (showAlert) {
+				Alert alert = this.stageManager.makeAlert(Alert.AlertType.ERROR, "dataimport.dialog.error.failed", "dataimport.dialog.error.invalidName", machineNameField.getText());
+				alert.initOwner(this);
+				alert.show();
+			}
+			// provide fixed machine name:
+			machineName.set(machineName.get().replace(".","_")); // dots are not supported in quoted B identifiers
+			cbMachineName.setSelected(true);
+			machineNameField.setText(machineName.get());
+			return false;
+		}
+		return true;
 	}
 
 	private boolean invalidMachineName(String machineName) {

@@ -25,6 +25,7 @@ import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
 import de.prob2.ui.config.ConfigListener;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.dataimport.RailML2BDataImportDialog;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
@@ -60,7 +61,7 @@ public final class ProjectManager {
 	private final FileChooserManager fileChooserManager;
 	private final I18n i18n;
 	private final ObjectMapper objectMapper;
-	
+
 	private final ObservableList<Path> recentProjects;
 	private final IntegerProperty maximumRecentProjects;
 	private final Injector injector;
@@ -353,6 +354,12 @@ public final class ProjectManager {
 			case NONE -> {
 			}
 		}
+	}
+
+	public void openRailML(Path selected) {
+		RailML2BDataImportDialog railMLDialog = injector.getInstance(RailML2BDataImportDialog.class);
+		railMLDialog.setPath(selected);
+		railMLDialog.showAndWait();
 	}
 
 	private JsonType chooseType() {

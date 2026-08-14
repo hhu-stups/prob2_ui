@@ -204,7 +204,15 @@ public final class FileChooserManager {
 	public FileChooser.ExtensionFilter getSimBFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.simulation", SimulationFileHandler.SIMULATION_FILE_EXTENSION);
 	}
-	
+
+	public FileChooser.ExtensionFilter getRailMLFilter(boolean allowXml) {
+		if (allowXml) {
+			return this.getExtensionFilter("common.fileChooser.fileTypes.railml", "railml", "railmlx", "xml");
+		} else {
+			return this.getExtensionFilter("common.fileChooser.fileTypes.railml", "railml", "railmlx");
+		}
+	}
+
 	public FileChooser.ExtensionFilter getPlainTextFilter() {
 		return this.getExtensionFilter("common.fileChooser.fileTypes.text", "txt");
 	}
@@ -320,7 +328,7 @@ public final class FileChooserManager {
 	 * @param machines whether machines should be selectable
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
-	private Path showOpenProjectOrMachineChooser(final Window window, final boolean projects, final boolean machines, final boolean traces, final boolean visualisations) {
+	private Path showOpenProjectOrMachineChooser(final Window window, final boolean projects, final boolean machines, final boolean traces, final boolean visualisations, final boolean railml) {
 		final FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("common.fileChooser.open.title"));
 		
@@ -338,9 +346,13 @@ public final class FileChooserManager {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + TraceFileHandler.TRACE_FILE_EXTENSION);
 			fileChooser.getExtensionFilters().addAll(this.getProB2TraceFilter());
 		}
-		if(visualisations) {
+		if (visualisations) {
 			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + "json");
 			fileChooser.getExtensionFilters().addAll(this.getExtensionFilter("common.fileChooser.fileTypes.simOrVisB", "json"));
+		}
+		if (railml) {
+			allExtensionPatterns.add(EXTENSION_PATTERN_PREFIX + "railml");
+			fileChooser.getExtensionFilters().addAll(this.getRailMLFilter(false));
 		}
 
 		// This extension filter is created manually instead of with getExtensionFilter,
@@ -356,7 +368,7 @@ public final class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenProjectChooser(final Window window) {
-		return showOpenProjectOrMachineChooser(window, true, false, false, false);
+		return showOpenProjectOrMachineChooser(window, true, false, false, false, false);
 	}
 	
 	/**
@@ -366,7 +378,7 @@ public final class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenMachineChooser(final Window window) {
-		return showOpenProjectOrMachineChooser(window, false, true, false, false);
+		return showOpenProjectOrMachineChooser(window, false, true, false, false, false);
 	}
 	
 	/**
@@ -376,11 +388,11 @@ public final class FileChooserManager {
 	 * @return the selected {@link Path}, or {@code null} if none was selected
 	 */
 	public Path showOpenProjectOrMachineChooser(final Window window) {
-		return showOpenProjectOrMachineChooser(window, true, true, false, false);
+		return showOpenProjectOrMachineChooser(window, true, true, false, false, false);
 	}
 
 	public Path showOpenAnyFileChooser(final Window window){
-		return showOpenProjectOrMachineChooser(window, true, true, true, true);
+		return showOpenProjectOrMachineChooser(window, true, true, true, true, true);
 	}
 	
 	/**

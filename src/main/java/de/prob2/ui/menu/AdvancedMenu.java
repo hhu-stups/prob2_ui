@@ -9,6 +9,7 @@ import de.prob2.ui.animation.tracereplay.refactoring.RefactorSetupView;
 import de.prob2.ui.consoles.groovy.GroovyConsoleStage;
 import de.prob2.ui.dataimport.CSVDataImportDialog;
 import de.prob2.ui.dataimport.JSONDataImportDialog;
+import de.prob2.ui.dataimport.RailML2BDataImportDialog;
 import de.prob2.ui.dataimport.XML2BDataImportDialog;
 import de.prob2.ui.dataimport.XMLDataImportDialog;
 import de.prob2.ui.internal.FXMLInjected;
@@ -154,6 +155,13 @@ public final class AdvancedMenu extends Menu {
 	@FXML
 	private void showCSVImport() {
 		injector.getInstance(CSVDataImportDialog.class).showAndWait();
+	}
+
+	@FXML
+	private void showRailMLImport() {
+		RailML2BDataImportDialog dialog = injector.getInstance(RailML2BDataImportDialog.class);
+		dialog.show();
+		dialog.toFront();
 	}
 
 	@FXML
