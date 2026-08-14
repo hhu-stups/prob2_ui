@@ -5,6 +5,11 @@ Downloads of the current release and snapshot development builds can be found on
 ## Version 1.4.0 (not released yet)
 
 * Updated the ProB core to version 1.16.0 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
+* Integrated the _certified_ ProB railML import interface (railML2B) - see the [ProB Wiki](https://prob.hhu.de/w/index.php?title=RailML) for further details
+  * Translation of railML 3 to the formal B language
+  * Formal semantic validation of the railML data
+  * Visualisation of the topology using Graphviz (for validation)
+  * Animation and simulation can be used for validation and verification of the dynamic interlocking behaviour
 * Added support for ProB's new sequent prover mode:
   * Enabled to load `.probpo` files to use the animator for interactive proving of Event-B proof obligations
   * Added export of proof traces as standalone HTML, BPR for replay in Rodin, and proof tree visualisation
