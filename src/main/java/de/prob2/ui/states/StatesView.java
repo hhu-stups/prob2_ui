@@ -47,6 +47,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -84,6 +85,8 @@ public final class StatesView extends BorderPane {
 	private HelpButton helpButton;
 	@FXML
 	private ToggleButton showExpandedFormulasButton;
+	@FXML
+	private Label placeholder;
 
 	@FXML
 	private TreeTableView<StateItem> tv;
@@ -669,7 +672,10 @@ public final class StatesView extends BorderPane {
 
 	private void updateRoot(final Trace from, final Trace to, final String filter) {
 		if (to == null) {
-			Platform.runLater(() -> this.tv.setRoot(createRootItem()));
+			Platform.runLater(() -> {
+				this.tv.setRoot(createRootItem());
+				this.placeholder.setText(i18n.translate("common.noModelLoaded"));
+			});
 			this.expandedFormulas.clear();
 			this.formulaStructureCache.clear();
 			this.structureFullyExpanded = false;
@@ -692,7 +698,7 @@ public final class StatesView extends BorderPane {
 				cacheMissingFormulaValues(this.visibleFormulas, to.getPreviousState());
 			}
 		}
-		// After the visible formulas have been evaluted,
+		// After the visible formulas have been evaluated,
 		// clear the collection and let createRootItem recalculate the currently visible formulas.
 		this.visibleFormulas.clear();
 
@@ -728,8 +734,8 @@ public final class StatesView extends BorderPane {
 			this.tv.getSelectionModel().select(selectedRow);
 			persistSorting = true;
 
-			// Reseting the root triggers the default sorting order.
-			// When resting the sorting order to default, the table has to be refilled by triggering this method.
+			// Resetting the root triggers the default sorting order.
+			// When resetting the sorting order to default, the table has to be refilled by triggering this method.
 			// That is why the additional flag persistSorting was introduced.
 
 			for (TreeTableColumn<StateItem, ?> column : tv.getColumns()) {
@@ -739,6 +745,10 @@ public final class StatesView extends BorderPane {
 					tv.getSortOrder().add(column);
 				}
 			}
+
+			// Always set the placeholder to noResult when a model has been loaded.
+			// The placeholder is only visible if there are no matching results.
+			this.placeholder.setText(i18n.translate("states.statesView.search.noResult", filter));
 		});
 	}
 

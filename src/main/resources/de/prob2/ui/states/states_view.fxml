@@ -47,7 +47,7 @@
 				<TreeTableColumn fx:id="tvPreviousValue" id="previousValue" editable="false" minWidth="80.0" prefWidth="160" sortable="true" text="%states.statesView.columns.previousValue" />
 			</columns>
 			<placeholder>
-				<Label text="%common.noModelLoaded"/>
+				<Label fx:id="placeholder" text="%common.noModelLoaded"/>
 			</placeholder>
 		</TreeTableView>
 	</center>
