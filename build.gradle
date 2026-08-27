@@ -91,7 +91,7 @@ dependencies {
 	implementation(platform("de.hhu.stups:prob-java-bom:4.16.1"))
 	implementation("de.hhu.stups:de.prob2.kernel")
 	implementation("de.hhu.stups:voparser:0.3.0")
-	implementation("de.hhu.stups:xml2b:1.1.0")
+	implementation("de.hhu.stups:xml2b:1.2.0")
 	implementation("de.hhu.stups:railml2b:1.0.0-SNAPSHOT")
 	implementation("io.github.java-diff-utils:java-diff-utils:4.17")
 	implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
