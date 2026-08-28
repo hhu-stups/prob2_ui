@@ -92,7 +92,7 @@ dependencies {
 	implementation("de.hhu.stups:de.prob2.kernel")
 	implementation("de.hhu.stups:voparser:0.3.0")
 	implementation("de.hhu.stups:xml2b:1.2.0")
-	implementation("de.hhu.stups:railml2b:1.0.0-SNAPSHOT")
+	implementation("de.hhu.stups:railml2b:1.0.0")
 	implementation("io.github.java-diff-utils:java-diff-utils:4.17")
 	implementation("jakarta.annotation:jakarta.annotation-api:3.0.0")
 	implementation("org.apache.commons:commons-csv:1.14.1")
