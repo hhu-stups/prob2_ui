@@ -13,13 +13,29 @@ Downloads of the current release and snapshot development builds can be found on
 * Added support for ProB's new sequent prover mode:
   * Enabled to load `.probpo` files to use the animator for interactive proving of Event-B proof obligations
   * Added export of proof traces as standalone HTML, BPR for replay in Rodin, and proof tree visualisation
+* Added trace statistics view
 * Added search for VisB visualisations
 * Added support for CSP||B mode via CSP_GUIDE_FILE definition
+* Added "prettify" option to B console
+* Improved SimB
+  * Added support for triggering multiple actions in a direct activation
+  * Added `errorWhenNotExecuted` option in activations
+  * Added `probability` option in activation calls
+  * Added estimation type "Final Value"
+  * Added automatic loading of simulation from `SIMB_JSON_FILE` definition in model
+  * Fixed various small bugs
 * Improved inspection of proof obligations for Rodin projects
   * Added stage showing the proof sequent and type information
   * Added export of Rodin proof obligations as Prolog facts for use with the ProB Disprover and ProB Sequent Prover (`.probpo` files)
+* Fixed incorrect "No model loaded" message in state view when a search returns no results
+* Fixed removing of a trace from a project when the trace file no longer exists
+* Fixed rule validation blocking the UI thread
+* Fixed the documentation generator not outputting the code of the machine
 * Fixed the `--help` option returning an unsuccessful exit code.
+* Removed VisB HTML export from documentation generator due to reliability issues
 * Removed the multi-platform shadow jar build due to being not properly supported by JavaFX and incompatible with multiple processor architectures. Please use the platform-specific binaries instead, which are available for most OSes and architectures supported by ProB. On systems that cannot use these binaries, ProB2-UI must now be built from source.
+
+**Note:** Support for plugins and custom Java-based visualizations will be removed in a future release. All known existing ProB2-UI plugins have already been incompatible with recent ProB2-UI versions, because of the lack of a stable plugin API. Users who need advanced customization of ProB2-UI are encouraged to fork the ProB2-UI source code instead - this offers better stability than developing a plugin. ProB2-UI's built-in VisB and SimB features can also be used to implement moderately complex visualizations and automatic animation without needing to modify/extend the ProB2-UI code.
 
 ## Version 1.3.1 (2026-01-22)
 
