@@ -69,6 +69,7 @@ The following section briefly shows an example for the B model "button".
 This example shows you how VisB is used. For bigger examples checkout the next section.
 
 ==== Machine File
+
 ----
 MACHINE button
 VARIABLES
@@ -83,11 +84,13 @@ OPERATIONS
   END
 END
 ----
+
 As you can see, the B model does not need to include any kind of information about the visualisation, that means you can use one visualisation for similar B models, if you want to.
 
 ==== VisB File
 The following VisB file shows an example for a visualisation of the button B model.
 This model is a simple boolean value, that gets set to TRUE after using the "press_button" operation.
+
 ----
 {
   "svg": "button.svg",
