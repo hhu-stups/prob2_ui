@@ -42,10 +42,8 @@ However, even though this is the most simple approach and can be used for every 
 This is why I recommend the next approach for simple visualisations.
 
 === Using an SVG Image Editor
-In this approach, you can use the SVG image editor of your choice.
-There are a lot of free online graphic editors that can create SVG images, e.g. https://vectr.com/[Vectr].
-However, for this example I will use https://inkscape.org/[Inkscape].
-Another option is https://www.adobe.com/de/products/illustrator.html[Adobe Illustrator].
+In this approach, you can use the SVG image editor of your choice - there are many options, both free and paid.
+For this example, I will use https://inkscape.org/[Inkscape].
 
 Now to create an SVG image, you need to have the specifications of your B model in mind.
 How you create the image for the visualisation is up to you.
