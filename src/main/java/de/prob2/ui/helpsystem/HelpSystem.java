@@ -102,10 +102,12 @@ public final class HelpSystem extends StackPane {
 			if (newVal == Worker.State.SUCCEEDED) {
 				String url = webEngine.getLocation();
 				if (url.contains("http://") || url.contains("https://")) {
+					// Open external links in the system browser instead of in the help viewer.
 					webView.getEngine().getHistory().go(-1);
 					hostServices.showDocument(url);
+				} else {
+					findMatchingTreeViewEntryToSelect(url);
 				}
-				findMatchingTreeViewEntryToSelect(url);
 			}
 		});
 
