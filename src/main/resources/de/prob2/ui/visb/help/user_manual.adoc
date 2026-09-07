@@ -1,18 +1,11 @@
 = VisB User Manual
 
-VisB is a visualisation plugin for ProB2-UI. It enables formal method experts
+VisB is a visualisation mechanism for ProB2-UI. It enables formal method experts
 and domain experts to better communicate with each other by creating visualisations for their B models.
-In this user manual, you will find all of the information you need to start visualising your B models.
 
-== What is VisB?
-
-VisB is a plugin based on Java, JavaFX, and JavaScript.
-The intention of this plugin is to simplify the way of creating visualisations for B models
-and to be more maintainable than its predecessors.
-
-There have been visualisation tools for ProB in the past, e.g. the ANIMATION_FUNCTION<<lesabelu08>>, BMotionWeb<<la16>>,
-and the visualisation mechanism<<he18>>. However, these tools have their disadvantages.
-That is why VisB was implemented.
+VisB improves upon previous visualisation tools based on ProB:
+it is more powerful than the https://prob.hhu.de/w/index.php/Graphical_Visualization[ANIMATION_FUNCTION] feature
+and has a lower barrier to entry than https://prob.hhu.de/w/index.php/BMotionWeb[BMotionWeb] (now discontinued).
 
 VisB is designed to work with two input files, one containing the path to the other one.
 These input files are the VisB file, in http://www.json.org/[JSON] format, and an  https://developer.mozilla.org/en-US/docs/Web/SVG[SVG] image.
@@ -147,12 +140,3 @@ How the visualisation looks like in VisB can be seen in the following two screen
 image:images/button1.png[title="Before press_button"]
 
 image:images/button2.png[title="After press_button"]
-
-== References
-- [[la16]] Lukas Ladenberger. “Rapid Creation of Interactive Formal Prototypes for Validating
-Safety-Critical Systems”. PhD thesis. 2016.
-- [[he18]] Christoph Heinzen. “A user-interface Plugin for the Rule Validation Language
-in ProB”. MA thesis. 2018.
-- [[lesabelu08]] Michael Leuschel et al. “Easy Graphical Animation and Formula Viewing for
-Teaching B”. In: The B Method: from Research to Teaching (2008). Ed. by C.
-Attiogbé and H. Habrias, pp. 17–32.
