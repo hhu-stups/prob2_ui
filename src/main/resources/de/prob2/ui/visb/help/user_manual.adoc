@@ -17,7 +17,7 @@ That is why VisB was implemented.
 VisB is designed to work with two input files, one containing the path to the other one.
 These input files are the VisB file, in http://www.json.org/[JSON] format, and an  https://developer.mozilla.org/en-US/docs/Web/SVG[SVG] image.
 In this manual, you will find three examples on how to create an SVG image.
-Additionally, I will explain how to build the VisB files for those images.
+Additionally, we will explain how to build the VisB files for those images.
 All of the following examples can be found in the https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples[visb-visualisation-examples repository].
 
 == How to Create an SVG Image?
@@ -39,11 +39,11 @@ The image created with this code looks like this:
 image:images/button.png[title="button"].
 
 However, even though this is the most simple approach and can be used for every visualisation, it is very time consuming.
-This is why I recommend the next approach for simple visualisations.
+This is why we recommend the next approach for simple visualisations.
 
 === Using an SVG Image Editor
 In this approach, you can use the SVG image editor of your choice - there are many options, both free and paid.
-For this example, I will use https://inkscape.org/[Inkscape].
+For this example, we will use https://inkscape.org/[Inkscape].
 
 Now to create an SVG image, you need to have the specifications of your B model in mind.
 How you create the image for the visualisation is up to you.
@@ -54,7 +54,7 @@ After selecting that, you can set the ID by typing it in the panel "ID", which y
 image:images/inkscapeID.jpg[title="Inkscape"]
 
 After setting the IDs the image is ready to be used for visualisation.
-But first, I will show you the third option on how to create SVG images.
+But first, we will show you the third option on how to create SVG images.
 
 === Using High-Level Programming Languages to Generate the SVG Image
 This is a somewhat more difficult approach than the other two.
@@ -65,11 +65,11 @@ Start by using a small number of elements and try to find reoccuring pattern to 
 A code example on the creation of a chessboard with grouped elements and nestes SVG images can be found in https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples/N-Queens[the N-Queens example in visb-visualisation-examples].
 
 == How to Create a VisB File?
-For this, you can either write the VisB file in an text editor, like I did for Examples 1 and 2 of the SVG images,
-or you can generate this file in a high-level programming language, as well.
+For this, you can either write the VisB file in an text editor
+or generate it in a high-level programming language.
 Moreover, there will be more possibilities on how to create a VisB file in the future.
 
-If you use a text editor, I would suggest you use one that has the possibility to validate JSON format and that spaces your code correctly.
+If you use a text editor, we recommend using one that supports automatic formatting and syntax validation for JSON.
 
 === Button Example
 The following section briefly shows an example for the B model "button".
