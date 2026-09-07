@@ -27,7 +27,7 @@ The following code sniplet shows you how an SVG image like that would look like:
 
 The image created with this code looks like this:
 
-![button](images/button.png).
+![button](../../screenshots/Main%20View/VisB/button.png).
 
 However, even though this is the most simple approach and can be used for every visualisation, it is very time consuming.
 This is why we recommend the next approach for simple visualisations.
@@ -42,7 +42,7 @@ After the image is created, you have to set IDs for all the different SVG elemen
 In the following screenshot, you can see, that for setting the IDs you have to right-click on the element and select "Object Properties..." in the mouse menu.
 After selecting that, you can set the ID by typing it in the panel "ID", which you can see in the top right corner of the screenshot.
 
-![Inkscape](images/inkscapeID.jpg)
+![Inkscape](../../screenshots/Main%20View/VisB/inkscapeID.jpg)
 
 After setting the IDs the image is ready to be used for visualisation.
 But first, we will show you the third option on how to create SVG images.
@@ -131,13 +131,13 @@ you can simply start the visualisation by clicking the button "Load VisB File".
 Note, however, that you have to load a machine first.
 In the following screenshot, you can see the VisB-UI with nothing loaded, yet.
 
-![VisB on ProB2-UI](images/uiDev3.png)
+![VisB on ProB2-UI](../../screenshots/Main%20View/VisB/uiDev3.png)
 
 After you selected a VisB file, VisB does everything automatically.
 You can use ProB2-UI as usual and additionally use VisB to execute operations
 and see the visualisation of your current B model.
 How the visualisation looks like in VisB can be seen in the following two screenshots:
 
-![Before press_button](images/button1.png)
+![Before press_button](../../screenshots/Main%20View/VisB/button1.png)
 
-![After press_button](images/button2.png)
+![After press_button](../../screenshots/Main%20View/VisB/button2.png)

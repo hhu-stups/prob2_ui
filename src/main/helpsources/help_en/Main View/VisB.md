@@ -1,5 +1,5 @@
 VisB provides an interactive Visualisation of the current machine. To use VisB, two files are needed, the VisB-file in .json-format and a svg-file.
-You can find further information on how to create those files in the user manual.
+You can find further information on how to create those files in the [VisB user manual](VisB%20User%20Manual.md).
 
 As soon as the machine is open an initialised, the VisB-window shows a graphic visualisation of the machine, which can be animated by clicking on the visualisation itself.
 Possible operations and transitions are additionally shown the operations- and history-view.

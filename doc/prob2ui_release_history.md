@@ -27,6 +27,7 @@ Downloads of the current release and snapshot development builds can be found on
 * Improved inspection of proof obligations for Rodin projects
   * Added stage showing the proof sequent and type information
   * Added export of Rodin proof obligations as Prolog facts for use with the ProB Disprover and ProB Sequent Prover (`.probpo` files)
+* Moved the VisB user manual into the help window (it was previously its own separate window).
 * Fixed incorrect "No model loaded" message in state view when a search returns no results
 * Fixed removing of a trace from a project when the trace file no longer exists
 * Fixed rule validation blocking the UI thread

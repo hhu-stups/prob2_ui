@@ -37,6 +37,7 @@ import de.prob.statespace.StateSpace;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.plantuml.PlantUmlLocator;
+import de.prob2.ui.helpsystem.HelpButton;
 import de.prob2.ui.helpsystem.HelpSystem;
 import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.DisablePropertyController;
@@ -48,7 +49,6 @@ import de.prob2.ui.internal.executor.FxThreadExecutor;
 import de.prob2.ui.menu.ExternalEditor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
-import de.prob2.ui.visb.help.UserManualStage;
 
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -228,6 +228,8 @@ public final class VisBView extends BorderPane {
 	@FXML
 	private Button zoomOutButton;
 	@FXML
+	private HelpButton helpButton;
+	@FXML
 	private Label lblActualVisualisationName;
 	@FXML
 	private VBox placeholder;
@@ -290,7 +292,8 @@ public final class VisBView extends BorderPane {
 	 * With this method a visible stage with an empty WebView and an empty ListView is initialised.
 	 */
 	@FXML
-	public void initialize(){
+	public void initialize() {
+		this.helpButton.setHelpContent("mainView.visB", null);
 		this.loadVisualisationButton.disableProperty().bind(currentProject.currentMachineProperty().isNull());
 		this.saveTraceButton.disableProperty().bind(visBController.absoluteVisBPathProperty().isNull());
 
@@ -455,11 +458,6 @@ public final class VisBView extends BorderPane {
 		helpSystem.openHelpForKeyAndAnchor("mainView.visB", null);
 		helpSystemStage.show();
 		helpSystemStage.toFront();
-	}
-
-	@FXML
-	private void openUserManual() {
-		injector.getInstance(UserManualStage.class).show();
 	}
 
 	private static Path getPathFromDefinitions(final StateSpace stateSpace) {

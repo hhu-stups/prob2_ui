@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import de.prob2.ui.helpsystem.HelpButton?>
 <?import de.prob2.ui.layout.BindableGlyph?>
 <?import de.prob2.ui.layout.FontSize?>
 <?import de.prob2.ui.sharedviews.Spacer?>
@@ -126,19 +127,7 @@
 						<Tooltip text="%visb.menu.view.zoom.out"/>
 					</tooltip>
 				</Button>
-				<MenuButton>
-					<graphic>
-						<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
-									   bindableFontSize="${fontSize.fontSize * 2}"/>
-					</graphic>
-					<tooltip>
-						<Tooltip text="%visb.menu.help"/>
-					</tooltip>
-					<items>
-						<MenuItem text="%visb.menu.help.helppages" onAction="#openHelpPage"/>
-						<MenuItem text="%visb.menu.help.user.manual" onAction="#openUserManual"/>
-					</items>
-				</MenuButton>
+				<HelpButton fx:id="helpButton"/>
 			</ToolBar>
 			<VisBSearchPane fx:id="visBSearchPane"/>
 		</VBox>
