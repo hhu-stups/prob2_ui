@@ -172,6 +172,71 @@
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
 </head>
 <body>
@@ -196,22 +261,23 @@ image. Additionally, we will explain how to build the VisB files for
 those images. All of the following examples can be found in the <a
 href="https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples">visb-visualisation-examples
 repository</a>.</p>
-<h1 id="_how_to_create_an_svg_image?">How to Create an SVG Image?</h1>
-<h2 id="_using_a_text_editor">Using a Text Editor</h2>
+<h2 id="how-to-create-an-svg-image">How to Create an SVG Image?</h2>
+<h3 id="using-a-text-editor">Using a Text Editor</h3>
 <p>Using an editor has the advantage, that everything you write in the
 SVG image file is up to you. You can create whatever you want to and
 make sure, that everything is set as intended. This will give you a lot
 of control over the output. The following code sniplet shows you how an
 SVG image like that would look like:</p>
-<pre><code>&lt;svg height=&quot;200&quot; width=&quot;200&quot;&gt;
-&lt;circle id=&quot;button&quot; cx=&quot;100&quot; cy=&quot;100&quot; r=&quot;80&quot; stroke=&quot;black&quot; stroke-width=&quot;3&quot; fill=&quot;green&quot; /&gt;
-&lt;/svg&gt;</code></pre>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode svg"><code class="sourceCode xml"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">svg</span> <span class="ot">height=</span><span class="st">&quot;200&quot;</span> <span class="ot">width=</span><span class="st">&quot;200&quot;</span>&gt;</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>&lt;<span class="kw">circle</span> <span class="ot">id=</span><span class="st">&quot;button&quot;</span> <span class="ot">cx=</span><span class="st">&quot;100&quot;</span> <span class="ot">cy=</span><span class="st">&quot;100&quot;</span> <span class="ot">r=</span><span class="st">&quot;80&quot;</span> <span class="ot">stroke=</span><span class="st">&quot;black&quot;</span> <span class="ot">stroke-width=</span><span class="st">&quot;3&quot;</span> <span class="ot">fill=</span><span class="st">&quot;green&quot;</span> /&gt;</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>&lt;/<span class="kw">svg</span>&gt;</span></code></pre></div>
 <p>The image created with this code looks like this:</p>
-<p><img src="images/button.png" title="button" />.</p>
+<p><img src="images/button.png" alt="button" />.</p>
 <p>However, even though this is the most simple approach and can be used
 for every visualisation, it is very time consuming. This is why we
 recommend the next approach for simple visualisations.</p>
-<h2 id="_using_an_svg_image_editor">Using an SVG Image Editor</h2>
+<h3 id="using-an-svg-image-editor">Using an SVG Image Editor</h3>
 <p>In this approach, you can use the SVG image editor of your choice -
 there are many options, both free and paid. For this example, we will
 use <a href="https://inkscape.org/">Inkscape</a>.</p>
@@ -220,16 +286,17 @@ your B model in mind. How you create the image for the visualisation is
 up to you. After the image is created, you have to set IDs for all the
 different SVG elements you want to use in your visualisation. In the
 following screenshot, you can see, that for setting the IDs you have to
-right-click on the element and select "Object Properties…" in the mouse
-menu. After selecting that, you can set the ID by typing it in the panel
-"ID", which you can see in the top right corner of the screenshot.</p>
-<p><img src="images/inkscapeID.jpg" title="Inkscape" /></p>
+right-click on the element and select "Object Properties..." in the
+mouse menu. After selecting that, you can set the ID by typing it in the
+panel "ID", which you can see in the top right corner of the
+screenshot.</p>
+<p><img src="images/inkscapeID.jpg" alt="Inkscape" /></p>
 <p>After setting the IDs the image is ready to be used for
 visualisation. But first, we will show you the third option on how to
 create SVG images.</p>
-<h2
-id="_using_high_level_programming_languages_to_generate_the_svg_image">Using
-High-Level Programming Languages to Generate the SVG Image</h2>
+<h3
+id="using-high-level-programming-languages-to-generate-the-svg-image">Using
+High-Level Programming Languages to Generate the SVG Image</h3>
 <p>This is a somewhat more difficult approach than the other two. This
 approach will be implemented in further work with VisB, though. Now, to
 do this, you will need a model that contains a lot of reoccurring
@@ -242,17 +309,17 @@ chessboard with grouped elements and nestes SVG images can be found in
 <a
 href="https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples/N-Queens">the
 N-Queens example in visb-visualisation-examples</a>.</p>
-<h1 id="_how_to_create_a_visb_file?">How to Create a VisB File?</h1>
+<h2 id="how-to-create-a-visb-file">How to Create a VisB File?</h2>
 <p>For this, you can either write the VisB file in an text editor or
 generate it in a high-level programming language. Moreover, there will
 be more possibilities on how to create a VisB file in the future.</p>
 <p>If you use a text editor, we recommend using one that supports
 automatic formatting and syntax validation for JSON.</p>
-<h2 id="_button_example">Button Example</h2>
+<h3 id="button-example">Button Example</h3>
 <p>The following section briefly shows an example for the B model
 "button". This example shows you how VisB is used. For bigger examples
 checkout the next section.</p>
-<h3 id="_machine_file">Machine File</h3>
+<h4 id="machine-file">Machine File</h4>
 <pre><code>MACHINE button
 VARIABLES
   button
@@ -268,61 +335,62 @@ END</code></pre>
 <p>As you can see, the B model does not need to include any kind of
 information about the visualisation, that means you can use one
 visualisation for similar B models, if you want to.</p>
-<h3 id="_visb_file">VisB File</h3>
+<h4 id="visb-file">VisB File</h4>
 <p>The following VisB file shows an example for a visualisation of the
 button B model. This model is a simple boolean value, that gets set to
 TRUE after using the "press_button" operation.</p>
-<pre><code>{
-  &quot;svg&quot;: &quot;button.svg&quot;,
-  &quot;items&quot;: [
-    {
-      &quot;id&quot;: &quot;button&quot;,
-      &quot;attr&quot;: &quot;fill&quot;,
-      &quot;value&quot;: &quot;IF button=TRUE THEN \&quot;green\&quot; ELSE \&quot;red\&quot; END&quot;
-    }
-  ],
-  &quot;events&quot;: [
-    {
-      &quot;id&quot;: &quot;button&quot;,
-      &quot;event&quot;: &quot;press_button&quot;
-    }
-  ]
-}</code></pre>
-<h3 id="_svg_image_file_path">SVG Image File Path</h3>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;svg&quot;</span><span class="fu">:</span> <span class="st">&quot;button.svg&quot;</span><span class="fu">,</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;button&quot;</span><span class="fu">,</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;attr&quot;</span><span class="fu">:</span> <span class="st">&quot;fill&quot;</span><span class="fu">,</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;value&quot;</span><span class="fu">:</span> <span class="st">&quot;IF button=TRUE THEN </span><span class="ch">\&quot;</span><span class="st">green</span><span class="ch">\&quot;</span><span class="st"> ELSE </span><span class="ch">\&quot;</span><span class="st">red</span><span class="ch">\&quot;</span><span class="st"> END&quot;</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;events&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;button&quot;</span><span class="fu">,</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;event&quot;</span><span class="fu">:</span> <span class="st">&quot;press_button&quot;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h4 id="svg-image-file-path">SVG Image File Path</h4>
 <p>It is important, that the SVG image is in the same folder as your
 VisB file or that you use an absolute path in the "svg" field of the
 JSON file.</p>
-<h3 id="_visb_items_and_events">VisB Items and Events</h3>
+<h4 id="visb-items-and-events">VisB Items and Events</h4>
 <p>As you can see, the items and the events of the VisB file are JSON
 lists which are filled with VisB Items and Events. The VisB Items are
 used to change SVG attributes of your SVG image via jQuery library
 calls. The VisB Elements can be used to create an interactive
 visualisation. You simply have to put an operation name for the "event"
 keyword of the VisB Event and it is executed by VisB.</p>
-<h2 id="_further_examples">Further Examples</h2>
+<h3 id="further-examples">Further Examples</h3>
 <p>More examples on finished visualisations for VisB can be found in the
 <a
 href="https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples">visb-visualisation-examples
 repository</a>.</p>
-<h1 id="_the_full_reference_on_svg_attributes">The Full Reference on SVG
-Attributes</h1>
+<h2 id="the-full-reference-on-svg-attributes">The Full Reference on SVG
+Attributes</h2>
 <p>You can find a full reference on SVG attributes and how they are used
 <a
 href="https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute">here</a>.
 Deprecated elements are not included in VisB, because it is highly
 probable that they will not be included in further SVG updates.</p>
-<h1 id="_running_a_visualisation">Running a Visualisation</h1>
+<h2 id="running-a-visualisation">Running a Visualisation</h2>
 <p>After you have created an SVG image and a VisB file, you can simply
 start the visualisation by clicking the button "Load VisB File". Note,
 however, that you have to load a machine first. In the following
 screenshot, you can see the VisB-UI with nothing loaded, yet.</p>
-<p><img src="images/uiDev3.png" title="VisB on ProB2-UI" /></p>
+<p><img src="images/uiDev3.png" alt="VisB on ProB2-UI" /></p>
 <p>After you selected a VisB file, VisB does everything automatically.
 You can use ProB2-UI as usual and additionally use VisB to execute
 operations and see the visualisation of your current B model. How the
 visualisation looks like in VisB can be seen in the following two
 screenshots:</p>
-<p><img src="images/button1.png" title="Before press_button" /></p>
-<p><img src="images/button2.png" title="After press_button" /></p>
+<p><img src="images/button1.png" alt="Before press_button" /></p>
+<p><img src="images/button2.png" alt="After press_button" /></p>
 </body>
 </html>
