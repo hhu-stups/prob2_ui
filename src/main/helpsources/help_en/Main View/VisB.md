@@ -1,4 +1,4 @@
-The VisB Plugin provides an interactive Visualisation of the current machine. To use this plugin, two files are needed, the VisB-file in .json-format and a svg-file.
+VisB provides an interactive Visualisation of the current machine. To use VisB, two files are needed, the VisB-file in .json-format and a svg-file.
 You can find further information on how to create those files in the user manual.
 
 As soon as the machine is open an initialised, the VisB-window shows a graphic visualisation of the machine, which can be animated by clicking on the visualisation itself.

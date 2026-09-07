@@ -1,4 +1,4 @@
-Das VisB PlugIn ermöglicht es, eine interaktive Visualisierung der aktuellen Maschine zu erstellen. Hierfür werden zwei Dateien,
+VisB ermöglicht es, eine interaktive Visualisierung der aktuellen Maschine zu erstellen. Hierfür werden zwei Dateien,
 nämlich die VisB-Datei im .json-Format, sowie eine svg-Datei benötigt. Nähere Informationen zu Erstellung dieser sind im VisB-Benutzerhandbuch zu finden.
 
 Sobald die Maschine geöffnet und initialisiert ist, wird im VisB-Fenster die grafische Visualisierung angezeigt. Diese kann durch Klicken auf die Grafik selbst animiert werden.
