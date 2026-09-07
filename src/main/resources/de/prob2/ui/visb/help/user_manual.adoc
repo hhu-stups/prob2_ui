@@ -18,7 +18,7 @@ VisB is designed to work with two input files, one containing the path to the ot
 These input files are the VisB file, in http://www.json.org/[JSON] format, and an  https://developer.mozilla.org/en-US/docs/Web/SVG[SVG] image.
 In this manual, you will find three examples on how to create an SVG image.
 Additionally, I will explain how to build the VisB files for those images.
-All of the follwing examples can be found https://github.com/miwer106/bachelors_thesis/tree/master/bachelors_thesis_examples/[here].
+All of the following examples can be found in the https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples[visb-visualisation-examples repository].
 
 == How to Create an SVG Image?
 
@@ -64,7 +64,7 @@ This approach will be implemented in further work with VisB, though.
 Now, to do this, you will need a model that contains a lot of reoccurring elements, e.g. a chessboard, and a good idea on how you want your visualisation to look like.
 If the visualisation is like a chessboard, you can build the image up in pieces.
 Start by using a small number of elements and try to find reoccuring pattern to use, when writing your code for generating the image.
-A code example on the creation of a chessboard with grouped elements and nestes SVG images can be found https://github.com/miwer106/bachelors_thesis/tree/master/bachelors_thesis_examples/N-Queens[here].
+A code example on the creation of a chessboard with grouped elements and nestes SVG images can be found in https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples/N-Queens[the N-Queens example in visb-visualisation-examples].
 
 == How to Create a VisB File?
 For this, you can either write the VisB file in an text editor, like I did for Examples 1 and 2 of the SVG images,
@@ -127,7 +127,7 @@ The VisB Elements can be used to create an interactive visualisation.
 You simply have to put an operation name for the "event" keyword of the VisB Event and it is executed by VisB.
 
 === Further Examples
-More examples on finished visualisations for VisB can be found https://github.com/miwer106/bachelors_thesis/tree/master/bachelors_thesis_examples/[here].
+More examples on finished visualisations for VisB can be found in the https://gitlab.cs.uni-duesseldorf.de/general/stups/visb-visualisation-examples[visb-visualisation-examples repository].
 
 == The Full Reference on SVG Attributes
 You can find a full reference on SVG attributes and how they are used https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute[here].
