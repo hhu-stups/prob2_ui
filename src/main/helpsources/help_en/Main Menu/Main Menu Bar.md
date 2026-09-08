@@ -37,7 +37,7 @@ Furthermore, the [history chart](Visualisations/History%20Chart.md) shows a char
 
 This submenu provides a Groovy and a ProB core console.
 
-The [SimB]-option provides automatic simulations for formal models.
+The [SimB](Advanced/SimB.md)-option provides automatic simulations for formal models.
 
 
 
