@@ -56,12 +56,12 @@ application {
 	applicationDefaultJvmArgs += opens.collect { "--add-opens=${it}=ALL-UNNAMED".toString() }
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
 	options.encoding = "UTF-8"
 	options.release = Integer.parseInt(java.sourceCompatibility.toString())
 }
 
-configurations.all {
+configurations.configureEach {
 	resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
 	resolutionStrategy.cacheDynamicVersionsFor(0, 'seconds')
 }
@@ -139,7 +139,7 @@ final helpSourceDir = file("src/main/helpsources")
 final helpSourceFiles = fileTree(dir: helpSourceDir, include: ["**/*.md"])
 final helpOutputDir = new File(generatedResourcesDir, "de/prob2/ui/helpsystem/helppages")
 final helpFilterLuaScript = "pandoc_links_to_html.lua"
-task createHelp {
+tasks.register("createHelp") {
 	inputs.file(helpFilterLuaScript)
 	inputs.files(helpSourceFiles)
 	outputs.dir(helpOutputDir)
@@ -226,7 +226,7 @@ shadowJar {
 
 if (project.hasProperty("probHome")) {
 	allprojects {
-		tasks.withType(JavaForkOptions) {
+		tasks.withType(JavaForkOptions).configureEach {
 			delegate.systemProperties["prob.home"] = project.probHome
 		}
 	}
@@ -234,7 +234,7 @@ if (project.hasProperty("probHome")) {
 
 // Assumes that the correct version of jpackage is on the PATH.
 // This task does not respect JAVA_HOME or other non-default JDK locations!
-task jpackage(type: Exec) {
+tasks.register("jpackage", Exec) {
 	dependsOn 'shadowJar'
 
 	// Show jpackage --verbose output only if running Gradle with --info (or higher)
