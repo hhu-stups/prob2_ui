@@ -44,7 +44,7 @@ Des Weiteren bietet das [Zeitdiagramm](Visualisierungen/Zeitdiagramm.md) eine Da
 ## <a name="Erweitert"> Erweitert</a>
 ![Weitere-Optionen-Menü](../../screenshots/Menu/Advanced.png)
 
-Dieses Untermenü stellt eine Groovy- sowie eine ProB-Kern-Konsole zur Verfügung und erlaubt es eigene Visualisierungen zu verwalten.
+Dieses Untermenü stellt eine Groovy- sowie eine ProB-Kern-Konsole zur Verfügung.
 
 Die [SimB](Erweitert/SimB.md)-Option stellt automatisierte Simulationen für formale Modellierung zur Verfügung.
 

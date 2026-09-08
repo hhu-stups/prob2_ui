@@ -18,7 +18,6 @@ import de.prob2.ui.output.PrologOutputStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulatorStage;
-import de.prob2.ui.visualisation.fx.VisualisationController;
 import de.prob2.ui.vomanager.VOManagerStage;
 
 import javafx.fxml.FXML;
@@ -27,9 +26,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @FXMLInjected
 @Singleton
@@ -43,25 +39,12 @@ public final class AdvancedMenu extends Menu {
 	@FXML
 	private Menu importDataFiles;
 
-	@FXML
-	private MenuItem openVisualisationItem;
-
-	@FXML
-	private MenuItem stopVisualisationItem;
-
-	@FXML
-	private MenuItem detachVisualisationItem;
-
 	private final StageManager stageManager;
-	private final VisualisationController visualisationController;
 	private final Injector injector;
-	private static final Logger LOGGER = LoggerFactory.getLogger(AdvancedMenu.class);
-
 
 	@Inject
 	public AdvancedMenu(
 		StageManager stageManager,
-		VisualisationController visualisationController,
 		CurrentProject currentProject,
 		CurrentTrace currentTrace,
 		Injector injector
@@ -69,13 +52,8 @@ public final class AdvancedMenu extends Menu {
 		this.stageManager = stageManager;
 		this.injector = injector;
 		stageManager.loadFXML(this, "advancedMenu.fxml");
-		this.visualisationController = visualisationController;
 		interactiveTraceItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.animatorBusyProperty()));
 		refactorTraceItem.disableProperty().bind(currentProject.currentMachineProperty().isNull().or(currentTrace.animatorBusyProperty()));
-		openVisualisationItem.disableProperty().bind(visualisationController.currentMachineProperty().isNull());
-		stopVisualisationItem.disableProperty().bind(visualisationController.visualisationProperty().isNull());
-		detachVisualisationItem.disableProperty()
-				.bind(visualisationController.visualisationProperty().isNull().or(visualisationController.detachProperty()));
 	}
 
 	@FXML
@@ -90,24 +68,6 @@ public final class AdvancedMenu extends Menu {
 		final Stage prologOutputStage = injector.getInstance(PrologOutputStage.class);
 		prologOutputStage.show();
 		prologOutputStage.toFront();
-	}
-
-	@FXML
-	private void stopVisualisation() {
-		LOGGER.debug("Stop menu-item called.");
-		visualisationController.stopVisualisation();
-	}
-
-	@FXML
-	private void openVisualisation() {
-		LOGGER.debug("Open menu-item called.");
-		visualisationController.openVisualisation();
-	}
-
-	@FXML
-	void detachVisualisation() {
-		LOGGER.debug("Detach menu-item called.");
-		visualisationController.detachVisualisation();
 	}
 
 	@FXML

@@ -36,8 +36,7 @@ Downloads of the current release and snapshot development builds can be found on
 * Removed VisB HTML export from documentation generator due to reliability issues
 * Removed the multi-platform shadow jar build due to being not properly supported by JavaFX and incompatible with multiple processor architectures. Please use the platform-specific binaries instead, which are available for most OSes and architectures supported by ProB. On systems that cannot use these binaries, ProB2-UI must now be built from source.
 * Removed the plugin mechanism. All known existing ProB2-UI plugins have already been incompatible with recent ProB2-UI versions, because of the lack of a stable plugin API. Users who need advanced customization of ProB2-UI are encouraged to fork the ProB2-UI source code instead - this offers better stability than developing a plugin. ProB2-UI's built-in VisB and SimB features can also be used to implement moderately complex visualizations and automatic animation without needing to modify/extend the ProB2-UI code.
-
-**Note:** Support for custom Java-based visualizations will be removed in a future release, for the same reasons as the plugin mechanism.
+* Removed support for custom Java-based visualizations. This mechanism has already been broken for multiple releases. VisB and SimB can instead be used to implement custom visualizations and automatic animation.
 
 ## Version 1.3.1 (2026-01-22)
 
