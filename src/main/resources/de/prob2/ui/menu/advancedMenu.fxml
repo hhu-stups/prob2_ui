@@ -21,9 +21,7 @@
 		<MenuItem fx:id="importRailMLData" text="railML 3" onAction="#showRailMLImport"/>
 	</Menu>
 	<SeparatorMenuItem />
-	<MenuItem text="%menu.advanced.items.pluginMenu" onAction="#showPluginMenu"/>
-	<SeparatorMenuItem />
-	<Menu text="%menu.advanced.items.useVisualisation" fx:id="visualisationFxMenu">
+	<Menu text="%menu.advanced.items.useVisualisation">
 		<MenuItem fx:id="openVisualisationItem" text="%menu.advanced.items.useVisualisation.select" onAction="#openVisualisation"/>
 		<MenuItem fx:id="stopVisualisationItem" text="%menu.advanced.items.useVisualisation.stop" onAction="#stopVisualisation"/>
 		<MenuItem fx:id="detachVisualisationItem" text="%menu.advanced.items.useVisualisation.detach" onAction="#detachVisualisation"/>

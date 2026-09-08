@@ -35,7 +35,7 @@ Furthermore, the [history chart](Visualisations/History%20Chart.md) shows a char
 ## <a name="Advanced"> Advanced</a>
 ![Advanced Menu](../../screenshots/Menu/Advanced.png)
 
-This submenu provides a Groovy and a ProB core console and allows you to manage your plugins and own visualisations.
+This submenu provides a Groovy and a ProB core console and allows you to manage your own visualisations.
 
 The [SimB]-option provides automatic simulations for formal models.
 

@@ -39,11 +39,4 @@ public final class DataPathsModule extends AbstractModule {
 	private static Path getConfigFilePath(final @ConfigDirectory Path configDirectory) {
 		return configDirectory.resolve(ConfigData.configFileNameForVersion(ConfigData.CURRENT_FORMAT_VERSION));
 	}
-	
-	@Provides
-	@Singleton
-	@DefaultPluginDirectory
-	private static Path getDefaultPluginsDirectoryPath(final AppDirs appDirs) {
-		return Paths.get(appDirs.getUserDataDir(APPDIRS_APP_NAME, null, APPDIRS_APP_AUTHOR), "plugins");
-	}
 }

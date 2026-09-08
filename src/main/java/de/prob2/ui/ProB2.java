@@ -30,7 +30,6 @@ import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
 import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.persistence.UIState;
-import de.prob2.ui.plugin.ProBPluginManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.MachineLoader;
 import de.prob2.ui.project.Project;
@@ -345,9 +344,6 @@ public final class ProB2 extends Application {
 		primaryStage.show();
 
 		this.openFilesFromCommandLine(stageManager, currentProject);
-
-		ProBPluginManager pluginManager = injector.getInstance(ProBPluginManager.class);
-		pluginManager.start();
 	}
 
 	private void updateTitle(final Stage stage) {

@@ -7,9 +7,9 @@
 <fx:root type="MenuBar" xmlns:fx="http://javafx.com/fxml"
 		 BorderPane.alignment="CENTER">
 	<FileMenu fx:id="fileMenu" />
-	<ViewMenu fx:id="viewMenu" />
-	<VisualisationMenu fx:id="visualisationMenu"/>
-	<AdvancedMenu fx:id="pluginMenu"/>
+	<ViewMenu/>
+	<VisualisationMenu/>
+	<AdvancedMenu/>
 	<WindowMenu fx:id="windowMenu"/>
 	<HelpMenu fx:id="helpMenu" />
 </fx:root>

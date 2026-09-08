@@ -80,6 +80,16 @@ public final class Config {
 
 				// Version 6 just adds the DATA_IMPORT option
 
+				// Version 7 removes the plugin mechanism.
+				if (oldVersion <= 6) {
+					oldObject.remove("pluginDirectory");
+					JsonNode fileChooserInitialDirectoriesNode = oldObject.get("fileChooserInitialDirectories");
+					if (fileChooserInitialDirectoriesNode != null && fileChooserInitialDirectoriesNode.isObject()) {
+						ObjectNode fileChooserInitialDirectories = (ObjectNode)fileChooserInitialDirectoriesNode;
+						fileChooserInitialDirectories.remove("PLUGINS");
+					}
+				}
+
 				return oldObject;
 			}
 		});

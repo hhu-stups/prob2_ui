@@ -15,7 +15,6 @@ import de.prob2.ui.dataimport.XMLDataImportDialog;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.output.PrologOutputStage;
-import de.prob2.ui.plugin.PluginMenuStage;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.simulation.SimulatorStage;
@@ -91,13 +90,6 @@ public final class AdvancedMenu extends Menu {
 		final Stage prologOutputStage = injector.getInstance(PrologOutputStage.class);
 		prologOutputStage.show();
 		prologOutputStage.toFront();
-	}
-
-	@FXML
-	private void showPluginMenu() {
-		PluginMenuStage pluginMenuStage = injector.getInstance(PluginMenuStage.class);
-		pluginMenuStage.show();
-		pluginMenuStage.toFront();
 	}
 
 	@FXML
