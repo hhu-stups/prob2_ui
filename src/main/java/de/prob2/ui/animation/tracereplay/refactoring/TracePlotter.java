@@ -1,4 +1,4 @@
-package de.prob2.ui.visualisation.traceDifference;
+package de.prob2.ui.animation.tracereplay.refactoring;
 
 import de.prob.check.tracereplay.PersistentTransition;
 import de.prob.check.tracereplay.check.refinement.TraceConnector;

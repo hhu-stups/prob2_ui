@@ -38,7 +38,6 @@ import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.project.machines.Machine;
-import de.prob2.ui.visualisation.traceDifference.TracePlotter;
 
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
