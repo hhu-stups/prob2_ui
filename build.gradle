@@ -1,5 +1,7 @@
-import org.openjfx.gradle.JavaFXPlatform
 import java.nio.file.Files
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.openjfx.gradle.JavaFXPlatform
 
 plugins {
 	id "java"
@@ -13,7 +15,7 @@ project.group = "de.hhu.stups"
 project.version = "1.4.0-SNAPSHOT"
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
-test {
+tasks.named("test", Test) {
 	useJUnitPlatform()
 	systemProperty("logback.configurationFile", "de/prob/logging/production.xml")
 	testLogging {
@@ -167,13 +169,14 @@ tasks.register("createHelp") {
 		}
 	}
 }
-processResources.dependsOn(createHelp)
 
 final firstLineOfProcessOutput = {ExecOutput execOutput ->
 	return execOutput.standardOutput.asText.map {it.split('\n')[0]}
 }
 
-processResources {
+tasks.named("processResources", ProcessResources) {
+	dependsOn("createHelp")
+
 	inputs.property("version", project.version)
 	inputs.property("currentGitBranch", firstLineOfProcessOutput(providers.exec {
 		executable = "git"
@@ -193,7 +196,7 @@ processResources {
 	}
 }
 
-jar {
+tasks.named("jar", Jar) {
 	manifest {
 		attributes([
 			"Add-Exports": exports.join(" "),
@@ -208,7 +211,7 @@ final probBinariesByOs = [
 	(OperatingSystemFamily.LINUX): "linux64",
 ].collectEntries {k, v -> [(k): "de/prob/cli/binaries/probcli_${v}.zip".toString()]}
 
-shadowJar {
+tasks.named("shadowJar", ShadowJar) {
 	// Set the classifier depending on the current platform to make it clear that this jar is platform-specific.
 	if (javafx.platform == JavaFXPlatform.OSX) { // This is x86_64 macOS specifically! aarch64 macOS would be JavaFXPlatform.OSX_AARCH64.
 		// The JavaFX classifier for x86_64 Mac builds is simply "mac".
