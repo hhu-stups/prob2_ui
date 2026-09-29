@@ -12,7 +12,7 @@ plugins {
 }
 
 project.group = "de.hhu.stups"
-project.version = "1.4.0-SNAPSHOT"
+project.version = "1.4.0"
 final isSnapshot = project.version.endsWith("-SNAPSHOT")
 
 tasks.named("test", Test) {

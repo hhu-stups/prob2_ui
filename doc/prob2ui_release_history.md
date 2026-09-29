@@ -2,7 +2,7 @@
 
 Downloads of the current release and snapshot development builds can be found on [our main download page](https://prob.hhu.de/w/index.php?title=Download#ProB2-UI).
 
-## Version 1.4.0 (not released yet)
+## Version 1.4.0 (2026-09-29)
 
 * Updated the ProB core to version 1.16.1 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
 * Integrated the _certified_ ProB railML import interface (railML2B) - see the [ProB Wiki](https://prob.hhu.de/w/index.php?title=RailML) for further details

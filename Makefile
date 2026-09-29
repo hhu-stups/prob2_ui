@@ -29,7 +29,7 @@ clean:
 	rm out.prop
 
 # version of ProB2UI without optional SNAPSHOT suffixes:
-PROB2UI_VERSION=1.3.1
+PROB2UI_VERSION=1.4.0
 SNAPSH=
 # comment in next line for SNAPSHOT builds
 #SNAPSH=-SNAPSHOT
@@ -124,7 +124,7 @@ $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
 	/usr/bin/ditto -c -k --keepParent --sequesterRsrc "$(APPFILE)" $(ZIP_FILE)
 	#zip -vr $(ZIP_FILE) $(APPFILE)
 	
-NOTVERS = 1.3.2
+NOTVERS = 1.4.0
 notarize-info: $(ZIP_FILE)
 	@echo "JAR_TO_SIGN =  $(JAR_TO_SIGN)"
 	@echo "PROB2APP_CONTENTS =  $(PROB2APP_CONTENTS)"
