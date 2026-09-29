@@ -96,7 +96,10 @@ macos_sign: $(JAR_TO_SIGN)
 	$(CODESIGNRT2) "$(JAR_TO_SIGN)/com/sun/jna/darwin$(ARCHSUFFIX2)/libjnidispatch.jnilib"
 	make makejar
 	@echo "3c: Signing app binary $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)"
+	# The following is required
 	$(CODESIGNRT2) $(PROB2APP_CONTENTS)runtime/Contents/MacOS/libjli.dylib
+	# alternatively : remove folder https://mail.openjdk.org/pipermail/core-libs-dev/2020-February/064687.html
+	rm -rf $(PROB2APP_CONTENTS)runtime/Contents/MacOS/
 	$(CODESIGNRT2) $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
 makejar:
 	@echo "Step 3b: Repacking the JAR with signed components"
@@ -112,12 +115,12 @@ check:
 	@echo "Check signing of Java and JavaFX dylibs"
 	for file in $(libs); do codesign -vv --deep-verify $(JAR_TO_SIGN)/$$file ; done
 	codesign -vv --deep-verify $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
-	codesign -vv --deep-verify $(PROB2APP_CONTENTS)runtime/Contents/MacOS/libjli.dylib
+	#codesign -vv --deep-verify $(PROB2APP_CONTENTS)runtime/Contents/MacOS/libjli.dylib
 
 
 $(ZIP_FILE): $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
 	@echo "Step 5: Putting APP into a zipfile for Apple's notarization (into $(ZIP_FILE))"
-	# (ditto creates a reproducible, resource‑preserving archive)
+	#/usr/bin/ditto -c -k --keepParent "$(APPFILE)" $(ZIP_FILE)
 	/usr/bin/ditto -c -k --keepParent --sequesterRsrc "$(APPFILE)" $(ZIP_FILE)
 	#zip -vr $(ZIP_FILE) $(APPFILE)
 	
@@ -140,7 +143,7 @@ notarize-app: $(ZIP_FILE)
 	echo "In case of errors run:"
 	echo " xcrun notarytool log --keychain-profile \"notarytool\"  HASH"
 
-HASH=72edc8c1-873a-4521-a668-7099ceb46e53
+HASH=4f47f112-3ec6-4dba-8c9a-e936316defa9
 info:
 	@echo "Step 6b: Obtaining information about a particular notarization request"
 	xcrun notarytool log --keychain-profile "notarytool"  $(HASH)
