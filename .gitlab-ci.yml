@@ -62,22 +62,28 @@ test:jdk-21-windows64:
   tags:
     - windows
 
-deploy:snapshot:
+deploy:
   stage: deploy
-  only:
-    - develop@stups/prob/prob2_ui
+  rules:
+    - if: $CI_PROJECT_PATH == "stups/prob/prob2_ui" && ($CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_TAG =~ /v.+/)
   image: alpine:3
+  variables:
+    GIT_STRATEGY: none
+    lftp_setup: "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/"
+    mput_patterns: "build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe"
   before_script:
     - apk update
     - apk add lftp openssh-client
-  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/snapshot/; mput -e build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe"
-
-deploy:release:
-  stage: deploy
-  only:
-    - master@stups/prob/prob2_ui
-  image: alpine:3
-  before_script:
-    - apk update
-    - apk add lftp openssh-client
-  script: LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "set cmd:fail-exit true; set sftp:auto-confirm true; open --user ${DEPLOY_USERNAME} --env-password sftp://${DEPLOY_HOST}/${DEPLOY_REMOTE_BASEDIR}/downloads/prob2/; mkdir release-next; cd release-next; mput build/distributions/*.deb build/distributions/*.dmg build/distributions/*.exe"
+  script:
+    - |
+      if [ -z "${CI_COMMIT_TAG-}" ]
+      then
+        # If it's not a tag, upload to the snapshot folder.
+        LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "$lftp_setup; mput -e -O snapshot $mput_patterns"
+      else
+        # If it's a tag, upload to a new folder named after the version number
+        # (which is the tag name with the leading "v" removed).
+        # Then clear out the snapshot directory
+        # to remove all old snapshots with the previous version number.
+        LFTP_PASSWORD="${DEPLOY_PASSWORD}" lftp -c "$lftp_setup; mkdir release_temp; mput -e -O release_temp $mput_patterns; mv release_temp ${CI_COMMIT_TAG##v}; rm -r snapshot; mkdir snapshot"
+      fi
