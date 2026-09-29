@@ -40,6 +40,19 @@ Downloads of the current release and snapshot development builds can be found on
 * Removed the plugin mechanism. All known existing ProB2-UI plugins have already been incompatible with recent ProB2-UI versions, because of the lack of a stable plugin API. Users who need advanced customization of ProB2-UI are encouraged to fork the ProB2-UI source code instead - this offers better stability than developing a plugin. ProB2-UI's built-in VisB and SimB features can also be used to implement moderately complex visualizations and automatic animation without needing to modify/extend the ProB2-UI code.
 * Removed support for custom Java-based visualizations. This mechanism has already been broken for multiple releases. VisB and SimB can instead be used to implement custom visualizations and automatic animation.
 
+### Downloads for version 1.4.0
+
+* [Windows installer (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/ProB2-UI-1.4.0.exe)
+* [macOS arm64 (Apple Silicon) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/ProB2-UI-aarch64-1.4.0.dmg)
+* [macOS x86_64 (Intel) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/ProB2-UI-x86_64-1.4.0.dmg)
+* [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/prob2-ui_1.4.0_amd64.deb)
+
+Supported operating systems:
+
+* Windows 10 or later on x86\_64
+* macOS 12 or later on x86\_64 or arm64
+* Linux with glibc 2.28 or later on x86\_64
+
 ## Version 1.3.1 (2026-01-22)
 
 * Updated the ProB core to version 1.15.1 - see the [ProB Release History](https://prob.hhu.de/w/index.php/ProB_Release_History)
