@@ -27,6 +27,7 @@ build:
 	@echo "If successful do make notarize-app"
 clean:
 	rm out.prop
+# TODO: remove build/libs/*.jar
 
 # version of ProB2UI without optional SNAPSHOT suffixes:
 PROB2UI_VERSION=1.4.0
@@ -81,7 +82,7 @@ $(JAR_TO_SIGN): $(APPFILE)
 	@echo " Unpacking to $(JAR_TO_SIGN)"
 	unzip $(PROB2APP_CONTENTS)app/prob2-ui-$(VERSION)$(SNAPSH)-mac$(ARCHSUFFIX).jar -d $(JAR_TO_SIGN)
 
-libs=libjavafx_iio.dylib libjfxmedia_avf.dylib libglib-lite.dylib libglib-lite.dylib libfxplugins.dylib libglass.dylib libjavafx_font.dylib libgstreamer-lite.dylib libjfxwebkit.dylib libprism_common.dylib libprism_es2.dylib libdecora_sse.dylib libjfxmedia.dylib libprism_sw.dylib
+libs=libjavafx_iio.dylib libjfxmedia_avf.dylib libglib-lite.dylib libglib-lite.dylib libfxplugins.dylib libglass.dylib libjavafx_font.dylib libgstreamer-lite.dylib libjfxwebkit.dylib libprism_common.dylib libprism_es2.dylib libdecora_sse.dylib libjfxmedia.dylib libprism_sw.dylib    
 
 RTIME2 = --options runtime --entitlements probcli.entitlements
 CODESIGNRT2 = codesign --timestamp -f $(RTIME2) -s $(ADC_CERTIFICATE_NAME)
@@ -94,10 +95,18 @@ macos_sign: $(JAR_TO_SIGN)
 	$(CODESIGNRT2) "$(JAR_TO_SIGN)/com/sun/jna/darwin$(ARCHSUFFIX)/libjnidispatch.jnilib"
 	# for some reason there is also a x86 jnilib there which needs to be signed:
 	$(CODESIGNRT2) "$(JAR_TO_SIGN)/com/sun/jna/darwin$(ARCHSUFFIX2)/libjnidispatch.jnilib"
+	# railML needs these:
+	$(CODESIGNRT2) "$(JAR_TO_SIGN)/org/jline/nativ/Mac/x86/libjlinenative.jnilib"
+	$(CODESIGNRT2) "$(JAR_TO_SIGN)/org/jline/nativ/Mac/x86_64/libjlinenative.jnilib"
+	$(CODESIGNRT2) "$(JAR_TO_SIGN)/org/jline/nativ/Mac/arm64/libjlinenative.jnilib"
 	make makejar
 	@echo "3c: Signing app binary $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)"
+	# The following no longer exists
+	#$(CODESIGNRT2) $(PROB2APP_CONTENTS)runtime/Contents/MacOS/libjli.dylib
 	# The following is required
-	$(CODESIGNRT2) $(PROB2APP_CONTENTS)runtime/Contents/MacOS/libjli.dylib
+	$(CODESIGNRT2) $(PROB2APP_CONTENTS)/runtime/Contents/Home/lib/*.dylib
+	$(CODESIGNRT2) $(PROB2APP_CONTENTS)/runtime/Contents/Home/lib/server/*.dylib
+	$(CODESIGNRT2) $(PROB2APP_CONTENTS)/runtime/Contents/Home/lib/jspawnhelper
 	# alternatively : remove folder https://mail.openjdk.org/pipermail/core-libs-dev/2020-February/064687.html
 	rm -rf $(PROB2APP_CONTENTS)runtime/Contents/MacOS/
 	$(CODESIGNRT2) $(PROB2APP_CONTENTS)MacOS/$(APPRPOB2)
