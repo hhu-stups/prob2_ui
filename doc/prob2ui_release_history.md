@@ -44,6 +44,7 @@ Downloads of the current release and snapshot development builds can be found on
 ### Downloads for version 1.4.0
 
 * [Windows installer (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/ProB2-UI-1.4.0.exe)
+* [macOS arm64 (Apple Silicon) application (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/ProB2-UI-aarch64-1.4.0-notarized.zip)
 * [macOS arm64 (Apple Silicon) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/ProB2-UI-aarch64-1.4.0.dmg)
 * [macOS x86_64 (Intel) application (with bundled JRE, not signed or notarized)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/ProB2-UI-x86_64-1.4.0.dmg)
 * [Linux deb package (with bundled JRE)](https://stups.hhu-hosting.de/downloads/prob2/1.4.0/prob2-ui_1.4.0_amd64.deb)
