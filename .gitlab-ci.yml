@@ -29,9 +29,9 @@ stages:
     # otherwise texlive-latex-recommended would be enough.
     - apt-get install --assume-yes git pandoc texlive-latex-extra texlive-lang-german
 
-test:jdk-21-linux:
+test:jdk-25-linux:
   extends: .test-linux
-  image: eclipse-temurin:21-jammy
+  image: eclipse-temurin:25-jammy
   before_script:
     - *default_before_script_linux
     # build-essential and fakeroot are needed for jpackage.
@@ -39,7 +39,7 @@ test:jdk-21-linux:
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
 
-test:jdk-21-macos-x86_64:
+test:jdk-25-macos-x86_64:
   extends: .test-common
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
@@ -47,7 +47,7 @@ test:jdk-21-macos-x86_64:
     - macos
     - x86_64
 
-test:jdk-21-macos-arm64:
+test:jdk-25-macos-arm64:
   extends: .test-common
   script:
     - ./gradlew ${GRADLE_OPTIONS} check jpackage
@@ -55,7 +55,7 @@ test:jdk-21-macos-arm64:
     - macos
     - arm64
 
-test:jdk-21-windows64:
+test:jdk-25-windows64:
   extends: .test-common
   script:
     - cmd /c ".\gradlew.bat %GRADLE_OPTIONS% check jpackage"
