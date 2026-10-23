@@ -289,7 +289,7 @@ public class RailML2BDataImportOptions extends VBox {
 				visualisationDialog.initializeForArguments(importArguments, railML2B.getMachineLoader().getCurrentTrace());
 				visualisationDialog.showAndWait();
 				if (importArguments.saveGeneratedDataMachine() || importArguments.generateAnimationMachine() || importArguments.generateValidationMachine()) {
-					visualisationDialog.setOnHidden(event -> {
+					visualisationDialog.setOnHiding(event -> {
 						createMachinesAndProject();
 						if (controller != null) controller.close();
 					});
@@ -499,13 +499,13 @@ public class RailML2BDataImportOptions extends VBox {
 		if (controller != null) {
 			controller.btImportAndOpen.disableProperty().unbind();
 			controller.btImportAndOpen.disableProperty().bind(
-					translatedMachineCheckbox.selectedProperty()
-							.or(dataMachineCheckbox.selectedProperty()
-									.or(animationMachineCheckbox.selectedProperty())
-									.or(validationMachineCheckbox.selectedProperty())
-									.or(visualisationCheckbox.selectedProperty())
-									.or(generationRunning))
-							.not());
+						translatedMachineCheckbox.selectedProperty()
+						.or(dataMachineCheckbox.selectedProperty()
+						.or(animationMachineCheckbox.selectedProperty())
+						.or(validationMachineCheckbox.selectedProperty())
+						.or(visualisationCheckbox.selectedProperty())
+						.or(generationRunning))
+					.not());
 			controller.btImportAndOpen.setText(i18n.translate("railml.stage.generateAndFinish"));
 			BindableGlyph saveIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.SAVE);
 			saveIcon.getStyleClass().add("icon-dark");
