@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.configuration;
 
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Objects;
@@ -10,7 +9,6 @@ import de.prob2.ui.simulation.SimulatorUtils;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonGetter;
-import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;

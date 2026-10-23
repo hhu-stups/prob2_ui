@@ -1,9 +1,6 @@
 package de.prob2.ui.simulation.configuration;
 
-import java.lang.RuntimeException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -13,7 +10,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.JsonMappingException;
 
 public class ActivationCallDeserializer extends JsonDeserializer<ActivationCall> {
 

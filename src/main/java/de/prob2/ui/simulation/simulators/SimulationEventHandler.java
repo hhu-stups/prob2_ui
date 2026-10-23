@@ -8,7 +8,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import de.prob.formula.PredicateBuilder;
 import de.prob.statespace.State;

@@ -1,6 +1,5 @@
 package de.prob2.ui.simulation.configuration;
 
-import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import java.util.Locale;
