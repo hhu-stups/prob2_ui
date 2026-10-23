@@ -38,8 +38,6 @@ import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.dynamic.plantuml.PlantUmlLocator;
 import de.prob2.ui.helpsystem.HelpButton;
-import de.prob2.ui.helpsystem.HelpSystem;
-import de.prob2.ui.helpsystem.HelpSystemStage;
 import de.prob2.ui.internal.DisablePropertyController;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
@@ -449,15 +447,6 @@ public final class VisBView extends BorderPane {
 				() -> searchButton.isSelected(), e -> visBSearchPane.find(false)));
 		Nodes.addInputMap(this, InputMap.consumeWhen(EventPattern.keyPressed(KeyCode.G, KeyCombination.SHIFT_DOWN, KeyCombination.SHORTCUT_DOWN),
 				() -> searchButton.isSelected(), e -> visBSearchPane.find(true)));
-	}
-
-	@FXML
-	private void openHelpPage() {
-		final HelpSystemStage helpSystemStage = injector.getInstance(HelpSystemStage.class);
-		final HelpSystem helpSystem = injector.getInstance(HelpSystem.class);
-		helpSystem.openHelpForKeyAndAnchor("mainView.visB", null);
-		helpSystemStage.show();
-		helpSystemStage.toFront();
 	}
 
 	private static Path getPathFromDefinitions(final StateSpace stateSpace) {
