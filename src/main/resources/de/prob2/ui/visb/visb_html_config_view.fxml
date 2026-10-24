@@ -29,14 +29,14 @@
 					</VBox>
 					<Separator/>
 					<HBox>
-						<Button fx:id="btCreateExport" text="%visb.menu.file.export.html.customConfiguration.dialog.buttonCreate"/>
-						<HBox alignment="CENTER" HBox.hgrow="ALWAYS">
+						<HBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
 							<Label fx:id="modeLabel" style="-fx-text-fill: lightgray;">
 								<padding>
 									<Insets left="10" right="10"/>
 								</padding>
 							</Label>
 						</HBox>
+						<Button fx:id="btCreateExport" text="%visb.menu.file.export.html.customConfiguration.dialog.buttonCreate"/>
 					</HBox>
 				</VBox>
 			</AnchorPane>
