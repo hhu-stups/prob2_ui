@@ -6,6 +6,7 @@ import de.prob.animator.command.ExportStateAsMachineCommand;
 import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -53,14 +54,17 @@ public final class ExportStateAsMachineStage extends Stage {
 	private final CurrentTrace currentTrace;
 	private final FileChooserManager fileChooserManager;
 	private final StageManager stageManager;
+	private final CliTaskExecutor cliExecutor;
 
 	@Inject
 	public ExportStateAsMachineStage(CurrentProject currentProject, CurrentTrace currentTrace,
-	                                 FileChooserManager fileChooserManagerFileMenu, StageManager stageManager) {
+	                                 FileChooserManager fileChooserManagerFileMenu, StageManager stageManager,
+	                                 CliTaskExecutor cliExecutor) {
 		super();
 		this.currentProject = currentProject;
 		this.currentTrace = currentTrace;
 		this.fileChooserManager = fileChooserManagerFileMenu;
+		this.cliExecutor = cliExecutor;
 		this.stageManager = stageManager;
 		stageManager.loadFXML(this, "export_state_as_machine_stage.fxml");
 	}
@@ -116,7 +120,7 @@ public final class ExportStateAsMachineStage extends Stage {
 			}
 		});
 		ExportStateAsMachineCommand cmd = new ExportStateAsMachineCommand(path.toFile(), currentId, selectedIdentifiers);
-		currentTrace.getStateSpace().execute(cmd);
+		cliExecutor.execute(() -> currentTrace.getStateSpace().execute(cmd));
 		this.close();
 	}
 }

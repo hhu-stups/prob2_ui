@@ -7,6 +7,7 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
+import de.prob2.ui.internal.executor.CliTaskExecutor;
 import de.prob2.ui.prob2fx.CurrentProject;
 import de.prob2.ui.prob2fx.CurrentTrace;
 import javafx.fxml.FXML;
@@ -28,14 +29,16 @@ public final class SequentProverView extends AnchorPane {
 	private final FileChooserManager fileChooserManager;
 	private final CurrentTrace currentTrace;
 	private final CurrentProject currentProject;
+	private final CliTaskExecutor cliExecutor;
 
 	@Inject
 	public SequentProverView(final StageManager stageManager, final I18n i18n, final FileChooserManager fileChooserManager,
-	                         final CurrentTrace currentTrace, final CurrentProject currentProject) {
+	                         final CurrentTrace currentTrace, final CurrentProject currentProject, final CliTaskExecutor cliExecutor) {
 		this.i18n = i18n;
 		this.fileChooserManager = fileChooserManager;
 		this.currentTrace = currentTrace;
 		this.currentProject = currentProject;
+		this.cliExecutor = cliExecutor;
 		this.stageManager = stageManager;
 		this.stageManager.loadFXML(this, "sequent_prover_view.fxml");
 	}
@@ -62,7 +65,7 @@ public final class SequentProverView extends AnchorPane {
 		Path path = this.fileChooserManager.showSaveFileChooser(fileChooser, FileChooserManager.Kind.VISUALISATIONS, stageManager.getCurrent());
 		if (path != null) {
 			ExportSequentProverProofCommand cmd = new ExportSequentProverProofCommand(path, currentTrace.get());
-			currentTrace.getStateSpace().execute(cmd);
+			cliExecutor.execute(() -> currentTrace.getStateSpace().execute(cmd));
 		}
 	}
 
