@@ -27,7 +27,6 @@ public class ValueCell extends TreeTableCell<Object, Object> {
 	@Override
 	protected void updateItem(Object item, boolean empty) {
 		super.updateItem(item, empty);
-		getTreeTableView().refresh();
 		if (getTableRow().getTreeItem() instanceof OperationItem opItem) {
 			executable = opItem.isExecutable();
 		}

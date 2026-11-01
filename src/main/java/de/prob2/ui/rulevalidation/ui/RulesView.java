@@ -29,6 +29,7 @@ import de.prob2.ui.prob2fx.CurrentTrace;
 import de.prob2.ui.rulevalidation.RulesController;
 import de.prob2.ui.rulevalidation.RulesDataModel;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.ListChangeListener;
@@ -132,6 +133,7 @@ public final class RulesView extends AnchorPane {
 	private Map<String, List<TreeItem<Object>>> classificationItems;
 	private List<TreeItem<Object>> computationItems;
 	private Set<String> currentTags;
+	private boolean refreshScheduled;
 
 	private final RulesDataModel dataModel;
 	private final StageManager stageManager;
@@ -437,9 +439,23 @@ public final class RulesView extends AnchorPane {
 		notCheckedLabel.textProperty().bind(dataModel.notCheckedRulesProperty());
 		successLabel.textProperty().bind(dataModel.successRulesProperty());
 
+		dataModel.getRuleValueMap().values().forEach(p -> p.addListener(o -> scheduleRefresh()));
+		dataModel.getComputationValueMap().values().forEach(p -> p.addListener(o -> scheduleRefresh()));
+
 		executeAllButton.setDisable(false);
 		treeTableView.sort();
 		treeTableView.refresh();
+	}
+
+	private void scheduleRefresh() {
+		if (refreshScheduled) {
+			return;
+		}
+		refreshScheduled = true;
+		Platform.runLater(() -> {
+			refreshScheduled = false;
+			treeTableView.refresh();
+		});
 	}
 
 	private TreeTableRow<Object> initTableRow() {
