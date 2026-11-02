@@ -133,6 +133,7 @@ public final class HistoryView extends BorderPane {
 	private final TraceFileHandler traceFileHandler;
 	private int lastSelectedIndex = -1;
 
+	private final BackgroundUpdater itemsLoader;
 	private final BackgroundUpdater descriptionLoader;
 	// avoid loading if descriptions for the entire trace after every step
 	private final Map<String, String> descriptionCache = new HashMap<>();
@@ -156,6 +157,8 @@ public final class HistoryView extends BorderPane {
 		this.traceFileHandler = traceFileHandler;
 		this.descriptionLoader = new BackgroundUpdater("HistoryView description loader");
 		stopActions.add(this.descriptionLoader::shutdownNow);
+		this.itemsLoader = new BackgroundUpdater("HistoryView items loader");
+		stopActions.add(this.itemsLoader::shutdownNow);
 		stageManager.loadFXML(this, "history_view.fxml");
 	}
 
@@ -199,17 +202,31 @@ public final class HistoryView extends BorderPane {
 
 		final ChangeListener<Trace> traceChangeListener = (observable, from, to) -> {
 			if (to != null) {
-				var newItems = HistoryItem.itemsForTrace(to);
-				var current = newItems.get(to.getCurrent().getIndex() + 1);
-				var currentIsLast = to.getCurrent().getIndex() + 1 == newItems.size() - 1;
-				this.loadMissingDescriptions(to.getStateSpace(), newItems);
-				historyTableView.getItems().setAll(newItems);
-				historyTableView.sort();
-				historyTableView.getSelectionModel().focus(lastSelectedIndex);
-				if (currentIsLast) {
-					historyTableView.scrollTo(current);
-				}
+				itemsLoader.execute(() -> {
+					final List<HistoryItem> newItems;
+					try {
+						newItems = HistoryItem.itemsForTrace(to);
+					} catch (RuntimeException e) {
+						LOGGER.warn("Failed to create history items", e);
+						return;
+					}
+					Platform.runLater(() -> {
+						if (currentTrace.get() != to) {
+							return;
+						}
+						var current = newItems.get(to.getCurrent().getIndex() + 1);
+						var currentIsLast = to.getCurrent().getIndex() + 1 == newItems.size() - 1;
+						this.loadMissingDescriptions(to.getStateSpace(), newItems);
+						historyTableView.getItems().setAll(newItems);
+						historyTableView.sort();
+						historyTableView.getSelectionModel().focus(lastSelectedIndex);
+						if (currentIsLast) {
+							historyTableView.scrollTo(current);
+						}
+					});
+				});
 			} else {
+				itemsLoader.cancel(false);
 				historyTableView.getItems().clear();
 			}
 		};

@@ -17,8 +17,11 @@ public final class HistoryItem {
 		this.operation = operation;
 		this.index = index;
 	}
-	
+
+	// This may communicate with probcli (to evaluate the transitions' parameters and return values)!
 	public static List<HistoryItem> itemsForTrace(final Trace trace) {
+		// TODO: evaluate all unknown transitions at once here? Can happen after RulesView executeAll.
+		// trace.getStateSpace().evaluateTransitions(trace.getTransitionList(), FormulaExpand.EXPAND);
 		// additional information is queried by OperationsDetailsStage when opened
 		final Map<Transition, OperationItem> operations = OperationItem.forTransitionsFast(trace.getStateSpace(), trace.getTransitionList());
 		final List<HistoryItem> items = new ArrayList<>();
