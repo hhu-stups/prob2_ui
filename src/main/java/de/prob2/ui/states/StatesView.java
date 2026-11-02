@@ -305,7 +305,8 @@ public final class StatesView extends BorderPane {
 			row.getStyleClass().remove("changed");
 			row.setTooltip(null);
 			if (to != null) {
-				final boolean previousStateInitialised = to.getPreviousState() != null && to.getPreviousState().isInitialised();
+				final State previousState = to.getPreviousState();
+				final boolean previousStateInitialised = previousState != null && previousState.isExplored() && previousState.isInitialised();
 				if (!to.getCurrentValue().equals(to.getPreviousValue()) && previousStateInitialised) {
 					row.getStyleClass().add("changed");
 				}
@@ -697,6 +698,9 @@ public final class StatesView extends BorderPane {
 			if (to.canGoBack()) {
 				cacheMissingFormulaValues(this.visibleFormulas, to.getPreviousState());
 			}
+		}
+		if (to.canGoBack()) {
+			to.getPreviousState().exploreIfNeeded();
 		}
 		// After the visible formulas have been evaluated,
 		// clear the collection and let createRootItem recalculate the currently visible formulas.
