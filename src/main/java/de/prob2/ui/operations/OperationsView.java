@@ -326,7 +326,11 @@ public final class OperationsView extends BorderPane {
 		showOperationDescriptions.addListener((o, from, to) -> {
 			opDescriptionsMenuItem.setText(to ? i18n.translate("operations.operationsView.menu.hideDescriptions") : i18n.translate("operations.operationsView.menu.showDescriptions"));
 			opDescriptionsIcon.setIcon(to ? FontAwesome.Glyph.EYE_SLASH : FontAwesome.Glyph.EYE);
-			opsListView.refresh();
+			if (to) { // The descriptions may not have been loaded yet - reload the operations in the background, including descriptions.
+				this.update(currentTrace.get());
+			} else {
+				opsListView.refresh();
+			}
 		});
 
 		sortMode.addListener((o, from, to) -> {
@@ -427,6 +431,9 @@ public final class OperationsView extends BorderPane {
 		events.addAll(OperationItem.computeUnambiguousConstantsAndVariables(
 			OperationItem.forTransitions(trace.getStateSpace(), operations).values()
 		));
+		if (this.showOperationDescriptions.get()) {
+			OperationItem.loadDescriptions(trace.getStateSpace(), events);
+		}
 
 		LoadedMachine loadedMachine = trace.getStateSpace().getLoadedMachine();
 		Set<String> disabled = loadedMachine.getOperationNames().stream()

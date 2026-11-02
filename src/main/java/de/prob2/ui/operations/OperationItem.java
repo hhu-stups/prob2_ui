@@ -16,6 +16,7 @@ import java.util.stream.Stream;
 
 import com.google.common.base.MoreObjects;
 
+import de.prob.animator.command.ComposedCommand;
 import de.prob.animator.command.GetOperationDescriptionCommand;
 import de.prob.animator.command.GetTransitionInfosCommand;
 import de.prob.animator.domainobjects.AbstractEvalResult;
@@ -32,7 +33,12 @@ import de.prob.statespace.State;
 import de.prob.statespace.StateSpace;
 import de.prob.statespace.Transition;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class OperationItem {
+	private static final Logger LOGGER = LoggerFactory.getLogger(OperationItem.class);
+
 	public enum Status {
 		DISABLED, ENABLED, TIMEOUT, MAX_OPERATIONS
 	}
@@ -91,7 +97,7 @@ public class OperationItem {
 	
 	private final Transition transition;
 	private final String name;
-	private String description;
+	private volatile String description;
 	private Map<String,List<PrologTerm>> transitionInfos;
 	private final OperationItem.Status status;
 	private final List<String> parameterNames;
@@ -289,6 +295,13 @@ public class OperationItem {
 		return Transition.prettifyName(this.getName());
 	}
 
+	/**
+	 * Get this operation's description, loading it from probcli if necessary. Do not call this on the UI thread!
+	 * Use {@link #getDescriptionIfLoaded()} there instead
+	 * and load the descriptions in the background using {@link #loadDescriptions(StateSpace, Collection)}.
+	 * 
+	 * @return this operation's description, or an empty string if it has none
+	 */
 	public String getDescription() {
 		// request description only if required
 		if (description == null) {
@@ -301,6 +314,55 @@ public class OperationItem {
 			}
 		}
 		return description;
+	}
+
+	public boolean isDescriptionLoaded() {
+		return this.transition == null || this.description != null;
+	}
+
+	/**
+	 * Get this operation's description if it has already been loaded, without communicating with probcli.
+	 *
+	 * @return this operation's description, or an empty string if it has none, or it hasn't been loaded yet
+	 */
+	public String getDescriptionIfLoaded() {
+		final String desc = this.description;
+		return desc == null ? "" : desc;
+	}
+
+	/**
+	 * Load the descriptions of all given operations that haven't been loaded yet.
+	 * This communicates with probcli, so do not call this on the UI thread!
+	 * 
+	 * @param stateSpace the state space that all the operations' transitions belong to
+	 * @param toLoad the operations whose descriptions should be loaded
+	 */
+	public static void loadDescriptions(final StateSpace stateSpace, final List<OperationItem> toLoad) {
+		toLoad.removeIf(item -> item == null || item.isDescriptionLoaded());
+		if (toLoad.isEmpty()) {
+			return;
+		}
+
+		final List<GetOperationDescriptionCommand> cmds = toLoad.stream()
+			.map(item -> new GetOperationDescriptionCommand(item.getTransition().getSource().getId(), item.getTransition().getId()))
+			.collect(Collectors.toList());
+		try {
+			stateSpace.execute(new ComposedCommand(cmds));
+		} catch (ProBError e) {
+			LOGGER.warn("Failed to load operation descriptions in one batch, loading them one by one", e);
+			for (final OperationItem item : toLoad) {
+				try {
+					item.getDescription();
+				} catch (ProBError e2) {
+					LOGGER.warn("Failed to load description of operation {}", item.getName(), e2);
+				}
+			}
+			return;
+		}
+		for (int i = 0; i < toLoad.size(); i++) {
+			final String desc = cmds.get(i).getDescription();
+			toLoad.get(i).description = desc == null ? "" : desc;
+		}
 	}
 
 	public Map<String,List<PrologTerm>> getTransitionInfos() {
@@ -370,7 +432,7 @@ public class OperationItem {
 	public String toString() {
 		return MoreObjects.toStringHelper(this).add("transition", this.getTransition())
 				.add("name", this.getName()).add("status", this.getStatus())
-				.add("description", this.getDescription())
+				.add("description", this.description)
 				.add("parameterNames", this.getParameterNames()).add("parameterValues", this.getParameterValues())
 				.add("returnParameterNames", this.getReturnParameterNames())
 				.add("returnParameterValues", this.getReturnParameterValues())
@@ -385,8 +447,11 @@ public class OperationItem {
 	}
 
 	public String toPrettyString(final boolean includeUnambiguous, final boolean showDescriptions) {
-		if (showDescriptions && !this.getDescription().isEmpty()) {
-			return this.getDescription();
+		// Never load the description here, because this is called on the UI thread.
+		// Descriptions have to be loaded beforehand using loadDescriptions.
+		final String desc = this.getDescriptionIfLoaded();
+		if (showDescriptions && !desc.isEmpty()) {
+			return desc;
 		}
 		StringBuilder sb = new StringBuilder(this.getPrettyName());
 
