@@ -112,17 +112,32 @@ public final class PredicateBuilderView extends VBox {
 		}
 		
 		final String[] predicates = predicate.split(" & ");
+		// Try to parse each part of the conjunction
+		// and stop at the first one that can't be mapped to an item in the table.
 		int firstNonAssignment = predicates.length;
 		for (int i = 0; i < predicates.length; i++) {
 			final String[] assignment = predicates[i].split("=");
 			final String lhs = assignment[0];
-			// Stop if this is not an assignment, the variable is unknown, or the variable already has a value.
-			if (assignment.length <= 1 || this.items.stream().anyMatch(item -> !item.getName().equals(lhs) || !item.getValue().isEmpty())) {
+			if (assignment.length <= 1) {
+				// This isn't an assignment.
 				firstNonAssignment = i;
 				break;
 			}
 			final String rhs = assignment[1];
-			items.stream().filter(item -> item.getName().equals(lhs)).toList().get(0).setValue(rhs);
+			
+			List<PredicateBuilderTableItem> matchingItems = items.stream().filter(item -> item.getName().equals(lhs)).toList();
+			if (matchingItems.isEmpty()) {
+				// There is no item with this name.
+				firstNonAssignment = i;
+				break;
+			}
+			PredicateBuilderTableItem matchingItem = matchingItems.getFirst();
+			if (!matchingItem.getValue().isEmpty()) {
+				// The item with this name already has a value.
+				firstNonAssignment = i;
+				break;
+			}
+			matchingItem.setValue(rhs);
 		}
 		table.refresh();
 		// Store all remaining parts of the conjunction in the predicate field.
