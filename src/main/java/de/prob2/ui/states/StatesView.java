@@ -9,7 +9,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import com.google.inject.Inject;
@@ -104,12 +106,15 @@ public final class StatesView extends BorderPane {
 	private final Config config;
 
 	private final BackgroundUpdater updater;
+	private final BackgroundUpdater valueLoader;
 	private final Set<BVisual2Formula> expandedFormulas;
 	private final Set<BVisual2Formula> visibleFormulas;
 	private final Map<BVisual2Formula, ExpandedFormula> formulaStructureCache;
 	private boolean structureFullyExpanded;
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCache;
 	private final Map<State, Map<BVisual2Formula, BVisual2Value>> formulaValueCacheUnlimited;
+	private final Map<State, Set<BVisual2Formula>> missingFormulaValues;
+	private boolean valueLoadScheduled;
 	private final StateItem.FormulaEvaluator cachingEvaluator;
 	private final BooleanProperty fullValuePrettify;
 	private final BooleanProperty fullValueShowFullValue;
@@ -127,13 +132,16 @@ public final class StatesView extends BorderPane {
 
 		this.updater = new BackgroundUpdater("StatesView Updater");
 		stopActions.add(this.updater::shutdownNow);
+		this.valueLoader = new BackgroundUpdater("StatesView value loader");
+		stopActions.add(this.valueLoader::shutdownNow);
 		statusBar.addUpdatingExpression(this.updater.runningProperty());
 		this.expandedFormulas = new HashSet<>();
 		this.visibleFormulas = new HashSet<>();
-		this.formulaStructureCache = new HashMap<>();
+		this.formulaStructureCache = new ConcurrentHashMap<>();
 		this.structureFullyExpanded = false;
-		this.formulaValueCache = new HashMap<>();
-		this.formulaValueCacheUnlimited = new HashMap<>();
+		this.formulaValueCache = new ConcurrentHashMap<>();
+		this.formulaValueCacheUnlimited = new ConcurrentHashMap<>();
+		this.missingFormulaValues = new HashMap<>();
 		this.cachingEvaluator = new StateItem.FormulaEvaluator() {
 			@Override
 			public ExpandedFormula expand(final BVisual2Formula formula) {
@@ -307,7 +315,9 @@ public final class StatesView extends BorderPane {
 			if (to != null) {
 				final State previousState = to.getPreviousState();
 				final boolean previousStateInitialised = previousState != null && previousState.isExplored() && previousState.isInitialised();
-				if (!to.getCurrentValue().equals(to.getPreviousValue()) && previousStateInitialised) {
+				final BVisual2Value currentValue = to.getCurrentValue();
+				final BVisual2Value previousValue = to.getPreviousValue();
+				if (currentValue != null && previousValue != null && !Objects.equals(currentValue, previousValue) && previousStateInitialised) {
 					row.getStyleClass().add("changed");
 				}
 				row.setTooltip(this.buildItemTooltip(to));
@@ -411,10 +421,15 @@ public final class StatesView extends BorderPane {
 	}
 
 	private BVisual2Value evaluateFormulaWithCaching(final BVisual2Formula formula, final State state) {
-		Map<BVisual2Formula, BVisual2Value> cacheByState = this.formulaValueCache.computeIfAbsent(state, s -> new HashMap<>());
+		Map<BVisual2Formula, BVisual2Value> cacheByState = this.getFormulaValueCacheForState(state);
 		BVisual2Value value = cacheByState.get(formula);
 		if (value != null) {
 			return value;
+		}
+
+		if (Platform.isFxApplicationThread()) { // Never evaluate formulas on the UI thread
+			this.requestMissingFormulaValue(formula, state);
+			return null;
 		}
 
 		BVisual2Value newValue = formula.evaluate(state);
@@ -422,8 +437,30 @@ public final class StatesView extends BorderPane {
 		return newValue;
 	}
 
+	private void requestMissingFormulaValue(final BVisual2Formula formula, final State state) {
+		this.missingFormulaValues.computeIfAbsent(state, s -> new HashSet<>()).add(formula);
+		if (this.valueLoadScheduled) {
+			return;
+		}
+		this.valueLoadScheduled = true;
+		Platform.runLater(() -> {
+			this.valueLoadScheduled = false;
+			Map<State, Set<BVisual2Formula>> toLoad = new HashMap<>(this.missingFormulaValues);
+			this.missingFormulaValues.clear();
+			this.valueLoader.execute(() -> {
+				try {
+					toLoad.forEach((s, formulas) -> this.cacheMissingFormulaValues(formulas, s));
+				} catch (RuntimeException e) {
+					LOGGER.warn("Failed to load formula values for states view", e);
+					return;
+				}
+				Platform.runLater(this.tv::refresh);
+			});
+		});
+	}
+
 	private BVisual2Value evaluateFormulaUnlimitedWithCaching(final BVisual2Formula formula, final State state) {
-		Map<BVisual2Formula, BVisual2Value> cacheByState = this.formulaValueCacheUnlimited.computeIfAbsent(state, s -> new HashMap<>());
+		Map<BVisual2Formula, BVisual2Value> cacheByState = this.formulaValueCacheUnlimited.computeIfAbsent(state, s -> new ConcurrentHashMap<>());
 		BVisual2Value value = cacheByState.get(formula);
 		if (value != null) {
 			return value;
@@ -435,7 +472,7 @@ public final class StatesView extends BorderPane {
 	}
 
 	private Map<BVisual2Formula, BVisual2Value> getFormulaValueCacheForState(final State state) {
-		return this.formulaValueCache.computeIfAbsent(state, s -> new HashMap<>());
+		return this.formulaValueCache.computeIfAbsent(state, s -> new ConcurrentHashMap<>());
 	}
 
 	/**
@@ -546,9 +583,11 @@ public final class StatesView extends BorderPane {
 				if (to) {
 					// Pre-cache the structures and current and previous values of the newly visible formulas.
 					cacheMissingFormulaStructures(subformulas);
-					cacheMissingFormulaValues(subformulas, currentState);
-					if (previousState != null) {
-						cacheMissingFormulaValues(subformulas, previousState);
+					if (!Platform.isFxApplicationThread()) {
+						cacheMissingFormulaValues(subformulas, currentState);
+						if (previousState != null) {
+							cacheMissingFormulaValues(subformulas, previousState);
+						}
 					}
 					for (final TreeItem<StateItem> subTreeItem : children) {
 						addSubformulaItemsUnfiltered(subTreeItem, subTreeItem.getValue().getSubformulas(), currentState, previousState);

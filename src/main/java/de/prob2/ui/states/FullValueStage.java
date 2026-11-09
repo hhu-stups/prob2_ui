@@ -275,9 +275,9 @@ public final class FullValueStage extends Stage {
 	}
 
 	private String valueToString(final BVisual2Value value) {
-		Objects.requireNonNull(value, "value");
-
-		if (value instanceof BVisual2Value.PredicateValue) {
+		if (value == null) {
+			return "";
+		} else if (value instanceof BVisual2Value.PredicateValue) {
 			return String.valueOf(((BVisual2Value.PredicateValue) value).getValue());
 		} else if (value instanceof BVisual2Value.ExpressionValue) {
 			return ((BVisual2Value.ExpressionValue) value).getValue();

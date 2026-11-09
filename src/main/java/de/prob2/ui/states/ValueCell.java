@@ -21,10 +21,13 @@ final class ValueCell extends TreeTableCell<StateItem, BVisual2Value> {
 	protected void updateItem(final BVisual2Value item, final boolean empty) {
 		super.updateItem(item, empty);
 		
-		this.getStyleClass().removeAll("false", "true", "not-initialized", "error");
+		this.getStyleClass().removeAll("false", "true", "not-initialized", "error", "loading");
 		
-		if (item == null || empty) {
+		if (empty) {
 			this.setText(null);
+		} else if (item == null) {
+			this.setText(i18n.translate("common.loading"));
+			this.getStyleClass().add("loading");
 		} else {
 			checkResult(item);
 		}

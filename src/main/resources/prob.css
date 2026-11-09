@@ -1194,6 +1194,11 @@
 	-fx-text-fill: -prob-grey-75;
 }
 
+.tree-table-cell.loading {
+	-fx-text-fill: -prob-grey-75;
+	-fx-font-style: italic;
+}
+
 .tree-table-cell.error {
 	-fx-font-weight: bold;
 	-fx-text-fill: -prob-orange;
