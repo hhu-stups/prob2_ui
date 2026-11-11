@@ -26,9 +26,12 @@ import de.prob2.ui.project.Project;
 import de.prob2.ui.project.machines.Machine;
 import de.prob2.ui.simulation.model.SimulationModel;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ChangeListener;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -117,7 +120,7 @@ public class RailML2BDataImportOptions extends VBox {
 	private final ImportArguments importArguments;
 	private Path outputPath;
 	private String modelName;
-	private List<File> extensionSchemas = List.of();
+	private final ObservableList<File> extensionSchemas = FXCollections.observableArrayList();
 	private final BooleanProperty invalidFile = new SimpleBooleanProperty(false);
 	private final BooleanProperty importSuccess = new SimpleBooleanProperty(false);
 	private final BooleanProperty generationRunning = new SimpleBooleanProperty(false);
@@ -245,7 +248,7 @@ public class RailML2BDataImportOptions extends VBox {
 		}
 		List<File> files = fileChooser.showOpenMultipleDialog(stageManager.getCurrent());
 		if (files != null) {
-			extensionSchemas = List.copyOf(files);
+			extensionSchemas.setAll(files);
 			extensionSchemasField.setText(files.stream().map(File::getName).collect(Collectors.joining(", ")));
 		}
 	}
@@ -546,7 +549,8 @@ public class RailML2BDataImportOptions extends VBox {
 			controller.btImportAndOpen.disableProperty().bind(
 					updater.runningProperty()
 							.or(invalidFile)
-							.or(importSuccess));
+							.or(importSuccess)
+							.or(extensionSchemasCheckbox.selectedProperty().and(Bindings.isEmpty(extensionSchemas))));
 			controller.btImportAndOpen.setText(i18n.translate("railml.stage.button.import"));
 			controller.btImportAndOpen.setGraphic(null);
 
