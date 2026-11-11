@@ -501,16 +501,14 @@ public class RailML2BDataImportOptions extends VBox {
 
 	@FXML
 	void resetUI() {
-		Platform.runLater(() -> {
-			invalidFile.set(false);
-			importSuccess.set(false);
-			clearProgressWithMessage("");
-			animationMachineCheckbox.setSelected(false);
-			validationMachineCheckbox.setSelected(false);
-			validationInfoMessage.setText("");
-			generationRunning.set(false);
-			setupButtonForLoading();
-		});
+		invalidFile.set(false);
+		importSuccess.set(false);
+		clearProgressWithMessage("");
+		animationMachineCheckbox.setSelected(false);
+		validationMachineCheckbox.setSelected(false);
+		validationInfoMessage.setText("");
+		generationRunning.set(false);
+		setupButtonForLoading();
 	}
 
 	private void setupButtonForLoading() {
@@ -518,7 +516,7 @@ public class RailML2BDataImportOptions extends VBox {
 			controller.btImportAndOpen.disableProperty().unbind();
 			controller.btImportAndOpen.disableProperty().bind(
 					updater.runningProperty()
-							.or(invalidFile) // FIXME does not work
+							.or(invalidFile)
 							.or(importSuccess));
 			controller.btImportAndOpen.setText(i18n.translate("railml.stage.button.import"));
 			controller.btImportAndOpen.setGraphic(null);
