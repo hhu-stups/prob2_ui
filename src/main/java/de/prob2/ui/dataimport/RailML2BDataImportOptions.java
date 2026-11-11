@@ -57,13 +57,16 @@ public class RailML2BDataImportOptions extends VBox {
 
 		private final ProgressBar progressBar;
 		private final Label operation, progressLabel, progressDescription;
-		private final int max;
+		private volatile int max;
 
-		public UIProgressListener(ProgressBar progressBar, Label operation, Label progressLabel, Label progressDescription, int max) {
+		public UIProgressListener(ProgressBar progressBar, Label operation, Label progressLabel, Label progressDescription) {
 			this.progressBar = progressBar;
 			this.operation = operation;
 			this.progressLabel = progressLabel;
 			this.progressDescription = progressDescription;
+		}
+
+		public void setMax(int max) {
 			this.max = max;
 		}
 
@@ -260,6 +263,8 @@ public class RailML2BDataImportOptions extends VBox {
 			try {
 				resetRailML2B(); // e.g. after a failed import
 				railML2B = new RailML2B(importArguments, injector.getInstance(Api.class));
+				UIProgressListener progressListener = new UIProgressListener(progressBar, progressOperation, progressLabel, progressDescription);
+				railML2B.setCustomProgressListener(progressListener);
 				railML2B.load();
 				if (importArguments.onlyTranslation()) {
 					Platform.runLater(this::createMachinesAndProject);
@@ -269,13 +274,7 @@ public class RailML2BDataImportOptions extends VBox {
 				if (Thread.currentThread().isInterrupted()) {
 					return;
 				}
-				railML2B.setCustomProgressListener(
-						new UIProgressListener(progressBar,
-								progressOperation,
-								progressLabel,
-								progressDescription,
-								railML2B.getMachineLoader().getNumberOfOperations())
-				);
+				progressListener.setMax(railML2B.getMachineLoader().getNumberOfOperations());
 
 				if (Thread.currentThread().isInterrupted()) {
 					return;
