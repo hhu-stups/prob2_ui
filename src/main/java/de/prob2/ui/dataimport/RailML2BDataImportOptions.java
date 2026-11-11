@@ -8,11 +8,11 @@ import de.be4.classicalb.core.parser.exceptions.BCompoundException;
 import de.be4.classicalb.core.parser.exceptions.BException;
 import de.hhu.stups.railml2b.RailML2B;
 import de.hhu.stups.railml2b.exceptions.RailML2BException;
-import de.hhu.stups.railml2b.exceptions.RailML2BVisualisationException;
 import de.hhu.stups.railml2b.internal.ProgressListener;
 import de.hhu.stups.railml2b.load.ImportArguments;
 import de.hhu.stups.railml2b.output.MachinePrinter;
 import de.prob.animator.domainobjects.DotOutputFormat;
+import de.prob.exception.CliError;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResults;
 import de.prob.scripting.Api;
@@ -257,6 +257,7 @@ public class RailML2BDataImportOptions extends VBox {
 		updateArguments();
 		updater.execute(() -> {
 			try {
+				resetRailML2B(); // e.g. after a failed import
 				railML2B = new RailML2B(importArguments, injector.getInstance(Api.class));
 				railML2B.load();
 				if (importArguments.onlyTranslation()) {
@@ -264,6 +265,9 @@ public class RailML2BDataImportOptions extends VBox {
 					return;
 				}
 
+				if (Thread.currentThread().isInterrupted()) {
+					return;
+				}
 				railML2B.setCustomProgressListener(
 						new UIProgressListener(progressBar,
 								progressOperation,
@@ -275,7 +279,16 @@ public class RailML2BDataImportOptions extends VBox {
 				if (Thread.currentThread().isInterrupted()) {
 					return;
 				}
-				RuleResults results = railML2B.loadAndValidate();
+				RuleResults results;
+				try {
+					results = railML2B.loadAndValidate();
+				} catch (CliError e) {
+					if (Thread.currentThread().isInterrupted()) {
+						// state space has been killed during the import - don't report that to the user
+						return;
+					}
+					throw e;
+				}
 				RuleResults.ResultSummary summary = results.getSummary();
 
 				Platform.runLater(() -> {
@@ -377,7 +390,9 @@ public class RailML2BDataImportOptions extends VBox {
 						}
 					} catch (RailML2BException e) {
 						Platform.runLater(() -> showError(e, "error.errorTable.type.INTERNAL_ERROR"));
-					}
+					} /*finally {
+						Platform.runLater(this::resetUI); // TODO: the import is finished: we could free its ProB instance
+					} */
 				});
 			}
 			if (controller != null)
@@ -439,7 +454,6 @@ public class RailML2BDataImportOptions extends VBox {
 			if (updater.isRunning()) {
 				if (confirmAbortImport()) {
 					updater.cancel(true);
-					if (railML2B != null) railML2B.finish();
 				} else {
 					this.toFront();
 					return;
@@ -447,6 +461,7 @@ public class RailML2BDataImportOptions extends VBox {
 			}
 			if (controller != null)
 				controller.close();
+			resetUI();
 		});
 	}
 
@@ -501,6 +516,7 @@ public class RailML2BDataImportOptions extends VBox {
 
 	@FXML
 	void resetUI() {
+		resetRailML2B();
 		invalidFile.set(false);
 		importSuccess.set(false);
 		clearProgressWithMessage("");
@@ -509,6 +525,13 @@ public class RailML2BDataImportOptions extends VBox {
 		validationInfoMessage.setText("");
 		generationRunning.set(false);
 		setupButtonForLoading();
+	}
+
+	private void resetRailML2B() {
+		if (railML2B != null) {
+			railML2B.finish();
+			railML2B = null;
+		}
 	}
 
 	private void setupButtonForLoading() {
