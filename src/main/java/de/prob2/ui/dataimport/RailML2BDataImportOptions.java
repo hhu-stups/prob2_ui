@@ -229,7 +229,8 @@ public class RailML2BDataImportOptions extends VBox {
 		updateArguments();
 		updater.execute(() -> {
 			try {
-				railML2B = injector.getInstance(RailML2B.class);
+				railML2B = new RailML2B(importArguments);
+				railML2B.load();
 				if (importArguments.onlyTranslation()) {
 					Platform.runLater(this::createMachinesAndProject);
 					return;
@@ -272,8 +273,10 @@ public class RailML2BDataImportOptions extends VBox {
 					} else {
 						showError(e, "error.errorTable.type.INTERNAL_ERROR");
 					}
-					this.toFront();
 				});
+			} catch (BCompoundException e) {
+				Platform.runLater(() ->
+						showError(new ProBError(e), "railml.stage.import.error.header", "railml.stage.import.error.content"));
 			} catch (Exception e) {
 				showError(e, "error.errorTable.type.INTERNAL_ERROR");
 			}
@@ -374,7 +377,7 @@ public class RailML2BDataImportOptions extends VBox {
 				updateModelName();
 				railML2B.saveRuleDependencyGraph(dotOutputFormat);
 				validationInfoMessage.setText(i18n.translate("railml.stage.messages.savedGraph"));
-			} catch (RailML2BVisualisationException e) {
+			} catch (RailML2BException e) {
 				showError(e, "error.errorTable.type.INTERNAL_ERROR");
 			}
 		} else {
