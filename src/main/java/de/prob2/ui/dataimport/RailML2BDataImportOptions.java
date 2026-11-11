@@ -392,9 +392,11 @@ public class RailML2BDataImportOptions extends VBox {
 						Platform.runLater(this::resetUI); // TODO: the import is finished: we could free its ProB instance
 					} */
 				});
+				if (controller != null)
+					controller.close();
+			} else if (controller != null) {
+				controller.toFront();
 			}
-			if (controller != null)
-				controller.close();
 		});
 	}
 
