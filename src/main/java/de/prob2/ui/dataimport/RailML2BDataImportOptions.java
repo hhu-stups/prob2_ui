@@ -316,8 +316,9 @@ public class RailML2BDataImportOptions extends VBox {
 					}
 				});
 			} catch (BCompoundException e) {
-				Platform.runLater(() ->
-						showError(new ProBError(e), "railml.stage.import.error.header", "railml.stage.import.error.content"));
+				showError(new ProBError(e), "railml.stage.import.error.header", "railml.stage.import.error.content");
+			} catch (RailML2BException e) {
+				showError(e, "railml.stage.filename.error.header");
 			} catch (Exception e) {
 				showError(e, "error.errorTable.type.INTERNAL_ERROR");
 			}
