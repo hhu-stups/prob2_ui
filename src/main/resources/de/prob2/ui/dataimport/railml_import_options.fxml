@@ -12,6 +12,7 @@
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ProgressBar?>
 <?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.Tooltip?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
@@ -21,6 +22,30 @@
 	<fx:define>
 		<FontSize fx:id="fontSize"/>
 	</fx:define>
+	<VBox spacing="10">
+		<HBox alignment="CENTER_LEFT">
+			<CheckBox text="%railml.stage.extensionSchemas" fx:id="extensionSchemasCheckbox"/>
+			<Button style="-fx-background-color: transparent; -fx-border-color: transparent; -fx-padding: 0;">
+				<graphic>
+					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="QUESTION_CIRCLE"
+								   bindableFontSize="${fontSize.fontSize}"/>
+				</graphic>
+				<tooltip>
+					<Tooltip text="%railml.stage.extensionSchemas.tooltip" showDuration="1m" showDelay="0s"/>
+				</tooltip>
+				<HBox.margin>
+					<Insets left="5"/>
+				</HBox.margin>
+			</Button>
+		</HBox>
+		<HBox spacing="10">
+			<TextField fx:id="extensionSchemasField" editable="false" HBox.hgrow="ALWAYS"/>
+			<Button fx:id="btExtensionSchemas" styleClass="button-dark2" text="%dataimport.dialog.fileChooser.multipleFiles" onAction="#selectExtensionSchemas"/>
+		</HBox>
+		<VBox.margin>
+			<Insets top="5"/>
+		</VBox.margin>
+	</VBox>
 	<HBox alignment="TOP_CENTER" fx:id="preOptions" spacing="20">
 		<HBox>
 			<CheckBox text="%railml.stage.translatedOnly" fx:id="onlyTranslation"/>

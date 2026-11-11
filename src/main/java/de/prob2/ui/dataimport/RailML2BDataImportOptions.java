@@ -37,13 +37,17 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuButton;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ProgressBar;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import org.controlsfx.glyphfont.FontAwesome;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Singleton
 public class RailML2BDataImportOptions extends VBox {
@@ -94,7 +98,11 @@ public class RailML2BDataImportOptions extends VBox {
 	private Button btReload;
 	@FXML
 	private CheckBox onlyTranslation, semanticChecks, invariants, animationMachineCheckbox, translatedMachineCheckbox, dataMachineCheckbox,
-			validationMachineCheckbox, visualisationCheckbox;
+			validationMachineCheckbox, visualisationCheckbox, extensionSchemasCheckbox;
+	@FXML
+	private TextField extensionSchemasField;
+	@FXML
+	private Button btExtensionSchemas;
 	@FXML
 	public VBox progressBox;
 	@FXML
@@ -105,6 +113,7 @@ public class RailML2BDataImportOptions extends VBox {
 	private final ImportArguments importArguments;
 	private Path outputPath;
 	private String modelName;
+	private List<File> extensionSchemas = List.of();
 	private final BooleanProperty invalidFile = new SimpleBooleanProperty(false);
 	private final BooleanProperty importSuccess = new SimpleBooleanProperty(false);
 	private final BooleanProperty generationRunning = new SimpleBooleanProperty(false);
@@ -144,6 +153,9 @@ public class RailML2BDataImportOptions extends VBox {
 		semanticChecks.selectedProperty().addListener((obs, o, n) -> invariants.setSelected(false));
 		invariants.disableProperty().bind(onlyTranslation.selectedProperty().or(semanticChecks.selectedProperty().not()).or(updater.runningProperty()).or(importSuccess));
 		visualisationCheckbox.disableProperty().bind(onlyTranslation.selectedProperty().or(updater.runningProperty()).or(importSuccess));
+		extensionSchemasCheckbox.disableProperty().bind(updater.runningProperty().or(importSuccess));
+		extensionSchemasField.disableProperty().bind(extensionSchemasCheckbox.selectedProperty().not().or(extensionSchemasCheckbox.disabledProperty()));
+		btExtensionSchemas.disableProperty().bind(extensionSchemasField.disabledProperty());
 
 		validationResults.visibleProperty().bind(importSuccess.and(semanticChecks.selectedProperty()));
 		validationResults.managedProperty().bind(validationResults.visibleProperty());
@@ -215,6 +227,21 @@ public class RailML2BDataImportOptions extends VBox {
 				showError(e, "railml.stage.filename.error.header");
 			}
 			modelName = importArguments.modelName();
+		}
+	}
+
+	@FXML
+	private void selectExtensionSchemas() {
+		FileChooser fileChooser = new FileChooser();
+		fileChooser.setTitle(i18n.translate("dataimport.dialog.fileChooser.title"));
+		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(i18n.translate("dataimport.dialog.fileChooser.xsd"), "*.xsd"));
+		if (importArguments.file() != null) {
+			fileChooser.setInitialDirectory(importArguments.file().getAbsoluteFile().getParentFile());
+		}
+		List<File> files = fileChooser.showOpenMultipleDialog(stageManager.getCurrent());
+		if (files != null) {
+			extensionSchemas = List.copyOf(files);
+			extensionSchemasField.setText(files.stream().map(File::getName).collect(Collectors.joining(", ")));
 		}
 	}
 
@@ -432,7 +459,8 @@ public class RailML2BDataImportOptions extends VBox {
 				.generateValidationMachine(validationMachineCheckbox.isSelected())
 				.generateVisualisation(visualisationCheckbox.isSelected() ? DotOutputFormat.SVG : null)
 				.visualisationStrategy(visualisationCheckbox.isSelected() ? ImportArguments.VisualisationStrategy.DOT : null)
-				.checkInvariants(invariants.isSelected());
+				.checkInvariants(invariants.isSelected())
+				.extensionSchemas(extensionSchemasCheckbox.isSelected() ? extensionSchemas : List.of());
 	}
 
 	private void updateModelName() {
