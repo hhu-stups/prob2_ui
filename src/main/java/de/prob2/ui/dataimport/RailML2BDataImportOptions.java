@@ -15,6 +15,7 @@ import de.hhu.stups.railml2b.output.MachinePrinter;
 import de.prob.animator.domainobjects.DotOutputFormat;
 import de.prob.exception.ProBError;
 import de.prob.model.brules.RuleResults;
+import de.prob.scripting.Api;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.internal.StopActions;
@@ -256,7 +257,7 @@ public class RailML2BDataImportOptions extends VBox {
 		updateArguments();
 		updater.execute(() -> {
 			try {
-				railML2B = new RailML2B(importArguments);
+				railML2B = new RailML2B(importArguments, injector.getInstance(Api.class));
 				railML2B.load();
 				if (importArguments.onlyTranslation()) {
 					Platform.runLater(this::createMachinesAndProject);
