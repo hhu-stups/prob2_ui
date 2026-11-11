@@ -304,8 +304,8 @@ public class RailML2BDataImportOptions extends VBox {
 					if (!violatedInvariants.isEmpty()) {
 						showError(new ProBError(new BCompoundException(violatedInvariants)), "The following invariants are violated");
 					}
+					importSuccess.set(true);
 				});
-				importSuccess.set(true);
 			} catch (ProBError e) {
 				Platform.runLater(() -> {
 					boolean isRailMLError = e.getErrors().stream().allMatch(error -> error.getMessage().startsWith("RailML"));
