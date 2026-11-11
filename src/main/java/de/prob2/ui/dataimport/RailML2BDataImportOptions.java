@@ -326,7 +326,7 @@ public class RailML2BDataImportOptions extends VBox {
 	}
 
 	void generateAndFinish() {
-		generationRunning.set(true);
+		Platform.runLater(() -> generationRunning.set(true));
 		updateArguments();
 		if (importArguments.generateVisualisation() != null) {
 			Platform.runLater(() -> {
@@ -336,12 +336,13 @@ public class RailML2BDataImportOptions extends VBox {
 				if (importArguments.saveTranslatedDataMachine() || importArguments.saveGeneratedDataMachine()
 						|| importArguments.generateAnimationMachine() || importArguments.generateValidationMachine()) {
 					createMachinesAndProject();
+				} else {
+					generationRunning.set(false);
 				}
 			});
 		} else {
 			createMachinesAndProject();
 		}
-		generationRunning.set(false);
 	}
 
 	private void createMachinesAndProject() {
@@ -397,8 +398,10 @@ public class RailML2BDataImportOptions extends VBox {
 				});
 				if (controller != null)
 					controller.close();
-			} else if (controller != null) {
-				controller.toFront();
+			} else {
+				generationRunning.set(false);
+				if (controller != null)
+					controller.toFront();
 			}
 		});
 	}
@@ -556,12 +559,12 @@ public class RailML2BDataImportOptions extends VBox {
 			controller.btImportAndOpen.disableProperty().unbind();
 			controller.btImportAndOpen.disableProperty().bind(
 						translatedMachineCheckbox.selectedProperty()
-						.or(dataMachineCheckbox.selectedProperty()
+						.or(dataMachineCheckbox.selectedProperty())
 						.or(animationMachineCheckbox.selectedProperty())
 						.or(validationMachineCheckbox.selectedProperty())
 						.or(visualisationCheckbox.selectedProperty())
-						.or(generationRunning))
-					.not());
+					.not()
+					.or(generationRunning));
 			controller.btImportAndOpen.setText(i18n.translate("railml.stage.generateAndFinish"));
 			BindableGlyph saveIcon = new BindableGlyph("FontAwesome", FontAwesome.Glyph.SAVE);
 			saveIcon.getStyleClass().add("icon-dark");
