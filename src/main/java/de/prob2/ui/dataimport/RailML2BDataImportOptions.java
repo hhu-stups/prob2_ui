@@ -382,10 +382,12 @@ public class RailML2BDataImportOptions extends VBox {
 							Platform.runLater(() -> currentProject.addMachine(animationMachine));
 						}
 
-						List<Machine> createdMachines = currentProject.getMachines();
-						if (!createdMachines.isEmpty()) {
-							Platform.runLater(() -> currentProject.loadMachineWithConfirmation(createdMachines.getLast()));
-						}
+						Platform.runLater(() -> {
+							List<Machine> createdMachines = currentProject.getMachines();
+							if (!createdMachines.isEmpty()) {
+								currentProject.loadMachineWithConfirmation(createdMachines.getLast());
+							}
+						});
 					} catch (RailML2BException e) {
 						Platform.runLater(() -> showError(e, "error.errorTable.type.INTERNAL_ERROR"));
 					} /*finally {
