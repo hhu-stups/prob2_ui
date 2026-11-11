@@ -332,11 +332,9 @@ public class RailML2BDataImportOptions extends VBox {
 				RailML2BVisualisationDialog visualisationDialog = injector.getInstance(RailML2BVisualisationDialog.class);
 				visualisationDialog.initializeForArguments(importArguments, railML2B.getMachineLoader().getCurrentTrace());
 				visualisationDialog.showAndWait();
-				if (importArguments.saveGeneratedDataMachine() || importArguments.generateAnimationMachine() || importArguments.generateValidationMachine()) {
-					visualisationDialog.setOnHiding(event -> {
-						createMachinesAndProject();
-						if (controller != null) controller.close();
-					});
+				if (importArguments.saveTranslatedDataMachine() || importArguments.saveGeneratedDataMachine()
+						|| importArguments.generateAnimationMachine() || importArguments.generateValidationMachine()) {
+					createMachinesAndProject();
 				}
 			});
 		} else {
