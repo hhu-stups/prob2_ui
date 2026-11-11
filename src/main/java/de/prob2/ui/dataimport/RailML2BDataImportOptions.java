@@ -302,7 +302,7 @@ public class RailML2BDataImportOptions extends VBox {
 
 					List<BException> violatedInvariants = railML2B.getMachineLoader().getViolatedInvariants();
 					if (!violatedInvariants.isEmpty()) {
-						showError(new ProBError(new BCompoundException(violatedInvariants)), "The following invariants are violated");
+						showError(new ProBError(new BCompoundException(violatedInvariants)), "railml.stage.violatedInvariants");
 					}
 					importSuccess.set(true);
 				});
