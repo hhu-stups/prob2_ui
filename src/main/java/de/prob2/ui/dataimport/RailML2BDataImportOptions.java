@@ -236,8 +236,9 @@ public class RailML2BDataImportOptions extends VBox {
 		FileChooser fileChooser = new FileChooser();
 		fileChooser.setTitle(i18n.translate("dataimport.dialog.fileChooser.title"));
 		fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter(i18n.translate("dataimport.dialog.fileChooser.xsd"), "*.xsd"));
-		if (importArguments.file() != null) {
-			fileChooser.setInitialDirectory(importArguments.file().getAbsoluteFile().getParentFile());
+		File railMLFile = controller != null ? controller.file.get() : null;
+		if (railMLFile != null) {
+			fileChooser.setInitialDirectory(railMLFile.getAbsoluteFile().getParentFile());
 		}
 		List<File> files = fileChooser.showOpenMultipleDialog(stageManager.getCurrent());
 		if (files != null) {
