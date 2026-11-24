@@ -7,7 +7,6 @@ import de.prob2.ui.config.FileChooserManager;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.StageManager;
 import javafx.fxml.FXML;
-import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 
 import java.nio.file.Path;
@@ -29,6 +28,11 @@ public class RailML2BDataImportDialog extends DataImportDialog {
 	public void initialize() {
 		super.initialize();
 		options.setController(this);
+		directory.addListener((obs, o, n) -> {
+			if (n != null) {
+				options.setDirectory(n);
+			}
+		});
 		dialogOptions.getChildren().addAll(options.getChildren());
 		version.setText("railML2B " + RailML2B.getVersion());
 
@@ -45,21 +49,15 @@ public class RailML2BDataImportDialog extends DataImportDialog {
 		setPath(path);
 	}
 
-	@Override
-	public void selectDirectory() {
-		DirectoryChooser directoryChooser = new DirectoryChooser();
-		directoryChooser.setTitle(i18n.translate("project.newProjectStage.directoryChooser.selectLocation.title"));
-		Path path = fileChooserManager.showDirectoryChooser(directoryChooser, FileChooserManager.Kind.DATA_IMPORT, stageManager.getCurrent());
-		if (path != null) {
-			directory.set(path.toAbsolutePath());
-			options.setDirectory(path);
-		}
-	}
-
 	public void setPath(Path path) {
 		if (path != null) {
 			file.set(path.toFile());
 			options.initializeForPath(path);
+			if (directory.get() != null) {
+				options.setDirectory(directory.get());
+			} else {
+				directory.set(path.toAbsolutePath().getParent());
+			}
 			checkAndUpdateMachineName(false);
 		}
 	}
