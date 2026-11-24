@@ -138,6 +138,7 @@
 							</HBox>
 							<StackPane VBox.vgrow="ALWAYS">
 								<Label fx:id="placeholderLabel"/>
+								<WebView fx:id="dotView" visible="false"/>
 								<BorderPane fx:id="errorsView" visible="false">
 									<top>
 										<Label text="%dynamic.errors">
@@ -150,7 +151,6 @@
 										<TextArea fx:id="taErrors" editable="false" wrapText="true"/>
 									</center>
 								</BorderPane>
-								<WebView fx:id="dotView" visible="false"/>
 							</StackPane>
 							<HBox alignment="CENTER_RIGHT">
 								<Button styleClass="button-dark2" text="%common.buttons.cancel" cancelButton="true" onAction="#cancel">

@@ -337,9 +337,7 @@ public class RailML2BVisualisationDialog extends Stage {
 				svgData = dotCall.call();
 			} catch (ProBError e) {
 				LOGGER.error("could not visualize graph with dot (command={}, layoutEngine={}, outputFormat={})", dotLocal, dotEngineLocal, outputFormat, e);
-				Platform.runLater(() -> {
-					this.stageManager.makeExceptionAlert(e, "dotty.error.dotVisualization.message").show();
-				});
+				showErrors(e.getMessage());
 				return;
 			}
 
@@ -384,6 +382,7 @@ public class RailML2BVisualisationDialog extends Stage {
 	 */
 	@FXML
 	private void refreshDotView () {
+		hideErrors();
 		this.updater.execute(() -> {
 			try {
 				visualizeCustomGraph();
@@ -398,11 +397,8 @@ public class RailML2BVisualisationDialog extends Stage {
 				} else if (e.getCause() instanceof BCompoundException) {
 					handleProBError(new ProBError((BCompoundException) e.getCause()));
 				} else {
-					LOGGER.error("RailML Visualization failed", e);
-					Platform.runLater(() -> {
-						taErrors.setText(e.getMessage());
-						errorsView.setVisible(true);
-					});
+					LOGGER.error("railML Visualization failed", e);
+					showErrors(e.getMessage());
 				}
 			}
 		});
@@ -410,9 +406,22 @@ public class RailML2BVisualisationDialog extends Stage {
 
 	private void handleProBError(ProBError e)  {
 		LOGGER.error("Visualization failed with ProBError", e);
+		showErrors(e.getMessage());
+	}
+
+	private void showErrors(String message) {
 		Platform.runLater(() -> {
-			taErrors.setText(e.getMessage());
+			currentDotContent.set(null);
+			dotView.getEngine().loadContent("");
+			taErrors.setText(message);
 			errorsView.setVisible(true);
+		});
+	}
+
+	private void hideErrors() {
+		Platform.runLater(() -> {
+			errorsView.setVisible(false);
+			taErrors.clear();
 		});
 	}
 
