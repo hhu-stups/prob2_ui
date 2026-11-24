@@ -69,21 +69,18 @@
 									<Insets left="10" top="30"/>
 								</padding>
 							</Label>
-							<VBox styleClass="border">
+							<VBox styleClass="border" spacing="10">
 								<HBox alignment="CENTER_LEFT" spacing="10" fx:id="dotEngineBox">
 									<Label text="%railml.inspectDot.configureDot.dotengine"/>
 									<ChoiceBox fx:id="dotEngineChoiceBox"/>
 								</HBox>
 								<HBox alignment="CENTER_LEFT" spacing="10" fx:id="scalingBox">
 									<Label text="%railml.inspectDot.configureDot.scaling"/>
-									<Button fx:id="incScalingButton">
+									<Spinner fx:id="scalingSpinner" editable="true" prefWidth="90"/>
+									<Label text="\%"/>
+									<Button fx:id="resetScalingButton" onAction="#resetScaling">
 										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="PLUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
-										</graphic>
-									</Button>
-									<Button fx:id="decScalingButton">
-										<graphic>
-											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="MINUS_CIRCLE" bindableFontSize="${fontSize.fontSize * 2}"/>
+											<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="UNDO" bindableFontSize="${fontSize.fontSize + 2}"/>
 										</graphic>
 									</Button>
 								</HBox>

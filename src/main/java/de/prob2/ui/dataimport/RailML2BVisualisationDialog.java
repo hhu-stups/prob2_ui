@@ -14,6 +14,7 @@ import de.prob.animator.domainobjects.IEvalElement;
 import de.prob.exception.ProBError;
 import de.prob.statespace.Trace;
 import de.prob2.ui.config.FileChooserManager;
+import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 import de.prob2.ui.internal.I18n;
 import de.prob2.ui.internal.MultiKeyCombination;
 import de.prob2.ui.internal.StageManager;
@@ -35,6 +36,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
+import javafx.scene.control.Spinner;
 import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
@@ -78,10 +80,6 @@ public class RailML2BVisualisationDialog extends Stage {
 	private Button zoomOutButton;
 	@FXML
 	private Button zoomInButton;
-	@FXML
-	private Button incScalingButton;
-	@FXML
-	private Button decScalingButton;
 	@FXML
 	private Button refreshDotView;
 	@FXML
@@ -130,6 +128,8 @@ public class RailML2BVisualisationDialog extends Stage {
 	@FXML
 	private HBox scalingBox;
 	@FXML
+	private Spinner<Integer> scalingSpinner;
+	@FXML
 	private CheckBox curvedsplines;
 	@FXML
 	private Button saveButton;
@@ -147,7 +147,9 @@ public class RailML2BVisualisationDialog extends Stage {
 	private ImportArguments.VisualisationStrategy visualisationStrategy = null;
 	private Trace trace;
 
-	private double scalingFactor;
+	private static final int DEFAULT_SCALING_PERCENT = (int) Math.round(DotVisualizer.DEFAULT_SCALING_FACTOR * 100);
+	private static final int MIN_SCALING_PERCENT = 10, MAX_SCALING_PERCENT = 1000, SCALING_PERCENT_STEP = 10;
+	private boolean resettingOptions = false;
 	private String dot;
 	private String dotEngine;
 	private final ObjectProperty<byte[]> currentDotContent;
@@ -172,7 +174,6 @@ public class RailML2BVisualisationDialog extends Stage {
 		this.i18n = i18n;
 		this.trace = null;
 
-		this.scalingFactor = 0.1;
 		this.dot = null;
 		this.dotEngine = null;
 		this.currentDotContent = new SimpleObjectProperty<>(this, "currentDotContent", null);
@@ -195,18 +196,21 @@ public class RailML2BVisualisationDialog extends Stage {
 
 		visualisationStrategyChoiceBox.getItems().addAll(ImportArguments.VisualisationStrategy.values());
 		visualisationStrategyChoiceBox.valueProperty().addListener(((obs,o,n) -> {
-			initializeOptionsForStrategy(n);
-			visualisationStrategy = n;
+			if (n != null && n != visualisationStrategy) {
+				visualisationStrategy = n;
+				initializeOptionsForStrategy(n);
+			}
 		}));
+		scalingSpinner.setValueFactory(new ImprovedIntegerSpinnerValueFactory(MIN_SCALING_PERCENT, MAX_SCALING_PERCENT, DEFAULT_SCALING_PERCENT, SCALING_PERCENT_STEP));
+		scalingSpinner.valueProperty().addListener((obs, o, n) -> {
+			if (n != null && !n.equals(o) && !resettingOptions && currentDotContent.get() != null) {
+				refreshDotView();
+			}
+		});
 		initializeOptions();
 		languageChoiceBox.getItems().addAll(RailML2BVisualisationDialog.Language.values());
 		dotEngineChoiceBox.getItems().addAll(RailML2BVisualisationDialog.DotEngine.values());
 		// TODO: Maybe use ProB preference for dot engine later
-
-		incScalingButton.pressedProperty()
-			.addListener((o,f,t) -> scalingFactor += visualisationStrategy.equals(ImportArguments.VisualisationStrategy.D4R) ? 0.001 : 0.1);
-		decScalingButton.pressedProperty()
-			.addListener((o,f,t) -> scalingFactor -= visualisationStrategy.equals(ImportArguments.VisualisationStrategy.D4R) ? 0.001 : 0.1);
 
 		dotView.visibleProperty().bind(this.updater.runningProperty().not().and(currentDotContent.isNull()).not());
 		placeholderLabel.visibleProperty().bind(this.dotView.visibleProperty().not());
@@ -231,28 +235,30 @@ public class RailML2BVisualisationDialog extends Stage {
 	}
 
 	private void initializeOptionsForStrategy(ImportArguments.VisualisationStrategy strategy) {
-		boolean isDotCustomGraph = strategy.equals(ImportArguments.VisualisationStrategy.DOT);
+		boolean isDotCustomGraph = strategy == ImportArguments.VisualisationStrategy.DOT;
 
 		visualisationStrategyChoiceBox.setValue(strategy);
 
-		balises.setVisible(!isDotCustomGraph); balises.setManaged(!isDotCustomGraph);
-		borders.setDisable(isDotCustomGraph);
-		bufferstops.setDisable(isDotCustomGraph);
-		crossings.setDisable(isDotCustomGraph);
-		derailers.setVisible(!isDotCustomGraph); derailers.setManaged(!isDotCustomGraph);
-		levelcrossings.setVisible(!isDotCustomGraph); levelcrossings.setManaged(!isDotCustomGraph);
-		operationalpoints.setVisible(!isDotCustomGraph); operationalpoints.setManaged(!isDotCustomGraph);
-		signals.setVisible(!isDotCustomGraph); signals.setManaged(!isDotCustomGraph);
-		switches.setDisable(isDotCustomGraph);
-		traindetectionelements.setVisible(!isDotCustomGraph); traindetectionelements.setManaged(!isDotCustomGraph);
-		tvdsections.setVisible(!isDotCustomGraph); tvdsections.setManaged(!isDotCustomGraph);
-
-		dotEngineBox.setVisible(isDotCustomGraph); dotEngineBox.setManaged(isDotCustomGraph);
-		scalingBox.setVisible(!isDotCustomGraph); scalingBox.setManaged(!isDotCustomGraph);
-		curvedsplines.setVisible(isDotCustomGraph); curvedsplines.setManaged(isDotCustomGraph);
+		setShown(operationalpoints, !isDotCustomGraph);
+		setShown(tvdsections, !isDotCustomGraph);
+		setShown(dotEngineBox, isDotCustomGraph);
+		setShown(curvedsplines, isDotCustomGraph);
 
 		initializeOptions();
-		scalingFactor = visualisationStrategy.equals(ImportArguments.VisualisationStrategy.D4R) ? 0.004 : 0.1;
+	}
+
+	private static void setShown(Node node, boolean shown) {
+		node.setVisible(shown);
+		node.setManaged(shown);
+	}
+
+	@FXML
+	private void resetScaling() {
+		scalingSpinner.getValueFactory().setValue(DEFAULT_SCALING_PERCENT);
+	}
+
+	private double getScalingFactor() {
+		return ((ImprovedIntegerSpinnerValueFactory) scalingSpinner.getValueFactory()).getValueOrInitial() / 100.0;
 	}
 
 	private void initializeOptions() {
@@ -271,6 +277,12 @@ public class RailML2BVisualisationDialog extends Stage {
 		languageChoiceBox.setValue(Language.EN);
 		dotEngineChoiceBox.setValue(DotEngine.DOT);
 		curvedsplines.setSelected(true);
+		resettingOptions = true;
+		try {
+			resetScaling();
+		} finally {
+			resettingOptions = false;
+		}
 	}
 
 	protected void visualizeCustomGraph() throws InterruptedException {
@@ -288,7 +300,7 @@ public class RailML2BVisualisationDialog extends Stage {
 				traindetectionelements.isSelected(),
 				tvdsections.isSelected(),
 				names.isSelected(),
-				scalingFactor,
+				getScalingFactor(),
 				languageChoiceBox.getValue().toString().toLowerCase(),
 				dotEngineChoiceBox.getValue().toString().toLowerCase(),
 				curvedsplines.isSelected()
