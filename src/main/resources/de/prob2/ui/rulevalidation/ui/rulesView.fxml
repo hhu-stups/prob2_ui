@@ -23,7 +23,7 @@
 					</graphic>
 				</Button>
 				<TextField fx:id="filterTextField" onAction="#handleFilterButton" promptText="%rulevalidation.view.filter" HBox.hgrow="ALWAYS" prefHeight="${filterButton.width}" />
-				<Button fx:id="executeAllButton" text="%rulevalidation.view.executeAll" onAction="#executeAll" styleClass="button-blue"/>
+				<Button fx:id="executeAllButton" text="%rulevalidation.view.executeAll" onAction="#executeAll" styleClass="button-blue" minWidth="-Infinity"/>
 			</HBox>
 		</AnchorPane>
 		<StackPane VBox.vgrow="always" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
@@ -55,7 +55,8 @@
 				<Label fx:id="progressOperation"/>
 			</VBox>
 			<Pane fx:id="tagSelectionContainer" visible="false" pickOnBounds="false">
-				<ScrollPane fx:id="tagSelectionScrollPane" maxWidth="600" maxHeight="300">
+				<ScrollPane fx:id="tagSelectionScrollPane" maxWidth="600" maxHeight="300"
+							style="-fx-background-color: -fx-control-inner-background; -fx-border-color: lightgray; -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 8, 0, 0, 2);">
 					<VBox>
 						<Label text="Tags" style="-fx-font-weight: bold;"/>
 						<Separator/>
@@ -77,8 +78,8 @@
 			<Separator HBox.hgrow="ALWAYS" style="-fx-background-color:lightgray;-fx-background-radius:2;"/>
 		</HBox>
 		<HBox VBox.vgrow="never" alignment="CENTER_LEFT" spacing="5">
-			<HBox HBox.hgrow="ALWAYS" spacing="10" alignment="CENTER_LEFT">
-				<HBox alignment="CENTER_LEFT" >
+			<FlowPane HBox.hgrow="ALWAYS" hgap="10" vgap="5" alignment="CENTER_LEFT">
+				<HBox alignment="CENTER_LEFT" minWidth="-Infinity">
 					<Label text="%rulevalidation.view.summary.rules"/>
 					<Label text=" "/>
 					<Label fx:id="rulesLabel" text="-"/>
@@ -86,7 +87,7 @@
 						<Insets left="5" right="5"/>
 					</padding>
 				</HBox>
-				<HBox alignment="CENTER_LEFT" >
+				<HBox alignment="CENTER_LEFT" minWidth="-Infinity">
 					<Label text="%rulevalidation.view.summary.notChecked"/>
 					<Label text=" "/>
 					<Label fx:id="notCheckedLabel" text="-"/>
@@ -94,7 +95,7 @@
 						<Insets left="5" right="5"/>
 					</padding>
 				</HBox>
-				<HBox alignment="CENTER_LEFT"  style="-fx-background-color: rgba(76, 175, 80, 0.15)">
+				<HBox alignment="CENTER_LEFT" minWidth="-Infinity" style="-fx-background-color: rgba(76, 175, 80, 0.15)">
 					<Label text="%rulevalidation.view.summary.success"/>
 					<Label text=" "/>
 					<Label fx:id="successLabel" text="-"/>
@@ -102,7 +103,7 @@
 						<Insets left="5" right="5"/>
 					</padding>
 				</HBox>
-				<HBox alignment="CENTER_LEFT" style="-fx-background-color: rgba(204, 47, 39, 0.15)">
+				<HBox alignment="CENTER_LEFT" minWidth="-Infinity" style="-fx-background-color: rgba(204, 47, 39, 0.15)">
 					<Label text="%rulevalidation.view.summary.fail"/>
 					<Label text=" "/>
 					<Label fx:id="failLabel" text="-"/>
@@ -110,7 +111,7 @@
 						<Insets left="5" right="5"/>
 					</padding>
 				</HBox>
-				<HBox alignment="CENTER_LEFT" style="-fx-background-color:lightgray">
+				<HBox alignment="CENTER_LEFT" minWidth="-Infinity" style="-fx-background-color:lightgray">
 					<Label text="%rulevalidation.view.summary.disabled"/>
 					<Label text=" "/>
 					<Label fx:id="disabledLabel" text="-"/>
@@ -118,8 +119,8 @@
 						<Insets left="5" right="5"/>
 					</padding>
 				</HBox>
-			</HBox>
-			<Button fx:id="visualizeGraphButton" onAction="#visualizeCompleteDependencyGraph" HBox.hgrow="NEVER" prefHeight="${filterButton.width}">
+			</FlowPane>
+			<Button fx:id="visualizeGraphButton" onAction="#visualizeCompleteDependencyGraph" HBox.hgrow="NEVER" prefHeight="${filterButton.width}" minWidth="-Infinity">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="&#xf1e0;" />
 				</graphic>
@@ -127,7 +128,7 @@
 					<Tooltip text="%rulevalidation.view.dependencyGraph.complete"/>
 				</tooltip>
 			</Button>
-			<Button fx:id="validationReportButton" text="%rulevalidation.view.save" onAction="#saveValidationReport" styleClass="button-blue">
+			<Button fx:id="validationReportButton" text="%rulevalidation.view.save" onAction="#saveValidationReport" styleClass="button-blue" minWidth="-Infinity">
 				<graphic>
 					<BindableGlyph styleClass="icon-dark" fontFamily="FontAwesome" icon="SAVE" bindableFontSize="${fontSize.fontSize + 2}" />
 				</graphic>
