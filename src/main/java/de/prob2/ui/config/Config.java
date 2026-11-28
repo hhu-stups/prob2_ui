@@ -2,10 +2,10 @@ package de.prob2.ui.config;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,7 +60,7 @@ public final class Config {
 					}
 
 					JsonNode bConsoleExpandedNode = oldObject.remove("bConsoleExpanded");
-					if (bConsoleExpandedNode.isBoolean() && bConsoleExpandedNode.booleanValue()) {
+					if (bConsoleExpandedNode != null && bConsoleExpandedNode.isBoolean() && bConsoleExpandedNode.booleanValue()) {
 						JsonNode expandedTitledPanesNode = oldObject.get("expandedTitledPanes");
 						if (expandedTitledPanesNode instanceof ArrayNode expandedTitledPanes) {
 							expandedTitledPanes.add("bconsole");
@@ -125,9 +125,10 @@ public final class Config {
 			} catch (FileNotFoundException | NoSuchFileException exc) {
 				LOGGER.info("Config file not found, loading default settings");
 				configData = new ConfigData();
-			} catch (IOException exc) {
-				LOGGER.warn("Failed to load config file", exc);
-				throw new UncheckedIOException("Failed to load config file: " + exc, exc);
+			} catch (IOException | RuntimeException exc) {
+				LOGGER.error("Failed to load config file {} - using default settings", this.configFilePath, exc);
+				this.backupBrokenConfigFile();
+				configData = new ConfigData();
 			}
 		} else {
 			LOGGER.info("Config loading disabled via runtime options, loading default config");
@@ -139,6 +140,16 @@ public final class Config {
 		}
 
 		this.currentConfigData = configData;
+	}
+
+	private void backupBrokenConfigFile() {
+		final Path backup = this.configFilePath.resolveSibling(this.configFilePath.getFileName() + ".broken");
+		try {
+			Files.move(this.configFilePath, backup, StandardCopyOption.REPLACE_EXISTING);
+			LOGGER.warn("Moved broken config file to {}", backup);
+		} catch (IOException | RuntimeException e) {
+			LOGGER.warn("Failed to back up broken config file {}", this.configFilePath, e);
+		}
 	}
 
 	public void save() {
@@ -158,11 +169,11 @@ public final class Config {
 
 		try {
 			this.jacksonManager.writeToFile(this.configFilePath, configData);
+			LOGGER.info("Config successfully saved to {}", this.configFilePath);
 		} catch (FileNotFoundException | NoSuchFileException exc) {
 			LOGGER.warn("Failed to create config file", exc);
 		} catch (IOException exc) {
 			LOGGER.warn("Failed to save config file", exc);
 		}
-		LOGGER.info("Config successfully saved to {}", this.configFilePath);
 	}
 }
