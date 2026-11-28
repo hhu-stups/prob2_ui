@@ -464,7 +464,10 @@ public final class ProB2 extends Application {
 			if (result.isEmpty() || result.get().equals(ButtonType.CANCEL)) {
 				event.consume();
 			} else if (result.get().equals(save)) {
-				injector.getInstance(ProjectManager.class).saveCurrentProject();
+				if (!injector.getInstance(ProjectManager.class).saveCurrentProject()) {
+					event.consume();
+					return; // Do not exit if saving did not work
+				}
 				uiState.prepareForExit();
 				Platform.exit();
 			} else if (result.get().equals(doNotSave)) {

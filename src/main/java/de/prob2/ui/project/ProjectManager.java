@@ -166,7 +166,7 @@ public final class ProjectManager {
 		return newItems;
 	}
 
-	public void saveCurrentProject() {
+	public boolean saveCurrentProject() {
 		Project project = currentProject.get();
 		String name = project.getName();
 		Path location = project.getLocation().resolve(project.getName() + "." + PROJECT_FILE_EXTENSION);
@@ -183,7 +183,7 @@ public final class ProjectManager {
 					"project.projectManager.alerts.fileAlreadyExistsWarning.content", location)
 					.showAndWait();
 			if (result.isEmpty() || result.get() == ButtonType.CANCEL) {
-				return;
+				return false;
 			} else if (result.get().equals(renameBT)) {
 				FileChooser fileChooser = new FileChooser();
 				fileChooser.setInitialDirectory(currentProject.getLocation().toFile());
@@ -191,7 +191,7 @@ public final class ProjectManager {
 				fileChooser.getExtensionFilters().add(fileChooserManager.getProB2ProjectFilter());
 				final Path selected = fileChooserManager.showSaveFileChooser(fileChooser, null, stageManager.getCurrent());
 				if (selected == null) {
-					return;
+					return false;
 				}
 				location = selected;
 				name = MoreFiles.getNameWithoutExtension(location);
@@ -215,14 +215,15 @@ public final class ProjectManager {
 			this.jacksonManager.writeToFile(location, updatedProject);
 		} catch (Exception e) {
 			LOGGER.warn("Failed to save project file {}", location, e);
-			stageManager.makeExceptionAlert(e, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").show();
-			return;
+			stageManager.makeExceptionAlert(e, "project.projectManager.alerts.failedToSaveProject.header", "project.projectManager.alerts.failedToSaveProject.content").showAndWait();
+			return false;
 		}
 
 		currentProject.setNewProject(false);
 		addToRecentProjects(location);
 		currentProject.setSaved(true);
 		currentProject.get().resetChanged();
+		return true;
 	}
 
 	private Project loadProject(Path path) {
