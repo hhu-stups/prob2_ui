@@ -6,6 +6,9 @@ import com.google.common.base.MoreObjects;
 
 import de.prob.animator.domainobjects.ProBPreference;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 interface PrefTreeItem {
 	final class Category implements PrefTreeItem {
 		private final String name;
@@ -28,7 +31,12 @@ interface PrefTreeItem {
 		public String getDefaultValue() {
 			return "";
 		}
-		
+
+		@Override
+		public StringProperty valueProperty() {
+			return new SimpleStringProperty("");
+		}
+
 		@Override
 		public String getDescription() {
 			return "";
@@ -61,11 +69,11 @@ interface PrefTreeItem {
 	
 	final class Preference implements PrefTreeItem {
 		private final ProBPreference preferenceInfo;
-		private final String value;
-		
+		private final StringProperty value;
+
 		public Preference(final ProBPreference preferenceInfo, final String value) {
 			this.preferenceInfo = preferenceInfo;
-			this.value = value;
+			this.value = new SimpleStringProperty(this, "value", value);
 		}
 		
 		public ProBPreference getPreferenceInfo() {
@@ -79,14 +87,19 @@ interface PrefTreeItem {
 		
 		@Override
 		public String getValue() {
-			return this.value;
+			return this.value.get();
 		}
 		
 		@Override
 		public String getDefaultValue() {
 			return this.getPreferenceInfo().defaultValue;
 		}
-		
+
+		@Override
+		public StringProperty valueProperty() {
+			return this.value;
+		}
+
 		@Override
 		public String getDescription() {
 			return this.getPreferenceInfo().description;
@@ -124,6 +137,8 @@ interface PrefTreeItem {
 	String getValue();
 	
 	String getDefaultValue();
+
+	StringProperty valueProperty();
 	
 	default boolean isChanged() {
 		return !Objects.equals(this.getValue(), this.getDefaultValue());

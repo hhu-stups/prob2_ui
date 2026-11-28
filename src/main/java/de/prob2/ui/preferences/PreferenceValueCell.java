@@ -8,6 +8,7 @@ import de.prob.prolog.term.PrologTerm;
 import de.prob2.ui.internal.ImprovedIntegerSpinnerValueFactory;
 
 import javafx.beans.property.ReadOnlyObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ColorPicker;
@@ -26,15 +27,28 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferenceValueCell.class);
 
 	private final ReadOnlyObjectProperty<PreferencesChangeState> state;
+	private final ChangeListener<String> valueListener;
+	private PrefTreeItem.Preference observedItem;
+	private boolean changingValue;
 
 	PreferenceValueCell(final ReadOnlyObjectProperty<PreferencesChangeState> state) {
 		super();
 
 		this.state = state;
+		this.valueListener = (o, from, to) -> {
+			if (!this.changingValue) {
+				this.updateEditor(this.getItem(), this.isEmpty());
+			}
+		};
 	}
 
 	private void setPreferenceValue(final String name, final String newValue) {
-		this.state.get().changePreference(name, newValue);
+		this.changingValue = true;
+		try {
+			this.state.get().changePreference(name, newValue);
+		} finally {
+			this.changingValue = false;
+		}
 	}
 
 	private void changeToSpinner(final PrefTreeItem.Preference pti, final int min, final int max) {
@@ -110,6 +124,17 @@ class PreferenceValueCell extends TreeTableCell<PrefTreeItem, PrefTreeItem> {
 	@Override
 	public void updateItem(final PrefTreeItem item, final boolean empty) {
 		super.updateItem(item, empty);
+		if (this.observedItem != null) {
+			this.observedItem.valueProperty().removeListener(this.valueListener);
+		}
+		this.observedItem = !empty && item instanceof PrefTreeItem.Preference pref ? pref : null;
+		if (this.observedItem != null) {
+			this.observedItem.valueProperty().addListener(this.valueListener);
+		}
+		this.updateEditor(item, empty);
+	}
+
+	private void updateEditor(final PrefTreeItem item, final boolean empty) {
 		if (empty || item == null || item instanceof PrefTreeItem.Category) {
 			// Empty rows and categories have no value.
 			this.setText(null);

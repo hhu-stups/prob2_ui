@@ -12,9 +12,9 @@ import de.prob2.ui.internal.FXMLInjected;
 import de.prob2.ui.internal.StageManager;
 
 import javafx.beans.InvalidationListener;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
@@ -77,9 +77,8 @@ public final class PreferencesView extends BorderPane {
 
 		tvName.setCellValueFactory(new TreeItemPropertyValueFactory<>("name"));
 
-		tvChanged.setCellValueFactory(features -> Bindings.createStringBinding(
-			() -> features.getValue().getValue().isChanged() ? "*" : " ",
-			features.getValue().valueProperty()
+		tvChanged.setCellValueFactory(features -> features.getValue().valueProperty().flatMap(item ->
+				item.valueProperty().map(value -> item.isChanged() ? "*" : " ")
 		));
 
 		tvValue.setCellFactory(col -> new PreferenceValueCell(this.stateProperty()));
@@ -172,7 +171,12 @@ public final class PreferencesView extends BorderPane {
 					return ti;
 				});
 
-			item.setValue(new PrefTreeItem.Preference(pref, this.getState().getPreferenceValueWithChanges(pref.name)));
+			final String value = this.getState().getPreferenceValueWithChanges(pref.name);
+			if (item.getValue() instanceof PrefTreeItem.Preference existing && existing.getPreferenceInfo() == pref) {
+				existing.valueProperty().set(value);
+			} else {
+				item.setValue(new PrefTreeItem.Preference(pref, value));
+			}
 		}
 	}
 }
