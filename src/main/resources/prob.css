@@ -1336,3 +1336,7 @@
 	-fx-text-fill: -prob-grey-75;
 	-fx-font-weight: bold;
 }
+
+.toggle-switch:selected > .thumb-area {
+	-fx-background-color: -prob-aqua;
+}

@@ -38,6 +38,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollBar;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCharacterCombination;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyCodeCombination;
@@ -46,6 +47,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.controlsfx.control.ToggleSwitch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -92,7 +94,9 @@ public class RailML2BVisualisationDialog extends Stage {
 	private MenuItem zoomOutMenuButton;
 
 	@FXML
-	private ChoiceBox<ImportArguments.VisualisationStrategy> visualisationStrategyChoiceBox;
+	private HBox visualisationOptions;
+	@FXML
+	private ToggleSwitch autoLayout;
 	@FXML
 	private CheckBox balises;
 	@FXML
@@ -144,7 +148,7 @@ public class RailML2BVisualisationDialog extends Stage {
 	private final I18n i18n;
 	private String modelName = null;
 	private Path output;
-	private ImportArguments.VisualisationStrategy visualisationStrategy = null;
+	private ImportArguments.VisualisationLayout visualisationLayout = ImportArguments.VisualisationLayout.AUTO;
 	private Trace trace;
 
 	private static final int DEFAULT_SCALING_PERCENT = (int) Math.round(DotVisualizer.DEFAULT_SCALING_FACTOR * 100);
@@ -194,13 +198,15 @@ public class RailML2BVisualisationDialog extends Stage {
 		zoomInMenuButton.setAccelerator(new MultiKeyCombination(zoomInChar, zoomInCode, zoomInKeypad));
 		zoomOutMenuButton.setAccelerator(new MultiKeyCombination(zoomOutChar, zoomOutCode, zoomOutKeypad));
 
-		visualisationStrategyChoiceBox.getItems().addAll(ImportArguments.VisualisationStrategy.values());
-		visualisationStrategyChoiceBox.valueProperty().addListener(((obs,o,n) -> {
-			if (n != null && n != visualisationStrategy) {
-				visualisationStrategy = n;
-				initializeOptionsForStrategy(n);
+		autoLayout.selectedProperty().addListener((obs, o, n) -> {
+			ImportArguments.VisualisationLayout layout = n ? ImportArguments.VisualisationLayout.AUTO : ImportArguments.VisualisationLayout.FILE;
+			if (layout != visualisationLayout) {
+				visualisationLayout = layout;
+				initializeOptionsForLayout(layout);
 			}
-		}));
+		});
+		Tooltip.install(visualisationOptions, autoLayout.getTooltip());
+
 		scalingSpinner.setValueFactory(new ImprovedIntegerSpinnerValueFactory(MIN_SCALING_PERCENT, MAX_SCALING_PERCENT, DEFAULT_SCALING_PERCENT, SCALING_PERCENT_STEP));
 		scalingSpinner.valueProperty().addListener((obs, o, n) -> {
 			if (n != null && !n.equals(o) && !resettingOptions && currentDotContent.get() != null) {
@@ -228,21 +234,24 @@ public class RailML2BVisualisationDialog extends Stage {
 	protected void initializeForArguments(final ImportArguments arguments, final Trace trace) {
 		this.modelName = arguments.modelName();
 		this.output = arguments.output();
-		this.visualisationStrategy = arguments.visualisationStrategy();
 		this.trace = trace;
-		initializeOptionsForStrategy(visualisationStrategy);
+		boolean hasData = DotVisualizer.hasVisualisationData(trace);
+		this.visualisationLayout = DotVisualizer.getLayout(arguments.visualisationLayout(), trace);
+		autoLayout.setDisable(!hasData);
+		autoLayout.getTooltip().setText(i18n.translate(hasData ? "railml.inspectDot.autoLayout.tooltip" : "railml.inspectDot.autoLayout.noData"));
+		initializeOptionsForLayout(visualisationLayout);
 		clearGraph();
 	}
 
-	private void initializeOptionsForStrategy(ImportArguments.VisualisationStrategy strategy) {
-		boolean isDotCustomGraph = strategy == ImportArguments.VisualisationStrategy.DOT;
+	private void initializeOptionsForLayout(ImportArguments.VisualisationLayout layout) {
+		boolean isAutoLayout = layout == ImportArguments.VisualisationLayout.AUTO;
 
-		visualisationStrategyChoiceBox.setValue(strategy);
+		autoLayout.setSelected(isAutoLayout);
 
-		setShown(operationalpoints, !isDotCustomGraph);
-		setShown(tvdsections, !isDotCustomGraph);
-		setShown(dotEngineBox, isDotCustomGraph);
-		setShown(curvedsplines, isDotCustomGraph);
+		setShown(operationalpoints, !isAutoLayout);
+		setShown(tvdsections, !isAutoLayout);
+		setShown(dotEngineBox, isAutoLayout);
+		setShown(curvedsplines, isAutoLayout);
 
 		initializeOptions();
 	}
@@ -287,7 +296,7 @@ public class RailML2BVisualisationDialog extends Stage {
 
 	protected void visualizeCustomGraph() throws InterruptedException {
 		String graphFormula = DotVisualizer.getGraphDefinitionFormula(
-				visualisationStrategy,
+				visualisationLayout,
 				balises.isSelected(),
 				bufferstops.isSelected(),
 				borders.isSelected(),
@@ -374,7 +383,7 @@ public class RailML2BVisualisationDialog extends Stage {
 		saveConverted(DotOutputFormat.SVG, tempSvgFile);
 
 		try {
-			SvgConverter.convertSvgForVisB(tempSvgFile, visualisationStrategy);
+			SvgConverter.convertSvgForVisB(tempSvgFile);
 		} catch (Exception e) {
 			throw new ProBError("Failed to convert railML SVG file", e);
 		}

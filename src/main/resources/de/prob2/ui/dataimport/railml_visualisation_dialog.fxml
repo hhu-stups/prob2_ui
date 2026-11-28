@@ -1,14 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import de.prob2.ui.dataimport.RailML2BVisualisationDialog?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
-<?import de.prob2.ui.layout.FontSize?>
-<?import javafx.scene.web.WebView?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Menu?>
+<?import javafx.scene.control.MenuBar?>
+<?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.Tooltip?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.Scene?>
+<?import javafx.scene.web.WebView?>
+<?import org.controlsfx.control.ToggleSwitch?>
+
+<?import de.prob2.ui.dataimport.RailML2BVisualisationDialog?>
 <?import de.prob2.ui.layout.BindableGlyph?>
+<?import de.prob2.ui.layout.FontSize?>
+
 <fx:root type="RailML2BVisualisationDialog" title="%railml.inspectDot.title" minWidth="800" minHeight="600" width="1200.0" height="800.0" xmlns:fx="http://javafx.com/fxml/1">
 <fx:define>
 	<FontSize fx:id="fontSize" />
@@ -31,11 +46,14 @@
 				<center>
 					<SplitPane dividerPositions="0.21">
 						<VBox>
-							<HBox alignment="CENTER" fx:id="visualisationOptions" spacing="10">
-								<Label text="%railml.stage.visualisation.strategy" fx:id="visualisationStrategyField"/>
-								<ChoiceBox fx:id="visualisationStrategyChoiceBox"/>
+							<HBox alignment="CENTER_LEFT" fx:id="visualisationOptions">
+								<ToggleSwitch text="%railml.inspectDot.autoLayout" fx:id="autoLayout">
+									<tooltip>
+										<Tooltip text="%railml.inspectDot.autoLayout.tooltip"/>
+									</tooltip>
+								</ToggleSwitch>
 								<padding>
-									<Insets bottom="10"/>
+									<Insets left="10" bottom="10"/>
 								</padding>
 							</HBox>
 							<Label text="%railml.inspectDot.chooseElements.title" styleClass="details-title">

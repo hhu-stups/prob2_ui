@@ -483,7 +483,7 @@ public class RailML2BDataImportOptions extends VBox {
 				.generateAnimationMachine(animationMachineCheckbox.isSelected())
 				.generateValidationMachine(validationMachineCheckbox.isSelected())
 				.generateVisualisation(visualisationCheckbox.isSelected() ? DotOutputFormat.SVG : null)
-				.visualisationStrategy(visualisationCheckbox.isSelected() ? ImportArguments.VisualisationStrategy.DOT : null)
+				.visualisationLayout(null) // chosen by the data of the file, can be switched in the visualisation dialog
 				.checkInvariants(invariants.isSelected())
 				.extensionSchemas(extensionSchemasCheckbox.isSelected() ? extensionSchemas : List.of());
 	}
