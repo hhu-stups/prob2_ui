@@ -2,6 +2,7 @@ package de.prob2.ui.preferences;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -14,7 +15,6 @@ import de.prob2.ui.internal.StageManager;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 @FXMLInjected
 public final class PreferencesView extends BorderPane {
 	private static final Logger LOGGER = LoggerFactory.getLogger(PreferencesView.class);
-	private static final Pattern EMPTY_PATTERN = Pattern.compile("", Pattern.CASE_INSENSITIVE);
+	private static final String SEARCH_ERROR_STYLE_CLASS = "text-field-error";
 
 	@FXML
 	private TextField prefSearchField;
@@ -111,17 +111,7 @@ public final class PreferencesView extends BorderPane {
 			return;
 		}
 
-		Pattern tempSearchPattern;
-		try {
-			tempSearchPattern = Pattern.compile(this.prefSearchField.getText(), Pattern.CASE_INSENSITIVE);
-		} catch (PatternSyntaxException e) {
-			tempSearchPattern = EMPTY_PATTERN;
-			LOGGER.trace("Bad regex syntax, this is probably not an error!", e);
-			this.prefSearchField.getStyleClass().add("text-field-error");
-		}
-
-		// Extra final variable is necessary so the lambda below can use it.
-		final Pattern searchPattern = tempSearchPattern;
+		final Pattern searchPattern = this.compileSearchPattern(this.prefSearchField.getText());
 		generateTreeItems(searchPattern);
 
 		for (Iterator<TreeItem<PrefTreeItem>> itcat = this.tv.getRoot().getChildren().iterator(); itcat.hasNext(); ) {
@@ -142,6 +132,21 @@ public final class PreferencesView extends BorderPane {
 		this.tv.getRoot().getChildren().sort(nameComparator);
 		for (TreeItem<PrefTreeItem> ti : this.tv.getRoot().getChildren()) {
 			ti.getChildren().sort(nameComparator);
+		}
+	}
+
+	private Pattern compileSearchPattern(final String text) {
+		final List<String> styleClasses = this.prefSearchField.getStyleClass();
+		try {
+			final Pattern pattern = Pattern.compile(text, Pattern.CASE_INSENSITIVE);
+			styleClasses.remove(SEARCH_ERROR_STYLE_CLASS);
+			return pattern;
+		} catch (PatternSyntaxException e) {
+			LOGGER.trace("Bad regex syntax, this is probably not an error!", e);
+			if (!styleClasses.contains(SEARCH_ERROR_STYLE_CLASS)) {
+				styleClasses.add(SEARCH_ERROR_STYLE_CLASS);
+			}
+			return Pattern.compile(Pattern.quote(text), Pattern.CASE_INSENSITIVE);
 		}
 	}
 
