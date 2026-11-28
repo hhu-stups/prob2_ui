@@ -17,11 +17,13 @@ import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
+import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.layout.Region;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +48,8 @@ public class DynamicPreferencesStage extends Stage {
 	private final CurrentTrace currentTrace;
 
 	private DynamicVisualizationStage toRefresh;
-	
+	private MapChangeListener<String, String> globalPreferencesListener;
+
 	@Inject
 	private DynamicPreferencesStage(final StageManager stageManager, final GlobalPreferences globalPreferences, final CurrentTrace currentTrace) {
 		this.stageManager = stageManager;
@@ -62,6 +65,14 @@ public class DynamicPreferencesStage extends Stage {
 		resetButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		cancelButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
 		okButton.setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
+		this.addEventHandler(WindowEvent.WINDOW_HIDDEN, event -> this.removeGlobalPreferencesListener());
+	}
+
+	private void removeGlobalPreferencesListener() {
+		if (this.globalPreferencesListener != null) {
+			this.globalPreferences.removeListener(this.globalPreferencesListener);
+			this.globalPreferencesListener = null;
+		}
 	}
 
 	public void setToRefresh(final DynamicVisualizationStage toRefresh) {
@@ -72,7 +83,9 @@ public class DynamicPreferencesStage extends Stage {
 		final List<ProBPreference> visiblePreferences = new ArrayList<>(this.currentTrace.getStateSpace().getPreferenceInformation());
 		visiblePreferences.removeIf(pref -> !preferenceNames.contains(pref.name));
 		final PreferencesChangeState state = new PreferencesChangeState(visiblePreferences);
-		this.globalPreferences.addListener((o, from, to) -> state.setCurrentPreferenceValues(to));
+		this.removeGlobalPreferencesListener();
+		this.globalPreferencesListener = change -> state.setCurrentPreferenceValues(this.globalPreferences);
+		this.globalPreferences.addListener(this.globalPreferencesListener);
 		state.setCurrentPreferenceValues(this.globalPreferences);
 		this.preferences.setState(state);
 	}
