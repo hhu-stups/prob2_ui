@@ -12,21 +12,21 @@ import javafx.beans.property.StringProperty;
 interface PrefTreeItem {
 	final class Category implements PrefTreeItem {
 		private final String name;
-		
+
 		Category(final String name) {
 			this.name = name;
 		}
-		
+
 		@Override
 		public String getName() {
 			return this.name;
 		}
-		
+
 		@Override
 		public String getValue() {
 			return "";
 		}
-		
+
 		@Override
 		public String getDefaultValue() {
 			return "";
@@ -41,7 +41,7 @@ interface PrefTreeItem {
 		public String getDescription() {
 			return "";
 		}
-		
+
 		@Override
 		public boolean equals(final Object obj) {
 			if (this == obj) {
@@ -53,12 +53,12 @@ interface PrefTreeItem {
 			final PrefTreeItem.Category other = (PrefTreeItem.Category)obj;
 			return this.getName().equals(other.getName());
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return Objects.hash(this.getName());
 		}
-		
+
 		@Override
 		public String toString() {
 			return MoreObjects.toStringHelper(this)
@@ -66,7 +66,7 @@ interface PrefTreeItem {
 				.toString();
 		}
 	}
-	
+
 	final class Preference implements PrefTreeItem {
 		private final ProBPreference preferenceInfo;
 		private final StringProperty value;
@@ -75,21 +75,21 @@ interface PrefTreeItem {
 			this.preferenceInfo = preferenceInfo;
 			this.value = new SimpleStringProperty(this, "value", value);
 		}
-		
+
 		public ProBPreference getPreferenceInfo() {
 			return this.preferenceInfo;
 		}
-		
+
 		@Override
 		public String getName() {
 			return this.getPreferenceInfo().name;
 		}
-		
+
 		@Override
 		public String getValue() {
 			return this.value.get();
 		}
-		
+
 		@Override
 		public String getDefaultValue() {
 			return this.getPreferenceInfo().defaultValue;
@@ -104,7 +104,7 @@ interface PrefTreeItem {
 		public String getDescription() {
 			return this.getPreferenceInfo().description;
 		}
-		
+
 		@Override
 		public boolean equals(final Object obj) {
 			if (this == obj) {
@@ -117,7 +117,7 @@ interface PrefTreeItem {
 			return this.getPreferenceInfo().equals(other.getPreferenceInfo())
 				&& this.getValue().equals(other.getValue());
 		}
-		
+
 		@Override
 		public int hashCode() {
 			return Objects.hash(this.getPreferenceInfo(), this.getValue());
