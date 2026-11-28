@@ -127,6 +127,9 @@ public final class MachinesTab extends Tab {
 			alert.initOwner(MachinesTab.this.getContent().getScene().getWindow());
 			alert.showAndWait().ifPresent(buttonType -> {
 				if (buttonType.equals(ButtonType.OK)) {
+					if (this.machineProperty.get() == currentProject.getCurrentMachine() && !currentProject.confirmMachineReplace()) {
+						return;
+					}
 					currentProject.removeMachine(this.machineProperty.get());
 				}
 			});

@@ -475,6 +475,12 @@ public final class BEditorView extends BorderPane {
 					if (path.getFileName().equals(event.context())) {
 						// Only reload on events for the file itself, not for other files in the directory.
 						Platform.runLater(() -> {
+							// Reloading replaces the editor text and clears the undo history.
+							// Never do that silently while the user has unsaved edits.
+							if (path.equals(this.getPath()) && !this.saved.get() && !this.currentProject.confirmMachineReplace()) {
+								this.fileContentChanged.set(true);
+								return;
+							}
 							loadText(path).exceptionally(exc -> {
 								stageManager.showUnhandledExceptionAlert(exc, this.getScene().getWindow());
 								return null;

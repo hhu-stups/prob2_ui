@@ -446,6 +446,10 @@ public final class ProB2 extends Application {
 
 	private void handleCloseRequest(Event event, CurrentProject currentProject, StageManager stageManager) {
 		UIState uiState = injector.getInstance(UIState.class);
+		if (!currentProject.confirmMachineReplace()) {
+			event.consume();
+			return;
+		}
 		if (!currentProject.isSaved()) {
 			ButtonType save = new ButtonType(i18n.translate("common.buttons.save"), ButtonBar.ButtonData.YES);
 			ButtonType doNotSave = new ButtonType(i18n.translate("common.buttons.doNotSave"), ButtonBar.ButtonData.NO);
