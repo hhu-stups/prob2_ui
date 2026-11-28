@@ -327,11 +327,10 @@ public final class ProjectManager {
 		JsonType type = JsonType.NONE;
 		try {
 			JsonNode rootNode = objectMapper.readTree(selected.toFile());
-			if (rootNode.has("items") || rootNode.has("events")) {
-				type = JsonType.VISB;
-			}
 			if (rootNode.has("activations")) {
 				type = JsonType.SIMB;
+			} else if (rootNode.has("items") || rootNode.has("events")) {
+				type = JsonType.VISB;
 			} else {
 				type = chooseType();
 			}
