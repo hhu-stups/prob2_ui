@@ -15,6 +15,7 @@ import com.google.inject.Singleton;
 import de.prob.animator.domainobjects.ErrorItem;
 import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
+import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorView;
 import de.prob2.ui.config.Config;
 import de.prob2.ui.config.ConfigData;
@@ -219,12 +220,13 @@ public final class PreferencesStage extends Stage {
 		final Map<String, String> changed = new HashMap<>(this.globalPrefsChangeState.getPreferenceChanges());
 		
 		try {
-			this.machineLoader.getActiveStateSpace().changePreferences(changed);
+			applyOrRevert(this.machineLoader.getActiveStateSpace(), changed);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToApplyChanges.content");
 			alert.initOwner(this);
 			alert.show();
+			return;
 		}
 		
 		this.globalPrefsChangeState.apply();
@@ -240,6 +242,31 @@ public final class PreferencesStage extends Stage {
 		
 		if (this.currentProject.getCurrentMachine() != null) {
 			this.currentProject.reloadCurrentMachine();
+		}
+	}
+
+	public static void applyOrRevert(final StateSpace stateSpace, final Map<String, String> changes) {
+		if (changes.isEmpty()) {
+			return;
+		}
+		final Map<String, String> allPreviousValues = stateSpace.getCurrentPreferences();
+		try {
+			stateSpace.changePreferences(changes);
+		} catch (final ProBError e) {
+			final Map<String, String> previousValues = new HashMap<>();
+			for (final String name : changes.keySet()) {
+				final String previousValue = allPreviousValues.get(name);
+				if (previousValue != null) {
+					previousValues.put(name, previousValue);
+				}
+			}
+			try {
+				stateSpace.changePreferences(previousValues);
+			} catch (final ProBError revertError) {
+				LOGGER.warn("Failed to revert partially applied preference changes", revertError);
+				e.addSuppressed(revertError);
+			}
+			throw e;
 		}
 	}
 }

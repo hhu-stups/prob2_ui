@@ -13,6 +13,7 @@ import de.prob.exception.ProBError;
 import de.prob2.ui.internal.StageManager;
 import de.prob2.ui.preferences.GlobalPreferences;
 import de.prob2.ui.preferences.PreferencesChangeState;
+import de.prob2.ui.preferences.PreferencesStage;
 import de.prob2.ui.preferences.PreferencesView;
 import de.prob2.ui.prob2fx.CurrentTrace;
 
@@ -93,7 +94,7 @@ public class DynamicPreferencesStage extends Stage {
 	private void handleOk() {
 		final Map<String, String> changedPreferences = new HashMap<>(this.preferences.getState().getPreferenceChanges());
 		try {
-			this.currentTrace.getStateSpace().changePreferences(changedPreferences);
+			PreferencesStage.applyOrRevert(this.currentTrace.getStateSpace(), changedPreferences);
 		} catch (final ProBError e) {
 			LOGGER.info("Failed to apply preference changes (this is probably because of invalid preference values entered by the user, and not a bug)", e);
 			final Alert alert = stageManager.makeExceptionAlert(e, "preferences.stage.tabs.globalPreferences.alerts.failedToApplyChanges.content");
