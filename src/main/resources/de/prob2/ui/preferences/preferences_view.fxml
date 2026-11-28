@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.StackPane?>
 <fx:root type="BorderPane" xmlns:fx="http://javafx.com/fxml/1" stylesheets="@/prob.css" maxWidth="Infinity" maxHeight="Infinity">
 	<top>
 		<HBox>
@@ -23,7 +24,10 @@
 				<TreeTableColumn fx:id="tvDescription" editable="false" styleClass="left" minWidth="80.0" prefWidth="900.0" sortable="false" text="%common.columns.description" />
 			</columns>
 			<placeholder>
-				<Label text="%common.noModelLoaded" />
+				<StackPane>
+					<Label fx:id="noModelLabel" text="%common.noModelLoaded" />
+					<Label fx:id="noMatchesLabel" text="%preferences.preferencesView.noMatches" visible="false" />
+				</StackPane>
 			</placeholder>
 			<TreeItem expanded="true" />
 		</TreeTableView>

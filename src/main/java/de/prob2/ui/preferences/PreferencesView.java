@@ -16,6 +16,7 @@ import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeTableColumn;
@@ -44,6 +45,10 @@ public final class PreferencesView extends BorderPane {
 	private TreeTableColumn<PrefTreeItem, String> tvDefaultValue;
 	@FXML
 	private TreeTableColumn<PrefTreeItem, String> tvDescription;
+	@FXML
+	private Label noModelLabel;
+	@FXML
+	private Label noMatchesLabel;
 
 	private final ObjectProperty<PreferencesChangeState> state;
 	private final InvalidationListener refreshIL;
@@ -106,7 +111,10 @@ public final class PreferencesView extends BorderPane {
 	}
 
 	public void refresh() {
-		if (this.getState() == null) {
+		final PreferencesChangeState currentState = this.getState();
+		this.noModelLabel.setVisible(currentState == null);
+		this.noMatchesLabel.setVisible(currentState != null);
+		if (currentState == null) {
 			this.tv.getRoot().getChildren().clear();
 			return;
 		}
