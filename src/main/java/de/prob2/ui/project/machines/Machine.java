@@ -557,7 +557,7 @@ public final class Machine {
 				description,
 				location,
 				this.getLastUsedPreferenceName(),
-				this.getValidationTasks(),
+				this.getValidationTasks().stream().map(IValidationTask::copy).collect(Collectors.toList()),
 				this.getLTLPatterns(),
 				this.getSimulations(),
 				this.getVisBVisualisations()
