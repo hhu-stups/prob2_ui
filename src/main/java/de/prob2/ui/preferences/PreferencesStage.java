@@ -13,7 +13,6 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 
 import de.prob.animator.domainobjects.ErrorItem;
-import de.prob.animator.domainobjects.ProBPreference;
 import de.prob.exception.ProBError;
 import de.prob.statespace.StateSpace;
 import de.prob2.ui.beditor.BEditorView;
@@ -230,15 +229,7 @@ public final class PreferencesStage extends Stage {
 		}
 		
 		this.globalPrefsChangeState.apply();
-		
-		final Map<String, ProBPreference> defaults = this.globalPrefsChangeState.getPreferenceInfos();
-		for (final Map.Entry<String, String> entry : changed.entrySet()) {
-			if (defaults.get(entry.getKey()).defaultValue.equals(entry.getValue())) {
-				this.globalPreferences.remove(entry.getKey());
-			} else {
-				this.globalPreferences.put(entry.getKey(), entry.getValue());
-			}
-		}
+		this.globalPreferences.storeChanges(changed, this.globalPrefsChangeState.getPreferenceInfos());
 		
 		if (this.currentProject.getCurrentMachine() != null) {
 			this.currentProject.reloadCurrentMachine();

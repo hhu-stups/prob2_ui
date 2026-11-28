@@ -115,8 +115,8 @@ public class DynamicPreferencesStage extends Stage {
 			alert.show();
 			return;
 		}
-		this.globalPreferences.get().putAll(changedPreferences);
 		this.preferences.getState().apply();
+		this.globalPreferences.storeChanges(changedPreferences, this.preferences.getState().getPreferenceInfos());
 		if (this.toRefresh != null) {
 			this.toRefresh.refresh();
 		}
